@@ -58,14 +58,22 @@ class SearchEngine:
     rrf_rank_constant = 60
 
     source = {
-        "excludes": [
-            "pages",
-            "content",
-            "content_chunks",
+        "includes": [
+            "expression_frbr_uri",
+            "date",
+            "nature",
+            "doc_type",
+            "title",
+            "jurisdiction",
+            "locality",
+            "citation",
+            "authors",
+            "labels",
+            "alternative_names",
             "flynote",
-            "case_summary",
-            "provisions",
-            "suggest",
+            "blurb",
+            "court",
+            "matter_type",
         ]
     }
 
@@ -106,6 +114,9 @@ class SearchEngine:
         "citation": {"boost": 2},
         "alternative_names": {"boost": 4},
         "content": None,
+        "summary": {"boost": 2},
+        "flynote": {"boost": 2},
+        "blurb": {"boost": 2},
     }
 
     advanced_search_fields = {

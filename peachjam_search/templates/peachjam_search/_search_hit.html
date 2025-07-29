@@ -33,7 +33,7 @@
           <div>
             <i>
               {% if hit.highlight.alternative_names %}
-                {{ hit.highlight.alternative_names|join:"; " }}
+                {{ hit.highlight.alternative_names|safeseq|join:"; " }}
               {% else %}
                 {{ hit.document.alternative_names|join:"; " }}
               {% endif %}
@@ -45,7 +45,6 @@
             <span class="me-3">
               {% if show_jurisdiction %}
                 <span class="me-1">{% jurisdiction_icon hit.document %}&nbsp;{{ hit.document.jurisdiction|default_if_none:'' }}</span>
-                {{ hit.document.jurisdiction }}
                 {% if hit.document.locality %}·{% endif %}
               {% endif %}
               {% if hit.document.locality %}<span>{{ hit.document.locality }}</span>{% endif %}

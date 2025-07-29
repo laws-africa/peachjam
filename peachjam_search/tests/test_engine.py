@@ -26,15 +26,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
                             "flynote",
-                            "case_summary",
-                            "provisions",
-                            "suggest",
-                        ]
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "explain": False,
                     "from": 0,
@@ -111,6 +119,30 @@ class TestSearchEngine(TestCase):
                                     "simple_query_string": {
                                         "default_operator": "OR",
                                         "fields": ["content"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["summary^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["flynote^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["blurb^2"],
                                         "minimum_should_match": "4<80%",
                                         "query": "test",
                                     }
@@ -259,15 +291,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
                             "flynote",
-                            "case_summary",
-                            "provisions",
-                            "suggest",
-                        ]
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "aggs": {
                         "_filter_attorneys": {
@@ -464,6 +504,30 @@ class TestSearchEngine(TestCase):
                                     }
                                 },
                                 {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["summary^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["flynote^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["blurb^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
                                     "match_phrase": {
                                         "content": {
                                             "boost": 4,
@@ -607,15 +671,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
                             "flynote",
-                            "case_summary",
-                            "provisions",
-                            "suggest",
-                        ]
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "explain": False,
                     "from": 0,
@@ -693,6 +765,30 @@ class TestSearchEngine(TestCase):
                                     "simple_query_string": {
                                         "default_operator": "OR",
                                         "fields": ["content"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["summary^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["flynote^2"],
+                                        "minimum_should_match": "4<80%",
+                                        "query": "test",
+                                    }
+                                },
+                                {
+                                    "simple_query_string": {
+                                        "default_operator": "OR",
+                                        "fields": ["blurb^2"],
                                         "minimum_should_match": "4<80%",
                                         "query": "test",
                                     }
@@ -843,15 +939,23 @@ class TestSearchEngine(TestCase):
             json.dumps(
                 {
                     "_source": {
-                        "excludes": [
-                            "pages",
-                            "content",
-                            "content_chunks",
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
                             "flynote",
-                            "case_summary",
-                            "provisions",
-                            "suggest",
-                        ]
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ],
                     },
                     "explain": False,
                     "from": 0,
