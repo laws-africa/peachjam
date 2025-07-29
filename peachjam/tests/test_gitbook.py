@@ -64,9 +64,18 @@ class GitbookAdapterTest(TestCase):
             },
         ]
 
-        self.adapter.get_repo_file = (
-            lambda file_path: f"# Contents for {file_path}\n\nHello :)".encode("utf-8")
-        )
+        def content(file_path):
+            return f"""
+# Contents for {file_path}
+
+Hello :)
+
+## Subheading
+""".encode(
+                "utf-8"
+            )
+
+        self.adapter.get_repo_file = content
         self.adapter.compile_pages(book, toc, "book1")
 
         self.assertHTMLEqual(
@@ -76,7 +85,9 @@ class GitbookAdapterTest(TestCase):
 Contents for book1/unit-1-administration-of-law.md
 </h1><p>
 Hello :)
-</p>
+</p><h2 id="unit-1-adm--subheading">
+Subheading
+</h2>
 </div>
 </div><div id="unit-2-the">
 <div>
@@ -84,8 +95,42 @@ Hello :)
 Contents for book1/unit-2-the-composition-of-courts.md
 </h1><p>
 Hello :)
-</p>
+</p><h2 id="unit-2-the--subheading">
+Subheading
+</h2>
 </div>
 </div>""",
             book.content_html,
+        )
+
+        self.assertEqual(
+            [
+                {
+                    "id": "unit-1-adm",
+                    "title": "Unit 1: Administration of Law",
+                    "path": "unit-1-administration-of-law.md",
+                    "children": [
+                        {
+                            "id": "unit-1-adm--subheading",
+                            "title": "Subheading",
+                            "type": "h2",
+                            "children": [],
+                        }
+                    ],
+                },
+                {
+                    "id": "unit-2-the",
+                    "title": "Unit 2: The Composition of Courts",
+                    "path": "unit-2-the-composition-of-courts.md",
+                    "children": [
+                        {
+                            "id": "unit-2-the--subheading",
+                            "title": "Subheading",
+                            "type": "h2",
+                            "children": [],
+                        }
+                    ],
+                },
+            ],
+            toc,
         )

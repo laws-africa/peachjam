@@ -12,6 +12,7 @@ from lxml import etree
 from martor.utils import markdownify
 
 from peachjam.adapters.base import Adapter
+from peachjam.analysis.html import generate_toc_json_from_html
 from peachjam.models import Book, Language, get_country_and_locality
 from peachjam.plugins import plugins
 from peachjam.xmlutils import parse_html_str
@@ -172,9 +173,24 @@ class GitbookAdapter(Adapter):
             entry_html = self.compile_page(
                 self.get_repo_file(f"{repo_path}/{entry['path']}").decode("utf-8")
             )
+
             # html for all its children
             entry_html += "\n".join(process_entry(kid) for kid in entry["children"])
-            entry_html = self.munge_page_html(entry, entry_html)
+
+            root = parse_html_str(entry_html)
+            # adjust the HTML to update ids
+            self.munge_page_html(entry, root)
+
+            # use HTML headings to generate TOC children for this entry
+            if not entry["children"]:
+                sub_toc = generate_toc_json_from_html(root)
+                if sub_toc:
+                    # the very first item will be a repetition of this entry's title, so we hoist its children
+                    # up to replace it
+                    sub_toc = sub_toc[0]["children"] + sub_toc[1:]
+                entry["children"] = sub_toc
+
+            entry_html = etree.tostring(root, encoding="unicode")
 
             # combined html for this entry
             return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
@@ -245,16 +261,16 @@ class GitbookAdapter(Adapter):
     def clean_toc(self, toc):
         # remove "path" from the TOC items
         def clean(entry):
-            del entry["path"]
+            if "path" in entry:
+                del entry["path"]
             for child in entry["children"]:
                 clean(child)
 
         for item in toc:
             clean(item)
 
-    def munge_page_html(self, page, page_html):
+    def munge_page_html(self, page, root):
         # scope all ids
-        root = parse_html_str(page_html)
         ids = {}
         for el in root.xpath("//*[@id]"):
             ids[el.attrib["id"]] = new_id = f"{page['id']}--{el.attrib['id']}"
@@ -265,8 +281,6 @@ class GitbookAdapter(Adapter):
             href = el.attrib["href"]
             if href[1:] in ids:
                 el.attrib["href"] = f"#{ids[href[1:]]}"
-
-        return etree.tostring(root, encoding="unicode")
 
 
 def parse_kv_pairs(parser):
