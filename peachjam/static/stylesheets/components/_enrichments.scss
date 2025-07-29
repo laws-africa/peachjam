@@ -39,11 +39,11 @@
     }
   }
 
-  la-gutter-item.citation-count .card {
+  la-gutter-item.citation-count .gutter-item-link {
     visibility: hidden;
   }
 
-  la-gutter-item[active].citation-count .card {
+  la-gutter-item[active].citation-count .gutter-item-link  {
     visibility: visible;
   }
 

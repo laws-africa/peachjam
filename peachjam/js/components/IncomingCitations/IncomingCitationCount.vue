@@ -3,21 +3,17 @@
     <div class="">
       <span class="align-middle me-2 fs-5"><i class="bi bi-chat-quote" /></span>
       <span class="badge rounded-pill bg-secondary">{{ citations }}</span>
-    </div>
-    <div class="card gutter-item-card mt-2">
-      <div class="card-body d-flex">
-        <span>
-          <a :href="`${expressionFrbrUri}/provision/${provision_eid}`">
-            Cited {{ citations }} times
-          </a>
-        </span>
-        <button
+      <span class="gutter-item-link ms-2 border p-2 rounded bg-white d-inline-flex justify-content-around">
+        <a :href="`${expressionFrbrUri}/provision/${provision_eid}`">
+          Cited {{ citations }} times
+        </a>
+       <button
           type="button"
           class="btn-close ms-auto d-lg-none"
           aria-label="Close"
           @click.stop="deactivate"
         />
-      </div>
+      </span>
     </div>
   </la-gutter-item>
 </template>
@@ -59,5 +55,5 @@ export default {
       this.anchorElement.classList.remove('active');
     }
   }
-}
+};
 </script>
