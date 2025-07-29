@@ -107,7 +107,6 @@ class GitbookAdapter(Adapter):
             )
 
         self.compile_book(book, document["path"])
-        # TODO: ensure we're not messing with the HTML and updating the TOC
         book.save()
 
         logger.info(f"Updated book {book.expression_frbr_uri}")
@@ -202,7 +201,6 @@ class GitbookAdapter(Adapter):
         # preprocess with jinja
         template = self.jinja_env.from_string(markdown_text)
         markdown_text = template.render()
-        # TODO: is markdownify using pandoc?
         return markdownify(markdown_text)
 
     def build_toc(self, toc_html):
