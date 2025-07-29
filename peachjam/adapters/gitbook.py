@@ -62,8 +62,13 @@ class GitbookAdapter(Adapter):
         return docs, to_delete
 
     def get_updated_docs(self, last_refreshed):
-        # TODO: handle last_refreshed timestamp
-        return [d["expression_frbr_uri"] for d in self.get_repo_documents()]
+        documents = self.get_repo_documents()
+
+        if last_refreshed:
+            # filter documents based on last_refreshed
+            documents = [d for d in documents if d["updated_at"] > last_refreshed]
+
+        return [d["expression_frbr_uri"] for d in documents]
 
     def update_document(self, expression_frbr_uri):
         logger.info(f"Updating ... {expression_frbr_uri}")
@@ -120,7 +125,15 @@ class GitbookAdapter(Adapter):
         parses it, and returns the list of documents from the 'documents' key.
         """
         yaml_content = yaml.safe_load(self.get_repo_file("peachjam.yaml"))
-        return yaml_content.get("documents", [])
+        documents = yaml_content.get("documents", [])
+
+        # attach timestamp information
+        for doc in documents:
+            logger.info(f"Getting latest commit date for {doc['path']}")
+            commits = self.repo.get_commits(path=doc["path"])
+            doc["updated_at"] = commits[0].commit.author.date
+
+        return documents
 
     def get_repo_document(self, expression_frbr_uri):
         for doc in self.get_repo_documents():
