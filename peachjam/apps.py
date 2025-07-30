@@ -19,7 +19,7 @@ class PeachJamConfig(AppConfig):
 
         Country.get_absolute_url = get_country_absolute_url
         # bump up the context for citation extraction
-        CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 75
+        CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 80
 
         if not settings.DEBUG:
             from background_task.models import Task
