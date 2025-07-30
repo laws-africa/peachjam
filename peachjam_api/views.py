@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from rest_framework import authentication, viewsets
+from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -18,7 +18,6 @@ from peachjam.models import (
     Relationship,
     Work,
 )
-from peachjam_api.permissions import CoreDocumentPermission
 from peachjam_api.serializers import (
     AnnotationSerializer,
     CitationLinkSerializer,
@@ -66,13 +65,15 @@ class CitationLinkViewSet(viewsets.ModelViewSet):
 
 
 class IngestorWebhookView(APIView):
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [CoreDocumentPermission]
+    authentication_classes = []
+    permission_classes = []
 
     def post(self, request, ingestor_id):
         ingestor = get_object_or_404(Ingestor, pk=ingestor_id)
         if ingestor.enabled:
-            ingestor.handle_webhook(request.data)
+            # read the request body; this allows the ingestor and the adapter to inspect request.body later on
+            body = request.body  # noqa
+            ingestor.handle_webhook(request, request.data)
         return Response({}, status=200)
 
 

@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import logging
 import re
 from datetime import date
@@ -6,6 +8,7 @@ from functools import cached_property
 import magic
 import yaml
 from cobalt import FrbrUri
+from django.conf import settings
 from django.core.files.base import ContentFile
 from github import Github
 from jinja2 import Environment, nodes
@@ -119,7 +122,15 @@ class GitbookAdapter(Adapter):
         if frbr_uri not in [d["expression_frbr_uri"] for d in documents]:
             Book.objects.filter(expression_frbr_uri=frbr_uri).delete()
 
-    def handle_webhook(self, data):
+    def handle_webhook(self, request, data):
+        if not verify_github_signature(
+            request.body,
+            settings.PEACHJAM["GITHUB_WEBHOOK_SECRET"],
+            request.headers.get("x-hub-signature-256", ""),
+        ):
+            logger.warning("Invalid GitHub webhook signature")
+            return
+
         logger.info(f"Ingestor {self.ingestor} handling webhook {data}")
         if data.get("repository", {}).get("full_name", None) == self.repo_name:
             logger.info("Will run ingestor to update documents")
@@ -421,3 +432,17 @@ class TabsExtension(Extension):
         output.append("</div></div>")
         self.__class__.n_tabs += len(tabs)
         return "".join(output)
+
+
+def verify_github_signature(payload_body, secret_token, signature_header):
+    """Verify that the payload was sent from GitHub by validating SHA256.
+    Args:
+        payload_body: original request body to verify (request.body())
+        secret_token: GitHub app webhook token (WEBHOOK_SECRET)
+        signature_header: header received from GitHub (x-hub-signature-256)
+    """
+    hash_object = hmac.new(
+        secret_token.encode("utf-8"), msg=payload_body, digestmod=hashlib.sha256
+    )
+    expected_signature = "sha256=" + hash_object.hexdigest()
+    return hmac.compare_digest(expected_signature, signature_header)

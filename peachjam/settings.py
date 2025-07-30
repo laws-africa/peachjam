@@ -156,6 +156,8 @@ PEACHJAM = {
     "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
     "CUSTOMERIO_EMAIL_API_KEY": os.environ.get("CUSTOMERIO_EMAIL_API_KEY"),
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
+    # GitHub ingestor webhook secret (optional)
+    "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))

@@ -7,6 +7,7 @@ from languages_plus.models import Language
 
 from peachjam.models import Gazette, SourceFile, get_country_and_locality
 from peachjam.plugins import plugins
+from peachjam_api.permissions import CoreDocumentPermission
 
 from .base import RequestsAdapter
 
@@ -144,8 +145,13 @@ class GazetteAPIAdapter(RequestsAdapter):
             else:
                 raise e
 
-    def handle_webhook(self, data):
+    def handle_webhook(self, request, data):
         from peachjam.tasks import delete_document, update_document
+
+        # check perms
+        if not CoreDocumentPermission().has_permission(request, None):
+            logger.warning("Unauthorized webhook request")
+            return
 
         logger.info(f"Ingestor {self.ingestor} handling webhook {data}")
 

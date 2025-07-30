@@ -83,9 +83,9 @@ class Ingestor(models.Model):
         adapter = self.get_adapter()
         adapter.delete_document(expression_frbr_uri)
 
-    def handle_webhook(self, data):
+    def handle_webhook(self, request, data):
         adapter = self.get_adapter()
-        adapter.handle_webhook(data)
+        adapter.handle_webhook(request, data)
 
     def get_adapter(self):
         klass = plugins.registry["ingestor-adapter"][self.adapter]
