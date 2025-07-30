@@ -157,3 +157,22 @@ Subheading
 """,
             etree.tostring(root, encoding="unicode"),
         )
+
+    def test_fix_footnotes(self):
+        root = parse_html_str(
+            """
+<div>
+<p>to enforce<sup>[</sup><a href="#user-content-fn-1"><sup>1</sup></a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><sup>]</sup></p>
+</div>
+"""  # noqa
+        )
+        self.adapter.munge_page_html({"id": "test"}, root)
+
+        self.assertHTMLEqual(
+            """
+<div>
+<p>to enforce<sup>[</sup><a href="#fn1" class="footnote-ref" id="test--fnref1" role="doc-noteref"><sup>1</sup></a><sup>]</sup></p>
+</div>
+""",  # noqa
+            etree.tostring(root, encoding="unicode"),
+        )

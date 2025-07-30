@@ -276,9 +276,16 @@ class GitbookAdapter(Adapter):
             ids[el.attrib["id"]] = new_id = f"{page['id']}--{el.attrib['id']}"
             el.attrib["id"] = new_id
 
-        # rewrite all hrefs to point to the correct entry
+        # rewrite all hrefs to point to the correct entry, and remove broken footnote refs
         for el in root.xpath("//a[starts-with(@href, '#')]"):
             href = el.attrib["href"]
+
+            if href.startswith("#user-content-fn-"):
+                # gitbook inserts two types of footnotes: ones like this (which pandoc doesn't understand)
+                # and the usual "[^1]" style which pandoc handles correctly. We remove the first type.
+                el.getparent().remove(el)
+                continue
+
             if href[1:] in ids:
                 el.attrib["href"] = f"#{ids[href[1:]]}"
 
