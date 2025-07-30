@@ -393,14 +393,6 @@
                           </dd>
                         {% endif %}
                       {% endblock %}
-                      {% block document-metadata-content-doctype %}
-                        <dt>
-                          {% trans 'Type' %}
-                        </dt>
-                        <dd class="text-muted">
-                          {% trans document.get_doc_type_display %}
-                        </dd>
-                      {% endblock %}
                       {% block document-metadata-content-publication %}
                         {% if document.publication_file %}
                           <dt>
