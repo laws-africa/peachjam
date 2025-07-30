@@ -17,6 +17,7 @@ from peachjam.analysis.html import generate_toc_json_from_html
 from peachjam.helpers import markdownify
 from peachjam.models import Book, Image, Language, get_country_and_locality
 from peachjam.plugins import plugins
+from peachjam.tasks import run_ingestor
 from peachjam.xmlutils import parse_html_str
 
 logger = logging.getLogger(__name__)
@@ -119,8 +120,10 @@ class GitbookAdapter(Adapter):
             Book.objects.filter(expression_frbr_uri=frbr_uri).delete()
 
     def handle_webhook(self, data):
-        # TODO:
         logger.info(f"Ingestor {self.ingestor} handling webhook {data}")
+        if data.get("repository", {}).get("full_name", None) == self.repo_name:
+            logger.info("Will run ingestor to update documents")
+            run_ingestor(self.ingestor.pk)
 
     def get_repo_documents(self):
         """
