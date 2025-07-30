@@ -65,6 +65,7 @@ class DocumentCitationContextView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["document"] = self.document
+        context["provision_eid"] = self.provision_eid
         context["provision_title"] = context["document"].friendly_provision_title(
             self.provision_eid
         )
