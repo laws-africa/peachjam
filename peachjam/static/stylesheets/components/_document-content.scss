@@ -86,9 +86,54 @@
         border-color: var(--bs-border-color);
 
         th, td {
-          border-bottom-width: 1px;
+          border-width: 1px;
           padding: 0.5rem 0.5rem;
         }
+
+        th {
+          background-color: $gray-100;
+        }
+      }
+
+      details {
+        border: 1px solid var(--bs-border-color);
+        padding: $spacer;
+        margin-bottom: $spacer;
+
+        &:has(+ details) {
+          margin-bottom: 0;
+        }
+
+        &[open] summary {
+          margin-bottom: $spacer;
+        }
+      }
+
+      details + details {
+        border-top: none;
+      }
+
+      .nav {
+        border: 1px solid var(--bs-border-color);
+        border-bottom: none;
+        background-color: $gray-100;
+      }
+
+      .nav + .tab-content {
+        border: 1px solid var(--bs-border-color);
+        border-top: none;
+        padding: $spacer $spacer 0 $spacer;
+        margin-bottom: $spacer;
+      }
+
+      .alert > *:first-child {
+        padding-top: 0px;
+        margin-top: 0px;
+      }
+
+      .alert > *:last-child {
+        padding-bottom: 0px;
+        margin-bottom: 0px;
       }
     }
 
