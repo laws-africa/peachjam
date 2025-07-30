@@ -35,6 +35,7 @@ from peachjam.models import (
     Work,
 )
 from peachjam.plugins import plugins
+from peachjam_api.permissions import CoreDocumentPermission
 
 logger = logging.getLogger(__name__)
 
@@ -751,8 +752,13 @@ class IndigoAdapter(RequestsAdapter):
                 f"Added {len(taxonomies)} local taxonomies to {created_document}"
             )
 
-    def handle_webhook(self, data):
+    def handle_webhook(self, request, data):
         from peachjam.tasks import delete_document, update_document
+
+        # check perms
+        if not CoreDocumentPermission().has_permission(request, None):
+            logger.warning("Unauthorized webhook request")
+            return
 
         logger.info(f"Handling webhook {data}")
 

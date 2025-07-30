@@ -67,7 +67,7 @@ class Adapter:
         """Update the document identified by some opaque id, returned by check_for_updates."""
         raise NotImplementedError()
 
-    def handle_webhook(self, data):
+    def handle_webhook(self, request, data):
         """Handle webhook from a remote server."""
         pass
 
