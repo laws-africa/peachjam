@@ -158,7 +158,7 @@ class GitbookAdapter(Adapter):
                 return doc
 
     def get_local_documents(self):
-        return self.ingestor.document_set.all()
+        return self.ingestor.coredocument_set.all()
 
     @cached_property
     def repo(self):
