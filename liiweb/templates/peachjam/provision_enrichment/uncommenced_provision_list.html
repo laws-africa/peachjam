@@ -1,0 +1,7 @@
+{% extends 'peachjam/provision_enrichment/uncommenced_provision_list.html' %}
+{% load i18n %}
+{% block page-subtitle %}
+  <div class="mb-5">
+    <a href="{% url 'legislation_list_uncommenced' %}">{% trans "Uncommenced legislation" %}</a>
+  </div>
+{% endblock %}
