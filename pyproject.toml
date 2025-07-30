@@ -67,7 +67,7 @@ dependencies = [
     "igraph>=0.10.4",
     "llama-index-core>=0.12.19",
     "lxml>=4.8.0",
-    "martor~=1.6",
+    "martor<1.7",
     "Pillow>=9.0.1",
     "pgvector>=0.4.0",
     "PyGithub>=2.6",
