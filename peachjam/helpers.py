@@ -93,14 +93,6 @@ class ISODateConverter:
         return value.strftime("%Y-%m-%d")
 
 
-def parse_utf8_html(html):
-    """Parse html assuming utf8 encoding and return lxml tree."""
-    import lxml.html
-
-    parser = lxml.html.HTMLParser(encoding="utf-8")
-    return lxml.html.fromstring(html, parser=parser)
-
-
 def markdownify(text):
     """Convert markdown text to html using pandoc on the commandline."""
     with tempfile.NamedTemporaryFile(suffix=".md") as inf:

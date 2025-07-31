@@ -5,7 +5,7 @@
       <span class="badge rounded-pill bg-secondary">{{ citations }}</span>
       <span class="gutter-item-link ms-2 border p-2 rounded bg-white d-inline-flex justify-content-around">
         <a :href="`${expressionFrbrUri}/provision/${provision_eid}`">
-          Cited {{ citations }} times
+          {{ $t('Cited {count} times', {count: citations}) }}
         </a>
        <button
           type="button"

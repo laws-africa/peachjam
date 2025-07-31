@@ -36,7 +36,7 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
-from peachjam.helpers import parse_utf8_html, pdfjs_to_text
+from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.enrichments import ProvisionCitation
@@ -579,7 +579,6 @@ class CoreDocument(PolymorphicModel):
             self.toc_json = []
 
     def clean_html_field(self, html):
-
         if not html:
             return None
 
@@ -795,7 +794,7 @@ class CoreDocument(PolymorphicModel):
             return None
 
         # Parse the HTML content
-        root = parse_utf8_html(self.content_html)
+        root = parse_html_str(self.content_html)
         images = {i.filename: i for i in self.images.all()}
 
         # inline images

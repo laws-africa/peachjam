@@ -6,7 +6,6 @@ import requests
 from cobalt import FrbrUri
 from django.conf import settings
 from docpipe.matchers import ExtractedCitation
-from lxml import html
 from lxml.etree import ParseError
 
 from peachjam.models import CitationLink, ProvisionCitation
@@ -114,7 +113,6 @@ class CitationAnalyser:
             log.warning("No HTML content to extract citation contexts from.")
             return
 
-        root = html.fromstring(document.content_html)
         if document.content_html_is_akn:
             xpath = (
                 '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
@@ -125,10 +123,10 @@ class CitationAnalyser:
             xpath = '//a[starts-with(@href, "/akn")]'
             attr = "href"
 
-        for a in root.xpath(xpath):
+        for a in document.content_html_tree.xpath(xpath):
             try:
                 href = a.attrib[attr]
-                log.info("Processing citation link %s in document %s", href, document)
+                log.debug(f"Processing citation link to: {href}")
                 work_frbr_uri = FrbrUri.parse(href).work_uri()
                 work = Work.objects.get(frbr_uri=work_frbr_uri)
                 exact = a.text_content().strip()
@@ -152,7 +150,7 @@ class CitationAnalyser:
                     work=work,
                     provision_eid=self.get_provision_eid(href),
                 )
-                log.info("Created citation context %s for document %s", ctx, document)
+                log.debug(f"Created citation context {ctx}")
             except ValueError as e:
                 log.warning(
                     "Invalid FRBR URI in citation link %s in document %s: %s",
