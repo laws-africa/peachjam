@@ -163,39 +163,6 @@ class ExtractedCitation(models.Model):
         )
 
 
-class ExtractedCitationContext(models.Model):
-    document = models.ForeignKey(
-        "peachjam.CoreDocument",
-        on_delete=models.CASCADE,
-        related_name="citation_contexts",
-        verbose_name=_("citation context"),
-    )
-
-    selector_anchor_id = models.CharField(
-        _("selector anchor id"),
-        max_length=1024,
-    )
-    prefix = models.CharField(_("prefix"), max_length=1024, null=True, blank=True)
-    suffix = models.CharField(_("suffix"), max_length=1024, null=True, blank=True)
-    exact = models.CharField(_("exact"), max_length=1024, null=True, blank=True)
-    target_work = models.ForeignKey(
-        "peachjam.Work",
-        null=False,
-        on_delete=models.CASCADE,
-        related_name="+",
-        verbose_name=_("target work"),
-    )
-    target_provision_eid = models.CharField(
-        _("target provision eid"), max_length=1024, null=True
-    )
-    created_at = models.DateField(auto_now_add=True)
-
-    def get_absolute_url(self):
-        if self.target_provision_eid:
-            return f"{self.target_work.frbr_uri}#{self.target_provision_eid}"
-        return self.target_work.frbr_uri
-
-
 class Treatment(models.Model):
     name = models.CharField(_("name"), max_length=4096, unique=True)
 

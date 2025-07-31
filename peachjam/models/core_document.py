@@ -13,7 +13,6 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import models
-from django.db.models import Max
 from django.http import Http404
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -38,9 +37,9 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_date,
 )
 from peachjam.helpers import parse_utf8_html, pdfjs_to_text
-from peachjam.models import ExtractedCitationContext
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
+from peachjam.models.enrichments import ProvisionCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -550,11 +549,6 @@ class CoreDocument(PolymorphicModel):
     def year(self):
         return self.date.year
 
-    @property
-    def is_latest_expression(self):
-        latest_date = self.work.documents.aggregate(latest=Max("date"))["latest"]
-        return self.date == latest_date
-
     def full_clean(self, *args, **kwargs):
         # give ourselves and subclasses a chance to pre-populate derived fields before cleaning
         self.pre_save()
@@ -733,18 +727,18 @@ class CoreDocument(PolymorphicModel):
         self.delete_citations()
         return citation_analyser.extract_citations(self)
 
-    def extract_citation_contexts(self):
+    def extract_provision_citations(self):
         """Extract citation contexts for this document. This will extract contexts for all citations
         in the document, and update the ExtractedCitationContext objects.
         """
         from peachjam.analysis.citations import citation_analyser
 
-        self.delete_citation_contexts()
-        citation_analyser.update_citation_contexts(self)
+        self.delete_provision_citations()
+        citation_analyser.update_provision_citations(self)
 
-    def delete_citation_contexts(self):
-        """Delete existing citation contexts for this document."""
-        ExtractedCitationContext.objects.filter(document=self).delete()
+    def delete_provision_citations(self):
+        """Delete existing provision citations for this document."""
+        ProvisionCitation.objects.filter(citing_document=self).delete()
 
     def delete_citations(self):
         """Delete existing citation links and added citations from this document."""

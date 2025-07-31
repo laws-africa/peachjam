@@ -19,7 +19,7 @@
           {% if document.blurb %}<div>{{ document.blurb }}</div>{% endif %}
           {% if document.flynote %}<div class="fst-italic">{{ document.flynote|safe }}</div>{% endif %}
           <div class="mt-2 ms-2">
-            {% for citation_context in document.relevant_citation_contexts %}
+            {% for citation_context in document.relevant_provision_citations %}
               <div class="mb-2">
                 [...] {{ citation_context.prefix }}<strong>{{ citation_context.exact }}</strong>{{ citation_context.suffix }} [...]
               </div>
