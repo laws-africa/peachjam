@@ -6,7 +6,7 @@ import SelectionSearch from './selection-search';
 import SelectionShare from './selection-share';
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
-import { IncomingCitations } from '../IncomingCitations';
+import { ProvisionCitations } from '../ProvisionCitations';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -25,7 +25,7 @@ class EnrichmentsManager {
   private citationLinks: PDFCitationLinks | null = null;
   private gutterManager: GutterEnrichmentManager;
   private displayType: string; // html, pdf or akn
-  private incomingCitations: IncomingCitations | null = null;
+  private provisionCitations: ProvisionCitations | null = null;
 
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
@@ -43,7 +43,7 @@ class EnrichmentsManager {
       this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
-      this.incomingCitations = new IncomingCitations(this.root);
+      this.provisionCitations = new ProvisionCitations(this.root);
     }
     this.selectionSearch = new SelectionSearch(this.gutterManager);
     this.selectionShare = new SelectionShare(this.gutterManager);

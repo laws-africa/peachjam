@@ -8,7 +8,7 @@ from django.conf import settings
 from docpipe.matchers import ExtractedCitation
 from lxml.etree import ParseError
 
-from peachjam.models import CitationLink, ExtractedCitationContext
+from peachjam.models import CitationLink, ProvisionCitation
 from peachjam.xmlutils import get_following_text, get_preceding_text
 
 log = logging.getLogger(__name__)
@@ -85,8 +85,7 @@ class CitationAnalyser:
         citation = CitationLink.from_extracted_citation(citation)
         return citation
 
-    def update_citation_contexts(self, document):
-        log.debug(f"Updating citation contexts for {document}")
+    def update_provision_citations(self, document):
         if document.content_html:
             self.create_from_html(document)
         else:
@@ -140,16 +139,16 @@ class CitationAnalyser:
                 )
 
                 parent_element = get_parent_element(a)
-                selector_id = parent_element.attrib.get("id", "")
+                citation_id = parent_element.attrib.get("id", "")
 
-                ctx = ExtractedCitationContext.objects.create(
-                    document=document,
+                ctx = ProvisionCitation.objects.create(
+                    citing_document=document,
                     prefix=prefix,
                     suffix=suffix,
                     exact=exact,
-                    selector_anchor_id=selector_id,
-                    target_work=work,
-                    target_provision_eid=self.get_provision_eid(href),
+                    citation_anchor_id=citation_id,
+                    work=work,
+                    provision_eid=self.get_provision_eid(href),
                 )
                 log.debug(f"Created citation context {ctx}")
             except ValueError as e:
@@ -186,14 +185,14 @@ class CitationAnalyser:
                             prefix = selector.get("prefix", "")
                             suffix = selector.get("suffix", "")
 
-                ExtractedCitationContext.objects.create(
-                    document=document,
-                    selector_anchor_id=citation_link.target_id,
+                ProvisionCitation.objects.create(
+                    citing_document=document,
+                    citation_anchor_id=citation_link.target_id,
                     prefix=prefix,
                     suffix=suffix,
                     exact=exact,
-                    target_work=target_work,
-                    target_provision_eid=self.get_provision_eid(citation_link.url),
+                    work=target_work,
+                    provision_eid=self.get_provision_eid(citation_link.url),
                 )
             except ValueError as e:
                 log.warning(

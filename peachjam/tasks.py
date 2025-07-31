@@ -139,37 +139,13 @@ def extract_citations(document_id):
         if doc.extract_citations():
             doc.save()
 
-        extract_citation_contexts(document_id)
+            if doc.is_most_recent():
+                doc.extract_provision_citations()
     except Exception as e:
         log.error(f"Error extracting citations for {doc}", exc_info=e)
         raise
 
     log.info("Citations extracted")
-
-
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -2})
-def extract_citation_contexts(document_id):
-    """Extract citation contexts from a document in the background."""
-
-    log.info(f"Extracting citation contexts for document {document_id}")
-
-    doc = CoreDocument.objects.filter(pk=document_id).first()
-    if not doc:
-        log.info(f"No document with id {document_id} exists, ignoring.")
-        return
-    if not doc.is_latest_expression:
-        log.info(
-            f"Document is not latest_expression {document_id}, skipping context extraction."
-        )
-        return
-
-    try:
-        doc.extract_citation_contexts()
-    except Exception as e:
-        log.error(f"Error extracting citation contexts for {doc}", exc_info=e)
-        raise
-
-    log.info("Citation contexts extracted")
 
 
 @background(queue="peachjam", schedule=60, remove_existing_tasks=True)

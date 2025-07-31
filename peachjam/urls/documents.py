@@ -14,6 +14,7 @@ from peachjam.views import (
     DocumentMediaView,
     DocumentPopupView,
     DocumentProblemView,
+    DocumentProvisionCitationView,
     DocumentPublicationView,
     DocumentSocialImageView,
     DocumentSourcePDFView,
@@ -22,7 +23,6 @@ from peachjam.views import (
     DocumentTextContentView,
     PartnerLogoView,
 )
-from peachjam.views.citation_context import DocumentCitationContextView
 
 urlpatterns = [
     # document detail views
@@ -53,7 +53,7 @@ urlpatterns = [
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.+?)/provision(?:/(?P<provision_eid>.+))?$",
-        cache_page(CACHE_DURATION)(DocumentCitationContextView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentProvisionCitationView.as_view()),
         name="document_citation_context",
     ),
     re_path(

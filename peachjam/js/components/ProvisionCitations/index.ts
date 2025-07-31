@@ -1,16 +1,16 @@
 import { createAndMountApp } from "../../utils/vue-utils";
-import IncomingCitationCount from "./IncomingCitationCount.vue";
+import ProvisionCitationCount from "./ProvisionCitationCount.vue";
 import { vueI18n } from "../../i18n";
 
-interface IncomingCitation {
+interface ProvisionCitation {
   provision_eid: string;
   citations: number;
 }
 
-export class IncomingCitations {
+export class ProvisionCitations {
   root: HTMLElement;
   gutter: HTMLElement | null;
-  citations: IncomingCitation[];
+  citations: ProvisionCitation[];
   expressionFrbrUri: string;
 
   constructor (root: HTMLElement) {
@@ -32,7 +32,7 @@ export class IncomingCitations {
     if (this.gutter && this.citations) {
       for (const info of this.citations) {
         createAndMountApp({
-          component: IncomingCitationCount,
+          component: ProvisionCitationCount,
           props: {
             gutter: this.gutter,
             provision_eid: info.provision_eid,
