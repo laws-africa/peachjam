@@ -16,8 +16,8 @@ log = logging.getLogger(__name__)
 
 class CitationAnalyser:
     matchers = []
-    context_not_above = ["p", "section", "div"]
-    context_length = 75
+    context_not_above = ["p", "section", "div", "td", "th"]
+    context_length = 100
 
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
