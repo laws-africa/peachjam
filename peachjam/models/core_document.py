@@ -850,12 +850,10 @@ class CoreDocument(PolymorphicModel):
     def get_provision_by_eid(self, eid):
         if not self.content_html or not self.content_html_is_akn:
             return None
-        parser = etree.HTMLParser()
-        tree = etree.fromstring(self.content_html, parser)
 
         # Find element with data-eId
         xpath = f"//*[@data-eid='{eid}']"
-        elements = tree.xpath(xpath)
+        elements = self.content_html_tree.xpath(xpath)
 
         if elements:
             return etree.tostring(elements[0], encoding="unicode", method="html")
