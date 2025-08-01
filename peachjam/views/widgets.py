@@ -10,7 +10,7 @@ from django.shortcuts import redirect
 from django.utils.translation import get_language
 from django.views.generic import DetailView
 
-from peachjam.helpers import add_slash, parse_utf8_html
+from peachjam.helpers import add_slash
 from peachjam.models import CoreDocument
 from peachjam.resolver import RedirectResolver, resolver
 
@@ -99,8 +99,9 @@ class DocumentPopupView(DetailView):
 
             # try to find the portion within the object
             try:
-                tree = parse_utf8_html(self.object.content_html)
-                elems = tree.xpath(f'//*[@id="{self.portion}"]')
+                elems = self.object.content_html_tree.xpath(
+                    f'//*[@id="{self.portion}"]'
+                )
                 if elems:
                     context["portion_html"] = lxml.html.tostring(
                         elems[0], encoding="unicode"

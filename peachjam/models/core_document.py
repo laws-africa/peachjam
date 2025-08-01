@@ -36,9 +36,10 @@ from peachjam.frbr_uri import (
     validate_frbr_uri_component,
     validate_frbr_uri_date,
 )
-from peachjam.helpers import parse_utf8_html, pdfjs_to_text
+from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
+from peachjam.models.enrichments import ProvisionCitation
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -578,7 +579,6 @@ class CoreDocument(PolymorphicModel):
             self.toc_json = []
 
     def clean_html_field(self, html):
-
         if not html:
             return None
 
@@ -726,6 +726,19 @@ class CoreDocument(PolymorphicModel):
         self.delete_citations()
         return citation_analyser.extract_citations(self)
 
+    def extract_provision_citations(self):
+        """Extract citation contexts for this document. This will extract contexts for all citations
+        in the document, and update the ExtractedCitationContext objects.
+        """
+        from peachjam.analysis.citations import citation_analyser
+
+        self.delete_provision_citations()
+        citation_analyser.update_provision_citations(self)
+
+    def delete_provision_citations(self):
+        """Delete existing provision citations for this document."""
+        ProvisionCitation.objects.filter(citing_document=self).delete()
+
     def delete_citations(self):
         """Delete existing citation links and added citations from this document."""
         from peachjam.models.citations import CitationLink
@@ -781,7 +794,7 @@ class CoreDocument(PolymorphicModel):
             return None
 
         # Parse the HTML content
-        root = parse_utf8_html(self.content_html)
+        root = parse_html_str(self.content_html)
         images = {i.filename: i for i in self.images.all()}
 
         # inline images
@@ -833,6 +846,18 @@ class CoreDocument(PolymorphicModel):
             .first()
             == self.pk
         )
+
+    def get_provision_by_eid(self, eid):
+        if not self.content_html or not self.content_html_is_akn:
+            return None
+
+        # Find element with data-eId
+        xpath = f"//*[@data-eid='{eid}']"
+        elements = self.content_html_tree.xpath(xpath)
+
+        if elements:
+            return etree.tostring(elements[0], encoding="unicode", method="html")
+        return None
 
     def get_content_as_text(self):
         """Get the document content as plain text."""

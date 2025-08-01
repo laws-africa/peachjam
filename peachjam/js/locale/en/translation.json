@@ -12,6 +12,7 @@
   "Between {prev_expression_date} and {new_expression_date}": "Between {prev_expression_date} and {new_expression_date}",
   "Can't find what you're looking for? Please let us know": "Can't find what you're looking for? Please let us know.",
   "Cancel": "Cancel",
+  "Cited {count} times": "Cited {count} times",
   "Clear": "Clear",
   "Clear all": "Clear all",
   "Close": "Close",

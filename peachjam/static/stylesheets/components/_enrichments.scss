@@ -38,4 +38,18 @@
       background-color: transparentize(tint-color($primary, 80%), 0.6);
     }
   }
+
+  la-gutter-item.citation-count .gutter-item-link {
+    visibility: hidden;
+  }
+
+  la-gutter-item[active].citation-count .gutter-item-link  {
+    visibility: visible;
+  }
+
+  .enrich-citation-count {
+    &.active {
+      background-color: transparentize(tint-color($secondary, 80%), 0.6);
+    }
+  }
 }

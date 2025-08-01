@@ -113,14 +113,16 @@
              data-position="{{ hit.position }}"
              data-portion="page-{{ page.page_num }}"
              target="_blank">{% trans "Page" %} {{ page.page_num }}</a>:
-          {% if page.highlight.pages_body %}<span>{{ page.highlight.pages_body|safeseq|join:" ... " }}</span>{% endif %}
+          {% if page.highlight.pages_body %}
+            <span>[...] {{ page.highlight.pages_body|safeseq|join:" ... " }} [...]</span>
+          {% endif %}
           {% if can_debug %}({{ page.score }}){% endif %}
         </div>
       {% endfor %}
       {% for provision in hit.provisions %}
         {% include 'peachjam_search/_search_hit_provision.html' with parents=provision.parents %}
       {% empty %}
-        <div class="ms-3 snippet text-muted">{{ hit.highlight.content|safeseq|join:" ... " }}</div>
+        <div class="ms-3 snippet text-muted">[...] {{ hit.highlight.content|safeseq|join:" ... " }} [...]</div>
       {% endfor %}
     </div>
     <div class="card-footer text-end">
