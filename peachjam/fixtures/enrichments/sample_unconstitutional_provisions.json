@@ -5,7 +5,7 @@
     "whole_work": false,
     "enrichment_type":  "unconstitutional_provision",
     "text": "This is a snippet of text that was copied from the judgment by an editor and pasted into the form on indigo. It is not linked, and must be updated manually on the Enrichment object.",
-    "read_in_text": "<akomaNtoso xmlns=\"http://docs.oasis-open.org/legaldocml/ns/akn/3.0\"><portion name=\"portion><meta/><portionBody xmlns=\"http://docs.oasis-open.org/legaldocml/ns/akn/3.0\"><paragraph eId=\"para_a\"><num>(a)</num><content><p eId=\"para_a__p_1\">new text;</p></content></paragraph><paragraph eId=\"para_b\"><num>(b)</num><content><p eId=\"para_b__p_1\">more;</p></content></paragraph><hcontainer name=\"hcontainer\" eId=\"hcontainer_1\"><content><p eId=\"hcontainer_1__p_1\">and wrap-up.</p></content></hcontainer></portionBody></portion></akomaNtoso>",
+    "read_in_text": "<span class=\"akn-portionBody\"><section class=\"akn-paragraph\" id=\"para_a\" data-eId=\"para_a\"><span class=\"akn-num\">(a)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"para_a__p_1\" data-eId=\"para_a__p_1\">new text;</span></span></section><section class=\"akn-paragraph\" id=\"para_b\" data-eId=\"para_b\"><span class=\"akn-num\">(b)</span><span class=\"akn-content\"><span class=\"akn-p\" id=\"para_b__p_1\" data-eId=\"para_b__p_1\">more;</span></span></section><span class=\"akn-hcontainer\" data-name=\"hcontainer\" id=\"hcontainer_1\" data-eId=\"hcontainer_1\"><span class=\"akn-content\"><span class=\"akn-p\" id=\"hcontainer_1__p_1\" data-eId=\"hcontainer_1__p_1\">and a wrap.</span></span></span></span>",
     "judgment_frbr_uri": "/akn/za/judgment/zacc/2021/51",
     "date_deemed_unconstitutional": "2021-12-31",
     "end_of_suspension_period": "2024-12-31",
