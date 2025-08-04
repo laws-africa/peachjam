@@ -3,17 +3,21 @@ from bisect import bisect_left
 
 import lxml.html
 import requests
+from cobalt import FrbrUri
 from django.conf import settings
 from docpipe.matchers import ExtractedCitation
 from lxml.etree import ParseError
 
-from peachjam.models import CitationLink
+from peachjam.models import CitationLink, ProvisionCitation
+from peachjam.xmlutils import get_following_text, get_preceding_text
 
 log = logging.getLogger(__name__)
 
 
 class CitationAnalyser:
     matchers = []
+    context_not_above = ["p", "section", "div", "td", "th"]
+    context_length = 100
 
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
@@ -80,6 +84,115 @@ class CitationAnalyser:
 
         citation = CitationLink.from_extracted_citation(citation)
         return citation
+
+    def update_provision_citations(self, document):
+        if document.content_html:
+            self.create_from_html(document)
+        else:
+            self.create_from_citation_links(document)
+
+    def get_provision_eid(self, url):
+        for sep in ("~", "#"):
+            if sep in url:
+                return url.split(sep, 1)[1]
+        return None
+
+    def create_from_html(self, document):
+        """Create citation contexts from an HTML document."""
+        from peachjam.models import Work
+
+        if not document.content_html:
+            log.warning("No HTML content to extract citation contexts from.")
+            return
+
+        if document.content_html_is_akn:
+            xpath = (
+                '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
+                'not(ancestor::*[contains(@class, "akn-remark")])]'
+            )
+            attr = "data-href"
+        else:
+            xpath = '//a[starts-with(@href, "/akn")]'
+            attr = "href"
+
+        for a in document.content_html_tree.xpath(xpath):
+            try:
+                href = a.attrib[attr]
+                log.debug(f"Processing citation link to: {href}")
+                work_frbr_uri = FrbrUri.parse(href).work_uri()
+                work = Work.objects.get(frbr_uri=work_frbr_uri)
+                exact = a.text_content().strip()
+
+                prefix = get_preceding_text(
+                    a, self.context_not_above, self.context_length
+                )
+                suffix = get_following_text(
+                    a, self.context_not_above, self.context_length
+                )
+                ctx = ProvisionCitation.objects.create(
+                    citing_document=document,
+                    prefix=prefix,
+                    suffix=suffix,
+                    exact=exact,
+                    work=work,
+                    provision_eid=self.get_provision_eid(href),
+                )
+                log.debug(f"Created citation context {ctx}")
+            except ValueError as e:
+                log.warning(
+                    "Invalid FRBR URI in citation link %s in document %s: %s",
+                    a.attrib[attr],
+                    document,
+                    e,
+                )
+            except Work.DoesNotExist:
+                log.warning(
+                    "No work found for FRBR URI %s in document %s",
+                    a.attrib[attr],
+                    document,
+                )
+
+    def create_from_citation_links(self, document):
+        """Create a citation context from an existing CitationLink."""
+        from peachjam.models import Work
+
+        for citation_link in CitationLink.objects.filter(document=document):
+
+            try:
+                url = citation_link.url
+                frbr_uri = FrbrUri.parse(url).work_uri()
+                target_work = Work.objects.get(frbr_uri=frbr_uri)
+                exact = None
+                prefix = None
+                suffix = None
+                if citation_link.target_selectors:
+                    for selector in citation_link.target_selectors:
+                        if selector["type"] == "TextQuoteSelector":
+                            exact = selector.get("exact")
+                            prefix = selector.get("prefix")
+                            suffix = selector.get("suffix")
+
+                ProvisionCitation.objects.create(
+                    citing_document=document,
+                    prefix=prefix,
+                    suffix=suffix,
+                    exact=exact,
+                    work=target_work,
+                    provision_eid=self.get_provision_eid(citation_link.url),
+                )
+            except ValueError as e:
+                log.warning(
+                    "Invalid FRBR URI in citation link %s in document %s: %s",
+                    citation_link.url,
+                    document,
+                    e,
+                )
+            except Work.DoesNotExist:
+                log.warning(
+                    "No work found for FRBR URI %s in document %s",
+                    citation_link.url,
+                    document,
+                )
 
 
 class CitatorMatcher:

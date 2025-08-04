@@ -17,14 +17,14 @@ la-gutter-item {
   }
 }
 
-la-gutter-item .gutter-item-card {
+la-gutter-item .gutter-item-card, la-gutter-item .gutter-item-link {
   display: none;
   @include media-breakpoint-up(lg) {
     display: block;
   }
 }
 
-la-gutter-item[active] .gutter-item-card {
+la-gutter-item[active] .gutter-item-card, la-gutter-item[active] .gutter-item-link {
   // on moblie, display at the bottom of the screen when active
   @include media-breakpoint-down(lg) {
     display: block;

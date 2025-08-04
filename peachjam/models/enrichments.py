@@ -1,7 +1,6 @@
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
-from lxml import etree
 from polymorphic.models import PolymorphicModel
 
 
@@ -11,6 +10,7 @@ class ProvisionEnrichment(PolymorphicModel):
         ("provision_enrichment", _("Provision enrichment")),
         ("unconstitutional_provision", _("Unconstitutional provision")),
         ("uncommenced_provision", _("Uncommenced provision")),
+        ("provision_citation", _("Provision citation")),
     )
 
     work = models.ForeignKey(
@@ -57,19 +57,7 @@ class ProvisionEnrichment(PolymorphicModel):
 
     @cached_property
     def provision_by_eid(self):
-        html_content = self.document.content_html
-        if not html_content:
-            return None
-        parser = etree.HTMLParser()
-        tree = etree.fromstring(html_content, parser)
-
-        # Find element with data-eId
-        xpath = f"//*[@data-eid='{self.provision_eid}']"
-        elements = tree.xpath(xpath)
-
-        if elements:
-            return etree.tostring(elements[0], encoding="unicode", method="html")
-        return None
+        return self.document.get_provision_by_eid(self.provision_eid)
 
     @cached_property
     def provision_title(self):
@@ -129,4 +117,24 @@ class UncommencedProvision(ProvisionEnrichment):
 
     def save(self, *args, **kwargs):
         self.enrichment_type = "uncommenced_provision"
+        super().save(*args, **kwargs)
+
+
+class ProvisionCitation(ProvisionEnrichment):
+    prefix = models.CharField(_("prefix"), max_length=1024, null=True, blank=True)
+    suffix = models.CharField(_("suffix"), max_length=1024, null=True, blank=True)
+    exact = models.CharField(_("exact"), max_length=1024, null=True, blank=True)
+    citing_document = models.ForeignKey(
+        "peachjam.CoreDocument",
+        on_delete=models.CASCADE,
+        related_name="provision_citations",
+        verbose_name=_("citing document"),
+    )
+
+    class Meta:
+        verbose_name = _("provision citation")
+        verbose_name_plural = _("provision citations")
+
+    def save(self, *args, **kwargs):
+        self.enrichment_type = "provision_citation"
         super().save(*args, **kwargs)

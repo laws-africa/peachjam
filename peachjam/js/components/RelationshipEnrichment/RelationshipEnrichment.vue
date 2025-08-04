@@ -50,7 +50,7 @@
             v-if="objectDocument"
             target="_blank"
             :href="`${objectDocument.expression_frbr_uri}/`"
-          >{{ objectDocument.title }}</a><span v-else>{{ enrichment.object_work.frbr_uri }} xx</span>.
+          >{{ objectDocument.title }}</a><span v-else>{{ enrichment.object_work.frbr_uri }}</span>.
         </div>
         <div v-else>
           <a

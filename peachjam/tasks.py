@@ -138,6 +138,9 @@ def extract_citations(document_id):
     try:
         if doc.extract_citations():
             doc.save()
+
+            if doc.is_most_recent():
+                doc.extract_provision_citations()
     except Exception as e:
         log.error(f"Error extracting citations for {doc}", exc_info=e)
         raise

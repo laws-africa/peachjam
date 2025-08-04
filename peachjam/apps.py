@@ -9,6 +9,7 @@ class PeachJamConfig(AppConfig):
     def ready(self):
         import jazzmin.settings
         from countries_plus.models import Country
+        from docpipe.matchers import CitationMatcher
 
         import peachjam.adapters  # noqa
         import peachjam.signals  # noqa
@@ -17,6 +18,8 @@ class PeachJamConfig(AppConfig):
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
         Country.get_absolute_url = get_country_absolute_url
+        # bump up the context for citation extraction
+        CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 100
 
         if not settings.DEBUG:
             from background_task.models import Task

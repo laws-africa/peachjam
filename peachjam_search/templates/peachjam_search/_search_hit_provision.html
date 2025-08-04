@@ -13,7 +13,7 @@
        data-position="{{ hit.position }}"
        data-portion="{{ provision.id }}">{{ provision.title }}</a>
     {% if provision.highlight.provisions_body %}
-      <div class="ms-3 text-muted">{{ provision.highlight.provisions_body|safeseq|join:" ... " }}</div>
+      <div class="ms-3 text-muted">[...] {{ provision.highlight.provisions_body|safeseq|join:" ... " }} [...]</div>
     {% endif %}
   {% endif %}
 </div>

@@ -1,16 +1,22 @@
 from datetime import datetime, timedelta
+from functools import cached_property
 
 from django.contrib import messages
-from django.db.models import CharField, Func, Value
+from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
+from django.http import Http404
 from django.template.defaultfilters import date as format_date
+from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
+from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import (
+    CoreDocument,
     Legislation,
+    ProvisionCitation,
     UncommencedProvision,
     UnconstitutionalProvision,
     pj_settings,
@@ -519,4 +525,74 @@ class UnconstitutionalProvisionListView(LegislationListView):
             for enrichment in doc.provision_enrichments:
                 enrichment.document = doc
 
+        return context
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentProvisionCitationView(FilteredDocumentListView):
+    template_name = "peachjam/provision_enrichment/provision_citations.html"
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/provision_enrichment/_provision_citations_table.html"]
+            return [
+                "peachjam/provision_enrichment/_provision_citations_table_form.html"
+            ]
+        return super().get_template_names()
+
+    @cached_property
+    def document(self):
+        obj = CoreDocument.objects.filter(
+            expression_frbr_uri=self.kwargs.get("frbr_uri")
+        ).first()
+        if not obj:
+            raise Http404()
+
+        # TODO: extract perms logic into a mixin
+        if obj.restricted:
+            perm = f"{obj._meta.app_label}.view_{obj._meta.model_name}"
+            if not self.request.user.has_perm(perm, obj):
+                raise Http404()
+        return obj
+
+    @property
+    def provision_eid(self):
+        return self.kwargs.get("provision_eid", "")
+
+    @cached_property
+    def provision_citations(self):
+        contexts = ProvisionCitation.objects.filter(
+            work=self.document.work, provision_eid=self.provision_eid
+        ).prefetch_related("work")
+        if not contexts.exists():
+            raise Http404("No citations found for this provision.")
+        return contexts
+
+    def get_base_queryset(self, *args, **kwargs):
+        document_ids = self.provision_citations.values_list(
+            "citing_document_id", flat=True
+        )
+        prefetch = Prefetch(
+            "provision_citations",
+            queryset=self.provision_citations,
+            to_attr="relevant_provision_citations",
+        )
+        qs = (
+            CoreDocument.objects.filter(pk__in=document_ids)
+            .prefetch_related(prefetch)
+            .for_document_table()
+        )
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["document"] = self.document
+        context["provision_title"] = context["document"].friendly_provision_title(
+            self.provision_eid
+        )
+        context["provision_html"] = context["document"].get_provision_by_eid(
+            self.provision_eid
+        )
+        context["citation_contexts"] = self.provision_citations
         return context
