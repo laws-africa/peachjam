@@ -124,12 +124,6 @@ class ProvisionCitation(ProvisionEnrichment):
     prefix = models.CharField(_("prefix"), max_length=1024, null=True, blank=True)
     suffix = models.CharField(_("suffix"), max_length=1024, null=True, blank=True)
     exact = models.CharField(_("exact"), max_length=1024, null=True, blank=True)
-    citation_anchor_id = models.CharField(
-        _("citation anchor id"),
-        max_length=1024,
-        null=True,
-        blank=True,
-    )
     citing_document = models.ForeignKey(
         "peachjam.CoreDocument",
         on_delete=models.CASCADE,

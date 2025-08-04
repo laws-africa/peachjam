@@ -101,14 +101,6 @@ class CitationAnalyser:
         """Create citation contexts from an HTML document."""
         from peachjam.models import Work
 
-        def get_parent_element(anchor, tags=("p", "div", "section")):
-            current = anchor
-            while current is not None:
-                if current.tag in tags:
-                    return current
-                current = current.getparent()
-            return None
-
         if not document.content_html:
             log.warning("No HTML content to extract citation contexts from.")
             return
@@ -137,16 +129,11 @@ class CitationAnalyser:
                 suffix = get_following_text(
                     a, self.context_not_above, self.context_length
                 )
-
-                parent_element = get_parent_element(a)
-                citation_id = parent_element.attrib.get("id", "")
-
                 ctx = ProvisionCitation.objects.create(
                     citing_document=document,
                     prefix=prefix,
                     suffix=suffix,
                     exact=exact,
-                    citation_anchor_id=citation_id,
                     work=work,
                     provision_eid=self.get_provision_eid(href),
                 )
@@ -175,19 +162,18 @@ class CitationAnalyser:
                 url = citation_link.url
                 frbr_uri = FrbrUri.parse(url).work_uri()
                 target_work = Work.objects.get(frbr_uri=frbr_uri)
-                exact = ""
-                prefix = ""
-                suffix = ""
+                exact = None
+                prefix = None
+                suffix = None
                 if citation_link.target_selectors:
                     for selector in citation_link.target_selectors:
                         if selector["type"] == "TextQuoteSelector":
-                            exact = selector.get("exact", "")
-                            prefix = selector.get("prefix", "")
-                            suffix = selector.get("suffix", "")
+                            exact = selector.get("exact")
+                            prefix = selector.get("prefix")
+                            suffix = selector.get("suffix")
 
                 ProvisionCitation.objects.create(
                     citing_document=document,
-                    citation_anchor_id=citation_link.target_id,
                     prefix=prefix,
                     suffix=suffix,
                     exact=exact,

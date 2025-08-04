@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from functools import cached_property
 
 from django.contrib import messages
 from django.db.models import CharField, Func, Prefetch, Value
@@ -541,7 +540,7 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
             ]
         return super().get_template_names()
 
-    @cached_property
+    @property
     def document(self):
         obj = CoreDocument.objects.filter(
             expression_frbr_uri=self.kwargs.get("frbr_uri")
@@ -556,11 +555,11 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
                 raise Http404()
         return obj
 
-    @cached_property
+    @property
     def provision_eid(self):
         return self.kwargs.get("provision_eid", "")
 
-    @cached_property
+    @property
     def provision_citations(self):
         contexts = ProvisionCitation.objects.filter(
             work=self.document.work, provision_eid=self.provision_eid

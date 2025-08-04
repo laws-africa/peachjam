@@ -429,20 +429,18 @@ class BaseDocumentDetailView(DetailView):
             doc.work.works_citing_current_work(), "citing_works"
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
-        # TODO: load real data
 
-        citation_contexts = (
+        provision_citations = (
             ProvisionCitation.objects.filter(work=doc.work)
             .values("provision_eid")
             .annotate(citations=Count("id"))
         )
-
         context["incoming_citations_json"] = [
             {
                 "provision_eid": item["provision_eid"],
                 "citations": item["citations"],
             }
-            for item in citation_contexts
+            for item in provision_citations
         ]
 
         # provide extra context for analytics
