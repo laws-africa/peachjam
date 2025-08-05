@@ -1,8 +1,10 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.decorators import LegislationDecorator
 from peachjam.models import (
+    BreadCrumb,
     CoreDocument,
     CoreDocumentManager,
     CoreDocumentQuerySet,
@@ -58,3 +60,10 @@ class Legislation(CoreDocument):
     def pre_save(self):
         self.doc_type = "legislation"
         return super().pre_save()
+
+    def get_breadcrumbs(self):
+        breadcrumbs = super().get_breadcrumbs()
+        breadcrumbs.append(
+            BreadCrumb(name=_("Legislation"), url=reverse("legislation_list"))
+        )
+        return breadcrumbs

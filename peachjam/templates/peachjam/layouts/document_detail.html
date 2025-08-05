@@ -30,7 +30,9 @@
   <div class="pb-5" data-document-id="{{ document.pk }}">
     <div class="bg-light">
       <div class="container">
-        {% block breadcrumbs %}{% endblock %}
+        {% block breadcrumbs %}
+          {% include "peachjam/_breadcrumbs.html" %}
+        {% endblock %}
         {% block document-title %}
           <div class="d-md-flex justify-content-md-between my-3">
             <div>
