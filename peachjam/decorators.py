@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -180,6 +181,61 @@ class LegislationDecorator(DocumentDecorator):
         crumbs = super().get_breadcrumbs(document)
         crumbs.append(BreadCrumb(_("Legislation"), reverse("legislation_list")))
         return crumbs
+
+
+class GazetteDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        breadcrumbs = super().get_breadcrumbs(document)
+        breadcrumbs.append(
+            BreadCrumb(
+                _("Gazettes"),
+                reverse("gazettes"),
+            )
+        )
+        breadcrumbs.append(
+            BreadCrumb(
+                document.jurisdiction.name,
+                reverse(
+                    "gazettes_by_locality", args=[document.jurisdiction.pk.lower()]
+                ),
+            )
+        )
+        if document.locality:
+            breadcrumbs.append(
+                BreadCrumb(
+                    document.locality.name,
+                    reverse(
+                        "gazettes_by_locality", args=[document.locality.place_code]
+                    ),
+                )
+            )
+            breadcrumbs.append(
+                BreadCrumb(
+                    str(document.date.year),
+                    reverse(
+                        "gazettes_by_year",
+                        args=[document.locality.place_code, document.date.year],
+                    ),
+                )
+            )
+        elif settings.PEACHJAM["MULTIPLE_JURISDICTIONS"]:
+            breadcrumbs.append(
+                BreadCrumb(
+                    str(document.date.year),
+                    reverse(
+                        "gazettes_by_year",
+                        args=[document.jurisdiction.pk.lower(), document.date.year],
+                    ),
+                )
+            )
+        else:
+            breadcrumbs.append(
+                BreadCrumb(
+                    str(document.date.year),
+                    reverse("gazettes_by_year", args=[document.date.year]),
+                )
+            )
+        return breadcrumbs
 
 
 class GenericDocumentDecorator(DocumentDecorator):
