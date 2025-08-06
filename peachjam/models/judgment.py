@@ -156,9 +156,6 @@ class CourtDivision(models.Model):
             self.code = slugify(self.name)
         return super().save(*args, **kwargs)
 
-    def get_absolute_url(self):
-        return reverse("court_division", args=[self.code])
-
 
 class Court(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False, unique=True)
