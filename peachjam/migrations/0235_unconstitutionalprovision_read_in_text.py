@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
             model_name="unconstitutionalprovision",
             name="read_in_text_html",
             field=models.CharField(
-                blank=True, max_length=4096, null=True, verbose_name="read-in text"
+                blank=True, max_length=4096, null=True, verbose_name="read-in text HTML"
             ),
         ),
     ]

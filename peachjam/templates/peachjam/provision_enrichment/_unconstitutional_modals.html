@@ -14,7 +14,9 @@
                   data-bs-dismiss="modal"
                   aria-label="{% trans 'Close' %}"></button>
         </div>
-        <div class="modal-body">{% include "peachjam/provision_enrichment/_detail.html" %}</div>
+        <div class="modal-body">
+          {% include "peachjam/provision_enrichment/_unconstitutional_provision_detail.html" with expanded=True %}
+        </div>
         <div class="modal-footer">
           <a href="{% url 'unconstitutional_provision_list' %}" class="me-auto">{% trans "All unconstitutional provisions" %}</a>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>

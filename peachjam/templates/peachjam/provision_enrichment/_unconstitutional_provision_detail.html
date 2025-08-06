@@ -1,0 +1,32 @@
+{% load i18n %}
+<h6 class="mb-2 provision-toggle">
+  <button type="button"
+          class="btn btn-sm bg-none {% if not expanded %}collapsed{% endif %}"
+          hx-get="{% url 'unconstitutional_provision_detail' enrichment.pk %}"
+          hx-target="#provision-detail-{{ enrichment.pk }}"
+          hx-swap="innerHTML"
+          hx-trigger="click once"
+          data-bs-toggle="collapse"
+          data-bs-target="#provision-detail-{{ enrichment.pk }}"
+          aria-expanded="{% if expanded %}true{% else %}false{% endif %}"
+          aria-controls="provision-detail-{{ enrichment.pk }}">
+    <i class="bi"></i>
+  </button>
+  {# djLint:off #}
+  <a href="{{ enrichment.document.get_absolute_url }}{% if enrichment.provision_eid %}#{{ enrichment.provision_eid }}{% endif %}" class="provision-link me-2">
+    {% if enrichment.whole_work %}{{ enrichment.document.title }}{% else %}{{ enrichment.provision_title }}{% endif %}</a>
+  {# djLint:on #}
+  {% if enrichment.resolved %}
+    <span class="badge bg-success">{% trans 'Resolved' %}</span>
+  {% else %}
+    <span class="badge bg-danger">{% trans 'Unresolved' %}</span>
+  {% endif %}
+</h6>
+<div id="provision-detail-{{ enrichment.pk }}"
+     class="collapse {% if expanded %}show{% endif %}">
+  {% if expanded %}
+    {% include 'peachjam/provision_enrichment/unconstitutional_provision_detail.html' %}
+  {% else %}
+    <div class="spinner-when-empty"></div>
+  {% endif %}
+</div>

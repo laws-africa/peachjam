@@ -17,6 +17,7 @@ from peachjam.views import (
     TermsOfUsePageView,
     UncommencedProvisionDetailView,
     UncommencedProvisionListView,
+    UnconstitutionalProvisionDetailView,
     UnconstitutionalProvisionListView,
 )
 from peachjam.views.generic_views import CSRFTokenView
@@ -41,6 +42,11 @@ urlpatterns = [
         "uncommenced-provisions/<int:pk>",
         UncommencedProvisionDetailView.as_view(),
         name="uncommenced_provision_detail",
+    ),
+    path(
+        "unconstitutional-provisions/<int:pk>",
+        UnconstitutionalProvisionDetailView.as_view(),
+        name="unconstitutional_provision_detail",
     ),
     path(
         "document-uncommenced-provisions/<int:pk>",
