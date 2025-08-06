@@ -60,4 +60,3 @@ class PlaceBillListView(BillListView):
 @registry.register_doc_type("bill")
 class BillDetailView(BaseDocumentDetailView):
     model = Bill
-    template_name = "peachjam/bill_detail.html"

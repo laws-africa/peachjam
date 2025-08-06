@@ -995,9 +995,9 @@ class CoreDocument(PolymorphicModel):
 
     def get_breadcrumbs(self):
         """Get a list of breadcrumbs for this document, suitable for rendering in a template."""
-        crumbs = [
-            BreadCrumb(name=_("Home"), url=reverse("home_page")),
-        ]
+        crumbs = []
+        if self.decorator:
+            crumbs = self.decorator.get_breadcrumbs(self)
         return crumbs
 
 

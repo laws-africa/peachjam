@@ -1,10 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.decorators import BillDecorator
 from peachjam.models import CoreDocument
 
 
 class Bill(CoreDocument):
+
+    decorator = BillDecorator()
+
     frbr_uri_doctypes = ["bill"]
     default_nature = ("bill", "Bill")
     author = models.ForeignKey(

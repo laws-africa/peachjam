@@ -351,6 +351,7 @@ class FilteredDocumentListView(DocumentListView):
 
 
 class BaseDocumentDetailView(DetailView):
+    template_name = "peachjam/layouts/document_detail.html"
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"

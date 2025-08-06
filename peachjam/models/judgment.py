@@ -11,8 +11,8 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.decorators import JudgmentDecorator
-from peachjam.models import BreadCrumb, CoreDocument, Locality, SourceFile
+from peachjam.decorators import CauseListDecorator, JudgmentDecorator
+from peachjam.models import CoreDocument, Locality, SourceFile
 from peachjam.tasks import create_anonymised_source_file_pdf
 
 log = logging.getLogger(__name__)
@@ -614,46 +614,6 @@ class Judgment(CoreDocument):
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
 
-    def get_breadcrumbs(self):
-        crumbs = super().get_breadcrumbs()
-        crumbs.append(BreadCrumb(name=_("Judgments"), url=reverse("judgment_list")))
-        if self.court:
-            crumbs.append(
-                BreadCrumb(
-                    name=self.court.name,
-                    url=self.court.get_absolute_url(),
-                )
-            )
-        if self.court.court_class:
-            if self.court.court_class.show_listing_page:
-                crumbs.append(
-                    BreadCrumb(
-                        name=self.court.court_class.name,
-                        url=self.court.court_class.get_absolute_url(),
-                    )
-                )
-        if self.registry:
-            crumbs.append(
-                BreadCrumb(
-                    name=self.registry.name,
-                    url=self.registry.get_absolute_url(),
-                )
-            )
-        if self.division:
-            crumbs.append(
-                BreadCrumb(
-                    name=self.division.name,
-                    url=self.division.get_absolute_url(),
-                )
-            )
-        crumbs.append(
-            BreadCrumb(
-                name=str(self.date.year),
-                url=reverse("court_year", args=[self.court.code, self.date.year]),
-            )
-        )
-        return crumbs
-
 
 class CaseNumber(models.Model):
     string_override = models.CharField(
@@ -756,6 +716,9 @@ class CaseHistory(models.Model):
 
 
 class CauseList(CoreDocument):
+
+    decorator = CauseListDecorator()
+
     frbr_uri_doctypes = ["doc"]
     default_nature = ("causelist", "Cause list")
     court = models.ForeignKey(
@@ -786,44 +749,6 @@ class CauseList(CoreDocument):
         self.frbr_uri_doctype = "doc"
         self.doc_type = "causelist"
         super().pre_save()
-
-    def get_breadcrumbs(self):
-        crumbs = super().get_breadcrumbs()
-        crumbs.append(BreadCrumb(_("Cause Lists"), reverse("causelist_list")))
-        if self.court.court_class:
-            if self.court.court_class.show_listing_page:
-                crumbs.append(
-                    BreadCrumb(
-                        self.court.court_class.name,
-                        reverse(
-                            "causelist_court_class", args=[self.court.court_class.slug]
-                        ),
-                    )
-                )
-        if self.court:
-            crumbs.append(
-                BreadCrumb(
-                    self.court.name,
-                    reverse("causelist_court", args=[self.court.code]),
-                )
-            )
-        if self.registry:
-            crumbs.append(
-                BreadCrumb(
-                    self.registry.name,
-                    reverse(
-                        "causelist_court_registry",
-                        args=[self.court.code, self.registry.code],
-                    ),
-                )
-            )
-        crumbs.append(
-            BreadCrumb(
-                str(self.date.year),
-                reverse("causelist_court_year", args=[self.court.code, self.date.year]),
-            )
-        )
-        return crumbs
 
 
 class Replacement(models.Model):
