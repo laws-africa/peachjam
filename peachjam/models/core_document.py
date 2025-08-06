@@ -48,6 +48,14 @@ from peachjam.xmlutils import parse_html_str
 log = logging.getLogger(__name__)
 
 
+@dataclass
+class BreadCrumb:
+    """A simple dataclass to represent a breadcrumb."""
+
+    name: str
+    url: str
+
+
 class Label(models.Model):
     name = models.CharField(
         _("name"), max_length=1024, unique=True, null=False, blank=False
@@ -343,14 +351,6 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         return self.select_related(
             "nature", "work", "jurisdiction", "locality"
         ).prefetch_related("labels", "taxonomies", "taxonomies__topic")
-
-
-@dataclass
-class BreadCrumb:
-    """A simple dataclass to represent a breadcrumb."""
-
-    name: str
-    url: str
 
 
 class CoreDocument(PolymorphicModel):

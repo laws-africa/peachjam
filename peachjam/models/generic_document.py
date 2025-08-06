@@ -1,7 +1,8 @@
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import CoreDocument
+from peachjam.models import BreadCrumb, CoreDocument
 from peachjam.models.author import Author
 
 
@@ -32,3 +33,14 @@ class GenericDocument(CoreDocument):
     def pre_save(self):
         self.doc_type = "generic_document"
         super().pre_save()
+
+    def get_breadcrumbs(self):
+        breadcrumbs = super().get_breadcrumbs()
+        if self.nature:
+            breadcrumbs.append(
+                BreadCrumb(
+                    name=str(self.nature),
+                    url=reverse("document_nature_list", args=[self.nature.code]),
+                )
+            )
+        return breadcrumbs

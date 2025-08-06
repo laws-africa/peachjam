@@ -1,8 +1,10 @@
 from django.db import models
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from martor.models import MartorField
 from martor.utils import markdownify
 
-from peachjam.models import CoreDocument
+from peachjam.models import BreadCrumb, CoreDocument
 
 
 class Book(CoreDocument):
@@ -26,6 +28,16 @@ class Book(CoreDocument):
         self.doc_type = "book"
         return super().pre_save()
 
+    def get_breadcrumbs(self):
+        breadcrumbs = super().get_breadcrumbs()
+        breadcrumbs.append(
+            BreadCrumb(
+                name=_("Books"),
+                url=reverse("book_list"),
+            )
+        )
+        return breadcrumbs
+
 
 class Journal(CoreDocument):
     publisher = models.CharField(max_length=2048)
@@ -36,3 +48,13 @@ class Journal(CoreDocument):
         self.frbr_uri_subtype = "journal"
         self.doc_type = "journal"
         return super().pre_save()
+
+    def get_breadcrumbs(self):
+        breadcrumbs = super().get_breadcrumbs()
+        breadcrumbs.append(
+            BreadCrumb(
+                name=_("Journals"),
+                url=reverse("journal_list"),
+            )
+        )
+        return breadcrumbs

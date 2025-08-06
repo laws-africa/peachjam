@@ -787,6 +787,44 @@ class CauseList(CoreDocument):
         self.doc_type = "causelist"
         super().pre_save()
 
+    def get_breadcrumbs(self):
+        crumbs = super().get_breadcrumbs()
+        crumbs.append(BreadCrumb(_("Cause Lists"), reverse("causelist_list")))
+        if self.court.court_class:
+            if self.court.court_class.show_listing_page:
+                crumbs.append(
+                    BreadCrumb(
+                        self.court.court_class.name,
+                        reverse(
+                            "causelist_court_class", args=[self.court.court_class.slug]
+                        ),
+                    )
+                )
+        if self.court:
+            crumbs.append(
+                BreadCrumb(
+                    self.court.name,
+                    reverse("causelist_court", args=[self.court.code]),
+                )
+            )
+        if self.registry:
+            crumbs.append(
+                BreadCrumb(
+                    self.registry.name,
+                    reverse(
+                        "causelist_court_registry",
+                        args=[self.court.code, self.registry.code],
+                    ),
+                )
+            )
+        crumbs.append(
+            BreadCrumb(
+                str(self.date.year),
+                reverse("causelist_court_year", args=[self.court.code, self.date.year]),
+            )
+        )
+        return crumbs
+
 
 class Replacement(models.Model):
     """A replacement made for anonymisation in a Judgment. Part of the judgment anonymiser app."""
