@@ -11,7 +11,7 @@
   {% endif %}
 </h6>
 {% if enrichment.text %}<div class="my-2">{{ enrichment.text|linebreaks }}</div>{% endif %}
-{% if enrichment.read_in_text %}
+{% if enrichment.read_in_text_html %}
   <h6>{% trans 'Read-in text' %}</h6>
   <la-akoma-ntoso
   frbr-expression-uri="{{ enrichment.document.expression_frbr_uri }}"
@@ -19,7 +19,7 @@
   style="max-height: 50vh; overflow-y: auto;"
   lang="{{ enrichment.document.language.iso }}"
   >
-  {{ enrichment.read_in_text|safe }}
+  {{ enrichment.read_in_text_html|safe }}
   </la-akoma-ntoso>
 {% endif %}
 <dl class="document-metadata-list d-flex mb-3">

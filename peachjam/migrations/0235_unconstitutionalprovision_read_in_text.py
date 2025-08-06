@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="unconstitutionalprovision",
-            name="read_in_text",
+            name="read_in_text_html",
             field=models.CharField(
                 blank=True, max_length=4096, null=True, verbose_name="read-in text"
             ),
