@@ -9,7 +9,12 @@ class MncMatcher(CitationMatcher):
     example: [2022] ZASCA 126
     """
 
-    country_codes = "|".join("BW GH KE LS MW MU MZ NA SN SC ZA SZ TZ UG ZM ZW".split())
+    country_codes = "|".join(
+        # Africa
+        "BW GH KE LS MW MU MZ NA SN SC ZA SZ TZ UG ZM ZW".split()
+        # Caribbean
+        + ["TC"]
+    )
 
     pattern_re = re.compile(
         r"\[(?P<year>\d{4})\]\s+(?P<court>("
