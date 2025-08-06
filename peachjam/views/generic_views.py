@@ -434,7 +434,7 @@ class BaseDocumentDetailView(DetailView):
         provision_citations = (
             ProvisionCitation.objects.filter(work=doc.work)
             .values("provision_eid")
-            .annotate(citations=Count("id"))
+            .annotate(citations=Count("citing_document_id", distinct=True))
         )
         context["incoming_citations_json"] = [
             {
