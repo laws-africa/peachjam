@@ -29,4 +29,3 @@ class JournalListView(FilteredDocumentListView):
 @registry.register_doc_type("journal")
 class JournalDetailView(BaseDocumentDetailView):
     model = Journal
-    template_name = "peachjam/journal_detail.html"

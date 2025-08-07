@@ -1,3 +1,18 @@
+from dataclasses import dataclass
+
+from django.conf import settings
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+
+
+@dataclass
+class BreadCrumb:
+    """A simple dataclass to represent a breadcrumb."""
+
+    name: str
+    url: str
+
+
 class DocumentDecorator:
     """Decorators are mini plugins that allow you to add extra functionality to your documents."""
 
@@ -11,6 +26,13 @@ class DocumentDecorator:
 
     def apply_labels(self, document):
         pass
+
+    def get_breadcrumbs(self, document):
+        """Get a list of breadcrumbs for this document, suitable for rendering in a template."""
+        crumbs = [
+            BreadCrumb(_("Home"), reverse("home_page")),
+        ]
+        return crumbs
 
 
 class JudgmentDecorator(DocumentDecorator):
@@ -37,6 +59,41 @@ class JudgmentDecorator(DocumentDecorator):
             document.labels.remove(label.pk)
 
         super().apply_labels(document)
+
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(BreadCrumb(name=_("Judgments"), url=reverse("judgment_list")))
+        if document.court.court_class:
+            if document.court.court_class.show_listing_page:
+                crumbs.append(
+                    BreadCrumb(
+                        name=document.court.court_class.name,
+                        url=document.court.court_class.get_absolute_url(),
+                    )
+                )
+        if document.court:
+            crumbs.append(
+                BreadCrumb(
+                    name=document.court.name,
+                    url=document.court.get_absolute_url(),
+                )
+            )
+        if document.registry:
+            crumbs.append(
+                BreadCrumb(
+                    name=document.registry.name,
+                    url=document.registry.get_absolute_url(),
+                )
+            )
+        crumbs.append(
+            BreadCrumb(
+                name=str(document.date.year),
+                url=reverse(
+                    "court_year", args=[document.court.code, document.date.year]
+                ),
+            )
+        )
+        return crumbs
 
 
 class LegislationDecorator(DocumentDecorator):
@@ -119,3 +176,141 @@ class LegislationDecorator(DocumentDecorator):
             document.labels.remove(uncommenced_label.pk)
 
         super().apply_labels(document)
+
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(BreadCrumb(_("Legislation"), reverse("legislation_list")))
+        return crumbs
+
+
+class GazetteDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        breadcrumbs = super().get_breadcrumbs(document)
+        breadcrumbs.append(
+            BreadCrumb(
+                _("Gazettes"),
+                reverse("gazettes"),
+            )
+        )
+        breadcrumbs.append(
+            BreadCrumb(
+                document.jurisdiction.name,
+                reverse(
+                    "gazettes_by_locality", args=[document.jurisdiction.pk.lower()]
+                ),
+            )
+        )
+        if document.locality:
+            breadcrumbs.append(
+                BreadCrumb(
+                    document.locality.name,
+                    reverse(
+                        "gazettes_by_locality", args=[document.locality.place_code]
+                    ),
+                )
+            )
+            breadcrumbs.append(
+                BreadCrumb(
+                    str(document.date.year),
+                    reverse(
+                        "gazettes_by_year",
+                        args=[document.locality.place_code, document.date.year],
+                    ),
+                )
+            )
+        elif settings.PEACHJAM["MULTIPLE_JURISDICTIONS"]:
+            breadcrumbs.append(
+                BreadCrumb(
+                    str(document.date.year),
+                    reverse(
+                        "gazettes_by_year",
+                        args=[document.jurisdiction.pk.lower(), document.date.year],
+                    ),
+                )
+            )
+        else:
+            breadcrumbs.append(
+                BreadCrumb(
+                    str(document.date.year),
+                    reverse("gazettes_by_year", args=[document.date.year]),
+                )
+            )
+        return breadcrumbs
+
+
+class GenericDocumentDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        if document.nature:
+            crumbs.append(
+                BreadCrumb(
+                    document.nature.name,
+                    reverse("document_nature_list", args=[document.nature.code]),
+                )
+            )
+        return crumbs
+
+
+class CauseListDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(BreadCrumb(_("Cause Lists"), reverse("causelist_list")))
+        if document.court.court_class:
+            if document.court.court_class.show_listing_page:
+                crumbs.append(
+                    BreadCrumb(
+                        document.court.court_class.name,
+                        reverse(
+                            "causelist_court_class",
+                            args=[document.court.court_class.slug],
+                        ),
+                    )
+                )
+        if document.court:
+            crumbs.append(
+                BreadCrumb(
+                    document.court.name,
+                    reverse("causelist_court", args=[document.court.code]),
+                )
+            )
+        if document.registry:
+            crumbs.append(
+                BreadCrumb(
+                    document.registry.name,
+                    reverse(
+                        "causelist_court_registry",
+                        args=[document.court.code, document.registry.code],
+                    ),
+                )
+            )
+        crumbs.append(
+            BreadCrumb(
+                str(document.date.year),
+                reverse(
+                    "causelist_court_year",
+                    args=[document.court.code, document.date.year],
+                ),
+            )
+        )
+        return crumbs
+
+
+class BookDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(BreadCrumb(_("Books"), reverse("book_list")))
+        return crumbs
+
+
+class JournalDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(BreadCrumb(_("Journals"), reverse("journal_list")))
+        return crumbs
+
+
+class BillDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(BreadCrumb(_("Bills"), reverse("bill_list")))
+        return crumbs

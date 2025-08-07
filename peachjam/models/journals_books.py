@@ -2,10 +2,14 @@ from django.db import models
 from martor.models import MartorField
 from martor.utils import markdownify
 
+from peachjam.decorators import BookDecorator, JournalDecorator
 from peachjam.models import CoreDocument
 
 
 class Book(CoreDocument):
+
+    decorator = BookDecorator()
+
     publisher = models.CharField(max_length=2048)
     content_markdown = MartorField(blank=True, null=True)
     default_nature = ("book", "Book")
@@ -28,6 +32,9 @@ class Book(CoreDocument):
 
 
 class Journal(CoreDocument):
+
+    decorator = JournalDecorator()
+
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal", "Journal")
 

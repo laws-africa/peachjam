@@ -4,6 +4,7 @@ import re
 import shutil
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 
 from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
@@ -45,6 +46,14 @@ from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
 
 log = logging.getLogger(__name__)
+
+
+@dataclass
+class BreadCrumb:
+    """A simple dataclass to represent a breadcrumb."""
+
+    name: str
+    url: str
 
 
 class Label(models.Model):
@@ -983,6 +992,13 @@ class CoreDocument(PolymorphicModel):
 
         # fallback to the eid
         return provision_eid
+
+    def get_breadcrumbs(self):
+        """Get a list of breadcrumbs for this document, suitable for rendering in a template."""
+        crumbs = []
+        if self.decorator:
+            crumbs = self.decorator.get_breadcrumbs(self)
+        return crumbs
 
 
 class AlternativeName(models.Model):

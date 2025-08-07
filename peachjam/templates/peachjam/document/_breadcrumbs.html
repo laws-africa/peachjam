@@ -1,0 +1,14 @@
+{% load i18n %}
+<nav>
+  <ol class="breadcrumb">
+    {% for crumb in document.get_breadcrumbs %}
+      <li class="breadcrumb-item">
+        {% if crumb.url %}
+          <a href="{{ crumb.url }}">{{ crumb.name }}</a>
+        {% else %}
+          {{ crumb.name }}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ol>
+</nav>

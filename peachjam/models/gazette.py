@@ -1,10 +1,14 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.decorators import GazetteDecorator
 from peachjam.models import CoreDocument
 
 
 class Gazette(CoreDocument):
+
+    decorator = GazetteDecorator()
+
     publication = models.CharField(
         _("publication"), max_length=100, null=True, blank=True
     )

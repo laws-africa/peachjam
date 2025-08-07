@@ -11,7 +11,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
-from peachjam.decorators import JudgmentDecorator
+from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.models import CoreDocument, Locality, SourceFile
 from peachjam.tasks import create_anonymised_source_file_pdf
 
@@ -713,6 +713,9 @@ class CaseHistory(models.Model):
 
 
 class CauseList(CoreDocument):
+
+    decorator = CauseListDecorator()
+
     frbr_uri_doctypes = ["doc"]
     default_nature = ("causelist", "Cause list")
     court = models.ForeignKey(

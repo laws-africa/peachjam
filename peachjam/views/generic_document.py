@@ -23,4 +23,3 @@ class DocumentListView(FilteredDocumentListView):
 @registry.register_doc_type("generic_document")
 class DocumentDetailView(BaseDocumentDetailView):
     model = GenericDocument
-    template_name = "peachjam/generic_document_detail.html"

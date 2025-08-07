@@ -1,11 +1,15 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.decorators import GenericDocumentDecorator
 from peachjam.models import CoreDocument
 from peachjam.models.author import Author
 
 
 class GenericDocument(CoreDocument):
+
+    decorator = GenericDocumentDecorator()
+
     author = models.ManyToManyField(
         Author,
         blank=True,
