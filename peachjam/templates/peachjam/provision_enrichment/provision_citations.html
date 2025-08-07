@@ -5,6 +5,7 @@
   {% if provision %}- {{ provision }}{% endif %}
 {% endblock %}
 {% block page-title %}
+  {% include "peachjam/document/_breadcrumbs.html" %}
   <div class="my-4">
     <div class="mb-3">
       <a href="{{ document.get_absolute_url }}" class="h5">{{ document.title }}</a>
@@ -16,7 +17,7 @@
     {{ provision_html|safe }}
     </la-akoma-ntoso>
     <h4 >
-      {% trans "Citations" %} <span class="badge bg-secondary">{{ citation_contexts.count }}</span>
+      {% trans "Documents that cite this provision" %} <span class="badge bg-secondary">{{ citing_documents_count }}</span>
     </h4>
   </div>
 {% endblock %}

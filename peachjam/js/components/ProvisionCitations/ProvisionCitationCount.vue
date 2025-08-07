@@ -1,7 +1,7 @@
 <template>
   <la-gutter-item :anchor.prop="anchorElement" class="citation-count">
     <div class="">
-      <span class="align-middle me-2 fs-5"><i class="bi bi-chat-quote" /></span>
+      <span class="align-middle text-muted me-1 fs-5"><i class="bi bi-quote" /></span>
       <span class="badge rounded-pill bg-secondary">{{ citations }}</span>
       <span class="gutter-item-link ms-2 border p-2 rounded bg-white d-inline-flex justify-content-around">
         <a :href="`${expressionFrbrUri}/provision/${provision_eid}`">

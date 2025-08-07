@@ -595,4 +595,5 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
             self.provision_eid
         )
         context["citation_contexts"] = self.provision_citations
+        context["citing_documents_count"] = self.get_base_queryset().count()
         return context
