@@ -7,7 +7,8 @@
   {% if adminform.model_admin.is_document_admin %}
     {% if not original %}
       <div data-component="DocumentUploader"
-           data-extractor-url="{{ adminform.form.extractor_url }}"></div>
+           data-extractor-url="{{ adminform.form.extractor_url|default_if_none:"" }}">
+      </div>
     {% endif %}
     {% if original and original.source_file.pk %}
       {% include 'admin/peachjam/_duplicates_warning.html' with document=original %}
