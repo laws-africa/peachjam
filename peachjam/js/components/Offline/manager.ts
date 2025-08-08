@@ -18,6 +18,12 @@ interface Inventory {
   taxonomies: OfflineTaxonomy[],
 }
 
+interface OfflineStatus {
+  isOffline: boolean;
+  activity: string | null;
+  progress: number;
+}
+
 /**
  * This class handles storing and tracking content that is available offline.
  *
@@ -51,14 +57,24 @@ export class OfflineManager {
   cache: Cache | null = null;
   registered = false;
   offline = false;
+  status: OfflineStatus;
 
   constructor () {
-    this.setupOffline();
+    this.status = {
+      isOffline: false,
+      activity: null,
+      progress: 0
+    };
 
+    this.setupOffline();
     if (localStorage.getItem(OfflineManager.INVENTORY_KEY)) {
       this.registerServiceWorker();
       this.checkForUpdates();
     }
+  }
+
+  getStatus () {
+    return this.status;
   }
 
   setupOffline () {
@@ -77,7 +93,8 @@ export class OfflineManager {
   }
 
   setOfflineStatus (offline: boolean) {
-    if (this.offline !== offline) {
+    if (this.status.isOffline !== offline) {
+      this.status.isOffline = offline;
       if (offline) {
         document.documentElement.classList.add('offline');
         console.log('You are currently offline.');
@@ -176,13 +193,46 @@ export class OfflineManager {
     }
   }
 
+  removeTopicFromInventory (inventory: Inventory, id: string) {
+    const taxonomy = inventory.taxonomies.find((t: OfflineTaxonomy) => t.id === id);
+    inventory.taxonomies = inventory.taxonomies.filter((t: OfflineTaxonomy) => t.id !== id);
+
+    const toDelete : string[] = [];
+
+    for (const doc of taxonomy?.documents || []) {
+      // do any other taxonomies have this document?
+      const others = inventory.taxonomies.filter((t: OfflineTaxonomy) => t.documents.some(d => d.url === doc.url));
+      if (others.length === 0) {
+        // no other taxonomies have this document, so remove it
+        this.removeDocumentFromInventory(inventory, doc);
+        toDelete.push(doc.url);
+      }
+    }
+
+    this.getCache().then(cache => {
+      for (const url of toDelete) {
+        console.log(`Removing document ${url} from cache`);
+        cache.delete(url);
+      }
+    });
+  }
+
   addDocumentToInventory (inventory: Inventory, doc: OfflineDocument) {
     // delete any existing document with the same URL
-    inventory.documents = inventory.documents.filter((d: OfflineDocument) => d.url !== doc.url);
+    this.removeDocumentFromInventory(inventory, doc);
     inventory.documents.push(doc);
   }
 
-  async * makeTaxonomyAvailableOffline (id: string) {
+  removeDocumentFromInventory (inventory: Inventory, doc: OfflineDocument) {
+    inventory.documents = inventory.documents.filter((d: OfflineDocument) => d.url !== doc.url);
+  }
+
+  isTaxonomyAvailableOffline (id: string) {
+    const inventory = this.getInventory();
+    return inventory.taxonomies.some((taxonomy: OfflineTaxonomy) => taxonomy.id === id);
+  }
+
+  async * makeTaxonomyAvailableOfflineDetails (id: string) {
     this.registerServiceWorker();
     console.log(`Making taxonomy ${id} available offline...`);
 
@@ -212,27 +262,41 @@ export class OfflineManager {
 
         const cache = await this.getCache();
         console.log('Caching urls for offline:', urls);
+        this.status.activity = 'caching';
+        this.status.progress = 0;
 
-        let completed = 0;
-        for (const url of urls) {
-          try {
-            await cache.add(url);
-            completed++;
-            yield { url, completed, total: urls.length, success: true };
-          } catch (e) {
-            console.error(`Failed to cache URL: ${url}`, e);
-            yield { url, completed, total: urls.length, success: false };
+        try {
+          let completed = 0;
+          for (const url of urls) {
+            try {
+              await cache.add(url);
+              completed++;
+              this.status.progress = completed / urls.length * 100.0;
+              yield {url, completed, total: urls.length, success: true};
+            } catch (e) {
+              console.error(`Failed to cache URL: ${url}`, e);
+              yield {url, completed, total: urls.length, success: false};
+            }
           }
+        } finally {
+          this.status.activity = null;
+          this.status.progress = 0;
         }
 
         console.log('Cached URLs');
+        console.log(`Taxonomy ${id} is now available offline.`);
       }
     } catch (e) {
       console.error('Failed to fetch taxonomy manifest: ', e);
     }
 
-    console.log(`Taxonomy ${id} is now available offline.`);
     yield { completed: 1, total: 1, success: true, finished: true };
+  }
+
+  async makeTaxonomyAvailableOffline (id: string) {
+    for await (const result of this.makeTaxonomyAvailableOfflineDetails(id)) {
+      // do nothing, just consume the iterables to ensure it progresses
+    }
   }
 
   /**
@@ -260,6 +324,16 @@ export class OfflineManager {
     // Clear the cache
     await caches.delete(OfflineManager.CACHE_NAME);
     this.cache = null;
+  }
+
+  /**
+   * Remove a taxonomy and its documents from offline storage.
+   * @param id taxonomy id
+   */
+  removeOfflineTaxonomy (id: string) {
+    const inventory = this.getInventory();
+    this.removeTopicFromInventory(inventory, id);
+    this.saveInventory(inventory);
   }
 }
 
