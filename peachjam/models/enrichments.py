@@ -99,7 +99,7 @@ class UnconstitutionalProvision(ProvisionEnrichment):
         verbose_name=_("resolving amendment work"),
     )
     read_in_text_html = models.CharField(
-        _("read-in text HTML"), max_length=4096, null=True, blank=True
+        _("read-in text HTML"), max_length=16384, null=True, blank=True
     )
 
     class Meta:
