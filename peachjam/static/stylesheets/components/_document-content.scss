@@ -149,7 +149,7 @@
     position: sticky;
     top: $floating-header-height;
     left: 0;
-    height: 100vh;
+    height: calc(100vh - $floating-header-height);
     border-right: 1px solid $gray-200;
     padding: 0;
   }
@@ -186,11 +186,15 @@
 
     .tab-content {
       flex: 1 1 auto;
-      overflow-y: auto;
       min-height: 0px;
       background-color: $gray-100;
 
-      .tab-pane, .toc {
+      .tab-pane {
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .toc {
         height: 100%;
       }
     }

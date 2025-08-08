@@ -58,20 +58,15 @@ and #navigation-column for desktop screensize.
         </button>
       </div>
     </nav>
-    <div class="tab-content"
-         id="navigation-tab-content"
-         data-preview-scroll-container>
-      <div class="tab-pane h-100"
+    <div class="tab-content" id="navigation-tab-content">
+      <div class="tab-pane"
            id="navigation-search"
            role="tabpanel"
            aria-labelledby="navigation-search-tab">
         <div data-doc-search class="h-100"></div>
       </div>
       {% if display_type == 'akn' or display_type == 'html' %}
-        <div class="tab-pane h-100"
-             id="toc"
-             role="tabpanel"
-             aria-labelledby="toc-tab">
+        <div class="tab-pane" id="toc" role="tabpanel" aria-labelledby="toc-tab">
           <aside class="toc">
           </aside>
         </div>
@@ -88,7 +83,8 @@ and #navigation-column for desktop screensize.
         <div class="tab-pane pdf-previews-pane"
              id="pdf-previews"
              role="tabpanel"
-             aria-labelledby="pdf-previews">
+             aria-labelledby="pdf-previews"
+             data-preview-scroll-container>
           <div class="pdf-previews"></div>
         </div>
       {% endif %}
