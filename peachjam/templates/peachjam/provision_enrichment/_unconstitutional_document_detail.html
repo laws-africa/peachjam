@@ -4,8 +4,10 @@
     <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
   </h5>
   <ul class="list-group list-group-flush">
-    {% for enrichment in provision_enrichments %}
-      <li class="list-group-item">{% include "peachjam/provision_enrichment/_detail.html" %}</li>
+    {% for enrichment in unconstitutional_provisions %}
+      <li class="list-group-item">
+        {% include "peachjam/provision_enrichment/_unconstitutional_provision_detail.html" with expanded=False %}
+      </li>
     {% endfor %}
   </ul>
 </div>

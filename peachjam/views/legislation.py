@@ -450,6 +450,14 @@ class UncommencedProvisionListView(LegislationListView):
         return context
 
 
+class UnconstitutionalProvisionDetailView(DetailView):
+    model = UnconstitutionalProvision
+    template_name = (
+        "peachjam/provision_enrichment/unconstitutional_provision_detail.html"
+    )
+    context_object_name = "enrichment"
+
+
 class UnconstitutionalProvisionListView(LegislationListView):
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
@@ -459,8 +467,10 @@ class UnconstitutionalProvisionListView(LegislationListView):
     def get_template_names(self):
         if self.request.htmx:
             if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_table.html"]
-            return ["peachjam/provision_enrichment/_table_form.html"]
+                return ["peachjam/provision_enrichment/_unconstitutional_table.html"]
+            return [
+                "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html"
+            ]
         return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
