@@ -26,7 +26,7 @@
       <div
         class="progress-bar progress-bar-animated progress-bar-striped"
         role="progressbar"
-        :style="`width: ${status.progress}%;`"
+        :style="`width: ${progress}%`"
       />
     </div>
   </div>
@@ -41,25 +41,30 @@ export default {
   data: function () {
     return {
       offlineEnabled: false,
-      status: {}
+      progress: 0
     };
-  },
-  created () {
-    this.offlineEnabled = manager.isTaxonomyAvailableOffline(this.taxonomy);
-    this.status = manager.getStatus();
   },
   computed: {
     updating () {
-      return this.status.progress > 0;
+      return this.progress > 0;
     }
+  },
+  created () {
+    this.offlineEnabled = manager.isTaxonomyAvailableOffline(this.taxonomy);
   },
   methods: {
     async enable () {
-      await manager.makeTaxonomyAvailableOffline(this.taxonomy);
+      this.progress = 1;
+      for await (const x of manager.makeTaxonomyAvailableOfflineDetails(this.taxonomy)) {
+        this.progress = x.completed / x.total * 100;
+        await new Promise(resolve => setTimeout(resolve, 0));
+      }
+      this.progress = 0;
       this.offlineEnabled = manager.isTaxonomyAvailableOffline(this.taxonomy);
     },
     disable () {
       manager.removeOfflineTaxonomy(this.taxonomy);
+      this.offlineEnabled = manager.isTaxonomyAvailableOffline(this.taxonomy);
     }
   }
 };

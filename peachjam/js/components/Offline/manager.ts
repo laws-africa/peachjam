@@ -18,12 +18,6 @@ interface Inventory {
   taxonomies: OfflineTaxonomy[],
 }
 
-interface OfflineStatus {
-  isOffline: boolean;
-  activity: string | null;
-  progress: number;
-}
-
 /**
  * This class handles storing and tracking content that is available offline.
  *
@@ -56,25 +50,14 @@ export class OfflineManager {
 
   cache: Cache | null = null;
   registered = false;
-  offline = false;
-  status: OfflineStatus;
+  isOffline = false;
 
   constructor () {
-    this.status = {
-      isOffline: false,
-      activity: null,
-      progress: 0
-    };
-
     this.setupOffline();
     if (localStorage.getItem(OfflineManager.INVENTORY_KEY)) {
       this.registerServiceWorker();
       this.checkForUpdates();
     }
-  }
-
-  getStatus () {
-    return this.status;
   }
 
   setupOffline () {
@@ -93,8 +76,8 @@ export class OfflineManager {
   }
 
   setOfflineStatus (offline: boolean) {
-    if (this.status.isOffline !== offline) {
-      this.status.isOffline = offline;
+    if (this.isOffline !== offline) {
+      this.isOffline = offline;
       if (offline) {
         document.documentElement.classList.add('offline');
         console.log('You are currently offline.');
@@ -262,25 +245,19 @@ export class OfflineManager {
 
         const cache = await this.getCache();
         console.log('Caching urls for offline:', urls);
-        this.status.activity = 'caching';
-        this.status.progress = 0;
 
-        try {
-          let completed = 0;
-          for (const url of urls) {
-            try {
-              await cache.add(url);
-              completed++;
-              this.status.progress = completed / urls.length * 100.0;
-              yield {url, completed, total: urls.length, success: true};
-            } catch (e) {
-              console.error(`Failed to cache URL: ${url}`, e);
-              yield {url, completed, total: urls.length, success: false};
-            }
+        let completed = 0;
+        for (const url of urls) {
+          try {
+            await cache.add(url);
+            completed++;
+            yield {url, completed, total: urls.length, success: true};
+          } catch (e) {
+            console.error(`Failed to cache URL: ${url}`, e);
+            yield {url, completed, total: urls.length, success: false};
           }
-        } finally {
-          this.status.activity = null;
-          this.status.progress = 0;
+          // wait a bit to avoid overwhelming the server, and to give the browser a chance to re-render progress
+          await new Promise(resolve => setTimeout(resolve, 100));
         }
 
         console.log('Cached URLs');
