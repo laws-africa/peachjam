@@ -276,6 +276,11 @@ export class OfflineManager {
     }
   }
 
+  async makeCurrentPageAvailableOffline () {
+    const cache = await this.getCache();
+    await cache.add(location.pathname);
+  }
+
   /**
    * Get a list of asset URLs on this page that should be cached. This is easier than explicitly listing all
    * static assets, and will include things like images in footers, etc.

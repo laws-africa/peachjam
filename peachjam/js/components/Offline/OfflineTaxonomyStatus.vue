@@ -59,6 +59,7 @@ export default {
         this.progress = x.completed / x.total * 100;
         await new Promise(resolve => setTimeout(resolve, 0));
       }
+      await manager.makeCurrentPageAvailableOffline();
       this.progress = 0;
       this.offlineEnabled = manager.isTaxonomyAvailableOffline(this.taxonomy);
     },
