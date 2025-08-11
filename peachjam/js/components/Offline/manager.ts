@@ -251,10 +251,10 @@ export class OfflineManager {
           try {
             await this.addUrlToCache(url, cache);
             completed++;
-            yield {url, completed, total: urls.length, success: true};
+            yield { url, completed, total: urls.length, success: true };
           } catch (e) {
             console.error(`Failed to cache URL: ${url}`, e);
-            yield {url, completed, total: urls.length, success: false};
+            yield { url, completed, total: urls.length, success: false };
           }
           // wait a bit to avoid overwhelming the server, and to give the browser a chance to re-render progress
           await new Promise(resolve => setTimeout(resolve, 100));
