@@ -310,6 +310,18 @@ export class OfflineManager {
       }
     });
 
+    // handle hard-coded background images in style attributes
+    document.querySelectorAll('[style*="background-image"]').forEach(el => {
+      const style = el.getAttribute('style');
+      if (style) {
+        const matches = style.match(/url\(['"]?([^'")]+)['"]?\)/);
+        if (matches && matches[1]) {
+          const url = new URL(matches[1], location.origin).pathname;
+          urls.add(url);
+        }
+      }
+    });
+
     return Array.from(urls);
   }
 
