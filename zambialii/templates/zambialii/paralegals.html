@@ -47,33 +47,51 @@
       <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col">
           <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Training manuals</h5>
-              <p class="card-text">TEVET paralegal manuals, updated for quick reference.</p>
-              <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-training-manuals' %}"
-                 class="stretched-link">Training manuals →</a>
+            <div class="card-body d-flex flex-row">
+              <div class="paralegals-card-img me-3"
+                   style="background-image: url('{% static 'images/paralegals/training.png' %}')"
+                   alt="Training graphic">
+              </div>
+              <div class="flex-grow-1">
+                <h5 class="card-title">Training manuals</h5>
+                <p class="card-text">TEVET paralegal manuals, updated for quick reference.</p>
+                <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-training-manuals' %}"
+                   class="stretched-link">Training manuals →</a>
+              </div>
             </div>
           </div>
         </div>
         <div class="col">
           <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Guides and best practices</h5>
-              <p class="card-text">
-                Step-by-step resources on common legal issues such as land rights, family law, and criminal justice.
-              </p>
-              <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-guides' %}"
-                 class="stretched-link">Guides and best practices →</a>
+            <div class="card-body d-flex flex-row">
+              <div class="paralegals-card-img me-3"
+                   style="background-image: url('{% static 'images/paralegals/guides.png' %}')"
+                   alt="Guides graphic">
+              </div>
+              <div class="flex-grow-1">
+                <h5 class="card-title">Guides and best practices</h5>
+                <p class="card-text">
+                  Step-by-step resources on common legal issues such as land rights, family law, and criminal justice.
+                </p>
+                <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-guides' %}"
+                   class="stretched-link">Guides and best practices →</a>
+              </div>
             </div>
           </div>
         </div>
         <div class="col">
           <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Legal information</h5>
-              <p class="card-text">Curated summaries of laws and court decisions most relevant to paralegal work.</p>
-              <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-legal-information' %}"
-                 class="stretched-link">Legal information →</a>
+            <div class="card-body d-flex flex-row">
+              <div class="paralegals-card-img me-3"
+                   style="background-image: url('{% static 'images/paralegals/law.png' %}')"
+                   alt="Legal information graphic">
+              </div>
+              <div class="flex-grow-1">
+                <h5 class="card-title">Legal information</h5>
+                <p class="card-text">Curated summaries of laws and court decisions most relevant to paralegal work.</p>
+                <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-legal-information' %}"
+                   class="stretched-link">Legal information →</a>
+              </div>
             </div>
           </div>
         </div>

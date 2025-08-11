@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="offlineEnabled">
-      <h3>Offline ready!</h3>
+      <h4>Offline ready!</h4>
       <p>This content is available when you're offline.</p>
       <button
         class="btn btn-outline-danger"
@@ -11,7 +11,7 @@
       </button>
     </div>
     <div v-else>
-      <h3>Offline not enabled</h3>
+      <h4>Offline not enabled</h4>
       <p>Make this content available even without an internet connection.</p>
       <button
         class="btn btn-primary"
