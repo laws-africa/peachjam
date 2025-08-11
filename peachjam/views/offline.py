@@ -78,6 +78,13 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
             taxonomy_url = taxonomy.get_absolute_url()
             urls.append(taxonomy_url)
             urls.extend(f"{taxonomy_url}?page={i}" for i in range(1, n_pages + 1))
+            if taxonomy.is_root():
+                # hack for top-level taxonomies which can appear at two URLs
+                urls.append(
+                    reverse(
+                        "first_level_taxonomy_list", kwargs={"topic": taxonomy.slug}
+                    )
+                )
 
         # include document images
         for doc in docs:

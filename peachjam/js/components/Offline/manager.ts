@@ -249,7 +249,7 @@ export class OfflineManager {
         let completed = 0;
         for (const url of urls) {
           try {
-            await cache.add(url);
+            await this.addUrlToCache(url, cache);
             completed++;
             yield {url, completed, total: urls.length, success: true};
           } catch (e) {
@@ -278,7 +278,21 @@ export class OfflineManager {
 
   async makeCurrentPageAvailableOffline () {
     const cache = await this.getCache();
-    await cache.add(location.pathname);
+    await this.addUrlToCache(location.pathname, cache);
+  }
+
+  /**
+   * Cache a URL in the cache. This will also ensure that redirects are cached properly.
+   * This gets around an issue that service workers can't handle redirects when serving responses
+   * from the cache.
+   * @param url
+   * @param cache
+   */
+  async addUrlToCache (url: string, cache: Cache) {
+    // setting this to manual seems to be necessary to ensure that redirects are handled properly
+    const req = new Request(url, { redirect: 'manual' });
+    const res = await fetch(req);
+    await cache.put(url, res.clone());
   }
 
   /**
