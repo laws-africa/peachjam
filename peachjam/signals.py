@@ -14,6 +14,7 @@ from peachjam.models import (
     CoreDocument,
     DocumentContent,
     ExtractedCitation,
+    Folder,
     SavedDocument,
     SourceFile,
     UserFollowing,
@@ -202,3 +203,12 @@ def judgment_content_changed_generate_summary(sender, instance, **kwargs):
     )
     if should_generate:
         generate_judgment_summary(judgment.pk)
+
+
+@receiver(signals.pre_delete, sender=Folder)
+def delete_saved_document_if_no_folder(sender, instance, **kwargs):
+    saved_documents = instance.saved_documents.all()
+
+    for doc in saved_documents:
+        if doc.folders.count() == 1:
+            doc.delete()

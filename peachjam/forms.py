@@ -563,7 +563,7 @@ class SaveDocumentForm(forms.ModelForm):
                 "-created_at"
             ).first()
             if most_recent_saved:
-                folders = [most_recent_saved.folders.all().last()]
+                folders = most_recent_saved.folders.all().last()
 
             if not folders:
                 folders = self.instance.user.folders.all()[:1]
@@ -575,7 +575,7 @@ class SaveDocumentForm(forms.ModelForm):
                     )[0]
                 ]
 
-        cleaned_data["folders"] = folders
+        cleaned_data["folders"] = list(folders)
         return cleaned_data
 
 
