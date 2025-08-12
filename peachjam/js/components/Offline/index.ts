@@ -1,6 +1,7 @@
 import { manager } from './manager';
 
 export { default as OfflineDetails } from './OfflineDetails.vue';
+export { default as OfflineTaxonomyStatus } from './OfflineTaxonomyStatus.vue';
 
 export class OfflineTaxonomyButton {
   constructor (button: HTMLElement) {
@@ -24,7 +25,7 @@ export class OfflineTaxonomyButton {
           let completed = 0;
           let total = 1; // Default total to avoid division by zero
 
-          for await (const result of manager.makeTaxonomyAvailableOffline(id)) {
+          for await (const result of manager.makeTaxonomyAvailableOfflineDetails(id)) {
             if (result.total) total = result.total;
             completed = result.completed;
 
