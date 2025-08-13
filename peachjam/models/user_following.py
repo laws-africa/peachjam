@@ -13,7 +13,16 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
-from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
+from . import (
+    Author,
+    CoreDocument,
+    Court,
+    CourtClass,
+    CourtRegistry,
+    Locality,
+    Taxonomy,
+    TimelineEvent,
+)
 
 log = logging.getLogger(__name__)
 
@@ -220,10 +229,16 @@ class UserFollowing(models.Model):
                 )
                 follow.last_alerted_at = timezone.now()
                 follow.save()
-                followed_documents.append(new)
-        if followed_documents:
-            log.info(f"Sending alert to user {user.pk}")
-            cls.send_alert(user, followed_documents)
+                # log.info(f"Sending alert to user {user.pk}")
+                # cls.send_alert(user, followed_documents)
+                # add to timeline
+                TimelineEvent.objects.create(
+                    user_following=follows.first(),
+                    subject_documents=[
+                        doc for fd in followed_documents for doc in fd["documents"]
+                    ],
+                    event_type="new_documents",
+                )
 
     @classmethod
     def send_alert(cls, user, followed_documents):
