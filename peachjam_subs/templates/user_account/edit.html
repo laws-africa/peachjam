@@ -1,8 +1,9 @@
-{% extends 'user_account/home.html' %}
+{% extends 'user_account/edit.html' %}
 {% load i18n %}
-{% block account-home-content %}
+{% block account-content %}
   {{ block.super }}
-  <h2 class="mt-4">{% trans "Subscription" %}</h2>
+  <hr class="my-5" />
+  <h3>{% trans "Subscription" %}</h3>
   {% for subscription in user.subscriptions.all %}
     {% if subscription.active %}
       <div class="row">

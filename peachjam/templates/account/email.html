@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block title %}Emails {{ block.super }}{% endblock %}
 {% block account-tabs %}
-  {% include 'user_account/_tabs.html' with active='emails' %}
+  {% include 'user_account/_tabs.html' %}
 {% endblock %}
 {% block account-content %}
   <h2>{% trans "Email addresses" %}</h2>
@@ -75,8 +75,9 @@
   <form method="post" action="{% url 'account_email' %}">
     {% csrf_token %}
     <div class="mb-3">
-      <input type="text"
+      <input type="email"
              class="form-control col-sm-6"
+             required
              name="{{ form.email.name }}"
              value="{{ form.email.value|default:'' }}"
              placeholder="new-email@example.com"/>
