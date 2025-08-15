@@ -2,10 +2,11 @@ import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.aggregates import Count
+from django.db.models.functions import TruncDate
 from django.http.response import Http404
 from django.views.generic.base import TemplateView
 
-from peachjam.models import Folder, pj_settings
+from peachjam.models import Folder, TimelineEvent, pj_settings
 from peachjam.models.user_following import get_user_following_timeline
 
 
@@ -19,12 +20,13 @@ class CommonContextMixin:
             context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
                 n_saved_documents=Count("saved_documents")
             )
-            context["following_timeline"] = timeline = get_user_following_timeline(
-                self.request.user, 7, self.max_docs
+            qs = (
+                TimelineEvent.objects.select_related("user_following")
+                .prefetch_related("subject_documents")
+                .annotate(event_date=TruncDate("created_at"))
+                .order_by("-event_date", "user_following__id", "-created_at")
             )
-            context["timeline_truncated"] = self.timeline_truncated
-            if timeline:
-                context["before_date"] = list(timeline.keys())[-1]
+            context["timeline"] = qs
 
         return context
 

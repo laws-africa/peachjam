@@ -8,7 +8,6 @@ from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls.base import reverse
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
@@ -212,6 +211,7 @@ class UserFollowing(models.Model):
             qs = qs.filter(created_at__gt=self.last_alerted_at)
 
         return {
+            # TODO: remove followed object
             "followed_object": self.followed_object,
             "documents": qs[:10],
         }
@@ -220,25 +220,22 @@ class UserFollowing(models.Model):
     def update_and_alert(cls, user):
         follows = UserFollowing.objects.filter(user=user)
         log.info(f"Found {follows.count()} follows for user {user.pk}")
-        followed_documents = []
         for follow in follows:
             new = follow.get_new_followed_documents()
             if new["documents"]:
                 log.info(
                     f"Found {new['documents'].count()} new documents for {new['followed_object']}"
                 )
-                follow.last_alerted_at = timezone.now()
-                follow.save()
-                # log.info(f"Sending alert to user {user.pk}")
-                # cls.send_alert(user, followed_documents)
+
+                # follow.last_alerted_at = timezone.now()
+                # follow.save()
+
                 # add to timeline
-                TimelineEvent.objects.create(
-                    user_following=follows.first(),
-                    subject_documents=[
-                        doc for fd in followed_documents for doc in fd["documents"]
-                    ],
+                timeline_event = TimelineEvent.objects.create(
+                    user_following=follow,
                     event_type="new_documents",
                 )
+                timeline_event.subject_documents.set(new["documents"])
 
     @classmethod
     def send_alert(cls, user, followed_documents):
