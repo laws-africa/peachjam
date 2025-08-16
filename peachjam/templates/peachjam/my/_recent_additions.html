@@ -3,7 +3,7 @@
 <p>
   <a href="{% url 'user_following_list' %}">{% trans "Topics you follow" %} →</a>
 </p>
-{% if following_timeline %}
+{% if timeline %}
   <ol class="list-timeline">
     {% include "peachjam/user_following/_timeline.html" with truncated=timeline_truncated %}
   </ol>

@@ -263,3 +263,12 @@ def generate_judgment_summary(doc_id):
         return
     log.info(f"Summarizing judgment {doc_id}")
     doc.generate_summary()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def send_timeline_emails():
+    from peachjam.models import TimelineEvent
+
+    log.info("Sending timeline emails")
+    TimelineEvent.send_emails()
+    log.info("Timeline emails sent")
