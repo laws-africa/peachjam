@@ -270,5 +270,5 @@ def send_timeline_emails():
     from peachjam.models import TimelineEvent
 
     log.info("Sending timeline emails")
-    TimelineEvent.send_emails()
+    TimelineEvent.send_email_alerts()
     log.info("Timeline emails sent")
