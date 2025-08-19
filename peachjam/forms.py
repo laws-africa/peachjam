@@ -562,7 +562,7 @@ class SaveDocumentForm(forms.ModelForm):
             most_recent_saved = self.instance.user.saved_documents.order_by(
                 "-created_at"
             ).first()
-            if most_recent_saved:
+            if most_recent_saved and most_recent_saved.folders.all().last():
                 folders = [most_recent_saved.folders.all().last()]
 
             if not folders:
