@@ -2,12 +2,10 @@ import datetime
 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models.aggregates import Count
-from django.db.models.functions import TruncDate
 from django.http.response import Http404
 from django.views.generic.base import TemplateView
 
 from peachjam.models import Folder, TimelineEvent, pj_settings
-from peachjam.models.user_following import get_user_following_timeline
 
 
 class CommonContextMixin:
@@ -20,13 +18,11 @@ class CommonContextMixin:
             context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
                 n_saved_documents=Count("saved_documents")
             )
-            qs = (
-                TimelineEvent.objects.select_related("user_following")
-                .prefetch_related("subject_documents")
-                .annotate(event_date=TruncDate("created_at"))
-                .order_by("-event_date", "user_following__id", "-created_at")
-            )
-            context["timeline"] = qs
+            timeline, next_before = TimelineEvent.get_events(self.request.user)
+
+            context["timeline"] = timeline
+            context["next_before"] = next_before
+            context["timeline_truncated"] = self.timeline_truncated
 
         return context
 
@@ -67,13 +63,10 @@ class MyTimelineView(LoginRequiredMixin, TemplateView):
         except (TypeError, ValueError):
             before_date = None
 
-        context["following_timeline"] = timeline = get_user_following_timeline(
-            self.request.user,
-            10,
-            50,
-            before_date,
+        timeline, next_before = TimelineEvent.get_events(
+            self.request.user, before=before_date
         )
-        if timeline:
-            context["before_date"] = list(timeline.keys())[-1]
 
+        context["timeline"] = timeline
+        context["next_before"] = (next_before,)
         return context

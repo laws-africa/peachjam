@@ -1,13 +1,38 @@
-{% regroup timeline by event_date as events_by_date %}
-{% for date_group in events_by_date %}
+{% load i18n %}
+{% for date, groups in timeline.items %}
   <li>
-    <div class="bg-white text-muted">{{ date_group.grouper|date:"Y-m-d" }}</div>
-    {% regroup date_group.list by user_following as events_by_following %}
-    {% for follow_group in events_by_following %}
-      <b><a href="{{ follow_group.grouper.followed_object.get_absolute_url }}">{{ follow_group.grouper.followed_object }}</a></b>
-      {% for event in follow_group.list %}
-        {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=event.subject_documents.all %}
+    <div class="bg-white text-muted">{{ date }}</div>
+    <ul class="list-unstyled">
+      {% for following, docs in groups %}
+        <li>
+          <b><a href="{{ following.get_absolute_url }}">{{ following }}</a></b>
+          <div class="ms-3">
+            {% include "peachjam/_document_table.html" with doc_table_hide_thead=True doc_table_show_date=True documents=docs.0 %}
+            {% if docs.1 %}
+              <details>
+                <summary>
+                  {% blocktrans trimmed with n_more=docs.1|length obj=following %}{{ n_more }} more for {{ obj }}{% endblocktrans %}
+                </summary>
+                {% include "peachjam/_document_table.html" with doc_table_hide_thead=True doc_table_show_date=True documents=docs.1 %}
+              </details>
+            {% endif %}
+          </div>
+        </li>
       {% endfor %}
-    {% endfor %}
+    </ul>
   </li>
 {% endfor %}
+{% if truncated %}
+  <li>
+    <a href="{% url 'my_home' %}#timeline">{% trans "Explore older updates" %}</a>
+  </li>
+{% elif next_before %}
+  <li>
+    <button class="btn btn-secondary"
+            hx-get="{% url 'my_timeline' %}?before={{ next_before.isoformat }}"
+            hx-swap="outerHTML"
+            hx-target="closest li">
+      {% trans "Load more" %} ...
+    </button>
+  </li>
+{% endif %}

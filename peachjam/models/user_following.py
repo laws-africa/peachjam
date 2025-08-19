@@ -1,6 +1,4 @@
-import heapq
 import logging
-from itertools import groupby
 
 from countries_plus.models import Country
 from django.conf import settings
@@ -251,72 +249,3 @@ class UserFollowing(models.Model):
                 recipient_list=[user.email],
                 context=context,
             )
-
-
-def get_user_following_timeline(user, docs_per_source, max_docs, before_date=None):
-    # Get the latest documents from all followed sources
-    def apply_filter(qs):
-        if before_date:
-            qs = qs.filter(created_at__lt=before_date)
-        return qs
-
-    sources = [
-        (
-            f,
-            apply_filter(
-                f.get_documents_queryset()
-                .order_by("-created_at")
-                .select_related("work")
-                .prefetch_related("labels", "taxonomies", "taxonomies__topic")
-            ).iterator(max_docs),
-        )
-        for f in user.following.all()
-    ]
-    sources = merge_sources_by_date(sources, "created_at")
-
-    # group the (source, document) tuples by date
-    n_docs = 0
-    groups_by_date = {}
-    for day, doc_group in groupby(sources, lambda p: p[1].created_at.date()):
-        doc_group = list(doc_group)
-        n_docs += len(doc_group)
-
-        # group the days documents by source, and put the smallest groups first
-        groups = {}
-        for source, doc in doc_group:
-            groups.setdefault(source, []).append(doc)
-
-        # cap documents per source
-        for source, docs in groups.items():
-            docs = sorted(docs, key=lambda d: d.date, reverse=True)
-            groups[source] = (docs[:docs_per_source], docs[docs_per_source:])
-
-        # tuples: (source, (docs, rest))
-        groups_by_date[day] = sorted(
-            groups.items(), key=lambda x: len(x[1][0]) + len(x[1][1])
-        )
-
-        if max_docs and n_docs > max_docs:
-            break
-
-    return groups_by_date
-
-
-def merge_sources_by_date(sources, date_attr):
-    """Merge multiple following sources into a single iterator of documents, ordered by the date attribute,
-    most recent first.
-
-    sources: (source, Iterator[Document])
-    Yields (source, document) in descending date order across all sources.
-    """
-
-    def pair_generator(source, docs):
-        for d in docs:
-            yield source, d
-
-    generators = [pair_generator(source, docs) for source, docs in sources]
-
-    # merge the sources by date, reverse=True because we have the largest date first
-    return heapq.merge(
-        *generators, key=lambda p: getattr(p[1], date_attr), reverse=True
-    )
