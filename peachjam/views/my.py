@@ -66,7 +66,6 @@ class MyTimelineView(LoginRequiredMixin, TemplateView):
         timeline, next_before = TimelineEvent.get_events(
             self.request.user, before=before_date
         )
-
         context["timeline"] = timeline
-        context["next_before"] = (next_before,)
+        context["next_before"] = next_before
         return context

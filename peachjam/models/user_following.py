@@ -1,14 +1,11 @@
 import logging
 
 from countries_plus.models import Country
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.urls.base import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import override
-from templated_email import send_templated_mail
 
 from . import (
     Author,
@@ -207,45 +204,40 @@ class UserFollowing(models.Model):
         )
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
-
-        return {
-            # TODO: remove followed object
-            "followed_object": self.followed_object,
-            "documents": qs[:10],
-        }
+        return qs[:10]
 
     @classmethod
-    def update_and_alert(cls, user):
-        follows = UserFollowing.objects.filter(user=user)
+    def update_timeline(cls, user):
+        follows = cls.objects.filter(user=user)
         log.info(f"Found {follows.count()} follows for user {user.pk}")
         for follow in follows:
             new = follow.get_new_followed_documents()
-            if new["documents"]:
+            if new:
                 log.info(
-                    f"Found {new['documents'].count()} new documents for {new['followed_object']}"
+                    f"Found {new.count()} new documents for {follow.followed_object}"
                 )
-
-                # follow.last_alerted_at = timezone.now()
-                # follow.save()
-
-                # add to timeline
-                timeline_event = TimelineEvent.objects.create(
+                today = timezone.now().date()
+                timeline_event = TimelineEvent.objects.filter(
+                    created_at__date=today,
                     user_following=follow,
-                    event_type="new_documents",
-                )
-                timeline_event.subject_documents.set(new["documents"])
+                    event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+                    email_alert_sent_at__isnull=True,
+                ).first()
+                if not timeline_event:
+                    log.info(
+                        f"Creating new timeline event for {follow.followed_object}"
+                    )
+                    timeline_event = TimelineEvent.objects.create(
+                        user_following=follow,
+                        event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+                    )
+                else:
+                    log.info(
+                        f"Updating existing timeline event for {follow.followed_object}"
+                    )
 
-    @classmethod
-    def send_alert(cls, user, followed_documents):
-        context = {
-            "followed_documents": followed_documents,
-            "user": user,
-            "manage_url_path": reverse("user_following_list"),
-        }
-        with override(user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="user_following_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                context=context,
-            )
+                timeline_event.subject_documents.add(*new)
+
+                # update last_alert_date
+                follow.last_alerted_at = timezone.now()
+                follow.save()

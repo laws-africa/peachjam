@@ -27,7 +27,7 @@ class TimelineEvent(models.Model):
         choices=EventTypes.choices,
     )
     created_at = models.DateTimeField(auto_now_add=True)
-    user_notified = models.BooleanField(default=False)
+    email_alert_sent_at = models.DateTimeField(null=True)
 
     @classmethod
     def get_events(cls, user, before=None, limit=1):
@@ -80,28 +80,53 @@ class TimelineEvent(models.Model):
 
     @classmethod
     def send_email_alerts(cls):
-        """
-        Sends email alerts to the user following the documents if they haven't been notified yet.
-        """
-        for event in cls.objects.filter(user_notified=False):
-            # Check if the user has any subject documents
+        from peachjam.tasks import send_new_document_email_alert
 
-            event.send_email_alert()
+        users = (
+            cls.objects.filter(
+                email_alert_sent_at__isnull=True,
+                event_type=cls.EventTypes.NEW_DOCUMENTS,
+            )
+            .values_list("user_following__user", flat=True)
+            .distinct()
+        )
+        for user_id in users:
+            send_new_document_email_alert(user_id)
 
-    def send_email_alert(self):
+    @classmethod
+    def send_new_document_email_alert(cls, user):
+        new_document_events = (
+            cls.objects.filter(
+                email_alert_sent_at__isnull=True,
+                event_type=cls.EventTypes.NEW_DOCUMENTS,
+                user_following__user=user,
+            )
+            .select_related("user_following")
+            .prefetch_related("subject_documents")
+        )
+        if not new_document_events.exists():
+            return
+
+        follows_map = {}
+        for ev in new_document_events:
+            key = ev.user_following.followed_object
+            follows_map.setdefault(key, set()).update(ev.subject_documents.all())
+        follows = [
+            {"followed_object": k, "documents": list(v)} for k, v in follows_map.items()
+        ]
 
         context = {
-            "followed_documents": self.subject_documents.all(),
-            "user": self.user_following.user,
+            "followed_documents": follows,
+            "user": user,
             "manage_url_path": reverse("user_following_list"),
         }
-        with override(self.user_following.user.userprofile.preferred_language.pk):
+        with override(user.userprofile.preferred_language.pk):
             send_templated_mail(
                 template_name="user_following_alert",
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[self.user_following.user.email],
+                recipient_list=[user.email],
                 context=context,
             )
 
-        self.user_notified = True
-        self.save(update_fields=["user_notified"])
+        # mark the events as sent after successful send. allows retries in case of failure.
+        new_document_events.update(email_alert_sent_at=models.functions.Now())

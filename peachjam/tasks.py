@@ -250,7 +250,32 @@ def update_user_follows_for_user(user_id):
         return
 
     log.info(f"Updating user follows for user {user_id}")
-    UserFollowing.update_and_alert(user)
+    UserFollowing.update_timeline(user)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def send_timeline_email_alerts():
+    from peachjam.models import TimelineEvent
+
+    log.info("Sending timeline emails")
+    TimelineEvent.send_email_alerts()
+    log.info("Timeline emails sent")
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def send_new_document_email_alert(user_id):
+    from django.contrib.auth import get_user_model
+
+    from peachjam.models import TimelineEvent
+
+    user = get_user_model().objects.filter(pk=user_id).first()
+    if not user:
+        log.info(f"No user with id {user_id} exists, ignoring.")
+        return
+
+    log.info(f"Sending new document email alerts for user {user_id}")
+    TimelineEvent.send_new_document_email_alert(user)
+    log.info("New document email alerts sent")
 
 
 @background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
@@ -263,12 +288,3 @@ def generate_judgment_summary(doc_id):
         return
     log.info(f"Summarizing judgment {doc_id}")
     doc.generate_summary()
-
-
-@background(queue="peachjam", remove_existing_tasks=True)
-def send_timeline_emails():
-    from peachjam.models import TimelineEvent
-
-    log.info("Sending timeline emails")
-    TimelineEvent.send_email_alerts()
-    log.info("Timeline emails sent")
