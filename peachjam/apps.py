@@ -25,7 +25,11 @@ class PeachJamConfig(AppConfig):
             from background_task.models import Task
 
             from peachjam.models import Ingestor
-            from peachjam.tasks import rank_works, update_user_follows
+            from peachjam.tasks import (
+                rank_works,
+                send_timeline_email_alerts,
+                update_user_follows,
+            )
 
             # always queue up ingestor tasks on application start
             for ingestor in Ingestor.objects.all():
@@ -38,3 +42,4 @@ class PeachJamConfig(AppConfig):
             ).replace(hour=3, minute=0, second=0)
             rank_works(schedule=run_at, repeat=Task.WEEKLY)
             update_user_follows(schedule=Task.HOURLY, repeat=Task.DAILY)
+            send_timeline_email_alerts(schedule=Task.HOURLY, repeat=Task.DAILY)
