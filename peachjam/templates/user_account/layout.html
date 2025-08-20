@@ -1,25 +1,19 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load i18n %}
 {% block page-content %}
-  <div class="bg-light">
-    <div class="container">
-      {% block breadcrumbs %}
-        <nav aria-label="breadcrumb">
-          <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-              <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
-            </li>
-            <li class="breadcrumb-item">
-              <a href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
-            </li>
-          </ol>
-        </nav>
-      {% endblock %}
-      {% block account-title %}
-        <h1>{% trans "My account" %}</h1>
-      {% endblock %}
-      {% block account-tabs %}{% endblock %}
-    </div>
+  <div class="container">
+    {% block breadcrumbs %}
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+          </li>
+          <li class="breadcrumb-item">
+            <a href="{% url 'edit_account' %}">{% trans 'My account' %}</a>
+          </li>
+        </ol>
+      </nav>
+    {% endblock %}
   </div>
   <div class="container py-3">
     {% block account-content %}{% endblock %}

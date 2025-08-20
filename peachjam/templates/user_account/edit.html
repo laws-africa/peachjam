@@ -3,15 +3,12 @@
 {% block title %}
   {% trans "My Account" %} {{ block.super }}
 {% endblock %}
-{% block account-tabs %}
-  {% include 'user_account/_tabs.html' with active='profile' %}
-{% endblock %}
 {% block account-content %}
   <div class="row">
-    <div class="col-lg-8">
+    <div class="col-lg-8 offset-lg-2">
       {% block account-content-items %}
         {% block account-content-profile %}
-          <h2>{% trans "Account" %}</h2>
+          <h2>{% trans "My account" %}</h2>
           <form method="post">
             {% csrf_token %}
             <div class="row row-cols-1 row-cols-md-2">
@@ -85,6 +82,38 @@
           <hr class="my-5"/>
           <h3>{% trans "Password" %}</h3>
           <a href="{% url 'account_change_password' %}">{% trans "Change your password" %}</a>
+        {% endblock %}
+        {% block account-content-third-party %}
+          <hr class="my-5"/>
+          <h3>{% trans "Log in with social accounts" %}</h3>
+          <p>{% trans "Manage the accounts you can use to log in to this account." %}</p>
+          <a href="{% url 'socialaccount_connections' %}">{% trans "Manage social accounts" %}</a>
+        {% endblock %}
+        {% block account-document-access-groups %}
+          <hr class="my-5"/>
+          <h3>{% trans 'Document access groups' %}</h3>
+          <p>
+            {% blocktrans trimmed %}
+              Some documents are only visible to certain users. These groups control which restricted documents you have access to.
+            {% endblocktrans %}
+          </p>
+          <div class="my-3">
+            {% if document_access_groups|length %}
+              <ul>
+                {% for group in document_access_groups %}
+                  <li>
+                    <a href="{{ group.get_absolute_url }}">{{ group.group }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p>
+                {% blocktrans trimmed %}
+                  You do not belong to any groups.
+                {% endblocktrans %}
+              </p>
+            {% endif %}
+          </div>
         {% endblock %}
       {% endblock %}
     </div>

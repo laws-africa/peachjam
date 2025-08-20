@@ -2,7 +2,6 @@ from django.urls import include, path
 
 from peachjam.views import (
     DocumentAccessGroupDetailView,
-    DocumentAccessGroupListView,
     EditAccountView,
     GetAccountView,
     LoggedOutView,
@@ -17,11 +16,6 @@ urlpatterns = [
         "document-access-groups/",
         include(
             [
-                path(
-                    "",
-                    DocumentAccessGroupListView.as_view(),
-                    name="document_access_group_list",
-                ),
                 path(
                     "<int:pk>",
                     DocumentAccessGroupDetailView.as_view(),

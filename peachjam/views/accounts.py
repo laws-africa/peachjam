@@ -10,6 +10,7 @@ from django.views.generic.base import TemplateView
 
 from peachjam.auth import user_display
 from peachjam.forms import UserProfileForm
+from peachjam.models import DocumentAccessGroup
 
 User = get_user_model()
 
@@ -32,6 +33,15 @@ class EditAccountView(LoginRequiredMixin, FormView):
         setattr(self.request, "set_language", language_code)
         messages.success(self.request, _("Your profile has been updated."))
         return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["document_access_groups"] = (
+            DocumentAccessGroup.objects.filter(
+                group__in=self.request.user.groups.all()
+            ),
+        )
+        return context
 
 
 class GetAccountView(View):
