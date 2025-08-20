@@ -24,7 +24,7 @@ class FeatureAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "description")
+    list_display = ("name", "description", "tier")
     search_fields = ("name",)
     readonly_fields = ("group",)
     filter_horizontal = ("features",)
@@ -46,9 +46,9 @@ class ProductOfferingAdmin(admin.ModelAdmin):
 
 @admin.register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("user", "product_offering", "active", "created_at")
+    list_display = ("user", "product_offering", "status", "created_at")
     search_fields = ("user__username", "product_offering__product__name")
-    list_filter = ("product_offering", "active", "created_at")
+    list_filter = ("product_offering", "status", "created_at")
     readonly_fields = ["created_at"]
 
     def get_readonly_fields(self, request, obj=None):
@@ -81,12 +81,20 @@ class SubscriptionSettingsAdmin(admin.ModelAdmin):
                 )
 
 
-class SubscriptionInline(admin.TabularInline):
+class SubscriptionInline(admin.StackedInline):
     model = Subscription
     extra = 0
-    readonly_fields = ["created_at"]
+    fields = [
+        "product_offering",
+        "status",
+        "created_at",
+        "active_at",
+        "closed_at",
+        "start_of_current_period",
+        "end_of_current_period",
+    ]
+    readonly_fields = fields
     can_delete = False
-    max_num = 1
 
     def get_readonly_fields(self, request, obj=None):
         if obj:

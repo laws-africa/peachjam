@@ -1,7 +1,9 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
+from django.utils.translation import gettext as _
 from django.views import View
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
@@ -28,6 +30,7 @@ class EditAccountView(LoginRequiredMixin, FormView):
         user = form.save()
         language_code = user.userprofile.preferred_language.iso_639_1
         setattr(self.request, "set_language", language_code)
+        messages.success(self.request, _("Your profile has been updated."))
         return super().form_valid(form)
 
 

@@ -4,19 +4,7 @@
     <li class="nav-item">
       <a href="{% url 'edit_account' %}"
          class="nav-link {% if active == 'profile' %}active{% endif %}">
-        {% trans "Profile" %}
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="{% url 'account_change_password' %}"
-         class="nav-link {% if active == 'password' %}active{% endif %}">
-        {% trans "Password" %}
-      </a>
-    </li>
-    <li class="nav-item">
-      <a href="{% url 'account_email' %}"
-         class="nav-link {% if active == 'emails' %}active{% endif %}">
-        {% trans "Email addresses" %}
+        {% trans "Account" %}
       </a>
     </li>
     {% get_providers as socialaccount_providers %}

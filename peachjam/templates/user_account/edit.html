@@ -1,54 +1,92 @@
 {% extends 'user_account/layout.html' %}
 {% load i18n %}
 {% block title %}
-  {% trans "Edit Profile" %} {{ block.super }}
+  {% trans "My Account" %} {{ block.super }}
 {% endblock %}
 {% block account-tabs %}
   {% include 'user_account/_tabs.html' with active='profile' %}
 {% endblock %}
 {% block account-content %}
-  <h2>{% trans "Profile" %}</h2>
-  <form method="post" class="mb-5">
-    {% csrf_token %}
-    <div class="mb-3">
-      <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-      <input type="text"
-             class="form-control"
-             name="{{ form.first_name.name }}"
-             id="{{ form.first_name.id_for_label }}"
-             value="{{ form.first_name.value|default:'' }}"/>
-      {% if form.first_name.errors %}
-        <div class="text-danger">
-          {% for error in form.first_name.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
+  <div class="row">
+    <div class="col-lg-8">
+      {% block account-content-items %}
+        {% block account-content-profile %}
+          <h2>{% trans "Account" %}</h2>
+          <form method="post">
+            {% csrf_token %}
+            <div class="row row-cols-1 row-cols-md-2">
+              <div class="col mb-3">
+                <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       required
+                       name="{{ form.first_name.name }}"
+                       id="{{ form.first_name.id_for_label }}"
+                       value="{{ form.first_name.value|default:'' }}"/>
+                {% if form.first_name.errors %}
+                  <div class="text-danger">
+                    {% for error in form.first_name.errors %}<p>{{ error }}</p>{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="col mb-3">
+                <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                <input type="text"
+                       class="form-control"
+                       required
+                       name="{{ form.last_name.name }}"
+                       id="{{ form.last_name.id_for_label }}"
+                       value="{{ form.last_name.value|default:'' }}"/>
+                {% if form.last_name.errors %}
+                  <div class="text-danger">
+                    {% for error in form.last_name.errors %}<p>{{ error }}</p>{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="col mb-3">
+                <label class="form-label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
+                <select class="form-control"
+                        name="{{ form.preferred_language.name }}"
+                        id="{{ form.preferred_language.id_for_label }}">
+                  {% for opt in form.preferred_language %}{{ opt }}{% endfor %}
+                </select>
+                {% if form.preferred_language.errors %}
+                  <div class="text-danger">
+                    {% for error in form.preferred_language.errors %}<p>{{ error }}</p>{% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">{% trans "Update" %}</button>
+          </form>
+        {% endblock %}
+        {% block account-content-email %}
+          <hr class="my-5"/>
+          <h3>{% trans "Email address" %}</h3>
+          {% with user.emailaddress_set.all as emails %}
+            <ol class="list-unstyled">
+              {% for emailaddress in emails %}
+                <li>
+                  <span class="me-3">{{ emailaddress.email }}</span>
+                  {% if emailaddress.verified %}
+                    <i class="bi bi-check-circle text-success"></i>
+                    {% trans 'verified' %}
+                  {% else %}
+                    <i class="bi bi-question-circle text-danger"></i>
+                    {% trans 'unverified' %}
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ol>
+            <a href="{% url 'account_email' %}">{% trans "Update email address" %}</a>
+          {% endwith %}
+        {% endblock %}
+        {% block account-content-password %}
+          <hr class="my-5"/>
+          <h3>{% trans "Password" %}</h3>
+          <a href="{% url 'account_change_password' %}">{% trans "Change your password" %}</a>
+        {% endblock %}
+      {% endblock %}
     </div>
-    <div class="mb-3">
-      <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-      <input type="text"
-             class="form-control"
-             name="{{ form.last_name.name }}"
-             id="{{ form.last_name.id_for_label }}"
-             value="{{ form.last_name.value|default:'' }}"/>
-      {% if form.last_name.errors %}
-        <div class="text-danger">
-          {% for error in form.last_name.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <div class="mb-3">
-      <label class="form-label" for="{{ form.preferred_language.id_for_label }}">{{ form.preferred_language.label }}</label>
-      <select class="form-control"
-              name="{{ form.preferred_language.name }}"
-              id="{{ form.preferred_language.id_for_label }}">
-        {% for opt in form.preferred_language %}{{ opt }}{% endfor %}
-      </select>
-      {% if form.preferred_language.errors %}
-        <div class="text-danger">
-          {% for error in form.preferred_language.errors %}<p>{{ error }}</p>{% endfor %}
-        </div>
-      {% endif %}
-    </div>
-    <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
-  </form>
+  </div>
 {% endblock %}

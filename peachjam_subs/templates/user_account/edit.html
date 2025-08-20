@@ -1,0 +1,33 @@
+{% extends 'user_account/edit.html' %}
+{% load i18n %}
+{% block account-content-email %}
+  {{ block.super }}
+  {% block account-content-subscription %}
+    <hr class="my-5" />
+    <h3>{% trans "Subscription" %}</h3>
+    {% for subscription in user.subscriptions.all %}
+      {% if subscription.is_active %}
+        <div class="row">
+          <div class="col col-md-6">
+            <div class="card mb-3">
+              <div class="card-body">
+                <h4 class="card-title">{{ subscription.product.name }}</h4>
+                <div class="text-muted mb-3">{% trans "Member since" %} {{ subscription.created_at|date }}</div>
+                <p>{{ subscription.product.description|linebreaksbr }}</p>
+                <ul class="list-unstyled">
+                  {% for feature in subscription.product.features.all %}
+                    {% if not feature.hidden %}
+                      <li>
+                        <i class="bi bi-check text-success"></i> {{ feature.name }}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endblock %}
+{% endblock %}
