@@ -126,7 +126,7 @@ class TimelineEvent(models.Model):
             context = {
                 "user": user,
                 "hits": ev.subject_documents.all(),
-                "saved_search": ev.saved_search,
+                "saved_search": ev.user_following.saved_search,
                 "manage_url_path": reverse("search:saved_search_list"),
             }
             with override(user.userprofile.preferred_language.pk):
