@@ -33,7 +33,7 @@ class TimelineEvent(models.Model):
     email_alert_sent_at = models.DateTimeField(null=True)
 
     @classmethod
-    def get_events(cls, user, before=None, limit=1):
+    def get_events(cls, user, before=None, limit=5):
         qs = cls.objects.filter(user_following__user=user).annotate(
             event_date=TruncDate("created_at")
         )
