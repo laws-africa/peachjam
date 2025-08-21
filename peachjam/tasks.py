@@ -124,7 +124,7 @@ def run_ingestor(ingestor_id):
 
 
 # this can be slow and is not urgent, run at a lower priority
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -5})
 def extract_citations(document_id):
     """Extract citations from a document in the background."""
 
@@ -253,7 +253,7 @@ def update_user_follows_for_user(user_id):
     UserFollowing.update_timeline(user)
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_timeline_email_alerts():
     from peachjam.models import TimelineEvent
 
@@ -262,7 +262,7 @@ def send_timeline_email_alerts():
     log.info("Timeline emails sent")
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_new_document_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
