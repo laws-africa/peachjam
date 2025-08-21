@@ -16,6 +16,7 @@ log = logging.getLogger(__name__)
 class TimelineEvent(models.Model):
     class EventTypes(models.TextChoices):
         NEW_DOCUMENTS = "new_documents", _("New Documents")
+        SAVED_SEARCH = "saved_search", _("Saved Search")
 
     user_following = models.ForeignKey(
         "peachjam.UserFollowing",

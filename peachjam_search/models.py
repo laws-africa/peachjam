@@ -243,10 +243,7 @@ class SavedSearch(models.Model):
         hits = [h for h in hits if h.document]
 
         # get hits that were created later than the last alert
-        if self.last_alerted_at:
-            hits = [
-                hit for hit in hits if hit.document.created_at > self.last_alerted_at
-            ]
+        hits = [hit for hit in hits if hit.document.created_at > self.last_alerted_at]
 
         return hits
 

@@ -7,6 +7,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam_search.models import SavedSearch
+
 from . import (
     Author,
     CoreDocument,
@@ -84,6 +86,15 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
+    saved_search = models.ForeignKey(
+        SavedSearch,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("saved search"),
+    )
+
     last_alerted_at = models.DateTimeField(
         _("last alerted at"), null=True, blank=True, auto_now_add=True
     )
@@ -91,9 +102,7 @@ class UserFollowing(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     # fields that can be followed
-    follow_fields = (
-        "court author court_class court_registry country locality taxonomy".split()
-    )
+    follow_fields = "court author court_class court_registry country locality taxonomy saved_search".split()
 
     class Meta:
         constraints = [
@@ -132,6 +141,11 @@ class UserFollowing(models.Model):
                 condition=models.Q(taxonomy__isnull=False),
                 name="unique_user_taxonomy",
             ),
+            models.UniqueConstraint(
+                fields=["user", "saved_search"],
+                condition=models.Q(saved_search__isnull=False),
+                name="unique_user_saved_seardh",
+            ),
         ]
 
     def __str__(self):
@@ -148,6 +162,16 @@ class UserFollowing(models.Model):
         field = self.followed_field
         if field:
             return getattr(self, field)
+
+    def get_follow_event_type(self):
+        new_doc_fields = (
+            "court author court_class court_registry country locality taxonomy".split()
+        )
+        if self.followed_field in new_doc_fields:
+            return TimelineEvent.EventTypes.NEW_DOCUMENTS
+        elif self.followed_field == "saved_search":
+            return TimelineEvent.EventTypes.SAVED_SEARCH
+        return None
 
     def clean(self):
         super().clean()
@@ -198,6 +222,10 @@ class UserFollowing(models.Model):
             topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
             return qs.filter(taxonomies__topic__in=topics)
 
+        if self.saved_search:
+            pks = [doc.pk for doc in self.saved_search.find_new_hits()]
+            return qs.filter(pk__in=pks)
+
     def get_new_followed_documents(self):
         qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
@@ -220,7 +248,7 @@ class UserFollowing(models.Model):
                 timeline_event = TimelineEvent.objects.filter(
                     created_at__date=today,
                     user_following=follow,
-                    event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+                    event_type=follow.get_event_type(),
                     email_alert_sent_at__isnull=True,
                 ).first()
                 if not timeline_event:
@@ -229,7 +257,7 @@ class UserFollowing(models.Model):
                     )
                     timeline_event = TimelineEvent.objects.create(
                         user_following=follow,
-                        event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+                        event_type=follow.get_event_type(),
                     )
                 else:
                     log.info(
