@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, SavedSearch, UserFollowing
 
 
 @receiver(post_save)
@@ -16,3 +16,12 @@ def document_saved(sender, instance, **kwargs):
                 work=instance.work, date__lt=instance.date
             ):
                 post_save.send(doc.__class__, instance=doc, created=False, raw=False)
+
+
+@receiver(post_save, sender=SavedSearch)
+def create_user_following(sender, instance, created, **kwargs):
+    if created:
+        UserFollowing.objects.create(
+            user=instance.user,
+            saved_search=instance,
+        )
