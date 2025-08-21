@@ -1,3 +1,4 @@
+import logging
 from collections import defaultdict
 from itertools import islice
 
@@ -8,6 +9,8 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
+
+log = logging.getLogger(__name__)
 
 
 class TimelineEvent(models.Model):
@@ -90,6 +93,10 @@ class TimelineEvent(models.Model):
             .values_list("user_following__user", flat=True)
             .distinct()
         )
+        if not users:
+            log.info("No users with new events to send emails to.")
+            return
+        log.info(f"Sending new document email alerts to {len(users)} users.")
         for user_id in users:
             send_new_document_email_alert(user_id)
 
@@ -105,6 +112,7 @@ class TimelineEvent(models.Model):
             .prefetch_related("subject_documents")
         )
         if not new_document_events.exists():
+            log.info(f"No new document events to send for user {user.pk}")
             return
 
         follows_map = {}
@@ -112,7 +120,8 @@ class TimelineEvent(models.Model):
             key = ev.user_following.followed_object
             follows_map.setdefault(key, set()).update(ev.subject_documents.all())
         follows = [
-            {"followed_object": k, "documents": list(v)} for k, v in follows_map.items()
+            {"followed_object": k, "documents": list(v)[:10]}
+            for k, v in follows_map.items()
         ]
 
         context = {
