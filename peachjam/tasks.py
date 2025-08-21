@@ -278,6 +278,22 @@ def send_new_document_email_alert(user_id):
     log.info("New document email alerts sent")
 
 
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+def send_saved_search_email_alert(user_id):
+    from django.contrib.auth import get_user_model
+
+    from peachjam.models import TimelineEvent
+
+    user = get_user_model().objects.filter(pk=user_id).first()
+    if not user:
+        log.info(f"No user with id {user_id} exists, ignoring.")
+        return
+
+    log.info(f"Sending saved search email alerts for user {user_id}")
+    TimelineEvent.send_saved_search_email_alert(user)
+    log.info("Saved search email alerts sent")
+
+
 @background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
 def generate_judgment_summary(doc_id):
     from peachjam.models import Judgment

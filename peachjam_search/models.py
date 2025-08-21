@@ -6,15 +6,12 @@ from math import exp
 from urllib.parse import urlencode
 
 from allauth.account import app_settings
-from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
 from django.http import QueryDict
 from django.shortcuts import reverse
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import override
-from templated_email import send_templated_mail
 
 log = logging.getLogger(__name__)
 
@@ -102,6 +99,8 @@ class SavedSearch(models.Model):
         User, on_delete=models.CASCADE, related_name="saved_searches"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    # TODO: remove this field after back fill since we now use user following last alerted at
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
 
     class Meta:
@@ -170,13 +169,6 @@ class SavedSearch(models.Model):
             filters["q"] = self.q
         return reverse("search:search") + "?" + urlencode(filters, doseq=True)
 
-    def update_and_alert(self):
-        hits = self.find_new_hits()
-        if hits:
-            self.send_alert(hits)
-            self.last_alerted_at = now()
-            self.save()
-
     def generate_advanced_search_query(self, criteria):
         a = ""
 
@@ -241,27 +233,7 @@ class SavedSearch(models.Model):
         SearchHit.attach_documents(hits, fake_documents=False)
         # only keep those with a document
         hits = [h for h in hits if h.document]
-
-        # get hits that were created later than the last alert
-        hits = [hit for hit in hits if hit.document.created_at > self.last_alerted_at]
-
         return hits
-
-    def send_alert(self, hits):
-        hits = hits[:10]
-        context = {
-            "user": self.user,
-            "hits": hits,
-            "saved_search": self,
-            "manage_url_path": reverse("search:saved_search_list"),
-        }
-        with override(self.user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="search_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[self.user.email],
-                context=context,
-            )
 
 
 class SearchFeedback(models.Model):

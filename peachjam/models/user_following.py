@@ -144,7 +144,7 @@ class UserFollowing(models.Model):
             models.UniqueConstraint(
                 fields=["user", "saved_search"],
                 condition=models.Q(saved_search__isnull=False),
-                name="unique_user_saved_seardh",
+                name="unique_user_saved_search",
             ),
         ]
 
@@ -163,7 +163,7 @@ class UserFollowing(models.Model):
         if field:
             return getattr(self, field)
 
-    def get_follow_event_type(self):
+    def get_event_type(self):
         new_doc_fields = (
             "court author court_class court_registry country locality taxonomy".split()
         )
@@ -223,7 +223,7 @@ class UserFollowing(models.Model):
             return qs.filter(taxonomies__topic__in=topics)
 
         if self.saved_search:
-            pks = [doc.pk for doc in self.saved_search.find_new_hits()]
+            pks = [doc.document.pk for doc in self.saved_search.find_new_hits()]
             return qs.filter(pk__in=pks)
 
     def get_new_followed_documents(self):
@@ -235,9 +235,13 @@ class UserFollowing(models.Model):
         return qs[:10]
 
     @classmethod
-    def update_timeline(cls, user):
-        follows = cls.objects.filter(user=user)
-        log.info(f"Found {follows.count()} follows for user {user.pk}")
+    def update_timeline(cls, user=None, following=None):
+        follows = cls.objects.all()
+        if user:
+            follows = follows.filter(user=user)
+        if following:
+            follows = follows.filter(pk__in=following)
+        log.info(f"Found {follows.count()} follows")
         for follow in follows:
             new = follow.get_new_followed_documents()
             if new:
