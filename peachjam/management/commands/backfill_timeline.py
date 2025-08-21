@@ -45,7 +45,7 @@ class Command(BaseCommand):
                         self.stdout.write(f"Checking for existing event on {day}...")
                         event = TimelineEvent.objects.filter(
                             user_following=follow,
-                            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+                            event_type=follow.get_event_type(),
                             created_at__date=day,
                             email_alert_sent_at__isnull=True,
                         ).first()
@@ -56,7 +56,7 @@ class Command(BaseCommand):
                             )
                             event = TimelineEvent.objects.create(
                                 user_following=follow,
-                                event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+                                event_type=follow.get_event_type(),
                             )
                         event.created_at = day
                         event.email_alert_sent_at = day
