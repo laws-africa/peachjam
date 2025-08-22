@@ -25,7 +25,7 @@ class PeachJamConfig(AppConfig):
         from docpipe import soffice
 
         soffice.TIMEOUT = 60 * 10  # 10 minutes
-        soffice.SOFFICE_CMD = ["timeout"]
+        soffice.SOFFICE_CMD = "timeout"
         soffice.SOFFICE_ARGS = [
             # send SIGKLL when the grace period is up
             "--signal=KILL",
