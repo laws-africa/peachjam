@@ -15,14 +15,14 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name="subscription",
-            name="end_date",
+            name="ends_on",
             field=models.DateField(
                 blank=True, help_text="Date when the subscription ends", null=True
             ),
         ),
         migrations.AddField(
             model_name="subscription",
-            name="start_date",
+            name="starts_on",
             field=models.DateField(
                 blank=True,
                 help_text="Date when the subscription becomes active",

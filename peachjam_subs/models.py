@@ -172,20 +172,17 @@ class Subscription(models.Model):
     active_at = models.DateTimeField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
 
-    start_date = models.DateField(
+    starts_on = models.DateField(
         null=True, blank=True, help_text="Date when the subscription becomes active"
     )
-    end_date = models.DateField(
+    ends_on = models.DateField(
         null=True, blank=True, help_text="Date when the subscription ends"
     )
 
     objects = SubscriptionManager()
 
-    @classmethod
-    def can_activate(cls, instance):
-        return (
-            instance.start_date is None or instance.start_date <= timezone.now().date()
-        )
+    def can_activate(self):
+        return self.starts_on is None or self.starts_on <= timezone.now().date()
 
     @property
     def product(self):
@@ -306,15 +303,15 @@ class Subscription(models.Model):
 
         # Activate pending subscriptions that should be active today
         for sub in cls.objects.filter(
-            status=cls.Status.PENDING, start_date__lte=today
+            status=cls.Status.PENDING, starts_on__lte=today
         ).all():
-            if cls.can_activate(sub):
+            if sub.can_activate():
                 sub.activate()
                 sub.save()
 
         # Close active subscriptions that have ended
         for sub in cls.objects.filter(
-            status__in=[cls.Status.ACTIVE, cls.Status.PENDING], end_date__lt=today
+            status__in=[cls.Status.ACTIVE, cls.Status.PENDING], ends_on__lt=today
         ).all():
             sub.close()
             sub.save()
