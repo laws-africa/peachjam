@@ -192,6 +192,14 @@ class Subscription(models.Model):
     def is_active(self):
         return self.status == Subscription.Status.ACTIVE
 
+    @property
+    def is_pending(self):
+        return self.status == Subscription.Status.PENDING
+
+    @property
+    def is_closed(self):
+        return self.status == Subscription.Status.CLOSED
+
     @transition(
         field=status,
         source=[Status.PENDING],

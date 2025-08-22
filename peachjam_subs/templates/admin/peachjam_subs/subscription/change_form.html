@@ -10,11 +10,13 @@
         {% trans "Activate subscription" %}
       </button>
     {% endif %}
-    <button formaction="{% url 'admin:peachjam_subs_subscription_close' original.pk %}"
-            form="subscription-button-form"
-            class="btn btn-danger form-control mt-3">
-      {% trans "Cancel subscription" %}
-    </button>
+    {% if not original.is_closed %}
+      <button formaction="{% url 'admin:peachjam_subs_subscription_close' original.pk %}"
+              form="subscription-button-form"
+              class="btn btn-danger form-control mt-3">
+        {% trans "Cancel subscription" %}
+      </button>
+    {% endif %}
   {% endif %}
   {{ block.super }}
 {% endblock %}
