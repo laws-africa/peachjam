@@ -210,8 +210,9 @@ class Subscription(models.Model):
             .all()
         ):
             sub.close()
-            sub.save()
         self.active_at = timezone.now()
+        self.status = Subscription.Status.ACTIVE
+        self.save()
 
     @transition(
         field=status, source=[Status.ACTIVE, Status.PENDING], target=Status.CLOSED
@@ -219,6 +220,8 @@ class Subscription(models.Model):
     def close(self):
         log.info(f"Closing subscription {self}")
         self.closed_at = timezone.now()
+        self.status = Subscription.Status.CLOSED
+        self.save()
 
     def end_of_current_period(self):
         """Returns the last day of the current subscription period."""
@@ -293,7 +296,6 @@ class Subscription(models.Model):
                     product_offering=sub_settings.default_product_offering,
                 )
                 subscription.activate()
-                subscription.save()
         return subscription
 
     @classmethod
@@ -307,14 +309,12 @@ class Subscription(models.Model):
         ).all():
             if sub.can_activate():
                 sub.activate()
-                sub.save()
 
         # Close active subscriptions that have ended
         for sub in cls.objects.filter(
             status__in=[cls.Status.ACTIVE, cls.Status.PENDING], ends_on__lt=today
         ).all():
             sub.close()
-            sub.save()
 
         # ensure all users have a subscription
         for user in User.objects.filter(subscriptions__isnull=True).all():

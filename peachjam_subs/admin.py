@@ -85,7 +85,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
             subscription = Subscription.objects.get(pk=subscription_id)
             try:
                 subscription.activate()
-                subscription.save()
                 messages.success(request, _("Subscription activated."))
             except TransitionNotAllowed:
                 messages.warning(request, _("Subscription cannot be activated."))
@@ -96,7 +95,6 @@ class SubscriptionAdmin(admin.ModelAdmin):
             subscription = Subscription.objects.get(pk=subscription_id)
             try:
                 subscription.close()
-                subscription.save()
                 # ensure the user has an active subscription
                 Subscription.get_or_create_active_for_user(request.user)
                 messages.success(request, _("Subscription cancelled."))

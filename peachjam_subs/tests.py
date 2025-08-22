@@ -85,3 +85,6 @@ class SubscriptionTests(TestCase):
         sub1.activate()
         self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
         self.assertIsNotNone(sub1.active_at)
+        sub1.refresh_from_db()
+        self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
+        self.assertIsNotNone(sub1.active_at)

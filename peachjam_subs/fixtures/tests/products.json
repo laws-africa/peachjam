@@ -27,6 +27,15 @@
     }
   },
   {
+    "model": "peachjam_subs.product",
+    "pk": 3,
+    "fields": {
+      "name": "My LII Silver",
+      "description": "Better than bronze.",
+      "features": []
+    }
+  },
+  {
     "model": "peachjam_subs.pricingplan",
     "pk": 1,
     "fields": {
@@ -45,6 +54,15 @@
     }
   },
   {
+    "model": "peachjam_subs.pricingplan",
+    "pk": 3,
+    "fields": {
+      "name": "Silver",
+      "price": "20.00",
+      "period": "monthly"
+    }
+  },
+  {
     "model": "peachjam_subs.productoffering",
     "pk": 1,
     "fields": {
@@ -58,6 +76,14 @@
     "fields": {
       "product": 2,
       "pricing_plan": 1
+    }
+  },
+  {
+    "model": "peachjam_subs.productoffering",
+    "pk": 3,
+    "fields": {
+      "product": 3,
+      "pricing_plan": 3
     }
   },
   {
