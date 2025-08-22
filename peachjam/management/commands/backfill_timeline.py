@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models.functions import TruncDate
 
-from peachjam.models import TimelineEvent
+from peachjam.models import CoreDocument, TimelineEvent
 
 User = get_user_model()
 
@@ -43,28 +43,19 @@ class Command(BaseCommand):
                     for day, documents in docs_by_day.items():
                         # Check if an event already exists for this day
                         self.stdout.write(f"Checking for existing event on {day}...")
-                        event = TimelineEvent.objects.filter(
-                            user_following=follow,
-                            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
-                            created_at__date=day,
-                            email_alert_sent_at__isnull=True,
-                        ).first()
 
+                        documents = CoreDocument.objects.filter(
+                            pk__in=[doc.pk for doc in documents]
+                        )
+                        event = follow.create_timeline_event(documents)
                         if not event:
                             self.stdout.write(
-                                f"Creating new timeline event for {follow.followed_object} on {day}"
+                                f"No event created for {follow.followed_object} on {day}"
                             )
-                            event = TimelineEvent.objects.create(
-                                user_following=follow,
-                                event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
-                            )
+                            continue
                         event.created_at = day
                         event.email_alert_sent_at = day
                         event.save()
-
-                        # Add documents to the event, limit to 50
-                        for doc in documents[:50]:
-                            event.subject_documents.add(doc)
                 self.stdout.write(f"Updated timeline for user {user.username}")
             self.stdout.write(
                 self.style.SUCCESS("Successfully backfilled timelines for all users")

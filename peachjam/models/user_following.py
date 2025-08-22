@@ -198,46 +198,53 @@ class UserFollowing(models.Model):
             topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
             return qs.filter(taxonomies__topic__in=topics)
 
-    def get_new_followed_documents(self):
+    def get_new_followed_documents(self, since=None, limit=10):
         qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
         )
-        if self.last_alerted_at:
+        cutoff = since or self.last_alerted_at
+        if cutoff:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
-        return qs[:10]
+        return qs[:limit]
+
+    def create_timeline_event(self, documents):
+        if not documents:
+            log.info("No documents")
+            return
+        log.info(f"Found {documents.count()} new documents for {self.followed_object}")
+        # check for unsent event
+        event = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            email_alert_sent_at__isnull=True,
+        ).first()
+        if not event:
+            log.info(f"Creating new timeline event for {self.followed_object}")
+            event = TimelineEvent.objects.create(
+                user_following=self,
+                event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            )
+        else:
+            log.info(f"Updating existing timeline event for {self.followed_object}")
+
+        event.subject_documents.add(*documents)
+        self.last_alerted_at = timezone.now()
+        self.save(update_fields=["last_alerted_at"])
+
+        return event
 
     @classmethod
     def update_timeline(cls, user):
         follows = cls.objects.filter(user=user)
         log.info(f"Found {follows.count()} follows for user {user.pk}")
         for follow in follows:
-            new = follow.get_new_followed_documents()
-            if new:
+            documents = follow.get_new_followed_documents()
+            event = follow.create_timeline_event(documents)
+            if event:
                 log.info(
-                    f"Found {new.count()} new documents for {follow.followed_object}"
+                    f"Created timeline event for {follow.followed_object} with {len(documents)} documents"
                 )
-                today = timezone.now().date()
-                timeline_event = TimelineEvent.objects.filter(
-                    created_at__date=today,
-                    user_following=follow,
-                    event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
-                    email_alert_sent_at__isnull=True,
-                ).first()
-                if not timeline_event:
-                    log.info(
-                        f"Creating new timeline event for {follow.followed_object}"
-                    )
-                    timeline_event = TimelineEvent.objects.create(
-                        user_following=follow,
-                        event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
-                    )
-                else:
-                    log.info(
-                        f"Updating existing timeline event for {follow.followed_object}"
-                    )
-
-                timeline_event.subject_documents.add(*new)
-
-                # update last_alert_date
-                follow.last_alerted_at = timezone.now()
-                follow.save()
+            else:
+                log.info(
+                    f"No new documents for {follow.followed_object}, no timeline event created"
+                )

@@ -257,9 +257,8 @@ def update_user_follows_for_user(user_id):
 def send_timeline_email_alerts():
     from peachjam.models import TimelineEvent
 
-    log.info("Sending timeline emails")
+    log.info("Checking for pending timeline emails")
     TimelineEvent.send_email_alerts()
-    log.info("Timeline emails sent")
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
