@@ -141,12 +141,22 @@ class SubscriptionManager(models.Manager):
 
 
 class Subscription(models.Model):
+    """A user's subscription to a product offering.
+
+    Only one subscription can be active at a time for a user. There can be multiple pending subscriptions.
+
+    Every day, just after midnight, the system activates subscriptions that have a start date of today. It then
+    closes any active subscriptions that had an end date at or before yesterday. Because activating a new subscription
+    also deactivates any existing subscription, this means that a user can be upgraded or downgraded to a different
+    subscription tier by ensuring the new subscription starts the day after the old one ends.
+    """
+
     class Status(models.TextChoices):
         """
         Flow diagrom:
 
-        pending -> active
-        active  -> closed
+        pending -> active -> closed
+                -> closed
         """
 
         PENDING = "pending", _("Pending")
@@ -162,7 +172,20 @@ class Subscription(models.Model):
     active_at = models.DateTimeField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
 
+    start_date = models.DateField(
+        null=True, blank=True, help_text="Date when the subscription becomes active"
+    )
+    end_date = models.DateField(
+        null=True, blank=True, help_text="Date when the subscription ends"
+    )
+
     objects = SubscriptionManager()
+
+    @classmethod
+    def can_activate(cls, instance):
+        return (
+            instance.start_date is None or instance.start_date <= timezone.now().date()
+        )
 
     @property
     def product(self):
@@ -172,7 +195,12 @@ class Subscription(models.Model):
     def is_active(self):
         return self.status == Subscription.Status.ACTIVE
 
-    @transition(field=status, source=[Status.PENDING], target=Status.ACTIVE)
+    @transition(
+        field=status,
+        source=[Status.PENDING],
+        target=Status.ACTIVE,
+        conditions=[can_activate],
+    )
     def activate(self):
         """Activate this subscription. This also closes any other active subscriptions for the user."""
         log.info(f"Activating subscription {self}")
@@ -188,7 +216,9 @@ class Subscription(models.Model):
             sub.save()
         self.active_at = timezone.now()
 
-    @transition(field=status, source=[Status.ACTIVE], target=Status.CLOSED)
+    @transition(
+        field=status, source=[Status.ACTIVE, Status.PENDING], target=Status.CLOSED
+    )
     def close(self):
         log.info(f"Closing subscription {self}")
         self.closed_at = timezone.now()
@@ -268,6 +298,30 @@ class Subscription(models.Model):
                 subscription.activate()
                 subscription.save()
         return subscription
+
+    @classmethod
+    def update_subscriptions(cls):
+        """Activate pending subscriptions and close active subscriptions as needed."""
+        today = timezone.now().date()
+
+        # Activate pending subscriptions that should be active today
+        for sub in cls.objects.filter(
+            status=cls.Status.PENDING, start_date__lte=today
+        ).all():
+            if cls.can_activate(sub):
+                sub.activate()
+                sub.save()
+
+        # Close active subscriptions that have ended
+        for sub in cls.objects.filter(
+            status__in=[cls.Status.ACTIVE, cls.Status.PENDING], end_date__lt=today
+        ).all():
+            sub.close()
+            sub.save()
+
+        # ensure all users have a subscription
+        for user in User.objects.filter(subscriptions__isnull=True).all():
+            cls.get_or_create_active_for_user(user)
 
 
 class SubscriptionSettings(SingletonModel):
