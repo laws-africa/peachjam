@@ -12,6 +12,7 @@ class PeachjamSubsConfig(AppConfig):
     def ready(self):
         from background_task.models import Task
 
+        import peachjam_subs.metrics  # noqa
         import peachjam_subs.signals  # noqa
         from peachjam_subs.tasks import update_subscriptions
 

@@ -4,6 +4,7 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = [
     "tanzlii.apps.TanzLIIConfig",
+    "django_fsm",
     "peachjam_subs",
     "peachjam_ml",
 ] + INSTALLED_APPS  # noqa
