@@ -105,6 +105,13 @@ def set_user_language(sender, request, user, **kwargs):
     setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)
 
 
+@receiver(allauth_signals.email_changed)
+def primary_email_changed(sender, request, user, to_email_address, **kwargs):
+    # store the new primary email address in the User model as well
+    user.email = to_email_address
+    user.save()
+
+
 ###
 # Analytics
 
