@@ -1,22 +1,11 @@
 from functools import cached_property
 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
 from guardian.shortcuts import get_objects_for_group
 from rest_framework.generics import get_object_or_404
 
 from peachjam.models import CoreDocument, DocumentAccessGroup
 from peachjam.views import FilteredDocumentListView
-
-
-class DocumentAccessGroupListView(LoginRequiredMixin, ListView):
-    template_name = "peachjam/document_access_group_list.html"
-    context_object_name = "groups"
-
-    def get_queryset(self):
-        return DocumentAccessGroup.objects.filter(
-            group__in=self.request.user.groups.all()
-        )
 
 
 class DocumentAccessGroupDetailView(LoginRequiredMixin, FilteredDocumentListView):

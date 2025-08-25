@@ -1,0 +1,28 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block extra_actions %}
+  {% if original.pk %}
+    {% if not original.is_active %}
+      <button formaction="{% url 'admin:peachjam_subs_subscription_activate' original.pk %}"
+              form="subscription-button-form"
+              class="btn btn-success form-control mt-3"
+              {% if not original.can_activate %}disabled{% endif %}>
+        {% trans "Activate subscription" %}
+      </button>
+    {% endif %}
+    {% if not original.is_closed %}
+      <button formaction="{% url 'admin:peachjam_subs_subscription_close' original.pk %}"
+              form="subscription-button-form"
+              class="btn btn-danger form-control mt-3">
+        {% trans "Cancel subscription" %}
+      </button>
+    {% endif %}
+  {% endif %}
+  {{ block.super }}
+{% endblock %}
+{% block content %}
+  {{ block.super }}
+  <form id="subscription-button-form" method="post">
+    {% csrf_token %}
+  </form>
+{% endblock %}

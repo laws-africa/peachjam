@@ -1,6 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
+from django_fsm import post_transition
+
+from peachjam.customerio import get_customerio
 
 from .models import Feature, Product, Subscription, subscription_settings
 
@@ -28,6 +31,16 @@ def product_features_changed(sender, instance, action, **kwargs):
 def feature_saved(sender, instance, **kwargs):
     for product in instance.product_set.all():
         product.reset_permissions()
+
+
+@receiver(post_transition, sender=Subscription)
+def subscription_changed(sender, instance, target, field, **kwargs):
+    if field.name == "status":
+        cio = get_customerio()
+        if target == Subscription.Status.ACTIVE:
+            cio.track_subscription_activated(instance)
+        elif target == Subscription.Status.CLOSED:
+            cio.track_subscription_closed(instance)
 
 
 User = get_user_model()
