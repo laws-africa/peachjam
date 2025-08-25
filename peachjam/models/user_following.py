@@ -208,10 +208,6 @@ class UserFollowing(models.Model):
         return qs[:limit]
 
     def create_timeline_event(self, documents):
-        if not documents:
-            log.info("No documents")
-            return
-        log.info(f"Found {documents.count()} new documents for {self.followed_object}")
         # check for unsent event
         event = TimelineEvent.objects.filter(
             user_following=self,
@@ -228,23 +224,21 @@ class UserFollowing(models.Model):
             log.info(f"Updating existing timeline event for {self.followed_object}")
 
         event.subject_documents.add(*documents)
-        self.last_alerted_at = timezone.now()
-        self.save(update_fields=["last_alerted_at"])
-
         return event
 
     @classmethod
-    def update_timeline(cls, user):
+    def update_timeline_for_user(cls, user):
         follows = cls.objects.filter(user=user)
         log.info(f"Found {follows.count()} follows for user {user.pk}")
         for follow in follows:
-            documents = follow.get_new_followed_documents()
-            event = follow.create_timeline_event(documents)
-            if event:
-                log.info(
-                    f"Created timeline event for {follow.followed_object} with {len(documents)} documents"
-                )
-            else:
-                log.info(
-                    f"No new documents for {follow.followed_object}, no timeline event created"
-                )
+            follow.update_timeline()
+
+    def update_timeline(self):
+        documents = self.get_new_followed_documents()
+        if not documents:
+            log.info("No documents")
+            return
+        log.info(f"Found {documents.count()} new documents for {self.followed_object}")
+        self.create_timeline_event(documents)
+        self.last_alerted_at = timezone.now()
+        self.save(update_fields=["last_alerted_at"])

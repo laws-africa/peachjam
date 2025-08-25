@@ -32,7 +32,7 @@ class TimelineViewTest(TestCase):
         self.assertEqual(0, TimelineEvent.objects.count())
 
         # Update the timeline for the user → should create one event
-        UserFollowing.update_timeline(self.user)
+        UserFollowing.update_timeline_for_user(self.user)
         self.assertEqual(
             1, TimelineEvent.objects.filter(user_following__user=self.user).count()
         )
@@ -51,7 +51,7 @@ class TimelineViewTest(TestCase):
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
-        UserFollowing.update_timeline(self.user)
+        UserFollowing.update_timeline_for_user(self.user)
         self.assertEqual(1, TimelineEvent.objects.count())
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
@@ -69,7 +69,7 @@ class TimelineViewTest(TestCase):
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
-        UserFollowing.update_timeline(self.user)
+        UserFollowing.update_timeline_for_user(self.user)
         self.assertEqual(2, TimelineEvent.objects.count())
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
