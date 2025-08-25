@@ -209,17 +209,13 @@ class UserFollowing(models.Model):
 
     def create_timeline_event(self, documents):
         # check for unsent event
-        event = TimelineEvent.objects.filter(
+        event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
             email_alert_sent_at__isnull=True,
-        ).first()
-        if not event:
+        )
+        if new:
             log.info(f"Creating new timeline event for {self.followed_object}")
-            event = TimelineEvent.objects.create(
-                user_following=self,
-                event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
-            )
         else:
             log.info(f"Updating existing timeline event for {self.followed_object}")
 
