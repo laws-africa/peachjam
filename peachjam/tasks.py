@@ -124,7 +124,7 @@ def run_ingestor(ingestor_id):
 
 
 # this can be slow and is not urgent, run at a lower priority
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -5})
 def extract_citations(document_id):
     """Extract citations from a document in the background."""
 
@@ -229,17 +229,17 @@ def get_deleted_documents(ingestor_id, range_start, range_end):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_user_follows():
+def update_user_timelines():
     from django.contrib.auth import get_user_model
 
     log.info("Updating user follows")
     users = get_user_model().objects.filter(following__isnull=False).distinct()
     for user in users:
-        update_user_follows_for_user(user.pk)
+        update_timeline_for_user(user.pk)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_user_follows_for_user(user_id):
+def update_timeline_for_user(user_id):
     from django.contrib.auth import get_user_model
 
     from peachjam.models import UserFollowing
@@ -250,7 +250,31 @@ def update_user_follows_for_user(user_id):
         return
 
     log.info(f"Updating user follows for user {user_id}")
-    UserFollowing.update_and_alert(user)
+    UserFollowing.update_timeline_for_user(user)
+
+
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+def send_timeline_email_alerts():
+    from peachjam.models import TimelineEvent
+
+    log.info("Checking for pending timeline emails")
+    TimelineEvent.send_email_alerts()
+
+
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+def send_new_document_email_alert(user_id):
+    from django.contrib.auth import get_user_model
+
+    from peachjam.models import TimelineEvent
+
+    user = get_user_model().objects.filter(pk=user_id).first()
+    if not user:
+        log.info(f"No user with id {user_id} exists, ignoring.")
+        return
+
+    log.info(f"Sending new document email alerts for user {user_id}")
+    TimelineEvent.send_new_document_email_alert(user)
+    log.info("New document email alerts sent")
 
 
 @background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
