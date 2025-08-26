@@ -5,7 +5,7 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from languages_plus.models import Language
 
-from peachjam.models import Court, Judgment, UserFollowing
+from peachjam.models import Court, Judgment, TimelineEvent, UserFollowing
 
 
 class TimelineViewTest(TestCase):
@@ -18,37 +18,61 @@ class TimelineViewTest(TestCase):
         self.user.user_permissions.add(
             Permission.objects.get(codename="view_userfollowing")
         )
+        self.court = Court.objects.get(code="ECOWASCJ")
+        self.follow = UserFollowing.objects.create(user=self.user, court=self.court)
+        self.last_alerted_at = datetime(2000, 7, 1)
+        self.follow.last_alerted_at = self.last_alerted_at
+        self.initial_documents_count = Judgment.objects.filter(
+            court=self.court, created_at__gte=self.last_alerted_at
+        ).count()
+        self.follow.save()
 
-    def test_timeline_view(self):
-        court = Court.objects.get(code="ECOWASCJ")
-        follow = UserFollowing.objects.create(user=self.user, court=court)
-        follow.last_alerted_at = datetime(2000, 7, 1)
-        follow.save()
+    def test_timeline_create_and_update(self):
+        # Initially, no timeline events
+        self.assertEqual(0, TimelineEvent.objects.count())
 
-        UserFollowing.update_timeline(self.user)
+        # Update the timeline for the user → should create one event
+        UserFollowing.update_timeline_for_user(self.user)
+        self.assertEqual(
+            1, TimelineEvent.objects.filter(user_following__user=self.user).count()
+        )
+        subject_docs = TimelineEvent.objects.filter(
+            user_following__user=self.user
+        ).values_list("subject_documents__id", flat=True)
+        self.assertEqual(self.initial_documents_count, subject_docs.count())
 
+        # Create a new judgment and update timeline
+        # → should NOT create a new event, but subject doc count should increase
         date = datetime(2023, 10, 1)
-
-        Judgment.objects.create(
+        j = Judgment.objects.create(
             case_name="New Case",
-            court=court,
+            court=self.court,
             date=date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
+        UserFollowing.update_timeline_for_user(self.user)
+        self.assertEqual(1, TimelineEvent.objects.count())
+        subject_docs = TimelineEvent.objects.filter(
+            user_following__user=self.user
+        ).values_list("subject_documents__id", flat=True)
+        self.assertEqual(self.initial_documents_count + 1, subject_docs.count())
+        self.assertIn(j.pk, subject_docs)
 
-        response = self.client.get("/my/")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(
-            response, "Ababacar and Ors vs Senegal [2018] ECOWASCJ 17 (29 June 2018)"
+        # Send timeline emails, then create another doc and update timeline
+        # → should create a NEW timeline event, subject doc count should increase
+        TimelineEvent.objects.all().update(email_alert_sent_at=date)
+        j = Judgment.objects.create(
+            case_name="Another Case",
+            court=self.court,
+            date=date,
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
         )
-        self.assertContains(
-            response,
-            "Obi vs Federal Republic of Nigeria [2016] ECOWASCJ 52 (09 November 2016",
-        )
-        self.assertNotContains(response, "New Case")
-
-        UserFollowing.update_timeline(self.user)
-        response = self.client.get("/my/")
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "New Case")
+        UserFollowing.update_timeline_for_user(self.user)
+        self.assertEqual(2, TimelineEvent.objects.count())
+        subject_docs = TimelineEvent.objects.filter(
+            user_following__user=self.user
+        ).values_list("subject_documents__id", flat=True)
+        self.assertEqual(self.initial_documents_count + 2, subject_docs.count())
+        self.assertIn(j.pk, subject_docs)

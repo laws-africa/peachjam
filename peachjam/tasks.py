@@ -229,17 +229,17 @@ def get_deleted_documents(ingestor_id, range_start, range_end):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_user_follows():
+def update_user_timelines():
     from django.contrib.auth import get_user_model
 
     log.info("Updating user follows")
     users = get_user_model().objects.filter(following__isnull=False).distinct()
     for user in users:
-        update_user_follows_for_user(user.pk)
+        update_timeline_for_user(user.pk)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_user_follows_for_user(user_id):
+def update_timeline_for_user(user_id):
     from django.contrib.auth import get_user_model
 
     from peachjam.models import UserFollowing
@@ -250,16 +250,15 @@ def update_user_follows_for_user(user_id):
         return
 
     log.info(f"Updating user follows for user {user_id}")
-    UserFollowing.update_timeline(user)
+    UserFollowing.update_timeline_for_user(user)
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_timeline_email_alerts():
     from peachjam.models import TimelineEvent
 
-    log.info("Sending timeline emails")
+    log.info("Checking for pending timeline emails")
     TimelineEvent.send_email_alerts()
-    log.info("Timeline emails sent")
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
