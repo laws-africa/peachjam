@@ -184,13 +184,13 @@ class UserFollowing(models.Model):
         if set_fields == 0:
             raise ValidationError(
                 "One of the following fields must be set: court, author, court class, court registry, country, "
-                "locality, taxonomy topic"
+                "locality, taxonomy topic saved search"
             )
 
         if set_fields > 1:
             raise ValidationError(
                 "Only one of the following fields can be set: court, author, court class, court registry,"
-                " country, locality, taxonomy topic"
+                " country, locality, taxonomy topic saved search"
             )
 
     def save(self, *args, **kwargs):
@@ -239,7 +239,7 @@ class UserFollowing(models.Model):
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            event_type=self.get_event_type(),
             email_alert_sent_at__isnull=True,
         )
         if new:
