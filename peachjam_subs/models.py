@@ -103,11 +103,15 @@ class PricingPlan(models.Model):
             # two decimals
             return f"{self.currency_symbol}{price:.2f}"
 
+    def format_price_per_period(self, price=None):
+        price = self.price if price is None else price
+        if price:
+            return f"{self.format_price(price)}/{self.period_singular}"
+        return _("FREE")
+
     @property
     def price_per_period(self):
-        if self.price:
-            return f"{self.price_str}/{self.period_singular}"
-        return _("FREE")
+        return self.format_price_per_period()
 
     def relative_delta(self):
         return {
