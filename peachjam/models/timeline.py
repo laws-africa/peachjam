@@ -66,7 +66,7 @@ class TimelineEvent(models.Model):
 
         for ev in qs:
             for doc in ev.subject_documents.all():
-                grouped[ev.event_date][ev.user_following.followed_object].append(doc)
+                grouped[ev.event_date][ev.user_following].append(doc)
 
         # step 4: split docs into (first 10, rest)
         events = {}
