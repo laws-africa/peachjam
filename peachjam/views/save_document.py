@@ -233,14 +233,11 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
     http_method_names = ["post"]
 
     def dispatch(self, request, *args, **kwargs):
-        doc_id = self.request.GET.get("doc_id")
-        if doc_id:
-            try:
-                self.document = get_object_or_404(CoreDocument, pk=int(doc_id))
-            except ValueError:
-                pass
-        else:
+        doc_id = request.GET.get("doc_id")
+        if not doc_id or not doc_id.isdigit():
             raise Http404
+
+        self.document = get_object_or_404(CoreDocument, pk=doc_id)
         return super().dispatch(request, *args, **kwargs)
 
     def handle_no_permission(self):
