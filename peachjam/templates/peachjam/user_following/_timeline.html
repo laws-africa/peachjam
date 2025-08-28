@@ -1,19 +1,19 @@
 {% load i18n %}
-{% for date, groups in following_timeline.items %}
+{% for date, groups in timeline.items %}
   <li>
     <div class="bg-white text-muted">{{ date }}</div>
     <ul class="list-unstyled">
       {% for following, docs in groups %}
         <li>
-          <b><a href="{{ following.followed_object.get_absolute_url }}">{{ following.followed_object }}</a></b>
+          <b><a href="{{ following.get_absolute_url }}">{{ following }}</a></b>
           <div class="ms-3">
-            {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=docs.0 %}
+            {% include "peachjam/_document_table.html" with doc_table_hide_thead=True doc_table_show_date=True documents=docs.0 %}
             {% if docs.1 %}
               <details>
                 <summary>
-                  {% blocktrans trimmed with n_more=docs.1|length obj=following.followed_object %}{{ n_more }} more for {{ obj }}{% endblocktrans %}
+                  {% blocktrans trimmed with n_more=docs.1|length obj=following %}{{ n_more }} more for {{ obj }}{% endblocktrans %}
                 </summary>
-                {% include 'peachjam/_document_table.html' with doc_table_hide_thead=True doc_table_show_date=True documents=docs.1 %}
+                {% include "peachjam/_document_table.html" with doc_table_hide_thead=True doc_table_show_date=True documents=docs.1 %}
               </details>
             {% endif %}
           </div>
@@ -26,10 +26,10 @@
   <li>
     <a href="{% url 'my_home' %}#timeline">{% trans "Explore older updates" %}</a>
   </li>
-{% elif before_date %}
+{% elif next_before %}
   <li>
     <button class="btn btn-secondary"
-            hx-get="{% url 'my_timeline' %}?before={{ before_date.isoformat }}"
+            hx-get="{% url 'my_timeline' %}?before={{ next_before.isoformat }}"
             hx-swap="outerHTML"
             hx-target="closest li">
       {% trans "Load more" %} ...

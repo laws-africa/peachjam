@@ -1,19 +1,22 @@
-import heapq
 import logging
-from itertools import groupby
 
 from countries_plus.models import Country
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import override
-from templated_email import send_templated_mail
 
-from . import Author, CoreDocument, Court, CourtClass, CourtRegistry, Locality, Taxonomy
+from . import (
+    Author,
+    CoreDocument,
+    Court,
+    CourtClass,
+    CourtRegistry,
+    Locality,
+    Taxonomy,
+    TimelineEvent,
+)
 
 log = logging.getLogger(__name__)
 
@@ -195,116 +198,43 @@ class UserFollowing(models.Model):
             topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
             return qs.filter(taxonomies__topic__in=topics)
 
-    def get_new_followed_documents(self):
+    def get_new_followed_documents(self, since=None, limit=10):
         qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
         )
-        if self.last_alerted_at:
+        cutoff = since or self.last_alerted_at
+        if cutoff:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
+        return qs[:limit]
 
-        return {
-            "followed_object": self.followed_object,
-            "documents": qs[:10],
-        }
+    def create_timeline_event(self, documents):
+        # check for unsent event
+        event, new = TimelineEvent.objects.get_or_create(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            email_alert_sent_at__isnull=True,
+        )
+        if new:
+            log.info(f"Creating new timeline event for {self.followed_object}")
+        else:
+            log.info(f"Updating existing timeline event for {self.followed_object}")
+
+        event.subject_documents.add(*documents)
+        return event
 
     @classmethod
-    def update_and_alert(cls, user):
-        follows = UserFollowing.objects.filter(user=user)
+    def update_timeline_for_user(cls, user):
+        follows = cls.objects.filter(user=user)
         log.info(f"Found {follows.count()} follows for user {user.pk}")
-        followed_documents = []
         for follow in follows:
-            new = follow.get_new_followed_documents()
-            if new["documents"]:
-                log.info(
-                    f"Found {new['documents'].count()} new documents for {new['followed_object']}"
-                )
-                follow.last_alerted_at = timezone.now()
-                follow.save()
-                followed_documents.append(new)
-        if followed_documents:
-            log.info(f"Sending alert to user {user.pk}")
-            cls.send_alert(user, followed_documents)
+            follow.update_timeline()
 
-    @classmethod
-    def send_alert(cls, user, followed_documents):
-        context = {
-            "followed_documents": followed_documents,
-            "user": user,
-            "manage_url_path": reverse("user_following_list"),
-        }
-        with override(user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="user_following_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                context=context,
-            )
-
-
-def get_user_following_timeline(user, docs_per_source, max_docs, before_date=None):
-    # Get the latest documents from all followed sources
-    def apply_filter(qs):
-        if before_date:
-            qs = qs.filter(created_at__lt=before_date)
-        return qs
-
-    sources = [
-        (
-            f,
-            apply_filter(
-                f.get_documents_queryset()
-                .order_by("-created_at")
-                .select_related("work")
-                .prefetch_related("labels", "taxonomies", "taxonomies__topic")
-            ).iterator(max_docs),
-        )
-        for f in user.following.all()
-    ]
-    sources = merge_sources_by_date(sources, "created_at")
-
-    # group the (source, document) tuples by date
-    n_docs = 0
-    groups_by_date = {}
-    for day, doc_group in groupby(sources, lambda p: p[1].created_at.date()):
-        doc_group = list(doc_group)
-        n_docs += len(doc_group)
-
-        # group the days documents by source, and put the smallest groups first
-        groups = {}
-        for source, doc in doc_group:
-            groups.setdefault(source, []).append(doc)
-
-        # cap documents per source
-        for source, docs in groups.items():
-            docs = sorted(docs, key=lambda d: d.date, reverse=True)
-            groups[source] = (docs[:docs_per_source], docs[docs_per_source:])
-
-        # tuples: (source, (docs, rest))
-        groups_by_date[day] = sorted(
-            groups.items(), key=lambda x: len(x[1][0]) + len(x[1][1])
-        )
-
-        if max_docs and n_docs > max_docs:
-            break
-
-    return groups_by_date
-
-
-def merge_sources_by_date(sources, date_attr):
-    """Merge multiple following sources into a single iterator of documents, ordered by the date attribute,
-    most recent first.
-
-    sources: (source, Iterator[Document])
-    Yields (source, document) in descending date order across all sources.
-    """
-
-    def pair_generator(source, docs):
-        for d in docs:
-            yield source, d
-
-    generators = [pair_generator(source, docs) for source, docs in sources]
-
-    # merge the sources by date, reverse=True because we have the largest date first
-    return heapq.merge(
-        *generators, key=lambda p: getattr(p[1], date_attr), reverse=True
-    )
+    def update_timeline(self):
+        documents = self.get_new_followed_documents()
+        if not documents:
+            log.info("No documents")
+            return
+        log.info(f"Found {documents.count()} new documents for {self.followed_object}")
+        self.create_timeline_event(documents)
+        self.last_alerted_at = timezone.now()
+        self.save(update_fields=["last_alerted_at"])
