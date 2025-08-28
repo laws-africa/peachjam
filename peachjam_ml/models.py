@@ -9,7 +9,7 @@ from django.db.models import Avg, F
 from django.forms import model_to_dict
 from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
-from peachjam.models import Work
+from peachjam.models import CoreDocument, Work
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR, get_text_embedding_batch
 from peachjam_search.tasks import search_model_saved
 
@@ -212,6 +212,12 @@ class DocumentEmbedding(models.Model):
             )
             .order_by("-similarity")
         )[:top_k]
+        similar_docs = filter(
+            lambda doc: CoreDocument.objects.filter(pk=doc["document_id"])
+            .first()
+            .is_most_recent(),
+            similar_docs,
+        )
 
         # re-rank based on a weighted average of similarity and authority score, and keep the top 10
         similar_docs = sorted(
