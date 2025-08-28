@@ -38,6 +38,8 @@ from treebeard.forms import MoveNodeForm, movenodeform_factory
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
+    GuardianGroupForm,
+    GuardianUserForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     RatificationForm,
@@ -527,8 +529,20 @@ class AccessGroupForm(forms.Form):
             remove_perm(view_perm, group.group, self.obj)
 
 
+# better forms for django guardian admin views
+GuardedModelAdminMixin.get_obj_perms_group_select_form = (
+    lambda self, request: GuardianGroupForm
+)
+GuardedModelAdminMixin.get_obj_perms_user_select_form = (
+    lambda self, request: GuardianUserForm
+)
+
+
 class AccessGroupMixin(GuardedModelAdminMixin):
     change_form_template = None
+    obj_perms_manage_template = (
+        "admin/guardian/model/obj_perms_manage_access_groups.html"
+    )
 
     def obj_perms_manage_view(self, request, object_pk):
         from django.contrib.admin.utils import unquote
