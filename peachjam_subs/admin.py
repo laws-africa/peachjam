@@ -33,7 +33,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "description", "tier")
     search_fields = ("name",)
     readonly_fields = ("group",)
-    filter_horizontal = ("features",)
+    filter_horizontal = ("features", "key_features")
 
 
 @admin.register(PricingPlan)

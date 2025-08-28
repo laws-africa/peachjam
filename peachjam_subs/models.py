@@ -84,6 +84,9 @@ class Product(models.Model):
             for feature in self.features.all():
                 self.group.permissions.add(*feature.permissions.all())
 
+    def key_features_sorted(self):
+        return self.key_features.all().order_by("ordering")
+
     def __str__(self):
         return self.name
 
