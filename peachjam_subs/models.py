@@ -8,6 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django_fsm import FSMField, transition
+from guardian.shortcuts import get_objects_for_user
 
 from peachjam.models import SingletonModel
 
@@ -142,6 +143,20 @@ class ProductOffering(models.Model):
 
     def __str__(self):
         return f"{self.product} - {self.pricing_plan}"
+
+    @classmethod
+    def product_offerings_available_to_user(cls, user):
+        """Return a queryset of ProductOffering objects available to the user."""
+        return (
+            get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
+            .exclude(
+                # exclude currently active subscription
+                pk__in=Subscription.objects.active_for_user(user).values_list(
+                    "product_offering", flat=True
+                )
+            )
+            .order_by("-pricing_plan__price")
+        )
 
 
 class SubscriptionManager(models.Manager):
