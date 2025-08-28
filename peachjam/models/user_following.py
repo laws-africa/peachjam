@@ -102,7 +102,17 @@ class UserFollowing(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     # fields that can be followed
-    follow_fields = "court author court_class court_registry country locality taxonomy saved_search".split()
+    EVENT_FIELD_MAP = {
+        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
+    }
+    follow_fields = list(EVENT_FIELD_MAP.keys())
 
     class Meta:
         constraints = [
@@ -154,9 +164,9 @@ class UserFollowing(models.Model):
     @property
     def description_text(self):
         if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
-            return _("New matches for saved search")
+            return _("New matches for search alert")
         elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
-            return _("New documents found for")
+            return _("New documents added for")
 
     @property
     def followed_field(self):
@@ -164,21 +174,17 @@ class UserFollowing(models.Model):
             if getattr(self, field):
                 return field
 
+    def get_event_type(self):
+        field = self.followed_field
+        if field:
+            return self.EVENT_FIELD_MAP[field]
+        return None
+
     @property
     def followed_object(self):
         field = self.followed_field
         if field:
             return getattr(self, field)
-
-    def get_event_type(self):
-        new_doc_fields = (
-            "court author court_class court_registry country locality taxonomy".split()
-        )
-        if self.followed_field in new_doc_fields:
-            return TimelineEvent.EventTypes.NEW_DOCUMENTS
-        elif self.followed_field == "saved_search":
-            return TimelineEvent.EventTypes.SAVED_SEARCH
-        return None
 
     def clean(self):
         super().clean()
@@ -190,14 +196,12 @@ class UserFollowing(models.Model):
 
         if set_fields == 0:
             raise ValidationError(
-                "One of the following fields must be set: court, author, court class, court registry, country, "
-                "locality, taxonomy topic saved search"
+                f"One of the following fields must be set: {' '.join(self.follow_fields)}"
             )
 
         if set_fields > 1:
             raise ValidationError(
-                "Only one of the following fields can be set: court, author, court class, court registry,"
-                " country, locality, taxonomy topic saved search"
+                f"Only one of the following fields can be set:  {' '.join(self.follow_fields)}"
             )
 
     def save(self, *args, **kwargs):
