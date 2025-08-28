@@ -9,3 +9,20 @@
 h1.doc-title {
   font-size: $font-size-base * 1.75; // h3
 }
+
+.details-faq-list {
+  details {
+    summary {
+      font-weight: bold;
+      font-size: larger;
+    }
+
+    margin-bottom: 1rem;
+  }
+
+  details[open] {
+    summary {
+      margin-bottom: 0.5rem;
+    }
+  }
+}

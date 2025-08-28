@@ -30,18 +30,12 @@ class Feature(models.Model):
     name = models.CharField(max_length=100, unique=True)
     permissions = models.ManyToManyField(Permission, blank=True)
     ordering = models.IntegerField(default=0)
-    hidden = models.BooleanField(
-        default=False, help_text=_("Is this feature hidden from users?")
-    )
 
     class Meta:
         ordering = ("ordering",)
 
     def __str__(self):
-        s = self.name
-        if self.hidden:
-            s += " (" + _("hidden") + ")"
-        return s
+        return self.name
 
 
 class Product(models.Model):
@@ -49,6 +43,19 @@ class Product(models.Model):
     description = models.TextField(blank=True, null=True)
     group = models.OneToOneField(Group, on_delete=models.CASCADE, null=True, blank=True)
     features = models.ManyToManyField(Feature, blank=True)
+    key_features = models.ManyToManyField(
+        Feature,
+        blank=True,
+        help_text="These features are highlighted in the product listing.",
+        related_name="+",
+    )
+    default_offering = models.ForeignKey(
+        "peachjam_subs.ProductOffering",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="+",
+    )
     # used to compare products
     tier = models.IntegerField(default=10)
 
@@ -341,11 +348,20 @@ class SubscriptionSettings(SingletonModel):
         related_name="+",
         null=True,
         on_delete=models.SET_NULL,
-        verbose_name=_("default product offering"),
+        verbose_name=_("Default product offering"),
+    )
+    key_products = models.ManyToManyField(
+        Product,
+        blank=True,
+        help_text=_("These products are highlighted in the product listing."),
     )
 
     def __str__(self):
         return "Subscription Settings"
+
+    class Meta:
+        verbose_name = "Subscription Settings"
+        verbose_name_plural = verbose_name
 
 
 def subscription_settings():
