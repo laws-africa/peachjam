@@ -136,6 +136,9 @@ class ProductOffering(models.Model):
 
     class Meta:
         unique_together = ("product", "pricing_plan")
+        permissions = [
+            ("can_subscribe", "Can subscribe to this offering"),
+        ]
 
     def __str__(self):
         return f"{self.product} - {self.pricing_plan}"

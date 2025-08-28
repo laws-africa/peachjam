@@ -6,6 +6,7 @@ from django.urls import path, reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from django_fsm import TransitionNotAllowed
+from guardian.admin import GuardedModelAdmin
 
 from peachjam.admin import UserAdminCustom
 
@@ -43,7 +44,7 @@ class PricingPlanAdmin(admin.ModelAdmin):
 
 
 @admin.register(ProductOffering)
-class ProductOfferingAdmin(admin.ModelAdmin):
+class ProductOfferingAdmin(GuardedModelAdmin):
     list_display = ("product", "pricing_plan")
     search_fields = ("product__name", "pricing_plan__name")
     list_filter = ("product", "pricing_plan")
