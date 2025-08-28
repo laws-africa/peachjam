@@ -22,6 +22,13 @@ The subscriptions work as follows:
 4. A product offering is a product with a pricing plan. The same product may be offered under different pricing plans
    to reflect discounts, etc.
 5. A subscription is a user's access to a product offering.
+
+The SubscriptionSettings singleton model holds global settings for subscriptions, such as the default product offering
+for new users (should be free). The key products are the ones that should be shown on the pricing page. This allows
+us to exclude certain products that are only available by special arrangement.
+
+Per-object permissions are used to control access to product offerings. A user must have the "can_subscribe" permission
+for a product offering to be able to subscribe to it. This is managed by django-guardian.
 """
 
 log = logging.getLogger(__name__)
