@@ -27,8 +27,6 @@ RUN npx puppeteer browsers install chrome
 # install python dependencies
 # copying this in first means Docker can cache this operation
 COPY pyproject.toml /app/
-# this dir is needed by pip when processing pyproject.toml
-COPY bin /app/bin
 RUN pip install .
 
 ENV NODE_PATH=/app/node_modules/

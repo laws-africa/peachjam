@@ -1,5 +1,11 @@
 from liiweb.settings import *  # noqa
 
+BASE_DIR = Path(__file__).resolve().parent.parent  # noqa
+
+SASS_PROCESSOR_INCLUDE_DIRS = [
+    os.environ.get("NODE_PATH") or os.path.join(BASE_DIR, "node_modules"),  # noqa
+]
+
 INSTALLED_APPS = [
     "lawlibrary.apps.LawlibraryConfig",
     "django_fsm",
