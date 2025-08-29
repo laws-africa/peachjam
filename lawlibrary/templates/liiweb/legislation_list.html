@@ -1,9 +1,0 @@
-{% extends "liiweb/legislation_list.html" %}
-{% load i18n %}
-{% block page-title %}
-  <h1 class="my-4">{% trans 'National Legislation' %}</h1>
-{% endblock %}
-{% block alerts %}
-  {% include 'lawlibrary/_legislation_alert.html' %}
-  {{ block.super }}
-{% endblock %}

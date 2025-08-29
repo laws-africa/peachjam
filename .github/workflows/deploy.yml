@@ -25,22 +25,6 @@ jobs:
         git_remote_url: 'ssh://dokku@web3.laws.africa:22/agp'
         git_push_flags: '--force'
 
-  deploy-lawlibrary:
-    if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
-    name: Deploy to lawlibrary
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-      with:
-        fetch-depth: 0
-
-    - name: git push to lawlibrary.org.za
-      uses: dokku/github-action@master
-      with:
-        ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@web3.laws.africa:22/lawlibrary-peachjam'
-        git_push_flags: '--force'
-
   deploy-ulii:
     if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to ulii
@@ -76,7 +60,6 @@ jobs:
 
   deploy-gazettes:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-lawlibrary
     name: Deploy to gazettes.africa
     runs-on: ubuntu-latest
     steps:
