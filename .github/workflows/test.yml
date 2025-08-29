@@ -9,10 +9,7 @@ jobs:
     strategy:
       matrix:
         app:
-          - peachjam
-          - africanlii
           - lawlibrary
-          - liiweb
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -55,7 +52,7 @@ jobs:
         TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
       run: |
         pre-commit run --all-files
-        python manage.py test peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
+        python manage.py test ${{ matrix.app }} --settings=${{ matrix.app }}.settings
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/linux@v2

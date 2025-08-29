@@ -1,8 +1,0 @@
-{% load i18n %}
-<form hx-post="{% url 'user_following_delete' object.pk %}?{{ request.GET.urlencode }}">
-  {% csrf_token %}
-  <button class="btn btn-primary" type="submit">
-    <span><i class="bi bi-bell-fill"></i></span>
-    <span>{% trans 'Following' %}</span>
-  </button>
-</form>

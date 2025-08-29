@@ -1,9 +1,0 @@
-{% load peachjam i18n %}
-{% if documents %}
-  {% include "peachjam/_document_table.html" with doc_table_hide_thead=True doc_table_collapse=collapse doc_table_citations=with_citations doc_table_show_date=True %}
-  {% if view_more_url_name %}
-    <a class="btn btn-primary" href="{% url view_more_url_name %}">{{ view_more_text }}</a>
-  {% endif %}
-{% else %}
-  <p>{% trans 'No recent documents.' %}</p>
-{% endif %}

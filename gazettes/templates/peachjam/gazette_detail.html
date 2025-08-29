@@ -1,7 +1,0 @@
-{% extends 'peachjam/gazette_detail.html' %}
-{% block document-relationships-content %}
-  {{ block.super }}
-  {% if contributors %}
-    <div class="col-md-2">{% include 'gazettes/_contributors.html' %}</div>
-  {% endif %}
-{% endblock %}

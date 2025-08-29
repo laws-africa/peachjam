@@ -1,61 +1,9 @@
 {
-  "name": "peach-jam",
-  "version": "1.0.0",
-  "description": "Project Peach Jam",
-  "main": "",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/laws-africa/peach-jam.git"
-  },
-  "author": "Laws.Africa",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/laws-africa/peach-jam/issues"
-  },
-  "homepage": "https://github.com/laws-africa/peach-jam#readme",
-  "devDependencies": {
-    "@lawsafrica/indigo-akn": "^5.3.0",
-    "@lawsafrica/law-widgets": "^2.2.1",
-    "@sentry/webpack-plugin": "^2.21.1",
-    "@types/bootstrap": "^5.2.6",
-    "@types/lodash": "^4.14.180",
-    "@types/mark.js": "^8.11.7",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "@vue/compiler-sfc": "^3.2.31",
-    "bootstrap5-autocomplete": "^1.1.33",
-    "css-loader": "^6.7.1",
-    "eslint": "^7.3.0",
-    "eslint-config-standard": "^14.1.1",
-    "eslint-plugin-import": "^2.21.2",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-standard": "^4.0.1",
-    "eslint-plugin-vue": "^8.5.0",
-    "flag-icons": "^6.6.6",
-    "htmx.org": "^2.0.4",
-    "i18next": "^22.0.6",
-    "i18next-parser": "^9.0.2",
-    "lodash.debounce": "^4.0.8",
-    "mark.js": "^8.11.1",
-    "sass": "^1.53.0",
-    "sass-loader": "^12.6.0",
-    "ts-loader": "^9.2.7",
-    "typescript": "^4.6.2",
-    "vue": "^3.2.31",
-    "vue-i18n": "^9.1.10",
-    "vue-loader": "^16.0.0-beta.4",
-    "vue-select": "^4.0.0-beta.3",
-    "vue-style-loader": "^4.1.3",
-    "webpack": "^5.96.1",
-    "webpack-cli": "^4.9.2"
-  },
+  "name": "peachjam-pro",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
     "bootstrap": "^5.3.1",
-    "pdfjs-dist": "^2.14.305",
-    "puppeteer": "^24.4.0"
+    "pdfjs-dist": "^2.14.305"
   }
 }

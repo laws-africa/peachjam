@@ -1,7 +1,0 @@
-{% for saved_document, form in saved_documents %}
-  {% if saved_document.id %}
-    {% include "peachjam/saved_document/_update.html" %}
-  {% else %}
-    {% include "peachjam/saved_document/_create.html" with document=saved_document.document %}
-  {% endif %}
-{% endfor %}
