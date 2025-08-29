@@ -9,6 +9,7 @@ SASS_PROCESSOR_INCLUDE_DIRS = [
 INSTALLED_APPS = [
     "lawlibrary.apps.LawlibraryConfig",
     "django_fsm",
+    "peachjam_pay",
     "peachjam_subs",
     "peachjam_ml",
 ] + INSTALLED_APPS  # noqa
@@ -27,6 +28,9 @@ TEMPLATES[0]["OPTIONS"]["context_processors"].append(  # noqa
 )
 
 TEMPLATED_EMAIL_BACKEND = "peachjam.emails.CustomerIOTemplateBackend"
+
+
+LOGGING["loggers"]["peachjam_pay"] = {"level": "DEBUG" if DEBUG else "INFO"}
 
 
 if not DEBUG:  # noqa
