@@ -7,6 +7,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam_search.models import SavedSearch
+
 from . import (
     Author,
     CoreDocument,
@@ -84,6 +86,15 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
+    saved_search = models.ForeignKey(
+        SavedSearch,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("saved search"),
+    )
+
     last_alerted_at = models.DateTimeField(
         _("last alerted at"), null=True, blank=True, auto_now_add=True
     )
@@ -91,9 +102,17 @@ class UserFollowing(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     # fields that can be followed
-    follow_fields = (
-        "court author court_class court_registry country locality taxonomy".split()
-    )
+    EVENT_FIELD_MAP = {
+        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
+    }
+    follow_fields = list(EVENT_FIELD_MAP.keys())
 
     class Meta:
         constraints = [
@@ -132,16 +151,34 @@ class UserFollowing(models.Model):
                 condition=models.Q(taxonomy__isnull=False),
                 name="unique_user_taxonomy",
             ),
+            models.UniqueConstraint(
+                fields=["user", "saved_search"],
+                condition=models.Q(saved_search__isnull=False),
+                name="unique_user_saved_search",
+            ),
         ]
 
     def __str__(self):
         return f"{self.user} follows {self.followed_object}"
 
     @property
+    def description_text(self):
+        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
+            return _("New matches for search alert")
+        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
+            return _("New documents added for")
+
+    @property
     def followed_field(self):
         for field in self.follow_fields:
             if getattr(self, field):
                 return field
+
+    def get_event_type(self):
+        field = self.followed_field
+        if field:
+            return self.EVENT_FIELD_MAP[field]
+        return None
 
     @property
     def followed_object(self):
@@ -159,14 +196,12 @@ class UserFollowing(models.Model):
 
         if set_fields == 0:
             raise ValidationError(
-                "One of the following fields must be set: court, author, court class, court registry, country, "
-                "locality, taxonomy topic"
+                f"One of the following fields must be set: {' '.join(self.follow_fields)}"
             )
 
         if set_fields > 1:
             raise ValidationError(
-                "Only one of the following fields can be set: court, author, court class, court registry,"
-                " country, locality, taxonomy topic"
+                f"Only one of the following fields can be set:  {' '.join(self.follow_fields)}"
             )
 
     def save(self, *args, **kwargs):
@@ -198,6 +233,10 @@ class UserFollowing(models.Model):
             topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
             return qs.filter(taxonomies__topic__in=topics)
 
+        if self.saved_search:
+            pks = [doc.document.pk for doc in self.saved_search.find_new_hits()]
+            return qs.filter(pk__in=pks)
+
     def get_new_followed_documents(self, since=None, limit=10):
         qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
@@ -211,7 +250,7 @@ class UserFollowing(models.Model):
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            event_type=self.get_event_type(),
             email_alert_sent_at__isnull=True,
         )
         if new:
