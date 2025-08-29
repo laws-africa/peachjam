@@ -9,12 +9,12 @@
       <div class="col mb-3">
         {% for subscription in user.subscriptions.all %}
           {% if subscription.is_active %}
-            {% include 'peachjam_subs/_active_subscription_card.html' %}
+            {% include 'peachjam_subs/_subscription_card.html' %}
           {% endif %}
         {% endfor %}
         {% for subscription in user.subscriptions.all %}
           {% if subscription.is_pending and subscription.starts_on %}
-            {% include 'peachjam_subs/_pending_subscription_card.html' %}
+            {% include 'peachjam_subs/_subscription_card.html' %}
           {% endif %}
         {% endfor %}
       </div>

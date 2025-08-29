@@ -13,6 +13,7 @@
     "fields": {
       "name": "My LII Bronze",
       "description": "Simplify your research.",
+      "tier": 10,
       "features": [1]
     }
   },
@@ -22,6 +23,7 @@
     "fields": {
       "name": "My LII FREE",
       "description": "Access to primary legal information, free forever.",
+      "tier": 0,
       "features": []
     }
   },
@@ -31,6 +33,7 @@
     "fields": {
       "name": "My LII Silver",
       "description": "Better than bronze.",
+      "tier": 20,
       "features": []
     }
   },

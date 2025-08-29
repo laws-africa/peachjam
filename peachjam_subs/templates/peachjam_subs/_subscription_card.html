@@ -1,0 +1,31 @@
+{% load i18n %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h4 class="card-title">
+      {{ subscription.product.name }}
+      {% if subscription.is_trial %}
+        <span class="badge bg-primary">{% trans "Trial" %}</span>
+      {% endif %}
+    </h4>
+    {% if subscription.product_offering.pricing_plan.price %}
+      <div class="text-muted">{{ subscription.product_offering.pricing_plan.price_per_period }}</div>
+      {% if subscription.is_active and not subscription.is_trial %}
+        {% if not subscription.ends_on or subscription.ends_on > subscription.next_billing_date %}
+          <div class="text-muted">
+            {% trans "Next payment due on" %}
+            {{ subscription.next_billing_date|date }}
+          </div>
+        {% endif %}
+      {% endif %}
+    {% endif %}
+    {% if subscription.is_active %}
+      <div class="text-muted mt-3">{% trans "Active since" %} {{ subscription.active_at|date }}</div>
+    {% elif subscription.starts_on %}
+      <div class="text-muted mt-3">{% trans "Begins on" %} {{ subscription.starts_on|date }}</div>
+    {% endif %}
+    {% if subscription.ends_on %}
+      <div class="text-muted mt-3">{% trans "Ends on" %} {{ subscription.ends_on|date }}</div>
+    {% endif %}
+    <div class="mt-2">{{ subscription.product.description|linebreaksbr }}</div>
+  </div>
+</div>
