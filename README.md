@@ -2,6 +2,16 @@
 
 Select peachjam websites that need more advanced deployment options.
 
+# Production deployment
+
+See [peachjam/DEPLOYMENT.md](https://github.com/laws-africa/peachjam/blob/main/DEPLOYMENT.md) for details.
+
+Requires a GitHub Personal Access Token to clone certain libraries from the Laws.Africa github repo. Substitute the <TOKEN> below:
+
+```
+dokku docker-options:add <APP-NAME> build "--build-arg GITHUB_PAT=<TOKEN>"
+```
+
 # License
 
 Copyright 2023 Laws.Africa.

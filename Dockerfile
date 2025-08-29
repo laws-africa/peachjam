@@ -25,9 +25,19 @@ RUN npm ci --no-audit --ignore-scripts --omit=dev
 RUN npx puppeteer browsers install chrome
 
 # install python dependencies
+
+# setup SSH auth for cloning some private Laws.Africa repos
+ARG GITHUB_PAT
+RUN echo https://xxx:$GITHUB_PAT@github.com > /root/.git-credentials
+RUN chmod 700 /root/.git-credentials
+RUN git config --global credential.helper store
+
 # copying this in first means Docker can cache this operation
 COPY pyproject.toml /app/
 RUN pip install .
+
+# clean up git credentials
+RUN rm -f /root/.git-credentials
 
 ENV NODE_PATH=/app/node_modules/
 
