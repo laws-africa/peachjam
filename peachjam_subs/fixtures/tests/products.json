@@ -4,8 +4,7 @@
     "pk": 1,
     "fields": {
       "name": "Save documents to private folders",
-      "ordering": 20,
-      "hidden": false
+      "ordering": 20
     }
   },
   {

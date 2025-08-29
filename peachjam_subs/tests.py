@@ -15,7 +15,7 @@ class SubscriptionTests(TestCase):
     def setUp(self):
         self.user = User.objects.first()
 
-        self.product = Product.objects.first()
+        self.product = Product.objects.get(pk=1)
         self.monthly_plan = PricingPlan.objects.create(
             name="Monthly Plan",
             price=Decimal("100.00"),
@@ -35,7 +35,7 @@ class SubscriptionTests(TestCase):
             status=Subscription.Status.ACTIVE,
             created_at=timezone.now(),
         )
-        self.subscription.created_at = timezone.datetime(
+        self.subscription.created_at = self.subscription.active_at = timezone.datetime(
             2023, 1, 1, tzinfo=timezone.utc
         )
 

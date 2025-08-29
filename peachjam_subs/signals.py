@@ -11,7 +11,8 @@ from .models import Feature, Product, Subscription, subscription_settings
 @receiver(post_delete, sender=Subscription)
 def remove_user_from_group(sender, instance, **kwargs):
     """Remove subscribing user from the product group when the subscription is deleted."""
-    instance.product_offering.product.group.user_set.remove(instance.user)
+    if instance.product_offering.product.group:
+        instance.product_offering.product.group.user_set.remove(instance.user)
 
 
 @receiver(m2m_changed, sender=Feature.permissions.through)
