@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group, Permission, User
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django_fsm import FSMField, transition
+from django_fsm import GET_STATE, FSMField, transition
 from guardian.shortcuts import get_objects_for_user
 
 from peachjam.models import SingletonModel
@@ -29,7 +29,15 @@ us to exclude certain products that are only available by special arrangement.
 
 Per-object permissions are used to control access to product offerings. A user must have the "can_subscribe" permission
 for a product offering to be able to subscribe to it. This is managed by django-guardian.
-"""
+
+Trial subscriptions are supported. They are activated the first time a user subscribes to a paid product, if the
+product is a higher tier than the user's current product. The trial subscription is linked to the paid subscription
+it replaces. The paid subscription is configured to activate when the trial subscription ends. When the real
+subscription truly activates, the trial is closed. If the user upgrades in the mean time, both the trial and the
+replaced subscription are closed.
+
+See workflow here: https://mermaid.live/edit#pako:eNqNUs1um0AQfpXRXEsse4HURmoujcQD4FOFVG3ZsbMq7JL9SZpafvfOQmwldiIVLuzo-93hgJ1VhBV6eoxkOrrXcu_k0Brgx9hA0NMugN1B01SwdVr24OMv3zk9Bm1Na2boKF3QnR6lCYwE6aF5g4JG90_krqHbOkFn2XeE2vbqA-X6SnkGztCmubm7SzllF_STDHQx7nrrCWx4IHeGqHd1_BvGtmaGI8Yk05AyZtBr8xuCZUQGZBRf0TN8gVVxwfskwDSmnzLAt8TMYGQNbfYZ-MA1_UmuPDW62sAUIzn7_yk9VUil59knmnHklSsCFR1nmS1eReqkzSKjfOFcFw71tcNMaM6z9GKGe6cVVsFFynAgN8h0xEPitMjrGKjFij8V7WTsQ4utOTKNd_7D2uHEdDbuH7Dayd7zKY6Ko7z-r-ep46sh991GE7ASy-VmUsHqgH_4XIiFyIu1KEVZFsVquc7wBavbfCHEKt_cliJfF_lGHDP8O_kuF-uv5fEfQkABYw
+"""  # noqa
 
 log = logging.getLogger(__name__)
 
@@ -211,6 +219,19 @@ class Subscription(models.Model):
     active_at = models.DateTimeField(null=True, blank=True)
     closed_at = models.DateTimeField(null=True, blank=True)
 
+    is_trial = models.BooleanField(
+        default=False, help_text="Whether this is a trial subscription"
+    )
+    """ If this is a trial subscription, then trial_replaces points to the subscription it is replacing. When this trial
+    ends, the replaced subscription (if any) is re-activated. """
+    trial_replaces = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="trial_subscriptions",
+    )
+
     starts_on = models.DateField(
         null=True, blank=True, help_text="Date when the subscription becomes active"
     )
@@ -242,12 +263,23 @@ class Subscription(models.Model):
     @transition(
         field=status,
         source=[Status.PENDING],
-        target=Status.ACTIVE,
+        # can either go to active or remain pending, use the final status to determine
+        target=GET_STATE(
+            lambda self, *args, **kwargs: self.status, [Status.ACTIVE, Status.PENDING]
+        ),
         conditions=[can_activate],
     )
     def activate(self):
-        """Activate this subscription. This also closes any other active subscriptions for the user."""
+        """Activate this subscription. This also closes any other active subscriptions for the user.
+
+        If a trial upgrade is applicable to the user, then:
+
+        - create a trial subscription and activate it, and link it back to this one
+        - this subscription remains in pending, but `active_at` is set to now
+        - the trial end date, and this subscription start date, are set appropriately
+        """
         log.info(f"Activating subscription {self}")
+
         # ensure all other subscriptions for the user are closed
         for sub in (
             Subscription.objects.filter(
@@ -257,8 +289,37 @@ class Subscription(models.Model):
             .all()
         ):
             sub.close()
-        self.active_at = timezone.now()
-        self.status = Subscription.Status.ACTIVE
+            if sub.is_trial and sub.trial_replaces:
+                log.info(
+                    f"Subscription closes {sub} which is a trial, and so also closes {sub.trial_replaces}"
+                )
+                # the trial is being replaced by a new subscription, so close the replaced one too
+                sub.trial_replaces.close()
+
+        # it might already be set, if there was a trial subscription, and we don't want to lose that timestamp
+        self.active_at = self.active_at or timezone.now()
+
+        # set up a trial if applicable
+        sub_settings = subscription_settings()
+        trial_offering = sub_settings.get_trial_offering(self)
+        if trial_offering:
+            trial = Subscription.objects.create(
+                user=self.user,
+                product_offering=trial_offering,
+                is_trial=True,
+                trial_replaces=self,
+                ends_on=timezone.now().date()
+                + timedelta(days=sub_settings.trial_duration_days - 1),
+            )
+
+            # set this subscription to start when the trial ends
+            self.starts_on = trial.ends_on + timedelta(days=1)
+
+            log.info(f"Created trial subscription {trial} in place of {self}")
+            trial.activate()
+        else:
+            self.status = Subscription.Status.ACTIVE
+
         self.save()
 
     @transition(
@@ -375,6 +436,7 @@ class SubscriptionSettings(SingletonModel):
         ProductOffering,
         related_name="+",
         null=True,
+        blank=True,
         on_delete=models.SET_NULL,
         verbose_name=_("Default product offering"),
     )
@@ -383,13 +445,55 @@ class SubscriptionSettings(SingletonModel):
         blank=True,
         help_text=_("These products are highlighted in the product listing."),
     )
-
-    def __str__(self):
-        return "Subscription Settings"
+    trial_product_offering = models.ForeignKey(
+        ProductOffering,
+        related_name="+",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        verbose_name=_("Trial product offering"),
+        help_text=_("If set, this product offering is used for trials."),
+    )
+    trial_duration_days = models.IntegerField(
+        default=14,
+        verbose_name=_("Trial duration (days)"),
+        help_text=_("Number of days for the trial period."),
+    )
 
     class Meta:
         verbose_name = "Subscription Settings"
         verbose_name_plural = verbose_name
+
+    def get_trial_offering(self, subscription):
+        """Return the trial product offering if it is applicable to the given subscription.
+
+        A trial is applicable if:
+        - this is the first paid subscription for the user (i.e. no previous active or closed subscriptions)
+        - this product has a lower tier than the trial product (i.e. it would be an upgrade)
+        """
+        if (
+            self.trial_product_offering
+            and not subscription.is_trial
+            and self.trial_product_offering.product.tier
+            > subscription.product_offering.product.tier
+        ):
+            # check if the user has had a previously activated, non-free subscription
+            if (
+                not Subscription.objects.filter(
+                    user=subscription.user,
+                    active_at__isnull=False,
+                    product_offering__pricing_plan__price__gt=0,
+                )
+                .exclude(
+                    pk=subscription.pk,
+                    status=Subscription.Status.PENDING,
+                )
+                .exists()
+            ):
+                return self.trial_product_offering
+
+    def __str__(self):
+        return "Subscription Settings"
 
 
 def subscription_settings():

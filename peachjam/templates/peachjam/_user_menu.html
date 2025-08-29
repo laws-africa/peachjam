@@ -39,14 +39,14 @@
         <li>
           <hr class="dropdown-divider"/>
         </li>
+        <li>
+          <a class="dropdown-item" href="{% url 'my_account' %}">{% trans "My account" %}</a>
+        </li>
         {% if user.is_staff %}
           <li>
             <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
           </li>
         {% endif %}
-        <li>
-          <a class="dropdown-item" href="{% url 'my_account' %}">{% trans "Settings" %}</a>
-        </li>
         <li>
           <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
         </li>
