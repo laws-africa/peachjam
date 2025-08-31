@@ -1,8 +1,7 @@
 import hashlib
-import os
 from math import ceil
 
-from django.conf import settings
+from django.contrib.staticfiles.finders import find as find_static
 from django.http.response import FileResponse, JsonResponse
 from django.urls.base import reverse
 from django.views.generic.base import TemplateView
@@ -13,9 +12,7 @@ from peachjam.views import AllowedTaxonomyMixin, TaxonomyDetailView
 
 
 def service_worker(request):
-    filepath = os.path.join(
-        settings.BASE_DIR, "peachjam/static/js/offline-service-worker.js"
-    )
+    filepath = find_static("js/offline-service-worker.js")
     response = FileResponse(open(filepath, "rb"), content_type="application/javascript")
     response["Cache-Control"] = "no-cache"
     return response
