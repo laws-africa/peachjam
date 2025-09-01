@@ -30,6 +30,7 @@ class TimelineEvent(models.Model):
         max_length=256,
         choices=EventTypes.choices,
     )
+    extra_data = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 

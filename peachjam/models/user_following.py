@@ -233,10 +233,6 @@ class UserFollowing(models.Model):
             topics = [self.taxonomy] + [t for t in self.taxonomy.get_descendants()]
             return qs.filter(taxonomies__topic__in=topics)
 
-        if self.saved_search:
-            pks = [doc.document.pk for doc in self.saved_search.find_new_hits()]
-            return qs.filter(pk__in=pks)
-
     def get_new_followed_documents(self, since=None, limit=10):
         qs = self.get_documents_queryset().preferred_language(
             self.user.userprofile.preferred_language.iso_639_3
@@ -244,20 +240,39 @@ class UserFollowing(models.Model):
         cutoff = since or self.last_alerted_at
         if cutoff:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
-        return qs[:limit]
+        if qs.exists():
+            self.create_timeline_event_for_followed_docs(qs[:limit])
+            return True
 
-    def create_timeline_event(self, documents):
+    def create_timeline_event_for_followed_docs(self, documents):
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
             event_type=self.get_event_type(),
             email_alert_sent_at__isnull=True,
         )
-        if new:
-            log.info(f"Creating new timeline event for {self.followed_object}")
-        else:
-            log.info(f"Updating existing timeline event for {self.followed_object}")
+        event.subject_documents.add(*documents)
+        return event
 
+    def get_new_search_hits(self, since=None, limit=10):
+        if self.saved_search:
+            hits = self.saved_search.find_new_hits()
+            cutoff = since or self.last_alerted_at
+            if cutoff:
+                hits = [hit for hit in hits if hit.document.created_at > cutoff][:limit]
+            if hits and len(hits) > 0:
+                self.create_timeline_event_for_search_alert(hits)
+                return True
+
+    def create_timeline_event_for_search_alert(self, hits):
+        documents = [hit.document for hit in hits]
+        # check for unsent event
+        event, new = TimelineEvent.objects.get_or_create(
+            user_following=self,
+            event_type=self.get_event_type(),
+            email_alert_sent_at__isnull=True,
+            extra_data={"hits": [hit.to_dict() for hit in hits]},
+        )
         event.subject_documents.add(*documents)
         return event
 
@@ -269,11 +284,17 @@ class UserFollowing(models.Model):
             follow.update_timeline()
 
     def update_timeline(self):
-        documents = self.get_new_followed_documents()
-        if not documents:
+        updated = False
+        if self.get_event_type == TimelineEvent.EventTypes.NEW_DOCUMENTS:
+            updated = self.get_new_followed_documents()
+
+        if self.get_event_type == TimelineEvent.EventTypes.SAVED_SEARCH:
+            updated = self.get_new_search_hits()
+
+        if not updated:
             log.info("No documents")
             return
-        log.info(f"Found {documents.count()} new documents for {self.followed_object}")
-        self.create_timeline_event(documents)
+
+        log.info(f"Updating timeline event for {self.followed_object}")
         self.last_alerted_at = timezone.now()
         self.save(update_fields=["last_alerted_at"])
