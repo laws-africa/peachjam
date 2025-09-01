@@ -190,11 +190,13 @@ class DocumentEmbedding(models.Model):
         weight_authority = 0.1
         top_k = 100
         avg_embedding = cls.get_average_embedding(doc_ids)
+        most_recent_docs = (
+            CoreDocument.objects.all().latest_expression().values_list("pk", flat=True)
+        )
 
         similar_docs = (
-            DocumentEmbedding.objects.exclude(
-                document__work__in=Work.objects.filter(documents__in=doc_ids)
-            )
+            DocumentEmbedding.objects.filter(document__pk__in=most_recent_docs)
+            .exclude(document__work__in=Work.objects.filter(documents__in=doc_ids))
             .exclude(text_embedding__isnull=True)
             .annotate(
                 similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1,
@@ -212,12 +214,6 @@ class DocumentEmbedding(models.Model):
             )
             .order_by("-similarity")
         )[:top_k]
-        similar_docs = filter(
-            lambda doc: CoreDocument.objects.filter(pk=doc["document_id"])
-            .first()
-            .is_most_recent(),
-            similar_docs,
-        )
 
         # re-rank based on a weighted average of similarity and authority score, and keep the top 10
         similar_docs = sorted(
