@@ -239,7 +239,7 @@ class UserFollowing(models.Model):
         )
         cutoff = since or self.last_alerted_at
         if cutoff:
-            qs = qs.filter(created_at__gt=self.last_alerted_at)
+            qs = qs.filter(created_at__gt=cutoff)
         if qs.exists():
             self.create_timeline_event_for_followed_docs(qs[:limit])
             return True
@@ -261,17 +261,23 @@ class UserFollowing(models.Model):
             if cutoff:
                 hits = [hit for hit in hits if hit.document.created_at > cutoff][:limit]
             if hits and len(hits) > 0:
-                self.create_timeline_event_for_search_alert(hits)
+                self.create_timeline_event_for_search_alert(hits[:limit])
                 return True
 
     def create_timeline_event_for_search_alert(self, hits):
         documents = [hit.document for hit in hits]
+        extra_data = {
+            "hits": [
+                {k: v for k, v in hit.as_dict().items() if k != "document"}
+                for hit in hits
+            ]
+        }
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
             event_type=self.get_event_type(),
             email_alert_sent_at__isnull=True,
-            extra_data={"hits": [hit.to_dict() for hit in hits]},
+            extra_data=extra_data,
         )
         event.subject_documents.add(*documents)
         return event
@@ -285,14 +291,14 @@ class UserFollowing(models.Model):
 
     def update_timeline(self):
         updated = False
-        if self.get_event_type == TimelineEvent.EventTypes.NEW_DOCUMENTS:
+        if self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
             updated = self.get_new_followed_documents()
 
-        if self.get_event_type == TimelineEvent.EventTypes.SAVED_SEARCH:
+        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
             updated = self.get_new_search_hits()
 
         if not updated:
-            log.info("No documents")
+            log.info("No new documents found for follow %s", self)
             return
 
         log.info(f"Updating timeline event for {self.followed_object}")
