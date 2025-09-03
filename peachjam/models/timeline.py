@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.functions import TruncDate
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
@@ -30,6 +31,7 @@ class TimelineEvent(models.Model):
         max_length=256,
         choices=EventTypes.choices,
     )
+    extra_data = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
@@ -125,7 +127,7 @@ class TimelineEvent(models.Model):
         for ev in saved_searches:
             context = {
                 "user": user,
-                "hits": ev.subject_documents.all(),
+                "hits": (ev.extra_data or {}).get("hits", []),
                 "saved_search": ev.user_following.saved_search,
                 "manage_url_path": reverse("search:saved_search_list"),
             }
@@ -136,6 +138,8 @@ class TimelineEvent(models.Model):
                     recipient_list=[user.email],
                     context=context,
                 )
+                ev.email_alert_sent_at = timezone.now()
+                ev.save(update_fields=["email_alert_sent_at"])
 
     @classmethod
     def send_new_document_email_alert(cls, user):
