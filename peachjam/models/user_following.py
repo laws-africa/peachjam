@@ -266,19 +266,27 @@ class UserFollowing(models.Model):
 
     def create_timeline_event_for_search_alert(self, hits):
         documents = [hit.document for hit in hits]
-        extra_data = {
-            "hits": [
-                {k: v for k, v in hit.as_dict().items() if k != "document"}
-                for hit in hits
-            ]
-        }
+        new_hits = [
+            {k: v for k, v in hit.as_dict().items() if k != "document"} for hit in hits
+        ]
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
             event_type=self.get_event_type(),
             email_alert_sent_at__isnull=True,
-            extra_data=extra_data,
+            defaults={"extra_data": {"hits": new_hits}},
         )
+        if not new:
+            existing_hits = event.extra_data.get("hits", [])
+
+            # Deduplicate by "id" (latest hit wins if duplicate id appears)
+            combined = {hit["id"]: hit for hit in existing_hits}
+            for hit in new_hits:
+                combined[hit["id"]] = hit
+
+            event.extra_data["hits"] = list(combined.values())
+            event.save(update_fields=["extra_data"])
+
         event.subject_documents.add(*documents)
         return event
 
