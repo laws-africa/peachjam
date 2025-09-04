@@ -98,6 +98,17 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_lowest_product_for_permission(cls, permission_codename):
+        """Return the best (lowest tier) product offering available to the user that includes the given feature."""
+        product = (
+            subscription_settings()
+            .key_products.filter(features__permissions__codename=permission_codename)
+            .order_by("tier")
+            .first()
+        )
+        return product
+
 
 class PricingPlan(models.Model):
     class Period(models.TextChoices):
@@ -176,16 +187,6 @@ class ProductOffering(models.Model):
                 )
             )
         return qs.order_by("-pricing_plan__price")
-
-    @classmethod
-    def get_best_offer_for_feature(cls, user, permission_codename):
-        """Return the best (lowest tier) product offering available to the user that includes the given feature."""
-        return (
-            cls.product_offerings_available_to_user(user)
-            .filter(product__features__permissions__codename=permission_codename)
-            .order_by("-product__tier")
-            .first()
-        )
 
 
 class SubscriptionManager(models.Manager):

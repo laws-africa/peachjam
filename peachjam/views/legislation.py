@@ -26,7 +26,7 @@ from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
-from peachjam_subs.models import ProductOffering
+from peachjam_subs.models import Product
 
 
 class LegislationListView(FilteredDocumentListView):
@@ -555,10 +555,8 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
     def check_for_perms(self, context):
         perm = "view_provisioncitation"
         context["user_has_perm"] = self.request.user.has_perm(perm)
-        product_offering = ProductOffering.get_best_offer_for_feature(
-            self.request.user, perm
-        )
-        context["best_product_offering"] = product_offering
+        lowest_product = Product.get_lowest_product_for_permission(perm)
+        context["lowest_product"] = lowest_product
 
     @cached_property
     def document(self):
