@@ -165,15 +165,26 @@ class ProductOffering(models.Model):
     @classmethod
     def product_offerings_available_to_user(cls, user):
         """Return a queryset of ProductOffering objects available to the user."""
-        return (
-            get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
-            .exclude(
-                # exclude currently active subscription
+        qs = cls.objects.all()
+        if user.is_authenticated:
+            qs = get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
+
+            # exclude active subscriptions
+            qs = qs.exclude(
                 pk__in=Subscription.objects.active_for_user(user).values_list(
                     "product_offering", flat=True
                 )
             )
-            .order_by("-pricing_plan__price")
+        return qs.order_by("-pricing_plan__price")
+
+    @classmethod
+    def get_best_offer_for_feature(cls, user, permission_codename):
+        """Return the best (lowest tier) product offering available to the user that includes the given feature."""
+        return (
+            cls.product_offerings_available_to_user(user)
+            .filter(product__features__permissions__codename=permission_codename)
+            .order_by("-product__tier")
+            .first()
         )
 
 

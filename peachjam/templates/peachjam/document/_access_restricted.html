@@ -1,0 +1,15 @@
+{% load i18n %}
+{% if not request.user.is_authenticated %}
+  <p>
+    {% trans "This content is available only to subscribers." %}
+    <a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
+    {% trans "or" %}
+    <a href="{% url 'account_login' %}">{% trans "Log in" %}</a>
+    {% trans "and upgrade to" %} {{ best_product_offering }} {% trans "to unlock access." %}
+  </p>
+{% else %}
+  <p>
+    {% trans "Your current plan doesn’t include this content." %}
+    {% trans "Please upgrade to" %} {{ best_product_offering }} {% trans "to unlock access." %}
+  </p>
+{% endif %}
