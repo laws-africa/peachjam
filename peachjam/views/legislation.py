@@ -552,12 +552,6 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
             ]
         return super().get_template_names()
 
-    def check_for_perms(self, context):
-        perm = "view_provisioncitation"
-        context["user_has_perm"] = self.request.user.has_perm(perm)
-        lowest_product = Product.get_lowest_product_for_permission(perm)
-        context["lowest_product"] = lowest_product
-
     @cached_property
     def document(self):
         obj = CoreDocument.objects.filter(
@@ -602,8 +596,20 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
         )
         return qs
 
+    def check_for_perms(self, *args, **kwargs):
+        perm = "view_provisioncitation"
+        user_has_perm = self.request.user.has_perm(perm)
+        lowest_product = Product.get_lowest_product_for_permission(perm)
+        return {
+            "user_has_perm": user_has_perm,
+            "lowest_product": lowest_product,
+        }
+
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = self.check_for_perms()
+        # include citing documents only if user lacks permission
+        if context["user_has_perm"]:
+            context.update(super().get_context_data(**kwargs))
         context["document"] = self.document
         context["provision_title"] = context["document"].friendly_provision_title(
             self.provision_eid
@@ -613,5 +619,4 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
         )
         context["citation_contexts"] = self.provision_citations
         context["citing_documents_count"] = self.get_base_queryset().count()
-        self.check_for_perms(context)
         return context
