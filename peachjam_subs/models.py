@@ -176,17 +176,16 @@ class ProductOffering(models.Model):
     @classmethod
     def product_offerings_available_to_user(cls, user):
         """Return a queryset of ProductOffering objects available to the user."""
-        qs = cls.objects.all()
-        if user.is_authenticated:
-            qs = get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
-
-            # exclude active subscriptions
-            qs = qs.exclude(
+        return (
+            get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
+            .exclude(
+                # exclude currently active subscription
                 pk__in=Subscription.objects.active_for_user(user).values_list(
                     "product_offering", flat=True
                 )
             )
-        return qs.order_by("-pricing_plan__price")
+            .order_by("-pricing_plan__price")
+        )
 
 
 class SubscriptionManager(models.Manager):
