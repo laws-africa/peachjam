@@ -269,8 +269,14 @@ class UserFollowing(models.Model):
         new_hits = []
         for hit in hits:
             hit_dict = hit.as_dict()
-            # replace the Django ORM object with the raw ES hit
-            hit_dict["document"] = hit.es_hit.to_dict()
+            # replace the Django ORM object with the fields we want
+            doc = hit.document
+            hit_dict["title"] = doc.title
+            hit_dict["document"] = {
+                "title": getattr(doc, "title", "") or "",
+                "blurb": getattr(doc, "blurb", "") or "",
+                "flynote": getattr(doc, "flynote", "") or "",
+            }
             new_hits.append(hit_dict)
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
