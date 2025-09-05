@@ -257,18 +257,21 @@ class UserFollowing(models.Model):
     def get_new_search_hits(self, since=None, limit=10):
         if self.saved_search:
             hits = self.saved_search.find_new_hits()
-            cutoff = since or self.last_alerted_at
-            if cutoff:
-                hits = [hit for hit in hits if hit.document.created_at > cutoff][:limit]
+            # cutoff = since or self.last_alerted_at
+            # if cutoff:
+            #     hits = [hit for hit in hits if hit.document.created_at > cutoff][:limit]
             if hits and len(hits) > 0:
                 self.create_timeline_event_for_search_alert(hits[:limit])
                 return True
 
     def create_timeline_event_for_search_alert(self, hits):
         documents = [hit.document for hit in hits]
-        new_hits = [
-            {k: v for k, v in hit.as_dict().items() if k != "document"} for hit in hits
-        ]
+        new_hits = []
+        for hit in hits:
+            hit_dict = hit.as_dict()
+            # replace the Django ORM object with the raw ES hit
+            hit_dict["document"] = hit.es_hit.to_dict()
+            new_hits.append(hit_dict)
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
