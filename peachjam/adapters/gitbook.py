@@ -206,7 +206,7 @@ class GitbookAdapter(Adapter):
                     sub_toc = sub_toc[0]["children"] + sub_toc[1:]
                 entry["children"] = sub_toc
 
-            entry_html = etree.tostring(root, encoding="unicode")
+            entry_html = etree.tostring(root, method="html", encoding="unicode")
 
             # combined html for this entry
             return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
@@ -309,6 +309,10 @@ class GitbookAdapter(Adapter):
             if ".gitbook/assets/" in src:
                 src = src.rsplit("/", 1)[1]
                 el.attrib["src"] = f"media/{src}"
+
+        # remove empty a tags
+        for el in root.xpath("//a[not(node())]"):
+            el.getparent().remove(el)
 
     def fetch_images(self, book, repo_path):
         root = parse_html_str(book.content_html)

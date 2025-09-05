@@ -101,6 +101,7 @@ def markdownify(text):
             inf.flush()
             cmd = [
                 "pandoc",
+                "--wrap=none",
                 "--from=markdown",
                 "--to=html",
                 "--output",
