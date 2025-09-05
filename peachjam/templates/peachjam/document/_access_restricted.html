@@ -1,17 +1,24 @@
 {% load i18n %}
 {% if lowest_product %}
   {% if not request.user.is_authenticated %}
-    <p>
-      {% trans "This content is available only to subscribers." %}
-      <a href="{% url 'account_login' %}">{% trans "Log in" %}</a>
-      {% trans "or" %}
-      <a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
-      {% trans "and subscribe to" %} {{ lowest_product }} {% trans "to unlock access." %}
-    </p>
+    {% url 'account_login' as base_login_url %}
+    {% url 'account_signup' as signup_url %}
+    {% with login_url=base_login_url|add:"?next="|add:request.path %}
+      <p>
+        {% blocktrans with lowest_product=lowest_product login_url=login_url signup_url=signup_url %}
+      This content is available only to subscribers.
+      <a href="{{ login_url }}">Log in</a> or
+      <a href="{{ signup_url }}">Sign up</a>
+      and subscribe to {{ lowest_product }} to unlock access.
+    {% endblocktrans %}
+      </p>
+    {% endwith %}
   {% else %}
     <p>
-      {% trans "Your current plan doesn’t include this content." %}
-      {% trans "Please upgrade to" %} {{ lowest_product }} {% trans "to unlock access." %}
+      {% blocktrans with lowest_product=lowest_product %}
+      Your current subscription doesn’t include this content.
+      Please upgrade to {{ lowest_product }} to unlock access.
+    {% endblocktrans %}
     </p>
   {% endif %}
 {% else %}
