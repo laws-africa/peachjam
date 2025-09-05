@@ -266,9 +266,18 @@ class UserFollowing(models.Model):
 
     def create_timeline_event_for_search_alert(self, hits):
         documents = [hit.document for hit in hits]
-        new_hits = [
-            {k: v for k, v in hit.as_dict().items() if k != "document"} for hit in hits
-        ]
+        new_hits = []
+        for hit in hits:
+            hit_dict = hit.as_dict()
+            # replace the Django ORM object with the fields we want
+            doc = hit.document
+            hit_dict["title"] = doc.title
+            hit_dict["document"] = {
+                "title": getattr(doc, "title", "") or "",
+                "blurb": getattr(doc, "blurb", "") or "",
+                "flynote": getattr(doc, "flynote", "") or "",
+            }
+            new_hits.append(hit_dict)
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
