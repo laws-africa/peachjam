@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "peachjam.apps.PeachJamConfig",
     "peachjam_search.apps.PeachjamSearchConfig",
     "peachjam_api.apps.PeachjamApiConfig",
+    "peachjam_subs",
+    "django_fsm",
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
