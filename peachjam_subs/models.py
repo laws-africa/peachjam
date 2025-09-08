@@ -98,6 +98,17 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
+    @classmethod
+    def get_lowest_product_for_permission(cls, permission_codename):
+        """Return the best (lowest tier) product offering available to the user that includes the given feature."""
+        product = (
+            subscription_settings()
+            .key_products.filter(features__permissions__codename=permission_codename)
+            .order_by("tier")
+            .first()
+        )
+        return product
+
 
 class PricingPlan(models.Model):
     class Period(models.TextChoices):
