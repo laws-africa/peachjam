@@ -75,6 +75,12 @@ class Product(models.Model):
     # used to compare products
     tier = models.IntegerField(default=10)
 
+    saved_document_limit = models.IntegerField(
+        null=True,
+        blank=True,
+        help_text="If set, this is the maximum number of documents a user can save. Leave blank for unlimited.",
+    )
+
     class Meta:
         ordering = ("tier",)
 
@@ -108,12 +114,6 @@ class Product(models.Model):
             .first()
         )
         return product
-
-
-class ProductFeatureLimit(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    feature = models.ForeignKey(Feature, on_delete=models.CASCADE)
-    limit = models.PositiveIntegerField(null=True, blank=True)
 
 
 class PricingPlan(models.Model):
@@ -522,62 +522,8 @@ class SubscriptionUsage(models.Model):
     subscription = models.ForeignKey(
         "Subscription", on_delete=models.CASCADE, related_name="usages"
     )
-    feature = models.ForeignKey("Feature", on_delete=models.CASCADE)
-    used = models.PositiveIntegerField(default=0)
-    limit = models.PositiveIntegerField(
-        null=True, blank=True, help_text="Max allowed in current period"
-    )
-    period_start = models.DateField()
-    period_end = models.DateField()
-
-    class Meta:
-        unique_together = ("subscription", "feature", "period_start")
-
-    def increment(self, amount=1):
-        """Increase usage count."""
-        self.used += amount
-        self.save()
 
     @property
-    def remaining(self):
-        if self.limit is None:
-            return None
-        return max(0, self.limit - self.used)
-
-    @property
-    def is_exhausted(self):
-        return self.limit is not None and self.used >= self.limit
-
-    @classmethod
-    def check_feature_usage(cls, user, feature_name, increment=False):
-        subscription = Subscription.get_or_create_active_for_user(user)
-        feature = Feature.objects.get(name=feature_name)
-
-        # Current subscription period
-        start = subscription.start_of_current_period()
-        end = subscription.end_of_current_period()
-
-        # Look up limit from ProductFeatureLimit (if defined)
-        product = subscription.product_offering.product
-        pfl = ProductFeatureLimit.objects.filter(
-            product=product, feature=feature
-        ).first()
-        limit = pfl.limit if pfl else None  # None = unlimited
-
-        # Get or create usage record
-        usage, _ = cls.objects.get_or_create(
-            subscription=subscription,
-            feature=feature,
-            period_start=start,
-            period_end=end,
-            defaults={"limit": limit},
-        )
-
-        # Enforce limits
-        if usage.is_exhausted:
-            return False
-
-        if increment:
-            usage.increment()
-
-        return True
+    def saved_documents(self):
+        """Return the saved documents usage for this subscription."""
+        return self.subscription.user.saved_documents.count()

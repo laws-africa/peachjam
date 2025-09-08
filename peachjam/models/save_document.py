@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls.base import reverse
 from django.utils.translation import gettext_lazy as _
@@ -51,6 +52,24 @@ class SavedDocument(models.Model):
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
 
+    def user_can_save(self):
+        active_subscription = self.user.subscriptions.filter(status="active").first()
+        if not active_subscription:
+            return False
+        limit = active_subscription.product_offering.product.saved_document_limit
+        if limit < 0:
+            return True
+        count = self.user.saved_documents.count()
+        return count <= limit
+
+    def clean(self):
+        if not self.user_can_save():
+            raise ValidationError("User has reached the limit of saved documents.")
+
     def delete(self, using=None, keep_parents=False):
         self.document.annotations.filter(user=self.user).delete()
         return super().delete(using=using, keep_parents=keep_parents)
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super().save(*args, **kwargs)
