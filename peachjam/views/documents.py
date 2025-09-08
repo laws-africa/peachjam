@@ -4,6 +4,7 @@ import re
 from cobalt import FrbrUri
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Avg
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -382,7 +383,13 @@ class DocumentResearchView(DocumentDebugViewBase):
 
         # what provisions are likely relevant for each cited document?
         # either compare embeddings portion-to-portion (n^2) or do it document-to-portion
-        chunks = ContentChunk.objects.filter(document=self.object)
+        # average all the chunks in a portion
+        chunks = (
+            ContentChunk.objects.filter(document=self.object)
+            .values("portion")
+            .annotate(text_embedding=Avg("text_embedding"))
+            .order_by("portion")
+        )
 
         for cited in context["cited_works"]:
             doc = (
@@ -392,31 +399,39 @@ class DocumentResearchView(DocumentDebugViewBase):
             )
             if doc:
                 log.info(f"Finding similar chunks in {doc}")
-                cited["similar_chunks"] = get_similar_chunks(chunks, doc)
+                # use the main embedding
+                # cited["similar_chunks"] = get_similar_chunks(doc, embedding=self.object.embedding)
+                cited["similar_chunks"] = get_similar_chunks(doc, chunks=chunks)
 
         return context
 
 
-def get_similar_chunks(chunks, document):
+def get_similar_chunks(document, chunks=None, embedding=None):
     from pgvector.django import MaxInnerProduct
 
-    threshold = 0.7
-    top_k = 5
+    threshold = 0.5
+    top_k = 3
     similar_chunks = []
 
-    for chunk in chunks:
-        chunks = list(
+    def get_chunks(text_embedding):
+        return list(
             ContentChunk.objects.filter(document=document)
             .exclude(text_embedding__isnull=True)
             .annotate(
-                similarity=MaxInnerProduct("text_embedding", chunk.text_embedding) * -1,
+                similarity=MaxInnerProduct("text_embedding", text_embedding) * -1,
             )
             .filter(similarity__gt=threshold)
             .order_by("-similarity")[:top_k]
         )
-        for ch in chunks:
-            ch.similar_to = chunk
-        similar_chunks.extend(chunks)
+
+    if chunks:
+        for chunk in chunks:
+            chunks = get_chunks(chunk["text_embedding"])
+            for ch in chunks:
+                ch.similar_to = chunk
+            similar_chunks.extend(chunks)
+    elif embedding:
+        similar_chunks = get_chunks(embedding.text_embedding)
 
     # keep only the best
     similar_chunks = sorted(similar_chunks, key=lambda c: c.similarity, reverse=True)[
