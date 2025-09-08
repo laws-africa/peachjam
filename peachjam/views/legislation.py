@@ -607,7 +607,7 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = self.check_for_perms()
-        # include citing documents only if user lacks permission
+        # include citing documents only if user has permission
         if context["user_has_perm"]:
             context.update(super().get_context_data(**kwargs))
         context["document"] = self.document

@@ -5,7 +5,7 @@
     {% url 'account_signup' as signup_url %}
     {% with login_url=base_login_url|add:"?next="|add:request.path %}
       <p>
-        {% blocktrans with lowest_product=lowest_product login_url=login_url signup_url=signup_url %}
+        {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
       This content is available only to subscribers.
       <a href="{{ login_url }}">Log in</a> or
       <a href="{{ signup_url }}">Sign up</a>
@@ -15,7 +15,7 @@
     {% endwith %}
   {% else %}
     <p>
-      {% blocktrans with lowest_product=lowest_product %}
+      {% blocktrans trimmed with lowest_product=lowest_product.name %}
       Your current subscription doesn’t include this content.
       Please upgrade to {{ lowest_product }} to unlock access.
     {% endblocktrans %}
