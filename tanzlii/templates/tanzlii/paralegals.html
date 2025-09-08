@@ -6,24 +6,18 @@
 {% block page-content %}
   <section class="py-4">
     <div class="container">
-      <h1>{% trans "Paralegal Resources" %}</h1>
+      <h1>{% trans "TanzLII Digital Paralegal Knowledge Hub" %}</h1>
       <p class="lead">
-        This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development.
+        {% trans "This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development. The Paralegal Hub is developed as a kiSwahili-first resource and is available on your device as an off-line resource." %}
       </p>
-      <p>Explore:</p>
-      <ol>
-        <li>
-          <b>Training manuals</b> – Paralegal manuals, updated for quick reference.
-        </li>
-        <li>
-          <b>Guides and best practices</b> – step-by-step resources on common legal issues such as land rights, family law, and criminal justice.
-        </li>
-        <li>
-          <b>Legal information</b> – curated summaries of laws and court decisions most relevant to paralegal work.
-        </li>
-      </ol>
       <p>
-        All materials are free to access, regularly updated, and tailored to the needs of the Tanzanian paralegal community.
+        {% trans "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa." %}
+      </p>
+      <p>
+        {% trans "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania." %}
+      </p>
+      <p>
+        {% trans "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community." %}
       </p>
     </div>
   </section>
@@ -31,9 +25,9 @@
     <div class="container">
       <div class="row">
         <div class="col-md-8">
-          <h2>Research when you're offline</h2>
+          <h2>{% trans "Research when you're offline" %}</h2>
           <p class="lead">
-            Enable offline access for these resources. Once enabled, you can use these resources at any time without an internet connection.
+            {% trans "Enable offline access for these resources. Once enabled, you can use these resources at any time without an internet connection." %}
           </p>
         </div>
         <div class="col-md-4">
@@ -45,7 +39,7 @@
   </section>
   <section class="py-4">
     <div class="container">
-      <h2>Resources</h2>
+      <h2>{% trans "Resources" %}</h2>
       <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col">
           <div class="card">
@@ -55,10 +49,10 @@
                    alt="Training graphic">
               </div>
               <div class="flex-grow-1">
-                <h5 class="card-title">Training manuals</h5>
-                <p class="card-text">Paralegal manuals, updated for quick reference.</p>
+                <h5 class="card-title">{% trans "Training manuals" %}</h5>
+                <p class="card-text">{% trans "Paralegal manuals, updated for quick reference." %}</p>
                 <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-training-manuals' %}"
-                   class="stretched-link">Training manuals →</a>
+                   class="stretched-link">{% trans "Training manuals" %} →</a>
               </div>
             </div>
           </div>
@@ -71,12 +65,12 @@
                    alt="Guides graphic">
               </div>
               <div class="flex-grow-1">
-                <h5 class="card-title">Guides and best practices</h5>
+                <h5 class="card-title">{% trans "Guides and best practices" %}</h5>
                 <p class="card-text">
-                  Step-by-step resources on common legal issues such as land rights, family law, and criminal justice.
+                  {% trans "Step-by-step resources on common legal issues such as land rights, family law, and criminal justice." %}
                 </p>
                 <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-guides' %}"
-                   class="stretched-link">Guides and best practices →</a>
+                   class="stretched-link">{% trans "Guides and best practices" %} →</a>
               </div>
             </div>
           </div>
@@ -89,10 +83,10 @@
                    alt="Legal information graphic">
               </div>
               <div class="flex-grow-1">
-                <h5 class="card-title">Legal information</h5>
-                <p class="card-text">Curated summaries of laws and court decisions most relevant to paralegal work.</p>
+                <h5 class="card-title">{% trans "Legal information" %}</h5>
+                <p class="card-text">{% trans "Curated summaries of laws and court decisions most relevant to paralegal work." %}</p>
                 <a href="{% url 'taxonomy_detail' 'paralegals' 'paralegals-legal-information' %}"
-                   class="stretched-link">Legal information →</a>
+                   class="stretched-link">{% trans "Legal information" %} →</a>
               </div>
             </div>
           </div>
