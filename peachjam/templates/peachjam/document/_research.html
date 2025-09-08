@@ -1,0 +1,21 @@
+<div class="container">
+  <h5>Research context</h5>
+  <h6>Cited works</h6>
+  <ul>
+    {% for citation in cited_works %}
+      <li>
+        <a href="{{ citation.target_work.frbr_uri }}">{{ citation.target_work.title }}</a>
+        <ul>
+          {% for chunk in citation.similar_chunks %}
+            <li>
+              {{ chunk.similarity }} - {{ chunk.title }}: {{ chunk.text }}
+              <hr/>
+              {{ chunk.similar_to.text }}
+            </li>
+          {% endfor %}
+        </ul>
+      </li>
+    {% endfor %}
+  </ul>
+  <hr/>
+</div>

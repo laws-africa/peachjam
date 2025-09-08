@@ -1,3 +1,4 @@
+import logging
 import re
 
 from cobalt import FrbrUri
@@ -23,6 +24,9 @@ from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
+from peachjam_ml.models import ContentChunk
+
+log = logging.getLogger(__name__)
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -363,3 +367,60 @@ class DocumentTextContentView(DocumentDebugViewBase):
         response = FileResponse(text, as_attachment=True, content_type="text/plain")
         response["Content-Disposition"] = f"attachment; filename={filename}"
         return response
+
+
+class DocumentResearchView(DocumentDebugViewBase):
+    template_name = "peachjam/document/_research.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["cited_works"] = [
+            {"target_work": c.target_work}
+            for c in ExtractedCitation.for_citing_works(self.object.work)
+        ]
+
+        # what provisions are likely relevant for each cited document?
+        # either compare embeddings portion-to-portion (n^2) or do it document-to-portion
+        chunks = ContentChunk.objects.filter(document=self.object)
+
+        for cited in context["cited_works"]:
+            doc = (
+                CoreDocument.objects.filter(work=cited["target_work"])
+                .latest_expression()
+                .first()
+            )
+            if doc:
+                log.info(f"Finding similar chunks in {doc}")
+                cited["similar_chunks"] = get_similar_chunks(chunks, doc)
+
+        return context
+
+
+def get_similar_chunks(chunks, document):
+    from pgvector.django import MaxInnerProduct
+
+    threshold = 0.7
+    top_k = 5
+    similar_chunks = []
+
+    for chunk in chunks:
+        chunks = list(
+            ContentChunk.objects.filter(document=document)
+            .exclude(text_embedding__isnull=True)
+            .annotate(
+                similarity=MaxInnerProduct("text_embedding", chunk.text_embedding) * -1,
+            )
+            .filter(similarity__gt=threshold)
+            .order_by("-similarity")[:top_k]
+        )
+        for ch in chunks:
+            ch.similar_to = chunk
+        similar_chunks.extend(chunks)
+
+    # keep only the best
+    similar_chunks = sorted(similar_chunks, key=lambda c: c.similarity, reverse=True)[
+        :top_k
+    ]
+
+    return similar_chunks

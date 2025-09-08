@@ -16,6 +16,7 @@ from peachjam.views import (
     DocumentProblemView,
     DocumentProvisionCitationView,
     DocumentPublicationView,
+    DocumentResearchView,
     DocumentSocialImageView,
     DocumentSourcePDFView,
     DocumentSourceView,
@@ -118,6 +119,11 @@ urlpatterns = [
         "document/<int:pk>/text",
         DocumentTextContentView.as_view(),
         name="document_text_content",
+    ),
+    path(
+        "document/<int:pk>/research",
+        DocumentResearchView.as_view(),
+        name="document_research",
     ),
     path(
         "partners/<int:pk>/logo/<int:logo_pk>",
