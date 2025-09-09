@@ -51,6 +51,7 @@ from django.views.generic.detail import DetailView
 from peachjam.forms import SaveDocumentForm
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam.resources import DownloadDocumentsResource
+from peachjam_subs.models import Product
 
 User = get_user_model()
 
@@ -256,10 +257,26 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         self.object = SavedDocument(user=self.request.user, document=self.document)
         return super().get_form_kwargs()
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if not self.object.can_save_more_documents():
+            context["limit_reached"] = True
+            context["upgrade_product"] = Product.get_user_upgrade_products(
+                self.object.user
+            ).first()
+        return context
+
     def form_valid(self, form):
         self.object = form.save()
         # this ensures the form reflects the actual saved document
         form = self.form_class(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(saved_document=self.object, form=form)
+        )
+
+    #
+    def form_invalid(self, form):
+        self.object = SavedDocument(user=self.request.user, document=self.document)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )

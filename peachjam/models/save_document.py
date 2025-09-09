@@ -52,7 +52,7 @@ class SavedDocument(models.Model):
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
 
-    def user_can_save(self):
+    def can_save_more_documents(self):
         active_subscription = self.user.subscriptions.filter(status="active").first()
         if not active_subscription:
             return False
@@ -63,7 +63,7 @@ class SavedDocument(models.Model):
         return count <= limit
 
     def clean(self):
-        if not self.user_can_save():
+        if not self.can_save_more_documents():
             raise ValidationError("User has reached the limit of saved documents.")
 
     def delete(self, using=None, keep_parents=False):

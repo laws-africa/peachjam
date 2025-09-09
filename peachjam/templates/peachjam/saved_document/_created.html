@@ -1,3 +1,14 @@
 {% load i18n %}
-{% include 'peachjam/saved_document/_update.html' %}
-{% include 'peachjam/saved_document/_update_modal.html' %}
+{% if limit_reached %}
+  <div class="modal-content" id="saved-document-modal-content">
+    <p>{% trans 'Saved document limit reached' %}</p>
+    {% if upgrade_product %}
+      {% blocktrans trimmed with product=upgrade_product.name %}
+    <p>Please upgrade to {{ product }}</p>
+    {% endblocktrans %}
+    {% endif %}
+  </div>
+{% elif saved_document.pk %}
+  {% include 'peachjam/saved_document/_update.html' %}
+  {% include 'peachjam/saved_document/_update_modal.html' %}
+{% endif %}

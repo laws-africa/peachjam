@@ -76,6 +76,7 @@ class Product(models.Model):
     tier = models.IntegerField(default=10)
 
     saved_document_limit = models.IntegerField(
+        default=-1,
         null=True,
         blank=True,
         help_text="If set, this is the maximum number of documents a user can save. Leave blank for unlimited.",
@@ -114,6 +115,21 @@ class Product(models.Model):
             .first()
         )
         return product
+
+    @classmethod
+    def get_user_upgrade_products(cls, user):
+        """Return a queryset of ProductOffering objects that are upgrades for the user."""
+        active_subscription = user.subscriptions.filter(status="active").first()
+        if active_subscription:
+            current_tier = active_subscription.product_offering.product.tier
+            return (
+                subscription_settings()
+                .key_products.filter(tier__gt=current_tier)
+                .order_by("tier")
+            )
+        else:
+            # no active subscription, so all offerings are upgrades
+            return subscription_settings().key_products.all().order_by("tier")
 
 
 class PricingPlan(models.Model):
