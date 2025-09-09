@@ -9,6 +9,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin.options import StackedInline
 from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -103,6 +104,7 @@ from peachjam.models import (
     Treatment,
     UncommencedProvision,
     UnconstitutionalProvision,
+    UserFollowing,
     UserProfile,
     Work,
     citations_processor,
@@ -125,6 +127,7 @@ from peachjam.tasks import (
     generate_judgment_summary,
     update_extracted_citations_for_a_work,
 )
+from peachjam_search.models import SavedSearch
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
@@ -1749,8 +1752,19 @@ class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
+class UserFollowingInline(StackedInline):
+    model = UserFollowing
+    extra = 0
+
+
+class SavedSearchInline(StackedInline):
+    model = SavedSearch
+    extra = 0
+
+
 class UserAdminCustom(ImportExportMixin, UserAdmin):
     resource_class = UserResource
+    inlines = [UserFollowingInline, SavedSearchInline]
 
 
 @admin.register(Label)
