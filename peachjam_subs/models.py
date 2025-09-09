@@ -81,7 +81,7 @@ class Product(models.Model):
     )
 
     FEATURES_WITH_LIMIT = [
-        "saved_documents_limit",
+        "saved_document_limit",
     ]
 
     class Meta:
