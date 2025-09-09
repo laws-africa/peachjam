@@ -11,7 +11,7 @@ class Command(BaseCommand):
         # bulk get required document details to make this faster
         self.stdout.write("Preloading document details...")
         self.docs_by_id = {
-            d.id: d
+            str(d.id): d
             for d in CoreDocument.objects.only("id", "work")
             .select_related("work")
             .iterator(chunk_size=1000)
@@ -38,8 +38,9 @@ class Command(BaseCommand):
         count = 0
 
         for doc in helpers.scan(self.client, index=ix._name, query=query, size=50):
-            doc_id = doc["_id"]
+            doc_id = str(doc["_id"])
             if doc_id not in self.docs_by_id:
+                self.stdout.write(f"Skipping {doc_id}")
                 continue
             work = self.docs_by_id[doc_id].work
 
