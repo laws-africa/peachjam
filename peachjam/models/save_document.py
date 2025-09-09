@@ -4,6 +4,8 @@ from django.db import models
 from django.urls.base import reverse
 from django.utils.translation import gettext_lazy as _
 
+from peachjam_subs.models import Subscription
+
 from .core_document import CoreDocument
 
 User = get_user_model()
@@ -53,7 +55,7 @@ class SavedDocument(models.Model):
         verbose_name_plural = _("saved documents")
 
     def can_save_more_documents(self):
-        active_subscription = self.user.subscriptions.filter(status="active").first()
+        active_subscription = Subscription.objects.active_for_user(self.user).first()
         if not active_subscription:
             return False
         limit = active_subscription.product_offering.product.saved_document_limit
@@ -67,7 +69,3 @@ class SavedDocument(models.Model):
     def delete(self, using=None, keep_parents=False):
         self.document.annotations.filter(user=self.user).delete()
         return super().delete(using=using, keep_parents=keep_parents)
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        return super().save(*args, **kwargs)

@@ -276,7 +276,6 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
             self.get_context_data(saved_document=self.object, form=form)
         )
 
-    #
     def form_invalid(self, form):
         self.object = SavedDocument(user=self.request.user, document=self.document)
         return self.render_to_response(

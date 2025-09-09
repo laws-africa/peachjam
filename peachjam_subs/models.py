@@ -77,12 +77,12 @@ class Product(models.Model):
 
     saved_document_limit = models.IntegerField(
         default=0,
-        help_text="If set, this is the maximum number of documents a user can save. Leave blank for unlimited.",
+        help_text="The is the maximum number of documents a user can save.",
     )
 
-    FEATURE_FIELD_MAP = {
-        "saved_documents_limit": "saved_document_limit",
-    }
+    FEATURES_WITH_LIMIT = [
+        "saved_documents_limit",
+    ]
 
     class Meta:
         ordering = ("tier",)
@@ -121,10 +121,10 @@ class Product(models.Model):
     @classmethod
     def get_user_upgrade_products(cls, user, feature=None, count=None):
         """
-        Return a queryset of ProductOffering objects that are upgrades for the user.
+        Return a queryset of Product objects that are upgrades for the user.
         If feature and count are given, filter upgrades to those that raise the limit.
         """
-        active_subscription = user.subscriptions.filter(status="active").first()
+        active_subscription = Subscription.objects.active_for_user(user).first()
         products = subscription_settings().key_products.all()
 
         if active_subscription:
@@ -132,10 +132,9 @@ class Product(models.Model):
             products = products.filter(tier__gt=current_tier)
 
         if feature and count is not None:
-            field_name = cls.FEATURE_FIELD_MAP.get(feature)
-            if not field_name:
+            if feature not in cls.FEATURES_WITH_LIMIT:
                 raise ValueError(f"Unknown feature: {feature}")
-            products = products.filter(**{f"{field_name}__gt": count})
+            products = products.filter(**{f"{feature}__gt": count})
 
         return products.order_by("tier")
 

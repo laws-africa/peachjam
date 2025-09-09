@@ -10,7 +10,7 @@ class SavedDocumentViewsTest(TestCase):
         "tests/countries",
         "documents/sample_documents",
         "tests/users",
-        "tests/subscriptions",
+        "tests/products",
     ]
 
     def setUp(self):
