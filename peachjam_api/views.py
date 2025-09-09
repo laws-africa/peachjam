@@ -65,7 +65,6 @@ class CitationLinkViewSet(viewsets.ModelViewSet):
 
 
 class IngestorWebhookView(APIView):
-    authentication_classes = []
     permission_classes = []
 
     def post(self, request, ingestor_id):
