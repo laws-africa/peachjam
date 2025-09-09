@@ -12,7 +12,8 @@ class Command(BaseCommand):
         self.stdout.write("Preloading document details...")
         self.docs_by_id = {
             str(d.id): d
-            for d in CoreDocument.objects.only("id", "work")
+            for d in CoreDocument.objects.non_polymorphic()
+            .only("id", "work")
             .select_related("work")
             .iterator(chunk_size=1000)
         }
