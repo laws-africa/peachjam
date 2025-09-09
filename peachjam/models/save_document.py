@@ -57,14 +57,12 @@ class SavedDocument(models.Model):
         if not active_subscription:
             return False
         limit = active_subscription.product_offering.product.saved_document_limit
-        if limit < 0:
-            return True
         count = self.user.saved_documents.count()
-        return count <= limit
+        return count < limit
 
     def clean(self):
         if not self.can_save_more_documents():
-            raise ValidationError("User has reached the limit of saved documents.")
+            raise ValidationError(_("Saved documents limit reached"))
 
     def delete(self, using=None, keep_parents=False):
         self.document.annotations.filter(user=self.user).delete()

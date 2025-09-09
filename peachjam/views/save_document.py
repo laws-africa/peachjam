@@ -262,7 +262,9 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         if not self.object.can_save_more_documents():
             context["limit_reached"] = True
             context["upgrade_product"] = Product.get_user_upgrade_products(
-                self.object.user
+                self.object.user,
+                feature="saved_documents_limit",
+                count=self.object.user.saved_documents.count(),
             ).first()
         return context
 

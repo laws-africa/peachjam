@@ -76,11 +76,13 @@ class Product(models.Model):
     tier = models.IntegerField(default=10)
 
     saved_document_limit = models.IntegerField(
-        default=-1,
-        null=True,
-        blank=True,
+        default=0,
         help_text="If set, this is the maximum number of documents a user can save. Leave blank for unlimited.",
     )
+
+    FEATURE_FIELD_MAP = {
+        "saved_documents_limit": "saved_document_limit",
+    }
 
     class Meta:
         ordering = ("tier",)
@@ -117,19 +119,25 @@ class Product(models.Model):
         return product
 
     @classmethod
-    def get_user_upgrade_products(cls, user):
-        """Return a queryset of ProductOffering objects that are upgrades for the user."""
+    def get_user_upgrade_products(cls, user, feature=None, count=None):
+        """
+        Return a queryset of ProductOffering objects that are upgrades for the user.
+        If feature and count are given, filter upgrades to those that raise the limit.
+        """
         active_subscription = user.subscriptions.filter(status="active").first()
+        products = subscription_settings().key_products.all()
+
         if active_subscription:
             current_tier = active_subscription.product_offering.product.tier
-            return (
-                subscription_settings()
-                .key_products.filter(tier__gt=current_tier)
-                .order_by("tier")
-            )
-        else:
-            # no active subscription, so all offerings are upgrades
-            return subscription_settings().key_products.all().order_by("tier")
+            products = products.filter(tier__gt=current_tier)
+
+        if feature and count is not None:
+            field_name = cls.FEATURE_FIELD_MAP.get(feature)
+            if not field_name:
+                raise ValueError(f"Unknown feature: {feature}")
+            products = products.filter(**{f"{field_name}__gt": count})
+
+        return products.order_by("tier")
 
 
 class PricingPlan(models.Model):
@@ -532,14 +540,3 @@ class SubscriptionSettings(SingletonModel):
 
 def subscription_settings():
     return SubscriptionSettings.load()
-
-
-class SubscriptionUsage(models.Model):
-    subscription = models.ForeignKey(
-        "Subscription", on_delete=models.CASCADE, related_name="usages"
-    )
-
-    @property
-    def saved_documents(self):
-        """Return the saved documents usage for this subscription."""
-        return self.subscription.user.saved_documents.count()

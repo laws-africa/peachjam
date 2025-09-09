@@ -1,0 +1,24 @@
+{% load i18n %}
+<div class="modal-content" id="saved-document-modal-content">
+  <div class="modal-header">
+    <h5>{% trans 'Saved document limit reached' %}</h5>
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="{% trans 'Close' %}"></button>
+  </div>
+  <div class="modal-body">
+    <p class="h5">{{ saved_document.document.title }}</p>
+    <p>{% trans 'You have reached your limit for saved documents.' %}</p>
+    {% if upgrade_product %}
+      {% blocktrans trimmed with product=upgrade_product.name %}
+        <p>To save more, please upgrade to {{ product }}</p>
+      {% endblocktrans %}
+    {% endif %}
+  </div>
+  <div class="modal-footer">
+    <div>
+      <button class="btn btn-primary ms-auto" data-bs-dismiss="modal">{% trans 'Close' %}</button>
+    </div>
+  </div>
+</div>
