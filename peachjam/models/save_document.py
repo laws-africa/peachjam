@@ -39,7 +39,7 @@ class Folder(models.Model):
 
     def clean(self):
         if not self.can_save_more_folders():
-            raise ValidationError(_("Saved documents limit reached"))
+            raise ValidationError(_("Folder limit reached"))
 
     def get_absolute_url(self):
         return reverse("folder_list") + "#folder-" + str(self.pk)
