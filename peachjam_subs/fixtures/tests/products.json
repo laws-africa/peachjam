@@ -1,0 +1,98 @@
+[
+  {
+    "model": "peachjam_subs.feature",
+    "pk": 1,
+    "fields": {
+      "name": "Save documents to private folders",
+      "ordering": 20
+    }
+  },
+  {
+    "model": "peachjam_subs.product",
+    "pk": 1,
+    "fields": {
+      "name": "My LII Bronze",
+      "description": "Simplify your research.",
+      "tier": 10,
+      "features": [1]
+    }
+  },
+  {
+    "model": "peachjam_subs.product",
+    "pk": 2,
+    "fields": {
+      "name": "My LII FREE",
+      "description": "Access to primary legal information, free forever.",
+      "tier": 0,
+      "features": []
+    }
+  },
+  {
+    "model": "peachjam_subs.product",
+    "pk": 3,
+    "fields": {
+      "name": "My LII Silver",
+      "description": "Better than bronze.",
+      "tier": 20,
+      "features": []
+    }
+  },
+  {
+    "model": "peachjam_subs.pricingplan",
+    "pk": 1,
+    "fields": {
+      "name": "FREE",
+      "price": "0.00",
+      "period": "annually"
+    }
+  },
+  {
+    "model": "peachjam_subs.pricingplan",
+    "pk": 2,
+    "fields": {
+      "name": "Bronze",
+      "price": "10.00",
+      "period": "monthly"
+    }
+  },
+  {
+    "model": "peachjam_subs.pricingplan",
+    "pk": 3,
+    "fields": {
+      "name": "Silver",
+      "price": "20.00",
+      "period": "monthly"
+    }
+  },
+  {
+    "model": "peachjam_subs.productoffering",
+    "pk": 1,
+    "fields": {
+      "product": 1,
+      "pricing_plan": 2
+    }
+  },
+  {
+    "model": "peachjam_subs.productoffering",
+    "pk": 2,
+    "fields": {
+      "product": 2,
+      "pricing_plan": 1
+    }
+  },
+  {
+    "model": "peachjam_subs.productoffering",
+    "pk": 3,
+    "fields": {
+      "product": 3,
+      "pricing_plan": 3
+    }
+  },
+  {
+    "model": "peachjam_subs.subscriptionsettings",
+    "pk": 1,
+    "fields": {
+      "default_product_offering": 2
+    }
+  }
+]

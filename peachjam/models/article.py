@@ -113,6 +113,11 @@ class UserProfile(models.Model):
     def tracking_id_str(self):
         return str(self.tracking_id)
 
+    def is_primary_email_verified(self):
+        return self.user.emailaddress_set.filter(
+            verified=True, email=self.user.email
+        ).exists()
+
     def __str__(self):
         return f"{self.user.username}"
 

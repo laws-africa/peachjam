@@ -7,6 +7,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam_search.models import SavedSearch
+
 from . import (
     Author,
     CoreDocument,
@@ -84,6 +86,15 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
+    saved_search = models.ForeignKey(
+        SavedSearch,
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("saved search"),
+    )
+
     last_alerted_at = models.DateTimeField(
         _("last alerted at"), null=True, blank=True, auto_now_add=True
     )
@@ -91,9 +102,17 @@ class UserFollowing(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     # fields that can be followed
-    follow_fields = (
-        "court author court_class court_registry country locality taxonomy".split()
-    )
+    EVENT_FIELD_MAP = {
+        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
+    }
+    follow_fields = list(EVENT_FIELD_MAP.keys())
 
     class Meta:
         constraints = [
@@ -132,16 +151,34 @@ class UserFollowing(models.Model):
                 condition=models.Q(taxonomy__isnull=False),
                 name="unique_user_taxonomy",
             ),
+            models.UniqueConstraint(
+                fields=["user", "saved_search"],
+                condition=models.Q(saved_search__isnull=False),
+                name="unique_user_saved_search",
+            ),
         ]
 
     def __str__(self):
         return f"{self.user} follows {self.followed_object}"
 
     @property
+    def description_text(self):
+        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
+            return _("New matches for search alert")
+        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
+            return _("New documents added for")
+
+    @property
     def followed_field(self):
         for field in self.follow_fields:
             if getattr(self, field):
                 return field
+
+    def get_event_type(self):
+        field = self.followed_field
+        if field:
+            return self.EVENT_FIELD_MAP[field]
+        return None
 
     @property
     def followed_object(self):
@@ -159,14 +196,12 @@ class UserFollowing(models.Model):
 
         if set_fields == 0:
             raise ValidationError(
-                "One of the following fields must be set: court, author, court class, court registry, country, "
-                "locality, taxonomy topic"
+                f"One of the following fields must be set: {' '.join(self.follow_fields)}"
             )
 
         if set_fields > 1:
             raise ValidationError(
-                "Only one of the following fields can be set: court, author, court class, court registry,"
-                " country, locality, taxonomy topic"
+                f"Only one of the following fields can be set:  {' '.join(self.follow_fields)}"
             )
 
     def save(self, *args, **kwargs):
@@ -204,20 +239,62 @@ class UserFollowing(models.Model):
         )
         cutoff = since or self.last_alerted_at
         if cutoff:
-            qs = qs.filter(created_at__gt=self.last_alerted_at)
-        return qs[:limit]
+            qs = qs.filter(created_at__gt=cutoff)
+        if qs.exists():
+            self.create_timeline_event_for_followed_docs(qs[:limit])
+            return True
 
-    def create_timeline_event(self, documents):
+    def create_timeline_event_for_followed_docs(self, documents):
         # check for unsent event
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            event_type=self.get_event_type(),
             email_alert_sent_at__isnull=True,
         )
-        if new:
-            log.info(f"Creating new timeline event for {self.followed_object}")
-        else:
-            log.info(f"Updating existing timeline event for {self.followed_object}")
+        event.subject_documents.add(*documents)
+        return event
+
+    def get_new_search_hits(self, since=None, limit=10):
+        if self.saved_search:
+            hits = self.saved_search.find_new_hits()
+            cutoff = since or self.last_alerted_at
+            if cutoff:
+                hits = [hit for hit in hits if hit.document.created_at > cutoff][:limit]
+            if hits and len(hits) > 0:
+                self.create_timeline_event_for_search_alert(hits[:limit])
+                return True
+
+    def create_timeline_event_for_search_alert(self, hits):
+        documents = [hit.document for hit in hits]
+        new_hits = []
+        for hit in hits:
+            hit_dict = hit.as_dict()
+            # replace the Django ORM object with the fields we want
+            doc = hit.document
+            hit_dict["title"] = doc.title
+            hit_dict["document"] = {
+                "title": getattr(doc, "title", "") or "",
+                "blurb": getattr(doc, "blurb", "") or "",
+                "flynote": getattr(doc, "flynote", "") or "",
+            }
+            new_hits.append(hit_dict)
+        # check for unsent event
+        event, new = TimelineEvent.objects.get_or_create(
+            user_following=self,
+            event_type=self.get_event_type(),
+            email_alert_sent_at__isnull=True,
+            defaults={"extra_data": {"hits": new_hits}},
+        )
+        if not new:
+            existing_hits = event.extra_data.get("hits", [])
+
+            # Deduplicate by "id" (latest hit wins if duplicate id appears)
+            combined = {hit["id"]: hit for hit in existing_hits}
+            for hit in new_hits:
+                combined[hit["id"]] = hit
+
+            event.extra_data["hits"] = list(combined.values())
+            event.save(update_fields=["extra_data"])
 
         event.subject_documents.add(*documents)
         return event
@@ -230,11 +307,17 @@ class UserFollowing(models.Model):
             follow.update_timeline()
 
     def update_timeline(self):
-        documents = self.get_new_followed_documents()
-        if not documents:
-            log.info("No documents")
+        updated = False
+        if self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
+            updated = self.get_new_followed_documents()
+
+        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
+            updated = self.get_new_search_hits()
+
+        if not updated:
+            log.info("No new documents found for follow %s", self)
             return
-        log.info(f"Found {documents.count()} new documents for {self.followed_object}")
-        self.create_timeline_event(documents)
+
+        log.info(f"Updating timeline event for {self.followed_object}")
         self.last_alerted_at = timezone.now()
         self.save(update_fields=["last_alerted_at"])

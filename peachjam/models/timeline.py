@@ -6,6 +6,7 @@ from django.conf import settings
 from django.db import models
 from django.db.models.functions import TruncDate
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
@@ -16,6 +17,7 @@ log = logging.getLogger(__name__)
 class TimelineEvent(models.Model):
     class EventTypes(models.TextChoices):
         NEW_DOCUMENTS = "new_documents", _("New Documents")
+        SAVED_SEARCH = "saved_search", _("Saved Search")
 
     user_following = models.ForeignKey(
         "peachjam.UserFollowing",
@@ -29,6 +31,7 @@ class TimelineEvent(models.Model):
         max_length=256,
         choices=EventTypes.choices,
     )
+    extra_data = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
@@ -65,7 +68,7 @@ class TimelineEvent(models.Model):
 
         for ev in qs:
             for doc in ev.subject_documents.all():
-                grouped[ev.event_date][ev.user_following.followed_object].append(doc)
+                grouped[ev.event_date][ev.user_following].append(doc)
 
         # step 4: split docs into (first 10, rest)
         events = {}
@@ -83,22 +86,60 @@ class TimelineEvent(models.Model):
 
     @classmethod
     def send_email_alerts(cls):
-        from peachjam.tasks import send_new_document_email_alert
+        from peachjam.tasks import (
+            send_new_document_email_alert,
+            send_saved_search_email_alert,
+        )
 
-        users = (
-            cls.objects.filter(
-                email_alert_sent_at__isnull=True,
-                event_type=cls.EventTypes.NEW_DOCUMENTS,
-            )
-            .values_list("user_following__user", flat=True)
+        events = cls.objects.filter(email_alert_sent_at__isnull=True)
+        if not events:
+            log.info("No new events to alert.")
+            return
+
+        new_doc_users = (
+            events.filter(event_type=cls.EventTypes.NEW_DOCUMENTS)
+            .values_list("user_following__user_id", flat=True)
             .distinct()
         )
-        if not users:
-            log.info("No users with new events to send emails to.")
-            return
-        log.info(f"Sending new document email alerts to {len(users)} users.")
-        for user_id in users:
+        for user_id in new_doc_users:
             send_new_document_email_alert(user_id)
+        saved_search_users = (
+            events.filter(event_type=cls.EventTypes.SAVED_SEARCH)
+            .values_list("user_following__user_id", flat=True)
+            .distinct()
+        )
+        for user_id in saved_search_users:
+            send_saved_search_email_alert(user_id)
+
+    @classmethod
+    def send_saved_search_email_alert(cls, user):
+        saved_searches = cls.objects.filter(
+            email_alert_sent_at__isnull=True,
+            event_type=cls.EventTypes.SAVED_SEARCH,
+            user_following__user=user,
+        ).select_related("user_following")
+
+        if not saved_searches.exists():
+            log.info(f"No saved search events to send for user {user.pk}")
+            return
+        log.info(f"Sending saved search email alerts for user {user.pk}")
+
+        for ev in saved_searches:
+            context = {
+                "user": user,
+                "hits": (ev.extra_data or {}).get("hits", []),
+                "saved_search": ev.user_following.saved_search,
+                "manage_url_path": reverse("search:saved_search_list"),
+            }
+            with override(user.userprofile.preferred_language.pk):
+                send_templated_mail(
+                    template_name="search_alert",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    context=context,
+                )
+                ev.email_alert_sent_at = timezone.now()
+                ev.save(update_fields=["email_alert_sent_at"])
 
     @classmethod
     def send_new_document_email_alert(cls, user):
@@ -114,6 +155,7 @@ class TimelineEvent(models.Model):
         if not new_document_events.exists():
             log.info(f"No new document events to send for user {user.pk}")
             return
+        log.info(f"Sending new document email alerts for user {user.pk}")
 
         follows_map = {}
         for ev in new_document_events:

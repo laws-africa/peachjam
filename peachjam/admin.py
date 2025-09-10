@@ -9,6 +9,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin.options import StackedInline
 from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -38,6 +39,8 @@ from treebeard.forms import MoveNodeForm, movenodeform_factory
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
+    GuardianGroupForm,
+    GuardianUserForm,
     NewDocumentFormMixin,
     PublicationFileForm,
     RatificationForm,
@@ -101,6 +104,7 @@ from peachjam.models import (
     Treatment,
     UncommencedProvision,
     UnconstitutionalProvision,
+    UserFollowing,
     UserProfile,
     Work,
     citations_processor,
@@ -123,6 +127,7 @@ from peachjam.tasks import (
     generate_judgment_summary,
     update_extracted_citations_for_a_work,
 )
+from peachjam_search.models import SavedSearch
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
@@ -527,8 +532,20 @@ class AccessGroupForm(forms.Form):
             remove_perm(view_perm, group.group, self.obj)
 
 
+# better forms for django guardian admin views
+GuardedModelAdminMixin.get_obj_perms_group_select_form = (
+    lambda self, request: GuardianGroupForm
+)
+GuardedModelAdminMixin.get_obj_perms_user_select_form = (
+    lambda self, request: GuardianUserForm
+)
+
+
 class AccessGroupMixin(GuardedModelAdminMixin):
     change_form_template = None
+    obj_perms_manage_template = (
+        "admin/guardian/model/obj_perms_manage_access_groups.html"
+    )
 
     def obj_perms_manage_view(self, request, object_pk):
         from django.contrib.admin.utils import unquote
@@ -1735,8 +1752,19 @@ class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
+class UserFollowingInline(StackedInline):
+    model = UserFollowing
+    extra = 0
+
+
+class SavedSearchInline(StackedInline):
+    model = SavedSearch
+    extra = 0
+
+
 class UserAdminCustom(ImportExportMixin, UserAdmin):
     resource_class = UserResource
+    inlines = [UserFollowingInline, SavedSearchInline]
 
 
 @admin.register(Label)

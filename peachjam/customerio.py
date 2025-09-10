@@ -174,8 +174,11 @@ class CustomerIO:
             )
 
 
-_customerio = CustomerIO()
+_customerio = None
 
 
 def get_customerio():
+    global _customerio
+    if _customerio is None:
+        _customerio = CustomerIO()
     return _customerio

@@ -765,7 +765,7 @@ class IndigoAdapter(RequestsAdapter):
 
         # check perms
         if not CoreDocumentPermission().has_permission(request, None):
-            logger.warning("Unauthorized webhook request")
+            logger.warning(f"Unauthorized webhook request from {request.user}")
             return
 
         logger.info(f"Handling webhook {data}")

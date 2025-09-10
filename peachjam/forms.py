@@ -6,6 +6,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
@@ -637,3 +638,11 @@ class AnnotationForm(forms.ModelForm):
     class Meta:
         model = Annotation
         fields = ["text"]
+
+
+class GuardianGroupForm(forms.Form):
+    group = forms.ModelChoiceField(queryset=Group.objects.all())
+
+
+class GuardianUserForm(forms.Form):
+    user = forms.ModelChoiceField(queryset=User.objects.all())

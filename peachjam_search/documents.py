@@ -66,6 +66,19 @@ class SearchableDocument(Document):
     taxonomies = fields.KeywordField()
     labels = fields.KeywordField()
 
+    # frbr uri fields
+    # some fields use a prepare method so that we can return an empty string if they are not set, and not None. This
+    # makes them easier to filter on when they're not set.
+    frbr_uri_country = fields.KeywordField(attr="work.frbr_uri_country")
+    frbr_uri_locality = fields.KeywordField()
+    frbr_uri_place = fields.KeywordField(attr="work.frbr_uri_place")
+    frbr_uri_doctype = fields.KeywordField(attr="work.frbr_uri_doctype")
+    frbr_uri_subtype = fields.KeywordField()
+    frbr_uri_actor = fields.KeywordField()
+    # TODO: this should be a date-like field
+    # frbr_uri_date = fields.KeywordField(attr="work.frbr_uri_date")
+    # frbr_uri_number = fields.KeywordField(attr="work.frbr_uri_number")
+
     # Judgment
     court = fields.KeywordField(attr="court.name")
     court_en = fields.KeywordField()
@@ -250,6 +263,15 @@ class SearchableDocument(Document):
                 t for t in related_instance.get_descendants()
             ]
             return CoreDocument.objects.filter(taxonomies__topic__in=topics).distinct()
+
+    def prepare_frbr_uri_locality(self, instance):
+        return instance.work.frbr_uri_locality or ""
+
+    def prepare_frbr_uri_subtype(self, instance):
+        return instance.work.frbr_uri_subtype or ""
+
+    def prepare_frbr_uri_actor(self, instance):
+        return instance.work.frbr_uri_actor or ""
 
     def prepare_case_number(self, instance):
         if hasattr(instance, "case_numbers"):
