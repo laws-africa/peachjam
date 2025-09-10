@@ -92,6 +92,13 @@ class BaseFolderMixin(
             )
         )
 
+        sub = Subscription.objects.active_for_user(self.request.user).first()
+        if sub:
+            (
+                context["folder_limit_reached"],
+                context["folder_upgrade"],
+            ) = sub.check_feature_limit("folder_limit")
+
         return context
 
 

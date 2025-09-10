@@ -10,6 +10,16 @@
     </button>
   </div>
   <div class="mb-4">{% trans "Save documents to simplify your research and stay up-to-date" %}</div>
+  {% if folder_limit_reached %}
+    <div class="alert alert-info">
+      <div class="fw-bold">{% trans 'You have reached your limit for document folders.' %}</div>
+      {% if folder_upgrade %}
+        {% blocktrans trimmed with product=folder_upgrade.name %}
+      <div>To add more folders, please upgrade to {{ product }}.</div>
+    {% endblocktrans %}
+      {% endif %}
+    </div>
+  {% endif %}
   {% block folder-list %}
     {% for folder in folders %}
       <div class="card mb-5" id="folder-{{ folder.pk }}">

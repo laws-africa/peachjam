@@ -34,7 +34,7 @@ class Folder(models.Model):
         sub = Subscription.objects.active_for_user(self.user).first()
         if not sub:
             return False
-        limit_reached, _ = sub.check_feature_limit("folder")
+        limit_reached, _ = sub.check_feature_limit("folder_limit")
         return not limit_reached
 
     def clean(self):
