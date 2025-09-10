@@ -30,6 +30,17 @@ class Folder(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def can_save_more_folders(self):
+        sub = Subscription.objects.active_for_user(self.user).first()
+        if not sub:
+            return False
+        limit_reached, _ = sub.check_feature_limit("folder")
+        return not limit_reached
+
+    def clean(self):
+        if not self.can_save_more_folders():
+            raise ValidationError(_("Saved documents limit reached"))
+
     def get_absolute_url(self):
         return reverse("folder_list") + "#folder-" + str(self.pk)
 
@@ -55,12 +66,11 @@ class SavedDocument(models.Model):
         verbose_name_plural = _("saved documents")
 
     def can_save_more_documents(self):
-        active_subscription = Subscription.objects.active_for_user(self.user).first()
-        if not active_subscription:
+        sub = Subscription.objects.active_for_user(self.user).first()
+        if not sub:
             return False
-        limit = active_subscription.product_offering.product.saved_document_limit
-        count = self.user.saved_documents.count()
-        return count < limit
+        limit_reached, _ = sub.check_feature_limit("saved_document_limit")
+        return not limit_reached
 
     def clean(self):
         if not self.can_save_more_documents():

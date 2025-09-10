@@ -10,8 +10,8 @@
   <div class="modal-body">
     <p class="h5">{{ saved_document.document.title }}</p>
     <p>{% trans 'You have reached your limit for saved documents.' %}</p>
-    {% if upgrade_product %}
-      {% blocktrans trimmed with product=upgrade_product.name %}
+    {% if saved_document_upgrade %}
+      {% blocktrans trimmed with product=saved_document_upgrade.name %}
         <p>To save more, please upgrade to {{ product }}.</p>
       {% endblocktrans %}
     {% endif %}

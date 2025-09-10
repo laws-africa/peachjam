@@ -76,12 +76,17 @@ class Product(models.Model):
     tier = models.IntegerField(default=10)
 
     saved_document_limit = models.IntegerField(
-        default=0,
+        default=999999,
         help_text="The is the maximum number of documents a user can save.",
+    )
+    folder_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of folders a user can create.",
     )
 
     FEATURES_WITH_LIMIT = [
         "saved_document_limit",
+        "folder_limit",
     ]
 
     class Meta:
@@ -470,6 +475,43 @@ class Subscription(models.Model):
         # ensure all users have a subscription
         for user in User.objects.filter(subscriptions__isnull=True).all():
             cls.get_or_create_active_for_user(user)
+
+    def check_feature_limit(self, feature: str):
+        """
+        Check if this subscription's user has reached the limit for a feature.
+        Returns:
+            {
+                "reached": bool,            # True if limit is reached
+                "upgrade_product": Product or None,
+            }
+        """
+        # get the configured limit for this feature
+        limit = getattr(self.product_offering.product, feature, None)
+        if limit is None:
+            return {"reached": True, "upgrade_product": None}  # unknown feature = block
+
+        # resolve the related manager
+        feature_map = {
+            "saved_document_limit": self.user.saved_documents,
+            "folder_limit": self.user.folders,
+        }
+        manager = feature_map.get(feature)
+        if not manager:
+            return True, None
+
+        count = manager.count()
+        # within limit?
+        if count < limit:
+            return False, None
+
+        # over limit → suggest upgrade
+        upgrade = Product.get_user_upgrade_products(
+            self.user,
+            feature=feature,
+            count=count,
+        ).first()
+
+        return True, upgrade
 
 
 class SubscriptionSettings(SingletonModel):

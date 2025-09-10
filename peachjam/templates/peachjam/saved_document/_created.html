@@ -1,7 +1,7 @@
 {% load i18n %}
-{% if limit_reached %}
-  {% include 'peachjam/saved_document/_limit_reached.html' %}
-{% elif saved_document.pk %}
+{% if saved_document.pk %}
   {% include 'peachjam/saved_document/_update.html' %}
   {% include 'peachjam/saved_document/_update_modal.html' %}
+{% elif saved_document_limit_reached %}
+  {% include 'peachjam/saved_document/_limit_reached.html' %}
 {% endif %}
