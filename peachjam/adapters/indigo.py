@@ -552,9 +552,23 @@ class IndigoAdapter(RequestsAdapter):
         return self.client_get(document["url"] + ".html?resolver=none").text
 
     def get_toc_json(self, url):
+        definition_types = ["definition"]
+
+        def contains_definitions(d):
+            contains = False
+            for kid in d["children"]:
+                if kid["type"] in definition_types:
+                    contains = True
+                    break
+                else:
+                    contains = contains_definitions(kid) or contains
+
+            return contains
+
         def remove_subparagraph(d):
             if d["type"] == "paragraph" or d["basic_unit"]:
-                d["children"] = []
+                if not contains_definitions(d):
+                    d["children"] = []
             else:
                 for kid in d["children"]:
                     remove_subparagraph(kid)
