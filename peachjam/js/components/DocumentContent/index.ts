@@ -250,6 +250,15 @@ class DocumentContent {
     }
     addParentAndDepth(items);
 
+    // recursively collapse all ToC items
+    function collapseAll (items: any []) {
+      for (const item of items) {
+        item.expanded = false;
+        collapseAll(item.children);
+      }
+    }
+    collapseAll(items);
+
     return items;
   }
 
