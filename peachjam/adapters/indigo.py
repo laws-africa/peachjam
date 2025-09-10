@@ -558,6 +558,7 @@ class IndigoAdapter(RequestsAdapter):
             for kid in d["children"]:
                 if kid["type"] in definition_types or contains_definitions(kid):
                     return True
+
         def remove_subparagraph(d):
             if d["type"] == "paragraph" or d["basic_unit"]:
                 if not contains_definitions(d):
