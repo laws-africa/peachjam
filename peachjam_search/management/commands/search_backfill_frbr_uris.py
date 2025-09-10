@@ -1,3 +1,5 @@
+from time import sleep
+
 from django.core.management.base import BaseCommand
 from django_elasticsearch_dsl.registries import registry
 from elasticsearch import helpers
@@ -64,6 +66,8 @@ class Command(BaseCommand):
                 self.stdout.write(f"Updated {count}")
                 helpers.bulk(self.client, bulk_updates)
                 bulk_updates.clear()
+                # give ES some time to process
+                sleep(0.2)
 
         if bulk_updates:
             helpers.bulk(self.client, bulk_updates)
