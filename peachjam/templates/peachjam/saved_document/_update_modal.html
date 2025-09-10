@@ -36,12 +36,19 @@
                  placeholder="{% trans 'New folder name' %}"
                  type="text"/>
         {% else %}
-          <div>{% trans 'You have reached your limit for new document folders.' %}</div>
-          {% if folder_upgrade %}
-            {% blocktrans trimmed with product=folder_upgrade.name %}
-              <div>To add more, please upgrade to {{ product }}.</div>
+          <div class="alert alert-info d-flex">
+            <div class="me-2">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+              <div class="fw-bold">{% trans 'You have reached your limit for document folders.' %}</div>
+              {% if folder_upgrade %}
+                {% blocktrans trimmed with product=folder_upgrade.name %}
+              <div>To add more folders, please upgrade to {{ product }}.</div>
             {% endblocktrans %}
-          {% endif %}
+              {% endif %}
+            </div>
+          </div>
         {% endif %}
       </div>
       <div class="mt-3">
