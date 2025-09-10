@@ -1,21 +1,39 @@
 <div class="container">
   <h5>Research context</h5>
-  <h6>Cited works</h6>
-  <ul>
-    {% for citation in cited_works %}
-      <li>
-        <a href="{{ citation.target_work.frbr_uri }}">{{ citation.target_work.title }}</a>
-        <ul>
-          {% for chunk in citation.similar_chunks %}
-            <li>
-              {{ chunk.similarity }} - {{ chunk.title }}: {{ chunk.text }}
-              <hr/>
-              {{ chunk.similar_to.text }}
-            </li>
-          {% endfor %}
-        </ul>
-      </li>
-    {% endfor %}
-  </ul>
+  <details>
+    <summary class="h6">
+      Cited works
+    </summary>
+    <ol>
+      {% for citation in cited_works %}
+        <li class="mb-3">
+          {{ citation.target_work.title }}
+          <ul class="list-unstyled">
+            {% for chunk in citation.similar_chunks %}
+              <li class="mb-2">
+                <details>
+                  <summary>
+                    <a href="{{ chunk.document.get_absolute_url }}#{{ chunk.portion_id }}">{{ chunk.get_title_display }}</a>
+                    <i class="bi-pj pj-ai"></i>
+                  </summary>
+                  {% if chunk.type == "provision" %}
+                    <la-akoma-ntoso
+                    frbr-expression-uri="{{ chunk.document.expression_frbr_uri }}"
+                    class="bg-light p-3 border my-2 ms-3"
+                    style="max-height: 25vh; overflow-y: auto;"
+                    portion-id="{{ chunk.portion }}">{{ chunk.provision_html|safe }}</la-akoma-ntoso>
+                  {% else %}
+                    <div class="bg-light p-3 border my-2 ms-3"
+                         style="max-height: 25vh;
+                                overflow-y: auto">{{ chunk.text }}</div>
+                  {% endif %}
+                </details>
+              </li>
+            {% endfor %}
+          </ul>
+        </li>
+      {% endfor %}
+    </ol>
+  </details>
   <hr/>
 </div>

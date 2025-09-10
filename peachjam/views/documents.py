@@ -403,6 +403,13 @@ class DocumentResearchView(DocumentDebugViewBase):
                 # cited["similar_chunks"] = get_similar_chunks(doc, embedding=self.object.embedding)
                 cited["similar_chunks"] = get_similar_chunks(doc, chunks=chunks)
 
+                # decorate
+                for chunk in cited["similar_chunks"]:
+                    if chunk.type == "provision":
+                        chunk.provision_html = chunk.document.get_provision_by_eid(
+                            chunk.portion
+                        )
+
         return context
 
 
@@ -410,7 +417,7 @@ def get_similar_chunks(document, chunks=None, embedding=None):
     from pgvector.django import MaxInnerProduct
 
     threshold = 0.5
-    top_k = 3
+    top_k = 2
     similar_chunks = []
 
     def get_chunks(text_embedding):
@@ -421,6 +428,7 @@ def get_similar_chunks(document, chunks=None, embedding=None):
                 similarity=MaxInnerProduct("text_embedding", text_embedding) * -1,
             )
             .filter(similarity__gt=threshold)
+            .select_related("document")
             .order_by("-similarity")[:top_k]
         )
 

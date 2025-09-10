@@ -298,6 +298,17 @@ class ContentChunk(models.Model):
             ],
         )
 
+    def get_title_display(self):
+        if self.title:
+            return self.title
+        elif self.type == "page":
+            return f"Page {self.portion}" if self.portion else "Page"
+
+    def portion_id(self):
+        if self.type == "page":
+            return f"page-{self.portion}"
+        return self.portion
+
     def __str__(self):
         return f'ContentChunk<#{self.pk} {self.document}: "{self.text}">'
 
