@@ -25,23 +25,25 @@ export default class ResearchContext {
 
         if (target) {
           // append a number
-          let a = document.createElement('span');
-          a.className = 'citation-link';
-          a.innerText = `${i}`;
-          a.addEventListener('click', (e) => {
+          let span = document.createElement('span');
+          span.className = 'citation-link';
+          span.innerText = `${i}`;
+          span.addEventListener('click', (e) => {
             e.preventDefault();
             target.scrollIntoView({behavior: 'smooth'});
           });
-          citation.insertAdjacentElement('afterend', a);
+          citation.insertAdjacentElement('afterend', span);
 
-          a = document.createElement('span');
-          a.className = 'citation-link';
-          a.innerText = `${i}`;
-          a.addEventListener('click', (e) => {
+          span = document.createElement('span');
+          span.className = 'citation-link';
+          span.innerText = `${i}`;
+          span.addEventListener('click', (e) => {
             e.preventDefault();
             citation.scrollIntoView({behavior: 'smooth'});
           });
-          target.querySelector('.title')?.insertAdjacentElement('beforeend', a);
+          target.querySelector('.title')?.insertAdjacentElement('beforeend', span);
+          // add a single space after the span so that it wraps correctly
+          span.insertAdjacentText('afterend', ' ');
 
           i++;
         }

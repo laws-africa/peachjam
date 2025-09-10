@@ -11,6 +11,21 @@
             data-frbr-uri="{{ citation.target_work.frbr_uri }}">
           <span class="title fw-medium">{{ citation.target_work.title }}</span>
           <ul class="list-unstyled">
+            {% for provision in citation.provisions %}
+              <li class="mb-0">
+                <details>
+                  <summary>
+                    <a href="{{ provision.document.get_absolute_url }}#{{ provision.provision_eid }}"
+                       target="_blank">{{ chunk.provision_title }}</a>
+                  </summary>
+                  <la-akoma-ntoso
+                  frbr-expression-uri="{{ chunk.document.expression_frbr_uri }}"
+                  class="bg-light p-3 border my-2 ms-3"
+                  style="max-height: 25vh; overflow-y: auto;"
+                  portion-id="{{ chunk.portion }}">{{ chunk.provision_by_eid|safe }}</la-akoma-ntoso>
+                </details>
+              </li>
+            {% endfor %}
             {% for chunk in citation.similar_chunks %}
               <li class="mb-0">
                 <details>

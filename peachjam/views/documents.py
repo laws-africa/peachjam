@@ -376,10 +376,20 @@ class DocumentResearchView(DocumentDebugViewBase):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["cited_works"] = [
-            {"target_work": c.target_work}
+        cited_works = {
+            c.target_work.pk: {
+                "target_work": c.target_work,
+                "citation": c,
+                "provisions": [],
+                "similar_chunks": [],
+            }
             for c in ExtractedCitation.for_citing_works(self.object.work)
-        ]
+        }
+
+        # get provision-level citations and fold them into the extracted citations
+        for citation in self.object.provision_citations.all():
+            if citation.work_id in cited_works:
+                cited_works[citation.work_id]["provisions"].append(citation)
 
         # what provisions are likely relevant for each cited document?
         # either compare embeddings portion-to-portion (n^2) or do it document-to-portion
@@ -391,24 +401,27 @@ class DocumentResearchView(DocumentDebugViewBase):
             .order_by("portion")
         )
 
-        for cited in context["cited_works"]:
-            doc = (
-                CoreDocument.objects.filter(work=cited["target_work"])
-                .latest_expression()
-                .first()
-            )
-            if doc:
-                log.info(f"Finding similar chunks in {doc}")
-                # use the main embedding
-                # cited["similar_chunks"] = get_similar_chunks(doc, embedding=self.object.embedding)
-                cited["similar_chunks"] = get_similar_chunks(doc, chunks=chunks)
+        # guess at provisions for works that don't have any
+        for cited in cited_works.values():
+            if not cited["provisions"]:
+                doc = (
+                    CoreDocument.objects.filter(work=cited["target_work"])
+                    .latest_expression()
+                    .first()
+                )
+                if doc:
+                    # get the top provisions that are most similar to this document
+                    log.info(f"Finding similar chunks in {doc}")
+                    cited["similar_chunks"] = get_similar_chunks(doc, chunks=chunks)
 
-                # decorate
-                for chunk in cited["similar_chunks"]:
-                    if chunk.type == "provision":
-                        chunk.provision_html = chunk.document.get_provision_by_eid(
-                            chunk.portion
-                        )
+                    # decorate with html
+                    for chunk in cited["similar_chunks"]:
+                        if chunk.type == "provision":
+                            chunk.provision_html = chunk.document.get_provision_by_eid(
+                                chunk.portion
+                            )
+
+        context["cited_works"] = list(cited_works.values())
 
         return context
 
