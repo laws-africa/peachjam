@@ -15,6 +15,7 @@ import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
 import { SavedDocumentModal } from './saved-documents';
 import { OfflineTaxonomyButton, OfflineDetails, OfflineTaxonomyStatus } from './Offline';
+import ResearchContext from './research-context';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
@@ -35,6 +36,7 @@ const components: Record<string, any> = {
   RelationshipEnrichments,
   ProvisionEnrichments,
   AnnotationsProvider,
+  ResearchContext,
   SavedDocumentModal,
   SearchTypeahead,
   ShareMenuItem,

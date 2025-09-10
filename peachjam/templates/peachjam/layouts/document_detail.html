@@ -493,9 +493,6 @@
             {% block extra-metadata %}{% endblock %}
             <hr class="mb-5" />
           </div>
-          <div hx-get="{% url 'document_research' document.pk %}"
-               hx-trigger="load"
-               class="spinner-when-empty"></div>
           <div class="container-fluid">
             {% block content %}
               {% include 'peachjam/_document_content.html' with show_sidebar=True %}
@@ -562,9 +559,7 @@
                id="ratifications-tab"
                role="tabpanel"
                aria-labelledby="ratifications-tab">
-            <div class="container">
-              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
-            </div>
+            <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
           </div>
         {% endif %}
         {% if perms.peachjam.can_debug_document %}

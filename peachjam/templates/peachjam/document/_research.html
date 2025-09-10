@@ -1,20 +1,22 @@
-<div class="container">
-  <h5>Research context</h5>
-  <details>
-    <summary class="h6">
+<div class="container"
+     data-component="ResearchContext"
+     class="research-context">
+  <details open>
+    <summary class="h5">
       Cited works
     </summary>
-    <ol>
+    <ol class="list-unstyled">
       {% for citation in cited_works %}
-        <li class="mb-3">
-          {{ citation.target_work.title }}
+        <li class="mb-3 bg-white border p-2"
+            data-frbr-uri="{{ citation.target_work.frbr_uri }}">
+          <span class="title fw-medium">{{ citation.target_work.title }}</span>
           <ul class="list-unstyled">
             {% for chunk in citation.similar_chunks %}
-              <li class="mb-2">
+              <li class="mb-0">
                 <details>
                   <summary>
-                    <a href="{{ chunk.document.get_absolute_url }}#{{ chunk.portion_id }}">{{ chunk.get_title_display }}</a>
-                    <i class="bi-pj pj-ai"></i>
+                    <a href="{{ chunk.document.get_absolute_url }}#{{ chunk.portion_id }}"
+                       target="_blank">{{ chunk.get_title_display }}</a>
                   </summary>
                   {% if chunk.type == "provision" %}
                     <la-akoma-ntoso
@@ -35,5 +37,4 @@
       {% endfor %}
     </ol>
   </details>
-  <hr/>
 </div>

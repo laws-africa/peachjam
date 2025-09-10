@@ -56,6 +56,16 @@ and #navigation-column for desktop screensize.
                 aria-selected="false">
           {% trans 'Search' %}
         </button>
+        <button class="nav-link"
+                id="research-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#research"
+                type="button"
+                role="tab"
+                aria-controls="research"
+                aria-selected="false">
+          Research
+        </button>
       </div>
     </nav>
     <div class="tab-content" id="navigation-tab-content">
@@ -88,6 +98,11 @@ and #navigation-column for desktop screensize.
           <div class="pdf-previews"></div>
         </div>
       {% endif %}
+      <div class="tab-pane" id="research">
+        <div hx-get="{% url 'document_research' document.pk %}"
+             hx-trigger="load"
+             class="spinner-when-empty"></div>
+      </div>
     </div>
   </div>
 </div>

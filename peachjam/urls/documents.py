@@ -122,7 +122,7 @@ urlpatterns = [
     ),
     path(
         "document/<int:pk>/research",
-        DocumentResearchView.as_view(),
+        cache_page(30 * 60)(DocumentResearchView.as_view()),
         name="document_research",
     ),
     path(
