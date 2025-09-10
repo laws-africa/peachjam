@@ -421,7 +421,9 @@ class DocumentResearchView(DocumentDebugViewBase):
                                 chunk.portion
                             )
 
-        context["cited_works"] = list(cited_works.values())
+        context["cited_works"] = sorted(
+            list(cited_works.values()), key=lambda c: c["target_work"].title
+        )
 
         return context
 
