@@ -73,7 +73,7 @@ class SavedDocument(models.Model):
         return not limit_reached
 
     def clean(self):
-        if not self.can_save_more_documents():
+        if not self.pk and not self.can_save_more_documents():
             raise ValidationError(_("Saved documents limit reached"))
 
     def delete(self, using=None, keep_parents=False):
