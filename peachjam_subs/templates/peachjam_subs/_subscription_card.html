@@ -21,11 +21,22 @@
     {% if subscription.is_active %}
       <div class="text-muted mt-3">{% trans "Active since" %} {{ subscription.active_at|date }}</div>
     {% elif subscription.starts_on %}
-      <div class="text-muted mt-3">{% trans "Begins on" %} {{ subscription.starts_on|date }}</div>
+      <div class="fw-bold mt-3">{% trans "Begins on" %} {{ subscription.starts_on|date }}</div>
     {% endif %}
     {% if subscription.ends_on %}
       <div class="text-muted mt-3">{% trans "Ends on" %} {{ subscription.ends_on|date }}</div>
     {% endif %}
     <div class="mt-2">{{ subscription.product.description|linebreaksbr }}</div>
+    {% if subscription.is_pending %}
+      <form action="{% url 'cancel_subscription' subscription.pk %}"
+            method="post">
+        {% csrf_token %}
+        <button type="submit"
+                class="btn btn-outline-danger mt-3"
+                data-confirm="{% trans "Are you sure?" %}">
+          {% trans "Cancel change" %}
+        </button>
+      </form>
+    {% endif %}
   </div>
 </div>
