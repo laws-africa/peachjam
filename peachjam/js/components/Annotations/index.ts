@@ -37,7 +37,8 @@ export class AnnotationsProvider implements IGutterEnrichmentProvider {
       const btn = document.createElement('button');
       btn.className = 'btn btn-outline-secondary';
       btn.type = 'button';
-      btn.innerText = i18next.t('Add comment...');
+      btn.title = i18next.t('Add comment');
+      btn.innerHTML = '<i class="bi bi-comment"></i>';
       return btn;
     }
 
