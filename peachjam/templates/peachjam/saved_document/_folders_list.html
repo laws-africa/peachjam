@@ -3,6 +3,7 @@
   <div class="d-flex justify-content-between align-items-center">
     <h2>{% trans 'Saved documents' %}</h2>
     <button class="btn btn-primary"
+            {% if folder_limit_reached %} disabled{% endif %}
             hx-target="#folders-list"
             hx-prompt="{% trans "Folder name" %}"
             hx-post="{% url 'folder_create' %}">
