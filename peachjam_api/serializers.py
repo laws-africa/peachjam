@@ -126,23 +126,24 @@ class AnnotationSerializer(serializers.ModelSerializer):
         return user_display(instance.user)
 
 
-class CitationLinkSerializer(serializers.ModelSerializer):
-    target_selectors = serializers.SerializerMethodField()
-
-    class Meta:
-        model = CitationLink
-        fields = ("id", "document", "text", "url", "target_id", "target_selectors")
-
-    def get_target_selectors(self, instance):
+class TargetSelectorField(serializers.JSONField):
+    def to_representation(self, value):
         # re-write QuoteSelector selector so that the prefix and suffix aren't too long for diff-match-patch to handle
         # (max 32 each)
-        for selector in instance.target_selectors:
+        for selector in value:
             if selector["type"] == "TextQuoteSelector":
                 # shorten the prefix and suffix to 30 characters
                 selector["prefix"] = selector["prefix"][-30:]
                 selector["suffix"] = selector["suffix"][:30]
+        return super().to_representation(value)
 
-        return instance.target_selectors
+
+class CitationLinkSerializer(serializers.ModelSerializer):
+    target_selectors = TargetSelectorField()
+
+    class Meta:
+        model = CitationLink
+        fields = ("id", "document", "text", "url", "target_id", "target_selectors")
 
 
 class LabelSerializer(serializers.ModelSerializer):
