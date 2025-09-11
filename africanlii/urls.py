@@ -63,6 +63,11 @@ urlpatterns = [
         views.CustomTaxonomyDetailView.as_view(),
         name="taxonomy_detail",
     ),
+    path(
+        "mooc/",
+        views.AGPMOOCView.as_view(),
+        name="mooc_landing_page",
+    ),
     # redirects for legacy africanlii.org URLS
     path(
         "commercial",
