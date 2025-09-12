@@ -100,6 +100,7 @@ urlpatterns = [
     # other apps
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     path("api/", include("peachjam_api.urls")),
+    path("", include("peachjam_subs.urls")),
 ]
 
 if settings.DEBUG:
