@@ -51,6 +51,7 @@ from django.views.generic.detail import DetailView
 from peachjam.forms import SaveDocumentForm
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam.resources import DownloadDocumentsResource
+from peachjam_subs.models import Subscription
 
 User = get_user_model()
 
@@ -90,6 +91,13 @@ class BaseFolderMixin(
                 ),
             )
         )
+
+        sub = Subscription.objects.active_for_user(self.request.user).first()
+        if sub:
+            (
+                context["folder_limit_reached"],
+                context["folder_upgrade"],
+            ) = sub.check_feature_limit("folder_limit")
 
         return context
 
@@ -206,12 +214,21 @@ class SavedDocumentFormMixin(
     def form_invalid(self, form):
         return HttpResponseBadRequest(form.errors)
 
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            next=self.request.GET.get("next") or "",
-            target=self.request.GET.get("target") or "",
-            **kwargs,
-        )
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        sub = Subscription.objects.active_for_user(self.object.user).first()
+        if sub:
+            (
+                context["saved_document_limit_reached"],
+                context["saved_document_upgrade"],
+            ) = sub.check_feature_limit("saved_document_limit")
+            (
+                context["folder_limit_reached"],
+                context["folder_upgrade"],
+            ) = sub.check_feature_limit("folder_limit")
+        context["next"] = self.request.GET.get("next") or ""
+        context["target"] = self.request.GET.get("target") or ""
+        return context
 
     def get_success_url(self):
         # by default, we always redirect to the bulk view which refreshes this document's saved doc details in the page
@@ -260,6 +277,12 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         self.object = form.save()
         # this ensures the form reflects the actual saved document
         form = self.form_class(instance=self.object)
+        return self.render_to_response(
+            self.get_context_data(saved_document=self.object, form=form)
+        )
+
+    def form_invalid(self, form):
+        self.object = SavedDocument(user=self.request.user, document=self.document)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )

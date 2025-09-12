@@ -2,10 +2,16 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
+from peachjam_subs.models import Subscription
 
 
 class SavedDocumentViewsTest(TestCase):
-    fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
+    fixtures = [
+        "tests/countries",
+        "documents/sample_documents",
+        "tests/users",
+        "tests/products",
+    ]
 
     def setUp(self):
         pjs = pj_settings()
@@ -24,6 +30,7 @@ class SavedDocumentViewsTest(TestCase):
             Permission.objects.get(codename="delete_saveddocument")
         )
         self.folder = Folder.objects.create(user=self.user, name="test")
+        Subscription.get_or_create_active_for_user(self.user)
 
     def assert_no_recursive(self, response):
         self.assertNotContains(
