@@ -16,23 +16,21 @@
           {% trans 'Saved documents' %}
         </button>
       </li>
-      {% if perms.peachjam_ml.view_documentembedding %}
-        <li class="nav-item">
-          <button class="nav-link"
-                  id="similar-docs-tab-{{ folder.pk }}"
-                  data-bs-toggle="tab"
-                  data-bs-target="#similar-docs-{{ folder.pk }}"
-                  hx-target="#similar-docs-list-{{ folder.pk }}"
-                  hx-get="{% url 'folder_similar_docs' folder.pk %}"
-                  type="button"
-                  role="tab"
-                  aria-controls="similar-docs-{{ folder.pk }}"
-                  aria-selected="false">
-            {% trans 'Suggested for this folder' %}
-            <i class="bi-pj pj-ai"></i>
-          </button>
-        </li>
-      {% endif %}
+      <li class="nav-item">
+        <button class="nav-link"
+                id="similar-docs-tab-{{ folder.pk }}"
+                data-bs-toggle="tab"
+                data-bs-target="#similar-docs-{{ folder.pk }}"
+                hx-target="#similar-docs-list-{{ folder.pk }}"
+                hx-get="{% url 'folder_similar_docs' folder.pk %}"
+                type="button"
+                role="tab"
+                aria-controls="similar-docs-{{ folder.pk }}"
+                aria-selected="false">
+          {% trans 'Suggested for this folder' %}
+          <i class="bi-pj pj-ai"></i>
+        </button>
+      </li>
     </ul>
   {% endif %}
 {% endblock %}
@@ -44,13 +42,15 @@
          aria-labelledby="saved-doc-tab-{{ folder.pk }}">
       {{ block.super }}
     </div>
-    {% if perms.peachjam_ml.view_documentembedding %}
-      <div class="tab-pane"
-           id="similar-docs-{{ folder.pk }}"
-           role="tabpanel"
-           aria-labelledby="similar-docs-tab-{{ folder.pk }}">
+    <div class="tab-pane"
+         id="similar-docs-{{ folder.pk }}"
+         role="tabpanel"
+         aria-labelledby="similar-docs-tab-{{ folder.pk }}">
+      {% if perms.peachjam_ml.view_documentembedding %}
         <div id="similar-docs-list-{{ folder.pk }}" class="spinner-when-empty"></div>
-      </div>
-    {% endif %}
+      {% else %}
+        {% include "peachjam/document/_access_restricted.html" %}
+      {% endif %}
+    </div>
   </div>
 {% endblock %}
