@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView
 
 from peachjam_subs.models import Subscription
@@ -26,3 +27,7 @@ class CancelSubscriptionView(LoginRequiredMixin, DeleteView):
             _("Your pending subscription change has been cancelled."),
         )
         return redirect(self.get_success_url())
+
+
+class SubscribeView(TemplateView):
+    template_name = "peachjam_subs/subscribe.html"
