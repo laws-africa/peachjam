@@ -83,10 +83,15 @@ class Product(models.Model):
         default=999999,
         help_text="The is the maximum number of folders a user can create.",
     )
+    search_alert_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of search alerts a user can create.",
+    )
 
     FEATURES_WITH_LIMIT = [
         "saved_document_limit",
         "folder_limit",
+        "search_alert_limit",
     ]
 
     class Meta:
@@ -493,6 +498,7 @@ class Subscription(models.Model):
         feature_map = {
             "saved_document_limit": self.user.saved_documents,
             "folder_limit": self.user.folders,
+            "search_alert_limit": self.user.saved_searches,
         }
         manager = feature_map.get(feature)
         if not manager:
