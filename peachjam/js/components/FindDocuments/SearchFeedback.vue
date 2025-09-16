@@ -115,7 +115,7 @@ export default {
     };
   },
   async mounted () {
-    fetch('/accounts/user/', {
+    fetch('/api/user', {
       method: 'get'
     }).then(async response => {
       if (response.ok) {

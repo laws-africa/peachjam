@@ -70,7 +70,7 @@ export default {
     async getUser () {
       if (!this.editable) return;
       try {
-        const resp = await fetch('/accounts/user/');
+        const resp = await fetch('/api/user');
         if (resp.ok) {
           this.user = await resp.json();
         }
