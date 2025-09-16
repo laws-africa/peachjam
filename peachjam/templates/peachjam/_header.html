@@ -17,7 +17,9 @@
         {% endblock %}
       </a>
       {% block navbar-user-menu %}
-        {% include "peachjam/_user_menu.html" %}
+        <span hx-get="{% url 'user_navbar_menu' %}"
+              hx-trigger="load"
+              hx-swap="outerHTML"></span>
       {% endblock %}
       <button class="navbar-toggler"
               type="button"

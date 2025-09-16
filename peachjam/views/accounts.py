@@ -58,3 +58,7 @@ class LoggedOutView(TemplateView):
 
     template_name = "account/logged_out.html"
     extra_context = {"reset_analytics": True}
+
+
+class NavbarMenuView(TemplateView):
+    template_name = "peachjam/_user_menu.html"
