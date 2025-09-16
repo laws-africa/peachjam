@@ -1,3 +1,5 @@
+import re
+
 from django.conf import settings
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
@@ -93,6 +95,8 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         "/_",
     ]
 
+    lang_path_re = re.compile("^/[a-z]{2}/")
+
     def _should_update_cache(self, request, response):
         if (
             hasattr(request, "_cache_update_cache")
@@ -102,6 +106,12 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
             return False
 
         for prefix in self.never_cache_prefixes:
+            path = request.path
+
+            # strip language-based path
+            if self.lang_path_re.match(path):
+                path = path[3:]
+
             if request.path.startswith(prefix):
                 return False
 
