@@ -26,6 +26,7 @@ from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import Product
 
 
@@ -426,7 +427,8 @@ class DocumentUncommencedProvisionListView(DetailView):
         return context
 
 
-class UncommencedProvisionListView(LegislationListView):
+class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
+    permission_required = "view_uncommencedprovision"
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
     latest_expression_only = True
 
@@ -459,7 +461,8 @@ class UnconstitutionalProvisionDetailView(DetailView):
     context_object_name = "enrichment"
 
 
-class UnconstitutionalProvisionListView(LegislationListView):
+class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
+    permission_required = "view_unconstitutionalprovision"
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
