@@ -27,7 +27,6 @@ from peachjam.views.generic_views import (
     FilteredDocumentListView,
 )
 from peachjam_subs.mixins import SubscriptionRequiredMixin
-from peachjam_subs.models import Product
 
 
 class LegislationListView(FilteredDocumentListView):
@@ -620,20 +619,8 @@ class DocumentProvisionCitationView(
         )
         return qs
 
-    def check_for_perms(self, *args, **kwargs):
-        perm = "peachjam.view_provisioncitation"
-        user_has_perm = self.request.user.has_perm(perm)
-        lowest_product = Product.get_lowest_product_for_permission(perm)
-        return {
-            "user_has_perm": user_has_perm,
-            "lowest_product": lowest_product,
-        }
-
     def get_context_data(self, **kwargs):
-        context = self.check_for_perms()
-        # include citing documents only if user has permission
-        if context["user_has_perm"]:
-            context.update(super().get_context_data(**kwargs))
+        context = super().get_context_data(**kwargs)
         context["document"] = self.document
         context["provision_title"] = context["document"].friendly_provision_title(
             self.provision_eid

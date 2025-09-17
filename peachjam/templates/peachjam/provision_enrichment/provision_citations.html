@@ -23,9 +23,9 @@
 {% endblock %}
 {% block count-and-search %}{% endblock %}
 {% block document-table %}
-  {% if user_has_perm %}
-    {% include "peachjam/provision_enrichment/_provision_citations_table_form.html" %}
-  {% else %}
+  {% if subscription_required %}
     {% include "peachjam_subs/_subscription_required.html" %}
+  {% else %}
+    {% include "peachjam/provision_enrichment/_provision_citations_table_form.html" %}
   {% endif %}
 {% endblock %}
