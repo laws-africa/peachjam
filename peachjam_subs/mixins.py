@@ -5,11 +5,37 @@ from peachjam_subs.models import Product
 
 
 class SubscriptionRequiredMixin(PermissionRequiredMixin):
+    subscription_required_template = "peachjam_subs/subscription_required.html"
+
     def handle_no_permission(self):
-        lowest_product = Product.get_lowest_product_for_permission(
-            self.permission_required
+        perm = (
+            self.permission_required[0]
+            if isinstance(self.permission_required, (list, tuple))
+            else self.permission_required
         )
-        if lowest_product:
-            context = {"subscription_required": True, "lowest_product": lowest_product}
-            return render(self.request, self.template_name, context, status=403)
-        return super().handle_no_permission()
+
+        lowest_product = Product.get_lowest_product_for_permission(perm)
+
+        context = {
+            "subscription_required": True,
+            "lowest_product": lowest_product,
+        }
+
+        # Merge in extra context
+        context.update(self.get_subscription_required_context())
+
+        return render(
+            self.request,
+            self.get_subscription_required_template(),
+            context,
+            status=403,
+        )
+
+    def get_subscription_required_context(self):
+        """
+        Override this in your view to add extra context for the denied template.
+        """
+        return {}
+
+    def get_subscription_required_template(self):
+        return self.subscription_required_template
