@@ -46,11 +46,7 @@
          id="similar-docs-{{ folder.pk }}"
          role="tabpanel"
          aria-labelledby="similar-docs-tab-{{ folder.pk }}">
-      {% if perms.peachjam_ml.view_documentembedding %}
-        <div id="similar-docs-list-{{ folder.pk }}" class="spinner-when-empty"></div>
-      {% else %}
-        {% include "peachjam/document/_access_restricted.html" %}
-      {% endif %}
+      <div id="similar-docs-list-{{ folder.pk }}" class="spinner-when-empty"></div>
     </div>
   </div>
 {% endblock %}

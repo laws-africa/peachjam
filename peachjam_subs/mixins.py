@@ -5,7 +5,7 @@ from peachjam_subs.models import Product
 
 
 class SubscriptionRequiredMixin(PermissionRequiredMixin):
-    subscription_required_template = "peachjam_subs/subscription_required.html"
+    subscription_required_template = "peachjam_subs/_subscription_required.html"
 
     def handle_no_permission(self):
         perm = (
@@ -28,7 +28,7 @@ class SubscriptionRequiredMixin(PermissionRequiredMixin):
             self.request,
             self.get_subscription_required_template(),
             context,
-            status=403,
+            status=200,
         )
 
     def get_subscription_required_context(self):

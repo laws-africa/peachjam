@@ -39,6 +39,9 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
     template_name = "peachjam/_similar_documents_folder.html"
     model = Folder
 
+    def get_subscription_required_template(self):
+        return self.template_name
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         doc_ids = self.object.saved_documents.values_list("document_id", flat=True)
