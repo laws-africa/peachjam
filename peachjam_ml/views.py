@@ -5,6 +5,7 @@ from django.views.generic import DetailView
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
 from peachjam_ml.models import DocumentEmbedding
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -33,7 +34,7 @@ class SimilarDocumentsDocumentDetailView(PermissionRequiredMixin, DetailView):
         return context
 
 
-class SimilarDocumentsFolderView(PermissionRequiredMixin, DetailView):
+class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/_similar_documents_folder.html"
     model = Folder
