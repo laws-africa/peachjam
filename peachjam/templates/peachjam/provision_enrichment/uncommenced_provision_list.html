@@ -11,7 +11,7 @@
 {% block count-and-search %}{% endblock %}
 {% block document-table %}
   {% if subscription_required %}
-    {% include "peachjam/document/_access_restricted.html" %}
+    {% include "peachjam_subs/_subscription_required.html" %}
   {% else %}
     {% include "peachjam/provision_enrichment/_uncommenced_table_form.html" %}
   {% endif %}

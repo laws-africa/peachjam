@@ -428,9 +428,12 @@ class DocumentUncommencedProvisionListView(DetailView):
 
 
 class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
-    permission_required = "view_uncommencedprovision"
+    permission_required = "peachjam.view_uncommencedprovision"
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
     latest_expression_only = True
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
     def get_template_names(self):
         if self.request.htmx:
@@ -462,11 +465,14 @@ class UnconstitutionalProvisionDetailView(DetailView):
 
 
 class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
-    permission_required = "view_unconstitutionalprovision"
+    permission_required = "peachjam.view_unconstitutionalprovision"
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
     exclude_facets = ["alphabet", "years"]
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
     def get_template_names(self):
         if self.request.htmx:
@@ -543,8 +549,23 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-class DocumentProvisionCitationView(FilteredDocumentListView):
+class DocumentProvisionCitationView(
+    SubscriptionRequiredMixin, FilteredDocumentListView
+):
+    permission_required = "peachjam.view_provisioncitation"
     template_name = "peachjam/provision_enrichment/provision_citations.html"
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return {
+            "document": self.document,
+            "provision_title": self.document.friendly_provision_title(
+                self.provision_eid
+            ),
+            "provision_html": self.document.get_provision_by_eid(self.provision_eid),
+        }
 
     def get_template_names(self):
         if self.request.htmx:

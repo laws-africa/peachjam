@@ -26,6 +26,6 @@
   {% if user_has_perm %}
     {% include "peachjam/provision_enrichment/_provision_citations_table_form.html" %}
   {% else %}
-    {% include "peachjam/document/_access_restricted.html" %}
+    {% include "peachjam_subs/_subscription_required.html" %}
   {% endif %}
 {% endblock %}
