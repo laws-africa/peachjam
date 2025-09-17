@@ -600,7 +600,7 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
         return qs
 
     def check_for_perms(self, *args, **kwargs):
-        perm = "view_provisioncitation"
+        perm = "peachjam.view_provisioncitation"
         user_has_perm = self.request.user.has_perm(perm)
         lowest_product = Product.get_lowest_product_for_permission(perm)
         return {

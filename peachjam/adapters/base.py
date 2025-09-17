@@ -50,6 +50,11 @@ class Adapter:
                 "verb": "is replaced by",
                 "reverse_verb": "replaces",
             },
+            "disapplied-by": {
+                "name": "disapplied by",
+                "verb": "is disapplied by",
+                "reverse_verb": "disapplies",
+            },
             "commenced-by": {
                 "name": "commenced by",
                 "verb": "is commenced by",
