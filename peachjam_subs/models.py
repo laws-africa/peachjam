@@ -113,11 +113,28 @@ class Product(models.Model):
         return self.name
 
     @classmethod
-    def get_lowest_product_for_permission(cls, permission_codename):
-        """Return the best (lowest tier) product offering available to the user that includes the given feature."""
+    def get_lowest_product_for_permission(cls, perm):
+        """
+        Return the best (lowest tier) product offering that includes the given permission.
+        Accepts either 'app_label.codename' or just 'codename'.
+        """
+        # If perm looks like "app_label.codename", split it
+        if "." in perm:
+            app_label, codename = perm.split(".", 1)
+        else:
+            # Lookup the Permission by codename only (could raise MultipleObjectsReturned if not unique)
+            try:
+                permission = Permission.objects.get(codename=perm)
+            except Permission.DoesNotExist:
+                return None
+            app_label, codename = permission.content_type.app_label, permission.codename
+
         product = (
             subscription_settings()
-            .key_products.filter(features__permissions__codename=permission_codename)
+            .key_products.filter(
+                features__permissions__content_type__app_label=app_label,
+                features__permissions__codename=codename,
+            )
             .order_by("tier")
             .first()
         )
