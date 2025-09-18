@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
 
-  deploy-agp:
+  deploy-africanlii:
     if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to africanlii.org
     runs-on: ubuntu-latest
@@ -22,7 +22,7 @@ jobs:
       uses: dokku/github-action@master
       with:
         ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-        git_remote_url: 'ssh://dokku@web3.laws.africa:22/agp'
+        git_remote_url: 'ssh://dokku@web2.laws.africa:22/africanlii'
         git_push_flags: '--force'
 
   deploy-ulii:
@@ -93,7 +93,7 @@ jobs:
 
   deploy-ghalii:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-agp
+    needs: deploy-africanlii
     name: Deploy to ghalii
     runs-on: ubuntu-latest
     steps:
