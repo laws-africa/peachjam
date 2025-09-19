@@ -21,4 +21,5 @@ class AGPReportsGuidesListView(DocumentListView):
 
 
 class AGPMOOCView(TemplateView):
+    navbar_link = "mooc"
     template_name = "africanlii/mooc.html"
