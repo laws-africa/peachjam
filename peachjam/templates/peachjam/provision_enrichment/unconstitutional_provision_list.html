@@ -9,5 +9,9 @@
 {% endblock %}
 {% block count-and-search %}{% endblock %}
 {% block document-table %}
-  {% include "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html" %}
+  {% if subscription_required %}
+    {% include "peachjam_subs/_subscription_required.html" %}
+  {% else %}
+    {% include "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html" %}
+  {% endif %}
 {% endblock %}

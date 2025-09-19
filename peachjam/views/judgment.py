@@ -7,6 +7,7 @@ from django.views.generic import TemplateView
 from peachjam.models import CourtClass, Judgment
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
+from peachjam_subs.models import Product
 
 
 class JudgmentListView(TemplateView):
@@ -41,6 +42,17 @@ class JudgmentListView(TemplateView):
 class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
     template_name = "peachjam/judgment_detail.html"
+
+    def get_subscription_permissions_context(self, context):
+        # check summary access
+        if not self.request.user.has_perm("peachjam.can_view_document_summary"):
+            context["summary_subscription_required"] = True
+            context[
+                "lowest_summary_product"
+            ] = Product.get_lowest_product_for_permission(
+                "peachjam.can_view_document_summary"
+            )
+        return context
 
     def get_notices(self):
         notices = super().get_notices()
