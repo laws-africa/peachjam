@@ -88,6 +88,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "peachjam.middleware.SanityCheckCacheMiddleware",
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
