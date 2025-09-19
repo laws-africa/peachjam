@@ -86,13 +86,12 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
 
     # url prefixes that should never be cached
     never_cache_prefixes = [
+        "/_",
         "/accounts/",
         "/admin/",
         "/api/",
-        "/follow/",
+        "/me/",
         "/my/",
-        "/saved-documents/",
-        "/_",
     ]
 
     lang_path_re = re.compile("^/[a-z]{2}/")
@@ -106,13 +105,13 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
             return False
 
         for prefix in self.never_cache_prefixes:
-            path = request.path
+            if request.path.startswith(prefix):
+                return False
 
             # strip language-based path
-            if self.lang_path_re.match(path):
-                path = path[3:]
-
-            if request.path.startswith(prefix):
+            if self.lang_path_re.match(request.path) and request.path[3:].startswith(
+                prefix
+            ):
                 return False
 
         # support never_cache and explicit page cache times
@@ -120,10 +119,7 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         if max_age is not None:
             return False
 
-        # anonymous and non-staff users should see cached content
-        return getattr(request, "user", None) is not None and (
-            request.user.is_anonymous or not request.user.is_staff
-        )
+        return True
 
 
 class VaryOnHxHeadersMiddleware(MiddlewareMixin):

@@ -65,11 +65,6 @@ urlpatterns = [
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     # documents
     path("", include("peachjam.urls.documents")),
-    # user-related
-    path("accounts/", include("peachjam.urls.accounts")),
-    path("saved-documents/", include("peachjam.urls.saved_documents")),
-    path("follow/", include("peachjam.urls.following")),
-    path("my/", include("peachjam.urls.my")),
     # general
     path("about/", AboutPageView.as_view(), name="about"),
     path(
@@ -82,4 +77,17 @@ urlpatterns = [
     path("comments/", include("peachjam.urls.comments")),
     # other apps
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
+    # user auth and account management
+    path("accounts/", include("peachjam.urls.accounts")),
+    # user-specific page fragments
+    path(
+        "me/",
+        include(
+            [
+                path("saved-documents/", include("peachjam.urls.saved_documents")),
+                path("follow/", include("peachjam.urls.following")),
+            ]
+        ),
+    ),
+    path("my/", include("peachjam.urls.my")),
 ]

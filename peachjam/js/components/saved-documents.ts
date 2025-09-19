@@ -41,6 +41,6 @@ export function loadSavedDocuments (root: HTMLElement | null = null) {
     const el = document.createElement('div');
     const query = Array.from(ids).map(id => `doc_id=${id}`).join('&');
     // @ts-ignore
-    window.htmx.ajax('get', '/saved-documents/fragments?' + query, el);
+    window.htmx.ajax('get', '/me/saved-documents/fragments?' + query, el);
   }
 }
