@@ -32,6 +32,9 @@ class AfricanliiViewsTest(TestCase):
         recent_articles = [r_a.title for r_a in response.context.get("recent_articles")]
         self.assertEqual(0, len(recent_articles))
 
+        # should not set csrf token
+        self.assertNotContains(response, "csrfmiddlewaretoken")
+
     def test_legal_instrument_listing(self):
         response = self.client.get("/legal-instruments/")
         self.assertEqual(response.status_code, 301)
