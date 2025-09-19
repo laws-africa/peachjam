@@ -1,0 +1,14 @@
+{% load i18n %}
+<div class="mb-4">
+  {% for subscription in user.subscriptions.all %}
+    {% if subscription.is_active %}
+      {% include 'peachjam_subs/_subscription_card.html' %}
+    {% endif %}
+  {% endfor %}
+</div>
+{% for subscription in user.subscriptions.all %}
+  {% if subscription.is_pending and subscription.starts_on %}
+    <h4>{% trans "Upcoming change" %}</h4>
+    {% include 'peachjam_subs/_subscription_card.html' %}
+  {% endif %}
+{% endfor %}
