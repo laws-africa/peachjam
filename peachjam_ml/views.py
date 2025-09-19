@@ -37,10 +37,13 @@ class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
         return context
 
 
-class SimilarDocumentsFolderView(PermissionRequiredMixin, DetailView):
+class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/_similar_documents_folder.html"
     model = Folder
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
