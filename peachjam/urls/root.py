@@ -5,17 +5,11 @@ from peachjam.views import (
     AboutPageView,
     AuthorDetailView,
     BookListView,
-    DocumentUncommencedProvisionListView,
     HomePageView,
     JournalListView,
-    LegislationListView,
     PlaceDetailView,
     PocketLawResources,
     TermsOfUsePageView,
-    UncommencedProvisionDetailView,
-    UncommencedProvisionListView,
-    UnconstitutionalProvisionDetailView,
-    UnconstitutionalProvisionListView,
 )
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -33,37 +27,12 @@ urlpatterns = [
     path("gazettes/", include("peachjam.urls.gazettes")),
     path("journals/", JournalListView.as_view(), name="journal_list"),
     path("judgments/", include("peachjam.urls.judgments")),
-    path("legislation/", LegislationListView.as_view(), name="legislation_list"),
-    path(
-        "uncommenced-provisions/<int:pk>",
-        UncommencedProvisionDetailView.as_view(),
-        name="uncommenced_provision_detail",
-    ),
-    path(
-        "unconstitutional-provisions/<int:pk>",
-        UnconstitutionalProvisionDetailView.as_view(),
-        name="unconstitutional_provision_detail",
-    ),
-    path(
-        "document-uncommenced-provisions/<int:pk>",
-        DocumentUncommencedProvisionListView.as_view(),
-        name="document_uncommenced_provision_list",
-    ),
-    path(
-        "uncommenced-provisions/",
-        UncommencedProvisionListView.as_view(),
-        name="uncommenced_provision_list",
-    ),
-    path(
-        "unconstitutional-provisions/",
-        UnconstitutionalProvisionListView.as_view(),
-        name="unconstitutional_provision_list",
-    ),
     path("taxonomy/", include("peachjam.urls.taxonomies")),
     # detail views
     path("authors/<slug:code>/", AuthorDetailView.as_view(), name="author"),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     # documents
+    path("", include("peachjam.urls.legislation")),
     path("", include("peachjam.urls.documents")),
     # general
     path("about/", AboutPageView.as_view(), name="about"),
