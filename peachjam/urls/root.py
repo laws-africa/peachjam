@@ -49,6 +49,6 @@ urlpatterns = [
     # user auth and account management
     path("accounts/", include("peachjam.urls.accounts")),
     # user-specific page fragments
-    path("me/", include("peachjam.urls.me")),
+    path("user/", include("peachjam.urls.user")),
     path("my/", include("peachjam.urls.my")),
 ]

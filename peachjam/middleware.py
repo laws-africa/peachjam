@@ -93,8 +93,8 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         "/accounts/",
         "/admin/",
         "/api/",
-        "/me/",
         "/my/",
+        "/user/",
     ]
 
     lang_path_re = re.compile("^/[a-z]{2}/")
