@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import DetailView, ListView, TemplateView, View
 from lxml import html
 
 from peachjam.customerio import get_customerio
@@ -636,6 +636,13 @@ class CSRFTokenView(View):
 
     def get(self, request, *args, **kwargs):
         return HttpResponse(get_token(request), content_type="text/plain")
+
+
+class MessagesView(TemplateView):
+    """Renders django.contrib.messages messages, which allows us to use cookie-based messages with public caching.
+    This view is called via htmx on every page load."""
+
+    template_name = "peachjam/_messages.html"
 
 
 class YearMixin:
