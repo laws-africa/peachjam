@@ -16,6 +16,7 @@ from django.http.response import (
 )
 from django.shortcuts import redirect, reverse
 from django.template.loader import render_to_string
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -124,8 +125,7 @@ class DocumentSearchView(TemplateView):
             "can_download": self.request.user.has_perm(
                 "peachjam_search.download_search"
             ),
-            "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"]
-            and self.request.user.has_perm("peachjam_search.semantic_search"),
+            "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"],
         }
 
         return self.render(response)
@@ -171,9 +171,7 @@ class DocumentSearchView(TemplateView):
         form.configure_engine(engine)
 
         engine.explain = self.request.user.has_perm("peachjam_search.debug_search")
-        if settings.PEACHJAM["SEARCH_SEMANTIC"] and self.request.user.has_perm(
-            "peachjam_search.semantic_search"
-        ):
+        if settings.PEACHJAM["SEARCH_SEMANTIC"]:
             engine.mode = form.cleaned_data.get("mode") or engine.mode
 
         return engine
@@ -234,8 +232,12 @@ class DocumentSearchView(TemplateView):
         data = fmt.export_data(dataset)
 
         response = HttpResponse(data, content_type=fmt.get_content_type())
+        # prevent caching, so that we can enforce download permissions
+        add_never_cache_headers(response)
+
         fname = "search-results." + fmt.get_extension()
         response["Content-Disposition"] = f'attachment; filename="{fname}"'
+
         return response
 
 
