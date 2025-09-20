@@ -344,6 +344,7 @@ export default {
         date_from: null
       },
       googleActive: false,
+      urlPrefix: document.body.getAttribute('data-url-lang-prefix'),
       mode: 'text'
     };
     const facets = [
@@ -800,7 +801,11 @@ export default {
         try {
           const params = this.generateSearchParams();
           const previousId = this.searchInfo.trace_id || '';
-          const url = `/search/api/documents/?${params.toString()}`;
+          let url = `${this.urlPrefix}/search/api/documents/`;
+          if (peachjam.user.is_staff) {
+            url = url + 'explain';
+          }
+          url = url + `?${params.toString()}`;
 
           if (pushState) {
             window.history.pushState(
@@ -855,7 +860,7 @@ export default {
       try {
         const params = this.generateSearchParams();
         params.append('facets', '1');
-        const url = `/search/api/documents/facets?${params.toString()}`;
+        const url = `${this.urlPrefix}/search/api/documents/facets?${params.toString()}`;
         params.delete('facets');
         const response = await fetch(url);
 
@@ -897,7 +902,7 @@ export default {
         params.set('position', item.getAttribute('data-position'));
         params.set('search_trace', this.searchInfo.trace_id);
         try {
-          fetch('/search/api/click/', {
+          fetch(`${this.urlPrefix}/search/api/click/`, {
             method: 'POST',
             headers: await authHeaders(),
             body: params
@@ -942,7 +947,7 @@ export default {
         if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {
           this.linkedTraces.add(newId);
           try {
-            fetch(`/search/api/link-traces?previous=${previousId}&new=${newId}`, {
+            fetch(`${this.urlPrefix}/search/api/link-traces?previous=${previousId}&new=${newId}`, {
               method: 'POST',
               headers: await authHeaders()
             });
@@ -959,8 +964,7 @@ export default {
 
     downloadUrl () {
       const params = this.generateSearchParams();
-      params.set('format', 'xlsx');
-      return `/search/api/documents/?${params.toString()}`;
+      return `${this.urlPrefix}/search/api/documents/download?${params.toString()}`;
     }
   }
 };
