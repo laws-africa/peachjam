@@ -22,6 +22,7 @@ export interface PeachJamConfig {
   appName: string;
   pdfWorker: string;
   userHelpLink: string;
+  urlLangPrefix: string;
   sentry: {
     dsn: string | null;
     environment: string | null;
@@ -35,6 +36,7 @@ class PeachJam {
     appName: 'Peach Jam',
     pdfWorker: '/static/js/pdf.worker-prod.js',
     userHelpLink: '',
+    urlLangPrefix: '',
     sentry: {
       dsn: null,
       environment: null
@@ -363,8 +365,8 @@ class PeachJam {
 
   loaded () {
     // use htmx to populate user-specific content islands when the page loads.
-    const prefix = document.body.getAttribute('data-url-lang-prefix');
-    htmxAjax('get', `${prefix}/user/loaded`);
+    // @ts-ignore
+    htmxAjax('get', `${this.config.urlLangPrefix}/user/loaded`);
   }
 }
 

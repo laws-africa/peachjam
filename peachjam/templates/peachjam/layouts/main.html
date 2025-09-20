@@ -75,17 +75,6 @@
   <!-- must be last script to load -->
   <script defer src="{% static 'js/app-prod.js' %}"></script>
 {% endblock %}
-{% block body-tags %}
-  {{ block.super }}
-  {# set the language-based URL prefix for hard-coded Javascript URLs #}
-  {% get_current_language as LANGUAGE_CODE %}
-  {% get_available_languages as LANGUAGES %}
-  {% if LANGUAGES|length > 1 %}
-    data-url-lang-prefix="/{{ LANGUAGE_CODE }}"
-  {% else %}
-    data-url-lang-prefix=""
-  {% endif %}
-{% endblock %}
 {% block header %}
   {% include 'peachjam/_header.html' %}
 {% endblock %}

@@ -40,7 +40,7 @@ export function loadSavedDocuments (root: HTMLElement | null = null) {
 
   if (ids.size) {
     const query = Array.from(ids).map(id => `doc_id=${id}`).join('&');
-    const prefix = document.body.getAttribute('data-url-lang-prefix');
-    htmxAjax('get', `${prefix}/user/saved-documents/fragments?${query}`);
+    // @ts-ignore
+    htmxAjax('get', `${peachjam.config.urlLangPrefix}/user/saved-documents/fragments?${query}`);
   }
 }

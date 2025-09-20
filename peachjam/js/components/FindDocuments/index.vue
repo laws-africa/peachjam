@@ -342,7 +342,7 @@ export default {
         date_from: null
       },
       googleActive: false,
-      urlPrefix: document.body.getAttribute('data-url-lang-prefix'),
+      urlPrefix: peachjam.config.urlLangPrefix,
       mode: 'text'
     };
     const facets = [

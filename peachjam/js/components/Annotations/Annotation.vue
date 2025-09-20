@@ -104,8 +104,8 @@ export default {
 
       const isDocumentSaved = document.querySelector('[data-saved-document]') !== null;
       if (!isDocumentSaved) {
-        const prefix = document.body.getAttribute('data-url-lang-prefix');
-        await htmxAjax('post', `${prefix}/user/saved-documents/create?doc_id=${this.annotation.document}`);
+        // @ts-ignore
+        await htmxAjax('post', `${peachjam.config.urlLangPrefix}/user/saved-documents/create?doc_id=${this.annotation.document}`);
       }
 
       const headers = await authHeaders();

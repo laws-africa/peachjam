@@ -29,6 +29,7 @@ def general(request):
             "appName": settings.PEACHJAM["APP_NAME"],
             "pdfWorker": static("js/pdf.worker-prod.js"),
             "userHelpLink": pj_settings().user_help_link,
+            "urlLangPrefix": f"/{language}" if len(settings.LANGUAGES) > 1 else "",
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
