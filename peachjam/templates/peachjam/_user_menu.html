@@ -57,7 +57,7 @@
   <ul class="navbar-nav ms-auto me-2">
     <li class="nav-item">
       <a class="btn btn-primary"
-         href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">
+         href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}">
         <i class="bi bi-person-circle"></i>
         {% trans "Log in" %}
       </a>
