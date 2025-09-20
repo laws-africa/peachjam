@@ -115,7 +115,7 @@ def split(value, sep=None):
 @register.filter
 def get_follow_params(obj):
     # this would be better as a model method
-    return f"{'_'.join(obj._meta.verbose_name.lower().split())}={obj.pk}"
+    return f"{obj._meta.model_name}={obj.pk}"
 
 
 @register.simple_tag
