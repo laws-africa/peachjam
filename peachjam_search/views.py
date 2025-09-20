@@ -30,6 +30,7 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from django_htmx.http import HttpResponseClientRedirect
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
@@ -126,10 +127,6 @@ class DocumentSearchView(TemplateView):
                 },
             ),
             "trace_id": str(trace.id) if trace else None,
-            # TODO
-            "can_download": self.request.user.has_perm(
-                "peachjam_search.download_search"
-            ),
             "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"],
         }
 
@@ -179,8 +176,16 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        if not self.request.user.has_perm("peachjam_search.download_search"):
+        if not request.user.has_perm("peachjam_search.download_search"):
+            if request.htmx:
+                # this is the initial request to download, show a friendly permission-denied box
+                self.template_name = "peachjam_search/_download_403.html"
+                return self.render_to_response({})
             return HttpResponseForbidden()
+
+        if request.htmx:
+            # the download is allowed, do a full redirect to start it
+            return HttpResponseClientRedirect(request.get_full_path())
 
         # only need the ids
         engine.source = ["_id"]

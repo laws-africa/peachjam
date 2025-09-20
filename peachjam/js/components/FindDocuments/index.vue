@@ -211,10 +211,8 @@
                   <div class="me-2">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
                     <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
-                    <span v-if="searchInfo.can_download">
                       &nbsp;
-                      <a :href="downloadUrl()" target="_blank">{{ $t('Download to Excel') }}</a>
-                    </span>
+                    <a href="#" :hx-get="downloadUrl()" hx-swap="outerHTML">{{ $t('Download to Excel') }}</a>
                   </div>
                   <select
                     v-model="ordering"
