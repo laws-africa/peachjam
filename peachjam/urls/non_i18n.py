@@ -7,6 +7,7 @@ from peachjam.views.generic_views import CSRFTokenView
 
 # these urls do NOT get i18n language prefixes
 urlpatterns = [
+    path("", include("peachjam.urls.offline")),
     path("feeds/", include("peachjam.urls.feeds")),
     path("api/", include("peachjam_api.urls")),
     path("i18n/", include("peachjam.urls.i18n")),
@@ -19,10 +20,6 @@ urlpatterns = [
     ),
     # django-markdown-editor for admin area
     path("martor/", include("martor.urls")),
-    # offline documents
-    path("", include("peachjam.urls.offline")),
-    # other apps
-    path("api/", include("peachjam_api.urls")),
 ]
 
 if settings.DEBUG:
