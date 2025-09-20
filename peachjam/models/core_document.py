@@ -552,7 +552,9 @@ class CoreDocument(PolymorphicModel):
         return self._meta.get_fields()
 
     def get_absolute_url(self):
-        return self.expression_frbr_uri
+        return reverse(
+            "document_detail", kwargs={"frbr_uri": self.expression_frbr_uri[1:]}
+        )
 
     @property
     def year(self):

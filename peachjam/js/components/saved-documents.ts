@@ -40,7 +40,8 @@ export function loadSavedDocuments (root: HTMLElement | null = null) {
     // off-page element to load fragments into. Actual fragments will be swapped with hx-swap-oob
     const el = document.createElement('div');
     const query = Array.from(ids).map(id => `doc_id=${id}`).join('&');
+    const prefix = document.body.getAttribute('data-url-lang-prefix');
     // @ts-ignore
-    window.htmx.ajax('get', '/user/saved-documents/fragments?' + query, el);
+    window.htmx.ajax('get', `${prefix}/user/saved-documents/fragments?${query}`, el);
   }
 }

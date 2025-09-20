@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/base.html' %}
-{% load static peachjam %}
+{% load static peachjam i18n %}
 {% load sass_tags %}
 {% block head-css %}
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
@@ -74,6 +74,17 @@
   {% if track_page_properties %}{{ track_page_properties|json_script:"track-page-properties" }}{% endif %}
   <!-- must be last script to load -->
   <script defer src="{% static 'js/app-prod.js' %}"></script>
+{% endblock %}
+{% block body-tags %}
+  {{ block.super }}
+  {# set the language-based URL prefix for hard-coded Javascript URLs #}
+  {% get_current_language as LANGUAGE_CODE %}
+  {% get_available_languages as LANGUAGES %}
+  {% if LANGUAGES|length > 1 %}
+    data-url-lang-prefix="/{{ LANGUAGE_CODE }}"
+  {% else %}
+    data-url-lang-prefix=""
+  {% endif %}
 {% endblock %}
 {% block header %}
   {% include 'peachjam/_header.html' %}
