@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block title %}{{ title }}{% endblock %}
 {% block page-content %}
-  <div hx-get="{% url 'messages' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+  <div id="messages"></div>
   <div class="text-center">
     {% block logo %}
       <a href="{% url 'home_page' %}">

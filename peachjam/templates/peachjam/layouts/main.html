@@ -92,7 +92,7 @@
 {% block body-content %}
   {% block before-content %}{% endblock %}
   <main id="top">
-    <div hx-get="{% url 'messages' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+    <div id="messages"></div>
     {% block page-content %}{% endblock %}
     {% include 'peachjam/saved_document/_modal_placeholder.html' %}
   </main>

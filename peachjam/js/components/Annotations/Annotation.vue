@@ -62,6 +62,7 @@
 
 import { authHeaders } from '../../api';
 import { markRange, targetToRange } from '@lawsafrica/indigo-akn/dist/ranges';
+import { htmxAjax } from '../../utils/function';
 
 export default {
   name: 'AnnotationItem',
@@ -103,8 +104,8 @@ export default {
 
       const isDocumentSaved = document.querySelector('[data-saved-document]') !== null;
       if (!isDocumentSaved) {
-        const el = document.createElement('div');
-        await window.htmx.ajax('post', `/user/saved-documents/create?doc_id=${this.annotation.document}`, el);
+        const prefix = document.body.getAttribute('data-url-lang-prefix');
+        await htmxAjax('post', `${prefix}/user/saved-documents/create?doc_id=${this.annotation.document}`);
       }
 
       const headers = await authHeaders();

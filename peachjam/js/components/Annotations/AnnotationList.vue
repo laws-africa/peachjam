@@ -63,21 +63,9 @@ export default {
     }
   },
   mounted () {
-    this.getUser();
     this.getAnnotations();
   },
   methods: {
-    async getUser () {
-      if (!this.editable) return;
-      try {
-        const resp = await fetch('/api/user');
-        if (resp.ok) {
-          this.user = await resp.json();
-        }
-      } catch {
-        // ignore network errors
-      }
-    },
     async getAnnotations () {
       if (!this.editable) return;
       try {
@@ -101,7 +89,7 @@ export default {
         target_selectors: target.selectors,
         target_id: target.anchor_id,
         document: this.viewRoot.dataset.documentId,
-        user: this.user.name
+        user: window.peachjam.user.name
       };
       this.items.push(newAnnotation);
     },

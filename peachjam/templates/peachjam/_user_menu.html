@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if user.is_authenticated %}
-  <ul class="navbar-nav ms-auto me-2">
+  <ul class="navbar-nav ms-auto me-2" hx-swap-oob="true" id="user-menu">
     <li class="nav-item dropdown">
       <a class="btn"
          href="#"
@@ -54,7 +54,7 @@
     </li>
   </ul>
 {% elif PEACHJAM_SETTINGS.allow_signups %}
-  <ul class="navbar-nav ms-auto me-2">
+  <ul class="navbar-nav ms-auto me-2" hx-swap-oob="true" id="user-menu">
     <li class="nav-item">
       <a class="btn btn-primary"
          href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}">

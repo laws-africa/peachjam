@@ -1,4 +1,5 @@
 import itertools
+import json
 
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -14,6 +15,7 @@ from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView, View
 from lxml import html
 
+from peachjam.auth import user_display
 from peachjam.customerio import get_customerio
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
@@ -638,11 +640,32 @@ class CSRFTokenView(View):
         return HttpResponse(get_token(request), content_type="text/plain")
 
 
-class MessagesView(TemplateView):
-    """Renders django.contrib.messages messages, which allows us to use cookie-based messages with public caching.
-    This view is called via htmx on every page load."""
+class PageLoadedView(TemplateView):
+    """Called after all page loads via htmx. This allows us to inject user-specific content onto generic cached pages.
 
-    template_name = "peachjam/_messages.html"
+    - django.contrib.messages messages
+    - user details snippet (JSON)
+    - user menu bar
+    """
+
+    template_name = "peachjam/_loaded.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.request.user.is_authenticated:
+            context["user_json"] = json.dumps(
+                {
+                    "id": self.request.user.id,
+                    "email": self.request.user.email,
+                    "name": user_display(self.request.user),
+                    "is_staff": self.request.user.is_staff,
+                }
+            )
+        else:
+            context["user_json"] = json.dumps({})
+
+        return context
 
 
 class YearMixin:

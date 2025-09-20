@@ -3,6 +3,7 @@ import components from './components';
 // @ts-ignore
 import { vueI18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
+import { htmxAjax } from './utils/function';
 import { loadSavedDocuments } from './components/saved-documents';
 
 import '@lawsafrica/law-widgets/dist/components/la-akoma-ntoso';
@@ -63,6 +64,7 @@ class PeachJam {
     this.setupConfirm();
     this.setupProvisionClick();
     this.setupFormCSRF();
+    this.loaded();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -357,6 +359,12 @@ class PeachJam {
         }
       }
     });
+  }
+
+  loaded () {
+    // use htmx to populate user-specific content islands when the page loads.
+    const prefix = document.body.getAttribute('data-url-lang-prefix');
+    htmxAjax('get', `${prefix}/user/loaded`);
   }
 }
 

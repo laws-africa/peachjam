@@ -1,17 +1,14 @@
 from django import forms
 from django.db.models import Q
-from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from django.views import View
 from rest_framework import viewsets
 from rest_framework.permissions import DjangoModelPermissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from peachjam.auth import user_display
 from peachjam.models import (
     Annotation,
     CaseNumber,
@@ -147,19 +144,3 @@ class CheckDuplicatesView(APIView):
                 )
                 return Response(html)
         return Response()
-
-
-class GetAccountView(View):
-    def get_object(self):
-        return self.request.user
-
-    def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            user_details = {
-                "id": self.request.user.id,
-                "email": self.request.user.email,
-                "name": user_display(self.request.user),
-            }
-            response = JsonResponse(user_details)
-            return response
-        return HttpResponse(status=404)

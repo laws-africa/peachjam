@@ -21,7 +21,6 @@ router.register(
 urlpatterns = [
     # internal API
     path("", include(router.urls)),
-    path("user", views.GetAccountView.as_view(), name="get_account"),
     # semi-public
     path(
         "v1/ingestors/<int:ingestor_id>/webhook",

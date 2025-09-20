@@ -16,11 +16,7 @@
           <img src="{% static 'images/logo.png' %}" alt="{{ APP_NAME }}" height="50"/>
         {% endblock %}
       </a>
-      {% block navbar-user-menu %}
-        <span hx-get="{% url 'user_navbar_menu' %}"
-              hx-trigger="load"
-              hx-swap="outerHTML"></span>
-      {% endblock %}
+      {% block navbar-user-menu %}<span id="user-menu"></span>{% endblock %}
       <button class="navbar-toggler"
               type="button"
               data-bs-toggle="collapse"
