@@ -10,7 +10,7 @@ urlpatterns = [
     path("", include("peachjam.urls.offline")),
     path("feeds/", include("peachjam.urls.feeds")),
     path("api/", include("peachjam_api.urls")),
-    path("i18n/", include("peachjam.urls.i18n")),
+    path("i18n/", include("peachjam.urls.lang")),
     path("_token", CSRFTokenView.as_view(), name="csrf_token"),
     path(
         "robots.txt",

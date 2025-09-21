@@ -12,7 +12,7 @@ urlpatterns = i18n_patterns(
         RedirectView.as_view(pattern_name="paralegals"),
     ),
     path("", include("peachjam_ml.urls")),
-    path("", include("liiweb.urls")),
+    path("", include("liiweb.urls.i18n")),
 ) + [
-    path("", include("liiweb.urls_non_i18n")),
+    path("", include("liiweb.urls.non_i18n")),
 ]

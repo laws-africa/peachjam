@@ -92,5 +92,5 @@ urlpatterns = [
         ),
     ),
     path("donate/", DonatePageView.as_view(), name="donate"),
-    path("", include("peachjam.urls")),
+    path("", include("peachjam.urls.i18n")),
 ]
