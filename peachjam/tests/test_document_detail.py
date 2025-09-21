@@ -45,3 +45,4 @@ class RestrictedDocumentsTestCase(WebTest):
         authorized_user = User.objects.get(username="officer@example.com")
         response = self.app.get(doc.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
+        self.assertNotIn("public", response.headers.get("Cache-Control", ""))

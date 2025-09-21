@@ -1,5 +1,6 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import Http404, get_object_or_404
+from django.utils.cache import add_never_cache_headers
 from django.views.generic import DetailView, TemplateView
 
 from peachjam.models import Taxonomy
@@ -54,6 +55,12 @@ class TaxonomyDetailView(AllowedTaxonomyMixin, FilteredDocumentListView):
     navbar_link = "taxonomy"
     # taxonomies may include legislation, so we want to show the latest expression only
     latest_expression_only = True
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if self.taxonomy.restricted:
+            add_never_cache_headers(response)
+        return response
 
     def get_taxonomy(self):
         root = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])

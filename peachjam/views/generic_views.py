@@ -9,6 +9,7 @@ from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
@@ -359,6 +360,12 @@ class BaseDocumentDetailView(DetailView):
     context_object_name = "document"
     document_diffs_url = "https://services.lawsafrica.com"
     modify_context = Signal()
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if self.object.restricted:
+            add_never_cache_headers(response)
+        return response
 
     def get_object(self, *args, **kwargs):
         return get_object_or_404(
