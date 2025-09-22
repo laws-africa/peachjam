@@ -5,7 +5,7 @@ from django_fsm import post_transition
 
 from peachjam.customerio import get_customerio
 
-from .models import Feature, Product, Subscription, subscription_settings
+from .models import Feature, Product, Subscription
 
 
 @receiver(post_delete, sender=Subscription)
@@ -50,8 +50,4 @@ User = get_user_model()
 @receiver(post_save, sender=User)
 def create_default_subscription(sender, instance, created, **kwargs):
     if created:
-        default_product_offering = subscription_settings().default_product_offering
-        if default_product_offering:
-            Subscription.objects.create(
-                user=instance, product_offering=default_product_offering
-            )
+        Subscription.get_or_create_active_for_user(instance)

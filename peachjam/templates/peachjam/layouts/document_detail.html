@@ -3,7 +3,7 @@
 {% block title %}{{ document.title }}{% endblock %}
 {% block head-meta %}
   {{ block.super }}
-  {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
+  {% if not document.allow_robots or not document.is_most_recent %}<meta name="robots" content="noindex" />{% endif %}
   <meta property="og:title" content="{{ document.title }}" />
   <meta property="og:type" content="article" />
   <meta property="og:image"

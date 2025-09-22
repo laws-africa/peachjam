@@ -34,6 +34,8 @@ class AfricanliiViewsTest(TestCase):
 
         # should not set csrf token
         self.assertNotContains(response, "csrfmiddlewaretoken")
+        # should not set a cookie
+        self.assertNotIn("Set-Cookie", response.headers)
 
     def test_legal_instrument_listing(self):
         response = self.client.get("/legal-instruments/")

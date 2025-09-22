@@ -112,6 +112,12 @@
     </a>
   </li>
   <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'mooc' %}active{% endif %}"
+       href="{% url 'mooc_landing_page' %}">
+      {% trans 'Courses' %}
+    </a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'articles' %}active{% endif %}"
        href="{% url 'article_list' %}">
       {% trans 'Articles' %}
