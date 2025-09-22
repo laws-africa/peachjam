@@ -1,4 +1,6 @@
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import FileResponse
+from django.http.response import HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.generic import DetailView, ListView
@@ -27,7 +29,7 @@ class ArticleListView(ArticleViewMixin, ListView):
         .prefetch_related("topics")
         .order_by("-date")
     )
-    template_name = "peachjam/article_list.html"
+    template_name = "peachjam/article/list.html"
     context_object_name = "articles"
     navbar_link = "articles"
     paginate_by = 20
@@ -55,7 +57,7 @@ class ArticleYearView(YearMixin, ArticleListView):
 
 
 class ArticleTopicView(ArticleListView):
-    template_name = "peachjam/article_topic_detail.html"
+    template_name = "peachjam/article/topic.html"
 
     def get(self, *args, **kwargs):
         self.topic = get_object_or_404(Taxonomy.objects.filter(slug=kwargs["topic"]))
@@ -89,7 +91,7 @@ class ArticleTopicYearView(YearMixin, ArticleTopicView):
 class ArticleDetailView(ArticleViewMixin, DetailView):
     model = Article
     queryset = Article.objects.filter(published=True)
-    template_name = "peachjam/article_detail.html"
+    template_name = "peachjam/article/detail.html"
     context_object_name = "article"
 
     def get_queryset(self):
@@ -109,8 +111,19 @@ class ArticleDetailView(ArticleViewMixin, DetailView):
         return context
 
 
+class ArticleEditButtonView(PermissionRequiredMixin, DetailView):
+    permission_required = "peachjam.change_article"
+    template_name = "peachjam/article/_edit_button.html"
+    model = Article
+    queryset = Article.objects.filter(published=True)
+    context_object_name = "article"
+
+    def handle_no_permission(self):
+        return HttpResponseForbidden()
+
+
 class ArticleAuthorDetailView(ArticleListView):
-    template_name = "peachjam/article_author.html"
+    template_name = "peachjam/article/author.html"
 
     def dispatch(self, *args, **kwargs):
         self.user_profile = get_object_or_404(
