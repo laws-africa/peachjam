@@ -621,13 +621,7 @@ class DocumentProvisionCitationView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["document"] = self.document
-        context["provision_title"] = context["document"].friendly_provision_title(
-            self.provision_eid
-        )
-        context["provision_html"] = context["document"].get_provision_by_eid(
-            self.provision_eid
-        )
+        context.update(self.get_subscription_required_context())
         context["citation_contexts"] = self.provision_citations
         context["citing_documents_count"] = self.get_base_queryset().count()
         return context
