@@ -11,20 +11,17 @@ export class AnnotationsProvider implements IGutterEnrichmentProvider {
     gutter: Element | null;
     manager: GutterEnrichmentManager;
     listComponent: ComponentPublicInstance;
-    editable: boolean;
 
     constructor (root: HTMLElement, manager: GutterEnrichmentManager, displayType: string) {
       this.root = root;
       this.manager = manager;
       this.gutter = root.querySelector('la-gutter');
-      this.editable = this.root.hasAttribute('data-editable-annotation');
       // @ts-ignore
       this.listComponent = createAndMountApp({
         component: AnnotationList,
         props: {
           gutter: this.gutter,
           viewRoot: this.root,
-          editable: this.editable
         },
         use: [vueI18n],
         mountTarget: document.createElement('div') as HTMLElement

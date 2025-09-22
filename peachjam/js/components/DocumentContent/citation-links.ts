@@ -38,8 +38,10 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     const el = document.getElementById('citation-links');
     this.links = JSON.parse((el ? el.textContent : '') || '[]');
     this.applyLinks();
-    peachJam.whenUserLoaded().then(() => {
-      this.checkAndMakeEditable();
+    peachJam.whenUserLoaded().then((user) => {
+      if (user.perms.includes('peachjam.add_citationlink')) {
+        this.makeEditable();
+      }
     });
   }
 
@@ -66,19 +68,17 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     this.anchors.set(link, elements);
   }
 
-  checkAndMakeEditable () {
-    if (peachJam.user.perms.includes('peachjam.add_citationlink')) {
-      this.modal = this.createModal();
-      this.manager.addProvider(this);
+  makeEditable () {
+    this.modal = this.createModal();
+    this.manager.addProvider(this);
 
-      // add gutter items from this.anchors
-      this.anchors.forEach((elements, link) => {
-        if (elements.length > 0) {
-          // @ts-ignore
-          this.manager.gutter?.appendChild(this.createGutterItem(link, elements[0]));
-        }
-      });
-    }
+    // add gutter items from this.anchors
+    this.anchors.forEach((elements, link) => {
+      if (elements.length > 0) {
+        // @ts-ignore
+        this.manager.gutter?.appendChild(this.createGutterItem(link, elements[0]));
+      }
+    });
   }
 
   createModal () : ComponentPublicInstance {

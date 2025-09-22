@@ -391,14 +391,14 @@ class PeachJam {
     window.dispatchEvent(new Event('peachjam.user-loaded'));
   }
 
-  whenUserLoaded (): Promise<void> {
+  whenUserLoaded (): Promise<User> {
     return new Promise((resolve) => {
       if (this.user.id === -1) {
         window.addEventListener('peachjam.user-loaded', () => {
-          resolve();
+          resolve(this.user);
         });
       } else {
-        resolve();
+        resolve(this.user);
       }
     });
   }

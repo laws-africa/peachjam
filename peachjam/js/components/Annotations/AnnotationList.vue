@@ -42,6 +42,8 @@
 <script>
 import AnnotationItem from './Annotation.vue';
 import { Modal } from 'bootstrap';
+import peachJam from '../../peachjam';
+
 export default {
   name: 'AnnotationsList',
   components: {
@@ -49,13 +51,13 @@ export default {
   },
   props: {
     viewRoot: HTMLElement,
-    gutter: HTMLElement,
-    editable: Boolean
+    gutter: HTMLElement
   },
   data: () => ({
     items: [],
     counter: -1,
-    user: null
+    user: null,
+    editable: false
   }),
   computed: {
     loginUrl () {
@@ -63,7 +65,12 @@ export default {
     }
   },
   mounted () {
-    this.getAnnotations();
+    peachJam.whenUserLoaded().then((user) => {
+      if (user.perms.includes('peachjam.add_annotation')) {
+        this.editable = true;
+        this.getAnnotations();
+      }
+    });
   },
   methods: {
     async getAnnotations () {
