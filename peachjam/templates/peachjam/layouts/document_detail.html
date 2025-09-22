@@ -574,7 +574,6 @@
         {% endif %}
       {% endblock %}
     </div>
-    {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
     {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}

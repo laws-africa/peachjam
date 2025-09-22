@@ -23,7 +23,6 @@ from peachjam.models import (
     CoreDocument,
     DocumentNature,
     ExtractedCitation,
-    Predicate,
     ProvisionCitation,
     Relationship,
     Taxonomy,
@@ -33,7 +32,6 @@ from peachjam.models import (
 )
 from peachjam_api.serializers import (
     CitationLinkSerializer,
-    PredicateSerializer,
     RelationshipSerializer,
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
@@ -567,11 +565,6 @@ class BaseDocumentDetailView(DetailView):
         context["provision_relationships"] = RelationshipSerializer(
             rels, many=True
         ).data
-
-        if self.request.user.has_perm("peachjam.add_relationship"):
-            context["predicates_json"] = PredicateSerializer(
-                Predicate.objects.all(), many=True
-            ).data
 
     def add_provision_enrichments(self, context):
         unconstitutional_provisions = list(
