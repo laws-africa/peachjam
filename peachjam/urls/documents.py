@@ -10,6 +10,7 @@ from peachjam.views import (
     ComparePortionsView,
     DocumentAttachmentView,
     DocumentCitationsView,
+    DocumentDebugView,
     DocumentDetailViewResolver,
     DocumentMediaView,
     DocumentPopupView,
@@ -108,6 +109,11 @@ urlpatterns = [
                 ),
             ]
         ),
+    ),
+    path(
+        "document/<int:pk>/debug",
+        DocumentDebugView.as_view(),
+        name="document_debug",
     ),
     path(
         "document/<int:pk>/summary",
