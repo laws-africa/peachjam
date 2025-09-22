@@ -35,9 +35,11 @@
             <div>
               <div class="fw-bold">{% trans 'You have reached your limit for search alerts.' %}</div>
               {% if search_alert_upgrade %}
-                {% blocktrans trimmed with product=search_alert_upgrade.name %}
-                  <div>To add more, please upgrade to {{ product }}.</div>
+                <div>
+                  {% blocktrans trimmed with product=search_alert_upgrade.name %}
+                  To add more, please upgrade to {{ product }}.
                 {% endblocktrans %}
+                </div>
               {% endif %}
             </div>
           </div>
