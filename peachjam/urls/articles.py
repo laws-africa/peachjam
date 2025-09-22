@@ -5,6 +5,7 @@ from peachjam.views import (
     ArticleAuthorDetailView,
     ArticleAuthorYearDetailView,
     ArticleDetailView,
+    ArticleEditButtonView,
     ArticleListView,
     ArticleTopicView,
     ArticleTopicYearView,
@@ -42,6 +43,11 @@ urlpatterns = [
         "<isodate:date>/<str:author>/<slug:slug>",
         ArticleDetailView.as_view(),
         name="article_detail",
+    ),
+    path(
+        "<int:pk>/edit-button",
+        ArticleEditButtonView.as_view(),
+        name="article_edit_button",
     ),
     path(
         "<isodate:date>/<str:author>/<slug:slug>/attachment/<int:pk>/<str:filename>",
