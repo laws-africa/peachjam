@@ -4,6 +4,7 @@ from countries_plus.models import Country
 from django.contrib.auth.models import User
 from django.core.files.base import ContentFile
 from django.test import TestCase
+from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -21,11 +22,11 @@ class PeachjamViewsTest(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
 
     def test_login_page(self):
-        response = self.client.get("/accounts/login/")
+        response = self.client.get(reverse("account_login"))
         self.assertTemplateUsed(response, "account/login.html")
 
     def test_homepage(self):
-        response = self.client.get("/")
+        response = self.client.get(reverse("home_page"))
         self.assertEqual(response.status_code, 200)
 
         recent_judgments = [
@@ -45,7 +46,7 @@ class PeachjamViewsTest(TestCase):
         )
 
     def test_judgment_listing(self):
-        response = self.client.get("/judgments/")
+        response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -60,7 +61,7 @@ class PeachjamViewsTest(TestCase):
         self.assertIn("High Court", court_classes)
 
     def test_court_listing(self):
-        response = self.client.get("/judgments/ECOWASCJ/")
+        response = self.client.get(reverse("court", kwargs={"code": "ECOWASCJ"}))
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -73,7 +74,9 @@ class PeachjamViewsTest(TestCase):
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_court_year_listing(self):
-        response = self.client.get("/judgments/ECOWASCJ/2016/")
+        response = self.client.get(
+            reverse("court_year", kwargs={"code": "ECOWASCJ", "year": 2016})
+        )
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -92,13 +95,21 @@ class PeachjamViewsTest(TestCase):
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_court_year_listing_bad_year(self):
-        self.assertEqual(self.client.get("/judgments/ECOWASCJ/0/").status_code, 404)
         self.assertEqual(
-            self.client.get("/judgments/ECOWASCJ/999999/").status_code, 404
+            self.client.get(
+                reverse("court_year", kwargs={"code": "ECOWASCJ", "year": 0})
+            ).status_code,
+            404,
+        )
+        self.assertEqual(
+            self.client.get(
+                reverse("court_year", kwargs={"code": "ECOWASCJ", "year": 9999999})
+            ).status_code,
+            404,
         )
 
     def test_all_judgments_listing(self):
-        response = self.client.get("/judgments/all/")
+        response = self.client.get(reverse("court", kwargs={"code": "all"}))
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -111,7 +122,9 @@ class PeachjamViewsTest(TestCase):
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_all_judgments_year_listing(self):
-        response = self.client.get("/judgments/all/2016/")
+        response = self.client.get(
+            reverse("court_year", kwargs={"code": "all", "year": 2016})
+        )
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -131,7 +144,12 @@ class PeachjamViewsTest(TestCase):
 
     def test_judgment_detail(self):
         response = self.client.get(
-            "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+            reverse(
+                "document_detail",
+                kwargs={
+                    "frbr_uri": "akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+                },
+            )
         )
         self.assertEqual(response.status_code, 200)
 
@@ -143,7 +161,7 @@ class PeachjamViewsTest(TestCase):
         self.assertTrue(hasattr(response.context["document"], "court"))
 
     def test_legislation_listing(self):
-        response = self.client.get("/legislation/")
+        response = self.client.get(reverse("legislation_list"))
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -158,7 +176,12 @@ class PeachjamViewsTest(TestCase):
 
     def test_legislation_detail(self):
         response = self.client.get(
-            "/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31"
+            reverse(
+                "document_detail",
+                kwargs={
+                    "frbr_uri": "akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31"
+                },
+            )
         )
         self.assertEqual(response.status_code, 200)
 
@@ -170,7 +193,7 @@ class PeachjamViewsTest(TestCase):
         self.assertTrue(hasattr(response.context["document"], "repealed"))
 
     def test_generic_document_listing(self):
-        response = self.client.get("/doc/")
+        response = self.client.get(reverse("generic_document_list"))
         self.assertEqual(response.status_code, 200)
 
         documents = [doc.title for doc in response.context.get("documents")]
@@ -185,7 +208,12 @@ class PeachjamViewsTest(TestCase):
 
     def test_generic_document_detail(self):
         response = self.client.get(
-            "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+            reverse(
+                "document_detail",
+                kwargs={
+                    "frbr_uri": "akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+                },
+            )
         )
         self.assertEqual(response.status_code, 200)
 
@@ -202,9 +230,7 @@ class PeachjamViewsTest(TestCase):
         )
         doc.published = False
         doc.save()
-        response = self.client.get(
-            "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
-        )
+        response = self.client.get(doc.get_absolute_url())
         self.assertEqual(response.status_code, 404)
 
     def test_generic_document_detail_restricted(self):
@@ -213,9 +239,7 @@ class PeachjamViewsTest(TestCase):
         )
         doc.restricted = True
         doc.save()
-        response = self.client.get(
-            "/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
-        )
+        response = self.client.get(doc.get_absolute_url())
         self.assertEqual(response.status_code, 403)
 
     def test_robots_txt(self):
@@ -238,14 +262,14 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "foo\nbar")
 
     def test_account_profile(self):
-        response = self.client.get("/accounts/profile/")
+        response = self.client.get(reverse("my_account"))
         self.assertEqual(response.status_code, 302)
 
         # now log in and try again
         self.client._login(
             User.objects.first(), "django.contrib.auth.backends.ModelBackend"
         )
-        response = self.client.get("/accounts/profile/")
+        response = self.client.get(reverse("my_account"))
         self.assertEqual(response.status_code, 200)
 
     def test_case_history(self):
@@ -273,12 +297,12 @@ class PeachjamViewsTest(TestCase):
             outcome=appeal_allowed,
         )
 
-        response = self.client.get(appeal_case.expression_frbr_uri)
+        response = self.client.get(appeal_case.get_absolute_url())
         self.assertContains(response, "Case history")
         self.assertContains(response, main_case.title)
         self.assertContains(response, appeal_allowed.name)
 
-        response = self.client.get(main_case.expression_frbr_uri)
+        response = self.client.get(main_case.get_absolute_url())
         self.assertContains(response, "reviewed by another court")
         self.assertContains(response, "Case history")
         self.assertContains(response, appeal_case.title)
@@ -289,8 +313,12 @@ class PeachjamViewsTest(TestCase):
         doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
 
         # no source file
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 404
+        )
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
         # basic source file
         sf = SourceFile.objects.create(
@@ -298,9 +326,11 @@ class PeachjamViewsTest(TestCase):
             file=ContentFile(b"test", name="test.txt"),
             mimetype="text/plain",
         )
-        resp = self.client.get(f"{frbr_uri}/source")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
         doc.published = True
         doc.save()
 
@@ -311,8 +341,10 @@ class PeachjamViewsTest(TestCase):
             file=ContentFile(b"test", name="test.pdf"),
             mimetype="application/pdf",
         )
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 302)
-        resp = self.client.get(f"{frbr_uri}/source.pdf")
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 302
+        )
+        resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"test")
 
@@ -328,8 +360,12 @@ class PeachjamViewsTest(TestCase):
             file=ContentFile(b"test", name="test.txt"),
             mimetype="text/plain",
         )
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 404
+        )
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
         # pdf source file
         sf.delete()
@@ -339,8 +375,12 @@ class PeachjamViewsTest(TestCase):
             mimetype="application/pdf",
             source_url="https://example.com",
         )
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 404
+        )
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
     def test_document_source_restricted(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
@@ -354,8 +394,12 @@ class PeachjamViewsTest(TestCase):
             file=ContentFile(b"test", name="test.txt"),
             mimetype="text/plain",
         )
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 404
+        )
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
         # pdf source file
         sf.delete()
@@ -365,8 +409,12 @@ class PeachjamViewsTest(TestCase):
             mimetype="application/pdf",
             source_url="https://example.com",
         )
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 404
+        )
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
     def test_document_source_file_url(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
@@ -378,10 +426,12 @@ class PeachjamViewsTest(TestCase):
             mimetype="text/plain",
             source_url="https://example.com",
         )
-        resp = self.client.get(f"{frbr_uri}/source")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertEqual(resp.status_code, 302)
         self.assertRedirects(resp, "https://example.com", fetch_redirect_response=False)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
         sf.delete()
         sf = SourceFile.objects.create(
@@ -390,12 +440,12 @@ class PeachjamViewsTest(TestCase):
             mimetype="application/pdf",
             source_url="https://example.com",
         )
-        resp = self.client.get(f"{frbr_uri}/source")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertRedirects(
-            resp, f"{frbr_uri}/source.pdf", fetch_redirect_response=False
+            resp, f"{doc.get_absolute_url()}/source.pdf", fetch_redirect_response=False
         )
 
-        resp = self.client.get(f"{frbr_uri}/source.pdf")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertRedirects(resp, "https://example.com", fetch_redirect_response=False)
 
     def test_document_source_file_anonymised(self):
@@ -410,13 +460,19 @@ class PeachjamViewsTest(TestCase):
             mimetype="text/plain",
         )
         # source file not anonymised
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 404)
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 404)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 404
+        )
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
+        )
 
         # source file is anonymised
         sf.file_is_anonymised = True
         sf.save()
-        self.assertEqual(self.client.get(f"{frbr_uri}/source").status_code, 200)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source").status_code, 200
+        )
 
         # pdf source file is anonymised
         sf.delete()
@@ -426,11 +482,13 @@ class PeachjamViewsTest(TestCase):
             mimetype="application/pdf",
             file_is_anonymised=True,
         )
-        resp = self.client.get(f"{frbr_uri}/source")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertRedirects(
-            resp, f"{frbr_uri}/source.pdf", fetch_redirect_response=False
+            resp, f"{doc.get_absolute_url()}/source.pdf", fetch_redirect_response=False
         )
-        self.assertEqual(self.client.get(f"{frbr_uri}/source.pdf").status_code, 200)
+        self.assertEqual(
+            self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 200
+        )
 
         # extra anonymised file is available
         sf.delete()
@@ -440,10 +498,10 @@ class PeachjamViewsTest(TestCase):
             mimetype="text/plain",
             anonymised_file_as_pdf=ContentFile(b"anon", name="anon.pdf"),
         )
-        resp = self.client.get(f"{frbr_uri}/source")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertRedirects(
-            resp, f"{frbr_uri}/source.pdf", fetch_redirect_response=False
+            resp, f"{doc.get_absolute_url()}/source.pdf", fetch_redirect_response=False
         )
-        resp = self.client.get(f"{frbr_uri}/source.pdf")
+        resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"anon")
