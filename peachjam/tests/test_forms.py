@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 
 
 class BaseDocumentFilterFormTestCase(TestCase):
@@ -6,7 +7,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
     maxDiff = None
 
     def test_years_filter_with_single_year(self):
-        response = self.client.get("/legislation/?years=2007")
+        response = self.client.get(reverse("legislation_list") + "?years=2007")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             response.context["facet_data"]["years"]["options"],
@@ -14,7 +15,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
         )
 
     def test_alphabet_filter(self):
-        response = self.client.get("/legislation/?alphabet=a")
+        response = self.client.get(reverse("legislation_list") + "?alphabet=a")
 
         self.assertEqual(response.status_code, 200)
 
