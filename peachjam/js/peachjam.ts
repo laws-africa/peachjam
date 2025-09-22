@@ -29,6 +29,15 @@ export interface PeachJamConfig {
   }
 }
 
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  // eslint-disable-next-line camelcase
+  is_staff: boolean;
+  perms: Array<string>;
+}
+
 class PeachJam {
   private components: any[];
   public analytics: Analytics;
@@ -41,6 +50,14 @@ class PeachJam {
       dsn: null,
       environment: null
     }
+  };
+
+  public user: User = {
+    id: -1,
+    name: '',
+    email: '',
+    is_staff: false,
+    perms: []
   };
 
   constructor () {
@@ -367,6 +384,23 @@ class PeachJam {
     // use htmx to populate user-specific content islands when the page loads.
     // @ts-ignore
     htmxAjax('get', `${this.config.urlLangPrefix}/user/loaded`);
+  }
+
+  userLoaded () {
+    // called by the server response to the above call once user-specific content has been loaded
+    window.dispatchEvent(new Event('peachjam.user-loaded'));
+  }
+
+  whenUserLoaded (): Promise<void> {
+    return new Promise((resolve) => {
+      if (this.user.id === -1) {
+        window.addEventListener('peachjam.user-loaded', () => {
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
   }
 }
 

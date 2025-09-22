@@ -667,10 +667,15 @@ class PageLoadedView(TemplateView):
                     "email": self.request.user.email,
                     "name": user_display(self.request.user),
                     "is_staff": self.request.user.is_staff,
+                    "perms": [
+                        perm
+                        for perm in self.request.user.get_all_permissions()
+                        if perm.startswith("peachjam")
+                    ],
                 }
             )
         else:
-            context["user_json"] = json.dumps({})
+            context["user_json"] = json.dumps({"perms": []})
 
         return context
 
