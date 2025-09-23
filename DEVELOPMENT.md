@@ -19,7 +19,8 @@ Below is what’s implemented, why, and how to build new pages without breaking 
 
 * Cacheable pages (e.g. documents, listings, home) render no user-specific content.
 * Headers (example): Cache-Control: public, max-age=60, stale-while-revalidate=120, stale-if-error=600
-* Per-user islands (loaded after DOM ready via htmx GETs):
+* Per-user islands (loaded after DOM ready via htmx GETs)
+* On every pageload, htmx GETs /user/loaded (private, no-store) to get user info (name, avatar), messages (toasts), and other per-user bits.
 * Restricted pages (permissioned docs/taxonomies): not cacheable (private, no-store).
 
 Reasoning: Public HTML becomes identical for all users → the CDN can reuse it broadly. Personalization moves to private endpoints that are safe to call with cookies and can set/refresh cookies without polluting caches.
