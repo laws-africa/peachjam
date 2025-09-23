@@ -47,6 +47,7 @@ from peachjam_search.forms import (
 )
 from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.serializers import SearchClickSerializer, SearchHit
+from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
@@ -378,6 +379,16 @@ class BaseSavedSearchFormView(
                 "pk": self.object.pk,
             },
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        sub = Subscription.objects.active_for_user(self.request.user).first()
+        if sub:
+            (
+                context["search_alert_limit_reached"],
+                context["search_alert_upgrade"],
+            ) = sub.check_feature_limit("search_alert_limit")
+        return context
 
 
 class SavedSearchCreateView(BaseSavedSearchFormView, CreateView):

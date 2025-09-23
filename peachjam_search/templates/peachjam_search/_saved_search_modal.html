@@ -27,6 +27,22 @@
                         placeholder="{% trans "A note to yourself about this search" %}">{{ form.note.value|default_if_none:'' }}</textarea>
             </div>
           </form>
+        {% elif search_alert_limit_reached %}
+          <div class="alert alert-warning d-flex">
+            <div class="me-2">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+              <div class="fw-bold">{% trans 'You have reached your limit for search alerts.' %}</div>
+              {% if search_alert_upgrade %}
+                <div>
+                  {% blocktrans trimmed with product=search_alert_upgrade.name %}
+                  To add more, please upgrade to {{ product }}.
+                {% endblocktrans %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
         {% else %}
           {% trans "Saving..." %}
         {% endif %}

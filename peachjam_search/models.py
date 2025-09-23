@@ -7,11 +7,14 @@ from urllib.parse import urlencode
 
 from allauth.account import app_settings
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.http import QueryDict
 from django.shortcuts import reverse
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
+
+from peachjam_subs.models import Subscription
 
 log = logging.getLogger(__name__)
 
@@ -149,10 +152,20 @@ class SavedSearch(models.Model):
             ]
         )
 
+    def can_save_more_folders(self):
+        sub = Subscription.objects.active_for_user(self.user).first()
+        if not sub:
+            return False
+        limit_reached, _ = sub.check_feature_limit("search_alert_limit")
+        return not limit_reached
+
     def get_sorted_filters_string(self):
         return urlencode(sorted(self.get_filters_dict().items()), doseq=True)
 
     def clean(self):
+        if not self.pk and not self.can_save_more_folders():
+            raise ValidationError(_("Search alert limit reached"))
+
         # sort params alphabetically so that the lookup is consistent
         self.filters = self.get_sorted_filters_string()
 
