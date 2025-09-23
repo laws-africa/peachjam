@@ -647,6 +647,9 @@ else:
     # in general, cache most pages
     CACHE_MIDDLEWARE_SECONDS = 60 * 30
 
+# ensure that our SanityCheckCacheMiddleware fails when sanity checks fail, even in production
+CACHE_SANITY_STRICT = True
+
 # Override X-Frame-Options header value
 X_FRAME_OPTIONS = "SAMEORIGIN"
 

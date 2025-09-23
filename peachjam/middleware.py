@@ -175,7 +175,6 @@ class SanityCheckCacheMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
         self.strict = getattr(settings, "CACHE_SANITY_STRICT", settings.DEBUG)
-        self.log_level_errors = getattr(settings, "CACHE_SANITY_ERROR_LEVEL", "ERROR")
 
     def __call__(self, request):
         resp = self.get_response(request)
