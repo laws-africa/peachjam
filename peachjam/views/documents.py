@@ -4,7 +4,7 @@ from cobalt import FrbrUri
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.http import Http404, HttpResponse
-from django.http.response import FileResponse
+from django.http.response import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
@@ -333,11 +333,18 @@ class DocumentSocialImageView(DocumentDetailView):
         return FileResponse(image.file, content_type="image/png")
 
 
-class DocumentDebugViewBase(DetailView, PermissionRequiredMixin):
+class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
     permission_required = "peachjam.can_debug_document"
     model = CoreDocument
     queryset = CoreDocument.objects.filter(published=True)
     context_object_name = "document"
+
+    def handle_no_permission(self):
+        return HttpResponseForbidden()
+
+
+class DocumentDebugView(DocumentDebugViewBase):
+    template_name = "peachjam/document/_debug.html"
 
 
 class DocumentSummaryView(DocumentDebugViewBase):

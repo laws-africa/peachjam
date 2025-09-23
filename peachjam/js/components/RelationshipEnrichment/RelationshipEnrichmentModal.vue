@@ -167,10 +167,19 @@ export default {
     }
   },
 
-  mounted () {
+  async mounted () {
     document.body.appendChild(this.$el);
-    this.predicates = JSON.parse(document.getElementById('predicates').innerText || '[]');
-    this.relationship.predicate_id = this.predicates.length ? this.predicates[0].id : '';
+    fetch('/api/predicates/', { headers: await authHeaders() })
+      .then(resp => resp.ok ? resp.json() : Promise.reject(resp))
+      .then(data => {
+        this.predicates = data.results;
+        if (!this.relationship.predicate_id && this.predicates.length) {
+          this.relationship.predicate_id = this.predicates[0].id;
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load predicates', err);
+      });
     this.modal = new bootstrap.Modal(this.$el);
     this.$el.addEventListener('hidePrevented.bs.modal', this.close);
     this.modal.show();

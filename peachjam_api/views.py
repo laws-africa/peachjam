@@ -15,12 +15,14 @@ from peachjam.models import (
     CitationLink,
     Ingestor,
     Judgment,
+    Predicate,
     Relationship,
     Work,
 )
 from peachjam_api.serializers import (
     AnnotationSerializer,
     CitationLinkSerializer,
+    PredicateSerializer,
     RelationshipSerializer,
     WorkSerializer,
 )
@@ -144,3 +146,17 @@ class CheckDuplicatesView(APIView):
                 )
                 return Response(html)
         return Response()
+
+
+class AddRelationshipPerms(DjangoModelPermissions):
+    perms_map = {
+        "GET": ["peachjam.add_relationship"],
+        "HEAD": ["peachjam.add_relationship"],
+        "OPTIONS": ["peachjam.add_relationship"],
+    }
+
+
+class PredicatesViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Predicate.objects.all()
+    serializer_class = PredicateSerializer
+    permission_classes = [AddRelationshipPerms]
