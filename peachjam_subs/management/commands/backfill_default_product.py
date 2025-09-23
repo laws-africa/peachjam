@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.management.base import BaseCommand
 from django.db import transaction
@@ -127,15 +128,16 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         with transaction.atomic():
             log.info("Starting backfill of default product and its features")
-            settings = subscription_settings()
+            sub_settings = subscription_settings()
 
-            default_product_offering = settings.default_product_offering
+            default_product_offering = sub_settings.default_product_offering
             if not default_product_offering:
                 log.info(
                     "No default product offering set. Creating default product, pricing plan, and product offering."
                 )
+                app_name = settings.PEACHJAM.get("APP_NAME") or "LII"
                 product, _ = Product.objects.get_or_create(
-                    name="My LII",
+                    name=f"My {app_name}",
                     defaults={
                         "description": "Full access to all foundational legal information."
                     },
@@ -149,10 +151,10 @@ class Command(BaseCommand):
                     pricing_plan=pricing_plan,
                 )
 
-                settings.default_product_offering = product
-                settings.save()
+                sub_settings.default_product_offering = product_offering
+                sub_settings.save()
 
-            product = default_product_offering.product
+            product = sub_settings.default_product_offering.product
             log.info(f"Using product '{product.name}' (ID: {product.id})")
 
             for slug, data in self.FEATURES.items():
