@@ -1,11 +1,12 @@
 from django.test import TestCase
+from django.urls.base import reverse
 
 
 class AfricanliiViewsTest(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_homepage(self):
-        response = self.client.get("/")
+        response = self.client.get(reverse("home_page"))
         self.assertEqual(response.status_code, 200)
 
         # documents
@@ -38,5 +39,5 @@ class AfricanliiViewsTest(TestCase):
         self.assertNotIn("Set-Cookie", response.headers)
 
     def test_legal_instrument_listing(self):
-        response = self.client.get("/legal-instruments/")
+        response = self.client.get(reverse("agp_legal_instrument_list"))
         self.assertEqual(response.status_code, 301)

@@ -1,4 +1,5 @@
 from django.test import TestCase
+from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.models import Legislation
@@ -9,7 +10,7 @@ class TestPreferredLanguage(TestCase):
     maxDiff = None
 
     def test_preferred_language(self):
-        response = self.client.get("/legislation/")
+        response = self.client.get(reverse("legislation_list"))
         self.assertEqual(4, response.context.get("documents").count())
 
     def test_update_work_languages(self):

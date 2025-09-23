@@ -1,11 +1,12 @@
 from django.test import TestCase
+from django.urls.base import reverse
 
 
 class LegislationViewsTest(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents"]
 
     def test_legislation_listing_national_only(self):
-        response = self.client.get("/legislation/all")
+        response = self.client.get(reverse("legislation_list_all"))
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(
