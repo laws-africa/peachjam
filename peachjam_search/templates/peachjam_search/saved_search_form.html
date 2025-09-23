@@ -4,7 +4,11 @@
           data-bs-toggle="modal"
           data-bs-target="#saved-search-modal">
     <i class="bi bi-bell"></i>
-    {% trans 'Update this search alert' %}
+    {% if saved_search.pk %}
+      {% trans 'Update this search alert' %}
+    {% else %}
+      {% trans 'Get alerts for this search' %}
+    {% endif %}
   </button>
 </div>
 {% include 'peachjam_search/_saved_search_modal.html' %}
