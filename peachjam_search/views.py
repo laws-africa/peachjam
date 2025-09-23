@@ -78,7 +78,7 @@ class DocumentSearchView(TemplateView):
     config_version = "2025-07-28"
     user_can_debug = False
     # used by the /explain endpoint
-    explain = False
+    use_explain = False
 
     def get(self, request, *args, **kwargs):
         self.user_can_debug = self.request.user.has_perm("peachjam_search.debug_search")
@@ -121,6 +121,7 @@ class DocumentSearchView(TemplateView):
                 {
                     "request": request,
                     "hits": hits,
+                    "can_debug": self.use_explain,
                     "show_jurisdiction": settings.PEACHJAM[
                         "SEARCH_JURISDICTION_FILTER"
                     ],
@@ -137,7 +138,7 @@ class DocumentSearchView(TemplateView):
         if not self.user_can_debug:
             return HttpResponseForbidden()
 
-        self.explain = True
+        self.use_explain = True
         return self.search(request, *args, **kwargs)
 
     @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
@@ -217,7 +218,7 @@ class DocumentSearchView(TemplateView):
         engine = SearchEngine()
         form.configure_engine(engine)
 
-        engine.explain = self.explain
+        engine.explain = self.use_explain
         if settings.PEACHJAM["SEARCH_SEMANTIC"]:
             engine.mode = form.cleaned_data.get("mode") or engine.mode
 

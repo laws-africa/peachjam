@@ -292,6 +292,7 @@ import SearchTypeahead from '../search-typeahead';
 import htmx from 'htmx.org';
 import SearchFeedback from './SearchFeedback.vue';
 import { loadSavedDocuments } from '../saved-documents';
+import peachJam from '../../peachjam';
 
 export default {
   name: 'FindDocuments',
@@ -342,7 +343,7 @@ export default {
         date_from: null
       },
       googleActive: false,
-      urlPrefix: peachjam.config.urlLangPrefix,
+      urlPrefix: peachJam.config.urlLangPrefix,
       mode: 'text'
     };
     const facets = [
@@ -800,7 +801,7 @@ export default {
           const params = this.generateSearchParams();
           const previousId = this.searchInfo.trace_id || '';
           let url = `${this.urlPrefix}/search/api/documents/`;
-          if (peachjam.user.is_staff) {
+          if (peachJam.user.is_staff) {
             url = url + 'explain';
           }
           url = url + `?${params.toString()}`;
