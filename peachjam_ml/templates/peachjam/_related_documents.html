@@ -4,10 +4,9 @@
   <div class="row">
     <div class="col-lg">
       <h4>{% trans 'More documents like this one' %}</h4>
-      <div class="spinner-when-empty"
-           hx-get="{% url 'document_similar_docs' document.expression_frbr_uri|strip_first_character %}"
-           hx-trigger="load">
-      </div>
+      {# djLint:off #}
+      <div class="spinner-when-empty" hx-get="{% url 'document_similar_docs' document.expression_frbr_uri|strip_first_character %}" hx-trigger="load"></div>
+      {# djLint:on #}
     </div>
   </div>
 {% endblock %}
