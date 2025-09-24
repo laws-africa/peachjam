@@ -458,7 +458,7 @@
                                   <li>
                                     {% translate rel.predicate.verb as verb %}
                                     {{ verb|capfirst }}
-                                    <a href="{% url 'document_detail' frbr_uri=rel.object_work.frbr_uri|strip_first_character %}">{{ rel.object_work.title }}</a>
+                                    <a href="{{ rel.object_work.get_absolute_url }}">{{ rel.object_work.title }}</a>
                                   </li>
                                 {% endif %}
                               {% endfor %}
@@ -469,7 +469,7 @@
                                   <li>
                                     {% translate rel.predicate.reverse_verb as verb %}
                                     {{ verb|capfirst }}
-                                    <a href="{% url 'document_detail' frbr_uri=rel.subject_work.frbr_uri|strip_first_character %}">{{ rel.subject_work.title }}</a>
+                                    <a href="{{ rel.subject_work.get_absolute_url }}">{{ rel.subject_work.title }}</a>
                                   </li>
                                 {% endif %}
                               {% endfor %}

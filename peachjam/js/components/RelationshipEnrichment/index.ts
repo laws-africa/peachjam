@@ -5,6 +5,7 @@ import { GutterEnrichmentManager, IGutterEnrichmentProvider } from '@lawsafrica/
 import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import { vueI18n } from '../../i18n';
 import { createAndMountApp } from '../../utils/vue-utils';
+import peachJam from "../../peachjam";
 
 export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   root: HTMLElement;
@@ -15,7 +16,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   manager: GutterEnrichmentManager;
   workFrbrUri: string;
   workId: string;
-  editable: boolean;
   displayType: string; // html, pdf or akn
 
   constructor (root: HTMLElement, manager: GutterEnrichmentManager, displayType: string) {
@@ -26,7 +26,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     this.akn = root.querySelector('la-akoma-ntoso');
     this.workFrbrUri = root.dataset.workFrbrUri || '';
     this.workId = root.dataset.workId || '';
-    this.editable = this.root.hasAttribute('data-editable-relationships');
 
     const node = document.getElementById('provision-relationships');
     if (node) {
@@ -42,7 +41,6 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
         gutter: this.gutter,
         viewRoot: this.root,
         enrichments: this.enrichments,
-        editable: this.editable,
         useSelectors: this.displayType === 'pdf',
         thisWorkFrbrUri: this.workFrbrUri
       },
@@ -58,9 +56,11 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       observer.observe(this.akn, { childList: true });
     }
 
-    if (this.editable) {
-      this.manager.addProvider(this);
-    }
+    peachJam.whenUserLoaded().then((user) => {
+      if (user.perms.includes('peachjam.add_relationship')) {
+        this.manager.addProvider(this);
+      }
+    });
   }
 
   getButton (target: IRangeTarget): HTMLButtonElement | null {

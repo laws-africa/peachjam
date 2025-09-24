@@ -2,6 +2,7 @@ import datetime
 
 from django import forms
 
+from peachjam.resources import DownloadDocumentsResource
 from peachjam_search.models import SavedSearch, SearchFeedback
 
 
@@ -17,6 +18,10 @@ class SearchForm(forms.Form):
         required=False, choices=[(x, x) for x in ["text", "semantic", "hybrid"]]
     )
     facets = forms.BooleanField(required=False)
+    format = forms.ChoiceField(
+        required=False,
+        choices=[(x, x) for x in DownloadDocumentsResource.download_formats.keys()],
+    )
 
     def clean_ordering(self):
         if self.cleaned_data["ordering"] == "-score":

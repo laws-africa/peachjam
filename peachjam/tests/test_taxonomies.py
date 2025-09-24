@@ -46,3 +46,4 @@ class TaxonomyTestCase(WebTest):
         environment = Taxonomy.objects.get(name="Environment")
         response = self.app.get(environment.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
+        self.assertNotIn("public", response.headers.get("Cache-Control", ""))

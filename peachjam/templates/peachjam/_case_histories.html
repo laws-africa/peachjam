@@ -15,7 +15,7 @@
       <tr>
         <td>{{ entry.document.date }}</td>
         <td>
-          <a href="{% url 'document_detail' entry.document.expression_frbr_uri|slice:"1:" %}">{{ entry.document.title }}</a>
+          <a href="{{ entry.document.get_absolute_url }}">{{ entry.document.title }}</a>
           {% if entry.document == document %}
             <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
           {% endif %}
@@ -37,7 +37,7 @@
           <td>
             ↳
             {% if child.document %}
-              <a href="{% url 'document_detail' child.document.expression_frbr_uri|slice:"1:" %}">{{ child.document.title }}</a>
+              <a href="{{ child.document.get_absolute_url }}">{{ child.document.title }}</a>
               {% if child.document == document %}
                 <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
               {% endif %}

@@ -35,7 +35,7 @@
       {% trans 'Primary work' %}
     </dt>
     <dd class="text-muted">
-      <a href="{% url 'document_detail' document.parent_work.frbr_uri|strip_first_character %}">{{ document.parent_work.title }}</a>
+      <a href="{{ document.parent_work.get_absolute_url }}">{{ document.parent_work.title }}</a>
     </dd>
   {% endif %}
   {{ block.super }}

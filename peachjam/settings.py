@@ -88,6 +88,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "peachjam.middleware.SanityCheckCacheMiddleware",
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
@@ -289,7 +290,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 
 LANGUAGES = [
     ("en", _("English")),
@@ -645,6 +646,9 @@ else:
     }
     # in general, cache most pages
     CACHE_MIDDLEWARE_SECONDS = 60 * 30
+
+# ensure that our SanityCheckCacheMiddleware fails when sanity checks fail, even in production
+CACHE_SANITY_STRICT = True
 
 # Override X-Frame-Options header value
 X_FRAME_OPTIONS = "SAMEORIGIN"
