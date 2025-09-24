@@ -68,7 +68,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     btn.className = 'btn btn-outline-secondary';
     btn.type = 'button';
     btn.title = 'Add relationship';
-    btn.innerHTML = '<i class="bi bi-link"></i>';
+    btn.innerHTML = '<i class="bi bi-signpost-split-fill"></i>';
     return btn;
   }
 

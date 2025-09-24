@@ -40,10 +40,10 @@ class EnrichmentsManager {
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
     this.gutterManager.akn = this.root.querySelector('.content');
     if (this.displayType !== 'pdf') {
-      this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
       this.provisionCitations = new ProvisionCitations(this.root);
+      this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
     }
     this.selectionSearch = new SelectionSearch(this.gutterManager);
     this.selectionShare = new SelectionShare(this.gutterManager);
@@ -66,9 +66,9 @@ class EnrichmentsManager {
 
   addPdfEnrichments () {
     // setup PDF enrichments after the PDF has been rendered
-    this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
-    this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
     this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
+    this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
+    this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
   }
 }
 
