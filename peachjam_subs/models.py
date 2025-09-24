@@ -75,6 +75,25 @@ class Product(models.Model):
     # used to compare products
     tier = models.IntegerField(default=10)
 
+    saved_document_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of documents a user can save.",
+    )
+    folder_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of folders a user can create.",
+    )
+    search_alert_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of search alerts a user can create.",
+    )
+
+    FEATURES_WITH_LIMIT = [
+        "saved_document_limit",
+        "folder_limit",
+        "search_alert_limit",
+    ]
+
     class Meta:
         ordering = ("tier",)
 
@@ -99,15 +118,52 @@ class Product(models.Model):
         return self.name
 
     @classmethod
-    def get_lowest_product_for_permission(cls, permission_codename):
-        """Return the best (lowest tier) product offering available to the user that includes the given feature."""
+    def get_lowest_product_for_permission(cls, perm):
+        """
+        Return the best (lowest tier) product offering that includes the given permission.
+        Accepts either 'app_label.codename' or just 'codename'.
+        """
+        # If perm looks like "app_label.codename", split it
+        if "." in perm:
+            app_label, codename = perm.split(".", 1)
+        else:
+            # Lookup the Permission by codename only (could raise MultipleObjectsReturned if not unique)
+            try:
+                permission = Permission.objects.get(codename=perm)
+            except Permission.DoesNotExist:
+                return None
+            app_label, codename = permission.content_type.app_label, permission.codename
+
         product = (
             subscription_settings()
-            .key_products.filter(features__permissions__codename=permission_codename)
+            .key_products.filter(
+                features__permissions__content_type__app_label=app_label,
+                features__permissions__codename=codename,
+            )
             .order_by("tier")
             .first()
         )
         return product
+
+    @classmethod
+    def get_user_upgrade_products(cls, user, feature=None, count=None):
+        """
+        Return a queryset of Product objects that are upgrades for the user.
+        If feature and count are given, filter upgrades to those that raise the limit.
+        """
+        active_subscription = Subscription.objects.active_for_user(user).first()
+        products = subscription_settings().key_products.all()
+
+        if active_subscription:
+            current_tier = active_subscription.product_offering.product.tier
+            products = products.filter(tier__gt=current_tier)
+
+        if feature and count is not None:
+            if feature not in cls.FEATURES_WITH_LIMIT:
+                raise ValueError(f"Unknown feature: {feature}")
+            products = products.filter(**{f"{feature}__gt": count})
+
+        return products.order_by("tier")
 
 
 class PricingPlan(models.Model):
@@ -440,6 +496,44 @@ class Subscription(models.Model):
         # ensure all users have a subscription
         for user in User.objects.filter(subscriptions__isnull=True).all():
             cls.get_or_create_active_for_user(user)
+
+    def check_feature_limit(self, feature: str):
+        """
+        Check if this subscription's user has reached the limit for a feature.
+        Returns:
+            {
+                "reached": bool,            # True if limit is reached
+                "upgrade_product": Product or None,
+            }
+        """
+        # get the configured limit for this feature
+        limit = getattr(self.product_offering.product, feature, None)
+        if limit is None:
+            return {"reached": True, "upgrade_product": None}  # unknown feature = block
+
+        # resolve the related manager
+        feature_map = {
+            "saved_document_limit": self.user.saved_documents,
+            "folder_limit": self.user.folders,
+            "search_alert_limit": self.user.saved_searches,
+        }
+        manager = feature_map.get(feature)
+        if not manager:
+            return True, None
+
+        count = manager.count()
+        # within limit?
+        if count < limit:
+            return False, None
+
+        # over limit → suggest upgrade
+        upgrade = Product.get_user_upgrade_products(
+            self.user,
+            feature=feature,
+            count=count,
+        ).first()
+
+        return True, upgrade
 
 
 class SubscriptionSettings(SingletonModel):

@@ -23,10 +23,9 @@
           ·
           <a href={% url 'article_author' article.author.username %}>{% user_name article.author %}</a>
         </div>
-        {% if perms.peachjam.change_article %}
-          <a class="btn btn-outline-secondary"
-             href="{{ article|admin_url:'change' }}">{% trans "Edit" %}</a>
-        {% endif %}
+        <span hx-get="{% url 'article_edit_button' article.pk %}"
+              hx-trigger="load"
+              hx-swap="outerHTML"></span>
       </div>
       <div class="d-flex">
         <ul class="text-muted list-inline flex-grow-1 me-3">

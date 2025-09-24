@@ -157,7 +157,7 @@
       <section class="my-5">
         <div class="container">
           <h2 class="mb-4">{% trans 'Latest Articles' %}</h2>
-          {% include 'peachjam/_article_list.html' with articles=recent_articles %}
+          {% include 'peachjam/article/_list.html' with articles=recent_articles %}
           <a class="mt-3 btn btn-primary" href="{% url 'article_list' %}">{% trans "View more articles" %}</a>
         </div>
       </section>

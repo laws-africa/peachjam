@@ -1,3 +1,5 @@
+from django.views.generic import TemplateView
+
 from peachjam.views import DocumentListView
 
 
@@ -16,3 +18,8 @@ class AGPReportsGuidesListView(DocumentListView):
 
     def get_base_queryset(self):
         return super().get_base_queryset().filter(frbr_uri_doctype="doc")
+
+
+class AGPMOOCView(TemplateView):
+    navbar_link = "mooc"
+    template_name = "africanlii/mooc.html"

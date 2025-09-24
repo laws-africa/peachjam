@@ -14,7 +14,7 @@ import TermsOfUse from './terms-of-use';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
 import { SavedDocumentModal } from './saved-documents';
-import { OfflineTaxonomyButton, OfflineDetails, OfflineTaxonomyStatus } from './Offline';
+import { OfflineDetails, OfflineTaxonomyStatus } from './Offline';
 
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
@@ -31,7 +31,6 @@ const components: Record<string, any> = {
   FloatingHeader,
   DocumentUploader,
   NavigationSelect,
-  OfflineTaxonomyButton,
   RelationshipEnrichments,
   ProvisionEnrichments,
   AnnotationsProvider,

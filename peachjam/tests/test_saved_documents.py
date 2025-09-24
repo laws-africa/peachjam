@@ -1,11 +1,18 @@
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
+from django.urls import reverse
 
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
+from peachjam_subs.models import Subscription
 
 
 class SavedDocumentViewsTest(TestCase):
-    fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
+    fixtures = [
+        "tests/countries",
+        "documents/sample_documents",
+        "tests/users",
+        "tests/products",
+    ]
 
     def setUp(self):
         pjs = pj_settings()
@@ -24,6 +31,7 @@ class SavedDocumentViewsTest(TestCase):
             Permission.objects.get(codename="delete_saveddocument")
         )
         self.folder = Folder.objects.create(user=self.user, name="test")
+        Subscription.get_or_create_active_for_user(self.user)
 
     def assert_no_recursive(self, response):
         self.assertNotContains(
@@ -40,11 +48,14 @@ class SavedDocumentViewsTest(TestCase):
         pjs.save()
 
         self.assertEqual(
-            404, self.client.get("/saved-documents/fragments?doc_id=4124").status_code
+            404,
+            self.client.get(
+                reverse("saved_document_fragments") + "?doc_id=4124"
+            ).status_code,
         )
 
     def test_fragments(self):
-        response = self.client.get("/saved-documents/fragments?doc_id=4124")
+        response = self.client.get(reverse("saved_document_fragments") + "?doc_id=4124")
         self.assertNotContains(response, "Saved")
         self.assertContains(response, "saved-document-star--4124")
         self.assertContains(response, "save-document-button--4124")
@@ -56,7 +67,7 @@ class SavedDocumentViewsTest(TestCase):
         )
         sd.folders.set([self.folder])
 
-        response = self.client.get("/saved-documents/fragments?doc_id=4124")
+        response = self.client.get(reverse("saved_document_fragments") + "?doc_id=4124")
         self.assertContains(response, "Saved")
         self.assertContains(response, "saved-document-star--4124")
         self.assertContains(response, "save-document-button--4124")
@@ -64,7 +75,7 @@ class SavedDocumentViewsTest(TestCase):
         self.assert_no_recursive(response)
 
     def test_create(self):
-        response = self.client.post("/saved-documents/create?doc_id=4124")
+        response = self.client.post(reverse("saved_document_create") + "?doc_id=4124")
         self.assertContains(response, "Saved")
         self.assertContains(response, "saved-document-star--4124")
         self.assertContains(response, "save-document-button--4124")
@@ -83,7 +94,9 @@ class SavedDocumentViewsTest(TestCase):
             user=self.user, document=CoreDocument.objects.get(pk=4124)
         )
         sd.folders.set([self.folder])
-        response = self.client.get(f"/saved-documents/{sd.pk}/modal")
+        response = self.client.get(
+            reverse("saved_document_modal", kwargs={"pk": sd.pk})
+        )
         self.assertContains(response, "modal-content")
         self.assert_no_recursive(response)
 
@@ -93,14 +106,20 @@ class SavedDocumentViewsTest(TestCase):
         )
         sd.folders.set([self.folder])
         response = self.client.post(
-            f"/saved-documents/{sd.pk}/update", {"note": "my note"}
+            reverse("saved_document_update", kwargs={"pk": sd.pk}), {"note": "my note"}
         )
-        self.assertRedirects(response, "/saved-documents/fragments?doc_id=4124")
+        self.assertRedirects(
+            response, reverse("saved_document_fragments") + "?doc_id=4124"
+        )
 
     def test_delete(self):
         sd = SavedDocument.objects.create(
             user=self.user, document=CoreDocument.objects.get(pk=4124)
         )
         sd.folders.set([self.folder])
-        response = self.client.post(f"/saved-documents/{sd.pk}/delete")
-        self.assertRedirects(response, "/saved-documents/fragments?doc_id=4124")
+        response = self.client.post(
+            reverse("saved_document_delete", kwargs={"pk": sd.pk})
+        )
+        self.assertRedirects(
+            response, reverse("saved_document_fragments") + "?doc_id=4124"
+        )

@@ -62,6 +62,7 @@ class PeachJam {
     this.clearCIOCookies();
     this.setupConfirm();
     this.setupProvisionClick();
+    this.setupFormCSRF();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -323,6 +324,37 @@ class PeachJam {
         setTimeout(() => {
           target.scrollIntoView({ behavior: 'smooth' });
         }, 200);
+      }
+    });
+  }
+
+  setupFormCSRF () {
+    // when a form with data-csrf is POSTed, at the last minute grab the csrf token and add it to the form data
+    document.addEventListener('submit', (e) => {
+      if (e.target && e.target instanceof HTMLFormElement && e.target.hasAttribute('data-csrf')) {
+        const form = e.target as HTMLFormElement;
+        // @ts-ignore
+        if (form.method.toLowerCase() === 'post' && form.elements.csrfmiddlewaretoken === undefined) {
+          e.preventDefault();
+          csrfToken().then((token) => {
+            // add a hidden input field with the token, and preserve submitter value
+            const extra = [['csrfmiddlewaretoken', token]];
+            if (e.submitter && (e.submitter as HTMLInputElement).name) {
+              const submitter = e.submitter as HTMLInputElement;
+              extra.push([submitter.name, submitter.value]);
+            }
+
+            for (const pair of extra) {
+              const input = document.createElement('input');
+              input.type = 'hidden';
+              input.name = pair[0];
+              input.value = pair[1];
+              form.appendChild(input);
+            }
+
+            form.submit();
+          });
+        }
       }
     });
   }

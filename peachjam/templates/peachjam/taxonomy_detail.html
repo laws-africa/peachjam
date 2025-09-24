@@ -10,31 +10,6 @@
           <div hx-get="{% url 'user_following_button' %}?taxonomy={{ taxonomy.pk }}"
                hx-trigger="load"></div>
         {% endblock %}
-        {% block offline-button %}
-          {% if offline_taxonomy and perms.peachjam.offline %}
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary ms-2"
-                      type="button"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false">
-                <i class="bi bi-three-dots"></i>
-              </button>
-              <ul class="dropdown-menu">
-                <li>
-                  <button class="dropdown-item"
-                          data-component="OfflineTaxonomyButton"
-                          data-status=".offline-taxonomy-status"
-                          data-taxonomy="{{ offline_taxonomy.pk }}">
-                    {% trans "Make available offline" %}
-                  </button>
-                </li>
-                <li>
-                  <a href="{% url 'offline' %}" class="dropdown-item">All offline content</a>
-                </li>
-              </ul>
-            </div>
-          {% endif %}
-        {% endblock %}
       </div>
       {% if offline_taxonomy and perms.peachjam.offline %}<div class="offline-taxonomy-status my-3"></div>{% endif %}
     </div>

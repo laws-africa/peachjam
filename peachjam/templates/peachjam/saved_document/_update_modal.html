@@ -28,12 +28,28 @@
         {% trans 'New folder...' %}
       </button>
       <div class="collapse" id="addFolder">
-        <input class="form-control"
-               maxlength="{{ form.new_folder.field.max_length }}"
-               id="{{ form.new_folder.id_for_label }}"
-               name="{{ form.new_folder.name }}"
-               placeholder="{% trans 'New folder name' %}"
-               type="text"/>
+        {% if not folder_limit_reached %}
+          <input class="form-control"
+                 maxlength="{{ form.new_folder.field.max_length }}"
+                 id="{{ form.new_folder.id_for_label }}"
+                 name="{{ form.new_folder.name }}"
+                 placeholder="{% trans 'New folder name' %}"
+                 type="text"/>
+        {% else %}
+          <div class="alert alert-warning d-flex">
+            <div class="me-2">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+              <div class="fw-bold">{% trans 'You have reached your limit for document folders.' %}</div>
+              {% if folder_upgrade %}
+                {% blocktrans trimmed with product=folder_upgrade.name %}
+              <div>To add more folders, please upgrade to {{ product }}.</div>
+            {% endblocktrans %}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
       </div>
       <div class="mt-3">
         <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>

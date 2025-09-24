@@ -3,7 +3,7 @@
 {% block title %}{{ document.title }}{% endblock %}
 {% block head-meta %}
   {{ block.super }}
-  {% if not document.allow_robots %}<meta name="robots" content="noindex" />{% endif %}
+  {% if not document.allow_robots or not document.is_most_recent %}<meta name="robots" content="noindex" />{% endif %}
   <meta property="og:title" content="{{ document.title }}" />
   <meta property="og:type" content="article" />
   <meta property="og:image"
@@ -83,7 +83,9 @@
         {% include "peachjam/_document_detail_toolbar.html" %}
         <div id="saved-document-detail--{{ document.id }}"></div>
         {% include 'peachjam/_document_floating_header.html' %}
-        <ul class="nav nav-tabs border-bottom" role="tablist">
+        <ul class="nav nav-tabs border-bottom"
+            role="tablist"
+            id="document-tab-list">
           {% block document-tabs %}
             <li class="nav-item" role="presentation">
               <button class="nav-link active"
@@ -212,20 +214,10 @@
               </li>
             {% endif %}
           {% endblock %}
-          {% if perms.peachjam.can_debug_document %}
-            <li class="nav-item ms-auto">
-              <button class="nav-link"
-                      data-bs-toggle="tab"
-                      data-bs-target="#debug-tab"
-                      type="button">
-                <i class="bi bi-three-dots"></i>
-              </button>
-            </li>
-          {% endif %}
         </ul>
       </div>
     </div>
-    <div class="tab-content mt-3">
+    <div class="tab-content mt-3" id="document-tab-panes">
       {% block document-tab-panes %}
         <div class="tab-pane show active"
              id="document-detail-tab"
@@ -562,23 +554,14 @@
             <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
           </div>
         {% endif %}
-        {% if perms.peachjam.can_debug_document %}
-          <div class="tab-pane"
-               id="debug-tab"
-               role="tabpanel"
-               aria-labelledby="debug-tab">
-            <div class="container">
-              {% include 'peachjam/document/_debug.html' %}
-            </div>
-          </div>
-        {% endif %}
       {% endblock %}
     </div>
-    {% if perms.peachjam.add_relationship %}{{ predicates_json|json_script:"predicates" }}{% endif %}
     {{ citation_links|json_script:"citation-links" }}
     {{ provision_relationships|json_script:"provision-relationships" }}
     {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}
     {{ incoming_citations_json|json_script:"incoming-citations-json" }}
     {% include "peachjam/provision_enrichment/_unconstitutional_modals.html" %}
+    <div hx-get="{% url 'document_debug' document.pk %}" hx-trigger="load">
+    </div>
   </div>
 {% endblock %}

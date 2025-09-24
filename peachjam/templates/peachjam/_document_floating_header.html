@@ -11,7 +11,7 @@
   <h5 class="title px-2 py-0 m-0 align-self-center">{{ document.title }}</h5>
   <div class="ms-auto px-2 align-content-center text-nowrap">
     {% trans "Copy citation" as verb %}
-    {% include 'peachjam/_copy_to_clipboard.html' with value=document.mnc|default:document.citation verb=verb %}
+    {% include 'peachjam/_copy_to_clipboard.html' with value=document.mnc|default:document.citation|default:document.title verb=verb %}
     {% if show_save_doc_button %}
       <!-- this will be replaced by htmx from the main toolbar's save document button is loaded -->
       <div class="save-document-button save-document-button--{{ document.id }}"></div>

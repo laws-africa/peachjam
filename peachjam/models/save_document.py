@@ -1,7 +1,10 @@
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls.base import reverse
 from django.utils.translation import gettext_lazy as _
+
+from peachjam_subs.models import Subscription
 
 from .core_document import CoreDocument
 
@@ -27,6 +30,17 @@ class Folder(models.Model):
     def __str__(self):
         return f"{self.name}"
 
+    def can_save_more_folders(self):
+        sub = Subscription.objects.active_for_user(self.user).first()
+        if not sub:
+            return False
+        limit_reached, _ = sub.check_feature_limit("folder_limit")
+        return not limit_reached
+
+    def clean(self):
+        if not self.pk and not self.can_save_more_folders():
+            raise ValidationError(_("Folder limit reached"))
+
     def get_absolute_url(self):
         return reverse("folder_list") + "#folder-" + str(self.pk)
 
@@ -50,6 +64,17 @@ class SavedDocument(models.Model):
         ordering = ("document__title",)
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
+
+    def can_save_more_documents(self):
+        sub = Subscription.objects.active_for_user(self.user).first()
+        if not sub:
+            return False
+        limit_reached, _ = sub.check_feature_limit("saved_document_limit")
+        return not limit_reached
+
+    def clean(self):
+        if not self.pk and not self.can_save_more_documents():
+            raise ValidationError(_("Saved documents limit reached"))
 
     def delete(self, using=None, keep_parents=False):
         self.document.annotations.filter(user=self.user).delete()

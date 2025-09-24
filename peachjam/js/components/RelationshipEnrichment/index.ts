@@ -87,7 +87,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
       subject_documents: [],
 
       object_work: {},
-      object_target_id: null,
+      object_target_id: '',
       object_documents: []
     };
   }
