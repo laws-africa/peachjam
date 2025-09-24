@@ -488,7 +488,7 @@
           <div class="container-fluid">
             {% block content %}
               {% if subscription_required %}
-                {% include 'peachjam_subs/_subscription_required.html' with show_sidebar=True %}
+                <div class="container">{% include 'peachjam_subs/_subscription_required.html' with show_sidebar=True %}</div>
               {% else %}
                 {% include 'peachjam/_document_content.html' with show_sidebar=True %}
               {% endif %}
@@ -555,7 +555,9 @@
                id="ratifications-tab"
                role="tabpanel"
                aria-labelledby="ratifications-tab">
-            <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
+            <div class="container">
+              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
+            </div>
           </div>
         {% endif %}
       {% endblock %}
