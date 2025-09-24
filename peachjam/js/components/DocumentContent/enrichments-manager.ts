@@ -7,6 +7,7 @@ import SelectionShare from './selection-share';
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
 import { ProvisionCitations } from '../ProvisionCitations';
+import { SelectionToolbarManager } from './selection-toolbar';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -26,6 +27,7 @@ class EnrichmentsManager {
   private gutterManager: GutterEnrichmentManager;
   private displayType: string; // html, pdf or akn
   private provisionCitations: ProvisionCitations | null = null;
+  private selectionToolbarManager: SelectionToolbarManager | null = null;
 
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
@@ -36,9 +38,10 @@ class EnrichmentsManager {
 
     this.docDiffsManager = this.setupDocDiffs();
     this.gutterManager = new GutterEnrichmentManager(this.root);
+    const contentRoot = this.root.querySelector('.content');
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
-    this.gutterManager.akn = this.root.querySelector('.content');
+    this.gutterManager.akn = contentRoot;
     if (this.displayType !== 'pdf') {
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
@@ -53,6 +56,12 @@ class EnrichmentsManager {
         this.docDiffsManager?.closeInlineDiff();
       }
     });
+
+    if (contentRoot) {
+      this.selectionToolbarManager = new SelectionToolbarManager(contentRoot);
+      this.selectionToolbarManager.addProvider(this.selectionShare);
+      this.selectionToolbarManager.addProvider(this.selectionSearch);
+    }
   }
 
   setupDocDiffs () {
@@ -69,6 +78,9 @@ class EnrichmentsManager {
     this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
     this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
     this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
+    if (this.selectionToolbarManager) {
+      this.selectionToolbarManager.addProvider(this.annotationsManager);
+    }
   }
 }
 
