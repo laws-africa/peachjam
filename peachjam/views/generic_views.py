@@ -374,6 +374,10 @@ class BaseDocumentDetailView(DetailView):
             or self.request.user.has_perm("peachjam.add_saveddocument")
         )
 
+    def get_subscription_permissions_context(self, context):
+        # override in subclass to add subscription-related context
+        return context
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
@@ -443,6 +447,7 @@ class BaseDocumentDetailView(DetailView):
         ]
 
         # provide extra context for analytics
+        self.get_subscription_permissions_context(context)
         self.add_track_page_properties(context)
         self.modify_context.send(sender=self.__class__, context=context, view=self)
         return context
