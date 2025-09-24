@@ -544,6 +544,7 @@ class CoreDocument(PolymorphicModel):
             ("can_generate_judgment_summary", "Can generate judgment summary"),
             ("can_offline", "Can save content for offline use"),
             ("can_view_historical_legislation", "Can view historical legislation"),
+            ("can_view_case_history", "Can view case history"),
         ]
 
     def __str__(self):
