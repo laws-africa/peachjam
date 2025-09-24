@@ -312,7 +312,7 @@ class PdfRenderer {
       err.innerText = message;
     }
 
-    if (response) {
+    if (response && response.status !== 404) {
       throw new Error(`Error fetching PDF: ${message}`);
     }
   }
