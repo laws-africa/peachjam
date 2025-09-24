@@ -4,18 +4,49 @@ import { rangeToTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import tippy, { Instance as Tippy } from 'tippy.js';
 import debounce from 'lodash/debounce';
 
+/**
+ * This class handles showing a popup toolbar when the user selects text in the document body. Providers can
+ * register themselves with addProvider, using the same interface as the gutter element provider.
+ */
 export class SelectionToolbarManager {
   protected root: Element;
   protected providers: IGutterEnrichmentProvider[];
   protected btnGroup: HTMLDivElement;
-  public popup: Tippy | null = null;
+  protected popup: Tippy;
+  protected target: IRangeTarget | null = null;
+  protected range: Range | null = null;
 
   constructor (root: Element) {
     this.root = root;
     this.providers = [];
     this.btnGroup = document.createElement('div');
     this.btnGroup.className = 'btn-group btn-group-sm bg-light';
+    this.popup = this.createPopup();
     document.addEventListener('selectionchange', debounce(this.selectionChanged.bind(this), 100));
+  }
+
+  createPopup () {
+    return tippy(this.root, {
+      appendTo: document.body,
+      interactive: true,
+      theme: 'dark',
+      zIndex: 0,
+      // on mobile devices, the selection toolbar overlaps this otherwise
+      placement: 'bottom',
+      trigger: 'manual',
+      delay: [0, 0],
+      getReferenceClientRect: () => this.getBoundingClientRect(),
+      onShow: (instance) => {
+        if (this.target) {
+          // some providers re-use the same element as the content between popups, so we must clear the content
+          // first otherwise the popup doesn't re-render itself
+          instance.setContent('');
+          instance.setContent(this.getPopupContent(this.target));
+        } else {
+          this.hidePopup();
+        }
+      }
+    });
   }
 
   addProvider (provider: IGutterEnrichmentProvider) {
@@ -33,41 +64,21 @@ export class SelectionToolbarManager {
         // stash the range as converted to a target; this may be null!
         const target = rangeToTarget(range, this.root);
         if (target) {
-          // get the closest element
-          let node: Node | null = range.startContainer;
-          while (node && node.nodeType !== Node.ELEMENT_NODE) node = node.parentElement;
-          if (node) {
-            // show the popup
-            this.createPopup(node as HTMLElement, target, range);
-            return;
-          }
+          this.range = range;
+          this.target = target;
+          this.popup.show();
+          return;
         }
       }
     }
 
     // cleanup if anything fails
-    this.removePopup();
+    this.hidePopup();
   }
 
-  createPopup (node: Element, target: IRangeTarget, range: Range) {
-    this.popup = tippy(node, {
-      appendTo: document.body,
-      interactive: true,
-      theme: 'dark',
-      zIndex: 0,
-      // on mobile devices, the selection toolbar overlaps this otherwise
-      placement: 'bottom',
-      trigger: 'manual',
-      delay: [0, 0],
-      showOnCreate: true,
-      getReferenceClientRect: () => range.getBoundingClientRect(),
-      onShow: (instance) => {
-        // some providers re-use the same element as the content between popups, so we must clear the content
-        // first otherwise the popup doesn't re-render itself
-        instance.setContent('');
-        instance.setContent(this.getPopupContent(target));
-      }
-    });
+  getBoundingClientRect () {
+    // @ts-ignore
+    return this.range.getBoundingClientRect();
   }
 
   getPopupContent (target: IRangeTarget) {
@@ -77,7 +88,7 @@ export class SelectionToolbarManager {
       const btn = provider.getButton(target);
       if (btn) {
         btn.addEventListener('click', () => {
-          this.removePopup();
+          this.hidePopup();
           provider.addEnrichment(target);
         });
         this.btnGroup.appendChild(btn);
@@ -87,10 +98,7 @@ export class SelectionToolbarManager {
     return this.btnGroup;
   }
 
-  removePopup () {
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
+  hidePopup () {
+    this.popup.hide();
   }
 }

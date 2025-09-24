@@ -38,30 +38,26 @@ class EnrichmentsManager {
 
     this.docDiffsManager = this.setupDocDiffs();
     this.gutterManager = new GutterEnrichmentManager(this.root);
-    const contentRoot = this.root.querySelector('.content');
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
-    this.gutterManager.akn = contentRoot;
+    this.gutterManager.akn = this.root.querySelector('.content');
+
+    this.selectionSearch = new SelectionSearch(this.gutterManager);
+    this.selectionShare = new SelectionShare(this.gutterManager);
+
     if (this.displayType !== 'pdf') {
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
       this.provisionCitations = new ProvisionCitations(this.root);
       this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
+      this.setupSelectionToolbar();
     }
-    this.selectionSearch = new SelectionSearch(this.gutterManager);
-    this.selectionShare = new SelectionShare(this.gutterManager);
 
     this.gutter?.addEventListener('laItemChanged', (e: any) => {
       if (e.target.classList.contains('relationship-gutter-item') && e.target.active) {
         this.docDiffsManager?.closeInlineDiff();
       }
     });
-
-    if (contentRoot) {
-      this.selectionToolbarManager = new SelectionToolbarManager(contentRoot);
-      this.selectionToolbarManager.addProvider(this.selectionShare);
-      this.selectionToolbarManager.addProvider(this.selectionSearch);
-    }
   }
 
   setupDocDiffs () {
@@ -78,9 +74,17 @@ class EnrichmentsManager {
     this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
     this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
     this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
-    if (this.selectionToolbarManager) {
+    this.setupSelectionToolbar();
+  }
+
+  setupSelectionToolbar () {
+    // @ts-ignore
+    this.selectionToolbarManager = new SelectionToolbarManager(this.gutterManager.akn);
+    if (this.annotationsManager) {
       this.selectionToolbarManager.addProvider(this.annotationsManager);
     }
+    this.selectionToolbarManager.addProvider(this.selectionShare);
+    this.selectionToolbarManager.addProvider(this.selectionSearch);
   }
 }
 
