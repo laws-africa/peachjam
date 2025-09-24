@@ -1,3 +1,89 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% block title %}{{ MY_LII }}{% endblock %}
-{% block page-content %}{% endblock %}
+{% load i18n static %}
+{% block page-content %}
+  <div class="py-5 bg-brand-pale">
+    <div class="container">
+      <div class="row justify-content-center text-center">
+        <div class="col-lg-9">
+          <h1 class="display-5 fw-bold">{{ MY_LII }} – {% trans "Your personal research space" %}</h1>
+          <p class="lead text-muted">
+            {% blocktrans trimmed %}
+              {{ MY_LII }} is a free account that helps you personalise and organise your legal research. It’s simple to use, always free, and makes working with the law easier.
+            {% endblocktrans %}
+          </p>
+          <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg mt-2">{% trans "Sign up for free" %}</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <section class="py-5">
+    <div class="container">
+      <div class="row text-center g-4">
+        <div class="col-md-3">
+          <div class="d-flex flex-column align-items-center h-100 px-3">
+            <div class="bg-brand-pale p-4 rounded-3 h2 mb-3">
+              <i class="bi bi-star"></i>
+            </div>
+            <h5 class="fw-semibold">{% trans "Save documents for later" %}</h5>
+            <div>{% trans "Keep a library of judgments and legislation you often return to." %}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex flex-column align-items-center h-100 px-3">
+            <div class="bg-brand-pale p-4 rounded-3 h2 mb-3">
+              <i class="bi bi-folder"></i>
+            </div>
+            <h5 class="fw-semibold">{% trans "Organise with folders" %}</h5>
+            <div>{% trans "Group related materials together in a way that makes sense to you." %}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex flex-column align-items-center h-100 px-3">
+            <div class="bg-brand-pale p-4 rounded-3 h2 mb-3">
+              <i class="bi bi-chat"></i>
+            </div>
+            <h5 class="fw-semibold">{% trans "Add private notes" %}</h5>
+            <div>{% trans "Write down reminders, insights, or context on the documents you save." %}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="d-flex flex-column align-items-center h-100 px-3">
+            <div class="bg-brand-pale p-4 rounded-3 h2 mb-3">
+              <i class="bi bi-bell"></i>
+            </div>
+            <h5 class="fw-semibold">{% trans "Receive updates" %}</h5>
+            <div>
+              {% trans "Choose topics or courts you’re interested in, and we’ll let you know when something new is published." %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <div class="container my-5">
+    <section class="mb-5">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-6">
+          <h2 class="fw-bold mt-1">{% trans "Why create an acocunt?" %}</h2>
+          <ul class="list-unstyled check-list">
+            <li>✔ {% trans "Save time by not having to find the same documents again." %}</li>
+            <li>✔ {% trans "Stay organised and focused on what matters to you." %}</li>
+            <li>✔ {% trans "Be notified when important new materials are available." %}</li>
+          </ul>
+        </div>
+        <div class="col-lg-6">
+          <h2 class="fw-bold mt-1">{% trans "Getting started is easy" %}</h2>
+          <ol>
+            <li>{% trans "Sign up with your email address." %}</li>
+            <li>{% trans "Start saving and organising your research right away." %}</li>
+            <li>{% trans "Access your personal library wherever you are, on your desktop or phone." %}</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+    <section class="text-center">
+      <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">{% trans "Create your free account" %}</a>
+    </section>
+  </div>
+{% endblock %}

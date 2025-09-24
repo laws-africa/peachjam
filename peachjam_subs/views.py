@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView
 
+from peachjam.models import pj_settings
 from peachjam_subs.models import Subscription
 
 
@@ -31,3 +32,8 @@ class CancelSubscriptionView(LoginRequiredMixin, DeleteView):
 
 class SubscribeView(TemplateView):
     template_name = "peachjam_subs/subscribe.html"
+
+    def get(self, request, *args, **kwargs):
+        if not pj_settings().allow_signups:
+            return redirect("home_page")
+        return super().get(request, *args, **kwargs)
