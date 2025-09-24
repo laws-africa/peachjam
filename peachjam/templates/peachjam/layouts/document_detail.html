@@ -561,9 +561,7 @@
     {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}
     {{ incoming_citations_json|json_script:"incoming-citations-json" }}
     {% include "peachjam/provision_enrichment/_unconstitutional_modals.html" %}
-    <div data-component="DocumentDetail"
-         data-document-id="{{ document.pk }}"
-         data-debug-url="{% url 'document_debug' document.pk %}">
+    <div hx-get="{% url 'document_debug' document.pk %}" hx-trigger="load">
     </div>
   </div>
 {% endblock %}

@@ -5,7 +5,6 @@ import { AnnotationsProvider } from './Annotations';
 import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
-import DocumentDetail from './document-detail';
 import FloatingHeader from './floating-header';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
@@ -27,7 +26,6 @@ const components: Record<string, any> = {
   // Data components
   CopyToClipboard,
   DocumentContent,
-  DocumentDetail,
   DocumentFilterForm,
   DocumentTable,
   FloatingHeader,
