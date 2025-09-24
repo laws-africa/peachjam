@@ -487,7 +487,11 @@
           </div>
           <div class="container-fluid">
             {% block content %}
-              {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+              {% if subscription_required %}
+                {% include 'peachjam_subs/_subscription_required.html' with show_sidebar=True %}
+              {% else %}
+                {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+              {% endif %}
               <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
             {% endblock %}
           </div>
