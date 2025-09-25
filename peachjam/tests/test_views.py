@@ -1,7 +1,7 @@
 import datetime
 
 from countries_plus.models import Country
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core.files.base import ContentFile
 from django.test import TestCase
 from django.urls import reverse
@@ -273,6 +273,12 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_case_history(self):
+        self.user = User.objects.first()
+        self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="can_view_case_history")
+        )
+
         appeal_allowed = Outcome.objects.create(name="Appeal Allowed")
 
         main_case = Judgment.objects.create(
