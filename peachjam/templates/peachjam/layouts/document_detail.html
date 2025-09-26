@@ -183,21 +183,6 @@
                 </button>
               </li>
             {% endif %}
-            {% if case_histories %}
-              <li class="nav-item" role="presentation">
-                <button class="nav-link"
-                        data-bs-toggle="tab"
-                        data-bs-target="#case-history-tab"
-                        data-track-event="Document | Tab | Case history"
-                        type="button"
-                        role="tab"
-                        aria-controls="case-history-tab"
-                        aria-selected="false">
-                  <i class="bi bi-pj pj-case-history"></i>
-                  {% trans 'Case history' %}
-                </button>
-              </li>
-            {% endif %}
             {% if document.work.ratification %}
               <li class="nav-item" role="presentation">
                 <button class="nav-link"
@@ -487,7 +472,11 @@
           </div>
           <div class="container-fluid">
             {% block content %}
-              {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+              {% if subscription_required %}
+                <div class="container">{% include 'peachjam_subs/_subscription_required.html' with show_sidebar=True %}</div>
+              {% else %}
+                {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+              {% endif %}
               <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
             {% endblock %}
           </div>
@@ -536,14 +525,6 @@
                role="tabpanel"
                aria-labelledby="citations-tab">
             <div class="container">{% include 'peachjam/_citations.html' %}</div>
-          </div>
-        {% endif %}
-        {% if case_histories %}
-          <div class="tab-pane"
-               id="case-history-tab"
-               role="tabpanel"
-               aria-labelledby="case-history-tab">
-            <div class="container">{% include 'peachjam/_case_histories.html' %}</div>
           </div>
         {% endif %}
         {% if document.work.ratification %}

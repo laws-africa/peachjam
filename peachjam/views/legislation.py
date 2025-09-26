@@ -92,9 +92,25 @@ class LegislationListView(FilteredDocumentListView):
 
 
 @registry.register_doc_type("legislation")
-class LegislationDetailView(BaseDocumentDetailView):
+class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     model = Legislation
     template_name = "peachjam/legislation_detail.html"
+    permission_required = "peachjam.can_view_historical_legislation"
+
+    def has_permission(self):
+        # if it's the most recent version, always allow
+        self.object = self.get_object()
+        if self.object.is_most_recent():
+            return True
+        return super().has_permission()
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return {
+            "document": self.object,
+        }
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

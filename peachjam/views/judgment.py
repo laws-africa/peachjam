@@ -52,6 +52,14 @@ class JudgmentDetailView(BaseDocumentDetailView):
             ] = Product.get_lowest_product_for_permission(
                 "peachjam.can_view_document_summary"
             )
+        # check case history access
+        if not self.request.user.has_perm("peachjam.can_view_case_history"):
+            context["case_history_subscription_required"] = True
+            context[
+                "lowest_case_history_product"
+            ] = Product.get_lowest_product_for_permission(
+                "peachjam.can_view_case_history"
+            )
         return context
 
     def get_notices(self):
