@@ -155,7 +155,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     btn.className = 'btn btn-outline-secondary';
     btn.type = 'button';
     btn.title = 'Link citation';
-    btn.innerHTML = '<i class="bi bi-quote"></i>';
+    btn.innerHTML = '<i class="bi bi-quote"></i> ' + btn.title;
     return btn;
   }
 
