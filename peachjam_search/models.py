@@ -51,7 +51,6 @@ class SearchTrace(models.Model):
         permissions = [
             ("can_debug_search", "Can debug search"),
             ("can_download_search", "Can download search results"),
-            ("can_semantic_search", "Can use semantic search"),
         ]
 
     @classmethod

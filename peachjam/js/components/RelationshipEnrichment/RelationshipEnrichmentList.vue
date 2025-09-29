@@ -26,6 +26,7 @@
 import RelationshipEnrichment from './RelationshipEnrichment.vue';
 import RelationshipEnrichmentModal from './RelationshipEnrichmentModal.vue';
 import { authHeaders } from '../../api';
+import peachJam from '../../peachjam';
 
 export default {
   name: 'RelationshipEnrichmentList',
@@ -40,7 +41,6 @@ export default {
     },
     viewRoot: HTMLElement,
     gutter: HTMLElement,
-    editable: Boolean,
     useSelectors: Boolean,
     thisWorkFrbrUri: {
       type: String,
@@ -50,8 +50,14 @@ export default {
   data: (x) => {
     return {
       items: x.enrichments,
+      editable: false,
       creating: null
     };
+  },
+  mounted () {
+    peachJam.whenUserLoaded().then((user) => {
+      this.editable = user.perms.includes('peachjam.add_relationship');
+    });
   },
   methods: {
     markAndAnchorAll () {

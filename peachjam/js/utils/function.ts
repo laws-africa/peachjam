@@ -142,3 +142,18 @@ export const createTocController = (items: [] = []) => {
   laTocController.titleFilterClearBtnClasses = 'btn btn-secondary btn-sm';
   return laTocController;
 };
+
+/**
+ * Wrapper that runs an htmx.ajax on a dummy element
+ */
+export function htmxAjax(verb: string, url: string): Promise<void> {
+  const el = document.createElement('div');
+  el.style.display = 'none';
+  document.body.appendChild(el);
+
+  // @ts-ignore
+  return window.htmx.ajax(verb, url, {
+    "source": el,
+    "target": el,
+  });
+}

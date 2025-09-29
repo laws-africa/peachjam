@@ -16,9 +16,7 @@
           <img src="{% static 'images/logo.png' %}" alt="{{ APP_NAME }}" height="50"/>
         {% endblock %}
       </a>
-      {% block navbar-user-menu %}
-        {% include "peachjam/_user_menu.html" %}
-      {% endblock %}
+      {% block navbar-user-menu %}<span id="user-menu"></span>{% endblock %}
       <button class="navbar-toggler"
               type="button"
               data-bs-toggle="collapse"

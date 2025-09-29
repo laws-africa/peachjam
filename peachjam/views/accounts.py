@@ -1,14 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext as _
-from django.views import View
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
 
-from peachjam.auth import user_display
 from peachjam.forms import UserProfileForm
 from peachjam.models import DocumentAccessGroup
 
@@ -53,22 +50,6 @@ class EditAccountView(LoginRequiredMixin, FormView):
             ),
         )
         return context
-
-
-class GetAccountView(View):
-    def get_object(self):
-        return self.request.user
-
-    def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            user_details = {
-                "id": self.request.user.id,
-                "email": self.request.user.email,
-                "name": user_display(self.request.user),
-            }
-            response = JsonResponse(user_details)
-            return response
-        return HttpResponse(status=404)
 
 
 class LoggedOutView(TemplateView):

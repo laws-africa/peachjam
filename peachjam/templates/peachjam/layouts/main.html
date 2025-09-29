@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/base.html' %}
-{% load static peachjam %}
+{% load static peachjam i18n %}
 {% load sass_tags %}
 {% block head-css %}
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
@@ -81,7 +81,7 @@
 {% block body-content %}
   {% block before-content %}{% endblock %}
   <main id="top">
-    {% include "peachjam/_messages.html" %}
+    <div id="messages"></div>
     {% block page-content %}{% endblock %}
     {% include 'peachjam/saved_document/_modal_placeholder.html' %}
   </main>
