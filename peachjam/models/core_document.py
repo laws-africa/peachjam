@@ -291,6 +291,9 @@ class Work(models.Model):
         self.frbr_uri_date = frbr_uri.date
         self.frbr_uri_number = frbr_uri.number
 
+    def get_absolute_url(self):
+        return reverse("document_detail", kwargs={"frbr_uri": self.frbr_uri[1:]})
+
     def __str__(self):
         return f"{self.frbr_uri} - {self.title}"
 
@@ -552,7 +555,9 @@ class CoreDocument(PolymorphicModel):
         return self._meta.get_fields()
 
     def get_absolute_url(self):
-        return self.expression_frbr_uri
+        return reverse(
+            "document_detail", kwargs={"frbr_uri": self.expression_frbr_uri[1:]}
+        )
 
     @property
     def year(self):
