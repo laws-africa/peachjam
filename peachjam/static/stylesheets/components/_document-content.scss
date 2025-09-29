@@ -223,6 +223,7 @@
         @include media-breakpoint-down(lg) {
           flex: 100%;
           max-width: 100%;
+          padding-right: 0px;
         }
       }
     }
@@ -237,15 +238,12 @@
     la-gutter {
       flex: 0 0 40px;
 
-      &:empty {
-        display: none;
-        @include media-breakpoint-up(lg) {
-         display: block;
-        }
-      }
-
       @include media-breakpoint-up(lg) {
         flex: 20%;
+      }
+
+      @include media-breakpoint-down(lg) {
+        padding: 0px;
       }
     }
   }

@@ -22,7 +22,7 @@ export class SelectionToolbarManager {
     this.btnGroup = document.createElement('div');
     this.btnGroup.className = 'btn-group btn-group-sm bg-light';
     this.popup = this.createPopup();
-    document.addEventListener('selectionchange', debounce(this.selectionChanged.bind(this), 100));
+    document.addEventListener('selectionchange', debounce(this.selectionChanged.bind(this), 200));
   }
 
   createPopup () {
@@ -66,6 +66,7 @@ export class SelectionToolbarManager {
         if (target) {
           this.range = range;
           this.target = target;
+          this.popup.hide();
           this.popup.show();
           return;
         }
