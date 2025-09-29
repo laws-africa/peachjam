@@ -42,13 +42,17 @@ class EnrichmentsManager {
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
     this.gutterManager.akn = this.root.querySelector('.content');
 
-    this.selectionSearch = new SelectionSearch(this.gutterManager);
-    this.selectionShare = new SelectionShare(this.gutterManager);
-
+    // the order here matters for the order of buttons in the gutter
     if (this.displayType !== 'pdf') {
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
       this.provisionCitations = new ProvisionCitations(this.root);
+    }
+
+    this.selectionSearch = new SelectionSearch(this.gutterManager);
+    this.selectionShare = new SelectionShare(this.gutterManager);
+
+    if (this.displayType !== 'pdf') {
       this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.setupSelectionToolbar();
     }
