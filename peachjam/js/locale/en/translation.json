@@ -1,9 +1,7 @@
 {
   "{document_count} documents found": "{document_count} documents found.",
   "{reverse_verb} this provision": "{reverse_verb} this provision",
-  "Add comment": {
-    "": "Add comment..."
-  },
+  "Add comment": "Add comment",
   "Advanced search": "Advanced search",
   "AND": "AND",
   "Attorneys": "Attorneys",

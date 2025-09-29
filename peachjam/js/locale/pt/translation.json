@@ -1,9 +1,7 @@
 {
   "{document_count} documents found": "{document_count} documentos encontrados.",
   "{reverse_verb} this provision": "{reverse_verb} esta disposição",
-  "Add comment": {
-    "": "Adicionar comentário..."
-  },
+  "Add comment": "Adicionar comentário",
   "Advanced search": "Pesquisa avançada",
   "AND": "E",
   "Attorneys": "Advogados",
