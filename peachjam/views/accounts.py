@@ -65,6 +65,7 @@ class GetAccountView(View):
                 "id": self.request.user.id,
                 "email": self.request.user.email,
                 "name": user_display(self.request.user),
+                "is_staff": self.request.user.is_staff,
             }
             response = JsonResponse(user_details)
             return response
