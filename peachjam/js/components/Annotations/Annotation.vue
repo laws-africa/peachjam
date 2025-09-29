@@ -188,6 +188,12 @@ export default {
       });
       this.marks = [];
     },
+    focusTextArea () {
+      setTimeout(() => {
+        this.activate();
+        this.$el.querySelector('textarea').focus();
+      }, 200);
+    },
     activate () {
       this.$el.active = true;
       this.marks.forEach(mark => mark.classList.add('active'));

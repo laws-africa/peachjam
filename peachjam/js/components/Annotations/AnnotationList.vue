@@ -3,7 +3,7 @@
     <annotation-item
       v-for="annotation in items"
       :key="annotation.id"
-      ref="gutter-item"
+      :ref="'annotation-' + annotation.id"
       :annotation-data="annotation"
       :view-root="viewRoot"
       :gutter="gutter"
@@ -104,6 +104,9 @@ export default {
         user: this.user.name
       };
       this.items.push(newAnnotation);
+      this.$nextTick(() => {
+        this.$refs['annotation-' + newAnnotation.id][0].focusTextArea();
+      });
     },
     async removeAnnotation (annotation) {
       this.items = this.items.filter((item) => item !== annotation);
