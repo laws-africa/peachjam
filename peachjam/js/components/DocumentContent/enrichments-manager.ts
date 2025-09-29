@@ -41,6 +41,8 @@ class EnrichmentsManager {
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
     this.gutterManager.akn = this.root.querySelector('.content');
+    // @ts-ignore
+    this.gutterManager.floatingContainer.querySelector('.gutter-enrichment-new-buttons')?.classList.remove('btn-group-sm');
 
     // the order here matters for the order of buttons in the gutter
     if (this.displayType !== 'pdf') {

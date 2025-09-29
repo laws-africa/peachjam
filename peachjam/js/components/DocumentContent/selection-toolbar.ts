@@ -56,7 +56,7 @@ export class SelectionToolbarManager {
   selectionChanged () {
     const sel = document.getSelection();
 
-    if (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed) {
+    if (sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed && window.matchMedia('(max-width: 991px)').matches) {
       const range = sel.getRangeAt(0);
 
       // is the common ancestor inside the content container?
