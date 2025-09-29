@@ -178,7 +178,7 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        if True or not request.user.has_perm("peachjam_search.download_search"):
+        if not request.user.has_perm("peachjam_search.download_search"):
             if request.htmx:
                 # this is the initial request to download, show a friendly permission-denied box
                 self.template_name = "peachjam_search/_download_403.html"
