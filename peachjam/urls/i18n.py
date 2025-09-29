@@ -48,6 +48,7 @@ urlpatterns = [
     path("search/", include(("peachjam_search.urls", "search"), namespace="search")),
     # user auth and account management
     path("accounts/", include("peachjam.urls.accounts")),
+    path("", include("peachjam_subs.urls")),
     # user-specific page fragments
     path("user/", include("peachjam.urls.user")),
     path("my/", include("peachjam.urls.my")),

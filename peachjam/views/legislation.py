@@ -26,7 +26,7 @@ from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
-from peachjam_subs.models import Product
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 class LegislationListView(FilteredDocumentListView):
@@ -426,9 +426,13 @@ class DocumentUncommencedProvisionListView(DetailView):
         return context
 
 
-class UncommencedProvisionListView(LegislationListView):
+class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
+    permission_required = "peachjam.view_uncommencedprovision"
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
     latest_expression_only = True
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
     def get_template_names(self):
         if self.request.htmx:
@@ -459,11 +463,15 @@ class UnconstitutionalProvisionDetailView(DetailView):
     context_object_name = "enrichment"
 
 
-class UnconstitutionalProvisionListView(LegislationListView):
+class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
+    permission_required = "peachjam.view_unconstitutionalprovision"
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
     exclude_facets = ["alphabet", "years"]
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
     def get_template_names(self):
         if self.request.htmx:
@@ -540,8 +548,23 @@ class UnconstitutionalProvisionListView(LegislationListView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-class DocumentProvisionCitationView(FilteredDocumentListView):
+class DocumentProvisionCitationView(
+    SubscriptionRequiredMixin, FilteredDocumentListView
+):
+    permission_required = "peachjam.view_provisioncitation"
     template_name = "peachjam/provision_enrichment/provision_citations.html"
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return {
+            "document": self.document,
+            "provision_title": self.document.friendly_provision_title(
+                self.provision_eid
+            ),
+            "provision_html": self.document.get_provision_by_eid(self.provision_eid),
+        }
 
     def get_template_names(self):
         if self.request.htmx:
@@ -596,27 +619,9 @@ class DocumentProvisionCitationView(FilteredDocumentListView):
         )
         return qs
 
-    def check_for_perms(self, *args, **kwargs):
-        perm = "peachjam.view_provisioncitation"
-        user_has_perm = self.request.user.has_perm(perm)
-        lowest_product = Product.get_lowest_product_for_permission(perm)
-        return {
-            "user_has_perm": user_has_perm,
-            "lowest_product": lowest_product,
-        }
-
     def get_context_data(self, **kwargs):
-        context = self.check_for_perms()
-        # include citing documents only if user has permission
-        if context["user_has_perm"]:
-            context.update(super().get_context_data(**kwargs))
-        context["document"] = self.document
-        context["provision_title"] = context["document"].friendly_provision_title(
-            self.provision_eid
-        )
-        context["provision_html"] = context["document"].get_provision_by_eid(
-            self.provision_eid
-        )
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_subscription_required_context())
         context["citation_contexts"] = self.provision_citations
         context["citing_documents_count"] = self.get_base_queryset().count()
         return context
