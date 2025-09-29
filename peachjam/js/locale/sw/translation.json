@@ -1,7 +1,6 @@
 {
   "{document_count} documents found": "Nyaraka {document_count} zilizopatikana.",
   "{reverse_verb} this provision": "{reverse_verb} kifungu hiki",
-  "Add comment": "Ongeza maoni",
   "Advanced search": "Utafutaji wa kina",
   "AND": "NA",
   "Attorneys": "Wanasheria",
@@ -14,6 +13,7 @@
   "Clear all": "Futa zote",
   "Close": "Funga",
   "Collapse all": "Kunja zote",
+  "Comment": "Ongeza maoni",
   "Court": "Mahakama",
   "Court registry": "Usajili wa mahakama",
   "Date (newest first)": "Tarehe (za karibu zaidi kwanza)",

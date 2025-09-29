@@ -45,6 +45,10 @@ la-gutter-item[active] .gutter-item-card {
 
   box-shadow: 0 4px 8px 3px rgba(0, 0, 0, .15);
   border-radius: var(--bs-border-radius-sm);
+
+  .btn {
+    text-align: left;
+  }
 }
 
 @include media-breakpoint-up(lg) {

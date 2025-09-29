@@ -19,7 +19,7 @@ export default class SelectionSearch implements IGutterEnrichmentProvider {
     btn.className = 'btn btn-outline-secondary';
     btn.type = 'button';
     btn.title = i18next.t('Search');
-    btn.innerHTML = '<i class="bi bi-search"></i>';
+    btn.innerHTML = '<i class="bi bi-search"></i> ' + btn.title;
     return btn;
   }
 

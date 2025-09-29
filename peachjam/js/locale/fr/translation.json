@@ -1,7 +1,6 @@
 {
   "{document_count} documents found": "{document_count} documents trouvés.",
   "{reverse_verb} this provision": "{reverse_verb} cette disposition",
-  "Add comment": "Ajouter un commentaire",
   "Advanced search": "Recherche avancée",
   "AND": "ET",
   "Attorneys": "Avocats",
@@ -14,6 +13,7 @@
   "Clear all": "Effacer tout",
   "Close": "Fermer",
   "Collapse all": "Réduire tout",
+  "Comment": "Commenter",
   "Court": "Cour",
   "Court registry": "Registre des tribunaux",
   "Date (newest first)": "Date (plus récente en premier)",
