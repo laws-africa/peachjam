@@ -1,0 +1,237 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-30 08:44+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: admin.py:89
+msgid "Subscription activated."
+msgstr ""
+
+#: admin.py:91
+msgid "Subscription cannot be activated."
+msgstr ""
+
+#: admin.py:101
+msgid "Subscription cancelled."
+msgstr ""
+
+#: admin.py:103
+msgid "Subscription cannot be cancelled."
+msgstr ""
+
+#: admin.py:168
+msgid "View"
+msgstr ""
+
+#: models.py:171
+msgid "Monthly"
+msgstr ""
+
+#: models.py:172
+msgid "Annually"
+msgstr ""
+
+#: models.py:182
+msgid "month"
+msgstr ""
+
+#: models.py:183
+msgid "year"
+msgstr ""
+
+#: models.py:203
+msgid "FREE"
+msgstr ""
+
+#: models.py:276
+msgid "Pending"
+msgstr ""
+
+#: models.py:277
+msgid "Active"
+msgstr ""
+
+#: models.py:278
+msgid "Closed"
+msgstr ""
+
+#: models.py:546
+msgid "Default product offering"
+msgstr ""
+
+#: models.py:551
+msgid "These products are highlighted in the product listing."
+msgstr ""
+
+#: models.py:559
+msgid "Trial product offering"
+msgstr ""
+
+#: models.py:560
+msgid "If set, this product offering is used for trials."
+msgstr ""
+
+#: models.py:564
+msgid "Trial duration (days)"
+msgstr ""
+
+#: models.py:565
+msgid "Number of days for the trial period."
+msgstr ""
+
+#: templates/admin/peachjam_subs/subscription/change_form.html:10
+msgid "Activate subscription"
+msgstr ""
+
+#: templates/admin/peachjam_subs/subscription/change_form.html:17
+msgid "Cancel subscription"
+msgstr ""
+
+#: templates/peachjam_subs/_current_and_pending_subscriptions.html:11
+msgid "Upcoming change"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:7
+msgid "Trial"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:15
+msgid "Next payment due on"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:22
+msgid "Active since"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:24
+msgid "Begins on"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:27
+msgid "Ends on"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:36
+msgid "Are you sure?"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_card.html:37
+msgid "Cancel change"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:8
+#, python-format
+msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:18
+#, python-format
+msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:25
+msgid "This content is not currently available."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:9
+msgid "Your personal research space"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:11
+#, python-format
+msgid "%(MY_LII)s is a free account that helps you personalise and organise your legal research. It’s simple to use, always free, and makes working with the law easier."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:15
+msgid "Sign up for free"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:28
+msgid "Save documents for later"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:29
+msgid "Keep a library of judgments and legislation you often return to."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:37
+msgid "Organise with folders"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:38
+msgid "Group related materials together in a way that makes sense to you."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:46
+msgid "Add private notes"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:47
+msgid "Write down reminders, insights, or context on the documents you save."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:55
+msgid "Receive updates"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:57
+msgid "Choose topics or courts you’re interested in, and we’ll let you know when something new is published."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:68
+msgid "Why create an acocunt?"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:70
+msgid "Save time by not having to find the same documents again."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:71
+msgid "Stay organised and focused on what matters to you."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:72
+msgid "Be notified when important new materials are available."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:76
+msgid "Getting started is easy"
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:78
+msgid "Sign up with your email address."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:79
+msgid "Start saving and organising your research right away."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:80
+msgid "Access your personal library wherever you are, on your desktop or phone."
+msgstr ""
+
+#: templates/peachjam_subs/subscribe.html:86
+msgid "Create your free account"
+msgstr ""
+
+#: templates/user_account/home.html:7
+msgid "Subscription"
+msgstr ""
+
+#: views.py:28
+msgid "Your pending subscription change has been cancelled."
+msgstr ""
