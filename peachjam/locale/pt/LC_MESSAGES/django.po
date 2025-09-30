@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
+"PO-Revision-Date: 2025-09-30 06:58\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -22,22 +22,16 @@ msgid "Import"
 msgstr "Importar"
 
 #: admin.py:566
-#, fuzzy
-#| msgid "Document access groups updated."
 msgid "Access groups updated."
-msgstr "Grupos de acesso a documentos atualizados."
+msgstr "Grupos de acesso atualizados."
 
 #: admin.py:581
-#, fuzzy
-#| msgid "Select restricted document access groups"
 msgid "Manage restricted access groups"
-msgstr "Selecione grupos de acesso restrito a documentos"
+msgstr "Gerir grupos de acesso restrito"
 
 #: admin.py:585
-#, fuzzy
-#| msgid "Select restricted document access groups"
 msgid "Restricted access groups"
-msgstr "Selecione grupos de acesso restrito a documentos"
+msgstr "Grupos de acesso restrito"
 
 #: admin.py:637
 msgid "Key details"
@@ -171,26 +165,21 @@ msgid "case history"
 msgstr "histórico de caso"
 
 #: admin.py:1354 admin.py:1372
-#, fuzzy
-#| msgid "You don't have permission to view this document."
 msgid "You do not have permission to generate judgment summaries."
-msgstr "Você não tem permissão para visualizar este documento."
+msgstr "Não tem permissão para gerar resumos de julgamentos."
 
 #: admin.py:1363
-#, fuzzy, python-format
-#| msgid "Ensuring PDF for %(count)d documents."
+#, python-format
 msgid "Generating summaries for %(count)d judgments."
-msgstr "Garantindo PDF para %(count)d documentos."
+msgstr "Geração de resumos para %(count)d julgamentos."
 
 #: admin.py:1368
 msgid "Generating summary for judgment with ID: {}"
-msgstr ""
+msgstr "Gerando resumo para julgamento com ID: {}"
 
 #: admin.py:1383
-#, fuzzy
-#| msgid "Re-index for search (background)"
 msgid "Generate summaries (background)"
-msgstr "Reindexar para pesquisa (fundo)"
+msgstr "Gerar resumos (background)"
 
 #: admin.py:1441
 msgid "Refreshing all content for selected ingestors in the background."
@@ -332,19 +321,15 @@ msgstr "Mensagem de contato"
 
 #: forms.py:585
 msgid "Please provide a valid name"
-msgstr ""
+msgstr "Por favor, forneça um nome válido"
 
 #: forms.py:591 templates/account/signup.html:19
-#, fuzzy
-#| msgid "case name"
 msgid "First name"
-msgstr "nome do caso"
+msgstr "Nome próprio"
 
 #: forms.py:594 templates/account/signup.html:34
-#, fuzzy
-#| msgid "case name"
 msgid "Last name"
-msgstr "nome do caso"
+msgstr "Último nome"
 
 #: models/annotation.py:11 models/attachments.py:74 models/attachments.py:101
 #: models/attachments.py:234 models/attachments.py:277
@@ -387,10 +372,8 @@ msgid "annotations"
 msgstr "Anotações"
 
 #: models/annotation.py:34
-#, fuzzy
-#| msgid "Pages"
 msgid "Page"
-msgstr "Páginas"
+msgstr "Página"
 
 #: models/article.py:23 models/core_document.py:409 models/judgment.py:700
 msgid "date"
@@ -455,16 +438,12 @@ msgid "profile description"
 msgstr "Descrição do perfil"
 
 #: models/article.py:98
-#, fuzzy
-#| msgid "ranking"
 msgid "tracking id"
-msgstr "classificação"
+msgstr "ID de rastreio"
 
 #: models/article.py:105
-#, fuzzy
-#| msgid "Update languages"
 msgid "preferred language"
-msgstr "Atualizar idiomas"
+msgstr "idioma preferido"
 
 #: models/article.py:109
 msgid "user profile"
@@ -505,16 +484,12 @@ msgid "file as pdf"
 msgstr "arquivo como pdf"
 
 #: models/attachments.py:120
-#, fuzzy
-#| msgid "Anonymised"
 msgid "file is anonymised"
-msgstr "Anonimizado"
+msgstr "o ficheiro é anonimizado"
 
 #: models/attachments.py:122
-#, fuzzy
-#| msgid "file as pdf"
 msgid "anonymised file as pdf"
-msgstr "arquivo como pdf"
+msgstr "ficheiro anonimizado como pdf"
 
 #: models/attachments.py:130
 msgid "source file"
@@ -579,11 +554,11 @@ msgstr "natureza"
 
 #: models/attachments.py:283
 msgid "private"
-msgstr ""
+msgstr "privado"
 
 #: models/attachments.py:285
 msgid "Set to True if this file should not be publicly accessible"
-msgstr ""
+msgstr "Defina como Verdadeiro se este ficheiro não deve ser acessível publicamente"
 
 #: models/attachments.py:289
 msgid "attached file"
@@ -595,7 +570,7 @@ msgstr "arquivos anexados"
 
 #: models/attachments.py:330
 msgid "html md5sum"
-msgstr ""
+msgstr "html md5sum"
 
 #: models/attachments.py:332 models/core_document.py:499
 #: models/ratification.py:22 models/save_document.py:61
@@ -604,11 +579,11 @@ msgstr "atualizado em"
 
 #: models/attachments.py:335
 msgid "social media image"
-msgstr ""
+msgstr "imagem de social media"
 
 #: models/attachments.py:336
 msgid "social media images"
-msgstr ""
+msgstr "imagens de redes sociais"
 
 #: models/author.py:8
 msgid "Author"
@@ -671,10 +646,8 @@ msgid "target work"
 msgstr "trabalho alvo"
 
 #: models/citations.py:91
-#, fuzzy
-#| msgid "created at"
 msgid "treatment"
-msgstr "criado em"
+msgstr "tratamento"
 
 #: models/citations.py:174
 msgid "processing date"
@@ -767,13 +740,11 @@ msgstr "Parceiro de publicação"
 
 #: models/core_document.py:202
 msgid "pagerank"
-msgstr ""
+msgstr "classificação de página"
 
 #: models/core_document.py:204
-#, fuzzy
-#| msgid "pagerank boost value"
 msgid "pagerank normalized"
-msgstr "valor de aumento de classificação de página"
+msgstr "pagerank normalizado"
 
 #: models/core_document.py:206
 msgid "number of cited works"
@@ -784,16 +755,12 @@ msgid "number of incoming citations"
 msgstr "número de citações recebidas"
 
 #: models/core_document.py:211
-#, fuzzy
-#| msgid "number of incoming citations"
 msgid "number of incoming citations normalized"
-msgstr "número de citações recebidas"
+msgstr "número de citações recebidas normalizadas"
 
 #: models/core_document.py:214
-#, fuzzy
-#| msgid "authors"
 msgid "authority score"
-msgstr "autores"
+msgstr "pontuação de autoridade"
 
 #: models/core_document.py:217 models/core_document.py:398
 #: models/enrichments.py:22 models/ratification.py:16
@@ -938,53 +905,41 @@ msgid "document access groups"
 msgstr "grupos de acesso a documentos"
 
 #: models/enrichments.py:10
-#, fuzzy
-#| msgid "Permission denied"
 msgid "Provision enrichment"
-msgstr "Permissão negada"
+msgstr "Enriquecimento de provisões"
 
 #: models/enrichments.py:11
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:10
-#, fuzzy
-#| msgid "citation processing"
 msgid "Unconstitutional provision"
-msgstr "processamento de citações"
+msgstr "Disposição inconstitucional"
 
 #: models/enrichments.py:12
 msgid "Uncommenced provision"
-msgstr ""
+msgstr "Provisão não iniciada"
 
 #: models/enrichments.py:13
-#, fuzzy
-#| msgid "Copy citation"
 msgid "Provision citation"
-msgstr "Copiar citação"
+msgstr "Citação de prestação"
 
 #: models/enrichments.py:25
-#, fuzzy
-#| msgid "Permission denied"
 msgid "provision eid"
-msgstr "Permissão negada"
+msgstr "provisão eid"
 
 #: models/enrichments.py:27
-#, fuzzy
-#| msgid "object work"
 msgid "whole work"
-msgstr "trabalho objeto"
+msgstr "trabalho inteiro"
 
 #: models/enrichments.py:29
-#, fuzzy
-#| msgid "document type"
 msgid "enrichment type"
-msgstr "tipo de documento"
+msgstr "tipo de enriquecimento"
 
 #: models/enrichments.py:42
 msgid "provision enrichment"
-msgstr ""
+msgstr "enriquecimento de prestação"
 
 #: models/enrichments.py:43
 msgid "provision enrichments"
-msgstr ""
+msgstr "enriquecimentos de prestação"
 
 #: models/enrichments.py:83 models/judgment.py:254 models/judgment.py:270
 #: models/judgment.py:426 views/courts.py:54 views/judgment.py:27
@@ -993,83 +948,71 @@ msgstr "julgamento"
 
 #: models/enrichments.py:86
 msgid "date deemed unconstitutional"
-msgstr ""
+msgstr "data considerada inconstitucional"
 
 #: models/enrichments.py:89
 msgid "end of suspension period"
-msgstr ""
+msgstr "fim do período de suspensão"
 
 #: models/enrichments.py:91
 msgid "resolved"
-msgstr ""
+msgstr "resolvido"
 
 #: models/enrichments.py:92
 msgid "date resolved"
-msgstr ""
+msgstr "data resolvida"
 
 #: models/enrichments.py:99
 msgid "resolving amendment work"
-msgstr ""
+msgstr "resolvendo o trabalho de emenda"
 
 #: models/enrichments.py:101
-#, fuzzy
-#| msgid "content HTML"
 msgid "read-in text HTML"
-msgstr "conteúdo HTML"
+msgstr "texto de leitura HTML"
 
 #: models/enrichments.py:104
-#, fuzzy
-#| msgid "citation processing"
 msgid "unconstitutional provision"
-msgstr "processamento de citações"
+msgstr "disposição inconstitucional"
 
 #: models/enrichments.py:105
-#, fuzzy
-#| msgid "citation processing"
 msgid "unconstitutional provisions"
-msgstr "processamento de citações"
+msgstr "disposições inconstitucionais"
 
 #: models/enrichments.py:113
 msgid "and all descendants"
-msgstr ""
+msgstr "e todos os descendentes"
 
 #: models/enrichments.py:116
 msgid "uncommenced provision"
-msgstr ""
+msgstr "provisão não iniciada"
 
 #: models/enrichments.py:117
 msgid "uncommenced provisions"
-msgstr ""
+msgstr "disposições não iniciadas"
 
 #: models/enrichments.py:125
 msgid "prefix"
-msgstr ""
+msgstr "prefixo"
 
 #: models/enrichments.py:126
 msgid "suffix"
-msgstr ""
+msgstr "sufixo"
 
 #: models/enrichments.py:127
 msgid "exact"
-msgstr ""
+msgstr "exato"
 
 #: models/enrichments.py:132
-#, fuzzy
-#| msgid "Cited documents"
 msgid "citing document"
-msgstr "Documentos citados"
+msgstr "documento citante"
 
 #: models/enrichments.py:136
-#, fuzzy
-#| msgid "Copy citation"
 msgid "provision citation"
-msgstr "Copiar citação"
+msgstr "citação de provisão"
 
 #: models/enrichments.py:137
-#, fuzzy
-#| msgid "number of incoming citations"
 msgid "provision citations"
-msgstr "número de citações recebidas"
+msgstr "citações de provisão"
 
 #: models/gazette.py:13
 msgid "publication"
@@ -1177,16 +1120,12 @@ msgid "outcomes"
 msgstr "resultados"
 
 #: models/judgment.py:77 models/judgment.py:308
-#, fuzzy
-#| msgid "citation"
 msgid "case action"
-msgstr "citação"
+msgstr "ação de caso"
 
 #: models/judgment.py:78
-#, fuzzy
-#| msgid "case histories"
 msgid "case actions"
-msgstr "históricos de casos"
+msgstr "ações de caso"
 
 #: models/judgment.py:92 models/judgment.py:631
 msgid "matter type"
@@ -1243,10 +1182,8 @@ msgid "lower_court_judge"
 msgstr "juiz_do_tribunal_inferior"
 
 #: models/judgment.py:300
-#, fuzzy
-#| msgid "Court divisions"
 msgid "court division"
-msgstr "Divisões do tribunal"
+msgstr "divisão do tribunal"
 
 #: models/judgment.py:329
 msgid "case summary"
@@ -1258,57 +1195,51 @@ msgstr "nota"
 
 #: models/judgment.py:333
 msgid "blurb"
-msgstr ""
+msgstr "sinopse"
 
 #: models/judgment.py:337
 msgid "A quick summary of the judgment, for use in listings"
-msgstr ""
+msgstr "Um breve resumo do julgamento, para utilização em listagens"
 
 #: models/judgment.py:340
-#, fuzzy
-#| msgid "Issue"
 msgid "issues"
-msgstr "Emitir"
+msgstr "problemas"
 
 #: models/judgment.py:343
 msgid "A list of issues that the judgment addresses"
-msgstr ""
+msgstr "Uma lista de questões abordadas pelo acórdão"
 
 #: models/judgment.py:346
 msgid "held"
-msgstr ""
+msgstr "agarrado"
 
 #: models/judgment.py:349
 msgid "The main findings of the judgment"
-msgstr ""
+msgstr "As principais conclusões do acórdão"
 
 #: models/judgment.py:352
 msgid "summary AI generated"
-msgstr ""
+msgstr "resumo gerado pela IA"
 
 #: models/judgment.py:354
 msgid "Was this summary generated by an AI?"
-msgstr ""
+msgstr "Este resumo foi gerado por uma IA?"
 
 #: models/judgment.py:357
-#, fuzzy
-#| msgid "created at"
 msgid "summary generated at"
-msgstr "criado em"
+msgstr "resumo gerado em"
 
 #: models/judgment.py:360
 msgid "When the AI summary was generated"
-msgstr ""
+msgstr "Quando o resumo da IA foi gerado"
 
 #: models/judgment.py:363
-#, fuzzy
-#| msgid "summary"
 msgid "summary trace ID"
-msgstr "summary"
+msgstr "ID de rastreio de resumo"
 
 #: models/judgment.py:367
 msgid "The trace ID for the AI summary generation"
-msgstr ""
+msgstr "O ID de rastreio para a geração do resumo de IA"
 
 #: models/judgment.py:370
 msgid "case name"
@@ -1351,26 +1282,20 @@ msgid "Whether or not the system should assign the details"
 msgstr "Se o sistema deve ou não atribuir os detalhes"
 
 #: models/judgment.py:405
-#, fuzzy
-#| msgid "Anonymised"
 msgid "Must be anonymised"
-msgstr "Anonimizado"
+msgstr "Deve ser anonimizado"
 
 #: models/judgment.py:406
-#, fuzzy
-#| msgid "Whether or not the judgment is anonymised"
 msgid "Must this judgment be anonymised?"
-msgstr "Se o julgamento é ou não anonimizado"
+msgstr "Este julgamento deve ser anonimizado?"
 
 #: models/judgment.py:410
 msgid "Anonymised"
 msgstr "Anonimizado"
 
 #: models/judgment.py:411
-#, fuzzy
-#| msgid "Whether or not the judgment is anonymised"
 msgid "Has the judgment been anonymised?"
-msgstr "Se o julgamento é ou não anonimizado"
+msgstr "O julgamento foi anonimizado?"
 
 #: models/judgment.py:427 views/courts.py:55 views/judgment.py:28
 msgid "judgments"
@@ -1563,13 +1488,11 @@ msgstr "pastas"
 
 #: models/save_document.py:42
 msgid "Folder limit reached"
-msgstr ""
+msgstr "Limite de pastas atingido"
 
 #: models/save_document.py:59
-#, fuzzy
-#| msgid "flynote"
 msgid "note"
-msgstr "nota"
+msgstr ""
 
 #: models/save_document.py:65
 msgid "saved document"
@@ -1580,10 +1503,8 @@ msgid "saved documents"
 msgstr "documentos salvos"
 
 #: models/save_document.py:77
-#, fuzzy
-#| msgid "Saved documents"
 msgid "Saved documents limit reached"
-msgstr "Documentos salvos"
+msgstr ""
 
 #: models/settings.py:28
 msgid "default document language"
@@ -1634,16 +1555,12 @@ msgid "Allow signups via social accounts"
 msgstr "Permitir inscrições por meio de contas sociais"
 
 #: models/settings.py:76
-#, fuzzy
-#| msgid "allow social logins"
 msgid "allow signups"
-msgstr "permitir logins sociais"
+msgstr ""
 
 #: models/settings.py:78
-#, fuzzy
-#| msgid "Allow signups via social accounts"
 msgid "Allow users to create accounts"
-msgstr "Permitir inscrições por meio de contas sociais"
+msgstr ""
 
 #: models/settings.py:82
 msgid "metabase dashboard link"
@@ -1726,16 +1643,12 @@ msgid "Allow documents to be saved."
 msgstr "Permitir que documentos sejam salvos."
 
 #: models/settings.py:153
-#, fuzzy
-#| msgid "allowed login domains"
 msgid "allow anonymisation"
-msgstr "domínios de login permitidos"
+msgstr ""
 
 #: models/settings.py:155
-#, fuzzy
-#| msgid "Allow documents to be saved."
 msgid "Allow documents to be anonymised."
-msgstr "Permitir que documentos sejam salvos."
+msgstr ""
 
 #: models/settings.py:158
 msgid "allow save searches"
@@ -1782,20 +1695,16 @@ msgid "Show this taxonomy in the document listing page? Cascades to descendents.
 msgstr "Mostrar esta taxonomia na página de listagem de documentos? Cascatas para descendentes."
 
 #: models/taxonomies.py:36
-#, fuzzy
-#| msgid "allow save searches"
 msgid "allow offline access"
-msgstr "permitir salvar pesquisas"
+msgstr ""
 
 #: models/taxonomies.py:40
 msgid "Allow users to make this taxonomy and its descendants available offline."
 msgstr ""
 
 #: models/taxonomies.py:45 models/user_following.py:87
-#, fuzzy
-#| msgid "taxonomies"
 msgid "taxonomy"
-msgstr "taxonomies"
+msgstr "taxonomia"
 
 #: models/taxonomies.py:46
 msgid "taxonomies"
@@ -1814,38 +1723,28 @@ msgid "document topics"
 msgstr "tópicos do documento"
 
 #: models/timeline.py:19
-#, fuzzy
-#| msgid "Documents"
 msgid "New Documents"
-msgstr "Documentos"
+msgstr ""
 
 #: models/timeline.py:20
-#, fuzzy
-#| msgid "Search"
 msgid "Saved Search"
-msgstr "Pesquisa"
+msgstr ""
 
 #: models/user_following.py:95
-#, fuzzy
-#| msgid "Advanced search"
 msgid "saved search"
-msgstr "Pesquisa avançada"
+msgstr ""
 
 #: models/user_following.py:99
-#, fuzzy
-#| msgid "last refreshed at"
 msgid "last alerted at"
-msgstr "última atualização em"
+msgstr ""
 
 #: models/user_following.py:167
 msgid "New matches for search alert"
 msgstr ""
 
 #: models/user_following.py:169
-#, fuzzy
-#| msgid "No documents found."
 msgid "New documents added for"
-msgstr "Nenhum documento encontrado."
+msgstr ""
 
 #: settings.py:295
 msgid "English"
@@ -1864,16 +1763,12 @@ msgid "Swahili"
 msgstr "Suaíli"
 
 #: templates/403.html:4 templates/403.html:9
-#, fuzzy
-#| msgid "Not found (Error 404)"
 msgid "Forbidden (Error 403)"
-msgstr "Não encontrado (Erro 404)"
+msgstr ""
 
 #: templates/403.html:11
-#, fuzzy
-#| msgid "You don't have permission to view this document."
 msgid "You don't have permission to access this page."
-msgstr "Você não tem permissão para visualizar este documento."
+msgstr ""
 
 #: templates/403.html:17 templates/404.html:17 templates/429.html:17
 #: templates/500.html:17
@@ -1916,10 +1811,8 @@ msgid "Log in with %(provider)s"
 msgstr "Entre com %(provider)s"
 
 #: templates/account/email.html:4
-#, fuzzy
-#| msgid "Email address"
 msgid "Emails"
-msgstr "Endereço de e-mail"
+msgstr ""
 
 #: templates/account/email.html:9
 msgid "Email addresses"
@@ -1983,22 +1876,16 @@ msgid "Add an email address"
 msgstr "Adicionar um endereço de e-mail"
 
 #: templates/account/email.html:91
-#, fuzzy
-#| msgid "Add an email address"
 msgid "Add email address"
-msgstr "Adicionar um endereço de e-mail"
+msgstr ""
 
 #: templates/account/logged_out.html:5
-#, fuzzy
-#| msgid "Log Out"
 msgid "Logged Out"
-msgstr "Encerrar Sessão"
+msgstr ""
 
 #: templates/account/logged_out.html:8
-#, fuzzy
-#| msgid "You are not logged in"
 msgid "You have logged out."
-msgstr "Você não está logado"
+msgstr ""
 
 #: templates/account/logged_out.html:11 templates/account/login.html:8
 #: templates/account/login.html:60
@@ -2023,10 +1910,8 @@ msgid "Forgot your password?"
 msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:61
-#, fuzzy
-#| msgid "Already have an account?"
 msgid "Create an account"
-msgstr "Já tem uma conta?"
+msgstr ""
 
 #: templates/account/logout.html:4
 msgid "Log Out"
@@ -2034,10 +1919,8 @@ msgstr "Encerrar Sessão"
 
 #: templates/account/logout.html:7 templates/account/logout.html:16
 #: templates/peachjam/_user_menu.html:51
-#, fuzzy
-#| msgid "Log Out"
 msgid "Log out"
-msgstr "Encerrar Sessão"
+msgstr ""
 
 #: templates/account/logout.html:8
 msgid "Are you sure you want to log out?"
@@ -2060,20 +1943,16 @@ msgid "Reset Your Password"
 msgstr "Redefinir sua senha"
 
 #: templates/account/password_reset.html:7
-#, fuzzy
-#| msgid "Reset Your Password"
 msgid "Reset your password"
-msgstr "Redefinir sua senha"
+msgstr ""
 
 #: templates/account/password_reset.html:9
 msgid "Back to Login"
 msgstr "Voltar para Login"
 
 #: templates/account/password_reset.html:14
-#, fuzzy
-#| msgid "Enter your e-mail address below, and we will send you a link to reset it."
 msgid "Enter your e-mail address below, and we will send you a link to reset your password."
-msgstr "Insira seu endereço de e-mail abaixo e lhe enviaremos um link para redefini-lo."
+msgstr ""
 
 #: templates/account/password_reset.html:30
 #: templates/account/password_reset_from_key.html:11
@@ -2088,10 +1967,8 @@ msgid "Reset Password"
 msgstr "Redefinir a senha"
 
 #: templates/account/password_reset_from_key.html:9
-#, fuzzy
-#| msgid "Bad Token"
 msgid "Bad token"
-msgstr "Código ruim"
+msgstr ""
 
 #: templates/account/password_reset_from_key.html:17
 #, python-format
@@ -2151,16 +2028,12 @@ msgid "Add comment"
 msgstr "Adicionar comentário"
 
 #: templates/admin/change_form.html:17
-#, fuzzy
-#| msgid "Is this document published and visible on the website?"
 msgid "This document is not published and is not visible to the public."
-msgstr "Este documento está publicado e visível no site?"
+msgstr ""
 
 #: templates/admin/change_form.html:20
-#, fuzzy
-#| msgid "Is this document published and visible on the website?"
 msgid "This document is restricted and is only visible to some users."
-msgstr "Este documento está publicado e visível no site?"
+msgstr ""
 
 #: templates/admin/change_form.html:29 templates/admin/change_list.html:16
 #: templates/peachjam/_help_button.html:6
@@ -2172,16 +2045,12 @@ msgid "Upload"
 msgstr "Carregar"
 
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:26
-#, fuzzy
-#| msgid "document access groups"
 msgid "Manage access groups"
-msgstr "grupos de acesso a documentos"
+msgstr ""
 
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:35
-#, fuzzy
-#| msgid "Select the groups that have access to this document"
 msgid "Select the groups that have access permissions to this item."
-msgstr "Selecione os grupos que têm acesso a este documento"
+msgstr ""
 
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:44
 #: templates/peachjam/_annotation_edit.html:11
@@ -2216,20 +2085,16 @@ msgid "Extracted:"
 msgstr ""
 
 #: templates/admin/peachjam/judgment/change_form.html:6
-#, fuzzy
-#| msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgid "This judgment must be anonymised before it can be published."
-msgstr "Este julgamento foi tornado anônimo para proteger informações pessoais em conformidade com a lei."
+msgstr ""
 
 #: templates/admin/peachjam/judgment/change_form.html:11
 msgid "Anonymise"
 msgstr "Anonimizar"
 
 #: templates/admin/peachjam/judgment/change_form.html:15
-#, fuzzy
-#| msgid "case summary"
 msgid "Generate summary"
-msgstr "resumo do caso"
+msgstr ""
 
 #: templates/admin/tree_change_list.html:7
 #: templates/peachjam/_document_content_sidebar.html:57
@@ -2373,10 +2238,8 @@ msgid "Load document"
 msgstr "Carregar documento"
 
 #: templates/peachjam/_document_content.html:70
-#, fuzzy
-#| msgid "Loading PDF..."
 msgid "Error loading PDF"
-msgstr "Carregando PDF..."
+msgstr ""
 
 #: templates/peachjam/_document_content.html:71
 msgid "Try reloading the page or downloading the PDF."
@@ -2387,10 +2250,8 @@ msgid "Reload page"
 msgstr ""
 
 #: templates/peachjam/_document_content.html:74
-#, fuzzy
-#| msgid "Download"
 msgid "Download PDF"
-msgstr "Descarregar"
+msgstr ""
 
 #: templates/peachjam/_document_content.html:77
 msgid "Error"
@@ -2398,17 +2259,13 @@ msgstr ""
 
 #: templates/peachjam/_document_content_sidebar.html:7
 #: templates/peachjam/_header.html:6
-#, fuzzy
-#| msgid "document content"
 msgid "Skip to document content"
-msgstr "conteúdo do documento"
+msgstr ""
 
 #: templates/peachjam/_document_content_sidebar.html:22
 #: templates/peachjam/judgment_detail.html:97
-#, fuzzy
-#| msgid "summary"
 msgid "Summary"
-msgstr "summary"
+msgstr ""
 
 #: templates/peachjam/_document_content_sidebar.html:34
 msgid "Table of contents"
@@ -2451,7 +2308,7 @@ msgstr "Reportar um problema"
 
 #: templates/peachjam/_document_detail_toolbar.html:87
 msgid "Share"
-msgstr ""
+msgstr "Compartilhar"
 
 #: templates/peachjam/_document_floating_header.html:9
 msgid "Navigate document"
@@ -2527,16 +2384,12 @@ msgid "Visit website"
 msgstr "Visitar site"
 
 #: templates/peachjam/_header.html:7
-#, fuzzy
-#| msgid "Go to main menu"
 msgid "Skip to main menu"
-msgstr "Ir para o menu principal"
+msgstr ""
 
 #: templates/peachjam/_header.html:8
-#, fuzzy
-#| msgid "Go to search"
 msgid "Skip to search"
-msgstr "Ir para a pesquisa"
+msgstr ""
 
 #: templates/peachjam/_header.html:28
 msgid "Toggle navigation"
@@ -2634,8 +2487,7 @@ msgstr ""
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -2643,8 +2495,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Participe da pesquisa %(APP_NAME)s</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Ajude-nos a tornar o %(APP_NAME)s melhor.\n"
@@ -2660,14 +2511,12 @@ msgstr "Participe da pesquisa"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Ajude-nos a tornar o %(APP_NAME)s melhor. Responda a esta breve pesquisa de 5 minutos e conte-nos sobre como você usa o %(APP_NAME)s e como podemos melhorá-lo. Todas as informações compartilhadas são confidenciais.\n"
 "            </p>\n"
@@ -3020,10 +2869,8 @@ msgid "Case summary"
 msgstr "Resumo do caso"
 
 #: templates/peachjam/document/_case_summary.html:12
-#, fuzzy
-#| msgid "Issue"
 msgid "Issues"
-msgstr "Emitir"
+msgstr ""
 
 #: templates/peachjam/document/_case_summary.html:18
 msgid "Held"
@@ -3042,10 +2889,8 @@ msgid "Flynote"
 msgstr "Nota"
 
 #: templates/peachjam/document/_judgment_summary.html:10
-#, fuzzy
-#| msgid "case summary"
 msgid "Read full summary"
-msgstr "resumo do caso"
+msgstr ""
 
 #: templates/peachjam/document/_uncommenced_provisions.html:4
 #: templates/peachjam/layouts/document_detail.html:146
@@ -3062,10 +2907,8 @@ msgstr ""
 #: templates/peachjam/layouts/document_detail.html:129
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_list.html:4
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_list.html:7
-#, fuzzy
-#| msgid "citation processing"
 msgid "Unconstitutional provisions"
-msgstr "processamento de citações"
+msgstr ""
 
 #: templates/peachjam/document/_unconstitutional_provisions.html:8
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:21
@@ -3093,16 +2936,12 @@ msgid "Hearing date"
 msgstr "Data da audiência"
 
 #: templates/peachjam/judgment_detail.html:40
-#, fuzzy
-#| msgid "Court divisions"
 msgid "Court division"
-msgstr "Divisões do tribunal"
+msgstr ""
 
 #: templates/peachjam/judgment_detail.html:48
-#, fuzzy
-#| msgid "Collections"
 msgid "Case action"
-msgstr "Coleções"
+msgstr ""
 
 #: templates/peachjam/judgment_detail.html:70
 msgid "Case number"
@@ -3227,10 +3066,8 @@ msgid "Follow courts and topics to stay up-to-date."
 msgstr ""
 
 #: templates/peachjam/my/_saved_documents.html:16
-#, fuzzy
-#| msgid "No saved documents."
 msgid "You haven't saved any documents yet."
-msgstr "Nenhum documento salvo."
+msgstr ""
 
 #: templates/peachjam/my/_saved_searches.html:15
 msgid "You don't have any search alerts."
@@ -3242,17 +3079,14 @@ msgid "%(place)s Bills"
 msgstr "%(place)s Contas"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:21
-msgid ""
-"\n"
+msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
 msgstr ""
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provisions_blurb.html:2
-#, fuzzy
-#| msgid "This %(friendly_type)s has not yet come into force."
 msgid "Legislation provisions that have not yet come into force."
-msgstr "Este %(friendly_type)s ainda não entrou em vigor."
+msgstr ""
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:21
 #: views/legislation.py:498 views/legislation.py:502
@@ -3269,23 +3103,17 @@ msgid "Legislation provisions that have been declared unconstitutional by a cour
 msgstr ""
 
 #: templates/peachjam/provision_enrichment/provision_citations.html:20
-#, fuzzy
-#| msgid "Documents citing this one"
 msgid "Documents that cite this provision"
-msgstr "Documentos citando este"
+msgstr ""
 
 #: templates/peachjam/provision_enrichment/uncommenced_provision_detail.html:8
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:83
-#, fuzzy
-#| msgid "No courts found."
 msgid "No content found"
-msgstr "Não foram encontrados tribunais."
+msgstr ""
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:6
-#, fuzzy
-#| msgid "Judgments"
 msgid "Judgment"
-msgstr "Julgamentos"
+msgstr ""
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:21
 msgid "Date deemed unconstitutional"
@@ -3347,10 +3175,8 @@ msgstr[0] "%(comment_count)s comentário"
 msgstr[1] "%(comment_count)s comentários"
 
 #: templates/peachjam/saved_document/_folders_list.html:8
-#, fuzzy
-#| msgid "New folder name"
 msgid "Folder name"
-msgstr "Novo nome da pasta"
+msgstr ""
 
 #: templates/peachjam/saved_document/_folders_list.html:10
 msgid "New Folder"
@@ -3372,16 +3198,12 @@ msgid "<div>To add more folders, please upgrade to %(product)s.</div>"
 msgstr ""
 
 #: templates/peachjam/saved_document/_folders_list.html:51
-#, fuzzy
-#| msgid "Download"
 msgid "Download to Excel"
-msgstr "Descarregar"
+msgstr ""
 
 #: templates/peachjam/saved_document/_folders_list.html:59
-#, fuzzy
-#| msgid "folder"
 msgid "Rename folder"
-msgstr "pasta"
+msgstr ""
 
 #: templates/peachjam/saved_document/_folders_list.html:60
 msgid "Rename"
@@ -3396,10 +3218,8 @@ msgid "No saved documents."
 msgstr "Nenhum documento salvo."
 
 #: templates/peachjam/saved_document/_folders_list.html:87
-#, fuzzy
-#| msgid "No saved documents."
 msgid "You have no saved documents."
-msgstr "Nenhum documento salvo."
+msgstr ""
 
 #: templates/peachjam/saved_document/_limit_reached.html:17
 msgid "You have reached your limit for saved documents."
@@ -3417,17 +3237,15 @@ msgstr "Salvo"
 
 #: templates/peachjam/saved_document/_update.html:69
 msgid "edit"
-msgstr ""
+msgstr "editar"
 
 #: templates/peachjam/saved_document/_update.html:69
 msgid "Add a note"
 msgstr ""
 
 #: templates/peachjam/saved_document/_update_modal.html:18
-#, fuzzy
-#| msgid "Are you sure you want to remove this document?"
 msgid "A note to yourself about this document"
-msgstr "Tem certeza de que deseja remover este documento?"
+msgstr ""
 
 #: templates/peachjam/saved_document/_update_modal.html:28
 msgid "New folder..."
@@ -3471,16 +3289,12 @@ msgid "Follow"
 msgstr ""
 
 #: templates/peachjam/user_following/_button.html:20
-#, fuzzy
-#| msgid "You are not logged in"
 msgid "You are not logged in."
-msgstr "Você não está logado"
+msgstr ""
 
 #: templates/peachjam/user_following/_button.html:21
-#, fuzzy
-#| msgid "To save a document you need to be logged in"
 msgid "To follow, you need to be logged in."
-msgstr "Para salvar um documento você precisa estar logado"
+msgstr ""
 
 #: templates/peachjam/user_following/_timeline.html:14
 #, python-format
@@ -3488,16 +3302,12 @@ msgid "%(n_more)s more for %(obj)s"
 msgstr ""
 
 #: templates/peachjam/user_following/_timeline.html:27
-#, fuzzy
-#| msgid "Explore all courts"
 msgid "Explore older updates"
-msgstr "Explorar todos os tribunais"
+msgstr ""
 
 #: templates/peachjam/user_following/_timeline.html:35
-#, fuzzy
-#| msgid "Load document"
 msgid "Load more"
-msgstr "Carregar documento"
+msgstr ""
 
 #: templates/peachjam/user_following/list.html:8
 msgid "We'll email you when new documents are added for topics that you follow."
@@ -3551,50 +3361,36 @@ msgid "Connect to"
 msgstr "Conectar a"
 
 #: templates/user_account/edit.html:4 templates/user_account/home.html:4
-#, fuzzy
-#| msgid "My account"
 msgid "My Account"
-msgstr "Minha conta"
+msgstr ""
 
 #: templates/user_account/edit.html:9
-#, fuzzy
-#| msgid "Key details"
 msgid "Change details"
-msgstr "Detalhes da chave"
+msgstr ""
 
 #: templates/user_account/edit.html:55
-#, fuzzy
-#| msgid "date"
 msgid "Update"
-msgstr "data"
+msgstr ""
 
 #: templates/user_account/home.html:26
-#, fuzzy
-#| msgid "Key details"
 msgid "Update details"
-msgstr "Detalhes da chave"
+msgstr ""
 
 #: templates/user_account/home.html:47
-#, fuzzy
-#| msgid "Add an email address"
 msgid "Update email address"
-msgstr "Adicionar um endereço de e-mail"
+msgstr ""
 
 #: templates/user_account/home.html:52
-#, fuzzy
-#| msgid "Allow signups via social accounts"
 msgid "Log in with social accounts"
-msgstr "Permitir inscrições por meio de contas sociais"
+msgstr ""
 
 #: templates/user_account/home.html:53
 msgid "Manage the accounts you can use to log in to this account."
 msgstr ""
 
 #: templates/user_account/home.html:54
-#, fuzzy
-#| msgid "Social accounts"
 msgid "Manage social accounts"
-msgstr "Contas sociais"
+msgstr ""
 
 #: templates/user_account/home.html:58
 msgid "Document access groups"
@@ -3613,10 +3409,8 @@ msgid "Your message has been sent. Thank you!"
 msgstr "Sua mensagem foi enviada. Obrigado!"
 
 #: views/accounts.py:45
-#, fuzzy
-#| msgid "Your password has been reset."
 msgid "Your details have been updated."
-msgstr "Sua senha foi redefinida."
+msgstr ""
 
 #: views/anon.py:76
 msgid "Only judgments with HTML content can be anonymised."
@@ -3663,10 +3457,8 @@ msgid "Outcomes"
 msgstr "Resultados"
 
 #: views/courts.py:134
-#, fuzzy
-#| msgid "Collections"
 msgid "Case actions"
-msgstr "Coleções"
+msgstr ""
 
 #: views/gazette.py:169
 msgid "Special Issue"
@@ -3697,16 +3489,14 @@ msgid "This judgment was reviewed by another court. See the Case history tab for
 msgstr "Este julgamento foi revisado por outro tribunal. Veja a aba Case history para detalhes."
 
 #: views/legislation.py:131
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+#, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
-msgstr "Este %(friendly_type)s foi revogado em %(date)s por <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+msgstr ""
 
 #: views/legislation.py:143
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s will come into force on %(date)s."
+#, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
-msgstr "Este %(friendly_type)s entrará em vigor em %(date)s."
+msgstr ""
 
 #: views/legislation.py:156
 #, python-format
@@ -3714,10 +3504,9 @@ msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr "Este %(friendly_type)s entrará em vigor em %(date)s."
 
 #: views/legislation.py:171
-#, fuzzy, python-format
-#| msgid "This %(friendly_type)s has not yet come into force in full. See the Document detail tab for more information."
+#, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
-msgstr "Este %(friendly_type)s ainda não entrou em vigor na íntegra. Consulte a guia Detalhes do documento para obter mais informações."
+msgstr ""
 
 #: views/legislation.py:182
 #, python-format
@@ -3725,16 +3514,14 @@ msgid "This %(friendly_type)s has not yet come into force."
 msgstr "Este %(friendly_type)s ainda não entrou em vigor."
 
 #: views/legislation.py:219
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
-msgstr "Esta é a versão deste %(friendly_type)s como era quando foi revogada."
+msgstr ""
 
 #: views/legislation.py:232
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
-msgstr "Esta é a versão deste %(friendly_type)s como era quando foi revogada."
+msgstr ""
 
 #: views/legislation.py:249
 #, python-format
@@ -3742,16 +3529,14 @@ msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Esta é a versão mais recente deste %(friendly_type)s."
 
 #: views/legislation.py:265
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
-msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Leia a versão tal como se encontrava quando foi revogada</a>."
+msgstr ""
 
 #: views/legislation.py:270
-#, fuzzy, python-format
-#| msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
+#, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
-msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Leia a versão tal como se encontrava quando foi revogada</a>."
+msgstr ""
 
 #: views/legislation.py:275
 #, python-format
@@ -3766,77 +3551,3 @@ msgstr ""
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
 
-#~ msgid "Restricted document access"
-#~ msgstr "Acesso restrito a documentos"
-
-#~ msgid "The Laws.Africa extractor is not enabled. Please check your settings."
-#~ msgstr "O extrator Laws.Africa não está habilitado. Por favor, verifique suas configurações."
-
-#~ msgid "Uploaded"
-#~ msgstr "Enviado"
-
-#~ msgid "Judgment uploaded. Please check details carefully."
-#~ msgstr "Julgamento carregado. Por favor, verifique os detalhes cuidadosamente."
-
-#~ msgid "Add email"
-#~ msgstr "Adicionar e-mail"
-
-#~ msgid "Don't have an account?"
-#~ msgstr "Não tem uma conta?"
-
-#~ msgid "Sign up here"
-#~ msgstr "Inscreva-se aqui"
-
-#~ msgid "Your password is now reset."
-#~ msgstr "Sua senha foi redefinida."
-
-#~ msgid "Login here"
-#~ msgstr "Faça login aqui"
-
-#~ msgid "Username"
-#~ msgstr "Nome de usuário"
-
-#~ msgid "Document access"
-#~ msgstr "Acesso ao documento"
-
-#~ msgid "Upload judgment"
-#~ msgstr "Carregar julgamento"
-
-#~ msgid "File"
-#~ msgstr "Arquivo"
-
-#, python-format
-#~ msgid "%(n)s citation"
-#~ msgid_plural "%(n)s citations"
-#~ msgstr[0] "%(n)s citação"
-#~ msgstr[1] "%(n)s citações"
-
-#~ msgid "Report"
-#~ msgstr "Relatório"
-
-#~ msgid "Ungrouped documents"
-#~ msgstr "Documentos desagrupados"
-
-#~ msgid "Go to page content"
-#~ msgstr "Ir para o conteúdo da página"
-
-#~ msgid "Logout"
-#~ msgstr "Desconectar"
-
-#~ msgid "Type"
-#~ msgstr "tipo"
-
-#~ msgid "Saving..."
-#~ msgstr "Salvando..."
-
-#~ msgid "Login"
-#~ msgstr "Conecte-se"
-
-#~ msgid "Document saved"
-#~ msgstr "Documento salvo"
-
-#~ msgid "Profile"
-#~ msgstr "Perfil"
-
-#~ msgid "Edit Profile"
-#~ msgstr "Editar Perfil"
