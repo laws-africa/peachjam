@@ -10,11 +10,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
-"PO-Revision-Date: 2025-09-30 06:58\n"
+"PO-Revision-Date: 2025-09-30 08:20\n"
 
 #: models.py:168
 msgid "Search alert limit reached"
-msgstr ""
+msgstr "Limite de alerta de pesquisa atingido"
 
 #: models.py:256
 msgid "feedback"
@@ -47,12 +47,12 @@ msgstr "Uma nota para você mesmo sobre esta pesquisa"
 
 #: templates/peachjam_search/_saved_search_modal.html:36
 msgid "You have reached your limit for search alerts."
-msgstr ""
+msgstr "Atingiu o seu limite de alertas de pesquisa."
 
 #: templates/peachjam_search/_saved_search_modal.html:39
 #, python-format
 msgid "To add more, please upgrade to %(product)s."
-msgstr ""
+msgstr "Para adicionar mais, atualize para %(product)s."
 
 #: templates/peachjam_search/_saved_search_modal.html:47
 msgid "Saving..."
@@ -89,11 +89,11 @@ msgstr "Melhor correspondência"
 
 #: templates/peachjam_search/_search_hit.html:88
 msgid "Explanation"
-msgstr ""
+msgstr "Explicação"
 
 #: templates/peachjam_search/_search_hit.html:93
 msgid "Raw"
-msgstr ""
+msgstr "Cru"
 
 #: templates/peachjam_search/_search_hit.html:115
 #: templates/peachjam_search/_searchtrace_card.html:34
@@ -121,7 +121,7 @@ msgstr "Pesquisa avançada"
 
 #: templates/peachjam_search/_searchtrace_card.html:28
 msgid "Mode"
-msgstr ""
+msgstr "Modo"
 
 #: templates/peachjam_search/_searchtrace_card.html:30
 msgid "Ordering"
