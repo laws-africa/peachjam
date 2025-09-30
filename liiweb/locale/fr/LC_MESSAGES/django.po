@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-09-30 06:58\n"
+"PO-Revision-Date: 2025-09-30 08:20\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -112,7 +112,7 @@ msgstr "Voir plus d'articles"
 
 #: templates/liiweb/legislation_list.html:20
 msgid "More resources"
-msgstr ""
+msgstr "Plus de ressources"
 
 #: templates/liiweb/legislation_list.html:24
 msgid "Unconstitutional provisions"
