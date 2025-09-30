@@ -4,7 +4,7 @@
     :anchor.prop="anchorElement"
   >
     <i
-      class="bi bi-chat-left mobile-gutter-item-icon"
+      class="bi bi-chat mobile-gutter-item-icon"
       role="button"
       @click="activate"
     />

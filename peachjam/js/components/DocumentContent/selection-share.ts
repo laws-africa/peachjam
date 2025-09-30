@@ -23,7 +23,8 @@ export default class SelectionShare implements IGutterEnrichmentProvider {
     const btn = document.createElement('button');
     btn.className = 'btn btn-outline-secondary';
     btn.type = 'button';
-    btn.innerText = i18next.t('Share...');
+    btn.title = i18next.t('Share');
+    btn.innerHTML = '<i class="bi bi-share"></i> ' + btn.title;
     return btn;
   }
 

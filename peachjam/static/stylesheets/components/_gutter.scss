@@ -32,6 +32,27 @@ la-gutter-item[active] .gutter-item-card, la-gutter-item[active] .gutter-item-li
     bottom: 45px;
     left: 5px;
     right: 5px;
-    box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 8px 3px rgba(0, 0, 0, .15);
+  }
+}
+
+la-gutter-item[active] .gutter-item-card {
+  box-shadow: 0 4px 8px 3px rgba(0, 0, 0, .15);
+}
+
+.gutter-enrichment-new-buttons {
+  display: none;
+
+  box-shadow: 0 4px 8px 3px rgba(0, 0, 0, .15);
+  border-radius: var(--bs-border-radius-sm);
+
+  .btn {
+    text-align: left;
+  }
+}
+
+@include media-breakpoint-up(lg) {
+  .gutter-enrichment-new-buttons {
+    display: inline-flex;
   }
 }
