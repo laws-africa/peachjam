@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-09-30 06:58\n"
+"PO-Revision-Date: 2025-09-30 08:20\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -107,31 +107,31 @@ msgstr "Droit de la rue"
 
 #: templates/peachjam/_header.html:107
 msgid "African Union and EAC"
-msgstr ""
+msgstr "Union africaine et CAE"
 
 #: templates/peachjam/_header.html:112
 msgid "East African Community (EAC)"
-msgstr ""
+msgstr "Communauté de l'Afrique de l'Est (CAE)"
 
 #: templates/peachjam/_header.html:117
 msgid "East African Court of Justice"
-msgstr ""
+msgstr "Cour de justice de l'Afrique de l'Est"
 
 #: templates/peachjam/_header.html:122
 msgid "East African Court of Appeal"
-msgstr ""
+msgstr "Cour d'appel de l'Afrique de l'Est"
 
 #: templates/peachjam/_header.html:128
 msgid "African Court of Human and People's Rights"
-msgstr ""
+msgstr "Cour africaine des droits de l'homme et des peuples"
 
 #: templates/peachjam/_header.html:134
 msgid "African Commission on Human and People's Rights"
-msgstr ""
+msgstr "Commission africaine des droits de l'homme et des peuples"
 
 #: templates/peachjam/_header.html:140
 msgid "AU Charters and Treaties"
-msgstr ""
+msgstr "Chartes et traités de l'UA"
 
 #: templates/peachjam/about.html:11
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
@@ -151,61 +151,61 @@ msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2
 
 #: templates/tanzlii/paralegals.html:4
 msgid "Paralegal Resources"
-msgstr ""
+msgstr "Ressources parajuridiques"
 
 #: templates/tanzlii/paralegals.html:9
 msgid "TanzLII Digital Paralegal Knowledge Hub"
-msgstr ""
+msgstr "Centre de connaissances numériques pour parajuristes TanzLII"
 
 #: templates/tanzlii/paralegals.html:11
 msgid "This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development. The Paralegal Hub is developed as a kiSwahili-first resource and is available on your device as an off-line resource."
-msgstr ""
+msgstr "Cette section de TanzLII rassemble des outils pratiques, des supports de formation et des informations juridiques simplifiées pour soutenir le travail des parajuristes en Tanzanie. Elle est conçue pour offrir un accès rapide à des ressources fiables et actualisées, utiles au quotidien et au développement professionnel. La plateforme Paralegal Hub est conçue en kiswahili et est disponible sur votre appareil en mode hors connexion."
 
 #: templates/tanzlii/paralegals.html:14
 msgid "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa."
-msgstr ""
+msgstr "Le TanzLII Digital Paralegal Knowledge Hub est publié sous l'autorité du ministère des Affaires constitutionnelles et juridiques de Tanzanie (MoCLA), avec le soutien d'ENABEL et de la GIZ Tanzanie et Afrique de l'Est."
 
 #: templates/tanzlii/paralegals.html:17
 msgid "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania."
-msgstr ""
+msgstr "Le contenu est fourni par le MoCLA, le LHRC, la Tanganyika Law Society, la Tanzania School of Law et d'autres institutions en Tanzanie."
 
 #: templates/tanzlii/paralegals.html:20
 msgid "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community."
-msgstr ""
+msgstr "Tous les documents sont librement accessibles, régulièrement mis à jour et adaptés aux besoins de la communauté parajuridique tanzanienne."
 
 #: templates/tanzlii/paralegals.html:28
 msgid "Research when you're offline"
-msgstr ""
+msgstr "Effectuez des recherches lorsque vous êtes hors ligne"
 
 #: templates/tanzlii/paralegals.html:30
 msgid "Enable offline access for these resources. Once enabled, you can use these resources at any time without an internet connection."
-msgstr ""
+msgstr "Activez l'accès hors ligne à ces ressources. Une fois activé, vous pourrez les utiliser à tout moment sans connexion internet."
 
 #: templates/tanzlii/paralegals.html:42
 msgid "Resources"
-msgstr ""
+msgstr "Ressources"
 
 #: templates/tanzlii/paralegals.html:52 templates/tanzlii/paralegals.html:55
 msgid "Training manuals"
-msgstr ""
+msgstr "Manuels de formation"
 
 #: templates/tanzlii/paralegals.html:53
 msgid "Paralegal manuals, updated for quick reference."
-msgstr ""
+msgstr "Manuels parajuridiques, mis à jour pour une référence rapide."
 
 #: templates/tanzlii/paralegals.html:68 templates/tanzlii/paralegals.html:73
 msgid "Guides and best practices"
-msgstr ""
+msgstr "Guides et bonnes pratiques"
 
 #: templates/tanzlii/paralegals.html:70
 msgid "Step-by-step resources on common legal issues such as land rights, family law, and criminal justice."
-msgstr ""
+msgstr "Ressources étape par étape sur des questions juridiques courantes telles que les droits fonciers, le droit de la famille et la justice pénale."
 
 #: templates/tanzlii/paralegals.html:86 templates/tanzlii/paralegals.html:89
 msgid "Legal information"
-msgstr ""
+msgstr "Informations légales"
 
 #: templates/tanzlii/paralegals.html:87
 msgid "Curated summaries of laws and court decisions most relevant to paralegal work."
-msgstr ""
+msgstr "Résumés organisés des lois et des décisions judiciaires les plus pertinentes pour le travail parajuridique."
 
