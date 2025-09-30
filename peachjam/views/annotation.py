@@ -3,9 +3,10 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from peachjam.forms import AnnotationForm
 from peachjam.models import Annotation
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
-class BaseAnnotationView:
+class BaseAnnotationView(SubscriptionRequiredMixin):
     model = Annotation
 
     def get_queryset(self):
@@ -15,6 +16,7 @@ class BaseAnnotationView:
 
 
 class AnnotationListView(BaseAnnotationView, ListView):
+    permission_required = "peachjam.view_annotation"
     template_name = "peachjam/_annotation_list.html"
 
     def get_context_data(self, *args, **kwargs):
@@ -24,10 +26,12 @@ class AnnotationListView(BaseAnnotationView, ListView):
 
 
 class AnnotationDetailView(BaseAnnotationView, DetailView):
+    permission_required = "peachjam.view_annotation"
     template_name = "peachjam/_annotation_detail.html"
 
 
 class AnnotationEditView(BaseAnnotationView, UpdateView):
+    permission_required = "peachjam.change_annotation"
     template_name = "peachjam/_annotation_edit.html"
     form_class = AnnotationForm
 
@@ -38,6 +42,7 @@ class AnnotationEditView(BaseAnnotationView, UpdateView):
 
 
 class AnnotationDeleteView(BaseAnnotationView, DeleteView):
+    permission_required = "peachjam.delete_annotation"
     template_name = "peachjam/_annotation_detail.html"
 
     def get(self, *args, **kwargs):
