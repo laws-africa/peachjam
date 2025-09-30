@@ -40,7 +40,7 @@ class EnrichmentsManager {
     this.gutterManager = new GutterEnrichmentManager(this.root);
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
-    this.gutterManager.akn = this.root.querySelector('.content');
+    this.gutterManager.akn = this.akn;
     // @ts-ignore
     this.gutterManager.floatingContainer.querySelector('.gutter-enrichment-new-buttons')?.classList.remove('btn-group-sm');
 
@@ -84,13 +84,15 @@ class EnrichmentsManager {
   }
 
   setupSelectionToolbar () {
-    // @ts-ignore
-    this.selectionToolbarManager = new SelectionToolbarManager(this.gutterManager.akn);
-    if (this.annotationsManager) {
-      this.selectionToolbarManager.addProvider(this.annotationsManager);
+    if (this.akn) {
+      // @ts-ignore
+      this.selectionToolbarManager = new SelectionToolbarManager(this.akn);
+      if (this.annotationsManager) {
+        this.selectionToolbarManager.addProvider(this.annotationsManager);
+      }
+      this.selectionToolbarManager.addProvider(this.selectionShare);
+      this.selectionToolbarManager.addProvider(this.selectionSearch);
     }
-    this.selectionToolbarManager.addProvider(this.selectionShare);
-    this.selectionToolbarManager.addProvider(this.selectionSearch);
   }
 }
 
