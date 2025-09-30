@@ -18,9 +18,7 @@ export class AnnotationsProvider implements IGutterEnrichmentProvider {
       this.root = root;
       this.manager = manager;
       this.gutter = root.querySelector('la-gutter');
-      const subscriptionRequired = this.root.getAttribute('data-annotation-subscription-required');
-      console.log('subscriptionRequired', subscriptionRequired);
-      this.editable = subscriptionRequired !== 'True';
+      this.editable = this.root.hasAttribute('data-editable-annotation');
       this.subscriptionsProduct = this.root.getAttribute('data-annotation-subscription-product') || '';
       // @ts-ignore
       this.listComponent = createAndMountApp({

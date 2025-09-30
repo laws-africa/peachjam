@@ -25,8 +25,8 @@
          data-diffs-url="{{ document_diffs_url }}"
          data-display-type="{{ display_type }}"
          {% if perms.peachjam.add_citationlink %}data-editable-citation-links{% endif %}
-         data-annotation-subscription-required="{{ annotation_subscription_required }}"
-         data-annotation-subscription-product="{{ annotation_subscription_product }}"
+         {% if perms.peachjam.add_annotation %}data-editable-annotation{% endif %}
+         {% if data-annotation-subscription-product %} data-annotation-subscription-product="{{ annotation_subscription_product }}" {% endif %}
          {% if perms.peachjam.add_relationship %}data-editable-relationships{% endif %}>
       <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter">
         {% if display_type == 'akn' %}

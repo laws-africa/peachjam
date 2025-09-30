@@ -27,7 +27,9 @@
           </div>
           <div class="modal-body">
             <p>{{ $t('You cannot add a comment. ') }}</p>
-            <p>{{ $t('To add a comment, please subscribe to ') }}{{ subscriptionProduct }}</p>
+            <p v-if="subscriptionProduct">
+              {{ $t('To add a comment, please subscribe to ') }}{{ subscriptionProduct }}
+            </p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -52,7 +54,10 @@ export default {
     viewRoot: HTMLElement,
     gutter: HTMLElement,
     editable: Boolean,
-    subscriptionProduct: String
+    subscriptionProduct: {
+      type: String,
+      default: ''
+    }
   },
   data: () => ({
     items: [],
