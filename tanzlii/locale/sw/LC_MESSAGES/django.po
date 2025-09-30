@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-25 16:54+0200\n"
+"POT-Creation-Date: 2025-09-30 08:40+0200\n"
 "PO-Revision-Date: 2025-02-27 13:33\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Crowdin-File: /main/tanzlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 161\n"
 
-#: settings.py:21
+#: settings.py:27
 msgid "English"
 msgstr "Kiingereza"
 
-#: settings.py:22
+#: settings.py:28
 msgid "Swahili"
 msgstr "Kiswahili"
 
@@ -33,19 +33,19 @@ msgstr "Karibu Katika Mfumo wa Taarifa za Maamuzi, Sheria na Kanuni za Tanzania"
 msgid "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII mziki bure wa maamuzi, sheria na kanuni za Tanzania na ni wanachama wa Jumuiya ya Afrika ya LIIs."
 
-#: templates/liiweb/home.html:25 templates/peachjam/_header.html:10
+#: templates/liiweb/home.html:25 templates/peachjam/_header.html:7
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: templates/liiweb/home.html:28 templates/peachjam/_header.html:16
+#: templates/liiweb/home.html:28 templates/peachjam/_header.html:13
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/liiweb/home.html:31 templates/peachjam/_header.html:22
+#: templates/liiweb/home.html:31 templates/peachjam/_header.html:19
 msgid "Government Gazette"
 msgstr "Gazeti la Serikali"
 
-#: templates/liiweb/home.html:34 templates/peachjam/_header.html:83
+#: templates/liiweb/home.html:34 templates/peachjam/_header.html:80
 msgid "Articles"
 msgstr "Makala"
 
@@ -61,45 +61,77 @@ msgstr "TanzLII inaendeshwa na Mahakama ya Tanzania na Ofisi ya Mwanasheria Mkuu
 msgid "Our partners"
 msgstr "Washirika wetu"
 
-#: templates/peachjam/_header.html:31
+#: templates/peachjam/_header.html:28
 msgid "Practice Essentials"
 msgstr "Mazoezi Muhimu"
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:34
 msgid "Judiciary Guidelines & Procedures"
 msgstr "Miongozo na Taratibu za Mahakama"
 
-#: templates/peachjam/_header.html:43
+#: templates/peachjam/_header.html:40
 msgid "National Prosecution Service Guidelines & Manuals"
 msgstr "Miongozo na Miongozo ya Huduma ya Mashtaka ya Kitaifa"
 
-#: templates/peachjam/_header.html:49
+#: templates/peachjam/_header.html:46
 msgid "Tanganyika Law Society Guidelines & Manuals"
 msgstr "Tanganyika Law Society Guidelines & Miongozo"
 
-#: templates/peachjam/_header.html:60
+#: templates/peachjam/_header.html:57
 msgid "Research Hub"
 msgstr "Kituo cha Utafiti"
 
-#: templates/peachjam/_header.html:66
+#: templates/peachjam/_header.html:63
 msgid "TanzLII Case Digest"
 msgstr "TanzLII Case Digest"
 
-#: templates/peachjam/_header.html:72
+#: templates/peachjam/_header.html:69
 msgid "Law Reform Commission Reports"
 msgstr "Ripoti za Tume ya Kurekebisha Sheria"
 
-#: templates/peachjam/_header.html:77
+#: templates/peachjam/_header.html:74
 msgid "Legal Journals"
 msgstr "Majarida ya Kisheria"
 
-#: templates/peachjam/_header.html:88
+#: templates/peachjam/_header.html:85
 msgid "Notable Speeches"
 msgstr "Hotuba Mashuhuri"
 
-#: templates/peachjam/_header.html:96
+#: templates/peachjam/_header.html:90
+msgid "Collections"
+msgstr ""
+
+#: templates/peachjam/_header.html:98
 msgid "Street Law"
 msgstr "Sheria ya Mtaa"
+
+#: templates/peachjam/_header.html:107
+msgid "African Union and EAC"
+msgstr ""
+
+#: templates/peachjam/_header.html:112
+msgid "East African Community (EAC)"
+msgstr ""
+
+#: templates/peachjam/_header.html:117
+msgid "East African Court of Justice"
+msgstr ""
+
+#: templates/peachjam/_header.html:122
+msgid "East African Court of Appeal"
+msgstr ""
+
+#: templates/peachjam/_header.html:128
+msgid "African Court of Human and People's Rights"
+msgstr ""
+
+#: templates/peachjam/_header.html:134
+msgid "African Commission on Human and People's Rights"
+msgstr ""
+
+#: templates/peachjam/_header.html:140
+msgid "AU Charters and Treaties"
+msgstr ""
 
 #: templates/peachjam/about.html:11
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
@@ -117,3 +149,64 @@ msgstr "Wasiliana nasi"
 msgid "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@tanzlii.org</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 
+#: templates/tanzlii/paralegals.html:4
+msgid "Paralegal Resources"
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:9
+msgid "TanzLII Digital Paralegal Knowledge Hub"
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:11
+msgid "This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development. The Paralegal Hub is developed as a kiSwahili-first resource and is available on your device as an off-line resource."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:14
+msgid "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:17
+msgid "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:20
+msgid "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:28
+msgid "Research when you're offline"
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:30
+msgid "Enable offline access for these resources. Once enabled, you can use these resources at any time without an internet connection."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:42
+msgid "Resources"
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:52 templates/tanzlii/paralegals.html:55
+msgid "Training manuals"
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:53
+msgid "Paralegal manuals, updated for quick reference."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:68 templates/tanzlii/paralegals.html:73
+msgid "Guides and best practices"
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:70
+msgid "Step-by-step resources on common legal issues such as land rights, family law, and criminal justice."
+msgstr ""
+
+#: templates/tanzlii/paralegals.html:86 templates/tanzlii/paralegals.html:89
+#, fuzzy
+#| msgid "Legislation"
+msgid "Legal information"
+msgstr "Sheria"
+
+#: templates/tanzlii/paralegals.html:87
+msgid "Curated summaries of laws and court decisions most relevant to paralegal work."
+msgstr ""

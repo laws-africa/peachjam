@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-25 16:54+0200\n"
+"POT-Creation-Date: 2025-09-30 08:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,88 +52,101 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: templates/liiweb/home.html:42 templates/peachjam/_header.html:11
+#: templates/liiweb/home.html:42 templates/peachjam/_header.html:8
 msgid "Judgments"
 msgstr ""
 
 #: templates/liiweb/home.html:45 templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:17
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:14
 msgid "Legislation"
 msgstr ""
 
-#: templates/liiweb/home.html:87
+#: templates/liiweb/home.html:90
 msgid "Recent Judgments"
 msgstr ""
 
-#: templates/liiweb/home.html:88
+#: templates/liiweb/home.html:91
 msgid "View more judgments"
 msgstr ""
 
-#: templates/liiweb/home.html:94
+#: templates/liiweb/home.html:97
 msgid "Recent Legislation"
 msgstr ""
 
-#: templates/liiweb/home.html:95
+#: templates/liiweb/home.html:98
 msgid "View more legislation"
 msgstr ""
 
-#: templates/liiweb/home.html:102
+#: templates/liiweb/home.html:105
 msgid "Recent Gazettes"
 msgstr ""
 
-#: templates/liiweb/home.html:103
+#: templates/liiweb/home.html:106
 msgid "View more gazettes"
 msgstr ""
 
-#: templates/liiweb/home.html:115
+#: templates/liiweb/home.html:118
 msgid "Courts"
 msgstr ""
 
-#: templates/liiweb/home.html:123
+#: templates/liiweb/home.html:126
 msgid "Collections"
 msgstr ""
 
-#: templates/liiweb/home.html:139
+#: templates/liiweb/home.html:142
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr ""
 
-#: templates/liiweb/home.html:141
+#: templates/liiweb/home.html:144
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr ""
 
-#: templates/liiweb/home.html:156
+#: templates/liiweb/home.html:159
 msgid "Latest Articles"
 msgstr ""
 
-#: templates/liiweb/home.html:158
+#: templates/liiweb/home.html:161
 msgid "View more articles"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:13
+#: templates/liiweb/legislation_list.html:20
+msgid "More resources"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:24
+msgid "Unconstitutional provisions"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:29
+msgid "Uncommenced provisions"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:44
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:22
+#: templates/liiweb/legislation_list.html:53
 #: templates/liiweb/locality_legislation_list.html:27
 msgid "Current legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:30
+#: templates/liiweb/legislation_list.html:61
 msgid "Recent legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:44
+#: templates/liiweb/legislation_list.html:75
+#: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:5
 msgid "Uncommenced legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:52
+#: templates/liiweb/legislation_list.html:83
 #: templates/liiweb/locality_legislation_list.html:33
 msgid "Repealed legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_list.html:59
+#: templates/liiweb/legislation_list.html:90
 #: templates/liiweb/locality_legislation_list.html:43
 msgid "All legislation"
 msgstr ""
@@ -142,7 +155,7 @@ msgstr ""
 msgid "Pocket Law"
 msgstr ""
 
-#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:23
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:20
 msgid "About"
 msgstr ""
 

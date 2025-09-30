@@ -1,16 +1,16 @@
-#: models.py:169
-msgid "New matches for your search "
+#: models.py:168
+msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:185
+#: models.py:256
 msgid "feedback"
 msgstr ""
 
-#: models.py:187
+#: models.py:258
 msgid "name"
 msgstr ""
 
-#: models.py:192
+#: models.py:263
 msgid "email address"
 msgstr ""
 
@@ -19,7 +19,7 @@ msgid "Search alert"
 msgstr ""
 
 #: templates/peachjam_search/_saved_search_modal.html:11
-#: templates/peachjam_search/_saved_search_modal.html:54
+#: templates/peachjam_search/_saved_search_modal.html:70
 msgid "Close"
 msgstr ""
 
@@ -31,33 +31,64 @@ msgstr ""
 msgid "A note to yourself about this search"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:31
+#: templates/peachjam_search/_saved_search_modal.html:36
+msgid "You have reached your limit for search alerts."
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:39
+#, python-format
+msgid "To add more, please upgrade to %(product)s."
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:47
 msgid "Saving..."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:34
+#: templates/peachjam_search/_saved_search_modal.html:50
 msgid "All search alerts"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:37
+#: templates/peachjam_search/_saved_search_modal.html:53
 msgid "You are not logged in. Please log in to receive alerts when we find new matches for your search."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:49
-#: templates/peachjam_search/saved_search_list.html:34
+#: templates/peachjam_search/_saved_search_modal.html:65
+#: templates/peachjam_search/saved_search_list.html:33
 msgid "Are you sure?"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:50
+#: templates/peachjam_search/_saved_search_modal.html:66
 msgid "Delete alert"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:61
+#: templates/peachjam_search/_saved_search_modal.html:77
 msgid "Save"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:66
+#: templates/peachjam_search/_saved_search_modal.html:82
 msgid "Login"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:4
+msgid "Best match"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:88
+msgid "Explanation"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:93
+msgid "Raw"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:115
+#: templates/peachjam_search/_searchtrace_card.html:34
+#: templates/peachjam_search/searchtrace_list.html:34
+msgid "Page"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:133
+msgid "Download"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:9
@@ -75,16 +106,11 @@ msgid "Advanced search"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:28
-msgid "Filters"
+msgid "Mode"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:30
 msgid "Ordering"
-msgstr ""
-
-#: templates/peachjam_search/_searchtrace_card.html:34
-#: templates/peachjam_search/searchtrace_list.html:34
-msgid "Page"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:36
@@ -92,22 +118,26 @@ msgid "Number of results"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:40
+msgid "Filters"
+msgstr ""
+
+#: templates/peachjam_search/_searchtrace_card.html:42
 msgid "User"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:49
+#: templates/peachjam_search/_searchtrace_card.html:51
 msgid "staff"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:55
+#: templates/peachjam_search/_searchtrace_card.html:57
 msgid "Config version"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:57
+#: templates/peachjam_search/_searchtrace_card.html:59
 msgid "Request ID"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:64
+#: templates/peachjam_search/_searchtrace_card.html:66
 msgid "Clicks"
 msgstr ""
 
@@ -119,23 +149,12 @@ msgstr ""
 msgid "Go"
 msgstr ""
 
-#: templates/peachjam_search/emails/search_alert.html:6
-msgid "Search Alert"
-msgstr ""
-
-#: templates/peachjam_search/emails/search_alert.html:10
-msgid "We have found new documents that match your search alert:"
-msgstr ""
-
-#: templates/peachjam_search/emails/search_alert.html:23
-msgid "Manage your search alerts"
-msgstr ""
-
-#: templates/peachjam_search/saved_search_button.html:17
+#: templates/peachjam_search/saved_search_button.html:18
+#: templates/peachjam_search/saved_search_form.html:10
 msgid "Get alerts for this search"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_form.html:7
+#: templates/peachjam_search/saved_search_form.html:8
 msgid "Update this search alert"
 msgstr ""
 
@@ -143,19 +162,24 @@ msgstr ""
 msgid "Search Alerts"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:11
+#: templates/peachjam_search/saved_search_list.html:7
 msgid "Search alerts"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:13
+#: templates/peachjam_search/saved_search_list.html:8
 msgid "We'll email you when new documents are found for your search alerts."
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:35
+#: templates/peachjam_search/saved_search_list.html:21
+#, python-format
+msgid "Alerted %(ago)s ago"
+msgstr ""
+
+#: templates/peachjam_search/saved_search_list.html:34
 msgid "Delete"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:44
+#: templates/peachjam_search/saved_search_list.html:41
 msgid "You don't have any search alerts. Get started by searching for a document and clicking the search alert button."
 msgstr ""
 
@@ -186,11 +210,11 @@ msgstr ""
 msgid "No search traces found."
 msgstr ""
 
-#: views.py:54
+#: views.py:60
 #, python-format
 msgid "Search %(app_name)s"
 msgstr ""
 
-#: views.py:209
+#: views.py:263
 msgid "Search trace not found"
 msgstr ""
