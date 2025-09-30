@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-25 16:53+0200\n"
+"POT-Creation-Date: 2025-09-30 08:40+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,256 +18,330 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:157
+#: admin.py:166
 msgid "Import"
 msgstr ""
 
-#: admin.py:529
-msgid "Document access groups updated."
+#: admin.py:566
+msgid "Access groups updated."
 msgstr ""
 
-#: admin.py:582
+#: admin.py:581
+msgid "Manage restricted access groups"
+msgstr ""
+
+#: admin.py:585
+msgid "Restricted access groups"
+msgstr ""
+
+#: admin.py:637
 msgid "Key details"
 msgstr ""
 
-#: admin.py:595
+#: admin.py:651
 msgid "Additional details"
 msgstr ""
 
-#: admin.py:608 admin.py:1172
+#: admin.py:664 admin.py:1219
 msgid "Work identification"
 msgstr ""
 
-#: admin.py:621
+#: admin.py:677
 msgid "Content"
 msgstr ""
 
-#: admin.py:629 admin.py:1171
+#: admin.py:685 admin.py:1218
 msgid "Advanced"
 msgstr ""
 
-#: admin.py:643
+#: admin.py:699
 msgid "Taxonomies"
 msgstr ""
 
-#: admin.py:683
-msgid "Select restricted document access groups"
-msgstr ""
-
-#: admin.py:687
-msgid "Restricted document access"
-msgstr ""
-
-#: admin.py:775
+#: admin.py:816
 msgid "Work"
 msgstr ""
 
-#: admin.py:787
+#: admin.py:828
 #, python-format
 msgid "Queued tasks to extract citations from %(count)d documents."
 msgstr ""
 
-#: admin.py:791
+#: admin.py:832
 msgid "Extract citations (background)"
 msgstr ""
 
-#: admin.py:803
+#: admin.py:844
 #, python-format
 msgid "Re-imported content from %(count)d documents."
 msgstr ""
 
-#: admin.py:807
+#: admin.py:848
 msgid "Re-extract content from DOCX files"
 msgstr ""
 
-#: admin.py:817
+#: admin.py:858
 #, python-format
 msgid "Queued tasks to re-index for %(count)d documents."
 msgstr ""
 
-#: admin.py:821
+#: admin.py:862
 msgid "Re-index for search (background)"
 msgstr ""
 
-#: admin.py:830
+#: admin.py:871
 #, python-format
 msgid "Applying labels for %(count)d documents."
 msgstr ""
 
-#: admin.py:833
+#: admin.py:874
 msgid "Apply labels"
 msgstr ""
 
-#: admin.py:841
+#: admin.py:882
 #, python-format
 msgid "Ensuring PDF for %(count)d documents."
 msgstr ""
 
-#: admin.py:845
+#: admin.py:886
 msgid "Ensure PDF for source file (background)"
 msgstr ""
 
-#: admin.py:866
+#: admin.py:907
 msgid "Documents published."
 msgstr ""
 
-#: admin.py:868
+#: admin.py:909
 msgid "Publish selected documents"
 msgstr ""
 
-#: admin.py:872
+#: admin.py:913
 msgid "Documents unpublished."
 msgstr ""
 
-#: admin.py:874
+#: admin.py:915
 msgid "Unpublish selected documents"
 msgstr ""
 
-#: admin.py:909
+#: admin.py:950
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
 msgstr ""
 
-#: admin.py:991 models/judgment.py:475 models/judgment.py:511
+#: admin.py:1033 models/judgment.py:643 models/judgment.py:679
 msgid "case number"
 msgstr ""
 
-#: admin.py:992 models/judgment.py:476
+#: admin.py:1034 models/judgment.py:644
 msgid "case numbers"
 msgstr ""
 
-#: admin.py:1001 models/judgment.py:41 models/judgment.py:233
+#: admin.py:1043 models/judgment.py:47 models/judgment.py:256
 msgid "judge"
 msgstr ""
 
-#: admin.py:1002 models/judgment.py:42 models/judgment.py:272
-#: models/judgment.py:528 models/judgment.py:571
+#: admin.py:1044 models/judgment.py:48 models/judgment.py:311
+#: models/judgment.py:696 models/judgment.py:742
 msgid "judges"
 msgstr ""
 
-#: admin.py:1016
+#: admin.py:1058
 msgid "lower court judge"
 msgstr ""
 
-#: admin.py:1017 models/judgment.py:278
+#: admin.py:1059 models/judgment.py:317
 msgid "lower court judges"
 msgstr ""
 
-#: admin.py:1031
+#: admin.py:1073
 msgid "Related judgment"
 msgstr ""
 
-#: admin.py:1032
+#: admin.py:1074
 msgid "Related judgments"
 msgstr ""
 
-#: admin.py:1054 models/judgment.py:536
+#: admin.py:1096 models/judgment.py:704
 msgid "case history"
 msgstr ""
 
-#: admin.py:1195
-msgid "The Laws.Africa extractor is not enabled. Please check your settings."
+#: admin.py:1354 admin.py:1372
+msgid "You do not have permission to generate judgment summaries."
 msgstr ""
 
-#: admin.py:1219
-msgid "Uploaded"
+#: admin.py:1363
+#, python-format
+msgid "Generating summaries for %(count)d judgments."
 msgstr ""
 
-#: admin.py:1221
-msgid "Judgment uploaded. Please check details carefully."
+#: admin.py:1368
+msgid "Generating summary for judgment with ID: {}"
 msgstr ""
 
-#: admin.py:1292
+#: admin.py:1383
+msgid "Generate summaries (background)"
+msgstr ""
+
+#: admin.py:1441
 msgid "Refreshing all content for selected ingestors in the background."
 msgstr ""
 
-#: admin.py:1296
+#: admin.py:1445
 msgid "Refresh all content for selected ingestors - Full update"
 msgstr ""
 
-#: admin.py:1303
+#: admin.py:1452
 msgid "Getting content since last update in background."
 msgstr ""
 
-#: admin.py:1307
+#: admin.py:1456
 msgid "Update content for selected ingestors - Latest updates"
 msgstr ""
 
-#: admin.py:1388
+#: admin.py:1537
 msgid "Articles published."
 msgstr ""
 
-#: admin.py:1390
+#: admin.py:1539
 msgid "Publish selected articles"
 msgstr ""
 
-#: admin.py:1394
+#: admin.py:1543
 msgid "Articles unpublished."
 msgstr ""
 
-#: admin.py:1396
+#: admin.py:1545
 msgid "Unpublish selected articles"
 msgstr ""
 
-#: admin.py:1475
+#: admin.py:1624
 #, python-format
 msgid "Queued tasks to update extracted citations for %(count)d works."
 msgstr ""
 
-#: admin.py:1480
+#: admin.py:1629
 msgid "Update extracted citations (background)"
 msgstr ""
 
-#: admin.py:1488
+#: admin.py:1637
 #, python-format
 msgid "Updated languages for %(count)d works."
 msgstr ""
 
-#: admin.py:1491
+#: admin.py:1640
 msgid "Update languages"
 msgstr ""
 
-#: admin.py:1550
+#: admin.py:1699
 msgid "Gazette number"
 msgstr ""
 
-#: forms.py:152 forms.py:153 models/profile.py:13
-#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:228
+#: decorators.py:33 templates/account/logged_out.html:10
+#: templates/admin/guardian/model/obj_perms_manage_access_groups.html:12
+#: templates/peachjam/causelist_court_detail.html:9
+#: templates/peachjam/court_detail.html:9
+#: templates/peachjam/gazette_list.html:11
+#: templates/peachjam/gazette_year.html:11 templates/peachjam/home.html:4
+#: templates/peachjam/my/layout.html:11
+#: templates/peachjam/place_bill_list.html:9
+#: templates/peachjam/taxonomy_detail.html:23
+#: templates/peachjam/taxonomy_first_level_detail.html:10
+#: templates/user_account/layout.html:9
+msgid "Home"
+msgstr ""
+
+#: decorators.py:65 templates/peachjam/court_detail.html:12
+#: templates/peachjam/judgment_list.html:4
+#: templates/peachjam/judgment_list.html:7 views/courts.py:41
+msgid "Judgments"
+msgstr ""
+
+#: decorators.py:187 templates/peachjam/legislation_list.html:4
+#: templates/peachjam/legislation_list.html:7
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:13
+msgid "Legislation"
+msgstr ""
+
+#: decorators.py:196 templates/peachjam/gazette_list.html:4
+#: templates/peachjam/gazette_list.html:14
+#: templates/peachjam/gazette_list.html:34
+#: templates/peachjam/gazette_year.html:4
+#: templates/peachjam/gazette_year.html:14
+#: templates/peachjam/gazette_year.html:34
+msgid "Gazettes"
+msgstr ""
+
+#: decorators.py:262 templates/peachjam/causelist_court_detail.html:12
+#: templates/peachjam/causelist_list.html:4
+msgid "Cause Lists"
+msgstr ""
+
+#: decorators.py:306 templates/peachjam/book_list.html:4
+#: templates/peachjam/book_list.html:7
+msgid "Books"
+msgstr ""
+
+#: decorators.py:313 templates/peachjam/journal_list.html:4
+#: templates/peachjam/journal_list.html:7
+msgid "Journals"
+msgstr ""
+
+#: decorators.py:320 templates/peachjam/bill_list.html:4
+#: templates/peachjam/bill_list.html:7
+#: templates/peachjam/place_bill_list.html:12
+msgid "Bills"
+msgstr ""
+
+#: forms.py:156 forms.py:157 models/profile.py:13
+#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:225
 msgid "Title"
 msgstr ""
 
-#: forms.py:154 forms.py:155 templates/peachjam/_case_histories.html:5
-#: templates/peachjam/causelist_detail.html:59
-#: templates/peachjam/layouts/document_detail.html:256
-#: views/generic_views.py:229
+#: forms.py:158 forms.py:159 templates/peachjam/_case_histories.html:5
+#: templates/peachjam/causelist_detail.html:35
+#: templates/peachjam/layouts/document_detail.html:320
+#: views/generic_views.py:226
 msgid "Date"
 msgstr ""
 
-#: forms.py:154
+#: forms.py:158
 msgid "(Newest first)"
 msgstr ""
 
-#: forms.py:155
+#: forms.py:159
 msgid "(Oldest first)"
 msgstr ""
 
-#: forms.py:433
+#: forms.py:471
 msgid "Document problem reported"
 msgstr ""
 
-#: forms.py:474
+#: forms.py:519
 msgid "Contact us message"
 msgstr ""
 
-#: models/annotation.py:11 models/attachments.py:68 models/attachments.py:95
-#: models/attachments.py:173 models/attachments.py:216 models/citations.py:21
-#: models/core_document.py:831 models/core_document.py:857
-#: models/judgment.py:470 models/taxonomies.py:119
-#: templates/peachjam/_document_count.html:8 views/generic_views.py:117
+#: forms.py:585
+msgid "Please provide a valid name"
+msgstr ""
+
+#: forms.py:591 templates/account/signup.html:19
+msgid "First name"
+msgstr ""
+
+#: forms.py:594 templates/account/signup.html:34
+msgid "Last name"
+msgstr ""
+
+#: models/annotation.py:11 models/attachments.py:74 models/attachments.py:101
+#: models/attachments.py:234 models/attachments.py:277
+#: models/attachments.py:326 models/citations.py:21
+#: models/core_document.py:1014 models/core_document.py:1040
+#: models/judgment.py:638 models/taxonomies.py:247
+#: templates/peachjam/_document_count.html:8 views/generic_views.py:112
 msgid "document"
 msgstr ""
 
-#: models/annotation.py:13 models/citations.py:23
+#: models/annotation.py:13 models/citations.py:23 models/enrichments.py:36
 msgid "text"
 msgstr ""
 
@@ -279,13 +353,14 @@ msgstr ""
 msgid "target selectors"
 msgstr ""
 
-#: models/annotation.py:22 models/article.py:90 models/save_document.py:15
-#: models/save_document.py:36
+#: models/annotation.py:22 models/article.py:92 models/save_document.py:19
+#: models/save_document.py:55 models/user_following.py:31
 msgid "user"
 msgstr ""
 
-#: models/annotation.py:24 models/core_document.py:454
-#: models/save_document.py:18 models/save_document.py:47
+#: models/annotation.py:24 models/core_document.py:498
+#: models/save_document.py:22 models/save_document.py:60
+#: models/user_following.py:102
 msgid "created at"
 msgstr ""
 
@@ -297,210 +372,257 @@ msgstr ""
 msgid "annotations"
 msgstr ""
 
-#: models/article.py:21 models/core_document.py:365 models/judgment.py:532
+#: models/annotation.py:34
+msgid "Page"
+msgstr ""
+
+#: models/article.py:23 models/core_document.py:409 models/judgment.py:700
 msgid "date"
 msgstr ""
 
-#: models/article.py:22 models/core_document.py:167 models/core_document.py:364
+#: models/article.py:24 models/core_document.py:182 models/core_document.py:408
 msgid "title"
 msgstr ""
 
-#: models/article.py:23
+#: models/article.py:25
 msgid "body"
 msgstr ""
 
-#: models/article.py:28 models/author.py:21 models/bill.py:11
+#: models/article.py:30 models/author.py:22 models/bill.py:15
+#: models/user_following.py:47
 msgid "author"
 msgstr ""
 
-#: models/article.py:31 models/attachments.py:73
+#: models/article.py:33 models/attachments.py:79
 msgid "image"
 msgstr ""
 
-#: models/article.py:33
+#: models/article.py:35
 msgid "summary"
 msgstr ""
 
-#: models/article.py:34 models/judgment.py:81 models/relationships.py:7
-#: models/taxonomies.py:14
+#: models/article.py:36 models/judgment.py:102 models/relationships.py:7
+#: models/taxonomies.py:17
 msgid "slug"
 msgstr ""
 
-#: models/article.py:35 models/core_document.py:471
+#: models/article.py:37 models/core_document.py:515
 msgid "published"
 msgstr ""
 
-#: models/article.py:37
+#: models/article.py:39
 msgid "topics"
 msgstr ""
 
-#: models/article.py:40
+#: models/article.py:42
 msgid "featured"
 msgstr ""
 
-#: models/article.py:42
+#: models/article.py:44
 msgid "Featured articles will be displayed on the homepage."
 msgstr ""
 
-#: models/article.py:46
+#: models/article.py:48
 msgid "article"
 msgstr ""
 
-#: models/article.py:47
+#: models/article.py:49
 msgid "articles"
 msgstr ""
 
-#: models/article.py:93
+#: models/article.py:95
 msgid "photo"
 msgstr ""
 
-#: models/article.py:95
+#: models/article.py:97
 msgid "profile description"
 msgstr ""
 
 #: models/article.py:98
+msgid "tracking id"
+msgstr ""
+
+#: models/article.py:105
+msgid "preferred language"
+msgstr ""
+
+#: models/article.py:109
 msgid "user profile"
 msgstr ""
 
-#: models/article.py:99
+#: models/article.py:110
 msgid "user profiles"
 msgstr ""
 
-#: models/attachments.py:31
+#: models/attachments.py:37
 msgid "filename"
 msgstr ""
 
-#: models/attachments.py:32
+#: models/attachments.py:38
 msgid "mimetype"
 msgstr ""
 
-#: models/attachments.py:33
+#: models/attachments.py:39
 msgid "size"
 msgstr ""
 
-#: models/attachments.py:34 models/attachments.py:70 models/attachments.py:167
-#: models/partner.py:40
+#: models/attachments.py:40 models/attachments.py:76 models/attachments.py:228
+#: models/attachments.py:328 models/partner.py:40
 msgid "file"
 msgstr ""
 
-#: models/attachments.py:74
+#: models/attachments.py:80
 msgid "images"
 msgstr ""
 
-#: models/attachments.py:98 models/core_document.py:367
-#: models/ratification.py:18
+#: models/attachments.py:107 models/core_document.py:411
+#: models/ratification.py:19
 msgid "source URL"
 msgstr ""
 
-#: models/attachments.py:101
+#: models/attachments.py:110
 msgid "file as pdf"
 msgstr ""
 
-#: models/attachments.py:109
+#: models/attachments.py:120
+msgid "file is anonymised"
+msgstr ""
+
+#: models/attachments.py:122
+msgid "anonymised file as pdf"
+msgstr ""
+
+#: models/attachments.py:130
 msgid "source file"
 msgstr ""
 
-#: models/attachments.py:110
+#: models/attachments.py:131
 msgid "source files"
 msgstr ""
 
-#: models/attachments.py:176
+#: models/attachments.py:237
 msgid "URL"
 msgstr ""
 
-#: models/attachments.py:180
+#: models/attachments.py:241
 msgid "The external URL (e.g. on gazettes.africa) where this file lives"
 msgstr ""
 
-#: models/attachments.py:183
+#: models/attachments.py:244
 msgid "use source file"
 msgstr ""
 
-#: models/attachments.py:186
+#: models/attachments.py:247
 msgid "Set to True if the source file on the same document can be used instead"
 msgstr ""
 
-#: models/attachments.py:191
+#: models/attachments.py:252
 msgid "publication file"
 msgstr ""
 
-#: models/attachments.py:192
+#: models/attachments.py:253
 msgid "publication files"
 msgstr ""
 
-#: models/attachments.py:200 models/author.py:10 models/core_document.py:49
-#: models/core_document.py:77 models/core_document.py:92 models/ingestors.py:15
-#: models/ingestors.py:45 models/judgment.py:17 models/judgment.py:35
-#: models/judgment.py:50 models/judgment.py:65 models/judgment.py:79
-#: models/judgment.py:121 models/judgment.py:138 models/judgment.py:198
-#: models/partner.py:20 models/relationships.py:6 models/save_document.py:11
-#: models/taxonomies.py:12
+#: models/attachments.py:261 models/author.py:11 models/citations.py:167
+#: models/core_document.py:61 models/core_document.py:89
+#: models/core_document.py:104 models/ingestors.py:15 models/ingestors.py:45
+#: models/judgment.py:23 models/judgment.py:41 models/judgment.py:56
+#: models/judgment.py:71 models/judgment.py:86 models/judgment.py:100
+#: models/judgment.py:142 models/judgment.py:161 models/judgment.py:221
+#: models/partner.py:20 models/relationships.py:6 models/save_document.py:15
+#: models/taxonomies.py:15
 msgid "name"
 msgstr ""
 
-#: models/attachments.py:202 models/core_document.py:80 models/judgment.py:19
-#: models/judgment.py:37 models/judgment.py:52 models/judgment.py:67
-#: models/judgment.py:80
+#: models/attachments.py:263 models/core_document.py:92 models/judgment.py:25
+#: models/judgment.py:43 models/judgment.py:58 models/judgment.py:73
+#: models/judgment.py:88 models/judgment.py:101
 msgid "description"
 msgstr ""
 
-#: models/attachments.py:205
+#: models/attachments.py:266
 msgid "attached file nature"
 msgstr ""
 
-#: models/attachments.py:206
+#: models/attachments.py:267
 msgid "attached file natures"
 msgstr ""
 
-#: models/attachments.py:219 models/core_document.py:399
+#: models/attachments.py:280 models/core_document.py:443
 msgid "nature"
 msgstr ""
 
-#: models/attachments.py:223
+#: models/attachments.py:283
+msgid "private"
+msgstr ""
+
+#: models/attachments.py:285
+msgid "Set to True if this file should not be publicly accessible"
+msgstr ""
+
+#: models/attachments.py:289
 msgid "attached file"
 msgstr ""
 
-#: models/attachments.py:224
+#: models/attachments.py:290
 msgid "attached files"
 msgstr ""
 
-#: models/author.py:7
-msgid "Author"
+#: models/attachments.py:330
+msgid "html md5sum"
+msgstr ""
+
+#: models/attachments.py:332 models/core_document.py:499
+#: models/ratification.py:22 models/save_document.py:61
+msgid "updated at"
+msgstr ""
+
+#: models/attachments.py:335
+msgid "social media image"
+msgstr ""
+
+#: models/attachments.py:336
+msgid "social media images"
 msgstr ""
 
 #: models/author.py:8
+msgid "Author"
+msgstr ""
+
+#: models/author.py:9
 msgid "Authors"
 msgstr ""
 
-#: models/author.py:11 models/core_document.py:51 models/core_document.py:79
-#: models/core_document.py:96 models/judgment.py:122 models/judgment.py:139
-#: models/judgment.py:199
+#: models/author.py:12 models/core_document.py:63 models/core_document.py:91
+#: models/core_document.py:108 models/judgment.py:144 models/judgment.py:162
+#: models/judgment.py:222
 msgid "code"
 msgstr ""
 
-#: models/author.py:14 models/core_document.py:98 models/judgment.py:85
-#: models/judgment.py:124 models/judgment.py:148 models/profile.py:37
-#: models/profile.py:38 models/profile.py:48 models/taxonomies.py:17
+#: models/author.py:15 models/core_document.py:110 models/judgment.py:106
+#: models/judgment.py:147 models/judgment.py:171 models/profile.py:37
+#: models/profile.py:38 models/profile.py:48 models/taxonomies.py:20
 msgid "profile"
 msgstr ""
 
-#: models/author.py:22 models/generic_document.py:12
+#: models/author.py:23 models/generic_document.py:16
 msgid "authors"
 msgstr ""
 
-#: models/bill.py:14
+#: models/bill.py:18
 msgid "Chamber"
 msgstr ""
 
-#: models/bill.py:15
+#: models/bill.py:19
 msgid "Chambers"
 msgstr ""
 
-#: models/bill.py:18
+#: models/bill.py:22
 msgid "bill"
 msgstr ""
 
-#: models/bill.py:19
+#: models/bill.py:23
 msgid "bills"
 msgstr ""
 
@@ -524,226 +646,238 @@ msgstr ""
 msgid "target work"
 msgstr ""
 
-#: models/citations.py:166
+#: models/citations.py:91
+msgid "treatment"
+msgstr ""
+
+#: models/citations.py:174
 msgid "processing date"
 msgstr ""
 
-#: models/citations.py:169
+#: models/citations.py:177
 msgid "citation processing"
 msgstr ""
 
-#: models/core_document.py:53
+#: models/core_document.py:65
 msgid "level"
 msgstr ""
 
-#: models/core_document.py:67
+#: models/core_document.py:79
 msgid "label"
 msgstr ""
 
-#: models/core_document.py:68 models/core_document.py:480
+#: models/core_document.py:80 models/core_document.py:524
 msgid "labels"
 msgstr ""
 
-#: models/core_document.py:83
+#: models/core_document.py:95
 msgid "document nature"
 msgstr ""
 
-#: models/core_document.py:84
+#: models/core_document.py:96
 msgid "document natures"
 msgstr ""
 
-#: models/core_document.py:94 models/core_document.py:385 models/profile.py:46
+#: models/core_document.py:106 models/core_document.py:429 models/profile.py:46
 msgid "jurisdiction"
 msgstr ""
 
-#: models/core_document.py:102 models/core_document.py:392
-#: models/judgment.py:163
+#: models/core_document.py:114 models/core_document.py:436
+#: models/judgment.py:186 models/user_following.py:79
 msgid "locality"
 msgstr ""
 
-#: models/core_document.py:103
+#: models/core_document.py:115
 msgid "localities"
 msgstr ""
 
-#: models/core_document.py:116
+#: models/core_document.py:131
 msgid "FRBR URI"
 msgstr ""
 
-#: models/core_document.py:120
+#: models/core_document.py:135
 msgid "FRBR URI country"
 msgstr ""
 
-#: models/core_document.py:126
+#: models/core_document.py:141
 msgid "FRBR URI locality"
 msgstr ""
 
-#: models/core_document.py:132
+#: models/core_document.py:147
 msgid "FRBR URI place"
 msgstr ""
 
-#: models/core_document.py:138 models/core_document.py:408
+#: models/core_document.py:153 models/core_document.py:452
 msgid "FRBR URI doctype"
 msgstr ""
 
-#: models/core_document.py:144 models/core_document.py:415
+#: models/core_document.py:159 models/core_document.py:459
 msgid "FRBR URI subtype"
 msgstr ""
 
-#: models/core_document.py:150 models/core_document.py:423
+#: models/core_document.py:165 models/core_document.py:467
 msgid "FRBR URI actor"
 msgstr ""
 
-#: models/core_document.py:156 models/core_document.py:431
+#: models/core_document.py:171 models/core_document.py:475
 msgid "FRBR URI date"
 msgstr ""
 
-#: models/core_document.py:162 models/core_document.py:439
+#: models/core_document.py:177 models/core_document.py:483
 msgid "FRBR URI number"
 msgstr ""
 
-#: models/core_document.py:173
+#: models/core_document.py:188
 msgid "languages"
 msgstr ""
 
-#: models/core_document.py:176
-msgid "ranking"
-msgstr ""
-
-#: models/core_document.py:178
-msgid "number of cited works"
-msgstr ""
-
-#: models/core_document.py:180
-msgid "number of incoming citations"
-msgstr ""
-
-#: models/core_document.py:185 models/partner.py:38
+#: models/core_document.py:194 models/partner.py:38
 msgid "partner"
 msgstr ""
 
-#: models/core_document.py:186
+#: models/core_document.py:195
 msgid "Publication partner"
 msgstr ""
 
-#: models/core_document.py:191 models/core_document.py:354
-#: models/ratification.py:16
+#: models/core_document.py:202
+msgid "pagerank"
+msgstr ""
+
+#: models/core_document.py:204
+msgid "pagerank normalized"
+msgstr ""
+
+#: models/core_document.py:206
+msgid "number of cited works"
+msgstr ""
+
+#: models/core_document.py:208
+msgid "number of incoming citations"
+msgstr ""
+
+#: models/core_document.py:211
+msgid "number of incoming citations normalized"
+msgstr ""
+
+#: models/core_document.py:214
+msgid "authority score"
+msgstr ""
+
+#: models/core_document.py:217 models/core_document.py:398
+#: models/enrichments.py:22 models/ratification.py:16
 msgid "work"
 msgstr ""
 
-#: models/core_document.py:192
+#: models/core_document.py:218
 msgid "works"
 msgstr ""
 
-#: models/core_document.py:357
+#: models/core_document.py:401
 msgid "document type"
 msgstr ""
 
-#: models/core_document.py:369
+#: models/core_document.py:413
 msgid "citation"
 msgstr ""
 
-#: models/core_document.py:370
+#: models/core_document.py:414
 msgid "content HTML"
 msgstr ""
 
-#: models/core_document.py:371
+#: models/core_document.py:415
 msgid "content HTML is AKN"
 msgstr ""
 
-#: models/core_document.py:372
+#: models/core_document.py:416
 msgid "TOC JSON"
 msgstr ""
 
-#: models/core_document.py:378
+#: models/core_document.py:422
 msgid "language"
 msgstr ""
 
-#: models/core_document.py:403
+#: models/core_document.py:447
 msgid "work FRBR URI"
 msgstr ""
 
-#: models/core_document.py:420
+#: models/core_document.py:464
 msgid "Document subtype. Lowercase letters, numbers _ and - only."
 msgstr ""
 
-#: models/core_document.py:428
+#: models/core_document.py:472
 msgid "Originating actor. Lowercase letters, numbers _ and - only."
 msgstr ""
 
-#: models/core_document.py:436
+#: models/core_document.py:480
 msgid "YYYY, YYYY-MM, or YYYY-MM-DD"
 msgstr ""
 
-#: models/core_document.py:445
+#: models/core_document.py:489
 msgid "Unique number or short title identifying this work. Lowercase letters, numbers _ and - only."
 msgstr ""
 
-#: models/core_document.py:450
+#: models/core_document.py:494
 msgid "expression FRBR URI"
 msgstr ""
 
-#: models/core_document.py:455 models/ratification.py:20
-msgid "updated at"
-msgstr ""
-
-#: models/core_document.py:461
+#: models/core_document.py:505
 msgid "created by"
 msgstr ""
 
-#: models/core_document.py:464
+#: models/core_document.py:508
 msgid "allow robots"
 msgstr ""
 
-#: models/core_document.py:467
+#: models/core_document.py:511
 msgid "Allow this document to be indexed by search engine robots."
 msgstr ""
 
-#: models/core_document.py:474
+#: models/core_document.py:518
 msgid "Is this document published and visible on the website?"
 msgstr ""
 
-#: models/core_document.py:476
+#: models/core_document.py:520
 msgid "metadata JSON"
 msgstr ""
 
-#: models/core_document.py:489
+#: models/core_document.py:533
 msgid "Restrict access to this document to selected groups."
 msgstr ""
 
-#: models/core_document.py:562
+#: models/core_document.py:626
 #, python-format
 msgid "Invalid FRBR URI: %(uri)s"
 msgstr ""
 
-#: models/core_document.py:573
+#: models/core_document.py:637
 msgid "Document with this Expression FRBR URI already exists!"
 msgstr ""
 
-#: models/core_document.py:834
+#: models/core_document.py:1017
 msgid "Law report citation/Alternative known name"
 msgstr ""
 
-#: models/core_document.py:841
+#: models/core_document.py:1024
 msgid "alternative name"
 msgstr ""
 
-#: models/core_document.py:842
+#: models/core_document.py:1025
 msgid "alternative names"
 msgstr ""
 
-#: models/core_document.py:862
+#: models/core_document.py:1045
 msgid "document text"
 msgstr ""
 
-#: models/core_document.py:866
+#: models/core_document.py:1049
 msgid "document XML"
 msgstr ""
 
-#: models/core_document.py:870
+#: models/core_document.py:1053
 msgid "document content"
 msgstr ""
 
-#: models/core_document.py:871
+#: models/core_document.py:1054
 msgid "document contents"
 msgstr ""
 
@@ -771,51 +905,161 @@ msgstr ""
 msgid "document access groups"
 msgstr ""
 
-#: models/gazette.py:9
+#: models/enrichments.py:10
+msgid "Provision enrichment"
+msgstr ""
+
+#: models/enrichments.py:11
+#: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:10
+msgid "Unconstitutional provision"
+msgstr ""
+
+#: models/enrichments.py:12
+msgid "Uncommenced provision"
+msgstr ""
+
+#: models/enrichments.py:13
+msgid "Provision citation"
+msgstr ""
+
+#: models/enrichments.py:25
+msgid "provision eid"
+msgstr ""
+
+#: models/enrichments.py:27
+msgid "whole work"
+msgstr ""
+
+#: models/enrichments.py:29
+msgid "enrichment type"
+msgstr ""
+
+#: models/enrichments.py:42
+msgid "provision enrichment"
+msgstr ""
+
+#: models/enrichments.py:43
+msgid "provision enrichments"
+msgstr ""
+
+#: models/enrichments.py:83 models/judgment.py:254 models/judgment.py:270
+#: models/judgment.py:426 views/courts.py:54 views/judgment.py:27
+msgid "judgment"
+msgstr ""
+
+#: models/enrichments.py:86
+msgid "date deemed unconstitutional"
+msgstr ""
+
+#: models/enrichments.py:89
+msgid "end of suspension period"
+msgstr ""
+
+#: models/enrichments.py:91
+msgid "resolved"
+msgstr ""
+
+#: models/enrichments.py:92
+msgid "date resolved"
+msgstr ""
+
+#: models/enrichments.py:99
+msgid "resolving amendment work"
+msgstr ""
+
+#: models/enrichments.py:101
+msgid "read-in text HTML"
+msgstr ""
+
+#: models/enrichments.py:104
+msgid "unconstitutional provision"
+msgstr ""
+
+#: models/enrichments.py:105
+msgid "unconstitutional provisions"
+msgstr ""
+
+#: models/enrichments.py:113
+msgid "and all descendants"
+msgstr ""
+
+#: models/enrichments.py:116
+msgid "uncommenced provision"
+msgstr ""
+
+#: models/enrichments.py:117
+msgid "uncommenced provisions"
+msgstr ""
+
+#: models/enrichments.py:125
+msgid "prefix"
+msgstr ""
+
+#: models/enrichments.py:126
+msgid "suffix"
+msgstr ""
+
+#: models/enrichments.py:127
+msgid "exact"
+msgstr ""
+
+#: models/enrichments.py:132
+msgid "citing document"
+msgstr ""
+
+#: models/enrichments.py:136
+msgid "provision citation"
+msgstr ""
+
+#: models/enrichments.py:137
+msgid "provision citations"
+msgstr ""
+
+#: models/gazette.py:13
 msgid "publication"
 msgstr ""
 
-#: models/gazette.py:12
+#: models/gazette.py:16
 msgid "sub publication"
 msgstr ""
 
-#: models/gazette.py:14
+#: models/gazette.py:18
 msgid "supplement"
 msgstr ""
 
-#: models/gazette.py:16
+#: models/gazette.py:20
 msgid "supplement number"
 msgstr ""
 
-#: models/gazette.py:18
+#: models/gazette.py:22
 msgid "part"
 msgstr ""
 
-#: models/gazette.py:21
+#: models/gazette.py:25
 msgid "key"
 msgstr ""
 
-#: models/gazette.py:24
+#: models/gazette.py:28
 msgid "volume number"
 msgstr ""
 
-#: models/gazette.py:26
+#: models/gazette.py:30
 msgid "special"
 msgstr ""
 
-#: models/gazette.py:31 views/gazette.py:97 views/gazette.py:178
+#: models/gazette.py:35 views/gazette.py:97 views/gazette.py:178
 msgid "gazette"
 msgstr ""
 
-#: models/gazette.py:32 views/gazette.py:98 views/gazette.py:179
+#: models/gazette.py:36 views/gazette.py:98 views/gazette.py:179
 msgid "gazettes"
 msgstr ""
 
-#: models/generic_document.py:23
+#: models/generic_document.py:27
 msgid "generic document"
 msgstr ""
 
-#: models/generic_document.py:24
+#: models/generic_document.py:28
 msgid "generic documents"
 msgstr ""
 
@@ -851,187 +1095,250 @@ msgstr ""
 msgid "ingestors"
 msgstr ""
 
-#: models/judgment.py:23
+#: models/judgment.py:29
 msgid "attorney"
 msgstr ""
 
-#: models/judgment.py:24 models/judgment.py:282
+#: models/judgment.py:30 models/judgment.py:321
 msgid "attorneys"
 msgstr ""
 
-#: models/judgment.py:31
+#: models/judgment.py:37
 msgid "Judge"
 msgstr ""
 
-#: models/judgment.py:32 templates/peachjam/_case_histories.html:8
-#: templates/peachjam/layouts/document_detail.html:238
+#: models/judgment.py:38 templates/peachjam/_case_histories.html:8
+#: templates/peachjam/layouts/document_detail.html:302
 msgid "Judges"
 msgstr ""
 
-#: models/judgment.py:56 models/judgment.py:526
+#: models/judgment.py:62 models/judgment.py:694
 msgid "outcome"
 msgstr ""
 
-#: models/judgment.py:57
+#: models/judgment.py:63
 msgid "outcomes"
 msgstr ""
 
-#: models/judgment.py:71 models/judgment.py:463
+#: models/judgment.py:77 models/judgment.py:308
+msgid "case action"
+msgstr ""
+
+#: models/judgment.py:78
+msgid "case actions"
+msgstr ""
+
+#: models/judgment.py:92 models/judgment.py:631
 msgid "matter type"
 msgstr ""
 
-#: models/judgment.py:72
+#: models/judgment.py:93
 msgid "matter types"
 msgstr ""
 
-#: models/judgment.py:82 models/judgment.py:126 models/judgment.py:150
-#: models/judgment.py:291
+#: models/judgment.py:103 models/judgment.py:149 models/judgment.py:173
+#: models/judgment.py:331
 msgid "order"
 msgstr ""
 
-#: models/judgment.py:93 models/judgment.py:145
+#: models/judgment.py:114 models/judgment.py:168 models/user_following.py:55
 msgid "court class"
 msgstr ""
 
-#: models/judgment.py:94
+#: models/judgment.py:115
 msgid "court classes"
 msgstr ""
 
-#: models/judgment.py:156 models/ratification.py:65
+#: models/judgment.py:179 models/ratification.py:67 models/user_following.py:71
 msgid "country"
 msgstr ""
 
-#: models/judgment.py:171 models/judgment.py:196 models/judgment.py:262
-#: models/judgment.py:530 models/judgment.py:554
+#: models/judgment.py:194 models/judgment.py:219 models/judgment.py:285
+#: models/judgment.py:698 models/judgment.py:725 models/user_following.py:39
 msgid "court"
 msgstr ""
 
-#: models/judgment.py:172
+#: models/judgment.py:195
 msgid "courts"
 msgstr ""
 
-#: models/judgment.py:187
+#: models/judgment.py:210
 msgid "Court registry"
 msgstr ""
 
-#: models/judgment.py:188
+#: models/judgment.py:211
 msgid "Court registries"
 msgstr ""
 
-#: models/judgment.py:203
+#: models/judgment.py:226 models/user_following.py:63
 msgid "court registry"
 msgstr ""
 
-#: models/judgment.py:204
+#: models/judgment.py:227
 msgid "court registries"
 msgstr ""
 
-#: models/judgment.py:231 models/judgment.py:247 models/judgment.py:344
-#: views/courts.py:45 views/judgment.py:27
-msgid "judgment"
-msgstr ""
-
-#: models/judgment.py:250
+#: models/judgment.py:273
 msgid "lower_court_judge"
 msgstr ""
 
-#: models/judgment.py:289
-msgid "case summary"
-msgstr ""
-
-#: models/judgment.py:290
-msgid "flynote"
-msgstr ""
-
-#: models/judgment.py:293
-msgid "case name"
-msgstr ""
-
-#: models/judgment.py:295
-msgid "Party names for use in title"
-msgstr ""
-
-#: models/judgment.py:301
-msgid "serial number"
-msgstr ""
-
-#: models/judgment.py:303
-msgid "Serial number for MNC, unique for a year and an author."
-msgstr ""
-
-#: models/judgment.py:306
-msgid "serial number override"
-msgstr ""
-
-#: models/judgment.py:309
-msgid "Specific MNC serial number assigned by the court."
-msgstr ""
-
-#: models/judgment.py:313
-msgid "MNC"
-msgstr ""
-
-#: models/judgment.py:315
-msgid "Media neutral citation"
-msgstr ""
-
-#: models/judgment.py:322
-msgid "Auto-assign details"
-msgstr ""
-
-#: models/judgment.py:323
-msgid "Whether or not the system should assign the details"
-msgstr ""
-
-#: models/judgment.py:328
-msgid "Anonymised"
+#: models/judgment.py:300
+msgid "court division"
 msgstr ""
 
 #: models/judgment.py:329
-msgid "Whether or not the judgment is anonymised"
+msgid "case summary"
 msgstr ""
 
-#: models/judgment.py:345 views/courts.py:46 views/judgment.py:28
+#: models/judgment.py:330
+msgid "flynote"
+msgstr ""
+
+#: models/judgment.py:333
+msgid "blurb"
+msgstr ""
+
+#: models/judgment.py:337
+msgid "A quick summary of the judgment, for use in listings"
+msgstr ""
+
+#: models/judgment.py:340
+msgid "issues"
+msgstr ""
+
+#: models/judgment.py:343
+msgid "A list of issues that the judgment addresses"
+msgstr ""
+
+#: models/judgment.py:346
+msgid "held"
+msgstr ""
+
+#: models/judgment.py:349
+msgid "The main findings of the judgment"
+msgstr ""
+
+#: models/judgment.py:352
+msgid "summary AI generated"
+msgstr ""
+
+#: models/judgment.py:354
+msgid "Was this summary generated by an AI?"
+msgstr ""
+
+#: models/judgment.py:357
+msgid "summary generated at"
+msgstr ""
+
+#: models/judgment.py:360
+msgid "When the AI summary was generated"
+msgstr ""
+
+#: models/judgment.py:363
+msgid "summary trace ID"
+msgstr ""
+
+#: models/judgment.py:367
+msgid "The trace ID for the AI summary generation"
+msgstr ""
+
+#: models/judgment.py:370
+msgid "case name"
+msgstr ""
+
+#: models/judgment.py:372
+msgid "Party names for use in title"
+msgstr ""
+
+#: models/judgment.py:378
+msgid "serial number"
+msgstr ""
+
+#: models/judgment.py:380
+msgid "Serial number for MNC, unique for a year and an author."
+msgstr ""
+
+#: models/judgment.py:383
+msgid "serial number override"
+msgstr ""
+
+#: models/judgment.py:386
+msgid "Specific MNC serial number assigned by the court."
+msgstr ""
+
+#: models/judgment.py:390
+msgid "MNC"
+msgstr ""
+
+#: models/judgment.py:392
+msgid "Media neutral citation"
+msgstr ""
+
+#: models/judgment.py:399
+msgid "Auto-assign details"
+msgstr ""
+
+#: models/judgment.py:400
+msgid "Whether or not the system should assign the details"
+msgstr ""
+
+#: models/judgment.py:405
+msgid "Must be anonymised"
+msgstr ""
+
+#: models/judgment.py:406
+msgid "Must this judgment be anonymised?"
+msgstr ""
+
+#: models/judgment.py:410
+msgid "Anonymised"
+msgstr ""
+
+#: models/judgment.py:411
+msgid "Has the judgment been anonymised?"
+msgstr ""
+
+#: models/judgment.py:427 views/courts.py:55 views/judgment.py:28
 msgid "judgments"
 msgstr ""
 
-#: models/judgment.py:449
+#: models/judgment.py:617
 msgid "Full case number as printed on judgment"
 msgstr ""
 
-#: models/judgment.py:453
+#: models/judgment.py:621
 msgid "Override for full case number string"
 msgstr ""
 
-#: models/judgment.py:455
+#: models/judgment.py:623
 msgid "string"
 msgstr ""
 
-#: models/judgment.py:456
+#: models/judgment.py:624
 msgid "number"
 msgstr ""
 
-#: models/judgment.py:457
+#: models/judgment.py:625
 msgid "year"
 msgstr ""
 
-#: models/judgment.py:508
+#: models/judgment.py:676
 msgid "judgment work"
 msgstr ""
 
-#: models/judgment.py:519
+#: models/judgment.py:687
 msgid "historical judgment work"
 msgstr ""
 
-#: models/judgment.py:537
+#: models/judgment.py:705
 msgid "case histories"
 msgstr ""
 
-#: models/judgment.py:544 templates/peachjam/layouts/document_detail.html:135
+#: models/judgment.py:712 templates/peachjam/layouts/document_detail.html:197
 msgid "Case history"
 msgstr ""
 
-#: models/judgment.py:572
+#: models/judgment.py:743
 msgid "end date"
 msgstr ""
 
@@ -1099,35 +1406,35 @@ msgstr ""
 msgid "jurisdiction profiles"
 msgstr ""
 
-#: models/ratification.py:19
+#: models/ratification.py:21
 msgid "last updated"
 msgstr ""
 
-#: models/ratification.py:23 models/ratification.py:58
+#: models/ratification.py:25 models/ratification.py:60
 msgid "ratification"
 msgstr ""
 
-#: models/ratification.py:24
+#: models/ratification.py:26
 msgid "ratifications"
 msgstr ""
 
-#: models/ratification.py:67
+#: models/ratification.py:69
 msgid "ratification date"
 msgstr ""
 
-#: models/ratification.py:68
+#: models/ratification.py:70
 msgid "deposit date"
 msgstr ""
 
-#: models/ratification.py:69
+#: models/ratification.py:71
 msgid "signature date"
 msgstr ""
 
-#: models/ratification.py:72
+#: models/ratification.py:74
 msgid "ratification country"
 msgstr ""
 
-#: models/ratification.py:73
+#: models/ratification.py:75
 msgid "ratification countries"
 msgstr ""
 
@@ -1143,12 +1450,12 @@ msgstr ""
 msgid "Reversed verbal form of the relationship"
 msgstr ""
 
-#: models/relationships.py:17 models/relationships.py:51
-#: models/relationships.py:62
+#: models/relationships.py:17 models/relationships.py:59
+#: models/relationships.py:70
 msgid "predicate"
 msgstr ""
 
-#: models/relationships.py:18 models/relationships.py:63
+#: models/relationships.py:18 models/relationships.py:71
 msgid "predicates"
 msgstr ""
 
@@ -1160,32 +1467,44 @@ msgstr ""
 msgid "subject target ID"
 msgstr ""
 
-#: models/relationships.py:36
+#: models/relationships.py:40
 msgid "subject selectors"
 msgstr ""
 
-#: models/relationships.py:44
+#: models/relationships.py:48
 msgid "object work"
 msgstr ""
 
-#: models/relationships.py:47
+#: models/relationships.py:51
 msgid "object target ID"
 msgstr ""
 
-#: models/save_document.py:22 models/save_document.py:42
+#: models/save_document.py:26
 msgid "folder"
 msgstr ""
 
-#: models/save_document.py:23
+#: models/save_document.py:27
 msgid "folders"
 msgstr ""
 
-#: models/save_document.py:51
+#: models/save_document.py:42
+msgid "Folder limit reached"
+msgstr ""
+
+#: models/save_document.py:59
+msgid "note"
+msgstr ""
+
+#: models/save_document.py:65
 msgid "saved document"
 msgstr ""
 
-#: models/save_document.py:52
+#: models/save_document.py:66
 msgid "saved documents"
+msgstr ""
+
+#: models/save_document.py:77
+msgid "Saved documents limit reached"
 msgstr ""
 
 #: models/settings.py:28
@@ -1236,156 +1555,230 @@ msgstr ""
 msgid "Allow signups via social accounts"
 msgstr ""
 
-#: models/settings.py:77
+#: models/settings.py:76
+msgid "allow signups"
+msgstr ""
+
+#: models/settings.py:78
+msgid "Allow users to create accounts"
+msgstr ""
+
+#: models/settings.py:82
 msgid "metabase dashboard link"
 msgstr ""
 
-#: models/settings.py:81
+#: models/settings.py:86
 msgid "mailchimp form url"
 msgstr ""
 
-#: models/settings.py:84
+#: models/settings.py:89
 msgid "twitter link"
 msgstr ""
 
-#: models/settings.py:87
+#: models/settings.py:92
 msgid "facebook link"
 msgstr ""
 
-#: models/settings.py:90
+#: models/settings.py:95
 msgid "linkedin link"
 msgstr ""
 
-#: models/settings.py:93
+#: models/settings.py:98
 msgid "youtube link"
 msgstr ""
 
-#: models/settings.py:96
+#: models/settings.py:101
 msgid "contact form URL"
 msgstr ""
 
-#: models/settings.py:99
+#: models/settings.py:104
 msgid "re-extract citations"
 msgstr ""
 
-#: models/settings.py:102
+#: models/settings.py:107
 msgid "Pocket Law repo"
 msgstr ""
 
-#: models/settings.py:105
+#: models/settings.py:110
 msgid "editor help link"
 msgstr ""
 
-#: models/settings.py:111
+#: models/settings.py:116
 msgid "user help link"
 msgstr ""
 
-#: models/settings.py:117
+#: models/settings.py:122
 msgid "admin emails"
 msgstr ""
 
-#: models/settings.py:121
+#: models/settings.py:126
 msgid "Enter one or more email addresses separated by spaces."
 msgstr ""
 
-#: models/settings.py:124
+#: models/settings.py:129
 msgid "matomo domain"
 msgstr ""
 
-#: models/settings.py:128
+#: models/settings.py:133
 msgid "Matomo domain (e.g. mysite.matomo.cloud)"
 msgstr ""
 
-#: models/settings.py:131
+#: models/settings.py:136
 msgid "matomo site ID"
 msgstr ""
 
-#: models/settings.py:135
+#: models/settings.py:140
 msgid "Matomo site ID (e.g. 2)"
 msgstr ""
 
-#: models/settings.py:138
+#: models/settings.py:143
 msgid "survey link"
 msgstr ""
 
-#: models/settings.py:143
+#: models/settings.py:148
 msgid "allow save documents"
 msgstr ""
 
-#: models/settings.py:145
+#: models/settings.py:150
 msgid "Allow documents to be saved."
 msgstr ""
 
-#: models/settings.py:148
-msgid "allow save searches"
-msgstr ""
-
-#: models/settings.py:150
-msgid "Allow searches to be saved."
-msgstr ""
-
 #: models/settings.py:153
-msgid "show contact form"
+msgid "allow anonymisation"
 msgstr ""
 
 #: models/settings.py:155
-msgid "Show the contact form."
+msgid "Allow documents to be anonymised."
 msgstr ""
 
 #: models/settings.py:158
-msgid "Additional robots.txt rules."
+msgid "allow save searches"
 msgstr ""
 
-#: models/settings.py:164
-msgid "ID of a Google custom search engine."
+#: models/settings.py:160
+msgid "Allow searches to be saved."
+msgstr ""
+
+#: models/settings.py:163
+msgid "show contact form"
+msgstr ""
+
+#: models/settings.py:165
+msgid "Show the contact form."
 msgstr ""
 
 #: models/settings.py:168
+msgid "Additional robots.txt rules."
+msgstr ""
+
+#: models/settings.py:174
+msgid "ID of a Google custom search engine."
+msgstr ""
+
+#: models/settings.py:178
 msgid "site settings"
 msgstr ""
 
-#: models/taxonomies.py:13
+#: models/taxonomies.py:16
 msgid "path name"
 msgstr ""
 
-#: models/taxonomies.py:20
+#: models/taxonomies.py:23
+msgid "restricted"
+msgstr ""
+
+#: models/taxonomies.py:28
 msgid "show in document listing"
 msgstr ""
 
-#: models/taxonomies.py:24
+#: models/taxonomies.py:32
 msgid "Show this taxonomy in the document listing page? Cascades to descendents."
 msgstr ""
 
-#: models/taxonomies.py:29 models/taxonomies.py:30
+#: models/taxonomies.py:36
+msgid "allow offline access"
+msgstr ""
+
+#: models/taxonomies.py:40
+msgid "Allow users to make this taxonomy and its descendants available offline."
+msgstr ""
+
+#: models/taxonomies.py:45 models/user_following.py:87
+msgid "taxonomy"
+msgstr ""
+
+#: models/taxonomies.py:46
 msgid "taxonomies"
 msgstr ""
 
-#: models/taxonomies.py:122
+#: models/taxonomies.py:250
 msgid "topic"
 msgstr ""
 
-#: models/taxonomies.py:127
+#: models/taxonomies.py:255
 msgid "document topic"
 msgstr ""
 
-#: models/taxonomies.py:128
+#: models/taxonomies.py:256
 msgid "document topics"
 msgstr ""
 
-#: settings.py:279
+#: models/timeline.py:19
+msgid "New Documents"
+msgstr ""
+
+#: models/timeline.py:20
+msgid "Saved Search"
+msgstr ""
+
+#: models/user_following.py:95
+msgid "saved search"
+msgstr ""
+
+#: models/user_following.py:99
+msgid "last alerted at"
+msgstr ""
+
+#: models/user_following.py:167
+msgid "New matches for search alert"
+msgstr ""
+
+#: models/user_following.py:169
+msgid "New documents added for"
+msgstr ""
+
+#: settings.py:295
 msgid "English"
 msgstr ""
 
-#: settings.py:280
+#: settings.py:296
 msgid "French"
 msgstr ""
 
-#: settings.py:281
+#: settings.py:297
 msgid "Portuguese"
 msgstr ""
 
-#: settings.py:282
+#: settings.py:298
 msgid "Swahili"
+msgstr ""
+
+#: templates/403.html:4 templates/403.html:9
+msgid "Forbidden (Error 403)"
+msgstr ""
+
+#: templates/403.html:11
+msgid "You don't have permission to access this page."
+msgstr ""
+
+#: templates/403.html:17 templates/404.html:17 templates/429.html:17
+#: templates/500.html:17
+msgid "Go to the homepage."
+msgstr ""
+
+#: templates/403.html:20 templates/404.html:20 templates/429.html:20
+#: templates/500.html:20
+msgid "Try searching for what you're looking for."
 msgstr ""
 
 #: templates/404.html:4 templates/404.html:9
@@ -1394,14 +1787,6 @@ msgstr ""
 
 #: templates/404.html:11
 msgid "We couldn't find the page you're looking for. The link may be outdated or incorrect."
-msgstr ""
-
-#: templates/404.html:17 templates/429.html:17 templates/500.html:17
-msgid "Go to the homepage."
-msgstr ""
-
-#: templates/404.html:20 templates/429.html:20 templates/500.html:20
-msgid "Try searching for what you're looking for."
 msgstr ""
 
 #: templates/429.html:4 templates/429.html:9
@@ -1420,103 +1805,122 @@ msgstr ""
 msgid "Something went wrong. Please try again in a short while."
 msgstr ""
 
-#: templates/account/email.html:9 templates/user_account/_tabs.html:19
+#: templates/account/_social_login_buttons.html:19
+#: templates/admin/login.html:79
+#, python-format
+msgid "Log in with %(provider)s"
+msgstr ""
+
+#: templates/account/email.html:4
+msgid "Emails"
+msgstr ""
+
+#: templates/account/email.html:9
 msgid "Email addresses"
 msgstr ""
 
-#: templates/account/email.html:13
+#: templates/account/email.html:12
 msgid "You can use any of these email addresses to log in."
 msgstr ""
 
-#: templates/account/email.html:15
+#: templates/account/email.html:14
 msgid "Note:"
 msgstr ""
 
-#: templates/account/email.html:16
+#: templates/account/email.html:15
 msgid "We only send email notifications to your <strong>primary</strong> email address."
 msgstr ""
 
-#: templates/account/email.html:26 templates/account/signup.html:37
-#: templates/peachjam/_contact_form.html:20
+#: templates/account/email.html:25 templates/account/signup.html:50
+#: templates/peachjam/_contact_form.html:20 templates/user_account/home.html:31
 msgid "Email address"
 msgstr ""
 
-#: templates/account/email.html:27
+#: templates/account/email.html:26
 msgid "Status"
 msgstr ""
 
-#: templates/account/email.html:36
+#: templates/account/email.html:35 templates/user_account/home.html:39
 msgid "verified"
 msgstr ""
 
-#: templates/account/email.html:39
+#: templates/account/email.html:38 templates/user_account/home.html:42
 msgid "unverified"
 msgstr ""
 
-#: templates/account/email.html:42
+#: templates/account/email.html:41
 msgid "primary"
 msgstr ""
 
-#: templates/account/email.html:50
+#: templates/account/email.html:49
 msgid "Re-send verification"
 msgstr ""
 
-#: templates/account/email.html:56
+#: templates/account/email.html:55
 msgid "Make primary"
 msgstr ""
 
-#: templates/account/email.html:62
+#: templates/account/email.html:61
 msgid "Remove"
 msgstr ""
 
-#: templates/account/email.html:72
+#: templates/account/email.html:71
 msgid "Warning:"
 msgstr ""
 
-#: templates/account/email.html:72
+#: templates/account/email.html:71
 msgid "You currently do not have any e-mail address set up. You should really add an e-mail address so you can receive notifications, reset your password, etc."
 msgstr ""
 
-#: templates/account/email.html:76
+#: templates/account/email.html:75
 msgid "Add an email address"
 msgstr ""
 
 #: templates/account/email.html:91
-msgid "Add email"
+msgid "Add email address"
+msgstr ""
+
+#: templates/account/logged_out.html:5
+msgid "Logged Out"
+msgstr ""
+
+#: templates/account/logged_out.html:8
+msgid "You have logged out."
+msgstr ""
+
+#: templates/account/logged_out.html:11 templates/account/login.html:8
+#: templates/account/login.html:60
+#: templates/account/password_reset_from_key.html:58
+#: templates/account/password_reset_from_key_done.html:9
+#: templates/account/signup.html:103 templates/admin/login.html:56
+#: templates/peachjam/_user_menu.html:62
+#: templates/peachjam/my/_frontpage_anon.html:10
+#: templates/peachjam/my/_frontpage_loader.html:12
+#: templates/peachjam/restricted_document_detail.html:24
+#: templates/peachjam/saved_document/_anon_modal.html:19
+#: templates/peachjam/user_following/_button.html:26
+msgid "Log in"
 msgstr ""
 
 #: templates/account/login.html:5
 msgid "Log In"
 msgstr ""
 
-#: templates/account/login.html:9 templates/account/login.html:64
-#: templates/account/password_reset_from_key.html:63
-#: templates/account/password_reset_from_key_done.html:9
-#: templates/admin/login.html:56 templates/peachjam/_header.html:69
-#: templates/peachjam/restricted_document_detail.html:24
-msgid "Log in"
-msgstr ""
-
-#: templates/account/login.html:11
-msgid "Don't have an account?"
-msgstr ""
-
-#: templates/account/login.html:11
-msgid "Sign up here"
-msgstr ""
-
-#: templates/account/login.html:68 templates/account/password_reset.html:18
+#: templates/account/login.html:49
 msgid "Forgot your password?"
 msgstr ""
 
-#: templates/account/login.html:90 templates/admin/login.html:79
-#, python-format
-msgid "Log in with %(provider)s"
+#: templates/account/login.html:61
+msgid "Create an account"
 msgstr ""
 
-#: templates/account/logout.html:4 templates/account/logout.html:7
-#: templates/account/logout.html:16
+#: templates/account/logout.html:4
 msgid "Log Out"
+msgstr ""
+
+#: templates/account/logout.html:7 templates/account/logout.html:16
+#: templates/peachjam/_user_menu.html:51
+msgid "Log out"
 msgstr ""
 
 #: templates/account/logout.html:8
@@ -1524,63 +1928,63 @@ msgid "Are you sure you want to log out?"
 msgstr ""
 
 #: templates/account/password_change.html:4
-#: templates/account/password_reset_from_key_done.html:4
 msgid "Change Password"
 msgstr ""
 
-#: templates/account/password_change.html:15
+#: templates/account/password_change.html:9 templates/user_account/home.html:27
 msgid "Change your password"
 msgstr ""
 
-#: templates/account/password_change.html:62
+#: templates/account/password_change.html:59
 msgid "Change password"
 msgstr ""
 
 #: templates/account/password_reset.html:4
-#: templates/account/password_reset.html:8
 msgid "Reset Your Password"
 msgstr ""
 
-#: templates/account/password_reset.html:10
+#: templates/account/password_reset.html:7
+msgid "Reset your password"
+msgstr ""
+
+#: templates/account/password_reset.html:9
 msgid "Back to Login"
 msgstr ""
 
-#: templates/account/password_reset.html:19
-msgid "Enter your e-mail address below, and we will send you a link to reset it."
+#: templates/account/password_reset.html:14
+msgid "Enter your e-mail address below, and we will send you a link to reset your password."
 msgstr ""
 
-#: templates/account/password_reset.html:37
-#: templates/account/password_reset_from_key.html:58
+#: templates/account/password_reset.html:30
+#: templates/account/password_reset_from_key.html:11
+#: templates/account/password_reset_from_key.html:54
+#: templates/account/password_reset_from_key_done.html:7
 msgid "Reset password"
 msgstr ""
 
 #: templates/account/password_reset_from_key.html:4
-#: templates/account/password_reset_from_key.html:12
-#: templates/account/password_reset_from_key_done.html:7
+#: templates/account/password_reset_from_key_done.html:4
 msgid "Reset Password"
 msgstr ""
 
-#: templates/account/password_reset_from_key.html:10
-msgid "Bad Token"
+#: templates/account/password_reset_from_key.html:9
+msgid "Bad token"
 msgstr ""
 
-#: templates/account/password_reset_from_key.html:20
+#: templates/account/password_reset_from_key.html:17
 #, python-format
 msgid "The password reset link was invalid, possibly because it has already been used.  Please request a <a href=\"%(passwd_reset_url)s\">new password reset</a>."
 msgstr ""
 
-#: templates/account/password_reset_from_key.html:32
+#: templates/account/password_reset_from_key.html:29
 msgid "New Password"
 msgstr ""
 
-#: templates/account/password_reset_from_key.html:45
+#: templates/account/password_reset_from_key.html:42
 msgid "New Password (again)"
 msgstr ""
 
-#: templates/account/password_reset_from_key.html:62
-msgid "Your password is now reset."
-msgstr ""
-
+#: templates/account/password_reset_from_key.html:57
 #: templates/account/password_reset_from_key_done.html:8
 msgid "Your password has been reset."
 msgstr ""
@@ -1598,88 +2002,62 @@ msgstr ""
 msgid "Sign Up"
 msgstr ""
 
-#: templates/account/signup.html:9 templates/account/signup.html:85
+#: templates/account/signup.html:8 templates/account/signup.html:99
+#: templates/peachjam/my/_frontpage_anon.html:8
+#: templates/peachjam/my/_frontpage_loader.html:10
 msgid "Sign up"
 msgstr ""
 
-#: templates/account/signup.html:11
-msgid "Already have an account?"
-msgstr ""
-
-#: templates/account/signup.html:11
-msgid "Login here"
-msgstr ""
-
-#: templates/account/signup.html:23
-msgid "Username"
-msgstr ""
-
-#: templates/account/signup.html:51 templates/user_account/_tabs.html:13
+#: templates/account/signup.html:65
 msgid "Password"
 msgstr ""
 
-#: templates/account/signup.html:64
+#: templates/account/signup.html:78
 msgid "Confirm Password"
+msgstr ""
+
+#: templates/account/signup.html:103
+msgid "Already have an account?"
+msgstr ""
+
+#: templates/admin/_check_duplicate_files.html:4
+msgid "This file has already been uploaded."
 msgstr ""
 
 #: templates/admin/_comments_list.html:19
 msgid "Add comment"
 msgstr ""
 
-#: templates/admin/change_form.html:13 templates/admin/change_list.html:16
+#: templates/admin/change_form.html:17
+msgid "This document is not published and is not visible to the public."
+msgstr ""
+
+#: templates/admin/change_form.html:20
+msgid "This document is restricted and is only visible to some users."
+msgstr ""
+
+#: templates/admin/change_form.html:29 templates/admin/change_list.html:16
 #: templates/peachjam/_help_button.html:6
 msgid "Help"
 msgstr ""
 
 #: templates/admin/change_list.html:8
-#: templates/admin/judgment_upload_form.html:46
 msgid "Upload"
 msgstr ""
 
-#: templates/admin/guardian/model/obj_perms_manage.html:12
-#: templates/peachjam/bill_detail.html:7
-#: templates/peachjam/causelist_court_detail.html:9
-#: templates/peachjam/causelist_detail.html:8
-#: templates/peachjam/court_detail.html:9
-#: templates/peachjam/gazette_detail.html:7
-#: templates/peachjam/gazette_list.html:11
-#: templates/peachjam/gazette_year.html:11 templates/peachjam/home.html:4
-#: templates/peachjam/judgment_detail.html:7
-#: templates/peachjam/place_bill_list.html:9
-#: templates/peachjam/taxonomy_detail.html:12
-#: templates/peachjam/taxonomy_first_level_detail.html:10
-msgid "Home"
+#: templates/admin/guardian/model/obj_perms_manage_access_groups.html:26
+msgid "Manage access groups"
 msgstr ""
 
-#: templates/admin/guardian/model/obj_perms_manage.html:26
-msgid "Document access"
+#: templates/admin/guardian/model/obj_perms_manage_access_groups.html:35
+msgid "Select the groups that have access permissions to this item."
 msgstr ""
 
-#: templates/admin/guardian/model/obj_perms_manage.html:35
-msgid "Select the groups that have access to this document"
-msgstr ""
-
-#: templates/admin/guardian/model/obj_perms_manage.html:44
+#: templates/admin/guardian/model/obj_perms_manage_access_groups.html:44
 #: templates/peachjam/_annotation_edit.html:11
-#: templates/peachjam/saved_document_create.html:10
-#: templates/peachjam/saved_document_login.html:9
-#: templates/peachjam/saved_document_update.html:78
-#: templates/user_account/edit.html:45
+#: templates/peachjam/saved_document/_create.html:11
+#: templates/peachjam/saved_document/_update_modal.html:71
 msgid "Save"
-msgstr ""
-
-#: templates/admin/judgment_upload_form.html:5
-msgid "Upload judgment"
-msgstr ""
-
-#: templates/admin/judgment_upload_form.html:26
-#: templates/peachjam/_document_table.html:20
-#: templates/peachjam/layouts/document_detail.html:172
-msgid "Jurisdiction"
-msgstr ""
-
-#: templates/admin/judgment_upload_form.html:36
-msgid "File"
 msgstr ""
 
 #: templates/admin/login.html:20
@@ -1699,12 +2077,30 @@ msgstr ""
 msgid "Forgotten your password or username?"
 msgstr ""
 
-#: templates/admin/peachjam/judgment/change_form.html:5
+#: templates/admin/peachjam/_duplicates_warning.html:6
+msgid "This document is a duplicate of:"
+msgstr ""
+
+#: templates/admin/peachjam/judgment/_extracted_form.html:7
+msgid "Extracted:"
+msgstr ""
+
+#: templates/admin/peachjam/judgment/change_form.html:6
+msgid "This judgment must be anonymised before it can be published."
+msgstr ""
+
+#: templates/admin/peachjam/judgment/change_form.html:11
 msgid "Anonymise"
 msgstr ""
 
+#: templates/admin/peachjam/judgment/change_form.html:15
+msgid "Generate summary"
+msgstr ""
+
 #: templates/admin/tree_change_list.html:7
-#: templates/peachjam/_document_content_sidebar.html:42
+#: templates/peachjam/_document_content_sidebar.html:57
+#: templates/peachjam/_quick_search.html:4
+#: templates/peachjam/_quick_search.html:7
 msgid "Search"
 msgstr ""
 
@@ -1716,46 +2112,40 @@ msgstr ""
 msgid "Expand all"
 msgstr ""
 
-#: templates/allauth/layouts/base.html:13
+#: templates/allauth/layouts/base.html:23
 msgid "Need help? Please email"
 msgstr ""
 
-#: templates/peachjam/_annotation_detail.html:18
-#: templates/peachjam/_document_detail_toolbar.html:11
-#: templates/peachjam/_document_detail_toolbar.html:24
-#: templates/peachjam/article_detail.html:28
+#: templates/peachjam/_annotation_detail.html:16
+#: templates/peachjam/_document_detail_toolbar.html:17
+#: templates/peachjam/_document_detail_toolbar.html:30
+#: templates/peachjam/article/_edit_button.html:3
+#: templates/peachjam/saved_document/_folder_list_item.html:11
 msgid "Edit"
 msgstr ""
 
-#: templates/peachjam/_annotation_detail.html:19
+#: templates/peachjam/_annotation_detail.html:17
 msgid "Are you sure you want to delete this annotation?"
 msgstr ""
 
-#: templates/peachjam/_annotation_detail.html:23
-#: templates/peachjam/_folders_list.html:38
+#: templates/peachjam/_annotation_detail.html:21
+#: templates/peachjam/saved_document/_folder_list_item.html:20
+#: templates/peachjam/saved_document/_folders_list.html:68
 msgid "Delete"
 msgstr ""
-
-#: templates/peachjam/_annotation_list.html:5
-#: templates/peachjam/_folder_list_item.html:14
-#, python-format
-msgid "%(comment_count)s comment"
-msgid_plural "%(comment_count)s comments"
-msgstr[0] ""
-msgstr[1] ""
 
 #: templates/peachjam/_case_histories.html:6
 msgid "Case"
 msgstr ""
 
 #: templates/peachjam/_case_histories.html:7
-#: templates/peachjam/causelist_detail.html:31
-#: templates/peachjam/judgment_detail.html:51
+#: templates/peachjam/causelist_detail.html:7
+#: templates/peachjam/judgment_detail.html:24
 msgid "Court"
 msgstr ""
 
 #: templates/peachjam/_case_histories.html:9
-#: templates/peachjam/judgment_detail.html:68
+#: templates/peachjam/judgment_detail.html:57
 msgid "Outcome"
 msgstr ""
 
@@ -1776,30 +2166,19 @@ msgstr ""
 msgid "Subsidiary legislation"
 msgstr ""
 
-#: templates/peachjam/_citations.html:7
+#: templates/peachjam/_citations.html:6
 msgid "Cited documents"
 msgstr ""
 
-#: templates/peachjam/_citations.html:13
+#: templates/peachjam/_citations.html:12
 msgid "Documents citing this one"
-msgstr ""
-
-#: templates/peachjam/_citations_list_items.html:10
-#, python-format
-msgid "%(n)s citation"
-msgid_plural "%(n)s citations"
-msgstr[0] ""
-msgstr[1] ""
-
-#: templates/peachjam/_citations_list_more_button.html:8
-msgid "More..."
 msgstr ""
 
 #: templates/peachjam/_contact_form.html:4
 msgid "Send us a message us with any questions and comments."
 msgstr ""
 
-#: templates/peachjam/_contact_form.html:8
+#: templates/peachjam/_contact_form.html:8 templates/user_account/home.html:14
 msgid "Name"
 msgstr ""
 
@@ -1846,28 +2225,58 @@ msgstr ""
 msgid "All years"
 msgstr ""
 
-#: templates/peachjam/_document_content.html:52
+#: templates/peachjam/_document_content.html:53
 msgid "Loading PDF..."
 msgstr ""
 
-#: templates/peachjam/_document_content.html:62
+#: templates/peachjam/_document_content.html:63
 #, python-format
 msgid "This document is %(filesize)s. Do you want to load it?"
 msgstr ""
 
-#: templates/peachjam/_document_content.html:66
+#: templates/peachjam/_document_content.html:67
 msgid "Load document"
 msgstr ""
 
-#: templates/peachjam/_document_content_sidebar.html:19
+#: templates/peachjam/_document_content.html:70
+msgid "Error loading PDF"
+msgstr ""
+
+#: templates/peachjam/_document_content.html:71
+msgid "Try reloading the page or downloading the PDF."
+msgstr ""
+
+#: templates/peachjam/_document_content.html:73
+msgid "Reload page"
+msgstr ""
+
+#: templates/peachjam/_document_content.html:74
+msgid "Download PDF"
+msgstr ""
+
+#: templates/peachjam/_document_content.html:77
+msgid "Error"
+msgstr ""
+
+#: templates/peachjam/_document_content_sidebar.html:7
+#: templates/peachjam/_header.html:6
+msgid "Skip to document content"
+msgstr ""
+
+#: templates/peachjam/_document_content_sidebar.html:22
+#: templates/peachjam/judgment_detail.html:97
+msgid "Summary"
+msgstr ""
+
+#: templates/peachjam/_document_content_sidebar.html:34
 msgid "Table of contents"
 msgstr ""
 
-#: templates/peachjam/_document_content_sidebar.html:31
+#: templates/peachjam/_document_content_sidebar.html:46
 msgid "Pages"
 msgstr ""
 
-#: templates/peachjam/_document_count.html:14 views/generic_views.py:118
+#: templates/peachjam/_document_count.html:14 views/generic_views.py:113
 msgid "documents"
 msgstr ""
 
@@ -1875,28 +2284,31 @@ msgstr ""
 msgid "Document toolbar"
 msgstr ""
 
-#: templates/peachjam/_document_detail_toolbar.html:18
+#: templates/peachjam/_document_detail_toolbar.html:24
 msgid "Edit in admin area"
 msgstr ""
 
-#: templates/peachjam/_document_detail_toolbar.html:48
-#: templates/peachjam/_document_detail_toolbar.html:62
-#: templates/peachjam/article_detail.html:69
-#: templates/peachjam/layouts/document_detail.html:341
-#: templates/peachjam/layouts/document_detail.html:353
+#: templates/peachjam/_document_detail_toolbar.html:41
+#: templates/peachjam/_document_detail_toolbar.html:56
+#: templates/peachjam/_document_detail_toolbar.html:94
+#: templates/peachjam/_document_detail_toolbar.html:102
+#: templates/peachjam/article/detail.html:68
+#: templates/peachjam/layouts/document_detail.html:397
+#: templates/peachjam/layouts/document_detail.html:411
 msgid "Download"
 msgstr ""
 
-#: templates/peachjam/_document_detail_toolbar.html:56
+#: templates/peachjam/_document_detail_toolbar.html:49
 msgid "Toggle dropdown"
 msgstr ""
 
-#: templates/peachjam/_document_detail_toolbar.html:75
-msgid "Report"
+#: templates/peachjam/_document_detail_toolbar.html:68
+#: templates/peachjam/_document_detail_toolbar.html:112
+msgid "Report a problem"
 msgstr ""
 
-#: templates/peachjam/_document_detail_toolbar.html:76
-msgid "Report a problem"
+#: templates/peachjam/_document_detail_toolbar.html:87
+msgid "Share"
 msgstr ""
 
 #: templates/peachjam/_document_floating_header.html:9
@@ -1907,101 +2319,84 @@ msgstr ""
 msgid "Copy citation"
 msgstr ""
 
-#: templates/peachjam/_document_table.html:54
+#: templates/peachjam/_document_table.html:55
+#: templates/peachjam/layouts/document_detail.html:236
+msgid "Jurisdiction"
+msgstr ""
+
+#: templates/peachjam/_document_table.html:90
+#: templates/peachjam/provision_enrichment/_provision_citations_table.html:32
+#: templates/peachjam/provision_enrichment/_uncommenced_table.html:39
+#: templates/peachjam/provision_enrichment/_unconstitutional_table.html:7
 msgid "No documents found."
 msgstr ""
 
 #: templates/peachjam/_document_table_form.html:14
-#: templates/peachjam/_document_table_form.html:36
+#: templates/peachjam/_document_table_form.html:37
 msgid "Filters"
 msgstr ""
 
 #: templates/peachjam/_document_table_form.html:25
-#: templates/peachjam/saved_document_login.html:28
-#: templates/peachjam/saved_document_update.html:73
+#: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:15
+#: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:22
+#: templates/peachjam/saved_document/_anon_modal.html:8
+#: templates/peachjam/saved_document/_anon_modal.html:17
+#: templates/peachjam/saved_document/_limit_reached.html:8
+#: templates/peachjam/saved_document/_limit_reached.html:28
+#: templates/peachjam/saved_document/_update_modal.html:10
+#: templates/peachjam/saved_document/_update_modal.html:70
+#: templates/peachjam/user_following/_button.html:17
+#: templates/peachjam/user_following/_button.html:24
 msgid "Close"
 msgstr ""
 
-#: templates/peachjam/_document_table_form.html:42
+#: templates/peachjam/_document_table_form.html:44
 msgid "Clear all"
 msgstr ""
 
-#: templates/peachjam/_document_table_form.html:56
+#: templates/peachjam/_document_table_form.html:59
 msgid "Clear"
 msgstr ""
 
-#: templates/peachjam/_document_table_form.html:116
-#: templates/peachjam/_document_table_form.html:117
+#: templates/peachjam/_document_table_form.html:122
+#: templates/peachjam/_document_table_form.html:123
 msgid "Filter documents"
 msgstr ""
 
-#: templates/peachjam/_document_table_form.html:124
+#: templates/peachjam/_document_table_form.html:130
 msgid "Sort by"
 msgstr ""
 
-#: templates/peachjam/_document_table_form.html:134
+#: templates/peachjam/_document_table_form.html:140
 msgid "Filter"
 msgstr ""
 
-#: templates/peachjam/_document_table_row.html:27
-#: templates/peachjam/layouts/document_detail.html:292
+#: templates/peachjam/_document_table_row.html:29
+#: templates/peachjam/layouts/document_detail.html:356
 msgid "Multiple languages available"
 msgstr ""
 
-#: templates/peachjam/_entity_profile.html:24
+#: templates/peachjam/_entity_profile.html:30
 msgid "Physical address"
 msgstr ""
 
-#: templates/peachjam/_entity_profile.html:32
+#: templates/peachjam/_entity_profile.html:38
 msgid "Visit website"
 msgstr ""
 
-#: templates/peachjam/_folder_list_item.html:29
-msgid "Are you sure you want to remove this document?"
-msgstr ""
-
-#: templates/peachjam/_folders_list.html:4
-#: templates/peachjam/_user_menu.html:21 templates/user_account/_tabs.html:35
-msgid "Saved documents"
-msgstr ""
-
-#: templates/peachjam/_folders_list.html:9
-msgid "New Folder"
-msgstr ""
-
-#: templates/peachjam/_folders_list.html:23
-msgid "No saved documents."
-msgstr ""
-
-#: templates/peachjam/_folders_list.html:37
-msgid "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted."
-msgstr ""
-
-#: templates/peachjam/_folders_list.html:45
-msgid "Rename"
-msgstr ""
-
-#: templates/peachjam/_folders_list.html:52
-msgid "Ungrouped documents"
-msgstr ""
-
-#: templates/peachjam/_header.html:5
-msgid "Go to page content"
-msgstr ""
-
-#: templates/peachjam/_header.html:6
-msgid "Go to main menu"
-msgstr ""
-
 #: templates/peachjam/_header.html:7
-msgid "Go to search"
+msgid "Skip to main menu"
 msgstr ""
 
-#: templates/peachjam/_header.html:22
+#: templates/peachjam/_header.html:8
+msgid "Skip to search"
+msgstr ""
+
+#: templates/peachjam/_header.html:28
 msgid "Toggle navigation"
 msgstr ""
 
-#: templates/peachjam/_header.html:34 templates/peachjam/_header.html:35
+#: templates/peachjam/_header.html:41 templates/peachjam/_header.html:42
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr ""
@@ -2026,7 +2421,7 @@ msgstr ""
 msgid "Next"
 msgstr ""
 
-#: templates/peachjam/_quick_search.html:16
+#: templates/peachjam/_quick_search.html:17
 msgid "Advanced search"
 msgstr ""
 
@@ -2061,18 +2456,34 @@ msgstr ""
 msgid "Country"
 msgstr ""
 
-#: templates/peachjam/_recent_document_list.html:19
+#: templates/peachjam/_recent_document_list.html:8
 msgid "No recent documents."
 msgstr ""
 
 #: templates/peachjam/_related_documents.html:4
-#: templates/peachjam/layouts/document_detail.html:105
-#: templates/peachjam/layouts/document_detail.html:388
+#: templates/peachjam/layouts/document_detail.html:164
+#: templates/peachjam/layouts/document_detail.html:447
 msgid "Related documents"
 msgstr ""
 
 #: templates/peachjam/_social_media.html:5
 msgid "Contact us"
+msgstr ""
+
+#: templates/peachjam/_social_media.html:14
+msgid "Visit our Facebook Page"
+msgstr ""
+
+#: templates/peachjam/_social_media.html:24
+msgid "Visit our Twitter/X profile"
+msgstr ""
+
+#: templates/peachjam/_social_media.html:34
+msgid "Visit our Linked In profile"
+msgstr ""
+
+#: templates/peachjam/_social_media.html:44
+msgid "Visit our YouTube channel"
 msgstr ""
 
 #: templates/peachjam/_survey_banner_lg.html:7
@@ -2104,7 +2515,7 @@ msgid ""
 msgstr ""
 
 #: templates/peachjam/_taxonomies.html:4
-#: templates/peachjam/taxonomy_detail.html:15
+#: templates/peachjam/taxonomy_detail.html:26
 #: templates/peachjam/taxonomy_first_level_detail.html:13
 #: templates/peachjam/taxonomy_list.html:4
 #: templates/peachjam/taxonomy_list.html:9
@@ -2371,70 +2782,69 @@ msgstr ""
 msgid "Read this version"
 msgstr ""
 
-#: templates/peachjam/_user_menu.html:12 templates/user_account/layout.html:5
+#: templates/peachjam/_user_menu.html:12 templates/peachjam/_user_menu.html:43
+#: templates/user_account/home.html:11 templates/user_account/layout.html:12
 msgid "My account"
 msgstr ""
 
-#: templates/peachjam/_user_menu.html:16
-msgid "Admin"
+#: templates/peachjam/_user_menu.html:28
+#: templates/peachjam/my/_saved_documents.html:4
+#: templates/peachjam/my/_saved_documents.html:19
+#: templates/peachjam/my/layout.html:41
+#: templates/peachjam/saved_document/_folders_list.html:4
+msgid "Saved documents"
 msgstr ""
 
-#: templates/peachjam/_user_menu.html:26 templates/user_account/_tabs.html:44
+#: templates/peachjam/_user_menu.html:32 templates/peachjam/my/layout.html:50
+#: templates/peachjam/user_following/_delete.html:6
+#: templates/peachjam/user_following/list.html:4
+#: templates/peachjam/user_following/list.html:7
+msgid "Following"
+msgstr ""
+
+#: templates/peachjam/_user_menu.html:36
+#: templates/peachjam/my/_saved_searches.html:4
+#: templates/peachjam/my/_saved_searches.html:18
+#: templates/peachjam/my/layout.html:59
 msgid "Search alerts"
 msgstr ""
 
-#: templates/peachjam/_user_menu.html:30
-msgid "Logout"
+#: templates/peachjam/_user_menu.html:47
+msgid "Admin"
 msgstr ""
 
 #: templates/peachjam/about.html:4 templates/peachjam/about.html:10
 msgid "About"
 msgstr ""
 
-#: templates/peachjam/article_detail.html:56
+#: templates/peachjam/article/detail.html:55
 msgid "Take a look at this article from"
 msgstr ""
 
-#: templates/peachjam/article_list.html:5
+#: templates/peachjam/article/list.html:5
 #: templates/peachjam/layouts/articles.html:4
 #: templates/peachjam/layouts/articles.html:11
 msgid "Articles"
 msgstr ""
 
-#: templates/peachjam/article_list.html:7
+#: templates/peachjam/article/list.html:7
 msgid "Latest Articles"
 msgstr ""
 
-#: templates/peachjam/author_detail.html:6
+#: templates/peachjam/author_detail.html:7
 #, python-format
 msgid " Documents by %(author)s "
 msgstr ""
 
-#: templates/peachjam/bill_detail.html:10 templates/peachjam/bill_list.html:4
-#: templates/peachjam/bill_list.html:7
-#: templates/peachjam/place_bill_list.html:12
-msgid "Bills"
-msgstr ""
-
-#: templates/peachjam/book_list.html:4 templates/peachjam/book_list.html:7
-msgid "Books"
-msgstr ""
-
-#: templates/peachjam/causelist_court_detail.html:12
-#: templates/peachjam/causelist_detail.html:11
-#: templates/peachjam/causelist_list.html:4
-msgid "Cause Lists"
-msgstr ""
-
-#: templates/peachjam/causelist_detail.html:47
+#: templates/peachjam/causelist_detail.html:23
 msgid "Division"
 msgstr ""
 
-#: templates/peachjam/causelist_detail.html:57
+#: templates/peachjam/causelist_detail.html:33
 msgid "Start date"
 msgstr ""
 
-#: templates/peachjam/causelist_detail.html:67
+#: templates/peachjam/causelist_detail.html:43
 msgid "End date"
 msgstr ""
 
@@ -2442,39 +2852,59 @@ msgstr ""
 msgid "Recent Cause Lists"
 msgstr ""
 
-#: templates/peachjam/court_detail.html:12
-#: templates/peachjam/judgment_detail.html:10
-#: templates/peachjam/judgment_list.html:4
-#: templates/peachjam/judgment_list.html:7 views/courts.py:32
-msgid "Judgments"
+#: templates/peachjam/document/_case_summary.html:6
+msgid "Summary generated by AI."
 msgstr ""
 
-#: templates/peachjam/document_access_group_list.html:4
-#: templates/peachjam/document_access_group_list.html:11
-#: templates/user_account/_tabs.html:51
-msgid "Document access groups"
+#: templates/peachjam/document/_case_summary.html:9
+msgid "Case summary"
 msgstr ""
 
-#: templates/peachjam/document_access_group_list.html:13
-msgid "Some documents are only visible to certain users. These groups control which restricted documents you have access to."
+#: templates/peachjam/document/_case_summary.html:12
+msgid "Issues"
 msgstr ""
 
-#: templates/peachjam/document_access_group_list.html:28
-msgid "You do not belong to any groups."
+#: templates/peachjam/document/_case_summary.html:18
+msgid "Held"
 msgstr ""
 
-#: templates/peachjam/folders_list.html:4
-msgid "Saved Documents"
+#: templates/peachjam/document/_case_summary.html:24
+msgid "Order"
 msgstr ""
 
-#: templates/peachjam/gazette_detail.html:10
-#: templates/peachjam/gazette_list.html:4
-#: templates/peachjam/gazette_list.html:14
-#: templates/peachjam/gazette_list.html:34
-#: templates/peachjam/gazette_year.html:4
-#: templates/peachjam/gazette_year.html:14
-#: templates/peachjam/gazette_year.html:34
-msgid "Gazettes"
+#: templates/peachjam/document/_citations_list_more_button.html:9
+msgid "More..."
+msgstr ""
+
+#: templates/peachjam/document/_judgment_summary.html:4
+msgid "Flynote"
+msgstr ""
+
+#: templates/peachjam/document/_judgment_summary.html:10
+msgid "Read full summary"
+msgstr ""
+
+#: templates/peachjam/document/_uncommenced_provisions.html:4
+#: templates/peachjam/layouts/document_detail.html:146
+#: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:4
+#: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:7
+msgid "Uncommenced provisions"
+msgstr ""
+
+#: templates/peachjam/document/_uncommenced_provisions.html:8
+msgid "All uncommenced provisions"
+msgstr ""
+
+#: templates/peachjam/document/_unconstitutional_provisions.html:4
+#: templates/peachjam/layouts/document_detail.html:129
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_list.html:4
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_list.html:7
+msgid "Unconstitutional provisions"
+msgstr ""
+
+#: templates/peachjam/document/_unconstitutional_provisions.html:8
+#: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:21
+msgid "All unconstitutional provisions"
 msgstr ""
 
 #: templates/peachjam/gazette_list.html:66
@@ -2489,40 +2919,31 @@ msgstr[1] ""
 msgid "Generic Documents"
 msgstr ""
 
-#: templates/peachjam/journal_list.html:4
-#: templates/peachjam/journal_list.html:7
-msgid "Journals"
-msgstr ""
-
-#: templates/peachjam/judgment_detail.html:34
+#: templates/peachjam/judgment_detail.html:7
 msgid "Media Neutral Citation"
 msgstr ""
 
-#: templates/peachjam/judgment_detail.html:43
+#: templates/peachjam/judgment_detail.html:16
 msgid "Hearing date"
 msgstr ""
 
-#: templates/peachjam/judgment_detail.html:81
+#: templates/peachjam/judgment_detail.html:40
+msgid "Court division"
+msgstr ""
+
+#: templates/peachjam/judgment_detail.html:48
+msgid "Case action"
+msgstr ""
+
+#: templates/peachjam/judgment_detail.html:70
 msgid "Case number"
 msgstr ""
 
-#: templates/peachjam/judgment_detail.html:94 views/courts.py:127
+#: templates/peachjam/judgment_detail.html:83 views/courts.py:154
 msgid "Attorneys"
 msgstr ""
 
-#: templates/peachjam/judgment_detail.html:108
-msgid "Flynote"
-msgstr ""
-
-#: templates/peachjam/judgment_detail.html:116
-msgid "Case summary"
-msgstr ""
-
-#: templates/peachjam/judgment_detail.html:124
-msgid "Order"
-msgstr ""
-
-#: templates/peachjam/judgment_list.html:11 views/courts.py:159
+#: templates/peachjam/judgment_list.html:11 views/courts.py:206
 msgid "All courts"
 msgstr ""
 
@@ -2546,61 +2967,59 @@ msgstr ""
 msgid "Categories"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:55
-#: templates/peachjam/layouts/document_detail.html:58
+#: templates/peachjam/layouts/document_detail.html:72
+#: templates/peachjam/layouts/document_detail.html:76
 msgid "Take a look at this document from"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:78
+#: templates/peachjam/layouts/document_detail.html:100
 msgid "Document detail"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:91
+#: templates/peachjam/layouts/document_detail.html:114
 msgid "History"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:120
+#: templates/peachjam/layouts/document_detail.html:181
+#: templates/peachjam/provision_enrichment/provision_citations.html:4
 msgid "Citations"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:148
+#: templates/peachjam/layouts/document_detail.html:211
 msgid "Ratifications"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:186 views/courts.py:43
+#: templates/peachjam/layouts/document_detail.html:250 views/courts.py:52
 msgid "Citation"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:200
+#: templates/peachjam/layouts/document_detail.html:264
 msgid "Law report citations"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:202
+#: templates/peachjam/layouts/document_detail.html:266
 msgid "Alternative names"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:252 views/courts.py:44
+#: templates/peachjam/layouts/document_detail.html:316 views/courts.py:53
 msgid "Judgment date"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:288
+#: templates/peachjam/layouts/document_detail.html:352
+#: templates/user_account/home.html:20
 msgid "Language"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:328
-msgid "Type"
-msgstr ""
-
-#: templates/peachjam/layouts/document_detail.html:337
+#: templates/peachjam/layouts/document_detail.html:393
 msgid "Publication"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:393
+#: templates/peachjam/layouts/document_detail.html:452
 #, python-format
 msgid "%(n_relationships)s related documents"
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:432
+#: templates/peachjam/layouts/document_detail.html:491
 msgid "To the top"
 msgstr ""
 
@@ -2613,11 +3032,6 @@ msgstr ""
 msgid "Primary work"
 msgstr ""
 
-#: templates/peachjam/legislation_list.html:4
-#: templates/peachjam/legislation_list.html:7
-msgid "Legislation"
-msgstr ""
-
 #: templates/peachjam/metabase_stats.html:4
 msgid "Site Statistics"
 msgstr ""
@@ -2626,9 +3040,96 @@ msgstr ""
 msgid "Statistics"
 msgstr ""
 
+#: templates/peachjam/my/_frontpage_anon.html:6
+#: templates/peachjam/my/_frontpage_loader.html:8
+msgid "Create a free account to simplify your legal research and stay up to date."
+msgstr ""
+
+#: templates/peachjam/my/_recent_additions.html:2
+msgid "What's new in topics you follow"
+msgstr ""
+
+#: templates/peachjam/my/_recent_additions.html:4
+msgid "Topics you follow"
+msgstr ""
+
+#: templates/peachjam/my/_recent_additions.html:11
+msgid "Follow courts and topics to stay up-to-date."
+msgstr ""
+
+#: templates/peachjam/my/_saved_documents.html:16
+msgid "You haven't saved any documents yet."
+msgstr ""
+
+#: templates/peachjam/my/_saved_searches.html:15
+msgid "You don't have any search alerts."
+msgstr ""
+
 #: templates/peachjam/place_bill_list.html:19
 #, python-format
 msgid "%(place)s Bills"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:21
+msgid ""
+"\n"
+"      Note: this provision has some subprovisions that have already come into force.\n"
+"    "
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/_uncommenced_provisions_blurb.html:2
+msgid "Legislation provisions that have not yet come into force."
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:21
+#: views/legislation.py:498 views/legislation.py:502
+msgid "Resolved"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:23
+#: views/legislation.py:503
+msgid "Unresolved"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/_unconstitutional_provisions_blurb.html:2
+msgid "Legislation provisions that have been declared unconstitutional by a court. They are resolved when new legislation is passed."
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/provision_citations.html:20
+msgid "Documents that cite this provision"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/uncommenced_provision_detail.html:8
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:83
+msgid "No content found"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:6
+msgid "Judgment"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:21
+msgid "Date deemed unconstitutional"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:29
+msgid "End of suspension period"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:37
+msgid "Date resolved"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:45
+msgid "Resolving amendment"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:56
+msgid "Read-in text"
+msgstr ""
+
+#: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:74
+msgid "as at"
 msgstr ""
 
 #: templates/peachjam/restricted_document_detail.html:17
@@ -2643,55 +3144,124 @@ msgstr ""
 msgid "You must be logged in to view this document."
 msgstr ""
 
-#: templates/peachjam/saved_document_create.html:11
-#: templates/peachjam/saved_document_create.html:16
-#: templates/peachjam/saved_document_login.html:10
+#: templates/peachjam/saved_document/_anon_modal.html:4
 msgid "Save document"
 msgstr ""
 
-#: templates/peachjam/saved_document_create.html:22
-msgid "Saving..."
-msgstr ""
-
-#: templates/peachjam/saved_document_login.html:15
-#: templates/peachjam/saved_document_login.html:30
-msgid "Login"
-msgstr ""
-
-#: templates/peachjam/saved_document_login.html:23
+#: templates/peachjam/saved_document/_anon_modal.html:12
 msgid "You are not logged in"
 msgstr ""
 
-#: templates/peachjam/saved_document_login.html:25
+#: templates/peachjam/saved_document/_anon_modal.html:14
 msgid "To save a document you need to be logged in"
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:13
+#: templates/peachjam/saved_document/_folder_list_item.html:23
+msgid "Are you sure you want to remove this document?"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folder_list_item.html:35
+#, python-format
+msgid "%(comment_count)s comment"
+msgid_plural "%(comment_count)s comments"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/peachjam/saved_document/_folders_list.html:8
+msgid "Folder name"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:10
+msgid "New Folder"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:13
+msgid "Save documents to simplify your research and stay up-to-date"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:20
+#: templates/peachjam/saved_document/_update_modal.html:44
+msgid "You have reached your limit for document folders."
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:22
+#: templates/peachjam/saved_document/_update_modal.html:46
+#, python-format
+msgid "<div>To add more folders, please upgrade to %(product)s.</div>"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:51
+msgid "Download to Excel"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:59
+msgid "Rename folder"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:60
+msgid "Rename"
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:67
+msgid "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted."
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:81
+msgid "No saved documents."
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:87
+msgid "You have no saved documents."
+msgstr ""
+
+#: templates/peachjam/saved_document/_limit_reached.html:17
+msgid "You have reached your limit for saved documents."
+msgstr ""
+
+#: templates/peachjam/saved_document/_limit_reached.html:19
+#, python-format
+msgid "<div>To save more, please upgrade to %(product)s.</div>"
+msgstr ""
+
+#: templates/peachjam/saved_document/_update.html:11
+#: templates/peachjam/saved_document/_update.html:27
 msgid "Saved"
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:19
-msgid "Document saved"
+#: templates/peachjam/saved_document/_update.html:69
+msgid "edit"
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:47
+#: templates/peachjam/saved_document/_update.html:69
+msgid "Add a note"
+msgstr ""
+
+#: templates/peachjam/saved_document/_update_modal.html:18
+msgid "A note to yourself about this document"
+msgstr ""
+
+#: templates/peachjam/saved_document/_update_modal.html:28
 msgid "New folder..."
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:50
+#: templates/peachjam/saved_document/_update_modal.html:36
 msgid "New folder name"
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:57
+#: templates/peachjam/saved_document/_update_modal.html:55
 msgid "All saved documents"
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:67
+#: templates/peachjam/saved_document/_update_modal.html:64
 msgid "Are you sure you want to unsave? This will also remove all comments."
 msgstr ""
 
-#: templates/peachjam/saved_document_update.html:68
+#: templates/peachjam/saved_document/_update_modal.html:65
 msgid "Unsave"
+msgstr ""
+
+#: templates/peachjam/saved_document/folders_list.html:4
+msgid "Saved Documents"
 msgstr ""
 
 #: templates/peachjam/terms_of_use.html:4
@@ -2705,95 +3275,182 @@ msgstr ""
 msgid "Navigation"
 msgstr ""
 
+#: templates/peachjam/user_following/_button.html:7
+#: templates/peachjam/user_following/_button.html:13
+#: templates/peachjam/user_following/_create.html:7
+msgid "Follow"
+msgstr ""
+
+#: templates/peachjam/user_following/_button.html:20
+msgid "You are not logged in."
+msgstr ""
+
+#: templates/peachjam/user_following/_button.html:21
+msgid "To follow, you need to be logged in."
+msgstr ""
+
+#: templates/peachjam/user_following/_timeline.html:14
+#, python-format
+msgid "%(n_more)s more for %(obj)s"
+msgstr ""
+
+#: templates/peachjam/user_following/_timeline.html:27
+msgid "Explore older updates"
+msgstr ""
+
+#: templates/peachjam/user_following/_timeline.html:35
+msgid "Load more"
+msgstr ""
+
+#: templates/peachjam/user_following/list.html:8
+msgid "We'll email you when new documents are added for topics that you follow."
+msgstr ""
+
+#: templates/peachjam/user_following/list.html:20
+#, python-format
+msgid "Alerted %(ago)s ago"
+msgstr ""
+
+#: templates/peachjam/user_following/list.html:29
+msgid "Unfollow"
+msgstr ""
+
+#: templates/peachjam/user_following/list.html:34
+msgid "You are not following anything. Click the Follow button on pages across the site to start following."
+msgstr ""
+
 #: templates/socialaccount/connections.html:4
-#: templates/socialaccount/connections.html:11
-#: templates/user_account/_tabs.html:27
+#: templates/socialaccount/connections.html:9
 msgid "Social accounts"
 msgstr ""
 
-#: templates/socialaccount/connections.html:14
+#: templates/socialaccount/connections.html:11
 msgid "You can sign in to your account using any of these third party accounts:"
 msgstr ""
 
-#: templates/socialaccount/connections.html:34
+#: templates/socialaccount/connections.html:31
 msgid "Really remove this social account?"
 msgstr ""
 
-#: templates/socialaccount/connections.html:35
+#: templates/socialaccount/connections.html:32
 msgid "Disconnect"
 msgstr ""
 
-#: templates/socialaccount/connections.html:44
+#: templates/socialaccount/connections.html:41
 msgid "You currently have no social network accounts connected to this account."
 msgstr ""
 
-#: templates/socialaccount/connections.html:48
+#: templates/socialaccount/connections.html:45
 msgid "Connect a social account"
 msgstr ""
 
-#: templates/socialaccount/connections.html:50
+#: templates/socialaccount/connections.html:47
 #, python-format
 msgid "Connecting to a social account allows you to use it to log in to %(APP_NAME)s."
 msgstr ""
 
-#: templates/socialaccount/connections.html:62
+#: templates/socialaccount/connections.html:59
 msgid "Connect to"
 msgstr ""
 
-#: templates/user_account/_tabs.html:7 templates/user_account/edit.html:15
-msgid "Profile"
+#: templates/user_account/edit.html:4 templates/user_account/home.html:4
+msgid "My Account"
 msgstr ""
 
-#: templates/user_account/edit.html:4
-msgid "Edit Profile"
+#: templates/user_account/edit.html:9
+msgid "Change details"
+msgstr ""
+
+#: templates/user_account/edit.html:55
+msgid "Update"
+msgstr ""
+
+#: templates/user_account/home.html:26
+msgid "Update details"
+msgstr ""
+
+#: templates/user_account/home.html:47
+msgid "Update email address"
+msgstr ""
+
+#: templates/user_account/home.html:52
+msgid "Log in with social accounts"
+msgstr ""
+
+#: templates/user_account/home.html:53
+msgid "Manage the accounts you can use to log in to this account."
+msgstr ""
+
+#: templates/user_account/home.html:54
+msgid "Manage social accounts"
+msgstr ""
+
+#: templates/user_account/home.html:58
+msgid "Document access groups"
+msgstr ""
+
+#: templates/user_account/home.html:60
+msgid "Some documents are only visible to certain users. These groups control which restricted documents you have access to."
+msgstr ""
+
+#: templates/user_account/home.html:71
+msgid "You do not belong to any groups."
 msgstr ""
 
 #: views/about.py:28
 msgid "Your message has been sent. Thank you!"
 msgstr ""
 
-#: views/anon.py:55
+#: views/accounts.py:45
+msgid "Your details have been updated."
+msgstr ""
+
+#: views/anon.py:76
 msgid "Only judgments with HTML content can be anonymised."
 msgstr ""
 
-#: views/causelist.py:60 views/causelist.py:95
+#: views/causelist.py:59 views/causelist.py:94
 msgid "cause list"
 msgstr ""
 
-#: views/causelist.py:61 views/causelist.py:96
+#: views/causelist.py:60 views/causelist.py:95
 msgid "cause lists"
 msgstr ""
 
-#: views/causelist.py:80
+#: views/causelist.py:79
 msgid "CauseList"
 msgstr ""
 
-#: views/causelist.py:116 views/generic_views.py:276
+#: views/causelist.py:115 views/generic_views.py:274
 msgid "Document nature"
 msgstr ""
 
-#: views/causelist.py:135
+#: views/causelist.py:134 views/courts.py:172
 msgid "Court divisions"
 msgstr ""
 
-#: views/causelist.py:171 views/generic_views.py:246
+#: views/causelist.py:170 views/generic_views.py:244
 msgid "Topics"
 msgstr ""
 
-#: views/causelist.py:181 views/generic_views.py:257
+#: views/causelist.py:180 views/generic_views.py:255
 msgid "Alphabet"
 msgstr ""
 
-#: views/causelist.py:296 views/courts.py:287
+#: views/causelist.py:295 views/courts.py:334
 msgid "Courts"
 msgstr ""
 
-#: views/courts.py:87
+#: views/courts.py:96
 msgid "Labels"
 msgstr ""
 
-#: views/courts.py:105
+#: views/courts.py:114
 msgid "Outcomes"
+msgstr ""
+
+#: views/courts.py:134
+msgid "Case actions"
 msgstr ""
 
 #: views/gazette.py:169
@@ -2812,58 +3469,77 @@ msgstr ""
 msgid "Supplement"
 msgstr ""
 
-#: views/generic_views.py:323 views/legislation.py:50
+#: views/generic_views.py:321 views/legislation.py:64
 msgid "Years"
 msgstr ""
 
-#: views/judgment.py:55
+#: views/judgment.py:66
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr ""
 
-#: views/judgment.py:100
+#: views/judgment.py:111
 msgid "This judgment was reviewed by another court. See the Case history tab for details."
 msgstr ""
 
-#: views/legislation.py:108
+#: views/legislation.py:131
 #, python-format
-msgid "This %(friendly_type)s was repealed on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr ""
 
-#: views/legislation.py:124
+#: views/legislation.py:143
+#, python-format
+msgid "This %(friendly_type)s %(verb)s on %(date)s."
+msgstr ""
+
+#: views/legislation.py:156
 #, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr ""
 
-#: views/legislation.py:139
+#: views/legislation.py:171
 #, python-format
-msgid "This %(friendly_type)s has not yet come into force in full. See the Document detail tab for more information."
+msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
 msgstr ""
 
-#: views/legislation.py:150
+#: views/legislation.py:182
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force."
 msgstr ""
 
-#: views/legislation.py:186
+#: views/legislation.py:219
 #, python-format
-msgid "This is the version of this %(friendly_type)s as it was when it was repealed."
+msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
 msgstr ""
 
-#: views/legislation.py:200
+#: views/legislation.py:232
+#, python-format
+msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
+msgstr ""
+
+#: views/legislation.py:249
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr ""
 
-#: views/legislation.py:215
+#: views/legislation.py:265
 #, python-format
-msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was repealed</a>."
+msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
 msgstr ""
 
-#: views/legislation.py:220
+#: views/legislation.py:270
+#, python-format
+msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
+msgstr ""
+
+#: views/legislation.py:275
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr ""
 
-#: views/legislation.py:275
+#: views/legislation.py:299
+msgid "This version is at a future date."
+msgstr ""
+
+#: views/legislation.py:342
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr ""
