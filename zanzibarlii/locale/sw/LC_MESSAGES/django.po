@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-02-25 16:54+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
+"PO-Revision-Date: 2025-09-30 06:58\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -85,3 +85,4 @@ msgstr "Wasiliana nasi"
 #: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Wasiliana nasi kwa <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> kwa maelezo zaidi."
+

@@ -1,237 +1,238 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:44+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2025-09-30 06:58\n"
+"Last-Translator: \n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
+"X-Crowdin-Language: fr\n"
+"X-Crowdin-File: /main/peachjam_subs/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 267\n"
+
 #: admin.py:89
 msgid "Subscription activated."
-msgstr ""
+msgstr "Abonnement activé."
 
 #: admin.py:91
 msgid "Subscription cannot be activated."
-msgstr ""
+msgstr "L'abonnement ne peut pas être activé."
 
 #: admin.py:101
 msgid "Subscription cancelled."
-msgstr ""
+msgstr "Abonnement annulé."
 
 #: admin.py:103
 msgid "Subscription cannot be cancelled."
-msgstr ""
+msgstr "L'abonnement ne peut pas être annulé."
 
 #: admin.py:168
 msgid "View"
-msgstr ""
+msgstr "Voir"
 
 #: models.py:171
 msgid "Monthly"
-msgstr ""
+msgstr "Mensuel"
 
 #: models.py:172
 msgid "Annually"
-msgstr ""
+msgstr "Annuellement"
 
 #: models.py:182
 msgid "month"
-msgstr ""
+msgstr "mois"
 
 #: models.py:183
 msgid "year"
-msgstr ""
+msgstr "année"
 
 #: models.py:203
 msgid "FREE"
-msgstr ""
+msgstr "GRATUIT"
 
 #: models.py:276
 msgid "Pending"
-msgstr ""
+msgstr "En attente"
 
 #: models.py:277
 msgid "Active"
-msgstr ""
+msgstr "Actif"
 
 #: models.py:278
 msgid "Closed"
-msgstr ""
+msgstr "Fermé"
 
 #: models.py:546
 msgid "Default product offering"
-msgstr ""
+msgstr "Offre de produits par défaut"
 
 #: models.py:551
 msgid "These products are highlighted in the product listing."
-msgstr ""
+msgstr "Ces produits sont mis en évidence dans la liste des produits."
 
 #: models.py:559
 msgid "Trial product offering"
-msgstr ""
+msgstr "Offre de produits d'essai"
 
 #: models.py:560
 msgid "If set, this product offering is used for trials."
-msgstr ""
+msgstr "Si cette option est définie, cette offre de produits est utilisée pour les essais."
 
 #: models.py:564
 msgid "Trial duration (days)"
-msgstr ""
+msgstr "Durée de l'essai (jours)"
 
 #: models.py:565
 msgid "Number of days for the trial period."
-msgstr ""
+msgstr "Nombre de jours pour la période d'essai."
 
 #: templates/admin/peachjam_subs/subscription/change_form.html:10
 msgid "Activate subscription"
-msgstr ""
+msgstr "Activer l'abonnement"
 
 #: templates/admin/peachjam_subs/subscription/change_form.html:17
 msgid "Cancel subscription"
-msgstr ""
+msgstr "Annuler l'abonnement"
 
 #: templates/peachjam_subs/_current_and_pending_subscriptions.html:11
 msgid "Upcoming change"
-msgstr ""
+msgstr "Changement à venir"
 
 #: templates/peachjam_subs/_subscription_card.html:7
 msgid "Trial"
-msgstr ""
+msgstr "Procès"
 
 #: templates/peachjam_subs/_subscription_card.html:15
 msgid "Next payment due on"
-msgstr ""
+msgstr "Prochain paiement dû le"
 
 #: templates/peachjam_subs/_subscription_card.html:22
 msgid "Active since"
-msgstr ""
+msgstr "Actif depuis"
 
 #: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
-msgstr ""
+msgstr "Commence le"
 
 #: templates/peachjam_subs/_subscription_card.html:27
 msgid "Ends on"
-msgstr ""
+msgstr "Se termine le"
 
 #: templates/peachjam_subs/_subscription_card.html:36
 msgid "Are you sure?"
-msgstr ""
+msgstr "Es-tu sûr?"
 
 #: templates/peachjam_subs/_subscription_card.html:37
 msgid "Cancel change"
-msgstr ""
+msgstr "Annuler le changement"
 
 #: templates/peachjam_subs/_subscription_required.html:8
 #, python-format
 msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
-msgstr ""
+msgstr "Ce contenu est disponible uniquement pour les abonnés. <a href=\"%(login_url)s\">Connectez-vous</a> ou <a href=\"%(signup_url)s\">Inscrivez-vous</a> et abonnez-vous à %(lowest_product)s pour débloquer l'accès."
 
 #: templates/peachjam_subs/_subscription_required.html:18
 #, python-format
 msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
-msgstr ""
+msgstr "Votre abonnement actuel n'inclut pas ce contenu. Veuillez passer à %(lowest_product)s pour y accéder."
 
 #: templates/peachjam_subs/_subscription_required.html:25
 msgid "This content is not currently available."
-msgstr ""
+msgstr "Ce contenu n'est actuellement pas disponible."
 
 #: templates/peachjam_subs/subscribe.html:9
 msgid "Your personal research space"
-msgstr ""
+msgstr "Votre espace de recherche personnel"
 
 #: templates/peachjam_subs/subscribe.html:11
 #, python-format
 msgid "%(MY_LII)s is a free account that helps you personalise and organise your legal research. It’s simple to use, always free, and makes working with the law easier."
-msgstr ""
+msgstr "%(MY_LII)s est un compte gratuit qui vous permet de personnaliser et d'organiser vos recherches juridiques. Simple d'utilisation, toujours gratuit, il simplifie votre travail juridique."
 
 #: templates/peachjam_subs/subscribe.html:15
 msgid "Sign up for free"
-msgstr ""
+msgstr "Inscrivez-vous gratuitement"
 
 #: templates/peachjam_subs/subscribe.html:28
 msgid "Save documents for later"
-msgstr ""
+msgstr "Enregistrer les documents pour plus tard"
 
 #: templates/peachjam_subs/subscribe.html:29
 msgid "Keep a library of judgments and legislation you often return to."
-msgstr ""
+msgstr "Conservez une bibliothèque de jugements et de lois auxquels vous revenez souvent."
 
 #: templates/peachjam_subs/subscribe.html:37
 msgid "Organise with folders"
-msgstr ""
+msgstr "Organiser avec des dossiers"
 
 #: templates/peachjam_subs/subscribe.html:38
 msgid "Group related materials together in a way that makes sense to you."
-msgstr ""
+msgstr "Regroupez les documents connexes d’une manière qui a du sens pour vous."
 
 #: templates/peachjam_subs/subscribe.html:46
 msgid "Add private notes"
-msgstr ""
+msgstr "Ajouter des notes privées"
 
 #: templates/peachjam_subs/subscribe.html:47
 msgid "Write down reminders, insights, or context on the documents you save."
-msgstr ""
+msgstr "Notez des rappels, des idées ou du contexte sur les documents que vous enregistrez."
 
 #: templates/peachjam_subs/subscribe.html:55
 msgid "Receive updates"
-msgstr ""
+msgstr "Recevoir des mises à jour"
 
 #: templates/peachjam_subs/subscribe.html:57
 msgid "Choose topics or courts you’re interested in, and we’ll let you know when something new is published."
-msgstr ""
+msgstr "Choisissez les sujets ou les tribunaux qui vous intéressent et nous vous informerons dès qu'une nouveauté sera publiée."
 
 #: templates/peachjam_subs/subscribe.html:68
 msgid "Why create an acocunt?"
-msgstr ""
+msgstr "Pourquoi créer un compte ?"
 
 #: templates/peachjam_subs/subscribe.html:70
 msgid "Save time by not having to find the same documents again."
-msgstr ""
+msgstr "Gagnez du temps en n'ayant plus à retrouver les mêmes documents."
 
 #: templates/peachjam_subs/subscribe.html:71
 msgid "Stay organised and focused on what matters to you."
-msgstr ""
+msgstr "Restez organisé et concentré sur ce qui compte pour vous."
 
 #: templates/peachjam_subs/subscribe.html:72
 msgid "Be notified when important new materials are available."
-msgstr ""
+msgstr "Soyez informé lorsque de nouveaux documents importants sont disponibles."
 
 #: templates/peachjam_subs/subscribe.html:76
 msgid "Getting started is easy"
-msgstr ""
+msgstr "Commencer est facile"
 
 #: templates/peachjam_subs/subscribe.html:78
 msgid "Sign up with your email address."
-msgstr ""
+msgstr "Inscrivez-vous avec votre adresse e-mail."
 
 #: templates/peachjam_subs/subscribe.html:79
 msgid "Start saving and organising your research right away."
-msgstr ""
+msgstr "Commencez dès maintenant à sauvegarder et à organiser vos recherches."
 
 #: templates/peachjam_subs/subscribe.html:80
 msgid "Access your personal library wherever you are, on your desktop or phone."
-msgstr ""
+msgstr "Accédez à votre bibliothèque personnelle où que vous soyez, sur votre ordinateur de bureau ou votre téléphone."
 
 #: templates/peachjam_subs/subscribe.html:86
 msgid "Create your free account"
-msgstr ""
+msgstr "Créez votre compte gratuit"
 
 #: templates/user_account/home.html:7
 msgid "Subscription"
-msgstr ""
+msgstr "Abonnement"
 
 #: views.py:28
 msgid "Your pending subscription change has been cancelled."
-msgstr ""
+msgstr "Votre modification d’abonnement en attente a été annulée."
+
