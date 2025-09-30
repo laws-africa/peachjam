@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-09-30 06:58\n"
+"PO-Revision-Date: 2025-09-30 08:20\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -1492,7 +1492,7 @@ msgstr "Limite de pastas atingido"
 
 #: models/save_document.py:59
 msgid "note"
-msgstr ""
+msgstr "nota"
 
 #: models/save_document.py:65
 msgid "saved document"
@@ -1504,7 +1504,7 @@ msgstr "documentos salvos"
 
 #: models/save_document.py:77
 msgid "Saved documents limit reached"
-msgstr ""
+msgstr "Limite de documentos guardados atingido"
 
 #: models/settings.py:28
 msgid "default document language"
@@ -1556,11 +1556,11 @@ msgstr "Permitir inscrições por meio de contas sociais"
 
 #: models/settings.py:76
 msgid "allow signups"
-msgstr ""
+msgstr "permitir inscrições"
 
 #: models/settings.py:78
 msgid "Allow users to create accounts"
-msgstr ""
+msgstr "Permitir que os utilizadores criem contas"
 
 #: models/settings.py:82
 msgid "metabase dashboard link"
@@ -1644,11 +1644,11 @@ msgstr "Permitir que documentos sejam salvos."
 
 #: models/settings.py:153
 msgid "allow anonymisation"
-msgstr ""
+msgstr "permitir anonimização"
 
 #: models/settings.py:155
 msgid "Allow documents to be anonymised."
-msgstr ""
+msgstr "Permitir que os documentos sejam anonimizados."
 
 #: models/settings.py:158
 msgid "allow save searches"
@@ -1684,7 +1684,7 @@ msgstr "nome do caminho"
 
 #: models/taxonomies.py:23
 msgid "restricted"
-msgstr ""
+msgstr "restrito"
 
 #: models/taxonomies.py:28
 msgid "show in document listing"
@@ -1696,11 +1696,11 @@ msgstr "Mostrar esta taxonomia na página de listagem de documentos? Cascatas pa
 
 #: models/taxonomies.py:36
 msgid "allow offline access"
-msgstr ""
+msgstr "permitir o acesso offline"
 
 #: models/taxonomies.py:40
 msgid "Allow users to make this taxonomy and its descendants available offline."
-msgstr ""
+msgstr "Permitir que os utilizadores disponibilizem esta taxonomia e os seus descendentes offline."
 
 #: models/taxonomies.py:45 models/user_following.py:87
 msgid "taxonomy"
@@ -1724,27 +1724,27 @@ msgstr "tópicos do documento"
 
 #: models/timeline.py:19
 msgid "New Documents"
-msgstr ""
+msgstr "Novos Documentos"
 
 #: models/timeline.py:20
 msgid "Saved Search"
-msgstr ""
+msgstr "Pesquisa guardada"
 
 #: models/user_following.py:95
 msgid "saved search"
-msgstr ""
+msgstr "pesquisa salva"
 
 #: models/user_following.py:99
 msgid "last alerted at"
-msgstr ""
+msgstr "último alerta em"
 
 #: models/user_following.py:167
 msgid "New matches for search alert"
-msgstr ""
+msgstr "Novas correspondências para alerta de pesquisa"
 
 #: models/user_following.py:169
 msgid "New documents added for"
-msgstr ""
+msgstr "Novos documentos adicionados para"
 
 #: settings.py:295
 msgid "English"
@@ -1764,11 +1764,11 @@ msgstr "Suaíli"
 
 #: templates/403.html:4 templates/403.html:9
 msgid "Forbidden (Error 403)"
-msgstr ""
+msgstr "Proibido (Erro 403)"
 
 #: templates/403.html:11
 msgid "You don't have permission to access this page."
-msgstr ""
+msgstr "Não tem permissão para aceder a esta página."
 
 #: templates/403.html:17 templates/404.html:17 templates/429.html:17
 #: templates/500.html:17
@@ -1812,7 +1812,7 @@ msgstr "Entre com %(provider)s"
 
 #: templates/account/email.html:4
 msgid "Emails"
-msgstr ""
+msgstr "E-mails"
 
 #: templates/account/email.html:9
 msgid "Email addresses"
@@ -1877,15 +1877,15 @@ msgstr "Adicionar um endereço de e-mail"
 
 #: templates/account/email.html:91
 msgid "Add email address"
-msgstr ""
+msgstr "Adicionar endereço de e-mail"
 
 #: templates/account/logged_out.html:5
 msgid "Logged Out"
-msgstr ""
+msgstr "Desconectado"
 
 #: templates/account/logged_out.html:8
 msgid "You have logged out."
-msgstr ""
+msgstr "Efetuou logout."
 
 #: templates/account/logged_out.html:11 templates/account/login.html:8
 #: templates/account/login.html:60
@@ -1911,7 +1911,7 @@ msgstr "Esqueceu-se da sua senha?"
 
 #: templates/account/login.html:61
 msgid "Create an account"
-msgstr ""
+msgstr "Criar uma conta"
 
 #: templates/account/logout.html:4
 msgid "Log Out"
@@ -1920,7 +1920,7 @@ msgstr "Encerrar Sessão"
 #: templates/account/logout.html:7 templates/account/logout.html:16
 #: templates/peachjam/_user_menu.html:51
 msgid "Log out"
-msgstr ""
+msgstr "Sair"
 
 #: templates/account/logout.html:8
 msgid "Are you sure you want to log out?"
@@ -1944,7 +1944,7 @@ msgstr "Redefinir sua senha"
 
 #: templates/account/password_reset.html:7
 msgid "Reset your password"
-msgstr ""
+msgstr "Redefinir a sua palavra-passe"
 
 #: templates/account/password_reset.html:9
 msgid "Back to Login"
@@ -1952,7 +1952,7 @@ msgstr "Voltar para Login"
 
 #: templates/account/password_reset.html:14
 msgid "Enter your e-mail address below, and we will send you a link to reset your password."
-msgstr ""
+msgstr "Introduza o seu endereço de e-mail abaixo e enviar-lhe-emos um link para redefinir a sua palavra-passe."
 
 #: templates/account/password_reset.html:30
 #: templates/account/password_reset_from_key.html:11
@@ -1968,7 +1968,7 @@ msgstr "Redefinir a senha"
 
 #: templates/account/password_reset_from_key.html:9
 msgid "Bad token"
-msgstr ""
+msgstr "Token ruim"
 
 #: templates/account/password_reset_from_key.html:17
 #, python-format
@@ -2021,7 +2021,7 @@ msgstr "Já tem uma conta?"
 
 #: templates/admin/_check_duplicate_files.html:4
 msgid "This file has already been uploaded."
-msgstr ""
+msgstr "Este ficheiro já foi carregado."
 
 #: templates/admin/_comments_list.html:19
 msgid "Add comment"
@@ -2029,11 +2029,11 @@ msgstr "Adicionar comentário"
 
 #: templates/admin/change_form.html:17
 msgid "This document is not published and is not visible to the public."
-msgstr ""
+msgstr "Este documento não é publicado e não é visível ao público."
 
 #: templates/admin/change_form.html:20
 msgid "This document is restricted and is only visible to some users."
-msgstr ""
+msgstr "Este documento é restrito e apenas visível para alguns utilizadores."
 
 #: templates/admin/change_form.html:29 templates/admin/change_list.html:16
 #: templates/peachjam/_help_button.html:6
@@ -2046,11 +2046,11 @@ msgstr "Carregar"
 
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:26
 msgid "Manage access groups"
-msgstr ""
+msgstr "Gerir grupos de acesso"
 
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:35
 msgid "Select the groups that have access permissions to this item."
-msgstr ""
+msgstr "Selecione os grupos que têm permissões de acesso a este item."
 
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:44
 #: templates/peachjam/_annotation_edit.html:11
@@ -2078,15 +2078,15 @@ msgstr "Esqueceu sua senha ou usuário?"
 
 #: templates/admin/peachjam/_duplicates_warning.html:6
 msgid "This document is a duplicate of:"
-msgstr ""
+msgstr "Este documento é um duplicado de:"
 
 #: templates/admin/peachjam/judgment/_extracted_form.html:7
 msgid "Extracted:"
-msgstr ""
+msgstr "Extraído:"
 
 #: templates/admin/peachjam/judgment/change_form.html:6
 msgid "This judgment must be anonymised before it can be published."
-msgstr ""
+msgstr "Este julgamento deve ser tornado anónimo antes de ser publicado."
 
 #: templates/admin/peachjam/judgment/change_form.html:11
 msgid "Anonymise"
@@ -2094,7 +2094,7 @@ msgstr "Anonimizar"
 
 #: templates/admin/peachjam/judgment/change_form.html:15
 msgid "Generate summary"
-msgstr ""
+msgstr "Gerar resumo"
 
 #: templates/admin/tree_change_list.html:7
 #: templates/peachjam/_document_content_sidebar.html:57
@@ -2239,33 +2239,33 @@ msgstr "Carregar documento"
 
 #: templates/peachjam/_document_content.html:70
 msgid "Error loading PDF"
-msgstr ""
+msgstr "Erro ao carregar PDF"
 
 #: templates/peachjam/_document_content.html:71
 msgid "Try reloading the page or downloading the PDF."
-msgstr ""
+msgstr "Tente recarregar a página ou descarregar o PDF."
 
 #: templates/peachjam/_document_content.html:73
 msgid "Reload page"
-msgstr ""
+msgstr "Recarregar página"
 
 #: templates/peachjam/_document_content.html:74
 msgid "Download PDF"
-msgstr ""
+msgstr "Baixar PDF"
 
 #: templates/peachjam/_document_content.html:77
 msgid "Error"
-msgstr ""
+msgstr "Erro"
 
 #: templates/peachjam/_document_content_sidebar.html:7
 #: templates/peachjam/_header.html:6
 msgid "Skip to document content"
-msgstr ""
+msgstr "Saltar para o conteúdo do documento"
 
 #: templates/peachjam/_document_content_sidebar.html:22
 #: templates/peachjam/judgment_detail.html:97
 msgid "Summary"
-msgstr ""
+msgstr "Resumo"
 
 #: templates/peachjam/_document_content_sidebar.html:34
 msgid "Table of contents"
@@ -2385,11 +2385,11 @@ msgstr "Visitar site"
 
 #: templates/peachjam/_header.html:7
 msgid "Skip to main menu"
-msgstr ""
+msgstr "Ir para o menu principal"
 
 #: templates/peachjam/_header.html:8
 msgid "Skip to search"
-msgstr ""
+msgstr "Saltar para a pesquisa"
 
 #: templates/peachjam/_header.html:28
 msgid "Toggle navigation"
@@ -2471,19 +2471,19 @@ msgstr "Contate-nos"
 
 #: templates/peachjam/_social_media.html:14
 msgid "Visit our Facebook Page"
-msgstr ""
+msgstr "Visite a nossa página no Facebook"
 
 #: templates/peachjam/_social_media.html:24
 msgid "Visit our Twitter/X profile"
-msgstr ""
+msgstr "Visite o nosso perfil no Twitter/X"
 
 #: templates/peachjam/_social_media.html:34
 msgid "Visit our Linked In profile"
-msgstr ""
+msgstr "Visite o nosso perfil no LinkedIn"
 
 #: templates/peachjam/_social_media.html:44
 msgid "Visit our YouTube channel"
-msgstr ""
+msgstr "Visite o nosso canal no YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
@@ -2808,7 +2808,7 @@ msgstr "Documentos salvos"
 #: templates/peachjam/user_following/list.html:4
 #: templates/peachjam/user_following/list.html:7
 msgid "Following"
-msgstr ""
+msgstr "Seguinte"
 
 #: templates/peachjam/_user_menu.html:36
 #: templates/peachjam/my/_saved_searches.html:4
@@ -2862,7 +2862,7 @@ msgstr "Listas de Causas Recentes"
 
 #: templates/peachjam/document/_case_summary.html:6
 msgid "Summary generated by AI."
-msgstr ""
+msgstr "Resumo gerado pela IA."
 
 #: templates/peachjam/document/_case_summary.html:9
 msgid "Case summary"
@@ -2870,11 +2870,11 @@ msgstr "Resumo do caso"
 
 #: templates/peachjam/document/_case_summary.html:12
 msgid "Issues"
-msgstr ""
+msgstr "Problemas"
 
 #: templates/peachjam/document/_case_summary.html:18
 msgid "Held"
-msgstr ""
+msgstr "Agarrado"
 
 #: templates/peachjam/document/_case_summary.html:24
 msgid "Order"
@@ -2890,30 +2890,30 @@ msgstr "Nota"
 
 #: templates/peachjam/document/_judgment_summary.html:10
 msgid "Read full summary"
-msgstr ""
+msgstr "Leia o resumo completo"
 
 #: templates/peachjam/document/_uncommenced_provisions.html:4
 #: templates/peachjam/layouts/document_detail.html:146
 #: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:4
 #: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:7
 msgid "Uncommenced provisions"
-msgstr ""
+msgstr "Disposições não iniciadas"
 
 #: templates/peachjam/document/_uncommenced_provisions.html:8
 msgid "All uncommenced provisions"
-msgstr ""
+msgstr "Todas as disposições não iniciadas"
 
 #: templates/peachjam/document/_unconstitutional_provisions.html:4
 #: templates/peachjam/layouts/document_detail.html:129
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_list.html:4
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_list.html:7
 msgid "Unconstitutional provisions"
-msgstr ""
+msgstr "Disposições inconstitucionais"
 
 #: templates/peachjam/document/_unconstitutional_provisions.html:8
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:21
 msgid "All unconstitutional provisions"
-msgstr ""
+msgstr "Todas as disposições inconstitucionais"
 
 #: templates/peachjam/gazette_list.html:66
 #, python-format
@@ -2937,11 +2937,11 @@ msgstr "Data da audiência"
 
 #: templates/peachjam/judgment_detail.html:40
 msgid "Court division"
-msgstr ""
+msgstr "Divisão de tribunais"
 
 #: templates/peachjam/judgment_detail.html:48
 msgid "Case action"
-msgstr ""
+msgstr "Ação de caso"
 
 #: templates/peachjam/judgment_detail.html:70
 msgid "Case number"
@@ -3051,27 +3051,27 @@ msgstr "Estatisticas"
 #: templates/peachjam/my/_frontpage_anon.html:6
 #: templates/peachjam/my/_frontpage_loader.html:8
 msgid "Create a free account to simplify your legal research and stay up to date."
-msgstr ""
+msgstr "Crie uma conta gratuita para simplificar a sua pesquisa jurídica e manter-se atualizado."
 
 #: templates/peachjam/my/_recent_additions.html:2
 msgid "What's new in topics you follow"
-msgstr ""
+msgstr "Novidades nos tópicos que segue"
 
 #: templates/peachjam/my/_recent_additions.html:4
 msgid "Topics you follow"
-msgstr ""
+msgstr "Tópicos que segue"
 
 #: templates/peachjam/my/_recent_additions.html:11
 msgid "Follow courts and topics to stay up-to-date."
-msgstr ""
+msgstr "Siga os tribunais e os tópicos para se manter atualizado."
 
 #: templates/peachjam/my/_saved_documents.html:16
 msgid "You haven't saved any documents yet."
-msgstr ""
+msgstr "Ainda não guardou nenhum documento."
 
 #: templates/peachjam/my/_saved_searches.html:15
 msgid "You don't have any search alerts."
-msgstr ""
+msgstr "Não tem nenhum alerta de pesquisa."
 
 #: templates/peachjam/place_bill_list.html:19
 #, python-format
@@ -3082,62 +3082,64 @@ msgstr "%(place)s Contas"
 msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr ""
+msgstr "\n"
+"      Nota: esta disposição tem algumas subdisposições que já entraram em vigor.\n"
+"    "
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provisions_blurb.html:2
 msgid "Legislation provisions that have not yet come into force."
-msgstr ""
+msgstr "Disposições legislativas que ainda não entraram em vigor."
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:21
 #: views/legislation.py:498 views/legislation.py:502
 msgid "Resolved"
-msgstr ""
+msgstr "Resolvido"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:23
 #: views/legislation.py:503
 msgid "Unresolved"
-msgstr ""
+msgstr "Não resolvido"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provisions_blurb.html:2
 msgid "Legislation provisions that have been declared unconstitutional by a court. They are resolved when new legislation is passed."
-msgstr ""
+msgstr "Disposições legislativas que foram declaradas inconstitucionais por um tribunal. São resolvidas quando uma nova legislação é aprovada."
 
 #: templates/peachjam/provision_enrichment/provision_citations.html:20
 msgid "Documents that cite this provision"
-msgstr ""
+msgstr "Os documentos que citam esta disposição"
 
 #: templates/peachjam/provision_enrichment/uncommenced_provision_detail.html:8
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:83
 msgid "No content found"
-msgstr ""
+msgstr "Nenhum conteúdo encontrado"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:6
 msgid "Judgment"
-msgstr ""
+msgstr "Julgamento"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:21
 msgid "Date deemed unconstitutional"
-msgstr ""
+msgstr "Data considerada inconstitucional"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:29
 msgid "End of suspension period"
-msgstr ""
+msgstr "Fim do período de suspensão"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:37
 msgid "Date resolved"
-msgstr ""
+msgstr "Data resolvida"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:45
 msgid "Resolving amendment"
-msgstr ""
+msgstr "Resolução de emenda"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:56
 msgid "Read-in text"
-msgstr ""
+msgstr "Texto de leitura"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:74
 msgid "as at"
-msgstr ""
+msgstr "como em"
 
 #: templates/peachjam/restricted_document_detail.html:17
 msgid "Permission denied"
@@ -3176,7 +3178,7 @@ msgstr[1] "%(comment_count)s comentários"
 
 #: templates/peachjam/saved_document/_folders_list.html:8
 msgid "Folder name"
-msgstr ""
+msgstr "Nome da pasta"
 
 #: templates/peachjam/saved_document/_folders_list.html:10
 msgid "New Folder"
@@ -3184,26 +3186,26 @@ msgstr "Nova pasta"
 
 #: templates/peachjam/saved_document/_folders_list.html:13
 msgid "Save documents to simplify your research and stay up-to-date"
-msgstr ""
+msgstr "Guarde documentos para simplificar a sua pesquisa e manter-se atualizado"
 
 #: templates/peachjam/saved_document/_folders_list.html:20
 #: templates/peachjam/saved_document/_update_modal.html:44
 msgid "You have reached your limit for document folders."
-msgstr ""
+msgstr "Atingiu o seu limite de pastas de documentos."
 
 #: templates/peachjam/saved_document/_folders_list.html:22
 #: templates/peachjam/saved_document/_update_modal.html:46
 #, python-format
 msgid "<div>To add more folders, please upgrade to %(product)s.</div>"
-msgstr ""
+msgstr "<div>Para adicionar mais pastas, atualize para %(product)s.</div>"
 
 #: templates/peachjam/saved_document/_folders_list.html:51
 msgid "Download to Excel"
-msgstr ""
+msgstr "Download para Excel"
 
 #: templates/peachjam/saved_document/_folders_list.html:59
 msgid "Rename folder"
-msgstr ""
+msgstr "Renomear pasta"
 
 #: templates/peachjam/saved_document/_folders_list.html:60
 msgid "Rename"
@@ -3219,16 +3221,16 @@ msgstr "Nenhum documento salvo."
 
 #: templates/peachjam/saved_document/_folders_list.html:87
 msgid "You have no saved documents."
-msgstr ""
+msgstr "Não tem documentos guardados."
 
 #: templates/peachjam/saved_document/_limit_reached.html:17
 msgid "You have reached your limit for saved documents."
-msgstr ""
+msgstr "Atingiu o seu limite de documentos guardados."
 
 #: templates/peachjam/saved_document/_limit_reached.html:19
 #, python-format
 msgid "<div>To save more, please upgrade to %(product)s.</div>"
-msgstr ""
+msgstr "<div>Para poupar mais, atualize para %(product)s.</div>"
 
 #: templates/peachjam/saved_document/_update.html:11
 #: templates/peachjam/saved_document/_update.html:27
@@ -3241,11 +3243,11 @@ msgstr "editar"
 
 #: templates/peachjam/saved_document/_update.html:69
 msgid "Add a note"
-msgstr ""
+msgstr "Adicionar uma nota"
 
 #: templates/peachjam/saved_document/_update_modal.html:18
 msgid "A note to yourself about this document"
-msgstr ""
+msgstr "Uma nota para si sobre este documento"
 
 #: templates/peachjam/saved_document/_update_modal.html:28
 msgid "New folder..."
@@ -3286,45 +3288,45 @@ msgstr "Navigation"
 #: templates/peachjam/user_following/_button.html:13
 #: templates/peachjam/user_following/_create.html:7
 msgid "Follow"
-msgstr ""
+msgstr "Seguir"
 
 #: templates/peachjam/user_following/_button.html:20
 msgid "You are not logged in."
-msgstr ""
+msgstr "Não está logado."
 
 #: templates/peachjam/user_following/_button.html:21
 msgid "To follow, you need to be logged in."
-msgstr ""
+msgstr "Para acompanhar, precisa de estar logado."
 
 #: templates/peachjam/user_following/_timeline.html:14
 #, python-format
 msgid "%(n_more)s more for %(obj)s"
-msgstr ""
+msgstr "%(n_more)s mais por %(obj)s"
 
 #: templates/peachjam/user_following/_timeline.html:27
 msgid "Explore older updates"
-msgstr ""
+msgstr "Explorar atualizações mais antigas"
 
 #: templates/peachjam/user_following/_timeline.html:35
 msgid "Load more"
-msgstr ""
+msgstr "Carregar mais"
 
 #: templates/peachjam/user_following/list.html:8
 msgid "We'll email you when new documents are added for topics that you follow."
-msgstr ""
+msgstr "Enviaremos um e-mail quando forem adicionados novos documentos para os tópicos que segue."
 
 #: templates/peachjam/user_following/list.html:20
 #, python-format
 msgid "Alerted %(ago)s ago"
-msgstr ""
+msgstr "Alertado há %(ago)s"
 
 #: templates/peachjam/user_following/list.html:29
 msgid "Unfollow"
-msgstr ""
+msgstr "Deixar de seguir"
 
 #: templates/peachjam/user_following/list.html:34
 msgid "You are not following anything. Click the Follow button on pages across the site to start following."
-msgstr ""
+msgstr "Não está a seguir nada. Clique no botão Seguir nas páginas do site para começar a seguir."
 
 #: templates/socialaccount/connections.html:4
 #: templates/socialaccount/connections.html:9
@@ -3362,35 +3364,35 @@ msgstr "Conectar a"
 
 #: templates/user_account/edit.html:4 templates/user_account/home.html:4
 msgid "My Account"
-msgstr ""
+msgstr "A minha conta"
 
 #: templates/user_account/edit.html:9
 msgid "Change details"
-msgstr ""
+msgstr "Alterar detalhes"
 
 #: templates/user_account/edit.html:55
 msgid "Update"
-msgstr ""
+msgstr "Atualização"
 
 #: templates/user_account/home.html:26
 msgid "Update details"
-msgstr ""
+msgstr "Detalhes da atualização"
 
 #: templates/user_account/home.html:47
 msgid "Update email address"
-msgstr ""
+msgstr "Atualizar endereço de e-mail"
 
 #: templates/user_account/home.html:52
 msgid "Log in with social accounts"
-msgstr ""
+msgstr "Entrar com contas sociais"
 
 #: templates/user_account/home.html:53
 msgid "Manage the accounts you can use to log in to this account."
-msgstr ""
+msgstr "Gira as contas que pode utilizar para fazer login nesta conta."
 
 #: templates/user_account/home.html:54
 msgid "Manage social accounts"
-msgstr ""
+msgstr "Gerir contas sociais"
 
 #: templates/user_account/home.html:58
 msgid "Document access groups"
@@ -3410,7 +3412,7 @@ msgstr "Sua mensagem foi enviada. Obrigado!"
 
 #: views/accounts.py:45
 msgid "Your details have been updated."
-msgstr ""
+msgstr "Os seus dados foram atualizados."
 
 #: views/anon.py:76
 msgid "Only judgments with HTML content can be anonymised."
@@ -3458,7 +3460,7 @@ msgstr "Resultados"
 
 #: views/courts.py:134
 msgid "Case actions"
-msgstr ""
+msgstr "Ações de caso"
 
 #: views/gazette.py:169
 msgid "Special Issue"
@@ -3491,12 +3493,12 @@ msgstr "Este julgamento foi revisado por outro tribunal. Veja a aba Case history
 #: views/legislation.py:131
 #, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
-msgstr ""
+msgstr "Este %(friendly_type)s foi %(verb)s em %(date)s por <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
 #: views/legislation.py:143
 #, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
-msgstr ""
+msgstr "Este %(friendly_type)s %(verb)s em %(date)s."
 
 #: views/legislation.py:156
 #, python-format
@@ -3506,7 +3508,7 @@ msgstr "Este %(friendly_type)s entrará em vigor em %(date)s."
 #: views/legislation.py:171
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
-msgstr ""
+msgstr "Este %(friendly_type)s ainda não entrou em vigor na íntegra. Consulte o separador \"Disposições não iniciadas\" para obter mais informações."
 
 #: views/legislation.py:182
 #, python-format
@@ -3516,12 +3518,12 @@ msgstr "Este %(friendly_type)s ainda não entrou em vigor."
 #: views/legislation.py:219
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
-msgstr ""
+msgstr "Esta é a versão deste %(friendly_type)s como era quando era %(verb)s."
 
 #: views/legislation.py:232
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
-msgstr ""
+msgstr "Esta é a versão deste %(friendly_type)s tal como era quando %(verb)s."
 
 #: views/legislation.py:249
 #, python-format
@@ -3531,12 +3533,12 @@ msgstr "Esta é a versão mais recente deste %(friendly_type)s."
 #: views/legislation.py:265
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
-msgstr ""
+msgstr "Esta é a versão deste %(friendly_type)s tal como era de %(date_from)s a %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lê a versão tal como era quando era %(verb)s</a>."
 
 #: views/legislation.py:270
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
-msgstr ""
+msgstr "Esta é a versão deste %(friendly_type)s tal como era de %(date_from)s a %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lê a versão tal como era quando %(verb)s</a>."
 
 #: views/legislation.py:275
 #, python-format
@@ -3545,7 +3547,7 @@ msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(
 
 #: views/legislation.py:299
 msgid "This version is at a future date."
-msgstr ""
+msgstr "Esta versão está numa data futura."
 
 #: views/legislation.py:342
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
