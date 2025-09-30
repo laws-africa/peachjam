@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
+"PO-Revision-Date: 2025-09-30 06:58\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -99,7 +99,7 @@ msgstr "Hotuba Mashuhuri"
 
 #: templates/peachjam/_header.html:90
 msgid "Collections"
-msgstr ""
+msgstr "Makusanyo"
 
 #: templates/peachjam/_header.html:98
 msgid "Street Law"
@@ -202,11 +202,10 @@ msgid "Step-by-step resources on common legal issues such as land rights, family
 msgstr ""
 
 #: templates/tanzlii/paralegals.html:86 templates/tanzlii/paralegals.html:89
-#, fuzzy
-#| msgid "Legislation"
 msgid "Legal information"
-msgstr "Sheria"
+msgstr ""
 
 #: templates/tanzlii/paralegals.html:87
 msgid "Curated summaries of laws and court decisions most relevant to paralegal work."
 msgstr ""
+
