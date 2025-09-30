@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-09-30 06:58\n"
+"PO-Revision-Date: 2025-09-30 08:20\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -126,7 +126,7 @@ msgstr "Hakuna nyaraka zilizopatikana."
 
 #: templates/africanlii/mooc.html:4
 msgid "Policy-Making in the African Union"
-msgstr ""
+msgstr "Uundaji wa Sera katika Umoja wa Afrika"
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:129
 msgid "About"
@@ -233,7 +233,7 @@ msgstr "Ripoti na Miongozo"
 
 #: templates/peachjam/_header.html:117
 msgid "Courses"
-msgstr ""
+msgstr "Kozi"
 
 #: templates/peachjam/_header.html:123
 msgid "Articles"
