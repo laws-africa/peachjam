@@ -53,7 +53,7 @@ def search_hit_serializer(context, hit):
 
 
 class CustomerIOTemplateBackend(TemplateBackend):
-    """Sends emails using CustomerIO.
+    """Sends emails using CustomerIO if enabled, falling back to the usual Django email system otherwise.
 
     This requires us to serialise the context to JSON and send it to CustomerIO, and to add additional context
     such as site information.
@@ -91,6 +91,8 @@ class CustomerIOTemplateBackend(TemplateBackend):
 
         if template_name not in self.transactional_message_ids:
             log.info(f"Sending email using Django: {template_name}")
+            # tell supplement_context not to serialise the context
+            context["USE_SERIALISERS"] = False
             return super().send(
                 template_name, from_email, recipient_list, context, **kwargs
             )
@@ -111,6 +113,9 @@ class CustomerIOTemplateBackend(TemplateBackend):
 
     def supplement_context(self, context):
         super().supplement_context(context)
+
+        if context.get("USE_SERIALISERS") is False:
+            return
 
         # inject this first so the other serializers can use the site details
         context["site"] = {
