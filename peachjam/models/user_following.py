@@ -188,9 +188,6 @@ class UserFollowing(models.Model):
             return getattr(self, field)
 
     def can_add_more_follows(self):
-        if not self.saved_search:
-            # saved searches are not counted against the follow limit
-            return True
         sub = Subscription.objects.active_for_user(self.user).first()
         if not sub:
             return False
@@ -200,8 +197,9 @@ class UserFollowing(models.Model):
     def clean(self):
         super().clean()
 
-        if not self.pk and not self.can_add_more_follows():
-            raise ValidationError(_("Following limit reached"))
+        if not self.saved_search:  # saved searches have their own limit
+            if not self.pk and not self.can_add_more_follows():
+                raise ValidationError(_("Following limit reached"))
 
         # Count how many fields are set (not None)
         set_fields = sum(
