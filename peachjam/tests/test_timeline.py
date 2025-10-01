@@ -6,18 +6,35 @@ from django.test import TestCase
 from languages_plus.models import Language
 
 from peachjam.models import Court, Judgment, TimelineEvent, UserFollowing
+from peachjam_subs.models import Feature, Subscription
 
 
 class TimelineViewTest(TestCase):
-    fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
+    fixtures = [
+        "tests/countries",
+        "documents/sample_documents",
+        "tests/users",
+        "tests/products",
+    ]
 
     def setUp(self):
+        feature = Feature.objects.get(pk=1)
+
+        # attach permissions by codename/app_label
+        perms = Permission.objects.filter(
+            content_type__app_label="peachjam",
+            codename__in=[
+                "add_userfollowing",
+                "delete_userfollowing",
+                "view_userfollowing",
+            ],
+        )
+        feature.permissions.set(perms)
 
         self.user = User.objects.first()
+        Subscription.get_or_create_active_for_user(self.user)
         self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
-        self.user.user_permissions.add(
-            Permission.objects.get(codename="view_userfollowing")
-        )
+
         self.court = Court.objects.get(code="ECOWASCJ")
         self.follow = UserFollowing.objects.create(user=self.user, court=self.court)
         self.last_alerted_at = datetime(2000, 7, 1)

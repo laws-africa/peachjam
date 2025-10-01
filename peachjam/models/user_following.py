@@ -188,6 +188,9 @@ class UserFollowing(models.Model):
             return getattr(self, field)
 
     def can_add_more_follows(self):
+        if not self.saved_search:
+            # saved searches are not counted against the follow limit
+            return True
         sub = Subscription.objects.active_for_user(self.user).first()
         if not sub:
             return False
