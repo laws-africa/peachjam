@@ -1,9 +1,43 @@
 {% load i18n %}
-<form hx-post="{% url 'user_following_create' %}?{{ request.GET.urlencode }}">
-  {% csrf_token %}
-  {{ form }}
-  <button class="btn btn-outline-primary" type="submit">
-    <span><i class="bi bi-bell"></i></span>
+{% if following_limit_reached %}
+  <button class="btn btn-outline-primary ms-2"
+          type="button"
+          data-bs-toggle="modal"
+          data-bs-target="#followModal">
+    <i class="bi bi-bell"></i>
     <span>{% trans 'Follow' %}</span>
   </button>
-</form>
+  <div class="modal" id="followModal" tabindex="-1">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">{% trans 'Follow' %}</h5>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="{% trans 'Close' %}"></button>
+        </div>
+        <div class="modal-body">
+          {% trans 'You have reached your limit for following.' %}
+          {% if following_limit_product %}
+            {% blocktrans with product=following_upgrade %}
+            To follow more users, please upgrade to {{ following_upgrade }}.
+          {% endblocktrans %}
+          {% endif %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <form hx-post="{% url 'user_following_create' %}?{{ request.GET.urlencode }}">
+    {% csrf_token %}
+    {{ form }}
+    <button class="btn btn-outline-primary" type="submit">
+      <span><i class="bi bi-bell"></i></span>
+      <span>{% trans 'Follow' %}</span>
+    </button>
+  </form>
+{% endif %}

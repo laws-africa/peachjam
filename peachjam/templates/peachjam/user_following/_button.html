@@ -16,14 +16,13 @@
                 data-bs-dismiss="modal"
                 aria-label="{% trans 'Close' %}"></button>
       </div>
-      <div class="modal-body">
-        <p>{% trans 'You are not logged in.' %}</p>
-        <p>{% trans 'To follow, you need to be logged in.' %}</p>
-      </div>
+      <div class="modal-body">{% include "peachjam_subs/_subscription_required.html" %}</div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-        <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path }}"
-           class="btn btn-primary">{% trans 'Log in' %}</a>
+        {% if not request.user.is_authenticated %}
+          <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path }}"
+             class="btn btn-primary">{% trans 'Log in' %}</a>
+        {% endif %}
       </div>
     </div>
   </div>
