@@ -1,0 +1,16 @@
+{% block subject %}{{ APP_NAME }} Account Confirmation{% endblock %}
+{% block html %}
+    <p>Hello,</p>
+
+    <p>
+      To activate your {{ APP_NAME }} account, please confirm your email address.
+    </p>
+
+    <div style="text-align: center">
+      <a href="{{ activate_url }}" style="text-decoration: none">
+        <button style="height: 50px; background-color: #248159; color: #fff; font-size: 1rem; border-radius: 0.25rem; border: none; padding: 0 1rem">Confirm your email address</button>
+      </a>
+    </div>
+
+    <p>The {{ APP_NAME }} team.</p>
+{% endblock %}
