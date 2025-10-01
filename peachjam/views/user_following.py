@@ -29,24 +29,38 @@ class UserFollowingForm(forms.ModelForm):
             self.fields[field].widget = forms.HiddenInput()
 
 
+class UserFollowingButtonForm(forms.Form):
+    court = forms.IntegerField(required=False)
+    author = forms.IntegerField(required=False)
+    court_class = forms.IntegerField(required=False)
+    court_registry = forms.IntegerField(required=False)
+    country = forms.IntegerField(required=False)
+    locality = forms.IntegerField(required=False)
+    taxonomy = forms.IntegerField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Enforce "only one follow target"
+        set_fields = [f for f in cleaned_data if cleaned_data.get(f)]
+        if len(set_fields) == 0:
+            raise forms.ValidationError("One follow target must be set")
+        if len(set_fields) > 1:
+            raise forms.ValidationError("Only one follow target can be set")
+
+        return cleaned_data
+
+
 class UserFollowingButtonView(SubscriptionRequiredMixin, FormView):
     permission_required = "peachjam.add_userfollowing"
-    form_class = UserFollowingForm
+    form_class = UserFollowingButtonForm
     template_name = "peachjam/user_following/_button.html"
 
     def get_subscription_required_template(self):
         return self.template_name
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        instance = UserFollowing()
-        instance.user = self.request.user
-        kwargs["instance"] = instance
-        kwargs["data"] = self.request.GET or self.request.POST
-        return kwargs
-
     def get(self, *args, **kwargs):
-        form = self.get_form()
+        form = UserFollowingButtonForm(self.request.GET)
         if self.request.user.is_authenticated:
             if form.is_valid():
                 follow = UserFollowing.objects.filter(
@@ -77,6 +91,9 @@ class UserFollowingListView(BaseUserFollowingView, ListView):
     template_name = "peachjam/user_following/list.html"
     permission_required = "peachjam.view_userfollowing"
     tab = "user_following"
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
 
 class UserFollowingCreateView(BaseUserFollowingView, CreateView):

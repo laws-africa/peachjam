@@ -18,12 +18,21 @@
                   aria-label="{% trans 'Close' %}"></button>
         </div>
         <div class="modal-body">
-          {% trans 'You have reached your limit for following.' %}
-          {% if following_limit_product %}
-            {% blocktrans with product=following_upgrade %}
-            To follow more users, please upgrade to {{ following_upgrade }}.
-          {% endblocktrans %}
-          {% endif %}
+          <div class="alert alert-warning d-flex">
+            <div class="me-2">
+              <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <div>
+              <div class="fw-bold">{% trans 'You have reached your limit for following.' %}</div>
+              {% if following_upgrade %}
+                <div>
+                  {% blocktrans trimmed with product=following_upgrade.name %}
+                  To follow more topics, please upgrade to {{ product }}.
+                {% endblocktrans %}
+                </div>
+              {% endif %}
+            </div>
+          </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
