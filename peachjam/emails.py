@@ -4,6 +4,7 @@ from customerio import APIClient, Regions, SendEmailRequest
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
+from django.contrib.staticfiles import finders
 from django.db.models import QuerySet
 from templated_email.backends.vanilla_django import (
     TemplateBackend as BaseTemplateBackend,
@@ -17,6 +18,8 @@ log = logging.getLogger(__name__)
 
 
 class TemplateBackend(BaseTemplateBackend):
+    primary_colour = None
+
     def supplement_context(self, context):
         if not context.get("user"):
             raise Exception("Context must contain a user")
@@ -24,6 +27,7 @@ class TemplateBackend(BaseTemplateBackend):
         # inject common context
         context["site"] = Site.objects.get_current()
         context["APP_NAME"] = settings.PEACHJAM["APP_NAME"]
+        context["PRIMARY_COLOUR"] = self.get_primary_colour()
 
     def _render_email(
         self, template_name, context, template_dir=None, file_extension=None
@@ -34,6 +38,24 @@ class TemplateBackend(BaseTemplateBackend):
             context,
             template_dir=template_dir,
             file_extension=file_extension,
+        )
+
+    def get_primary_colour(self):
+        if self.primary_colour is None:
+            # try to get the primary colour from the _variables.scss file, looked up using the static files finder
+            path = finders.find("stylesheets/_variables.scss")
+            if path:
+                print(f"Found _variables.scss at {path}")
+                with open(path, "r") as f:
+                    for line in f:
+                        if line.startswith("$primary:"):
+                            self.__class__.primary_colour = (
+                                line.split(":", 1)[1].strip().rstrip(";")
+                            )
+                            break
+
+        return (
+            self.primary_colour or settings.PEACHJAM.get("PRIMARY_COLOUR") or "#0000ff"
         )
 
 

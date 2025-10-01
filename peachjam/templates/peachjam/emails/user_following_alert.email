@@ -16,12 +16,4 @@
     </ul>
     <hr/>
   {% endfor %}
-  <p>
-    {% blocktrans %}
-      The {{ APP_NAME }} Team
-    {% endblocktrans %}
-  </p>
-  <small>
-    <a href="https://{{ site.domain }}{{ manage_url_path }}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
-  </small>
 {% endblock %}

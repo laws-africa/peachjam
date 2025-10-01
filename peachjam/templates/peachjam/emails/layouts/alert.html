@@ -2,4 +2,16 @@
 {% block body %}
   <p>{{ user }},</p>
   {% block alert-body %}{% endblock %}
+  <p>&nbsp;</p>
+  <p>{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+  <p>
+    <small>
+      <a href="https://{{ site.domain }}{{ manage_url_path }}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
+    </small>
+  </p>
+{% endblock %}
+{% block footer %}
+  <p>
+    <small><a href="https://{{ site.domain }}{% url 'my_account' %}">{% blocktrans %}Manage your {{ APP_NAME }} account{% endblocktrans %}</a></small>
+  </p>
 {% endblock %}
