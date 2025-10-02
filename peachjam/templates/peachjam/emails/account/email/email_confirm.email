@@ -3,6 +3,6 @@
 {% block subject %}{% blocktrans trimmed %}Your email has been confirmed{% endblocktrans %}{% endblock %}
 {% block body %}
   <p>{% blocktrans trimmed %}Your email address has been confirmed successfully.{% endblocktrans %}</p>
-  <p>{% blocktrans trimmed with app_name=APP_NAME %}Thank you for keeping your {{ app_name }} account secure.{% endblocktrans %}</p>
-  <p>{% blocktrans trimmed with app_name=APP_NAME %}The {{ app_name }} Team{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}Thank you for keeping your {{ APP_NAME }} account secure.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
 {% endblock %}
