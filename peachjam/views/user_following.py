@@ -1,10 +1,12 @@
 from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-from django.views.generic import CreateView, DeleteView, ListView, TemplateView
+from django.views.generic import CreateView, DeleteView, FormView, ListView
 
 from peachjam.models import UserFollowing
+from peachjam_subs.mixins import SubscriptionRequiredMixin
+from peachjam_subs.models import Subscription
 
 
 class UserFollowingForm(forms.ModelForm):
@@ -27,13 +29,40 @@ class UserFollowingForm(forms.ModelForm):
             self.fields[field].widget = forms.HiddenInput()
 
 
-class UserFollowingButtonView(TemplateView):
+class UserFollowingButtonForm(forms.Form):
+    court = forms.IntegerField(required=False)
+    author = forms.IntegerField(required=False)
+    court_class = forms.IntegerField(required=False)
+    court_registry = forms.IntegerField(required=False)
+    country = forms.IntegerField(required=False)
+    locality = forms.IntegerField(required=False)
+    taxonomy = forms.IntegerField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Enforce "only one follow target"
+        set_fields = [f for f in cleaned_data if cleaned_data.get(f)]
+        if len(set_fields) == 0:
+            raise forms.ValidationError("One follow target must be set")
+        if len(set_fields) > 1:
+            raise forms.ValidationError("Only one follow target can be set")
+
+        return cleaned_data
+
+
+class UserFollowingButtonView(SubscriptionRequiredMixin, FormView):
+    permission_required = "peachjam.add_userfollowing"
+    form_class = UserFollowingButtonForm
     template_name = "peachjam/user_following/_button.html"
 
+    def get_subscription_required_template(self):
+        return self.template_name
+
     def get(self, *args, **kwargs):
-        form = UserFollowingForm(self.request.GET)
-        if form.is_valid():
-            if self.request.user.is_authenticated:
+        form = UserFollowingButtonForm(self.request.GET)
+        if self.request.user.is_authenticated:
+            if form.is_valid():
                 follow = UserFollowing.objects.filter(
                     **form.cleaned_data, user=self.request.user
                 ).first()
@@ -51,7 +80,7 @@ class UserFollowingButtonView(TemplateView):
         return HttpResponse(status=400)
 
 
-class BaseUserFollowingView(LoginRequiredMixin, PermissionRequiredMixin):
+class BaseUserFollowingView(LoginRequiredMixin):
     model = UserFollowing
 
     def get_queryset(self):
@@ -60,11 +89,12 @@ class BaseUserFollowingView(LoginRequiredMixin, PermissionRequiredMixin):
 
 class UserFollowingListView(BaseUserFollowingView, ListView):
     template_name = "peachjam/user_following/list.html"
-    permission_required = "peachjam.view_userfollowing"
     tab = "user_following"
 
 
-class UserFollowingCreateView(BaseUserFollowingView, CreateView):
+class UserFollowingCreateView(
+    BaseUserFollowingView, SubscriptionRequiredMixin, CreateView
+):
     form_class = UserFollowingForm
     template_name = "peachjam/user_following/_create.html"
     permission_required = "peachjam.add_userfollowing"
@@ -77,6 +107,18 @@ class UserFollowingCreateView(BaseUserFollowingView, CreateView):
         kwargs["data"] = self.request.GET or self.request.POST
         return kwargs
 
+    def get_context_data(self, *args, **kwargs):
+        context = super().get_context_data(*args, **kwargs)
+        sub = Subscription.objects.active_for_user(self.request.user).first()
+        if sub:
+            (
+                context["following_limit_reached"],
+                context["following_upgrade"],
+            ) = sub.check_feature_limit("following_limit")
+        context["next"] = self.request.GET.get("next") or ""
+        context["target"] = self.request.GET.get("target") or ""
+        return context
+
     def get_success_url(self):
         return (
             reverse("user_following_delete", kwargs={"pk": self.object.pk})
@@ -84,7 +126,9 @@ class UserFollowingCreateView(BaseUserFollowingView, CreateView):
         )
 
 
-class UserFollowingDeleteView(BaseUserFollowingView, DeleteView):
+class UserFollowingDeleteView(
+    BaseUserFollowingView, SubscriptionRequiredMixin, DeleteView
+):
     template_name = "peachjam/user_following/_delete.html"
     permission_required = "peachjam.delete_userfollowing"
 
