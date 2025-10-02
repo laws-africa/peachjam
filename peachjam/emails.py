@@ -1,5 +1,6 @@
 import logging
 
+import css_inline
 from customerio import APIClient, Regions, SendEmailRequest
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -33,12 +34,19 @@ class TemplateBackend(BaseTemplateBackend):
         self, template_name, context, template_dir=None, file_extension=None
     ):
         self.supplement_context(context)
-        return super()._render_email(
+
+        parts = super()._render_email(
             template_name,
             context,
             template_dir=template_dir,
             file_extension=file_extension,
         )
+
+        if parts.get("html"):
+            # inline CSS styles into the HTML
+            parts["html"] = css_inline.inline(parts["html"])
+
+        return parts
 
     def get_primary_colour(self):
         if self.primary_colour is None:

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n %}
 {% block html %}
   {# djlint:off #}
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -10,8 +10,8 @@
       <title></title>
       <!-- link to Foundation for Emails.  Removing or changing this link will break this layout.
       Learn more about Foundation for Emails and customizing their settings here - https://get.foundation/emails/docs/ -->
-      {% include 'peachjam/emails/layouts/foundation-emails.css' %}
       <style>
+        {% include 'peachjam/emails/layouts/foundation-emails.css' %}
           /*----------------------------------------------------------------------------------------
            Override some of the 'Foundation for Emails' styles
            -----------------------------------------------------------------------------------------*/
