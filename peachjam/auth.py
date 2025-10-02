@@ -3,9 +3,11 @@ from allauth.account.utils import perform_login
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
+from templated_email import send_templated_mail
 
 from peachjam.models import pj_settings
 from peachjam.signals import password_reset_started
@@ -31,7 +33,12 @@ class AccountAdapter(DefaultAccountAdapter):
                 user=user,
             )
 
-        super().send_mail(template_prefix, email, context)
+        send_templated_mail(
+            template_name=template_prefix,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            context=context,
+        )
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):

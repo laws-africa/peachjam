@@ -1,0 +1,13 @@
+{% extends 'peachjam/emails/layouts/base.html' %}
+{% block subject %}Activate your {{ APP_NAME }} account{% endblock %}
+{% block body %}
+  <p>Hello {{ user }},</p>
+
+  <p>
+    Click the button to confirm your email address and activate your {{ APP_NAME }} account.
+  </p>
+
+  {% include 'peachjam/emails/layouts/_button.html' with text="Confirm your email address" href=activate_url %}
+
+  <p>The {{ APP_NAME }} Team</p>
+{% endblock %}
