@@ -80,7 +80,7 @@ class UserFollowingButtonView(SubscriptionRequiredMixin, FormView):
         return HttpResponse(status=400)
 
 
-class BaseUserFollowingView(LoginRequiredMixin, SubscriptionRequiredMixin):
+class BaseUserFollowingView(LoginRequiredMixin):
     model = UserFollowing
 
     def get_queryset(self):
@@ -89,14 +89,12 @@ class BaseUserFollowingView(LoginRequiredMixin, SubscriptionRequiredMixin):
 
 class UserFollowingListView(BaseUserFollowingView, ListView):
     template_name = "peachjam/user_following/list.html"
-    permission_required = "peachjam.view_userfollowing"
     tab = "user_following"
 
-    def get_subscription_required_template(self):
-        return self.template_name
 
-
-class UserFollowingCreateView(BaseUserFollowingView, CreateView):
+class UserFollowingCreateView(
+    BaseUserFollowingView, SubscriptionRequiredMixin, CreateView
+):
     form_class = UserFollowingForm
     template_name = "peachjam/user_following/_create.html"
     permission_required = "peachjam.add_userfollowing"
@@ -128,7 +126,9 @@ class UserFollowingCreateView(BaseUserFollowingView, CreateView):
         )
 
 
-class UserFollowingDeleteView(BaseUserFollowingView, DeleteView):
+class UserFollowingDeleteView(
+    BaseUserFollowingView, SubscriptionRequiredMixin, DeleteView
+):
     template_name = "peachjam/user_following/_delete.html"
     permission_required = "peachjam.delete_userfollowing"
 
