@@ -1,0 +1,11 @@
+{% extends 'peachjam/emails/layouts/base.html' %}
+{% load i18n %}
+{% block subject %}{% blocktrans trimmed with app_name=APP_NAME %}We couldn't find your {{ app_name }} account{% endblocktrans %}{% endblock %}
+{% block body %}
+  <p>{% blocktrans trimmed with email=email %}We received a request to access an account with {{ email }}, but we couldn't find a matching account.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}If you were trying to sign in, you can create a new account using the button below.{% endblocktrans %}</p>
+  {% trans "Create your account" as create_account_text %}
+  {% include 'peachjam/emails/layouts/_button.html' with text=create_account_text href=signup_url %}
+  <p>{% blocktrans trimmed %}If you didn't try to sign in, you can safely ignore this email.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed with app_name=APP_NAME %}The {{ app_name }} Team{% endblocktrans %}</p>
+{% endblock %}

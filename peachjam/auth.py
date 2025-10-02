@@ -7,6 +7,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.contrib.auth.views import redirect_to_login
+from django.utils import translation
 from templated_email import send_templated_mail
 
 from peachjam.models import pj_settings
@@ -33,12 +34,28 @@ class AccountAdapter(DefaultAccountAdapter):
                 user=user,
             )
 
-        send_templated_mail(
+        user = context.get("user")
+        language = None
+
+        if user:
+            profile = getattr(user, "user_profile", None)
+            preferred_language = getattr(profile, "preferred_language", None)
+
+            if preferred_language:
+                language = preferred_language.pk
+
+        mail_kwargs = dict(
             template_name=template_prefix,
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[email],
             context=context,
         )
+
+        if language:
+            with translation.override(language):
+                send_templated_mail(**mail_kwargs)
+        else:
+            send_templated_mail(**mail_kwargs)
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):

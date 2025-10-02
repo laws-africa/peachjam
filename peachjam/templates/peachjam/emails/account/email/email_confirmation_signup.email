@@ -1,13 +1,13 @@
 {% extends 'peachjam/emails/layouts/base.html' %}
-{% block subject %}Activate your {{ APP_NAME }} account{% endblock %}
+{% load i18n %}
+{% block subject %}{% blocktrans trimmed with app_name=APP_NAME %}Activate your {{ app_name }} account{% endblocktrans %}{% endblock %}
 {% block body %}
-  <p>Hello {{ user.get_full_name }},</p>
+  <p>{% blocktrans trimmed with user=user.get_full_name %}Hello {{ user }},{% endblocktrans %}</p>
 
-  <p>
-    Click the button to confirm your email address and activate your {{ APP_NAME }} account.
-  </p>
+  <p>{% blocktrans trimmed with app_name=APP_NAME %}Click the button to confirm your email address and activate your {{ app_name }} account.{% endblocktrans %}</p>
 
-  {% include 'peachjam/emails/layouts/_button.html' with text="Confirm your email address" href=activate_url %}
+  {% trans "Confirm your email address" as confirm_email_text %}
+  {% include 'peachjam/emails/layouts/_button.html' with text=confirm_email_text href=activate_url %}
 
-  <p>The {{ APP_NAME }} Team</p>
+  <p>{% blocktrans trimmed with app_name=APP_NAME %}The {{ app_name }} Team{% endblocktrans %}</p>
 {% endblock %}
