@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block subject %}{% blocktrans trimmed %}An email address was removed from your account{% endblocktrans %}{% endblock %}
 {% block body %}
-  <p>{% blocktrans trimmed with deleted_email=deleted_email %}Email address {{ deleted_email }} has been removed from your account.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}Email address {{ deleted_email }} has been removed from your account.{% endblocktrans %}</p>
   <p>{% blocktrans trimmed %}If you didn't request this change, please secure your account immediately.{% endblocktrans %}</p>
-  <p>{% blocktrans trimmed with app_name=APP_NAME %}The {{ app_name }} Team{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
 {% endblock %}
