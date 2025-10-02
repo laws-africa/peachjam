@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block subject %}{% blocktrans trimmed with app_name=APP_NAME %}Activate your {{ app_name }} account{% endblocktrans %}{% endblock %}
 {% block body %}
-  <p>{% blocktrans trimmed with user=user %}Hello {{ user }},{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed with user=user.get_full_name %}Hello {{ user }},{% endblocktrans %}</p>
 
   <p>{% blocktrans trimmed with app_name=APP_NAME %}Click the button to confirm your email address and activate your {{ app_name }} account.{% endblocktrans %}</p>
 

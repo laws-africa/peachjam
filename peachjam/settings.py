@@ -167,7 +167,10 @@ PEACHJAM["MY_LII"] = f"My {PEACHJAM['APP_NAME']}"
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
-SERVER_EMAIL = DEFAULT_FROM_EMAIL = PEACHJAM["SUPPORT_EMAIL"]
+SERVER_EMAIL = DEFAULT_FROM_EMAIL = (
+    os.environ.get("DEFAULT_FROM_EMAIL")
+    or f'"{PEACHJAM["APP_NAME"]}" <{PEACHJAM["SUPPORT_EMAIL"]}>'
+)
 
 # Django all-auth
 AUTHENTICATION_BACKENDS = [
@@ -670,7 +673,6 @@ EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD")
 EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", 25))
 EMAIL_USE_TLS = os.environ.get("DJANGO_EMAIL_USE_TLS", "false") == "true"
 EMAIL_USE_SSL = os.environ.get("DJANGO_EMAIL_USE_SSL", "false") == "true"
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
 TEMPLATED_EMAIL_TEMPLATE_DIR = "peachjam/emails/"
 TEMPLATED_EMAIL_BACKEND = "peachjam.emails.TemplateBackend"

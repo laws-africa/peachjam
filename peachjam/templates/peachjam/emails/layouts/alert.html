@@ -1,7 +1,7 @@
 {% extends 'peachjam/emails/layouts/base.html' %}
 {% load i18n %}
 {% block body %}
-  <p>{{ user }},</p>
+  <p>{% blocktrans with name=user.get_full_name %}Hello {{ name }}{% endblocktrans %}</p>
   {% block alert-body %}{% endblock %}
   <p>&nbsp;</p>
   <p>{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>

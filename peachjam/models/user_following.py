@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from peachjam_search.models import SavedSearch
+from peachjam_subs.models import Subscription
 
 from . import (
     Author,
@@ -186,8 +187,19 @@ class UserFollowing(models.Model):
         if field:
             return getattr(self, field)
 
+    def can_add_more_follows(self):
+        sub = Subscription.objects.active_for_user(self.user).first()
+        if not sub:
+            return False
+        limit_reached, _ = sub.check_feature_limit("following_limit")
+        return not limit_reached
+
     def clean(self):
         super().clean()
+
+        if not self.saved_search:  # saved searches have their own limit
+            if not self.pk and not self.can_add_more_follows():
+                raise ValidationError(_("Following limit reached"))
 
         # Count how many fields are set (not None)
         set_fields = sum(
