@@ -1,15 +1,228 @@
+{% load static i18n %}
 {% block html %}
-  <!DOCTYPE html>
-  <html lang="en">
+  {# djlint:off #}
+  <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+  <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
     <head>
-      <meta charset="UTF-8"/>
-      {# djlint:off #}
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+      <meta name="viewport" content="width=device-width"/>
       <title></title>
-      {# djlint:on #}
+      <!-- link to Foundation for Emails.  Removing or changing this link will break this layout.
+      Learn more about Foundation for Emails and customizing their settings here - https://get.foundation/emails/docs/ -->
+      <style>
+        {% include 'peachjam/emails/layouts/foundation-emails.css' %}
+          /*----------------------------------------------------------------------------------------
+           Override some of the 'Foundation for Emails' styles
+           -----------------------------------------------------------------------------------------*/
+
+          body,
+          table.body,
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6,
+          p,
+          td,
+          th {
+              color: #4B4B60; }
+
+          small {
+              color: #6F7488; }
+
+          a {
+              color: {{ PRIMARY_COLOUR }};
+              text-decoration: underline; }
+          a:hover,
+          a:active,
+          a:visited {
+              color: {{ PRIMARY_COLOUR }}; }
+
+          /*------------
+           FONT FAMILY
+          ------------*/
+          body,
+          table.body,
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6,
+          p,
+          td,
+          th,
+          a {
+              font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6 {
+              font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+          table.button table td a {
+              font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+
+          table.body { background-color: #f8f9fa; }
+          /*------------------------
+          End Foundation Overrides
+          ------------------------*/
+
+          .container.outer-container {
+              background-color: #f8f9fa; }
+
+          .container {
+              border-radius: 10px; }
+
+          .inner-container {
+              border: 1px solid #dee2e6
+          }
+
+          h1 {
+              font-weight: 700; }
+
+          .footer p {
+              margin-bottom: 5px;
+              Margin-bottom: 5px; }
+
+          .footer a {
+              color: #6F7488;
+              text-decoration: underline; }
+          .footer a:hover {
+              cursor: pointer;
+              color: #5721CC; }
+      </style>
       {% block head %}{% endblock %}
     </head>
     <body>
-      {% block body %}{% endblock %}
+      <span class="preheader"></span>
+      <table class="body">
+        <tr>
+          <td class="center" align="center" valign="top">
+            <center>
+              <table align="center" class="container outer-container float-center">
+                <tbody>
+                  <tr>
+                    <td>
+                      <table class="spacer">
+                        <tbody>
+                          <tr>
+                            <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table class="row">
+                        <tbody>
+                          <tr>
+                            <th class="small-12 large-12 columns first last">
+                              <table>
+                                <tr>
+                                  <th>
+                                    {% block header %}
+                                      <center>
+                                        {% block header-logo %}
+                                          <img src="https://{{ site.domain }}{% static '/images/logo.png' %}" alt="{% trans "logo" %}" style="height: 60px" align="center" class="float-center"/>
+                                        {% endblock %}
+                                      </center>
+                                    {% endblock %}
+                                  </th>
+                                  <th class="expander"></th>
+                                </tr>
+                              </table>
+                            </th>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table class="spacer">
+                        <tbody>
+                          <tr>
+                            <td height="24px" style="font-size:24px;line-height:24px;">&#xA0;</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table align="center" class="container inner-container">
+                        <tbody>
+                          <tr>
+                            <td>
+                              <table class="spacer">
+                                <tbody>
+                                  <tr>
+                                    <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                                  </tr>
+                                </tbody>
+                              </table>
+                              <table class="row">
+                                <tbody>
+                                  <tr>
+                                    <th class="small-12 large-12 columns first last">
+                                      <table>
+                                        <tr>
+                                          <th>
+                                            <table class="wrapper" align="center">
+                                              <tr>
+                                                <td class="wrapper-inner">{% block body %}{% endblock %}</td>
+                                              </tr>
+                                            </table>
+                                          </th>
+                                          <th class="expander"></th>
+                                        </tr>
+                                      </table>
+                                    </th>
+                                  </tr>
+                                </tbody>
+                              </table>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </table>
+                      <table class="row footer">
+                        <tbody>
+                          <tr>
+                            <th class="small-12 large-12 columns first last">
+                              <table>
+                                <tr>
+                                  <th>
+                                    <table class="spacer">
+                                      <tbody>
+                                        <tr>
+                                          <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                    {% block footer %}{% endblock %}
+                                    <table class="spacer">
+                                      <tbody>
+                                        <tr>
+                                          <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                                        </tr>
+                                      </tbody>
+                                    </table>
+                                  </th>
+                                  <th class="expander"></th>
+                                </tr>
+                              </table>
+                            </th>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </center>
+          </td>
+        </tr>
+      </table>
+      <!-- prevent Gmail on iOS font size manipulation -->
+      <div style="display:none; white-space:nowrap; font:15px courier; line-height:0">
+        &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      </div>
     </body>
   </html>
+  {# djlint:on #}
 {% endblock %}
