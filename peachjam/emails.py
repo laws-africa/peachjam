@@ -22,9 +22,6 @@ class TemplateBackend(BaseTemplateBackend):
     primary_colour = None
 
     def supplement_context(self, context):
-        if not context.get("user"):
-            raise Exception("Context must contain a user")
-
         # inject common context
         context["site"] = Site.objects.get_current()
         context["APP_NAME"] = settings.PEACHJAM["APP_NAME"]
@@ -146,6 +143,9 @@ class CustomerIOTemplateBackend(TemplateBackend):
 
         if context.get("USE_SERIALISERS") is False:
             return
+
+        if not context.get("user"):
+            raise Exception("Context must contain a user")
 
         # inject this first so the other serializers can use the site details
         context["site"] = {
