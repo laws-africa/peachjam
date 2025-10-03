@@ -1,10 +1,16 @@
 import { createI18n } from 'vue-i18n';
 import i18n from 'i18next';
 
-const languageSelect: HTMLSelectElement | null = document.getElementById('language') as HTMLSelectElement;
-const langs = languageSelect ? Array.from(languageSelect.querySelectorAll('option'))
-  .map(option => option.value) : ['en'];
-const selectedLang = languageSelect ? languageSelect.options[languageSelect.selectedIndex].value : 'en';
+// Load language data from html, we can't use peachJam.config because it's loaded after this file
+const data = document.getElementById('peachjam-config')?.innerText;
+let config = {
+  language: 'en',
+  languages: ['en']
+};
+
+if (data) {
+  config = JSON.parse(data);
+}
 
 const loadJSONFile = (url = '') => {
   try {
@@ -14,12 +20,12 @@ const loadJSONFile = (url = '') => {
   }
 };
 
-const setUpI8n = () => {
+export function setUpI8n () {
   const resources: {
   [key: string] : any
 } = {};
 
-  langs.forEach(key => {
+  config.languages.forEach(key => {
     resources[key] = {
       translation: loadJSONFile(`${key}/translation.json`)
     };
@@ -27,7 +33,7 @@ const setUpI8n = () => {
 
   i18n.init({
     fallbackLng: 'en',
-    lng: selectedLang,
+    lng: config.language,
     resources
   });
 };
@@ -38,13 +44,13 @@ const setupVueI8n = () => {
   [key: string] : any
 } = {};
 
-  langs.forEach(key => {
+  config.languages.forEach(key => {
     messages[key] = loadJSONFile(`${key}/translation.json`);
   });
 
   const vueOptions = {
     fallbackLocale: 'en',
-    locale: selectedLang,
+    locale: config.language,
     messages
   };
   return createI18n(vueOptions);

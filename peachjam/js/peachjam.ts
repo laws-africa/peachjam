@@ -21,6 +21,8 @@ export interface PeachJamConfig {
   appName: string;
   pdfWorker: string;
   userHelpLink: string;
+  language: string;
+  languages: string[];
   sentry: {
     dsn: string | null;
     environment: string | null;
@@ -34,6 +36,8 @@ class PeachJam {
     appName: 'Peach Jam',
     pdfWorker: '/static/js/pdf.worker-prod.js',
     userHelpLink: '',
+    language: 'en',
+    languages: ['en'],
     sentry: {
       dsn: null,
       environment: null

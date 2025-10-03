@@ -7,9 +7,23 @@
         {{ group.title }}
         <span class="ms-2 badge text-bg-secondary">{{nApplied}} / {{group.replacements.length + group.suggestions.length}}</span>
       </h6>
-      <button class="btn btn-success ms-auto" @click="apply" :disabled="!canApply" title="Apply"><i class="bi bi-check"></i></button>
-      <button class="btn btn-warning ms-2" @click="unapply" :disabled="!canUnapply" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
-      <button class="btn btn-danger ms-2 " @click="remove" title="Remove"><i class="bi bi-trash"></i></button>
+      <button
+        class="btn btn-success ms-auto"
+        @click="apply"
+        :disabled="!canApply"
+        :title="$t('Apply')"
+      ><i class="bi bi-check"></i></button>
+      <button
+        class="btn btn-warning ms-2"
+        @click="unapply"
+        :disabled="!canUnapply"
+        title="$t('Undo')"
+      ><i class="bi bi-arrow-counterclockwise"></i></button>
+      <button
+        class="btn btn-danger ms-2"
+        @click="remove"
+        title="$t('Remove')"
+      ><i class="bi bi-trash"></i></button>
     </div>
     <ul :class="`list-group list-group-flush replacement-group-items ${collapsed ? 'd-none' : ''}`">
       <template v-for="replacement of group.replacements" :key="replacement.id">
