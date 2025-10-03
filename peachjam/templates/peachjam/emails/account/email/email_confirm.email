@@ -1,0 +1,8 @@
+{% extends 'peachjam/emails/layouts/base.html' %}
+{% load i18n %}
+{% block subject %}{% blocktrans trimmed %}Your email has been confirmed{% endblocktrans %}{% endblock %}
+{% block body %}
+  <p>{% blocktrans trimmed %}Your email address has been confirmed successfully.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}Thank you for keeping your {{ APP_NAME }} account secure.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+{% endblock %}

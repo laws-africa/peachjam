@@ -1,30 +1,34 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-09-30 08:40+0200\n"
+"PO-Revision-Date: 2025-02-27 13:33\n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Language-Team: Swahili\n"
-"Language: sw_KE\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
 
-#: models.py:169
-msgid "New matches for your search "
-msgstr "Mpya zinazolingana na utafutaji wako "
+#: models.py:168
+#, fuzzy
+#| msgid "Search alert"
+msgid "Search alert limit reached"
+msgstr "Tahadhari ya utafutaji"
 
-#: models.py:185
+#: models.py:256
 msgid "feedback"
 msgstr "maoni"
 
-#: models.py:187
+#: models.py:258
 msgid "name"
 msgstr "jina"
 
-#: models.py:192
+#: models.py:263
 msgid "email address"
 msgstr "anwani ya baruapepe"
 
@@ -33,7 +37,7 @@ msgid "Search alert"
 msgstr "Tahadhari ya utafutaji"
 
 #: templates/peachjam_search/_saved_search_modal.html:11
-#: templates/peachjam_search/_saved_search_modal.html:54
+#: templates/peachjam_search/_saved_search_modal.html:70
 msgid "Close"
 msgstr "Funga"
 
@@ -45,34 +49,67 @@ msgstr "Tutakutumia barua pepe hati mpya zitakapopatikana kwa utafutaji huu."
 msgid "A note to yourself about this search"
 msgstr "Ujumbe kwako mwenyewe kuhusu utafutaji huu"
 
-#: templates/peachjam_search/_saved_search_modal.html:31
+#: templates/peachjam_search/_saved_search_modal.html:36
+#, fuzzy
+#| msgid "Manage your search alerts"
+msgid "You have reached your limit for search alerts."
+msgstr "Dhibiti arifa zako za utafutaji"
+
+#: templates/peachjam_search/_saved_search_modal.html:39
+#, python-format
+msgid "To add more, please upgrade to %(product)s."
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:47
 msgid "Saving..."
 msgstr "Inahifadhi..."
 
-#: templates/peachjam_search/_saved_search_modal.html:34
+#: templates/peachjam_search/_saved_search_modal.html:50
 msgid "All search alerts"
 msgstr "Arifa zote za utafutaji"
 
-#: templates/peachjam_search/_saved_search_modal.html:37
+#: templates/peachjam_search/_saved_search_modal.html:53
 msgid "You are not logged in. Please log in to receive alerts when we find new matches for your search."
 msgstr "Hujaingia. Tafadhali ingia ili kupokea arifa tutakapopata zinazolingana na utafutaji wako."
 
-#: templates/peachjam_search/_saved_search_modal.html:49
-#: templates/peachjam_search/saved_search_list.html:34
+#: templates/peachjam_search/_saved_search_modal.html:65
+#: templates/peachjam_search/saved_search_list.html:33
 msgid "Are you sure?"
 msgstr "Je, una uhakika?"
 
-#: templates/peachjam_search/_saved_search_modal.html:50
+#: templates/peachjam_search/_saved_search_modal.html:66
 msgid "Delete alert"
 msgstr "Futa tahadhari"
 
-#: templates/peachjam_search/_saved_search_modal.html:61
+#: templates/peachjam_search/_saved_search_modal.html:77
 msgid "Save"
 msgstr "Hifadhi"
 
-#: templates/peachjam_search/_saved_search_modal.html:66
+#: templates/peachjam_search/_saved_search_modal.html:82
 msgid "Login"
 msgstr "Ingia"
+
+#: templates/peachjam_search/_search_hit.html:4
+msgid "Best match"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:88
+msgid "Explanation"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:93
+msgid "Raw"
+msgstr ""
+
+#: templates/peachjam_search/_search_hit.html:115
+#: templates/peachjam_search/_searchtrace_card.html:34
+#: templates/peachjam_search/searchtrace_list.html:34
+msgid "Page"
+msgstr "Ukurasa"
+
+#: templates/peachjam_search/_search_hit.html:133
+msgid "Download"
+msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:9
 msgid "Try it"
@@ -89,39 +126,38 @@ msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
 #: templates/peachjam_search/_searchtrace_card.html:28
-msgid "Filters"
-msgstr "Vichujio"
+msgid "Mode"
+msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:30
 msgid "Ordering"
 msgstr "Kuagiza"
-
-#: templates/peachjam_search/_searchtrace_card.html:34
-#: templates/peachjam_search/searchtrace_list.html:34
-msgid "Page"
-msgstr "Ukurasa"
 
 #: templates/peachjam_search/_searchtrace_card.html:36
 msgid "Number of results"
 msgstr "Idadi ya matokeo"
 
 #: templates/peachjam_search/_searchtrace_card.html:40
+msgid "Filters"
+msgstr "Vichujio"
+
+#: templates/peachjam_search/_searchtrace_card.html:42
 msgid "User"
 msgstr "Mtumiaji"
 
-#: templates/peachjam_search/_searchtrace_card.html:49
+#: templates/peachjam_search/_searchtrace_card.html:51
 msgid "staff"
 msgstr "wafanyakazi"
 
-#: templates/peachjam_search/_searchtrace_card.html:55
+#: templates/peachjam_search/_searchtrace_card.html:57
 msgid "Config version"
 msgstr "Sanidi toleo"
 
-#: templates/peachjam_search/_searchtrace_card.html:57
+#: templates/peachjam_search/_searchtrace_card.html:59
 msgid "Request ID"
 msgstr "Ombi la kitambulisho"
 
-#: templates/peachjam_search/_searchtrace_card.html:64
+#: templates/peachjam_search/_searchtrace_card.html:66
 msgid "Clicks"
 msgstr "Mibofyo"
 
@@ -133,23 +169,12 @@ msgstr "Kitambulisho cha kufuatilia"
 msgid "Go"
 msgstr "Nenda"
 
-#: templates/peachjam_search/emails/search_alert.html:6
-msgid "Search Alert"
-msgstr "Tahadhari ya Utafutaji"
-
-#: templates/peachjam_search/emails/search_alert.html:10
-msgid "We have found new documents that match your search alert:"
-msgstr "Tumepata hati mpya zinazolingana na arifa yako ya utafutaji:"
-
-#: templates/peachjam_search/emails/search_alert.html:23
-msgid "Manage your search alerts"
-msgstr "Dhibiti arifa zako za utafutaji"
-
-#: templates/peachjam_search/saved_search_button.html:17
+#: templates/peachjam_search/saved_search_button.html:18
+#: templates/peachjam_search/saved_search_form.html:10
 msgid "Get alerts for this search"
 msgstr "Pata arifa za utafutaji huu"
 
-#: templates/peachjam_search/saved_search_form.html:7
+#: templates/peachjam_search/saved_search_form.html:8
 msgid "Update this search alert"
 msgstr "Sasisha arifa hii ya utafutaji"
 
@@ -157,19 +182,24 @@ msgstr "Sasisha arifa hii ya utafutaji"
 msgid "Search Alerts"
 msgstr "Tafuta Tahadhari"
 
-#: templates/peachjam_search/saved_search_list.html:11
+#: templates/peachjam_search/saved_search_list.html:7
 msgid "Search alerts"
 msgstr "Tahadhari za utafutaji"
 
-#: templates/peachjam_search/saved_search_list.html:13
+#: templates/peachjam_search/saved_search_list.html:8
 msgid "We'll email you when new documents are found for your search alerts."
 msgstr "Tutakutumia barua pepe hati mpya zitakapopatikana kwa arifa zako za utafutaji."
 
-#: templates/peachjam_search/saved_search_list.html:35
+#: templates/peachjam_search/saved_search_list.html:21
+#, python-format
+msgid "Alerted %(ago)s ago"
+msgstr ""
+
+#: templates/peachjam_search/saved_search_list.html:34
 msgid "Delete"
 msgstr "Futa"
 
-#: templates/peachjam_search/saved_search_list.html:44
+#: templates/peachjam_search/saved_search_list.html:41
 msgid "You don't have any search alerts. Get started by searching for a document and clicking the search alert button."
 msgstr "Huna arifa zozote za utafutaji. Anza kwa kutafuta hati na kubofya kitufe cha arifa ya utafutaji."
 
@@ -200,12 +230,20 @@ msgstr "Imeundwa Katika"
 msgid "No search traces found."
 msgstr "Hakuna ufuatiliaji wa utafutaji uliopatikana."
 
-#: views.py:54
+#: views.py:60
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Tafuta %(app_name)s"
 
-#: views.py:209
+#: views.py:263
 msgid "Search trace not found"
 msgstr "Ufuatiliaji wa utafutaji haujapatikana"
 
+#~ msgid "New matches for your search "
+#~ msgstr "Mpya zinazolingana na utafutaji wako "
+
+#~ msgid "Search Alert"
+#~ msgstr "Tahadhari ya Utafutaji"
+
+#~ msgid "We have found new documents that match your search alert:"
+#~ msgstr "Tumepata hati mpya zinazolingana na arifa yako ya utafutaji:"

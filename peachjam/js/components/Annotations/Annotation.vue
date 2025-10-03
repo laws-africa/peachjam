@@ -3,7 +3,7 @@
     :anchor.prop="anchorElement"
   >
     <i
-      class="`bi bi-chat-left mobile-gutter-item-icon"
+      class="`bi bi-chat mobile-gutter-item-icon"
       role="button"
       @click="activate"
     />
@@ -188,6 +188,12 @@ export default {
         parent.removeChild(mark);
       });
       this.marks = [];
+    },
+    focusTextArea () {
+      setTimeout(() => {
+        this.activate();
+        this.$el.querySelector('textarea').focus();
+      }, 200);
     },
     activate () {
       this.$el.active = true;

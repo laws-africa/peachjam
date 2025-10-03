@@ -87,11 +87,16 @@ class Product(models.Model):
         default=999999,
         help_text="The is the maximum number of search alerts a user can create.",
     )
+    following_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of entities a user can follow.",
+    )
 
     FEATURES_WITH_LIMIT = [
         "saved_document_limit",
         "folder_limit",
         "search_alert_limit",
+        "following_limit",
     ]
 
     class Meta:
@@ -516,9 +521,10 @@ class Subscription(models.Model):
             "saved_document_limit": self.user.saved_documents,
             "folder_limit": self.user.folders,
             "search_alert_limit": self.user.saved_searches,
+            "following_limit": self.user.following.exclude(saved_search__isnull=False),
         }
         manager = feature_map.get(feature)
-        if not manager:
+        if manager is None:
             return True, None
 
         count = manager.count()

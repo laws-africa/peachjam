@@ -1,0 +1,11 @@
+{% extends 'peachjam/emails/layouts/base.html' %}
+{% load account i18n %}
+{% block subject %}{% blocktrans trimmed %}Confirm your {{ APP_NAME }} email address{% endblocktrans %}{% endblock %}
+{% block body %}
+  {% user_display user as user_display %}
+  <p>{% blocktrans trimmed %}You're receiving this email because {{ user_display }} used this address to register on {{ APP_NAME }}.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}Click the button below to confirm that this email address is correct.{% endblocktrans %}</p>
+  {% trans "Confirm your email address" as confirm_email_text %}
+  {% include 'peachjam/emails/layouts/_button.html' with text=confirm_email_text href=activate_url %}
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+{% endblock %}

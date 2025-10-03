@@ -1,0 +1,10 @@
+{% extends 'peachjam/emails/layouts/base.html' %}
+{% load i18n %}
+{% block subject %}{% blocktrans trimmed %}Activate your {{ APP_NAME }} account{% endblocktrans %}{% endblock %}
+{% block body %}
+  <p>{% blocktrans trimmed with user=user.get_full_name %}Hello {{ user }},{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}Click the button to confirm your email address and activate your {{ APP_NAME }} account.{% endblocktrans %}</p>
+  {% trans "Confirm your email address" as confirm_email_text %}
+  {% include 'peachjam/emails/layouts/_button.html' with text=confirm_email_text href=activate_url %}
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+{% endblock %}

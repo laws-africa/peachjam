@@ -7,6 +7,7 @@ import SelectionShare from './selection-share';
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
 import { ProvisionCitations } from '../ProvisionCitations';
+import { SelectionToolbarManager } from './selection-toolbar';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -26,6 +27,7 @@ class EnrichmentsManager {
   private gutterManager: GutterEnrichmentManager;
   private displayType: string; // html, pdf or akn
   private provisionCitations: ProvisionCitations | null = null;
+  private selectionToolbarManager: SelectionToolbarManager | null = null;
 
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
@@ -38,15 +40,24 @@ class EnrichmentsManager {
     this.gutterManager = new GutterEnrichmentManager(this.root);
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
-    this.gutterManager.akn = this.root.querySelector('.content');
+    this.gutterManager.akn = this.akn;
+    // @ts-ignore
+    this.gutterManager.floatingContainer.querySelector('.gutter-enrichment-new-buttons')?.classList.remove('btn-group-sm');
+
+    // the order here matters for the order of buttons in the gutter
     if (this.displayType !== 'pdf') {
-      this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
       this.provisionCitations = new ProvisionCitations(this.root);
     }
+
     this.selectionSearch = new SelectionSearch(this.gutterManager);
     this.selectionShare = new SelectionShare(this.gutterManager);
+
+    if (this.displayType !== 'pdf') {
+      this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
+      this.setupSelectionToolbar();
+    }
 
     this.gutter?.addEventListener('laItemChanged', (e: any) => {
       if (e.target.classList.contains('relationship-gutter-item') && e.target.active) {
@@ -66,9 +77,22 @@ class EnrichmentsManager {
 
   addPdfEnrichments () {
     // setup PDF enrichments after the PDF has been rendered
-    this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
-    this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
     this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
+    this.citationLinks = new PDFCitationLinks(this.root, this.gutterManager);
+    this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
+    this.setupSelectionToolbar();
+  }
+
+  setupSelectionToolbar () {
+    if (this.akn) {
+      // @ts-ignore
+      this.selectionToolbarManager = new SelectionToolbarManager(this.akn);
+      if (this.annotationsManager) {
+        this.selectionToolbarManager.addProvider(this.annotationsManager);
+      }
+      this.selectionToolbarManager.addProvider(this.selectionShare);
+      this.selectionToolbarManager.addProvider(this.selectionSearch);
+    }
   }
 }
 

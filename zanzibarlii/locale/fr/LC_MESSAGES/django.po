@@ -85,4 +85,3 @@ msgstr "Contactez-nous"
 #: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contactez-nous au <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> pour plus d'informations."
-
