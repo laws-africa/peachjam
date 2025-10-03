@@ -267,6 +267,7 @@ class SearchClickViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = SearchClickSerializer
 
 
+@method_decorator(never_cache, name="dispatch")
 class SearchTraceListView(PermissionRequiredMixin, ListView):
     model = SearchTrace
     paginate_by = 50
@@ -290,6 +291,7 @@ class SearchTraceListView(PermissionRequiredMixin, ListView):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
 
+@method_decorator(never_cache, name="dispatch")
 class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
     model = SearchTrace
     queryset = SearchTrace.objects.prefetch_related("previous_search", "next_searches")

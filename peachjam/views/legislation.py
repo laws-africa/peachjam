@@ -9,6 +9,7 @@ from django.template.defaultfilters import date as format_date
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
@@ -564,6 +565,7 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
 class DocumentProvisionCitationView(
     SubscriptionRequiredMixin, FilteredDocumentListView
 ):

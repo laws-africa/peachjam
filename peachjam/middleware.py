@@ -95,6 +95,7 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         "/api/",
         "/my/",
         "/user/",
+        "/search/saved-searches/",
     ]
 
     lang_path_re = re.compile("^/[a-z]{2}/")
