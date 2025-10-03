@@ -2,14 +2,14 @@
   <div>
     <SuggestionsPane @apply="add" :document-id="documentId" />
     <div class="d-flex">
-      <button class="btn btn-primary" @click="newReplacement">Replace...</button>
+      <button class="btn btn-primary" @click="newReplacement">{{ $t('Replace') }}...</button>
       <div class="dropdown ms-auto">
         <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-          Anonymisation notice
+          {{ $t('Anonymisation notice') }}
         </button>
         <ul class="dropdown-menu">
-          <li><button class="dropdown-item" @click="$emit('insertNotice')">Insert</button></li>
-          <li><button class="dropdown-item" @click="$emit('removeNotice')">Remove</button></li>
+          <li><button class="dropdown-item" @click="$emit('insertNotice')">{{ $t('Insert') }}</button></li>
+          <li><button class="dropdown-item" @click="$emit('removeNotice')">{{ $t('Remove') }}</button></li>
         </ul>
       </div>
     </div>

@@ -26,9 +26,9 @@
             />
           </div>
           <div class="modal-body">
-            <p>{{ $t('You cannot add a comment. ') }}</p>
+            <p>{{ $t('You cannot add a comment.') }}</p>
             <p v-if="subscriptionProduct">
-              {{ $t('To add a comment, please subscribe to ') }}{{ subscriptionProduct }}
+              {{ $t('To add a comment, please subscribe to') }} {{ subscriptionProduct }}
             </p>
           </div>
           <div class="modal-footer">
