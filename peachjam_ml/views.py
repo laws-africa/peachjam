@@ -1,11 +1,15 @@
+import json
+
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
+from langchain_core.messages import HumanMessage, SystemMessage
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
+from peachjam_ml.chat import graph
 from peachjam_ml.models import DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
@@ -66,14 +70,45 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
-        # TODO: handle chat message creation and response
+
+        # parse json input from request body
+        input = json.loads(request.body)
+        message = input.get("message", "")
+        first = input.get("first", False)
+
+        messages = []
+        if first:
+            document_text = self.object.get_content_as_text()[:1000]
+            system_prompt = (
+                "You are a helpful assistant that answers questions about the provided document. "
+                "Only use the document for answers; if the answer is not present, say so.\n\n"
+                f"Document contents:\n{document_text}"
+            )
+            system_message = SystemMessage(content=system_prompt)
+            messages.append(system_message)
+
+        message = HumanMessage(message["content"], id=message.get("id"))
+        messages.append(message)
+        # TODO: load previous messages in the thread
+        config = {"configurable": {"thread_id": "1"}}
+
+        result = graph.invoke(
+            {"messages": messages},
+            config,
+        )
+
         return JsonResponse(
             {
                 "messages": [
-                    {
-                        "role": "assistant",
-                        "content": "This is a placeholder response from the assistant.",
-                    }
+                    serialise(m) for m in result["messages"] if m.type != "system"
                 ]
             }
         )
+
+
+def serialise(message):
+    return {
+        "id": message.id,
+        "role": message.type,
+        "content": message.content,
+    }

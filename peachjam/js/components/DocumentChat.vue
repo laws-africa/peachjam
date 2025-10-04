@@ -20,11 +20,11 @@
           v-for="message in messages"
           :key="message.id"
           class="d-flex mb-3"
-          :class="message.role === 'user' ? 'justify-content-end' : 'justify-content-start'"
+          :class="message.role === 'human' ? 'justify-content-end' : 'justify-content-start'"
         >
           <div
             class="chat-bubble text-break"
-            :class="message.role === 'user' ? 'chat-bubble-user bg-primary text-white' : 'chat-bubble-agent bg-light'"
+            :class="message.role === 'human' ? 'chat-bubble-user bg-primary text-white' : 'chat-bubble-agent'"
           >
             <div class="chat-content">{{ message.content }}</div>
           </div>
@@ -32,7 +32,7 @@
       </transition-group>
 
       <div v-if="loading" class="d-flex justify-content-start mb-3">
-        <div class="chat-bubble chat-bubble-agent bg-light text-muted d-flex align-items-center gap-2">
+        <div class="chat-bubble chat-bubble-agent text-muted d-flex align-items-center gap-2">
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
           <span>Thinking…</span>
         </div>
@@ -110,7 +110,7 @@ export default {
         return;
       }
 
-      const userMessage = this.createMessage('user', text);
+      const userMessage = this.createMessage('human', text);
       this.messages.push(userMessage);
       this.inputText = '';
       this.loading = true;
@@ -122,9 +122,9 @@ export default {
       });
 
       try {
-        // TODO: server has full context, just send the latest message the user entered
         const payload = {
-          messages: this.messages.map(({ role, content }) => ({ role, content }))
+          message: userMessage,
+          first: this.messages.length == 1,
         };
 
         const resp = await fetch(this.endpoint, {
@@ -141,8 +141,7 @@ export default {
         }
 
         const data = await resp.json();
-        const assistantMessages = this.normaliseEvents(data.messages);
-        this.mergeMessages(assistantMessages);
+        this.mergeMessages(data.messages);
       } catch (err) {
         console.error(err);
         this.error = err.message || 'Something went wrong. Please try again.';
@@ -170,104 +169,6 @@ export default {
           this.messages.push({ ...msg });
         }
       }
-    },
-    normaliseEvents (events) {
-      if (!Array.isArray(events)) {
-        return [];
-      }
-
-      return events
-        .map((event) => {
-          const role = this.resolveRole(event);
-          const id = event.id || `${role || 'assistant'}-${generateId()}`;
-          const content = this.resolveContent(event);
-          return {
-            id,
-            role: role || 'assistant',
-            content
-          };
-        })
-        .filter((event) => event.role !== 'system' && event.role !== 'user' && event.content.trim().length > 0);
-    },
-    resolveRole (event) {
-      if (!event) {
-        return null;
-      }
-      if (event.role) {
-        return event.role;
-      }
-      if (event.data && event.data.role) {
-        return event.data.role;
-      }
-      if (event.message && event.message.role) {
-        return event.message.role;
-      }
-      return null;
-    },
-    resolveContent (event) {
-      const mapContentArray = (items) => {
-        return items
-          .map((item) => {
-            if (!item) {
-              return '';
-            }
-            if (typeof item === 'string') {
-              return item;
-            }
-            if (item.text) {
-              return item.text;
-            }
-            if (item.content) {
-              return this.resolveContent(item);
-            }
-            return '';
-          })
-          .filter(Boolean)
-          .join('\n\n');
-      };
-
-      if (!event) {
-        return '';
-      }
-      if (typeof event === 'string') {
-        return event;
-      }
-      if (typeof event.content === 'string') {
-        return event.content;
-      }
-      if (Array.isArray(event.content)) {
-        return mapContentArray(event.content);
-      }
-      if (event.data) {
-        if (typeof event.data === 'string') {
-          return event.data;
-        }
-        if (event.data.content) {
-          if (typeof event.data.content === 'string') {
-            return event.data.content;
-          }
-          if (Array.isArray(event.data.content)) {
-            return mapContentArray(event.data.content);
-          }
-        }
-      }
-      if (event.message && event.message.content) {
-        if (typeof event.message.content === 'string') {
-          return event.message.content;
-        }
-        if (Array.isArray(event.message.content)) {
-          return mapContentArray(event.message.content);
-        }
-      }
-      if (event.delta && typeof event.delta === 'string') {
-        return event.delta;
-      }
-      if (event.delta && event.delta.content) {
-        return Array.isArray(event.delta.content)
-          ? mapContentArray(event.delta.content)
-          : String(event.delta.content || '');
-      }
-      return '';
     },
     scrollToBottom () {
       const el = this.$refs.messageContainer;
@@ -299,18 +200,17 @@ export default {
 }
 
 .chat-bubble {
+}
+
+.chat-bubble-user {
   max-width: 75%;
   border-radius: 1rem;
+  border-bottom-right-radius: 0.25rem;
   padding: 0.75rem 1rem;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
 }
 
-.chat-bubble-user {
-  border-bottom-right-radius: 0.25rem;
-}
-
 .chat-bubble-agent {
-  border-bottom-left-radius: 0.25rem;
 }
 
 .chat-content {
