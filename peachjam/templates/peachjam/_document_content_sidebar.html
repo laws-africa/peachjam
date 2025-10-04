@@ -56,6 +56,16 @@ and #navigation-column for desktop screensize.
                 aria-selected="false">
           {% trans 'Search' %}
         </button>
+        <button class="nav-link"
+                id="navigation-chat-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#navigation-chat"
+                type="button"
+                role="tab"
+                aria-controls="navigation-chat"
+                aria-selected="false">
+          {% trans 'Chat' %}
+        </button>
       </div>
     </nav>
     <div class="tab-content" id="navigation-tab-content">
@@ -92,6 +102,13 @@ and #navigation-column for desktop screensize.
           <div class="pdf-previews"></div>
         </div>
       {% endif %}
+      <div class="tab-pane fade h-100"
+           id="navigation-chat"
+           role="tabpanel"
+           aria-labelledby="navigation-chat-tab"
+           data-vue-component="DocumentChat"
+           data-document-id="{{ document.id }}">
+      </div>
     </div>
   </div>
 </div>
