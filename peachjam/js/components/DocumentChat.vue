@@ -1,15 +1,5 @@
 <template>
-  <div class="document-chat d-flex flex-column h-100 bg-white">
-    <header class="chat-header d-flex align-items-center px-3 py-2 border-bottom">
-      <div class="chat-header__icon rounded-circle d-flex align-items-center justify-content-center me-2">
-        <i class="bi bi-chat-dots"></i>
-      </div>
-      <div>
-        <div class="fw-semibold">Ask this document</div>
-        <small class="text-muted">Powered by PeachJam AI assistant</small>
-      </div>
-    </header>
-
+  <div class="document-chat d-flex flex-column h-100">
     <div ref="messageContainer" class="chat-messages flex-grow-1 overflow-auto px-3 py-3">
       <div v-if="messages.length === 0 && !loading" class="text-center text-muted py-5">
         Start the conversation by asking a question about this document.
@@ -97,9 +87,23 @@ export default {
     }
   },
   mounted () {
+    this.load();
     this.focusInput();
   },
   methods: {
+    async load () {
+      try {
+        const resp = await fetch(this.endpoint);
+        if (!resp.ok) {
+          throw new Error('The assistant could not respond right now. Please try again.');
+        }
+        const data = await resp.json();
+        this.mergeMessages(data.messages);
+      } catch (err) {
+        console.error(err);
+        this.error = err.message || 'Something went wrong. Please try again.';
+      }
+    },
     async submit () {
       if (this.loading || !this.isReady) {
         return;
@@ -124,7 +128,6 @@ export default {
       try {
         const payload = {
           message: userMessage,
-          first: this.messages.length == 1,
         };
 
         const resp = await fetch(this.endpoint, {
@@ -189,17 +192,6 @@ export default {
 <style scoped>
 .document-chat {
   min-height: 28rem;
-}
-
-.chat-header__icon {
-  width: 2.5rem;
-  height: 2.5rem;
-  background-color: rgba(13, 110, 253, 0.1);
-  color: #0d6efd;
-  font-size: 1.1rem;
-}
-
-.chat-bubble {
 }
 
 .chat-bubble-user {

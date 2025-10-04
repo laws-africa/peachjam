@@ -66,18 +66,23 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         # TODO: return existing chat messages or create a new one
-        return JsonResponse({})
+
+        config = {"configurable": {"thread_id": "1"}}
+        snapshot = graph.get_state(config)
+        return self.render_state(snapshot.values)
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
 
         # parse json input from request body
         input = json.loads(request.body)
-        message = input.get("message", "")
-        first = input.get("first", False)
+
+        # TODO: make thread_id dynamic
+        config = {"configurable": {"thread_id": "1"}}
+        snapshot = graph.get_state(config)
 
         messages = []
-        if first:
+        if not snapshot.values:
             document_text = self.object.get_content_as_text()[:1000]
             system_prompt = (
                 "You are a helpful assistant that answers questions about the provided document. "
@@ -87,20 +92,24 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
             system_message = SystemMessage(content=system_prompt)
             messages.append(system_message)
 
-        message = HumanMessage(message["content"], id=message.get("id"))
+        message = input.get("message", "")
+        message = HumanMessage(message["content"], id=message["id"])
         messages.append(message)
-        # TODO: load previous messages in the thread
-        config = {"configurable": {"thread_id": "1"}}
 
         result = graph.invoke(
             {"messages": messages},
             config,
         )
 
+        return self.render_state(result)
+
+    def render_state(self, result):
         return JsonResponse(
             {
                 "messages": [
-                    serialise(m) for m in result["messages"] if m.type != "system"
+                    serialise(m)
+                    for m in result.get("messages", [])
+                    if m.type != "system"
                 ]
             }
         )
