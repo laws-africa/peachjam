@@ -5,11 +5,11 @@ from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
-from peachjam_ml.chat import graph
+from peachjam_ml.chat import get_system_prompt, graph
 from peachjam_ml.models import DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
@@ -66,9 +66,7 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
         # TODO: return existing chat messages or create a new one
-
-        config = {"configurable": {"thread_id": "1"}}
-        snapshot = graph.get_state(config)
+        snapshot = graph.get_state(self.get_config())
         return self.render_state(snapshot.values)
 
     def post(self, request, *args, **kwargs):
@@ -77,20 +75,12 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
         # parse json input from request body
         input = json.loads(request.body)
 
-        # TODO: make thread_id dynamic
-        config = {"configurable": {"thread_id": "1"}}
+        config = self.get_config()
         snapshot = graph.get_state(config)
 
         messages = []
         if not snapshot.values:
-            document_text = self.object.get_content_as_text()[:1000]
-            system_prompt = (
-                "You are a helpful assistant that answers questions about the provided document. "
-                "Only use the document for answers; if the answer is not present, say so.\n\n"
-                f"Document contents:\n{document_text}"
-            )
-            system_message = SystemMessage(content=system_prompt)
-            messages.append(system_message)
+            messages.append(get_system_prompt(self.object, self.request.user))
 
         message = input.get("message", "")
         message = HumanMessage(message["content"], id=message["id"])
@@ -102,6 +92,16 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
         )
 
         return self.render_state(result)
+
+    def get_config(self):
+        return {
+            "configurable": {
+                # TODO: make thread_id dynamic
+                "thread_id": "1",
+                "document_id": self.object.pk,
+                "user_id": self.request.user.pk,
+            }
+        }
 
     def render_state(self, result):
         return JsonResponse(
