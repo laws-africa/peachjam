@@ -1,3 +1,5 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
@@ -51,3 +53,27 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         doc_ids = self.object.saved_documents.values_list("document_id", flat=True)
         context["similar_documents"] = DocumentEmbedding.get_similar_documents(doc_ids)
         return context
+
+
+class DocumentChatView(LoginRequiredMixin, DetailView):
+    # TODO: perms
+    model = CoreDocument
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        # TODO: return existing chat messages or create a new one
+        return JsonResponse({})
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        # TODO: handle chat message creation and response
+        return JsonResponse(
+            {
+                "messages": [
+                    {
+                        "role": "assistant",
+                        "content": "This is a placeholder response from the assistant.",
+                    }
+                ]
+            }
+        )

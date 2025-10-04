@@ -1,6 +1,10 @@
 from django.urls import path, re_path
 
-from .views import SimilarDocumentsDocumentDetailView, SimilarDocumentsFolderView
+from .views import (
+    DocumentChatView,
+    SimilarDocumentsDocumentDetailView,
+    SimilarDocumentsFolderView,
+)
 
 urlpatterns = [
     re_path(
@@ -13,4 +17,5 @@ urlpatterns = [
         SimilarDocumentsFolderView.as_view(),
         name="folder_similar_docs",
     ),
+    path("api/documents/<int:pk>/chat", DocumentChatView.as_view()),
 ]
