@@ -303,12 +303,18 @@ class PeachjamViewsTest(TestCase):
             outcome=appeal_allowed,
         )
 
-        response = self.client.get(appeal_case.get_absolute_url())
+        response = self.client.get(
+            reverse(
+                "document_case_histories", args=[appeal_case.expression_frbr_uri[1:]]
+            )
+        )
         self.assertContains(response, "Case history")
         self.assertContains(response, main_case.title)
         self.assertContains(response, appeal_allowed.name)
 
-        response = self.client.get(main_case.get_absolute_url())
+        response = self.client.get(
+            reverse("document_case_histories", args=[main_case.expression_frbr_uri[1:]])
+        )
         self.assertContains(response, "reviewed by another court")
         self.assertContains(response, "Case history")
         self.assertContains(response, appeal_case.title)

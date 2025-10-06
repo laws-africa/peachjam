@@ -1,5 +1,13 @@
 {% load i18n %}
 {% if case_histories %}
+  {% if show_review_notice %}
+    <div hx-swap-oob="beforeend:#extra-notices">
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        {% trans 'This judgment was reviewed by another court. See the Case history tab for details.' %}
+      </div>
+    </div>
+  {% endif %}
   <ul hx-swap-oob="beforeend:#document-tab-list">
     <li class="nav-item" role="presentation">
       <button class="nav-link"

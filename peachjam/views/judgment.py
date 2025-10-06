@@ -86,7 +86,6 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
         return self.template_name
 
     def add_case_histories(self, context):
-        # TODO: add back the notice
         document = self.get_object()
 
         # judgments that impact this one
@@ -108,16 +107,7 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
         ]
 
         if histories:
-            context["notices"].append(
-                {
-                    "type": messages.WARNING,
-                    "html": mark_safe(
-                        _(
-                            "This judgment was reviewed by another court. See the Case history tab for details."
-                        )
-                    ),
-                }
-            )
+            context["show_review_notice"] = True
 
         # judgments that this one impacts
         outgoing_histories = [
