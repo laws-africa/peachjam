@@ -26,16 +26,14 @@
             />
           </div>
           <div class="modal-body">
-            <p>{{ $t('You cannot add a comment.') }}</p>
-            <p v-if="subscriptionProduct">
-              {{ $t('To add a comment, please subscribe to') }} {{ subscriptionProduct }}
-            </p>
+            <p v-if="!user?.id">{{ $t('To add comments, please login and subscribe.') }}</p>
+            <p v-else>{{ $t('To add comments, please upgrade your subscription.') }}</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               {{ $t('Close') }}
             </button>
-            <a :href="loginUrl" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
+            <a v-if="!user?.id" :href="loginUrl" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
           </div>
         </div>
       </div>
@@ -54,12 +52,7 @@ export default {
   },
   props: {
     viewRoot: HTMLElement,
-    gutter: HTMLElement,
-    editable: Boolean,
-    subscriptionProduct: {
-      type: String,
-      default: ''
-    }
+    gutter: HTMLElement
   },
   data: () => ({
     items: [],
@@ -74,6 +67,7 @@ export default {
   },
   mounted () {
     peachJam.whenUserLoaded().then((user) => {
+      this.user = user;
       if (user.perms.includes('peachjam.add_annotation')) {
         this.editable = true;
         this.getAnnotations();
