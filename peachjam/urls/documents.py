@@ -7,6 +7,8 @@ from peachjam.views import (
     AnnotationDetailView,
     AnnotationEditView,
     AnnotationListView,
+    CaseHistoryView,
+    CaseSummaryView,
     ComparePortionsView,
     DocumentAttachmentView,
     DocumentCitationsView,
@@ -61,6 +63,16 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/citations$",
         cache_page(CACHE_DURATION)(DocumentCitationsView.as_view()),
         name="document_citations",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/case-histories$",
+        CaseHistoryView.as_view(),
+        name="document_case_histories",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/judgment-summary$",
+        CaseSummaryView.as_view(),
+        name="document_case_summary",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/social-image.png$",

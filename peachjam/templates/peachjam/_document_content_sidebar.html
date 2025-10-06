@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load peachjam i18n %}
 <!--
 contents of #navigation-content will be placed in [data-offcanvas-body] for tablet/mobile screensize
 and #navigation-column for desktop screensize.
@@ -76,7 +76,9 @@ and #navigation-column for desktop screensize.
              id="doc-summary"
              role="tabpanel"
              aria-labelledby="doc-summary-tab">
-          <div class="p-3">{% include 'peachjam/document/_judgment_summary.html' with collapse_summary=False %}</div>
+          <div hx-trigger="load"
+               hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}">
+          </div>
         </div>
       {% endif %}
       {% if display_type == 'pdf' %}

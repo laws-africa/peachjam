@@ -1,70 +1,100 @@
 {% load i18n %}
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>{% trans 'Date' %}</th>
-      <th>{% trans 'Case' %}</th>
-      <th>{% trans 'Court' %}</th>
-      <th>{% trans 'Judges' %}</th>
-      <th>{% trans 'Outcome' %}</th>
-      <th>{% trans 'Appeal outcome' %}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for entry in case_histories %}
-      <tr>
-        <td>{{ entry.document.date }}</td>
-        <td>
-          <a href="{{ entry.document.get_absolute_url }}">{{ entry.document.title }}</a>
-          {% if entry.document == document %}
-            <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
-          {% endif %}
-        </td>
-        <td>{{ entry.document.court }}</td>
-        <td>
-          {% for judge in entry.document.judges.all %}
-            {# djlint:off #}
+{% if case_histories %}
+  <ul hx-swap-oob="beforeend:#document-tab-list">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link"
+              data-bs-toggle="tab"
+              data-bs-target="#case-history-tab"
+              data-track-event="Document | Tab | Case history"
+              type="button"
+              role="tab"
+              aria-controls="case-history-tab"
+              aria-selected="false">
+        <i class="bi bi-pj pj-case-history"></i>
+        {% trans 'Case history' %}
+      </button>
+    </li>
+  </ul>
+  <div hx-swap-oob="beforeend:#document-tab-panes">
+    <div class="tab-pane"
+         id="case-history-tab"
+         role="tabpanel"
+         aria-labelledby="case-history-tab">
+      <div class="container">
+        {% if subscription_required %}
+          {% include "peachjam_subs/_subscription_required.html" %}
+        {% else %}
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>{% trans 'Date' %}</th>
+                <th>{% trans 'Case' %}</th>
+                <th>{% trans 'Court' %}</th>
+                <th>{% trans 'Judges' %}</th>
+                <th>{% trans 'Outcome' %}</th>
+                <th>{% trans 'Appeal outcome' %}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for entry in case_histories %}
+                <tr>
+                  <td>{{ entry.document.date }}</td>
+                  <td>
+                    <a href="{{ entry.document.get_absolute_url }}">{{ entry.document.title }}</a>
+                    {% if entry.document == document %}
+                      <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ entry.document.court }}</td>
+                  <td>
+                    {% for judge in entry.document.judges.all %}
+                      {# djlint:off #}
           <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
-            {# djlint:on #}
-          {% endfor %}
-        </td>
-        <td>{{ entry.document.outcome }}</td>
-        <td>&nbsp;</td>
-      </tr>
-      {% for child in entry.children %}
-        <tr>
-          <td>{{ child.info.date }}</td>
-          <td>
-            ↳
-            {% if child.document %}
-              <a href="{{ child.document.get_absolute_url }}">{{ child.document.title }}</a>
-              {% if child.document == document %}
-                <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
-              {% endif %}
-            {% else %}
-              {{ child.case_history.case_number }}
-            {% endif %}
-          </td>
-          <td>{{ child.info.court }}</td>
-          <td>
-            {% for judge in child.info.judges.all %}
-              {# djlint:off #}
+                      {# djlint:on #}
+                    {% endfor %}
+                  </td>
+                  <td>{{ entry.document.outcome }}</td>
+                  <td>&nbsp;</td>
+                </tr>
+                {% for child in entry.children %}
+                  <tr>
+                    <td>{{ child.info.date }}</td>
+                    <td>
+                      ↳
+                      {% if child.document %}
+                        <a href="{{ child.document.get_absolute_url }}">{{ child.document.title }}</a>
+                        {% if child.document == document %}
+                          <span class="badge text-bg-primary">{% trans "This judgment" %}</span>
+                        {% endif %}
+                      {% else %}
+                        {{ child.case_history.case_number }}
+                      {% endif %}
+                    </td>
+                    <td>{{ child.info.court }}</td>
+                    <td>
+                      {% for judge in child.info.judges.all %}
+                        {# djlint:off #}
             <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
-              {# djlint:on #}
-            {% endfor %}
-          </td>
-          <td>
-            {% if child.document %}
-              {% for outcome in child.document.outcomes.all %}
-                {# djlint:off #}
+                        {# djlint:on #}
+                      {% endfor %}
+                    </td>
+                    <td>
+                      {% if child.document %}
+                        {% for outcome in child.document.outcomes.all %}
+                          {# djlint:off #}
                 <span class="text-nowrap">{{ outcome }}{% if not forloop.last %},{% endif %}</span>
-                {# djlint:on #}
+                          {# djlint:on #}
+                        {% endfor %}
+                      {% endif %}
+                    </td>
+                    <td>{{ child.case_history.outcome|default_if_none:"" }}</td>
+                  </tr>
+                {% endfor %}
               {% endfor %}
-            {% endif %}
-          </td>
-          <td>{{ child.case_history.outcome|default_if_none:"" }}</td>
-        </tr>
-      {% endfor %}
-    {% endfor %}
-  </tbody>
-</table>
+            </tbody>
+          </table>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endif %}
