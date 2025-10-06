@@ -4,15 +4,15 @@
       <h6 @click="toggle">
         <span v-if="collapsed" class="toggle">▶</span>
         <span v-if="!collapsed" class="toggle">▼</span>
-        Suggested replacements
+        {{ $t('Suggested replacements') }}
       </h6>
       <button
         class="btn btn-outline-primary ms-auto"
         :disabled="loading"
         @click="load"
       >
-        <span v-if="!loading">Make suggestions</span>
-        <span v-else>Thinking ... </span>
+        <span v-if="!loading">{{ $t('Make suggestions') }}</span>
+        <span v-else>{{ $t('Thinking') }}...</span>
       </button>
     </div>
     <div :class="`card-body ${collapsed ? 'd-none': ''}`" v-if="suggestions.length">
@@ -22,7 +22,7 @@
             <div>{{ suggestion.old_text }} → {{ suggestion.new_text }}</div>
             <div class="text-muted ms-3">{{ suggestion.reasoning }}</div>
           </div>
-          <button class="btn btn-primary ms-auto" @click="apply(suggestion)">Use</button>
+          <button class="btn btn-primary ms-auto" @click="apply(suggestion)">{{ $t('Use') }}</button>
         </li>
       </ul>
     </div>
