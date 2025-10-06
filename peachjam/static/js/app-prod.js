@@ -60961,6 +60961,44 @@ var CopyToClipboard = /** @class */ (function () {
 
 /***/ }),
 
+/***/ "./peachjam/js/components/document-detail.ts":
+/*!***************************************************!*\
+  !*** ./peachjam/js/components/document-detail.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var _peachjam__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../peachjam */ "./peachjam/js/peachjam.ts");
+/* harmony import */ var _utils_function__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../utils/function */ "./peachjam/js/utils/function.ts");
+
+
+var DocumentDetail = /** @class */ (function () {
+    function DocumentDetail(root) {
+        var _this = this;
+        this.documentId = root.dataset.documentId || '';
+        this.debugUrl = root.dataset.debugUrl || '';
+        _peachjam__WEBPACK_IMPORTED_MODULE_0__["default"].whenUserLoaded().then(function (user) {
+            if (user.perms.includes('peachjam.can_debug_document')) {
+                _this.loadDebug();
+            }
+        });
+    }
+    DocumentDetail.prototype.loadDebug = function () {
+        if (this.debugUrl) {
+            (0,_utils_function__WEBPACK_IMPORTED_MODULE_1__.htmxAjax)('GET', this.debugUrl);
+        }
+    };
+    return DocumentDetail;
+}());
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (DocumentDetail);
+
+
+/***/ }),
+
 /***/ "./peachjam/js/components/document-filter-form.ts":
 /*!********************************************************!*\
   !*** ./peachjam/js/components/document-filter-form.ts ***!
@@ -61351,21 +61389,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _document_filter_form__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./document-filter-form */ "./peachjam/js/components/document-filter-form.ts");
 /* harmony import */ var _document_table__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./document-table */ "./peachjam/js/components/document-table.ts");
 /* harmony import */ var _DocumentContent_index__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./DocumentContent/index */ "./peachjam/js/components/DocumentContent/index.ts");
-/* harmony import */ var _floating_header__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./floating-header */ "./peachjam/js/components/floating-header.ts");
-/* harmony import */ var _document_uploader__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./document-uploader */ "./peachjam/js/components/document-uploader.ts");
-/* harmony import */ var _navigation_select__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./navigation-select */ "./peachjam/js/components/navigation-select.ts");
-/* harmony import */ var _tabs__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./tabs */ "./peachjam/js/components/tabs.ts");
-/* harmony import */ var _taxonomy_tree__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./taxonomy-tree */ "./peachjam/js/components/taxonomy-tree.ts");
-/* harmony import */ var _terms_of_use__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./terms-of-use */ "./peachjam/js/components/terms-of-use.ts");
-/* harmony import */ var _search_typeahead__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./search-typeahead */ "./peachjam/js/components/search-typeahead.js");
-/* harmony import */ var _share_menu_item__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./share-menu-item */ "./peachjam/js/components/share-menu-item.ts");
-/* harmony import */ var _saved_documents__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./saved-documents */ "./peachjam/js/components/saved-documents.ts");
-/* harmony import */ var _Offline__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./Offline */ "./peachjam/js/components/Offline/index.ts");
-/* harmony import */ var _DocumentProblemModal_vue__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./DocumentProblemModal.vue */ "./peachjam/js/components/DocumentProblemModal.vue");
-/* harmony import */ var _FindDocuments_index_vue__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./FindDocuments/index.vue */ "./peachjam/js/components/FindDocuments/index.vue");
-/* harmony import */ var _PocketLawDownload_vue__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./PocketLawDownload.vue */ "./peachjam/js/components/PocketLawDownload.vue");
-/* harmony import */ var _TaxonomyTopics_vue__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./TaxonomyTopics.vue */ "./peachjam/js/components/TaxonomyTopics.vue");
-/* harmony import */ var _Anon_AnonApp_vue__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./Anon/AnonApp.vue */ "./peachjam/js/components/Anon/AnonApp.vue");
+/* harmony import */ var _document_detail__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./document-detail */ "./peachjam/js/components/document-detail.ts");
+/* harmony import */ var _floating_header__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./floating-header */ "./peachjam/js/components/floating-header.ts");
+/* harmony import */ var _document_uploader__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ./document-uploader */ "./peachjam/js/components/document-uploader.ts");
+/* harmony import */ var _navigation_select__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ./navigation-select */ "./peachjam/js/components/navigation-select.ts");
+/* harmony import */ var _tabs__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ./tabs */ "./peachjam/js/components/tabs.ts");
+/* harmony import */ var _taxonomy_tree__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ./taxonomy-tree */ "./peachjam/js/components/taxonomy-tree.ts");
+/* harmony import */ var _terms_of_use__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ./terms-of-use */ "./peachjam/js/components/terms-of-use.ts");
+/* harmony import */ var _search_typeahead__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ./search-typeahead */ "./peachjam/js/components/search-typeahead.js");
+/* harmony import */ var _share_menu_item__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! ./share-menu-item */ "./peachjam/js/components/share-menu-item.ts");
+/* harmony import */ var _saved_documents__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! ./saved-documents */ "./peachjam/js/components/saved-documents.ts");
+/* harmony import */ var _Offline__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! ./Offline */ "./peachjam/js/components/Offline/index.ts");
+/* harmony import */ var _DocumentProblemModal_vue__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! ./DocumentProblemModal.vue */ "./peachjam/js/components/DocumentProblemModal.vue");
+/* harmony import */ var _FindDocuments_index_vue__WEBPACK_IMPORTED_MODULE_19__ = __webpack_require__(/*! ./FindDocuments/index.vue */ "./peachjam/js/components/FindDocuments/index.vue");
+/* harmony import */ var _PocketLawDownload_vue__WEBPACK_IMPORTED_MODULE_20__ = __webpack_require__(/*! ./PocketLawDownload.vue */ "./peachjam/js/components/PocketLawDownload.vue");
+/* harmony import */ var _TaxonomyTopics_vue__WEBPACK_IMPORTED_MODULE_21__ = __webpack_require__(/*! ./TaxonomyTopics.vue */ "./peachjam/js/components/TaxonomyTopics.vue");
+/* harmony import */ var _Anon_AnonApp_vue__WEBPACK_IMPORTED_MODULE_22__ = __webpack_require__(/*! ./Anon/AnonApp.vue */ "./peachjam/js/components/Anon/AnonApp.vue");
+
 
 
 
@@ -61392,28 +61432,29 @@ var components = {
     // Data components
     CopyToClipboard: _clipboard__WEBPACK_IMPORTED_MODULE_0__.CopyToClipboard,
     DocumentContent: _DocumentContent_index__WEBPACK_IMPORTED_MODULE_6__["default"],
+    DocumentDetail: _document_detail__WEBPACK_IMPORTED_MODULE_7__["default"],
     DocumentFilterForm: _document_filter_form__WEBPACK_IMPORTED_MODULE_4__["default"],
     DocumentTable: _document_table__WEBPACK_IMPORTED_MODULE_5__["default"],
-    FloatingHeader: _floating_header__WEBPACK_IMPORTED_MODULE_7__["default"],
-    DocumentUploader: _document_uploader__WEBPACK_IMPORTED_MODULE_8__["default"],
-    NavigationSelect: _navigation_select__WEBPACK_IMPORTED_MODULE_9__["default"],
+    FloatingHeader: _floating_header__WEBPACK_IMPORTED_MODULE_8__["default"],
+    DocumentUploader: _document_uploader__WEBPACK_IMPORTED_MODULE_9__["default"],
+    NavigationSelect: _navigation_select__WEBPACK_IMPORTED_MODULE_10__["default"],
     RelationshipEnrichments: _RelationshipEnrichment__WEBPACK_IMPORTED_MODULE_1__.RelationshipEnrichments,
     ProvisionEnrichments: _ProvisionEnrichments__WEBPACK_IMPORTED_MODULE_2__.ProvisionEnrichments,
     AnnotationsProvider: _Annotations__WEBPACK_IMPORTED_MODULE_3__.AnnotationsProvider,
-    SavedDocumentModal: _saved_documents__WEBPACK_IMPORTED_MODULE_15__.SavedDocumentModal,
-    SearchTypeahead: _search_typeahead__WEBPACK_IMPORTED_MODULE_13__["default"],
-    ShareMenuItem: _share_menu_item__WEBPACK_IMPORTED_MODULE_14__["default"],
-    ToggleTab: _tabs__WEBPACK_IMPORTED_MODULE_10__.ToggleTab,
-    TaxonomyTree: _taxonomy_tree__WEBPACK_IMPORTED_MODULE_11__["default"],
-    TermsOfUse: _terms_of_use__WEBPACK_IMPORTED_MODULE_12__["default"],
+    SavedDocumentModal: _saved_documents__WEBPACK_IMPORTED_MODULE_16__.SavedDocumentModal,
+    SearchTypeahead: _search_typeahead__WEBPACK_IMPORTED_MODULE_14__["default"],
+    ShareMenuItem: _share_menu_item__WEBPACK_IMPORTED_MODULE_15__["default"],
+    ToggleTab: _tabs__WEBPACK_IMPORTED_MODULE_11__.ToggleTab,
+    TaxonomyTree: _taxonomy_tree__WEBPACK_IMPORTED_MODULE_12__["default"],
+    TermsOfUse: _terms_of_use__WEBPACK_IMPORTED_MODULE_13__["default"],
     // Vue components
-    AnonApp: _Anon_AnonApp_vue__WEBPACK_IMPORTED_MODULE_21__["default"],
-    DocumentProblemModal: _DocumentProblemModal_vue__WEBPACK_IMPORTED_MODULE_17__["default"],
-    FindDocuments: _FindDocuments_index_vue__WEBPACK_IMPORTED_MODULE_18__["default"],
-    OfflineDetails: _Offline__WEBPACK_IMPORTED_MODULE_16__.OfflineDetails,
-    OfflineTaxonomyStatus: _Offline__WEBPACK_IMPORTED_MODULE_16__.OfflineTaxonomyStatus,
-    PocketLawDownload: _PocketLawDownload_vue__WEBPACK_IMPORTED_MODULE_19__["default"],
-    TaxonomyTopics: _TaxonomyTopics_vue__WEBPACK_IMPORTED_MODULE_20__["default"]
+    AnonApp: _Anon_AnonApp_vue__WEBPACK_IMPORTED_MODULE_22__["default"],
+    DocumentProblemModal: _DocumentProblemModal_vue__WEBPACK_IMPORTED_MODULE_18__["default"],
+    FindDocuments: _FindDocuments_index_vue__WEBPACK_IMPORTED_MODULE_19__["default"],
+    OfflineDetails: _Offline__WEBPACK_IMPORTED_MODULE_17__.OfflineDetails,
+    OfflineTaxonomyStatus: _Offline__WEBPACK_IMPORTED_MODULE_17__.OfflineTaxonomyStatus,
+    PocketLawDownload: _PocketLawDownload_vue__WEBPACK_IMPORTED_MODULE_20__["default"],
+    TaxonomyTopics: _TaxonomyTopics_vue__WEBPACK_IMPORTED_MODULE_21__["default"]
 };
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (components);
 
