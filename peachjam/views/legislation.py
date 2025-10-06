@@ -580,6 +580,7 @@ class DocumentProvisionCitationView(
                 self.provision_eid
             ),
             "provision_html": self.document.get_provision_by_eid(self.provision_eid),
+            "provision_eid": self.provision_eid,
         }
 
     def get_template_names(self):
