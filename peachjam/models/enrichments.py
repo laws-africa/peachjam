@@ -1,3 +1,4 @@
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
@@ -139,3 +140,23 @@ class ProvisionCitation(ProvisionEnrichment):
     def save(self, *args, **kwargs):
         self.enrichment_type = "provision_citation"
         super().save(*args, **kwargs)
+
+
+place_code_validator = RegexValidator(
+    r"^[a-z]{2}(-[a-z]+)?$",
+    "Two lowercase letters (a country code), optionally followed by '-' and a lowercase locality code",
+)
+
+
+class Glossary(models.Model):
+    place_code = models.CharField(
+        _("place code"),
+        max_length=64,
+        null=False,
+        blank=False,
+        validators=[place_code_validator],
+    )
+    data = models.JSONField(_("data"), null=False, blank=False, default=dict)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
