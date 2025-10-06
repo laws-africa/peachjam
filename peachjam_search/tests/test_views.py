@@ -81,4 +81,4 @@ class SearchViewsTest(TestCase):
 
         response = self.client.get(reverse("search:search_documents") + "?search=test")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("public", response.headers["Cache-Control"])
+        self.assertIn("max-age=900", response.headers["Cache-Control"])

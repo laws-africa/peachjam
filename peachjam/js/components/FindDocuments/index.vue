@@ -212,7 +212,7 @@
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
                     <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
                       &nbsp;
-                    <a href="#" :hx-get="downloadUrl()" hx-swap="outerHTML">{{ $t('Download to Excel') }}</a>
+                    <a href="#" @click.prevent="download" hx-swap="outerHTML" class="d-none d-md-inline">{{ $t('Download to Excel') }}</a>
                   </div>
                   <select
                     v-model="ordering"
@@ -847,6 +847,14 @@ export default {
         this.loadingCount = this.loadingCount - 1;
         this.drawerOpen = false;
       }
+    },
+
+    download (e) {
+      const url = this.downloadUrl();
+      htmx.ajax('GET', url, {
+        source: e.target,
+        target: e.target
+      });
     },
 
     /**
