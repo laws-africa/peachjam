@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
+"PO-Revision-Date: 2025-10-07 09:02\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -99,7 +99,7 @@ msgstr "Hotuba Mashuhuri"
 
 #: templates/peachjam/_header.html:90
 msgid "Collections"
-msgstr ""
+msgstr "Makusanyo"
 
 #: templates/peachjam/_header.html:98
 msgid "Street Law"
@@ -107,31 +107,31 @@ msgstr "Sheria ya Mtaa"
 
 #: templates/peachjam/_header.html:107
 msgid "African Union and EAC"
-msgstr ""
+msgstr "Umoja wa Afrika na EAC"
 
 #: templates/peachjam/_header.html:112
 msgid "East African Community (EAC)"
-msgstr ""
+msgstr "Jumuiya ya Afrika Mashariki (EAC)"
 
 #: templates/peachjam/_header.html:117
 msgid "East African Court of Justice"
-msgstr ""
+msgstr "Mahakama ya Afrika Mashariki"
 
 #: templates/peachjam/_header.html:122
 msgid "East African Court of Appeal"
-msgstr ""
+msgstr "Mahakama ya Rufaa ya Afrika Mashariki"
 
 #: templates/peachjam/_header.html:128
 msgid "African Court of Human and People's Rights"
-msgstr ""
+msgstr "Mahakama ya Afrika ya Haki za Binadamu na Watu"
 
 #: templates/peachjam/_header.html:134
 msgid "African Commission on Human and People's Rights"
-msgstr ""
+msgstr "Tume ya Afrika ya Haki za Binadamu na Watu"
 
 #: templates/peachjam/_header.html:140
 msgid "AU Charters and Treaties"
-msgstr ""
+msgstr "Mikataba na Mikataba ya AU"
 
 #: templates/peachjam/about.html:11
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
@@ -151,62 +151,61 @@ msgstr "<div> <a href=\"mailto:info@tanzlii.org\"><span style=\"margin-right: .2
 
 #: templates/tanzlii/paralegals.html:4
 msgid "Paralegal Resources"
-msgstr ""
+msgstr "Rasilimali za Kisheria"
 
 #: templates/tanzlii/paralegals.html:9
 msgid "TanzLII Digital Paralegal Knowledge Hub"
-msgstr ""
+msgstr "TanzLII Digital Paralegal Knowledge Hub"
 
 #: templates/tanzlii/paralegals.html:11
 msgid "This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development. The Paralegal Hub is developed as a kiSwahili-first resource and is available on your device as an off-line resource."
-msgstr ""
+msgstr "Sehemu hii ya TanzLII inaleta pamoja zana za vitendo, nyenzo za mafunzo, na taarifa za kisheria zilizorahisishwa ili kusaidia kazi ya wasaidizi wa kisheria kote Tanzania. Imeundwa ili kutoa ufikiaji wa haraka kwa rasilimali za kuaminika, zilizosasishwa kwa matumizi katika mazoezi ya kila siku na ukuzaji wa taaluma. Paralegal Hub imeundwa kama nyenzo ya kiSwahili-ya kwanza na inapatikana kwenye kifaa chako kama nyenzo ya nje ya mtandao."
 
 #: templates/tanzlii/paralegals.html:14
 msgid "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa."
-msgstr ""
+msgstr "Kitovu cha Maarifa ya Wasaidizi wa Kisheria wa TanzLII kinachapishwa chini ya mamlaka ya Wizara ya Mambo ya Katiba na Sheria ya Tanzania (MoCLA), kwa msaada kutoka ENABEL na GIZ Tanzania na Afrika Mashariki."
 
 #: templates/tanzlii/paralegals.html:17
 msgid "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania."
-msgstr ""
+msgstr "Maudhui yamechangiwa na MoCLA, LHRC, Tanganyika Law Society, Tanzania School of Law, na taasisi nyinginezo nchini Tanzania."
 
 #: templates/tanzlii/paralegals.html:20
 msgid "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community."
-msgstr ""
+msgstr "Nyenzo zote zinapatikana kwa uhuru, zinasasishwa mara kwa mara, na kulengwa kulingana na mahitaji ya jumuiya ya wanasheria wa Tanzania."
 
 #: templates/tanzlii/paralegals.html:28
 msgid "Research when you're offline"
-msgstr ""
+msgstr "Fanya utafiti ukiwa nje ya mtandao"
 
 #: templates/tanzlii/paralegals.html:30
 msgid "Enable offline access for these resources. Once enabled, you can use these resources at any time without an internet connection."
-msgstr ""
+msgstr "Washa ufikiaji wa nje ya mtandao kwa rasilimali hizi. Baada ya kuwezeshwa, unaweza kutumia rasilimali hizi wakati wowote bila muunganisho wa intaneti."
 
 #: templates/tanzlii/paralegals.html:42
 msgid "Resources"
-msgstr ""
+msgstr "Rasilimali"
 
 #: templates/tanzlii/paralegals.html:52 templates/tanzlii/paralegals.html:55
 msgid "Training manuals"
-msgstr ""
+msgstr "Miongozo ya mafunzo"
 
 #: templates/tanzlii/paralegals.html:53
 msgid "Paralegal manuals, updated for quick reference."
-msgstr ""
+msgstr "Miongozo ya wasaidizi wa kisheria, imesasishwa kwa marejeleo ya haraka."
 
 #: templates/tanzlii/paralegals.html:68 templates/tanzlii/paralegals.html:73
 msgid "Guides and best practices"
-msgstr ""
+msgstr "Miongozo na mbinu bora"
 
 #: templates/tanzlii/paralegals.html:70
 msgid "Step-by-step resources on common legal issues such as land rights, family law, and criminal justice."
-msgstr ""
+msgstr "Nyenzo za hatua kwa hatua kuhusu masuala ya kawaida ya kisheria kama vile haki za ardhi, sheria ya familia na haki ya jinai."
 
 #: templates/tanzlii/paralegals.html:86 templates/tanzlii/paralegals.html:89
-#, fuzzy
-#| msgid "Legislation"
 msgid "Legal information"
-msgstr "Sheria"
+msgstr "Taarifa za kisheria"
 
 #: templates/tanzlii/paralegals.html:87
 msgid "Curated summaries of laws and court decisions most relevant to paralegal work."
-msgstr ""
+msgstr "Muhtasari ulioratibiwa wa sheria na maamuzi ya mahakama muhimu zaidi kwa kazi ya wasaidizi wa kisheria."
+

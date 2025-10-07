@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
+"PO-Revision-Date: 2025-10-07 09:02\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -125,10 +125,8 @@ msgid "No documents found."
 msgstr "Nenhum documento encontrado."
 
 #: templates/africanlii/mooc.html:4
-#, fuzzy
-#| msgid "Policies and regional laws of the African Union"
 msgid "Policy-Making in the African Union"
-msgstr "Políticas e leis regionais da União Africana"
+msgstr "Formulação de políticas na União Africana"
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:129
 msgid "About"
@@ -235,7 +233,7 @@ msgstr "Relatórios e guias"
 
 #: templates/peachjam/_header.html:117
 msgid "Courses"
-msgstr ""
+msgstr "Cursos"
 
 #: templates/peachjam/_header.html:123
 msgid "Articles"
@@ -427,3 +425,4 @@ msgstr "anos"
 #: views/taxonomy.py:147
 msgid "Alphabet"
 msgstr "Alfabeto"
+
