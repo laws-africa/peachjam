@@ -1,12 +1,9 @@
 {% load i18n %}
-<div class="bg-light my-5">
-  <div class="container py-4">
-    <h2 class="mb-2">{{ MY_LII }}</h2>
-    <p class="lead">
-      {% blocktrans trimmed %}Create a free account to simplify your legal research and stay up to date.{% endblocktrans %}
-    </p>
-    <a href="{% url 'account_signup' %}">{% trans "Sign up" %}</a>
-    or
-    <a href="{% url 'account_login' %}">{% trans "Log in" %}</a>
-  </div>
+<h2 class="mb-2">{{ MY_LII }}</h2>
+<p class="lead mb-3">
+  {% blocktrans %}Your personal research space — save documents, add notes, and get updates when the law changes.{% endblocktrans %}
+</p>
+<div class="d-flex flex-wrap gap-2">
+  <a href="{% url 'account_signup' %}" class="btn btn-primary">{% trans "Sign up" %}</a>
+  <a href="{% url 'account_login' %}" class="btn btn-outline-primary">{% trans "Log in" %}</a>
 </div>
