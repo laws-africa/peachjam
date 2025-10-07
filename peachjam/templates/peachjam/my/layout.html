@@ -10,9 +10,6 @@
             <li class="breadcrumb-item">
               <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
             </li>
-            <li class="breadcrumb-item">
-              <a href="{% url 'my_home' %}">{{ MY_LII }}</a>
-            </li>
           </ol>
         </nav>
       {% endblock %}
@@ -20,11 +17,12 @@
         <div class="col-sm">
           <h1 class="mb-2 text-nowrap">{{ MY_LII }}</h1>
         </div>
-        <div class="col-sm ms-sm-auto text-sm-end">
-          <div class="h5 text-muted">
+        <div class="col-sm ms-sm-auto text-end mb-2">
+          <div class="h5 text-muted mb-0">
             {% if user.first_name %}<div>{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
-            <div class="h6">{{ user.email }}</div>
+            <div class="h6 mb-0">{{ user.email }}</div>
           </div>
+          <a href="{% url 'my_account' %}" class="d-block">{% trans "My account" %}</a>
         </div>
       </div>
       <ul class="nav nav-tabs border-bottom">
