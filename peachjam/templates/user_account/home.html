@@ -10,16 +10,16 @@
         {% block account-content-profile %}
           <h2 class="mb-4">{% trans "My account" %}</h2>
           <dl class="row">
-            <dt class="col-2">
+            <dt class="col-4 col-md-2">
               {% trans "Name" %}
             </dt>
-            <dd class="col-10">
+            <dd class="col-8 col-md-10">
               {{ user.get_full_name }}
             </dd>
-            <dt class="col-2">
+            <dt class="col-4 col-md-2">
               {% trans "Language" %}
             </dt>
-            <dd class="col-10">
+            <dd class="col-8 col-md-10">
               {{ user.userprofile.preferred_language }}
             </dd>
           </dl>
