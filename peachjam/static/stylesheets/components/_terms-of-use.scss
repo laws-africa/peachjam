@@ -25,3 +25,19 @@
     display: block;
   }
 }
+
+.terms-of-use-content {
+  h2 {
+    margin-top: 2rem;
+    font-size: $font-size-base * 1.75;
+  }
+  h3 {
+    margin-top: 1.5rem;
+    font-size: $font-size-base * 1.5;
+  }
+  h4 {
+    margin-top: 1.5rem;
+    font-size: $font-size-base * 1.25;
+  }
+
+}
