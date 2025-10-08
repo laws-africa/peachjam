@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from languages_plus.models import Language
@@ -103,6 +104,13 @@ class UserProfile(models.Model):
         default="en",
         related_name="+",
         verbose_name=_("preferred language"),
+    )
+    accepted_terms_at = models.DateTimeField(
+        _("accepted terms at"),
+        default=timezone.now,
+        help_text=_("When the user accepted the terms of service."),
+        null=True,
+        blank=True,
     )
 
     class Meta:

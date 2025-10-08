@@ -1,11 +1,15 @@
 import logging
 import re
+from urllib.parse import urlencode
 
 from django.conf import settings
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
+from django.urls import Resolver404, resolve, reverse
 from django.utils.cache import get_max_age, patch_cache_control, patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
+
+from peachjam.models import UserProfile
 
 log = logging.getLogger(__name__)
 
@@ -68,6 +72,96 @@ class SetPreferredLanguageMiddleware(MiddlewareMixin):
                 samesite=settings.LANGUAGE_COOKIE_SAMESITE,
             )
         return response
+
+
+class TermsAcceptanceMiddleware:
+    """Ensure authenticated users accept the terms of use before using the site."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.exempt_url_names = {
+            "account_accept_terms",
+            "account_login",
+            "account_logout",
+            "account_signup",
+            "account_reset_password",
+            "account_reset_password_done",
+            "account_reset_password_from_key",
+            "account_reset_password_from_key_done",
+            "account_change_password",
+            "account_change_password_done",
+            "terms_of_use",
+            "csrf_token",
+            "home_page",
+        }
+        self.exempt_namespaces = {"socialaccount"}
+        self.exempt_prefixes = tuple(
+            prefix
+            for prefix in (
+                getattr(settings, "STATIC_URL", None),
+                "/favicon.ico",
+                "/robots.txt",
+            )
+            if prefix
+        )
+
+    def __call__(self, request):
+        if self._should_redirect(request):
+            return self._redirect(request)
+        return self.get_response(request)
+
+    def _should_redirect(self, request):
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            return False
+
+        if request.method == "OPTIONS":  # allow pre-flight requests
+            return False
+
+        if self._is_exempt(request):
+            return False
+
+        try:
+            profile = user.userprofile
+        except UserProfile.DoesNotExist:
+            return True
+
+        return not getattr(profile, "accepted_terms_at", None)
+
+    def _is_exempt(self, request):
+        path = request.path
+
+        if request.headers.get("HX-Request") == "true":
+            # HTMX requests are exempt
+            return True
+
+        for prefix in self.exempt_prefixes:
+            if path.startswith(prefix):
+                return True
+
+        try:
+            match = resolve(path)
+        except Resolver404:
+            return False
+
+        if match.url_name in self.exempt_url_names:
+            return True
+
+        if match.namespace and match.namespace.split(":")[0] in self.exempt_namespaces:
+            return True
+
+        return False
+
+    def _redirect(self, request):
+        accept_url = reverse("account_accept_terms")
+        next_url = request.get_full_path()
+        if next_url == accept_url:
+            return redirect(accept_url)
+
+        params = {"next": next_url} if next_url else None
+        if params:
+            accept_url = f"{accept_url}?{urlencode(params)}"
+        return redirect(accept_url)
 
 
 class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
