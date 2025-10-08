@@ -95,6 +95,10 @@
         </div>
       {% endif %}
     </div>
+    <div class="mb-3">
+      {% url 'terms_of_use' as terms_url %}
+      {% blocktrans trimmed %}By signing up, you are agreeing to our <a href="{{ terms_url }}">Terms of Use</a>.{% endblocktrans %}
+    </div>
     <div>
       <button class="btn btn-primary" type="submit">{% trans 'Sign up' %}</button>
     </div>

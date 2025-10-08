@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from peachjam.views import (
+    AcceptTermsView,
     AccountView,
     DocumentAccessGroupDetailView,
     EditAccountView,
@@ -9,6 +10,7 @@ from peachjam.views import (
 
 urlpatterns = [
     path("", include("allauth.urls")),
+    path("accept-terms/", AcceptTermsView.as_view(), name="account_accept_terms"),
     path("profile/", AccountView.as_view(), name="my_account"),
     path("profile/edit", EditAccountView.as_view(), name="edit_account"),
     path("logged-out", LoggedOutView.as_view(), name="account_logged_out"),

@@ -585,6 +585,7 @@ class SubscriptionSettings(SingletonModel):
         if (
             self.trial_product_offering
             and not subscription.is_trial
+            and subscription.product_offering.pricing_plan.price > 0
             and self.trial_product_offering.product.tier
             > subscription.product_offering.product.tier
         ):

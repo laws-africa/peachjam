@@ -640,6 +640,16 @@ class UserProfileForm(forms.Form):
         return self.user
 
 
+class TermsAcceptanceForm(forms.Form):
+    accepted_terms = forms.BooleanField(
+        label=_("I agree to the Terms of Use"),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        error_messages={
+            "required": _("You must accept the terms to continue."),
+        },
+    )
+
+
 class RatificationForm(forms.ModelForm):
     class Meta:
         model = Ratification

@@ -1,0 +1,24 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block content %}
+  <h1 class="h3 mb-4">{% trans "Terms of Use" %}</h1>
+  <div class="mb-3">
+    {% blocktrans trimmed %}Please review our <a href="{{ terms_url }}">Terms of Use</a> before continuing.{% endblocktrans %}
+  </div>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <input type="hidden" name="next" value="{{ next }}"/>
+    <div class="form-check mb-4">
+      {{ form.accepted_terms }}
+      <label class="form-check-label" for="{{ form.accepted_terms.id_for_label }}">{{ form.accepted_terms.label }}</label>
+      {% if form.accepted_terms.errors %}
+        <div class="invalid-feedback d-block">{{ form.accepted_terms.errors|striptags }}</div>
+      {% endif %}
+    </div>
+    <button type="submit" class="btn btn-primary">{% trans "Accept and continue" %}</button>
+  </form>
+  <div class="mt-3 text-muted">
+    {% blocktrans trimmed %}If you do not agree, you may <a href="{{ logout_url }}">log out</a>.{% endblocktrans %}
+  </div>
+{% endblock %}

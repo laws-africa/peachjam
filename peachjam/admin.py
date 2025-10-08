@@ -1765,6 +1765,20 @@ class SavedSearchInline(StackedInline):
 class UserAdminCustom(ImportExportMixin, UserAdmin):
     resource_class = UserResource
     inlines = [UserFollowingInline, SavedSearchInline]
+    actions = ["require_accept_terms"]
+
+    def require_accept_terms(self, request, queryset):
+        count = queryset.count()
+        UserProfile.objects.filter(user__in=queryset).update(accepted_terms_at=None)
+        self.message_user(
+            request,
+            _("Set 'accepted terms of use' to False for %(count)d users.")
+            % {"count": count},
+        )
+
+    require_accept_terms.short_description = gettext_lazy(
+        "Require selected users to accept terms of use"
+    )
 
 
 @admin.register(Label)
