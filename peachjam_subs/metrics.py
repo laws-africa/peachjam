@@ -57,6 +57,7 @@ class SubscriptionDetailsMixin:
 
     def track_subscription_activated(self, subscription):
         if self.enabled():
+            self.update_user_details(subscription.user)
             analytics.track(
                 subscription.user.userprofile.tracking_id_str,
                 "Subscription activated",
@@ -65,6 +66,7 @@ class SubscriptionDetailsMixin:
 
     def track_subscription_closed(self, subscription):
         if self.enabled():
+            self.update_user_details(subscription.user)
             analytics.track(
                 subscription.user.userprofile.tracking_id_str,
                 "Subscription closed",
