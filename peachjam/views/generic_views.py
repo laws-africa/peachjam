@@ -1,4 +1,5 @@
 import itertools
+import json
 
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -8,12 +9,14 @@ from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
-from django.views.generic import DetailView, ListView, View
+from django.views.generic import DetailView, ListView, TemplateView, View
 from lxml import html
 
+from peachjam.auth import user_display
 from peachjam.customerio import get_customerio
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
@@ -357,6 +360,12 @@ class BaseDocumentDetailView(DetailView):
     document_diffs_url = "https://services.lawsafrica.com"
     modify_context = Signal()
 
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if self.object.restricted:
+            add_never_cache_headers(response)
+        return response
+
     def get_object(self, *args, **kwargs):
         return get_object_or_404(
             self.model, expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri"))
@@ -643,6 +652,39 @@ class CSRFTokenView(View):
 
     def get(self, request, *args, **kwargs):
         return HttpResponse(get_token(request), content_type="text/plain")
+
+
+class PageLoadedView(TemplateView):
+    """Called after all page loads via htmx. This allows us to inject user-specific content onto generic cached pages.
+
+    - django.contrib.messages messages
+    - user details snippet (JSON)
+    - user menu bar
+    """
+
+    template_name = "peachjam/_loaded.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if self.request.user.is_authenticated:
+            context["user_json"] = json.dumps(
+                {
+                    "id": self.request.user.id,
+                    "email": self.request.user.email,
+                    "name": user_display(self.request.user),
+                    "is_staff": self.request.user.is_staff,
+                    "perms": [
+                        perm
+                        for perm in self.request.user.get_all_permissions()
+                        if perm.startswith("peachjam")
+                    ],
+                }
+            )
+        else:
+            context["user_json"] = json.dumps({"perms": []})
+
+        return context
 
 
 class YearMixin:

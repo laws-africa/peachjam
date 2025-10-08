@@ -1,5 +1,5 @@
 {% load i18n peachjam %}
-{% if not document.summary_ai_generated or not summary_subscription_required %}
+{% if not document.summary_ai_generated or not subscription_required %}
   {# summary is visible #}
   {% if document.summary_ai_generated %}
     <div class="mb-2 text-ai">
@@ -26,5 +26,5 @@
   {% endif %}
 {% else %}
   {# summary not visible, requires subscription #}
-  {% include "peachjam_subs/_subscription_required.html" with lowest_product=lowest_summary_product %}
+  {% include "peachjam_subs/_subscription_required.html" %}
 {% endif %}

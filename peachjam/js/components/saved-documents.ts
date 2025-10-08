@@ -1,3 +1,5 @@
+import { htmxAjax } from '../utils/function';
+
 export class SavedDocumentModal {
   root: HTMLElement;
   placeholder = '';
@@ -37,10 +39,8 @@ export function loadSavedDocuments (root: HTMLElement | null = null) {
   }
 
   if (ids.size) {
-    // off-page element to load fragments into. Actual fragments will be swapped with hx-swap-oob
-    const el = document.createElement('div');
     const query = Array.from(ids).map(id => `doc_id=${id}`).join('&');
     // @ts-ignore
-    window.htmx.ajax('get', '/saved-documents/fragments?' + query, el);
+    htmxAjax('get', `${peachjam.config.urlLangPrefix}/user/saved-documents/fragments?${query}`);
   }
 }

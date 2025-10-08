@@ -3,6 +3,7 @@ import components from './components';
 // @ts-ignore
 import { vueI18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
+import { htmxAjax } from './utils/function';
 import { loadSavedDocuments } from './components/saved-documents';
 
 import '@lawsafrica/law-widgets/dist/components/la-akoma-ntoso';
@@ -21,12 +22,22 @@ export interface PeachJamConfig {
   appName: string;
   pdfWorker: string;
   userHelpLink: string;
+  urlLangPrefix: string;
   language: string;
   languages: string[];
   sentry: {
     dsn: string | null;
     environment: string | null;
   }
+}
+
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  // eslint-disable-next-line camelcase
+  is_staff: boolean;
+  perms: Array<string>;
 }
 
 class PeachJam {
@@ -38,10 +49,19 @@ class PeachJam {
     userHelpLink: '',
     language: 'en',
     languages: ['en'],
+    urlLangPrefix: '',
     sentry: {
       dsn: null,
       environment: null
     }
+  };
+
+  public user: User = {
+    id: -1,
+    name: '',
+    email: '',
+    is_staff: false,
+    perms: []
   };
 
   constructor () {
@@ -67,6 +87,7 @@ class PeachJam {
     this.setupConfirm();
     this.setupProvisionClick();
     this.setupFormCSRF();
+    this.loaded();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -359,6 +380,29 @@ class PeachJam {
             form.submit();
           });
         }
+      }
+    });
+  }
+
+  loaded () {
+    // use htmx to populate user-specific content islands when the page loads.
+    // @ts-ignore
+    htmxAjax('get', `${this.config.urlLangPrefix}/user/loaded`);
+  }
+
+  userLoaded () {
+    // called by the server response to the above call once user-specific content has been loaded
+    window.dispatchEvent(new Event('peachjam.user-loaded'));
+  }
+
+  whenUserLoaded (): Promise<User> {
+    return new Promise((resolve) => {
+      if (this.user.id === -1) {
+        window.addEventListener('peachjam.user-loaded', () => {
+          resolve(this.user);
+        });
+      } else {
+        resolve(this.user);
       }
     });
   }

@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block title %}{{ title }}{% endblock %}
 {% block page-content %}
-  {% include "peachjam/_messages.html" %}
+  <div id="messages"></div>
   <div class="text-center">
     {% block logo %}
       <a href="{% url 'home_page' %}">

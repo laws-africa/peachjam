@@ -1,13 +1,16 @@
 from django.contrib import messages
+from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
-from django.views.generic import TemplateView
+from django.views.decorators.cache import never_cache
+from django.views.generic import DetailView, TemplateView
 
+from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
-from peachjam_subs.models import Product
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 class JudgmentListView(TemplateView):
@@ -43,25 +46,6 @@ class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
     template_name = "peachjam/judgment_detail.html"
 
-    def get_subscription_permissions_context(self, context):
-        # check summary access
-        if not self.request.user.has_perm("peachjam.can_view_document_summary"):
-            context["summary_subscription_required"] = True
-            context[
-                "lowest_summary_product"
-            ] = Product.get_lowest_product_for_permission(
-                "peachjam.can_view_document_summary"
-            )
-        # check case history access
-        if not self.request.user.has_perm("peachjam.can_view_case_history"):
-            context["case_history_subscription_required"] = True
-            context[
-                "lowest_case_history_product"
-            ] = Product.get_lowest_product_for_permission(
-                "peachjam.can_view_case_history"
-            )
-        return context
-
     def get_notices(self):
         notices = super().get_notices()
         document = self.get_object()
@@ -86,8 +70,20 @@ class JudgmentDetailView(BaseDocumentDetailView):
             .bench.prefetch_related("judge")
             .values_list("judge__name", flat=True)
         )
-        self.add_case_histories(context)
         return context
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
+class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
+    permission_required = "peachjam.can_view_case_history"
+    model = Judgment
+    slug_url_kwarg = "frbr_uri"
+    slug_field = "expression_frbr_uri"
+    template_name = "peachjam/_case_histories.html"
+
+    def get_subscription_required_template(self):
+        return self.template_name
 
     def add_case_histories(self, context):
         document = self.get_object()
@@ -111,16 +107,7 @@ class JudgmentDetailView(BaseDocumentDetailView):
         ]
 
         if histories:
-            context["notices"].append(
-                {
-                    "type": messages.WARNING,
-                    "html": mark_safe(
-                        _(
-                            "This judgment was reviewed by another court. See the Case history tab for details."
-                        )
-                    ),
-                }
-            )
+            context["show_review_notice"] = True
 
         # judgments that this one impacts
         outgoing_histories = [
@@ -163,3 +150,39 @@ class JudgmentDetailView(BaseDocumentDetailView):
         context["case_histories"] = histories
 
         return histories
+
+    def get_subscription_required_context(self):
+        context = {}
+        self.add_case_histories(context)
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_subscription_required_context())
+        return context
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
+class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
+    permission_required = "peachjam.can_view_document_summary"
+    template_name = "peachjam/document/_judgment_summary.html"
+    model = Judgment
+    slug_url_kwarg = "frbr_uri"
+    slug_field = "expression_frbr_uri"
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        context = {}
+        document = self.get_object()
+        if hasattr(document, "case_summary"):
+            collapse = self.request.GET.get("collapse", False)
+            context = {"collapse_summary": collapse, "document": document}
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_subscription_required_context())
+        return context

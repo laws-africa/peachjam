@@ -31,6 +31,7 @@ def general(request):
             "userHelpLink": pj_settings().user_help_link,
             "language": language,
             "languages": [x[0] for x in settings.LANGUAGES],
+            "urlLangPrefix": f"/{language}" if len(settings.LANGUAGES) > 1 else "",
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],

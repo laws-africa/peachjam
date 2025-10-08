@@ -26,16 +26,14 @@
             />
           </div>
           <div class="modal-body">
-            <p>{{ $t('You cannot add a comment.') }}</p>
-            <p v-if="subscriptionProduct">
-              {{ $t('To add a comment, please subscribe to') }} {{ subscriptionProduct }}
-            </p>
+            <p v-if="!user?.id">{{ $t('To add comments, please login and subscribe.') }}</p>
+            <p v-else>{{ $t('To add comments, please upgrade your subscription.') }}</p>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               {{ $t('Close') }}
             </button>
-            <a :href="loginUrl" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
+            <a v-if="!user?.id" :href="loginUrl" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
           </div>
         </div>
       </div>
@@ -45,6 +43,8 @@
 <script>
 import AnnotationItem from './Annotation.vue';
 import { Modal } from 'bootstrap';
+import peachJam from '../../peachjam';
+
 export default {
   name: 'AnnotationsList',
   components: {
@@ -52,17 +52,13 @@ export default {
   },
   props: {
     viewRoot: HTMLElement,
-    gutter: HTMLElement,
-    editable: Boolean,
-    subscriptionProduct: {
-      type: String,
-      default: ''
-    }
+    gutter: HTMLElement
   },
   data: () => ({
     items: [],
     counter: -1,
-    user: null
+    user: null,
+    editable: false
   }),
   computed: {
     loginUrl () {
@@ -70,21 +66,15 @@ export default {
     }
   },
   mounted () {
-    this.getUser();
-    this.getAnnotations();
+    peachJam.whenUserLoaded().then((user) => {
+      this.user = user;
+      if (user.perms.includes('peachjam.add_annotation')) {
+        this.editable = true;
+        this.getAnnotations();
+      }
+    });
   },
   methods: {
-    async getUser () {
-      if (!this.editable) return;
-      try {
-        const resp = await fetch('/accounts/user/');
-        if (resp.ok) {
-          this.user = await resp.json();
-        }
-      } catch {
-        // ignore network errors
-      }
-    },
     async getAnnotations () {
       if (!this.editable) return;
       try {
@@ -108,7 +98,7 @@ export default {
         target_selectors: target.selectors,
         target_id: target.anchor_id,
         document: this.viewRoot.dataset.documentId,
-        user: this.user.name
+        user: window.peachjam.user.name
       };
       this.items.push(newAnnotation);
       this.$nextTick(() => {
