@@ -1,6 +1,10 @@
 {% load i18n socialaccount static %}
 {% get_providers as socialaccount_providers %}
 {% if PEACHJAM_SETTINGS.allow_social_logins and socialaccount_providers %}
+  <div class="mb-3">
+    {% url 'terms_of_use' as terms_url %}
+    {% blocktrans trimmed %}By signing up, you are agreeing to our <a href="{{ terms_url }}">Terms of Use</a>.{% endblocktrans %}
+  </div>
   {% for provider in socialaccount_providers %}
     <form method="post"
           class="mt-4"
