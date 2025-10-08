@@ -38,7 +38,7 @@
             </select>
           </div>
 
-          <div class="col-6 d-none d-lg-block" v-if="canViewDiffs">
+          <div v-if="canViewDiffs" class="col-6 d-none d-lg-block">
             <label>
               <input
                 v-model="sideBySide"
@@ -53,7 +53,21 @@
       <div class="card-body reader-provision-changes-inline-body">
         <!-- NO PERMISSION -->
         <div v-if="!canViewDiffs">
-          <p>{{ $t('You need a subscription to view these changes.') }}</p>
+          <p v-if="user?.id">
+            {{ $t('You need to upgrade your subscription to view these changes.') }}
+          </p>
+          <p v-else>
+            {{ $t('Log in or sign up and subscribe to view these changes.') }}
+          </p>
+          <a
+            v-if="!user?.id"
+            class="btn btn-primary"
+            href="/subscribe"
+            target="_blank"
+            rel="noopeneroptional"
+          >
+            {{ $t('Subscribe') }}
+          </a>
         </div>
 
         <!-- HAS PERMISSION -->
