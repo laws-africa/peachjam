@@ -2,7 +2,6 @@ import peachjam.customerio
 from peachjam.customerio import analytics
 from peachjam_subs.models import Subscription
 
-
 class SubscriptionDetailsMixin:
     def get_user_details(self, user):
         details = super().get_user_details(user)
@@ -15,9 +14,7 @@ class SubscriptionDetailsMixin:
                     "is_paid": sub.product_offering.pricing_plan.price > 0,
                     "subscription_product": sub.product_offering.product.name,
                     "subscription_is_trial": sub.is_trial,
-                    "subscription_ends_on": sub.ends_on.isoformat()
-                    if sub.ends_on
-                    else None,
+                    "subscription_ends_on": int(sub.ends_on.timestamp()) if sub.ends_on else None,
                     "subscription_pricing_plan": str(sub.product_offering.pricing_plan),
                     "subscription_trial_replaces": sub.trial_replaces.product_offering.product.name
                     if sub.trial_replaces
@@ -45,9 +42,7 @@ class SubscriptionDetailsMixin:
                 "product": subscription.product_offering.product.name,
                 "pricing_plan": str(subscription.product_offering.pricing_plan),
                 "is_trial": subscription.is_trial,
-                "ends_on": subscription.ends_on.isoformat()
-                if subscription.ends_on
-                else None,
+                "ends_on": int(subscription.ends_on.timestamp()) if subscription.ends_on else None,
                 "trial_replaces": subscription.trial_replaces.product_offering.product.name
                 if subscription.trial_replaces
                 else None,
