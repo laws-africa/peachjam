@@ -1,24 +1,20 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
-"Language-Team: Swahili\n"
-"Language: sw_KE\n"
-"Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
+"PO-Revision-Date: 2025-10-07 09:02\n"
 
 #: models.py:168
-#, fuzzy
-#| msgid "Search alert"
 msgid "Search alert limit reached"
-msgstr "Tahadhari ya utafutaji"
+msgstr "Kikomo cha tahadhari ya utafutaji kimefikiwa"
 
 #: models.py:256
 msgid "feedback"
@@ -50,15 +46,13 @@ msgid "A note to yourself about this search"
 msgstr "Ujumbe kwako mwenyewe kuhusu utafutaji huu"
 
 #: templates/peachjam_search/_saved_search_modal.html:36
-#, fuzzy
-#| msgid "Manage your search alerts"
 msgid "You have reached your limit for search alerts."
-msgstr "Dhibiti arifa zako za utafutaji"
+msgstr "Umefikia kikomo chako cha arifa za utafutaji."
 
 #: templates/peachjam_search/_saved_search_modal.html:39
 #, python-format
 msgid "To add more, please upgrade to %(product)s."
-msgstr ""
+msgstr "Ili kuongeza zaidi, tafadhali pata toleo jipya la %(product)s."
 
 #: templates/peachjam_search/_saved_search_modal.html:47
 msgid "Saving..."
@@ -91,15 +85,15 @@ msgstr "Ingia"
 
 #: templates/peachjam_search/_search_hit.html:4
 msgid "Best match"
-msgstr ""
+msgstr "Mechi bora"
 
 #: templates/peachjam_search/_search_hit.html:88
 msgid "Explanation"
-msgstr ""
+msgstr "Maelezo"
 
 #: templates/peachjam_search/_search_hit.html:93
 msgid "Raw"
-msgstr ""
+msgstr "Mbichi"
 
 #: templates/peachjam_search/_search_hit.html:115
 #: templates/peachjam_search/_searchtrace_card.html:34
@@ -109,7 +103,7 @@ msgstr "Ukurasa"
 
 #: templates/peachjam_search/_search_hit.html:133
 msgid "Download"
-msgstr ""
+msgstr "Pakua"
 
 #: templates/peachjam_search/_searchtrace_card.html:9
 msgid "Try it"
@@ -127,7 +121,7 @@ msgstr "Utafutaji wa kina"
 
 #: templates/peachjam_search/_searchtrace_card.html:28
 msgid "Mode"
-msgstr ""
+msgstr "Hali"
 
 #: templates/peachjam_search/_searchtrace_card.html:30
 msgid "Ordering"
@@ -193,7 +187,7 @@ msgstr "Tutakutumia barua pepe hati mpya zitakapopatikana kwa arifa zako za utaf
 #: templates/peachjam_search/saved_search_list.html:21
 #, python-format
 msgid "Alerted %(ago)s ago"
-msgstr ""
+msgstr "Imearifiwa %(ago)s zilizopita"
 
 #: templates/peachjam_search/saved_search_list.html:34
 msgid "Delete"
@@ -239,11 +233,3 @@ msgstr "Tafuta %(app_name)s"
 msgid "Search trace not found"
 msgstr "Ufuatiliaji wa utafutaji haujapatikana"
 
-#~ msgid "New matches for your search "
-#~ msgstr "Mpya zinazolingana na utafutaji wako "
-
-#~ msgid "Search Alert"
-#~ msgstr "Tahadhari ya Utafutaji"
-
-#~ msgid "We have found new documents that match your search alert:"
-#~ msgstr "Tumepata hati mpya zinazolingana na arifa yako ya utafutaji:"
