@@ -32,6 +32,13 @@ class SubscriptionDetailsMixin:
             {
                 "product": subscription.product_offering.product.name,
                 "pricing_plan": str(subscription.product_offering.pricing_plan),
+                "is_trial": subscription.is_trial,
+                "ends_on": subscription.ends_on.isoformat()
+                if subscription.ends_on
+                else None,
+                "trial_replaces": subscription.trial_replaces.product_offering.product.name
+                if subscription.trial_replaces
+                else None,
             }
         )
         return details
