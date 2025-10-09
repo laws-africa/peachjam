@@ -1,7 +1,6 @@
 {% extends 'user_account/home.html' %}
 {% load i18n %}
-{% block account-content-email %}
-  {{ block.super }}
+{% block account-content-third-party %}
   {% block account-content-subscription %}
     <hr class="my-5" />
     <h3>{% trans "Subscription" %}</h3>
@@ -9,4 +8,5 @@
       <div class="col mb-3">{% include 'peachjam_subs/_current_and_pending_subscriptions.html' %}</div>
     </div>
   {% endblock %}
+  {{ block.super }}
 {% endblock %}

@@ -7,8 +7,8 @@
   <div class="row">
     <div class="col-lg-8 offset-lg-2">
       {% block account-content-items %}
+        <h2 class="mb-4">{% trans "My account" %}</h2>
         {% block account-content-profile %}
-          <h2 class="mb-4">{% trans "My account" %}</h2>
           <dl class="row">
             <dt class="col-4 col-md-2">
               {% trans "Name" %}
@@ -22,30 +22,36 @@
             <dd class="col-8 col-md-10">
               {{ user.userprofile.preferred_language }}
             </dd>
+            <dt class="col-4 col-md-2">
+              {% trans "Password" %}
+            </dt>
+            <dd class="col-8 col-md-10">
+              <a href="{% url 'account_change_password' %}" class="d-block">{% trans "Change your password" %}</a>
+            </dd>
+            <dt class="col-4 col-md-2">
+              {% trans "Email address" %}
+            </dt>
+            <dd class="col-8 col-md-10">
+              {% with user.emailaddress_set.all as emails %}
+                <ol class="list-unstyled mb-0">
+                  {% for emailaddress in emails %}
+                    <li>
+                      <span class="me-3">{{ emailaddress.email }}</span>
+                      {% if emailaddress.verified %}
+                        <i class="bi bi-check-circle text-success"></i>
+                        {% trans 'verified' %}
+                      {% else %}
+                        <i class="bi bi-question-circle text-danger"></i>
+                        {% trans 'unverified' %}
+                      {% endif %}
+                    </li>
+                  {% endfor %}
+                </ol>
+                <a href="{% url 'account_email' %}">{% trans "Update email address" %}</a>
+              {% endwith %}
+            </dd>
           </dl>
           <a href="{% url 'edit_account' %}" class="d-block mb-3">{% trans "Update details" %}</a>
-          <a href="{% url 'account_change_password' %}" class="d-block">{% trans "Change your password" %}</a>
-        {% endblock %}
-        {% block account-content-email %}
-          <hr class="my-5"/>
-          <h3>{% trans "Email address" %}</h3>
-          {% with user.emailaddress_set.all as emails %}
-            <ol class="list-unstyled">
-              {% for emailaddress in emails %}
-                <li>
-                  <span class="me-3">{{ emailaddress.email }}</span>
-                  {% if emailaddress.verified %}
-                    <i class="bi bi-check-circle text-success"></i>
-                    {% trans 'verified' %}
-                  {% else %}
-                    <i class="bi bi-question-circle text-danger"></i>
-                    {% trans 'unverified' %}
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ol>
-            <a href="{% url 'account_email' %}">{% trans "Update email address" %}</a>
-          {% endwith %}
         {% endblock %}
         {% block account-content-third-party %}
           <hr class="my-5"/>
