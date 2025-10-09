@@ -190,6 +190,7 @@ LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
 LOGOUT_REDIRECT_URL = "account_logged_out"
 ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "my_account"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_FORMS = {
@@ -712,6 +713,7 @@ CORS_URLS_REGEX = r"^$"
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
+    messages.SUCCESS: "info",
 }
 
 
