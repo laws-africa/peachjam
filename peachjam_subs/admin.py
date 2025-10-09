@@ -152,12 +152,15 @@ class SubscriptionInline(admin.StackedInline):
         "status",
         "starts_on",
         "ends_on",
+        "is_trial",
+        "trial_replaces",
         "created_at",
         "active_at",
         "closed_at",
     ]
     readonly_fields = fields
     can_delete = False
+    ordering = ["-created_at"]
 
     def subscription_link(self, obj):
         if obj.pk:

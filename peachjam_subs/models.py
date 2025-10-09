@@ -462,7 +462,10 @@ class Subscription(models.Model):
                 self.product_offering.product.group.user_set.remove(self.user)
 
     def __str__(self):
-        return f"Subscription<#{self.pk} ({self.status}) for {self.user.username} - {self.product_offering}>"
+        trial = ""
+        if self.is_trial:
+            trial = f" (trial for {self.trial_replaces})"
+        return f"Subscription<#{self.pk} ({self.status}) for {self.user.username} - {self.product_offering}{trial}>"
 
     @classmethod
     def get_or_create_active_for_user(cls, user):
