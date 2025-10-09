@@ -1,6 +1,12 @@
+from datetime import datetime, time
+
 import peachjam.customerio
 from peachjam.customerio import analytics
 from peachjam_subs.models import Subscription
+
+
+def date_to_timestamp(date):
+    return int(datetime.combine(date, time(0)).timestamp())
 
 
 class SubscriptionDetailsMixin:
@@ -15,7 +21,7 @@ class SubscriptionDetailsMixin:
                     "is_paid": sub.product_offering.pricing_plan.price > 0,
                     "subscription_product": sub.product_offering.product.name,
                     "subscription_is_trial": sub.is_trial,
-                    "subscription_ends_on": int(sub.ends_on.timestamp())
+                    "subscription_ends_on": date_to_timestamp(sub.ends_on)
                     if sub.ends_on
                     else None,
                     "subscription_pricing_plan": str(sub.product_offering.pricing_plan),
@@ -45,7 +51,7 @@ class SubscriptionDetailsMixin:
                 "product": subscription.product_offering.product.name,
                 "pricing_plan": str(subscription.product_offering.pricing_plan),
                 "is_trial": subscription.is_trial,
-                "ends_on": int(subscription.ends_on.timestamp())
+                "ends_on": date_to_timestamp(subscription.ends_on)
                 if subscription.ends_on
                 else None,
                 "trial_replaces": subscription.trial_replaces.product_offering.product.name

@@ -365,8 +365,9 @@ class Subscription(models.Model):
                 log.info(
                     f"Subscription closes {sub} which is a trial, and so also closes {sub.trial_replaces}"
                 )
-                # the trial is being replaced by a new subscription, so close the replaced one too
-                sub.trial_replaces.close()
+                if not sub.trial_replaces.is_closed:
+                    # the trial is being replaced by a new subscription, so close the replaced one too
+                    sub.trial_replaces.close()
 
         # it might already be set, if there was a trial subscription, and we don't want to lose that timestamp
         self.active_at = self.active_at or timezone.now()
