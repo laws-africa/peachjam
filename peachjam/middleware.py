@@ -221,8 +221,12 @@ class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):
         """Set extra cache details for responses that the superclass has decided are cacheable."""
         response = super().process_response(request, response)
 
-        if get_max_age(response) is not None and "private" not in response.get(
-            "Cache-Control", ()
+        has_nocache_param = "nocache" in request.GET
+
+        if (
+            get_max_age(response) is not None
+            and "private" not in response.get("Cache-Control", ())
+            and not has_nocache_param
         ):
             # there's a max age set, even if it's zero (which is used in debug mode), so set extra caching info
             patch_cache_control(
