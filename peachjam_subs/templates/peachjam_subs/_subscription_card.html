@@ -37,7 +37,7 @@
       </form>
     {% endif %}
   </div>
-  {% if subscription.is_active %}
+  {% if subscription.active_at %}
     <div class="card-footer">
       <small class="text-muted">{% trans "Active since" %} {{ subscription.active_at|date }}</small>
     </div>
