@@ -9,7 +9,7 @@ from langchain_core.messages import HumanMessage
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
-from peachjam_ml.chat import get_system_prompt, graph
+from peachjam_ml.chat import get_system_prompt, graph, langfuse_callback
 from peachjam_ml.models import DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
@@ -100,7 +100,8 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
                 "thread_id": "1",
                 "document_id": self.object.pk,
                 "user_id": self.request.user.pk,
-            }
+            },
+            "callbacks": [langfuse_callback],
         }
 
     def render_state(self, result):
@@ -109,7 +110,8 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
                 "messages": [
                     serialise(m)
                     for m in result.get("messages", [])
-                    if m.type != "system"
+                    # other types are system and tool
+                    if m.type in ["ai", "human"]
                 ]
             }
         )

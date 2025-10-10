@@ -4,6 +4,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
+from langfuse.langchain import CallbackHandler
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
@@ -27,10 +28,10 @@ def answer_document_question(config: RunnableConfig, question: str) -> str:
     response = llm.invoke(
         [
             SystemMessage(
-                content="You are a question answering tool. Only use the document for answers; if the answer is "
-                "not present, say so. The document contents are below.\n\n"
-                f"{text}"
+                content="You are a question answering tool. Only use the document for answers; if you cannot answer "
+                "the question based on the document content, say so."
             ),
+            HumanMessage(content="The document content is below:\n\n" + text),
             HumanMessage(content=question),
         ]
     )
@@ -42,6 +43,7 @@ llm = init_chat_model("openai:gpt-4.1", temperature=0)
 tools = [answer_document_question]
 llm_with_tools = llm.bind_tools(tools)
 tool_node = ToolNode(tools=tools)
+langfuse_callback = CallbackHandler()
 
 
 def chatbot(state: State):
@@ -67,7 +69,26 @@ def get_system_prompt(document, user) -> SystemMessage:
         "Only use the document for answers; if the answer is not present, say so. "
         "The full document contents are not provided because they are very long. Instead, "
         "use one of the provided tools to answer questions about the document.\n\n"
-        f"The document's title is: {document.title}\n\n"
         f"The user's name is: {user.get_full_name()}\n\n"
+        "Here is some information about the document to help you:\n\n"
     )
+
+    metadata = [
+        f"Title: {document.title}\n"
+        f"Date of this version: {document.date.isoformat()}\n"
+    ]
+
+    if document.citation and document.citation != document.title:
+        metadata.append(f"Citation: {document.citation}\n")
+
+    alternative_names = document.alternative_names.all()
+    if alternative_names:
+        metadata.append(
+            "Also referred to/cited as: "
+            + "; ".join(an.name for an in alternative_names)
+            + "\n"
+        )
+
+    system_prompt += "\n".join(metadata)
+
     return SystemMessage(content=system_prompt)
