@@ -2,8 +2,9 @@ import datetime
 
 from countries_plus.models import Country
 from django.contrib.auth.models import Permission, User
+from django.core.cache import caches
 from django.core.files.base import ContentFile
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
 
@@ -120,6 +121,29 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "/judgments/all/2018/")
         self.assertContains(response, "/judgments/all/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+
+    @override_settings(
+        DEBUG=False,
+        CACHES={
+            "default": {
+                "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            }
+        },
+        CACHE_MIDDLEWARE_SECONDS=60,
+        CACHE_MIDDLEWARE_ALIAS="default",
+        CACHE_MIDDLEWARE_KEY_PREFIX="test",
+    )
+    def test_homepage_cache_control_respects_nocache_query_param(self):
+        try:
+            response = self.client.get(reverse("home_page"))
+            cache_control = response.headers.get("Cache-Control", "")
+            self.assertIn("public", cache_control)
+
+            response = self.client.get(reverse("home_page"), {"nocache": "1"})
+            cache_control = response.headers.get("Cache-Control", "")
+            self.assertNotIn("public", cache_control)
+        finally:
+            caches["default"].clear()
 
     def test_all_judgments_year_listing(self):
         response = self.client.get(
