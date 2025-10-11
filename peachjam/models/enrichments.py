@@ -148,9 +148,7 @@ class ProvisionCitationCount(models.Model):
         related_name="provision_citation_counts",
         verbose_name=_("work"),
     )
-    provision_eid = models.CharField(
-        _("provision eid"), max_length=2048, null=True, blank=True
-    )
+    provision_eid = models.CharField(_("provision eid"), max_length=2048)
     count = models.PositiveIntegerField(_("count"), default=0)
 
     class Meta:
@@ -187,10 +185,8 @@ def refresh_provision_citation_counts(work_ids):
                 pe.provision_eid,
                 COUNT(DISTINCT pc.citing_document_id) AS citation_count
             FROM peachjam_provisionenrichment pe
-            INNER JOIN peachjam_provisioncitation pc
-                ON pc.provisionenrichment_ptr_id = pe.id
-            WHERE pe.enrichment_type = 'provision_citation'
-              AND pe.work_id IN %s
+            INNER JOIN peachjam_provisioncitation pc ON pc.provisionenrichment_ptr_id = pe.id
+            WHERE pe.enrichment_type = 'provision_citation' AND pe.provision_eid IS NOT NULL AND pe.work_id IN %s
             GROUP BY pe.work_id, pe.provision_eid
             """,
             [work_ids_tuple],

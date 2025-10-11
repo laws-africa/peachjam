@@ -443,9 +443,9 @@ class BaseDocumentDetailView(DetailView):
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
 
-        provision_citations = ProvisionCitationCount.objects.filter(work=doc.work).values(
-            "provision_eid", "count"
-        )
+        provision_citations = ProvisionCitationCount.objects.filter(
+            work=doc.work
+        ).values("provision_eid", "count")
         context["incoming_citations_json"] = [
             {
                 "provision_eid": item["provision_eid"],
