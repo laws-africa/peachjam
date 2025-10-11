@@ -19,6 +19,7 @@ from peachjam.models import (
     CoreDocument,
     Legislation,
     ProvisionCitation,
+    ProvisionCitationCount,
     UncommencedProvision,
     UnconstitutionalProvision,
     pj_settings,
@@ -651,5 +652,13 @@ class DocumentProvisionCitationView(
         context = super().get_context_data(**kwargs)
         context.update(self.get_subscription_required_context())
         context["citation_contexts"] = self.provision_citations
-        context["citing_documents_count"] = self.get_base_queryset().count()
+        target_eid = self.provision_eid or None
+        citing_documents_count = (
+            ProvisionCitationCount.objects.filter(
+                work=self.document.work, provision_eid=target_eid
+            )
+            .values_list("count", flat=True)
+            .first()
+        )
+        context["citing_documents_count"] = citing_documents_count or 0
         return context

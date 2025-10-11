@@ -40,7 +40,10 @@ from peachjam.frbr_uri import (
 from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
-from peachjam.models.enrichments import ProvisionCitation
+from peachjam.models.enrichments import (
+    ProvisionCitation,
+    refresh_provision_citation_counts,
+)
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -749,12 +752,23 @@ class CoreDocument(PolymorphicModel):
         """
         from peachjam.analysis.citations import citation_analyser
 
-        self.delete_provision_citations()
+        removed_work_ids = self.delete_provision_citations()
         citation_analyser.update_provision_citations(self)
+        current_work_ids = set(
+            ProvisionCitation.objects.filter(citing_document=self)
+            .values_list("work_id", flat=True)
+            .distinct()
+        )
+        affected_work_ids = removed_work_ids | current_work_ids
+        if affected_work_ids:
+            refresh_provision_citation_counts(affected_work_ids)
 
     def delete_provision_citations(self):
         """Delete existing provision citations for this document."""
-        ProvisionCitation.objects.filter(citing_document=self).delete()
+        qs = ProvisionCitation.objects.filter(citing_document=self)
+        work_ids = set(qs.values_list("work_id", flat=True).distinct())
+        qs.delete()
+        return work_ids
 
     def delete_citations(self):
         """Delete existing citation links and added citations from this document."""
