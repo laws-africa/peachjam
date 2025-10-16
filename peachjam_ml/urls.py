@@ -4,6 +4,7 @@ from .views import (
     DocumentChatView,
     SimilarDocumentsDocumentDetailView,
     SimilarDocumentsFolderView,
+    StartDocumentChatView,
 )
 
 urlpatterns = [
@@ -17,5 +18,6 @@ urlpatterns = [
         SimilarDocumentsFolderView.as_view(),
         name="folder_similar_docs",
     ),
-    path("api/documents/<int:pk>/chat", DocumentChatView.as_view()),
+    path("api/documents/<int:pk>/chat", StartDocumentChatView.as_view()),
+    path("api/chats/<str:pk>", DocumentChatView.as_view()),
 ]

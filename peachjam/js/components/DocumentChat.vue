@@ -31,8 +31,8 @@
       <div v-if="error" class="alert alert-warning">{{ error }}</div>
     </div>
 
-    <form class="chat-input border-top" @submit.prevent="submit" novalidate>
-      <div class="input-group p-2">
+    <form class="chat-input border-top p-2" @submit.prevent="submit" novalidate>
+      <div class="input-group">
         <textarea
           ref="messageInput"
           v-model="inputText"
@@ -47,6 +47,9 @@
           <span v-if="!loading">Send</span>
           <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         </button>
+      </div>
+      <div class="small pt-1 text-end">
+        <a href="#" @click.prevent="clear"><i class="bi bi-trash me-1"></i>Clear chat</a>
       </div>
     </form>
   </div>
@@ -72,6 +75,7 @@ export default {
   },
   data () {
     return {
+      threadId: null,
       messages: [],
       inputText: '',
       loading: false,
@@ -79,9 +83,6 @@ export default {
     };
   },
   computed: {
-    endpoint () {
-      return `/api/documents/${this.documentId}/chat`;
-    },
     isReady () {
       return this.inputText.trim().length > 0;
     }
@@ -91,13 +92,20 @@ export default {
     this.focusInput();
   },
   methods: {
-    async load () {
+    async load (isNew) {
       try {
-        const resp = await fetch(this.endpoint);
+        const url = `/api/documents/${this.documentId}/chat` + (isNew ? '?new' : '');
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': await csrfToken()
+          }
+        });
         if (!resp.ok) {
           throw new Error('The assistant could not respond right now. Please try again.');
         }
         const data = await resp.json();
+        this.threadId = data.thread_id;
         this.mergeMessages(data.messages);
       } catch (err) {
         console.error(err);
@@ -105,7 +113,7 @@ export default {
       }
     },
     async submit () {
-      if (this.loading || !this.isReady) {
+      if (this.loading || !this.isReady || !this.threadId) {
         return;
       }
 
@@ -127,10 +135,10 @@ export default {
 
       try {
         const payload = {
-          message: userMessage,
+          message: userMessage
         };
 
-        const resp = await fetch(this.endpoint, {
+        const resp = await fetch(`/api/chats/${this.threadId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -184,6 +192,13 @@ export default {
       if (input && typeof input.focus === 'function') {
         input.focus();
       }
+    },
+    clear () {
+      // start a new chat
+      this.messages.splice(0, this.messages.length);
+      this.error = null;
+      this.threadId = null;
+      this.load(true);
     }
   }
 };

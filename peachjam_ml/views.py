@@ -10,7 +10,7 @@ from langchain_core.messages import HumanMessage
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
 from peachjam_ml.chat import get_system_prompt, graph, langfuse_callback
-from peachjam_ml.models import DocumentEmbedding
+from peachjam_ml.models import ChatThread, DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -59,28 +59,61 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         return context
 
 
-class DocumentChatView(LoginRequiredMixin, DetailView):
+class StartDocumentChatView(LoginRequiredMixin, DetailView):
     # TODO: perms
     model = CoreDocument
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        # TODO: return existing chat messages or create a new one
-        snapshot = graph.get_state(self.get_config())
-        return self.render_state(snapshot.values)
+    http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        document = self.get_object()
+
+        if "new" in request.GET:
+            # force a new thread
+            thread = ChatThread.objects.create(
+                document=document,
+                user=self.request.user,
+            )
+        else:
+            # get the latest thread, if any
+            thread = (
+                ChatThread.objects.filter(
+                    user=self.request.user,
+                    document=document,
+                )
+                .order_by("-created_at")
+                .first()
+            )
+
+            if not thread:
+                # create a new one (avoiding race conditions)
+                thread, created = ChatThread.objects.get_or_create(
+                    document=document,
+                    user=self.request.user,
+                )
+
+        state = graph.get_state(get_chat_config(thread)).values
+        return render_thread_state(thread, state)
+
+
+class DocumentChatView(LoginRequiredMixin, DetailView):
+    # TODO: perms
+    model = ChatThread
+    http_method_names = ["post"]
+
+    def get_queryset(self):
+        return ChatThread.objects.filter(user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        thread = self.get_object()
 
         # parse json input from request body
         input = json.loads(request.body)
-
-        config = self.get_config()
+        config = get_chat_config(thread)
         snapshot = graph.get_state(config)
 
         messages = []
         if not snapshot.values:
-            messages.append(get_system_prompt(self.object, self.request.user))
+            messages.append(get_system_prompt(thread.document, thread.user))
 
         message = input.get("message", "")
         message = HumanMessage(message["content"], id=message["id"])
@@ -91,35 +124,36 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
             config,
         )
 
-        return self.render_state(result)
+        return render_thread_state(thread, result)
 
-    def get_config(self):
+
+def get_chat_config(thread):
+    return {
+        "configurable": {
+            "thread_id": str(thread.id),
+            "document_id": thread.document.pk,
+            "user_id": thread.user.pk,
+        },
+        "callbacks": [langfuse_callback],
+    }
+
+
+def render_thread_state(thread, state):
+    def serialise(message):
         return {
-            "configurable": {
-                # TODO: make thread_id dynamic
-                "thread_id": "1",
-                "document_id": self.object.pk,
-                "user_id": self.request.user.pk,
-            },
-            "callbacks": [langfuse_callback],
+            "id": message.id,
+            "role": message.type,
+            "content": message.content,
         }
 
-    def render_state(self, result):
-        return JsonResponse(
-            {
-                "messages": [
-                    serialise(m)
-                    for m in result.get("messages", [])
-                    # other types are system and tool
-                    if m.type in ["ai", "human"]
-                ]
-            }
-        )
-
-
-def serialise(message):
-    return {
-        "id": message.id,
-        "role": message.type,
-        "content": message.content,
-    }
+    return JsonResponse(
+        {
+            "thread_id": str(thread.id),
+            "messages": [
+                serialise(m)
+                for m in state.get("messages", [])
+                # other types are system and tool
+                if m.type in ["ai", "human"]
+            ],
+        }
+    )
