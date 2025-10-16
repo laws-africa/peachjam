@@ -4,6 +4,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
+from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
@@ -44,6 +45,10 @@ tools = [answer_document_question]
 llm_with_tools = llm.bind_tools(tools)
 tool_node = ToolNode(tools=tools)
 langfuse_callback = CallbackHandler()
+
+# Langfuse uses environment variables to configure itself
+# we block elasticsearch-api instrumentation which comes through from the opentelemetry data
+langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 
 
 def chatbot(state: State):

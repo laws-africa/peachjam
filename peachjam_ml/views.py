@@ -1,6 +1,6 @@
 import json
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http.response import JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -9,7 +9,7 @@ from langchain_core.messages import HumanMessage
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
-from peachjam_ml.chat import get_system_prompt, graph, langfuse_callback
+from peachjam_ml.chat import get_system_prompt, graph, langfuse, langfuse_callback
 from peachjam_ml.models import ChatThread, DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
@@ -59,9 +59,9 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         return context
 
 
-class StartDocumentChatView(LoginRequiredMixin, DetailView):
-    # TODO: perms
+class StartDocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = CoreDocument
+    permission_required = "peachjam_ml.create_chatthread"
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
@@ -95,9 +95,9 @@ class StartDocumentChatView(LoginRequiredMixin, DetailView):
         return render_thread_state(thread, state)
 
 
-class DocumentChatView(LoginRequiredMixin, DetailView):
-    # TODO: perms
+class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = ChatThread
+    permission_required = "peachjam_ml.create_chatthread"
     http_method_names = ["post"]
 
     def get_queryset(self):
@@ -119,10 +119,19 @@ class DocumentChatView(LoginRequiredMixin, DetailView):
         message = HumanMessage(message["content"], id=message["id"])
         messages.append(message)
 
-        result = graph.invoke(
-            {"messages": messages},
-            config,
-        )
+        with langfuse.start_as_current_observation(
+            name="document_chat",
+            as_type="generation",
+            input={"expression_frbr_uri": thread.document.expression_frbr_uri},
+        ) as generation:
+            result = graph.invoke(
+                {"messages": messages},
+                config,
+            )
+            # todo link generation.trace id to messages?
+            generation.update_trace(
+                user_id=thread.user.username, session_id=str(thread.id)
+            )
 
         return render_thread_state(thread, result)
 
