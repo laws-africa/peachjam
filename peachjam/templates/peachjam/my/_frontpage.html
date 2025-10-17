@@ -6,9 +6,10 @@
       <a href="{% url 'my_home' %}" class="h4">Explore →</a>
     </div>
   </div>
-  <div class="h5 text-muted ms-auto mb-3">
-    {% if user.first_name %}<div>{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
+  <div class="text-muted ms-auto mb-3">
+    {% if user.first_name %}<div class="h5 mb-0">{{ user.first_name }} {{ user.last_name }}</div>{% endif %}
     <div class="h6">{{ user.email }}</div>
+    <a href="{% url 'my_account' %}" class="d-block">{% trans "My account" %}</a>
   </div>
 </div>
 <div class="row">
