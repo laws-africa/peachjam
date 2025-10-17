@@ -13,7 +13,9 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from typing_extensions import TypedDict
 
+from peachjam.analysis.citations import CitatorMatcher
 from peachjam.models import CoreDocument, Legislation
+from peachjam.xmlutils import parse_html_str
 
 
 class DocumentChatState(TypedDict):
@@ -42,8 +44,63 @@ def answer_document_question(config: RunnableConfig, question: str) -> str:
     return response.content
 
 
+@tool
+def get_provision_eid(config: RunnableConfig, provision: str) -> str:
+    """Tries to find the unique internal EID of a provision of a document, which can be used to find out additional
+     information about the provision. The provision must be stated similar to the following:
+
+    - section 32
+    - section 5(2)(a)
+    - chapter 5
+    - paragraph 4
+    """
+    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+
+    # TODO: this should be way easier :(
+    resp = CitatorMatcher().call_citator(
+        {
+            "frbr_uri": doc.expression_frbr_uri,
+            "format": "html",
+            "body": f'<p>{provision} of <a href="{doc.expression_frbr_uri}" id="fake">xx</a></p>',
+        }
+    )
+
+    root = parse_html_str(resp["body"])
+    # grab the first a element without an id
+    for a in root.xpath("//a[not(@id)]"):
+        href = a.get("href", "")
+        if "~" in href:
+            eid = href.split("~")[-1]
+            return f"The EID of provision '{provision}' is: {eid}"
+
+    return f"Provision '{provision}' could not be identified."
+
+
+@tool
+def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
+    """Provides information about the commencement status of a provision given its EID."""
+    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    # TODO: don't allow this tool for non-legislation documents
+    if not isinstance(doc, Legislation):
+        return "This tool can only be used for legislation documents."
+
+    if not doc.commenced:
+        return "This legislation has not yet commenced, and so the provision has not commenced either."
+
+    for event in doc.commencements_json or []:
+        if event["all_provisions"]:
+            return (
+                f"The provision commenced at the same time as all other provisions, on {event['date']} "
+                f"by '{event['commencing_title']}'."
+            )
+        if eid in event.get("provisions", []):
+            return f"The provision commenced on {event['date']} by '{event['commencing_title']}'."
+
+    return "That provision has not commenced."
+
+
 llm = init_chat_model("openai:gpt-4.1", temperature=0)
-tools = [answer_document_question]
+tools = [answer_document_question, get_provision_eid, provision_commencement_info]
 llm_with_tools = llm.bind_tools(tools)
 tool_node = ToolNode(tools=tools)
 langfuse_callback = CallbackHandler()
@@ -88,7 +145,9 @@ def doc_metadata(state: DocumentChatState):
         if document.commenced:
             if document.metadata_json.get("commenced_in_full"):
                 metadata.append(
-                    f"This legislation commenced in full on {document.metadata_json['commencement_date']}."
+                    f"This legislation commenced on {document.metadata_json['commencement_date']}. Some provisions "
+                    "may have commenced after this date."
+                    "More information on commencements may be available from other tools."
                 )
             else:
                 metadata.append(
