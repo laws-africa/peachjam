@@ -77,6 +77,20 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
 
 
 @tool
+def get_provision_text(config: RunnableConfig, eid: str) -> str:
+    """Returns the text of a provision given its EID."""
+    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    provision_html = doc.get_provision_by_eid(eid)
+    if not provision_html:
+        return "No provision found with that EID."
+
+    root = parse_html_str(provision_html)
+    text = " ".join(root.itertext())
+
+    return f"The text of provision with EID {eid} is:\n\n{text}"
+
+
+@tool
 def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
     """Provides information about the commencement status of a provision given its EID."""
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
@@ -100,9 +114,13 @@ def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
 
 
 llm = init_chat_model("openai:gpt-4.1", temperature=0)
-tools = [answer_document_question, get_provision_eid, provision_commencement_info]
+tools = [
+    answer_document_question,
+    get_provision_eid,
+    provision_commencement_info,
+    get_provision_text,
+]
 llm_with_tools = llm.bind_tools(tools)
-tool_node = ToolNode(tools=tools)
 langfuse_callback = CallbackHandler()
 
 # Langfuse uses environment variables to configure itself
@@ -167,7 +185,7 @@ def doc_metadata(state: DocumentChatState):
 graph_builder = StateGraph(DocumentChatState)
 graph_builder.add_node("doc_metadata", doc_metadata)
 graph_builder.add_node("chatbot", chatbot)
-graph_builder.add_node("tools", tool_node)
+graph_builder.add_node("tools", ToolNode(tools=tools))
 
 graph_builder.add_edge(START, "doc_metadata")
 graph_builder.add_edge("doc_metadata", "chatbot")
