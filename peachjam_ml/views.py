@@ -111,13 +111,18 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
         config = get_chat_config(thread)
         snapshot = graph.get_state(config)
 
-        messages = []
         if not snapshot.values:
-            messages.append(get_system_prompt(thread.document, thread.user))
+            state = {
+                "messages": [get_system_prompt(thread.user)],
+                "user_id": thread.user.pk,
+                "document_id": thread.document.pk,
+            }
+        else:
+            state = snapshot.values
 
         message = input.get("message", "")
         message = HumanMessage(message["content"], id=message["id"])
-        messages.append(message)
+        state["messages"].append(message)
 
         with langfuse.start_as_current_observation(
             name="document_chat",
@@ -125,7 +130,7 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
             input={"expression_frbr_uri": thread.document.expression_frbr_uri},
         ) as generation:
             result = graph.invoke(
-                {"messages": messages},
+                state,
                 config,
             )
             # todo link generation.trace id to messages?
