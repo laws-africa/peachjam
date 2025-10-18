@@ -1,16 +1,15 @@
-{% load i18n %}
+{% load i18n peachjam account %}
 {% if user.is_authenticated %}
   <ul class="navbar-nav ms-auto me-2" hx-swap-oob="true" id="user-menu">
     <li class="nav-item dropdown">
-      <a class="btn"
-         href="#"
-         role="button"
-         data-bs-toggle="dropdown"
-         data-bs-reference="body"
-         aria-expanded="false">
-        <i class="bi bi-person-circle"></i>
-        <span class="d-none d-sm-inline">{% trans "My account" %}</span>
-      </a>
+      <button class="btn d-flex align-items-center user-dropdown-toggle"
+              type="button"
+              data-bs-toggle="dropdown"
+              data-bs-reference="body"
+              aria-expanded="false">
+        {% user_avatar user 30 %}
+        <span class="d-none d-sm-inline ms-2">{% user_display user %}</span>
+      </button>
       <ul class="dropdown-menu dropdown-menu-end nav-user-dropdown-menu">
         <li class="dropdown-item username text-center mb-2">
           {{ user.first_name }} {{ user.last_name }}
