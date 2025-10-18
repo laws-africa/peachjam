@@ -674,6 +674,7 @@ class PageLoadedView(TemplateView):
                     "email": self.request.user.email,
                     "name": user_display(self.request.user),
                     "is_staff": self.request.user.is_staff,
+                    "tracking_id": self.request.user.userprofile.tracking_id_str,
                     "perms": [
                         perm
                         for perm in self.request.user.get_all_permissions()
