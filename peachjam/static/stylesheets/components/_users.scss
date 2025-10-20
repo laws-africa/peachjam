@@ -4,3 +4,16 @@ img.user-profile-photo {
   margin-right: auto;
   border-radius: 50%;
 }
+
+img.user-avatar {
+  border-radius:50%;
+  object-fit:cover
+}
+
+.user-avatar-letter {
+  border-radius: 50%;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

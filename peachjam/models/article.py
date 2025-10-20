@@ -126,6 +126,12 @@ class UserProfile(models.Model):
             verified=True, email=self.user.email
         ).exists()
 
+    def avatar_url(self):
+        """Returns the URL of the first social account avatar, if any."""
+        for social_account in self.user.socialaccount_set.all():
+            if social_account.extra_data.get("picture"):
+                return social_account.extra_data.get("picture")
+
     def __str__(self):
         return f"{self.user.username}"
 

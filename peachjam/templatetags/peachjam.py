@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import json
 
 from django import template
@@ -6,6 +7,8 @@ from django.http import QueryDict
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+
+from peachjam.auth import user_display
 
 register = template.Library()
 
@@ -158,3 +161,47 @@ def json_table(data):
 @register.filter
 def get_dotted_key_value(obj, key):
     return obj.get(key, "")
+
+
+@register.simple_tag
+def user_avatar(user, size=40):
+    """
+    Renders a user's avatar. Uses their social image if available,
+    otherwise falls back to a circle with their first initial.
+    """
+
+    # Try to get social image (customize this depending on your user model)
+    avatar_url = (
+        user.userprofile.avatar_url()
+    )  # or "https://lh3.googleusercontent.com/a/ACg8ocLLVn6MqHHeblDXalODEv4YFmQBQO6gBtAIqb9RIrJ9pYwX7w=s96-c"
+    if avatar_url:
+        return format_html(
+            '<img src="{}" alt="{}" class="user-avatar" style="width:{}px;height:{}px">',
+            avatar_url,
+            user.get_full_name() or user.username,
+            size,
+            size,
+        )
+
+    # Fallback to initial avatar
+    initial = user_display(user)[:1].upper()
+
+    # Use deterministic background color based on username hash
+    color = color_for_user(user)
+
+    return format_html(
+        '<div class="user-avatar-letter" '
+        'style="width:{}px;height:{}px;background-color:{};font-size:{}px;">{}</div>',
+        size,
+        size,
+        color,
+        int(size / 2),
+        initial,
+    )
+
+
+def color_for_user(user):
+    """Generate a consistent color for each user."""
+    h = hashlib.md5(user.username.encode("utf-8")).hexdigest()
+    hue = int(h[:2], 16) % 360
+    return f"hsl({hue}, 60%, 50%)"
