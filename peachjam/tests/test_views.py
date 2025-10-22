@@ -1,6 +1,7 @@
 import datetime
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.core.cache import caches
 from django.core.files.base import ContentFile
@@ -284,6 +285,25 @@ class PeachjamViewsTest(TestCase):
 
         response = self.client.get("/robots.txt")
         self.assertContains(response, "foo\nbar")
+
+    def test_robots_txt_includes_language_prefixes(self):
+        document = CoreDocument.objects.first()
+        original_allow_robots = document.allow_robots
+        document.allow_robots = False
+        document.save(update_fields=["allow_robots"])
+
+        try:
+            response = self.client.get("/robots.txt")
+            work_uri = document.work_frbr_uri.rstrip("/")
+
+            self.assertContains(response, f"Disallow: {work_uri}/")
+            for language_code, _ in settings.LANGUAGES:
+                self.assertContains(
+                    response, f"Disallow: /{language_code}{work_uri}/"
+                )
+        finally:
+            document.allow_robots = original_allow_robots
+            document.save(update_fields=["allow_robots"])
 
     def test_account_profile(self):
         response = self.client.get(reverse("my_account"))
