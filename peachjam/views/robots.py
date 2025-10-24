@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.views.generic import TemplateView
 
-from peachjam.models import CoreDocument, Locality, PeachJamSettings, Work
+from peachjam.models import CoreDocument, Locality, pj_settings
 
 
 def _language_prefixes():
@@ -18,32 +18,12 @@ def _language_prefixes():
 
 def _place_codes(site_settings):
     """Return the FRBR place codes (jurisdictions and localities) used on the site."""
-
-    places = set(
-        Work.objects.order_by()
-        .values_list("frbr_uri_place", flat=True)
-        .distinct()
+    jurisdiction_codes = site_settings.document_jurisdictions.all().values_list(
+        "iso", flat=True
     )
-    places.update(
-        Work.objects.order_by()
-        .values_list("frbr_uri_country", flat=True)
-        .distinct()
-    )
-
-    jurisdiction_codes = list(
-        site_settings.document_jurisdictions.order_by().values_list("pk", flat=True)
-    )
-    places.update(code.lower() for code in jurisdiction_codes if code)
-
-    locality_qs = Locality.objects.order_by()
-    if jurisdiction_codes:
-        locality_qs = locality_qs.filter(jurisdiction__pk__in=jurisdiction_codes)
-
-    for country_code, locality_code in locality_qs.values_list("jurisdiction__pk", "code"):
-        if country_code and locality_code:
-            places.add(f"{country_code.lower()}-{locality_code}")
-
-    return sorted(place for place in places if place)
+    locality_codes = Locality.objects.all().values_list("code", flat=True)
+    places = list(jurisdiction_codes) + list(locality_codes)
+    return [place.lower() for place in places]
 
 
 def _prefixed_place_rules(prefixes, places):
@@ -79,7 +59,7 @@ class RobotsView(TemplateView):
             for prefix in prefixes:
                 disallowed_content.append(f"Disallow: {prefix}{frbr_uri}/")
 
-        site_settings = PeachJamSettings.load()
+        site_settings = pj_settings()
         place_codes = _place_codes(site_settings)
 
         context["prefixed_disallow_paths"] = "\n".join(
