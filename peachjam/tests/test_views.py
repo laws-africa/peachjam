@@ -1,6 +1,7 @@
 import datetime
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.core.cache import caches
 from django.core.files.base import ContentFile
@@ -16,6 +17,11 @@ from peachjam.models import (
     Outcome,
     PeachJamSettings,
     SourceFile,
+)
+from peachjam.views.robots import (
+    _language_prefixes,
+    _place_codes,
+    _prefixed_place_rules,
 )
 
 
@@ -267,20 +273,37 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 403)
 
     def test_robots_txt(self):
+        site_settings = PeachJamSettings.load()
+        site_settings.robots_txt = None
+        site_settings.save()
+
+        blocked_document = CoreDocument.objects.filter(allow_robots=False).first()
+        if not blocked_document:
+            blocked_document = CoreDocument.objects.first()
+            blocked_document.allow_robots = False
+            blocked_document.save()
+
         response = self.client.get("/robots.txt")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "User-agent")
-
-        settings = PeachJamSettings.load()
-        settings.robots_txt = None
-        settings.save()
-
-        response = self.client.get("/robots.txt")
-        self.assertContains(response, "User-agent")
         self.assertNotContains(response, "None")
 
-        settings.robots_txt = "foo\nbar"
-        settings.save()
+        body = response.content.decode()
+        self.assertIn("Disallow: /search/", body)
+
+        for code, _ in settings.LANGUAGES:
+            self.assertIn(f"Disallow: /{code}/search/", body)
+
+        prefixes = _language_prefixes()
+        for prefix in prefixes:
+            self.assertIn(f"Disallow: {prefix}{blocked_document.work_frbr_uri}/", body)
+
+        place_rules = _prefixed_place_rules(prefixes, _place_codes(site_settings))
+        for rule in place_rules:
+            self.assertIn(rule, body)
+
+        site_settings.robots_txt = "foo\nbar"
+        site_settings.save()
 
         response = self.client.get("/robots.txt")
         self.assertContains(response, "foo\nbar")

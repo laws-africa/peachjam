@@ -3,10 +3,21 @@
 User-agent: *
 Allow: /
 Disallow: /search/
+Disallow: /en/search/
+Disallow: /fr/search/
+Disallow: /pt/search/
+Disallow: /sw/search/
 Disallow: /api/
 Crawl-delay: 5
+{% if prefixed_disallow_paths %}
+{{ prefixed_disallow_paths }}
+{% endif %}
+{% if disallowed_content %}
 {{ disallowed_content }}
+{% endif %}
+{% if extra_content %}
 {{ extra_content }}
+{% endif %}
 
 
 User-Agent: AhrefsBot
