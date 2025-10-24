@@ -296,13 +296,9 @@ class PeachjamViewsTest(TestCase):
 
         prefixes = _language_prefixes()
         for prefix in prefixes:
-            self.assertIn(
-                f"Disallow: {prefix}{blocked_document.work_frbr_uri}/", body
-            )
+            self.assertIn(f"Disallow: {prefix}{blocked_document.work_frbr_uri}/", body)
 
-        place_rules = _prefixed_place_rules(
-            prefixes, _place_codes(site_settings)
-        )
+        place_rules = _prefixed_place_rules(prefixes, _place_codes(site_settings))
         for rule in place_rules:
             self.assertIn(rule, body)
 
