@@ -9,6 +9,7 @@ from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
@@ -362,7 +363,11 @@ class BaseDocumentDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
-        if self.object.restricted:
+        # documents that have been created/updated recently shouldn't be cached for an hour, to allow for quick fixes
+        if (
+            self.object.restricted
+            or self.object.updated_at >= timezone.now() - timezone.timedelta(hours=1)
+        ):
             add_never_cache_headers(response)
         return response
 
