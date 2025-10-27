@@ -6,6 +6,7 @@ from peachjam.models import Author, GenericDocument, Judgment, Legislation
 
 class HomePageView(TemplateView):
     template_name = "peachjam/home.html"
+    navbar_link = "home"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
