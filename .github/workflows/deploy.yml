@@ -24,7 +24,7 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/africanlii'
+          git_remote_url: 'ssh://dokku@web4.laws.africa:22/africanlii'
           git_push_flags: '--force'
 
   deploy-tanzlii:
