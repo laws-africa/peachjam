@@ -574,6 +574,12 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
     def get_subscription_required_template(self):
         return self.template_name
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        letters = list(self.object.data.keys())
+        context["first_letter"] = letters[0] if letters else None
+        return context
+
 
 class PlaceGlossaryLetterView(PlaceGlossaryView):
     template_name = "peachjam/glossary/_glossary_letter.html"
