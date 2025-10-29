@@ -21,9 +21,9 @@ import sentry_sdk
 from django.contrib.messages import constants as messages
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
-from import_export.formats import base_formats
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
