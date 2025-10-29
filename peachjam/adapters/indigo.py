@@ -925,7 +925,7 @@ class IndigoGlossaryAdapter(IndigoAdapter):
         logger.info(f"Updating glossary ... {url}")
 
         try:
-            glossary_data = self.client_get(f"{url}.json").json()
+            glossary_data = self.client_get(url).json()
         except requests.HTTPError as error:
             if error.response.status_code == 404:
                 logger.info(f"Glossary not found: {url}")
