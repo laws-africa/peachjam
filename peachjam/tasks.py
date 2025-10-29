@@ -303,3 +303,27 @@ def generate_judgment_summary(doc_id):
         return
     log.info(f"Summarizing judgment {doc_id}")
     doc.generate_summary()
+
+
+@background(queue="peachjam", remove_existing_tasks=True, schedule=Task.WEEKLY)
+def update_glossary(ingestor_id, place_code):
+    from peachjam.models import Ingestor
+
+    ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
+    if not ingestor:
+        log.info(f"No ingestor with id {ingestor_id} exists, ignoring.")
+        return
+    if not ingestor.enabled:
+        log.info(f"Ingestor {ingestor} disabled, ignoring.")
+        return
+
+    log.info(f"Updating glossary for {place_code} with ingestor {ingestor}.")
+    try:
+        adapter = ingestor.get_adapter()
+        adapter.update_glossary(place_code)
+    except Exception as e:
+        log.error("Error updating glossary", exc_info=e)
+        raise
+
+    log.info("Update glossary done")
+    return

@@ -889,7 +889,7 @@ class IndigoGlossaryAdapter(IndigoAdapter):
         return results
 
     def check_for_updated(self, glossaries, last_refreshed):
-        """Returns a set of URLs of glossaries that are new or have been updated since last_refreshed."""
+        """Returns a list of place codes of glossaries that are new or have been updated since last_refreshed."""
         updated = [
             glossary
             for glossary in glossaries
@@ -897,7 +897,7 @@ class IndigoGlossaryAdapter(IndigoAdapter):
             or parser.parse(glossary["updated_at"]) > last_refreshed
         ]
 
-        return {f"{self.api_url}/glossary/{g['place_code']}" for g in updated}
+        return [g["place_code"] for g in updated]
 
     def check_for_deleted(self, glossaries):
         """Returns a list of the place codes of all existing glossaries that *aren't* in the list of glossaries
@@ -913,7 +913,14 @@ class IndigoGlossaryAdapter(IndigoAdapter):
             "place_code", flat=True
         )
 
-    def update_document(self, url):
+    def update_document(self, place_code):
+        from peachjam.tasks import update_glossary
+
+        logger.info(f"Queueing up task to update glossary for {place_code} ...")
+        update_glossary(self.ingestor.pk, place_code)
+
+    def update_glossary(self, place_code):
+        url = f"{self.api_url}/glossary/{place_code}"
         logger.info(f"Updating glossary ... {url}")
 
         try:
