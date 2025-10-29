@@ -27,7 +27,7 @@ from peachjam.models import (
     CoreDocument,
     DocumentNature,
     ExtractedCitation,
-    ProvisionCitation,
+    ProvisionCitationCount,
     Relationship,
     Taxonomy,
     UncommencedProvision,
@@ -448,15 +448,13 @@ class BaseDocumentDetailView(DetailView):
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
 
-        provision_citations = (
-            ProvisionCitation.objects.filter(work=doc.work)
-            .values("provision_eid")
-            .annotate(citations=Count("citing_document_id", distinct=True))
-        )
+        provision_citations = ProvisionCitationCount.objects.filter(
+            work=doc.work
+        ).values("provision_eid", "count")
         context["incoming_citations_json"] = [
             {
                 "provision_eid": item["provision_eid"],
-                "citations": item["citations"],
+                "citations": item["count"],
             }
             for item in provision_citations
         ]

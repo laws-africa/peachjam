@@ -1,4 +1,4 @@
-from django.db import models
+from django.db import connection, models
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from polymorphic.models import PolymorphicModel
@@ -139,3 +139,55 @@ class ProvisionCitation(ProvisionEnrichment):
     def save(self, *args, **kwargs):
         self.enrichment_type = "provision_citation"
         super().save(*args, **kwargs)
+
+
+class ProvisionCitationCount(models.Model):
+    work = models.ForeignKey(
+        "peachjam.Work",
+        on_delete=models.CASCADE,
+        related_name="provision_citation_counts",
+        verbose_name=_("work"),
+    )
+    provision_eid = models.CharField(_("provision eid"), max_length=2048)
+    count = models.PositiveIntegerField(_("count"), default=0)
+
+    class Meta:
+        verbose_name = _("provision citation count")
+        verbose_name_plural = _("provision citation counts")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("work", "provision_eid"),
+                name="unique_provision_citation_count",
+            )
+        ]
+
+
+def refresh_provision_citation_counts(work_ids):
+    """Recompute provision citation counts for the supplied works using raw SQL."""
+
+    work_ids = {w for w in work_ids if w is not None}
+    if not work_ids:
+        return
+
+    work_ids_tuple = tuple(work_ids)
+
+    with connection.cursor() as cursor:
+        cursor.execute(
+            "DELETE FROM peachjam_provisioncitationcount WHERE work_id IN %s",
+            [work_ids_tuple],
+        )
+
+        cursor.execute(
+            """
+            INSERT INTO peachjam_provisioncitationcount (work_id, provision_eid, count)
+            SELECT
+                pe.work_id,
+                pe.provision_eid,
+                COUNT(DISTINCT pc.citing_document_id) AS citation_count
+            FROM peachjam_provisionenrichment pe
+            INNER JOIN peachjam_provisioncitation pc ON pc.provisionenrichment_ptr_id = pe.id
+            WHERE pe.enrichment_type = 'provision_citation' AND pe.provision_eid IS NOT NULL AND pe.work_id IN %s
+            GROUP BY pe.work_id, pe.provision_eid
+            """,
+            [work_ids_tuple],
+        )
