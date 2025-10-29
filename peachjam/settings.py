@@ -23,6 +23,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from import_export.formats import base_formats
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -455,6 +456,12 @@ if not DEBUG:
     DYNAMIC_STORAGE["DEFAULTS"][""] = f"s3:{AWS_STORAGE_BUCKET_NAME}:"
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+IMPORT_EXPORT_FORMATS = [
+    base_formats.CSV,
+    base_formats.XLSX,
+]
+IMPORT_EXPORT_IMPORT_FORMATS = IMPORT_EXPORT_FORMATS
+IMPORT_EXPORT_EXPORT_FORMATS = IMPORT_EXPORT_FORMATS
 
 GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
     "type": "service_account",
