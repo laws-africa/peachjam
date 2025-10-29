@@ -1,0 +1,86 @@
+{% load i18n %}
+<div id="glossary-{{ letter }}">
+  {% if not terms %}
+    <p>
+      <i>No terms for
+        {% if letter == '0' %}
+          #
+        {% else %}
+          {{ letter|upper }}
+        {% endif %}
+      .</i>
+    </p>
+  {% endif %}
+  {% for info in terms %}
+    {# TODO: fix the below to match the data #}
+    <div class="term" data-term="{{ info.term_lc }}">
+      <div>
+        <b>{{ info.term }}</b>
+      </div>
+      <div class="ms-5 mb-2">
+        <div class="glossary-defn akoma-ntoso">{{ info.defn|safe }}</div>
+        <div>
+          <ul class="list-unstyled mb-0 text-muted">
+            {% for expression_uri in info.expressions %}
+              <li>
+                — <a href="{{ expression_uri }}">{{ expression_uri }}</a>
+              </li>
+            {% endfor %}
+            {% if info.expressions|length > 3 %}
+              <li>
+                — <a href="#works-{{ letter }}-{{ forloop.counter }}"
+    data-bs-toggle="collapse">and {{ info.expressions|length|add:"-3" }} {% trans "more..." %}</a>
+              </li>
+            {% endif %}
+          </ul>
+          {% if info.docs|length > 3 %}
+            <ul class="list-unstyled collapse mb-0 text-muted"
+                id="works-{{ letter }}-{{ forloop.counter }}">
+              {% for doc in info.docs|slice:"3:" %}
+                <li>
+                  — <a href="{% url 'document' doc_id=doc.pk %}"
+    data-popup-url="{% url 'document_popup' doc_id=doc.pk %}">{{ doc.title }}</a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if info.defn_groups|length > 1 or info.defn_groups.0.defns|length > 1 %}
+            <div>
+              {% with info.defn_groups|length as n %}
+                <span class="text-muted">
+                  {% blocktrans count counter=n with forloopcounter=forloop.counter %}
+                    and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} group of similar definitions...</a>
+                  {% plural %}
+                    and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} groups of similar definitions...</a>
+                  {% endblocktrans %}
+                </span>
+              {% endwith %}
+              <div class="collapse card bg-light"
+                   id="works-{{ letter }}-{{ forloop.counter }}-extra">
+                <div class="card-body">
+                  {% for group in info.defn_groups %}
+                    <div class="card {% if not forloop.last %}mb-3{% endif %}">
+                      <div class="card-body">
+                        {% for defn in group.defns %}
+                          <div class="glossary-defn akoma-ntoso">{{ defn.defn|safe }}</div>
+                          <ul class="list-unstyled text-muted {% if forloop.last %}mb-0{% endif %}">
+                            {% for doc in defn.docs %}
+                              <li>
+                                — <a href="{% url 'document' doc_id=doc.pk %}"
+    data-popup-url="{% url 'document_popup' doc_id=doc.pk %}">{{ doc.title }}</a>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>

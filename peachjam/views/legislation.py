@@ -15,6 +15,7 @@ from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilte
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import (
     CoreDocument,
+    Glossary,
     Legislation,
     ProvisionCitation,
     UncommencedProvision,
@@ -560,6 +561,43 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
             for enrichment in doc.provision_enrichments:
                 enrichment.document = doc
 
+        return context
+
+
+class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
+    model = Glossary
+    slug_url_kwarg = "place_code"
+    slug_field = "place_code"
+    permission_required = "peachjam.view_glossary"
+    template_name = "peachjam/glossary/glossary.html"
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+
+class PlaceGlossaryLetterView(PlaceGlossaryView):
+    template_name = "peachjam/glossary/_glossary_letter.html"
+    letter = None
+
+    def get(self, *args, **kwargs):
+        self.letter = kwargs.get("letter")
+        return super().get(*args, **kwargs)
+
+    def get_filtered_terms(self, terms, q):
+        if not q:
+            return terms
+        return [t for t in terms if q.lower() in t["term_lc"]]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["letter"] = self.letter
+        terms = self.object.data.get(self.letter, [])
+        filtered_terms = self.get_filtered_terms(terms, self.request.GET.get("q"))
+        terms_with_expressions = []
+        for t in filtered_terms:
+            # TODO: add expression title / transform uri into document
+            terms_with_expressions.append(t)
+        context["terms"] = terms_with_expressions
         return context
 
 

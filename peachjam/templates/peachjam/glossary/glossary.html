@@ -1,0 +1,14 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans "Glossary" %}
+{% endblock %}
+{% block page-content %}
+  <div class="container pb-5">
+    {% if subscription_required %}
+      {% include "peachjam_subs/_subscription_required.html" %}
+    {% else %}
+      {% include "peachjam/glossary/_glossary.html" %}
+    {% endif %}
+  </div>
+{% endblock %}
