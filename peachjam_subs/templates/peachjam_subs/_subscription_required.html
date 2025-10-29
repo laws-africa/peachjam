@@ -3,7 +3,7 @@
   {% if not request.user.is_authenticated %}
     {% url 'account_login' as base_login_url %}
     {% url 'account_signup' as signup_url %}
-    {% with login_url=base_login_url|add:"?next="|add:request.path %}
+    {% with login_url=base_login_url|add:"?next="|add:request.htmx.current_url|default_if_none:request.path %}
       <p>
         {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
       This content is available only to subscribers.
