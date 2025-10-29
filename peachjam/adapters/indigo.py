@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from datetime import datetime
@@ -938,6 +939,8 @@ class IndigoGlossaryAdapter(IndigoAdapter):
             "created_at": "2025-09-09T11:11:55.607856Z",
             "updated_at": "2025-09-09T11:11:55.621109Z"
         } """
+        # turn `data` from a string into a dictionary
+        glossary_data["data"] = json.loads(glossary_data["data"])
         glossary, new = Glossary.objects.update_or_create(
             place_code=glossary_data["place_code"], defaults=glossary_data
         )
