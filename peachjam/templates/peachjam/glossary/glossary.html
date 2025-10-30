@@ -4,6 +4,9 @@
   {% trans "Glossary" %}
 {% endblock %}
 {% block page-content %}
+  <div class="container">
+    <h1 class="mt-4">{% trans 'Glossary of defined terms' %}</h1>
+  </div>
   <div class="container pb-5">
     {% if subscription_required %}
       {% include "peachjam_subs/_subscription_required.html" %}
