@@ -42,7 +42,7 @@
         {% endif %}
         {% if term.defn_groups|length > 1 or term.defn_groups.0.defns|length > 1 %}
           <div>
-            {% with term.defn_groups|length|add:"-1" as n %}
+            {% with term.defn_groups|length as n %}
               <span class="text-muted">
                 {% blocktrans count counter=n with forloopcounter=forloop.counter %}
                   and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} group of similar definitions...</a>
