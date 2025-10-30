@@ -1,81 +1,74 @@
 {% load i18n %}
 <div id="glossary-{{ letter }}">
-  {% if not terms %}
-    <p>
-      <i>No terms for
-        {% if letter == '0' %}
-          #
-        {% else %}
-          {{ letter|upper }}
-        {% endif %}
-      .</i>
-    </p>
-  {% endif %}
-  {% for info in terms %}
+  {% for term in terms %}
     <div class="term">
       <div class="mb-1">
-        <b>{{ info.term }}</b>
+        <b>{{ term.term }}</b>
       </div>
       <div class="ms-5 mb-2">
-        <la-akoma-ntoso frbr-expression-uri="{{ info.document.expression_frbr_uri }}"
-        class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;"
-        lang="{{ info.document.language.iso }}">
-        {{ info.defn|safe }}
+        <la-akoma-ntoso frbr-expression-uri="{{ term.expression_frbr_uri }}"
+        class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;">
+        {{ term.defn|safe }}
         </la-akoma-ntoso>
         <div>
           <ul class="list-unstyled text-muted">
-            {% for document in info.documents|slice:":3" %}
-              <li>
-                — <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-              </li>
+            {% for expression in term.expressions|slice:":3" %}
+              {% for uri, title in expression.items %}
+                <li>
+                  — <a href="{% url 'document_detail' frbr_uri=uri|slice:"1:" %}">{{ title }}</a>
+                </li>
+              {% endfor %}
             {% endfor %}
-            {% if info.documents|length > 3 %}
+            {% if term.expressions|length > 3 %}
               <li>
-                {% blocktrans with forloopcounter=forloop.counter n_more=info.expressions|length|add:"-3" %}
+                {% blocktrans with forloopcounter=forloop.counter n_more=term.expressions|length|add:"-3" %}
                 — <a href="#works-{{ letter }}-{{ forloopcounter }}"
     data-bs-toggle="collapse">and {{ n_more }} more...</a>
               {% endblocktrans %}
             </li>
           {% endif %}
         </ul>
-        {% if info.documents|length > 3 %}
+        {% if term.expressions|length > 3 %}
           <ul class="list-unstyled collapse text-muted"
               id="works-{{ letter }}-{{ forloop.counter }}">
-            {% for document in info.documents|slice:"3:" %}
-              <li>
-                — <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-              </li>
+            {% for expression in term.expressions|slice:"3:" %}
+              {% for uri, title in expression.items %}
+                <li>
+                  — <a href="{% url 'document_detail' frbr_uri=uri|slice:"1:" %}">{{ title }}</a>
+                </li>
+              {% endfor %}
             {% endfor %}
           </ul>
         {% endif %}
-        {% if info.defn_groups|length > 1 or info.defn_groups.0.defns|length > 1 %}
+        {% if term.defn_groups|length > 1 or term.defn_groups.0.defns|length > 1 %}
           <div>
-            {% with info.defn_groups|length as n %}
+            {% with term.defn_groups|length|add:"-1" as n %}
               <span class="text-muted">
                 {% blocktrans count counter=n with forloopcounter=forloop.counter %}
-                    and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} group of similar definitions...</a>
-                  {% plural %}
-                    and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} groups of similar definitions...</a>
-                  {% endblocktrans %}
+                  and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} group of similar definitions...</a>
+                {% plural %}
+                  and <a href="#works-{{ letter }}-{{ forloopcounter }}-extra" data-bs-toggle="collapse">{{ counter }} groups of similar definitions...</a>
+                {% endblocktrans %}
               </span>
             {% endwith %}
             <div class="collapse card bg-light"
                  id="works-{{ letter }}-{{ forloop.counter }}-extra">
               <div class="card-body">
-                {% for group in info.defn_groups %}
-                  <div class="card {% if not forloop.last %}mb-3{% endif %}">
+                {% for group in term.defn_groups %}
+                  <div class="card mb-3">
                     <div class="card-body">
                       {% for defn in group.defns %}
-                        <la-akoma-ntoso frbr-expression-uri="{{ info.document.expression_frbr_uri }}"
-                        class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;"
-                        lang="{{ info.document.language.iso }}">
+                        <la-akoma-ntoso frbr-expression-uri="{{ term.expression_frbr_uri }}"
+                        class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;">
                         {{ defn.defn|safe }}
                         </la-akoma-ntoso>
-                        <ul class="list-unstyled text-muted {% if forloop.last %}mb-0{% endif %}">
-                          {% for document in defn.documents %}
-                            <li>
-                              — <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-                            </li>
+                        <ul class="list-unstyled text-muted">
+                          {% for expression in defn.expressions %}
+                            {% for uri, title in expression.items %}
+                              <li>
+                                — <a href="{% url 'document_detail' frbr_uri=uri|slice:"1:" %}">{{ title }}</a>
+                              </li>
+                            {% endfor %}
                           {% endfor %}
                         </ul>
                       {% endfor %}

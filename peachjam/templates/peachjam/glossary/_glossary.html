@@ -1,7 +1,7 @@
 {% load i18n %}
 <div>
   <div class="nav nav-pills mb-3 mt-3" id="glossary-nav">
-    {% for letter in glossary.data %}
+    {% for letter in letters %}
       <a hx-get="{% url 'glossary-letter' place_code=glossary.place_code letter=letter %}"
          hx-target="#glossary-content-{{ letter }}"
          {% if letter == first_letter %}hx-trigger="load"{% endif %}
@@ -17,7 +17,7 @@
     {% endfor %}
   </div>
   <div class="card tab-content">
-    {% for letter in glossary.data %}
+    {% for letter in letters %}
       <div class="tab-pane {% if letter == first_letter %}active{% endif %}"
            id="glossary-pane-{{ letter }}">
         <div class="card-header">
