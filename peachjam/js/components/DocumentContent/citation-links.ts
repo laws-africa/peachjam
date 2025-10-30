@@ -6,6 +6,7 @@ import CitationLinkModal from './CitationLinkModal.vue';
 import CitationLinkGutterItem from './CitationLinkGutterItem.vue';
 import { ComponentPublicInstance } from 'vue';
 import { authHeaders } from '../../api';
+import peachJam from '../../peachjam';
 
 export interface ICitationLink {
   document: number | string | null;
@@ -26,7 +27,6 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
   protected links: ICitationLink[];
   protected manager: GutterEnrichmentManager;
   protected modal: ComponentPublicInstance | null = null;
-  protected editable = true;
   protected anchors: Map<ICitationLink, HTMLElement[]> = new Map<ICitationLink, HTMLElement[]>();
   protected gutterItems: Map<ICitationLink, HTMLElement> = new Map<ICitationLink, HTMLElement>();
   protected documentId: string | null;
@@ -37,13 +37,12 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     this.manager = manager;
     const el = document.getElementById('citation-links');
     this.links = JSON.parse((el ? el.textContent : '') || '[]');
-    this.editable = this.root.hasAttribute('data-editable-citation-links');
-
     this.applyLinks();
-    if (this.editable) {
-      this.modal = this.createModal();
-      this.manager.addProvider(this);
-    }
+    peachJam.whenUserLoaded().then((user) => {
+      if (user.perms.includes('peachjam.add_citationlink')) {
+        this.makeEditable();
+      }
+    });
   }
 
   applyLinks () {
@@ -67,12 +66,19 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
       return a;
     });
     this.anchors.set(link, elements);
+  }
 
-    if (this.editable && elements.length > 0) {
-      // add a gutter item
-      // @ts-ignore
-      this.manager.gutter?.appendChild(this.createGutterItem(link, elements[0]));
-    }
+  makeEditable () {
+    this.modal = this.createModal();
+    this.manager.addProvider(this);
+
+    // add gutter items from this.anchors
+    this.anchors.forEach((elements, link) => {
+      if (elements.length > 0) {
+        // @ts-ignore
+        this.manager.gutter?.appendChild(this.createGutterItem(link, elements[0]));
+      }
+    });
   }
 
   createModal () : ComponentPublicInstance {

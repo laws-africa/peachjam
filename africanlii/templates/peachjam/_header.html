@@ -27,6 +27,11 @@
        width="120"/>
 {% endblock %}
 {% block nav-items %}
+  <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'home' %}active{% endif %}"
+       href="{% url 'home_page' %}">
+    {% trans 'Home' %}</a>
+  </li>
   <li class="nav-item dropdown main-nav">
     <a class="nav-link {% with 'legislation soft_law legal_instruments judgments gazettes' as list %} {% if view.navbar_link in list.split %} active{% endif %} {% endwith %} dropdown-toggle"
        href="#"

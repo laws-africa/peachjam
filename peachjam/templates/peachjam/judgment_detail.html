@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
-{% load i18n %}
+{% load peachjam i18n %}
 {% block document-metadata-content-citation %}
   {{ block.super }}
   {% if document.mnc %}
@@ -97,43 +97,16 @@
         {% trans 'Summary' %}
       </dt>
       <dd>
-        {% include 'peachjam/document/_judgment_summary.html' with collapse_summary=True %}
+        <div hx-trigger="load"
+             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1">
+        </div>
       </dd>
     {% endif %}
   </dl>
 {% endblock %}
 {% block document-tabs %}
   {{ block.super }}
-  {% if case_histories %}
-    <li class="nav-item" role="presentation">
-      <button class="nav-link"
-              data-bs-toggle="tab"
-              data-bs-target="#case-history-tab"
-              data-track-event="Document | Tab | Case history"
-              type="button"
-              role="tab"
-              aria-controls="case-history-tab"
-              aria-selected="false">
-        <i class="bi bi-pj pj-case-history"></i>
-        {% trans 'Case history' %}
-      </button>
-    </li>
-  {% endif %}
-{% endblock %}
-{% block document-tab-panes %}
-  {{ block.super }}
-  {% if case_histories %}
-    <div class="tab-pane"
-         id="case-history-tab"
-         role="tabpanel"
-         aria-labelledby="case-history-tab">
-      <div class="container">
-        {% if case_history_subscription_required %}
-          {% include "peachjam_subs/_subscription_required.html" with lowest_product=lowest_case_history_product %}
-        {% else %}
-          {% include 'peachjam/_case_histories.html' %}
-        {% endif %}
-      </div>
-    </div>
-  {% endif %}
+  <div hx-trigger="load"
+       hx-get="{% url 'document_case_histories' document.expression_frbr_uri|strip_first_character %}">
+  </div>
 {% endblock %}

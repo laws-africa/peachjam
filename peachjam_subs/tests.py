@@ -5,6 +5,7 @@ from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.test import TestCase
 from django.utils import timezone
+from guardian.shortcuts import assign_perm
 
 from peachjam_subs.models import (
     PricingPlan,
@@ -121,6 +122,7 @@ class SubscriptionTests(TestCase):
         silver_offering = ProductOffering.objects.get(pk=3)
         trial = sub.trial_subscriptions.first()
         self.assertIsNotNone(trial)
+        self.assertTrue(trial.is_trial)
         self.assertEqual(Subscription.Status.ACTIVE, trial.status)
         self.assertEqual(date.today() + timedelta(days=13), trial.ends_on)
         self.assertEqual(silver_offering, trial.product_offering)
@@ -165,10 +167,21 @@ class SubscriptionTests(TestCase):
 
         trial = sub.trial_subscriptions.first()
         self.assertIsNotNone(trial)
+        self.assertTrue(trial.is_trial)
         self.assertEqual(Subscription.Status.ACTIVE, trial.status)
 
-        # user upgrades to silver
+        # silver should be an available offering
         silver_offering = ProductOffering.objects.get(pk=3)
+        assign_perm("peachjam_subs.can_subscribe", self.user, silver_offering)
+        self.assertIn(
+            silver_offering.pk,
+            [
+                po.pk
+                for po in ProductOffering.product_offerings_available_to_user(self.user)
+            ],
+        )
+
+        # user upgrades to silver
         upgrade_sub = Subscription.objects.create(
             user=self.user,
             product_offering=silver_offering,

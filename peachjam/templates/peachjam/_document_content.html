@@ -23,11 +23,7 @@
          data-work-frbr-uri="{{ document.work_frbr_uri }}"
          data-document-id="{{ document.id }}"
          data-diffs-url="{{ document_diffs_url }}"
-         data-display-type="{{ display_type }}"
-         {% if perms.peachjam.add_citationlink %}data-editable-citation-links{% endif %}
-         {% if perms.peachjam.add_annotation %}data-editable-annotation{% endif %}
-         {% if annotation_subscription_product %} data-annotation-subscription-product="{{ annotation_subscription_product }}" {% endif %}
-         {% if perms.peachjam.add_relationship %}data-editable-relationships{% endif %}>
+         data-display-type="{{ display_type }}">
       <div class="content-and-enrichments__inner la-akoma-ntoso-with-gutter">
         {% if display_type == 'akn' %}
           <la-akoma-ntoso

@@ -41,6 +41,19 @@ log = logging.getLogger(__name__)
 User = get_user_model()
 
 
+def get_recaptcha_field():
+    """Return a captcha field that is disabled when running in DEBUG mode."""
+
+    if settings.DEBUG:
+        return forms.BooleanField(
+            required=False,
+            widget=forms.HiddenInput,
+            initial=True,
+        )
+
+    return ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+
 def work_choices():
     return [("", "---")] + [
         (doc.work.pk, doc.title) for doc in CoreDocument.objects.order_by("title")
@@ -494,7 +507,7 @@ class ContactUsForm(forms.Form):
     name = forms.CharField(max_length=255, required=True)
     email = forms.EmailField(required=True)
     message = forms.CharField(widget=forms.Textarea, required=True)
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    captcha = get_recaptcha_field()
 
     def send_email(self):
         name = self.cleaned_data["name"]
@@ -586,7 +599,7 @@ def no_links(value):
 
 
 class PeachjamSignupForm(SignupForm):
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    captcha = get_recaptcha_field()
     first_name = forms.CharField(
         max_length=40, label=_("First name"), required=False, validators=[no_links]
     )
@@ -596,7 +609,7 @@ class PeachjamSignupForm(SignupForm):
 
 
 class PeachjamLoginForm(LoginForm):
-    captcha = ReCaptchaField(widget=ReCaptchaV2Invisible)
+    captcha = get_recaptcha_field()
 
 
 class UserProfileForm(forms.Form):
@@ -625,6 +638,16 @@ class UserProfileForm(forms.Form):
         self.user.save()
         self.user.refresh_from_db()
         return self.user
+
+
+class TermsAcceptanceForm(forms.Form):
+    accepted_terms = forms.BooleanField(
+        label=_("I agree to the Terms of Use"),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        error_messages={
+            "required": _("You must accept the terms to continue."),
+        },
+    )
 
 
 class RatificationForm(forms.ModelForm):

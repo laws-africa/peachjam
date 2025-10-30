@@ -5,9 +5,9 @@
         🥷
         <a :href="`/admin/peachjam/judgment/${documentId}/change/`">{{ title }}</a>
       </h5>
-      <a class="btn btn-link ms-auto" :href="`/admin/peachjam/judgment/${documentId}/change/`">Close</a>
-      <button class="btn btn-success ms-2" :disabled="saving" @click="savePublish">Save and publish</button>
-      <button class="btn btn-outline-success ms-2" :disabled="saving" @click="saveDraft">Save draft</button>
+      <a class="btn btn-link ms-auto" :href="`/admin/peachjam/judgment/${documentId}/change/`">{{ $t('Close') }}</a>
+      <button class="btn btn-success ms-2" :disabled="saving" @click="savePublish">{{ $t('Save and publish') }}</button>
+      <button class="btn btn-outline-success ms-2" :disabled="saving" @click="saveDraft">{{ $t('Save draft') }}</button>
     </div>
     <input v-model="newCaseName" class="form-control" />
   </header>
@@ -21,10 +21,10 @@
     <div class="sidebar-pane border-start">
       <ul class="nav nav-tabs border-bottom">
         <li class="nav-item">
-          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#replacements-tab" type="button">Replacements</button>
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#replacements-tab" type="button">{{ $t('Replacements') }}</button>
         </li>
         <li class="nav-item">
-          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#comments-tab" type="button">Comments</button>
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#comments-tab" type="button">{{ $t('Comments') }}</button>
         </li>
       </ul>
       <div class="tab-content">
@@ -74,7 +74,7 @@ export default {
         // insert the anonymisation notice, only if it isn't there
         const notice = document.createElement('div');
         notice.id = 'pj-anonymisation-notice';
-        notice.innerText = 'Editorial note: This judgment has been anonymised to protect personal information in compliance with the law.';
+        notice.innerText = this.$t('Editorial note: This judgment has been anonymised to protect personal information in compliance with the law.');
         this.$refs.documentRoot.insertAdjacentElement('afterbegin', notice);
       }
     },

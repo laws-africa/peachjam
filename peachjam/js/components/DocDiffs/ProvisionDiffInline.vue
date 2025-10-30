@@ -21,7 +21,7 @@
         <div class="row">
           <div class="col-12 col-lg-6">
             <select
-              v-if="diffsets"
+              v-if="canViewDiffs && diffsets.length"
               v-model="diffset"
               class="form-control"
             >
@@ -38,7 +38,7 @@
             </select>
           </div>
 
-          <div class="col-6 d-none d-lg-block">
+          <div v-if="canViewDiffs" class="col-6 d-none d-lg-block">
             <label>
               <input
                 v-model="sideBySide"
@@ -51,86 +51,112 @@
       </div>
 
       <div class="card-body reader-provision-changes-inline-body">
-        <template v-if="diffsets.length">
-          <diff-content
-            v-if="diffset"
-            :diffset="diffset"
-            :side-by-side="sideBySide"
-          />
-        </template>
-        <template v-else>
-          {{ $t('Loading') }}...
-        </template>
+        <!-- NO PERMISSION -->
+        <div v-if="!canViewDiffs">
+          <p v-if="user?.id">
+            {{ $t('You need to upgrade your subscription to view these changes.') }}
+          </p>
+          <p v-else>
+            {{ $t('Log in or sign up and subscribe to view these changes.') }}
+          </p>
+          <a
+            v-if="!user?.id"
+            class="btn btn-primary"
+            href="/subscribe"
+            target="_blank"
+            rel="noopeneroptional"
+          >
+            {{ $t('Subscribe') }}
+          </a>
+        </div>
+
+        <!-- HAS PERMISSION -->
+        <div v-else>
+          <template v-if="diffsets.length">
+            <diff-content
+              v-if="diffset"
+              :diffset="diffset"
+              :side-by-side="sideBySide"
+            />
+          </template>
+          <template v-else>
+            {{ $t('Loading changes...') }}
+          </template>
+        </div>
       </div>
     </div>
   </div>
 </template>
-
+>
 <script>
 import DiffContent from './DiffContent.vue';
 import debounce from 'lodash/debounce';
+import peachjam from '../../peachjam';
 
 export default {
   name: 'ProvisionDiffContentInline',
   components: { DiffContent },
   props: {
-    documentId: {
-      type: String,
-      required: true
-    },
-    provision: {
-      type: Object,
-      required: true
-    },
-    frbrExpressionUri: {
-      type: String,
-      required: true
-    },
-    serviceUrl: {
-      type: String,
-      required: true
-    }
+    documentId: { type: String, required: true },
+    provision: { type: Object, required: true },
+    frbrExpressionUri: { type: String, required: true },
+    serviceUrl: { type: String, required: true }
   },
   data: () => ({
-    originalElement: null,
-    wrapperElement: null,
-    sideBySide: true,
+    user: null,
+    canViewDiffs: false,
+    loadingUser: true,
     diffsets: [],
     diffset: null,
+    sideBySide: true,
+    originalElement: null,
+    wrapperElement: null,
     vw: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
   }),
 
   watch: {
-    vw: {
-      immediate: true,
-      handler (newVw) {
-        // Turn off side by side in mobile view
-        if (newVw < 992) {
-          this.sideBySide = false;
-        }
+    vw (newVw) {
+      // Turn off side by side in mobile view
+      if (newVw < 992) {
+        this.sideBySide = false;
       }
     }
   },
 
-  mounted () {
-    this.loadDiffContentsets();
+  async mounted () {
+    window.addEventListener('resize', this.setVw);
+
+    // Wait for user info before doing anything that requires permissions
+    try {
+      const user = await peachjam.whenUserLoaded();
+      this.user = user;
+      this.loadingUser = false;
+
+      this.canViewDiffs = user?.perms?.includes('peachjam.can_view_provision_changes') || false;
+
+      if (this.canViewDiffs) {
+        await this.loadDiffContentsets();
+      }
+    } catch (err) {
+      console.error('Error loading user info:', err);
+      this.loadingUser = false;
+    }
+
+    // Setup wrapping logic only if original element exists
     this.originalElement = document.getElementById(this.provision.id);
-    this.wrapperElement = document.createElement('div');
-    this.wrapperElement.style.position = 'relative';
     if (this.originalElement) {
-      /**
-       * the originalElement's gutter item isn't able to properly anchor to originalElement if it has a style: display:none.
-       * So we hide originalElement behind ProvisionDiffInline via absolute positioning, so originalElement's gutter
-       * item can anchor correctly.
-       * */
+      this.wrapperElement = document.createElement('div');
+      this.wrapperElement.style.position = 'relative';
+
+      // hide original element behind inline diff
       this.originalElement.style.position = 'absolute';
       this.originalElement.style.visibility = 'hidden';
       this.originalElement.style.height = '0';
       this.originalElement.style.top = '0';
+
       this.originalElement.insertAdjacentElement('beforebegin', this.wrapperElement);
       this.wrapperElement.append(this.originalElement, this.$el);
     }
-    window.addEventListener('resize', this.setVw);
   },
 
   unmounted () {
@@ -144,22 +170,29 @@ export default {
 
     async loadDiffContentsets () {
       const url = `${this.serviceUrl}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
-      const resp = await fetch(url);
-      if (resp.ok) {
-        this.diffsets = (await resp.json()).diffsets;
-        this.diffset = this.diffsets ? this.diffsets[0] : null;
+      try {
+        const resp = await fetch(url);
+        if (resp.ok) {
+          const data = await resp.json();
+          this.diffsets = data.diffsets || [];
+          this.diffset = this.diffsets[0] || null;
+        } else {
+          console.warn('Failed to load diffsets', resp.status);
+        }
+      } catch (e) {
+        console.error('Error loading diffsets:', e);
       }
     },
 
     close () {
       if (this.originalElement) {
-        // Place originalElement back to where it was and remove wrapperElement
         this.wrapperElement.insertAdjacentElement('beforebegin', this.originalElement);
-        this.originalElement.style.position = null;
-        this.originalElement.style.visibility = null;
-        this.originalElement.style.height = null;
-        this.originalElement.style.top = null;
-
+        Object.assign(this.originalElement.style, {
+          position: null,
+          visibility: null,
+          height: null,
+          top: null
+        });
         this.wrapperElement.remove();
       }
       this.$el.dispatchEvent(new CustomEvent('close'));

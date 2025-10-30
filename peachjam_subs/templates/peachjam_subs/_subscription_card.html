@@ -18,9 +18,7 @@
         {% endif %}
       {% endif %}
     {% endif %}
-    {% if subscription.is_active %}
-      <div class="text-muted mt-3">{% trans "Active since" %} {{ subscription.active_at|date }}</div>
-    {% elif subscription.starts_on %}
+    {% if not subscription.is_active and subscription.starts_on %}
       <div class="fw-bold mt-3">{% trans "Begins on" %} {{ subscription.starts_on|date }}</div>
     {% endif %}
     {% if subscription.ends_on %}
@@ -39,4 +37,9 @@
       </form>
     {% endif %}
   </div>
+  {% if subscription.active_at %}
+    <div class="card-footer">
+      <small class="text-muted">{% trans "Active since" %} {{ subscription.active_at|date }}</small>
+    </div>
+  {% endif %}
 </div>

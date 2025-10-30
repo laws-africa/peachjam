@@ -1,4 +1,5 @@
 from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 from peachjam.helpers import add_slash_to_frbr_uri
@@ -8,6 +9,7 @@ from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
 class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/document/_similar_documents.html"

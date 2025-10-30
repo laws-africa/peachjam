@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-02-27 13:33\n"
+"PO-Revision-Date: 2025-10-07 09:02\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -112,17 +112,15 @@ msgstr "Tazama makala zaidi"
 
 #: templates/liiweb/legislation_list.html:20
 msgid "More resources"
-msgstr ""
+msgstr "Rasilimali zaidi"
 
 #: templates/liiweb/legislation_list.html:24
 msgid "Unconstitutional provisions"
-msgstr ""
+msgstr "Masharti kinyume na katiba"
 
 #: templates/liiweb/legislation_list.html:29
-#, fuzzy
-#| msgid "Uncommenced legislation"
 msgid "Uncommenced provisions"
-msgstr "Sheria ambayo haijaanza kutumika"
+msgstr "Masharti ambayo hayajaanza"
 
 #: templates/liiweb/legislation_list.html:44
 msgid "You are viewing repealed legislation which is no longer in force."
@@ -193,3 +191,4 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
+

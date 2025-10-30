@@ -1,16 +1,16 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
-from django.views import View
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
 
-from peachjam.auth import user_display
-from peachjam.forms import UserProfileForm
-from peachjam.models import DocumentAccessGroup
+from peachjam.forms import TermsAcceptanceForm, UserProfileForm
+from peachjam.models import DocumentAccessGroup, UserProfile
 
 User = get_user_model()
 
@@ -55,25 +55,56 @@ class EditAccountView(LoginRequiredMixin, FormView):
         return context
 
 
-class GetAccountView(View):
-    def get_object(self):
-        return self.request.user
-
-    def get(self, *args, **kwargs):
-        if self.request.user.is_authenticated:
-            user_details = {
-                "id": self.request.user.id,
-                "email": self.request.user.email,
-                "name": user_display(self.request.user),
-            }
-            response = JsonResponse(user_details)
-            return response
-        return HttpResponse(status=404)
-
-
 class LoggedOutView(TemplateView):
     """When the user has logged out, they see this page with a Continue button. This gives us
     a chance to clear client-side state and cookies."""
 
     template_name = "account/logged_out.html"
     extra_context = {"reset_analytics": True}
+
+
+class AcceptTermsView(LoginRequiredMixin, FormView):
+    template_name = "user_account/accept_terms.html"
+    form_class = TermsAcceptanceForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated and self._user_has_accepted_terms():
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    def _user_has_accepted_terms(self):
+        profile = getattr(self.request.user, "userprofile", None)
+        return bool(getattr(profile, "accepted_terms_at", None))
+
+    def _clean_next_url(self, default=None, allow_default=True):
+        next_url = self.request.POST.get("next") or self.request.GET.get("next")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return next_url
+        if allow_default:
+            return default if default is not None else reverse("home_page")
+        return ""
+
+    def get_next_url(self):
+        return self._clean_next_url()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["terms_url"] = reverse("terms_of_use")
+        context["next"] = self._clean_next_url(allow_default=False)
+        context["logout_url"] = reverse("account_logout")
+        return context
+
+    def get_success_url(self):
+        return self.get_next_url()
+
+    def form_valid(self, form):
+        profile = getattr(self.request.user, "userprofile", None)
+        if profile is None:
+            profile, _ = UserProfile.objects.get_or_create(user=self.request.user)
+        profile.accepted_terms_at = timezone.now()
+        profile.save()
+        return super().form_valid(form)

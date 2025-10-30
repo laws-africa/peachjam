@@ -21,6 +21,7 @@ import sentry_sdk
 from django.contrib.messages import constants as messages
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -88,6 +89,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "peachjam.middleware.SanityCheckCacheMiddleware",
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
@@ -100,6 +102,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "peachjam.middleware.TermsAcceptanceMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
@@ -188,6 +191,7 @@ LOGIN_URL = "account_login"
 LOGIN_REDIRECT_URL = "home_page"
 LOGOUT_REDIRECT_URL = "account_logged_out"
 ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "my_account"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_FORMS = {
@@ -292,7 +296,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
 
 LANGUAGES = [
     ("en", _("English")),
@@ -452,6 +456,12 @@ if not DEBUG:
     DYNAMIC_STORAGE["DEFAULTS"][""] = f"s3:{AWS_STORAGE_BUCKET_NAME}:"
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+IMPORT_EXPORT_FORMATS = [
+    base_formats.CSV,
+    base_formats.XLSX,
+]
+IMPORT_EXPORT_IMPORT_FORMATS = IMPORT_EXPORT_FORMATS
+IMPORT_EXPORT_EXPORT_FORMATS = IMPORT_EXPORT_FORMATS
 
 GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
     "type": "service_account",
@@ -649,6 +659,9 @@ else:
     # in general, cache most pages
     CACHE_MIDDLEWARE_SECONDS = 60 * 30
 
+# ensure that our SanityCheckCacheMiddleware fails when sanity checks fail, even in production
+CACHE_SANITY_STRICT = True
+
 # Override X-Frame-Options header value
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -707,6 +720,7 @@ CORS_URLS_REGEX = r"^$"
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
+    messages.SUCCESS: "info",
 }
 
 

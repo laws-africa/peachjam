@@ -45,7 +45,7 @@
               <input
                 id="search-feedback_name"
                 name="name"
-                :value="userInfo?.name"
+                :value="userInfo().name"
                 type="text"
                 class="form-control"
                 maxlength="1024"
@@ -56,7 +56,7 @@
               <input
                 id="search-feedback_email"
                 name="email"
-                :value="userInfo?.email"
+                :value="userInfo().email"
                 type="email"
                 class="form-control"
               >
@@ -109,23 +109,14 @@ export default {
   },
   data () {
     return {
-      userInfo: {},
       submitted: false,
       success: false
     };
   },
-  async mounted () {
-    fetch('/accounts/user/', {
-      method: 'get'
-    }).then(async response => {
-      if (response.ok) {
-        this.userInfo = await response.json();
-      }
-    }).catch(error => {
-      console.log(error);
-    });
-  },
   methods: {
+    userInfo () {
+      return window.peachjam.user;
+    },
     async onSubmit () {
       const form = new FormData(this.$refs.feedbackForm);
 

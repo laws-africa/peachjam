@@ -16,12 +16,12 @@ from django.http.response import (
 )
 from django.shortcuts import redirect, reverse
 from django.template.loader import render_to_string
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.decorators.cache import cache_page
-from django.views.decorators.vary import vary_on_cookie
+from django.views.decorators.cache import cache_page, never_cache
 from django.views.generic import (
     CreateView,
     DeleteView,
@@ -30,6 +30,7 @@ from django.views.generic import (
     TemplateView,
     UpdateView,
 )
+from django_htmx.http import HttpResponseClientRedirect
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
@@ -76,26 +77,34 @@ class DocumentSearchView(TemplateView):
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
     config_version = "2025-07-28"
+    user_can_debug = False
+    # used by the /explain endpoint
+    use_explain = False
 
     def get(self, request, *args, **kwargs):
+        self.user_can_debug = self.request.user.has_perm("peachjam_search.debug_search")
         return getattr(self, self.action)(request, *args, **kwargs)
 
-    @vary_on_cookie
-    @method_decorator(cache_page(CACHE_SECS))
-    def search(self, request, *args, **kwargs):
+    def prepare(self, request, facets=False):
         form = SearchForm(request.GET)
         if not form.is_valid():
-            return JsonResponse({"error": form.errors}, status=400)
+            return JsonResponse({"error": form.errors}, status=400), None, None
+
+        if facets:
+            form.cleaned_data["facets"] = True
 
         engine = self.make_search_engine(form)
-
         if not engine.query and not engine.field_queries:
             # no search term
-            return JsonResponse({"error": "No search term"}, status=400)
+            return JsonResponse({"error": "No search term"}, status=400), None, None
 
-        # download as xlsx
-        if self.request.GET.get("format"):
-            return self.download_results(engine, self.request.GET["format"])
+        return None, form, engine
+
+    @method_decorator(cache_page(CACHE_SECS))
+    def search(self, request, *args, **kwargs):
+        response, form, engine = self.prepare(request)
+        if response:
+            return response
 
         es_response = engine.execute()
         trace = self.save_search_trace(engine, es_response.hits.total.value)
@@ -113,23 +122,25 @@ class DocumentSearchView(TemplateView):
                 {
                     "request": request,
                     "hits": hits,
-                    "can_debug": self.request.user.has_perm(
-                        "peachjam_search.debug_search"
-                    ),
+                    "can_debug": self.use_explain,
                     "show_jurisdiction": settings.PEACHJAM[
                         "SEARCH_JURISDICTION_FILTER"
                     ],
                 },
             ),
             "trace_id": str(trace.id) if trace else None,
-            "can_download": self.request.user.has_perm(
-                "peachjam_search.download_search"
-            ),
-            "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"]
-            and self.request.user.has_perm("peachjam_search.semantic_search"),
+            "can_semantic": settings.PEACHJAM["SEARCH_SEMANTIC"],
         }
 
         return self.render(response)
+
+    @method_decorator(never_cache)
+    def explain(self, request, *args, **kwargs):
+        if not self.user_can_debug:
+            return HttpResponseForbidden()
+
+        self.use_explain = True
+        return self.search(request, *args, **kwargs)
 
     @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
@@ -143,19 +154,12 @@ class DocumentSearchView(TemplateView):
         response = {"suggestions": suggestions}
         return self.render(response)
 
-    @vary_on_cookie
     @method_decorator(cache_page(CACHE_SECS))
     def facets(self, request, *args, **kwargs):
         """Only return facets from search."""
-        form = SearchForm(request.GET)
-        if not form.is_valid():
-            return JsonResponse({"error": form.errors}, status=400)
-
-        form.cleaned_data["facets"] = True
-        engine = self.make_search_engine(form)
-        if not engine.query and not engine.field_queries:
-            # no search term
-            return JsonResponse({"error": "No search term"}, status=400)
+        response, form, engine = self.prepare(request, facets=True)
+        if response:
+            return response
 
         engine.page_size = 0
         es_response = engine.execute()
@@ -167,25 +171,70 @@ class DocumentSearchView(TemplateView):
             }
         )
 
+    @method_decorator(never_cache)
+    def download(self, request, *args, **kwargs):
+        """Download. Doesn't allow caching to prevent permission spillage."""
+        response, form, engine = self.prepare(request)
+        if response:
+            return response
+
+        if not request.user.has_perm("peachjam_search.download_search"):
+            if request.htmx:
+                # this is the initial request to download, show a friendly permission-denied box
+                self.template_name = "peachjam_search/_download_403.html"
+                return self.render_to_response({})
+            return HttpResponseForbidden()
+
+        if request.htmx:
+            # the download is allowed, do a full redirect to start it
+            return HttpResponseClientRedirect(request.get_full_path())
+
+        # only need the ids
+        engine.source = ["_id"]
+        engine.explain = False
+        # TODO: first 1000 hits
+        engine.page = 1
+        engine.page_size = 1000
+        response = engine.execute()
+        pks = [int(hit.meta.id) for hit in response.hits]
+
+        dataset = DownloadDocumentsResource().export(
+            DownloadDocumentsResource.get_objects_for_download(pks)
+        )
+        fmt = DownloadDocumentsResource.download_formats[
+            form.cleaned_data.get("format") or "xlsx"
+        ]()
+        data = fmt.export_data(dataset)
+
+        response = HttpResponse(data, content_type=fmt.get_content_type())
+        # prevent caching, so that we can enforce download permissions
+        add_never_cache_headers(response)
+
+        fname = "search-results." + fmt.get_extension()
+        response["Content-Disposition"] = f'attachment; filename="{fname}"'
+
+        return response
+
     def make_search_engine(self, form):
         engine = SearchEngine()
         form.configure_engine(engine)
 
-        engine.explain = self.request.user.has_perm("peachjam_search.debug_search")
-        if settings.PEACHJAM["SEARCH_SEMANTIC"] and self.request.user.has_perm(
-            "peachjam_search.semantic_search"
-        ):
+        engine.explain = self.use_explain
+        if settings.PEACHJAM["SEARCH_SEMANTIC"]:
             engine.mode = form.cleaned_data.get("mode") or engine.mode
 
         return engine
 
     def render(self, response):
-        if "html" in self.request.GET:
+        if "html" in self.request.GET and self.user_can_debug:
             # useful for debugging and showing django debug panel details
-            return self.render_to_response(
+            response = self.render_to_response(
                 {"response_json": json.dumps(response, indent=2)}
             )
-        return JsonResponse(response)
+        else:
+            response = JsonResponse(response)
+
+        return response
 
     def save_search_trace(self, engine, n_results):
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
@@ -212,39 +261,13 @@ class DocumentSearchView(TemplateView):
             user_agent=self.request.headers.get("user-agent"),
         )
 
-    def download_results(self, engine, format):
-        if not self.request.user.has_perm("peachjam_search.download_search"):
-            return HttpResponseForbidden()
-
-        if format not in DownloadDocumentsResource.download_formats:
-            return HttpResponseBadRequest("Invalid format")
-
-        # only need the ids
-        engine.source = ["_id"]
-        engine.explain = False
-        # TODO: first 1000 hits
-        engine.page = 1
-        engine.page_size = 1000
-        response = engine.execute()
-        pks = [int(hit.meta.id) for hit in response.hits]
-
-        dataset = DownloadDocumentsResource().export(
-            DownloadDocumentsResource.get_objects_for_download(pks)
-        )
-        fmt = DownloadDocumentsResource.download_formats[format]()
-        data = fmt.export_data(dataset)
-
-        response = HttpResponse(data, content_type=fmt.get_content_type())
-        fname = "search-results." + fmt.get_extension()
-        response["Content-Disposition"] = f'attachment; filename="{fname}"'
-        return response
-
 
 class SearchClickViewSet(CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
 
 
+@method_decorator(never_cache, name="dispatch")
 class SearchTraceListView(PermissionRequiredMixin, ListView):
     model = SearchTrace
     paginate_by = 50
@@ -268,6 +291,7 @@ class SearchTraceListView(PermissionRequiredMixin, ListView):
         return self.request.user.is_authenticated and self.request.user.is_staff
 
 
+@method_decorator(never_cache, name="dispatch")
 class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
     model = SearchTrace
     queryset = SearchTrace.objects.prefetch_related("previous_search", "next_searches")

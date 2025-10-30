@@ -240,10 +240,10 @@ class ProductOffering(models.Model):
         return (
             get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
             .exclude(
-                # exclude currently active subscription
-                pk__in=Subscription.objects.active_for_user(user).values_list(
-                    "product_offering", flat=True
-                )
+                # exclude currently active (non-trial) subscription
+                pk__in=Subscription.objects.active_for_user(user)
+                .filter(is_trial=False)
+                .values_list("product_offering", flat=True)
             )
             .order_by("-pricing_plan__price")
         )
@@ -365,8 +365,9 @@ class Subscription(models.Model):
                 log.info(
                     f"Subscription closes {sub} which is a trial, and so also closes {sub.trial_replaces}"
                 )
-                # the trial is being replaced by a new subscription, so close the replaced one too
-                sub.trial_replaces.close()
+                if not sub.trial_replaces.is_closed:
+                    # the trial is being replaced by a new subscription, so close the replaced one too
+                    sub.trial_replaces.close()
 
         # it might already be set, if there was a trial subscription, and we don't want to lose that timestamp
         self.active_at = self.active_at or timezone.now()
@@ -461,7 +462,10 @@ class Subscription(models.Model):
                 self.product_offering.product.group.user_set.remove(self.user)
 
     def __str__(self):
-        return f"Subscription<#{self.pk} ({self.status}) for {self.user.username} - {self.product_offering}>"
+        trial = ""
+        if self.is_trial:
+            trial = f" (trial for {self.trial_replaces})"
+        return f"Subscription<#{self.pk} ({self.status}) for {self.user.username} - {self.product_offering}{trial}>"
 
     @classmethod
     def get_or_create_active_for_user(cls, user):
@@ -585,6 +589,7 @@ class SubscriptionSettings(SingletonModel):
         if (
             self.trial_product_offering
             and not subscription.is_trial
+            and subscription.product_offering.pricing_plan.price > 0
             and self.trial_product_offering.product.tier
             > subscription.product_offering.product.tier
         ):

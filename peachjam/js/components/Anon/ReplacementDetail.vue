@@ -3,8 +3,18 @@
     <div v-html="replacement.snippet()" class="mb-1" />
     <div class="d-flex">
       <input type="text" v-model="newText" class="form-control me-auto" />
-      <button class="btn btn-success ms-2" @click="apply" :disabled="!dirty" title="Apply"><i class="bi bi-check"></i></button>
-      <button class="btn btn-warning ms-2" @click="unapply" :disabled="!replacement.applied" title="Undo"><i class="bi bi-arrow-counterclockwise"></i></button>
+      <button
+        class="btn btn-success ms-2"
+        @click="apply"
+        :disabled="!dirty"
+        :title="$t('Apply')"
+      ><i class="bi bi-check"></i></button>
+      <button
+        class="btn btn-warning ms-2"
+        @click="unapply"
+        :disabled="!replacement.applied"
+        :title="$t('Undo')"
+      ><i class="bi bi-arrow-counterclockwise"></i></button>
     </div>
   </li>
 </template>

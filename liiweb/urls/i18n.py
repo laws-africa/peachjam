@@ -1,4 +1,4 @@
-from django.urls import include, path, re_path
+from django.urls import include, path
 
 from liiweb import views
 from liiweb.views.donate import DonatePageView
@@ -91,12 +91,6 @@ urlpatterns = [
             ]
         ),
     ),
-    # This redirects old Ulii case laws to work with peachjam urls
-    re_path(
-        r"^(?P<country>[a-z]{2})/judgment/(?P<court>[-\w]+)/(?P<year>\d+)/(?P<number>\d+)$",
-        views.RedirectCaseURLsView.as_view(),
-        name="old_lii_case_redirect",
-    ),
     path("donate/", DonatePageView.as_view(), name="donate"),
-    path("", include("peachjam.urls")),
+    path("", include("peachjam.urls.i18n")),
 ]

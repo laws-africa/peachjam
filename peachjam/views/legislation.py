@@ -6,9 +6,11 @@ from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
 from django.http import Http404
 from django.template.defaultfilters import date as format_date
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
@@ -18,6 +20,7 @@ from peachjam.models import (
     Glossary,
     Legislation,
     ProvisionCitation,
+    ProvisionCitationCount,
     UncommencedProvision,
     UnconstitutionalProvision,
     pj_settings,
@@ -97,6 +100,12 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     model = Legislation
     template_name = "peachjam/legislation_detail.html"
     permission_required = "peachjam.can_view_historical_legislation"
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        if not self.object.is_most_recent():
+            add_never_cache_headers(response)
+        return response
 
     def has_permission(self):
         # if it's the most recent version, always allow
@@ -443,6 +452,7 @@ class DocumentUncommencedProvisionListView(DetailView):
         return context
 
 
+@method_decorator(never_cache, name="dispatch")
 class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_uncommencedprovision"
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
@@ -480,6 +490,7 @@ class UnconstitutionalProvisionDetailView(DetailView):
     context_object_name = "enrichment"
 
 
+@method_decorator(never_cache, name="dispatch")
 class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_unconstitutionalprovision"
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
@@ -632,6 +643,7 @@ class PlaceGlossaryLetterView(PlaceGlossaryView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
 class DocumentProvisionCitationView(
     SubscriptionRequiredMixin, FilteredDocumentListView
 ):
@@ -648,6 +660,7 @@ class DocumentProvisionCitationView(
                 self.provision_eid
             ),
             "provision_html": self.document.get_provision_by_eid(self.provision_eid),
+            "provision_eid": self.provision_eid,
         }
 
     def get_template_names(self):
@@ -707,5 +720,13 @@ class DocumentProvisionCitationView(
         context = super().get_context_data(**kwargs)
         context.update(self.get_subscription_required_context())
         context["citation_contexts"] = self.provision_citations
-        context["citing_documents_count"] = self.get_base_queryset().count()
+        target_eid = self.provision_eid or None
+        citing_documents_count = (
+            ProvisionCitationCount.objects.filter(
+                work=self.document.work, provision_eid=target_eid
+            )
+            .values_list("count", flat=True)
+            .first()
+        )
+        context["citing_documents_count"] = citing_documents_count or 0
         return context

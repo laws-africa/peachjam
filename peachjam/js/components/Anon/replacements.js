@@ -144,14 +144,15 @@ export class ReplacementGroup {
 export function findText (root, text, max = 0) {
   const ranges = [];
   const marks = [];
+  let needle = text;
 
   if (!RegExp.escape) {
-    text = text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    needle = needle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   } else {
-    text = RegExp.escape(text);
+    needle = RegExp.escape(needle);
   }
 
-  const re = new RegExp('\\b' + text + '\\b', 'g');
+  const re = new RegExp('\\b' + needle + '\\b', 'g');
 
   new Mark(root).markRegExp(re, {
     acrossElements: true,

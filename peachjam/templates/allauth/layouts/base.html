@@ -3,7 +3,7 @@
 {% load i18n %}
 {% block title %}{{ title }}{% endblock %}
 {% block page-content %}
-  {% include "peachjam/_messages.html" %}
+  <div id="messages"></div>
   <div class="text-center">
     {% block logo %}
       <a href="{% url 'home_page' %}">
@@ -19,7 +19,7 @@
       {% block content %}{% endblock %}
     </div>
     {% if SUPPORT_EMAIL %}
-      <div class="card-footer mx-4 bg-white">
+      <div class="card-footer">
         {% trans 'Need help? Please email' %} <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.
       </div>
     {% endif %}

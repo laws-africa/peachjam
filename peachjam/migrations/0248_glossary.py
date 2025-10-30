@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0244_alter_coredocument_options"),
+        ("peachjam", "0247_provision_citation_counts"),
     ]
 
     operations = [

@@ -6,6 +6,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from languages_plus.models import Language
@@ -104,6 +105,13 @@ class UserProfile(models.Model):
         related_name="+",
         verbose_name=_("preferred language"),
     )
+    accepted_terms_at = models.DateTimeField(
+        _("accepted terms at"),
+        default=timezone.now,
+        help_text=_("When the user accepted the terms of service."),
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _("user profile")
@@ -117,6 +125,12 @@ class UserProfile(models.Model):
         return self.user.emailaddress_set.filter(
             verified=True, email=self.user.email
         ).exists()
+
+    def avatar_url(self):
+        """Returns the URL of the first social account avatar, if any."""
+        for social_account in self.user.socialaccount_set.all():
+            if social_account.extra_data.get("picture"):
+                return social_account.extra_data.get("picture")
 
     def __str__(self):
         return f"{self.user.username}"
