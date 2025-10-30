@@ -916,12 +916,6 @@ class IndigoGlossaryAdapter(IndigoAdapter):
         )
 
     def update_document(self, place_code):
-        from peachjam.tasks import update_glossary
-
-        logger.info(f"Queueing up task to update glossary for {place_code} ...")
-        update_glossary(self.ingestor.pk, place_code)
-
-    def update_glossary(self, place_code):
         url = f"{self.api_url}/glossary/{place_code}"
         logger.info(f"Updating glossary ... {url}")
 
