@@ -4,7 +4,7 @@
     {% for letter in letters %}
       <a hx-get="{% url 'glossary-letter' place_code=glossary.place_code letter=letter %}"
          hx-target="#glossary-content-{{ letter }}"
-         {% if letter == first_letter %}hx-trigger="load"{% endif %}
+         hx-trigger="{% if letter == first_letter %}load{% else %}click once{% endif %}"
          class="nav-link {% if letter == first_letter %}active{% endif %}"
          data-bs-toggle="pill"
          href="#glossary-pane-{{ letter }}">
