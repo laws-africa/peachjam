@@ -3,15 +3,17 @@
   {% if not request.user.is_authenticated %}
     {% url 'account_login' as base_login_url %}
     {% url 'account_signup' as signup_url %}
-    {% with login_url=base_login_url|add:"?next="|add:request.path %}
-      <p>
-        {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
+    {% with next_url=request.htmx.current_url|default:request.path %}
+      {% with login_url=base_login_url|add:"?next="|add:next_url %}
+        <p>
+          {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
       This content is available only to subscribers.
       <a href="{{ login_url }}">Log in</a> or
       <a href="{{ signup_url }}">Sign up</a>
       and subscribe to {{ lowest_product }} to unlock access.
     {% endblocktrans %}
-      </p>
+        </p>
+      {% endwith %}
     {% endwith %}
   {% else %}
     <p>
