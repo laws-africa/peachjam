@@ -594,16 +594,40 @@ class PlaceGlossaryLetterView(PlaceGlossaryView):
             return terms
         return [t for t in terms if q.lower() in t["term_lc"]]
 
+    def get_context_terms(self, terms):
+        context_terms = []
+        for term in terms:
+            # grab the first (maybe only) expression URI; if we have the matching document we can include the term
+            expression_frbr_uri = (
+                term["expressions"][0] if len(term["expressions"]) else None
+            )
+            try:
+                term["document"] = CoreDocument.objects.get(
+                    expression_frbr_uri=expression_frbr_uri
+                )
+                # also add all the expressions so we can display their title
+                term["documents"] = CoreDocument.objects.filter(
+                    expression_frbr_uri__in=term["expressions"]
+                )
+                # now do the same for defn_groups
+                # TODO: remove a definitions from "defns" if there are no documents
+                for group in term["defn_groups"]:
+                    for defn in group["defns"]:
+                        defn["documents"] = CoreDocument.objects.filter(
+                            expression_frbr_uri__in=defn["expressions"]
+                        )
+                context_terms.append(term)
+            except CoreDocument.DoesNotExist:
+                continue
+
+        return context_terms
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["letter"] = self.letter
         terms = self.object.data.get(self.letter, [])
         filtered_terms = self.get_filtered_terms(terms, self.request.GET.get("q"))
-        terms_with_expressions = []
-        for t in filtered_terms:
-            # TODO: add expression title / transform uri into document
-            terms_with_expressions.append(t)
-        context["terms"] = terms_with_expressions
+        context["terms"] = self.get_context_terms(filtered_terms)
         return context
 
 
