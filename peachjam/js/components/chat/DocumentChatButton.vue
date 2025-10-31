@@ -25,9 +25,12 @@
         >
           <i class="bi bi-arrows-angle-contract"></i>
         </button>
-        <button class="btn btn-sm btn-outline-secondary border-0 ms-1" @click="open = false" title="Close">
-          &times;
-        </button>
+        <button
+          class="btn btn-sm btn-outline-secondary border-0 ms-1"
+          data-track-event="Document Chat | Close"
+          title="Close"
+          @click="open = false"
+        >&times;</button>
       </div>
       <div class="flex-grow-1 overflow-y-hidden">
         <document-chat :documentId="documentId" ref="chat"></document-chat>
@@ -36,6 +39,7 @@
     <button
       v-else
       class="btn btn-primary document-chat-button"
+      data-track-event="Document Chat | Open"
       @click="open = true"
     >Ask {{ assistantName }}</button>
   </div>
