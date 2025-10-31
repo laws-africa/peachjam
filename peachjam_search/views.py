@@ -248,7 +248,7 @@ class DocumentSearchView(TemplateView):
             user=self.request.user if self.request.user.is_authenticated else None,
             config_version=self.config_version,
             request_id=self.request.id if self.request.id != "none" else None,
-            mode=engine.mode,
+            mode=engine.mode[:20],
             search=search,
             field_searches=engine.field_queries,
             n_results=n_results,
