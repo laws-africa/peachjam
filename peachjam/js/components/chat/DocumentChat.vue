@@ -48,15 +48,12 @@
           <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         </button>
       </div>
-      <div class="small pt-1 text-end">
-        <a href="#" @click.prevent="clear"><i class="bi bi-trash me-1"></i>Clear chat</a>
-      </div>
     </form>
   </div>
 </template>
 
 <script>
-import { csrfToken } from '../api';
+import { csrfToken } from '../../api';
 
 function generateId () {
   if (window.crypto && window.crypto.randomUUID) {
@@ -205,10 +202,6 @@ export default {
 </script>
 
 <style scoped>
-.document-chat {
-  min-height: 28rem;
-}
-
 .chat-bubble-user {
   max-width: 75%;
   border-radius: 1rem;

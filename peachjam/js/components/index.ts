@@ -22,7 +22,6 @@ import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 import TaxonomyTopics from './TaxonomyTopics.vue';
 import AnonApp from './Anon/AnonApp.vue';
-import DocumentChat from './DocumentChat.vue';
 
 const components: Record<string, any> = {
   // Data components
@@ -46,7 +45,6 @@ const components: Record<string, any> = {
 
   // Vue components
   AnonApp,
-  DocumentChat,
   DocumentProblemModal,
   FindDocuments,
   OfflineDetails,
