@@ -135,16 +135,20 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
             with langfuse.start_as_current_observation(
                 name="document_chat",
                 as_type="generation",
-                input={"expression_frbr_uri": thread.document.expression_frbr_uri},
+                input={
+                    "expression_frbr_uri": thread.document.expression_frbr_uri,
+                    "question": message.content,
+                },
             ) as generation:
                 config["configurable"]["trace_id"] = generation.trace_id
                 result = graph.invoke(
                     state,
                     config,
                 )
-                # todo link generation.trace id to messages?
                 generation.update_trace(
-                    user_id=thread.user.username, session_id=str(thread.id)
+                    user_id=thread.user.username,
+                    session_id=str(thread.id),
+                    output={"reply": result.get("messages", [])[-1].content},
                 )
 
         return render_thread_state(thread, result)
