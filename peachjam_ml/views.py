@@ -9,7 +9,12 @@ from langchain_core.messages import HumanMessage
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
-from peachjam_ml.chat import get_system_prompt, graph, langfuse, langfuse_callback
+from peachjam_ml.chat import (
+    get_chat_config,
+    get_chat_graph,
+    get_system_prompt,
+    langfuse,
+)
 from peachjam_ml.models import ChatThread, DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
@@ -91,7 +96,8 @@ class StartDocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailV
                     user=self.request.user,
                 )
 
-        state = graph.get_state(get_chat_config(thread)).values
+        with get_chat_graph() as graph:
+            state = graph.get_state(get_chat_config(thread)).values
         return render_thread_state(thread, state)
 
 
@@ -109,47 +115,37 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
         # parse json input from request body
         input = json.loads(request.body)
         config = get_chat_config(thread)
-        snapshot = graph.get_state(config)
+        with get_chat_graph() as graph:
+            snapshot = graph.get_state(config)
 
-        if not snapshot.values:
-            state = {
-                "messages": [get_system_prompt(thread.user)],
-                "user_id": thread.user.pk,
-                "document_id": thread.document.pk,
-            }
-        else:
-            state = snapshot.values
+            if not snapshot.values:
+                state = {
+                    "messages": [get_system_prompt(thread.user)],
+                    "user_id": thread.user.pk,
+                    "document_id": thread.document.pk,
+                }
+            else:
+                state = snapshot.values
 
-        message = input.get("message", "")
-        message = HumanMessage(message["content"], id=message["id"])
-        state["messages"].append(message)
+            message = input.get("message", "")
+            message = HumanMessage(message["content"], id=message["id"])
+            state["messages"].append(message)
 
-        with langfuse.start_as_current_observation(
-            name="document_chat",
-            as_type="generation",
-            input={"expression_frbr_uri": thread.document.expression_frbr_uri},
-        ) as generation:
-            result = graph.invoke(
-                state,
-                config,
-            )
-            # todo link generation.trace id to messages?
-            generation.update_trace(
-                user_id=thread.user.username, session_id=str(thread.id)
-            )
+            with langfuse.start_as_current_observation(
+                name="document_chat",
+                as_type="generation",
+                input={"expression_frbr_uri": thread.document.expression_frbr_uri},
+            ) as generation:
+                result = graph.invoke(
+                    state,
+                    config,
+                )
+                # todo link generation.trace id to messages?
+                generation.update_trace(
+                    user_id=thread.user.username, session_id=str(thread.id)
+                )
 
         return render_thread_state(thread, result)
-
-
-def get_chat_config(thread):
-    return {
-        "configurable": {
-            "thread_id": str(thread.id),
-            "document_id": thread.document.pk,
-            "user_id": thread.user.pk,
-        },
-        "callbacks": [langfuse_callback],
-    }
 
 
 def render_thread_state(thread, state):

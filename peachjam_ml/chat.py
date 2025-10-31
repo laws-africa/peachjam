@@ -1,3 +1,4 @@
+from contextlib import contextmanager
 from typing import Annotated, List
 
 from django.conf import settings
@@ -7,7 +8,7 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
-from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
@@ -193,8 +194,29 @@ graph_builder.add_conditional_edges("chatbot", tools_condition)
 graph_builder.add_edge("tools", "chatbot")
 graph_builder.add_edge("chatbot", END)
 
-memory = InMemorySaver()
-graph = graph_builder.compile(checkpointer=memory)
+
+_db_setup = False
+
+
+@contextmanager
+def get_chat_graph():
+    with get_graph_memory() as memory:
+        yield graph_builder.compile(checkpointer=memory)
+
+
+@contextmanager
+def get_graph_memory():
+    db_config = settings.DATABASES["default"]
+    db_url = (
+        f"postgresql://{db_config['USER']}:{db_config['PASSWORD']}"
+        f"@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}"
+    )
+    with PostgresSaver.from_conn_string(db_url) as memory:
+        global _db_setup
+        if not _db_setup:
+            memory.setup()
+            _db_setup = True
+        yield memory
 
 
 def get_system_prompt(user) -> SystemMessage:
@@ -211,3 +233,15 @@ def get_system_prompt(user) -> SystemMessage:
     )
 
     return SystemMessage(content=system_prompt)
+
+
+def get_chat_config(thread) -> RunnableConfig:
+    """Given a ChatThread object, get the config object to provide to langgraph."""
+    return {
+        "configurable": {
+            "thread_id": str(thread.id),
+            "document_id": thread.document.pk,
+            "user_id": thread.user.pk,
+        },
+        "callbacks": [langfuse_callback],
+    }
