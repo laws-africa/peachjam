@@ -61,7 +61,7 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
 
 class StartDocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = CoreDocument
-    permission_required = "peachjam_ml.create_chatthread"
+    permission_required = "peachjam_ml.add_chatthread"
     http_method_names = ["post"]
 
     def post(self, request, *args, **kwargs):
@@ -97,7 +97,7 @@ class StartDocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailV
 
 class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = ChatThread
-    permission_required = "peachjam_ml.create_chatthread"
+    permission_required = "peachjam_ml.add_chatthread"
     http_method_names = ["post"]
 
     def get_queryset(self):
