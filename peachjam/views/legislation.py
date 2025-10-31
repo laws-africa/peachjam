@@ -23,6 +23,7 @@ from peachjam.models import (
     ProvisionCitationCount,
     UncommencedProvision,
     UnconstitutionalProvision,
+    get_country_and_locality,
     pj_settings,
 )
 from peachjam.registry import registry
@@ -593,6 +594,8 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
             letters.append("0")
         context["letters"] = letters
         context["first_letter"] = letters[0] if letters else None
+        country, locality = get_country_and_locality(self.object.place_code)
+        context["place_name"] = locality.name if locality else country.name
         return context
 
 

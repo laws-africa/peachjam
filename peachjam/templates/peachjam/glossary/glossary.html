@@ -18,6 +18,11 @@
   </div>
   <div class="container">
     <h1>{% trans 'Glossary of defined terms' %}</h1>
+    <div class="mb-5">
+      {% blocktrans trimmed %}
+        Terms that have been defined in legislation across {{ place_name }}.
+      {% endblocktrans %}
+    </div>
   </div>
   <div class="container pb-5">
     {% if subscription_required %}
