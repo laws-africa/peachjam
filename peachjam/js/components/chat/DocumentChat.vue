@@ -14,7 +14,7 @@
         >
           <div
             class="chat-bubble text-break"
-            :class="message.role === 'human' ? 'chat-bubble-user bg-primary text-white' : 'chat-bubble-agent'"
+            :class="message.role === 'human' ? 'chat-bubble-user bg-brand-pale' : 'chat-bubble-agent'"
           >
             <div class="chat-content">{{ message.content }}</div>
             <div v-if="message.role === 'ai'">
@@ -244,33 +244,4 @@ export default {
 </script>
 
 <style scoped>
-.chat-bubble-user {
-  max-width: 75%;
-  border-radius: 1rem;
-  border-bottom-right-radius: 0.25rem;
-  padding: 0.5rem 0.75rem;
-  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
-}
-
-.chat-bubble-agent {
-}
-
-.chat-content {
-  white-space: pre-wrap;
-}
-
-.chat-enter-active,
-.chat-leave-active {
-  transition: all 0.2s ease;
-}
-
-.chat-enter-from,
-.chat-leave-to {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-.chat-input textarea {
-  resize: none;
-}
 </style>

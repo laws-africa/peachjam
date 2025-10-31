@@ -41,7 +41,10 @@
       class="btn btn-primary document-chat-button"
       data-track-event="Document Chat | Open"
       @click="open = true"
-    >Ask {{ assistantName }}</button>
+    >
+      <i class="bi-pj pj-ai"></i>
+      Ask {{ assistantName }}
+    </button>
   </div>
 </template>
 

@@ -17,8 +17,8 @@
   @include media-breakpoint-up(md) {
     left: auto;
     top: auto;
-    width: 350px;
-    height: 450px;
+    width: 400px;
+    height: 500px;
   }
 
   &.expanded {
@@ -27,4 +27,33 @@
       height: 75vh;
     }
   }
+}
+
+.chat-bubble-user {
+  max-width: 75%;
+  border-radius: 1rem;
+  border-bottom-right-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.chat-bubble-agent {
+}
+
+.chat-content {
+  white-space: pre-wrap;
+}
+
+.chat-enter-active,
+.chat-leave-active {
+  transition: all 0.2s ease;
+}
+
+.chat-enter-from,
+.chat-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.chat-input textarea {
+  resize: none;
 }
