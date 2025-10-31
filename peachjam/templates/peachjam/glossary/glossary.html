@@ -5,7 +5,19 @@
 {% endblock %}
 {% block page-content %}
   <div class="container">
-    <h1 class="mt-4">{% trans 'Glossary of defined terms' %}</h1>
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url "legislation_list" %}">{% trans "Legislation" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url "glossary" place_code=glossary.place_code %}">{% trans "Glossary" %}</a>
+        </li>
+      </ol>
+    </nav>
+  </div>
+  <div class="container">
+    <h1>{% trans 'Glossary of defined terms' %}</h1>
   </div>
   <div class="container pb-5">
     {% if subscription_required %}
