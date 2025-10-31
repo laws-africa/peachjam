@@ -43,8 +43,8 @@
           @keydown.enter.exact.prevent="submit"
           @keydown.enter.shift.stop
         ></textarea>
-        <button class="btn btn-primary" type="submit" :disabled="loading || !isReady">
-          <span v-if="!loading">Send</span>
+        <button class="btn btn-primary" type="submit" :disabled="loading || !isReady" title="Send">
+          <i v-if="!loading" class="bi bi-send"></i>
           <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         </button>
       </div>
