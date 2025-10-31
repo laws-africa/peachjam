@@ -1,6 +1,6 @@
 <template>
-  <div class="document-chat-wrapper">
-    <div v-if="open" class="document-chat-popup bg-light border rounded shadow d-flex flex-column">
+  <div>
+    <div v-if="open" :class="`document-chat-popup bg-light border rounded shadow d-flex flex-column ${expanded ? 'expanded' : ''}`">
       <div class="d-flex p-2 pb-0">
         <h5>
           <i class="bi-pj pj-ai"></i>
@@ -8,6 +8,22 @@
         </h5>
         <button class="btn btn-sm btn-outline-secondary border-0 ms-auto" @click="clear" title="Clear chat">
           <i class="bi bi-trash"></i>
+        </button>
+        <button
+          v-if="!expanded"
+          class="btn btn-sm btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
+          title="Expand"
+          @click="expanded = true"
+        >
+          <i class="bi bi-arrows-angle-expand"></i>
+        </button>
+        <button
+            v-if="expanded"
+            class="btn btn-sm btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
+            title="Collapse"
+            @click="expanded = false"
+        >
+          <i class="bi bi-arrows-angle-contract"></i>
         </button>
         <button class="btn btn-sm btn-outline-secondary border-0 ms-1" @click="open = false" title="Close">
           &times;
@@ -19,7 +35,7 @@
     </div>
     <button
       v-else
-      class="btn btn-primary"
+      class="btn btn-primary document-chat-button"
       @click="open = true"
     >Ask {{ assistantName }}</button>
   </div>
@@ -45,7 +61,8 @@ export default {
   },
   data () {
     return {
-      open: false
+      open: false,
+      expanded: false
     };
   },
   methods: {
@@ -57,15 +74,4 @@ export default {
 </script>
 
 <style scoped>
-.document-chat-wrapper {
-  position: fixed;
-  bottom: 50px;
-  right: 20px;
-  z-index: 999;
-}
-
-.document-chat-popup {
-  width: 350px;
-  height: 450px;
-}
 </style>
