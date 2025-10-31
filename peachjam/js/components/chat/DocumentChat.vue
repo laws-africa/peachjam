@@ -17,6 +17,16 @@
             :class="message.role === 'human' ? 'chat-bubble-user bg-primary text-white' : 'chat-bubble-agent'"
           >
             <div class="chat-content">{{ message.content }}</div>
+            <div v-if="message.role === 'ai'">
+              <button class="btn btn-sm btn-outline-secondary border-0" title="Upvote message" @click="voteUp(message.id)">
+                <i v-if="votingUp === message.id" class="bi bi-check"></i>
+                <i v-else class="bi bi-hand-thumbs-up"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-secondary border-0 ms-1" title="Downvote message" @click="voteDown(message.id)">
+                <i v-if="votingDown === message.id" class="bi bi-check"></i>
+                <i v-else class="bi bi-hand-thumbs-down"></i>
+              </button>
+            </div>
           </div>
         </div>
       </transition-group>
@@ -76,7 +86,9 @@ export default {
       messages: [],
       inputText: '',
       loading: false,
-      error: null
+      error: null,
+      votingUp: null,
+      votingDown: null
     };
   },
   computed: {
@@ -196,6 +208,32 @@ export default {
       this.error = null;
       this.threadId = null;
       this.load(true);
+    },
+    async voteUp (messageId) {
+      this.votingUp = messageId;
+      setTimeout(() => {
+        this.votingUp = null;
+      }, 1500);
+      fetch(`/api/chats/${this.threadId}/messages/${messageId}/vote-up`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': await csrfToken()
+        }
+      });
+    },
+    async voteDown (messageId) {
+      this.votingDown = messageId;
+      setTimeout(() => {
+        this.votingDown = null;
+      }, 1500);
+      fetch(`/api/chats/${this.threadId}/messages/${messageId}/vote-down`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': await csrfToken()
+        }
+      });
     }
   }
 };

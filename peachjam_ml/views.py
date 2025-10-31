@@ -1,7 +1,7 @@
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.http.response import JsonResponse
+from django.http.response import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
@@ -12,6 +12,7 @@ from peachjam.models import CoreDocument, Folder
 from peachjam_ml.chat import (
     get_chat_config,
     get_chat_graph,
+    get_message_snapshot,
     get_system_prompt,
     langfuse,
 )
@@ -136,6 +137,7 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
                 as_type="generation",
                 input={"expression_frbr_uri": thread.document.expression_frbr_uri},
             ) as generation:
+                config["configurable"]["trace_id"] = generation.trace_id
                 result = graph.invoke(
                     state,
                     config,
@@ -146,6 +148,31 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
                 )
 
         return render_thread_state(thread, result)
+
+
+class VoteChatMessageView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = ChatThread
+    permission_required = "peachjam_ml.add_chatthread"
+    http_method_names = ["post"]
+    up = True
+
+    def get_queryset(self):
+        return ChatThread.objects.filter(user=self.request.user)
+
+    def post(self, request, pk, message_id, *args, **kwargs):
+        thread = self.get_object()
+        message, snapshot = get_message_snapshot(thread, message_id)
+        if message and message.type == "ai":
+            trace_id = snapshot.metadata.get("trace_id")
+            if trace_id:
+                langfuse.create_score(
+                    trace_id=trace_id,
+                    name="user-vote",
+                    value=1 if self.up else -1,
+                    data_type="NUMERIC",
+                )
+
+        return HttpResponse(status=200)
 
 
 def render_thread_state(thread, state):

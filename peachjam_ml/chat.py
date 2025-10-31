@@ -245,3 +245,16 @@ def get_chat_config(thread) -> RunnableConfig:
         },
         "callbacks": [langfuse_callback],
     }
+
+
+def get_message_snapshot(thread, message_id):
+    """Get a (message, snapshot) tuple for the given message ID in the chat thread, or None if not found."""
+    with get_chat_graph() as graph:
+        history = graph.get_state_history(get_chat_config(thread))
+        # this is ordered most recent first
+        for snapshot in history:
+            for message in reversed(snapshot.values.get("messages", [])):
+                if message.id == message_id:
+                    return message, snapshot
+
+    return None, None
