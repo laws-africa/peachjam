@@ -4,7 +4,7 @@
       <div class="d-flex p-2">
         <h5>
           <i class="bi-pj pj-ai"></i>
-          Chat with AI
+          Ask {{ assistantName }}
         </h5>
         <button class="btn btn-sm btn-secondary ms-auto" @click="clear" title="Clear chat">
           <i class="bi bi-trash"></i>
@@ -21,7 +21,7 @@
       v-else
       class="btn btn-primary"
       @click="open = true"
-    >Ask AI</button>
+    >Ask {{ assistantName }}</button>
   </div>
 </template>
 
@@ -36,6 +36,10 @@ export default {
   props: {
     documentId: {
       type: [String, Number],
+      required: true
+    },
+    assistantName: {
+      type: [String],
       required: true
     }
   },

@@ -163,6 +163,9 @@ PEACHJAM = {
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
+    # Chat settings
+    "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
+    "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
