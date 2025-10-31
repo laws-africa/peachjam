@@ -6,6 +6,11 @@
 {% endblock %}
 {% block nav-items %}
   <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'home' %}active{% endif %}"
+       href="{% url 'home_page' %}">
+    {% trans 'Home' %}</a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"
        href="{% url 'judgment_list' %}">
       {% trans 'Judgments' %}

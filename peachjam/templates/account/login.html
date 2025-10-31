@@ -58,7 +58,8 @@
     </div>
     <div class="mb-4">
       <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
-      <a class="btn btn-link ms-3" href="{% url 'account_signup' %}">{% trans 'Create an account' %}</a>
+      <a class="btn btn-link ms-3"
+         href="{% url 'account_signup' %}?{{ redirect_field_name }}={{ redirect_field_value|urlencode }}">{% trans 'Create an account' %}</a>
     </div>
   </form>
 {% endblock %}

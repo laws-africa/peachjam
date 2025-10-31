@@ -1,3 +1,5 @@
+import { User } from './user';
+
 /**
  * Helper class to do common analytics tracking across both GA and Matomo.
  */
@@ -6,6 +8,7 @@ export interface AnalyticsProvider {
   trackPageView: () => void;
   trackEvent: (category: string, action: string, name?: string, value?: number) => void;
   trackSiteSearch: (keyword: string, category: string, searchCount: number) => void;
+  identifyUser: (trackingId: string) => void;
 }
 
 export class Analytics {
@@ -58,6 +61,14 @@ export class Analytics {
       }
     });
   }
+
+  identifyUser (user: User) {
+    if (user.tracking_id) {
+      for (const provider of this.providers) {
+        provider.identifyUser(user.tracking_id);
+      }
+    }
+  }
 }
 
 export class GA4 implements AnalyticsProvider {
@@ -79,6 +90,9 @@ export class GA4 implements AnalyticsProvider {
     // @ts-ignore
     window.gtag('event', 'site_search', { keyword, category, searchCount });
   }
+
+  identifyUser (trackingId: string) {
+  }
 }
 
 export class Matomo implements AnalyticsProvider {
@@ -99,6 +113,11 @@ export class Matomo implements AnalyticsProvider {
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
     // @ts-ignore
     window._paq.push(['trackSiteSearch', keyword, category, searchCount]);
+  }
+
+  identifyUser (trackingId: string) {
+    // @ts-ignore
+    window._paq.push(['setUserId', trackingId]);
   }
 }
 
@@ -144,6 +163,11 @@ export class CustomerIO implements AnalyticsProvider {
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
     // TODO
+  }
+
+  identifyUser (trackingId: string) {
+    // @ts-ignore
+    window.cioanalytics.identify(trackingId);
   }
 }
 

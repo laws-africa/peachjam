@@ -34,10 +34,9 @@
         });
       </script>
     {% endif %}
-    {% if PEACHJAM_SETTINGS.matomo_domain and PEACHJAM_SETTINGS.matomo_site_id and not user.is_staff %}
+    {% if PEACHJAM_SETTINGS.matomo_domain and PEACHJAM_SETTINGS.matomo_site_id %}
       <script>
         var _paq = window._paq = window._paq || [];
-        {% if user.is_authenticated %}_paq.push(['setUserId', '{{ user.userprofile.tracking_id }}']);{% endif %}
         _paq.push(["disableCookies"]);
         _paq.push(['setCustomDimension', 1, '{{ CURRENT_LANGUAGE }}']);
         _paq.push(['FormAnalytics::disableFormAnalytics']);
@@ -67,7 +66,6 @@
           }
       );
         {% if reset_analytics %}analytics.reset();{% endif %}
-        {% if user.is_authenticated %}analytics.identify('{{ user.userprofile.tracking_id }}');{% endif %}
       }}();
     </script>
   {% endif %}

@@ -9,6 +9,7 @@ from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
@@ -26,7 +27,7 @@ from peachjam.models import (
     CoreDocument,
     DocumentNature,
     ExtractedCitation,
-    ProvisionCitation,
+    ProvisionCitationCount,
     Relationship,
     Taxonomy,
     UncommencedProvision,
@@ -362,7 +363,11 @@ class BaseDocumentDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
-        if self.object.restricted:
+        # documents that have been created/updated recently shouldn't be cached for an hour, to allow for quick fixes
+        if (
+            self.object.restricted
+            or self.object.updated_at >= timezone.now() - timezone.timedelta(hours=1)
+        ):
             add_never_cache_headers(response)
         return response
 
@@ -443,15 +448,13 @@ class BaseDocumentDetailView(DetailView):
         )
         context["show_save_doc_button"] = self.show_save_doc_button()
 
-        provision_citations = (
-            ProvisionCitation.objects.filter(work=doc.work)
-            .values("provision_eid")
-            .annotate(citations=Count("citing_document_id", distinct=True))
-        )
+        provision_citations = ProvisionCitationCount.objects.filter(
+            work=doc.work
+        ).values("provision_eid", "count")
         context["incoming_citations_json"] = [
             {
                 "provision_eid": item["provision_eid"],
-                "citations": item["citations"],
+                "citations": item["count"],
             }
             for item in provision_citations
         ]
@@ -674,6 +677,7 @@ class PageLoadedView(TemplateView):
                     "email": self.request.user.email,
                     "name": user_display(self.request.user),
                     "is_staff": self.request.user.is_staff,
+                    "tracking_id": self.request.user.userprofile.tracking_id_str,
                     "perms": [
                         perm
                         for perm in self.request.user.get_all_permissions()

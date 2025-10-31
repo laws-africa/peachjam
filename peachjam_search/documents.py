@@ -78,6 +78,12 @@ class SearchableDocument(Document):
     # TODO: this should be a date-like field
     # frbr_uri_date = fields.KeywordField(attr="work.frbr_uri_date")
     # frbr_uri_number = fields.KeywordField(attr="work.frbr_uri_number")
+    frbr_uri_language = fields.KeywordField(attr="language.iso_639_3")
+
+    # legislation
+    principal = fields.BooleanField()
+    commenced = fields.BooleanField()
+    repealed = fields.BooleanField()
 
     # Judgment
     court = fields.KeywordField(attr="court.name")

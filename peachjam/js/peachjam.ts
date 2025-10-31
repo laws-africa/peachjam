@@ -17,6 +17,7 @@ import '@lawsafrica/law-widgets/dist/components/la-decorate-terms';
 import htmx from 'htmx.org';
 import { csrfToken } from './api';
 import analytics, { Analytics } from './analytics';
+import { User } from './user';
 
 export interface PeachJamConfig {
   appName: string;
@@ -29,15 +30,6 @@ export interface PeachJamConfig {
     dsn: string | null;
     environment: string | null;
   }
-}
-
-export interface User {
-  id: number;
-  name: string;
-  email: string;
-  // eslint-disable-next-line camelcase
-  is_staff: boolean;
-  perms: Array<string>;
 }
 
 class PeachJam {
@@ -61,7 +53,8 @@ class PeachJam {
     name: '',
     email: '',
     is_staff: false,
-    perms: []
+    perms: [],
+    tracking_id: null
   };
 
   constructor () {
@@ -393,6 +386,7 @@ class PeachJam {
   userLoaded () {
     // called by the server response to the above call once user-specific content has been loaded
     window.dispatchEvent(new Event('peachjam.user-loaded'));
+    this.analytics.identifyUser(this.user);
   }
 
   whenUserLoaded (): Promise<User> {

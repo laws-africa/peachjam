@@ -2,6 +2,11 @@
 {% load i18n %}
 {% block nav-items %}
   <li class="nav-item">
+    <a class="nav-link {% if view.navbar_link == 'home' %}active{% endif %}"
+       href="{% url 'home_page' %}">
+    {% trans 'Home' %}</a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link {% if request.path == '/judgments/UKPC/' %}active{% endif %}"
        href="{% url 'court' 'UKPC' %}">
       {% trans 'Privy Council' %}
