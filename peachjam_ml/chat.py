@@ -1,28 +1,32 @@
 from contextlib import contextmanager
-from typing import Annotated, List
+from typing import TypedDict
 
 from django.conf import settings
+from django.contrib.auth.models import User
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from langgraph.checkpoint.postgres import PostgresSaver
-from langgraph.graph import END, START, StateGraph
-from langgraph.graph.message import add_messages
+from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
-from typing_extensions import TypedDict
 
 from peachjam.analysis.citations import CitatorMatcher
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
 
 
-class DocumentChatState(TypedDict):
+class UserMessage(TypedDict):
+    content: str
+    id: str
+
+
+class DocumentChatState(MessagesState):
     document_id: int
     user_id: int
-    messages: Annotated[List[BaseMessage], add_messages]
+    user_message: UserMessage
 
 
 @tool
@@ -130,7 +134,27 @@ langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 
 
 def chatbot(state: DocumentChatState):
+    state["messages"].append(
+        HumanMessage(
+            content=state["user_message"]["content"], id=state["user_message"]["id"]
+        )
+    )
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
+
+
+def initial_prompt(state: DocumentChatState):
+    user = User.objects.get(pk=state["user_id"])
+    app = settings.PEACHJAM["APP_NAME"]
+    prompt = (
+        f"You are a helpful assistant for the website {app}, which is a legal information database with judgments, "
+        "legislation and gazettes. The user is asking you questions through a page on the website that is showing them "
+        "a document. You must answer their questions about the document. "
+        "Only use the document for answers; if the answer is not present, say so. "
+        "The full document contents are not provided because they are very long. Instead, "
+        "use one of the provided tools to answer questions about the document.\n\n"
+        f"The user's name is: {user.get_full_name()}"
+    )
+    return {"messages": [SystemMessage(content=prompt)]}
 
 
 def doc_metadata(state: DocumentChatState):
@@ -183,12 +207,21 @@ def doc_metadata(state: DocumentChatState):
     return {"messages": [SystemMessage(content=msg)]}
 
 
+def is_fresh_chat(state: DocumentChatState) -> bool:
+    return not (state["messages"])
+
+
 graph_builder = StateGraph(DocumentChatState)
+graph_builder.add_node("initial_prompt", initial_prompt)
 graph_builder.add_node("doc_metadata", doc_metadata)
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_node("tools", ToolNode(tools=tools))
 
-graph_builder.add_edge(START, "doc_metadata")
+# when resuming a chat, jump to the chatbot state
+graph_builder.add_conditional_edges(
+    START, is_fresh_chat, {True: "initial_prompt", False: "chatbot"}
+)
+graph_builder.add_edge("initial_prompt", "doc_metadata")
 graph_builder.add_edge("doc_metadata", "chatbot")
 graph_builder.add_conditional_edges("chatbot", tools_condition)
 graph_builder.add_edge("tools", "chatbot")
@@ -217,22 +250,6 @@ def get_graph_memory():
             memory.setup()
             _db_setup = True
         yield memory
-
-
-def get_system_prompt(user) -> SystemMessage:
-    app = settings.PEACHJAM["APP_NAME"]
-
-    system_prompt = (
-        f"You are a helpful assistant for the website {app}, which is a legal information database with judgments, "
-        "legislation and gazettes. The user is asking you questions through a page on the website that is showing them "
-        "a document. You must answer their questions about the document. "
-        "Only use the document for answers; if the answer is not present, say so. "
-        "The full document contents are not provided because they are very long. Instead, "
-        "use one of the provided tools to answer questions about the document.\n\n"
-        f"The user's name is: {user.get_full_name()}"
-    )
-
-    return SystemMessage(content=system_prompt)
 
 
 def get_chat_config(thread) -> RunnableConfig:

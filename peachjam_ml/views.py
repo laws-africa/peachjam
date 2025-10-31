@@ -5,7 +5,6 @@ from django.http.response import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
-from langchain_core.messages import HumanMessage
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
@@ -13,7 +12,6 @@ from peachjam_ml.chat import (
     get_chat_config,
     get_chat_graph,
     get_message_snapshot,
-    get_system_prompt,
     langfuse,
 )
 from peachjam_ml.models import ChatThread, DocumentEmbedding
@@ -121,23 +119,22 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
 
             if not snapshot.values:
                 state = {
-                    "messages": [get_system_prompt(thread.user)],
                     "user_id": thread.user.pk,
                     "document_id": thread.document.pk,
                 }
             else:
                 state = snapshot.values
 
-            message = input.get("message", "")
-            message = HumanMessage(message["content"], id=message["id"])
-            state["messages"].append(message)
+            # TODO validate
+            message = input.get("message", {})
+            state["user_message"] = message
 
             with langfuse.start_as_current_observation(
                 name="document_chat",
                 as_type="generation",
                 input={
                     "expression_frbr_uri": thread.document.expression_frbr_uri,
-                    "question": message.content,
+                    "question": message["content"],
                 },
             ) as generation:
                 config["configurable"]["trace_id"] = generation.trace_id
