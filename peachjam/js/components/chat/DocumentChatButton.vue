@@ -1,15 +1,15 @@
 <template>
   <div class="document-chat-wrapper">
     <div v-if="open" class="document-chat-popup bg-light border rounded shadow d-flex flex-column">
-      <div class="d-flex p-2">
+      <div class="d-flex p-2 pb-0">
         <h5>
           <i class="bi-pj pj-ai"></i>
           Ask {{ assistantName }}
         </h5>
-        <button class="btn btn-sm btn-secondary ms-auto" @click="clear" title="Clear chat">
+        <button class="btn btn-sm btn-outline-secondary border-0 ms-auto" @click="clear" title="Clear chat">
           <i class="bi bi-trash"></i>
         </button>
-        <button class="btn btn-sm btn-secondary ms-2" @click="open = false" title="Close">
+        <button class="btn btn-sm btn-outline-secondary border-0 ms-1" @click="open = false" title="Close">
           &times;
         </button>
       </div>

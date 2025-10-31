@@ -1,6 +1,6 @@
 <template>
   <div class="document-chat d-flex flex-column h-100">
-    <div ref="messageContainer" class="chat-messages flex-grow-1 overflow-auto px-3 py-3">
+    <div ref="messageContainer" class="chat-messages flex-grow-1 overflow-auto p-2">
       <div v-if="messages.length === 0 && !loading" class="text-center text-muted py-5">
         Start the conversation by asking a question about this document.
       </div>
@@ -9,7 +9,7 @@
         <div
           v-for="message in messages"
           :key="message.id"
-          class="d-flex mb-3"
+          class="d-flex mb-2"
           :class="message.role === 'human' ? 'justify-content-end' : 'justify-content-start'"
         >
           <div
@@ -116,6 +116,10 @@ export default {
         const data = await resp.json();
         this.threadId = data.thread_id;
         this.mergeMessages(data.messages);
+        this.$nextTick(() => {
+          this.scrollToBottom();
+          this.focusInput();
+        });
       } catch (err) {
         console.error(err);
         this.error = err.message || 'Something went wrong. Please try again.';
@@ -244,7 +248,7 @@ export default {
   max-width: 75%;
   border-radius: 1rem;
   border-bottom-right-radius: 0.25rem;
-  padding: 0.75rem 1rem;
+  padding: 0.5rem 0.75rem;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.05);
 }
 
