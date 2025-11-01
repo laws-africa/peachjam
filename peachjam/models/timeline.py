@@ -18,6 +18,8 @@ class TimelineEvent(models.Model):
     class EventTypes(models.TextChoices):
         NEW_DOCUMENTS = "new_documents", _("New Documents")
         SAVED_SEARCH = "saved_search", _("Saved Search")
+        NEW_CITATION = "new_citation", _("New Citation")
+        NEW_AMENDMENT = "new_amendment", _("New Amendment")
 
     user_following = models.ForeignKey(
         "peachjam.UserFollowing",

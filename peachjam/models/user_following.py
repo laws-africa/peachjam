@@ -95,6 +95,14 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("saved search"),
     )
+    saved_document = models.ForeignKey(
+        "peachjam.SavedDocument",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("saved document"),
+    )
 
     last_alerted_at = models.DateTimeField(
         _("last alerted at"), null=True, blank=True, auto_now_add=True
@@ -156,6 +164,11 @@ class UserFollowing(models.Model):
                 fields=["user", "saved_search"],
                 condition=models.Q(saved_search__isnull=False),
                 name="unique_user_saved_search",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "saved_document"],
+                condition=models.Q(saved_document__isnull=False),
+                name="unique_user_saved_document",
             ),
         ]
 
@@ -266,6 +279,28 @@ class UserFollowing(models.Model):
         event.subject_documents.add(*documents)
         return event
 
+    def create_timeline_event_for_amendment(self, relationship):
+        amending_work = relationship.object_work
+        document = amending_work.documents.latest_expression()
+
+        # TODO: check if we have ever alerted user about this new amendment
+
+        event, new = TimelineEvent.objects.get_or_create(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            email_alert_sent_at__isnull=True,
+        )
+        event.subject_documents.add([document])
+
+    def create_timeline_event_for_citation(self, citation):
+        document = citation.work.documents.first()
+        event, new = TimelineEvent.objects.get_or_create(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            email_alert_sent_at__isnull=True,
+        )
+        event.subject_documents.add([document])
+
     def get_new_search_hits(self, since=None, limit=10):
         if self.saved_search:
             hits = self.saved_search.find_new_hits()
@@ -310,6 +345,32 @@ class UserFollowing(models.Model):
 
         event.subject_documents.add(*documents)
         return event
+
+    def update_new_citation(self, citation):
+        if not self.saved_document:
+            return
+
+        # check that the cited document is the saved one
+        if citation.target_work != self.saved_document.work:
+            return
+        # check if the user has ever been alerted about this citation
+        events = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+        )
+
+        for event in events:
+            if citation in event.extra_data.get("citations", []):
+                return
+
+        document = citation.citing_work.documents.first()
+
+        event, new = TimelineEvent.objects.get_or_create(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+            email_alert_sent_at__isnull=True,
+        )
+        event.subject_documents.add([document])
 
     @classmethod
     def update_timeline_for_user(cls, user):

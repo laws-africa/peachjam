@@ -15,6 +15,7 @@ from peachjam.models import (
     DocumentContent,
     ExtractedCitation,
     Folder,
+    Relationship,
     SavedDocument,
     SourceFile,
     UserFollowing,
@@ -219,3 +220,24 @@ def delete_saved_document_if_no_folder(sender, instance, **kwargs):
     for doc in saved_documents:
         if doc.folders.count() == 1:
             doc.delete()
+
+
+@receiver(signals.post_save, sender=ExtractedCitation)
+def notify_new_citation(sender, instance, **kwargs):
+    """Notify users following the subject work when a new amendment relationship is created."""
+    follows = UserFollowing.objects.filter(
+        saved_document__document__work=instance.target_work
+    )
+    for follow in follows:
+        follow.update_new_citation(instance)
+
+
+@receiver(signals.post_save, sender=Relationship)
+def notify_new_amendment_relationship(sender, instance, **kwargs):
+    """Notify users following the subject work when a new amendment relationship is created."""
+
+    follows = UserFollowing.objects.filter(
+        saved_document__document__work=instance.target_work
+    )
+    for follow in follows:
+        follow.update_amendments()
