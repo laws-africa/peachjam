@@ -282,28 +282,6 @@ class UserFollowing(models.Model):
         event.subject_documents.add(*documents)
         return event
 
-    def create_timeline_event_for_amendment(self, relationship):
-        amending_work = relationship.object_work
-        document = amending_work.documents.latest_expression()
-
-        # TODO: check if we have ever alerted user about this new amendment
-
-        event, new = TimelineEvent.objects.get_or_create(
-            user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
-            email_alert_sent_at__isnull=True,
-        )
-        event.subject_documents.add([document])
-
-    def create_timeline_event_for_citation(self, citation):
-        document = citation.work.documents.first()
-        event, new = TimelineEvent.objects.get_or_create(
-            user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
-            email_alert_sent_at__isnull=True,
-        )
-        event.subject_documents.add([document])
-
     def get_new_search_hits(self, since=None, limit=10):
         if self.saved_search:
             hits = self.saved_search.find_new_hits()
