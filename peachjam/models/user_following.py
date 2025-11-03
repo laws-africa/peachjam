@@ -356,13 +356,13 @@ class UserFollowing(models.Model):
         # check that the cited document is the saved one
         if citation.target_work != self.saved_document.document.work:
             return
+
         # check if the user has ever been alerted about this citation
         events = TimelineEvent.objects.filter(
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
         )
-        document = citation.citing_work.documents.first()
-
+        document = citation.citing_work.documents.latest_expression()
         for event in events:
             if document in event.subject_documents.all():
                 log.info(
