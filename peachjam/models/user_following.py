@@ -340,7 +340,7 @@ class UserFollowing(models.Model):
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
         )
-        document = citation.citing_work.documents.latest_expression()
+        document = citation.citing_work.documents.latest_expression().first()
         for event in events:
             if document in event.subject_documents.all():
                 log.info(
