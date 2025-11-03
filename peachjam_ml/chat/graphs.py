@@ -20,6 +20,9 @@ from peachjam_ml.chat.tools import (
     provision_commencement_info,
 )
 
+INITIAL_PROMPT_NAME = "chat/document/initial"
+PROMPT_CACHE_TTL_SECS = 30 if settings.DEBUG else 60
+
 
 class UserMessage(TypedDict):
     content: str
@@ -60,14 +63,12 @@ def chatbot(state: DocumentChatState):
 def initial_prompt(state: DocumentChatState):
     user = User.objects.get(pk=state["user_id"])
     app = settings.PEACHJAM["APP_NAME"]
-    prompt = (
-        f"You are a helpful assistant for the website {app}, which is a legal information database with judgments, "
-        "legislation and gazettes. The user is asking you questions through a page on the website that is showing them "
-        "a document. You must answer their questions about the document. "
-        "Only use the document for answers; if the answer is not present, say so. "
-        "The full document contents are not provided because they are very long. Instead, "
-        "use one of the provided tools to answer questions about the document.\n\n"
-        f"The user's name is: {user.get_full_name()}"
+    prompt = langfuse.get_prompt(
+        INITIAL_PROMPT_NAME, cache_ttl_seconds=PROMPT_CACHE_TTL_SECS
+    )
+    prompt = prompt.compile(
+        app=app,
+        user_name=user.get_full_name(),
     )
     return {"messages": [SystemMessage(content=prompt)]}
 
