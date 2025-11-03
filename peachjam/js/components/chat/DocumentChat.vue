@@ -41,7 +41,7 @@
       <div v-if="error" class="alert alert-warning">{{ error }}</div>
     </div>
 
-    <form class="chat-input border-top p-2" @submit.prevent="submit" novalidate>
+    <form class="chat-input p-2" @submit.prevent="submit" novalidate>
       <div class="input-group">
         <textarea
           ref="messageInput"

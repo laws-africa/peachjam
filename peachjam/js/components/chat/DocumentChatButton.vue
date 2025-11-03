@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div v-if="open" :class="`document-chat-popup bg-light border rounded shadow d-flex flex-column ${expanded ? 'expanded' : ''}`">
-      <div class="d-flex p-2 pb-0">
-        <h5>
+    <div v-if="open" :class="`document-chat-popup bg-white border rounded shadow d-flex flex-column ${expanded ? 'expanded' : ''}`">
+      <div class="d-flex bg-light border-bottom">
+        <h5 class="p-2 pb-0">
           <i class="bi-pj pj-ai"></i>
           Ask {{ assistantName }}
         </h5>
