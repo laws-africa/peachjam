@@ -17,7 +17,7 @@ def lowercase_alphabet():
 
 def add_slash(frbr_uri):
     # adds the leading slash if not present
-    if frbr_uri[0] != "/":
+    if frbr_uri and frbr_uri[0] != "/":
         return f"/{frbr_uri}"
     return frbr_uri
 

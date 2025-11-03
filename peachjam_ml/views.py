@@ -5,9 +5,11 @@ from django.http.response import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
+from rest_framework.exceptions import ValidationError
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
+from peachjam.views.documents import DocumentDetailView
 from peachjam_ml.chat import (
     get_chat_config,
     get_chat_graph,
@@ -15,6 +17,7 @@ from peachjam_ml.chat import (
     langfuse,
 )
 from peachjam_ml.models import ChatThread, DocumentEmbedding
+from peachjam_ml.serializers import ChatRequestSerializer
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -63,8 +66,11 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         return context
 
 
-class StartDocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
-    model = CoreDocument
+class StartDocumentChatView(
+    LoginRequiredMixin, PermissionRequiredMixin, DocumentDetailView
+):
+    slug_field = "pk"
+    slug_url_kwarg = "pk"
     permission_required = "peachjam_ml.add_chatthread"
     http_method_names = ["post"]
 
@@ -100,19 +106,29 @@ class StartDocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailV
         return render_thread_state(thread, state)
 
 
-class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = ChatThread
     permission_required = "peachjam_ml.add_chatthread"
-    http_method_names = ["post"]
 
     def get_queryset(self):
         return ChatThread.objects.filter(user=self.request.user)
 
+
+class DocumentChatView(ChatThreadDetailMixin):
+    http_method_names = ["post"]
+
     def post(self, request, *args, **kwargs):
         thread = self.get_object()
 
-        # parse json input from request body
+        # validate request
         input = json.loads(request.body)
+        serializer = ChatRequestSerializer(data=input.get("message", {}))
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            return JsonResponse({"errors": e.detail}, status=400)
+        message = serializer.data
+
         config = get_chat_config(thread)
         with get_chat_graph() as graph:
             snapshot = graph.get_state(config)
@@ -125,8 +141,6 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
             else:
                 state = snapshot.values
 
-            # TODO validate
-            message = input.get("message", {})
             state["user_message"] = message
 
             with langfuse.start_as_current_observation(
@@ -151,14 +165,11 @@ class DocumentChatView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
         return render_thread_state(thread, result)
 
 
-class VoteChatMessageView(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
-    model = ChatThread
-    permission_required = "peachjam_ml.add_chatthread"
+class VoteChatMessageView(ChatThreadDetailMixin):
+    """View to handle upvoting or downvoting an AI-provided chat message."""
+
     http_method_names = ["post"]
     up = True
-
-    def get_queryset(self):
-        return ChatThread.objects.filter(user=self.request.user)
 
     def post(self, request, pk, message_id, *args, **kwargs):
         thread = self.get_object()
