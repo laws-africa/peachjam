@@ -60,6 +60,9 @@ class SavedDocument(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
+    def __str__(self):
+        return f"Saved document: {self.document} for user {self.user}"
+
     class Meta:
         ordering = ("document__title",)
         verbose_name = _("saved document")

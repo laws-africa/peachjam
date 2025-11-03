@@ -120,6 +120,7 @@ class UserFollowing(models.Model):
         "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
         "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
         "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
+        "saved_document": TimelineEvent.EventTypes.NEW_CITATION,
     }
     follow_fields = list(EVENT_FIELD_MAP.keys())
 
@@ -181,6 +182,8 @@ class UserFollowing(models.Model):
             return _("New matches for search alert")
         elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
             return _("New documents added for")
+        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
+            return _("New citations to saved document")
 
     @property
     def followed_field(self):
@@ -351,26 +354,28 @@ class UserFollowing(models.Model):
             return
 
         # check that the cited document is the saved one
-        if citation.target_work != self.saved_document.work:
+        if citation.target_work != self.saved_document.document.work:
             return
         # check if the user has ever been alerted about this citation
         events = TimelineEvent.objects.filter(
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
         )
+        document = citation.citing_work.documents.first()
 
         for event in events:
-            if citation in event.extra_data.get("citations", []):
+            if document in event.subject_documents.all():
+                log.info(
+                    "User %s has already been alerted about citation from document %s",
+                )
                 return
-
-        document = citation.citing_work.documents.first()
 
         event, new = TimelineEvent.objects.get_or_create(
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
             email_alert_sent_at__isnull=True,
         )
-        event.subject_documents.add([document])
+        event.subject_documents.add(document)
 
     @classmethod
     def update_timeline_for_user(cls, user):
