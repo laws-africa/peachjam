@@ -17,11 +17,13 @@ from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilte
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import (
     CoreDocument,
+    Glossary,
     Legislation,
     ProvisionCitation,
     ProvisionCitationCount,
     UncommencedProvision,
     UnconstitutionalProvision,
+    get_country_and_locality,
     pj_settings,
 )
 from peachjam.registry import registry
@@ -571,6 +573,50 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
             for enrichment in doc.provision_enrichments:
                 enrichment.document = doc
 
+        return context
+
+
+class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
+    model = Glossary
+    slug_url_kwarg = "place_code"
+    slug_field = "place_code"
+    permission_required = "peachjam.view_glossary"
+    template_name = "peachjam/glossary/glossary.html"
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        letters = list(self.object.data.keys())
+        if letters and letters[0] == "0":
+            letters.pop(0)
+            letters.append("0")
+        context["letters"] = letters
+        context["first_letter"] = letters[0] if letters else None
+        country, locality = get_country_and_locality(self.object.place_code)
+        context["place_name"] = locality.name if locality else country.name
+        return context
+
+
+class PlaceGlossaryLetterView(PlaceGlossaryView):
+    template_name = "peachjam/glossary/_glossary_letter.html"
+    letter = None
+
+    def get(self, *args, **kwargs):
+        self.letter = kwargs.get("letter")
+        return super().get(*args, **kwargs)
+
+    def get_filtered_terms(self, terms, q):
+        if not q:
+            return terms
+        return [t for t in terms if q.lower() in t["term_lc"]]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["letter"] = self.letter
+        terms = self.object.data.get(self.letter, [])
+        context["terms"] = self.get_filtered_terms(terms, self.request.GET.get("q"))
         return context
 
 

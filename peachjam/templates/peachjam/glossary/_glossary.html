@@ -1,0 +1,53 @@
+{% load i18n %}
+<div>
+  <div class="nav nav-pills mb-3 mt-3" id="glossary-nav">
+    {% for letter in letters %}
+      <a hx-get="{% url 'glossary-letter' place_code=glossary.place_code letter=letter %}"
+         hx-target="#glossary-content-{{ letter }}"
+         hx-trigger="{% if letter == first_letter %}load{% else %}click once{% endif %}"
+         class="nav-link {% if letter == first_letter %}active{% endif %}"
+         data-bs-toggle="pill"
+         href="#glossary-pane-{{ letter }}">
+        {% if letter == '0' %}
+          #
+        {% else %}
+          {{ letter|upper }}
+        {% endif %}
+      </a>
+    {% endfor %}
+  </div>
+  <div class="card tab-content">
+    {% for letter in letters %}
+      <div class="tab-pane {% if letter == first_letter %}active{% endif %}"
+           id="glossary-pane-{{ letter }}">
+        <div class="card-header">
+          <div class="row">
+            <div class="col-7 col-md-9 align-self-center">
+              <h5 class="mb-0">
+                {% if letter == '0' %}
+                  #
+                {% else %}
+                  {{ letter|upper }}
+                {% endif %}
+              </h5>
+            </div>
+            <div class="col-5 col-md-3">
+              <input hx-get="{% url 'glossary-letter' place_code=glossary.place_code letter=letter %}"
+                     hx-trigger="keyup changed delay:300ms"
+                     hx-target="#glossary-content-{{ letter }}"
+                     class="form-control"
+                     type="text"
+                     name="q"
+                     autocomplete="off"
+                     aria-label="{% trans "Find a term..." %}"
+                     placeholder="{% trans "Find a term..." %}"
+                     value="{{ form.q.value|default_if_none:'' }}"/>
+            </div>
+          </div>
+        </div>
+        <div class="card-body spinner-when-empty"
+             id="glossary-content-{{ letter }}"></div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
