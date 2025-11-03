@@ -303,3 +303,15 @@ def generate_judgment_summary(doc_id):
         return
     log.info(f"Summarizing judgment {doc_id}")
     doc.generate_summary()
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_users_new_citation(citation_id):
+    from peachjam.models import ExtractedCitation, UserFollowing
+
+    citation = ExtractedCitation.objects.filter(id=citation_id).first()
+    if not citation:
+        log.info(f"No citation with id {citation_id} exists, ignoring.")
+        return
+    log.info(f"Updating users for new citation {citation_id}")
+    UserFollowing.update_users_new_citation(citation)

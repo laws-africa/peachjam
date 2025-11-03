@@ -233,8 +233,6 @@ def delete_saved_document_if_no_folder(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=ExtractedCitation)
 def notify_new_citation(sender, instance, **kwargs):
     """Notify users following the subject work when a new amendment relationship is created."""
-    follows = UserFollowing.objects.filter(
-        saved_document__document__work=instance.target_work
-    )
-    for follow in follows:
-        follow.update_new_citation(instance)
+    from peachjam.tasks import update_users_new_citation
+
+    update_users_new_citation(instance.pk)

@@ -377,3 +377,14 @@ class UserFollowing(models.Model):
         log.info(f"Updating timeline event for {self.followed_object}")
         self.last_alerted_at = timezone.now()
         self.save(update_fields=["last_alerted_at"])
+
+    @classmethod
+    def update_users_new_citation(cls, citation):
+        follows = cls.objects.filter(
+            saved_document__document__work=citation.target_work
+        )
+        log.info(
+            f"Found {follows.count()} follows for citation to work {citation.target_work.pk}"
+        )
+        for follow in follows:
+            follow.update_new_citation(citation)
