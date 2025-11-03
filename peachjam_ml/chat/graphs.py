@@ -38,7 +38,7 @@ langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 langfuse_callback = CallbackHandler()
 
 
-chat_llm = init_chat_model("openai:gpt-4.1", temperature=0)
+chat_llm = init_chat_model("openai:gpt-5-mini", temperature=0)
 tools = [
     answer_document_question,
     get_provision_eid,

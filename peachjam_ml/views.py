@@ -10,7 +10,7 @@ from rest_framework.exceptions import ValidationError
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
 from peachjam.views.documents import DocumentDetailView
-from peachjam_ml.chat import (
+from peachjam_ml.chat.graphs import (
     get_chat_config,
     get_chat_graph,
     get_message_snapshot,

@@ -2,7 +2,7 @@ from django.db.models import signals
 from django.dispatch.dispatcher import receiver
 
 from peachjam.models import DocumentContent
-from peachjam_ml.chat import get_graph_memory
+from peachjam_ml.chat.graphs import get_graph_memory
 from peachjam_ml.models import ChatThread
 from peachjam_ml.tasks import update_document_embeddings
 
