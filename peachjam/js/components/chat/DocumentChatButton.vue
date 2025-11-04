@@ -11,7 +11,7 @@
         </button>
         <button
           v-if="!expanded"
-          class="btn btn-sm btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
+          class="btn btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
           title="Expand"
           @click="expanded = true"
         >
@@ -19,14 +19,14 @@
         </button>
         <button
             v-if="expanded"
-            class="btn btn-sm btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
+            class="btn btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
             title="Collapse"
             @click="expanded = false"
         >
           <i class="bi bi-arrows-angle-contract"></i>
         </button>
         <button
-          class="btn btn-sm btn-outline-secondary border-0 ms-1"
+          class="btn btn-outline-secondary border-0 ms-1"
           data-track-event="Document Chat | Close"
           title="Close"
           @click="open = false"
