@@ -256,7 +256,7 @@ class DocumentSearchView(TemplateView):
             filters=engine.filters,
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
-            suggestion=self.request.GET.get("suggestion"),
+            suggestion=self.request.GET.get("suggestion", "")[:1024],
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
         )
