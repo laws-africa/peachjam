@@ -16,7 +16,8 @@
             class="chat-bubble text-break"
             :class="message.role === 'human' ? 'chat-bubble-user bg-brand-pale' : 'chat-bubble-agent'"
           >
-            <div class="chat-content">{{ message.content }}</div>
+            <div v-if="message.content_html" v-html="message.content_html" class="chat-content chat-content-html" />
+            <div v-else class="chat-content">{{ message.content }}</div>
             <div v-if="message.role === 'ai'">
               <button class="btn btn-sm btn-outline-secondary border-0" title="Upvote message" @click="voteUp(message.id)">
                 <i v-if="votingUp === message.id" class="bi bi-check"></i>

@@ -112,6 +112,9 @@ def markdownify(text):
             return outf.read().decode("utf-8")
 
 
+# keep a reference to the original martor markdownify function, which also does sanitization
+markdownify_simple = martor.utils.markdownify
+
 # override martor's markownify to use pandoc, so that we get alpha-numbered list support
 martor.utils.markdownify = markdownify
 
