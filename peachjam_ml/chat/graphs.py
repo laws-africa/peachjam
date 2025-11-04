@@ -1,16 +1,64 @@
+"""
+This module defines the chat graph for document-based chats using Langgraph and Langchain.
+
+# How a chat works
+
+A single chat interaction (human question + AI reply) is a run of a graph. The graph is made up of nodes, each of which
+is a function that takes in a state and returns a new state. The state is a TypedDict that contains the chat messages
+and any other relevant information (e.g. document ID, user ID).
+
+For example, when a chat starts one of the first nodes adds a system prompt to the messages state, which describes
+to the LLM who it is talking to and the context of the document. Another node adds metadata about the document, also
+as a system message.
+
+One of the nodes is the main chatbot node, which takes in the current messages state, appends the user's query as a
+new human message, and then calls the LLM (with tools) to get a response. The response is appended as an AI message to
+the messages state.
+
+# Follow-up queries
+
+Follow-up queries in the same chat session work by re-running the graph with the full message history. Follow-up runs
+don't need to re-inject the system prompt or document metadata, as these are already in the message history. The graph
+has conditional edges to skip the initial prompt and metadata nodes if there are already messages in the state,
+jumping immediately to the chatbot node.
+
+# Tools
+
+The chatbot node uses an LLM that has been augmented with tools. If the LLM decides to use a tool, the graph has
+conditional edges to route to a tool node, which executes the tool and returns the result to the chatbot node for
+inclusion in the message history.
+
+For example, there is a tool that can answer questions about the document content. If the user asks a question
+that requires knowledge of the document, the LLM can invoke this tool to get the answer. This is better than
+always including the full document text in the prompt, which may exceed token limits.
+
+# Persistence
+
+Each time the graph is run, the state is saved to a Postgres database using Langgraph's PostgresSaver. When the user
+returns and wants to ask a follow-up question, we provide the same thread_id to the graph run, which allows it to
+load the previous state from the database and continue the conversation.
+
+# Langfuse
+
+The module also integrates with Langfuse for prompt management and observability of chat interactions. This makes
+debugging and monitoring chat sessions easier.
+"""
+
 from contextlib import contextmanager
-from typing import TypedDict
+from typing import Iterator, Tuple, TypedDict
 
 from django.conf import settings
 from django.contrib.auth.models import User
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AnyMessage, HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, START, MessagesState, StateGraph
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.types import StateSnapshot
 
 from peachjam.models import CoreDocument, Judgment, Legislation
 from peachjam_ml.chat.tools import (
@@ -169,7 +217,7 @@ graph_builder.add_edge("chatbot", END)
 
 
 @contextmanager
-def get_chat_graph():
+def get_chat_graph() -> Iterator[CompiledStateGraph]:
     with get_graph_memory() as memory:
         yield graph_builder.compile(checkpointer=memory)
 
@@ -178,7 +226,7 @@ _db_setup = False
 
 
 @contextmanager
-def get_graph_memory():
+def get_graph_memory() -> Iterator[PostgresSaver]:
     db_config = settings.DATABASES["default"]
     db_url = (
         f"postgresql://{db_config['USER']}:{db_config['PASSWORD']}"
@@ -204,7 +252,9 @@ def get_chat_config(thread) -> RunnableConfig:
     }
 
 
-def get_message_snapshot(thread, message_id):
+def get_message_snapshot(
+    thread, message_id
+) -> Tuple[AnyMessage | None, StateSnapshot | None]:
     """Get a (message, snapshot) tuple for the given message ID in the chat thread, or None if not found."""
     with get_chat_graph() as graph:
         history = graph.get_state_history(get_chat_config(thread))

@@ -9,7 +9,9 @@ from peachjam.xmlutils import parse_html_str
 
 @tool
 def answer_document_question(config: RunnableConfig, question: str) -> str:
-    """Answers a question about the content of the document. It has no memory of previous questions."""
+    """Answers a question about the content of the document. It has no memory of previous questions. Only use it
+    if you need to answer a specific question about the document content. The document does not contain information
+    about this website or its features."""
     from .graphs import chat_llm
 
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
