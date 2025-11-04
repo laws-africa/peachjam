@@ -55,6 +55,7 @@ The following must be configured as ENV variables:
 * CHAT_ASSISTANT_NAME (optional)
 """
 
+import os
 from contextlib import contextmanager
 from typing import Iterator, Tuple, TypedDict
 
@@ -100,7 +101,10 @@ langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 langfuse_callback = CallbackHandler()
 
 
-chat_llm = init_chat_model("openai:gpt-5-mini", temperature=0)
+# we must supply a non-blank API key otherwise the client complains (the key is not validated until a request is made)
+chat_llm = init_chat_model(
+    "openai:gpt-5-mini", temperature=0, api_key=os.environ.get("OPENAI_API_KEY") or "-"
+)
 tools = [
     answer_document_question,
     get_provision_eid,
