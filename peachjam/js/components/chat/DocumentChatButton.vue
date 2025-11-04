@@ -38,7 +38,7 @@
     </div>
     <button
       v-else
-      class="btn btn-primary document-chat-button"
+      class="btn btn-primary btn-shrink-sm document-chat-button"
       data-track-event="Document Chat | Open"
       @click="open = true"
     >

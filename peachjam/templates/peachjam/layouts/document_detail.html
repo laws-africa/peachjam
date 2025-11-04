@@ -477,7 +477,7 @@
               {% else %}
                 {% include 'peachjam/_document_content.html' with show_sidebar=True %}
               {% endif %}
-              <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
+              <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ <span class="d-none d-sm-inline">{% trans "To the top" %}</span></a>
             {% endblock %}
           </div>
         </div>

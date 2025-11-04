@@ -211,4 +211,9 @@ export default {
 .card-body {
   background-color: #fff6da;
 }
+
+.reader-provision-changes-inline select {
+  /* ensure the select control is not too wide on small screens */
+  max-width: 60vw;
+}
 </style>

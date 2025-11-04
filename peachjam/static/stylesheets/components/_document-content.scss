@@ -203,6 +203,11 @@
   .content-and-enrichments {
     @extend .col-12;
     @extend .col-lg-9;
+
+    @include media-breakpoint-down(lg) {
+      // allow the gutter to use the full right width on small screens
+      padding-right: 0px;
+    }
   }
 
   .content-and-enrichments__inner {
@@ -218,7 +223,6 @@
       .content {
         flex: 80%;
         max-width: 80%;
-        padding-right: 0.5rem;
 
         @include media-breakpoint-down(lg) {
           flex: 100%;
@@ -226,24 +230,22 @@
           padding-right: 0px;
         }
       }
-    }
 
-    la-akoma-ntoso {
-      @include media-breakpoint-down(lg) {
-        flex: 100%;
-        max-width: 100%;
-      }
-    }
+      la-gutter {
+        flex: 0 0 45px;
 
-    la-gutter {
-      flex: 0 0 40px;
+        @include media-breakpoint-up(lg) {
+          flex: 20%;
+        }
 
-      @include media-breakpoint-up(lg) {
-        flex: 20%;
-      }
+        @include media-breakpoint-down(lg) {
+          padding: 0px;
 
-      @include media-breakpoint-down(lg) {
-        padding: 0px;
+          > la-gutter-item,
+          > la-gutter-item[active] {
+            left: 0px;
+          }
+        }
       }
     }
   }

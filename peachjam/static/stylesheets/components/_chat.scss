@@ -1,18 +1,24 @@
 .document-chat-button {
   position: fixed;
-  z-index: 999;
-  bottom: 50px;
-  right: 10px;
+  z-index: 10;
+  bottom: 10px;
+  left: 10px;
+
+  @include media-breakpoint-up(lg) {
+    left: auto;
+    right: 10px;
+    bottom: 60px;
+  }
 }
 
 .document-chat-popup {
   position: fixed;
   z-index: 999;
-  bottom: 50px;
+  bottom: 0px;
   right: 10px;
 
   left: 10px;
-  top: 60px;
+  height: 50vh;
 
   @include media-breakpoint-up(md) {
     left: auto;
