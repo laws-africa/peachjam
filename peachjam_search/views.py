@@ -248,7 +248,7 @@ class DocumentSearchView(TemplateView):
             user=self.request.user if self.request.user.is_authenticated else None,
             config_version=self.config_version,
             request_id=self.request.id if self.request.id != "none" else None,
-            mode=engine.mode[:20],
+            mode=engine.mode,
             search=search,
             field_searches=engine.field_queries,
             n_results=n_results,
@@ -256,7 +256,7 @@ class DocumentSearchView(TemplateView):
             filters=engine.filters,
             filters_string=filters_string,
             ordering=self.request.GET.get("ordering"),
-            suggestion=self.request.GET.get("suggestion"),
+            suggestion=self.request.GET.get("suggestion")[:1024],
             ip_address=self.request.headers.get("x-forwarded-for"),
             user_agent=self.request.headers.get("user-agent"),
         )
