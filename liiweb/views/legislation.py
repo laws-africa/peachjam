@@ -9,6 +9,7 @@ from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks, get_language
 from peachjam.models import (
+    Glossary,
     JurisdictionProfile,
     Locality,
     get_country_and_locality_or_404,
@@ -70,6 +71,14 @@ class LegislationListView(BaseLegislationListView):
         context["doc_table_show_court"] = False
         context["doc_table_show_author"] = False
         context["doc_table_show_jurisdiction"] = False
+        country = pj_settings().default_document_jurisdiction
+        if country:
+            context["show_glossary"] = Glossary.objects.filter(
+                place_code=country.iso.lower()
+            ).exists()
+            context["place_code"] = country.iso.lower()
+        else:
+            context["show_glossary"] = False
 
         context["documents"] = self.group_documents(context["documents"])
 
@@ -160,6 +169,10 @@ class LocalityLegislationListView(LegislationListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["show_glossary"] = Glossary.objects.filter(
+            place_code=self.kwargs["code"]
+        ).exists()
+        context["place_code"] = self.kwargs["code"]
         context.update(
             {
                 "locality": self.locality,

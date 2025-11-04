@@ -44,7 +44,7 @@ jobs:
         sudo apt-get install -y libreoffice poppler-utils pandoc
         python -m pip install --upgrade setuptools wheel
         pip install .[dev]
-        pip install psycopg2-binary==2.9.3 unittest-xml-reporting
+        pip install psycopg[binary]==3.2.12 unittest-xml-reporting
         npm ci --no-audit --ignore-scripts --only=prod
         npm i -g sass
 
