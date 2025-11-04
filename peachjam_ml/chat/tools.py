@@ -15,11 +15,14 @@ def answer_document_question(config: RunnableConfig, question: str) -> str:
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
     text = doc.get_content_as_text()
 
+    if len(text) > 1_250_000:
+        return "Document text is too long to process."
+
     response = chat_llm.invoke(
         [
             SystemMessage(
-                content="You are a question answering tool. Only use the document for answers; if you cannot answer "
-                "the question based on the document content, say so."
+                content="You are a question answering tool. Only use the document content for answers; if you cannot"
+                " answer the question based on the document content, say so."
             ),
             HumanMessage(content="The document content is below:\n\n" + text),
             HumanMessage(content=question),
