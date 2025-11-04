@@ -12,7 +12,7 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 
-from peachjam.models import CoreDocument, Legislation
+from peachjam.models import CoreDocument, Judgment, Legislation
 from peachjam_ml.chat.tools import (
     answer_document_question,
     get_provision_eid,
@@ -116,9 +116,33 @@ def doc_metadata(state: DocumentChatState):
         else:
             metadata.append("This legislation has not yet commenced.")
 
+    elif isinstance(document, Judgment):
+        if document.anonymised:
+            metadata.append(
+                "This judgment has anonymised to protect personal information in compliance with the law."
+            )
+        if document.court:
+            metadata.append(f"Court: {document.court.name}")
+        if document.judges:
+            metadata.append(
+                "Judges: " + ", ".join(judge.name for judge in document.judges.all())
+            )
+        if document.blurb:
+            metadata.append(f"Short summary: {document.blurb}")
+        if document.flynote:
+            metadata.append(f"Flynote: {document.flynote}")
+        if document.case_summary:
+            metadata.append(f"Case summary: {document.case_summary}")
+        if document.issues:
+            metadata.append("Issues: \n  * " + "\n  * ".join(document.issues))
+        if document.held:
+            metadata.append("Held: \n  * " + "\n  * ".join(document.held))
+        if document.order:
+            metadata.append(f"Order: {document.order}")
+
     msg = (
         "Here is some information about the document to help answer questions:\n\n"
-        + ("\n".join(metadata))
+        + "\n".join(metadata)
     )
     return {"messages": [SystemMessage(content=msg)]}
 
