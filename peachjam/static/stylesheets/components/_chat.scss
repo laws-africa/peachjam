@@ -1,0 +1,55 @@
+.document-chat-button {
+  position: fixed;
+  z-index: 999;
+  bottom: 50px;
+  right: 10px;
+}
+
+.document-chat-popup {
+  position: fixed;
+  z-index: 999;
+  bottom: 50px;
+  right: 10px;
+
+  left: 10px;
+  top: 60px;
+
+  @include media-breakpoint-up(md) {
+    left: auto;
+    top: auto;
+    width: 400px;
+    height: 500px;
+  }
+
+  &.expanded {
+    @include media-breakpoint-up(lg) {
+      width: 50vw;
+      height: 75vh;
+    }
+  }
+}
+
+.chat-bubble-user {
+  max-width: 75%;
+  border-radius: 1rem;
+  border-bottom-right-radius: 0.25rem;
+  padding: 0.5rem 0.75rem;
+}
+
+.chat-bubble-agent {
+}
+
+.chat-enter-active,
+.chat-leave-active {
+  transition: all 0.2s ease;
+}
+
+.chat-enter-from,
+.chat-leave-to {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.chat-input textarea {
+  resize: none;
+}

@@ -163,6 +163,9 @@ PEACHJAM = {
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
+    # Chat settings
+    "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
+    "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -712,6 +715,17 @@ MARTOR_ENABLE_CONFIGS = {
 }
 # disable the normal martor theme which pulls in another bootstrap version
 MARTOR_ALTERNATIVE_CSS_FILE_THEME = "martor/css/peachjam.css"
+MARTOR_MARKDOWN_EXTENSIONS = [
+    "markdown.extensions.extra",
+    "markdown.extensions.nl2br",
+    "markdown.extensions.smarty",
+    "mdx_truly_sane_lists",
+    # Custom markdown extensions.
+    "martor.extensions.urlize",
+    "martor.extensions.del_ins",  # ~~strikethrough~~ and ++underscores++
+    "martor.extensions.emoji",  # to parse markdown emoji
+    "martor.extensions.escape_html",  # to handle the XSS vulnerabilities
+]
 
 # CORS
 # disable regex matches, we do matching using signals

@@ -32,6 +32,10 @@ def general(request):
             "language": language,
             "languages": [x[0] for x in settings.LANGUAGES],
             "urlLangPrefix": f"/{language}" if len(settings.LANGUAGES) > 1 else "",
+            "chat": {
+                "enabled": settings.PEACHJAM["CHAT_ENABLED"],
+                "assistantName": settings.PEACHJAM["CHAT_ASSISTANT_NAME"],
+            },
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
