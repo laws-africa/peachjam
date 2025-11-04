@@ -236,7 +236,7 @@ class BaseDocumentFilterForm(forms.Form):
         authors = self.cleaned_data.get("authors")
         return (
             queryset.filter(author__name__in=authors)
-            if authors and hasattr(queryset, "author")
+            if authors and hasattr(queryset.model, "author")
             else queryset
         )
 
@@ -244,7 +244,7 @@ class BaseDocumentFilterForm(forms.Form):
         courts = self.cleaned_data.get("courts", [])
         return (
             queryset.filter(court__name__in=courts)
-            if courts and hasattr(queryset, "court")
+            if courts and hasattr(queryset.model, "court")
             else queryset
         )
 
@@ -256,7 +256,7 @@ class BaseDocumentFilterForm(forms.Form):
         judges = self.cleaned_data.get("judges", [])
         return (
             queryset.filter(judges__name__in=judges).distinct()
-            if judges and hasattr(queryset, "judges")
+            if judges and hasattr(queryset.model, "judges")
             else queryset
         )
 
@@ -274,7 +274,7 @@ class BaseDocumentFilterForm(forms.Form):
         registries = self.cleaned_data.get("registries", [])
         return (
             queryset.filter(registry__name__in=registries)
-            if registries and hasattr(queryset, "registry")
+            if registries and hasattr(queryset.model, "registry")
             else queryset
         )
 
@@ -282,7 +282,7 @@ class BaseDocumentFilterForm(forms.Form):
         divisions = self.cleaned_data.get("divisions", [])
         return (
             queryset.filter(division__code__in=divisions)
-            if divisions and hasattr(queryset, "division")
+            if divisions and hasattr(queryset.model, "division")
             else queryset
         )
 
@@ -290,7 +290,7 @@ class BaseDocumentFilterForm(forms.Form):
         attorneys = self.cleaned_data.get("attorneys", [])
         return (
             queryset.filter(attorneys__name__in=attorneys).distinct()
-            if attorneys and hasattr(queryset, "attorneys")
+            if attorneys and hasattr(queryset.model, "attorneys")
             else queryset
         )
 
@@ -298,7 +298,7 @@ class BaseDocumentFilterForm(forms.Form):
         outcomes = self.cleaned_data.get("outcomes", [])
         return (
             queryset.filter(outcomes__name__in=outcomes).distinct()
-            if outcomes and hasattr(queryset, "outcomes")
+            if outcomes and hasattr(queryset.model, "outcomes")
             else queryset
         )
 
@@ -306,7 +306,7 @@ class BaseDocumentFilterForm(forms.Form):
         actions = self.cleaned_data.get("case_actions", [])
         return (
             queryset.filter(case_action__name__in=actions).distinct()
-            if actions and hasattr(queryset, "case_action")
+            if actions and hasattr(queryset.model, "case_action")
             else queryset
         )
 
