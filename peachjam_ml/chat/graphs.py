@@ -152,7 +152,7 @@ def doc_metadata(state: DocumentChatState):
     if alternative_names:
         metadata.append(
             "Also referred to/cited as: "
-            + "; ".join(an.name for an in alternative_names)
+            + "; ".join(an.title for an in alternative_names)
         )
 
     if isinstance(document, Legislation):
