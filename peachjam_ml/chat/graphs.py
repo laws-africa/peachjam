@@ -42,6 +42,17 @@ load the previous state from the database and continue the conversation.
 
 The module also integrates with Langfuse for prompt management and observability of chat interactions. This makes
 debugging and monitoring chat sessions easier.
+
+# Configuration
+
+The following must be configured as ENV variables:
+
+* CHAT_ENABLED = true
+* LANGFUSE_HOST = https://cloud.langfuse.com
+* LANGFUSE_PUBLIC_KEY
+* LANGFUSE_SECRET_KEY
+* OPENAI_API_KEY
+* CHAT_ASSISTANT_NAME (optional)
 """
 
 from contextlib import contextmanager
