@@ -65,6 +65,8 @@
 
 <script>
 import { csrfToken } from '../../api';
+import peachJam from '../../peachjam';
+import { marked } from 'marked';
 
 function generateId () {
   if (window.crypto && window.crypto.randomUUID) {
@@ -104,7 +106,7 @@ export default {
   methods: {
     async load (isNew) {
       try {
-        const url = `/api/documents/${this.documentId}/chat` + (isNew ? '?new' : '');
+        const url = `${peachJam.config.urlLangPrefix}/api/documents/${this.documentId}/chat` + (isNew ? '?new' : '');
         const resp = await fetch(url, {
           method: 'POST',
           headers: {
@@ -152,7 +154,7 @@ export default {
           message: userMessage
         };
 
-        const resp = await fetch(`/api/chats/${this.threadId}`, {
+        const resp = await fetch(`${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -191,6 +193,10 @@ export default {
         if (existing) {
           existing.content = msg.content;
         } else if (msg.content.trim().length > 0) {
+          if (msg.role === 'ai') {
+            // parse markdown
+            msg.content_html = marked.parse(msg.content);
+          }
           this.messages.push({ ...msg });
         }
       }
@@ -219,7 +225,7 @@ export default {
       setTimeout(() => {
         this.votingUp = null;
       }, 1500);
-      fetch(`/api/chats/${this.threadId}/messages/${messageId}/vote-up`, {
+      fetch(`${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}/messages/${messageId}/vote-up`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -232,7 +238,7 @@ export default {
       setTimeout(() => {
         this.votingDown = null;
       }, 1500);
-      fetch(`/api/chats/${this.threadId}/messages/${messageId}/vote-down`, {
+      fetch(`${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}/messages/${messageId}/vote-down`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

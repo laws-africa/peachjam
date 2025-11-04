@@ -39,6 +39,12 @@
 .chat-bubble-agent {
 }
 
+.chat-content-html {
+  li > p {
+    margin-bottom: 0px;
+  }
+}
+
 .chat-enter-active,
 .chat-leave-active {
   transition: all 0.2s ease;
