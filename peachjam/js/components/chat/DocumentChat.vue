@@ -66,6 +66,7 @@
 <script>
 import { csrfToken } from '../../api';
 import peachJam from '../../peachjam';
+import { marked } from 'marked';
 
 function generateId () {
   if (window.crypto && window.crypto.randomUUID) {
@@ -192,6 +193,10 @@ export default {
         if (existing) {
           existing.content = msg.content;
         } else if (msg.content.trim().length > 0) {
+          if (msg.role === 'ai') {
+            // parse markdown
+            msg.content_html = marked.parse(msg.content);
+          }
           this.messages.push({ ...msg });
         }
       }
