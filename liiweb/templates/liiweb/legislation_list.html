@@ -29,6 +29,11 @@
               <a href="{% url "uncommenced_provision_list" %}">{% trans "Uncommenced provisions" %}</a>
             </li>
           {% endif %}
+          {% if show_glossary %}
+            <li>
+              <a href="{% url "glossary" place_code=place_code %}">{% trans "Glossary of defined terms" %}</a>
+            </li>
+          {% endif %}
         </ul>
       {% endif %}
     </div>

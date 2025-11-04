@@ -27,7 +27,7 @@ source .venv/bin/activate
 - Install requirements.
 ```
 pip install -e .[dev]
-pip install psycopg2-binary==2.9.3
+pip install psycopg[binary]==3.2.12
 ```
 
 - Ensure you have PostgreSQL installed and running. Create a postgresql user with username and password peachjam, and create a corresponding database called peachjam.

@@ -21,6 +21,7 @@ import sentry_sdk
 from django.contrib.messages import constants as messages
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -162,6 +163,9 @@ PEACHJAM = {
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
+    # Chat settings
+    "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
+    "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -455,6 +459,12 @@ if not DEBUG:
     DYNAMIC_STORAGE["DEFAULTS"][""] = f"s3:{AWS_STORAGE_BUCKET_NAME}:"
 
 IMPORT_EXPORT_USE_TRANSACTIONS = True
+IMPORT_EXPORT_FORMATS = [
+    base_formats.CSV,
+    base_formats.XLSX,
+]
+IMPORT_EXPORT_IMPORT_FORMATS = IMPORT_EXPORT_FORMATS
+IMPORT_EXPORT_EXPORT_FORMATS = IMPORT_EXPORT_FORMATS
 
 GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
     "type": "service_account",
@@ -705,6 +715,17 @@ MARTOR_ENABLE_CONFIGS = {
 }
 # disable the normal martor theme which pulls in another bootstrap version
 MARTOR_ALTERNATIVE_CSS_FILE_THEME = "martor/css/peachjam.css"
+MARTOR_MARKDOWN_EXTENSIONS = [
+    "markdown.extensions.extra",
+    "markdown.extensions.nl2br",
+    "markdown.extensions.smarty",
+    "mdx_truly_sane_lists",
+    # Custom markdown extensions.
+    "martor.extensions.urlize",
+    "martor.extensions.del_ins",  # ~~strikethrough~~ and ++underscores++
+    "martor.extensions.emoji",  # to parse markdown emoji
+    "martor.extensions.escape_html",  # to handle the XSS vulnerabilities
+]
 
 # CORS
 # disable regex matches, we do matching using signals

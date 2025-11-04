@@ -9,6 +9,9 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils.translation import get_language_from_request
 from languages_plus.models import Language
+from lxml import html as lxml_html
+
+from peachjam.xmlutils import parse_html_str
 
 
 def lowercase_alphabet():
@@ -17,7 +20,7 @@ def lowercase_alphabet():
 
 def add_slash(frbr_uri):
     # adds the leading slash if not present
-    if frbr_uri[0] != "/":
+    if frbr_uri and frbr_uri[0] != "/":
         return f"/{frbr_uri}"
     return frbr_uri
 
@@ -93,7 +96,11 @@ class ISODateConverter:
         return value.strftime("%Y-%m-%d")
 
 
-def markdownify(text):
+# keep a reference to the original martor markdownify function, which also does sanitization
+markdownify_orig = martor.utils.markdownify
+
+
+def markdownify_pandoc(text):
     """Convert markdown text to html using pandoc on the commandline."""
     with tempfile.NamedTemporaryFile(suffix=".md") as inf:
         with tempfile.NamedTemporaryFile(suffix=".html") as outf:
@@ -113,7 +120,18 @@ def markdownify(text):
 
 
 # override martor's markownify to use pandoc, so that we get alpha-numbered list support
-martor.utils.markdownify = markdownify
+martor.utils.markdownify = markdownify_pandoc
+
+
+def markdownify_llm_response(text):
+    """Parse markdown from LLM."""
+    markdown_html = markdownify_orig(text)
+    if markdown_html:
+        root = parse_html_str(markdown_html)
+        for el in root.iter("table"):
+            el.set("class", "table")
+        return lxml_html.tostring(root, encoding="unicode")
+    return text
 
 
 def get_update_or_create(model, defaults, **kwargs):

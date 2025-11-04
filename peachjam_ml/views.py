@@ -1,10 +1,23 @@
+import json
+
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.http.response import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
+from rest_framework.exceptions import ValidationError
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
-from peachjam_ml.models import DocumentEmbedding
+from peachjam.views.documents import DocumentDetailView
+from peachjam_ml.chat.graphs import (
+    get_chat_config,
+    get_chat_graph,
+    get_message_snapshot,
+    langfuse,
+)
+from peachjam_ml.models import ChatThread, DocumentEmbedding
+from peachjam_ml.serializers import ChatRequestSerializer
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -51,3 +64,145 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         doc_ids = self.object.saved_documents.values_list("document_id", flat=True)
         context["similar_documents"] = DocumentEmbedding.get_similar_documents(doc_ids)
         return context
+
+
+class StartDocumentChatView(
+    LoginRequiredMixin, PermissionRequiredMixin, DocumentDetailView
+):
+    slug_field = "pk"
+    slug_url_kwarg = "pk"
+    permission_required = "peachjam_ml.add_chatthread"
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        document = self.get_object()
+
+        if "new" in request.GET:
+            # force a new thread
+            thread = ChatThread.objects.create(
+                document=document,
+                user=self.request.user,
+            )
+        else:
+            # get the latest thread, if any
+            thread = (
+                ChatThread.objects.filter(
+                    user=self.request.user,
+                    document=document,
+                )
+                .order_by("-created_at")
+                .first()
+            )
+
+            if not thread:
+                # create a new one (avoiding race conditions)
+                thread, created = ChatThread.objects.get_or_create(
+                    document=document,
+                    user=self.request.user,
+                )
+
+        with get_chat_graph() as graph:
+            state = graph.get_state(get_chat_config(thread)).values
+        return render_thread_state(thread, state)
+
+
+class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
+    model = ChatThread
+    permission_required = "peachjam_ml.add_chatthread"
+
+    def get_queryset(self):
+        return ChatThread.objects.filter(user=self.request.user)
+
+
+class DocumentChatView(ChatThreadDetailMixin):
+    http_method_names = ["post"]
+
+    def post(self, request, *args, **kwargs):
+        thread = self.get_object()
+
+        # validate request
+        input = json.loads(request.body)
+        serializer = ChatRequestSerializer(data=input.get("message", {}))
+        try:
+            serializer.is_valid(raise_exception=True)
+        except ValidationError as e:
+            return JsonResponse({"errors": e.detail}, status=400)
+        message = serializer.data
+
+        config = get_chat_config(thread)
+        with get_chat_graph() as graph:
+            snapshot = graph.get_state(config)
+
+            if not snapshot.values:
+                state = {
+                    "user_id": thread.user.pk,
+                    "document_id": thread.document.pk,
+                }
+            else:
+                state = snapshot.values
+
+            state["user_message"] = message
+
+            with langfuse.start_as_current_observation(
+                name="document_chat",
+                as_type="generation",
+                input={
+                    "expression_frbr_uri": thread.document.expression_frbr_uri,
+                    "question": message["content"],
+                },
+            ) as generation:
+                config["configurable"]["trace_id"] = generation.trace_id
+                result = graph.invoke(
+                    state,
+                    config,
+                )
+                generation.update_trace(
+                    user_id=thread.user.username,
+                    session_id=str(thread.id),
+                    output={"reply": result.get("messages", [])[-1].content},
+                )
+
+        return render_thread_state(thread, result)
+
+
+class VoteChatMessageView(ChatThreadDetailMixin):
+    """View to handle upvoting or downvoting an AI-provided chat message."""
+
+    http_method_names = ["post"]
+    up = True
+
+    def post(self, request, pk, message_id, *args, **kwargs):
+        thread = self.get_object()
+        message, snapshot = get_message_snapshot(thread, message_id)
+        if message and message.type == "ai":
+            trace_id = snapshot.metadata.get("trace_id")
+            if trace_id:
+                langfuse.create_score(
+                    trace_id=trace_id,
+                    name="user-vote",
+                    value=1 if self.up else -1,
+                    data_type="NUMERIC",
+                )
+
+        return HttpResponse(status=200)
+
+
+def render_thread_state(thread, state):
+    def serialise(message):
+        return {
+            "id": message.id,
+            "role": message.type,
+            "content": message.content,
+        }
+
+    return JsonResponse(
+        {
+            "thread_id": str(thread.id),
+            "messages": [
+                serialise(m)
+                for m in state.get("messages", [])
+                # other types are system and tool
+                if m.type in ["ai", "human"]
+            ],
+        }
+    )

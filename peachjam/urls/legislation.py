@@ -3,6 +3,8 @@ from django.urls import path
 from peachjam.views import (
     DocumentUncommencedProvisionListView,
     LegislationListView,
+    PlaceGlossaryLetterView,
+    PlaceGlossaryView,
     UncommencedProvisionDetailView,
     UncommencedProvisionListView,
     UnconstitutionalProvisionDetailView,
@@ -11,6 +13,16 @@ from peachjam.views import (
 
 urlpatterns = [
     path("legislation/", LegislationListView.as_view(), name="legislation_list"),
+    path(
+        "glossary/<str:place_code>",
+        PlaceGlossaryView.as_view(),
+        name="glossary",
+    ),
+    path(
+        "glossary/<str:place_code>/<str:letter>",
+        PlaceGlossaryLetterView.as_view(),
+        name="glossary-letter",
+    ),
     path(
         "uncommenced-provisions/<int:pk>",
         UncommencedProvisionDetailView.as_view(),

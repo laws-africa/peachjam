@@ -41,6 +41,7 @@
     "i18next-parser": "^9.3.0",
     "lodash.debounce": "^4.0.8",
     "mark.js": "^8.11.1",
+    "marked": "^16.4.1",
     "sass": "^1.53.0",
     "sass-loader": "^12.6.0",
     "ts-loader": "^9.2.7",

@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 from datetime import datetime
@@ -23,6 +24,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentTopic,
     GenericDocument,
+    Glossary,
     Image,
     Legislation,
     Locality,
@@ -837,3 +839,107 @@ class IndigoTopicAdapter(IndigoAdapter):
         return qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
             "expression_frbr_uri", flat=True
         )
+
+
+@plugins.register("ingestor-adapter")
+class IndigoGlossaryAdapter(IndigoAdapter):
+    """Specialises the Indigo adapter to update glossaries.
+
+    Settings:
+
+    * token: API token
+    * api_url: URL to API base (no ending slash)
+    * places: space-separated list of place codes, such as: bw za-*
+    """
+
+    def get_doc_list(self):
+        """Returns a list of glossary results that looks like:
+        [
+            {
+                "place_code": "za",
+                "created_at": "2025-09-09T11:11:55.607856Z",
+                "updated_at": "2025-09-09T11:11:55.621109Z"
+            },
+            {
+                "place_code": "za-cpt",
+                "created_at": "2025-09-09T11:26:38.079351Z",
+                "updated_at": "2025-09-09T11:26:38.089205Z"
+            }
+        ]
+        """
+        logger.info(
+            f"Getting glossary summaries for available places from: {', '.join(self.place_codes)}"
+        )
+        results = []
+        url = f"{self.api_url}/glossary"
+        while url:
+            try:
+                resp = self.client_get(url).json()
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    logger.warning(f"Ignoring 404 for {url}")
+                    break
+                raise e
+            results.extend(
+                [r for r in resp["results"] if r["place_code"] in self.place_codes]
+            )
+            url = resp["next"]
+
+        logger.info(
+            f"Got glossary summaries for these places: {', '.join([r['place_code'] for r in results])}"
+        )
+        return results
+
+    def check_for_updated(self, glossaries, last_refreshed):
+        """Returns a list of place codes of glossaries that are new or have been updated since last_refreshed."""
+        updated = [
+            glossary
+            for glossary in glossaries
+            if last_refreshed is None
+            or parser.parse(glossary["updated_at"]) > last_refreshed
+        ]
+
+        return [g["place_code"] for g in updated]
+
+    def check_for_deleted(self, glossaries):
+        """Returns a list of the place codes of all existing glossaries that *aren't* in the list of glossaries
+         that we're now getting from the API.
+        This could be because we've stopped caring about that place and updated our settings, or because it no longer
+         exists.
+        `glossaries` is the intersection of what we care about (self.place_codes) and what's available
+         from the /glossary endpoint.
+        """
+        place_codes = [g["place_code"] for g in glossaries]
+        existing_glossaries = Glossary.objects.all()
+        return existing_glossaries.exclude(place_code__in=place_codes).values_list(
+            "place_code", flat=True
+        )
+
+    def update_document(self, place_code):
+        url = f"{self.api_url}/glossary/{place_code}"
+        logger.info(f"Updating glossary ... {url}")
+
+        try:
+            glossary_data = self.client_get(url).json()
+        except requests.HTTPError as error:
+            if error.response.status_code == 404:
+                logger.info(f"Glossary not found: {url}")
+                return
+            else:
+                raise error
+
+        """ {
+            "data": ""{\"0\": [{\"defn\": \"<span class=\\\"akn-p\\\" data-refersTo=\\\"#term-_ZADNA\\\" id=\\\"..."
+            "place_code": "za",
+            "created_at": "2025-09-09T11:11:55.607856Z",
+            "updated_at": "2025-09-09T11:11:55.621109Z"
+        } """
+        # turn `data` from a string into a dictionary
+        glossary_data["data"] = json.loads(glossary_data["data"])
+        glossary, new = Glossary.objects.update_or_create(
+            place_code=glossary_data["place_code"], defaults=glossary_data
+        )
+        logger.info(f"New glossary: {new}")
+
+    def delete_document(self, place_code):
+        Glossary.objects.filter(place_code=place_code).delete()
