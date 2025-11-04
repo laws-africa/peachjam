@@ -7,7 +7,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 from rest_framework.exceptions import ValidationError
 
-from peachjam.helpers import add_slash_to_frbr_uri, markdownify_simple
+from peachjam.helpers import add_slash_to_frbr_uri, markdownify_llm_response
 from peachjam.models import CoreDocument, Folder
 from peachjam.views.documents import DocumentDetailView
 from peachjam_ml.chat.graphs import (
@@ -193,7 +193,7 @@ def render_thread_state(thread, state):
             "id": message.id,
             "role": message.type,
             "content": message.content,
-            "content_html": markdownify_simple(message.content)
+            "content_html": markdownify_llm_response(message.content)
             if message.type == "ai"
             else None,
         }

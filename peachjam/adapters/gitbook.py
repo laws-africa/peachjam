@@ -17,7 +17,7 @@ from lxml import etree
 
 from peachjam.adapters.base import Adapter
 from peachjam.analysis.html import generate_toc_json_from_html
-from peachjam.helpers import markdownify
+from peachjam.helpers import markdownify_pandoc
 from peachjam.models import Book, Image, Language, get_country_and_locality
 from peachjam.plugins import plugins
 from peachjam.tasks import run_ingestor
@@ -174,7 +174,7 @@ class GitbookAdapter(Adapter):
         Compiles a book by fetching the SUMMARY.md file and using it to build a TOC, which then drives
         the creation of a single nested HTML file with all the TOC pages combined.
         """
-        summary_html = markdownify(
+        summary_html = markdownify_pandoc(
             self.get_repo_file(f"{repo_path}/SUMMARY.md").decode("utf-8")
         )
         toc = self.build_toc(summary_html)
@@ -217,7 +217,7 @@ class GitbookAdapter(Adapter):
         # preprocess with jinja
         template = self.jinja_env.from_string(markdown_text)
         markdown_text = template.render()
-        return markdownify(markdown_text)
+        return markdownify_pandoc(markdown_text)
 
     def build_toc(self, toc_html):
         """Build a TOC structure from the provided markdown content."""
