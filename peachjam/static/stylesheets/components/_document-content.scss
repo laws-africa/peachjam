@@ -155,13 +155,29 @@
   }
 
   .document-content__inner {
-    @extend .row;
+    display: flex;
 
     .navigation {
-      @extend .col-3;
       display: none;
+
       @include media-breakpoint-up(lg) {
         display: block;
+        flex: 0 0 auto;
+        width: 25%;
+      }
+    }
+
+    .content-and-enrichments {
+      flex: 0 0 auto;
+      width: 100%;
+
+      @include media-breakpoint-up(lg) {
+        width: 75%;
+      }
+
+      @include media-breakpoint-down(lg) {
+        // allow the gutter to use the full right width on small screens
+        padding-right: 0px;
       }
     }
   }
@@ -197,16 +213,6 @@
       .toc {
         height: 100%;
       }
-    }
-  }
-
-  .content-and-enrichments {
-    @extend .col-12;
-    @extend .col-lg-9;
-
-    @include media-breakpoint-down(lg) {
-      // allow the gutter to use the full right width on small screens
-      padding-right: 0px;
     }
   }
 
