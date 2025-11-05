@@ -560,6 +560,13 @@ class SaveDocumentForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["folders"].queryset = self.instance.user.folders.all()
 
+    def clean_work(self):
+        work = self.cleaned_data.get("work")
+        if not work:
+            work = self.instance.document.work
+        self.cleaned_data["work"] = work
+        return work
+
     def clean(self):
         cleaned_data = super().clean()
         folders = list(cleaned_data.get("folders") or [])

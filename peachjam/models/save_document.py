@@ -49,6 +49,13 @@ class SavedDocument(models.Model):
     document = models.ForeignKey(
         CoreDocument, related_name="saved_documents", on_delete=models.CASCADE
     )
+    work = models.ForeignKey(
+        "peachjam.Work",
+        on_delete=models.CASCADE,
+        verbose_name=_("work"),
+        related_name="saved_documents",
+        null=True,
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,

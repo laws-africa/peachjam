@@ -11,7 +11,7 @@
       title="{% trans "Saved" %}">
   <i class="bi-pj pj-saved"></i>
 </span>
-<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ saved_document.document.id }}"
+<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ saved_document.work.id }}"
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#saved-document-modal"
@@ -19,7 +19,7 @@
         hx-target="#saved-document-modal-content"
         data-saved-document="{{ saved_document.id }}"
         aria-expanded="false"
-        hx-swap-oob="outerHTML:.save-document-button--{{ saved_document.document.id }}">
+        hx-swap-oob="outerHTML:.save-document-button--{{ saved_document.work.id }}">
   <i class="bi bi-star-fill"></i>
   {% if saved_document.folder %}
     {{ saved_document.folder }}

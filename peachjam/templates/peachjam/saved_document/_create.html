@@ -1,16 +1,17 @@
 {% load i18n %}
-<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ document.id }}"
+<button class="btn btn-primary btn-shrink-sm save-document-button save-document-button--{{ document.work.id }}"
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#saved-document-modal"
         hx-post="{% url 'saved_document_create' %}?doc_id={{ document.id }}"
         hx-target="#saved-document-modal-content"
         aria-expanded="false"
-        hx-swap-oob="outerHTML:.save-document-button--{{ document.id }}">
+        hx-swap-oob="outerHTML:.save-document-button--{{ document.work.id }}">
   <i class="bi bi-star"></i>
   {% trans 'Save' %}
+  {{ saved_document.pk }}
 </button>
-<span hx-swap-oob="true" id="saved-document-star--{{ document.id }}"></span>
+<span hx-swap-oob="true" id="saved-document-star--{{ document.work.id }}"></span>
 <span hx-swap-oob="true"
       id="saved-document-table-detail--{{ document.id }}"></span>
 <div id="saved-document-detail--{{ document.id }}" hx-swap-oob="true"></div>

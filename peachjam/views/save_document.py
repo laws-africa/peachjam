@@ -172,18 +172,20 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
         except ValueError:
             pass
         # validate the pks - first few only
-        docs = {doc.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:50]}
+        docs = {
+            doc.work.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:50]
+        }
         saved_docs = {}
 
         if self.request.user.is_authenticated:
             # stash saved documents and forms (for updating) for ones that are already saved
             saved_docs = {
-                sd.document_id: (
+                sd.document.work.id: (
                     sd,
                     SaveDocumentForm(instance=sd),
                 )
                 for sd in SavedDocument.objects.filter(
-                    user=self.request.user, document_id__in=docs.keys()
+                    user=self.request.user, work_id__in=docs.keys()
                 )
                 .select_related("document")
                 .all()
@@ -191,8 +193,8 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
 
         # fake saved docs for the ones that don't exist
         for doc in docs.values():
-            if doc.id not in saved_docs:
-                saved_docs[doc.id] = (SavedDocument(document=doc), None)
+            if doc.work.id not in saved_docs:
+                saved_docs[doc.work.id] = (SavedDocument(document=doc), None)
 
         context["saved_documents"] = saved_docs.values()
         return context
@@ -270,7 +272,9 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         return super().handle_no_permission()
 
     def get_form_kwargs(self):
-        self.object = SavedDocument(user=self.request.user, document=self.document)
+        self.object = SavedDocument(
+            user=self.request.user, document=self.document, work=self.document.work
+        )
         return super().get_form_kwargs()
 
     def form_valid(self, form):
