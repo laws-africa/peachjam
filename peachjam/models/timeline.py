@@ -29,6 +29,7 @@ class TimelineEvent(models.Model):
     subject_documents = models.ManyToManyField(
         "peachjam.CoreDocument", related_name="+"
     )
+    subject_works = models.ManyToManyField("peachjam.Work", related_name="+")
     event_type = models.CharField(
         max_length=256,
         choices=EventTypes.choices,
@@ -113,6 +114,16 @@ class TimelineEvent(models.Model):
         for user_id in saved_search_users:
             send_saved_search_email_alert(user_id)
 
+        new_citation_users = (
+            events.filter(event_type=cls.EventTypes.NEW_CITATION)
+            .values_list("user_following__user_id", flat=True)
+            .distinct()
+        )
+
+        for user_id in new_citation_users:
+            # send_new_citation_email_alert(user_id)
+            pass
+
     @classmethod
     def send_saved_search_email_alert(cls, user):
         saved_searches = cls.objects.filter(
@@ -183,3 +194,44 @@ class TimelineEvent(models.Model):
 
         # mark the events as sent after successful send. allows retries in case of failure.
         new_document_events.update(email_alert_sent_at=models.functions.Now())
+
+    @classmethod
+    def send_new_citation_email_alert(cls, user):
+        new_citation_events = (
+            cls.objects.filter(
+                email_alert_sent_at__isnull=True,
+                event_type=cls.EventTypes.NEW_CITATION,
+                user_following__user=user,
+            )
+            .select_related("user_following")
+            .prefetch_related("subject_works")
+        )
+        if not new_citation_events.exists():
+            log.info(f"No new citation events to send for user {user.pk}")
+            return
+        log.info(f"Sending new citation email alerts for user {user.pk}")
+
+        follows_map = {}
+        for ev in new_citation_events:
+            key = ev.user_following.followed_object
+            follows_map.setdefault(key, set()).update(ev.subject_works.all())
+        follows = [
+            {"followed_object": k, "works": list(v)[:10]}
+            for k, v in follows_map.items()
+        ]
+
+        context = {
+            "followed_works": follows,
+            "user": user,
+            "manage_url_path": reverse("user_following_list"),
+        }
+        with override(user.userprofile.preferred_language.pk):
+            send_templated_mail(
+                template_name="new_citation_alert",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                context=context,
+            )
+
+        # mark the events as sent after successful send. allows retries in case of failure.
+        new_citation_events.update(email_alert_sent_at=models.functions.Now())

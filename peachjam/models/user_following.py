@@ -331,7 +331,7 @@ class UserFollowing(models.Model):
         if not self.saved_document:
             return
 
-        # check that the cited document is the saved one
+        # check that we are passing a citation to the saved document
         if citation.target_work != self.saved_document.document.work:
             return
 
@@ -340,11 +340,13 @@ class UserFollowing(models.Model):
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
         )
-        document = citation.citing_work.documents.latest_expression().first()
+        work = citation.citing_work
         for event in events:
-            if document in event.subject_documents.all():
+            if work in event.subject_works.all():
                 log.info(
-                    "User %s has already been alerted about citation from document %s",
+                    "User %s has already been alerted about citation from work %s",
+                    self.user,
+                    work,
                 )
                 return
 
@@ -353,7 +355,7 @@ class UserFollowing(models.Model):
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
             email_alert_sent_at__isnull=True,
         )
-        event.subject_documents.add(document)
+        event.subject_works.add(work)
 
     @classmethod
     def update_timeline_for_user(cls, user):
