@@ -1,8 +1,8 @@
 .document-content {
-
   .content {
     // so that gutter items can position relative to this
     position: relative;
+    padding-left: 0.75rem;
   }
 
   .content.content__html {
