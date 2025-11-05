@@ -21,7 +21,7 @@
     {% endif %}
     <div class="mb-3">
       <label class="form-label" for="{{ form.login.id_for_label }}">{{ form.login.label }}</label>
-      <input type="email"
+      <input type="{{ form.login.field.widget.input_type }}"
              class="form-control"
              name="{{ form.login.name }}"
              id="{{ form.login.id_for_label }}"
