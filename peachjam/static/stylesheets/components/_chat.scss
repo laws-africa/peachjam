@@ -20,6 +20,8 @@
   left: 10px;
   height: 50vh;
 
+  transition: width 0.15s, height 0.15s;
+
   @include media-breakpoint-up(md) {
     left: auto;
     top: auto;
