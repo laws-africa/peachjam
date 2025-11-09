@@ -3,6 +3,10 @@
     // so that gutter items can position relative to this
     position: relative;
     padding-left: 0.75rem;
+
+    &.content__pdf {
+      padding-left: 0px;
+    }
   }
 
   .content.content__html {
@@ -159,11 +163,11 @@
 
     .navigation {
       display: none;
+      flex: 0 0 auto;
+      width: 25%;
 
       @include media-breakpoint-up(lg) {
         display: block;
-        flex: 0 0 auto;
-        width: 25%;
       }
     }
 
@@ -217,6 +221,8 @@
   }
 
   .content-and-enrichments__inner {
+    display: flex;
+    flex-direction: row;
     max-width: 70em;
     margin-left: auto;
     margin-right: auto;
@@ -226,22 +232,37 @@
     }
 
     &.la-akoma-ntoso-with-gutter {
+      > la-akoma-ntoso {
+        /* override la-widgets default */
+        max-width: 100%;
+      }
+
       .content {
-        flex: 80%;
-        max-width: 80%;
+        flex: 1 1 auto;
+        /* prevent long lines from forcing the container to expand */
+        min-width: 0;
+
+        @include media-breakpoint-down(sm) {
+          /* make word-wrapping better at small sizes; works with min-width above */
+          hyphens: auto;
+          overflow-wrap: anywhere;
+        }
+
+        @include media-breakpoint-up(lg) {
+          width: 80%;
+        }
 
         @include media-breakpoint-down(lg) {
-          flex: 100%;
-          max-width: 100%;
           padding-right: 0px;
         }
       }
 
       la-gutter {
-        flex: 0 0 45px;
+        flex: 0 0 auto;
+        width: 45px;
 
         @include media-breakpoint-up(lg) {
-          flex: 20%;
+          width: 20%;
         }
 
         @include media-breakpoint-down(lg) {
