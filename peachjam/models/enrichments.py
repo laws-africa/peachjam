@@ -170,12 +170,12 @@ def refresh_provision_citation_counts(work_ids):
     if not work_ids:
         return
 
-    work_ids_tuple = tuple(work_ids)
+    work_ids = list(work_ids)
 
     with connection.cursor() as cursor:
         cursor.execute(
-            "DELETE FROM peachjam_provisioncitationcount WHERE work_id IN %s",
-            [work_ids_tuple],
+            "DELETE FROM peachjam_provisioncitationcount WHERE work_id = ANY(%s)",
+            [work_ids],
         )
 
         cursor.execute(
@@ -187,10 +187,10 @@ def refresh_provision_citation_counts(work_ids):
                 COUNT(DISTINCT pc.citing_document_id) AS citation_count
             FROM peachjam_provisionenrichment pe
             INNER JOIN peachjam_provisioncitation pc ON pc.provisionenrichment_ptr_id = pe.id
-            WHERE pe.enrichment_type = 'provision_citation' AND pe.provision_eid IS NOT NULL AND pe.work_id IN %s
+            WHERE pe.enrichment_type = 'provision_citation' AND pe.provision_eid IS NOT NULL AND pe.work_id = ANY(%s)
             GROUP BY pe.work_id, pe.provision_eid
             """,
-            [work_ids_tuple],
+            [work_ids],
         )
 
 
