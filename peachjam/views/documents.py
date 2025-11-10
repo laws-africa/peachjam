@@ -8,6 +8,7 @@ from django.http.response import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
 
 from peachjam.analysis.summariser import SummariserError, SummariserService
@@ -333,8 +334,9 @@ class DocumentSocialImageView(DocumentDetailView):
         return FileResponse(image.file, content_type="image/png")
 
 
+@method_decorator(never_cache, name="dispatch")
 class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
-    permission_required = "peachjam.can_debug_document"
+    permission_required = "peachjam.change_coredocument"
     model = CoreDocument
     queryset = CoreDocument.objects.filter(published=True)
     context_object_name = "document"

@@ -1,52 +1,78 @@
-<ul hx-swap-oob="beforeend:#document-tab-list">
-  <li class="nav-item order-5 ms-auto">
-    <button class="nav-link"
-            data-bs-toggle="tab"
-            data-bs-target="#debug-tab"
-            type="button">
-      <i class="bi bi-three-dots"></i>
-    </button>
-  </li>
-</ul>
-<div hx-swap-oob="beforeend:#document-tab-panes">
-  <div class="tab-pane"
-       id="debug-tab"
-       role="tabpanel"
-       aria-labelledby="debug-tab">
-    <div class="container">
-      <ul class="nav nav-tabs border-bottom">
-        <li class="nav-item">
-          <a class="nav-link active" data-bs-toggle="tab" href="#debug-main-tab">Debug</a>
-        </li>
-        {% if document.doc_type == "judgment" %}
-          <li class="nav-item">
-            <a class="nav-link" data-bs-toggle="tab" href="#debug-summary-tab">Summary</a>
+{% load i18n peachjam %}
+{% if user.is_staff %}
+  <div hx-swap-oob="true" id="edit-document-button">
+    {% if document.ingestor_edit_url %}
+      <div class="btn-group">
+        <a class="btn btn-outline-secondary btn-shrink-sm"
+           href="{{ document.ingestor_edit_url }}"
+           target="_blank">{% trans "Edit" %}</a>
+        <button type="button"
+                class="btn btn-outline-secondary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown">
+        </button>
+        <ul class="dropdown-menu">
+          <li>
+            <a class="dropdown-item" href="{{ document|admin_url:'change' }}">{% trans "Edit in admin area" %}</a>
           </li>
-        {% endif %}
-      </ul>
-      <div class="tab-content py-3">
-        <div class="tab-pane show active" id="debug-main-tab">
-          <ul>
-            <li>
-              <a href="{% url 'document_text_content' document.id %}">Download text content</a>
+        </ul>
+      </div>
+    {% else %}
+      <a class="btn btn-outline-secondary btn-shrink-sm"
+         href="{{ document|admin_url:'change' }}">{% trans "Edit" %}</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% if perms.peachjam.can_debug_document %}
+  <ul hx-swap-oob="beforeend:#document-tab-list">
+    <li class="nav-item order-5 ms-auto">
+      <button class="nav-link"
+              data-bs-toggle="tab"
+              data-bs-target="#debug-tab"
+              type="button">
+        <i class="bi bi-three-dots"></i>
+      </button>
+    </li>
+  </ul>
+  <div hx-swap-oob="beforeend:#document-tab-panes">
+    <div class="tab-pane"
+         id="debug-tab"
+         role="tabpanel"
+         aria-labelledby="debug-tab">
+      <div class="container">
+        <ul class="nav nav-tabs border-bottom">
+          <li class="nav-item">
+            <a class="nav-link active" data-bs-toggle="tab" href="#debug-main-tab">Debug</a>
+          </li>
+          {% if document.doc_type == "judgment" %}
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="tab" href="#debug-summary-tab">Summary</a>
             </li>
-          </ul>
-        </div>
-        {% if document.doc_type == "judgment" %}
-          <div class="tab-pane" id="debug-summary-tab">
-            <button class="btn btn-secondary"
-                    hx-get="{% url 'document_summary' document.id %}"
-                    hx-target="#debug-summary-content"
-                    hx-indicator=".htmx-progress">
-              Summarise
-            </button>
-            <div class="htmx-progress progress my-2">
-              <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
-            </div>
-            <div id="debug-summary-content"></div>
+          {% endif %}
+        </ul>
+        <div class="tab-content py-3">
+          <div class="tab-pane show active" id="debug-main-tab">
+            <ul>
+              <li>
+                <a href="{% url 'document_text_content' document.id %}">Download text content</a>
+              </li>
+            </ul>
           </div>
-        {% endif %}
+          {% if document.doc_type == "judgment" %}
+            <div class="tab-pane" id="debug-summary-tab">
+              <button class="btn btn-secondary"
+                      hx-get="{% url 'document_summary' document.id %}"
+                      hx-target="#debug-summary-content"
+                      hx-indicator=".htmx-progress">
+                Summarise
+              </button>
+              <div class="htmx-progress progress my-2">
+                <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+              </div>
+              <div id="debug-summary-content"></div>
+            </div>
+          {% endif %}
+        </div>
       </div>
     </div>
   </div>
-</div>
+{% endif %}
