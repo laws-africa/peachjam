@@ -994,7 +994,7 @@ class CoreDocumentAdmin(DocumentAdmin):
 
 @admin.register(GenericDocument)
 class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
-    resource_class = GenericDocumentResource
+    resource_classes = [GenericDocumentResource]
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     list_display = list(DocumentAdmin.list_display) + ["nature"]
     list_filter = list(DocumentAdmin.list_filter) + ["nature", "author"]
@@ -1022,7 +1022,7 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
 
 @admin.register(Bill)
 class BillAdmin(ImportExportMixin, DocumentAdmin):
-    resource_class = BillResource
+    resource_classes = [BillResource]
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author"])
 
@@ -1143,7 +1143,7 @@ class JudgmentAdminForm(DocumentForm):
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
-    resource_class = JudgmentResource
+    resource_classes = [JudgmentResource]
     inlines = [
         BenchInline,
         LowerBenchInline,
@@ -1499,7 +1499,7 @@ class ArticleForm(forms.ModelForm):
 
 @admin.register(Article)
 class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_class = ArticleResource
+    resource_classes = [ArticleResource]
     inlines = [ArticleAttachmentInline]
     form = ArticleForm
     list_display = ("title", "author", "date", "published")
@@ -1668,7 +1668,7 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(ImportExportMixin, DocumentAdmin):
-    resource_class = GazetteResource
+    resource_classes = [GazetteResource]
     inlines = [
         SourceFileInline,
         BackgroundTaskInline,
@@ -1763,7 +1763,7 @@ class SavedSearchInline(StackedInline):
 
 
 class UserAdminCustom(ImportExportMixin, UserAdmin):
-    resource_class = UserResource
+    resource_classes = [UserResource]
     inlines = [UserFollowingInline, SavedSearchInline]
     actions = ["require_accept_terms"]
 
@@ -1815,7 +1815,7 @@ class MatterTypeAdmin(BaseAdmin):
 
 @admin.register(Attorney)
 class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_class = AttorneyResource
+    resource_classes = [AttorneyResource]
     list_display = ("name", "description")
 
 
@@ -1833,7 +1833,7 @@ class RatificationCountryAdmin(admin.StackedInline):
 class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
     inlines = (RatificationCountryAdmin,)
     form = RatificationForm
-    resource_class = RatificationResource
+    resource_classes = [RatificationResource]
     search_fields = ("work__title",)
 
 

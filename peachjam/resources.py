@@ -75,10 +75,10 @@ User = get_user_model()
 
 
 class ForeignKeyRequiredWidget(ForeignKeyWidget):
-    def clean(self, value, row=None, *args, **kwargs):
+    def clean(self, value, row=None, **kwargs):
         if not value:
             raise ValueError("this field is required")
-        return super().clean(value, row, *args, **kwargs)
+        return super().clean(value, row, **kwargs)
 
 
 class SourceFileWidget(CharWidget):
@@ -227,16 +227,16 @@ class CustomPropertiesWidget(ManyToManyWidget):
 class ManyToManyField(fields.Field):
     """Handles many-to-many relationships."""
 
-    def save(self, obj, data, is_m2m=False, **kwargs):
+    def save(self, instance, row, is_m2m=False, **kwargs):
         if not self.readonly:
             attrs = self.attribute.split("__")
             for attr in attrs[:-1]:
-                obj = getattr(obj, attr, None)
-            cleaned = self.clean(data, **kwargs)
+                instance = getattr(instance, attr, None)
+            cleaned = self.clean(row, **kwargs)
             if cleaned is not None or self.saves_null_values:
                 assert is_m2m
-                getattr(obj, attrs[-1]).all().delete()
-                getattr(obj, attrs[-1]).set(cleaned, bulk=False)
+                getattr(instance, attrs[-1]).all().delete()
+                getattr(instance, attrs[-1]).set(cleaned, bulk=False)
 
 
 class ManyToOneWidget(ManyToManyWidget):
@@ -246,9 +246,9 @@ class ManyToOneWidget(ManyToManyWidget):
         values = [v.strip() for v in value.split(self.separator)]
         return [self.model(**{self.field: v}) for v in values if v]
 
-    def render(self, value, obj=None):
+    def render(self, value, obj=None, **kwargs):
         if obj.pk:
-            return super().render(value, obj)
+            return super().render(value, obj, **kwargs)
 
 
 class StripHtmlWidget(CharWidget):
@@ -264,7 +264,7 @@ class StripHtmlWidget(CharWidget):
 class BaseDocumentResource(resources.ModelResource):
     frbr_uri_date = fields.Field(
         attribute="frbr_uri_date",
-        widget=CharWidget(coerce_to_string=True, allow_blank=True),
+        widget=CharWidget(allow_blank=True),
     )
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
     language = fields.Field(
@@ -331,7 +331,7 @@ class BaseDocumentResource(resources.ModelResource):
         import_id_fields = ("expression_frbr_uri",)
         clean_model_instances = True
 
-    def before_import(self, dataset, using_transactions, dry_run, **kwargs):
+    def before_import(self, dataset, **kwargs):
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
         try:
@@ -381,10 +381,10 @@ class BaseDocumentResource(resources.ModelResource):
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"] or all(not x for x in row.values())
 
-    def save_m2m(self, instance, row, using_transactions, dry_run):
-        super().save_m2m(instance, row, using_transactions, dry_run)
+    def save_m2m(self, instance, row, **kwargs):
+        super().save_m2m(instance, row, **kwargs)
 
-        if not dry_run:
+        if not kwargs.get("dry_run", ""):
             # only re-extract content if the content explicitly changed, or the source file changed (next block)
             extract_content = "content_html" in row
 
@@ -405,8 +405,8 @@ class BaseDocumentResource(resources.ModelResource):
                 instance.extract_citations()
                 instance.save()
 
-    def after_save_instance(self, instance, using_transactions, dry_run):
-        if not dry_run:
+    def after_save_instance(self, instance, row, **kwargs):
+        if not kwargs.get("dry_run", ""):
             cp = citations_processor()
             cp.queue_re_extract_citations(instance.date)
 
@@ -597,10 +597,10 @@ class JudgmentResource(BaseDocumentResource):
 
         return case_numbers
 
-    def after_import_row(self, row, instance, row_number=None, **kwargs):
-        super().after_import_row(row, instance, row_number, **kwargs)
+    def after_import_row(self, row, row_result, **kwargs):
+        super().after_import_row(row, row_result, **kwargs)
 
-        judgment = Judgment.objects.filter(pk=instance.object_id).first()
+        judgment = Judgment.objects.filter(pk=row_result.object_id).first()
 
         if judgment:
             CaseNumber.objects.filter(document=judgment).delete()
@@ -745,7 +745,7 @@ class UserResource(resources.ModelResource):
         import_id_fields = ("email", "username")
         # export_order = ("first_name", "last_name", "email", "groups")
 
-    def before_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(self, instance, row, **kwargs):
         if not instance.pk:
             instance.username = instance.email
             instance.password = make_password(instance.password)
@@ -837,7 +837,7 @@ class RatificationResource(resources.ModelResource):
             "country",
         )
 
-    def filter_export(self, queryset, *args, **kwargs):
+    def filter_export(self, queryset, **kwargs):
         return RatificationCountry.objects.filter(
             ratification__in=queryset
         ).select_related("country", "ratification", "ratification__work")
