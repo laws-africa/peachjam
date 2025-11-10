@@ -10,7 +10,7 @@ export default class DocumentDetail {
     this.documentId = root.dataset.documentId || '';
     this.debugUrl = root.dataset.debugUrl || '';
     peachJam.whenUserLoaded().then((user) => {
-      if (user.perms.includes('peachjam.can_debug_document')) {
+      if (user.perms.includes('peachjam.change_coredocument')) {
         this.loadDebug();
       }
     });
