@@ -1,5 +1,5 @@
 from django.core.validators import RegexValidator
-from django.db import connection, models
+from django.db import connection, models, transaction
 from django.utils.functional import cached_property
 from django.utils.translation import gettext_lazy as _
 from polymorphic.models import PolymorphicModel
@@ -172,26 +172,30 @@ def refresh_provision_citation_counts(work_ids):
 
     work_ids = list(work_ids)
 
-    with connection.cursor() as cursor:
-        cursor.execute(
-            "DELETE FROM peachjam_provisioncitationcount WHERE work_id = ANY(%s)",
-            [work_ids],
-        )
+    with transaction.atomic():
+        with connection.cursor() as cursor:
+            cursor.execute(
+                "DELETE FROM peachjam_provisioncitationcount WHERE work_id = ANY(%s)",
+                [work_ids],
+            )
 
-        cursor.execute(
-            """
-            INSERT INTO peachjam_provisioncitationcount (work_id, provision_eid, count)
-            SELECT
-                pe.work_id,
-                pe.provision_eid,
-                COUNT(DISTINCT pc.citing_document_id) AS citation_count
-            FROM peachjam_provisionenrichment pe
-            INNER JOIN peachjam_provisioncitation pc ON pc.provisionenrichment_ptr_id = pe.id
-            WHERE pe.enrichment_type = 'provision_citation' AND pe.provision_eid IS NOT NULL AND pe.work_id = ANY(%s)
-            GROUP BY pe.work_id, pe.provision_eid
-            """,
-            [work_ids],
-        )
+            cursor.execute(
+                """
+                INSERT INTO peachjam_provisioncitationcount (work_id, provision_eid, count)
+                SELECT
+                    pe.work_id,
+                    pe.provision_eid,
+                    COUNT(DISTINCT pc.citing_document_id) AS citation_count
+                FROM peachjam_provisionenrichment pe
+                INNER JOIN peachjam_provisioncitation pc ON pc.provisionenrichment_ptr_id = pe.id
+                WHERE
+                    pe.enrichment_type = 'provision_citation' AND pe.provision_eid IS NOT NULL AND pe.work_id = ANY(%s)
+                GROUP BY pe.work_id, pe.provision_eid
+                ON CONFLICT (work_id, provision_eid)
+                DO UPDATE SET count = EXCLUDED.count
+                """,
+                [work_ids],
+            )
 
 
 place_code_validator = RegexValidator(
