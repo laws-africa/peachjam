@@ -40,10 +40,7 @@ from peachjam.frbr_uri import (
 from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
-from peachjam.models.enrichments import (
-    ProvisionCitation,
-    refresh_provision_citation_counts,
-)
+from peachjam.models.enrichments import ProvisionCitation, ProvisionCitationCount
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -761,7 +758,7 @@ class CoreDocument(PolymorphicModel):
         )
         affected_work_ids = removed_work_ids | current_work_ids
         if affected_work_ids:
-            refresh_provision_citation_counts(affected_work_ids)
+            ProvisionCitationCount.refresh_for_works(affected_work_ids)
 
     def delete_provision_citations(self):
         """Delete existing provision citations for this document."""
