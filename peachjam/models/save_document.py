@@ -8,6 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from peachjam_subs.models import Subscription
 
 from .core_document import CoreDocument
+from .settings import pj_settings
 
 User = get_user_model()
 
@@ -48,9 +49,20 @@ class Folder(models.Model):
 
 class SavedDocumentManager(models.Manager):
     def for_user_with_related(self, user):
-        latest_docs_qs = CoreDocument.objects.latest_expression().prefetch_related(
-            "labels"
+        # Determine user's preferred language, or fall back to site default
+        preferred_lang = getattr(user.userprofile, "preferred_language", None)
+        lang_code = (
+            getattr(preferred_lang, "iso_639_3", None)
+            or pj_settings().default_document_language
         )
+
+        # Get latest expressions in preferred (or fallback) language
+        latest_docs_qs = (
+            CoreDocument.objects.latest_expression()
+            .preferred_language(lang_code)
+            .prefetch_related("labels")
+        )
+
         return (
             self.select_related("work")
             .prefetch_related(
@@ -72,7 +84,7 @@ class SavedDocumentManager(models.Manager):
 
 class SavedDocument(models.Model):
     # document = models.ForeignKey(
-    #     CoreDocument, related_name="saved_documents", on_delete=models.CASCADE
+    #     CoreDocument, related_name="saved_documents", on_delete=models.CASCADE, null=True, blank=True
     # )
 
     work = models.ForeignKey(

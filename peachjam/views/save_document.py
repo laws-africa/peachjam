@@ -262,6 +262,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
             raise Http404
 
         self.document = get_object_or_404(CoreDocument, pk=doc_id)
+        self.work = self.document.work
         return super().dispatch(request, *args, **kwargs)
 
     def handle_no_permission(self):
@@ -277,9 +278,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         return super().handle_no_permission()
 
     def get_form_kwargs(self):
-        self.object = SavedDocument(
-            user=self.request.user, document=self.document, work=self.document.work
-        )
+        self.object = SavedDocument(user=self.request.user, work=self.work)
         return super().get_form_kwargs()
 
     def form_valid(self, form):
@@ -291,7 +290,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         )
 
     def form_invalid(self, form):
-        self.object = SavedDocument(user=self.request.user, document=self.document)
+        self.object = SavedDocument(user=self.request.user, work=self.work)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )
