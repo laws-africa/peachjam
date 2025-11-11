@@ -7,7 +7,14 @@ from django.test import TestCase
 from languages_plus.models import Language
 
 from peachjam.analysis.citations import citation_analyser
-from peachjam.models import CoreDocument, SourceFile
+from peachjam.models import (
+    CoreDocument,
+    DocumentNature,
+    ProvisionCitation,
+    ProvisionCitationCount,
+    SourceFile,
+    Work,
+)
 
 
 class CitationAnalyserTestCase(TestCase):
@@ -137,3 +144,104 @@ class CitationAnalyserTestCase(TestCase):
 """,
             doc.content_html,
         )
+
+
+class ProvisionCitationCountTests(TestCase):
+    fixtures = ["tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.language = Language.objects.get(pk="en")
+        self.country = Country.objects.get(pk="ZA")
+        self.nature, _ = DocumentNature.objects.get_or_create(
+            code="act", defaults={"name": "Act"}
+        )
+
+    def make_work(self, number):
+        return Work.objects.create(
+            title=f"Work {number}",
+            frbr_uri=f"/akn/za/act/2020/{number}",
+        )
+
+    def make_document(self, work, expression_suffix):
+        number = work.frbr_uri.split("/")[-1]
+        return CoreDocument.objects.create(
+            work=work,
+            title=f"Doc {expression_suffix}",
+            date=datetime(2020, 1, 1),
+            language=self.language,
+            jurisdiction=self.country,
+            nature=self.nature,
+            work_frbr_uri=work.frbr_uri,
+            frbr_uri_doctype="act",
+            frbr_uri_date="2020",
+            frbr_uri_number=number,
+            expression_frbr_uri=f"{work.frbr_uri}@eng@{expression_suffix}",
+        )
+
+    def test_refresh_for_works_populates_counts(self):
+        target_work = self.make_work(100)
+        citing_doc_one = self.make_document(self.make_work(200), 1)
+        citing_doc_two = self.make_document(self.make_work(201), 2)
+
+        # stale count that should be replaced
+        ProvisionCitationCount.objects.create(
+            work=target_work, provision_eid="p-1", count=99
+        )
+
+        ProvisionCitation.objects.create(
+            work=target_work,
+            provision_eid="p-1",
+            citing_document=citing_doc_one,
+        )
+        ProvisionCitation.objects.create(
+            work=target_work,
+            provision_eid="p-1",
+            citing_document=citing_doc_one,
+        )
+        ProvisionCitation.objects.create(
+            work=target_work,
+            provision_eid="p-1",
+            citing_document=citing_doc_two,
+        )
+        ProvisionCitation.objects.create(
+            work=target_work,
+            provision_eid="p-2",
+            citing_document=citing_doc_one,
+        )
+
+        ProvisionCitationCount.refresh_for_works({target_work.id, None})
+
+        counts = {
+            c.provision_eid: c.count
+            for c in ProvisionCitationCount.objects.filter(work=target_work)
+        }
+        self.assertEqual({"p-1": 2, "p-2": 1}, counts)
+
+    def test_refresh_only_updates_requested_work(self):
+        target_work = self.make_work(300)
+        other_work = self.make_work(400)
+
+        target_doc = self.make_document(self.make_work(301), 3)
+        other_doc = self.make_document(self.make_work(401), 4)
+
+        ProvisionCitation.objects.create(
+            work=target_work, provision_eid="p-1", citing_document=target_doc
+        )
+        ProvisionCitation.objects.create(
+            work=other_work, provision_eid="p-2", citing_document=other_doc
+        )
+
+        ProvisionCitationCount.objects.create(
+            work=other_work, provision_eid="p-2", count=5
+        )
+
+        ProvisionCitationCount.refresh_for_works([target_work.id])
+
+        target_counts = ProvisionCitationCount.objects.filter(work=target_work)
+        self.assertEqual(1, target_counts.count())
+        self.assertEqual(1, target_counts.first().count)
+
+        other_count = ProvisionCitationCount.objects.get(
+            work=other_work, provision_eid="p-2"
+        )
+        self.assertEqual(5, other_count.count)
