@@ -302,6 +302,14 @@ class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
     permission_required = "peachjam.change_saveddocument"
     http_method_names = ["post"]
 
+    def get_object(self, queryset=None):
+        sd = super().get_object(queryset)
+        doc_id = self.request.GET.get("doc_id")
+        if doc_id and doc_id.isdigit():
+            document = sd.work.documents.filter(id=doc_id).first()
+            setattr(sd, "document", document)
+        return sd
+
 
 class SavedDocumentModalView(SavedDocumentUpdateView):
     template_name = "peachjam/saved_document/_update_modal.html"
