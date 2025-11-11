@@ -60,7 +60,7 @@
               type="button"
               data-bs-dismiss="modal"
               hx-target="{{ target }}"
-              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={{ next }}"
+              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={{ next }}&doc_id={{ saved_document.document.id }}"
               hx-confirm="{% trans "Are you sure you want to unsave? This will also remove all comments." %}">
         {% trans 'Unsave' %}
       </button>

@@ -239,12 +239,13 @@ class SavedDocumentFormMixin(
 
     def get_success_url(self):
         # by default, we always redirect to the bulk view which refreshes this document's saved doc details in the page
+        doc_id = self.request.GET.get("doc_id") or self.object.document.id
         return (
             self.request.GET.get("next")
             or reverse(
                 "saved_document_fragments",
             )
-            + f"?doc_id={self.object.document.id}"
+            + f"?doc_id={doc_id}"
         )
 
 
@@ -285,6 +286,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         self.object = form.save()
         # this ensures the form reflects the actual saved document
         form = self.form_class(instance=self.object)
+        setattr(self.object, "document", self.document)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )
