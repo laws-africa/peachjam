@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models import Count, Prefetch, Q
 from django.urls.base import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -45,10 +46,35 @@ class Folder(models.Model):
         return reverse("folder_list") + "#folder-" + str(self.pk)
 
 
+class SavedDocumentManager(models.Manager):
+    def for_user_with_related(self, user):
+        latest_docs_qs = CoreDocument.objects.latest_expression().prefetch_related(
+            "labels"
+        )
+        return (
+            self.select_related("work")
+            .prefetch_related(
+                Prefetch(
+                    "work__documents",
+                    queryset=latest_docs_qs,
+                    to_attr="latest_documents",
+                )
+            )
+            .annotate(
+                annotation_count=Count(
+                    "work__documents__annotations",
+                    filter=Q(work__documents__annotations__user=user),
+                    distinct=True,
+                )
+            )
+        )
+
+
 class SavedDocument(models.Model):
-    document = models.ForeignKey(
-        CoreDocument, related_name="saved_documents", on_delete=models.CASCADE
-    )
+    # document = models.ForeignKey(
+    #     CoreDocument, related_name="saved_documents", on_delete=models.CASCADE
+    # )
+
     work = models.ForeignKey(
         "peachjam.Work",
         on_delete=models.CASCADE,
@@ -67,8 +93,27 @@ class SavedDocument(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
 
+    objects = SavedDocumentManager()
+
+    @property
+    def document(self):
+        # use manually set doc if available
+        if hasattr(self, "_document"):
+            return self._document
+        # use prefetched latest document
+        docs = getattr(self.work, "latest_documents", None)
+        if docs:
+            return docs[0]
+        # fallback to DB query
+        return self.work.documents.latest_expression().first()
+
+    @document.setter
+    def document(self, value):
+        # store a temporary doc in memory for this request
+        self._document = value
+
     class Meta:
-        ordering = ("document__title",)
+        ordering = ("work__title",)
         verbose_name = _("saved document")
         verbose_name_plural = _("saved documents")
 
