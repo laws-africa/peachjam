@@ -88,7 +88,6 @@ class SavedDocument(models.Model):
         on_delete=models.CASCADE,
         verbose_name=_("work"),
         related_name="saved_documents",
-        null=True,
     )
     user = models.ForeignKey(
         User,
