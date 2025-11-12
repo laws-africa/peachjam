@@ -447,44 +447,44 @@
     .pdf-error {
       display: none;
     }
+  }
 
-    &[data-pdf-standby], &[data-pdf-loading], &[data-pdf-error] {
-      .navigation {
-        opacity: 0;
-      }
-
-      .pdf-content {
-        display: none;
-      }
+  &[data-pdf-standby], &[data-pdf-loading], &[data-pdf-error] {
+    .navigation {
+      opacity: 0;
     }
 
-    &[data-pdf-standby] {
-      .pdf-loading {
-        display: none;
-      }
-    }
-
-    &[data-pdf-loading] {
-      .pdf-loading {
-        display: block;
-      }
-    }
-
-    &[data-pdf-error] {
-      .pdf-error {
-        display: block;
-      }
-    }
-
-    .pdf-large-prompt {
-      text-align: center;
+    .pdf-content {
       display: none;
     }
+  }
 
-    &[data-large-pdf] {
-      .pdf-large-prompt {
-        display: block;
-      }
+  &[data-pdf-standby] {
+    .pdf-loading {
+      display: none;
+    }
+  }
+
+  &[data-pdf-loading] {
+    .pdf-loading {
+      display: block;
+    }
+  }
+
+  &[data-pdf-error] {
+    .pdf-error {
+      display: block;
+    }
+  }
+
+  .pdf-large-prompt {
+    text-align: center;
+    display: none;
+  }
+
+  &[data-large-pdf] {
+    .pdf-large-prompt {
+      display: block;
     }
   }
 }
