@@ -61,7 +61,12 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        doc_ids = self.object.saved_documents.values_list("document_id", flat=True)
+        work_ids = self.object.saved_documents.values_list("work_id", flat=True)
+        doc_ids = (
+            CoreDocument.objects.filter(work_id__in=work_ids)
+            .latest_expression()
+            .values_list("id", flat=True)
+        )
         context["similar_documents"] = DocumentEmbedding.get_similar_documents(doc_ids)
         return context
 
