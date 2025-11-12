@@ -1029,3 +1029,338 @@ class TestSearchEngine(TestCase):
             ),
             json.dumps(d, indent=2, sort_keys=True),
         )
+
+    def test_hybrid(self):
+        params = QueryDict("", mutable=True)
+        params["search"] = "test"
+        params["nature"] = "Act"
+
+        engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(engine)
+        engine.mode = "hybrid"
+
+        with patch.object(engine, "get_query_embedding", return_value=[0.1, 0.2]):
+            search = engine.build_search()
+
+        d = search.to_dict()
+        self.assertEqual(
+            json.dumps(
+                {
+                    "_source": {
+                        "includes": [
+                            "expression_frbr_uri",
+                            "date",
+                            "nature",
+                            "doc_type",
+                            "title",
+                            "jurisdiction",
+                            "locality",
+                            "citation",
+                            "authors",
+                            "labels",
+                            "alternative_names",
+                            "flynote",
+                            "blurb",
+                            "court",
+                            "matter_type",
+                        ]
+                    },
+                    "explain": False,
+                    "from": 0,
+                    "highlight": {
+                        "fields": {
+                            "alternative_names": {
+                                "fragment_size": 0,
+                                "max_analyzed_offset": 999999,
+                                "number_of_fragments": 0,
+                                "post_tags": ["</mark>"],
+                                "pre_tags": ["<mark>"],
+                            },
+                            "citation": {
+                                "fragment_size": 0,
+                                "max_analyzed_offset": 999999,
+                                "number_of_fragments": 0,
+                                "post_tags": ["</mark>"],
+                                "pre_tags": ["<mark>"],
+                            },
+                            "content": {
+                                "fragment_size": 80,
+                                "max_analyzed_offset": 999999,
+                                "number_of_fragments": 2,
+                                "post_tags": ["</mark>"],
+                                "pre_tags": ["<mark>"],
+                            },
+                            "title": {
+                                "fragment_size": 0,
+                                "max_analyzed_offset": 999999,
+                                "number_of_fragments": 0,
+                                "post_tags": ["</mark>"],
+                                "pre_tags": ["<mark>"],
+                            },
+                        }
+                    },
+                    "post_filter": {"terms": {"nature": ["Act"]}},
+                    "retriever": {
+                        "rrf": {
+                            "rank_constant": 60,
+                            "rank_window_size": 150,
+                            "retrievers": [
+                                {
+                                    "standard": {
+                                        "_name": "text",
+                                        "query": {
+                                            "bool": {
+                                                "filter": [
+                                                    {"term": {"is_most_recent": True}}
+                                                ],
+                                                "minimum_should_match": 1,
+                                                "should": [
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": ["title^8"],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": [
+                                                                "title_expanded^3"
+                                                            ],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": ["citation^2"],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": [
+                                                                "alternative_names^4"
+                                                            ],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": ["content"],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": ["summary^2"],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": ["flynote^2"],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "simple_query_string": {
+                                                            "default_operator": "OR",
+                                                            "fields": ["blurb^2"],
+                                                            "minimum_should_match": "4<80%",
+                                                            "query": "test",
+                                                        }
+                                                    },
+                                                    {
+                                                        "match_phrase": {
+                                                            "content": {
+                                                                "boost": 4,
+                                                                "query": "test",
+                                                                "slop": 0,
+                                                            }
+                                                        }
+                                                    },
+                                                    {
+                                                        "nested": {
+                                                            "inner_hits": {
+                                                                "_source": [
+                                                                    "pages.page_num"
+                                                                ],
+                                                                "highlight": {
+                                                                    "fields": {
+                                                                        "pages.body": {},
+                                                                        "pages.body.exact": {},
+                                                                    },
+                                                                    "fragment_size": 80,
+                                                                    "max_analyzed_offset": 999999,
+                                                                    "number_of_fragments": 2,
+                                                                    "post_tags": [
+                                                                        "</mark>"
+                                                                    ],
+                                                                    "pre_tags": [
+                                                                        "<mark>"
+                                                                    ],
+                                                                },
+                                                            },
+                                                            "path": "pages",
+                                                            "query": {
+                                                                "bool": {
+                                                                    "must": [
+                                                                        {
+                                                                            "simple_query_string": {
+                                                                                "default_operator": "OR",
+                                                                                "fields": [
+                                                                                    "pages.body"
+                                                                                ],
+                                                                                "minimum_should_match": "4<80%",
+                                                                                "query": "test",
+                                                                                "quote_field_suffix": ".exact",
+                                                                            }
+                                                                        }
+                                                                    ],
+                                                                    "should": [
+                                                                        {
+                                                                            "match_phrase": {
+                                                                                "pages.body": {
+                                                                                    "boost": 4,
+                                                                                    "query": "test",
+                                                                                    "slop": 0,
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    ],
+                                                                }
+                                                            },
+                                                        }
+                                                    },
+                                                    {
+                                                        "nested": {
+                                                            "inner_hits": {
+                                                                "_source": [
+                                                                    "provisions.title",
+                                                                    "provisions.id",
+                                                                    "provisions.parent_titles",
+                                                                    "provisions.parent_ids",
+                                                                ],
+                                                                "highlight": {
+                                                                    "fields": {
+                                                                        "provisions.body": {},
+                                                                        "provisions.body.exact": {},
+                                                                    },
+                                                                    "fragment_size": 80,
+                                                                    "max_analyzed_offset": 999999,
+                                                                    "number_of_fragments": 2,
+                                                                    "post_tags": [
+                                                                        "</mark>"
+                                                                    ],
+                                                                    "pre_tags": [
+                                                                        "<mark>"
+                                                                    ],
+                                                                },
+                                                            },
+                                                            "path": "provisions",
+                                                            "query": {
+                                                                "bool": {
+                                                                    "should": [
+                                                                        {
+                                                                            "match_phrase": {
+                                                                                "provisions.body": {
+                                                                                    "boost": 4,
+                                                                                    "query": "test",
+                                                                                    "slop": 0,
+                                                                                }
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "simple_query_string": {
+                                                                                "default_operator": "OR",
+                                                                                "fields": [
+                                                                                    "provisions.body"
+                                                                                ],
+                                                                                "minimum_should_match": "4<80%",
+                                                                                "query": "test",
+                                                                                "quote_field_suffix": ".exact",
+                                                                            }
+                                                                        },
+                                                                        {
+                                                                            "simple_query_string": {
+                                                                                "default_operator": "OR",
+                                                                                "fields": [
+                                                                                    "provisions.title^4",
+                                                                                    "provisions.parent_titles^2",
+                                                                                ],
+                                                                                "minimum_should_match": "4<80%",
+                                                                                "query": "test",
+                                                                            }
+                                                                        },
+                                                                    ]
+                                                                }
+                                                            },
+                                                        }
+                                                    },
+                                                ],
+                                            }
+                                        },
+                                    }
+                                },
+                                {
+                                    "standard": {
+                                        "_name": "semantic",
+                                        "filter": [{"term": {"is_most_recent": True}}],
+                                        "query": {
+                                            "bool": {
+                                                "must": [
+                                                    {
+                                                        "nested": {
+                                                            "inner_hits": {
+                                                                "_source": {
+                                                                    "excludes": [
+                                                                        "content_chunks.text_embedding"
+                                                                    ]
+                                                                }
+                                                            },
+                                                            "path": "content_chunks",
+                                                            "query": {
+                                                                "knn": {
+                                                                    "field": "content_chunks.text_embedding",
+                                                                    "k": 150,
+                                                                    "num_candidates": 1500,
+                                                                    "query_vector": [
+                                                                        0.1,
+                                                                        0.2,
+                                                                    ],
+                                                                    "similarity": 0.4,
+                                                                }
+                                                            },
+                                                            "score_mode": "max",
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                    }
+                                },
+                            ],
+                        }
+                    },
+                    "size": 10,
+                },
+                indent=2,
+                sort_keys=True,
+            ),
+            json.dumps(d, indent=2, sort_keys=True),
+        )
