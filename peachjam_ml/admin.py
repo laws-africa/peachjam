@@ -79,7 +79,9 @@ class ChatThreadAdmin(admin.ModelAdmin):
         return False
 
     def document_link(self, obj):
-        return format_html("<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document)
+        return format_html(
+            "<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document
+        )
 
     document_link.short_description = _("Document")
 
@@ -96,8 +98,8 @@ class ChatThreadInline(admin.TabularInline):
     model = ChatThread
     extra = 0
     can_delete = False
-    fields = ("document_link", "score", "created_at", "updated_at")
-    readonly_fields = ("document_link", "score", "created_at", "updated_at")
+    fields = ("updated_at", "document_link", "score")
+    readonly_fields = fields
     show_change_link = True
 
     def has_add_permission(self, request, obj=None):
@@ -107,7 +109,9 @@ class ChatThreadInline(admin.TabularInline):
         return False
 
     def document_link(self, obj):
-        return format_html("<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document)
+        return format_html(
+            "<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document
+        )
 
     document_link.short_description = _("Document")
 

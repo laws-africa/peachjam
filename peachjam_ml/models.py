@@ -398,6 +398,5 @@ class ChatThread(models.Model):
     score = models.IntegerField(default=0)
     state_json = models.JSONField(blank=True, null=True)
 
-    def touch(self):
-        """Update the updated_at timestamp."""
-        self.save()
+    class Meta:
+        ordering = ["-updated_at"]
