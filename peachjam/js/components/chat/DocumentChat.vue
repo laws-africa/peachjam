@@ -44,17 +44,22 @@
 
     <form class="chat-input p-2" @submit.prevent="submit" novalidate>
       <div class="input-group">
-        <textarea
+        <input
           ref="messageInput"
           v-model="inputText"
+          type="text"
           class="form-control"
           placeholder="Ask a question…"
-          rows="1"
           :disabled="loading"
           @keydown.enter.exact.prevent="submit"
           @keydown.enter.shift.stop
-        ></textarea>
-        <button class="btn btn-primary" type="submit" :disabled="loading || !isReady" title="Send">
+        />
+        <button
+          class="btn btn-primary"
+          type="submit"
+          :disabled="loading || !isReady"
+          title="Send"
+        >
           <i v-if="!loading" class="bi bi-send"></i>
           <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
         </button>

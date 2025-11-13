@@ -198,10 +198,5 @@ export default {
   la-gutter-item[active] .card {
     transform: translateY(0);
   }
-
-  /*So content is above To the top element*/
-  .card .card-body {
-    padding-bottom: 40px;
-  }
 }
 </style>

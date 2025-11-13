@@ -406,7 +406,7 @@ if not DEBUG:
         before_send_transaction=before_send,
         send_default_pii=True,
         # sample x% of requests for performance metrics
-        traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.25")),
+        traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.1")),
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}

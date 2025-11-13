@@ -94,13 +94,6 @@ class DocumentContent {
   setupPdf () {
     // if pdf setup pdf renderer instance
     if (this.displayType === 'pdf') {
-      // get dataset attributes
-      const pdfAttrsElement: HTMLElement | null = this.root.querySelector('[data-pdf]');
-      if (pdfAttrsElement) {
-        Object.keys(pdfAttrsElement.dataset).forEach(key => {
-          this.root.dataset[key] = pdfAttrsElement.dataset[key];
-        });
-      }
       this.pdfRenderer = new PdfRenderer(this.root, this);
       this.pdfRenderer.onPreviewPanelClick = () => {
         this.navOffCanvas?.hide();
