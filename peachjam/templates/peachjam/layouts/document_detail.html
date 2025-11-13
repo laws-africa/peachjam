@@ -470,16 +470,13 @@
             {% block extra-metadata %}{% endblock %}
             <hr class="mb-5" />
           </div>
-          <div class="container-fluid">
-            {% block content %}
-              {% if subscription_required %}
-                <div class="container">{% include 'peachjam_subs/_subscription_required.html' with show_sidebar=True %}</div>
-              {% else %}
-                {% include 'peachjam/_document_content.html' with show_sidebar=True %}
-              {% endif %}
-              <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ {% trans "To the top" %}</a>
-            {% endblock %}
-          </div>
+          {% block content %}
+            {% if subscription_required %}
+              <div class="container">{% include 'peachjam_subs/_subscription_required.html' with show_sidebar=True %}</div>
+            {% else %}
+              {% include 'peachjam/_document_content.html' with show_sidebar=True %}
+            {% endif %}
+          {% endblock %}
         </div>
         {% if timeline %}
           <div class="tab-pane"
@@ -542,6 +539,7 @@
     {{ provision_enrichments_json|json_script:"provision-enrichments-json" }}
     {{ incoming_citations_json|json_script:"incoming-citations-json" }}
     {% include "peachjam/provision_enrichment/_unconstitutional_modals.html" %}
+    <a href="#top" class="btn btn-sm btn-secondary to-the-top">▲ <span class="d-none d-sm-inline">{% trans "To the top" %}</span></a>
     <div data-component="DocumentDetail"
          data-document-id="{{ document.pk }}"
          data-debug-url="{% url 'document_debug' document.pk %}">

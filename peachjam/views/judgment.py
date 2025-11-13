@@ -171,6 +171,13 @@ class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
 
+    def has_permission(self):
+        document = self.get_object()
+        is_public = document.case_summary_public
+        if is_public:
+            return True
+        return super().has_permission()
+
     def get_subscription_required_template(self):
         return self.template_name
 

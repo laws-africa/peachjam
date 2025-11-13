@@ -26,6 +26,10 @@ export interface PeachJamConfig {
   urlLangPrefix: string;
   language: string;
   languages: string[];
+  chat: {
+    enabled: boolean;
+    assistantName: string;
+  }
   sentry: {
     dsn: string | null;
     environment: string | null;
@@ -42,6 +46,10 @@ class PeachJam {
     language: 'en',
     languages: ['en'],
     urlLangPrefix: '',
+    chat: {
+      enabled: false,
+      assistantName: 'AI'
+    },
     sentry: {
       dsn: null,
       environment: null

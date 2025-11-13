@@ -63,7 +63,7 @@ class SavedDocumentViewsTest(TestCase):
         self.assert_no_recursive(response)
 
         sd = SavedDocument.objects.create(
-            user=self.user, document=CoreDocument.objects.get(pk=4124)
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
         )
         sd.folders.set([self.folder])
 
@@ -85,13 +85,13 @@ class SavedDocumentViewsTest(TestCase):
 
         self.assertTrue(
             SavedDocument.objects.filter(
-                user=self.user, document=CoreDocument.objects.get(pk=4124)
+                user=self.user, work=CoreDocument.objects.get(pk=4124).work
             ).exists()
         )
 
     def test_modal(self):
         sd = SavedDocument.objects.create(
-            user=self.user, document=CoreDocument.objects.get(pk=4124)
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
         )
         sd.folders.set([self.folder])
         response = self.client.get(
@@ -102,7 +102,7 @@ class SavedDocumentViewsTest(TestCase):
 
     def test_update(self):
         sd = SavedDocument.objects.create(
-            user=self.user, document=CoreDocument.objects.get(pk=4124)
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
         )
         sd.folders.set([self.folder])
         response = self.client.post(
@@ -114,7 +114,7 @@ class SavedDocumentViewsTest(TestCase):
 
     def test_delete(self):
         sd = SavedDocument.objects.create(
-            user=self.user, document=CoreDocument.objects.get(pk=4124)
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
         )
         sd.folders.set([self.folder])
         response = self.client.post(

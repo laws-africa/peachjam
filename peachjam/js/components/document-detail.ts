@@ -1,5 +1,6 @@
 import peachJam from '../peachjam';
 import { htmxAjax } from '../utils/function';
+import { DocumentChat } from './chat';
 
 export default class DocumentDetail {
   private documentId: string;
@@ -9,10 +10,14 @@ export default class DocumentDetail {
     this.documentId = root.dataset.documentId || '';
     this.debugUrl = root.dataset.debugUrl || '';
     peachJam.whenUserLoaded().then((user) => {
-      if (user.perms.includes('peachjam.can_debug_document')) {
+      if (user.perms.includes('peachjam.change_coredocument')) {
         this.loadDebug();
       }
     });
+    if (this.documentId) {
+      // eslint-disable-next-line no-new
+      new DocumentChat(this.documentId);
+    }
   }
 
   loadDebug () {

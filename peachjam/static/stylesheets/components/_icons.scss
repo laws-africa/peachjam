@@ -18,3 +18,7 @@
     content: "\f586"; /* bi-star-fill */
   }
 }
+
+.btn-primary .bi-pj.pj-ai::before {
+  color: var(--bs-btn-color);
+}

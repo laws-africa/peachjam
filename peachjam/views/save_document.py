@@ -33,7 +33,7 @@ import re
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.db.models import Count, Prefetch, Q
+from django.db.models import Prefetch
 from django.forms.forms import Form
 from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseBadRequest
@@ -77,18 +77,12 @@ class BaseFolderMixin(
         return self.request.user.folders.all()
 
     def get_context_data(self, *args, **kwargs):
-        context = super().get_context_data(**kwargs)
+        context = super().get_context_data(*args, **kwargs)
+
         context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
                 "saved_documents",
-                queryset=SavedDocument.objects.select_related("document")
-                .prefetch_related("document__labels")
-                .annotate(
-                    annotation_count=Count(
-                        "document__annotations",
-                        filter=Q(document__annotations__user=self.request.user),
-                    )
-                ),
+                queryset=SavedDocument.objects.for_user_with_related(self.request.user),
             )
         )
 
@@ -166,34 +160,47 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        pks = []
         try:
-            pks = [int(pk) for pk in self.request.GET.getlist("doc_id")]
+            requested_ids = [int(pk) for pk in self.request.GET.getlist("doc_id")]
         except ValueError:
-            pass
-        # validate the pks - first few only
-        docs = {doc.id: doc for doc in CoreDocument.objects.filter(pk__in=pks)[:50]}
+            requested_ids = []
+
+        requested_ids = requested_ids[:50]  # sanity limit
+
+        # Fetch all requested CoreDocuments
+        docs = {
+            doc.id: doc for doc in CoreDocument.objects.filter(pk__in=requested_ids)
+        }
+
         saved_docs = {}
 
-        if self.request.user.is_authenticated:
-            # stash saved documents and forms (for updating) for ones that are already saved
-            saved_docs = {
-                sd.document_id: (
+        if self.request.user.is_authenticated and docs:
+            # Get all SavedDocuments for works linked to requested CoreDocuments
+            work_ids = [doc.work_id for doc in docs.values()]
+            existing_sds = SavedDocument.objects.filter(
+                user=self.request.user,
+                work_id__in=work_ids,
+            ).select_related("work")
+
+            # Map by work_id for lookup
+            saved_by_work = {sd.work_id: sd for sd in existing_sds}
+
+            # Match each doc to a SavedDocument (by work)
+            for doc_id, doc in docs.items():
+                sd = saved_by_work.get(doc.work_id)
+                if sd:
+                    setattr(sd, "document", doc)
+                    saved_docs[doc_id] = (sd, SaveDocumentForm(instance=sd))
+
+        # Create fake SavedDocuments for any missing ones
+        for doc_id, doc in docs.items():
+            if doc_id not in saved_docs:
+                sd = SavedDocument(work=doc.work)
+                setattr(sd, "document", doc)
+                saved_docs[doc_id] = (
                     sd,
-                    SaveDocumentForm(instance=sd),
+                    None,
                 )
-                for sd in SavedDocument.objects.filter(
-                    user=self.request.user, document_id__in=docs.keys()
-                )
-                .select_related("document")
-                .all()
-            }
-
-        # fake saved docs for the ones that don't exist
-        for doc in docs.values():
-            if doc.id not in saved_docs:
-                saved_docs[doc.id] = (SavedDocument(document=doc), None)
-
         context["saved_documents"] = saved_docs.values()
         return context
 
@@ -232,12 +239,13 @@ class SavedDocumentFormMixin(
 
     def get_success_url(self):
         # by default, we always redirect to the bulk view which refreshes this document's saved doc details in the page
+        doc_id = self.request.GET.get("doc_id") or self.object.document.id
         return (
             self.request.GET.get("next")
             or reverse(
                 "saved_document_fragments",
             )
-            + f"?doc_id={self.object.document.id}"
+            + f"?doc_id={doc_id}"
         )
 
 
@@ -255,6 +263,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
             raise Http404
 
         self.document = get_object_or_404(CoreDocument, pk=doc_id)
+        self.work = self.document.work
         return super().dispatch(request, *args, **kwargs)
 
     def handle_no_permission(self):
@@ -270,19 +279,20 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
         return super().handle_no_permission()
 
     def get_form_kwargs(self):
-        self.object = SavedDocument(user=self.request.user, document=self.document)
+        self.object = SavedDocument(user=self.request.user, work=self.work)
         return super().get_form_kwargs()
 
     def form_valid(self, form):
         self.object = form.save()
         # this ensures the form reflects the actual saved document
         form = self.form_class(instance=self.object)
+        setattr(self.object, "document", self.document)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )
 
     def form_invalid(self, form):
-        self.object = SavedDocument(user=self.request.user, document=self.document)
+        self.object = SavedDocument(user=self.request.user, work=self.work)
         return self.render_to_response(
             self.get_context_data(saved_document=self.object, form=form)
         )
@@ -292,6 +302,14 @@ class SavedDocumentUpdateView(SavedDocumentFormMixin, UpdateView):
     template_name = "peachjam/saved_document/_update.html"
     permission_required = "peachjam.change_saveddocument"
     http_method_names = ["post"]
+
+    def get_object(self, queryset=None):
+        sd = super().get_object(queryset)
+        doc_id = self.request.GET.get("doc_id")
+        if doc_id and doc_id.isdigit():
+            document = sd.work.documents.filter(id=doc_id).first()
+            setattr(sd, "document", document)
+        return sd
 
 
 class SavedDocumentModalView(SavedDocumentUpdateView):
