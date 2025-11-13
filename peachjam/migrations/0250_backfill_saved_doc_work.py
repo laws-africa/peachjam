@@ -6,11 +6,31 @@ from django.db import migrations
 def forwards_func(apps, schema_editor):
     SavedDocument = apps.get_model("peachjam", "SavedDocument")
     CoreDocument = apps.get_model("peachjam", "CoreDocument")
-    for saved_doc in SavedDocument.objects.filter(work__isnull=True):
-        core_doc = CoreDocument.objects.filter(id=saved_doc.document_id).first()
+
+    # Step 1: backfill work from related CoreDocument
+    for saved_doc in SavedDocument.objects.filter(work__isnull=True).select_related(
+        "document"
+    ):
+        core_doc = saved_doc.document
         if core_doc and core_doc.work_id:
             saved_doc.work_id = core_doc.work_id
             saved_doc.save(update_fields=["work"])
+
+    # Step 2: deduplicate (keep the first saved document per user+work)
+    seen = set()
+    duplicates = []
+    qs = SavedDocument.objects.exclude(work__isnull=True).order_by(
+        "user_id", "work_id", "id"
+    )
+    for saved_doc in qs:
+        key = (saved_doc.user_id, saved_doc.work_id)
+        if key in seen:
+            duplicates.append(saved_doc.id)
+        else:
+            seen.add(key)
+
+    if duplicates:
+        SavedDocument.objects.filter(id__in=duplicates).delete()
 
 
 class Migration(migrations.Migration):
