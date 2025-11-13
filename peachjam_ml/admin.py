@@ -50,7 +50,7 @@ DocumentAdmin.update_chunk_embeddings = update_chunk_embeddings
 
 @admin.register(ChatThread)
 class ChatThreadAdmin(admin.ModelAdmin):
-    list_display = ("id", "user", "document_link", "score", "created_at", "updated_at")
+    list_display = ("id", "user", "document_link", "score", "updated_at")
     readonly_fields = (
         "id",
         "user",
@@ -69,13 +69,11 @@ class ChatThreadAdmin(admin.ModelAdmin):
         "updated_at",
         "state_display",
     )
+    date_hierarchy = "updated_at"
     list_select_related = ("user", "document")
     search_fields = ("id", "user__username", "document__title")
 
     def has_add_permission(self, request):
-        return False
-
-    def has_delete_permission(self, request, obj=None):
         return False
 
     def document_link(self, obj):
