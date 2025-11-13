@@ -172,12 +172,10 @@ class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     slug_field = "expression_frbr_uri"
 
     def has_permission(self):
-        slug = self.kwargs.get(self.slug_url_kwarg)
-        if slug is not None:
-            queryset = self.get_queryset().filter(**{self.slug_field: slug})
-            is_public = queryset.values_list("case_summary_public", flat=True).first()
-            if is_public:
-                return True
+        document = self.get_object()
+        is_public = document.case_summary_public
+        if is_public:
+            return True
         return super().has_permission()
 
     def get_subscription_required_template(self):
