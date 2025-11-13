@@ -1,7 +1,11 @@
+import json
+
+from django.contrib import admin
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.admin import DocumentAdmin
-from peachjam_ml.models import DocumentEmbedding
+from peachjam.admin import DocumentAdmin, UserAdminCustom
+from peachjam_ml.models import ChatThread, DocumentEmbedding
 from peachjam_ml.tasks import update_document_embeddings
 
 
@@ -42,3 +46,71 @@ DocumentAdmin.actions.append("update_chunk_embeddings")
 DocumentAdmin.actions.append("update_doc_embeddings")
 DocumentAdmin.update_doc_embeddings = update_doc_embeddings
 DocumentAdmin.update_chunk_embeddings = update_chunk_embeddings
+
+
+@admin.register(ChatThread)
+class ChatThreadAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "document_link", "score", "created_at", "updated_at")
+    readonly_fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "state_display",
+    )
+    fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "state_display",
+    )
+    list_select_related = ("user", "document")
+    search_fields = ("id", "user__username", "document__title")
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def document_link(self, obj):
+        return format_html("<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document)
+
+    document_link.short_description = _("Document")
+
+    def state_display(self, obj):
+        if not obj.state_json:
+            return "-"
+        formatted = json.dumps(obj.state_json, indent=2, sort_keys=True)
+        return format_html("<pre>{}</pre>", formatted)
+
+    state_display.short_description = _("State JSON")
+
+
+class ChatThreadInline(admin.TabularInline):
+    model = ChatThread
+    extra = 0
+    can_delete = False
+    fields = ("document_link", "score", "created_at", "updated_at")
+    readonly_fields = ("document_link", "score", "created_at", "updated_at")
+    show_change_link = True
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def document_link(self, obj):
+        return format_html("<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document)
+
+    document_link.short_description = _("Document")
+
+
+if ChatThreadInline not in UserAdminCustom.inlines:
+    UserAdminCustom.inlines.append(ChatThreadInline)

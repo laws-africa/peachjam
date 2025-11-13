@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import F
 from django.http.response import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -162,6 +163,10 @@ class DocumentChatView(ChatThreadDetailMixin):
                     output={"reply": result.get("messages", [])[-1].content},
                 )
 
+            history = graph.get_state_history(config)
+            thread.state_json = serialise_state_history(history)
+            thread.save(update_fields=["state_json", "updated_at"])
+
         return render_thread_state(thread, result)
 
 
@@ -175,7 +180,11 @@ class VoteChatMessageView(ChatThreadDetailMixin):
         thread = self.get_object()
         message, snapshot = get_message_snapshot(thread, message_id)
         if message and message.type == "ai":
-            trace_id = snapshot.metadata.get("trace_id")
+            increment = 1 if self.up else -1
+            ChatThread.objects.filter(pk=thread.pk).update(score=F("score") + increment)
+            trace_id = None
+            if snapshot and snapshot.metadata:
+                trace_id = snapshot.metadata.get("trace_id")
             if trace_id:
                 langfuse.create_score(
                     trace_id=trace_id,
@@ -185,6 +194,36 @@ class VoteChatMessageView(ChatThreadDetailMixin):
                 )
 
         return HttpResponse(status=200)
+
+
+def serialise_state_history(history):
+    iterator = iter(history)
+    try:
+        snapshot = next(iterator)
+    except StopIteration:
+        return []
+
+    return [
+        {
+            "created_at": snapshot.created_at,
+            "metadata": dict(snapshot.metadata) if snapshot.metadata else None,
+            "next": list(snapshot.next),
+            "values": serialise_state_values(snapshot.values),
+        }
+    ]
+
+
+def serialise_state_values(values):
+    if not isinstance(values, dict):
+        return values
+
+    serialised = {}
+    for key, value in values.items():
+        if key == "messages" and isinstance(value, list):
+            serialised[key] = [message.to_json() for message in value]
+        else:
+            serialised[key] = value
+    return serialised
 
 
 def render_thread_state(thread, state):
