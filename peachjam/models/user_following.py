@@ -160,7 +160,7 @@ class UserFollowing(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user} follows {self.followed_object}"
+        return f"{self.user} follows {self.followed_field} {self.followed_object}"
 
     @property
     def description_text(self):

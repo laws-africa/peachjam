@@ -1754,9 +1754,20 @@ class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
-class UserFollowingInline(StackedInline):
+class UserFollowingInline(admin.TabularInline):
     model = UserFollowing
     extra = 0
+    fields = (
+        "__str__",
+        "last_alerted_at",
+    )
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 class SavedSearchInline(StackedInline):
