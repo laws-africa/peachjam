@@ -3,7 +3,7 @@ from peachjam.models import CoreDocument
 
 class FollowQueryService:
     @staticmethod
-    def documents_for_follow(follow):
+    def documents_for_followed_topic(follow):
         qs = CoreDocument.objects
 
         if follow.court:
@@ -29,3 +29,7 @@ class FollowQueryService:
             return qs.filter(taxonomies__topic__in=topics)
 
         return qs.none()
+
+    @staticmethod
+    def documents_for_followed_search(follow):
+        return follow.saved_search.find_new_hits()

@@ -242,7 +242,7 @@ def update_user_timelines():
 def update_timeline_for_user(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.models import UserFollowing
+    from peachjam.services.follow_update_service import FollowUpdateService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -250,22 +250,22 @@ def update_timeline_for_user(user_id):
         return
 
     log.info(f"Updating user follows for user {user_id}")
-    UserFollowing.update_timeline_for_user(user)
+    FollowUpdateService.update_follow_for_user(user)
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_timeline_email_alerts():
-    from peachjam.models import TimelineEvent
+    from peachjam.services.timeline_email_service import TimelineEmailService
 
     log.info("Checking for pending timeline emails")
-    TimelineEvent.send_email_alerts()
+    TimelineEmailService.send_email_alerts()
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_new_document_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.models import TimelineEvent
+    from peachjam.services.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -273,7 +273,7 @@ def send_new_document_email_alert(user_id):
         return
 
     log.info(f"Sending new document email alerts for user {user_id}")
-    TimelineEvent.send_new_document_email_alert(user)
+    TimelineEmailService.send_new_documents_email(user_id)
     log.info("New document email alerts sent")
 
 
@@ -281,7 +281,7 @@ def send_new_document_email_alert(user_id):
 def send_saved_search_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.models import TimelineEvent
+    from peachjam.services.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -289,7 +289,7 @@ def send_saved_search_email_alert(user_id):
         return
 
     log.info(f"Sending saved search email alerts for user {user_id}")
-    TimelineEvent.send_saved_search_email_alert(user)
+    TimelineEmailService.send_saved_search_email(user_id)
     log.info("Saved search email alerts sent")
 
 

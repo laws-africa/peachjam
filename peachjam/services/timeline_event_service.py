@@ -3,7 +3,7 @@ from peachjam.models import TimelineEvent
 
 class TimelineEventService:
     @staticmethod
-    def add_documents_event(follow, documents):
+    def add_new_documents_event(follow, documents):
         event, _ = TimelineEvent.objects.get_or_create(
             user_following=follow,
             event_type=follow.get_event_type(),
@@ -13,7 +13,7 @@ class TimelineEventService:
         return event
 
     @staticmethod
-    def add_search_hits_event(follow, hits):
+    def add_new_search_hits_event(follow, hits):
         # Prepare extra_data
         new_hits = []
         docs = []

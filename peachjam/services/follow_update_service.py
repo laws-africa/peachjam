@@ -6,6 +6,12 @@ from .timeline_event_service import TimelineEventService
 
 class FollowUpdateService:
     @staticmethod
+    def update_follow_for_user(user):
+        follows = user.following.all()
+        for follow in follows:
+            FollowUpdateService.update_follow(follow)
+
+    @staticmethod
     def update_follow(follow):
         if follow.is_new_docs:
             return FollowUpdateService._update_new_docs(follow)
@@ -15,7 +21,7 @@ class FollowUpdateService:
 
     @staticmethod
     def _update_new_docs(follow):
-        qs = FollowQueryService.documents_for_follow(follow)
+        qs = FollowQueryService.documents_for_followed_topic(follow)
         qs = qs.preferred_language(follow.user.userprofile.preferred_language.iso_639_3)
 
         if follow.last_alerted_at:
@@ -25,14 +31,14 @@ class FollowUpdateService:
         if not docs:
             return False
 
-        TimelineEventService.add_documents_event(follow, docs)
+        TimelineEventService.add_new_documents_event(follow, docs)
         follow.last_alerted_at = timezone.now()
         follow.save(update_fields=["last_alerted_at"])
         return True
 
     @staticmethod
     def _update_search(follow):
-        hits = follow.saved_search.find_new_hits()
+        hits = FollowQueryService.documents_for_followed_search(follow)
         cutoff = follow.last_alerted_at
 
         if cutoff:
@@ -41,7 +47,7 @@ class FollowUpdateService:
         if not hits:
             return False
 
-        TimelineEventService.add_search_hits_event(follow, hits)
+        TimelineEventService.add_new_search_hits_event(follow, hits)
         follow.last_alerted_at = timezone.now()
         follow.save(update_fields=["last_alerted_at"])
         return True
