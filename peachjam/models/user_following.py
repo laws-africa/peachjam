@@ -87,6 +87,7 @@ class UserFollowing(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
+    # fields that can be followed
     EVENT_FIELD_MAP = {
         "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
         "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
