@@ -396,7 +396,7 @@ class ChatThread(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     score = models.IntegerField(default=0)
-    state_json = models.JSONField(blank=True, null=True)
+    messages_json = models.JSONField(blank=True, null=True)
 
     class Meta:
         ordering = ["-updated_at"]

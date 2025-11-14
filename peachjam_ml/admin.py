@@ -58,7 +58,7 @@ class ChatThreadAdmin(admin.ModelAdmin):
         "score",
         "created_at",
         "updated_at",
-        "state_display",
+        "messages_display",
     )
     fields = (
         "id",
@@ -67,7 +67,7 @@ class ChatThreadAdmin(admin.ModelAdmin):
         "score",
         "created_at",
         "updated_at",
-        "state_display",
+        "messages_display",
     )
     date_hierarchy = "updated_at"
     list_select_related = ("user", "document")
@@ -83,13 +83,13 @@ class ChatThreadAdmin(admin.ModelAdmin):
 
     document_link.short_description = _("Document")
 
-    def state_display(self, obj):
-        if not obj.state_json:
+    def messages_display(self, obj):
+        if not obj.messages_json:
             return "-"
-        formatted = json.dumps(obj.state_json, indent=2, sort_keys=True)
+        formatted = json.dumps(obj.messages_json, indent=2, sort_keys=True)
         return format_html("<pre>{}</pre>", formatted)
 
-    state_display.short_description = _("State JSON")
+    messages_display.short_description = _("Messages JSON")
 
 
 class ChatThreadInline(admin.TabularInline):

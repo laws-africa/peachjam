@@ -164,12 +164,12 @@ class DocumentChatView(ChatThreadDetailMixin):
                 )
 
             history = graph.get_state_history(config)
-            thread.state_json = self.serialise_state_history(history)
+            thread.messages_json = self.serialise_message_history(history)
             thread.save()
 
         return render_thread_state(thread, result)
 
-    def serialise_state_history(self, history):
+    def serialise_message_history(self, history):
         # we just want the messages from the first snapshot
         for snapshot in history:
             return [

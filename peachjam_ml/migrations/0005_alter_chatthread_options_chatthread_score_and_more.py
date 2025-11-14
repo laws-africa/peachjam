@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="chatthread",
-            name="state_json",
+            name="messages_json",
             field=models.JSONField(blank=True, null=True),
         ),
     ]
