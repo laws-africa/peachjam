@@ -162,6 +162,15 @@ class SubscriptionInline(admin.StackedInline):
     can_delete = False
     ordering = ["-created_at"]
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related(
+                "user", "product_offering__product", "product_offering__pricing_plan"
+            )
+        )
+
     def subscription_link(self, obj):
         if obj.pk:
             url = reverse("admin:peachjam_subs_subscription_change", args=[obj.pk])

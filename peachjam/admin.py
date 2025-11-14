@@ -9,7 +9,6 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin.options import StackedInline
 from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -1754,14 +1753,33 @@ class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
-class UserFollowingInline(StackedInline):
+class UserFollowingInline(admin.TabularInline):
     model = UserFollowing
     extra = 0
+    fields = (
+        "__str__",
+        "last_alerted_at",
+    )
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
-class SavedSearchInline(StackedInline):
+class SavedSearchInline(admin.TabularInline):
     model = SavedSearch
     extra = 0
+    fields = ("q", "a", "filters", "note", "last_alerted_at")
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 class UserAdminCustom(ImportExportMixin, UserAdmin):
