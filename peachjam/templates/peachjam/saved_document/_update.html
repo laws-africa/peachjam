@@ -4,7 +4,7 @@
       class="saved-document-star"
       data-bs-toggle="modal"
       data-bs-target="#saved-document-modal"
-      hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+      hx-get="{% url 'saved_document_modal' saved_document.pk %}?doc_id={{ saved_document.document.id }}"
       hx-target="#saved-document-modal-content"
       hx-trigger="click"
       aria-expanded="false"
@@ -15,7 +15,7 @@
         type="button"
         data-bs-toggle="modal"
         data-bs-target="#saved-document-modal"
-        hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+        hx-get="{% url 'saved_document_modal' saved_document.pk %}?doc_id={{ saved_document.document.id }}"
         hx-target="#saved-document-modal-content"
         data-saved-document="{{ saved_document.id }}"
         aria-expanded="false"
@@ -48,7 +48,7 @@
           <a href="#saved-document-modal"
              class="btn btn-outline-secondary ms-auto"
              data-bs-toggle="modal"
-             hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+             hx-get="{% url 'saved_document_modal' saved_document.pk %}?doc_id={{ saved_document.document.id }}"
              hx-target="#saved-document-modal-content"><i class="bi bi-three-dots"></i></a>
         </div>
         <ul class="list-unstyled mb-2">
@@ -63,7 +63,7 @@
           {{ saved_document.note|default_if_none:"" }}
           <a href="#saved-document-modal"
              data-bs-toggle="modal"
-             hx-get="{% url 'saved_document_modal' saved_document.pk %}"
+             hx-get="{% url 'saved_document_modal' saved_document.pk %}?doc_id={{ saved_document.document.id }}"
              hx-target="#saved-document-modal-content">
             {# djLint:off #}
             <i class="bi bi-pencil me-1"></i>{% if saved_document.note %}{% trans "edit" %}{% else %}{% trans "Add a note" %}{% endif %}
