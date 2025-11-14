@@ -275,7 +275,7 @@ class UserFollowing(models.Model):
         return True
 
     @classmethod
-    def update_follow_for_user(cls, user):
+    def update_follows_for_user(cls, user):
         follows = user.following.all()
         for follow in follows:
             follow.update_follow()

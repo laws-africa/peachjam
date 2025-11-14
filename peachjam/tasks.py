@@ -229,20 +229,20 @@ def get_deleted_documents(ingestor_id, range_start, range_end):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_user_timelines():
+def update_user_follows():
     from django.contrib.auth import get_user_model
 
     log.info("Updating user follows")
     users = get_user_model().objects.filter(following__isnull=False).distinct()
     for user in users:
-        update_timeline_for_user(user.pk)
+        update_follows_for_user(user.pk)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_timeline_for_user(user_id):
+def update_follows_for_user(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.services.follow_update_service import FollowUpdateService
+    from peachjam.models import UserFollowing
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -250,7 +250,7 @@ def update_timeline_for_user(user_id):
         return
 
     log.info(f"Updating user follows for user {user_id}")
-    FollowUpdateService.update_follow_for_user(user)
+    UserFollowing.update_follows_for_user(user)
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
