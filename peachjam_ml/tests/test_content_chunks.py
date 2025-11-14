@@ -8,6 +8,7 @@ from peachjam.models import (
     Country,
     DocumentContent,
     GenericDocument,
+    Judgment,
     Language,
     Legislation,
 )
@@ -316,5 +317,53 @@ class TestContentChunks(TestCase):
                 [c.text for c in chunks],
             )
             self.assertEqual([0.031249847] * 1024, de.text_embedding)
+        finally:
+            settings.PEACHJAM["SEARCH_SEMANTIC"] = False
+
+    @patch("peachjam_ml.models.get_text_embedding_batch")
+    def test_refresh_for_judgment_adds_summary_chunk(
+        self, mock_get_text_embedding_batch
+    ):
+        mock_get_text_embedding_batch.return_value = [
+            [0.1] * 1024,
+            [0.2] * 1024,
+        ]
+
+        judgment = Judgment.objects.create(
+            jurisdiction=Country.objects.first(),
+            title="Judgment Title",
+            date=date.today(),
+            language=Language.objects.first(),
+            frbr_uri_doctype="judgment",
+            frbr_uri_number="case-123",
+            frbr_uri_date="2024",
+            case_name="Foo v Bar",
+            serial_number=1,
+            mnc="[2024] ZASM 1",
+        )
+        judgment.case_summary = "<p>Summary text</p>"
+        judgment.issues = ["Issue 1"]
+        judgment.held = ["Held 1"]
+        judgment.order = "<p>Order text</p>"
+        judgment.save()
+
+        DocumentContent.objects.create(
+            document=judgment,
+            content_text="Main text.",
+        )
+
+        settings.PEACHJAM["SEARCH_SEMANTIC"] = True
+        try:
+            DocumentEmbedding.refresh_for_document(judgment)
+            chunks = list(ContentChunk.objects.filter(document=judgment))
+            self.assertEqual({"text", "summary"}, {c.type for c in chunks})
+
+            text_chunk = next(c for c in chunks if c.type == "text")
+            summary_chunk = next(c for c in chunks if c.type == "summary")
+
+            self.assertEqual("Main text.", text_chunk.text)
+            self.assertEqual(
+                "Summary text Issue 1 Held 1 Order text", summary_chunk.text
+            )
         finally:
             settings.PEACHJAM["SEARCH_SEMANTIC"] = False

@@ -244,10 +244,10 @@ class ContentChunk(models.Model):
     """
 
     document = models.ForeignKey("peachjam.CoreDocument", on_delete=models.CASCADE)
-    # "text", "page" or "provision"
+    # "text", "page", "provision" or "summary"
     type = models.CharField(max_length=20)
     text = models.TextField()
-    # page number (type=page), eid (type=provision), None (type=text)
+    # page number (type=page), eid (type=provision), None (type=text, summary)
     portion = models.CharField(max_length=4096, null=True, blank=True)
     chunk_n = models.IntegerField(default=0)
     n_chunks = models.IntegerField(default=1)
@@ -306,10 +306,11 @@ class ContentChunk(models.Model):
     def make_document_chunks(cls, document):
         from peachjam_search.documents import SearchableDocument
 
+        search_document = SearchableDocument()
         chunks = []
         if document.content_html and document.content_html_is_akn and document.toc_json:
             # AKN provisions
-            provisions = SearchableDocument().prepare_provisions(document)
+            provisions = search_document.prepare_provisions(document)
             for provision in provisions:
                 text = provision["body"]
                 # inject the titles at the top of the text to add extra context
@@ -344,6 +345,14 @@ class ContentChunk(models.Model):
                             [ContentChunk(document=document, type="text", text=text)]
                         )
                     )
+
+        summary_text = search_document.prepare_summary(document)
+        if summary_text:
+            summary_text = summary_text.strip()
+            if summary_text:
+                chunks.append(
+                    ContentChunk(document=document, type="summary", text=summary_text)
+                )
 
         # TODO: can we re-use existing embeddings if we already have them, to save $$$?
         log.info(f"Getting embeddings for {len(chunks)} chunks for {document}")
