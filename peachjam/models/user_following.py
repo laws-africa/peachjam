@@ -4,8 +4,11 @@ from countries_plus.models import Country
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.models.core_document import CoreDocument
+from peachjam.models.timeline import TimelineEvent
 from peachjam_search.models import SavedSearch
 from peachjam_subs.models import Subscription
 
@@ -202,3 +205,77 @@ class UserFollowing(models.Model):
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
+
+    def documents_for_followed_topic(self):
+        qs = CoreDocument.objects
+
+        if self.court:
+            return qs.filter(judgment__court=self.court)
+
+        if self.author:
+            return qs.filter(genericdocument__author=self.author)
+
+        if self.court_class:
+            return qs.filter(judgment__court__court_class=self.court_class)
+
+        if self.court_registry:
+            return qs.filter(judgment__registry=self.court_registry)
+
+        if self.country:
+            return qs.filter(jurisdiction=self.country)
+
+        if self.locality:
+            return qs.filter(locality=self.locality)
+
+        if self.taxonomy:
+            topics = [self.taxonomy] + list(self.taxonomy.get_descendants())
+            return qs.filter(taxonomies__topic__in=topics)
+
+        return qs.none()
+
+    def documents_for_followed_search(self):
+        return self.saved_search.find_new_hits()
+
+    def update_follow(self):
+        if self.is_new_docs:
+            return self._update_new_docs()
+
+        if self.is_saved_search:
+            return self._update_search()
+
+    def _update_new_docs(self):
+        qs = self.documents_for_followed_topic()
+        qs = qs.preferred_language(self.user.userprofile.preferred_language.iso_639_3)
+
+        if self.last_alerted_at:
+            qs = qs.filter(created_at__gt=self.last_alerted_at)
+
+        docs = list(qs[:10])
+        if not docs:
+            return False
+
+        TimelineEvent.add_new_documents_event(self, docs)
+        self.last_alerted_at = timezone.now()
+        self.save(update_fields=["last_alerted_at"])
+        return True
+
+    def _update_search(self):
+        hits = self.documents_for_followed_search()
+        cutoff = self.last_alerted_at
+
+        if cutoff:
+            hits = [h for h in hits if h.document.created_at > cutoff][:10]
+
+        if not hits:
+            return False
+
+        TimelineEvent.add_new_search_hits_event(self, hits)
+        self.last_alerted_at = timezone.now()
+        self.save(update_fields=["last_alerted_at"])
+        return True
+
+    @classmethod
+    def update_follow_for_user(cls, user):
+        follows = user.following.all()
+        for follow in follows:
+            follow.update_follow()

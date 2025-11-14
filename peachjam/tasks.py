@@ -255,7 +255,7 @@ def update_timeline_for_user(user_id):
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_timeline_email_alerts():
-    from peachjam.services.timeline_email_service import TimelineEmailService
+    from peachjam.timeline_email_service import TimelineEmailService
 
     log.info("Checking for pending timeline emails")
     TimelineEmailService.send_email_alerts()
@@ -265,7 +265,7 @@ def send_timeline_email_alerts():
 def send_new_document_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.services.timeline_email_service import TimelineEmailService
+    from peachjam.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -281,7 +281,7 @@ def send_new_document_email_alert(user_id):
 def send_saved_search_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.services.timeline_email_service import TimelineEmailService
+    from peachjam.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
