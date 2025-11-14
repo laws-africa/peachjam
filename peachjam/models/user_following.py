@@ -329,10 +329,16 @@ class UserFollowing(models.Model):
 
     def update_new_citation(self, citation):
         if not self.saved_document:
+            log.error("User %s follow %s is not for a saved document", self.user, self)
             return
 
         # check that we are passing a citation to the saved document
-        if citation.target_work != self.saved_document.document.work:
+        if citation.target_work != self.saved_document.work:
+            log.error(
+                "Citation target work %s does not match saved document work %s",
+                citation.target_work,
+                self.saved_document.work,
+            )
             return
 
         # check if the user has ever been alerted about this citation
@@ -382,11 +388,9 @@ class UserFollowing(models.Model):
 
     @classmethod
     def update_users_new_citation(cls, citation):
-        follows = cls.objects.filter(
-            saved_document__document__work=citation.target_work
-        )
+        follows = cls.objects.filter(saved_document__work=citation.target_work)
         log.info(
-            f"Found {follows.count()} follows for citation to work {citation.target_work.pk}"
+            f"Found {follows.count()} follows for citation to work {citation.target_work}"
         )
         for follow in follows:
             follow.update_new_citation(citation)
