@@ -88,14 +88,14 @@ class UserFollowing(models.Model):
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
     EVENT_FIELD_MAP = {
-        "court": "new_documents",
-        "author": "new_documents",
-        "court_class": "new_documents",
-        "court_registry": "new_documents",
-        "country": "new_documents",
-        "locality": "new_documents",
-        "taxonomy": "new_documents",
-        "saved_search": "saved_search",
+        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
+        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
     }
 
     follow_fields = list(EVENT_FIELD_MAP.keys())
