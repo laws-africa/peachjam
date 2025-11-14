@@ -395,7 +395,8 @@ class ChatThread(models.Model):
     document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    score = models.IntegerField(default=0)
+    messages_json = models.JSONField(blank=True, null=True)
 
-    def touch(self):
-        """Update the updated_at timestamp."""
-        self.save()
+    class Meta:
+        ordering = ["-updated_at"]
