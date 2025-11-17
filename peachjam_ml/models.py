@@ -61,11 +61,10 @@ class DocumentEmbedding(models.Model):
 
     def update_or_delete(
         self,
-        *,
         content_changed=False,
         summary_changed=False,
-        content_text_md5=None,
-        summary_text_md5=None,
+        content_md5=None,
+        summary_md5=None,
     ):
         """Re-calculate chunk embeddings and the document-level embedding."""
         if content_changed:
@@ -85,12 +84,16 @@ class DocumentEmbedding(models.Model):
             self.delete()
             return None
 
-        self.content_text_md5 = content_text_md5
-        self.summary_text_md5 = summary_text_md5
+        self.content_text_md5 = content_md5 or self.content_text_md5
+        self.summary_text_md5 = summary_md5 or self.summary_text_md5
         self.save()
 
         log.info(f"Document embedding updated for {self.document}")
 
+        # ensure this document is re-indexed for search
+        search_model_saved(
+            self.document.__class__._meta.label, self.document.pk, schedule=60
+        )
         return self
 
     def update_embedding(self):
@@ -137,26 +140,71 @@ class DocumentEmbedding(models.Model):
         ).delete()
         # build the chunks and save them
         ContentChunk.objects.bulk_create(
-            ContentChunk.make_document_chunks(
-                self.document, include_content=True, include_summary=False
-            )
+            ContentChunk.make_content_chunks(self.document)
         )
 
     def update_summary_chunks(self):
         ContentChunk.objects.filter(document=self.document, type="summary").delete()
         ContentChunk.objects.bulk_create(
-            ContentChunk.make_document_chunks(
-                self.document, include_content=False, include_summary=True
-            )
+            ContentChunk.make_summary_chunks(self.document)
+        )
+
+    @staticmethod
+    def should_have_embeddings(document, has_content=False, has_summary=False):
+        return (
+            (has_content or has_summary)
+            and document.doc_type
+            not in settings.PEACHJAM["SEARCH_SEMANTIC_EXCLUDE_DOCTYPES"]
+            and document.is_most_recent()
         )
 
     @classmethod
-    def refresh_for_document(cls, document):
+    def clear_embeddings(cls, document):
+        log.info(
+            f"Document is empty or excluded, clearing embeddings (if any): {document}"
+        )
+        ContentChunk.objects.filter(document=document).delete()
+        cls.objects.filter(document=document).delete()
+
+    @classmethod
+    def refresh_for_document_summary(cls, document):
+        """Refresh summary chunks and document-level embedding for a document, if they don't exist or the document
+        summary has changed.
+        """
+        if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
+            return
+
+        from peachjam_search.documents import SearchableDocument
+
+        summary_text = SearchableDocument().prepare_summary(document) or ""
+        summary_md5 = (
+            hashlib.md5(summary_text.encode()).hexdigest() if summary_text else None
+        )
+
+        doc_embedding = cls.objects.filter(document=document).first()
+        has_content_chunks = (
+            ContentChunk.objects.filter(document=document)
+            .exclude(type="summary")
+            .exists()
+        )
+        if not cls.should_have_embeddings(
+            document, has_content=has_content_chunks, has_summary=bool(summary_text)
+        ):
+            cls.clear_embeddings(document)
+            return
+
+        if doc_embedding and summary_md5 == doc_embedding.summary_text_md5:
+            return doc_embedding
+
+        doc_embedding = doc_embedding or cls.objects.get_or_create(document=document)[0]
+        return doc_embedding.update_or_delete(
+            summary_changed=True, summary_md5=summary_md5
+        )
+
+    @classmethod
+    def refresh_for_document_content(cls, document):
         """Refresh content chunks and document-level embedding for a document, if they don't exist or the document
         text has changed.
-
-        This is the primary way of creating or updating embeddings. When refreshing, existing embeddings are deleted.
-        If this document shouldn't have embeddings, none are created.
         """
         if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
             return
@@ -164,63 +212,23 @@ class DocumentEmbedding(models.Model):
         text = document.get_content_as_text()
         text_md5 = hashlib.md5(text.encode()).hexdigest() if text else None
 
-        from peachjam_search.documents import SearchableDocument
-
-        search_document = SearchableDocument()
-        summary_text = search_document.prepare_summary(document) or ""
-        summary_md5 = (
-            hashlib.md5(summary_text.encode()).hexdigest() if summary_text else None
-        )
-
         doc_embedding = cls.objects.filter(document=document).first()
-        should_have_embeddings = (
-            (text or summary_text)
-            and document.doc_type
-            not in settings.PEACHJAM["SEARCH_SEMANTIC_EXCLUDE_DOCTYPES"]
-            and document.is_most_recent()
-        )
-
-        if not should_have_embeddings:
-            log.info(
-                f"Document is empty or excluded, clearing embeddings (if any): {document}"
-            )
-            ContentChunk.objects.filter(document=document).delete()
-            if doc_embedding:
-                doc_embedding.delete()
+        has_summary_chunks = ContentChunk.objects.filter(
+            document=document, type="summary"
+        ).exists()
+        if not cls.should_have_embeddings(
+            document, has_content=bool(text), has_summary=has_summary_chunks
+        ):
+            cls.clear_embeddings(document)
             return
 
-        existing_content_md5 = doc_embedding.content_text_md5 if doc_embedding else None
-        existing_summary_md5 = doc_embedding.summary_text_md5 if doc_embedding else None
-        content_changed = text_md5 != existing_content_md5
-        summary_changed = summary_md5 != existing_summary_md5
+        if doc_embedding and text_md5 == doc_embedding.content_text_md5:
+            return doc_embedding
 
-        if doc_embedding and not content_changed and not summary_changed:
-            # nothing has changed
-            return
-
-        # ensure there's a doc_embedding object (avoids race conditions)
-        doc_embedding = (
-            doc_embedding
-            or DocumentEmbedding.objects.get_or_create(document=document)[0]
+        doc_embedding = doc_embedding or cls.objects.get_or_create(document=document)[0]
+        return doc_embedding.update_or_delete(
+            content_changed=True, content_md5=text_md5
         )
-
-        doc_embedding = doc_embedding.update_or_delete(
-            content_changed=content_changed,
-            summary_changed=summary_changed,
-            content_text_md5=text_md5,
-            summary_text_md5=summary_md5,
-        )
-
-        if not doc_embedding:
-            log.info(
-                f"Document embedding deleted after refresh (no chunks or zero vector): {document}"
-            )
-            return
-
-        # ensure this document is re-indexed for search
-        search_model_saved(document.__class__._meta.label, document.pk, schedule=60)
-
-        return doc_embedding
 
     @classmethod
     def get_average_embedding(cls, pks):
@@ -354,19 +362,12 @@ class ContentChunk(models.Model):
         return f'ContentChunk<#{self.pk} {self.document}: "{self.text}">'
 
     @classmethod
-    def make_document_chunks(
-        cls, document, *, include_content=True, include_summary=True
-    ):
+    def make_content_chunks(cls, document):
         from peachjam_search.documents import SearchableDocument
 
         search_document = SearchableDocument()
         chunks = []
-        if (
-            include_content
-            and document.content_html
-            and document.content_html_is_akn
-            and document.toc_json
-        ):
+        if document.content_html and document.content_html_is_akn and document.toc_json:
             # AKN provisions
             provisions = search_document.prepare_provisions(document)
             for provision in provisions:
@@ -388,7 +389,7 @@ class ContentChunk(models.Model):
                     chunk.parent_ids = provision["parent_ids"]
                     chunks.append(chunk)
 
-        elif include_content:
+        else:
             # plain html or PDF text
             text = (document.get_content_as_text() or "").strip()
             if text:
@@ -404,24 +405,31 @@ class ContentChunk(models.Model):
                         )
                     )
 
-        if include_summary:
-            summary_text = search_document.prepare_summary(document)
-            if summary_text:
-                chunks.extend(
-                    cls.split_chunks(
-                        [
-                            ContentChunk(
-                                document=document, type="summary", text=summary_text
-                            )
-                        ]
-                    )
-                )
-
         if not chunks:
             return []
 
         # TODO: can we re-use existing embeddings if we already have them, to save $$$?
         log.info(f"Getting embeddings for {len(chunks)} chunks for {document}")
+        embeddings = get_text_embedding_batch([c.text for c in chunks])
+        for chunk, embedding in zip(chunks, embeddings):
+            chunk.text_embedding = embedding
+        log.info("Got embeddings")
+
+        return chunks
+
+    @classmethod
+    def make_summary_chunks(cls, document):
+        from peachjam_search.documents import SearchableDocument
+
+        summary_text = SearchableDocument().prepare_summary(document)
+        if not summary_text:
+            return []
+
+        chunks = cls.split_chunks(
+            [ContentChunk(document=document, type="summary", text=summary_text)]
+        )
+
+        log.info(f"Getting embeddings for {len(chunks)} summary chunks for {document}")
         embeddings = get_text_embedding_batch([c.text for c in chunks])
         for chunk, embedding in zip(chunks, embeddings):
             chunk.text_embedding = embedding

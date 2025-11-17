@@ -243,7 +243,7 @@ class TestContentChunks(TestCase):
 
         settings.PEACHJAM["SEARCH_SEMANTIC"] = True
         try:
-            de = DocumentEmbedding.refresh_for_document(self.document)
+            de = DocumentEmbedding.refresh_for_document_content(self.document)
 
             # Verify
             self.assertTrue(mock_get_text_embedding_batch.called)
@@ -304,7 +304,7 @@ class TestContentChunks(TestCase):
 
         settings.PEACHJAM["SEARCH_SEMANTIC"] = True
         try:
-            de = DocumentEmbedding.refresh_for_document(self.document)
+            de = DocumentEmbedding.refresh_for_document_content(self.document)
 
             # Verify
             self.assertTrue(mock_get_text_embedding_batch.called)
@@ -324,9 +324,9 @@ class TestContentChunks(TestCase):
     def test_refresh_for_judgment_adds_summary_chunk(
         self, mock_get_text_embedding_batch
     ):
-        mock_get_text_embedding_batch.return_value = [
-            [0.1] * 1024,
-            [0.2] * 1024,
+        mock_get_text_embedding_batch.side_effect = [
+            [[0.1] * 1024],
+            [[0.2] * 1024],
         ]
 
         judgment = Judgment.objects.create(
@@ -354,7 +354,8 @@ class TestContentChunks(TestCase):
 
         settings.PEACHJAM["SEARCH_SEMANTIC"] = True
         try:
-            DocumentEmbedding.refresh_for_document(judgment)
+            DocumentEmbedding.refresh_for_document_content(judgment)
+            DocumentEmbedding.refresh_for_document_summary(judgment)
             chunks = list(ContentChunk.objects.filter(document=judgment))
             self.assertEqual({"text", "summary"}, {c.type for c in chunks})
 

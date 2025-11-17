@@ -5,7 +5,7 @@ from peachjam.models import DocumentContent, Judgment
 from peachjam.models.lifecycle import after_attribute_changed
 from peachjam_ml.chat.graphs import get_graph_memory
 from peachjam_ml.models import ChatThread
-from peachjam_ml.tasks import update_document_embeddings
+from peachjam_ml.tasks import update_document_embeddings, update_summary_embeddings
 
 
 @receiver(signals.post_save, sender=DocumentContent)
@@ -15,10 +15,11 @@ def document_content_saved(sender, instance, **kwargs):
         update_document_embeddings(instance.document_id, schedule=5)
 
 
-@after_attribute_changed(Judgment, "case_summary")
+@after_attribute_changed(
+    Judgment, ["blurb", "case_summary", "flynote", "held", "issues", "order"]
+)
 def when_case_summary_changed(judgment):
-    # TODO: update summary embedding only
-    update_document_embeddings(judgment.document_id, schedule=5)
+    update_summary_embeddings(judgment.document_id, schedule=5)
 
 
 @receiver(signals.post_delete, sender=ChatThread)
