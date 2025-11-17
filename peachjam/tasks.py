@@ -273,7 +273,7 @@ def send_new_document_email_alert(user_id):
         return
 
     log.info(f"Sending new document email alerts for user {user_id}")
-    TimelineEmailService.send_new_documents_email(user_id)
+    TimelineEmailService.send_new_documents_email(user)
     log.info("New document email alerts sent")
 
 
@@ -289,7 +289,7 @@ def send_saved_search_email_alert(user_id):
         return
 
     log.info(f"Sending saved search email alerts for user {user_id}")
-    TimelineEmailService.send_saved_search_email(user_id)
+    TimelineEmailService.send_saved_search_email(user)
     log.info("Saved search email alerts sent")
 
 
