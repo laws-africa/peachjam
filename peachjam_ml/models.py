@@ -365,11 +365,10 @@ class ContentChunk(models.Model):
     def make_content_chunks(cls, document):
         from peachjam_search.documents import SearchableDocument
 
-        search_document = SearchableDocument()
         chunks = []
         if document.content_html and document.content_html_is_akn and document.toc_json:
             # AKN provisions
-            provisions = search_document.prepare_provisions(document)
+            provisions = SearchableDocument().prepare_provisions(document)
             for provision in provisions:
                 text = provision["body"]
                 # inject the titles at the top of the text to add extra context
