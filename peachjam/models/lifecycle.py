@@ -59,7 +59,7 @@ def lifecycle_hook(target_cls, *hook_args, **hook_kwargs):
     return decorator
 
 
-def after_attribute_changed(target_cls, when: str | List[str]):
+def after_attribute_changed(target_cls, attr: str | List[str]):
     """Decorator to install an AFTER_SAVE django-lifecycle hook when one on more attributes change on a class.
 
     The obj.track_changes() must be called on the object before this will be triggered.
@@ -70,4 +70,6 @@ def after_attribute_changed(target_cls, when: str | List[str]):
         def when_case_summary_changed(obj):
             ...
     """
-    return lifecycle_hook(target_cls, AFTER_SAVE, when=when, has_changed=True)
+    if not isinstance(attr, list):
+        attr = [attr]
+    return lifecycle_hook(target_cls, AFTER_SAVE, when_any=attr, has_changed=True)
