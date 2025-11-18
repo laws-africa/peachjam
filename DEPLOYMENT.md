@@ -234,7 +234,7 @@ Go to Security, Security rules:
   - Operator: starts with
   - Value: your prefix such as `/akn/` for all documents
 - Action: mananged challenge
-- Save
+- Click Deploy
 
 ### Preventing bots for a wildcard path
 
