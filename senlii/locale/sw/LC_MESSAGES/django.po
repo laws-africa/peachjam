@@ -1,0 +1,51 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-18 15:27+0200\n"
+"PO-Revision-Date: 2025-11-18 15:29\n"
+"Last-Translator: \n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
+"X-Crowdin-Language: sw\n"
+"X-Crowdin-File: /main/senlii/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 112\n"
+
+#: settings.py:10
+msgid "French"
+msgstr "Kifaransa"
+
+#: settings.py:11
+msgid "English"
+msgstr "Kiingereza"
+
+#: templates/liiweb/home.html:4
+msgid "Welcome to the Senegal Legal Information Institute"
+msgstr "Karibu katika Taasisi ya Taarifa za Kisheria ya Senegal"
+
+#: templates/liiweb/home.html:7
+msgid "Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement."
+msgstr "Ufikiaji wa bure kwa sheria ya Senegal. SenegalLII ni mwanachama wa jumuiya ya LII za Kiafrika na wa Ufikiaji Huru wa Vuguvugu la Sheria."
+
+#: templates/peachjam/_header.html:12
+msgid "Judgments"
+msgstr "Hukumu"
+
+#: templates/peachjam/_header.html:18
+msgid "Legislation"
+msgstr "Sheria"
+
+#: templates/peachjam/_header.html:24
+msgid "Articles"
+msgstr "Makala"
+
+#: templates/peachjam/_header.html:30
+msgid "About"
+msgstr "Kuhusu"
+
