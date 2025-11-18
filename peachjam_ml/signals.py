@@ -19,7 +19,7 @@ def document_content_saved(sender, instance, **kwargs):
     Judgment, ["blurb", "case_summary", "flynote", "held", "issues", "order"]
 )
 def when_case_summary_changed(judgment):
-    update_summary_embeddings(judgment.document_id, schedule=5)
+    update_summary_embeddings(judgment.id, schedule=5)
 
 
 @receiver(signals.post_delete, sender=ChatThread)
