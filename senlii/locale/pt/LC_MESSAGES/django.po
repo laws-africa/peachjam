@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-11 14:05+0300\n"
+"POT-Creation-Date: 2025-11-18 15:27+0200\n"
 "PO-Revision-Date: 2023-05-16 07:12\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -17,59 +17,58 @@ msgstr ""
 "X-Crowdin-File: /main/senlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 112\n"
 
-#: settings.py:12
+#: settings.py:10
 msgid "French"
 msgstr "Francês"
 
-#: settings.py:13
+#: settings.py:11
 msgid "English"
 msgstr "Inglês"
 
-#: templates/liiweb/home.html:6
-msgid "Recent Judgments"
-msgstr "Julgamentos Recentes"
+#: templates/liiweb/home.html:4
+msgid "Welcome to the Senegal Legal Information Institute"
+msgstr ""
 
 #: templates/liiweb/home.html:7
-msgid "View more judgments"
-msgstr "Ver mais julgamentos"
+msgid "Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement."
+msgstr ""
 
-#: templates/liiweb/home.html:11
-msgid "Recent Legislation"
-msgstr "Legislação recente"
-
-#: templates/liiweb/home.html:12
-msgid "View more legislation"
-msgstr "Ver mais legislação"
-
-#: templates/liiweb/home.html:16
-msgid "Recent Articles"
-msgstr "Artigos Recentes"
-
-#: templates/liiweb/home.html:18
-msgid "View more articles"
-msgstr "Ver mais artigos"
-
-#: templates/peachjam/_header.html:9
+#: templates/peachjam/_header.html:12
 msgid "Judgments"
 msgstr "Julgamentos"
 
-#: templates/peachjam/_header.html:15
+#: templates/peachjam/_header.html:18
 msgid "Legislation"
 msgstr "Legislação"
 
-#: templates/peachjam/_header.html:21
-msgid "Taxonomy"
-msgstr "Taxonomia"
-
-#: templates/peachjam/_header.html:27
+#: templates/peachjam/_header.html:24
 msgid "Articles"
 msgstr "Artigos"
 
-#: templates/peachjam/_header.html:33
+#: templates/peachjam/_header.html:30
 msgid "About"
 msgstr "Sobre"
 
-#: templates/senlii/home.html:4
-msgid "Home"
-msgstr "Página inicial"
+#~ msgid "Recent Judgments"
+#~ msgstr "Julgamentos Recentes"
 
+#~ msgid "View more judgments"
+#~ msgstr "Ver mais julgamentos"
+
+#~ msgid "Recent Legislation"
+#~ msgstr "Legislação recente"
+
+#~ msgid "View more legislation"
+#~ msgstr "Ver mais legislação"
+
+#~ msgid "Recent Articles"
+#~ msgstr "Artigos Recentes"
+
+#~ msgid "View more articles"
+#~ msgstr "Ver mais artigos"
+
+#~ msgid "Taxonomy"
+#~ msgstr "Taxonomia"
+
+#~ msgid "Home"
+#~ msgstr "Página inicial"
