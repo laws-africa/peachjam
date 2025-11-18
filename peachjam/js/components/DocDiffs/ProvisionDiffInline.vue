@@ -108,24 +108,12 @@ export default {
     loadingUser: true,
     diffsets: [],
     diffset: null,
-    sideBySide: true,
+    sideBySide: window.matchMedia('(min-width: 992px)').matches,
     originalElement: null,
-    wrapperElement: null,
-    vw: Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0)
+    wrapperElement: null
   }),
 
-  watch: {
-    vw (newVw) {
-      // Turn off side by side in mobile view
-      if (newVw < 992) {
-        this.sideBySide = false;
-      }
-    }
-  },
-
   async mounted () {
-    window.addEventListener('resize', this.setVw);
-
     // Wait for user info before doing anything that requires permissions
     try {
       const user = await peachjam.whenUserLoaded();
@@ -159,15 +147,7 @@ export default {
     }
   },
 
-  unmounted () {
-    window.removeEventListener('resize', this.setVw);
-  },
-
   methods: {
-    setVw: debounce(function () {
-      this.vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    }, 200),
-
     async loadDiffContentsets () {
       const url = `${this.serviceUrl}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
       try {
@@ -210,5 +190,10 @@ export default {
 
 .card-body {
   background-color: #fff6da;
+}
+
+.reader-provision-changes-inline select {
+  /* ensure the select control is not too wide on small screens */
+  max-width: 60vw;
 }
 </style>

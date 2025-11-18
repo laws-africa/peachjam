@@ -1,5 +1,6 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
 {% if lowest_product %}
+  {% upsell_url lowest_product as upsell_url %}
   {% if not request.user.is_authenticated %}
     {% url 'account_login' as base_login_url %}
     {% url 'account_signup' as signup_url %}
@@ -7,20 +8,20 @@
       {% with login_url=base_login_url|add:"?next="|add:next_url %}
         <p>
           {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
-      This content is available only to subscribers.
-      <a href="{{ login_url }}">Log in</a> or
-      <a href="{{ signup_url }}">Sign up</a>
-      and subscribe to {{ lowest_product }} to unlock access.
-    {% endblocktrans %}
+            This content is available only to subscribers.
+            <a href="{{ login_url }}">Log in</a> or
+            <a href="{{ signup_url }}">Sign up</a>
+            and <a href="{{ upsell_url }}">subscribe to {{ lowest_product }}</a> to unlock access.
+          {% endblocktrans %}
         </p>
       {% endwith %}
     {% endwith %}
   {% else %}
     <p>
       {% blocktrans trimmed with lowest_product=lowest_product.name %}
-      Your current subscription doesn’t include this content.
-      Please upgrade to {{ lowest_product }} to unlock access.
-    {% endblocktrans %}
+        Your current subscription doesn’t include this content.
+        Please <a href="{{ upsell_url }}">upgrade to {{ lowest_product }}</a> to unlock access.
+      {% endblocktrans %}
     </p>
   {% endif %}
 {% else %}

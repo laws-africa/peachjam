@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.db.models import F
 from django.http.response import HttpResponse, JsonResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -61,7 +62,12 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        doc_ids = self.object.saved_documents.values_list("document_id", flat=True)
+        work_ids = self.object.saved_documents.values_list("work_id", flat=True)
+        doc_ids = (
+            CoreDocument.objects.filter(work_id__in=work_ids)
+            .latest_expression()
+            .values_list("id", flat=True)
+        )
         context["similar_documents"] = DocumentEmbedding.get_similar_documents(doc_ids)
         return context
 
@@ -162,7 +168,18 @@ class DocumentChatView(ChatThreadDetailMixin):
                     output={"reply": result.get("messages", [])[-1].content},
                 )
 
+            history = graph.get_state_history(config)
+            thread.messages_json = self.serialise_message_history(history)
+            thread.save()
+
         return render_thread_state(thread, result)
+
+    def serialise_message_history(self, history):
+        # we just want the messages from the first snapshot
+        for snapshot in history:
+            return [
+                message.to_json() for message in snapshot.values.get("messages", [])
+            ]
 
 
 class VoteChatMessageView(ChatThreadDetailMixin):
@@ -175,7 +192,14 @@ class VoteChatMessageView(ChatThreadDetailMixin):
         thread = self.get_object()
         message, snapshot = get_message_snapshot(thread, message_id)
         if message and message.type == "ai":
-            trace_id = snapshot.metadata.get("trace_id")
+            # store locally
+            increment = 1 if self.up else -1
+            ChatThread.objects.filter(pk=thread.pk).update(score=F("score") + increment)
+
+            # push to Langfuse
+            trace_id = None
+            if snapshot and snapshot.metadata:
+                trace_id = snapshot.metadata.get("trace_id")
             if trace_id:
                 langfuse.create_score(
                     trace_id=trace_id,

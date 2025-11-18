@@ -214,7 +214,7 @@ class TaxonomiesWidget(CustomManyToManyWidget):
         return [self.model(**{self.field: t}) for t in taxonomies]
 
 
-class CustomPropertiesWidget(ManyToManyWidget):
+class CustomPropertiesWidget(CustomManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         """Parse newline separate key: value pairs."""
         properties = []
@@ -384,6 +384,9 @@ class BaseDocumentResource(resources.ModelResource):
     def skip_row(self, instance, original, row, import_validation_errors=None):
         return row["skip"] or all(not x for x in row.values())
 
+    def after_import_instance(self, instance, new, row_number=None, **kwargs):
+        instance.track_changes()
+
     def save_m2m(self, instance, row, **kwargs):
         super().save_m2m(instance, row, **kwargs)
 
@@ -538,13 +541,13 @@ class JudgmentResource(BaseDocumentResource):
         widget=ForeignKeyWidget(CourtRegistry, field="code"),
     )
     case_number_numeric = fields.Field(
-        column_name="case_number_numeric", widget=CharWidget
+        column_name="case_number_numeric", widget=CharWidget()
     )
-    case_number_year = fields.Field(column_name="case_number_year", widget=CharWidget)
+    case_number_year = fields.Field(column_name="case_number_year", widget=CharWidget())
     case_string_override = fields.Field(
-        column_name="case_string_override", widget=CharWidget
+        column_name="case_string_override", widget=CharWidget()
     )
-    matter_type = fields.Field(column_name="matter_type", widget=CharWidget)
+    matter_type = fields.Field(column_name="matter_type", widget=CharWidget())
 
     outcome = fields.Field(
         column_name="outcome",

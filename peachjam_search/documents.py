@@ -479,7 +479,7 @@ class SearchableDocument(Document):
                 parts.extend(parse_html_str(instance.order).itertext())
 
             # combine
-            return " ".join(p for p in parts if p)
+            return " ".join(p for p in parts if p).strip()
 
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
