@@ -23,6 +23,7 @@ class TimelineEvent(models.Model):
     subject_documents = models.ManyToManyField(
         "peachjam.CoreDocument", related_name="+"
     )
+    subject_works = models.ManyToManyField("peachjam.Work", related_name="+")
     event_type = models.CharField(
         max_length=256,
         choices=EventTypes.choices,
