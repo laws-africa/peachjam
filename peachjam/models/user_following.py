@@ -175,11 +175,11 @@ class UserFollowing(models.Model):
 
     @property
     def is_new_docs(self):
-        return self.get_event_type() == "new_documents"
+        return self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS
 
     @property
     def is_saved_search(self):
-        return self.get_event_type() == "saved_search"
+        return self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH
 
     # --- validation only ---
 
