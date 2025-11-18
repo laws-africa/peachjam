@@ -302,4 +302,5 @@ def generate_judgment_summary(doc_id):
         log.info(f"No judgment with id {doc_id} exists, ignoring.")
         return
     log.info(f"Summarizing judgment {doc_id}")
+    doc.track_changes()
     doc.generate_summary()

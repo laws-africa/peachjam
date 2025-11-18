@@ -423,6 +423,9 @@ class DocumentForm(forms.ModelForm):
                 "topic__slug", flat=True
             )
 
+        # start attribute-level tracking
+        self.instance.track_changes()
+
     def full_clean(self):
         super().full_clean()
         if "content_html" in self.changed_data:

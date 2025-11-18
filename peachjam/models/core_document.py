@@ -41,6 +41,7 @@ from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.enrichments import ProvisionCitation, ProvisionCitationCount
+from peachjam.models.lifecycle import AttributeHooksMixin
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -356,7 +357,7 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
         ).prefetch_related("labels", "taxonomies", "taxonomies__topic")
 
 
-class CoreDocument(PolymorphicModel):
+class CoreDocument(AttributeHooksMixin, PolymorphicModel):
     # There are three ways of indicating a document's type:
     #
     # 1. doc_type: This is historical and not widely used, since PolymorphicModel does the bulk of the work for us.
