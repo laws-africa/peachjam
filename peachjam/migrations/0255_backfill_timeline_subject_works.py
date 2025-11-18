@@ -10,6 +10,7 @@ def forwards_func(apps, schema_editor):
     for event in TimelineEvent.objects.all():
         work_ids = event.subject_documents.all().values_list("work__id", flat=True)
         works = Work.objects.filter(id__in=work_ids).distinct()
+        event.subject_works.set(works)
 
 
 class Migration(migrations.Migration):
@@ -18,4 +19,6 @@ class Migration(migrations.Migration):
         ("peachjam", "0254_timelineevent_subject_works"),
     ]
 
-    operations = []
+    operations = [
+        migrations.RunPython(forwards_func, migrations.RunPython.noop),
+    ]

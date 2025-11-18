@@ -20,9 +20,6 @@ class TimelineEvent(models.Model):
         on_delete=models.CASCADE,
         related_name="timeline_events",
     )
-    subject_documents = models.ManyToManyField(
-        "peachjam.CoreDocument", related_name="+"
-    )
     subject_works = models.ManyToManyField("peachjam.Work", related_name="+")
     event_type = models.CharField(
         max_length=256,
@@ -32,13 +29,22 @@ class TimelineEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
+    @property
+    def subject_documents(self):
+        from peachjam.models import CoreDocument
+
+        return CoreDocument.objects.filter(
+            work__in=self.subject_works.all()
+        ).latest_expression()
+
     def mark_as_sent(self):
         self.email_alert_sent_at = timezone.now()
         self.save(update_fields=["email_alert_sent_at"])
 
     def append_documents(self, docs):
         """Tiny helper to avoid clutter."""
-        self.subject_documents.add(*docs)
+        works = {doc.work for doc in docs}
+        self.subject_works.add(*works)
 
     def __str__(self):
         return f"{self.user_following} – {self.event_type}"
@@ -108,9 +114,8 @@ class TimelineEvent(models.Model):
             )
             .select_related("user_following")
             .prefetch_related(
-                "subject_documents",
-                "subject_documents__work",
-                "subject_documents__labels",
+                "subject_works",
+                "subject_works__documents__labels",
             )
             .annotate(event_date=TruncDate("created_at"))
             .order_by("-event_date", "user_following__id", "-created_at")
