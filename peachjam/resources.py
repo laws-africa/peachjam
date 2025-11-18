@@ -337,6 +337,7 @@ class BaseDocumentResource(resources.ModelResource):
     def before_import(self, dataset, **kwargs):
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
+        dataset.headers.append("expression_frbr_uri")
         try:
             ix = dataset.headers.index("skip")
             for i, skipped in enumerate(dataset.get_col(ix)):
