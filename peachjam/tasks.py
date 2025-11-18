@@ -229,17 +229,17 @@ def get_deleted_documents(ingestor_id, range_start, range_end):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_user_timelines():
+def update_user_follows():
     from django.contrib.auth import get_user_model
 
     log.info("Updating user follows")
     users = get_user_model().objects.filter(following__isnull=False).distinct()
     for user in users:
-        update_timeline_for_user(user.pk)
+        update_follows_for_user(user.pk)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
-def update_timeline_for_user(user_id):
+def update_follows_for_user(user_id):
     from django.contrib.auth import get_user_model
 
     from peachjam.models import UserFollowing
@@ -250,22 +250,22 @@ def update_timeline_for_user(user_id):
         return
 
     log.info(f"Updating user follows for user {user_id}")
-    UserFollowing.update_timeline_for_user(user)
+    UserFollowing.update_follows_for_user(user)
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_timeline_email_alerts():
-    from peachjam.models import TimelineEvent
+    from peachjam.timeline_email_service import TimelineEmailService
 
     log.info("Checking for pending timeline emails")
-    TimelineEvent.send_email_alerts()
+    TimelineEmailService.send_email_alerts()
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def send_new_document_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.models import TimelineEvent
+    from peachjam.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -273,7 +273,7 @@ def send_new_document_email_alert(user_id):
         return
 
     log.info(f"Sending new document email alerts for user {user_id}")
-    TimelineEvent.send_new_document_email_alert(user)
+    TimelineEmailService.send_new_documents_email(user)
     log.info("New document email alerts sent")
 
 
@@ -281,7 +281,7 @@ def send_new_document_email_alert(user_id):
 def send_saved_search_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.models import TimelineEvent
+    from peachjam.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -289,7 +289,7 @@ def send_saved_search_email_alert(user_id):
         return
 
     log.info(f"Sending saved search email alerts for user {user_id}")
-    TimelineEvent.send_saved_search_email_alert(user)
+    TimelineEmailService.send_saved_search_email(user)
     log.info("Saved search email alerts sent")
 
 
