@@ -9,6 +9,7 @@ from peachjam.models import GenericDocument, Judgment, Taxonomy
 from peachjam.resources import GenericDocumentResource, JudgmentResource
 
 judgment_import_headers = [
+    "expression_frbr_uri",
     "skip",
     "case_name",
     "case_string_override",
@@ -27,6 +28,7 @@ judgment_import_headers = [
     "serial_number_override",
 ]
 row = [
+    "/akn/za/judgment/eacj/2022/44/eng@2022-09-14",
     "",
     "Sigcau and Another v President of Republic of South Africa and Others",
     "CCT 315/21|CCT 321/21|CCT 6/22",

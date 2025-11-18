@@ -74,6 +74,13 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
+class CustomManyToManyWidget(ManyToManyWidget):
+    def render(self, value, **kwargs):
+        if value.instance.pk is None:
+            return ""
+        return super().render(value, **kwargs)
+
+
 class ForeignKeyRequiredWidget(ForeignKeyWidget):
     def clean(self, value, row=None, **kwargs):
         if not value:
@@ -191,7 +198,7 @@ class DateWidget(CharWidget):
             return parse(value)
 
 
-class TaxonomiesWidget(ManyToManyWidget):
+class TaxonomiesWidget(CustomManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             return self.model.objects.none()
@@ -239,16 +246,12 @@ class ManyToManyField(fields.Field):
                 getattr(instance, attrs[-1]).set(cleaned, bulk=False)
 
 
-class ManyToOneWidget(ManyToManyWidget):
+class ManyToOneWidget(CustomManyToManyWidget):
     def clean(self, value, row=None, *args, **kwargs):
         if not value:
             return self.model.objects.none()
         values = [v.strip() for v in value.split(self.separator)]
         return [self.model(**{self.field: v}) for v in values if v]
-
-    def render(self, value, obj=None, **kwargs):
-        if obj.pk:
-            return super().render(value, obj, **kwargs)
 
 
 class StripHtmlWidget(CharWidget):
@@ -264,7 +267,7 @@ class StripHtmlWidget(CharWidget):
 class BaseDocumentResource(resources.ModelResource):
     frbr_uri_date = fields.Field(
         attribute="frbr_uri_date",
-        widget=CharWidget(allow_blank=True),
+        widget=CharWidget(),
     )
     date = fields.Field(attribute="date", widget=DateWidget(name="date"))
     language = fields.Field(
@@ -334,7 +337,6 @@ class BaseDocumentResource(resources.ModelResource):
     def before_import(self, dataset, **kwargs):
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
-        dataset.headers.append("expression_frbr_uri")
         try:
             ix = dataset.headers.index("skip")
             for i, skipped in enumerate(dataset.get_col(ix)):
@@ -686,7 +688,7 @@ class PublishedWidget(BooleanWidget):
         return bool(value)
 
 
-class TopicsWidget(ManyToManyWidget):
+class TopicsWidget(CustomManyToManyWidget):
     def clean(self, value, row=None, **kwargs):
         if value:
             article_tag_root = Article.get_article_tags_root()
@@ -875,7 +877,7 @@ class DownloadDocumentsResource(resources.ModelResource):
     jurisdiction = fields.Field("jurisdiction")
     locality = fields.Field("locality")
     labels = fields.Field(
-        "labels", widget=ManyToManyWidget(Label, separator=", ", field="name")
+        "labels", widget=CustomManyToManyWidget(Label, separator=", ", field="name")
     )
 
     # judgments
@@ -883,17 +885,18 @@ class DownloadDocumentsResource(resources.ModelResource):
     registry = fields.Field("registry", widget=DateWidget())
     order = fields.Field("order")
     judges = fields.Field(
-        "judges", widget=ManyToManyWidget(Judge, separator=", ", field="name")
+        "judges", widget=CustomManyToManyWidget(Judge, separator=", ", field="name")
     )
 
     # generic documents
     author = fields.Field(
-        "author", widget=ManyToManyWidget(Author, separator=", ", field="name")
+        "author", widget=CustomManyToManyWidget(Author, separator=", ", field="name")
     )
 
     # causelists
     division = fields.Field(
-        "division", widget=ManyToManyWidget(CourtDivision, separator=", ", field="name")
+        "division",
+        widget=CustomManyToManyWidget(CourtDivision, separator=", ", field="name"),
     )
 
     # legislation

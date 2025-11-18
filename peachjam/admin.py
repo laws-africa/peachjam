@@ -146,8 +146,8 @@ class BaseAdmin(admin.ModelAdmin):
 
 
 class ImportExportMixin(BaseImportExportMixin):
-    def import_action(self, request, *args, **kwargs):
-        resp = super().import_action(request, *args, **kwargs)
+    def import_action(self, request, **kwargs):
+        resp = super().import_action(request, **kwargs)
         # fix for jazzmin not using the correct field variable
         try:
             resp.context_data["fields"] = resp.context_data["fields_list"][0][1]
