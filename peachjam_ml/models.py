@@ -10,7 +10,8 @@ from django.db.models import Avg, F, Q
 from django.forms import model_to_dict
 from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
-from peachjam.models import CoreDocument, Work
+from peachjam.models import CoreDocument, Judgment, Work
+from peachjam.xmlutils import parse_html_str
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR, get_text_embedding_batch
 from peachjam_search.tasks import search_model_saved
 
@@ -420,7 +421,16 @@ class ContentChunk(models.Model):
     def make_summary_chunks(cls, document):
         from peachjam_search.documents import SearchableDocument
 
-        summary_text = SearchableDocument().prepare_summary(document)
+        summary = []
+        if isinstance(document, Judgment):
+            # flynote and blurb are separate to the main summary text
+            if document.blurb:
+                summary.append(document.blurb)
+            if document.flynote and document.flynote:
+                summary.extend(parse_html_str(document.flynote).itertext())
+
+        summary.append(SearchableDocument().prepare_summary(document))
+        summary_text = " ".join(x.strip() for x in summary if x.strip())
         if not summary_text:
             return []
 
