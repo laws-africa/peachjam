@@ -426,7 +426,8 @@ class ContentChunk(models.Model):
             # flynote and blurb are separate to the main summary text
             if document.blurb:
                 summary.append(document.blurb)
-            if document.flynote and document.flynote:
+            if document.flynote:
+                # may be html
                 summary.extend(parse_html_str(document.flynote).itertext())
 
         summary.append(SearchableDocument().prepare_summary(document))
