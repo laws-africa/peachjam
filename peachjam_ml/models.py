@@ -175,9 +175,7 @@ class DocumentEmbedding(models.Model):
         if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
             return
 
-        from peachjam_search.documents import SearchableDocument
-
-        summary_text = SearchableDocument().prepare_summary(document) or ""
+        summary_text = ContentChunk.get_summary_text(document)
         summary_md5 = (
             hashlib.md5(summary_text.encode()).hexdigest() if summary_text else None
         )
@@ -419,19 +417,7 @@ class ContentChunk(models.Model):
 
     @classmethod
     def make_summary_chunks(cls, document):
-        from peachjam_search.documents import SearchableDocument
-
-        summary = []
-        if isinstance(document, Judgment):
-            # flynote and blurb are separate to the main summary text
-            if document.blurb:
-                summary.append(document.blurb)
-            if document.flynote:
-                # may be html
-                summary.extend(parse_html_str(document.flynote).itertext())
-
-        summary.append(SearchableDocument().prepare_summary(document))
-        summary_text = " ".join(x.strip() for x in summary if x.strip())
+        summary_text = cls.get_summary_text(document)
         if not summary_text:
             return []
 
@@ -446,6 +432,23 @@ class ContentChunk(models.Model):
         log.info("Got embeddings")
 
         return chunks
+
+    @classmethod
+    def get_summary_text(cls, document):
+        from peachjam_search.documents import SearchableDocument
+
+        summary = []
+        if isinstance(document, Judgment):
+            # flynote and blurb are separate to the main summary text
+            if document.blurb:
+                summary.append(document.blurb)
+            if document.flynote:
+                # may be html
+                summary.extend(parse_html_str(document.flynote).itertext())
+
+        summary.append(SearchableDocument().prepare_summary(document))
+        summary_text = " ".join(x.strip() for x in summary if x.strip()).strip()
+        return summary_text
 
     @classmethod
     def make_page_chunks(cls, document, text):
