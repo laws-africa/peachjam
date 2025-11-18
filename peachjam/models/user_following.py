@@ -31,6 +31,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("court"),
     )
     author = models.ForeignKey(
         "peachjam.Author",
@@ -38,6 +39,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("author"),
     )
     court_class = models.ForeignKey(
         "peachjam.CourtClass",
@@ -45,6 +47,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("court class"),
     )
     court_registry = models.ForeignKey(
         "peachjam.CourtRegistry",
@@ -52,6 +55,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("court registry"),
     )
     country = models.ForeignKey(
         Country,
@@ -59,6 +63,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("country"),
     )
     locality = models.ForeignKey(
         "peachjam.Locality",
@@ -66,6 +71,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("locality"),
     )
     taxonomy = models.ForeignKey(
         "peachjam.Taxonomy",
@@ -73,6 +79,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("taxonomy"),
     )
     saved_search = models.ForeignKey(
         SavedSearch,
@@ -80,6 +87,7 @@ class UserFollowing(models.Model):
         blank=True,
         on_delete=models.CASCADE,
         related_name="followers",
+        verbose_name=_("saved search"),
     )
 
     last_alerted_at = models.DateTimeField(
