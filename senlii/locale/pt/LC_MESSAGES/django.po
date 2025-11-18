@@ -1,0 +1,75 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-05-11 14:05+0300\n"
+"PO-Revision-Date: 2023-05-16 07:12\n"
+"Last-Translator: \n"
+"Language-Team: Portuguese\n"
+"Language: pt_PT\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
+"X-Crowdin-Language: pt\n"
+"X-Crowdin-File: /main/senlii/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 112\n"
+
+#: settings.py:12
+msgid "French"
+msgstr "Francês"
+
+#: settings.py:13
+msgid "English"
+msgstr "Inglês"
+
+#: templates/liiweb/home.html:6
+msgid "Recent Judgments"
+msgstr "Julgamentos Recentes"
+
+#: templates/liiweb/home.html:7
+msgid "View more judgments"
+msgstr "Ver mais julgamentos"
+
+#: templates/liiweb/home.html:11
+msgid "Recent Legislation"
+msgstr "Legislação recente"
+
+#: templates/liiweb/home.html:12
+msgid "View more legislation"
+msgstr "Ver mais legislação"
+
+#: templates/liiweb/home.html:16
+msgid "Recent Articles"
+msgstr "Artigos Recentes"
+
+#: templates/liiweb/home.html:18
+msgid "View more articles"
+msgstr "Ver mais artigos"
+
+#: templates/peachjam/_header.html:9
+msgid "Judgments"
+msgstr "Julgamentos"
+
+#: templates/peachjam/_header.html:15
+msgid "Legislation"
+msgstr "Legislação"
+
+#: templates/peachjam/_header.html:21
+msgid "Taxonomy"
+msgstr "Taxonomia"
+
+#: templates/peachjam/_header.html:27
+msgid "Articles"
+msgstr "Artigos"
+
+#: templates/peachjam/_header.html:33
+msgid "About"
+msgstr "Sobre"
+
+#: templates/senlii/home.html:4
+msgid "Home"
+msgstr "Página inicial"
+
