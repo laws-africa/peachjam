@@ -341,6 +341,8 @@ class TestContentChunks(TestCase):
             serial_number=1,
             mnc="[2024] ZASM 1",
         )
+        judgment.blurb = "blurb"
+        judgment.flynote = "flynote"
         judgment.case_summary = "<p>Summary text</p>"
         judgment.issues = ["Issue 1"]
         judgment.held = ["Held 1"]
@@ -364,7 +366,8 @@ class TestContentChunks(TestCase):
 
             self.assertEqual("Main text.", text_chunk.text)
             self.assertEqual(
-                "Summary text Issue 1 Held 1 Order text", summary_chunk.text
+                "blurb flynote Summary text Issue 1 Held 1 Order text",
+                summary_chunk.text,
             )
         finally:
             settings.PEACHJAM["SEARCH_SEMANTIC"] = False
