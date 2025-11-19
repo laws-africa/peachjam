@@ -161,6 +161,10 @@ class DocumentChatView(ChatThreadDetailMixin):
                 result = graph.invoke(
                     state,
                     config,
+                    # checkpoint only once a whole call is complete, to avoid saving partial state
+                    # alternatively, we need to run through the messages when "resuming" and ensure that any
+                    # dangling (unanswered) tool calls are removed
+                    durability="exit",
                 )
                 generation.update_trace(
                     user_id=thread.user.username,
