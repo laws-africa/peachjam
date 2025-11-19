@@ -18,7 +18,7 @@ class CommonContextMixin:
             context["folders"] = Folder.objects.filter(user=self.request.user).annotate(
                 n_saved_documents=Count("saved_documents")
             )
-            timeline, next_before = TimelineEvent.get_events(self.request.user)
+            timeline, next_before = TimelineEvent.get_user_timeline(self.request.user)
 
             context["timeline"] = timeline
             context["next_before"] = next_before

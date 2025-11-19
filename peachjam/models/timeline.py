@@ -2,16 +2,52 @@ import logging
 from collections import defaultdict
 from itertools import islice
 
-from django.conf import settings
 from django.db import models
+from django.db.models import Prefetch
 from django.db.models.functions import TruncDate
-from django.urls import reverse
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
-from django.utils.translation import override
-from templated_email import send_templated_mail
+
+from peachjam.models import CoreDocument
 
 log = logging.getLogger(__name__)
+
+
+class TimelineEventManager(models.Manager):
+    def prefetch_subject_documents(self, user):
+        """
+        Returns a queryset with prefetched latest documents for each subject work.
+        Does NOT attach them yet — call attach_subject_documents() after evaluation.
+        """
+        lang = user.userprofile.preferred_language.iso_639_3
+
+        return (
+            self.get_queryset()
+            .select_related("user_following")
+            .prefetch_related(
+                Prefetch(
+                    "subject_works__documents",
+                    queryset=(
+                        CoreDocument.objects.latest_expression()
+                        .preferred_language(lang)
+                        .prefetch_related("labels")
+                    ),
+                    to_attr="latest_docs",
+                )
+            )
+        )
+
+    def attach_subject_documents(self, event):
+        """
+        Attach subject_documents to a TimelineEvent instance.
+        """
+        docs = []
+        for work in event.subject_works.all():
+            if hasattr(work, "latest_docs"):
+                docs.extend(work.latest_docs)
+
+        event._cached_subject_documents = docs
+        return event
 
 
 class TimelineEvent(models.Model):
@@ -21,13 +57,12 @@ class TimelineEvent(models.Model):
         NEW_CITATION = "new_citation", _("New Citation")
         NEW_AMENDMENT = "new_amendment", _("New Amendment")
 
+    objects = TimelineEventManager()
+
     user_following = models.ForeignKey(
         "peachjam.UserFollowing",
         on_delete=models.CASCADE,
         related_name="timeline_events",
-    )
-    subject_documents = models.ManyToManyField(
-        "peachjam.CoreDocument", related_name="+"
     )
     subject_works = models.ManyToManyField("peachjam.Work", related_name="+")
     event_type = models.CharField(
@@ -38,200 +73,125 @@ class TimelineEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
+    @property
+    def subject_documents(self):
+        """
+        Returns list of CoreDocuments.
+        If prefetched via manager, returns cached.
+        Otherwise runs a single efficient query.
+        """
+        if hasattr(self, "_cached_subject_documents"):
+            return self._cached_subject_documents
+
+        from peachjam.models import CoreDocument
+
+        docs = list(
+            CoreDocument.objects.latest_expression()
+            .filter(work__in=self.subject_works.all())
+            .prefetch_related("labels")
+        )
+        self._cached_subject_documents = docs
+        return docs
+
+    def mark_as_sent(self):
+        self.email_alert_sent_at = timezone.now()
+        self.save(update_fields=["email_alert_sent_at"])
+
+    def append_documents(self, docs):
+        """Tiny helper to avoid clutter."""
+        works = {doc.work for doc in docs}
+        self.subject_works.add(*works)
+
+    def __str__(self):
+        return f"{self.user_following} – {self.event_type}"
+
     @classmethod
-    def get_events(cls, user, before=None, limit=5):
-        qs = cls.objects.filter(user_following__user=user).annotate(
+    def add_new_documents_event(cls, follow, documents):
+        event, _ = TimelineEvent.objects.get_or_create(
+            user_following=follow,
+            event_type=follow.get_event_type(),
+            email_alert_sent_at__isnull=True,
+        )
+        event.append_documents(documents)
+        return event
+
+    @classmethod
+    def add_new_search_hits_event(cls, follow, hits):
+        # Prepare extra_data
+        new_hits = []
+        docs = []
+        for hit in hits:
+            doc = hit.document
+            docs.append(doc)
+
+            hit_dict = hit.as_dict()
+            hit_dict["document"] = {
+                "title": doc.title or "",
+                "blurb": getattr(doc, "blurb", ""),
+                "flynote": getattr(doc, "flynote", ""),
+            }
+            new_hits.append(hit_dict)
+
+        event, created = TimelineEvent.objects.get_or_create(
+            user_following=follow,
+            event_type=follow.get_event_type(),
+            email_alert_sent_at__isnull=True,
+            defaults={"extra_data": {"hits": new_hits}},
+        )
+
+        if not created:
+            existing = event.extra_data.get("hits", [])
+            combined = {hit["id"]: hit for hit in existing}
+            for hit in new_hits:
+                combined[hit["id"]] = hit
+            event.extra_data["hits"] = list(combined.values())
+            event.save(update_fields=["extra_data"])
+
+        event.append_documents(docs)
+        return event
+
+    @classmethod
+    def get_user_timeline(cls, user, before=None, limit=5):
+        qs = TimelineEvent.objects.filter(user_following__user=user).annotate(
             event_date=TruncDate("created_at")
         )
 
-        # If "before" is provided, only consider earlier days
         if before:
             qs = qs.filter(event_date__lt=before)
 
-        # get the next N distinct dates
         dates = qs.values("event_date").distinct().order_by("-event_date")[:limit]
 
-        # Step 2: fetch all events for those dates
-        qs = (
-            cls.objects.filter(
+        date_list = [d["event_date"] for d in dates]
+
+        events_qs = (
+            TimelineEvent.objects.prefetch_subject_documents(user)
+            .filter(
                 user_following__user=user,
-                created_at__date__in=[d["event_date"] for d in dates],
-            )
-            .select_related("user_following")
-            .prefetch_related(
-                "subject_documents",
-                "subject_documents__work",
-                "subject_documents__labels",
+                created_at__date__in=date_list,
             )
             .annotate(event_date=TruncDate("created_at"))
             .order_by("-event_date", "user_following__id", "-created_at")
         )
-        # step 3: group into {date: {followed_obj: [docs...]}}
+
+        events_qs = [
+            TimelineEvent.objects.attach_subject_documents(ev) for ev in events_qs
+        ]
+
         grouped = defaultdict(lambda: defaultdict(list))
 
-        for ev in qs:
-            for doc in ev.subject_documents.all():
+        for ev in events_qs:
+            for doc in ev.subject_documents:
                 grouped[ev.event_date][ev.user_following].append(doc)
 
-        # step 4: split docs into (first 10, rest)
-        events = {}
-        for date, objs in grouped.items():
-            events[date] = []
-            for obj, docs in objs.items():
-                first_ten = list(islice(docs, 10))
-                remaining = docs[10:]
-                events[date].append((obj, (first_ten, remaining)))
+        results = {}
 
-        # Find the earliest date in this batch, so we know where to continue
-        next_before = min(d["event_date"] for d in dates) if dates else None
+        for date, by_follow in grouped.items():
+            entries = []
+            for follow, docs in by_follow.items():
+                first = list(islice(docs, 10))
+                rest = docs[10:]
+                entries.append((follow, (first, rest)))
+            results[date] = entries
 
-        return events, next_before
-
-    @classmethod
-    def send_email_alerts(cls):
-        from peachjam.tasks import (
-            send_new_document_email_alert,
-            send_saved_search_email_alert,
-        )
-
-        events = cls.objects.filter(email_alert_sent_at__isnull=True)
-        if not events:
-            log.info("No new events to alert.")
-            return
-
-        new_doc_users = (
-            events.filter(event_type=cls.EventTypes.NEW_DOCUMENTS)
-            .values_list("user_following__user_id", flat=True)
-            .distinct()
-        )
-        for user_id in new_doc_users:
-            send_new_document_email_alert(user_id)
-        saved_search_users = (
-            events.filter(event_type=cls.EventTypes.SAVED_SEARCH)
-            .values_list("user_following__user_id", flat=True)
-            .distinct()
-        )
-        for user_id in saved_search_users:
-            send_saved_search_email_alert(user_id)
-
-        new_citation_users = (
-            events.filter(event_type=cls.EventTypes.NEW_CITATION)
-            .values_list("user_following__user_id", flat=True)
-            .distinct()
-        )
-
-        for user_id in new_citation_users:
-            # send_new_citation_email_alert(user_id)
-            pass
-
-    @classmethod
-    def send_saved_search_email_alert(cls, user):
-        saved_searches = cls.objects.filter(
-            email_alert_sent_at__isnull=True,
-            event_type=cls.EventTypes.SAVED_SEARCH,
-            user_following__user=user,
-        ).select_related("user_following")
-
-        if not saved_searches.exists():
-            log.info(f"No saved search events to send for user {user.pk}")
-            return
-        log.info(f"Sending saved search email alerts for user {user.pk}")
-
-        for ev in saved_searches:
-            context = {
-                "user": user,
-                "hits": (ev.extra_data or {}).get("hits", []),
-                "saved_search": ev.user_following.saved_search,
-                "manage_url_path": reverse("search:saved_search_list"),
-            }
-            with override(user.userprofile.preferred_language.pk):
-                send_templated_mail(
-                    template_name="search_alert",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    context=context,
-                )
-                ev.email_alert_sent_at = timezone.now()
-                ev.save(update_fields=["email_alert_sent_at"])
-
-    @classmethod
-    def send_new_document_email_alert(cls, user):
-        new_document_events = (
-            cls.objects.filter(
-                email_alert_sent_at__isnull=True,
-                event_type=cls.EventTypes.NEW_DOCUMENTS,
-                user_following__user=user,
-            )
-            .select_related("user_following")
-            .prefetch_related("subject_documents")
-        )
-        if not new_document_events.exists():
-            log.info(f"No new document events to send for user {user.pk}")
-            return
-        log.info(f"Sending new document email alerts for user {user.pk}")
-
-        follows_map = {}
-        for ev in new_document_events:
-            key = ev.user_following.followed_object
-            follows_map.setdefault(key, set()).update(ev.subject_documents.all())
-        follows = [
-            {"followed_object": k, "documents": list(v)[:10]}
-            for k, v in follows_map.items()
-        ]
-
-        context = {
-            "followed_documents": follows,
-            "user": user,
-            "manage_url_path": reverse("user_following_list"),
-        }
-        with override(user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="user_following_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                context=context,
-            )
-
-        # mark the events as sent after successful send. allows retries in case of failure.
-        new_document_events.update(email_alert_sent_at=models.functions.Now())
-
-    @classmethod
-    def send_new_citation_email_alert(cls, user):
-        new_citation_events = (
-            cls.objects.filter(
-                email_alert_sent_at__isnull=True,
-                event_type=cls.EventTypes.NEW_CITATION,
-                user_following__user=user,
-            )
-            .select_related("user_following")
-            .prefetch_related("subject_works")
-        )
-        if not new_citation_events.exists():
-            log.info(f"No new citation events to send for user {user.pk}")
-            return
-        log.info(f"Sending new citation email alerts for user {user.pk}")
-
-        follows_map = {}
-        for ev in new_citation_events:
-            key = ev.user_following.followed_object
-            follows_map.setdefault(key, set()).update(ev.subject_works.all())
-        follows = [
-            {"followed_object": k, "works": list(v)[:10]}
-            for k, v in follows_map.items()
-        ]
-
-        context = {
-            "followed_works": follows,
-            "user": user,
-            "manage_url_path": reverse("user_following_list"),
-        }
-        with override(user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="new_citation_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                context=context,
-            )
-
-        # mark the events as sent after successful send. allows retries in case of failure.
-        new_citation_events.update(email_alert_sent_at=models.functions.Now())
+        next_before = min(date_list) if date_list else None
+        return results, next_before

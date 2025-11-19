@@ -21,7 +21,10 @@ def _place_codes(site_settings):
     jurisdiction_codes = site_settings.document_jurisdictions.all().values_list(
         "iso", flat=True
     )
-    locality_codes = Locality.objects.all().values_list("code", flat=True)
+    locality_codes = [
+        loc.place_code()
+        for loc in Locality.objects.select_related("jurisdiction").all()
+    ]
     places = list(jurisdiction_codes) + list(locality_codes)
     return [place.lower() for place in places]
 

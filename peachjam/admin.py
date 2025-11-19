@@ -9,7 +9,6 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin.options import StackedInline
 from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -146,8 +145,8 @@ class BaseAdmin(admin.ModelAdmin):
 
 
 class ImportExportMixin(BaseImportExportMixin):
-    def import_action(self, request, *args, **kwargs):
-        resp = super().import_action(request, *args, **kwargs)
+    def import_action(self, request, **kwargs):
+        resp = super().import_action(request, **kwargs)
         # fix for jazzmin not using the correct field variable
         try:
             resp.context_data["fields"] = resp.context_data["fields_list"][0][1]
@@ -423,6 +422,9 @@ class DocumentForm(forms.ModelForm):
             self.fields["topics"].initial = self.instance.taxonomies.values_list(
                 "topic__slug", flat=True
             )
+
+        # start attribute-level tracking
+        self.instance.track_changes()
 
     def full_clean(self):
         super().full_clean()
@@ -994,7 +996,7 @@ class CoreDocumentAdmin(DocumentAdmin):
 
 @admin.register(GenericDocument)
 class GenericDocumentAdmin(ImportExportMixin, DocumentAdmin):
-    resource_class = GenericDocumentResource
+    resource_classes = [GenericDocumentResource]
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     list_display = list(DocumentAdmin.list_display) + ["nature"]
     list_filter = list(DocumentAdmin.list_filter) + ["nature", "author"]
@@ -1022,7 +1024,7 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
 
 @admin.register(Bill)
 class BillAdmin(ImportExportMixin, DocumentAdmin):
-    resource_class = BillResource
+    resource_classes = [BillResource]
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[0][1]["fields"].extend(["author"])
 
@@ -1134,8 +1136,6 @@ class JudgmentAdminForm(DocumentForm):
             self.instance.serial_number = None
         super().save(*args, **kwargs)
 
-        self.instance.ensure_anonymised_source_file()
-
         return self.instance
 
 
@@ -1143,7 +1143,7 @@ class JudgmentAdminForm(DocumentForm):
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
     form = JudgmentAdminForm
-    resource_class = JudgmentResource
+    resource_classes = [JudgmentResource]
     inlines = [
         BenchInline,
         LowerBenchInline,
@@ -1384,6 +1384,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     generate_summary.short_description = gettext_lazy("Generate summaries (background)")
 
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        obj.ensure_anonymised_source_file()
+
 
 @admin.register(CauseList)
 class CauseListAdmin(DocumentAdmin):
@@ -1501,7 +1505,7 @@ class ArticleForm(forms.ModelForm):
 
 @admin.register(Article)
 class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_class = ArticleResource
+    resource_classes = [ArticleResource]
     inlines = [ArticleAttachmentInline]
     form = ArticleForm
     list_display = ("title", "author", "date", "published")
@@ -1670,7 +1674,7 @@ class AuthorAdmin(admin.ModelAdmin):
 
 @admin.register(Gazette)
 class GazetteAdmin(ImportExportMixin, DocumentAdmin):
-    resource_class = GazetteResource
+    resource_classes = [GazetteResource]
     inlines = [
         SourceFileInline,
         BackgroundTaskInline,
@@ -1754,18 +1758,37 @@ class OutcomeAdmin(admin.ModelAdmin):
     list_display = ("name",)
 
 
-class UserFollowingInline(StackedInline):
+class UserFollowingInline(admin.TabularInline):
     model = UserFollowing
     extra = 0
+    fields = (
+        "__str__",
+        "last_alerted_at",
+    )
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
-class SavedSearchInline(StackedInline):
+class SavedSearchInline(admin.TabularInline):
     model = SavedSearch
     extra = 0
+    fields = ("q", "a", "filters", "note", "last_alerted_at")
+    readonly_fields = fields
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
 
 
 class UserAdminCustom(ImportExportMixin, UserAdmin):
-    resource_class = UserResource
+    resource_classes = [UserResource]
     inlines = [UserFollowingInline, SavedSearchInline]
     actions = ["require_accept_terms"]
 
@@ -1817,7 +1840,7 @@ class MatterTypeAdmin(BaseAdmin):
 
 @admin.register(Attorney)
 class AttorneyAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_class = AttorneyResource
+    resource_classes = [AttorneyResource]
     list_display = ("name", "description")
 
 
@@ -1835,7 +1858,7 @@ class RatificationCountryAdmin(admin.StackedInline):
 class RatificationAdmin(ImportExportMixin, admin.ModelAdmin):
     inlines = (RatificationCountryAdmin,)
     form = RatificationForm
-    resource_class = RatificationResource
+    resource_classes = [RatificationResource]
     search_fields = ("work__title",)
 
 
