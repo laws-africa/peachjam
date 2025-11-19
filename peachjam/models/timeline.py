@@ -125,8 +125,8 @@ class TimelineEvent(models.Model):
             hit_dict = hit.as_dict()
             hit_dict["document"] = {
                 "title": doc.title or "",
-                "blurb": doc.blurb or "",
-                "flynote": doc.flynote or "",
+                "blurb": getattr(doc, "blurb", ""),
+                "flynote": getattr(doc, "flynote", ""),
             }
             new_hits.append(hit_dict)
 
