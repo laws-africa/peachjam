@@ -55,7 +55,7 @@ class TimelineViewTest(TestCase):
         )
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
-        ).values_list("subject_documents__id", flat=True)
+        ).values_list("subject_works__documents__id", flat=True)
         self.assertEqual(self.initial_documents_count, subject_docs.count())
 
         # Create a new judgment and update timeline
@@ -72,7 +72,7 @@ class TimelineViewTest(TestCase):
         self.assertEqual(1, TimelineEvent.objects.count())
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
-        ).values_list("subject_documents__id", flat=True)
+        ).values_list("subject_works__documents__id", flat=True)
         self.assertEqual(self.initial_documents_count + 1, subject_docs.count())
         self.assertIn(j.pk, subject_docs)
 
@@ -90,6 +90,6 @@ class TimelineViewTest(TestCase):
         self.assertEqual(2, TimelineEvent.objects.count())
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
-        ).values_list("subject_documents__id", flat=True)
+        ).values_list("subject_works__documents__id", flat=True)
         self.assertEqual(self.initial_documents_count + 2, subject_docs.count())
         self.assertIn(j.pk, subject_docs)
