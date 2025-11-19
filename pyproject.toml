@@ -44,7 +44,7 @@ dependencies = [
     "django-fsm-2>=4.0.0",
     "django-htmx>=1.18.0",
     "django-guardian>=2.4.0",
-    "django-import-export<4.0",
+    "django-import-export[xlsx]>=4.3.1",
     "django-jazzmin>=2.5.0",
     "django-languages-plus>=1.1.1",
     "django-lifecycle>=1.2.4",
