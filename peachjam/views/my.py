@@ -63,7 +63,7 @@ class MyTimelineView(LoginRequiredMixin, TemplateView):
         except (TypeError, ValueError):
             before_date = None
 
-        timeline, next_before = TimelineEvent.get_events(
+        timeline, next_before = TimelineEvent.get_user_timeline(
             self.request.user, before=before_date
         )
         context["timeline"] = timeline
