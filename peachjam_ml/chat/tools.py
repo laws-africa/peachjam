@@ -46,21 +46,7 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
     - paragraph 4
     """
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
-
-    citator_url = settings.PEACHJAM["CITATOR_API"]
-    citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
-    resp = requests.post(
-        citator_url + "get-citations",
-        json={
-            "frbr_uri": doc.expression_frbr_uri,
-            "format": "text",
-            "body": provision,
-        },
-        headers={"Authorization": f"token {citator_key}"},
-        timeout=60 * 10,
-    )
-    resp.raise_for_status()
-    resp = resp.json()
+    resp = get_citator_citations(doc.expression_frbr_uri, provision)
 
     # grab the first ref
     for ref in resp["citations"]:
@@ -69,6 +55,23 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
             return f"The EID of provision '{provision}' is: {eid}"
 
     return f"Provision '{provision}' could not be identified."
+
+
+def get_citator_citations(expression_frbr_uri, text):
+    citator_url = settings.PEACHJAM["CITATOR_API"]
+    citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
+    resp = requests.post(
+        citator_url + "get-citations",
+        json={
+            "frbr_uri": expression_frbr_uri,
+            "format": "text",
+            "body": text,
+        },
+        headers={"Authorization": f"token {citator_key}"},
+        timeout=60 * 10,
+    )
+    resp.raise_for_status()
+    return resp.json()
 
 
 @tool
