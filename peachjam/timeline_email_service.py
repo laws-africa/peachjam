@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -35,22 +34,24 @@ class TimelineEmailService:
     @staticmethod
     def send_new_documents_email(user):
         events = (
-            TimelineEvent.objects.filter(
+            TimelineEvent.objects.prefetch_subject_documents(user)
+            .filter(
                 email_alert_sent_at__isnull=True,
                 event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
                 user_following__user=user,
             )
             .select_related("user_following")
-            .prefetch_related("subject_documents")
         )
 
         if not events.exists():
             return
 
+        events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
+
         follows_map = {}
         for ev in events:
             key = ev.user_following.followed_object
-            follows_map.setdefault(key, set()).update(ev.subject_documents.all())
+            follows_map.setdefault(key, set()).update(ev.subject_documents)
 
         follows = [
             {"followed_object": key, "documents": list(docs)[:10]}
@@ -71,18 +72,25 @@ class TimelineEmailService:
                 context=context,
             )
 
-        events.update(email_alert_sent_at=timezone.now())
+        for ev in events:
+            ev.mark_as_sent()
 
     @staticmethod
     def send_saved_search_email(user):
-        events = TimelineEvent.objects.filter(
-            email_alert_sent_at__isnull=True,
-            event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
-            user_following__user=user,
-        ).select_related("user_following")
+        events = (
+            TimelineEvent.objects.prefetch_subject_documents(user)
+            .filter(
+                email_alert_sent_at__isnull=True,
+                event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
+                user_following__user=user,
+            )
+            .select_related("user_following")
+        )
 
         if not events.exists():
             return
+
+        events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
 
         for ev in events:
             context = {

@@ -3,11 +3,51 @@ from collections import defaultdict
 from itertools import islice
 
 from django.db import models
+from django.db.models import Prefetch
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.models import CoreDocument
+
 log = logging.getLogger(__name__)
+
+
+class TimelineEventManager(models.Manager):
+    def prefetch_subject_documents(self, user):
+        """
+        Returns a queryset with prefetched latest documents for each subject work.
+        Does NOT attach them yet — call attach_subject_documents() after evaluation.
+        """
+        lang = user.userprofile.preferred_language.iso_639_3
+
+        return (
+            self.get_queryset()
+            .select_related("user_following")
+            .prefetch_related(
+                Prefetch(
+                    "subject_works__documents",
+                    queryset=(
+                        CoreDocument.objects.latest_expression()
+                        .preferred_language(lang)
+                        .prefetch_related("labels")
+                    ),
+                    to_attr="latest_docs",
+                )
+            )
+        )
+
+    def attach_subject_documents(self, event):
+        """
+        Attach subject_documents to a TimelineEvent instance.
+        """
+        docs = []
+        for work in event.subject_works.all():
+            if hasattr(work, "latest_docs"):
+                docs.extend(work.latest_docs)
+
+        event._cached_subject_documents = docs
+        return event
 
 
 class TimelineEvent(models.Model):
@@ -15,14 +55,14 @@ class TimelineEvent(models.Model):
         NEW_DOCUMENTS = "new_documents", _("New Documents")
         SAVED_SEARCH = "saved_search", _("Saved Search")
 
+    objects = TimelineEventManager()
+
     user_following = models.ForeignKey(
         "peachjam.UserFollowing",
         on_delete=models.CASCADE,
         related_name="timeline_events",
     )
-    subject_documents = models.ManyToManyField(
-        "peachjam.CoreDocument", related_name="+"
-    )
+    subject_works = models.ManyToManyField("peachjam.Work", related_name="+")
     event_type = models.CharField(
         max_length=256,
         choices=EventTypes.choices,
@@ -31,13 +71,34 @@ class TimelineEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
+    @property
+    def subject_documents(self):
+        """
+        Returns list of CoreDocuments.
+        If prefetched via manager, returns cached.
+        Otherwise runs a single efficient query.
+        """
+        if hasattr(self, "_cached_subject_documents"):
+            return self._cached_subject_documents
+
+        from peachjam.models import CoreDocument
+
+        docs = list(
+            CoreDocument.objects.latest_expression()
+            .filter(work__in=self.subject_works.all())
+            .prefetch_related("labels")
+        )
+        self._cached_subject_documents = docs
+        return docs
+
     def mark_as_sent(self):
         self.email_alert_sent_at = timezone.now()
         self.save(update_fields=["email_alert_sent_at"])
 
     def append_documents(self, docs):
         """Tiny helper to avoid clutter."""
-        self.subject_documents.add(*docs)
+        works = {doc.work for doc in docs}
+        self.subject_works.add(*works)
 
     def __str__(self):
         return f"{self.user_following} – {self.event_type}"
@@ -101,24 +162,23 @@ class TimelineEvent(models.Model):
         date_list = [d["event_date"] for d in dates]
 
         events_qs = (
-            TimelineEvent.objects.filter(
+            TimelineEvent.objects.prefetch_subject_documents(user)
+            .filter(
                 user_following__user=user,
                 created_at__date__in=date_list,
-            )
-            .select_related("user_following")
-            .prefetch_related(
-                "subject_documents",
-                "subject_documents__work",
-                "subject_documents__labels",
             )
             .annotate(event_date=TruncDate("created_at"))
             .order_by("-event_date", "user_following__id", "-created_at")
         )
 
+        events_qs = [
+            TimelineEvent.objects.attach_subject_documents(ev) for ev in events_qs
+        ]
+
         grouped = defaultdict(lambda: defaultdict(list))
 
         for ev in events_qs:
-            for doc in ev.subject_documents.all():
+            for doc in ev.subject_documents:
                 grouped[ev.event_date][ev.user_following].append(doc)
 
         results = {}
