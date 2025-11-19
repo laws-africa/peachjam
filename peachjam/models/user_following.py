@@ -159,6 +159,13 @@ class UserFollowing(models.Model):
     # --- simple helpers ---
 
     @property
+    def description_text(self):
+        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
+            return _("New matches for search alert")
+        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
+            return _("New documents added for")
+
+    @property
     def followed_field(self):
         for f in self.follow_fields:
             if getattr(self, f):
