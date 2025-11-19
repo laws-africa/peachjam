@@ -1,8 +1,9 @@
+import requests
+from django.conf import settings
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
-from peachjam.analysis.citations import CitatorMatcher
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
 
@@ -46,21 +47,25 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
     """
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
 
-    # TODO: this should be way easier :(
-    resp = CitatorMatcher().call_citator(
-        {
+    citator_url = settings.PEACHJAM["CITATOR_API"]
+    citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
+    resp = requests.post(
+        citator_url + "get-citations",
+        json={
             "frbr_uri": doc.expression_frbr_uri,
-            "format": "html",
-            "body": f'<p>{provision} of <a href="{doc.expression_frbr_uri}" id="fake">xx</a></p>',
-        }
+            "format": "text",
+            "body": provision,
+        },
+        headers={"Authorization": f"token {citator_key}"},
+        timeout=60 * 10,
     )
+    resp.raise_for_status()
+    resp = resp.json()
 
-    root = parse_html_str(resp["body"])
-    # grab the first a element without an id
-    for a in root.xpath("//a[not(@id)]"):
-        href = a.get("href", "")
-        if "~" in href:
-            eid = href.split("~")[-1]
+    # grab the first ref
+    for ref in resp["citations"]:
+        if ref["href"] and "~" in ref["href"]:
+            eid = ref["href"].split("~")[-1]
             return f"The EID of provision '{provision}' is: {eid}"
 
     return f"Provision '{provision}' could not be identified."
