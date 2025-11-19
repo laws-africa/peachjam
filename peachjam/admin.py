@@ -1136,8 +1136,6 @@ class JudgmentAdminForm(DocumentForm):
             self.instance.serial_number = None
         super().save(*args, **kwargs)
 
-        self.instance.ensure_anonymised_source_file()
-
         return self.instance
 
 
@@ -1385,6 +1383,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         )
 
     generate_summary.short_description = gettext_lazy("Generate summaries (background)")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        obj.ensure_anonymised_source_file()
 
 
 @admin.register(CauseList)
