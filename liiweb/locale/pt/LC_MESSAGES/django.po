@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 11:48+0200\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -125,7 +125,7 @@ msgstr "Disposições não iniciadas"
 
 #: templates/liiweb/legislation_list.html:34
 msgid "Glossary of defined terms"
-msgstr ""
+msgstr "Glossário de termos definidos"
 
 #: templates/liiweb/legislation_list.html:49
 msgid "You are viewing repealed legislation which is no longer in force."
@@ -196,3 +196,4 @@ msgstr "Outras Instituições Jurídicas Africanas"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"
+
