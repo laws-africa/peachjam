@@ -1,32 +1,39 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"PO-Revision-Date: 2025-10-07 09:02\n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Language-Team: Swahili\n"
-"Language: sw_KE\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
 
-#: models.py:168
+#: models.py:167
 msgid "Search alert limit reached"
 msgstr "Kikomo cha tahadhari ya utafutaji kimefikiwa"
 
-#: models.py:256
+#: models.py:255
 msgid "feedback"
 msgstr "maoni"
 
-#: models.py:258
+#: models.py:257
 msgid "name"
 msgstr "jina"
 
-#: models.py:263
+#: models.py:262
 msgid "email address"
 msgstr "anwani ya baruapepe"
+
+#: templates/peachjam_search/_download_403.html:4
+#, python-format
+msgid "<a href=\"%(signup_url)s?next=%(next)s\">Sign up</a> or <a href=\"%(login_url)s?next=%(next)s\">log in</a> to download search results."
+msgstr ""
 
 #: templates/peachjam_search/_saved_search_modal.html:7
 msgid "Search alert"
@@ -224,12 +231,11 @@ msgstr "Imeundwa Katika"
 msgid "No search traces found."
 msgstr "Hakuna ufuatiliaji wa utafutaji uliopatikana."
 
-#: views.py:60
+#: views.py:61
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Tafuta %(app_name)s"
 
-#: views.py:263
+#: views.py:286
 msgid "Search trace not found"
 msgstr "Ufuatiliaji wa utafutaji haujapatikana"
-

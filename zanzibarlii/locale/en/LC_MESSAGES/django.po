@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-02-25 16:54+0200\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -52,22 +52,26 @@ msgid "Our partners"
 msgstr ""
 
 #: templates/peachjam/_header.html:8
+msgid "Home"
+msgstr ""
+
+#: templates/peachjam/_header.html:13
 msgid "Judgments"
 msgstr ""
 
-#: templates/peachjam/_header.html:14
+#: templates/peachjam/_header.html:19
 msgid "Legislation"
 msgstr ""
 
-#: templates/peachjam/_header.html:20
+#: templates/peachjam/_header.html:25
 msgid "Licensed Advocates"
 msgstr ""
 
-#: templates/peachjam/_header.html:26
+#: templates/peachjam/_header.html:31
 msgid "Gazettes"
 msgstr ""
 
-#: templates/peachjam/_header.html:32
+#: templates/peachjam/_header.html:37
 msgid "About"
 msgstr ""
 
