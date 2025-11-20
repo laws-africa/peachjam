@@ -87,3 +87,23 @@ Per-user islands (htmx):
 * Messages rendered on public pages → moved to /user/loaded (private).
 
 If you’re unsure whether something belongs in the cacheable HTML or an island, default to island. It’s easy to merge later; it’s much harder to unwind a cache leak.
+
+# Favicons
+
+To generate or update a favicon for a site:
+
+1. `pip install favicons`
+2. create a .PNG of the icon and put it into lii-name/static/images/lii-name-icon.png
+3. run the favicons CLI as follows (it seems a bit broken):
+
+```
+python .env/lib/python3.10/site-packages/favicons/cli.py generate --source lii-name/static/images/lii-name-icon.png --output-directory t
+```
+
+That will generate a bunch of icons in the director `t/`.
+
+Copy only certain files into the project:
+
+```
+cp t/favicon.ico t/favicon-16x16.png t/favicon-32x32.png t/favicon-96x96.png t/favicon-180x180.png lii-name/static/images/
+```
