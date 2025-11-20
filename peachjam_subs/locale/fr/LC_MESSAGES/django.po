@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 11:48+0200\n"
-"PO-Revision-Date: 2025-11-20 09:25\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -134,16 +134,14 @@ msgid "Active since"
 msgstr "Actif depuis"
 
 #: templates/peachjam_subs/_subscription_required.html:10
-#, fuzzy, python-format
-#| msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
+#, python-format
 msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and <a href=\"%(upsell_url)s\">subscribe to %(lowest_product)s</a> to unlock access."
-msgstr "Ce contenu est disponible uniquement pour les abonnés. <a href=\"%(login_url)s\">Connectez-vous</a> ou <a href=\"%(signup_url)s\">Inscrivez-vous</a> et abonnez-vous à %(lowest_product)s pour débloquer l'accès."
+msgstr "Ce contenu est réservé aux abonnés. <a href=\"%(login_url)s\">Connectez-vous</a> ou <a href=\"%(signup_url)s\">Inscrivez-vous</a> et <a href=\"%(upsell_url)s\">abonnez-vous à %(lowest_product)s</a> pour débloquer l'accès."
 
 #: templates/peachjam_subs/_subscription_required.html:21
-#, fuzzy, python-format
-#| msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
+#, python-format
 msgid "Your current subscription doesn’t include this content. Please <a href=\"%(upsell_url)s\">upgrade to %(lowest_product)s</a> to unlock access."
-msgstr "Votre abonnement actuel n'inclut pas ce contenu. Veuillez passer à %(lowest_product)s pour y accéder."
+msgstr "Votre abonnement actuel ne comprend pas ce contenu. Veuillez <a href=\"%(upsell_url)s\">passer à %(lowest_product)s</a> pour y accéder."
 
 #: templates/peachjam_subs/_subscription_required.html:28
 msgid "This content is not currently available."
@@ -237,3 +235,4 @@ msgstr "Abonnement"
 #: views.py:28
 msgid "Your pending subscription change has been cancelled."
 msgstr "Votre modification d’abonnement en attente a été annulée."
+
