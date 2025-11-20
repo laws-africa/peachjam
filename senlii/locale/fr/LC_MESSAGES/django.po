@@ -48,3 +48,4 @@ msgstr "Articles"
 #: templates/peachjam/_header.html:30
 msgid "About"
 msgstr "À propos"
+

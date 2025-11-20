@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 11:48+0200\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -130,197 +130,195 @@ msgstr "Formulação de políticas na União Africana"
 
 #: templates/africanlii/mooc.html:11
 msgid "Equip yourself to meaningfully engage with AU policy processes — from development to implementation."
-msgstr ""
+msgstr "Prepare-se para participar de forma significativa nos processos políticos da UA — desde o desenvolvimento até à implementação."
 
 #: templates/africanlii/mooc.html:14
 msgid "Designed for civil society organisations, diplomats, parliamentarians, government officials, international organisations, journalists, judges, and academics who want to strengthen their role in shaping Africa’s future."
-msgstr ""
+msgstr "Concebido para organizações da sociedade civil, diplomatas, parlamentares, funcionários governamentais, organizações internacionais, jornalistas, juízes e académicos que pretendam reforçar o seu papel na construção do futuro de África."
 
 #: templates/africanlii/mooc.html:19
 msgid "Enroll now — start learning"
-msgstr ""
+msgstr "Inscreva-se já — comece a aprender"
 
 #: templates/africanlii/mooc.html:20
 msgid "See course modules"
-msgstr ""
+msgstr "Veja os módulos do curso"
 
 #: templates/africanlii/mooc.html:25
 msgid "Why Enrol?"
-msgstr ""
+msgstr "Porquê se matricular?"
 
 #: templates/africanlii/mooc.html:27
 msgid "Through expert insights and practical tools, you’ll learn how to navigate the complexities of AU policy-making, influence outcomes, and contribute to policies that make a real impact."
-msgstr ""
+msgstr "Através de análises de especialistas e ferramentas práticas, aprenderá a navegar pelas complexidades da formulação de políticas da UA, a influenciar os resultados e a contribuir para políticas que gerem um impacto real."
 
 #: templates/africanlii/mooc.html:33
 msgid "Deepen your understanding"
-msgstr ""
+msgstr "Aprofunde o seu entendimento"
 
 #: templates/africanlii/mooc.html:34
 msgid "Understand AU objectives and institutions."
-msgstr ""
+msgstr "Compreender os objetivos e as instituições da UA."
 
 #: templates/africanlii/mooc.html:40
 msgid "Understand policy shaping"
-msgstr ""
+msgstr "Compreender a formulação de políticas"
 
 #: templates/africanlii/mooc.html:41
 msgid "Learn who influences decisions and how to reach them."
-msgstr ""
+msgstr "Saiba quem influencia as decisões e como contactar essas pessoas."
 
 #: templates/africanlii/mooc.html:47
 msgid "Practical tools"
-msgstr ""
+msgstr "Ferramentas práticas"
 
 #: templates/africanlii/mooc.html:48
 msgid "Evidence-based advocacy strategies and resources."
-msgstr ""
+msgstr "Estratégias e recursos de defesa baseados na evidência."
 
 #: templates/africanlii/mooc.html:57
 msgid "Who it's for"
-msgstr ""
+msgstr "Para quem é?"
 
 #: templates/africanlii/mooc.html:59
 msgid "CSOs, diplomats, parliamentarians, officials, journalists, judges, academics."
-msgstr ""
+msgstr "Organizações da sociedade civil, diplomatas, parlamentares, funcionários públicos, jornalistas, juízes, académicos."
 
 #: templates/africanlii/mooc.html:65
 msgid "Outcome"
-msgstr ""
+msgstr "Resultado"
 
 #: templates/africanlii/mooc.html:66
 msgid "Practical skills to influence AU policy and track progress."
-msgstr ""
+msgstr "Competências práticas para influenciar as políticas da UA e acompanhar o progresso."
 
 #: templates/africanlii/mooc.html:71
 msgid "Format"
-msgstr ""
+msgstr "Formatar"
 
 #: templates/africanlii/mooc.html:72
 msgid "Online, self-paced, with curated resources and practical exercises."
-msgstr ""
+msgstr "Online, ao seu ritmo, com recursos selecionados e exercícios práticos."
 
 #: templates/africanlii/mooc.html:77
 msgid "Duration"
-msgstr ""
+msgstr "Duração"
 
 #: templates/africanlii/mooc.html:78
 msgid "Estimated 6–8 weeks (self-paced)."
-msgstr ""
+msgstr "Duração estimada: 6 a 8 semanas (ritmo individual)."
 
 #: templates/africanlii/mooc.html:90
 msgid "What You’ll Learn"
-msgstr ""
+msgstr "O que aprenderá"
 
 #: templates/africanlii/mooc.html:92
 msgid "Each module is carefully structured so you always know what to expect and can track your progress with ease."
-msgstr ""
+msgstr "Cada módulo está cuidadosamente estruturado para que saiba sempre o que esperar e possa acompanhar o seu progresso com facilidade."
 
 #: templates/africanlii/mooc.html:100
 msgid "Module 1"
-msgstr ""
+msgstr "Módulo 1"
 
 #: templates/africanlii/mooc.html:103
 msgid "African Solutions to African Problems"
-msgstr ""
+msgstr "Soluções africanas para os problemas africanos"
 
 #: templates/africanlii/mooc.html:106
 msgid "Deepen your understanding of the AU and its objectives."
-msgstr ""
+msgstr "Aprofunde o seu conhecimento sobre a UA e os seus objetivos."
 
 #: templates/africanlii/mooc.html:115
 msgid "Module 2"
-msgstr ""
+msgstr "Módulo 2"
 
 #: templates/africanlii/mooc.html:118
 msgid "Influencing AU Policy Development"
-msgstr ""
+msgstr "Influenciando o desenvolvimento de políticas da UA"
 
 #: templates/africanlii/mooc.html:121
 msgid "Shifting from purpose to practice, this module explores how AU policies are shaped—who the key players are, how decisions are made, and where to engage effectively."
-msgstr ""
+msgstr "Passando da finalidade para a prática, este módulo explora como as políticas da UA são moldadas — quem são os principais intervenientes, como as decisões são tomadas e onde se pode participar eficazmente."
 
 #: templates/africanlii/mooc.html:130
 msgid "Module 3"
-msgstr ""
+msgstr "Módulo 3"
 
 #: templates/africanlii/mooc.html:133
 msgid "Influencing AU Policy Implementation"
-msgstr ""
+msgstr "Influenciando a implementação das políticas da UA"
 
 #: templates/africanlii/mooc.html:136
 msgid "Explore how AU policies are implemented in practice, across multiple levels, by diverse actors, and within complex political and legal landscapes."
-msgstr ""
+msgstr "Explore como as políticas da UA são implementadas na prática, a múltiplos níveis, por diversos intervenientes e em contextos políticos e jurídicos complexos."
 
 #: templates/africanlii/mooc.html:145
 msgid "Module 4"
-msgstr ""
+msgstr "Módulo 4"
 
 #: templates/africanlii/mooc.html:148
-#, fuzzy
-#| msgid "African Union"
 msgid "African Union Policy Toolbox"
-msgstr "União Africana"
+msgstr "Caixa de ferramentas de políticas da União Africana"
 
 #: templates/africanlii/mooc.html:151
 msgid "Practical tools for effective AU policy engagement, from data and educational resources to advocacy strategies that support evidence-based change."
-msgstr ""
+msgstr "Ferramentas práticas para um envolvimento político eficaz na UA, desde dados e recursos educativos a estratégias de defesa que apoiam a mudança baseada em evidências."
 
 #: templates/africanlii/mooc.html:159
 msgid "Start the course — Enrol now"
-msgstr ""
+msgstr "Comece o curso — Inscreva-se já"
 
 #: templates/africanlii/mooc.html:169
 msgid "Certification"
-msgstr ""
+msgstr "Certificação"
 
 #: templates/africanlii/mooc.html:172
 msgid "Upon successful completion, participants will receive a"
-msgstr ""
+msgstr "Após a conclusão com sucesso, os participantes receberão um"
 
 #: templates/africanlii/mooc.html:172
 msgid "certificate of completion issued by the University of Cape Town"
-msgstr ""
+msgstr "Certificado de conclusão emitido pela Universidade da Cidade do Cabo"
 
 #: templates/africanlii/mooc.html:172
 msgid "a mark of recognition for their commitment to advancing effective AU policy-making."
-msgstr ""
+msgstr "uma demonstração de reconhecimento pelo seu empenho em promover a formulação de políticas eficazes na UA."
 
 #: templates/africanlii/mooc.html:175
 msgid "Take the next step in your policy journey — enrol today and help shape Africa’s future."
-msgstr ""
+msgstr "Dê o próximo passo na sua jornada política — inscreva-se hoje e ajude a moldar o futuro de África."
 
 #: templates/africanlii/mooc.html:178
 msgid "Enrol now"
-msgstr ""
+msgstr "Inscreva-se já"
 
 #: templates/africanlii/mooc.html:189
 msgid "Frequently asked questions"
-msgstr ""
+msgstr "Perguntas frequentes"
 
 #: templates/africanlii/mooc.html:202
 msgid "Who should take this course?"
-msgstr ""
+msgstr "Quem deve fazer este curso?"
 
 #: templates/africanlii/mooc.html:210
 msgid "Civil society organisations, diplomats, parliamentarians, government officials, international organisations, journalists, judges, and academics."
-msgstr ""
+msgstr "Organizações da sociedade civil, diplomatas, parlamentares, funcionários governamentais, organizações internacionais, jornalistas, juízes e académicos."
 
 #: templates/africanlii/mooc.html:222
 msgid "How long does it take?"
-msgstr ""
+msgstr "Quanto tempo demora?"
 
 #: templates/africanlii/mooc.html:230
 msgid "Estimated 6–8 weeks self-paced; your pace may vary depending on time dedicated each week."
-msgstr ""
+msgstr "Duração estimada de 6 a 8 semanas, ao seu ritmo; o seu ritmo pode variar consoante o tempo dedicado a cada semana."
 
 #: templates/africanlii/mooc.html:242
 msgid "Is there a certificate?"
-msgstr ""
+msgstr "Existe algum certificado?"
 
 #: templates/africanlii/mooc.html:250
 msgid "Yes — a certificate of completion issued by the University of Cape Town."
-msgstr ""
+msgstr "Sim, um certificado de conclusão emitido pela Universidade da Cidade do Cabo."
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:134
 msgid "About"
@@ -365,7 +363,7 @@ msgstr "Universidade da Cidade do Cabo"
 
 #: templates/peachjam/_footer.html:157
 msgid "GIZ"
-msgstr ""
+msgstr "GIZ"
 
 #: templates/peachjam/_header.html:41
 msgid "African Legal Information"
@@ -623,3 +621,4 @@ msgstr "anos"
 #: views/taxonomy.py:147
 msgid "Alphabet"
 msgstr "Alfabeto"
+

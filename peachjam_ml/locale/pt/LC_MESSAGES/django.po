@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 11:48+0200\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -34,14 +34,12 @@ msgid "Re-calculate average document embeddings"
 msgstr "Recalcular a média de incorporações de documentos"
 
 #: admin.py:84 admin.py:122
-#, fuzzy
-#| msgid "Saved documents"
 msgid "Document"
-msgstr "Documentos salvos"
+msgstr "Documento"
 
 #: admin.py:92
 msgid "Messages JSON"
-msgstr ""
+msgstr "Mensagens JSON"
 
 #: templates/peachjam/_related_documents.html:6
 msgid "More documents like this one"
@@ -64,3 +62,4 @@ msgstr "Documentos salvos"
 #: templates/peachjam/saved_document/_folders_list.html:30
 msgid "Suggested for this folder"
 msgstr "Sugerido para esta pasta"
+
