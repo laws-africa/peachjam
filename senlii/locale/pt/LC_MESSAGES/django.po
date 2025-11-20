@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-18 15:27+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2025-11-20 09:25\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -27,11 +27,11 @@ msgstr "Inglês"
 
 #: templates/liiweb/home.html:4
 msgid "Welcome to the Senegal Legal Information Institute"
-msgstr ""
+msgstr "Bem-vindo ao Instituto de Informação Jurídica do Senegal"
 
 #: templates/liiweb/home.html:7
 msgid "Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-msgstr ""
+msgstr "Acesso livre à legislação do Senegal. A SenegalLII é membro da comunidade das Instituições de Acesso Livre à Legislação Africanas e do Movimento de Acesso Livre à Legislação."
 
 #: templates/peachjam/_header.html:12
 msgid "Judgments"
@@ -49,26 +49,3 @@ msgstr "Artigos"
 msgid "About"
 msgstr "Sobre"
 
-#~ msgid "Recent Judgments"
-#~ msgstr "Julgamentos Recentes"
-
-#~ msgid "View more judgments"
-#~ msgstr "Ver mais julgamentos"
-
-#~ msgid "Recent Legislation"
-#~ msgstr "Legislação recente"
-
-#~ msgid "View more legislation"
-#~ msgstr "Ver mais legislação"
-
-#~ msgid "Recent Articles"
-#~ msgstr "Artigos Recentes"
-
-#~ msgid "View more articles"
-#~ msgstr "Ver mais artigos"
-
-#~ msgid "Taxonomy"
-#~ msgstr "Taxonomia"
-
-#~ msgid "Home"
-#~ msgstr "Página inicial"

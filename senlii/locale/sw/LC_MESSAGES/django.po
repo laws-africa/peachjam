@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-18 15:27+0200\n"
-"PO-Revision-Date: 2023-05-16 07:12\n"
+"PO-Revision-Date: 2025-11-20 09:25\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -27,11 +27,11 @@ msgstr "Kiingereza"
 
 #: templates/liiweb/home.html:4
 msgid "Welcome to the Senegal Legal Information Institute"
-msgstr ""
+msgstr "Karibu katika Taasisi ya Taarifa za Kisheria ya Senegal"
 
 #: templates/liiweb/home.html:7
 msgid "Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-msgstr ""
+msgstr "Ufikiaji wa bure kwa sheria ya Senegal. SenegalLII ni mwanachama wa jumuiya ya LII za Kiafrika na wa Ufikiaji Huru wa Vuguvugu la Sheria."
 
 #: templates/peachjam/_header.html:12
 msgid "Judgments"
@@ -49,26 +49,3 @@ msgstr "Makala"
 msgid "About"
 msgstr "Kuhusu"
 
-#~ msgid "Recent Judgments"
-#~ msgstr "Hukumu za Hivi Karibuni"
-
-#~ msgid "View more judgments"
-#~ msgstr "Tazama hukumu zaidi"
-
-#~ msgid "Recent Legislation"
-#~ msgstr "Sheria ya Hivi Karibuni"
-
-#~ msgid "View more legislation"
-#~ msgstr "Tazama sheria zaidi"
-
-#~ msgid "Recent Articles"
-#~ msgstr "Makala za Hivi Karibuni"
-
-#~ msgid "View more articles"
-#~ msgstr "Tazama makala zaidi"
-
-#~ msgid "Taxonomy"
-#~ msgstr "Taksonomia"
-
-#~ msgid "Home"
-#~ msgstr "Nyumbani"
