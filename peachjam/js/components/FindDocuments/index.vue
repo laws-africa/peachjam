@@ -954,7 +954,7 @@ export default {
         if (newId && previousId !== newId && !this.linkedTraces.has(newId)) {
           this.linkedTraces.add(newId);
           try {
-            fetch(`${this.urlPrefix}/search/api/link-traces?previous=${previousId}&new=${newId}`, {
+            await fetch(`${this.urlPrefix}/search/api/link-traces?previous=${previousId}&new=${newId}`, {
               method: 'POST',
               headers: await authHeaders()
             });
