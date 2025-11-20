@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 11:48+0200\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -130,197 +130,195 @@ msgstr "Uundaji wa Sera katika Umoja wa Afrika"
 
 #: templates/africanlii/mooc.html:11
 msgid "Equip yourself to meaningfully engage with AU policy processes — from development to implementation."
-msgstr ""
+msgstr "Jitayarishe kujihusisha kikamilifu na michakato ya sera ya AU - kutoka kwa maendeleo hadi utekelezaji."
 
 #: templates/africanlii/mooc.html:14
 msgid "Designed for civil society organisations, diplomats, parliamentarians, government officials, international organisations, journalists, judges, and academics who want to strengthen their role in shaping Africa’s future."
-msgstr ""
+msgstr "Imeundwa kwa ajili ya mashirika ya kiraia, wanadiplomasia, wabunge, maafisa wa serikali, mashirika ya kimataifa, waandishi wa habari, majaji, na wasomi ambao wanataka kuimarisha jukumu lao katika kuunda mustakabali wa Afrika."
 
 #: templates/africanlii/mooc.html:19
 msgid "Enroll now — start learning"
-msgstr ""
+msgstr "Jiandikishe sasa - anza kujifunza"
 
 #: templates/africanlii/mooc.html:20
 msgid "See course modules"
-msgstr ""
+msgstr "Tazama moduli za kozi"
 
 #: templates/africanlii/mooc.html:25
 msgid "Why Enrol?"
-msgstr ""
+msgstr "Kwa Nini Ujiandikishe?"
 
 #: templates/africanlii/mooc.html:27
 msgid "Through expert insights and practical tools, you’ll learn how to navigate the complexities of AU policy-making, influence outcomes, and contribute to policies that make a real impact."
-msgstr ""
+msgstr "Kupitia maarifa ya kitaalamu na zana za vitendo, utajifunza jinsi ya kuabiri matatizo ya utungaji sera wa AU, kuathiri matokeo na kuchangia sera zinazoleta matokeo halisi."
 
 #: templates/africanlii/mooc.html:33
 msgid "Deepen your understanding"
-msgstr ""
+msgstr "Kuza uelewa wako"
 
 #: templates/africanlii/mooc.html:34
 msgid "Understand AU objectives and institutions."
-msgstr ""
+msgstr "Kuelewa malengo na taasisi za AU."
 
 #: templates/africanlii/mooc.html:40
 msgid "Understand policy shaping"
-msgstr ""
+msgstr "Kuelewa uundaji wa sera"
 
 #: templates/africanlii/mooc.html:41
 msgid "Learn who influences decisions and how to reach them."
-msgstr ""
+msgstr "Jifunze ni nani anaathiri maamuzi na jinsi ya kuyafikia."
 
 #: templates/africanlii/mooc.html:47
 msgid "Practical tools"
-msgstr ""
+msgstr "Zana za vitendo"
 
 #: templates/africanlii/mooc.html:48
 msgid "Evidence-based advocacy strategies and resources."
-msgstr ""
+msgstr "Mikakati na nyenzo za utetezi zenye msingi wa ushahidi."
 
 #: templates/africanlii/mooc.html:57
 msgid "Who it's for"
-msgstr ""
+msgstr "Ni kwa ajili ya nani"
 
 #: templates/africanlii/mooc.html:59
 msgid "CSOs, diplomats, parliamentarians, officials, journalists, judges, academics."
-msgstr ""
+msgstr "AZAKi, wanadiplomasia, wabunge, maafisa, waandishi wa habari, majaji, wasomi."
 
 #: templates/africanlii/mooc.html:65
 msgid "Outcome"
-msgstr ""
+msgstr "Matokeo"
 
 #: templates/africanlii/mooc.html:66
 msgid "Practical skills to influence AU policy and track progress."
-msgstr ""
+msgstr "Ujuzi wa vitendo wa kushawishi sera ya AU na kufuatilia maendeleo."
 
 #: templates/africanlii/mooc.html:71
 msgid "Format"
-msgstr ""
+msgstr "Umbizo"
 
 #: templates/africanlii/mooc.html:72
 msgid "Online, self-paced, with curated resources and practical exercises."
-msgstr ""
+msgstr "Mtandaoni, unaojiendesha, na rasilimali zilizoratibiwa na mazoezi ya vitendo."
 
 #: templates/africanlii/mooc.html:77
 msgid "Duration"
-msgstr ""
+msgstr "Muda"
 
 #: templates/africanlii/mooc.html:78
 msgid "Estimated 6–8 weeks (self-paced)."
-msgstr ""
+msgstr "Inakadiriwa wiki 6-8 (kujiendesha)."
 
 #: templates/africanlii/mooc.html:90
 msgid "What You’ll Learn"
-msgstr ""
+msgstr "Utajifunza Nini"
 
 #: templates/africanlii/mooc.html:92
 msgid "Each module is carefully structured so you always know what to expect and can track your progress with ease."
-msgstr ""
+msgstr "Kila sehemu imeundwa kwa uangalifu ili uweze kujua kila wakati nini cha kutarajia na unaweza kufuatilia maendeleo yako kwa urahisi."
 
 #: templates/africanlii/mooc.html:100
 msgid "Module 1"
-msgstr ""
+msgstr "Moduli ya 1"
 
 #: templates/africanlii/mooc.html:103
 msgid "African Solutions to African Problems"
-msgstr ""
+msgstr "Suluhu za Kiafrika kwa Matatizo ya Kiafrika"
 
 #: templates/africanlii/mooc.html:106
 msgid "Deepen your understanding of the AU and its objectives."
-msgstr ""
+msgstr "Imarisha uelewa wako wa AU na malengo yake."
 
 #: templates/africanlii/mooc.html:115
 msgid "Module 2"
-msgstr ""
+msgstr "Moduli ya 2"
 
 #: templates/africanlii/mooc.html:118
 msgid "Influencing AU Policy Development"
-msgstr ""
+msgstr "Kuathiri Ukuzaji wa Sera ya AU"
 
 #: templates/africanlii/mooc.html:121
 msgid "Shifting from purpose to practice, this module explores how AU policies are shaped—who the key players are, how decisions are made, and where to engage effectively."
-msgstr ""
+msgstr "Kuhama kutoka kwa madhumuni hadi mazoezi, sehemu hii inachunguza jinsi sera za AU zinavyoundwa—wahusika wakuu ni akina nani, jinsi maamuzi yanafanywa, na wapi pa kushiriki kikamilifu."
 
 #: templates/africanlii/mooc.html:130
 msgid "Module 3"
-msgstr ""
+msgstr "Moduli ya 3"
 
 #: templates/africanlii/mooc.html:133
 msgid "Influencing AU Policy Implementation"
-msgstr ""
+msgstr "Kuathiri Utekelezaji wa Sera ya AU"
 
 #: templates/africanlii/mooc.html:136
 msgid "Explore how AU policies are implemented in practice, across multiple levels, by diverse actors, and within complex political and legal landscapes."
-msgstr ""
+msgstr "Chunguza jinsi sera za AU zinavyotekelezwa kivitendo, katika ngazi mbalimbali, na watendaji mbalimbali, na ndani ya nyanja tata za kisiasa na kisheria."
 
 #: templates/africanlii/mooc.html:145
 msgid "Module 4"
-msgstr ""
+msgstr "Moduli ya 4"
 
 #: templates/africanlii/mooc.html:148
-#, fuzzy
-#| msgid "African Union"
 msgid "African Union Policy Toolbox"
-msgstr "Umoja wa Afrika"
+msgstr "Zana ya Sera ya Umoja wa Afrika"
 
 #: templates/africanlii/mooc.html:151
 msgid "Practical tools for effective AU policy engagement, from data and educational resources to advocacy strategies that support evidence-based change."
-msgstr ""
+msgstr "Zana za vitendo za ushirikishwaji bora wa sera za AU, kutoka kwa data na nyenzo za elimu hadi mikakati ya utetezi ambayo inasaidia mabadiliko yanayotegemea ushahidi."
 
 #: templates/africanlii/mooc.html:159
 msgid "Start the course — Enrol now"
-msgstr ""
+msgstr "Anza kozi - Jiandikishe sasa"
 
 #: templates/africanlii/mooc.html:169
 msgid "Certification"
-msgstr ""
+msgstr "Uthibitisho"
 
 #: templates/africanlii/mooc.html:172
 msgid "Upon successful completion, participants will receive a"
-msgstr ""
+msgstr "Baada ya kukamilika kwa mafanikio, washiriki watapata a"
 
 #: templates/africanlii/mooc.html:172
 msgid "certificate of completion issued by the University of Cape Town"
-msgstr ""
+msgstr "cheti cha kukamilika kilichotolewa na Chuo Kikuu cha Cape Town"
 
 #: templates/africanlii/mooc.html:172
 msgid "a mark of recognition for their commitment to advancing effective AU policy-making."
-msgstr ""
+msgstr "alama ya kutambuliwa kwa kujitolea kwao kuendeleza utungaji sera bora wa AU."
 
 #: templates/africanlii/mooc.html:175
 msgid "Take the next step in your policy journey — enrol today and help shape Africa’s future."
-msgstr ""
+msgstr "Chukua hatua inayofuata katika safari yako ya sera - jiandikishe leo na usaidie kuunda mustakabali wa Afrika."
 
 #: templates/africanlii/mooc.html:178
 msgid "Enrol now"
-msgstr ""
+msgstr "Jiandikishe sasa"
 
 #: templates/africanlii/mooc.html:189
 msgid "Frequently asked questions"
-msgstr ""
+msgstr "Maswali yanayoulizwa mara kwa mara"
 
 #: templates/africanlii/mooc.html:202
 msgid "Who should take this course?"
-msgstr ""
+msgstr "Nani anapaswa kuchukua kozi hii?"
 
 #: templates/africanlii/mooc.html:210
 msgid "Civil society organisations, diplomats, parliamentarians, government officials, international organisations, journalists, judges, and academics."
-msgstr ""
+msgstr "Mashirika ya kiraia, wanadiplomasia, wabunge, maafisa wa serikali, mashirika ya kimataifa, waandishi wa habari, majaji na wasomi."
 
 #: templates/africanlii/mooc.html:222
 msgid "How long does it take?"
-msgstr ""
+msgstr "Inachukua muda gani?"
 
 #: templates/africanlii/mooc.html:230
 msgid "Estimated 6–8 weeks self-paced; your pace may vary depending on time dedicated each week."
-msgstr ""
+msgstr "Inakadiriwa wiki 6-8 za kujitegemea; kasi yako inaweza kutofautiana kulingana na wakati uliowekwa kila wiki."
 
 #: templates/africanlii/mooc.html:242
 msgid "Is there a certificate?"
-msgstr ""
+msgstr "Je, kuna cheti?"
 
 #: templates/africanlii/mooc.html:250
 msgid "Yes — a certificate of completion issued by the University of Cape Town."
-msgstr ""
+msgstr "Ndiyo - cheti cha kukamilika kilichotolewa na Chuo Kikuu cha Cape Town."
 
 #: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:134
 msgid "About"
@@ -365,7 +363,7 @@ msgstr "Chuo Kikuu cha Cape Town"
 
 #: templates/peachjam/_footer.html:157
 msgid "GIZ"
-msgstr ""
+msgstr "GIZ"
 
 #: templates/peachjam/_header.html:41
 msgid "African Legal Information"
@@ -623,3 +621,4 @@ msgstr "Miaka"
 #: views/taxonomy.py:147
 msgid "Alphabet"
 msgstr "Alfabeti"
+
