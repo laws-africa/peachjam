@@ -139,11 +139,9 @@ PEACHJAM = {
     "LAWSAFRICA_API_KEY": os.environ.get(
         "LAWSAFRICA_API_KEY", os.environ.get("CITATOR_API_KEY")
     ),
-    "CITATOR_API": os.environ.get(
-        "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
-    ),
+    "CITATOR_API": os.environ.get("CITATOR_API", "https://api.laws.africa/citator/v1/"),
     "EXTRACTOR_API": os.environ.get(
-        "EXTRACTOR_API", "https://services.lawsafrica.com/extractor/v1/"
+        "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
