@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:44+0200\n"
-"PO-Revision-Date: 2025-10-07 08:34\n"
+"PO-Revision-Date: 2025-11-20 09:25\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -107,7 +107,7 @@ msgstr "Changement à venir"
 
 #: templates/peachjam_subs/_subscription_card.html:7
 msgid "Trial"
-msgstr "Procès"
+msgstr "Essai"
 
 #: templates/peachjam_subs/_subscription_card.html:15
 msgid "Next payment due on"
