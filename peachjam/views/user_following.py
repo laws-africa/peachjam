@@ -84,7 +84,9 @@ class BaseUserFollowingView(LoginRequiredMixin):
     model = UserFollowing
 
     def get_queryset(self):
-        return self.request.user.following.filter(saved_search__isnull=True)
+        return self.request.user.following.filter(
+            saved_search__isnull=True, saved_document__isnull=True
+        )
 
 
 class UserFollowingListView(BaseUserFollowingView, ListView):

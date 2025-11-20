@@ -4,7 +4,11 @@ from django.utils.translation import override
 from templated_email import send_templated_mail
 
 from peachjam.models import TimelineEvent
-from peachjam.tasks import send_new_document_email_alert, send_saved_search_email_alert
+from peachjam.tasks import (
+    send_new_citation_email_alert,
+    send_new_document_email_alert,
+    send_saved_search_email_alert,
+)
 
 
 class TimelineEmailService:
@@ -25,22 +29,27 @@ class TimelineEmailService:
             .distinct()
         )
 
+        new_citation_user_ids = (
+            events.filter(event_type=TimelineEvent.EventTypes.NEW_CITATION)
+            .values_list("user_following__user_id", flat=True)
+            .distinct()
+        )
+
         for user_id in new_doc_user_ids:
             send_new_document_email_alert(user_id)
 
         for user_id in saved_search_user_ids:
             send_saved_search_email_alert(user_id)
 
+        for user_id in new_citation_user_ids:
+            send_new_citation_email_alert(user_id)
+
     @staticmethod
     def send_new_documents_email(user):
-        events = (
-            TimelineEvent.objects.prefetch_subject_documents(user)
-            .filter(
-                email_alert_sent_at__isnull=True,
-                event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
-                user_following__user=user,
-            )
-            .select_related("user_following")
+        events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
+            email_alert_sent_at__isnull=True,
+            event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
+            user_following__user=user,
         )
 
         if not events.exists():
@@ -77,14 +86,10 @@ class TimelineEmailService:
 
     @staticmethod
     def send_saved_search_email(user):
-        events = (
-            TimelineEvent.objects.prefetch_subject_documents(user)
-            .filter(
-                email_alert_sent_at__isnull=True,
-                event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
-                user_following__user=user,
-            )
-            .select_related("user_following")
+        events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
+            email_alert_sent_at__isnull=True,
+            event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
+            user_following__user=user,
         )
 
         if not events.exists():
@@ -103,6 +108,35 @@ class TimelineEmailService:
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(
                     template_name="search_alert",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    context=context,
+                )
+                ev.mark_as_sent()
+
+    @staticmethod
+    def send_new_citation_email(user):
+        events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
+            email_alert_sent_at__isnull=True,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+            user_following__user=user,
+        )
+
+        if not events.exists():
+            return
+
+        events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
+
+        for ev in events:
+            context = {
+                "user": user,
+                "documents": ev.subject_documents,
+                "manage_url_path": reverse("folder_list"),
+            }
+
+            with override(user.userprofile.preferred_language.pk):
+                send_templated_mail(
+                    template_name="new_citation_alert",
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
                     context=context,

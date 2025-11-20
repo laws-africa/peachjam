@@ -102,6 +102,9 @@ class SavedDocument(models.Model):
 
     objects = SavedDocumentManager()
 
+    def __str__(self):
+        return f"SavedDocument: {self.work.title} for {self.user.username}"
+
     @property
     def document(self):
         # use manually set doc if available

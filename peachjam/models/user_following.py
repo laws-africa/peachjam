@@ -326,15 +326,19 @@ class UserFollowing(models.Model):
                 )
                 return
 
-        event, new = TimelineEvent.objects.get_or_create(
-            user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_CITATION,
-            email_alert_sent_at__isnull=True,
-        )
-        event.subject_works.add(work)
+        TimelineEvent.add_new_citation_events(self, work)
 
     @classmethod
     def update_follows_for_user(cls, user):
         follows = user.following.all()
         for follow in follows:
             follow.update_follow()
+
+    @classmethod
+    def update_new_citation_follows(cls, citation):
+        follows = cls.objects.filter(
+            saved_document__work=citation.target_work,
+        )
+        log.info("Found %d follows for new citation update", follows.count())
+        for follow in follows:
+            follow._update_new_citation(citation)

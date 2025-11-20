@@ -297,7 +297,7 @@ def send_saved_search_email_alert(user_id):
 def send_new_citation_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
-    from peachjam.models import TimelineEvent
+    from peachjam.timeline_email_service import TimelineEmailService
 
     user = get_user_model().objects.filter(pk=user_id).first()
     if not user:
@@ -305,7 +305,7 @@ def send_new_citation_email_alert(user_id):
         return
 
     log.info(f"Sending new citation email alerts for user {user_id}")
-    TimelineEvent.send_new_citation_email_alert(user)
+    TimelineEmailService.send_new_citation_email(user)
     log.info("New citation email alerts sent")
 
 
@@ -331,4 +331,4 @@ def update_users_new_citation(citation_id):
         log.info(f"No citation with id {citation_id} exists, ignoring.")
         return
     log.info(f"Updating users for new citation {citation_id}")
-    UserFollowing.update_users_new_citation(citation)
+    UserFollowing.update_new_citation_follows(citation)
