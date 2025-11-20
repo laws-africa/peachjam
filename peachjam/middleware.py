@@ -347,3 +347,16 @@ class SanityCheckCacheMiddleware:
         if self.strict:
             raise AssertionError("[CacheSanity] " + message)
         log.error(f"[CacheSanity] {message}")
+
+
+class UserIDHeaderMiddleware:
+    """Adds the user id to the response headers, for logging (and stripping) by nginx."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if request.user.is_authenticated:
+            response["X-UID"] = f"user-{request.user.userprofile.tracking_id}"
+        return response
