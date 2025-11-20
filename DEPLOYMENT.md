@@ -175,7 +175,7 @@ Large sites will benefit from Cloudflare, for both caching and for mitigating at
 This puts the site behind Cloudflare.
 
 - Add the domain to Cloudflare but DO NOT enable DNS proxying, configure DNS only.
-- Under SSL/TLS, configure **Full (Strict)** mode.
+- Under SSL/TLS, configure **Full** mode.
 - Go to DNS and configure **proxied** for the site's A record (NOT the www record).
 
 ## Caching
