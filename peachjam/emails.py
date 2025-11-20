@@ -104,7 +104,11 @@ class CustomerIOTemplateBackend(TemplateBackend):
     }
 
     # use CustomerIO for these templates, otherwise fall back to the usual system
-    transactional_message_ids = ["search_alert", "user_following_alert"]
+    transactional_message_ids = [
+        "search_alert",
+        "user_following_alert",
+        "new_citation_alert",
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

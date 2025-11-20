@@ -127,18 +127,27 @@ class TimelineEmailService:
 
         events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
 
-        for ev in events:
-            context = {
-                "user": user,
-                "documents": ev.subject_documents,
-                "manage_url_path": reverse("folder_list"),
-            }
+        context = {
+            "user": user,
+            "saved_documents": [],
+            "manage_url_path": reverse("folder_list"),
+        }
 
-            with override(user.userprofile.preferred_language.pk):
-                send_templated_mail(
-                    template_name="new_citation_alert",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    context=context,
-                )
+        for ev in events:
+            context["saved_documents"].append(
+                {
+                    "saved_document": ev.user_following.saved_document.document,
+                    "citing_documents": ev.subject_documents,
+                }
+            )
+
+        with override(user.userprofile.preferred_language.pk):
+            send_templated_mail(
+                template_name="new_citation_alert",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                context=context,
+            )
+
+            for ev in events:
                 ev.mark_as_sent()
