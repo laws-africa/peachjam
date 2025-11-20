@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:44+0200\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
 "PO-Revision-Date: 2025-10-07 09:02\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -33,63 +33,63 @@ msgstr "Usajili umeghairiwa."
 msgid "Subscription cannot be cancelled."
 msgstr "Usajili hauwezi kughairiwa."
 
-#: admin.py:168
+#: admin.py:180
 msgid "View"
 msgstr "Tazama"
 
-#: models.py:171
+#: models.py:176
 msgid "Monthly"
 msgstr "Kila mwezi"
 
-#: models.py:172
+#: models.py:177
 msgid "Annually"
 msgstr "Kila mwaka"
 
-#: models.py:182
+#: models.py:187
 msgid "month"
 msgstr "mwezi"
 
-#: models.py:183
+#: models.py:188
 msgid "year"
 msgstr "mwaka"
 
-#: models.py:203
+#: models.py:208
 msgid "FREE"
 msgstr "BILA MALIPO"
 
-#: models.py:276
+#: models.py:281
 msgid "Pending"
 msgstr "Inasubiri"
 
-#: models.py:277
+#: models.py:282
 msgid "Active"
 msgstr "Inayotumika"
 
-#: models.py:278
+#: models.py:283
 msgid "Closed"
 msgstr "Imefungwa"
 
-#: models.py:546
+#: models.py:556
 msgid "Default product offering"
 msgstr "Utoaji wa bidhaa chaguomsingi"
 
-#: models.py:551
+#: models.py:561
 msgid "These products are highlighted in the product listing."
 msgstr "Bidhaa hizi zimeangaziwa kwenye orodha ya bidhaa."
 
-#: models.py:559
+#: models.py:569
 msgid "Trial product offering"
 msgstr "Sadaka ya bidhaa ya majaribio"
 
-#: models.py:560
+#: models.py:570
 msgid "If set, this product offering is used for trials."
 msgstr "Ikiwa imewekwa, toleo la bidhaa hii linatumika kwa majaribio."
 
-#: models.py:564
+#: models.py:574
 msgid "Trial duration (days)"
 msgstr "Muda wa majaribio (siku)"
 
-#: models.py:565
+#: models.py:575
 msgid "Number of days for the trial period."
 msgstr "Idadi ya siku kwa kipindi cha majaribio."
 
@@ -114,36 +114,38 @@ msgid "Next payment due on"
 msgstr "Malipo yanayofuata yatalipwa"
 
 #: templates/peachjam_subs/_subscription_card.html:22
-msgid "Active since"
-msgstr "Imetumika tangu"
-
-#: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
 msgstr "Huanza"
 
-#: templates/peachjam_subs/_subscription_card.html:27
+#: templates/peachjam_subs/_subscription_card.html:25
 msgid "Ends on"
 msgstr "Inaisha"
 
-#: templates/peachjam_subs/_subscription_card.html:36
+#: templates/peachjam_subs/_subscription_card.html:34
 msgid "Are you sure?"
 msgstr "Je, una uhakika?"
 
-#: templates/peachjam_subs/_subscription_card.html:37
+#: templates/peachjam_subs/_subscription_card.html:35
 msgid "Cancel change"
 msgstr "Ghairi mabadiliko"
 
-#: templates/peachjam_subs/_subscription_required.html:8
-#, python-format
-msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
+#: templates/peachjam_subs/_subscription_card.html:42
+msgid "Active since"
+msgstr "Imetumika tangu"
+
+#: templates/peachjam_subs/_subscription_required.html:10
+#, fuzzy, python-format
+#| msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
+msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and <a href=\"%(upsell_url)s\">subscribe to %(lowest_product)s</a> to unlock access."
 msgstr "Maudhui haya yanapatikana kwa waliojisajili pekee. <a href=\"%(login_url)s\">Ingia</a> au <a href=\"%(signup_url)s\">Jisajili</a> na ujiandikishe kwa %(lowest_product)s ili kufungua ufikiaji."
 
-#: templates/peachjam_subs/_subscription_required.html:18
-#, python-format
-msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
+#: templates/peachjam_subs/_subscription_required.html:21
+#, fuzzy, python-format
+#| msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
+msgid "Your current subscription doesn’t include this content. Please <a href=\"%(upsell_url)s\">upgrade to %(lowest_product)s</a> to unlock access."
 msgstr "Usajili wako wa sasa haujumuishi maudhui haya. Tafadhali pata toleo jipya la %(lowest_product)s ili kufungua ufikiaji."
 
-#: templates/peachjam_subs/_subscription_required.html:25
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "This content is not currently available."
 msgstr "Maudhui haya hayapatikani kwa sasa."
 
@@ -228,11 +230,10 @@ msgstr "Fikia maktaba yako ya kibinafsi popote ulipo, kwenye eneo-kazi au simu y
 msgid "Create your free account"
 msgstr "Fungua akaunti yako ya bure"
 
-#: templates/user_account/home.html:7
+#: templates/user_account/home.html:6
 msgid "Subscription"
 msgstr "Usajili"
 
 #: views.py:28
 msgid "Your pending subscription change has been cancelled."
 msgstr "Mabadiliko ya usajili unaosubiri kutekelezwa yameghairiwa."
-

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:40+0200\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
 "PO-Revision-Date: 2025-10-07 09:02\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -48,15 +48,16 @@ msgstr "Pesquisa avançada"
 
 #: templates/liiweb/home.html:4
 #: templates/liiweb/locality_legislation_list.html:9
+#: templates/peachjam/_header.html:8
 msgid "Home"
 msgstr "Página inicial"
 
-#: templates/liiweb/home.html:42 templates/peachjam/_header.html:8
+#: templates/liiweb/home.html:42 templates/peachjam/_header.html:13
 msgid "Judgments"
 msgstr "Julgamentos"
 
 #: templates/liiweb/home.html:45 templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:14
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:19
 msgid "Legislation"
 msgstr "Legislação"
 
@@ -122,30 +123,34 @@ msgstr "Disposições inconstitucionais"
 msgid "Uncommenced provisions"
 msgstr "Disposições não iniciadas"
 
-#: templates/liiweb/legislation_list.html:44
+#: templates/liiweb/legislation_list.html:34
+msgid "Glossary of defined terms"
+msgstr ""
+
+#: templates/liiweb/legislation_list.html:49
 msgid "You are viewing repealed legislation which is no longer in force."
 msgstr "Estão a ver legislação revogada, que já não está em vigor."
 
-#: templates/liiweb/legislation_list.html:53
+#: templates/liiweb/legislation_list.html:58
 #: templates/liiweb/locality_legislation_list.html:27
 msgid "Current legislation"
 msgstr "Legislação atual"
 
-#: templates/liiweb/legislation_list.html:61
+#: templates/liiweb/legislation_list.html:66
 msgid "Recent legislation"
 msgstr "Legislação recente"
 
-#: templates/liiweb/legislation_list.html:75
+#: templates/liiweb/legislation_list.html:80
 #: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:5
 msgid "Uncommenced legislation"
 msgstr "Legislação não iniciada"
 
-#: templates/liiweb/legislation_list.html:83
+#: templates/liiweb/legislation_list.html:88
 #: templates/liiweb/locality_legislation_list.html:33
 msgid "Repealed legislation"
 msgstr "Legislação repetida"
 
-#: templates/liiweb/legislation_list.html:90
+#: templates/liiweb/legislation_list.html:95
 #: templates/liiweb/locality_legislation_list.html:43
 msgid "All legislation"
 msgstr "Toda a legislação"
@@ -154,7 +159,7 @@ msgstr "Toda a legislação"
 msgid "Pocket Law"
 msgstr "Lei de Bolso"
 
-#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:20
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:25
 msgid "About"
 msgstr "Sobre"
 
@@ -187,8 +192,7 @@ msgstr "Nossos parceiros"
 msgid "Other African Legal Information Institutions"
 msgstr "Outras Instituições Jurídicas Africanas"
 
-#: views/legislation.py:166
+#: views/legislation.py:179
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"
-

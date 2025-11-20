@@ -1,17 +1,22 @@
-#: models.py:168
+#: models.py:167
 msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:256
+#: models.py:255
 msgid "feedback"
 msgstr ""
 
-#: models.py:258
+#: models.py:257
 msgid "name"
 msgstr ""
 
-#: models.py:263
+#: models.py:262
 msgid "email address"
+msgstr ""
+
+#: templates/peachjam_search/_download_403.html:4
+#, python-format
+msgid "<a href=\"%(signup_url)s?next=%(next)s\">Sign up</a> or <a href=\"%(login_url)s?next=%(next)s\">log in</a> to download search results."
 msgstr ""
 
 #: templates/peachjam_search/_saved_search_modal.html:7
@@ -210,11 +215,11 @@ msgstr ""
 msgid "No search traces found."
 msgstr ""
 
-#: views.py:60
+#: views.py:61
 #, python-format
 msgid "Search %(app_name)s"
 msgstr ""
 
-#: views.py:263
+#: views.py:286
 msgid "Search trace not found"
 msgstr ""

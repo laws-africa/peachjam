@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:44+0200\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
 "PO-Revision-Date: 2025-11-20 09:25\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -33,63 +33,63 @@ msgstr "Abonnement annulé."
 msgid "Subscription cannot be cancelled."
 msgstr "L'abonnement ne peut pas être annulé."
 
-#: admin.py:168
+#: admin.py:180
 msgid "View"
 msgstr "Voir"
 
-#: models.py:171
+#: models.py:176
 msgid "Monthly"
 msgstr "Mensuel"
 
-#: models.py:172
+#: models.py:177
 msgid "Annually"
 msgstr "Annuellement"
 
-#: models.py:182
+#: models.py:187
 msgid "month"
 msgstr "mois"
 
-#: models.py:183
+#: models.py:188
 msgid "year"
 msgstr "année"
 
-#: models.py:203
+#: models.py:208
 msgid "FREE"
 msgstr "GRATUIT"
 
-#: models.py:276
+#: models.py:281
 msgid "Pending"
 msgstr "En attente"
 
-#: models.py:277
+#: models.py:282
 msgid "Active"
 msgstr "Actif"
 
-#: models.py:278
+#: models.py:283
 msgid "Closed"
 msgstr "Fermé"
 
-#: models.py:546
+#: models.py:556
 msgid "Default product offering"
 msgstr "Offre de produits par défaut"
 
-#: models.py:551
+#: models.py:561
 msgid "These products are highlighted in the product listing."
 msgstr "Ces produits sont mis en évidence dans la liste des produits."
 
-#: models.py:559
+#: models.py:569
 msgid "Trial product offering"
 msgstr "Offre de produits d'essai"
 
-#: models.py:560
+#: models.py:570
 msgid "If set, this product offering is used for trials."
 msgstr "Si cette option est définie, cette offre de produits est utilisée pour les essais."
 
-#: models.py:564
+#: models.py:574
 msgid "Trial duration (days)"
 msgstr "Durée de l'essai (jours)"
 
-#: models.py:565
+#: models.py:575
 msgid "Number of days for the trial period."
 msgstr "Nombre de jours pour la période d'essai."
 
@@ -114,36 +114,38 @@ msgid "Next payment due on"
 msgstr "Prochain paiement dû le"
 
 #: templates/peachjam_subs/_subscription_card.html:22
-msgid "Active since"
-msgstr "Actif depuis"
-
-#: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
 msgstr "Commence le"
 
-#: templates/peachjam_subs/_subscription_card.html:27
+#: templates/peachjam_subs/_subscription_card.html:25
 msgid "Ends on"
 msgstr "Se termine le"
 
-#: templates/peachjam_subs/_subscription_card.html:36
+#: templates/peachjam_subs/_subscription_card.html:34
 msgid "Are you sure?"
 msgstr "Es-tu sûr?"
 
-#: templates/peachjam_subs/_subscription_card.html:37
+#: templates/peachjam_subs/_subscription_card.html:35
 msgid "Cancel change"
 msgstr "Annuler le changement"
 
-#: templates/peachjam_subs/_subscription_required.html:8
-#, python-format
-msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
+#: templates/peachjam_subs/_subscription_card.html:42
+msgid "Active since"
+msgstr "Actif depuis"
+
+#: templates/peachjam_subs/_subscription_required.html:10
+#, fuzzy, python-format
+#| msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to %(lowest_product)s to unlock access."
+msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and <a href=\"%(upsell_url)s\">subscribe to %(lowest_product)s</a> to unlock access."
 msgstr "Ce contenu est disponible uniquement pour les abonnés. <a href=\"%(login_url)s\">Connectez-vous</a> ou <a href=\"%(signup_url)s\">Inscrivez-vous</a> et abonnez-vous à %(lowest_product)s pour débloquer l'accès."
 
-#: templates/peachjam_subs/_subscription_required.html:18
-#, python-format
-msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
+#: templates/peachjam_subs/_subscription_required.html:21
+#, fuzzy, python-format
+#| msgid "Your current subscription doesn’t include this content. Please upgrade to %(lowest_product)s to unlock access."
+msgid "Your current subscription doesn’t include this content. Please <a href=\"%(upsell_url)s\">upgrade to %(lowest_product)s</a> to unlock access."
 msgstr "Votre abonnement actuel n'inclut pas ce contenu. Veuillez passer à %(lowest_product)s pour y accéder."
 
-#: templates/peachjam_subs/_subscription_required.html:25
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "This content is not currently available."
 msgstr "Ce contenu n'est actuellement pas disponible."
 
@@ -228,11 +230,10 @@ msgstr "Accédez à votre bibliothèque personnelle où que vous soyez, sur votr
 msgid "Create your free account"
 msgstr "Créez votre compte gratuit"
 
-#: templates/user_account/home.html:7
+#: templates/user_account/home.html:6
 msgid "Subscription"
 msgstr "Abonnement"
 
 #: views.py:28
 msgid "Your pending subscription change has been cancelled."
 msgstr "Votre modification d’abonnement en attente a été annulée."
-
