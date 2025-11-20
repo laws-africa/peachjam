@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2025-11-20 12:10+0200\n"
 "PO-Revision-Date: 2025-10-07 09:02\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -3204,6 +3204,10 @@ msgstr "Estatísticas do site"
 #: templates/peachjam/metabase_stats.html:9
 msgid "Statistics"
 msgstr "Estatisticas"
+
+#: templates/peachjam/my/_frontpage.html:6
+msgid "Explore"
+msgstr ""
 
 #: templates/peachjam/my/_frontpage_anon.html:4
 msgid "Your personal research space — save documents, add notes, and get updates when the law changes."

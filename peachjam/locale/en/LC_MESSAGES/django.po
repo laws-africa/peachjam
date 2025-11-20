@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2025-11-20 12:10+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -3174,6 +3174,10 @@ msgstr ""
 
 #: templates/peachjam/metabase_stats.html:9
 msgid "Statistics"
+msgstr ""
+
+#: templates/peachjam/my/_frontpage.html:6
+msgid "Explore"
 msgstr ""
 
 #: templates/peachjam/my/_frontpage_anon.html:4
