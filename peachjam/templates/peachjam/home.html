@@ -1,8 +1,6 @@
 {% extends "peachjam/layouts/main.html" %}
 {% load i18n %}
-{% block title %}
-  {% trans 'Home' %}
-{% endblock %}
+{% block full-title %}{{ APP_NAME }}{% endblock %}
 {% block body-class %}home-template{% endblock %}
 {% block page-content %}
   <section>
