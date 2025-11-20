@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 11:48+0200\n"
-"PO-Revision-Date: 2025-10-07 08:34\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -52,7 +52,7 @@ msgstr "Nos partenaires"
 
 #: templates/peachjam/_header.html:8
 msgid "Home"
-msgstr ""
+msgstr "Accueil"
 
 #: templates/peachjam/_header.html:13
 msgid "Judgments"
@@ -89,3 +89,4 @@ msgstr "Contactez-nous"
 #: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contactez-nous au <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> pour plus d'informations."
+
