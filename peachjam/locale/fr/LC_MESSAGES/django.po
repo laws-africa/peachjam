@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-10-07 08:34\n"
+"PO-Revision-Date: 2025-11-20 09:25\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -906,7 +906,7 @@ msgstr "groupes d'accès aux documents"
 
 #: models/enrichments.py:10
 msgid "Provision enrichment"
-msgstr "Enrichissement des provisions"
+msgstr "Enrichissement des disposition"
 
 #: models/enrichments.py:11
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:10
@@ -915,7 +915,7 @@ msgstr "Disposition inconstitutionnelle"
 
 #: models/enrichments.py:12
 msgid "Uncommenced provision"
-msgstr "Disposition non commencée"
+msgstr "Disposition non encore mises en vigueur"
 
 #: models/enrichments.py:13
 msgid "Provision citation"
@@ -927,7 +927,7 @@ msgstr "disposition eid"
 
 #: models/enrichments.py:27
 msgid "whole work"
-msgstr "œuvre entière"
+msgstr "travail entier"
 
 #: models/enrichments.py:29
 msgid "enrichment type"
@@ -939,7 +939,7 @@ msgstr "enrichissement des provisions"
 
 #: models/enrichments.py:43
 msgid "provision enrichments"
-msgstr "enrichissements des provisions"
+msgstr "enrichissements de disposition"
 
 #: models/enrichments.py:83 models/judgment.py:254 models/judgment.py:270
 #: models/judgment.py:426 views/courts.py:54 views/judgment.py:27
@@ -984,11 +984,11 @@ msgstr "et tous les descendants"
 
 #: models/enrichments.py:116
 msgid "uncommenced provision"
-msgstr "disposition non commencée"
+msgstr "dispositions non encore mises en vigueur"
 
 #: models/enrichments.py:117
 msgid "uncommenced provisions"
-msgstr "dispositions non encore appliquées"
+msgstr "dispositions non encore mises en vigueur"
 
 #: models/enrichments.py:125
 msgid "prefix"
@@ -1121,11 +1121,11 @@ msgstr "résultats"
 
 #: models/judgment.py:77 models/judgment.py:308
 msgid "case action"
-msgstr "action en justice"
+msgstr "décision sur l’affaire"
 
 #: models/judgment.py:78
 msgid "case actions"
-msgstr "actions en justice"
+msgstr "décisions sur l’affaire"
 
 #: models/judgment.py:92 models/judgment.py:631
 msgid "matter type"
@@ -1183,7 +1183,7 @@ msgstr "juge_du_court_inférieur"
 
 #: models/judgment.py:300
 msgid "court division"
-msgstr "division du tribunal"
+msgstr "division judiciaire"
 
 #: models/judgment.py:329
 msgid "case summary"
@@ -1203,7 +1203,7 @@ msgstr "Un bref résumé du jugement, à utiliser dans les listes"
 
 #: models/judgment.py:340
 msgid "issues"
-msgstr "problèmes"
+msgstr "questions en litige"
 
 #: models/judgment.py:343
 msgid "A list of issues that the judgment addresses"
@@ -1211,7 +1211,7 @@ msgstr "Une liste de questions abordées dans le jugement"
 
 #: models/judgment.py:346
 msgid "held"
-msgstr "détenu"
+msgstr "décision"
 
 #: models/judgment.py:349
 msgid "The main findings of the judgment"
@@ -2808,7 +2808,7 @@ msgstr "Documents enregistrés"
 #: templates/peachjam/user_following/list.html:4
 #: templates/peachjam/user_following/list.html:7
 msgid "Following"
-msgstr "Suivant"
+msgstr "Abonnements"
 
 #: templates/peachjam/_user_menu.html:36
 #: templates/peachjam/my/_saved_searches.html:4
@@ -2870,11 +2870,11 @@ msgstr "Résumé du cas"
 
 #: templates/peachjam/document/_case_summary.html:12
 msgid "Issues"
-msgstr "Problèmes"
+msgstr "Questions en litige"
 
 #: templates/peachjam/document/_case_summary.html:18
 msgid "Held"
-msgstr "Détenu"
+msgstr "Décision"
 
 #: templates/peachjam/document/_case_summary.html:24
 msgid "Order"
@@ -2901,7 +2901,7 @@ msgstr "Dispositions non encore mises en vigueur"
 
 #: templates/peachjam/document/_uncommenced_provisions.html:8
 msgid "All uncommenced provisions"
-msgstr "Toutes les dispositions non encore mises en œuvre"
+msgstr "Toutes les dispositions non encore mises en vigueur"
 
 #: templates/peachjam/document/_unconstitutional_provisions.html:4
 #: templates/peachjam/layouts/document_detail.html:129
@@ -2941,7 +2941,7 @@ msgstr "Division du tribunal"
 
 #: templates/peachjam/judgment_detail.html:48
 msgid "Case action"
-msgstr "Action en justice"
+msgstr "Décisions sur l’affaire"
 
 #: templates/peachjam/judgment_detail.html:70
 msgid "Case number"
@@ -3139,7 +3139,7 @@ msgstr "Texte lu"
 
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:74
 msgid "as at"
-msgstr "comme à"
+msgstr "en date du"
 
 #: templates/peachjam/restricted_document_detail.html:17
 msgid "Permission denied"
@@ -3376,7 +3376,7 @@ msgstr "Mise à jour"
 
 #: templates/user_account/home.html:26
 msgid "Update details"
-msgstr "Détails de la mise à jour"
+msgstr "Mettre à jour les informations"
 
 #: templates/user_account/home.html:47
 msgid "Update email address"
@@ -3460,7 +3460,7 @@ msgstr "Résultats"
 
 #: views/courts.py:134
 msgid "Case actions"
-msgstr "Actions en justice"
+msgstr "Décisions sur l’affaire"
 
 #: views/gazette.py:169
 msgid "Special Issue"
