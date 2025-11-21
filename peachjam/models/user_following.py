@@ -178,6 +178,8 @@ class UserFollowing(models.Model):
             return _("New matches for search alert")
         elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
             return _("New documents added for")
+        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
+            return _("New citations to")
 
     @property
     def followed_field(self):
