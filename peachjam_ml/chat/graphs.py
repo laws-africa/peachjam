@@ -75,11 +75,9 @@ from langgraph.types import StateSnapshot
 
 from peachjam.models import CoreDocument, Judgment, Legislation
 from peachjam_ml.chat.tools import (
-    answer_document_question,
+    ALL_TOOLS,
     get_citator_citations,
-    get_provision_eid,
-    get_provision_text,
-    provision_commencement_info,
+    get_tools_for_document,
 )
 
 INITIAL_PROMPT_NAME = "chat/document/initial"
@@ -107,16 +105,12 @@ langfuse_callback = CallbackHandler()
 chat_llm = init_chat_model(
     "openai:gpt-5-mini", temperature=0, api_key=os.environ.get("OPENAI_API_KEY") or "-"
 )
-tools = [
-    answer_document_question,
-    get_provision_eid,
-    provision_commencement_info,
-    get_provision_text,
-]
-llm_with_tools = chat_llm.bind_tools(tools)
 
 
 def chatbot(state: DocumentChatState):
+    document = CoreDocument.objects.get(pk=state["document_id"])
+    llm_with_tools = chat_llm.bind_tools(get_tools_for_document(document))
+
     state["messages"].append(
         HumanMessage(
             content=state["user_message"]["content"], id=state["user_message"]["id"]
@@ -254,7 +248,7 @@ graph_builder.add_node("initial_prompt", initial_prompt)
 graph_builder.add_node("doc_metadata", doc_metadata)
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_node("markup_refs", markup_refs)
-graph_builder.add_node("tools", ToolNode(tools=tools))
+graph_builder.add_node("tools", ToolNode(tools=ALL_TOOLS))
 
 # when resuming a chat, jump to the chatbot state
 graph_builder.add_conditional_edges(
