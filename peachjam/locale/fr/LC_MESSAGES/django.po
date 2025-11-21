@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-20 12:10+0200\n"
-"PO-Revision-Date: 2025-11-20 11:14\n"
+"PO-Revision-Date: 2025-11-21 15:05\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -2842,7 +2842,7 @@ msgstr "Si vous avez des commentaires ou des suggestions au sujet de cette polit
 
 #: templates/peachjam/_terms_of_use_content.html:252
 msgid "Date of notice: 8 October 2025"
-msgstr "Date de notification : 8 octobre 2025"
+msgstr "Date de la notification: 8 novembre 2025"
 
 #: templates/peachjam/_timeline_events.html:4
 msgid "History of this document"
