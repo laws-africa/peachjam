@@ -2,7 +2,7 @@
   <div class="document-chat d-flex flex-column h-100">
     <div ref="messageContainer" class="chat-messages flex-grow-1 overflow-auto p-2">
       <div v-if="messages.length === 0 && !loading" class="text-center text-muted py-5">
-        Start the conversation by asking a question about this document.
+        Ask a question about this document.
       </div>
 
       <transition-group name="chat" tag="div">
@@ -40,6 +40,9 @@
       </div>
 
       <div v-if="error" class="alert alert-warning">{{ error }}</div>
+      <div v-if="error && !threadId" class="text-center">
+        <button class="btn btn-link" @click="load">Try again</button>
+      </div>
     </div>
 
     <form class="chat-input p-2" @submit.prevent="submit" novalidate>
@@ -124,6 +127,7 @@ export default {
         const data = await resp.json();
         this.threadId = data.thread_id;
         this.mergeMessages(data.messages);
+        this.error = null;
         this.$nextTick(() => {
           this.scrollToBottom();
           this.focusInput();
@@ -174,9 +178,13 @@ export default {
 
         const data = await resp.json();
         this.mergeMessages(data.messages);
+        this.error = null;
       } catch (err) {
         console.error(err);
         this.error = err.message || 'Something went wrong. Please try again.';
+        // remove the message so that the user can try again
+        this.inputText = text;
+        this.messages.pop();
       } finally {
         this.loading = false;
         this.$nextTick(() => {
