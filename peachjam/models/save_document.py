@@ -103,7 +103,8 @@ class SavedDocument(models.Model):
     objects = SavedDocumentManager()
 
     def __str__(self):
-        return f"SavedDocument: {self.work.title} for {self.user.username}"
+        latest_expression = self.work.documents.latest_expression().first()
+        return latest_expression.title
 
     @property
     def document(self):
