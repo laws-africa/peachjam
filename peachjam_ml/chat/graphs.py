@@ -210,32 +210,30 @@ def markup_refs(state: DocumentChatState):
     """Markup refs in the last AI response message."""
     message = state["messages"][-1]
     if message.type == "ai":
-        # TODO: make this more robust, or always call?
-        if "section" in message.content.lower():
-            doc = CoreDocument.objects.get(pk=state["document_id"])
-            resp = get_citator_citations(doc.expression_frbr_uri, message.content)
-            # get citations, last one first
-            citations = sorted(resp["citations"], key=lambda c: c["end"], reverse=True)
-            for citation in citations:
-                href = citation["href"]
-                try:
-                    uri = FrbrUri.parse(href)
-                    # is it a local reference?
-                    if uri.work_uri(False) == doc.work_frbr_uri:
-                        href = f"#{uri.portion}"
-                except ValueError:
-                    continue
+        doc = CoreDocument.objects.get(pk=state["document_id"])
+        resp = get_citator_citations(doc.expression_frbr_uri, message.content)
+        # get citations, last one first
+        citations = sorted(resp["citations"], key=lambda c: c["end"], reverse=True)
+        for citation in citations:
+            href = citation["href"]
+            try:
+                uri = FrbrUri.parse(href)
+                # is it a local reference?
+                if uri.portion and uri.work_uri(False) == doc.work_frbr_uri:
+                    href = f"#{uri.portion}"
+            except ValueError:
+                continue
 
-                # wrap markdown-style links around cited text based on offset and length
-                message.content = (
-                    message.content[: citation["start"]]
-                    + "["
-                    + citation["text"]
-                    + "]("
-                    + href
-                    + ")"
-                    + message.content[citation["end"] :]
-                )
+            # wrap markdown-style links around cited text based on offset and length
+            message.content = (
+                message.content[: citation["start"]]
+                + "["
+                + citation["text"]
+                + "]("
+                + href
+                + ")"
+                + message.content[citation["end"] :]
+            )
     return {}
 
 
