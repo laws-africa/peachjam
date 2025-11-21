@@ -105,15 +105,18 @@ class UserFollowing(models.Model):
 
     # fields that can be followed
     EVENT_FIELD_MAP = {
-        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
-        "saved_document": TimelineEvent.EventTypes.NEW_CITATION,
+        "court": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "author": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "court_class": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "court_registry": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "country": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "locality": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "taxonomy": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
+        "saved_search": [TimelineEvent.EventTypes.SAVED_SEARCH],
+        "saved_document": [
+            TimelineEvent.EventTypes.NEW_CITATION,
+            TimelineEvent.EventTypes.NEW_AMENDMENT,
+        ],
     }
 
     follow_fields = list(EVENT_FIELD_MAP.keys())
@@ -337,6 +340,37 @@ class UserFollowing(models.Model):
 
         TimelineEvent.add_new_citation_events(self, work)
 
+    def _update_new_relationship(self, relationship):
+        if not self.saved_document:
+            log.error("User %s follow %s is not for a saved document", self.user, self)
+            return
+
+        # check that we are passing a relationship to the saved document
+        if relationship.subject_work != self.saved_document.work:
+            log.error(
+                "Relationship subject work %s does not match saved document work %s",
+                relationship.subject_work,
+                self.saved_document.work,
+            )
+            return
+
+        # check if the user has ever been alerted about this relationship
+        events = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+        )
+        work = relationship.source_work
+        for event in events:
+            if work in event.subject_works.all():
+                log.info(
+                    "User %s has already been alerted about relationship from work %s",
+                    self.user,
+                    work,
+                )
+                return
+
+        TimelineEvent.add_new_citation_events(self, work)
+
     @classmethod
     def update_follows_for_user(cls, user):
         follows = user.following.all()
@@ -351,3 +385,12 @@ class UserFollowing(models.Model):
         log.info("Found %d follows for new citation update", follows.count())
         for follow in follows:
             follow._update_new_citation(citation)
+
+    @classmethod
+    def update_new_relationship_follows(cls, relationship):
+        follows = cls.objects.filter(
+            saved_document__work=relationship.target_work,
+        )
+        log.info("Found %d follows for new relationship update", follows.count())
+        for follow in follows:
+            follow._update_new_relationship(relationship)
