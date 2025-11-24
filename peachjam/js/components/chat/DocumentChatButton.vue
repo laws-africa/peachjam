@@ -3,37 +3,41 @@
     <div v-if="open" :class="`document-chat-popup bg-white border rounded shadow d-flex flex-column ${expanded ? 'expanded' : ''}`">
       <div class="d-flex bg-light border-bottom">
         <h5 class="p-2 pb-0">
-          <i class="bi-pj pj-ai"></i>
-          Ask {{ assistantName }}
+          <i class="bi-pj pj-ai"/>
+          {{ $t('Ask {assistantName}', { assistantName }) }}
         </h5>
-        <button class="btn btn-sm btn-outline-secondary border-0 ms-auto" @click="clear" title="Clear chat">
-          <i class="bi bi-trash"></i>
+        <button
+          class="btn btn-sm btn-outline-secondary border-0 ms-auto"
+          :title="$t('Clear chat')"
+          @click="clear"
+        >
+          <i class="bi bi-trash"/>
         </button>
         <button
           v-if="!expanded"
           class="btn btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
-          title="Expand"
+          :title="$t('Expand')"
           @click="expanded = true"
         >
-          <i class="bi bi-arrows-angle-expand"></i>
+          <i class="bi bi-arrows-angle-expand" />
         </button>
         <button
-            v-if="expanded"
-            class="btn btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
-            title="Collapse"
-            @click="expanded = false"
+          v-if="expanded"
+          class="btn btn-outline-secondary border-0 ms-1 d-none d-lg-inline"
+          :title="$t('Collapse')"
+          @click="expanded = false"
         >
-          <i class="bi bi-arrows-angle-contract"></i>
+          <i class="bi bi-arrows-angle-contract"/>
         </button>
         <button
           class="btn btn-outline-secondary border-0 ms-1"
           data-track-event="Document Chat | Close"
-          title="Close"
+          :title="$t('Close')"
           @click="open = false"
         >&times;</button>
       </div>
       <div class="flex-grow-1 overflow-y-hidden">
-        <document-chat :documentId="documentId" ref="chat"></document-chat>
+        <document-chat ref="chat" :document-id="documentId" />
       </div>
     </div>
     <button
@@ -42,8 +46,8 @@
       data-track-event="Document Chat | Open"
       @click="open = true"
     >
-      <i class="bi-pj pj-ai"></i>
-      Ask {{ assistantName }}
+      <i class="bi-pj pj-ai" />
+      {{ $t('Ask {assistantName}', { assistantName }) }}
     </button>
   </div>
 </template>

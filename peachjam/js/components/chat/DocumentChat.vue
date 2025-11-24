@@ -2,7 +2,7 @@
   <div class="document-chat d-flex flex-column h-100">
     <div ref="messageContainer" class="chat-messages flex-grow-1 overflow-auto p-2">
       <div v-if="messages.length === 0 && !loading" class="text-center text-muted py-5">
-        Start the conversation by asking a question about this document.
+        {{ $t('Ask a question about this document.') }}
       </div>
 
       <transition-group name="chat" tag="div">
@@ -20,12 +20,12 @@
             <div v-else class="chat-content">{{ message.content }}</div>
             <div v-if="message.role === 'ai'">
               <button class="btn btn-sm btn-outline-secondary border-0" title="Upvote message" @click="voteUp(message.id)">
-                <i v-if="votingUp === message.id" class="bi bi-check"></i>
-                <i v-else class="bi bi-hand-thumbs-up"></i>
+                <i v-if="votingUp === message.id" class="bi bi-check"/>
+                <i v-else class="bi bi-hand-thumbs-up"/>
               </button>
               <button class="btn btn-sm btn-outline-secondary border-0 ms-1" title="Downvote message" @click="voteDown(message.id)">
-                <i v-if="votingDown === message.id" class="bi bi-check"></i>
-                <i v-else class="bi bi-hand-thumbs-down"></i>
+                <i v-if="votingDown === message.id" class="bi bi-check"/>
+                <i v-else class="bi bi-hand-thumbs-down"/>
               </button>
             </div>
           </div>
@@ -34,12 +34,15 @@
 
       <div v-if="loading" class="d-flex justify-content-start mb-3">
         <div class="chat-bubble chat-bubble-agent text-muted d-flex align-items-center gap-2">
-          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-          <span>Thinking…</span>
+          <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+          <span>{{ $t('Thinking...') }}</span>
         </div>
       </div>
 
       <div v-if="error" class="alert alert-warning">{{ error }}</div>
+      <div v-if="error && !threadId" class="text-center">
+        <button class="btn btn-link" @click="load">{{ $t('Try again') }}</button>
+      </div>
     </div>
 
     <form class="chat-input p-2" @submit.prevent="submit" novalidate>
@@ -49,7 +52,7 @@
           v-model="inputText"
           type="text"
           class="form-control"
-          placeholder="Ask a question…"
+          :placeholder="$t('Ask a question')"
           :disabled="loading"
           @keydown.enter.exact.prevent="submit"
           @keydown.enter.shift.stop
@@ -60,8 +63,8 @@
           :disabled="loading || !isReady"
           title="Send"
         >
-          <i v-if="!loading" class="bi bi-send"></i>
-          <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+          <i v-if="!loading" class="bi bi-send"/>
+          <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
         </button>
       </div>
     </form>
@@ -119,18 +122,19 @@ export default {
           }
         });
         if (!resp.ok) {
-          throw new Error('The assistant could not respond right now. Please try again.');
+          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
         }
         const data = await resp.json();
         this.threadId = data.thread_id;
         this.mergeMessages(data.messages);
+        this.error = null;
         this.$nextTick(() => {
           this.scrollToBottom();
           this.focusInput();
         });
       } catch (err) {
         console.error(err);
-        this.error = err.message || 'Something went wrong. Please try again.';
+        this.error = err.message || this.$t('Something went wrong. Please try again.');
       }
     },
     async submit () {
@@ -169,14 +173,18 @@ export default {
         });
 
         if (!resp.ok) {
-          throw new Error('The assistant could not respond right now. Please try again.');
+          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
         }
 
         const data = await resp.json();
         this.mergeMessages(data.messages);
+        this.error = null;
       } catch (err) {
         console.error(err);
-        this.error = err.message || 'Something went wrong. Please try again.';
+        this.error = err.message || this.$t('Something went wrong. Please try again.');
+        // remove the message so that the user can try again
+        this.inputText = text;
+        this.messages.pop();
       } finally {
         this.loading = false;
         this.$nextTick(() => {
