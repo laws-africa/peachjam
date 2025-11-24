@@ -157,7 +157,7 @@ class TimelineEvent(models.Model):
             event_type=cls.EventTypes.NEW_CITATION,
             email_alert_sent_at__isnull=True,
         )
-        event.append_documents(work.documents.latest_expression())
+        event.subject_works.add(work)
         return event
 
     @classmethod

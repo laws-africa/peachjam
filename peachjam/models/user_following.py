@@ -179,7 +179,7 @@ class UserFollowing(models.Model):
         elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
             return _("New documents added for")
         elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
-            return _("New citations to")
+            return _("New citations of")
 
     @property
     def followed_field(self):
@@ -307,35 +307,25 @@ class UserFollowing(models.Model):
         return True
 
     def _update_new_citation(self, citation):
-        if not self.saved_document:
-            log.error("User %s follow %s is not for a saved document", self.user, self)
-            return
+        assert self.saved_document
 
         # check that we are passing a citation to the saved document
-        if citation.target_work != self.saved_document.work:
-            log.error(
-                "Citation target work %s does not match saved document work %s",
-                citation.target_work,
-                self.saved_document.work,
-            )
-            return
+        assert citation.target_work == self.saved_document.work
 
         # check if the user has ever been alerted about this citation
-        events = TimelineEvent.objects.filter(
+        already_alerted = TimelineEvent.objects.filter(
             user_following=self,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
-        )
-        work = citation.citing_work
-        for event in events:
-            if work in event.subject_works.all():
-                log.info(
-                    "User %s has already been alerted about citation from work %s",
-                    self.user,
-                    work,
-                )
-                return
-
-        TimelineEvent.add_new_citation_events(self, work)
+            subject_works=citation.citing_work,
+        ).exists()
+        if already_alerted:
+            log.info(
+                "User %s has already been alerted about citation from work %s",
+                self.user,
+                citation.citing_work,
+            )
+            return
+        TimelineEvent.add_new_citation_events(self, citation.citing_work)
 
     @classmethod
     def update_follows_for_user(cls, user):
