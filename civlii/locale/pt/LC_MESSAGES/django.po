@@ -1,94 +1,95 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-#
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-11-25 14:25+0200\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2025-11-25 12:42\n"
+"Last-Translator: \n"
+"Language-Team: Portuguese\n"
+"Language: pt_PT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"X-Crowdin-Project-ID: 4\n"
+"X-Crowdin-Language: pt\n"
+"X-Crowdin-File: /main/civlii/locale/en/LC_MESSAGES/django.po\n"
+"X-Crowdin-File-ID: 277\n"
+
 #: settings.py:13
 msgid "French"
-msgstr ""
+msgstr "Francês"
 
 #: settings.py:14
 msgid "English"
-msgstr ""
+msgstr "Inglês"
 
 #: templates/liiweb/home.html:4
 msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
-msgstr ""
+msgstr "Bem-vindo ao Instituto de Informação Jurídica da Costa do Marfim"
 
 #: templates/liiweb/home.html:7
 msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-msgstr ""
+msgstr "Acesso livre à legislação da Costa do Marfim. A CIVLII é membro da comunidade das Instituições de Acesso Livre à Justiça Africanas e do Movimento de Acesso Livre à Justiça."
 
 #: templates/peachjam/_header.html:11
 msgid "Home"
-msgstr ""
+msgstr "Página inicial"
 
 #: templates/peachjam/_header.html:16
 msgid "Judgments"
-msgstr ""
+msgstr "Julgamentos"
 
 #: templates/peachjam/_header.html:22
 msgid "Legislation"
-msgstr ""
+msgstr "Legislação"
 
 #: templates/peachjam/_header.html:31
 msgid "African Union and ECOWAS"
-msgstr ""
+msgstr "União Africana e CEDEAO"
 
 #: templates/peachjam/_header.html:37
 msgid "African Court of Human and People's Rights"
-msgstr ""
+msgstr "Tribunal Africano dos Direitos Humanos e dos Povos"
 
 #: templates/peachjam/_header.html:43
 msgid "African Commission on Human and People's Rights"
-msgstr ""
+msgstr "Comissão Africana dos Direitos Humanos e dos Povos"
 
 #: templates/peachjam/_header.html:49
 msgid "Economic Community of West African States (ECOWAS)"
-msgstr ""
+msgstr "Comunidade Económica dos Estados da África Ocidental (CEDEAO)"
 
 #: templates/peachjam/_header.html:55
 msgid "ECOWAS Community Court of Justice"
-msgstr ""
+msgstr "Tribunal de Justiça da Comunidade da CEDEAO"
 
 #: templates/peachjam/_header.html:61
 msgid "AU Charters and Treaties"
-msgstr ""
+msgstr "Cartas e Tratados da UA"
 
 #: templates/peachjam/_header.html:69
 msgid "About"
-msgstr ""
+msgstr "Sobre"
 
 #: templates/peachjam/about.html:5
 msgid "CNDJ is a member of the community of African LIIs and of the Free Access to Law Movement."
-msgstr ""
+msgstr "A CNDJ é membro da comunidade das instituições de ensino jurídico africanas e do Movimento de Livre Acesso à Justiça."
 
 #: templates/peachjam/about.html:11
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
-msgstr ""
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> faz parte da <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Unidade de Governança Democrática e Direitos</a> da Faculdade de Direito da Universidade da Cidade do Cabo (UCT), África do Sul. O AfricanLII ajuda indivíduos, organizações e governos a construir e manter acesso gratuito e sustentável a portais jurídicos e a alcançar o povo da África e além."
 
 #: templates/peachjam/about.html:21
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
-msgstr ""
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> é uma organização sem fins lucrativos da África do Sul que digitaliza informações legais africanas para uso público. O acesso aberto à informação jurídica digital africana ajuda as comunidades a prosperar, as empresas a ter sucesso e os funcionários judiciais e funcionários públicos a prestar serviços de forma eficiente e eficaz."
 
 #: templates/peachjam/about.html:28
 msgid "Contact us"
-msgstr ""
+msgstr "Contate-nos"
 
 #: templates/peachjam/about.html:30
 msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
-msgstr ""
+msgstr "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
+
