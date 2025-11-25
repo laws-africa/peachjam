@@ -1,0 +1,94 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-25 14:25+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+#: settings.py:13
+msgid "French"
+msgstr ""
+
+#: settings.py:14
+msgid "English"
+msgstr ""
+
+#: templates/liiweb/home.html:4
+msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
+msgstr ""
+
+#: templates/liiweb/home.html:7
+msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
+msgstr ""
+
+#: templates/peachjam/_header.html:11
+msgid "Home"
+msgstr ""
+
+#: templates/peachjam/_header.html:16
+msgid "Judgments"
+msgstr ""
+
+#: templates/peachjam/_header.html:22
+msgid "Legislation"
+msgstr ""
+
+#: templates/peachjam/_header.html:31
+msgid "African Union and ECOWAS"
+msgstr ""
+
+#: templates/peachjam/_header.html:37
+msgid "African Court of Human and People's Rights"
+msgstr ""
+
+#: templates/peachjam/_header.html:43
+msgid "African Commission on Human and People's Rights"
+msgstr ""
+
+#: templates/peachjam/_header.html:49
+msgid "Economic Community of West African States (ECOWAS)"
+msgstr ""
+
+#: templates/peachjam/_header.html:55
+msgid "ECOWAS Community Court of Justice"
+msgstr ""
+
+#: templates/peachjam/_header.html:61
+msgid "AU Charters and Treaties"
+msgstr ""
+
+#: templates/peachjam/_header.html:69
+msgid "About"
+msgstr ""
+
+#: templates/peachjam/about.html:5
+msgid "CNDJ is a member of the community of African LIIs and of the Free Access to Law Movement."
+msgstr ""
+
+#: templates/peachjam/about.html:11
+msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
+msgstr ""
+
+#: templates/peachjam/about.html:21
+msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
+msgstr ""
+
+#: templates/peachjam/about.html:28
+msgid "Contact us"
+msgstr ""
+
+#: templates/peachjam/about.html:30
+msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
+msgstr ""
