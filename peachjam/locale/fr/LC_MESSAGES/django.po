@@ -2880,7 +2880,7 @@ msgstr "Abonnements"
 #: templates/peachjam/my/_saved_searches.html:18
 #: templates/peachjam/my/layout.html:60
 msgid "Search alerts"
-msgstr "Rechercher des alertes"
+msgstr "Alertes de recherche"
 
 #: templates/peachjam/_user_menu.html:42
 #: templates/peachjam/my/_frontpage.html:14

@@ -13,3 +13,6 @@ LANGUAGES = [
     ("fr", _("French")),
     ("en", _("English")),
 ]
+LANGUAGE_CODE = "fr"
+
+PEACHJAM["MY_LII"] = f"Mon {PEACHJAM['APP_NAME']}"  # noqa
