@@ -217,7 +217,7 @@ class UserFollowing(models.Model):
         super().clean()
 
         # enforce subscription limits
-        if not self.saved_search:
+        if not (self.saved_search or self.saved_document):
             if not self.pk and not self.can_add_more_follows():
                 raise ValidationError(_("Following limit reached"))
 
