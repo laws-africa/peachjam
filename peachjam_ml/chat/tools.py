@@ -10,9 +10,9 @@ from peachjam.xmlutils import parse_html_str
 
 @tool
 def answer_document_question(config: RunnableConfig, question: str) -> str:
-    """Answers a question about the content of the document. It has no memory of previous questions. Only use it
-    if you need to answer a specific question about the document content. The document does not contain information
-    about this website or its features."""
+    """Answers a question about the content of the current document. It knows which document is active.
+    It has no memory of previous questions. Only use it if you need to answer a specific question about the document
+    content. The document does not contain information about this website or its features."""
     from .graphs import chat_llm
 
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
@@ -92,7 +92,6 @@ def get_provision_text(config: RunnableConfig, eid: str) -> str:
 def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
     """Provides information about the commencement status of a provision given its EID."""
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
-    # TODO: don't allow this tool for non-legislation documents
     if not isinstance(doc, Legislation):
         return "This tool can only be used for legislation documents."
 
@@ -109,3 +108,28 @@ def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
             return f"The provision commenced on {event['date']} by '{event['commencing_title']}'."
 
     return "That provision has not commenced."
+
+
+def get_tools_for_document(document):
+    tools = [
+        answer_document_question,
+    ]
+
+    if isinstance(document, Legislation):
+        tools.extend(
+            [
+                get_provision_eid,
+                provision_commencement_info,
+                get_provision_text,
+            ]
+        )
+
+    return tools
+
+
+ALL_TOOLS = [
+    answer_document_question,
+    get_provision_eid,
+    get_provision_text,
+    provision_commencement_info,
+]
