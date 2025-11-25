@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
-from peachjam.models import TimelineEvent
+from peachjam.models import ProvisionCitation, TimelineEvent
 from peachjam.tasks import (
     send_new_citation_email_alert,
     send_new_document_email_alert,
@@ -134,10 +134,24 @@ class TimelineEmailService:
         }
 
         for ev in events:
+            citing_documents = []
+            for doc in ev.subject_documents:
+                provision_citations = ProvisionCitation.objects.filter(
+                    citing_document=doc,
+                    work=ev.user_following.saved_document.document.work,
+                    whole_work=False,
+                )
+                citing_documents.append(
+                    {
+                        "document": doc,
+                        "provision_citations": provision_citations,
+                    }
+                )
+
             context["saved_documents"].append(
                 {
                     "saved_document": ev.user_following.saved_document.document,
-                    "citing_documents": ev.subject_documents,
+                    "citing_documents": citing_documents,
                 }
             )
 
