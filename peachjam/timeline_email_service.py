@@ -140,7 +140,7 @@ class TimelineEmailService:
                     citing_document=doc,
                     work=ev.user_following.saved_document.document.work,
                     whole_work=False,
-                )
+                )[:5]
                 citing_documents.append(
                     {
                         "document": doc,
