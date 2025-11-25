@@ -7,6 +7,8 @@ files:
     translation: /peachjam_search/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /peachjam_subs/locale/en/LC_MESSAGES/django.po
     translation: /peachjam_subs/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
+  - source: /civlii/locale/en/LC_MESSAGES/django.po
+    translation: /civlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /africanlii/locale/en/LC_MESSAGES/django.po
     translation: /africanlii/locale/%two_letters_code%/LC_MESSAGES/%original_file_name%
   - source: /liiweb/locale/en/LC_MESSAGES/django.po
