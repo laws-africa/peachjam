@@ -1,5 +1,6 @@
 import json
 import logging
+import operator
 import re
 from datetime import datetime
 from functools import cached_property, reduce
@@ -51,7 +52,15 @@ class IndigoAdapter(RequestsAdapter):
     * token: API token
     * api_url: URL to API base (no ending slash)
     * places: space-separate list of place codes, such as: bw za-*
-    * taxonomy_topic_root: the root of a taxonomy topic tree that must be copied from the server into our database
+    * taxonomy_topic_root: a space-separated list of src-root:target-root pairs that must be copied from the server
+                           into our database. The :target-root is optional, and src-root is used if it is not provided.
+
+                           For example:
+
+                             subject-areas-per-country-civ:subjects
+
+                           will copied topics anchored at subject-areas-per-country-civ into the local database
+                           under subjects. So subject-areas-per-country-civ-foo becomes subjects-foo
     * include_doctypes: space-separate list of document types to include
     * exclude_doctypes: space-separate list of document types to exclude
     * include_subtypes: space-separate list of sub types to include
@@ -729,27 +738,35 @@ class IndigoAdapter(RequestsAdapter):
 
     def attach_taxonomy_topics(self, document, created_document):
         if self.taxonomy_topic_root:
-            # clear any existing taxonomies
+            root_mapping, tree_mapping = self.import_taxonomy_tree()
+
+            # clear any existing taxonomies using our local tree
             created_document.taxonomies.filter(
-                topic__slug__startswith=self.taxonomy_topic_root
+                reduce(
+                    operator.or_,
+                    (
+                        Q(topic__slug__startswith=prefix)
+                        for prefix in root_mapping.values()
+                    ),
+                )
             ).delete()
 
             if document["taxonomy_topics"]:
-                # get topics beginning with "subject-areas"
-                topics = [
+                # topics to import
+                slugs = [
                     t
                     for t in document["taxonomy_topics"]
-                    if t.startswith(self.taxonomy_topic_root)
+                    for prefix in root_mapping.keys()
+                    if t.startswith(prefix)
                 ]
+                topics = [tree_mapping[slug] for slug in slugs if slug in tree_mapping]
                 if topics:
-                    taxonomies = Taxonomy.objects.filter(slug__in=topics)
-                    for taxonomy in taxonomies:
-                        DocumentTopic.objects.create(
-                            document=created_document,
-                            topic=taxonomy,
-                        )
-                    logger.info(
-                        f"Added {len(taxonomies)} imported taxonomies to {created_document}"
+                    logger.info(f"Attaching imported taxonomies: {slugs} -> {topics}")
+                    DocumentTopic.objects.bulk_create(
+                        [
+                            DocumentTopic(document=created_document, topic=topic)
+                            for topic in topics
+                        ]
                     )
 
         if self.add_topics:
@@ -762,6 +779,110 @@ class IndigoAdapter(RequestsAdapter):
             logger.info(
                 f"Added {len(taxonomies)} local taxonomies to {created_document}"
             )
+
+    def import_taxonomy_tree(self):
+        """Import the taxonomy trees rooted at self.taxonomy_topic_root from Indigo.
+
+        Returns a (root_mapping, tree_mapping) tuple:
+
+        - root_mapping: map from src slug to target slug for the tree roots
+        - tree_mapping: full source taxonomy topic slugs to target taxonomy topic objects
+        """
+        root_mapping = {}
+        for item in self.taxonomy_topic_root.split():
+            # parse src:target, defaulting to src:src if there is no :
+            if ":" in item:
+                src, target = item.split(":", 1)
+            else:
+                src = target = item
+            root_mapping[src] = target
+
+        # mapping from source topic slug prefix to target topic object
+        tree_mapping = {}
+        if root_mapping:
+            # get the full remote tree and index topics by slug, recursively
+            src_tree = {}
+
+            def index_topics(topic_list):
+                for topic in topic_list:
+                    src_tree[topic["slug"]] = topic
+                    if topic["children"]:
+                        index_topics(topic["children"])
+
+            index_topics(self.get_taxonomy_tree())
+
+            # load the local tree portions
+            roots = Taxonomy.objects.filter(slug__in=root_mapping.values())
+            local_tree = (
+                {
+                    topic.slug: topic
+                    for topic in Taxonomy.objects.filter(
+                        reduce(
+                            operator.or_, (Q(path__startswith=t.path) for t in roots)
+                        )
+                    )
+                }
+                if roots
+                else {}
+            )
+
+            # now import the portions of the tree that we need
+            for src_prefix, target_prefix in root_mapping.items():
+                if src_prefix not in src_tree:
+                    raise ValueError(
+                        f"Taxonomy root {src_prefix} not in tree from server"
+                    )
+
+                if target_prefix not in local_tree:
+                    raise ValueError(f"Taxonomy root {target_prefix} not found locally")
+
+                def import_tree(topic, parent):
+                    target_slug = target_prefix + topic["slug"][len(src_prefix) :]
+                    if target_slug not in local_tree:
+                        logger.info(
+                            f"Creating taxonomy {target_slug} not found locally"
+                        )
+                        local_tree[target_slug] = parent.add_child(name=topic["name"])
+                        assert (
+                            target_slug == local_tree[target_slug].slug
+                        ), f"Expected slug {target_slug}, got {local_tree[target_slug].slug}"
+                    tree_mapping[topic["slug"]] = local_topic = local_tree[target_slug]
+
+                    # ensure the name is correct
+                    if local_topic.name != topic["name"]:
+                        local_topic.name = topic["name"]
+                        local_topic.save()
+
+                    for kid in topic["children"]:
+                        import_tree(kid, local_topic)
+
+                logger.info(
+                    f"Importing taxonomy topic tree rooted at {src_prefix} into {target_prefix}"
+                )
+                for child in src_tree[src_prefix]["children"]:
+                    assert child["slug"].startswith(
+                        src_prefix
+                    ), f"Child slug {child['slug']} does not start with root prefix {src_prefix}"
+                    import_tree(child, local_tree[target_prefix])
+
+            # delete any local topics that are no longer present on the server
+            expected_keys = set(
+                local_prefix + slug[len(src_prefix) :]
+                for src_prefix, local_prefix in root_mapping.items()
+                for slug in src_tree.keys()
+                if slug.startswith(src_prefix)
+            )
+            to_delete = set(local_tree.keys()) - expected_keys
+            if to_delete:
+                logger.info(
+                    f"Deleting {len(to_delete)} local taxonomy topics no longer present on server: {to_delete}"
+                )
+                Taxonomy.objects.filter(slug__in=to_delete).delete()
+
+        return root_mapping, tree_mapping
+
+    def get_taxonomy_tree(self):
+        return self.client_get(f"{self.api_url}/taxonomy-topics.json").json()["results"]
 
     def handle_webhook(self, request, data):
         from peachjam.tasks import delete_document, update_document
