@@ -1,0 +1,7 @@
+{% extends 'peachjam/emails/layouts/alert.html' %}
+{% load i18n %}
+{% block subject %}{{ subject_line }}{% endblock %}
+helloww!!!
+{% block alert-body %}
+  {% include "peachjam/emails/new_citation_alert_body.html"  %}
+{% endblock %}
