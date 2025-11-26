@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import override
 from templated_email import send_templated_mail
@@ -135,12 +136,12 @@ class TimelineEmailService:
 
         for ev in events:
             citing_documents = []
-            for doc in ev.subject_documents:
+            for doc in ev.subject_documents[:5]:
                 provision_citations = ProvisionCitation.objects.filter(
                     citing_document=doc,
                     work=ev.user_following.saved_document.document.work,
                     whole_work=False,
-                )[:5]
+                )[:2]
                 citing_documents.append(
                     {
                         "document": doc,
@@ -154,6 +155,19 @@ class TimelineEmailService:
                     "citing_documents": citing_documents,
                 }
             )
+
+        # render html template string
+        context["html_body"] = render_to_string(
+            "peachjam/emails/new_citation_alert_body.html", context=context
+        )
+        subject_line = (
+            f"New citations for {context['saved_documents'][0]['saved_document'].title}"
+        )
+        saved_docs_length = len(context["saved_documents"])
+        if saved_docs_length > 1:
+            subject_line += f" and {saved_docs_length} more"
+
+        context["subject_line"] = subject_line
 
         with override(user.userprofile.preferred_language.pk):
             send_templated_mail(
