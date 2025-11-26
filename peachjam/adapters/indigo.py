@@ -13,6 +13,7 @@ from countries_plus.models import Country
 from dateutil import parser
 from django.core.files import File
 from django.db.models import Q
+from django.utils import translation
 from django.utils.text import slugify
 from languages_plus.models import Language
 
@@ -328,11 +329,14 @@ class IndigoAdapter(RequestsAdapter):
                 document_nature_name = " ".join(
                     [name for name in document["subtype"].split("-")]
                 ).capitalize()
-            field_data["nature"] = get_update_or_create(
-                DocumentNature,
-                {"name": document_nature_name},
-                code=slugify(document["subtype"]),
-            )[0]
+            # we know we're ingesting English names, so to avoid incorrectly overwriting the default language name
+            # (which may not be English), for us to use English here
+            with translation.override("en"):
+                field_data["nature"] = get_update_or_create(
+                    DocumentNature,
+                    {"name": document_nature_name},
+                    code=slugify(document["subtype"]),
+                )[0]
 
         if hasattr(model, "metadata_json"):
             field_data["metadata_json"] = document
