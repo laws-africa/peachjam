@@ -15,4 +15,8 @@ LANGUAGES = [
 ]
 LANGUAGE_CODE = "fr"
 
+# For model translation fields, ensure that English is included as a fallback. Otherwise, if the default language
+# doesn't have a translation, there will be no fallback language.
+MODELTRANSLATION_FALLBACK_LANGUAGES = [LANGUAGE_CODE, "en"]
+
 PEACHJAM["MY_LII"] = f"Mon {PEACHJAM['APP_NAME']}"  # noqa
