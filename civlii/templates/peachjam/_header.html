@@ -3,7 +3,6 @@
 {% block top-bar %}{% endblock %}
 {% block navbar-logo %}
   <img src="{% static 'images/logo.png' %}" alt="{{ APP_NAME }}" height="40"/>
-  <a class="navbar-brand" href="{% url 'home_page' %}">CIVLII</a>
 {% endblock %}
 {% block nav-items %}
   <li class="nav-item">
@@ -19,7 +18,7 @@
   </li>
   <li class="nav-item">
     <a class="nav-link {% if view.navbar_link == 'legislation' %}active{% endif %}"
-       href="{% url 'legislation_list' %}">
+       href="{% url 'first_level_taxonomy_list' 'cote-divoire-codes' %}">
       {% trans 'Legislation' %}
     </a>
   </li>

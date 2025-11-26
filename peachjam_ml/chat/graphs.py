@@ -59,6 +59,7 @@ import os
 from contextlib import contextmanager
 from typing import Iterator, Tuple, TypedDict
 
+from cobalt.uri import FrbrUri
 from django.conf import settings
 from django.contrib.auth.models import User
 from langchain.chat_models import init_chat_model
@@ -74,10 +75,9 @@ from langgraph.types import StateSnapshot
 
 from peachjam.models import CoreDocument, Judgment, Legislation
 from peachjam_ml.chat.tools import (
-    answer_document_question,
-    get_provision_eid,
-    get_provision_text,
-    provision_commencement_info,
+    ALL_TOOLS,
+    get_citator_citations,
+    get_tools_for_document,
 )
 
 INITIAL_PROMPT_NAME = "chat/document/initial"
@@ -105,16 +105,12 @@ langfuse_callback = CallbackHandler()
 chat_llm = init_chat_model(
     "openai:gpt-5-mini", temperature=0, api_key=os.environ.get("OPENAI_API_KEY") or "-"
 )
-tools = [
-    answer_document_question,
-    get_provision_eid,
-    provision_commencement_info,
-    get_provision_text,
-]
-llm_with_tools = chat_llm.bind_tools(tools)
 
 
 def chatbot(state: DocumentChatState):
+    document = CoreDocument.objects.get(pk=state["document_id"])
+    llm_with_tools = chat_llm.bind_tools(get_tools_for_document(document))
+
     state["messages"].append(
         HumanMessage(
             content=state["user_message"]["content"], id=state["user_message"]["id"]
@@ -210,6 +206,37 @@ def doc_metadata(state: DocumentChatState):
     return {"messages": [SystemMessage(content=msg)]}
 
 
+def markup_refs(state: DocumentChatState):
+    """Markup refs in the last AI response message."""
+    message = state["messages"][-1]
+    if message.type == "ai":
+        doc = CoreDocument.objects.get(pk=state["document_id"])
+        resp = get_citator_citations(doc.expression_frbr_uri, message.content)
+        # get citations, last one first
+        citations = sorted(resp["citations"], key=lambda c: c["end"], reverse=True)
+        for citation in citations:
+            href = citation["href"]
+            try:
+                uri = FrbrUri.parse(href)
+                # is it a local reference?
+                if uri.portion and uri.work_uri(False) == doc.work_frbr_uri:
+                    href = f"#{uri.portion}"
+            except ValueError:
+                continue
+
+            # wrap markdown-style links around cited text based on offset and length
+            message.content = (
+                message.content[: citation["start"]]
+                + "["
+                + citation["text"]
+                + "]("
+                + href
+                + ")"
+                + message.content[citation["end"] :]
+            )
+    return {}
+
+
 def is_fresh_chat(state: DocumentChatState) -> bool:
     return not (state["messages"])
 
@@ -218,7 +245,8 @@ graph_builder = StateGraph(DocumentChatState)
 graph_builder.add_node("initial_prompt", initial_prompt)
 graph_builder.add_node("doc_metadata", doc_metadata)
 graph_builder.add_node("chatbot", chatbot)
-graph_builder.add_node("tools", ToolNode(tools=tools))
+graph_builder.add_node("markup_refs", markup_refs)
+graph_builder.add_node("tools", ToolNode(tools=ALL_TOOLS))
 
 # when resuming a chat, jump to the chatbot state
 graph_builder.add_conditional_edges(
@@ -228,7 +256,8 @@ graph_builder.add_edge("initial_prompt", "doc_metadata")
 graph_builder.add_edge("doc_metadata", "chatbot")
 graph_builder.add_conditional_edges("chatbot", tools_condition)
 graph_builder.add_edge("tools", "chatbot")
-graph_builder.add_edge("chatbot", END)
+graph_builder.add_edge("chatbot", "markup_refs")
+graph_builder.add_edge("markup_refs", END)
 
 
 @contextmanager

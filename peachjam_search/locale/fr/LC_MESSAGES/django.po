@@ -10,23 +10,28 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
+"PO-Revision-Date: 2025-11-20 11:14\n"
 
-#: models.py:168
+#: models.py:167
 msgid "Search alert limit reached"
 msgstr "Limite d'alerte de recherche atteinte"
 
-#: models.py:256
+#: models.py:255
 msgid "feedback"
 msgstr "retour"
 
-#: models.py:258
+#: models.py:257
 msgid "name"
 msgstr "nom"
 
-#: models.py:263
+#: models.py:262
 msgid "email address"
 msgstr "adresse e-mail"
+
+#: templates/peachjam_search/_download_403.html:4
+#, python-format
+msgid "<a href=\"%(signup_url)s?next=%(next)s\">Sign up</a> or <a href=\"%(login_url)s?next=%(next)s\">log in</a> to download search results."
+msgstr "<a href=\"%(signup_url)s?next=%(next)s\">Inscrivez-vous</a> ou <a href=\"%(login_url)s?next=%(next)s\">connectez-vous</a> pour télécharger les résultats de recherche."
 
 #: templates/peachjam_search/_saved_search_modal.html:7
 msgid "Search alert"
@@ -224,12 +229,12 @@ msgstr "Créé à"
 msgid "No search traces found."
 msgstr "Aucune trace de recherche trouvée."
 
-#: views.py:60
+#: views.py:61
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Rechercher dans %(app_name)s"
 
-#: views.py:263
+#: views.py:286
 msgid "Search trace not found"
 msgstr "Trace de recherche non trouvée"
 

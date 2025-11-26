@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:40+0200\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,19 +34,19 @@ msgstr ""
 msgid "TanzLII ni tovuti ya Serikali ya Tanzania inayochapisha maamuzi, sheria na kanuni bure mtandaoni. TanzLII inaruhusu ufikiaji bure wa maamuzi, sheria na kanuni za Tanzania na ni mwanachama wa Jumuiya ya Afrika ya LIIs."
 msgstr ""
 
-#: templates/liiweb/home.html:25 templates/peachjam/_header.html:7
+#: templates/liiweb/home.html:25 templates/peachjam/_header.html:12
 msgid "Judgments"
 msgstr ""
 
-#: templates/liiweb/home.html:28 templates/peachjam/_header.html:13
+#: templates/liiweb/home.html:28 templates/peachjam/_header.html:18
 msgid "Legislation"
 msgstr ""
 
-#: templates/liiweb/home.html:31 templates/peachjam/_header.html:19
+#: templates/liiweb/home.html:31 templates/peachjam/_header.html:24
 msgid "Government Gazette"
 msgstr ""
 
-#: templates/liiweb/home.html:34 templates/peachjam/_header.html:80
+#: templates/liiweb/home.html:34 templates/peachjam/_header.html:85
 msgid "Articles"
 msgstr ""
 
@@ -62,75 +62,79 @@ msgstr ""
 msgid "Our partners"
 msgstr ""
 
-#: templates/peachjam/_header.html:28
+#: templates/peachjam/_header.html:7
+msgid "Home"
+msgstr ""
+
+#: templates/peachjam/_header.html:33
 msgid "Practice Essentials"
 msgstr ""
 
-#: templates/peachjam/_header.html:34
+#: templates/peachjam/_header.html:39
 msgid "Judiciary Guidelines & Procedures"
 msgstr ""
 
-#: templates/peachjam/_header.html:40
+#: templates/peachjam/_header.html:45
 msgid "National Prosecution Service Guidelines & Manuals"
 msgstr ""
 
-#: templates/peachjam/_header.html:46
+#: templates/peachjam/_header.html:51
 msgid "Tanganyika Law Society Guidelines & Manuals"
 msgstr ""
 
-#: templates/peachjam/_header.html:57
+#: templates/peachjam/_header.html:62
 msgid "Research Hub"
 msgstr ""
 
-#: templates/peachjam/_header.html:63
+#: templates/peachjam/_header.html:68
 msgid "TanzLII Case Digest"
 msgstr ""
 
-#: templates/peachjam/_header.html:69
+#: templates/peachjam/_header.html:74
 msgid "Law Reform Commission Reports"
 msgstr ""
 
-#: templates/peachjam/_header.html:74
+#: templates/peachjam/_header.html:79
 msgid "Legal Journals"
 msgstr ""
 
-#: templates/peachjam/_header.html:85
+#: templates/peachjam/_header.html:90
 msgid "Notable Speeches"
 msgstr ""
 
-#: templates/peachjam/_header.html:90
+#: templates/peachjam/_header.html:95
 msgid "Collections"
 msgstr ""
 
-#: templates/peachjam/_header.html:98
+#: templates/peachjam/_header.html:103
 msgid "Street Law"
 msgstr ""
 
-#: templates/peachjam/_header.html:107
+#: templates/peachjam/_header.html:112
 msgid "African Union and EAC"
 msgstr ""
 
-#: templates/peachjam/_header.html:112
+#: templates/peachjam/_header.html:117
 msgid "East African Community (EAC)"
 msgstr ""
 
-#: templates/peachjam/_header.html:117
+#: templates/peachjam/_header.html:122
 msgid "East African Court of Justice"
 msgstr ""
 
-#: templates/peachjam/_header.html:122
+#: templates/peachjam/_header.html:127
 msgid "East African Court of Appeal"
 msgstr ""
 
-#: templates/peachjam/_header.html:128
+#: templates/peachjam/_header.html:133
 msgid "African Court of Human and People's Rights"
 msgstr ""
 
-#: templates/peachjam/_header.html:134
+#: templates/peachjam/_header.html:139
 msgid "African Commission on Human and People's Rights"
 msgstr ""
 
-#: templates/peachjam/_header.html:140
+#: templates/peachjam/_header.html:145
 msgid "AU Charters and Treaties"
 msgstr ""
 

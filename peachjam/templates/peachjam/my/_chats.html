@@ -1,0 +1,19 @@
+{% load i18n peachjam_ml %}
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="mb-3">
+      {% blocktrans with name=PEACHJAM_JS_CONFIG.chat.assistantName %}Recent chats with {{ name }}{% endblocktrans %}
+    </h5>
+    <ul class="list-unstyled mb-3">
+      {% recent_chats user as chats %}
+      {% for chat in chats %}
+        <li class="d-flex">
+          <i class="bi bi-chat-dots me-2"></i>
+          <div class="flex-grow-1">
+            <a href="{{ chat.document.get_absolute_url }}">{{ chat.document.title }}</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>

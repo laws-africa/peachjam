@@ -110,6 +110,7 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "peachjam.middleware.SetPreferredLanguageMiddleware",
+    "peachjam.middleware.UserIDHeaderMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
@@ -139,11 +140,9 @@ PEACHJAM = {
     "LAWSAFRICA_API_KEY": os.environ.get(
         "LAWSAFRICA_API_KEY", os.environ.get("CITATOR_API_KEY")
     ),
-    "CITATOR_API": os.environ.get(
-        "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
-    ),
+    "CITATOR_API": os.environ.get("CITATOR_API", "https://api.laws.africa/citator/v1/"),
     "EXTRACTOR_API": os.environ.get(
-        "EXTRACTOR_API", "https://services.lawsafrica.com/extractor/v1/"
+        "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
@@ -638,7 +637,9 @@ CKEDITOR_CONFIGS = {
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-SESSION_COOKIE_SECURE = True
+# this makes it easier to log in when debugging on something other than localhost, such as when testing on mobile
+# on your local network
+SESSION_COOKIE_SECURE = not DEBUG
 # nginx sets this header to indicate if the upstream request was secure
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
