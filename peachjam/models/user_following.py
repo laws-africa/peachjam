@@ -363,5 +363,7 @@ class UserFollowing(models.Model):
             saved_document__work=relationship.subject_work,
         )
         log.info("Found %d follows for new relationship update", follows.count())
+        # TODO: check for predicate
+
         for follow in follows:
             follow._update_new_relationship(relationship)
