@@ -282,6 +282,7 @@ class Work(models.Model):
         self.explode_frbr_uri()
         super().save(*args, **kwargs)
 
+    @property
     def parsed_date(self):
         """
         Parse frbr_uri_date into a real date.
