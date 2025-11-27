@@ -303,7 +303,7 @@ class UserFollowing(models.Model):
         hits = self.documents_for_followed_search()
 
         # avoid alerts for documents older than cutoff
-        hits = [h for h in hits if h.document.date >= self.cutoff_date]
+        hits = [h for h in hits if h.document.date > self.cutoff_date]
 
         if self.last_alerted_at:
             hits = [h for h in hits if h.document.created_at > self.last_alerted_at][
@@ -324,10 +324,11 @@ class UserFollowing(models.Model):
         # check that we are passing a citation to the saved document
         assert citation.target_work == self.saved_document.work
 
-        assert citation.target_work.parsed_date
-
         # avoid alerts for citations from documents older than cutoff
-        if citation.citing_work.parsed_date < self.cutoff_date:
+        if (
+            citation.citing_work.documents.latest_expression().first().date
+            < self.cutoff_date
+        ):
             log.info(
                 "Citation from work %s is older than cutoff date %s for user %s",
                 citation.citing_work,
