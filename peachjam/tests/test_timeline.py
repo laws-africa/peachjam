@@ -37,7 +37,7 @@ class TimelineViewTest(TestCase):
 
         self.court = Court.objects.get(code="ECOWASCJ")
         self.follow = UserFollowing.objects.create(user=self.user, court=self.court)
-        self.last_alerted_at = datetime(2000, 7, 1)
+        self.last_alerted_at = datetime(2025, 7, 1)
         self.follow.last_alerted_at = self.last_alerted_at
         self.initial_documents_count = Judgment.objects.filter(
             court=self.court, created_at__gte=self.last_alerted_at
@@ -47,6 +47,30 @@ class TimelineViewTest(TestCase):
     def test_timeline_create_and_update(self):
         # Initially, no timeline events
         self.assertEqual(0, TimelineEvent.objects.count())
+        date = datetime(2025, 10, 1)
+        Judgment.objects.create(
+            case_name="New Case",
+            court=self.court,
+            date=date,
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        Judgment.objects.create(
+            case_name="New Case 2",
+            court=self.court,
+            date=date,
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        date = datetime(2000, 10, 1)
+        # An old judgment that should not be included
+        Judgment.objects.create(
+            case_name="Old Case",
+            court=self.court,
+            date=date,
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
 
         # Update the timeline for the user → should create one event
         UserFollowing.update_follows_for_user(self.user)
@@ -56,13 +80,13 @@ class TimelineViewTest(TestCase):
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
         ).values_list("subject_works__documents__id", flat=True)
-        self.assertEqual(self.initial_documents_count, subject_docs.count())
+        self.assertEqual(2, subject_docs.count())
 
         # Create a new judgment and update timeline
         # → should NOT create a new event, but subject doc count should increase
-        date = datetime(2023, 10, 1)
+        date = datetime(2025, 10, 1)
         j = Judgment.objects.create(
-            case_name="New Case",
+            case_name="New Case 3",
             court=self.court,
             date=date,
             language=Language.objects.get(pk="en"),
@@ -73,7 +97,7 @@ class TimelineViewTest(TestCase):
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
         ).values_list("subject_works__documents__id", flat=True)
-        self.assertEqual(self.initial_documents_count + 1, subject_docs.count())
+        self.assertEqual(3, subject_docs.count())
         self.assertIn(j.pk, subject_docs)
 
         # Send timeline emails, then create another doc and update timeline
@@ -91,5 +115,5 @@ class TimelineViewTest(TestCase):
         subject_docs = TimelineEvent.objects.filter(
             user_following__user=self.user
         ).values_list("subject_works__documents__id", flat=True)
-        self.assertEqual(self.initial_documents_count + 2, subject_docs.count())
+        self.assertEqual(4, subject_docs.count())
         self.assertIn(j.pk, subject_docs)

@@ -288,7 +288,7 @@ class UserFollowing(models.Model):
             qs = qs.filter(created_at__gt=self.last_alerted_at)
 
         # avoid alerts for documents older than cutoff
-        qs = qs.filter(date=self.cutoff_date)
+        qs = qs.filter(date__gt=self.cutoff_date)
 
         docs = list(qs[:10])
         if not docs:
@@ -329,8 +329,9 @@ class UserFollowing(models.Model):
         # avoid alerts for citations from documents older than cutoff
         if citation.citing_work.parsed_date < self.cutoff_date:
             log.info(
-                "Citation from work %s is older than cutoff date for user %s",
+                "Citation from work %s is older than cutoff date %s for user %s",
                 citation.citing_work,
+                self.cutoff_date,
                 self.user,
             )
             return
