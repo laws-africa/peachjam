@@ -283,7 +283,7 @@ class UserFollowing(models.Model):
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
 
-        # filter out documents older than 1 year to avoid overwhelming users
+        # avoid alerts for documents older than cutoff
         cutoff = timezone.now() - timezone.timedelta(days=self.alert_cuttoff_days)
         qs = qs.filter(date=cutoff)
 
@@ -299,6 +299,7 @@ class UserFollowing(models.Model):
     def _update_search(self):
         hits = self.documents_for_followed_search()
 
+        # avoid alerts for documents older than cutoff
         cutoff = timezone.now() - timezone.timedelta(days=self.alert_cuttoff_days)
         hits = [h for h in hits if h.document.date >= cutoff]
 
@@ -306,8 +307,6 @@ class UserFollowing(models.Model):
             hits = [h for h in hits if h.document.created_at > self.last_alerted_at][
                 :10
             ]
-
-        # filter out documents older than 1 year to avoid overwhelming users
 
         if not hits:
             return False
