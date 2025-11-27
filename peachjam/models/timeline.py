@@ -1,6 +1,5 @@
 import logging
 from collections import defaultdict
-from itertools import islice
 
 from django.db import models
 from django.db.models import Prefetch
@@ -73,6 +72,18 @@ class TimelineEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
+    def description_text(self):
+        if self.event_type == self.EventTypes.NEW_DOCUMENTS:
+            return _("New documents added for")
+        elif self.event_type == self.EventTypes.SAVED_SEARCH:
+            return _("New search hits for")
+        elif self.event_type == self.EventTypes.NEW_CITATION:
+            return _("New citations for")
+        elif self.event_type == self.EventTypes.NEW_AMENDMENT:
+            return _("New amendments published for")
+        else:
+            return _("New updates for")
+
     @property
     def subject_documents(self):
         """
@@ -109,7 +120,7 @@ class TimelineEvent(models.Model):
     def add_new_documents_event(cls, follow, documents):
         event, _ = TimelineEvent.objects.get_or_create(
             user_following=follow,
-            event_type=follow.get_event_type(),
+            event_type=cls.EventTypes.NEW_DOCUMENTS,
             email_alert_sent_at__isnull=True,
         )
         event.append_documents(documents)
@@ -134,7 +145,7 @@ class TimelineEvent(models.Model):
 
         event, created = TimelineEvent.objects.get_or_create(
             user_following=follow,
-            event_type=follow.get_event_type(),
+            event_type=cls.EventTypes.SAVED_SEARCH,
             email_alert_sent_at__isnull=True,
             defaults={"extra_data": {"hits": new_hits}},
         )
@@ -170,7 +181,6 @@ class TimelineEvent(models.Model):
             qs = qs.filter(event_date__lt=before)
 
         dates = qs.values("event_date").distinct().order_by("-event_date")[:limit]
-
         date_list = [d["event_date"] for d in dates]
 
         events_qs = (
@@ -189,18 +199,26 @@ class TimelineEvent(models.Model):
 
         grouped = defaultdict(lambda: defaultdict(list))
 
+        # group by date + follow + docs
         for ev in events_qs:
             for doc in ev.subject_documents:
-                grouped[ev.event_date][ev.user_following].append(doc)
+                grouped[ev.event_date][ev.user_following].append((ev, doc))
 
         results = {}
 
         for date, by_follow in grouped.items():
             entries = []
-            for follow, docs in by_follow.items():
-                first = list(islice(docs, 10))
-                rest = docs[10:]
-                entries.append((follow, (first, rest)))
+            for follow, ev_doc_pairs in by_follow.items():
+                # ev_doc_pairs = list of (ev, doc)
+                # but all events in this follow group have same description_text
+                ev = ev_doc_pairs[0][0]
+
+                docs_only = [d for (_ev, d) in ev_doc_pairs]
+                first = docs_only[:10]
+                rest = docs_only[10:]
+
+                entries.append((follow, ev.description_text(), (first, rest)))
+
             results[date] = entries
 
         next_before = min(date_list) if date_list else None

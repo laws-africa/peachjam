@@ -103,23 +103,17 @@ class UserFollowing(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
-    # fields that can be followed
-    EVENT_FIELD_MAP = {
-        "court": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "author": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "court_class": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "court_registry": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "country": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "locality": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "taxonomy": [TimelineEvent.EventTypes.NEW_DOCUMENTS],
-        "saved_search": [TimelineEvent.EventTypes.SAVED_SEARCH],
-        "saved_document": [
-            TimelineEvent.EventTypes.NEW_CITATION,
-            TimelineEvent.EventTypes.NEW_AMENDMENT,
-        ],
-    }
-
-    follow_fields = list(EVENT_FIELD_MAP.keys())
+    follow_fields = [
+        "court",
+        "author",
+        "court_class",
+        "court_registry",
+        "country",
+        "locality",
+        "taxonomy",
+        "saved_search",
+        "saved_document",
+    ]
 
     class Meta:
         constraints = [
@@ -176,15 +170,6 @@ class UserFollowing(models.Model):
     # --- simple helpers ---
 
     @property
-    def description_text(self):
-        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
-            return _("New matches for search alert")
-        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
-            return _("New documents added for")
-        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
-            return _("New citations of")
-
-    @property
     def followed_field(self):
         for f in self.follow_fields:
             if getattr(self, f):
@@ -195,17 +180,21 @@ class UserFollowing(models.Model):
         field = self.followed_field
         return getattr(self, field) if field else None
 
-    def get_event_type(self):
-        field = self.followed_field
-        return self.EVENT_FIELD_MAP.get(field)
-
     @property
     def is_new_docs(self):
-        return self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS
+        return self.followed_field in [
+            "court",
+            "author",
+            "court_class",
+            "court_registry",
+            "country",
+            "locality",
+            "taxonomy",
+        ]
 
     @property
     def is_saved_search(self):
-        return self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH
+        return self.followed_field == "saved_search"
 
     # --- validation only ---
 
