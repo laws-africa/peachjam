@@ -5,6 +5,7 @@ import shutil
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import date
 
 from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
@@ -280,6 +281,32 @@ class Work(models.Model):
     def save(self, *args, **kwargs):
         self.explode_frbr_uri()
         super().save(*args, **kwargs)
+
+    def parsed_date(self):
+        """
+        Parse frbr_uri_date into a real date.
+        Handles:
+        - YYYY-MM-DD
+        - YYYY
+        Returns None if unparsable.
+        """
+        if not self.frbr_uri_date:
+            return None
+
+        s = self.frbr_uri_date.strip()
+
+        # Full ISO format YYYY-MM-DD
+        if len(s) == 10 and "-" in s:
+            try:
+                return date.fromisoformat(s)
+            except ValueError:
+                return None
+
+        # Year-only YYYY
+        if len(s) == 4 and s.isdigit():
+            return date(int(s), 1, 1)
+
+        return None
 
     def explode_frbr_uri(self):
         frbr_uri = FrbrUri.parse(self.frbr_uri)

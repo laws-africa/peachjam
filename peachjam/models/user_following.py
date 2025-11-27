@@ -324,8 +324,10 @@ class UserFollowing(models.Model):
         # check that we are passing a citation to the saved document
         assert citation.target_work == self.saved_document.work
 
+        assert citation.target_work.parsed_date
+
         # avoid alerts for citations from documents older than cutoff
-        if citation.citing_work.date < self.cutoff_date:
+        if citation.citing_work.parsed_date < self.cutoff_date:
             log.info(
                 "Citation from work %s is older than cutoff date for user %s",
                 citation.citing_work,
