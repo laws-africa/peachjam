@@ -117,7 +117,6 @@ class UserFollowing(models.Model):
     }
 
     follow_fields = list(EVENT_FIELD_MAP.keys())
-    alert_cuttoff_days = 365
 
     class Meta:
         constraints = [
@@ -205,6 +204,11 @@ class UserFollowing(models.Model):
     def is_saved_search(self):
         return self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH
 
+    @property
+    def cutoff_date(self):
+        cutoff_days = 365
+        return (timezone.now() - timezone.timedelta(days=cutoff_days)).date()
+
     # --- validation only ---
 
     def can_add_more_follows(self):
@@ -284,8 +288,7 @@ class UserFollowing(models.Model):
             qs = qs.filter(created_at__gt=self.last_alerted_at)
 
         # avoid alerts for documents older than cutoff
-        cutoff = timezone.now() - timezone.timedelta(days=self.alert_cuttoff_days)
-        qs = qs.filter(date=cutoff)
+        qs = qs.filter(date=self.cutoff_date)
 
         docs = list(qs[:10])
         if not docs:
@@ -300,8 +303,7 @@ class UserFollowing(models.Model):
         hits = self.documents_for_followed_search()
 
         # avoid alerts for documents older than cutoff
-        cutoff = timezone.now() - timezone.timedelta(days=self.alert_cuttoff_days)
-        hits = [h for h in hits if h.document.date >= cutoff]
+        hits = [h for h in hits if h.document.date >= self.cutoff_date]
 
         if self.last_alerted_at:
             hits = [h for h in hits if h.document.created_at > self.last_alerted_at][
@@ -323,10 +325,9 @@ class UserFollowing(models.Model):
         assert citation.target_work == self.saved_document.work
 
         # avoid alerts for citations from documents older than cutoff
-        cutoff = timezone.now() - timezone.timedelta(days=365)
-        if citation.citing_work.date < cutoff:
+        if citation.citing_work.date < self.cutoff_date:
             log.info(
-                "Citation from work %s is older than 1 year, not alerting user %s",
+                "Citation from work %s is older than cutoff date for user %s",
                 citation.citing_work,
                 self.user,
             )
