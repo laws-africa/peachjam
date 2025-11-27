@@ -11,7 +11,7 @@ from templated_email.backends.vanilla_django import (
     TemplateBackend as BaseTemplateBackend,
 )
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, ProvisionCitation
 from peachjam_search.models import SavedSearch
 from peachjam_search.serializers import SearchHit
 
@@ -101,10 +101,21 @@ class CustomerIOTemplateBackend(TemplateBackend):
             "email": user.email,
             "tracking_id": user.userprofile.tracking_id_str,
         },
+        ProvisionCitation: lambda context, pc: {
+            "document": document_serializer(context, pc.citing_document),
+            "prefix": pc.prefix,
+            "suffix": pc.suffix,
+            "exact": pc.exact,
+            "provision_eid": pc.provision_eid,
+        },
     }
 
     # use CustomerIO for these templates, otherwise fall back to the usual system
-    transactional_message_ids = ["search_alert", "user_following_alert"]
+    transactional_message_ids = [
+        "search_alert",
+        "user_following_alert",
+        "new_citation_alert",
+    ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

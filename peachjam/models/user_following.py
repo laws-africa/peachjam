@@ -89,6 +89,14 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("saved search"),
     )
+    saved_document = models.ForeignKey(
+        "peachjam.SavedDocument",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("saved document"),
+    )
 
     last_alerted_at = models.DateTimeField(
         _("last alerted at"), null=True, blank=True, auto_now_add=True
@@ -105,6 +113,7 @@ class UserFollowing(models.Model):
         "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
         "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
         "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
+        "saved_document": TimelineEvent.EventTypes.NEW_CITATION,
     }
 
     follow_fields = list(EVENT_FIELD_MAP.keys())
@@ -151,6 +160,11 @@ class UserFollowing(models.Model):
                 condition=models.Q(saved_search__isnull=False),
                 name="unique_user_saved_search",
             ),
+            models.UniqueConstraint(
+                fields=["user", "saved_document"],
+                condition=models.Q(saved_document__isnull=False),
+                name="unique_user_saved_document",
+            ),
         ]
 
     def __str__(self):
@@ -164,6 +178,8 @@ class UserFollowing(models.Model):
             return _("New matches for search alert")
         elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
             return _("New documents added for")
+        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
+            return _("New citations of")
 
     @property
     def followed_field(self):
@@ -201,7 +217,7 @@ class UserFollowing(models.Model):
         super().clean()
 
         # enforce subscription limits
-        if not self.saved_search:
+        if not (self.saved_search or self.saved_document):
             if not self.pk and not self.can_add_more_follows():
                 raise ValidationError(_("Following limit reached"))
 
@@ -290,8 +306,38 @@ class UserFollowing(models.Model):
         self.save(update_fields=["last_alerted_at"])
         return True
 
+    def _update_new_citation(self, citation):
+        assert self.saved_document
+
+        # check that we are passing a citation to the saved document
+        assert citation.target_work == self.saved_document.work
+
+        # check if the user has ever been alerted about this citation
+        already_alerted = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+            subject_works=citation.citing_work,
+        ).exists()
+        if already_alerted:
+            log.info(
+                "User %s has already been alerted about citation from work %s",
+                self.user,
+                citation.citing_work,
+            )
+            return
+        TimelineEvent.add_new_citation_events(self, citation.citing_work)
+
     @classmethod
     def update_follows_for_user(cls, user):
         follows = user.following.all()
         for follow in follows:
             follow.update_follow()
+
+    @classmethod
+    def update_new_citation_follows(cls, citation):
+        follows = cls.objects.filter(
+            saved_document__work=citation.target_work,
+        )
+        log.info("Found %d follows for new citation update", follows.count())
+        for follow in follows:
+            follow._update_new_citation(citation)

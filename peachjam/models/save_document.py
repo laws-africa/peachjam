@@ -102,6 +102,9 @@ class SavedDocument(models.Model):
 
     objects = SavedDocumentManager()
 
+    def __str__(self):
+        return self.work.title
+
     @property
     def document(self):
         # use manually set doc if available
@@ -112,7 +115,8 @@ class SavedDocument(models.Model):
         if docs:
             return docs[0]
         # fallback to DB query
-        return self.work.documents.latest_expression().first()
+        lang = self.user.userprofile.preferred_language.iso_639_3
+        return self.work.documents.latest_expression().preferred_language(lang).first()
 
     @document.setter
     def document(self, value):

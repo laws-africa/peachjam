@@ -54,6 +54,8 @@ class TimelineEvent(models.Model):
     class EventTypes(models.TextChoices):
         NEW_DOCUMENTS = "new_documents", _("New Documents")
         SAVED_SEARCH = "saved_search", _("Saved Search")
+        NEW_CITATION = "new_citation", _("New Citation")
+        NEW_AMENDMENT = "new_amendment", _("New Amendment")
 
     objects = TimelineEventManager()
 
@@ -146,6 +148,16 @@ class TimelineEvent(models.Model):
             event.save(update_fields=["extra_data"])
 
         event.append_documents(docs)
+        return event
+
+    @classmethod
+    def add_new_citation_events(cls, follow, work):
+        event, _ = TimelineEvent.objects.get_or_create(
+            user_following=follow,
+            event_type=cls.EventTypes.NEW_CITATION,
+            email_alert_sent_at__isnull=True,
+        )
+        event.subject_works.add(work)
         return event
 
     @classmethod

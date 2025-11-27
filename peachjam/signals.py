@@ -212,6 +212,15 @@ def judgment_content_changed_generate_summary(sender, instance, **kwargs):
         generate_judgment_summary(judgment.pk)
 
 
+@receiver(signals.post_save, sender=SavedDocument)
+def create_user_following_saved_document(sender, instance, created, **kwargs):
+    if created:
+        UserFollowing.objects.create(
+            user=instance.user,
+            saved_document=instance,
+        )
+
+
 @receiver(signals.pre_delete, sender=Folder)
 def delete_saved_document_if_no_folder(sender, instance, **kwargs):
     saved_documents = instance.saved_documents.all()
@@ -219,3 +228,12 @@ def delete_saved_document_if_no_folder(sender, instance, **kwargs):
     for doc in saved_documents:
         if doc.folders.count() == 1:
             doc.delete()
+
+
+@receiver(signals.post_save, sender=ExtractedCitation)
+def notify_new_citation(sender, instance, **kwargs):
+    """Notify users following the subject work when a new citation relationship is created."""
+    from peachjam.tasks import update_users_new_citation
+
+    if not kwargs["raw"]:
+        update_users_new_citation(instance.pk)
