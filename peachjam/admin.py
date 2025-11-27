@@ -1736,6 +1736,8 @@ class JournalAdmin(DocumentAdmin):
 @admin.register(ExternalDocument)
 class ExternalDocumentAdmin(DocumentAdmin):
     prepopulated_fields = {"frbr_uri_number": ("title",)}
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["nature"])
 
     def get_form(self, request, obj=None, **kwargs):
         form = super().get_form(request, obj, **kwargs)
