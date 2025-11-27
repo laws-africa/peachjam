@@ -117,6 +117,7 @@ class UserFollowing(models.Model):
     }
 
     follow_fields = list(EVENT_FIELD_MAP.keys())
+    alert_cuttoff_days = 365
 
     class Meta:
         constraints = [
@@ -282,6 +283,10 @@ class UserFollowing(models.Model):
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
 
+        # filter out documents older than 1 year to avoid overwhelming users
+        cutoff = timezone.now() - timezone.timedelta(days=self.alert_cuttoff_days)
+        qs = qs.filter(date=cutoff)
+
         docs = list(qs[:10])
         if not docs:
             return False
@@ -293,10 +298,16 @@ class UserFollowing(models.Model):
 
     def _update_search(self):
         hits = self.documents_for_followed_search()
-        cutoff = self.last_alerted_at
 
-        if cutoff:
-            hits = [h for h in hits if h.document.created_at > cutoff][:10]
+        cutoff = timezone.now() - timezone.timedelta(days=self.alert_cuttoff_days)
+        hits = [h for h in hits if h.document.date >= cutoff]
+
+        if self.last_alerted_at:
+            hits = [h for h in hits if h.document.created_at > self.last_alerted_at][
+                :10
+            ]
+
+        # filter out documents older than 1 year to avoid overwhelming users
 
         if not hits:
             return False
@@ -311,6 +322,16 @@ class UserFollowing(models.Model):
 
         # check that we are passing a citation to the saved document
         assert citation.target_work == self.saved_document.work
+
+        # avoid alerts for citations from documents older than cutoff
+        cutoff = timezone.now() - timezone.timedelta(days=365)
+        if citation.citing_work.date < cutoff:
+            log.info(
+                "Citation from work %s is older than 1 year, not alerting user %s",
+                citation.citing_work,
+                self.user,
+            )
+            return
 
         # check if the user has ever been alerted about this citation
         already_alerted = TimelineEvent.objects.filter(
