@@ -320,35 +320,27 @@ class UserFollowing(models.Model):
         TimelineEvent.add_new_citation_events(self, citation.citing_work)
 
     def _update_new_relationship(self, relationship):
-        if not self.saved_document:
-            log.error("User %s follow %s is not for a saved document", self.user, self)
-            return
+        assert self.saved_document
 
         # check that we are passing a relationship to the saved document
-        if relationship.subject_work != self.saved_document.work:
-            log.error(
-                "Relationship subject work %s does not match saved document work %s",
-                relationship.subject_work,
-                self.saved_document.work,
+        assert relationship.subject_work == self.saved_document.work
+
+        # check if the user has ever been alerted about this relationship
+        already_alerted = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            subject_works=relationship.object_work,
+        ).exists()
+
+        if already_alerted:
+            log.info(
+                "User %s has already been alerted about relationship to work %s",
+                self.user,
+                relationship.object_work,
             )
             return
 
-        # check if the user has ever been alerted about this relationship
-        events = TimelineEvent.objects.filter(
-            user_following=self,
-            event_type=TimelineEvent.EventTypes.NEW_CITATION,
-        )
-        work = relationship.source_work
-        for event in events:
-            if work in event.subject_works.all():
-                log.info(
-                    "User %s has already been alerted about relationship from work %s",
-                    self.user,
-                    work,
-                )
-                return
-
-        TimelineEvent.add_new_citation_events(self, work)
+        TimelineEvent.add_new_amendment_events(self, relationship.object_work)
 
     @classmethod
     def update_follows_for_user(cls, user):
@@ -368,7 +360,7 @@ class UserFollowing(models.Model):
     @classmethod
     def update_new_relationship_follows(cls, relationship):
         follows = cls.objects.filter(
-            saved_document__work=relationship.target_work,
+            saved_document__work=relationship.subject_work,
         )
         log.info("Found %d follows for new relationship update", follows.count())
         for follow in follows:

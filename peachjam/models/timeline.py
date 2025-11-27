@@ -172,6 +172,16 @@ class TimelineEvent(models.Model):
         return event
 
     @classmethod
+    def add_new_amendment_events(cls, follow, work):
+        event, _ = TimelineEvent.objects.get_or_create(
+            user_following=follow,
+            event_type=cls.EventTypes.NEW_AMENDMENT,
+            email_alert_sent_at__isnull=True,
+        )
+        event.subject_works.add(work)
+        return event
+
+    @classmethod
     def get_user_timeline(cls, user, before=None, limit=5):
         qs = TimelineEvent.objects.filter(user_following__user=user).annotate(
             event_date=TruncDate("created_at")
