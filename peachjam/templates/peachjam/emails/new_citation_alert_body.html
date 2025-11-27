@@ -6,7 +6,7 @@
   <ul>
     {% for citing in item.citing_documents %}
       <li style="margin-bottom: 1rem">
-        <a href="{{ citing.url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
+        <a href="{{ citing.document.url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
         {% if citing.document.blurb %}<div>{{ citing.blurb | safe }}</div>{% endif %}
         {% if citing.document.flynote %}
           <div>
