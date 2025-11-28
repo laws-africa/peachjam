@@ -1,12 +1,12 @@
 {% load i18n %}
 {% for item in saved_documents %}
   <p>
-    <a href="{{ item.saved_document.url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>
+    <a href="{{ site_domain }}{{ item.saved_document.get_absolute_url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>
   </p>
   <ul>
     {% for citing in item.citing_documents %}
       <li style="margin-bottom: 1rem">
-        <a href="{{ citing.document.url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
+        <a href="{{ site_domain }}{{ citing.document.get_absolute_url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
         {% if citing.document.blurb %}<div>{{ citing.blurb | safe }}</div>{% endif %}
         {% if citing.document.flynote %}
           <div>
