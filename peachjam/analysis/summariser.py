@@ -14,6 +14,7 @@ class SummariserService:
     def __init__(self):
         self.api_token = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
         self.api_url = settings.PEACHJAM["EXTRACTOR_API"]
+        self.summary_language = settings.PEACHJAM["SUMMARISER_LANGUAGE"]
 
     def enabled(self):
         return self.api_token and self.api_url
@@ -29,6 +30,7 @@ class SummariserService:
         data = {
             "expression_frbr_uri": document.expression_frbr_uri,
             "text": text,
+            "language": self.summary_language,
         }
         headers = self.get_headers()
         log.info("Calling summariser service")
