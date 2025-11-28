@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import override
@@ -155,6 +156,8 @@ class TimelineEmailService:
                     "citing_documents": citing_documents,
                 }
             )
+        site = Site.objects.get_current()
+        context["site_domain"] = f"https://{site.domain}"
 
         # render html template string
         context["html_body"] = render_to_string(
