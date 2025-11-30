@@ -258,6 +258,8 @@ def send_timeline_email_alerts():
     from peachjam.timeline_email_service import TimelineEmailService
 
     log.info("Checking for pending timeline emails")
+    log.info("Temporarily disabled")
+    return
     TimelineEmailService.send_email_alerts()
 
 
