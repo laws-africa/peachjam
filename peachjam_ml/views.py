@@ -2,7 +2,7 @@ import json
 
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import F
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
@@ -121,7 +121,92 @@ class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailV
 
 
 class DocumentChatView(ChatThreadDetailMixin):
-    http_method_names = ["post"]
+    http_method_names = ["post", "get"]
+    # post or stream
+    mode = "post"
+
+    def get(self, request, *args, **kwargs):
+        thread = self.get_object()
+
+        if self.mode != "stream":
+            return HttpResponse(status=405)
+
+        content = (request.GET.get("c") or "").strip()
+        msg_id = (request.GET.get("id") or "").strip()
+        if not content:
+            return HttpResponse(status=400)
+
+        # TODO: if the msg_id already exists, this is a dup, do something
+        message = {"content": content, "id": msg_id}
+
+        response = StreamingHttpResponse(
+            self.stream(thread, message), content_type="text/event-stream"
+        )
+        response["Cache-Control"] = "no-cache"
+        response["X-Accel-Buffering"] = "no"  # disable Nginx buffering
+
+        return response
+
+    def stream(self, thread, message):
+        def format_sse(event, data):
+            return f"event: {event}\n" + f"data: {json.dumps(data)}\n\n"
+
+        config = get_chat_config(thread)
+        with get_chat_graph() as graph:
+            snapshot = graph.get_state(config)
+
+            if not snapshot.values:
+                state = {
+                    "user_id": thread.user.pk,
+                    "document_id": thread.document.pk,
+                }
+            else:
+                state = snapshot.values
+
+            state["user_message"] = message
+
+            with langfuse.start_as_current_observation(
+                name="document_chat",
+                as_type="generation",
+                input={
+                    "expression_frbr_uri": thread.document.expression_frbr_uri,
+                    "question": message["content"],
+                },
+            ) as generation:
+                config["configurable"]["trace_id"] = generation.trace_id
+                # TODO: async
+                for chunk, metadata in graph.stream(
+                    state,
+                    config,
+                    stream_mode="messages",
+                    # checkpoint only once a whole call is complete, to avoid saving partial state
+                    # alternatively, we need to run through the messages when "resuming" and ensure that any
+                    # dangling (unanswered) tool calls are removed
+                    durability="exit",
+                ):
+                    if (
+                        chunk.type == "AIMessageChunk"
+                        and metadata.get("langgraph_node") == "chatbot"
+                        and chunk.content
+                    ):
+                        print(chunk)
+                        yield format_sse("chunk", {"id": chunk.id, "c": chunk.content})
+
+                result = graph.get_state(config).values
+                generation.update_trace(
+                    user_id=thread.user.username,
+                    session_id=str(thread.id),
+                    output={"reply": result.get("messages", [])[-1].content},
+                )
+
+                reply = result.get("messages", [])[-1]
+                # write the full final response
+                yield format_sse("message", serialise_message(reply))
+                yield format_sse("done", {})
+
+                history = graph.get_state_history(config)
+            thread.messages_json = self.serialise_message_history(history)
+            thread.save()
 
     def post(self, request, *args, **kwargs):
         thread = self.get_object()
@@ -215,19 +300,20 @@ class VoteChatMessageView(ChatThreadDetailMixin):
         return HttpResponse(status=200)
 
 
-def render_thread_state(thread, state):
-    def serialise(message):
-        return {
-            "id": message.id,
-            "role": message.type,
-            "content": message.content,
-        }
+def serialise_message(message):
+    return {
+        "id": message.id,
+        "role": message.type,
+        "content": message.content,
+    }
 
+
+def render_thread_state(thread, state):
     return JsonResponse(
         {
             "thread_id": str(thread.id),
             "messages": [
-                serialise(m)
+                serialise_message(m)
                 for m in state.get("messages", [])
                 # other types are system and tool
                 if m.type in ["ai", "human"]

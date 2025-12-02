@@ -21,6 +21,7 @@ urlpatterns = [
     ),
     path("api/documents/<int:pk>/chat", StartDocumentChatView.as_view()),
     path("api/chats/<str:pk>", DocumentChatView.as_view()),
+    path("api/chats/<str:pk>/stream", DocumentChatView.as_view(mode="stream")),
     path(
         "api/chats/<str:pk>/messages/<str:message_id>/vote-up",
         VoteChatMessageView.as_view(up=True),
