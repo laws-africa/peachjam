@@ -1127,6 +1127,8 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
 
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
+    held = forms.CharField(widget=CKEditorWidget(), required=False)
+    issues = forms.CharField(widget=CKEditorWidget(), required=False)
 
     class Meta:
         model = Judgment
@@ -1178,7 +1180,15 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     fieldsets[2][1]["classes"] = ["collapse"]
     fieldsets[3][1]["fields"].extend(
-        ["blurb", "case_summary", "case_summary_public", "flynote", "order"]
+        [
+            "blurb",
+            "case_summary",
+            "case_summary_public",
+            "flynote",
+            "order",
+            "held",
+            "issues",
+        ]
     )
     readonly_fields = [
         "mnc",
