@@ -177,9 +177,7 @@ export default {
           return;
         }
         const targetMessage = this.getOrCreateMessage(id, 'ai');
-        const chunk = typeof c === 'string' ? c : '';
-        targetMessage.content = (targetMessage.content || '') + chunk;
-        targetMessage.content_html = null;
+        this.setMessageContent(targetMessage, targetMessage.content + c);
         this.$nextTick(() => {
           this.scrollToBottom();
         });
@@ -192,7 +190,7 @@ export default {
           return;
         }
         const targetMessage = this.getOrCreateMessage(message.id, message.role || 'ai');
-        this.setMessageContent(targetMessage, message.content || '');
+        this.setMessageContent(targetMessage, message.content);
         this.$nextTick(() => {
           this.scrollToBottom();
         });

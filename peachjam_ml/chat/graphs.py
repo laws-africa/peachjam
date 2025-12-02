@@ -209,7 +209,7 @@ def doc_metadata(state: DocumentChatState):
 def markup_refs(state: DocumentChatState):
     """Markup refs in the last AI response message."""
     message = state["messages"][-1]
-    if message.type == "ai":
+    if message.type == "ai" and len(message.content.strip()) > 5:
         doc = CoreDocument.objects.get(pk=state["document_id"])
         resp = get_citator_citations(doc.expression_frbr_uri, message.content)
         # get citations, last one first
@@ -309,3 +309,15 @@ def get_message_snapshot(
                     return message, snapshot
 
     return None, None
+
+
+def get_previous_response(graph, config, message_id):
+    """Get the AI response message that follows the given user message ID in the chat history."""
+    found_user = False
+    # this is ordered most recent first
+    for snapshot in graph.get_state_history(config):
+        for msg in snapshot.values.get("messages", []):
+            if msg.id == message_id and msg.type == "human":
+                found_user = True
+            elif found_user and msg.type == "ai":
+                return msg
