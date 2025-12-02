@@ -9,7 +9,7 @@ concurrency:
 
 jobs:
   # ------------------
-  # web2.laws.africa
+  # web3.laws.africa
   # ------------------
 
   deploy-tanzlii:
@@ -24,96 +24,14 @@ jobs:
         uses: dokku/github-action@master
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/tanzlii-peachjam'
+          git_remote_url: 'ssh://dokku@web3.laws.africa:22/tanzlii-peachjam'
           git_push_flags: '--force'
 
-  deploy-rwandalii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    name: Deploy to rwandalii
-    needs: deploy-tanzlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to rwandalii.laws.africa
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/rwandalii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-eswatinilii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    name: Deploy to eswatinilii
-    needs: deploy-rwandalii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to eswatinilii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/eswatinilii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-sierralii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-eswatinilii
-    name: Deploy to sierralii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to sierralii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/sierralii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-tcilii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    name: Deploy to tcilii
-    needs: deploy-sierralii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to tcilii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/tcilii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-zanzibarlii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
-    needs: deploy-tcilii
-    name: Deploy to zanzibarlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to zanzibarlii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web2.laws.africa:22/zanzibarlii-peachjam'
-          git_push_flags: '--force'
-
-  # ------------------
-  # web3.laws.africa
-  # ------------------
 
   deploy-gazettes:
     if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
     name: Deploy to gazettes.africa
+    needs: deploy-tanzlii
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -367,4 +285,84 @@ jobs:
         with:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@web4.laws.africa:22/senlii-peachjam'
+          git_push_flags: '--force'
+
+  deploy-rwandalii:
+    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    name: Deploy to rwandalii
+    needs: deploy-senlii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: git push to rwandalii.laws.africa
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@web4.laws.africa:22/rwandalii-peachjam'
+          git_push_flags: '--force'
+
+  deploy-eswatinilii:
+    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    name: Deploy to eswatinilii
+    needs: deploy-rwandalii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: git push to eswatinilii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@web4.laws.africa:22/eswatinilii-peachjam'
+          git_push_flags: '--force'
+
+  deploy-sierralii:
+    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    needs: deploy-eswatinilii
+    name: Deploy to sierralii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: git push to sierralii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@web4.laws.africa:22/sierralii-peachjam'
+          git_push_flags: '--force'
+
+  deploy-tcilii:
+    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    name: Deploy to tcilii
+    needs: deploy-sierralii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: git push to tcilii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@web4.laws.africa:22/tcilii-peachjam'
+          git_push_flags: '--force'
+
+  deploy-zanzibarlii:
+    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    needs: deploy-tcilii
+    name: Deploy to zanzibarlii
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: git push to zanzibarlii.org
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@web4.laws.africa:22/zanzibarlii-peachjam'
           git_push_flags: '--force'
