@@ -1,7 +1,7 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% load i18n %}
 {% block title %}
-  {% trans "Glossary" %}
+  {% trans "Glossary" %} - {{ place.name }}
 {% endblock %}
 {% block page-content %}
   <div class="container">
@@ -19,8 +19,8 @@
   <div class="container">
     <h1>{% trans 'Glossary of defined terms' %}</h1>
     <div class="mb-5">
-      {% blocktrans trimmed %}
-        Terms that have been defined in legislation across {{ place_name }}.
+      {% blocktrans trimmed with name=place.name %}
+        Terms that have been defined in legislation across {{ name }}.
       {% endblocktrans %}
     </div>
   </div>
