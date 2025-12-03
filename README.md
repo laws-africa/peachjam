@@ -6,7 +6,9 @@
 Project Peach Jam
 
 ## Prerequisites
-- postgresql
+- Python@3.10
+- libmagic
+- postgresql > 14
 - pip
 - elasticsearch
 - global sass
@@ -43,6 +45,12 @@ sudo su - postgres -c 'createdb peachjam'
 ```
 export DATABASE_URL=postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>
 ```
+
+- Install the required frontend dependencies (Node modules) located in the `peachjam` directory:
+```
+npm install
+``` 
+
 - Run migrations to create tables.
 ```
 python manage.py migrate
