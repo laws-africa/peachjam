@@ -49,7 +49,7 @@ export DATABASE_URL=postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>
 - Install the required frontend dependencies (Node modules) located in the `peachjam` directory:
 ```
 npm install
-``` 
+```
 
 - Run migrations to create tables.
 ```
