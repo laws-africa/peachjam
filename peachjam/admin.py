@@ -1128,6 +1128,21 @@ class JudgmentAdminForm(DocumentForm):
         model = Judgment
         fields = ("hearing_date",)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if self.instance and self.instance.held:
+            self.initial["held"] = self.convert_to_paragraphs(self.instance.held)
+
+        if self.instance and self.instance.issues:
+            self.initial["issues"] = self.convert_to_paragraphs(self.instance.issues)
+
+    def clean_held(self):
+        return self.cleaned_data["held"].splitlines()
+
+    def clean_issues(self):
+        return self.cleaned_data["issues"].splitlines()
+
     def save(self, *args, **kwargs):
         if (
             "serial_number_override" in self.changed_data
@@ -1139,6 +1154,15 @@ class JudgmentAdminForm(DocumentForm):
         super().save(*args, **kwargs)
 
         return self.instance
+
+    def convert_to_paragraphs(self, value):
+        if not value:
+            return ""
+
+        if isinstance(value, list):
+            return "".join([f"{item}\n" for item in value])
+
+        return value
 
 
 @admin.register(Judgment)
@@ -1180,8 +1204,8 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             "case_summary_public",
             "flynote",
             "order",
-            "held",
             "issues",
+            "held",
         ]
     )
     readonly_fields = [
