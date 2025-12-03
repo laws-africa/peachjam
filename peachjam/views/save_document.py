@@ -160,8 +160,18 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        legacy_ids = self.request.GET.getlist("doc_id")
+
+        if "doc_ids" in self.request.GET:
+            csv_val = self.request.GET.get("doc_ids", "")
+
+            legacy_ids.extend(csv_val.split(","))
+
         try:
-            requested_ids = [int(pk) for pk in self.request.GET.getlist("doc_id")]
+            requested_ids = [
+                int(pk)
+                for pk in set(pk.strip() for pk in legacy_ids if pk and pk.strip())
+            ]
         except ValueError:
             requested_ids = []
 
