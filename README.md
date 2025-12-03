@@ -7,7 +7,7 @@ Project Peach Jam
 
 ## Prerequisites
 - Python@3.10
-- postgresql > 14
+- postgresql > 14 (*Please note that the database should have the pgvector extension installed.*)
 - global sass
 
 ## Local Setup
