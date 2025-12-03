@@ -7,10 +7,7 @@ Project Peach Jam
 
 ## Prerequisites
 - Python@3.10
-- libmagic
 - postgresql > 14
-- pip
-- elasticsearch
 - global sass
 
 ## Local Setup
