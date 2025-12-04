@@ -1,4 +1,3 @@
-
 # Deployment
 Peachjam can be deployed to a server that has [Dokku](https://dokku.com/) installed. This allows for easy config based deployments using Docker containers.
 The following steps outline the procedure to deploy a new Peachjam based application.
