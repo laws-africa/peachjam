@@ -176,7 +176,11 @@
                         type="button"
                         role="tab"
                         aria-controls="citations-tab"
-                        aria-selected="false">
+                        aria-selected="false"
+                        hx-get="{% url 'document_citations' document.expression_frbr_uri|strip_first_character %}"
+                        hx-target="#citations-tab"
+                        hx-swap="innerHTML"
+                        hx-trigger="click once">
                   <i class="bi bi-pj pj-citations"></i>
                   {% trans "Citations" %}
                   <span class="badge bg-secondary">{{ document.work.n_cited_works|default:"-" }} / {{ document.work.n_citing_works|default:"-" }}</span>
