@@ -8,12 +8,41 @@ concurrency:
   group: liiweb2.africanlii.org
 
 jobs:
+  check-nodeploy:
+    name: Block deploy on nodeploy commits
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if nodeploy in commit message
+        run: |
+          if echo "${{ github.event.head_commit.message }}" | grep -qi 'nodeploy'; then
+            echo "Deployment skipped because commit message contains 'nodeploy'."
+            exit 1
+          fi
+
+  check-peachjam-js:
+    name: Block deploy on peachjam/js changes
+    needs: check-nodeploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Fail if peachjam/js files changed
+        run: |
+          CHANGED="$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} -- 'peachjam/js/**' || true)"
+          if [ -n "$CHANGED" ]; then
+            echo "Deployment skipped because the following files changed under peachjam/js:"
+            echo "$CHANGED"
+            exit 1
+          fi
+
   # ------------------
   # web3.laws.africa
   # ------------------
 
   deploy-tanzlii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    needs: check-peachjam-js
+    if: ${{ !cancelled() }}
     name: Deploy to tanzlii
     runs-on: ubuntu-latest
     steps:
@@ -29,7 +58,7 @@ jobs:
 
 
   deploy-gazettes:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     name: Deploy to gazettes.africa
     needs: deploy-tanzlii
     runs-on: ubuntu-latest
@@ -45,7 +74,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-malawilii:
-    if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     name: Deploy to malawilii
     needs: deploy-gazettes
     runs-on: ubuntu-latest
@@ -61,7 +90,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-namiblii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-malawilii
     name: Deploy to namiblii
     runs-on: ubuntu-latest
@@ -77,7 +106,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ghalii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-namiblii
     name: Deploy to ghalii
     runs-on: ubuntu-latest
@@ -93,7 +122,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-seylii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-ghalii
     name: Deploy to seylii
     runs-on: ubuntu-latest
@@ -109,7 +138,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zimlii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-seylii
     name: Deploy to zimlii
     runs-on: ubuntu-latest
@@ -125,7 +154,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-nigerialii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-zimlii
     name: Deploy to nigerialii
     runs-on: ubuntu-latest
@@ -141,7 +170,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zambialii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-nigerialii
     name: Deploy to zambialii
     runs-on: ubuntu-latest
@@ -157,7 +186,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-lesotholii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-zambialii
     name: Deploy to lesotholii
     runs-on: ubuntu-latest
@@ -173,7 +202,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-mauritiuslii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-lesotholii
     name: Deploy to mauritiuslii
     runs-on: ubuntu-latest
@@ -189,7 +218,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-civlii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-mauritiuslii
     name: Deploy to civlii
     runs-on: ubuntu-latest
@@ -205,7 +234,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-open-by-laws:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-civlii
     name: Deploy to open-by-laws
     runs-on: ubuntu-latest
@@ -221,7 +250,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-obl-microsites:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-open-by-laws
     name: Deploy to open by-laws microsites
     runs-on: ubuntu-latest
@@ -241,7 +270,8 @@ jobs:
   # ------------------
 
   deploy-africanlii:
-    if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
+    needs: check-peachjam-js
+    if: ${{ !cancelled() }}
     name: Deploy to africanlii.org
     runs-on: ubuntu-latest
     steps:
@@ -256,7 +286,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ulii:
-    if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-africanlii
     name: Deploy to ulii
     runs-on: ubuntu-latest
@@ -272,7 +302,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-senlii:
-    if: ${{ !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-ulii
     name: Deploy to senlii
     runs-on: ubuntu-latest
@@ -288,7 +318,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-rwandalii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     name: Deploy to rwandalii
     needs: deploy-senlii
     runs-on: ubuntu-latest
@@ -304,7 +334,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-eswatinilii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     name: Deploy to eswatinilii
     needs: deploy-rwandalii
     runs-on: ubuntu-latest
@@ -320,7 +350,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-sierralii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-eswatinilii
     name: Deploy to sierralii
     runs-on: ubuntu-latest
@@ -336,7 +366,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-tcilii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     name: Deploy to tcilii
     needs: deploy-sierralii
     runs-on: ubuntu-latest
@@ -352,7 +382,7 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zanzibarlii:
-    if: ${{ !cancelled() && !contains(github.event.head_commit.message, 'nodeploy') }}
+    if: ${{ !cancelled() }}
     needs: deploy-tcilii
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
