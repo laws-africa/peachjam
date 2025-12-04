@@ -39,9 +39,9 @@ export function loadSavedDocuments (root: HTMLElement | null = null) {
   }
 
   if (ids.size) {
-    const seachParams = new URLSearchParams();
+    const searchParams = new URLSearchParams();
 
-    seachParams.set('doc_ids', Array.from(ids).join(','));
+    searchParams.set('doc_ids', Array.from(ids).join(','));
 
     // @ts-ignore
     htmxAjax('get', `${peachjam.config.urlLangPrefix}/user/saved-documents/fragments?${searchParams.toString()}`);
