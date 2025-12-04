@@ -2,11 +2,11 @@
 
 ![Liiweb icon](https://laws.africa/img/icons/liiweb.png)
 
+## Development
+See [DEVELOPMENT.md](DEVELOPMENT.md).
+
 ## Deployment
 Please refer to the [deployment documentation](DEPLOYMENT.md).
-
-## Developmtn
-See [DEVELOPMENT.md](DEVELOPMENT.md).
 
 # License
 
