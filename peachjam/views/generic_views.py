@@ -3,7 +3,6 @@ import json
 
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Count
 from django.dispatch import Signal
 from django.http import Http404
 from django.http.response import HttpResponse
@@ -27,8 +26,6 @@ from peachjam.models import (
     CitationLink,
     CoreDocument,
     DocumentNature,
-    ExtractedCitation,
-    ProvisionCitationCount,
     Relationship,
     SourceFile,
     Taxonomy,
@@ -442,24 +439,24 @@ class BaseDocumentDetailView(DetailView):
         context["labels"] = doc.labels.all()
 
         # citations
-        context["cited_documents"] = self.fetch_citation_docs(
-            doc.work.cited_works(), "cited_works"
-        )
-        context["documents_citing_current_doc"] = self.fetch_citation_docs(
-            doc.work.works_citing_current_work(), "citing_works"
-        )
+        # context["cited_documents"] = self.fetch_citation_docs(
+        #     doc.work.cited_works(), "cited_works"
+        # )
+        # context["documents_citing_current_doc"] = self.fetch_citation_docs(
+        #     doc.work.works_citing_current_work(), "citing_works"
+        # )
         context["show_save_doc_button"] = self.show_save_doc_button()
 
-        provision_citations = ProvisionCitationCount.objects.filter(
-            work=doc.work
-        ).values("provision_eid", "count")
-        context["incoming_citations_json"] = [
-            {
-                "provision_eid": item["provision_eid"],
-                "citations": item["count"],
-            }
-            for item in provision_citations
-        ]
+        # provision_citations = ProvisionCitationCount.objects.filter(
+        #     work=doc.work
+        # ).values("provision_eid", "count")
+        # context["incoming_citations_json"] = [
+        #     {
+        #         "provision_eid": item["provision_eid"],
+        #         "citations": item["count"],
+        #     }
+        #     for item in provision_citations
+        # ]
         context["download_options"] = self.get_download_options()
 
         # provide extra context for analytics
@@ -468,56 +465,6 @@ class BaseDocumentDetailView(DetailView):
         self.check_annotation_permission(context)
         self.modify_context.send(sender=self.__class__, context=context, view=self)
         return context
-
-    def fetch_citation_docs(self, works, direction):
-        """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
-        # count the number of unique works, grouping by nature
-        counts = {
-            r["nature"]: r["n"]
-            for r in CoreDocument.objects.filter(work__in=works)
-            .values("nature")
-            .annotate(n=Count("work_frbr_uri", distinct=True))
-        }
-
-        # get the top 10 documents for each nature, ordering by the number of incoming citations
-        docs, truncated = ExtractedCitation.fetch_grouped_citation_docs(
-            works, get_language(self.request)
-        )
-
-        table_direction = None
-        if direction == "cited_works":
-            table_direction = "outgoing"
-            citations = ExtractedCitation.objects.filter(
-                citing_work=self.object.work, target_work__documents__in=docs
-            ).prefetch_related("treatments")
-            treatments = {c.target_work_id: c.treatments for c in citations}
-
-        elif direction == "citing_works":
-            table_direction = "incoming"
-            citations = ExtractedCitation.objects.filter(
-                citing_work__documents__in=docs, target_work=self.object.work
-            ).prefetch_related("treatments")
-            treatments = {c.citing_work_id: c.treatments for c in citations}
-
-        for d in docs:
-            treatment = treatments.get(d.work.pk, [])
-            setattr(d, "treatments", treatment)
-
-        result = [
-            {
-                "nature": nature,
-                "n_docs": counts.get(nature.pk, 0),
-                "docs": list(group),
-                "table_id": f"citations-table-{table_direction}-{nature.pk}",
-            }
-            # the docs are already sorted by nature
-            for nature, group in itertools.groupby(docs, lambda d: d.nature)
-        ]
-
-        # sort by size of group, descending
-        result.sort(key=lambda g: -g["n_docs"])
-
-        return result
 
     def add_relationships(self, context):
         # sort and group by predicate

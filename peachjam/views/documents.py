@@ -1,8 +1,10 @@
+import itertools
 import re
 
 from cobalt import FrbrUri
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.db.models import Count
 from django.http import Http404, HttpResponse
 from django.http.response import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
@@ -19,6 +21,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentSocialImage,
     ExtractedCitation,
+    ProvisionCitationCount,
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
@@ -252,6 +255,99 @@ class DocumentAttachmentView(DocumentDetailView):
             response["Content-Length"] = str(len(file_bytes))
             return response
         raise Http404
+
+
+class DocumentCitationsFirstLoadView(DocumentDetailView):
+
+    template_name = "peachjam/_citations.html"
+
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+
+        return response
+
+    def fetch_citation_docs(self, works, direction):
+        """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
+        # count the number of unique works, grouping by nature
+        counts = {
+            r["nature"]: r["n"]
+            for r in CoreDocument.objects.filter(work__in=works)
+            .values("nature")
+            .annotate(n=Count("work_frbr_uri", distinct=True))
+        }
+
+        # get the top 10 documents for each nature, ordering by the number of incoming citations
+        docs, truncated = ExtractedCitation.fetch_grouped_citation_docs(
+            works, get_language()
+        )
+
+        table_direction = None
+        if direction == "cited_works":
+            table_direction = "outgoing"
+            citations = ExtractedCitation.objects.filter(
+                citing_work=self.object.work, target_work__documents__in=docs
+            ).prefetch_related("treatments")
+
+            treatments = {c.target_work_id: c.treatments for c in citations}
+
+        elif direction == "citing_works":
+            table_direction = "incoming"
+            citations = ExtractedCitation.objects.filter(
+                citing_work__documents__in=docs, target_work=self.object.work
+            ).prefetch_related("treatments")
+
+            treatments = {c.citing_work_id: c.treatments for c in citations}
+
+        for d in docs:
+            treatment = treatments.get(d.work.pk, [])
+            setattr(d, "treatments", treatment)
+
+        result = [
+            {
+                "nature": nature,
+                "n_docs": counts.get(nature.pk, 0),
+                "docs": list(group),
+                "table_id": f"citations-table-{table_direction}-{nature.pk}",
+            }
+            # the docs are already sorted by nature
+            for nature, group in itertools.groupby(docs, lambda d: d.nature)
+        ]
+
+        # sort by size of group, descending
+        result.sort(key=lambda g: -g["n_docs"])
+
+        return result
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        doc = self.get_object()
+
+        # This only runs when HTMX hits this specific endpoint
+        context["cited_documents"] = self.fetch_citation_docs(
+            doc.work.cited_works(), "cited_works"
+        )
+        context["documents_citing_current_doc"] = self.fetch_citation_docs(
+            doc.work.works_citing_current_work(),
+            "citing_works",  # Assuming 'citing_works' was the truncated method
+        )
+
+        provision_citations = ProvisionCitationCount.objects.filter(
+            work=doc.work
+        ).values("provision_eid", "count")
+        context["incoming_citations_json"] = [
+            {
+                "provision_eid": item["provision_eid"],
+                "citations": item["count"],
+            }
+            for item in provision_citations
+        ]
+
+        context["document"] = doc
+
+        print(context)
+
+        return context
 
 
 class DocumentCitationsView(DocumentDetailView):
