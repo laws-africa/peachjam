@@ -8,8 +8,16 @@
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
+          <a href="{% url "home_page" %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
           <a href="{% url "legislation_list" %}">{% trans "Legislation" %}</a>
         </li>
+        {% if place.jurisdiction %}
+          <li class="breadcrumb-item">
+            <a href="{% url "locality_legislation_list" code=place.code %}">{{ place.name }}</a>
+          </li>
+        {% endif %}
         <li class="breadcrumb-item">
           <a href="{% url "glossary" place_code=glossary.place_code %}">{% trans "Glossary" %}</a>
         </li>
