@@ -40,6 +40,10 @@ class TimelineEmailService:
 
     @staticmethod
     def send_email_alerts():
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
         events = TimelineEvent.objects.filter(email_alert_sent_at__isnull=True)
         if not events.exists():
             return
@@ -72,6 +76,10 @@ class TimelineEmailService:
 
     @staticmethod
     def send_new_documents_email(user):
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
         if TimelineEmailService.already_alerted_today(
             user, TimelineEvent.EventTypes.NEW_DOCUMENTS
         ):
@@ -118,6 +126,10 @@ class TimelineEmailService:
 
     @staticmethod
     def send_saved_search_email(user):
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
@@ -149,6 +161,10 @@ class TimelineEmailService:
 
     @staticmethod
     def send_new_citation_email(user):
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
         if TimelineEmailService.already_alerted_today(
             user, TimelineEvent.EventTypes.NEW_CITATION
         ):
