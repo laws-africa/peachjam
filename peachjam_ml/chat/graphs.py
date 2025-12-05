@@ -108,7 +108,9 @@ chat_llm = init_chat_model(
 )
 
 
-async def chatbot(state: DocumentChatState):
+# TODO: once upgrade to python 3.11, config can be dropped
+# TODO: see https://docs.langchain.com/oss/python/langgraph/streaming#async-with-python-%3C-3-11
+async def chatbot(state: DocumentChatState, config: RunnableConfig):
     document = await CoreDocument.objects.aget(pk=state["document_id"])
     llm_with_tools = chat_llm.bind_tools(get_tools_for_document(document))
 
@@ -117,7 +119,7 @@ async def chatbot(state: DocumentChatState):
             content=state["user_message"]["content"], id=state["user_message"]["id"]
         )
     )
-    return {"messages": [await llm_with_tools.ainvoke(state["messages"])]}
+    return {"messages": [await llm_with_tools.ainvoke(state["messages"], config)]}
 
 
 def initial_prompt(state: DocumentChatState):
