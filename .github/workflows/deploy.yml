@@ -55,7 +55,12 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@web3.laws.africa:22/tanzlii-peachjam'
           git_push_flags: '--force'
-
+      - name: git push to backend1
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/tanzlii-peachjam'
+          git_push_flags: '--force'
 
   deploy-gazettes:
     if: ${{ !cancelled() }}
