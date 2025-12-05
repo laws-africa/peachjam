@@ -244,7 +244,7 @@ default_db_url = "postgres://peachjam:peachjam@localhost:5432/peachjam"
 gazette_db_url = "postgres://indigo:indigo@localhost:5432/indigo"
 default_db_config = dj_database_url.config(default=default_db_url)
 # pgbouncer transaction pooling requires DISABLE_SERVER_SIDE_CURSORS
-default_db_config["DISABLED"] = True
+default_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
 gazette_db_config = dj_database_url.config(
     default=gazette_db_url, env="GAZETTES_DATABASE_URL"
 )
