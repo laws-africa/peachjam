@@ -56,6 +56,21 @@ jobs:
           git_remote_url: 'ssh://dokku@web3.laws.africa:22/tanzlii-peachjam'
           git_push_flags: '--force'
 
+  deploy-tanzlii-tasks:
+    needs: deploy-tanzlii
+    if: ${{ !cancelled() }}
+    name: Deploy to tanzlii tasks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: git push to backend1
+        uses: dokku/github-action@master
+        with:
+          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
+          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/tanzlii-peachjam'
+          git_push_flags: '--force'
 
   deploy-gazettes:
     if: ${{ !cancelled() }}
