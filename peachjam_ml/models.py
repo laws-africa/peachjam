@@ -498,3 +498,12 @@ class ChatThread(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
+
+    async def asave_message_history(self, graph, config):
+        # we just want the messages from the first snapshot
+        async for snapshot in graph.aget_state_history(config):
+            self.messages_json = [
+                message.to_json() for message in snapshot.values.get("messages", [])
+            ]
+            await self.asave()
+            break

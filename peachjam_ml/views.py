@@ -1,5 +1,7 @@
+import asyncio
 import json
 
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import F
@@ -12,10 +14,11 @@ from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
 from peachjam.views.documents import DocumentDetailView
 from peachjam_ml.chat.graphs import (
+    aget_chat_graph,
+    aget_previous_response,
     get_chat_config,
     get_chat_graph,
     get_message_snapshot,
-    get_previous_response,
     langfuse,
 )
 from peachjam_ml.models import ChatThread, DocumentEmbedding
@@ -109,9 +112,7 @@ class StartDocumentChatView(
 
         with get_chat_graph() as graph:
             state = graph.get_state(get_chat_config(thread)).values
-        return self.render_thread_state(thread, state)
 
-    def render_thread_state(self, thread, state):
         return JsonResponse(
             {
                 "thread_id": str(thread.id),
@@ -125,21 +126,45 @@ class StartDocumentChatView(
         )
 
 
+class AsyncDispatchMixin:
+    """This mixin helps makes class-based async-friendly when dispatch() performs database access.
+    This mixin will ensure that the dispatch method works correctly for async views.
+
+    The get/post method on the view must be async, and the dispatch method will call them accordingly.
+    """
+
+    async def dispatch(self, request, *args, **kwargs):
+        # when dispatch calls the actual view, it will get back a coroutine result
+        resp = await sync_to_async(super().dispatch)(request, *args, **kwargs)
+        # now wait on the coroutine result
+        if asyncio.iscoroutine(resp):
+            return await resp
+        return resp
+
+
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = ChatThread
     permission_required = "peachjam_ml.add_chatthread"
 
     def get_queryset(self):
-        return ChatThread.objects.filter(user=self.request.user)
+        return (
+            ChatThread.objects.filter(user=self.request.user)
+            .select_related("document", "user")
+            .defer(
+                "document__content_html",
+                "document__toc_json",
+                "document__metadata_json",
+            )
+        )
 
 
-class DocumentChatView(ChatThreadDetailMixin):
+class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
     """Streams a response to a chat message."""
 
     http_method_names = ["get"]
 
-    def get(self, request, *args, **kwargs):
-        thread = self.get_object()
+    async def get(self, request, *args, **kwargs):
+        thread = await sync_to_async(self.get_object)()
 
         content = (request.GET.get("c") or "").strip()
         msg_id = (request.GET.get("id") or "").strip()
@@ -155,27 +180,25 @@ class DocumentChatView(ChatThreadDetailMixin):
 
         return response
 
-    def stream(self, thread, message):
-        with get_chat_graph() as graph:
+    async def stream(self, thread, message):
+        async with aget_chat_graph() as graph:
             config = get_chat_config(thread)
-
-            # if the user has already sent this query; find the first AI message after it, and return that
-            reply = get_previous_response(graph, config, message["id"])
-            if reply:
-                yield self.format_sse("message", serialise_message(reply))
-                return
-
-            snapshot = graph.get_state(config)
+            snapshot = await graph.aget_state(config)
             if not snapshot.values:
                 # setup initial state
                 state = {
-                    "user_id": thread.user.pk,
-                    "document_id": thread.document.pk,
+                    "user_id": thread.user_id,
+                    "document_id": thread.document_id,
                 }
             else:
                 state = snapshot.values
-
             state["user_message"] = message
+
+            # if the user has already sent this query; find the first AI message after it, and return that
+            reply = await aget_previous_response(graph, config, message["id"])
+            if reply:
+                yield self.format_sse("message", serialise_message(reply))
+                return
 
             with langfuse.start_as_current_observation(
                 name="document_chat",
@@ -186,8 +209,7 @@ class DocumentChatView(ChatThreadDetailMixin):
                 },
             ) as generation:
                 config["configurable"]["trace_id"] = generation.trace_id
-                # TODO: async
-                for chunk, metadata in graph.stream(
+                async for chunk, metadata in graph.astream(
                     state,
                     config,
                     stream_mode="messages",
@@ -207,7 +229,7 @@ class DocumentChatView(ChatThreadDetailMixin):
                         )
 
                 # get final response message
-                result = graph.get_state(config).values
+                result = (await graph.aget_state(config)).values
                 reply = result.get("messages", [])[-1]
                 generation.update_trace(
                     tags=[settings.PEACHJAM["APP_NAME"]],
@@ -216,21 +238,11 @@ class DocumentChatView(ChatThreadDetailMixin):
                     output={"reply": reply.content},
                 )
 
-                # send the full final response
-                yield self.format_sse("message", serialise_message(reply))
-                yield self.format_sse("done", {})
+            # send the full final response
+            yield self.format_sse("message", serialise_message(reply))
+            yield self.format_sse("done", {})
 
-            thread.messages_json = self.serialise_message_history(
-                graph.get_state_history(config)
-            )
-            thread.save()
-
-    def serialise_message_history(self, history):
-        # we just want the messages from the first snapshot
-        for snapshot in history:
-            return [
-                message.to_json() for message in snapshot.values.get("messages", [])
-            ]
+            await thread.asave_message_history(graph, config)
 
     def format_sse(self, event, data):
         return f"event: {event}\n" + f"data: {json.dumps(data)}\n\n"
