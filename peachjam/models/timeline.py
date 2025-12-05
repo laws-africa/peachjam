@@ -179,19 +179,20 @@ class TimelineEvent(models.Model):
 
     @classmethod
     def add_new_amendment_events(cls, follow, relationship):
+        predicate_name = relationship.predicate.name
 
-        if relationship.predicate.name == "amended by":
-            event_type = cls.EventTypes.NEW_AMENDMENT
-        elif relationship.predicate.name == "repealed by":
-            event_type = cls.EventTypes.NEW_REPEAL
-        elif relationship.predicate.name == "commenced by":
-            event_type = cls.EventTypes.NEW_COMMENCEMENT
-        else:
+        predicate_to_event = {
+            "amended by": cls.EventTypes.NEW_AMENDMENT,
+            "repealed by": cls.EventTypes.NEW_REPEAL,
+            "commenced by": cls.EventTypes.NEW_COMMENCEMENT,
+        }
+
+        event_type = predicate_to_event.get(predicate_name)
+        if not event_type:
             log.error(
-                "relationship predicate of type % is not allowed",
-                relationship.predicate,
+                "relationship predicate of type %s is not allowed", predicate_name
             )
-            return
+            return None
 
         event, _ = TimelineEvent.objects.get_or_create(
             user_following=follow,
