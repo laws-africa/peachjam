@@ -1,4 +1,3 @@
-import asyncio
 import json
 
 from asgiref.sync import sync_to_async
@@ -13,6 +12,7 @@ from django.views.generic import DetailView
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
 from peachjam.views.documents import DocumentDetailView
+from peachjam.views.mixins import AsyncDispatchMixin
 from peachjam_ml.chat.graphs import (
     aget_chat_graph,
     aget_previous_response,
@@ -124,22 +124,6 @@ class StartDocumentChatView(
                 ],
             }
         )
-
-
-class AsyncDispatchMixin:
-    """This mixin helps makes class-based async-friendly when dispatch() performs database access.
-    This mixin will ensure that the dispatch method works correctly for async views.
-
-    The get/post method on the view must be async, and the dispatch method will call them accordingly.
-    """
-
-    async def dispatch(self, request, *args, **kwargs):
-        # when dispatch calls the actual view, it will get back a coroutine result
-        resp = await sync_to_async(super().dispatch)(request, *args, **kwargs)
-        # now wait on the coroutine result
-        if asyncio.iscoroutine(resp):
-            return await resp
-        return resp
 
 
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):

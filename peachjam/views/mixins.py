@@ -1,3 +1,6 @@
+import asyncio
+
+from asgiref.sync import sync_to_async
 from django.db import transaction
 
 
@@ -27,3 +30,19 @@ class AtomicWriteViewSetMixin:
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
         return super().destroy(request, *args, **kwargs)
+
+
+class AsyncDispatchMixin:
+    """This mixin helps makes class-based async-friendly when dispatch() performs database access.
+    This mixin will ensure that the dispatch method works correctly for async views.
+
+    The get/post method on the view must be async, and the dispatch method will call them accordingly.
+    """
+
+    async def dispatch(self, request, *args, **kwargs):
+        # when dispatch calls the actual view, it will get back a coroutine result
+        resp = await sync_to_async(super().dispatch)(request, *args, **kwargs)
+        # now wait on the coroutine result
+        if asyncio.iscoroutine(resp):
+            return await resp
+        return resp
