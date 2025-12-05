@@ -1,7 +1,7 @@
 <template>
   <div class="document-chat d-flex flex-column h-100">
     <div ref="messageContainer" class="chat-messages flex-grow-1 overflow-auto p-2">
-      <div v-if="messages.length === 0 && !loading" class="text-center text-muted py-5">
+      <div v-if="messages.length === 0 && !streaming" class="text-center text-muted py-5">
         {{ $t('Ask a question about this document.') }}
       </div>
 
@@ -18,7 +18,7 @@
           >
             <div v-if="message.content_html" v-html="message.content_html" class="chat-content chat-content-html" />
             <div v-else class="chat-content">{{ message.content }}</div>
-            <div v-if="message.role === 'ai'">
+            <div v-if="message.role === 'ai' && !message.streaming">
               <button class="btn btn-sm btn-outline-secondary border-0" title="Upvote message" @click="voteUp(message.id)">
                 <i v-if="votingUp === message.id" class="bi bi-check"/>
                 <i v-else class="bi bi-hand-thumbs-up"/>
@@ -32,7 +32,7 @@
         </div>
       </transition-group>
 
-      <div v-if="loading" class="d-flex justify-content-start mb-3">
+      <div v-if="streaming && awaitingFirstResponse" class="d-flex justify-content-start mb-3">
         <div class="chat-bubble chat-bubble-agent text-muted d-flex align-items-center gap-2">
           <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
           <span>{{ $t('Thinking...') }}</span>
@@ -53,18 +53,19 @@
           type="text"
           class="form-control"
           :placeholder="$t('Ask a question')"
-          :disabled="loading"
+          :disabled="streaming"
           @keydown.enter.exact.prevent="submit"
           @keydown.enter.shift.stop
         />
         <button
           class="btn btn-primary"
-          type="submit"
-          :disabled="loading || !isReady"
-          title="Send"
+          :type="streaming ? 'button' : 'submit'"
+          :disabled="streaming ? false : !isReady"
+          :title="streaming ? $t('Stop') : $t('Send')"
+          @click="streaming ? stopStream() : null"
         >
-          <i v-if="!loading" class="bi bi-send"/>
-          <span v-else class="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+          <i v-if="!streaming" class="bi bi-send"/>
+          <i v-else class="bi bi-stop-circle-fill"/>
         </button>
       </div>
     </form>
@@ -96,15 +97,19 @@ export default {
       threadId: null,
       messages: [],
       inputText: '',
-      loading: false,
       error: null,
       votingUp: null,
-      votingDown: null
+      votingDown: null,
+      eventSource: null,
+      awaitingFirstResponse: false
     };
   },
   computed: {
     isReady () {
       return this.inputText.trim().length > 0;
+    },
+    streaming () {
+      return Boolean(this.eventSource);
     }
   },
   mounted () {
@@ -128,17 +133,14 @@ export default {
         this.threadId = data.thread_id;
         this.mergeMessages(data.messages);
         this.error = null;
-        this.$nextTick(() => {
-          this.scrollToBottom();
-          this.focusInput();
-        });
+        this.focusInputAndScroll();
       } catch (err) {
         console.error(err);
         this.error = err.message || this.$t('Something went wrong. Please try again.');
       }
     },
     async submit () {
-      if (this.loading || !this.isReady || !this.threadId) {
+      if (this.streaming || !this.isReady || !this.threadId) {
         return;
       }
 
@@ -150,33 +152,28 @@ export default {
       const userMessage = this.createMessage('human', text);
       this.messages.push(userMessage);
       this.inputText = '';
-      this.loading = true;
       this.error = null;
 
-      this.$nextTick(() => {
-        this.focusInput();
-        this.scrollToBottom();
-      });
+      this.focusInputAndScroll();
 
       this.stream(userMessage);
     },
     stream (message) {
-      const done = () => {
-        this.loading = false;
-        this.$nextTick(() => {
-          this.scrollToBottom();
-          this.focusInput();
-        });
-      };
-
       const url = `${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}/stream?id=${message.id}&c=` + encodeURIComponent(message.content);
       const es = new EventSource(url);
+      if (this.eventSource) {
+        this.eventSource.close();
+      }
+      this.eventSource = es;
+      this.awaitingFirstResponse = true;
       es.addEventListener('chunk', e => {
         const { id, c } = JSON.parse(e.data);
         if (!id) {
           return;
         }
+        this.awaitingFirstResponse = false;
         const targetMessage = this.getOrCreateMessage(id, 'ai');
+        this.setMessageStreaming(targetMessage, true);
         this.setMessageContent(targetMessage, targetMessage.content + c);
         this.$nextTick(() => {
           this.scrollToBottom();
@@ -189,16 +186,18 @@ export default {
         if (!message || !message.id) {
           return;
         }
+        this.awaitingFirstResponse = false;
         const targetMessage = this.getOrCreateMessage(message.id, message.role || 'ai');
         this.setMessageContent(targetMessage, message.content);
+        this.setMessageStreaming(targetMessage, false);
         this.$nextTick(() => {
           this.scrollToBottom();
         });
       });
 
       es.addEventListener('done', () => {
-        es.close();
-        done();
+        this.closeStream(es);
+        this.finishStreamingUI();
       });
 
       es.addEventListener('error', err => {
@@ -210,8 +209,8 @@ export default {
           this.inputText = message.content;
           this.messages.pop();
         }
-        es.close();
-        done();
+        this.closeStream(es);
+        this.finishStreamingUI();
       });
     },
     createMessage (role, content) {
@@ -219,7 +218,8 @@ export default {
         id: generateId(),
         role,
         content,
-        content_html: role === 'ai' && content ? marked.parse(content) : null
+        content_html: role === 'ai' && content ? marked.parse(content) : null,
+        streaming: false
       };
     },
     getOrCreateMessage (id, role = 'ai') {
@@ -229,7 +229,8 @@ export default {
           id,
           role,
           content: '',
-          content_html: null
+          content_html: null,
+          streaming: false
         };
         this.messages.push(message);
       }
@@ -251,7 +252,48 @@ export default {
         const message = this.getOrCreateMessage(msg.id, msg.role || 'ai');
         message.role = msg.role || 'ai';
         this.setMessageContent(message, msg.content || '');
+        this.setMessageStreaming(message, false);
       }
+    },
+    setMessageStreaming (message, streaming) {
+      if (message.role !== 'ai') {
+        message.streaming = false;
+        return;
+      }
+      message.streaming = Boolean(streaming);
+    },
+    focusInputAndScroll () {
+      this.$nextTick(() => {
+        this.scrollToBottom();
+        this.focusInput();
+      });
+    },
+    clearStreamingMessages () {
+      for (const msg of this.messages) {
+        if (msg.streaming) {
+          this.setMessageStreaming(msg, false);
+        }
+      }
+    },
+    finishStreamingUI () {
+      this.focusInputAndScroll();
+    },
+    closeStream (source) {
+      if (source) {
+        source.close();
+      }
+      if (this.eventSource === source) {
+        this.eventSource = null;
+      }
+      this.clearStreamingMessages();
+      this.awaitingFirstResponse = false;
+    },
+    stopStream () {
+      if (!this.eventSource) {
+        return;
+      }
+      this.closeStream(this.eventSource);
+      this.finishStreamingUI();
     },
     scrollToBottom () {
       const el = this.$refs.messageContainer;
