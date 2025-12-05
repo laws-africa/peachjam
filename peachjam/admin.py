@@ -16,6 +16,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
@@ -836,11 +837,12 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     def reextract_content(self, request, queryset):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
         count = 0
-        for doc in queryset.iterator():
-            if doc.extract_content_from_source_file():
-                count += 1
-                doc.extract_citations()
-                doc.save()
+        with transaction.atomic():
+            for doc in queryset.iterator():
+                if doc.extract_content_from_source_file():
+                    count += 1
+                    doc.extract_citations()
+                    doc.save()
         self.message_user(
             request,
             _("Re-imported content from %(count)d documents.") % {"count": count},
@@ -865,10 +867,11 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     )
 
     def apply_labels(self, request, queryset):
-        count = queryset.count()
-        for doc in queryset.iterator():
-            if doc.decorator:
-                doc.decorator.apply_labels(doc)
+        with transaction.atomic():
+            count = queryset.count()
+            for doc in queryset.iterator():
+                if doc.decorator:
+                    doc.decorator.apply_labels(doc)
         self.message_user(
             request, _("Applying labels for %(count)d documents.") % {"count": count}
         )
@@ -876,10 +879,11 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     apply_labels.short_description = gettext_lazy("Apply labels")
 
     def ensure_source_file_pdf(self, request, queryset):
-        count = queryset.count()
-        for doc in queryset.iterator():
-            if hasattr(doc, "source_file"):
-                doc.source_file.ensure_file_as_pdf()
+        with transaction.atomic():
+            count = queryset.count()
+            for doc in queryset.iterator():
+                if hasattr(doc, "source_file"):
+                    doc.source_file.ensure_file_as_pdf()
         self.message_user(
             request, _("Ensuring PDF for %(count)d documents.") % {"count": count}
         )
@@ -905,13 +909,15 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         return super().has_change_permission(request, obj=obj)
 
     def publish(self, request, queryset):
-        queryset.update(published=True)
+        with transaction.atomic():
+            queryset.update(published=True)
         self.message_user(request, _("Documents published."))
 
     publish.short_description = gettext_lazy("Publish selected documents")
 
     def unpublish(self, request, queryset):
-        queryset.update(published=False)
+        with transaction.atomic():
+            queryset.update(published=False)
         self.message_user(request, _("Documents unpublished."))
 
     unpublish.short_description = gettext_lazy("Unpublish selected documents")
@@ -1539,13 +1545,15 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
         return form
 
     def publish(self, request, queryset):
-        queryset.update(published=True)
+        with transaction.atomic():
+            queryset.update(published=True)
         self.message_user(request, _("Articles published."))
 
     publish.short_description = gettext_lazy("Publish selected articles")
 
     def unpublish(self, request, queryset):
-        queryset.update(published=False)
+        with transaction.atomic():
+            queryset.update(published=False)
         self.message_user(request, _("Articles unpublished."))
 
     unpublish.short_description = gettext_lazy("Unpublish selected articles")
@@ -1636,9 +1644,10 @@ class WorkAdmin(admin.ModelAdmin):
     )
 
     def update_languages(self, request, queryset):
-        count = queryset.count()
-        for work in queryset:
-            work.update_languages()
+        with transaction.atomic():
+            count = queryset.count()
+            for work in queryset:
+                work.update_languages()
         self.message_user(
             request, _("Updated languages for %(count)d works.") % {"count": count}
         )
@@ -1795,8 +1804,9 @@ class UserAdminCustom(ImportExportMixin, UserAdmin):
     actions = ["require_accept_terms"]
 
     def require_accept_terms(self, request, queryset):
-        count = queryset.count()
-        UserProfile.objects.filter(user__in=queryset).update(accepted_terms_at=None)
+        with transaction.atomic():
+            count = queryset.count()
+            UserProfile.objects.filter(user__in=queryset).update(accepted_terms_at=None)
         self.message_user(
             request,
             _("Set 'accepted terms of use' to False for %(count)d users.")
