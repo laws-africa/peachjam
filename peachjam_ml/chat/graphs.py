@@ -73,6 +73,8 @@ from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.types import StateSnapshot
+from psycopg import AsyncConnection, Connection
+from psycopg.rows import dict_row
 
 from peachjam.models import CoreDocument, Judgment, Legislation
 from peachjam_ml.chat.tools import (
@@ -291,7 +293,11 @@ def get_db_url() -> str:
 
 @asynccontextmanager
 async def aget_graph_memory() -> AsyncIterator[AsyncPostgresSaver]:
-    async with AsyncPostgresSaver.from_conn_string(get_db_url()) as memory:
+    # prepare our own connection that avoids prepared statements because we use pgbouncer
+    async with await AsyncConnection.connect(
+        get_db_url(), autocommit=True, prepare_threshold=None, row_factory=dict_row
+    ) as conn:
+        memory = AsyncPostgresSaver(conn)
         global _db_setup
         if not _db_setup:
             await memory.setup()
@@ -301,7 +307,11 @@ async def aget_graph_memory() -> AsyncIterator[AsyncPostgresSaver]:
 
 @contextmanager
 def get_graph_memory() -> Iterator[AsyncPostgresSaver]:
-    with PostgresSaver.from_conn_string(get_db_url()) as memory:
+    # prepare our own connection that avoids prepared statements because we use pgbouncer
+    with Connection.connect(
+        get_db_url(), autocommit=True, prepare_threshold=None, row_factory=dict_row
+    ) as conn:
+        memory = PostgresSaver(conn)
         global _db_setup
         if not _db_setup:
             memory.setup()
