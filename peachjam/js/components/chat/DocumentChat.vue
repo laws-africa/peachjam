@@ -158,60 +158,99 @@ export default {
         this.scrollToBottom();
       });
 
-      try {
-        const payload = {
-          message: userMessage
-        };
-
-        const resp = await fetch(`${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': await csrfToken()
-          },
-          body: JSON.stringify(payload)
-        });
-
-        if (!resp.ok) {
-          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
-        }
-
-        const data = await resp.json();
-        this.mergeMessages(data.messages);
-        this.error = null;
-      } catch (err) {
-        console.error(err);
-        this.error = err.message || this.$t('Something went wrong. Please try again.');
-        // remove the message so that the user can try again
-        this.inputText = text;
-        this.messages.pop();
-      } finally {
+      this.stream(userMessage);
+    },
+    stream (message) {
+      const done = () => {
         this.loading = false;
         this.$nextTick(() => {
           this.scrollToBottom();
           this.focusInput();
         });
-      }
+      };
+
+      const url = `${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}/stream?id=${message.id}&c=` + encodeURIComponent(message.content);
+      const es = new EventSource(url);
+      es.addEventListener('chunk', e => {
+        const { id, c } = JSON.parse(e.data);
+        if (!id) {
+          return;
+        }
+        const targetMessage = this.getOrCreateMessage(id, 'ai');
+        this.setMessageContent(targetMessage, targetMessage.content + c);
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
+      });
+
+      es.addEventListener('message', e => {
+        // an entire message
+        const message = JSON.parse(e.data);
+        if (!message || !message.id) {
+          return;
+        }
+        const targetMessage = this.getOrCreateMessage(message.id, message.role || 'ai');
+        this.setMessageContent(targetMessage, message.content);
+        this.$nextTick(() => {
+          this.scrollToBottom();
+        });
+      });
+
+      es.addEventListener('done', () => {
+        es.close();
+        done();
+      });
+
+      es.addEventListener('error', err => {
+        console.error(err);
+        this.error = err.message || this.$t('Something went wrong. Please try again.');
+        // remove the message so that the user can try again
+        const lastMessage = this.messages[this.messages.length - 1];
+        if (!lastMessage || lastMessage.role !== 'ai') {
+          this.inputText = message.content;
+          this.messages.pop();
+        }
+        es.close();
+        done();
+      });
     },
     createMessage (role, content) {
       return {
         id: generateId(),
         role,
-        content
+        content,
+        content_html: role === 'ai' && content ? marked.parse(content) : null
       };
+    },
+    getOrCreateMessage (id, role = 'ai') {
+      let message = this.messages.find(existingMessage => existingMessage.id === id);
+      if (!message) {
+        message = {
+          id,
+          role,
+          content: '',
+          content_html: null
+        };
+        this.messages.push(message);
+      }
+      return message;
+    },
+    setMessageContent (message, content) {
+      message.content = content || '';
+      if (message.role === 'ai' && message.content.trim().length > 0) {
+        message.content_html = marked.parse(message.content);
+      } else {
+        message.content_html = null;
+      }
     },
     mergeMessages (newMessages) {
       for (const msg of newMessages) {
-        const existing = this.messages.find((existingMessage) => existingMessage.id === msg.id);
-        if (existing) {
-          existing.content = msg.content;
-        } else if (msg.content.trim().length > 0) {
-          if (msg.role === 'ai') {
-            // parse markdown
-            msg.content_html = marked.parse(msg.content);
-          }
-          this.messages.push({ ...msg });
+        if (!msg.id) {
+          continue;
         }
+        const message = this.getOrCreateMessage(msg.id, msg.role || 'ai');
+        message.role = msg.role || 'ai';
+        this.setMessageContent(message, msg.content || '');
       }
     },
     scrollToBottom () {

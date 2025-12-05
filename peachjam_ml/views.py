@@ -1,12 +1,12 @@
 import json
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import F
-from django.http.response import HttpResponse, JsonResponse
+from django.http.response import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
-from rest_framework.exceptions import ValidationError
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CoreDocument, Folder
@@ -15,10 +15,10 @@ from peachjam_ml.chat.graphs import (
     get_chat_config,
     get_chat_graph,
     get_message_snapshot,
+    get_previous_response,
     langfuse,
 )
 from peachjam_ml.models import ChatThread, DocumentEmbedding
-from peachjam_ml.serializers import ChatRequestSerializer
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -109,7 +109,20 @@ class StartDocumentChatView(
 
         with get_chat_graph() as graph:
             state = graph.get_state(get_chat_config(thread)).values
-        return render_thread_state(thread, state)
+        return self.render_thread_state(thread, state)
+
+    def render_thread_state(self, thread, state):
+        return JsonResponse(
+            {
+                "thread_id": str(thread.id),
+                "messages": [
+                    serialise_message(m)
+                    for m in state.get("messages", [])
+                    # other types are system and tool
+                    if m.type in ["ai", "human"]
+                ],
+            }
+        )
 
 
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
@@ -121,25 +134,40 @@ class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailV
 
 
 class DocumentChatView(ChatThreadDetailMixin):
-    http_method_names = ["post"]
+    """Streams a response to a chat message."""
 
-    def post(self, request, *args, **kwargs):
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
         thread = self.get_object()
 
-        # validate request
-        input = json.loads(request.body)
-        serializer = ChatRequestSerializer(data=input.get("message", {}))
-        try:
-            serializer.is_valid(raise_exception=True)
-        except ValidationError as e:
-            return JsonResponse({"errors": e.detail}, status=400)
-        message = serializer.data
+        content = (request.GET.get("c") or "").strip()
+        msg_id = (request.GET.get("id") or "").strip()
+        if not content:
+            return HttpResponse(status=400)
+        message = {"content": content, "id": msg_id}
 
-        config = get_chat_config(thread)
+        response = StreamingHttpResponse(
+            self.stream(thread, message), content_type="text/event-stream"
+        )
+        response["Cache-Control"] = "no-cache"
+        response["X-Accel-Buffering"] = "no"  # disable Nginx buffering
+
+        return response
+
+    def stream(self, thread, message):
         with get_chat_graph() as graph:
-            snapshot = graph.get_state(config)
+            config = get_chat_config(thread)
 
+            # if the user has already sent this query; find the first AI message after it, and return that
+            reply = get_previous_response(graph, config, message["id"])
+            if reply:
+                yield self.format_sse("message", serialise_message(reply))
+                return
+
+            snapshot = graph.get_state(config)
             if not snapshot.values:
+                # setup initial state
                 state = {
                     "user_id": thread.user.pk,
                     "document_id": thread.document.pk,
@@ -158,25 +186,44 @@ class DocumentChatView(ChatThreadDetailMixin):
                 },
             ) as generation:
                 config["configurable"]["trace_id"] = generation.trace_id
-                result = graph.invoke(
+                # TODO: async
+                for chunk, metadata in graph.stream(
                     state,
                     config,
+                    stream_mode="messages",
                     # checkpoint only once a whole call is complete, to avoid saving partial state
                     # alternatively, we need to run through the messages when "resuming" and ensure that any
                     # dangling (unanswered) tool calls are removed
                     durability="exit",
-                )
+                ):
+                    if (
+                        chunk.type == "AIMessageChunk"
+                        # TODO: make chatbot node type configurable
+                        and metadata.get("langgraph_node") == "chatbot"
+                        and chunk.content
+                    ):
+                        yield self.format_sse(
+                            "chunk", {"id": chunk.id, "c": chunk.content}
+                        )
+
+                # get final response message
+                result = graph.get_state(config).values
+                reply = result.get("messages", [])[-1]
                 generation.update_trace(
+                    tags=[settings.PEACHJAM["APP_NAME"]],
                     user_id=thread.user.username,
                     session_id=str(thread.id),
-                    output={"reply": result.get("messages", [])[-1].content},
+                    output={"reply": reply.content},
                 )
 
-            history = graph.get_state_history(config)
-            thread.messages_json = self.serialise_message_history(history)
-            thread.save()
+                # send the full final response
+                yield self.format_sse("message", serialise_message(reply))
+                yield self.format_sse("done", {})
 
-        return render_thread_state(thread, result)
+            thread.messages_json = self.serialise_message_history(
+                graph.get_state_history(config)
+            )
+            thread.save()
 
     def serialise_message_history(self, history):
         # we just want the messages from the first snapshot
@@ -184,6 +231,9 @@ class DocumentChatView(ChatThreadDetailMixin):
             return [
                 message.to_json() for message in snapshot.values.get("messages", [])
             ]
+
+    def format_sse(self, event, data):
+        return f"event: {event}\n" + f"data: {json.dumps(data)}\n\n"
 
 
 class VoteChatMessageView(ChatThreadDetailMixin):
@@ -215,22 +265,9 @@ class VoteChatMessageView(ChatThreadDetailMixin):
         return HttpResponse(status=200)
 
 
-def render_thread_state(thread, state):
-    def serialise(message):
-        return {
-            "id": message.id,
-            "role": message.type,
-            "content": message.content,
-        }
-
-    return JsonResponse(
-        {
-            "thread_id": str(thread.id),
-            "messages": [
-                serialise(m)
-                for m in state.get("messages", [])
-                # other types are system and tool
-                if m.type in ["ai", "human"]
-            ],
-        }
-    )
+def serialise_message(message):
+    return {
+        "id": message.id,
+        "role": message.type,
+        "content": message.content,
+    }
