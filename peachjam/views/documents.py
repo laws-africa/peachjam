@@ -27,6 +27,7 @@ from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
+from peachjam_api.serializers import CitationLink, CitationLinkSerializer
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -269,6 +270,7 @@ class DocumentCitationsFirstLoadView(DocumentDetailView):
     def fetch_citation_docs(self, works, direction):
         """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
         # count the number of unique works, grouping by nature
+
         counts = {
             r["nature"]: r["n"]
             for r in CoreDocument.objects.filter(work__in=works)
@@ -323,7 +325,14 @@ class DocumentCitationsFirstLoadView(DocumentDetailView):
 
         doc = self.get_object()
 
+        # citation links for a document
+        citation_links = CitationLink.objects.filter(document=doc)
+        context["citation_links"] = CitationLinkSerializer(
+            citation_links, many=True
+        ).data
+
         # This only runs when HTMX hits this specific endpoint
+        # Citations
         context["cited_documents"] = self.fetch_citation_docs(
             doc.work.cited_works(), "cited_works"
         )

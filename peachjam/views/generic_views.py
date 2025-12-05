@@ -23,7 +23,6 @@ from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
-    CitationLink,
     CoreDocument,
     DocumentNature,
     Relationship,
@@ -34,7 +33,6 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam_api.serializers import (
-    CitationLinkSerializer,
     RelationshipSerializer,
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
@@ -397,12 +395,7 @@ class BaseDocumentDetailView(DetailView):
             document_diffs_url=self.document_diffs_url, **kwargs
         )
 
-        # citation links for a document
-        doc = self.object
-        citation_links = CitationLink.objects.filter(document=doc)
-        context["citation_links"] = CitationLinkSerializer(
-            citation_links, many=True
-        ).data
+        doc = self.get_object()
 
         # get all versions that match current document work_frbr_uri
         all_versions = CoreDocument.objects.filter(
@@ -438,25 +431,8 @@ class BaseDocumentDetailView(DetailView):
         )
         context["labels"] = doc.labels.all()
 
-        # citations
-        # context["cited_documents"] = self.fetch_citation_docs(
-        #     doc.work.cited_works(), "cited_works"
-        # )
-        # context["documents_citing_current_doc"] = self.fetch_citation_docs(
-        #     doc.work.works_citing_current_work(), "citing_works"
-        # )
         context["show_save_doc_button"] = self.show_save_doc_button()
 
-        # provision_citations = ProvisionCitationCount.objects.filter(
-        #     work=doc.work
-        # ).values("provision_eid", "count")
-        # context["incoming_citations_json"] = [
-        #     {
-        #         "provision_eid": item["provision_eid"],
-        #         "citations": item["count"],
-        #     }
-        #     for item in provision_citations
-        # ]
         context["download_options"] = self.get_download_options()
 
         # provide extra context for analytics
