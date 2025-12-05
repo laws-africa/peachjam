@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Avg, F, Q
 from django.forms import model_to_dict
+from django.utils import timezone
 from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
 from peachjam.models import CoreDocument, Judgment, Work
@@ -507,3 +508,24 @@ class ChatThread(models.Model):
             ]
             await self.asave()
             break
+
+    @classmethod
+    def count_active_for_user(cls, user):
+        """How many active chat threads does the user have? Used to enforce monthly limits."""
+        now = timezone.now()
+        month_start = now.replace(
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        return (
+            cls.objects.filter(
+                user=user,
+                updated_at__gte=month_start,
+            )
+            .values("document_id")
+            .distinct()
+            .count()
+        )

@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import F
 from django.http.response import HttpResponse, JsonResponse, StreamingHttpResponse
+from django.template.loader import render_to_string
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
@@ -23,6 +24,7 @@ from peachjam_ml.chat.graphs import (
 )
 from peachjam_ml.models import ChatThread, DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
+from peachjam_subs.models import Subscription
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -30,12 +32,10 @@ from peachjam_subs.mixins import SubscriptionRequiredMixin
 class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/document/_similar_documents.html"
+    subscription_required_template = template_name
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
     model = CoreDocument
-
-    def get_subscription_required_template(self):
-        return self.template_name
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -58,10 +58,8 @@ class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
 class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam_ml.view_documentembedding"
     template_name = "peachjam/_similar_documents_folder.html"
+    subscription_required_template = template_name
     model = Folder
-
-    def get_subscription_required_template(self):
-        return self.template_name
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -76,24 +74,30 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
 
 
 class StartDocumentChatView(
-    LoginRequiredMixin, PermissionRequiredMixin, DocumentDetailView
+    LoginRequiredMixin, SubscriptionRequiredMixin, DocumentDetailView
 ):
+    """Starts a new chat thread for a document, or returns an existing one.
+
+    Enforces permissions and limits as follows, returning a 403 with HTML to display to the user explaining
+    what they can do to gain access:
+
+    1. add_chatthread permission: user must create an account or upgrade their subscription
+    2. monthly unique document chat limit: user must upgrade their subscription or wait until next month
+    """
+
     slug_field = "pk"
     slug_url_kwarg = "pk"
     permission_required = "peachjam_ml.add_chatthread"
     http_method_names = ["post"]
+    subscription_required_status = 403
+    subscription_required_template = "peachjam_ml/_chat_permission_denied.html"
 
     def post(self, request, *args, **kwargs):
         document = self.get_object()
+        force_new_thread = "new" in request.GET
 
-        if "new" in request.GET:
-            # force a new thread
-            thread = ChatThread.objects.create(
-                document=document,
-                user=self.request.user,
-            )
-        else:
-            # get the latest thread, if any
+        if not force_new_thread:
+            # does an existing thread exist? It doesn't count against limits
             thread = (
                 ChatThread.objects.filter(
                     user=self.request.user,
@@ -102,14 +106,26 @@ class StartDocumentChatView(
                 .order_by("-created_at")
                 .first()
             )
+            if thread:
+                return self.build_thread_response(thread)
 
-            if not thread:
-                # create a new one (avoiding race conditions)
-                thread, created = ChatThread.objects.get_or_create(
-                    document=document,
-                    user=self.request.user,
-                )
+        if limit_response := self.check_limits(document):
+            return limit_response
 
+        if force_new_thread:
+            thread = ChatThread.objects.create(
+                document=document,
+                user=self.request.user,
+            )
+        else:
+            thread, _ = ChatThread.objects.get_or_create(
+                document=document,
+                user=self.request.user,
+            )
+
+        return self.build_thread_response(thread)
+
+    def build_thread_response(self, thread):
         with get_chat_graph() as graph:
             state = graph.get_state(get_chat_config(thread)).values
 
@@ -119,11 +135,35 @@ class StartDocumentChatView(
                 "messages": [
                     serialise_message(m)
                     for m in state.get("messages", [])
-                    # other types are system and tool
                     if m.type in ["ai", "human"]
                 ],
             }
         )
+
+    def check_limits(self, document):
+        n_active = ChatThread.count_active_for_user(self.request.user)
+        sub = Subscription.get_or_create_active_for_user(self.request.user)
+
+        limit_reached, lowest_product = sub.get_feature_limit_status(
+            "document_chat_limit", n_active
+        )
+        if limit_reached:
+            context = self.build_subscription_required_context(
+                limit_reached=True,
+                chat_limit=sub.product_offering.product.document_chat_limit,
+                lowest_product=lowest_product,
+            )
+            return self.render_subscription_required(context)
+
+        return None
+
+    def render_subscription_required(self, context):
+        html = render_to_string(
+            self.get_subscription_required_template(),
+            context,
+            request=self.request,
+        )
+        return JsonResponse({"message_html": html}, status=403)
 
 
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
