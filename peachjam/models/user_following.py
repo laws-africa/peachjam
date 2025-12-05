@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.models import Predicate
 from peachjam.models.core_document import CoreDocument
 from peachjam.models.timeline import TimelineEvent
 from peachjam_search.models import SavedSearch
@@ -325,6 +326,13 @@ class UserFollowing(models.Model):
         # check that we are passing a relationship to the saved document
         assert relationship.subject_work == self.saved_document.work
 
+        allowed_predicates = Predicate.objects.filter(
+            name__in=["amended by", "repealed by", "commenced by"]
+        )
+        if relationship.predicate not in allowed_predicates:
+            log.info("relationship predicate %s is not allowed", relationship.predicate)
+            return
+
         # check if the user has ever been alerted about this relationship
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
@@ -340,7 +348,7 @@ class UserFollowing(models.Model):
             )
             return
 
-        TimelineEvent.add_new_amendment_events(self, relationship.object_work)
+        TimelineEvent.add_new_amendment_events(self, relationship)
 
     @classmethod
     def update_follows_for_user(cls, user):

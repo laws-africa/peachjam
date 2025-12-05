@@ -55,6 +55,8 @@ class TimelineEvent(models.Model):
         SAVED_SEARCH = "saved_search", _("Saved Search")
         NEW_CITATION = "new_citation", _("New Citation")
         NEW_AMENDMENT = "new_amendment", _("New Amendment")
+        NEW_REPEAL = "new_repeal", _("New Repeal")
+        NEW_COMMENCEMENT = "new_commencement", _("New Commencment")
 
     objects = TimelineEventManager()
 
@@ -81,6 +83,10 @@ class TimelineEvent(models.Model):
             return _("New citations for")
         elif self.event_type == self.EventTypes.NEW_AMENDMENT:
             return _("New amendments published for")
+        elif self.event_type == self.EventTypes.NEW_REPEAL:
+            return _("New repeal for")
+        elif self.event_type == self.EventTypes.NEW_COMMENCEMENT:
+            return _("New commencement for")
         else:
             return _("New updates for")
 
@@ -172,13 +178,27 @@ class TimelineEvent(models.Model):
         return event
 
     @classmethod
-    def add_new_amendment_events(cls, follow, work):
+    def add_new_amendment_events(cls, follow, relationship):
+
+        if relationship.predicate.name == "amended by":
+            event_type = cls.EventTypes.NEW_AMENDMENT
+        elif relationship.predicate.name == "repealed by":
+            event_type = cls.EventTypes.NEW_REPEAL
+        elif relationship.predicate.name == "commenced by":
+            event_type = cls.EventTypes.NEW_COMMENCEMENT
+        else:
+            log.error(
+                "relationship predicate of type % is not allowed",
+                relationship.predicate,
+            )
+            return
+
         event, _ = TimelineEvent.objects.get_or_create(
             user_following=follow,
-            event_type=cls.EventTypes.NEW_AMENDMENT,
+            event_type=event_type,
             email_alert_sent_at__isnull=True,
         )
-        event.subject_works.add(work)
+        event.subject_works.add(relationship.subject_work)
         return event
 
     @classmethod
