@@ -1,6 +1,7 @@
 import logging
 
 from background_task import background
+from django.db import transaction
 
 from peachjam.models import CoreDocument
 from peachjam_ml.models import DocumentEmbedding
@@ -9,6 +10,7 @@ log = logging.getLogger(__name__)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def update_document_embeddings(document_id):
     log.info(f"Updating document embeddings for document {document_id}")
 
@@ -22,6 +24,7 @@ def update_document_embeddings(document_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def update_summary_embeddings(document_id):
     log.info(f"Updating summary embeddings for document {document_id}")
 

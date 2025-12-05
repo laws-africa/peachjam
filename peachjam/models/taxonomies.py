@@ -178,8 +178,8 @@ class Taxonomy(MP_Node):
         return tree
 
     @classmethod
-    def get_allowed_taxonomies(cls, user, root=None):
-        if user.is_authenticated:
+    def get_allowed_taxonomies(cls, user=None, root=None):
+        if user and user.is_authenticated:
             allowed_taxonomies = set(
                 get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
                     "id", flat=True
