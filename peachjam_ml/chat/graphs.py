@@ -268,9 +268,12 @@ async def aget_chat_graph() -> AsyncIterator[CompiledStateGraph]:
 
 
 @contextmanager
-def get_chat_graph() -> Iterator[CompiledStateGraph]:
-    with get_graph_memory() as memory:
-        yield graph_builder.compile(checkpointer=memory)
+def get_chat_graph(use_checkpointer=True) -> Iterator[CompiledStateGraph]:
+    if use_checkpointer:
+        with get_graph_memory() as memory:
+            yield graph_builder.compile(checkpointer=memory)
+    else:
+        yield graph_builder.compile()
 
 
 _db_setup = False
