@@ -56,8 +56,8 @@ The following must be configured as ENV variables:
 """
 
 import os
-from contextlib import contextmanager
-from typing import Iterator, Tuple, TypedDict
+from contextlib import asynccontextmanager, contextmanager
+from typing import AsyncIterator, Iterator, Tuple, TypedDict
 
 from cobalt.uri import FrbrUri
 from django.conf import settings
@@ -68,6 +68,7 @@ from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
@@ -107,8 +108,8 @@ chat_llm = init_chat_model(
 )
 
 
-def chatbot(state: DocumentChatState):
-    document = CoreDocument.objects.get(pk=state["document_id"])
+async def chatbot(state: DocumentChatState):
+    document = await CoreDocument.objects.aget(pk=state["document_id"])
     llm_with_tools = chat_llm.bind_tools(get_tools_for_document(document))
 
     state["messages"].append(
@@ -116,7 +117,7 @@ def chatbot(state: DocumentChatState):
             content=state["user_message"]["content"], id=state["user_message"]["id"]
         )
     )
-    return {"messages": [llm_with_tools.invoke(state["messages"])]}
+    return {"messages": [await llm_with_tools.ainvoke(state["messages"])]}
 
 
 def initial_prompt(state: DocumentChatState):
@@ -260,6 +261,12 @@ graph_builder.add_edge("chatbot", "markup_refs")
 graph_builder.add_edge("markup_refs", END)
 
 
+@asynccontextmanager
+async def aget_chat_graph() -> AsyncIterator[CompiledStateGraph]:
+    async with aget_graph_memory() as memory:
+        yield graph_builder.compile(checkpointer=memory)
+
+
 @contextmanager
 def get_chat_graph() -> Iterator[CompiledStateGraph]:
     with get_graph_memory() as memory:
@@ -269,14 +276,27 @@ def get_chat_graph() -> Iterator[CompiledStateGraph]:
 _db_setup = False
 
 
-@contextmanager
-def get_graph_memory() -> Iterator[PostgresSaver]:
+def get_db_url() -> str:
     db_config = settings.DATABASES["default"]
-    db_url = (
+    return (
         f"postgresql://{db_config['USER']}:{db_config['PASSWORD']}"
         f"@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}"
     )
-    with PostgresSaver.from_conn_string(db_url) as memory:
+
+
+@asynccontextmanager
+async def aget_graph_memory() -> AsyncIterator[AsyncPostgresSaver]:
+    async with AsyncPostgresSaver.from_conn_string(get_db_url()) as memory:
+        global _db_setup
+        if not _db_setup:
+            await memory.setup()
+            _db_setup = True
+        yield memory
+
+
+@contextmanager
+def get_graph_memory() -> Iterator[AsyncPostgresSaver]:
+    with PostgresSaver.from_conn_string(get_db_url()) as memory:
         global _db_setup
         if not _db_setup:
             memory.setup()
@@ -289,8 +309,8 @@ def get_chat_config(thread) -> RunnableConfig:
     return {
         "configurable": {
             "thread_id": str(thread.id),
-            "document_id": thread.document.pk,
-            "user_id": thread.user.pk,
+            "document_id": thread.document_id,
+            "user_id": thread.user_id,
         },
         "callbacks": [langfuse_callback],
     }
@@ -311,11 +331,11 @@ def get_message_snapshot(
     return None, None
 
 
-def get_previous_response(graph, config, message_id):
+async def aget_previous_response(graph, config, message_id):
     """Get the AI response message that follows the given user message ID in the chat history."""
     found_user = False
     # this is ordered most recent first
-    for snapshot in graph.get_state_history(config):
+    async for snapshot in graph.aget_state_history(config):
         for msg in snapshot.values.get("messages", []):
             if msg.id == message_id and msg.type == "human":
                 found_user = True
