@@ -149,10 +149,20 @@ A `SENTRY_DSN_KEY` environment variable is required for Sentry to start monitori
 
 ### Enable Background Tasks
 
-- Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
-- On the dokku server, scale up the processes to run these tasks:
+Peachjam runs various background tasks as separate processes as the `task` runner specified in the `Procfile`.
 
-      dokku ps:scale <app_name> tasks=1
+On the dokku server, scale up the processes to run these tasks:
+
+    dokku ps:scale <app_name> tasks=1
+
+If tasks are run on a separate dokku host, create a minimal dokku app on that host with the same configuration:
+
+    dokku apps:create <app_name>
+    dokku proxy:disable <app_name>
+
+Deploy to the host via git push as before, then scale the tasks process:
+
+    dokku ps:scale <app_name> web=0 tasks=1
 
 ### Setup common taxonomies
 
