@@ -1,0 +1,13 @@
+{% extends 'peachjam_subs/_subscription_required.html' %}
+{% load i18n %}
+{% block authenticated-user %}
+  {% if limit_reached %}
+    {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
+      You've reached your limit of {{ chat_limit }} chats per month.
+      Please upgrade to <a href="{{ upsell_url }}">{{ lowest_product }}</a> to unlock more chats,
+      or wait until next month.
+    {% endblocktrans %}
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}
