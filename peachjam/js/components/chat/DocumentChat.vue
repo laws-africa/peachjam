@@ -4,6 +4,7 @@
       <div v-if="permissionDeniedHtml">
         <div class="text-center py-5" v-html="permissionDeniedHtml" />
       </div>
+      <div v-else-if="threadId === null" class="spinner-when-empty" />
       <template v-else>
         <div v-if="messages.length === 0 && !streaming" class="text-center text-muted py-5">
           {{ $t('Ask a question about this document.') }}
@@ -54,6 +55,7 @@
     </div>
 
     <form
+      v-if="!permissionDeniedHtml"
       class="chat-input p-2"
       @submit.prevent="submit"
       novalidate
@@ -72,7 +74,7 @@
         <button
           class="btn btn-primary"
           :type="streaming ? 'button' : 'submit'"
-          :disabled="streaming ? false : !hasInput || !threadId"
+          :disabled="streaming ? false : !hasInput"
           :title="streaming ? $t('Stop') : $t('Send')"
           @click="streaming ? stopStream() : null"
         >
@@ -126,13 +128,37 @@ export default {
     }
   },
   mounted () {
-    this.load();
-    this.focusInput();
+    this.loadThread();
   },
   methods: {
-    async load (isNew) {
+    /** Load an existing chat thread for this document, if one exists. Sets the threadId if it does, otherwise
+     * sets threadId to '' to indicate no existing thread.
+     */
+    async loadThread () {
+      const url = `${peachJam.config.urlLangPrefix}/api/documents/${this.documentId}/chat`;
       try {
-        const url = `${peachJam.config.urlLangPrefix}/api/documents/${this.documentId}/chat` + (isNew ? '?new' : '');
+        const resp = await fetch(url);
+        if (resp.status === 403) {
+          await this.handle403(resp);
+        } else if (!resp.ok) {
+          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
+        } else {
+          const data = await resp.json();
+          this.threadId = data.thread_id || '';
+          this.mergeMessages(data.messages);
+          this.focusInputAndScroll();
+        }
+      } catch (err) {
+        console.error(err);
+        this.error = err.message || this.$t('Something went wrong. Please try again.');
+      }
+    },
+    /**
+     * Create a new chat thread for this document and set threadId.
+     */
+    async createThread () {
+      const url = `${peachJam.config.urlLangPrefix}/api/documents/${this.documentId}/chat`;
+      try {
         const resp = await fetch(url, {
           method: 'POST',
           headers: {
@@ -140,58 +166,51 @@ export default {
           }
         });
         if (resp.status === 403) {
-          try {
-            const data = await resp.json();
-            if (data && data.message_html) {
-              this.handlePermissionDenied(data.message_html);
-              return;
-            }
-          } catch (parseErr) {
-            console.error(parseErr);
-          }
-          throw new Error(this.$t("You don't have permission to do that."));
-        }
-        if (!resp.ok) {
+          await this.handle403(resp);
+        } else if (!resp.ok) {
           throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
+        } else {
+          const data = await resp.json();
+          this.error = null;
+          this.permissionDeniedHtml = null;
+          this.threadId = data.thread_id;
+          this.messages.splice(0, this.messages.length);
+          this.mergeMessages(data.messages);
+          this.focusInputAndScroll();
         }
-        const data = await resp.json();
-        this.permissionDeniedHtml = null;
-        this.threadId = data.thread_id;
-        this.mergeMessages(data.messages);
-        this.error = null;
-        this.focusInputAndScroll();
       } catch (err) {
         console.error(err);
         this.error = err.message || this.$t('Something went wrong. Please try again.');
       }
     },
     async submit () {
-      if (this.streaming || !this.hasInput || !this.threadId) {
+      if (this.streaming || !this.hasInput) {
         return;
       }
 
-      const text = this.inputText.trim();
-      if (!text) {
-        return;
+      if (!this.threadId) {
+        await this.createThread();
+        if (!this.threadId) {
+          // failed to create thread
+          return;
+        }
       }
 
-      const userMessage = this.createMessage('human', text);
+      const userMessage = this.createMessage('human', this.inputText.trim());
       this.messages.push(userMessage);
       this.inputText = '';
       this.error = null;
-
       this.focusInputAndScroll();
-
       this.stream(userMessage);
     },
     stream (message) {
-      const url = `${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}/stream?id=${message.id}&c=` + encodeURIComponent(message.content);
-      const es = new EventSource(url);
       if (this.eventSource) {
         this.eventSource.close();
       }
-      this.eventSource = es;
       this.awaitingFirstResponse = true;
+      const url = `${peachJam.config.urlLangPrefix}/api/chats/${this.threadId}/stream?id=${message.id}&c=` + encodeURIComponent(message.content);
+      const es = new EventSource(url);
+      this.eventSource = es;
       es.addEventListener('chunk', e => {
         const { id, c } = JSON.parse(e.data);
         if (!id) {
@@ -334,11 +353,23 @@ export default {
       }
     },
     clear () {
-      // start a new chat
+      // clear the chat
+      this.stopStream();
       this.messages.splice(0, this.messages.length);
       this.error = null;
-      this.threadId = null;
-      this.load(true);
+      this.threadId = '';
+    },
+    async handle403 (response) {
+      try {
+        const data = await response.json();
+        if (data && data.message_html) {
+          this.handlePermissionDenied(data.message_html);
+          return;
+        }
+      } catch (parseErr) {
+        console.error(parseErr);
+      }
+      throw new Error(this.$t("You don't have permission to do that."));
     },
     handlePermissionDenied (messageHtml) {
       this.permissionDeniedHtml = messageHtml;

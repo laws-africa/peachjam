@@ -88,40 +88,33 @@ class StartDocumentChatView(
     slug_field = "pk"
     slug_url_kwarg = "pk"
     permission_required = "peachjam_ml.add_chatthread"
-    http_method_names = ["post"]
+    http_method_names = ["get", "post"]
     subscription_required_status = 403
     subscription_required_template = "peachjam_ml/_chat_permission_denied.html"
 
+    def get(self, request, *args, **kwargs):
+        document = self.get_object()
+
+        thread = (
+            ChatThread.objects.filter(user=self.request.user, document=document)
+            .order_by("-created_at")
+            .first()
+        )
+        if thread:
+            return self.build_thread_response(thread)
+
+        return HttpResponse(status=404)
+
     def post(self, request, *args, **kwargs):
         document = self.get_object()
-        force_new_thread = "new" in request.GET
-
-        if not force_new_thread:
-            # does an existing thread exist? It doesn't count against limits
-            thread = (
-                ChatThread.objects.filter(
-                    user=self.request.user,
-                    document=document,
-                )
-                .order_by("-created_at")
-                .first()
-            )
-            if thread:
-                return self.build_thread_response(thread)
 
         if limit_response := self.check_limits(document):
             return limit_response
 
-        if force_new_thread:
-            thread = ChatThread.objects.create(
-                document=document,
-                user=self.request.user,
-            )
-        else:
-            thread, _ = ChatThread.objects.get_or_create(
-                document=document,
-                user=self.request.user,
-            )
+        thread = ChatThread.objects.create(
+            document=document,
+            user=self.request.user,
+        )
 
         return self.build_thread_response(thread)
 
