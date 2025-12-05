@@ -8,8 +8,8 @@ concurrency:
   group: liiweb2.africanlii.org
 
 jobs:
-  check-nodeploy:
-    name: Block deploy on nodeploy commits
+  preconditions:
+    name: Block deploy on nodeploy commits or with unbuilt javascript
     runs-on: ubuntu-latest
     steps:
       - name: Fail if nodeploy in commit message
@@ -18,12 +18,6 @@ jobs:
             echo "Deployment skipped because commit message contains 'nodeploy'."
             exit 1
           fi
-
-  check-peachjam-js:
-    name: Block deploy on peachjam/js changes
-    needs: check-nodeploy
-    runs-on: ubuntu-latest
-    steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -41,8 +35,8 @@ jobs:
   # ------------------
 
   deploy-tanzlii:
-    needs: check-peachjam-js
-    if: ${{ !cancelled() }}
+    needs: preconditions
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to tanzlii
     runs-on: ubuntu-latest
     steps:
@@ -63,9 +57,11 @@ jobs:
           git_push_flags: '--force'
 
   deploy-gazettes:
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to gazettes.africa
-    needs: deploy-tanzlii
+    needs:
+      - deploy-tanzlii
+      - preconditions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -85,9 +81,11 @@ jobs:
           git_push_flags: '--force'
 
   deploy-malawilii:
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to malawilii
-    needs: deploy-gazettes
+    needs:
+      - deploy-gazettes
+      - preconditions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -107,8 +105,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-namiblii:
-    if: ${{ !cancelled() }}
-    needs: deploy-malawilii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-malawilii
+      - preconditions
     name: Deploy to namiblii
     runs-on: ubuntu-latest
     steps:
@@ -129,8 +129,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ghalii:
-    if: ${{ !cancelled() }}
-    needs: deploy-namiblii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-namiblii
+      - preconditions
     name: Deploy to ghalii
     runs-on: ubuntu-latest
     steps:
@@ -151,8 +153,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-seylii:
-    if: ${{ !cancelled() }}
-    needs: deploy-ghalii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-ghalii
+      - preconditions
     name: Deploy to seylii
     runs-on: ubuntu-latest
     steps:
@@ -173,8 +177,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zimlii:
-    if: ${{ !cancelled() }}
-    needs: deploy-seylii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-seylii
+      - preconditions
     name: Deploy to zimlii
     runs-on: ubuntu-latest
     steps:
@@ -195,8 +201,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-nigerialii:
-    if: ${{ !cancelled() }}
-    needs: deploy-zimlii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-zimlii
+      - preconditions
     name: Deploy to nigerialii
     runs-on: ubuntu-latest
     steps:
@@ -217,8 +225,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zambialii:
-    if: ${{ !cancelled() }}
-    needs: deploy-nigerialii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-nigerialii
+      - preconditions
     name: Deploy to zambialii
     runs-on: ubuntu-latest
     steps:
@@ -239,8 +249,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-lesotholii:
-    if: ${{ !cancelled() }}
-    needs: deploy-zambialii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-zambialii
+      - preconditions
     name: Deploy to lesotholii
     runs-on: ubuntu-latest
     steps:
@@ -261,8 +273,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-mauritiuslii:
-    if: ${{ !cancelled() }}
-    needs: deploy-lesotholii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-lesotholii
+      - preconditions
     name: Deploy to mauritiuslii
     runs-on: ubuntu-latest
     steps:
@@ -283,8 +297,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-civlii:
-    if: ${{ !cancelled() }}
-    needs: deploy-mauritiuslii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-mauritiuslii
+      - preconditions
     name: Deploy to civlii
     runs-on: ubuntu-latest
     steps:
@@ -305,8 +321,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-open-by-laws:
-    if: ${{ !cancelled() }}
-    needs: deploy-civlii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-civlii
+      - preconditions
     name: Deploy to open-by-laws
     runs-on: ubuntu-latest
     steps:
@@ -327,8 +345,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-obl-microsites:
-    if: ${{ !cancelled() }}
-    needs: deploy-open-by-laws
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-open-by-laws
+      - preconditions
     name: Deploy to open by-laws microsites
     runs-on: ubuntu-latest
     steps:
@@ -347,8 +367,8 @@ jobs:
   # ------------------
 
   deploy-africanlii:
-    needs: check-peachjam-js
-    if: ${{ !cancelled() }}
+    needs: preconditions
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to africanlii.org
     runs-on: ubuntu-latest
     steps:
@@ -369,8 +389,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-ulii:
-    if: ${{ !cancelled() }}
-    needs: deploy-africanlii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-africanlii
+      - preconditions
     name: Deploy to ulii
     runs-on: ubuntu-latest
     steps:
@@ -391,8 +413,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-senlii:
-    if: ${{ !cancelled() }}
-    needs: deploy-ulii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-ulii
+      - preconditions
     name: Deploy to senlii
     runs-on: ubuntu-latest
     steps:
@@ -413,9 +437,11 @@ jobs:
           git_push_flags: '--force'
 
   deploy-rwandalii:
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to rwandalii
-    needs: deploy-senlii
+    needs:
+      - deploy-senlii
+      - preconditions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -435,9 +461,11 @@ jobs:
           git_push_flags: '--force'
 
   deploy-eswatinilii:
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to eswatinilii
-    needs: deploy-rwandalii
+    needs:
+      - deploy-rwandalii
+      - preconditions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -457,8 +485,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-sierralii:
-    if: ${{ !cancelled() }}
-    needs: deploy-eswatinilii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-eswatinilii
+      - preconditions
     name: Deploy to sierralii
     runs-on: ubuntu-latest
     steps:
@@ -479,9 +509,11 @@ jobs:
           git_push_flags: '--force'
 
   deploy-tcilii:
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to tcilii
-    needs: deploy-sierralii
+    needs:
+      - deploy-sierralii
+      - preconditions
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -501,8 +533,10 @@ jobs:
           git_push_flags: '--force'
 
   deploy-zanzibarlii:
-    if: ${{ !cancelled() }}
-    needs: deploy-tcilii
+    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
+    needs:
+      - deploy-tcilii
+      - preconditions
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
     steps:
