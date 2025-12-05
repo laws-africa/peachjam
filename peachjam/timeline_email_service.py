@@ -1,7 +1,11 @@
+import logging
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -12,10 +16,34 @@ from peachjam.tasks import (
     send_saved_search_email_alert,
 )
 
+log = logging.getLogger(__name__)
+
 
 class TimelineEmailService:
     @staticmethod
+    def already_alerted_today(user, event_type):
+        last_24_hrs = timezone.now() - timedelta(hours=24)
+        email_sent = TimelineEvent.objects.filter(
+            email_alert_sent_at__gte=last_24_hrs,
+            event_type=event_type,
+            user_following__user=user,
+        ).exists()
+        if email_sent:
+            log.info(
+                "%s email for %s has been sent within the last 24hrs: %s",
+                event_type,
+                user,
+                last_24_hrs,
+            )
+            return True
+        return False
+
+    @staticmethod
     def send_email_alerts():
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
         events = TimelineEvent.objects.filter(email_alert_sent_at__isnull=True)
         if not events.exists():
             return
@@ -48,6 +76,15 @@ class TimelineEmailService:
 
     @staticmethod
     def send_new_documents_email(user):
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
+        if TimelineEmailService.already_alerted_today(
+            user, TimelineEvent.EventTypes.NEW_DOCUMENTS
+        ):
+            return
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
@@ -55,6 +92,7 @@ class TimelineEmailService:
         )
 
         if not events.exists():
+            log.info("No new documents events to alert for %s", user)
             return
 
         events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
@@ -88,6 +126,10 @@ class TimelineEmailService:
 
     @staticmethod
     def send_saved_search_email(user):
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
@@ -95,6 +137,7 @@ class TimelineEmailService:
         )
 
         if not events.exists():
+            log.info("No saved search events to alert for %s", user)
             return
 
         events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
@@ -118,6 +161,15 @@ class TimelineEmailService:
 
     @staticmethod
     def send_new_citation_email(user):
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            log.info("email alerts are disabled")
+            return
+
+        if TimelineEmailService.already_alerted_today(
+            user, TimelineEvent.EventTypes.NEW_CITATION
+        ):
+            return
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
@@ -125,6 +177,7 @@ class TimelineEmailService:
         )
 
         if not events.exists():
+            log.info("No new citation events to alert for %s", user)
             return
 
         events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
