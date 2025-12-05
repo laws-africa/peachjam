@@ -1,5 +1,6 @@
 import json
 
+from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models import F
 from django.http.response import HttpResponse, JsonResponse, StreamingHttpResponse
@@ -209,6 +210,7 @@ class DocumentChatView(ChatThreadDetailMixin):
                 result = graph.get_state(config).values
                 reply = result.get("messages", [])[-1]
                 generation.update_trace(
+                    tags=[settings.PEACHJAM["APP_NAME"]],
                     user_id=thread.user.username,
                     session_id=str(thread.id),
                     output={"reply": reply.content},
