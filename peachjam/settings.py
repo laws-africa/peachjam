@@ -248,6 +248,7 @@ default_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
 gazette_db_config = dj_database_url.config(
     default=gazette_db_url, env="GAZETTES_DATABASE_URL"
 )
+gazette_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 DATABASES = {
     "default": default_db_config,
