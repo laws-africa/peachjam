@@ -167,6 +167,8 @@ PEACHJAM = {
     # Chat settings
     "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
     "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
+    # Email alerts
+    "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
