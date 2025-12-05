@@ -6,24 +6,30 @@
     {% url 'account_signup' as signup_url %}
     {% with next_url=request.htmx.current_url|default:request.path %}
       {% with login_url=base_login_url|add:"?next="|add:next_url %}
-        <p>
-          {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
-            This content is available only to subscribers.
-            <a href="{{ login_url }}">Log in</a> or
-            <a href="{{ signup_url }}">Sign up</a>
-            and <a href="{{ upsell_url }}">subscribe to {{ lowest_product }}</a> to unlock access.
-          {% endblocktrans %}
-        </p>
+        {% block anonymous-user %}
+          <p>
+            {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
+              This feature is available only to subscribers.
+              <a href="{{ login_url }}">Log in</a> or
+              <a href="{{ signup_url }}">Sign up</a>
+              and subscribe to <a href="{{ upsell_url }}">{{ lowest_product }}</a> to unlock access.
+            {% endblocktrans %}
+          </p>
+        {% endblock %}
       {% endwith %}
     {% endwith %}
   {% else %}
-    <p>
-      {% blocktrans trimmed with lowest_product=lowest_product.name %}
-        Your current subscription doesn’t include this content.
-        Please <a href="{{ upsell_url }}">upgrade to {{ lowest_product }}</a> to unlock access.
-      {% endblocktrans %}
-    </p>
+    {% block authenticated-user %}
+      <p>
+        {% blocktrans trimmed with lowest_product=lowest_product.name %}
+          Your current subscription doesn’t include this feature.
+          Please upgrade to <a href="{{ upsell_url }}">{{ lowest_product }}</a> to unlock access.
+        {% endblocktrans %}
+      </p>
+    {% endblock %}
   {% endif %}
 {% else %}
-  <p>{% trans "This content is not currently available." %}</p>
+  {% block no-product %}
+    <p>{% trans "This feature is not currently available." %}</p>
+  {% endblock %}
 {% endif %}
