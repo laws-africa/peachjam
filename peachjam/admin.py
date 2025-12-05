@@ -824,7 +824,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
 
     def extract_citations(self, request, queryset):
         count = queryset.count()
-        for doc in queryset.iterator():
+        for doc in queryset.only("pk"):
             extract_citations_task(doc.pk, creator=doc)
         self.message_user(
             request,
@@ -838,7 +838,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         """Re-extract content from source files that are Word documents, overwriting content_html."""
         count = 0
         with transaction.atomic():
-            for doc in queryset.iterator():
+            for doc in queryset.only("pk"):
                 if doc.extract_content_from_source_file():
                     count += 1
                     doc.extract_citations()
@@ -855,7 +855,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     def reindex_for_search(self, request, queryset):
         """Set up a background task to re-index documents for search."""
         count = queryset.count()
-        for doc in queryset.iterator():
+        for doc in queryset.only("pk"):
             search_model_saved(doc._meta.label, doc.pk)
         self.message_user(
             request,
@@ -869,7 +869,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     def apply_labels(self, request, queryset):
         with transaction.atomic():
             count = queryset.count()
-            for doc in queryset.iterator():
+            for doc in queryset.all():
                 if doc.decorator:
                     doc.decorator.apply_labels(doc)
         self.message_user(
@@ -881,7 +881,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     def ensure_source_file_pdf(self, request, queryset):
         with transaction.atomic():
             count = queryset.count()
-            for doc in queryset.iterator():
+            for doc in queryset.all():
                 if hasattr(doc, "source_file"):
                     doc.source_file.ensure_file_as_pdf()
         self.message_user(
@@ -1364,7 +1364,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             return
 
         count = queryset.count()
-        for doc in queryset.iterator():
+        for doc in queryset.only("pk"):
             generate_judgment_summary(doc.pk)
         self.message_user(
             request,
