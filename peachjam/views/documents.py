@@ -258,7 +258,7 @@ class DocumentAttachmentView(DocumentDetailView):
         raise Http404
 
 
-class DocumentCitationsFirstLoadView(DocumentDetailView):
+class DocumentCitationsLoadView(DocumentDetailView):
 
     template_name = "peachjam/_citations.html"
 

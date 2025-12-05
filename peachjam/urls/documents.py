@@ -11,7 +11,7 @@ from peachjam.views import (
     CaseSummaryView,
     ComparePortionsView,
     DocumentAttachmentView,
-    DocumentCitationsFirstLoadView,
+    DocumentCitationsLoadView,
     DocumentCitationsView,
     DocumentDebugView,
     DocumentDetailViewResolver,
@@ -62,7 +62,7 @@ urlpatterns = [
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations/first-load$",
-        cache_page(CACHE_DURATION)(DocumentCitationsFirstLoadView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentCitationsLoadView.as_view()),
         name="document_citations_first_load",
     ),
     re_path(
