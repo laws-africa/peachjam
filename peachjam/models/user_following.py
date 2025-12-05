@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.models import Predicate
 from peachjam.models.core_document import CoreDocument
 from peachjam.models.timeline import TimelineEvent
 from peachjam_search.models import SavedSearch
@@ -103,20 +104,17 @@ class UserFollowing(models.Model):
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
 
-    # fields that can be followed
-    EVENT_FIELD_MAP = {
-        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
-        "saved_document": TimelineEvent.EventTypes.NEW_CITATION,
-    }
-
-    follow_fields = list(EVENT_FIELD_MAP.keys())
+    follow_fields = [
+        "court",
+        "author",
+        "court_class",
+        "court_registry",
+        "country",
+        "locality",
+        "taxonomy",
+        "saved_search",
+        "saved_document",
+    ]
 
     class Meta:
         constraints = [
@@ -173,15 +171,6 @@ class UserFollowing(models.Model):
     # --- simple helpers ---
 
     @property
-    def description_text(self):
-        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
-            return _("New matches for search alert")
-        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
-            return _("New documents added for")
-        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
-            return _("New citations of")
-
-    @property
     def followed_field(self):
         for f in self.follow_fields:
             if getattr(self, f):
@@ -192,17 +181,21 @@ class UserFollowing(models.Model):
         field = self.followed_field
         return getattr(self, field) if field else None
 
-    def get_event_type(self):
-        field = self.followed_field
-        return self.EVENT_FIELD_MAP.get(field)
-
     @property
     def is_new_docs(self):
-        return self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS
+        return self.followed_field in [
+            "court",
+            "author",
+            "court_class",
+            "court_registry",
+            "country",
+            "locality",
+            "taxonomy",
+        ]
 
     @property
     def is_saved_search(self):
-        return self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH
+        return self.followed_field == "saved_search"
 
     @property
     def cutoff_date(self):
@@ -352,6 +345,36 @@ class UserFollowing(models.Model):
             return
         TimelineEvent.add_new_citation_events(self, citation.citing_work)
 
+    def _update_new_relationship(self, relationship):
+        assert self.saved_document
+
+        # check that we are passing a relationship to the saved document
+        assert relationship.subject_work == self.saved_document.work
+
+        allowed_predicates = Predicate.objects.filter(
+            name__in=["amended by", "repealed by", "commenced by"]
+        )
+        if relationship.predicate not in allowed_predicates:
+            log.info("relationship predicate %s is not allowed", relationship.predicate)
+            return
+
+        # check if the user has ever been alerted about this relationship
+        already_alerted = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            subject_works=relationship.object_work,
+        ).exists()
+
+        if already_alerted:
+            log.info(
+                "User %s has already been alerted about relationship to work %s",
+                self.user,
+                relationship.object_work,
+            )
+            return
+
+        TimelineEvent.add_new_amendment_events(self, relationship)
+
     @classmethod
     def update_follows_for_user(cls, user):
         follows = user.following.all()
@@ -366,3 +389,14 @@ class UserFollowing(models.Model):
         log.info("Found %d follows for new citation update", follows.count())
         for follow in follows:
             follow._update_new_citation(citation)
+
+    @classmethod
+    def update_new_relationship_follows(cls, relationship):
+        follows = cls.objects.filter(
+            saved_document__work=relationship.subject_work,
+        )
+        log.info("Found %d follows for new relationship update", follows.count())
+        # TODO: check for predicate
+
+        for follow in follows:
+            follow._update_new_relationship(relationship)

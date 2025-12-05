@@ -352,3 +352,16 @@ def update_users_new_citation(citation_id):
         return
     log.info(f"Updating users for new citation {citation_id}")
     UserFollowing.update_new_citation_follows(citation)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_users_new_relationship(relationship_id):
+    # update users when a new relationship is created: amendment, repeal, commencement.
+    from peachjam.models import Relationship, UserFollowing
+
+    relationship = Relationship.objects.filter(id=relationship_id).first()
+    if not relationship:
+        log.info(f"No relationship with id {relationship_id} exists, ignoring.")
+        return
+    log.info(f"Updating users for new citation {relationship_id}")
+    UserFollowing.update_new_relationship_follows(relationship)
