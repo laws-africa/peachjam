@@ -18,14 +18,17 @@
           >
             <div v-if="message.content_html" v-html="message.content_html" class="chat-content chat-content-html" />
             <div v-else class="chat-content">{{ message.content }}</div>
-            <div v-if="message.role === 'ai' && !message.streaming">
-              <button class="btn btn-sm btn-outline-secondary border-0" title="Upvote message" @click="voteUp(message.id)">
+            <div v-if="message.role === 'ai' && !message.streaming" class="d-flex align-items-center">
+              <button class="btn btn-sm btn-outline-secondary border-0" :title="$t('Upvote message')" @click="voteUp(message.id)">
                 <i v-if="votingUp === message.id" class="bi bi-check"/>
                 <i v-else class="bi bi-hand-thumbs-up"/>
               </button>
-              <button class="btn btn-sm btn-outline-secondary border-0 ms-1" title="Downvote message" @click="voteDown(message.id)">
+              <button class="btn btn-sm btn-outline-secondary border-0 ms-1" :title="$t('Downvote message')" @click="voteDown(message.id)">
                 <i v-if="votingDown === message.id" class="bi bi-check"/>
                 <i v-else class="bi bi-hand-thumbs-down"/>
+              </button>
+              <button class="btn btn-sm btn-outline-secondary border-0 ms-1" :title="$t('Copy to clipboard')" @click="copyToClipboard(message)">
+                <i class="bi bi-copy"/>
               </button>
             </div>
           </div>
@@ -339,6 +342,30 @@ export default {
           'X-CSRFToken': await csrfToken()
         }
       });
+    },
+    async copyToClipboard (message) {
+      const textBlob = new Blob([message?.content || ''], { type: 'text/plain' });
+      const html = message?.content_html || message?.content || '';
+      const htmlBlob = new Blob([html], { type: 'text/html' });
+
+      if (navigator.clipboard?.write && window.ClipboardItem) {
+        try {
+          // eslint-disable-next-line no-undef
+          const item = new ClipboardItem({
+            'text/plain': textBlob,
+            'text/html': htmlBlob
+          });
+          await navigator.clipboard.write([item]);
+        } catch (err) {
+          console.warn('Failed to copy rich content via Clipboard API', err);
+        }
+      } else if (navigator.clipboard?.writeText) {
+        try {
+          await navigator.clipboard.writeText(html);
+        } catch (err) {
+          console.warn('Failed to copy HTML as text via Clipboard API', err);
+        }
+      }
     }
   }
 };
