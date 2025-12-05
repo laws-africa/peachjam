@@ -5,6 +5,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponseRedirect, QueryDict
 from django.http.response import (
@@ -37,6 +38,8 @@ from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
 from peachjam.resources import DownloadDocumentsResource
+from peachjam.views import AtomicPostMixin
+from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.engine import SearchEngine
 from peachjam_search.forms import (
@@ -244,25 +247,26 @@ class DocumentSearchView(TemplateView):
         search = search.replace("\00", " ")
 
         # save the search trace
-        return SearchTrace.objects.create(
-            user=self.request.user if self.request.user.is_authenticated else None,
-            config_version=self.config_version,
-            request_id=self.request.id if self.request.id != "none" else None,
-            mode=engine.mode,
-            search=search,
-            field_searches=engine.field_queries,
-            n_results=n_results,
-            page=engine.page,
-            filters=engine.filters,
-            filters_string=filters_string,
-            ordering=self.request.GET.get("ordering"),
-            suggestion=self.request.GET.get("suggestion", "")[:1024],
-            ip_address=self.request.headers.get("x-forwarded-for"),
-            user_agent=self.request.headers.get("user-agent"),
-        )
+        with transaction.atomic():
+            return SearchTrace.objects.create(
+                user=self.request.user if self.request.user.is_authenticated else None,
+                config_version=self.config_version,
+                request_id=self.request.id if self.request.id != "none" else None,
+                mode=engine.mode,
+                search=search,
+                field_searches=engine.field_queries,
+                n_results=n_results,
+                page=engine.page,
+                filters=engine.filters,
+                filters_string=filters_string,
+                ordering=self.request.GET.get("ordering"),
+                suggestion=self.request.GET.get("suggestion", "")[:1024],
+                ip_address=self.request.headers.get("x-forwarded-for"),
+                user_agent=self.request.headers.get("user-agent"),
+            )
 
 
-class SearchClickViewSet(CreateModelMixin, GenericViewSet):
+class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
 
@@ -366,7 +370,10 @@ class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
 
 
 class BaseSavedSearchFormView(
-    AllowSavedSearchesMixin, LoginRequiredMixin, PermissionRequiredMixin
+    AtomicPostMixin,
+    AllowSavedSearchesMixin,
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
 ):
     model = SavedSearch
     context_object_name = "saved_search"
@@ -431,7 +438,7 @@ class SavedSearchDeleteView(BaseSavedSearchFormView, DeleteView):
         return self.request.GET.get("next", None) or reverse("search:saved_search_list")
 
 
-class SearchFeedbackCreateView(View):
+class SearchFeedbackCreateView(AtomicPostMixin, View):
     form_class = SearchFeedbackCreateForm
     http_method_names = ["post"]
 
@@ -445,7 +452,7 @@ class SearchFeedbackCreateView(View):
         return HttpResponse(status=400)
 
 
-class LinkTracesView(View):
+class LinkTracesView(AtomicPostMixin, View):
     """This view allows the API to link new search trace to its preceding search, which we can't do directly
     when the search is executed because caching would get in the way. Instead, the search response includes a new
     trace ID and the frontend calls this to link the old and new search traces.

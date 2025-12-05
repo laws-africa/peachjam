@@ -1,4 +1,5 @@
 from django import forms
+from django.db import transaction
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -19,6 +20,7 @@ from peachjam.models import (
     Relationship,
     Work,
 )
+from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import (
     AnnotationSerializer,
     CitationLinkSerializer,
@@ -28,12 +30,12 @@ from peachjam_api.serializers import (
 )
 
 
-class RelationshipViewSet(viewsets.ModelViewSet):
+class RelationshipViewSet(AtomicWriteViewSetMixin, viewsets.ModelViewSet):
     queryset = Relationship.objects.all()
     serializer_class = RelationshipSerializer
 
 
-class AnnotationViewSet(viewsets.ModelViewSet):
+class AnnotationViewSet(AtomicWriteViewSetMixin, viewsets.ModelViewSet):
     queryset = Annotation.objects.all()
     serializer_class = AnnotationSerializer
     permission_classes = [DjangoModelPermissions]
@@ -61,7 +63,7 @@ class WorksViewSet(viewsets.ReadOnlyModelViewSet):
     }
 
 
-class CitationLinkViewSet(viewsets.ModelViewSet):
+class CitationLinkViewSet(AtomicWriteViewSetMixin, viewsets.ModelViewSet):
     queryset = CitationLink.objects.all()
     serializer_class = CitationLinkSerializer
 
@@ -74,7 +76,8 @@ class IngestorWebhookView(APIView):
         if ingestor.enabled:
             # read the request body; this allows the ingestor and the adapter to inspect request.body later on
             body = request.body  # noqa
-            ingestor.handle_webhook(request, request.data)
+            with transaction.atomic():
+                ingestor.handle_webhook(request, request.data)
         return Response({}, status=200)
 
 
