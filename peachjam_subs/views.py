@@ -6,10 +6,11 @@ from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView
 
 from peachjam.models import pj_settings
+from peachjam.views import AtomicPostMixin
 from peachjam_subs.models import Subscription
 
 
-class CancelSubscriptionView(LoginRequiredMixin, DeleteView):
+class CancelSubscriptionView(AtomicPostMixin, LoginRequiredMixin, DeleteView):
     """Cancel a pending subscription."""
 
     model = Subscription

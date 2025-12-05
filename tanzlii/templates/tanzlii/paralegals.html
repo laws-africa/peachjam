@@ -10,15 +10,26 @@
       <p class="lead">
         {% trans "This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development. The Paralegal Hub is developed as a kiSwahili-first resource and is available on your device as an off-line resource." %}
       </p>
-      <p>
-        {% trans "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa." %}
-      </p>
-      <p>
-        {% trans "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania." %}
-      </p>
-      <p>
-        {% trans "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community." %}
-      </p>
+      <div class="row">
+        <section class="col-lg-7">
+          <p>
+            {% trans "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa." %}
+          </p>
+          <p>
+            {% trans "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania." %}
+          </p>
+          <p>
+            {% trans "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community." %}
+          </p>
+        </section>
+        <section class="hero-logos row justify-content-center justify-content-lg-start col-lg-5">
+          <img src="{% static 'images/paralegals/eu.png' %}" alt="funded by the EU"/>
+          <img src="{% static 'images/paralegals/lsf.png' %}" alt="LSF logo"/>
+          <img src="{% static 'images/cooperation-logo-ger-ger-giz.jpg' %}"
+               alt="GIZ logo"/>
+          <img src="{% static 'images/paralegals/enabel.png' %}" alt="enabel logo"/>
+        </section>
+      </div>
     </div>
   </section>
   <section class="py-4 bg-light">

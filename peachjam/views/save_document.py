@@ -51,6 +51,7 @@ from django.views.generic.detail import DetailView
 from peachjam.forms import SaveDocumentForm
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam.resources import DownloadDocumentsResource
+from peachjam.views import AtomicPostMixin
 from peachjam_subs.models import Subscription
 
 User = get_user_model()
@@ -114,7 +115,7 @@ class BaseFolderFormMixin(BaseFolderMixin):
         return kwargs
 
 
-class FolderCreateView(BaseFolderFormMixin, CreateView):
+class FolderCreateView(AtomicPostMixin, BaseFolderFormMixin, CreateView):
     permission_required = "peachjam.add_folder"
 
     def get_form_kwargs(self):
@@ -125,11 +126,11 @@ class FolderCreateView(BaseFolderFormMixin, CreateView):
         return kwargs
 
 
-class FolderUpdateView(BaseFolderFormMixin, UpdateView):
+class FolderUpdateView(AtomicPostMixin, BaseFolderFormMixin, UpdateView):
     permission_required = "peachjam.change_folder"
 
 
-class FolderDeleteView(BaseFolderMixin, DeleteView):
+class FolderDeleteView(AtomicPostMixin, BaseFolderMixin, DeleteView):
     success_url = reverse_lazy("folder_list")
     permission_required = "peachjam.delete_folder"
 
@@ -160,8 +161,18 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        legacy_ids = self.request.GET.getlist("doc_id")
+
+        if "doc_ids" in self.request.GET:
+            csv_val = self.request.GET.get("doc_ids", "")
+
+            legacy_ids.extend(csv_val.split(","))
+
         try:
-            requested_ids = [int(pk) for pk in self.request.GET.getlist("doc_id")]
+            requested_ids = [
+                int(pk)
+                for pk in set(pk.strip() for pk in legacy_ids if pk and pk.strip())
+            ]
         except ValueError:
             requested_ids = []
 
@@ -206,7 +217,10 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
 
 
 class SavedDocumentFormMixin(
-    AllowSavedDocumentMixin, LoginRequiredMixin, PermissionRequiredMixin
+    AtomicPostMixin,
+    AllowSavedDocumentMixin,
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
 ):
     form_class = SaveDocumentForm
     context_object_name = "saved_document"
