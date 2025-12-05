@@ -2,6 +2,7 @@ import logging
 
 from background_task import background
 from django.apps import apps
+from django.db import transaction
 from django_elasticsearch_dsl.apps import DEDConfig
 from django_elasticsearch_dsl.signals import (
     BaseSignalProcessor,
@@ -60,5 +61,6 @@ def search_model_saved(model_name, pk):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def prune_search_traces():
     SearchTrace.prune()
