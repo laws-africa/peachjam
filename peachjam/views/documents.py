@@ -336,8 +336,6 @@ class DocumentCitationsLoadView(DocumentDetailView):
 
         context["document"] = doc
 
-        print(context)
-
         return context
 
 
