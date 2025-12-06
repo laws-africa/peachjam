@@ -21,7 +21,6 @@ from peachjam.models import (
     DocumentNature,
     DocumentSocialImage,
     ExtractedCitation,
-    ProvisionCitationCount,
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
@@ -259,13 +258,7 @@ class DocumentAttachmentView(DocumentDetailView):
 
 
 class DocumentCitationsLoadView(DocumentDetailView):
-
-    template_name = "peachjam/_citations.html"
-
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-
-        return response
+    template_name = "peachjam/document/_citations.html"
 
     def fetch_citation_docs(self, works, direction):
         """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
@@ -323,7 +316,7 @@ class DocumentCitationsLoadView(DocumentDetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        doc = self.get_object()
+        doc = self.object
 
         # citation links for a document
         citation_links = CitationLink.objects.filter(document=doc)
@@ -340,17 +333,6 @@ class DocumentCitationsLoadView(DocumentDetailView):
             doc.work.works_citing_current_work(),
             "citing_works",  # Assuming 'citing_works' was the truncated method
         )
-
-        provision_citations = ProvisionCitationCount.objects.filter(
-            work=doc.work
-        ).values("provision_eid", "count")
-        context["incoming_citations_json"] = [
-            {
-                "provision_eid": item["provision_eid"],
-                "citations": item["count"],
-            }
-            for item in provision_citations
-        ]
 
         context["document"] = doc
 

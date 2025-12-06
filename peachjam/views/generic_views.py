@@ -25,6 +25,7 @@ from peachjam.models import (
     Author,
     CoreDocument,
     DocumentNature,
+    ProvisionCitationCount,
     Relationship,
     SourceFile,
     Taxonomy,
@@ -395,8 +396,7 @@ class BaseDocumentDetailView(DetailView):
             document_diffs_url=self.document_diffs_url, **kwargs
         )
 
-        doc = self.get_object()
-
+        doc = self.object
         # get all versions that match current document work_frbr_uri
         all_versions = CoreDocument.objects.filter(
             work_frbr_uri=self.object.work_frbr_uri
@@ -432,6 +432,17 @@ class BaseDocumentDetailView(DetailView):
         context["labels"] = doc.labels.all()
 
         context["show_save_doc_button"] = self.show_save_doc_button()
+
+        provision_citations = ProvisionCitationCount.objects.filter(
+            work=doc.work
+        ).values("provision_eid", "count")
+        context["incoming_citations_json"] = [
+            {
+                "provision_eid": item["provision_eid"],
+                "citations": item["count"],
+            }
+            for item in provision_citations
+        ]
 
         context["download_options"] = self.get_download_options()
 
