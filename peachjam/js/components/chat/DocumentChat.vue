@@ -150,6 +150,7 @@ export default {
         }
       } catch (err) {
         console.error(err);
+        this.threadId = '';
         this.error = err.message || this.$t('Something went wrong. Please try again.');
       }
     },
