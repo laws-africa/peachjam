@@ -11,9 +11,6 @@ def forwards(apps, schema_editor):
         for ix in registry.get_indices():
             if not ix._mapping:
                 continue
-            print(
-                f"Adding principal,commenced,repealed,frbr_uri_language field mappings for {ix._name}"
-            )
 
             fields = """
             principal

@@ -75,7 +75,6 @@ class Command(BaseCommand):
             # also will need to be able to know when to ignore tool calls, etc. (or show a different message)
             #   - eg need to know that reflecting "chatbot" is fine?
             #     - ignore tool calls
-            print(chunk)
             continue
             streamed_message = self._extract_message(chunk)
             if streamed_message is None:

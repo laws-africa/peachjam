@@ -11,7 +11,6 @@ def forwards(apps, schema_editor):
         for ix in registry.get_indices():
             if not ix._mapping:
                 continue
-            print(f"Adding frbr_uri field mappings for {ix._name}")
 
             fields = """
             frbr_uri_country

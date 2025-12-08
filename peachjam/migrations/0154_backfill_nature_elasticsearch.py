@@ -23,8 +23,6 @@ def forwards(apps, schema_editor):
             if not ix._mapping:
                 continue
 
-            print(f"Backfilling natures for {ix._name}")
-
             for doc_type, nature in DOC_TYPES:
                 # update all documents of this doc_type that don't have a nature
                 # uses English as the default for all the language fields, too

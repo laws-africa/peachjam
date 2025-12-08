@@ -7,4 +7,3 @@ class Command(BaseCommand):
         call_command("update_countries_plus")
         call_command("loaddata", "languages_data.json.gz")
         associate_countries_and_languages()
-        print("OK")

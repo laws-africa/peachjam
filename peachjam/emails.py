@@ -50,7 +50,6 @@ class TemplateBackend(BaseTemplateBackend):
             # try to get the primary colour from the _variables.scss file, looked up using the static files finder
             path = finders.find("stylesheets/_variables.scss")
             if path:
-                print(f"Found _variables.scss at {path}")
                 with open(path, "r") as f:
                     for line in f:
                         if line.startswith("$primary:"):

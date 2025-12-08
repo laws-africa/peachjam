@@ -13,7 +13,6 @@ def forwards(apps, schema_editor):
         for ix in registry.get_indices():
             if not ix._mapping:
                 continue
-            print(f"Adding provisions mapping for {ix._name}")
             ix.connection.indices.put_mapping(
                 index=ix._name,
                 body={
