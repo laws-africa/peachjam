@@ -106,7 +106,7 @@ class SavedDocument(models.Model):
         return self.work.title
 
     def get_absolute_url(self):
-        return self.work.frbr_uri
+        return self.work.get_absolute_url()
 
     @property
     def document(self):
