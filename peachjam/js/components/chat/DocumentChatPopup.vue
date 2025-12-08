@@ -56,7 +56,7 @@
 import DocumentChat from './DocumentChat.vue';
 
 export default {
-  name: 'DocumentChatButton',
+  name: 'DocumentChatPopup',
   components: {
     DocumentChat
   },
@@ -79,6 +79,9 @@ export default {
   methods: {
     clear () {
       this.$refs.chat.clear();
+    },
+    show () {
+      this.open = true;
     }
   }
 };
