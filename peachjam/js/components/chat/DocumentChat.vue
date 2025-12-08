@@ -140,14 +140,17 @@ export default {
         const resp = await fetch(url);
         if (resp.status === 403) {
           await this.handle403(resp);
+        } else if (resp.status === 404) {
+          // no existing thread
+          this.threadId = '';
         } else if (!resp.ok) {
           throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
         } else {
           const data = await resp.json();
           this.threadId = data.thread_id || '';
           this.mergeMessages(data.messages);
-          this.focusInputAndScroll();
         }
+        this.focusInputAndScroll();
       } catch (err) {
         console.error(err);
         this.threadId = '';
