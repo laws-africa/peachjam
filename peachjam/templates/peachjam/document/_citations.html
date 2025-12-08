@@ -15,10 +15,8 @@
           {% translate 'Documents citing this one' %}
           <span class="badge bg-secondary">{{ work.n_citing_works }}</span>
         </h4>
-        {# djlint:off #}
-{% include 'peachjam/document/_citations_list.html' with citations=documents_citing_current_doc direction="incoming" %}
-{# djlint:off #}
-</div>
-{% endwith %}
-</div>
+        {% include 'peachjam/document/_citations_list.html' with citations=documents_citing_current_doc direction="incoming" %}
+      </div>
+    {% endwith %}
+  </div>
 </div>

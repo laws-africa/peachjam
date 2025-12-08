@@ -257,7 +257,7 @@ class DocumentAttachmentView(DocumentDetailView):
         raise Http404
 
 
-class DocumentCitationsLoadView(DocumentDetailView):
+class DocumentCitationsTabView(DocumentDetailView):
     template_name = "peachjam/document/_citations.html"
 
     def fetch_citation_docs(self, works, direction):
