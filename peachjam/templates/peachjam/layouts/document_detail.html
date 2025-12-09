@@ -521,10 +521,12 @@
           {% endif %}
         {% endblock %}
         {% if document.work.n_cited_works or document.work.n_citing_works %}
-          <div class="tab-pane spinner-when-empty"
+          <div class="tab-pane"
                id="citations-tab"
                role="tabpanel"
-               aria-labelledby="citations-tab"></div>
+               aria-labelledby="citations-tab">
+            <div class="spinner-when-empty"></div>
+          </div>
         {% endif %}
         {% if document.work.ratification %}
           <div class="tab-pane"
