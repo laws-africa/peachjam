@@ -33,7 +33,15 @@ class PortionSearchView(APIView):
         input_data = serializer.validated_data
 
         self.engine = PortionSearchEngine()
-        es_response = self.engine.execute(input_data)
+        self.engine.query = input_data["text"]
+
+        self.engine.filters = []
+        if input_data.get("pre_filters", None):
+            self.engine.filters.append(input_data["pre_filters"])
+        if input_data.get("filters", None):
+            self.engine.filters.append(input_data["filters"])
+
+        es_response = self.engine.execute()
 
         portions = self.build_portions(es_response)
         portions = portions[: input_data["top_k"]]

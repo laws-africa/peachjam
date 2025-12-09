@@ -1,6 +1,6 @@
 import dataclasses
 from enum import Enum
-from typing import List, Optional, Type
+from typing import Optional, Type
 
 from django.conf import settings
 from django.utils.html import escape
@@ -10,6 +10,7 @@ from rest_framework import serializers
 
 from peachjam.models import CoreDocument
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
+from peachjam_search.engine import PortionSearchFilters
 from peachjam_search.models import SearchClick
 
 
@@ -256,41 +257,6 @@ class SearchClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
-
-
-class PortionSearchFilters(BaseModel):
-    work_frbr_uri: Optional[str] = None
-    work_frbr_uri__in: Optional[List[str]] = None
-    expression_frbr_uri: Optional[str] = None
-    expression_frbr_uri__in: Optional[List[str]] = None
-    frbr_place: Optional[str] = None
-    frbr_place__in: Optional[List[str]] = None
-    frbr_doctype: Optional[str] = None
-    frbr_doctype__in: Optional[List[str]] = None
-    frbr_subtype: Optional[str] = None
-    frbr_subtype__in: Optional[List[str]] = None
-    # TODO: legislation only
-    repealed: Optional[bool] = None
-    commenced: Optional[bool] = None
-    principal: Optional[bool] = None
-
-    def to_es_query(self):
-        must = []
-        for key, value in self.model_dump(exclude_none=True).items():
-            field, *lookup = key.split("__")
-            lookup = lookup[0] if lookup else "exact"
-
-            if field.startswith("frbr_"):
-                # ES fields are named with frbr_uri_...
-                field = "frbr_uri_" + field[5:]
-
-            if lookup == "exact":
-                must.append({"term": {field: value}})
-            elif lookup == "in":
-                must.append({"terms": {field: value}})
-            else:
-                raise ValueError(f"Unsupported lookup: {lookup}")
-        return must
 
 
 @extend_schema_field(PortionSearchFilters.model_json_schema())
