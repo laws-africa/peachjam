@@ -1,9 +1,11 @@
 import logging
+from typing import List, Optional
 
 from django.conf import settings
 from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.query import Bool, MatchAll, MatchPhrase, Q, SimpleQueryString
+from pydantic import BaseModel
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
@@ -723,6 +725,41 @@ class SearchEngine:
         return field
 
 
+class PortionSearchFilters(BaseModel):
+    work_frbr_uri: Optional[str] = None
+    work_frbr_uri__in: Optional[List[str]] = None
+    expression_frbr_uri: Optional[str] = None
+    expression_frbr_uri__in: Optional[List[str]] = None
+    frbr_place: Optional[str] = None
+    frbr_place__in: Optional[List[str]] = None
+    frbr_doctype: Optional[str] = None
+    frbr_doctype__in: Optional[List[str]] = None
+    frbr_subtype: Optional[str] = None
+    frbr_subtype__in: Optional[List[str]] = None
+    # TODO: legislation only
+    repealed: Optional[bool] = None
+    commenced: Optional[bool] = None
+    principal: Optional[bool] = None
+
+    def to_es_query(self):
+        must = []
+        for key, value in self.model_dump(exclude_none=True).items():
+            field, *lookup = key.split("__")
+            lookup = lookup[0] if lookup else "exact"
+
+            if field.startswith("frbr_"):
+                # ES fields are named with frbr_uri_...
+                field = "frbr_uri_" + field[5:]
+
+            if lookup == "exact":
+                must.append({"term": {field: value}})
+            elif lookup == "in":
+                must.append({"terms": {field: value}})
+            else:
+                raise ValueError(f"Unsupported lookup: {lookup}")
+        return must
+
+
 class PortionSearchEngine(SearchEngine):
     """A SearchEngine designed for hybrid search returning portions of documents, rather than documents. Useful
     for RAG.
@@ -737,33 +774,24 @@ class PortionSearchEngine(SearchEngine):
     ]
 
     mode = "hybrid"
+    filters: Optional[List[PortionSearchFilters]] = None
 
-    def build_search(self, input_data):
-        self.query = input_data["text"]
-
+    def build_search(self):
         search = RetrieverSearch(using=self.client, index=self.index)
         search = self.add_source(search)
         search = self.add_query(search)
         search = self.add_sort(search)
-        search = self.add_filters(search, input_data)
+        search = self.add_filters(search)
         search = self.add_retrievers(search)
-
         return search
 
-    def add_filters(self, search, input_data):
-        pre_filters = input_data.get("pre_filters")
-        if pre_filters:
-            search = search.query(Bool(filter=pre_filters.to_es_query()))
+    def add_filters(self, search):
+        search = search.filter("term", is_most_recent=True)
 
-        filters = input_data.get("filters")
-        if filters:
-            search = search.query(Bool(filter=filters.to_es_query()))
+        for f in self.filters or []:
+            search = search.query(Bool(filter=f.to_es_query()))
 
         return search
-
-    def execute(self, input_data):
-        search = self.build_search(input_data)
-        return search.execute()
 
 
 class RetrieverSearch(Search):

@@ -1376,10 +1376,17 @@ class TestSearchEngine(TestCase):
             }
         )
         serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
 
         engine = PortionSearchEngine()
+        engine.query = input_data["text"]
+
+        engine.filters = []
+        engine.filters.append(input_data["pre_filters"])
+        engine.filters.append(input_data["filters"])
+
         with patch.object(engine, "get_query_embedding", return_value=[0.1, 0.2]):
-            search = engine.build_search(serializer.validated_data)
+            search = engine.build_search()
 
         self.assertDictEqual(
             {
@@ -1663,6 +1670,7 @@ class TestSearchEngine(TestCase):
                                                 },
                                             ],
                                             "filter": [
+                                                {"term": {"is_most_recent": True}},
                                                 {"term": {"frbr_uri_doctype": "act"}},
                                                 {"term": {"principal": True}},
                                             ],
@@ -1706,6 +1714,7 @@ class TestSearchEngine(TestCase):
                                         }
                                     },
                                     "filter": [
+                                        {"term": {"is_most_recent": True}},
                                         {"term": {"frbr_uri_doctype": "act"}},
                                         {"term": {"principal": True}},
                                     ],
