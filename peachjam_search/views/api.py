@@ -52,7 +52,8 @@ class PortionSearchView(APIView):
     def build_portions(self, es_response):
         portions = []
         # a list of portion ids to load full text for
-        portions_to_load = defaultdict(list)
+        provisions_to_load = defaultdict(list)
+        pages_to_load = defaultdict(list)
 
         for hit in es_response.hits.hits:
             frbr_uri = FrbrUri.parse(hit._source.expression_frbr_uri)
@@ -62,7 +63,10 @@ class PortionSearchView(APIView):
             for chunk in hit.inner_hits.content_chunks.hits.hits:
                 # if there's no portion, then it means the full text, and we just have to use what's here
                 if chunk._source.n_chunks > 1 and chunk._source.portion:
-                    portions_to_load[frbr_uri].append(chunk._source.portion)
+                    if chunk._source.type == "provision":
+                        provisions_to_load[frbr_uri].append(chunk._source.portion)
+                    elif chunk._source.type == "page":
+                        pages_to_load[frbr_uri].append(chunk._source.portion)
 
                 item = PortionHit(
                     content=PortionContent(text=self.clean_text(chunk._source.text)),
@@ -85,8 +89,7 @@ class PortionSearchView(APIView):
                 )
                 portions.append(item)
 
-        if portions_to_load:
-            self.load_full_portion_text(portions, portions_to_load)
+        self.load_full_portion_text(portions, provisions_to_load, pages_to_load)
 
         return portions
 
@@ -94,15 +97,13 @@ class PortionSearchView(APIView):
         # strip the additional context, if present
         return text.split(TEXT_INJECTION_SEPARATOR, 1)[-1]
 
-    def load_full_portion_text(self, portions, portions_to_load):
+    def load_full_portion_text(self, portions, provisions_to_load, pages_to_load):
         """Load the full text for portions that have multiple chunks. We do this by querying Elasticsearch again,
         using the "provisions" and "pages" nested fields."""
 
-        # TODO: handle pages
         search = Search(using=self.engine.client, index=self.engine.index)
         search = search.source(["expression_frbr_uri"])
-        # write an elasticsearch query to get the full text for the portions
-        filters = [
+        provision_filters = [
             [
                 {"term": {"expression_frbr_uri": frbr_uri.expression_uri()}},
                 {
@@ -121,24 +122,53 @@ class PortionSearchView(APIView):
                     }
                 },
             ]
-            for frbr_uri, portion_ids in portions_to_load.items()
+            for frbr_uri, portion_ids in provisions_to_load.items()
         ]
+        page_filters = [
+            [
+                {"term": {"expression_frbr_uri": frbr_uri.expression_uri()}},
+                {
+                    "nested": {
+                        "path": "pages",
+                        "query": {
+                            "terms": {"pages.page_num": page_nums},
+                        },
+                        "inner_hits": {
+                            "name": f"provisions_{frbr_uri.expression_uri()}",
+                            "size": 100,
+                            "_source": {"includes": ["pages.body", "pages.page_num"]},
+                        },
+                    }
+                },
+            ]
+            for frbr_uri, page_nums in pages_to_load.items()
+        ]
+        filters = provision_filters + page_filters
 
-        search = search.query(Bool(should=[Bool(filter=f) for f in filters]))
-        es_response = search.execute()
+        if filters:
+            search = search.query(Bool(should=[Bool(filter=f) for f in filters]))
+            es_response = search.execute()
 
-        # build up a lookup dict
-        full_texts = {}
-        for hit in es_response.hits.hits:
-            for inner_hit_key in hit.inner_hits:
-                inner_hit = hit.inner_hits[inner_hit_key]
-                for provision in inner_hit.hits.hits:
-                    portion_id = provision._source.id
-                    key = (hit._source.expression_frbr_uri, portion_id)
-                    full_texts[key] = provision._source.body
+            # build up a lookup dict
+            full_texts = {}
+            for hit in es_response.hits.hits:
+                for inner_hit_key in hit.inner_hits:
+                    inner_hit = hit.inner_hits[inner_hit_key]
+                    for portion in inner_hit.hits.hits:
+                        if hasattr(portion._source, "id"):
+                            # provision
+                            portion_id = portion._source.id
+                        else:
+                            # page - key in full_texts will be a string
+                            portion_id = str(portion._source.page_num)
+                        key = (hit._source.expression_frbr_uri, portion_id)
+                        full_texts[key] = portion._source.body
 
-        # update portions with full text
-        for portion in portions:
-            key = (portion.metadata.expression_frbr_uri, portion.metadata.portion_id)
-            if key in full_texts:
-                portion.content.text = full_texts[key]
+            # update portions with full text
+            for portion in portions:
+                key = (
+                    portion.metadata.expression_frbr_uri,
+                    portion.metadata.portion_id,
+                )
+                if key in full_texts:
+                    portion.content.text = full_texts[key]
