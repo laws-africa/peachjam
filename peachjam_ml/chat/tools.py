@@ -1,4 +1,5 @@
 import requests
+from asgiref.sync import sync_to_async
 from django.conf import settings
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
@@ -9,19 +10,22 @@ from peachjam.xmlutils import parse_html_str
 
 
 @tool
-def answer_document_question(config: RunnableConfig, question: str) -> str:
+async def answer_document_question(config: RunnableConfig, question: str) -> str:
     """Answers a question about the content of the current document. It knows which document is active.
     It has no memory of previous questions. Only use it if you need to answer a specific question about the document
     content. The document does not contain information about this website or its features."""
     from .graphs import chat_llm
 
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
-    text = doc.get_content_as_text()
+    @sync_to_async
+    def get_text():
+        doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+        return doc.get_content_as_text()
 
+    text = await get_text()
     if len(text) > 1_250_000:
         return "Document text is too long to process."
 
-    response = chat_llm.invoke(
+    response = await chat_llm.ainvoke(
         [
             SystemMessage(
                 content="You are a question answering tool. Only use the document content for answers; if you cannot"

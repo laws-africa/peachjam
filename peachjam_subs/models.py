@@ -91,12 +91,17 @@ class Product(models.Model):
         default=999999,
         help_text="The is the maximum number of entities a user can follow.",
     )
+    document_chat_limit = models.IntegerField(
+        default=999999,
+        help_text="The is the maximum number of chats per month a user can create.",
+    )
 
     FEATURES_WITH_LIMIT = [
         "saved_document_limit",
         "folder_limit",
         "search_alert_limit",
         "following_limit",
+        "document_chat_limit",
     ]
 
     class Meta:
@@ -515,23 +520,21 @@ class Subscription(models.Model):
                 "upgrade_product": Product or None,
             }
         """
-        # get the configured limit for this feature
-        limit = getattr(self.product_offering.product, feature, None)
-        if limit is None:
-            return {"reached": True, "upgrade_product": None}  # unknown feature = block
-
         # resolve the related manager
-        feature_map = {
+        manager = {
             "saved_document_limit": self.user.saved_documents,
             "folder_limit": self.user.folders,
             "search_alert_limit": self.user.saved_searches,
             "following_limit": self.user.following.exclude(saved_search__isnull=False),
-        }
-        manager = feature_map.get(feature)
-        if manager is None:
-            return True, None
+        }[feature]
 
         count = manager.count()
+        return self.get_feature_limit_status(feature, count)
+
+    def get_feature_limit_status(self, feature, count):
+        # get the configured limit for this feature, if the feature string is bad, fail
+        limit = getattr(self.product_offering.product, feature)
+
         # within limit?
         if count < limit:
             return False, None

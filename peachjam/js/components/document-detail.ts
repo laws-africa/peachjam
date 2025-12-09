@@ -1,6 +1,6 @@
 import peachJam from '../peachjam';
 import { htmxAjax } from '../utils/function';
-import { DocumentChat } from './chat';
+import { DocumentChatFloatingButton } from './chat';
 
 export default class DocumentDetail {
   private documentId: string;
@@ -16,7 +16,7 @@ export default class DocumentDetail {
     });
     if (this.documentId) {
       // eslint-disable-next-line no-new
-      new DocumentChat(this.documentId);
+      new DocumentChatFloatingButton(this.documentId);
     }
   }
 
