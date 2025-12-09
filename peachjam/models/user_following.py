@@ -348,7 +348,7 @@ class UserFollowing(models.Model):
             )
             return
 
-        TimelineEvent.add_new_amendment_events(self, relationship)
+        TimelineEvent.add_new_relationship_events(self, relationship)
 
     @classmethod
     def update_follows_for_user(cls, user):

@@ -178,7 +178,7 @@ class TimelineEvent(models.Model):
         return event
 
     @classmethod
-    def add_new_amendment_events(cls, follow, relationship):
+    def add_new_relationship_events(cls, follow, relationship):
         predicate_name = relationship.predicate.name
 
         predicate_to_event = {
@@ -199,7 +199,7 @@ class TimelineEvent(models.Model):
             event_type=event_type,
             email_alert_sent_at__isnull=True,
         )
-        event.subject_works.add(relationship.subject_work)
+        event.subject_works.add(relationship.object_work)
         return event
 
     @classmethod
@@ -228,27 +228,34 @@ class TimelineEvent(models.Model):
             TimelineEvent.objects.attach_subject_documents(ev) for ev in events_qs
         ]
 
-        grouped = defaultdict(lambda: defaultdict(list))
+        grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
-        # group by date + follow + docs
         for ev in events_qs:
             for doc in ev.subject_documents:
-                grouped[ev.event_date][ev.user_following].append((ev, doc))
+                grouped[ev.event_date][ev.user_following][ev.event_type].append(
+                    (ev, doc)
+                )
 
         results = {}
 
         for date, by_follow in grouped.items():
             entries = []
-            for follow, ev_doc_pairs in by_follow.items():
-                # ev_doc_pairs = list of (ev, doc)
-                # but all events in this follow group have same description_text
-                ev = ev_doc_pairs[0][0]
+            for follow, by_event_type in by_follow.items():
 
-                docs_only = [d for (_ev, d) in ev_doc_pairs]
-                first = docs_only[:10]
-                rest = docs_only[10:]
+                for event_type, ev_doc_pairs in by_event_type.items():
+                    ev = ev_doc_pairs[0][0]  # safe: same event_type
 
-                entries.append((follow, ev.description_text(), (first, rest)))
+                    docs_only = [d for (_ev, d) in ev_doc_pairs]
+                    first = docs_only[:10]
+                    rest = docs_only[10:]
+
+                    entries.append(
+                        (
+                            follow,
+                            ev.description_text(),
+                            (first, rest),
+                        )
+                    )
 
             results[date] = entries
 
