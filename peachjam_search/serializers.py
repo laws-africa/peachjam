@@ -1,4 +1,5 @@
 import dataclasses
+from enum import Enum
 from typing import List, Optional, Type
 
 from django.conf import settings
@@ -328,10 +329,18 @@ class PortionSearchRequestSerializer(serializers.Serializer):
         min_value=1, max_value=100, default=10, help_text="Number of results to return"
     )
     filters = PydanticModelField(PortionSearchFilters, required=False)
+    pre_filters = PydanticModelField(PortionSearchFilters, required=False)
 
 
 class PortionContent(BaseModel):
     text: str
+
+
+class PortionType(str, Enum):
+    PAGE = "page"
+    PROVISION = "provision"
+    TEXT = "text"
+    SUMMARY = "summary"
 
 
 class PortionMetadata(BaseModel):
@@ -343,8 +352,7 @@ class PortionMetadata(BaseModel):
     title: str
     expression_date: str
     expression_frbr_uri: str
-    # TODO: enum
-    portion_type: str
+    portion_type: PortionType
     portion_id: Optional[str]
     repealed: Optional[bool]
     commenced: Optional[bool]

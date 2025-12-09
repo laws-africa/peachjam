@@ -3,6 +3,7 @@ from collections import defaultdict
 from cobalt.uri import FrbrUri
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.query import Bool
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -17,9 +18,13 @@ from peachjam_search.serializers import (
 )
 
 
+class PortionSearchPermission(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.has_perm("peachjam_search.can_search_portions")
+
+
 class PortionSearchView(APIView):
-    # TODO: perms
-    permission_classes = []
+    permission_classes = [PortionSearchPermission]
     engine = None
 
     def post(self, request, *args, **kwargs):
@@ -37,6 +42,9 @@ class PortionSearchView(APIView):
         )
         search = self.engine.add_query(search)
         search = self.engine.add_sort(search)
+        if input_data.get("pre_filters"):
+            # these are filters injected by api.laws.africa to ensure that only relevant documents are searched
+            search = search.query(Bool(filter=input_data["pre_filters"].to_es_query()))
         if input_data.get("filters"):
             search = search.query(Bool(filter=input_data["filters"].to_es_query()))
         search = self.engine.add_retrievers(search)
