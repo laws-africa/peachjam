@@ -332,7 +332,7 @@ class PortionHit(BaseModel):
 
 
 class PortionHitSerializer(serializers.Serializer):
-    """A knowledge base item."""
+    """A document portion matching the query."""
 
     content = PydanticModelField(PortionContent)
     metadata = PydanticModelField(PortionMetadata, help_text="Metadata for the item")
@@ -344,6 +344,6 @@ class PortionHitSerializer(serializers.Serializer):
 
 
 class PortionSearchResponseSerializer(serializers.Serializer):
-    """Items retrieved from a knowledge base."""
+    """Results of a portion search."""
 
     results = PortionHitSerializer(many=True)
