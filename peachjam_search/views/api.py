@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
-from peachjam_search.engine import RetrieverSearch, SearchEngine
+from peachjam_search.engine import PortionSearchEngine
 from peachjam_search.serializers import (
     PortionContent,
     PortionHit,
@@ -32,27 +32,10 @@ class PortionSearchView(APIView):
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
 
-        self.engine = SearchEngine()
-        self.engine.query = input_data["text"]
-        self.engine.mode = "hybrid"
+        self.engine = PortionSearchEngine()
+        es_response = self.engine.execute(input_data)
 
-        search = RetrieverSearch(using=self.engine.client, index=self.engine.index)
-        search = search.source(
-            ["title", "expression_frbr_uri", "repealed", "commenced", "principal"]
-        )
-        search = self.engine.add_query(search)
-        search = self.engine.add_sort(search)
-        if input_data.get("pre_filters"):
-            # these are filters injected by api.laws.africa to ensure that only relevant documents are searched
-            search = search.query(Bool(filter=input_data["pre_filters"].to_es_query()))
-        if input_data.get("filters"):
-            search = search.query(Bool(filter=input_data["filters"].to_es_query()))
-        search = self.engine.add_retrievers(search)
-
-        es_response = search.execute()
         portions = self.build_portions(es_response)
-
-        portions.sort(key=lambda x: x.score)
         portions = portions[: input_data["top_k"]]
 
         return Response(PortionSearchResponseSerializer({"results": portions}).data)
@@ -98,6 +81,8 @@ class PortionSearchView(APIView):
                 portions.append(item)
 
         self.load_full_portion_text(portions, provisions_to_load, pages_to_load)
+
+        portions.sort(key=lambda x: x.score)
 
         return portions
 

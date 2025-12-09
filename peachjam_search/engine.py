@@ -3,7 +3,7 @@ import logging
 from django.conf import settings
 from elasticsearch_dsl import Search, TermsFacet
 from elasticsearch_dsl.connections import connections
-from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, SimpleQueryString
+from elasticsearch_dsl.query import Bool, MatchAll, MatchPhrase, Q, SimpleQueryString
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
@@ -721,6 +721,45 @@ class SearchEngine:
         if "boost" in options:
             return f'{field}^{options["boost"]}'
         return field
+
+
+class PortionSearchEngine(SearchEngine):
+    source = [
+        "title",
+        "expression_frbr_uri",
+        "repealed",
+        "commenced",
+        "principal",
+    ]
+
+    mode = "hybrid"
+
+    def build_search(self, input_data):
+        self.query = input_data["text"]
+
+        search = RetrieverSearch(using=self.client, index=self.index)
+        search = self.add_source(search)
+        search = self.add_query(search)
+        search = self.add_sort(search)
+        search = self.add_filters(search, input_data)
+        search = self.add_retrievers(search)
+
+        return search
+
+    def add_filters(self, search, input_data):
+        pre_filters = input_data.get("pre_filters")
+        if pre_filters:
+            search = search.query(Bool(filter=pre_filters.to_es_query()))
+
+        filters = input_data.get("filters")
+        if filters:
+            search = search.query(Bool(filter=filters.to_es_query()))
+
+        return search
+
+    def execute(self, input_data):
+        search = self.build_search(input_data)
+        return search.execute()
 
 
 class RetrieverSearch(Search):
