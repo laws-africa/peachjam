@@ -1,8 +1,10 @@
 import dataclasses
-from typing import Type
+from typing import List, Optional, Type
 
 from django.conf import settings
 from django.utils.html import escape
+from drf_spectacular.utils import extend_schema_field
+from pydantic import BaseModel, ValidationError
 from rest_framework import serializers
 
 from peachjam.models import CoreDocument
@@ -253,3 +255,121 @@ class SearchClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
+
+
+class PortionSearchFilters(BaseModel):
+    work_frbr_uri: Optional[str] = None
+    work_frbr_uri__in: Optional[List[str]] = None
+    expression_frbr_uri: Optional[str] = None
+    expression_frbr_uri__in: Optional[List[str]] = None
+    frbr_place: Optional[str] = None
+    frbr_place__in: Optional[List[str]] = None
+    frbr_doctype: Optional[str] = None
+    frbr_doctype__in: Optional[List[str]] = None
+    frbr_subtype: Optional[str] = None
+    frbr_subtype__in: Optional[List[str]] = None
+    # TODO: legislation only
+    repealed: Optional[bool] = None
+    commenced: Optional[bool] = None
+    principal: Optional[bool] = None
+
+    def to_es_query(self):
+        must = []
+        for key, value in self.model_dump(exclude_none=True).items():
+            field, *lookup = key.split("__")
+            lookup = lookup[0] if lookup else "exact"
+
+            if field.startswith("frbr_"):
+                # ES fields are named with frbr_uri_...
+                field = "frbr_uri_" + field[5:]
+
+            if lookup == "exact":
+                must.append({"term": {field: value}})
+            elif lookup == "in":
+                must.append({"terms": {field: value}})
+            else:
+                raise ValueError(f"Unsupported lookup: {lookup}")
+        return must
+
+
+@extend_schema_field(PortionSearchFilters.model_json_schema())
+class PydanticModelField(serializers.Field):
+    """Generic DRF field that wraps a Pydantic model. It validates incoming dicts using the model and returns the
+    model instance.
+    """
+
+    def __init__(self, model_cls, **kwargs):
+        assert model_cls is not None, "Pydantic model class is required"
+        self.model_cls = model_cls
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data):
+        if data in (None, ""):
+            return None
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Expected a JSON object for this field.")
+        try:
+            return self.model_cls.model_validate(data)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.errors())
+
+    def to_representation(self, value):
+        if value is None:
+            return None
+        if isinstance(value, self.model_cls):
+            return value.model_dump(exclude_none=True)
+        # handle already-dict case
+        return dict(value)
+
+
+class PortionSearchRequestSerializer(serializers.Serializer):
+    text = serializers.CharField(help_text="The text to find matching items for")
+    top_k = serializers.IntegerField(
+        min_value=1, max_value=100, default=10, help_text="Number of results to return"
+    )
+    filters = PydanticModelField(PortionSearchFilters, required=False)
+
+
+class PortionContent(BaseModel):
+    text: str
+
+
+class PortionMetadata(BaseModel):
+    work_frbr_uri: str
+    frbr_place: str
+    frbr_country: str
+    frbr_doctype: str
+    frbr_subtype: Optional[str]
+    title: str
+    expression_date: str
+    expression_frbr_uri: str
+    # TODO: enum
+    portion_type: str
+    portion_id: Optional[str]
+    repealed: Optional[bool]
+    commenced: Optional[bool]
+    principal: Optional[bool]
+
+
+class PortionHit(BaseModel):
+    content: PortionContent
+    metadata: PortionMetadata
+    score: float
+
+
+class PortionHitSerializer(serializers.Serializer):
+    """A knowledge base item."""
+
+    content = PydanticModelField(PortionContent)
+    metadata = PydanticModelField(PortionMetadata, help_text="Metadata for the item")
+    score = serializers.FloatField(
+        min_value=0,
+        max_value=1.0,
+        help_text="The similarity score of the item (lower is better)",
+    )
+
+
+class PortionSearchResponseSerializer(serializers.Serializer):
+    """Items retrieved from a knowledge base."""
+
+    results = PortionHitSerializer(many=True)
