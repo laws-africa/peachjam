@@ -724,6 +724,10 @@ class SearchEngine:
 
 
 class PortionSearchEngine(SearchEngine):
+    """A SearchEngine designed for hybrid search returning portions of documents, rather than documents. Useful
+    for RAG.
+    """
+
     source = [
         "title",
         "expression_frbr_uri",
