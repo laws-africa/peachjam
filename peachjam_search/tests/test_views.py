@@ -8,6 +8,7 @@ from elasticsearch_dsl.response import Response
 
 class SearchViewsTest(TestCase):
     fixtures = ["tests/countries", "tests/users"]
+    max_diff = None
 
     def setUp(self):
         self.user = User.objects.get(username="admin@example.com")
