@@ -467,30 +467,6 @@
                         </ul>
                       {% endif %}
                     {% endblock %}
-                    {% block ask-ai %}
-                      {% if PEACHJAM_JS_CONFIG.chat.enabled %}
-                        <div class="d-flex d-none mt-3 bg-brand-pale rounded p-2"
-                             data-component="DocumentChatBanner">
-                          <div>
-                            <div class="p-2 h3 m-0">
-                              <i class="bi-pj pj-ai"></i>
-                            </div>
-                          </div>
-                          <div class="flex-grow-1">
-                            <h5 class="mb-1">
-                              {% blocktrans trimmed with name=PEACHJAM_JS_CONFIG.chat.assistantName %}Ask {{ name }}{% endblocktrans %}
-                            </h5>
-                            {% trans "Ask questions and understand this document faster using AI." %}
-                          </div>
-                          <div class="ms-auto align-self-center">
-                            <button class="btn btn-primary" data-component="DocumentChatOpenButton">
-                              <i class="bi-pj pj-ai"></i>
-                              {% blocktrans trimmed with name=PEACHJAM_JS_CONFIG.chat.assistantName %}Ask {{ name }}{% endblocktrans %}
-                            </button>
-                          </div>
-                        </div>
-                      {% endif %}
-                    {% endblock %}
                   </div>
                 {% endif %}
               </div>
