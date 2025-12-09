@@ -91,8 +91,9 @@
   {% endwith %}
 {% endblock %}
 {% block extra-metadata %}
-  <dl class="document-metadata-list d-md-flex">
-    {% if document.case_summary %}
+  {{ block.super }}
+  {% if document.case_summary %}
+    <dl class="document-metadata-list d-md-flex">
       <dt>
         {% trans 'Summary' %}
       </dt>
@@ -101,8 +102,8 @@
              hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1">
         </div>
       </dd>
-    {% endif %}
-  </dl>
+    </dl>
+  {% endif %}
 {% endblock %}
 {% block document-tabs %}
   {{ block.super }}
