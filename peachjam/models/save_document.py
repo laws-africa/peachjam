@@ -105,6 +105,9 @@ class SavedDocument(models.Model):
     def __str__(self):
         return self.work.title
 
+    def get_absolute_url(self):
+        return self.work.get_absolute_url()
+
     @property
     def document(self):
         # use manually set doc if available
