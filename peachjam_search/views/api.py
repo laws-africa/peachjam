@@ -34,7 +34,9 @@ class PortionSearchView(APIView):
 
         self.engine = PortionSearchEngine()
         self.engine.query = input_data["text"]
-        self.engine.knn_k = input_data["top_k"]
+        self.engine.knn_k = (
+            input_data["top_k"] * 10
+        )  # retrieve more to allow for combining chunks
 
         self.engine.filters = []
         if input_data.get("pre_filters", None):
@@ -51,6 +53,8 @@ class PortionSearchView(APIView):
 
     def build_portions(self, es_response, request):
         portions = []
+        # (expression_frbr_uri, portion_id) tuples we've seen, for deduplication
+        seen = set()
         # a list of portion ids to load full text for
         provisions_to_load = defaultdict(list)
         pages_to_load = defaultdict(list)
@@ -69,6 +73,9 @@ class PortionSearchView(APIView):
                         pages_to_load[frbr_uri].append(chunk._source.portion)
 
                 portion_id = getattr(chunk._source, "portion", None)
+                if (expression_frbr_uri, portion_id) in seen:
+                    continue
+                seen.add((expression_frbr_uri, portion_id))
 
                 item = PortionHit(
                     content=PortionContent(text=self.clean_text(chunk._source.text)),
