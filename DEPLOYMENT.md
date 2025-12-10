@@ -1,4 +1,3 @@
-
 # Deployment
 Peachjam can be deployed to a server that has [Dokku](https://dokku.com/) installed. This allows for easy config based deployments using Docker containers.
 The following steps outline the procedure to deploy a new Peachjam based application.
@@ -150,10 +149,20 @@ A `SENTRY_DSN_KEY` environment variable is required for Sentry to start monitori
 
 ### Enable Background Tasks
 
-- Peachjam runs various background tasks as separate processes. They can be specified within the Procfile.
-- On the dokku server, scale up the processes to run these tasks:
+Peachjam runs various background tasks as separate processes as the `task` runner specified in the `Procfile`.
 
-      dokku ps:scale <app_name> tasks=1
+On the dokku server, scale up the processes to run these tasks:
+
+    dokku ps:scale <app_name> tasks=1
+
+If tasks are run on a separate dokku host, create a minimal dokku app on that host with the same configuration:
+
+    dokku apps:create <app_name>
+    dokku proxy:disable <app_name>
+
+Deploy to the host via git push as before, then scale the tasks process:
+
+    dokku ps:scale <app_name> web=0 tasks=1
 
 ### Setup common taxonomies
 
@@ -175,7 +184,7 @@ Large sites will benefit from Cloudflare, for both caching and for mitigating at
 This puts the site behind Cloudflare.
 
 - Add the domain to Cloudflare but DO NOT enable DNS proxying, configure DNS only.
-- Under SSL/TLS, configure **Full (Strict)** mode.
+- Under SSL/TLS, configure **Full** mode.
 - Go to DNS and configure **proxied** for the site's A record (NOT the www record).
 
 ## Caching
@@ -223,7 +232,7 @@ It's NOT recommended to block:
 
 - Search Engine Crawler
 
-### Preventing bots for a simple path prefix
+### Preventing bots using a simple path prefix
 
 Go to Security, Security rules:
 
@@ -236,9 +245,10 @@ Go to Security, Security rules:
 - Action: mananged challenge
 - Click Deploy
 
-### Preventing bots for a wildcard path
+### Preventing bots using a wildcard path
 
-This is important for sites with multiple languages, for example
+This is important for sites with multiple languages, for example, where the path prefix can change based on the user's
+preferred site language.
 
 Go to Security, Security rules:
 
@@ -247,6 +257,6 @@ Go to Security, Security rules:
 - When incoming requests match…
     - Field: URI path
     - Operator: wildcard
-    - Value: `*/akn/*/judgment/` (for example)
+    - Value: `/*/akn/*/judgment/` (for example)
 - Action: mananged challenge
-- Save
+- Click Deploy

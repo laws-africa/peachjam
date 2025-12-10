@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.urls.base import reverse
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
@@ -12,8 +13,8 @@ class TaxonomyTestCase(WebTest):
     fixtures = ["tests/users", "tests/countries", "tests/courts", "tests/languages"]
 
     def setUp(self):
-        root = Taxonomy.add_root(name="Collections")
-        first_child = root.add_child(name="Land Rights")
+        self.root = Taxonomy.add_root(name="Collections")
+        first_child = self.root.add_child(name="Land Rights")
         second_child = first_child.add_child(name="Environment")
         second_child.add_child(name="Climate Change")
 
@@ -22,6 +23,15 @@ class TaxonomyTestCase(WebTest):
 
         officer_group = Group.objects.get(name="Officers")
         assign_perm("view_taxonomy", officer_group, second_child)
+
+    def test_taxonomy_listing(self):
+        response = self.app.get(reverse("top_level_taxonomy_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("public", response.headers.get("Cache-Control", ""))
+
+        response = self.app.get(self.root.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("public", response.headers.get("Cache-Control", ""))
 
     def test_restricted_taxonomy_unauthorized(self):
         unauthorized_user = User.objects.get(username="user@example.com")

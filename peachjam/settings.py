@@ -110,6 +110,7 @@ MIDDLEWARE = [
     "django_htmx.middleware.HtmxMiddleware",
     "django.contrib.sites.middleware.CurrentSiteMiddleware",
     "peachjam.middleware.SetPreferredLanguageMiddleware",
+    "peachjam.middleware.UserIDHeaderMiddleware",
 ]
 
 ROOT_URLCONF = "peachjam.urls"
@@ -139,12 +140,12 @@ PEACHJAM = {
     "LAWSAFRICA_API_KEY": os.environ.get(
         "LAWSAFRICA_API_KEY", os.environ.get("CITATOR_API_KEY")
     ),
-    "CITATOR_API": os.environ.get(
-        "CITATOR_API", "https://services.lawsafrica.com/citator/v1/extract-citations"
-    ),
+    "CITATOR_API": os.environ.get("CITATOR_API", "https://api.laws.africa/citator/v1/"),
     "EXTRACTOR_API": os.environ.get(
-        "EXTRACTOR_API", "https://services.lawsafrica.com/extractor/v1/"
+        "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
+    # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
+    "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
     "SEARCH_SUGGESTIONS": os.environ.get("SEARCH_SUGGESTIONS", "false") == "true",
@@ -166,6 +167,8 @@ PEACHJAM = {
     # Chat settings
     "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
     "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
+    # Email alerts
+    "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -242,9 +245,12 @@ if DEBUG:
 default_db_url = "postgres://peachjam:peachjam@localhost:5432/peachjam"
 gazette_db_url = "postgres://indigo:indigo@localhost:5432/indigo"
 default_db_config = dj_database_url.config(default=default_db_url)
+# pgbouncer transaction pooling requires DISABLE_SERVER_SIDE_CURSORS
+default_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
 gazette_db_config = dj_database_url.config(
     default=gazette_db_url, env="GAZETTES_DATABASE_URL"
 )
+gazette_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
 
 DATABASES = {
     "default": default_db_config,
@@ -588,24 +594,29 @@ CKEDITOR_CONFIGS = {
             [
                 "Styles",
                 "Format",
+            ],
+            ["Undo", "Redo"],
+            [
                 "Bold",
                 "Italic",
                 "Underline",
                 "Strike",
-                "Blockquote",
-                "Superscript",
-                "Subscript",
-                "SpellChecker",
-                "Undo",
-                "Redo",
+            ],
+            [
                 "JustifyLeft",
                 "JustifyCenter",
                 "JustifyRight",
                 "JustifyBlock",
             ],
+            ["BulletedList", "NumberedList"],
+            [
+                "Blockquote",
+                "Superscript",
+                "Subscript",
+                "SpellChecker",
+            ],
             ["Link", "Unlink", "Anchor"],
             ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
-            ["TextColor", "BGColor"],
             ["Smiley", "SpecialChar", "LaAkn"],
             ["Source"],
         ],
@@ -638,7 +649,9 @@ CKEDITOR_CONFIGS = {
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
-SESSION_COOKIE_SECURE = True
+# this makes it easier to log in when debugging on something other than localhost, such as when testing on mobile
+# on your local network
+SESSION_COOKIE_SECURE = not DEBUG
 # nginx sets this header to indicate if the upstream request was secure
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 

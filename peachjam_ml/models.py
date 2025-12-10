@@ -8,6 +8,7 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Avg, F, Q
 from django.forms import model_to_dict
+from django.utils import timezone
 from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
 from peachjam.models import CoreDocument, Judgment, Work
@@ -487,7 +488,9 @@ class ContentChunk(models.Model):
 
 class ChatThread(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_threads"
+    )
     document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -496,3 +499,33 @@ class ChatThread(models.Model):
 
     class Meta:
         ordering = ["-updated_at"]
+
+    async def asave_message_history(self, graph, config):
+        # we just want the messages from the first snapshot
+        async for snapshot in graph.aget_state_history(config):
+            self.messages_json = [
+                message.to_json() for message in snapshot.values.get("messages", [])
+            ]
+            await self.asave()
+            break
+
+    @classmethod
+    def count_active_for_user(cls, user):
+        """How many active chat threads does the user have? Used to enforce monthly limits."""
+        now = timezone.now()
+        month_start = now.replace(
+            day=1,
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
+        return (
+            cls.objects.filter(
+                user=user,
+                updated_at__gte=month_start,
+            )
+            .values("document_id")
+            .distinct()
+            .count()
+        )

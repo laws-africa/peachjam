@@ -1,12 +1,15 @@
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import Http404, get_object_or_404
 from django.utils.cache import add_never_cache_headers
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, TemplateView
 
 from peachjam.models import Taxonomy
 from peachjam.views.generic_views import FilteredDocumentListView
 
 
+@method_decorator(never_cache, name="dispatch")
 class TaxonomyListView(TemplateView):
     template_name = "peachjam/taxonomy_list.html"
     navbar_link = "taxonomy"
@@ -18,6 +21,7 @@ class TaxonomyListView(TemplateView):
         return self.render_to_response(context)
 
 
+@method_decorator(never_cache, name="dispatch")
 class AllowedTaxonomyMixin:
     def dispatch(self, request, *args, **kwargs):
         self.taxonomy = self.get_taxonomy()

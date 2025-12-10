@@ -49,14 +49,14 @@
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_jurisdiction %}
-    {% if MULTIPLE_JURISDICTIONS %}
-      <td>
+    <td>
+      {% if MULTIPLE_JURISDICTIONS or document.jurisdiction != PEACHJAM_SETTINGS.default_document_jurisdiction %}
         {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
         {% if document.locality %}· {{ document.locality }}{% endif %}
-      </td>
-    {% elif MULTIPLE_LOCALITIES %}
-      <td>{{ document.locality|default_if_none:'' }}</td>
-    {% endif %}
+      {% elif MULTIPLE_LOCALITIES %}
+        {{ document.locality|default_if_none:'' }}
+      {% endif %}
+    </td>
   {% endif %}
   {% if doc_table_show_author %}<td>{{ document.author.first|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}

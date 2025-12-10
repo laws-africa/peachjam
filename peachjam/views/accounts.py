@@ -11,6 +11,7 @@ from django.views.generic.base import TemplateView
 
 from peachjam.forms import TermsAcceptanceForm, UserProfileForm
 from peachjam.models import DocumentAccessGroup, UserProfile
+from peachjam.views.mixins import AtomicPostMixin
 
 User = get_user_model()
 
@@ -26,7 +27,7 @@ class AccountView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class EditAccountView(LoginRequiredMixin, FormView):
+class EditAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
     template_name = "user_account/edit.html"
     form_class = UserProfileForm
 
@@ -63,7 +64,7 @@ class LoggedOutView(TemplateView):
     extra_context = {"reset_analytics": True}
 
 
-class AcceptTermsView(LoginRequiredMixin, FormView):
+class AcceptTermsView(AtomicPostMixin, LoginRequiredMixin, FormView):
     template_name = "user_account/accept_terms.html"
     form_class = TermsAcceptanceForm
 

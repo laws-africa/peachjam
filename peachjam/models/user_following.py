@@ -196,6 +196,11 @@ class UserFollowing(models.Model):
     def is_saved_search(self):
         return self.followed_field == "saved_search"
 
+    @property
+    def cutoff_date(self):
+        cutoff_days = 365
+        return (timezone.now() - timezone.timedelta(days=cutoff_days)).date()
+
     # --- validation only ---
 
     def can_add_more_follows(self):
@@ -274,6 +279,9 @@ class UserFollowing(models.Model):
         if self.last_alerted_at:
             qs = qs.filter(created_at__gt=self.last_alerted_at)
 
+        # avoid alerts for documents older than cutoff
+        qs = qs.filter(date__gt=self.cutoff_date)
+
         docs = list(qs[:10])
         if not docs:
             return False
@@ -285,10 +293,14 @@ class UserFollowing(models.Model):
 
     def _update_search(self):
         hits = self.documents_for_followed_search()
-        cutoff = self.last_alerted_at
 
-        if cutoff:
-            hits = [h for h in hits if h.document.created_at > cutoff][:10]
+        # avoid alerts for documents older than cutoff
+        hits = [h for h in hits if h.document.date > self.cutoff_date]
+
+        if self.last_alerted_at:
+            hits = [h for h in hits if h.document.created_at > self.last_alerted_at][
+                :10
+            ]
 
         if not hits:
             return False
@@ -303,6 +315,19 @@ class UserFollowing(models.Model):
 
         # check that we are passing a citation to the saved document
         assert citation.target_work == self.saved_document.work
+
+        # avoid alerts for citations from documents older than cutoff
+        if (
+            citation.citing_work.documents.latest_expression().first().date
+            < self.cutoff_date
+        ):
+            log.info(
+                "Citation from work %s is older than cutoff date %s for user %s",
+                citation.citing_work,
+                self.cutoff_date,
+                self.user,
+            )
+            return
 
         # check if the user has ever been alerted about this citation
         already_alerted = TimelineEvent.objects.filter(

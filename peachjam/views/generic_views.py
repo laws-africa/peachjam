@@ -3,12 +3,12 @@ import json
 
 from django.core.cache import cache
 from django.core.paginator import Paginator
-from django.db.models import Count
 from django.dispatch import Signal
 from django.http import Http404
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
 from django.shortcuts import get_object_or_404
+from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
@@ -23,19 +23,17 @@ from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
-    CitationLink,
     CoreDocument,
     DocumentNature,
-    ExtractedCitation,
     ProvisionCitationCount,
     Relationship,
+    SourceFile,
     Taxonomy,
     UncommencedProvision,
     UnconstitutionalProvision,
     pj_settings,
 )
 from peachjam_api.serializers import (
-    CitationLinkSerializer,
     RelationshipSerializer,
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
@@ -398,13 +396,7 @@ class BaseDocumentDetailView(DetailView):
             document_diffs_url=self.document_diffs_url, **kwargs
         )
 
-        # citation links for a document
         doc = self.object
-        citation_links = CitationLink.objects.filter(document=doc)
-        context["citation_links"] = CitationLinkSerializer(
-            citation_links, many=True
-        ).data
-
         # get all versions that match current document work_frbr_uri
         all_versions = CoreDocument.objects.filter(
             work_frbr_uri=self.object.work_frbr_uri
@@ -439,13 +431,6 @@ class BaseDocumentDetailView(DetailView):
         )
         context["labels"] = doc.labels.all()
 
-        # citations
-        context["cited_documents"] = self.fetch_citation_docs(
-            doc.work.cited_works(), "cited_works"
-        )
-        context["documents_citing_current_doc"] = self.fetch_citation_docs(
-            doc.work.works_citing_current_work(), "citing_works"
-        )
         context["show_save_doc_button"] = self.show_save_doc_button()
 
         provision_citations = ProvisionCitationCount.objects.filter(
@@ -459,62 +444,14 @@ class BaseDocumentDetailView(DetailView):
             for item in provision_citations
         ]
 
+        context["download_options"] = self.get_download_options()
+
         # provide extra context for analytics
         self.get_subscription_permissions_context(context)
         self.add_track_page_properties(context)
         self.check_annotation_permission(context)
         self.modify_context.send(sender=self.__class__, context=context, view=self)
         return context
-
-    def fetch_citation_docs(self, works, direction):
-        """Fetch documents for the given works, grouped by nature and ordered by the most incoming citations."""
-        # count the number of unique works, grouping by nature
-        counts = {
-            r["nature"]: r["n"]
-            for r in CoreDocument.objects.filter(work__in=works)
-            .values("nature")
-            .annotate(n=Count("work_frbr_uri", distinct=True))
-        }
-
-        # get the top 10 documents for each nature, ordering by the number of incoming citations
-        docs, truncated = ExtractedCitation.fetch_grouped_citation_docs(
-            works, get_language(self.request)
-        )
-
-        table_direction = None
-        if direction == "cited_works":
-            table_direction = "outgoing"
-            citations = ExtractedCitation.objects.filter(
-                citing_work=self.object.work, target_work__documents__in=docs
-            ).prefetch_related("treatments")
-            treatments = {c.target_work_id: c.treatments for c in citations}
-
-        elif direction == "citing_works":
-            table_direction = "incoming"
-            citations = ExtractedCitation.objects.filter(
-                citing_work__documents__in=docs, target_work=self.object.work
-            ).prefetch_related("treatments")
-            treatments = {c.citing_work_id: c.treatments for c in citations}
-
-        for d in docs:
-            treatment = treatments.get(d.work.pk, [])
-            setattr(d, "treatments", treatment)
-
-        result = [
-            {
-                "nature": nature,
-                "n_docs": counts.get(nature.pk, 0),
-                "docs": list(group),
-                "table_id": f"citations-table-{table_direction}-{nature.pk}",
-            }
-            # the docs are already sorted by nature
-            for nature, group in itertools.groupby(docs, lambda d: d.nature)
-        ]
-
-        # sort by size of group, descending
-        result.sort(key=lambda g: -g["n_docs"])
-
-        return result
 
     def add_relationships(self, context):
         # sort and group by predicate
@@ -648,6 +585,45 @@ class BaseDocumentDetailView(DetailView):
             context[
                 "annotation_subscription_product"
             ] = Product.get_lowest_product_for_permission("peachjam.add_annotation")
+
+    def get_download_options(self):
+        """Get the various formats that should be shown in the download menu. The first one will be the default."""
+        options = []
+
+        try:
+            source_file = self.object.source_file
+        except SourceFile.DoesNotExist:
+            return options
+
+        # use this source file unless it is a Judgment and it is not anonymised
+        can_use_source_file = (
+            not getattr(self.object, "must_be_anonymised", False)
+            or source_file.file_is_anonymised
+        )
+        if can_use_source_file:
+            options.append(
+                {
+                    "label": source_file.filename_extension().upper(),
+                    "url": reverse(
+                        "document_source", args=[self.object.expression_frbr_uri[1:]]
+                    ),
+                    "size": source_file.size,
+                }
+            )
+
+        # always offer a PDF version if the source file is not a PDF
+        if not options or source_file.filename_extension() != "pdf":
+            options.append(
+                {
+                    "label": "PDF",
+                    "url": reverse(
+                        "document_source_pdf",
+                        args=[self.object.expression_frbr_uri[1:]],
+                    ),
+                }
+            )
+
+        return options
 
 
 class CSRFTokenView(View):

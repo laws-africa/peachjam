@@ -1,26 +1,31 @@
+import requests
+from asgiref.sync import sync_to_async
+from django.conf import settings
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 
-from peachjam.analysis.citations import CitatorMatcher
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
 
 
 @tool
-def answer_document_question(config: RunnableConfig, question: str) -> str:
-    """Answers a question about the content of the document. It has no memory of previous questions. Only use it
-    if you need to answer a specific question about the document content. The document does not contain information
-    about this website or its features."""
+async def answer_document_question(config: RunnableConfig, question: str) -> str:
+    """Answers a question about the content of the current document. It knows which document is active.
+    It has no memory of previous questions. Only use it if you need to answer a specific question about the document
+    content. The document does not contain information about this website or its features."""
     from .graphs import chat_llm
 
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
-    text = doc.get_content_as_text()
+    @sync_to_async
+    def get_text():
+        doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+        return doc.get_content_as_text()
 
+    text = await get_text()
     if len(text) > 1_250_000:
         return "Document text is too long to process."
 
-    response = chat_llm.invoke(
+    response = await chat_llm.ainvoke(
         [
             SystemMessage(
                 content="You are a question answering tool. Only use the document content for answers; if you cannot"
@@ -45,25 +50,32 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
     - paragraph 4
     """
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    resp = get_citator_citations(doc.expression_frbr_uri, provision)
 
-    # TODO: this should be way easier :(
-    resp = CitatorMatcher().call_citator(
-        {
-            "frbr_uri": doc.expression_frbr_uri,
-            "format": "html",
-            "body": f'<p>{provision} of <a href="{doc.expression_frbr_uri}" id="fake">xx</a></p>',
-        }
-    )
-
-    root = parse_html_str(resp["body"])
-    # grab the first a element without an id
-    for a in root.xpath("//a[not(@id)]"):
-        href = a.get("href", "")
-        if "~" in href:
-            eid = href.split("~")[-1]
+    # grab the first ref
+    for ref in resp["citations"]:
+        if ref["href"] and "~" in ref["href"]:
+            eid = ref["href"].split("~")[-1]
             return f"The EID of provision '{provision}' is: {eid}"
 
     return f"Provision '{provision}' could not be identified."
+
+
+def get_citator_citations(expression_frbr_uri, text):
+    citator_url = settings.PEACHJAM["CITATOR_API"]
+    citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
+    resp = requests.post(
+        citator_url + "get-citations",
+        json={
+            "frbr_uri": expression_frbr_uri,
+            "format": "text",
+            "body": text,
+        },
+        headers={"Authorization": f"token {citator_key}"},
+        timeout=60 * 10,
+    )
+    resp.raise_for_status()
+    return resp.json()
 
 
 @tool
@@ -84,7 +96,6 @@ def get_provision_text(config: RunnableConfig, eid: str) -> str:
 def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
     """Provides information about the commencement status of a provision given its EID."""
     doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
-    # TODO: don't allow this tool for non-legislation documents
     if not isinstance(doc, Legislation):
         return "This tool can only be used for legislation documents."
 
@@ -101,3 +112,28 @@ def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
             return f"The provision commenced on {event['date']} by '{event['commencing_title']}'."
 
     return "That provision has not commenced."
+
+
+def get_tools_for_document(document):
+    tools = [
+        answer_document_question,
+    ]
+
+    if isinstance(document, Legislation):
+        tools.extend(
+            [
+                get_provision_eid,
+                provision_commencement_info,
+                get_provision_text,
+            ]
+        )
+
+    return tools
+
+
+ALL_TOOLS = [
+    answer_document_question,
+    get_provision_eid,
+    get_provision_text,
+    provision_commencement_info,
+]

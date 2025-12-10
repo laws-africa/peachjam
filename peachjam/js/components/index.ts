@@ -7,6 +7,7 @@ import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
 import FloatingHeader from './floating-header';
+import GlossaryFilter from './glossary';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
@@ -15,8 +16,9 @@ import TermsOfUse from './terms-of-use';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
 import { SavedDocumentModal } from './saved-documents';
-import { OfflineDetails, OfflineTaxonomyStatus } from './Offline';
+import { DocumentChatBanner, DocumentChatOpenButton } from './chat';
 
+import { OfflineDetails, OfflineTaxonomyStatus } from './Offline';
 import DocumentProblemModal from './DocumentProblemModal.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
@@ -26,11 +28,14 @@ import AnonApp from './Anon/AnonApp.vue';
 const components: Record<string, any> = {
   // Data components
   CopyToClipboard,
+  DocumentChatBanner,
+  DocumentChatOpenButton,
   DocumentContent,
   DocumentDetail,
   DocumentFilterForm,
   DocumentTable,
   FloatingHeader,
+  GlossaryFilter,
   DocumentUploader,
   NavigationSelect,
   RelationshipEnrichments,

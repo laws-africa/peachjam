@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView
 
 from peachjam.models import UserFollowing
+from peachjam.views import AtomicPostMixin
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import Subscription
 
@@ -95,7 +96,7 @@ class UserFollowingListView(BaseUserFollowingView, ListView):
 
 
 class UserFollowingCreateView(
-    BaseUserFollowingView, SubscriptionRequiredMixin, CreateView
+    AtomicPostMixin, BaseUserFollowingView, SubscriptionRequiredMixin, CreateView
 ):
     form_class = UserFollowingForm
     template_name = "peachjam/user_following/_create.html"
@@ -129,7 +130,7 @@ class UserFollowingCreateView(
 
 
 class UserFollowingDeleteView(
-    BaseUserFollowingView, SubscriptionRequiredMixin, DeleteView
+    AtomicPostMixin, BaseUserFollowingView, SubscriptionRequiredMixin, DeleteView
 ):
     template_name = "peachjam/user_following/_delete.html"
     permission_required = "peachjam.delete_userfollowing"

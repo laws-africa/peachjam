@@ -3,6 +3,7 @@ from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from peachjam.forms import AnnotationForm
 from peachjam.models import Annotation
+from peachjam.views import AtomicPostMixin
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -30,7 +31,7 @@ class AnnotationDetailView(BaseAnnotationView, DetailView):
     template_name = "peachjam/_annotation_detail.html"
 
 
-class AnnotationEditView(BaseAnnotationView, UpdateView):
+class AnnotationEditView(AtomicPostMixin, BaseAnnotationView, UpdateView):
     permission_required = "peachjam.change_annotation"
     template_name = "peachjam/_annotation_edit.html"
     form_class = AnnotationForm
@@ -41,7 +42,7 @@ class AnnotationEditView(BaseAnnotationView, UpdateView):
         )
 
 
-class AnnotationDeleteView(BaseAnnotationView, DeleteView):
+class AnnotationDeleteView(AtomicPostMixin, BaseAnnotationView, DeleteView):
     permission_required = "peachjam.delete_annotation"
     template_name = "peachjam/_annotation_detail.html"
 

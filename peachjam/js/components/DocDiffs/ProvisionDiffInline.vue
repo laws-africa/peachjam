@@ -80,7 +80,7 @@
             />
           </template>
           <template v-else>
-            {{ $t('Loading changes...') }}
+            {{ $t('Loading changes') }}
           </template>
         </div>
       </div>

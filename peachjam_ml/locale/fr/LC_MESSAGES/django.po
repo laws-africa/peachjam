@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:44+0200\n"
-"PO-Revision-Date: 2025-10-07 08:34\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -17,21 +17,29 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_ml/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 265\n"
 
-#: admin.py:14
+#: admin.py:18
 msgid "Updating document chunks and embeddings in the background."
 msgstr "Mise à jour des fragments de documents et des incorporations en arrière-plan."
 
-#: admin.py:19
+#: admin.py:23
 msgid "Update document chunks and embeddings (background)"
 msgstr "Mettre à jour les fragments et les incorporations de documents (arrière-plan)"
 
-#: admin.py:34
+#: admin.py:38
 msgid "Re-calculated document embeddings."
 msgstr "Incorporations de documents recalculées."
 
-#: admin.py:38
+#: admin.py:42
 msgid "Re-calculate average document embeddings"
 msgstr "Recalculer les intégrations moyennes de documents"
+
+#: admin.py:84 admin.py:122
+msgid "Document"
+msgstr "Document"
+
+#: admin.py:92
+msgid "Messages JSON"
+msgstr "Messages JSON"
 
 #: templates/peachjam/_related_documents.html:6
 msgid "More documents like this one"

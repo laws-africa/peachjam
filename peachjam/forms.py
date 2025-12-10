@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
@@ -563,6 +563,7 @@ class ContactUsForm(forms.Form):
 class SaveDocumentForm(forms.ModelForm):
     new_folder = forms.CharField(max_length=100, required=False)
     folders = forms.ModelMultipleChoiceField(
+        label=_("Folders"),
         queryset=Folder.objects.none(),
         required=False,
         widget=forms.CheckboxSelectMultiple,

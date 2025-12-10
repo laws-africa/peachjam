@@ -1,6 +1,11 @@
 <template>
   <la-gutter-item :anchor.prop="anchorElement">
-    <div class="card">
+    <i
+      class="`bi bi-link mobile-gutter-item-icon"
+      role="button"
+      @click="activate"
+    />
+    <div class="card gutter-item-card">
       <div class="card-body">
         <p>
           <button class="btn btn-sm btn-outline-secondary float-end ms-1" @click="edit">
@@ -36,6 +41,9 @@ export default {
   methods: {
     edit () {
       this.provider.editLink(this.link);
+    },
+    activate () {
+      this.$el.active = true;
     }
   }
 };

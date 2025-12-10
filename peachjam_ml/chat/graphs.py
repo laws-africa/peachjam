@@ -56,9 +56,10 @@ The following must be configured as ENV variables:
 """
 
 import os
-from contextlib import contextmanager
-from typing import Iterator, Tuple, TypedDict
+from contextlib import asynccontextmanager, contextmanager
+from typing import AsyncIterator, Iterator, Tuple, TypedDict
 
+from cobalt.uri import FrbrUri
 from django.conf import settings
 from django.contrib.auth.models import User
 from langchain.chat_models import init_chat_model
@@ -67,17 +68,19 @@ from langchain_core.runnables import RunnableConfig
 from langfuse import Langfuse
 from langfuse.langchain import CallbackHandler
 from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.types import StateSnapshot
+from psycopg import AsyncConnection, Connection
+from psycopg.rows import dict_row
 
 from peachjam.models import CoreDocument, Judgment, Legislation
 from peachjam_ml.chat.tools import (
-    answer_document_question,
-    get_provision_eid,
-    get_provision_text,
-    provision_commencement_info,
+    ALL_TOOLS,
+    get_citator_citations,
+    get_tools_for_document,
 )
 
 INITIAL_PROMPT_NAME = "chat/document/initial"
@@ -105,22 +108,20 @@ langfuse_callback = CallbackHandler()
 chat_llm = init_chat_model(
     "openai:gpt-5-mini", temperature=0, api_key=os.environ.get("OPENAI_API_KEY") or "-"
 )
-tools = [
-    answer_document_question,
-    get_provision_eid,
-    provision_commencement_info,
-    get_provision_text,
-]
-llm_with_tools = chat_llm.bind_tools(tools)
 
 
-def chatbot(state: DocumentChatState):
+# TODO: once upgrade to python 3.11, config can be dropped
+# TODO: see https://docs.langchain.com/oss/python/langgraph/streaming#async-with-python-%3C-3-11
+async def chatbot(state: DocumentChatState, config: RunnableConfig):
+    document = await CoreDocument.objects.aget(pk=state["document_id"])
+    llm_with_tools = chat_llm.bind_tools(get_tools_for_document(document))
+
     state["messages"].append(
         HumanMessage(
             content=state["user_message"]["content"], id=state["user_message"]["id"]
         )
     )
-    return {"messages": [llm_with_tools.invoke(state["messages"])]}
+    return {"messages": [await llm_with_tools.ainvoke(state["messages"], config)]}
 
 
 def initial_prompt(state: DocumentChatState):
@@ -210,6 +211,37 @@ def doc_metadata(state: DocumentChatState):
     return {"messages": [SystemMessage(content=msg)]}
 
 
+def markup_refs(state: DocumentChatState):
+    """Markup refs in the last AI response message."""
+    message = state["messages"][-1]
+    if message.type == "ai" and len(message.content.strip()) > 5:
+        doc = CoreDocument.objects.get(pk=state["document_id"])
+        resp = get_citator_citations(doc.expression_frbr_uri, message.content)
+        # get citations, last one first
+        citations = sorted(resp["citations"], key=lambda c: c["end"], reverse=True)
+        for citation in citations:
+            href = citation["href"]
+            try:
+                uri = FrbrUri.parse(href)
+                # is it a local reference?
+                if uri.portion and uri.work_uri(False) == doc.work_frbr_uri:
+                    href = f"#{uri.portion}"
+            except ValueError:
+                continue
+
+            # wrap markdown-style links around cited text based on offset and length
+            message.content = (
+                message.content[: citation["start"]]
+                + "["
+                + citation["text"]
+                + "]("
+                + href
+                + ")"
+                + message.content[citation["end"] :]
+            )
+    return {}
+
+
 def is_fresh_chat(state: DocumentChatState) -> bool:
     return not (state["messages"])
 
@@ -218,7 +250,8 @@ graph_builder = StateGraph(DocumentChatState)
 graph_builder.add_node("initial_prompt", initial_prompt)
 graph_builder.add_node("doc_metadata", doc_metadata)
 graph_builder.add_node("chatbot", chatbot)
-graph_builder.add_node("tools", ToolNode(tools=tools))
+graph_builder.add_node("markup_refs", markup_refs)
+graph_builder.add_node("tools", ToolNode(tools=ALL_TOOLS))
 
 # when resuming a chat, jump to the chatbot state
 graph_builder.add_conditional_edges(
@@ -228,26 +261,57 @@ graph_builder.add_edge("initial_prompt", "doc_metadata")
 graph_builder.add_edge("doc_metadata", "chatbot")
 graph_builder.add_conditional_edges("chatbot", tools_condition)
 graph_builder.add_edge("tools", "chatbot")
-graph_builder.add_edge("chatbot", END)
+graph_builder.add_edge("chatbot", "markup_refs")
+graph_builder.add_edge("markup_refs", END)
+
+
+@asynccontextmanager
+async def aget_chat_graph() -> AsyncIterator[CompiledStateGraph]:
+    async with aget_graph_memory() as memory:
+        yield graph_builder.compile(checkpointer=memory)
 
 
 @contextmanager
-def get_chat_graph() -> Iterator[CompiledStateGraph]:
-    with get_graph_memory() as memory:
-        yield graph_builder.compile(checkpointer=memory)
+def get_chat_graph(use_checkpointer=True) -> Iterator[CompiledStateGraph]:
+    if use_checkpointer:
+        with get_graph_memory() as memory:
+            yield graph_builder.compile(checkpointer=memory)
+    else:
+        yield graph_builder.compile()
 
 
 _db_setup = False
 
 
-@contextmanager
-def get_graph_memory() -> Iterator[PostgresSaver]:
+def get_db_url() -> str:
     db_config = settings.DATABASES["default"]
-    db_url = (
+    return (
         f"postgresql://{db_config['USER']}:{db_config['PASSWORD']}"
         f"@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}"
     )
-    with PostgresSaver.from_conn_string(db_url) as memory:
+
+
+@asynccontextmanager
+async def aget_graph_memory() -> AsyncIterator[AsyncPostgresSaver]:
+    # prepare our own connection that avoids prepared statements because we use pgbouncer
+    async with await AsyncConnection.connect(
+        get_db_url(), autocommit=True, prepare_threshold=None, row_factory=dict_row
+    ) as conn:
+        memory = AsyncPostgresSaver(conn)
+        global _db_setup
+        if not _db_setup:
+            await memory.setup()
+            _db_setup = True
+        yield memory
+
+
+@contextmanager
+def get_graph_memory() -> Iterator[AsyncPostgresSaver]:
+    # prepare our own connection that avoids prepared statements because we use pgbouncer
+    with Connection.connect(
+        get_db_url(), autocommit=True, prepare_threshold=None, row_factory=dict_row
+    ) as conn:
+        memory = PostgresSaver(conn)
         global _db_setup
         if not _db_setup:
             memory.setup()
@@ -260,8 +324,8 @@ def get_chat_config(thread) -> RunnableConfig:
     return {
         "configurable": {
             "thread_id": str(thread.id),
-            "document_id": thread.document.pk,
-            "user_id": thread.user.pk,
+            "document_id": thread.document_id,
+            "user_id": thread.user_id,
         },
         "callbacks": [langfuse_callback],
     }
@@ -280,3 +344,15 @@ def get_message_snapshot(
                     return message, snapshot
 
     return None, None
+
+
+async def aget_previous_response(graph, config, message_id):
+    """Get the AI response message that follows the given user message ID in the chat history."""
+    found_user = False
+    # this is ordered most recent first
+    async for snapshot in graph.aget_state_history(config):
+        for msg in snapshot.values.get("messages", []):
+            if msg.id == message_id and msg.type == "human":
+                found_user = True
+            elif found_user and msg.type == "ai":
+                return msg

@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-30 08:40+0200\n"
-"PO-Revision-Date: 2025-10-07 09:02\n"
+"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -52,7 +52,7 @@ msgstr "Tembelea %(lii_name)s kupata taarifa zaidi za kisheria."
 
 #: templates/africanlii/au_detail_page.html:4
 #: templates/africanlii/au_detail_page.html:11
-#: templates/peachjam/_header.html:72
+#: templates/peachjam/_header.html:77
 msgid "African Union (AU)"
 msgstr "Umoja wa Afrika (AU)"
 
@@ -74,7 +74,7 @@ msgstr "Kwa taarifa zaidi, tembelea tovuti rasmi <a href=\"https://au.int/\" tar
 
 #: templates/africanlii/au_detail_page.html:39
 #: templates/africanlii/au_organ_detail.html:14
-#: templates/peachjam/_header.html:78 templates/peachjam/home.html:65
+#: templates/peachjam/_header.html:83 templates/peachjam/home.html:65
 msgid "African Union Organs"
 msgstr "Mashirika ya Umoja wa Afrika"
 
@@ -86,7 +86,7 @@ msgstr "Jumuiya za Kiuchumi za Kanda"
 
 #: templates/africanlii/au_detail_page.html:61
 #: templates/africanlii/au_institution_detail.html:15
-#: templates/peachjam/_header.html:91 templates/peachjam/home.html:75
+#: templates/peachjam/_header.html:96 templates/peachjam/home.html:75
 msgid "African Union Institutions"
 msgstr "Taasisi za Umoja wa Afrika"
 
@@ -102,7 +102,7 @@ msgstr "Nchi Wanachama"
 #: templates/africanlii/doc_index_first_level.html:7
 #: templates/africanlii/member_state_detail.html:9
 #: templates/africanlii/regional_economic_community_detail.html:9
-#: templates/peachjam/home.html:4
+#: templates/peachjam/_header.html:33 templates/peachjam/home.html:4
 msgid "Home"
 msgstr "Nyumbani"
 
@@ -124,11 +124,203 @@ msgstr "Faharasa"
 msgid "No documents found."
 msgstr "Hakuna nyaraka zilizopatikana."
 
-#: templates/africanlii/mooc.html:4
+#: templates/africanlii/mooc.html:4 templates/africanlii/mooc.html:8
 msgid "Policy-Making in the African Union"
 msgstr "Uundaji wa Sera katika Umoja wa Afrika"
 
-#: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:129
+#: templates/africanlii/mooc.html:11
+msgid "Equip yourself to meaningfully engage with AU policy processes — from development to implementation."
+msgstr "Jitayarishe kujihusisha kikamilifu na michakato ya sera ya AU - kutoka kwa maendeleo hadi utekelezaji."
+
+#: templates/africanlii/mooc.html:14
+msgid "Designed for civil society organisations, diplomats, parliamentarians, government officials, international organisations, journalists, judges, and academics who want to strengthen their role in shaping Africa’s future."
+msgstr "Imeundwa kwa ajili ya mashirika ya kiraia, wanadiplomasia, wabunge, maafisa wa serikali, mashirika ya kimataifa, waandishi wa habari, majaji, na wasomi ambao wanataka kuimarisha jukumu lao katika kuunda mustakabali wa Afrika."
+
+#: templates/africanlii/mooc.html:19
+msgid "Enroll now — start learning"
+msgstr "Jiandikishe sasa - anza kujifunza"
+
+#: templates/africanlii/mooc.html:20
+msgid "See course modules"
+msgstr "Tazama moduli za kozi"
+
+#: templates/africanlii/mooc.html:25
+msgid "Why Enrol?"
+msgstr "Kwa Nini Ujiandikishe?"
+
+#: templates/africanlii/mooc.html:27
+msgid "Through expert insights and practical tools, you’ll learn how to navigate the complexities of AU policy-making, influence outcomes, and contribute to policies that make a real impact."
+msgstr "Kupitia maarifa ya kitaalamu na zana za vitendo, utajifunza jinsi ya kuabiri matatizo ya utungaji sera wa AU, kuathiri matokeo na kuchangia sera zinazoleta matokeo halisi."
+
+#: templates/africanlii/mooc.html:33
+msgid "Deepen your understanding"
+msgstr "Kuza uelewa wako"
+
+#: templates/africanlii/mooc.html:34
+msgid "Understand AU objectives and institutions."
+msgstr "Kuelewa malengo na taasisi za AU."
+
+#: templates/africanlii/mooc.html:40
+msgid "Understand policy shaping"
+msgstr "Kuelewa uundaji wa sera"
+
+#: templates/africanlii/mooc.html:41
+msgid "Learn who influences decisions and how to reach them."
+msgstr "Jifunze ni nani anaathiri maamuzi na jinsi ya kuyafikia."
+
+#: templates/africanlii/mooc.html:47
+msgid "Practical tools"
+msgstr "Zana za vitendo"
+
+#: templates/africanlii/mooc.html:48
+msgid "Evidence-based advocacy strategies and resources."
+msgstr "Mikakati na nyenzo za utetezi zenye msingi wa ushahidi."
+
+#: templates/africanlii/mooc.html:57
+msgid "Who it's for"
+msgstr "Ni kwa ajili ya nani"
+
+#: templates/africanlii/mooc.html:59
+msgid "CSOs, diplomats, parliamentarians, officials, journalists, judges, academics."
+msgstr "AZAKi, wanadiplomasia, wabunge, maafisa, waandishi wa habari, majaji, wasomi."
+
+#: templates/africanlii/mooc.html:65
+msgid "Outcome"
+msgstr "Matokeo"
+
+#: templates/africanlii/mooc.html:66
+msgid "Practical skills to influence AU policy and track progress."
+msgstr "Ujuzi wa vitendo wa kushawishi sera ya AU na kufuatilia maendeleo."
+
+#: templates/africanlii/mooc.html:71
+msgid "Format"
+msgstr "Umbizo"
+
+#: templates/africanlii/mooc.html:72
+msgid "Online, self-paced, with curated resources and practical exercises."
+msgstr "Mtandaoni, unaojiendesha, na rasilimali zilizoratibiwa na mazoezi ya vitendo."
+
+#: templates/africanlii/mooc.html:77
+msgid "Duration"
+msgstr "Muda"
+
+#: templates/africanlii/mooc.html:78
+msgid "Estimated 6–8 weeks (self-paced)."
+msgstr "Inakadiriwa wiki 6-8 (kujiendesha)."
+
+#: templates/africanlii/mooc.html:90
+msgid "What You’ll Learn"
+msgstr "Utajifunza Nini"
+
+#: templates/africanlii/mooc.html:92
+msgid "Each module is carefully structured so you always know what to expect and can track your progress with ease."
+msgstr "Kila sehemu imeundwa kwa uangalifu ili uweze kujua kila wakati nini cha kutarajia na unaweza kufuatilia maendeleo yako kwa urahisi."
+
+#: templates/africanlii/mooc.html:100
+msgid "Module 1"
+msgstr "Moduli ya 1"
+
+#: templates/africanlii/mooc.html:103
+msgid "African Solutions to African Problems"
+msgstr "Suluhu za Kiafrika kwa Matatizo ya Kiafrika"
+
+#: templates/africanlii/mooc.html:106
+msgid "Deepen your understanding of the AU and its objectives."
+msgstr "Imarisha uelewa wako wa AU na malengo yake."
+
+#: templates/africanlii/mooc.html:115
+msgid "Module 2"
+msgstr "Moduli ya 2"
+
+#: templates/africanlii/mooc.html:118
+msgid "Influencing AU Policy Development"
+msgstr "Kuathiri Ukuzaji wa Sera ya AU"
+
+#: templates/africanlii/mooc.html:121
+msgid "Shifting from purpose to practice, this module explores how AU policies are shaped—who the key players are, how decisions are made, and where to engage effectively."
+msgstr "Kuhama kutoka kwa madhumuni hadi mazoezi, sehemu hii inachunguza jinsi sera za AU zinavyoundwa—wahusika wakuu ni akina nani, jinsi maamuzi yanafanywa, na wapi pa kushiriki kikamilifu."
+
+#: templates/africanlii/mooc.html:130
+msgid "Module 3"
+msgstr "Moduli ya 3"
+
+#: templates/africanlii/mooc.html:133
+msgid "Influencing AU Policy Implementation"
+msgstr "Kuathiri Utekelezaji wa Sera ya AU"
+
+#: templates/africanlii/mooc.html:136
+msgid "Explore how AU policies are implemented in practice, across multiple levels, by diverse actors, and within complex political and legal landscapes."
+msgstr "Chunguza jinsi sera za AU zinavyotekelezwa kivitendo, katika ngazi mbalimbali, na watendaji mbalimbali, na ndani ya nyanja tata za kisiasa na kisheria."
+
+#: templates/africanlii/mooc.html:145
+msgid "Module 4"
+msgstr "Moduli ya 4"
+
+#: templates/africanlii/mooc.html:148
+msgid "African Union Policy Toolbox"
+msgstr "Zana ya Sera ya Umoja wa Afrika"
+
+#: templates/africanlii/mooc.html:151
+msgid "Practical tools for effective AU policy engagement, from data and educational resources to advocacy strategies that support evidence-based change."
+msgstr "Zana za vitendo za ushirikishwaji bora wa sera za AU, kutoka kwa data na nyenzo za elimu hadi mikakati ya utetezi ambayo inasaidia mabadiliko yanayotegemea ushahidi."
+
+#: templates/africanlii/mooc.html:159
+msgid "Start the course — Enrol now"
+msgstr "Anza kozi - Jiandikishe sasa"
+
+#: templates/africanlii/mooc.html:169
+msgid "Certification"
+msgstr "Uthibitisho"
+
+#: templates/africanlii/mooc.html:172
+msgid "Upon successful completion, participants will receive a"
+msgstr "Baada ya kukamilika kwa mafanikio, washiriki watapata a"
+
+#: templates/africanlii/mooc.html:172
+msgid "certificate of completion issued by the University of Cape Town"
+msgstr "cheti cha kukamilika kilichotolewa na Chuo Kikuu cha Cape Town"
+
+#: templates/africanlii/mooc.html:172
+msgid "a mark of recognition for their commitment to advancing effective AU policy-making."
+msgstr "alama ya kutambuliwa kwa kujitolea kwao kuendeleza utungaji sera bora wa AU."
+
+#: templates/africanlii/mooc.html:175
+msgid "Take the next step in your policy journey — enrol today and help shape Africa’s future."
+msgstr "Chukua hatua inayofuata katika safari yako ya sera - jiandikishe leo na usaidie kuunda mustakabali wa Afrika."
+
+#: templates/africanlii/mooc.html:178
+msgid "Enrol now"
+msgstr "Jiandikishe sasa"
+
+#: templates/africanlii/mooc.html:189
+msgid "Frequently asked questions"
+msgstr "Maswali yanayoulizwa mara kwa mara"
+
+#: templates/africanlii/mooc.html:202
+msgid "Who should take this course?"
+msgstr "Nani anapaswa kuchukua kozi hii?"
+
+#: templates/africanlii/mooc.html:210
+msgid "Civil society organisations, diplomats, parliamentarians, government officials, international organisations, journalists, judges, and academics."
+msgstr "Mashirika ya kiraia, wanadiplomasia, wabunge, maafisa wa serikali, mashirika ya kimataifa, waandishi wa habari, majaji na wasomi."
+
+#: templates/africanlii/mooc.html:222
+msgid "How long does it take?"
+msgstr "Inachukua muda gani?"
+
+#: templates/africanlii/mooc.html:230
+msgid "Estimated 6–8 weeks self-paced; your pace may vary depending on time dedicated each week."
+msgstr "Inakadiriwa wiki 6-8 za kujitegemea; kasi yako inaweza kutofautiana kulingana na wakati uliowekwa kila wiki."
+
+#: templates/africanlii/mooc.html:242
+msgid "Is there a certificate?"
+msgstr "Je, kuna cheti?"
+
+#: templates/africanlii/mooc.html:250
+msgid "Yes — a certificate of completion issued by the University of Cape Town."
+msgstr "Ndiyo - cheti cha kukamilika kilichotolewa na Chuo Kikuu cha Cape Town."
+
+#: templates/peachjam/_footer.html:5 templates/peachjam/_header.html:134
 msgid "About"
 msgstr "Kuhusu"
 
@@ -156,7 +348,7 @@ msgstr "Kwa msaada kutoka"
 msgid "European Union"
 msgstr "Umoja wa Ulaya"
 
-#: templates/peachjam/_footer.html:49 templates/peachjam/_footer.html:157
+#: templates/peachjam/_footer.html:49 templates/peachjam/_footer.html:164
 #: templates/peachjam/_header.html:19
 msgid "Open Law Africa"
 msgstr "Open Law Afrika"
@@ -169,77 +361,81 @@ msgstr "Taasisi Nyingine za Kisheria za Afrika"
 msgid "University of Cape Town"
 msgstr "Chuo Kikuu cha Cape Town"
 
-#: templates/peachjam/_header.html:36
+#: templates/peachjam/_footer.html:157
+msgid "GIZ"
+msgstr "GIZ"
+
+#: templates/peachjam/_header.html:41
 msgid "African Legal Information"
 msgstr "Taarifa za Kisheria za Afrika"
 
-#: templates/peachjam/_header.html:42
+#: templates/peachjam/_header.html:47
 msgid "Legal Instruments"
 msgstr "Hati za Kisheria"
 
-#: templates/peachjam/_header.html:43
+#: templates/peachjam/_header.html:48
 msgid "Charters, treaties, conventions and regulations."
 msgstr "Mikataba mbalimbali na kanuni."
 
-#: templates/peachjam/_header.html:48
+#: templates/peachjam/_header.html:53
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: templates/peachjam/_header.html:49
+#: templates/peachjam/_header.html:54
 msgid "Judgments from regional African courts."
 msgstr "Hukumu kutoka kwa mahakama za kanda ya Afrika."
 
-#: templates/peachjam/_header.html:54 templates/peachjam/soft_law_list.html:4
+#: templates/peachjam/_header.html:59 templates/peachjam/soft_law_list.html:4
 #: templates/peachjam/soft_law_list.html:7
 msgid "Soft Law"
 msgstr "Hati zisizofunga kisheria"
 
-#: templates/peachjam/_header.html:55
+#: templates/peachjam/_header.html:60
 msgid "Policies, decisions, recommendations and communiques."
 msgstr "Sera, maamuzi, mapendekezo na taarifa rasmi."
 
-#: templates/peachjam/_header.html:60
+#: templates/peachjam/_header.html:65
 msgid "Gazettes"
 msgstr "Magazeti ya serikali"
 
-#: templates/peachjam/_header.html:61
+#: templates/peachjam/_header.html:66
 msgid "Regional economic community official Gazettes."
 msgstr "Magazeti rasmi ya serikali ya jumuiya ya kiuchumi ya kanda."
 
-#: templates/peachjam/_header.html:79
+#: templates/peachjam/_header.html:84
 msgid "African Union (AU) Organs"
 msgstr "Mashirika ya Umoja wa Afrika (AU)"
 
-#: templates/peachjam/_header.html:84 templates/peachjam/_header.html:85
+#: templates/peachjam/_header.html:89 templates/peachjam/_header.html:90
 msgid "Regional Economic Communities (RECs)"
 msgstr "Jumuiya za Kiuchumi za Kikanda (RECs)"
 
-#: templates/peachjam/_header.html:92
+#: templates/peachjam/_header.html:97
 msgid "African Union (AU) Institutions"
 msgstr "Taasisi za Umoja wa Afrika (AU)."
 
-#: templates/peachjam/_header.html:97 templates/peachjam/_header.html:98
+#: templates/peachjam/_header.html:102 templates/peachjam/_header.html:103
 msgid "Member states"
 msgstr "Nchi wanachama"
 
-#: templates/peachjam/_header.html:106 templates/peachjam/taxonomy_list.html:4
+#: templates/peachjam/_header.html:111 templates/peachjam/taxonomy_list.html:4
 #: templates/peachjam/taxonomy_list.html:7
 msgid "Collections"
 msgstr "Makusanyo"
 
-#: templates/peachjam/_header.html:111
+#: templates/peachjam/_header.html:116
 msgid "Reports & Guides"
 msgstr "Ripoti na Miongozo"
 
-#: templates/peachjam/_header.html:117
+#: templates/peachjam/_header.html:122
 msgid "Courses"
 msgstr "Kozi"
 
-#: templates/peachjam/_header.html:123
+#: templates/peachjam/_header.html:128
 msgid "Articles"
 msgstr "Makala"
 
-#: templates/peachjam/_header.html:133
+#: templates/peachjam/_header.html:138
 msgid "Help"
 msgstr "Msaada"
 

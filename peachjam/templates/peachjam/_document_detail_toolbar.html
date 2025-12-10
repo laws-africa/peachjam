@@ -13,16 +13,16 @@
     <div id="edit-document-button"></div>
   {% endblock %}
   {% block download-btn %}
-    {% if document.source_file %}
+    {% if download_options %}
       <div class="btn-group dropdown-center ms-2 d-none d-md-block">
-        <a href="{% url 'document_source' document.expression_frbr_uri|strip_first_character %}"
+        <a href="{{ download_options.0.url }}"
            class="btn btn-secondary btn-shrink-sm"
            data-track-event="Document | Download"
            target="_blank">
-          {% trans "Download" %} {{ document.source_file.filename_extension|upper }}
-          ({{ document.source_file.size|filesizeformat }})
+          {% trans "Download" %} {{ download_options.0.label }}
+          {% if download_options.0.size %}({{ download_options.0.size|filesizeformat }}){% endif %}
         </a>
-        {% if document.source_file.filename_extension != "pdf" %}
+        {% if download_options|length > 1 %}
           <button type="button"
                   class="btn btn-secondary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
                   data-bs-toggle="dropdown"
@@ -30,12 +30,14 @@
             <span class="visually-hidden">{% trans "Toggle dropdown" %}</span>
           </button>
           <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item"
-                 href="{% url 'document_source_pdf' document.expression_frbr_uri|strip_first_character %}"
-                 data-track-event="Document | Download"
-                 target="_blank">{% trans "Download" %} PDF</a>
-            </li>
+            {% for option in download_options|slice:"1:" %}
+              <li>
+                <a class="dropdown-item"
+                   href="{{ option.url }}"
+                   data-track-event="Document | Download"
+                   target="_blank">{% trans "Download" %} {{ option.label }}</a>
+              </li>
+            {% endfor %}
           </ul>
         {% endif %}
       </div>

@@ -84,6 +84,9 @@ dependencies = [
     "requests>=2.27.1",
     "sentry-sdk>=1.16.0,<=2.22",
     "setproctitle",
+    "uvloop>=0.21.0",
+    "uvicorn>=0.34.2",
+    "uvicorn-worker>=0.3.0",
     "whitenoise==5.3.0",
 ]
 
