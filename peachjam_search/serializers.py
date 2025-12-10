@@ -4,7 +4,6 @@ from typing import Optional, Type
 
 from django.conf import settings
 from django.utils.html import escape
-from drf_spectacular.utils import extend_schema_field
 from pydantic import BaseModel, ValidationError
 from rest_framework import serializers
 
@@ -259,7 +258,6 @@ class SearchClickSerializer(serializers.ModelSerializer):
         fields = ("frbr_uri", "search_trace", "portion", "position")
 
 
-@extend_schema_field(PortionSearchFilters.model_json_schema())
 class PydanticModelField(serializers.Field):
     """Generic DRF field that wraps a Pydantic model. It validates incoming dicts using the model and returns the
     model instance.
@@ -334,10 +332,8 @@ class PortionHit(BaseModel):
 
 
 class PortionHitSerializer(serializers.Serializer):
-    """A document portion matching the query."""
-
     content = PydanticModelField(PortionContent)
-    metadata = PydanticModelField(PortionMetadata, help_text="Metadata for the item")
+    metadata = PydanticModelField(PortionMetadata)
     score = serializers.FloatField(
         min_value=0,
         max_value=1.0,
@@ -346,6 +342,4 @@ class PortionHitSerializer(serializers.Serializer):
 
 
 class PortionSearchResponseSerializer(serializers.Serializer):
-    """Results of a portion search."""
-
     results = PortionHitSerializer(many=True)
