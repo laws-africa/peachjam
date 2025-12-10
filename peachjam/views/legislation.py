@@ -613,16 +613,10 @@ class PlaceGlossaryLetterView(PlaceGlossaryView):
         self.letter = kwargs.get("letter")
         return super().get(*args, **kwargs)
 
-    def get_filtered_terms(self, terms, q):
-        if not q:
-            return terms
-        return [t for t in terms if q.lower() in t["term_lc"]]
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["letter"] = self.letter
-        terms = self.object.data.get(self.letter, [])
-        context["terms"] = self.get_filtered_terms(terms, self.request.GET.get("q"))
+        context["terms"] = self.object.data.get(self.letter, [])
         return context
 
 
