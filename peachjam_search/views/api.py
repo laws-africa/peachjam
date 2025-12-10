@@ -34,6 +34,7 @@ class PortionSearchView(APIView):
 
         self.engine = PortionSearchEngine()
         self.engine.query = input_data["text"]
+        self.engine.knn_k = input_data["top_k"]
 
         self.engine.filters = []
         if input_data.get("pre_filters", None):

@@ -1380,6 +1380,7 @@ class TestSearchEngine(TestCase):
 
         engine = PortionSearchEngine()
         engine.query = input_data["text"]
+        engine.knn_k = input_data["top_k"]
 
         engine.filters = []
         engine.filters.append(input_data["pre_filters"])
@@ -1699,8 +1700,8 @@ class TestSearchEngine(TestCase):
                                                         "query": {
                                                             "knn": {
                                                                 "field": "content_chunks.text_embedding",
-                                                                "k": 150,
-                                                                "num_candidates": 1500,
+                                                                "k": 5,
+                                                                "num_candidates": 50,
                                                                 "similarity": 0.4,
                                                                 "query_vector": [
                                                                     0.1,

@@ -776,6 +776,9 @@ class PortionSearchEngine(SearchEngine):
     filters: Optional[List[PortionSearchFilters]] = None
 
     def build_search(self):
+        # number of candidates to find on each shard
+        self.knn_num_candidates = self.knn_k * 10
+
         search = RetrieverSearch(using=self.client, index=self.index)
         search = self.add_source(search)
         search = self.add_query(search)
