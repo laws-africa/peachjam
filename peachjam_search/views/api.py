@@ -43,19 +43,20 @@ class PortionSearchView(APIView):
 
         es_response = self.engine.execute()
 
-        portions = self.build_portions(es_response)
+        portions = self.build_portions(es_response, request)
         portions = portions[: input_data["top_k"]]
 
         return Response(PortionSearchResponseSerializer({"results": portions}).data)
 
-    def build_portions(self, es_response):
+    def build_portions(self, es_response, request):
         portions = []
         # a list of portion ids to load full text for
         provisions_to_load = defaultdict(list)
         pages_to_load = defaultdict(list)
 
         for hit in es_response.hits.hits:
-            frbr_uri = FrbrUri.parse(hit._source.expression_frbr_uri)
+            expression_frbr_uri = hit._source.expression_frbr_uri
+            frbr_uri = FrbrUri.parse(expression_frbr_uri)
 
             # TODO: merge in "provisions.hits"
 
@@ -67,6 +68,8 @@ class PortionSearchView(APIView):
                     elif chunk._source.type == "page":
                         pages_to_load[frbr_uri].append(chunk._source.portion)
 
+                portion_id = getattr(chunk._source, "portion", None)
+
                 item = PortionHit(
                     content=PortionContent(text=self.clean_text(chunk._source.text)),
                     metadata=PortionMetadata(
@@ -77,12 +80,16 @@ class PortionSearchView(APIView):
                         frbr_subtype=frbr_uri.subtype,
                         title=hit._source.title,
                         expression_date=frbr_uri.expression_date[1:],
-                        expression_frbr_uri=hit._source.expression_frbr_uri,
-                        portion_type=chunk._source.type,
-                        portion_id=getattr(chunk._source, "portion", None),
+                        expression_frbr_uri=expression_frbr_uri,
                         repealed=getattr(hit._source, "repealed", None),
                         commenced=getattr(hit._source, "commenced", None),
                         principal=getattr(hit._source, "principal", None),
+                        public_url=self.request.build_absolute_uri(expression_frbr_uri),
+                        portion_type=chunk._source.type,
+                        portion_id=portion_id,
+                        portion_public_url=self.portion_public_url(
+                            request, expression_frbr_uri, chunk._source.type, portion_id
+                        ),
                     ),
                     score=1 - chunk._score,
                 )
@@ -97,6 +104,17 @@ class PortionSearchView(APIView):
     def clean_text(self, text):
         # strip the additional context, if present
         return text.split(TEXT_INJECTION_SEPARATOR, 1)[-1]
+
+    def portion_public_url(
+        self, request, expression_frbr_uri, portion_type, portion_id
+    ):
+        if portion_id is not None:
+            if portion_type == "page":
+                return request.build_absolute_uri(
+                    f"{expression_frbr_uri}#page-{portion_id}"
+                )
+            elif portion_type == "provision":
+                return request.build_absolute_uri(f"{expression_frbr_uri}#{portion_id}")
 
     def load_full_portion_text(self, portions, provisions_to_load, pages_to_load):
         """Load the full text for portions that have multiple chunks. We do this by querying Elasticsearch again,

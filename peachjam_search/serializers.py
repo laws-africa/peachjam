@@ -316,13 +316,15 @@ class PortionMetadata(BaseModel):
     frbr_doctype: str
     frbr_subtype: Optional[str]
     title: str
-    expression_date: str
-    expression_frbr_uri: str
-    portion_type: PortionType
-    portion_id: Optional[str]
     repealed: Optional[bool]
     commenced: Optional[bool]
     principal: Optional[bool]
+    expression_date: str
+    expression_frbr_uri: str
+    public_url: str
+    portion_type: PortionType
+    portion_id: Optional[str]
+    portion_public_url: Optional[str]
 
 
 class PortionHit(BaseModel):
