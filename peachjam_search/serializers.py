@@ -322,6 +322,7 @@ class PortionMetadata(BaseModel):
     public_url: str
     portion_type: PortionType
     portion_id: Optional[str]
+    portion_title: Optional[str]
     portion_public_url: Optional[str]
 
 

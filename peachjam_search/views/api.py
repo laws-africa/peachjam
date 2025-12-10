@@ -61,11 +61,10 @@ class PortionSearchView(APIView):
             # TODO: merge in "provisions.hits"
 
             for chunk in hit.inner_hits.content_chunks.hits.hits:
-                # if there's no portion, then it means the full text, and we just have to use what's here
-                if chunk._source.n_chunks > 1 and chunk._source.portion:
+                if chunk._source.portion:
                     if chunk._source.type == "provision":
                         provisions_to_load[frbr_uri].append(chunk._source.portion)
-                    elif chunk._source.type == "page":
+                    elif chunk._source.type == "page" and chunk._source.n_chunks > 1:
                         pages_to_load[frbr_uri].append(chunk._source.portion)
 
                 portion_id = getattr(chunk._source, "portion", None)
@@ -87,6 +86,7 @@ class PortionSearchView(APIView):
                         public_url=self.request.build_absolute_uri(expression_frbr_uri),
                         portion_type=chunk._source.type,
                         portion_id=portion_id,
+                        portion_title=None,
                         portion_public_url=self.portion_public_url(
                             request, expression_frbr_uri, chunk._source.type, portion_id
                         ),
@@ -95,7 +95,7 @@ class PortionSearchView(APIView):
                 )
                 portions.append(item)
 
-        self.load_full_portion_text(portions, provisions_to_load, pages_to_load)
+        self.load_portion_details(portions, provisions_to_load, pages_to_load)
 
         portions.sort(key=lambda x: x.score)
 
@@ -116,9 +116,10 @@ class PortionSearchView(APIView):
             elif portion_type == "provision":
                 return request.build_absolute_uri(f"{expression_frbr_uri}#{portion_id}")
 
-    def load_full_portion_text(self, portions, provisions_to_load, pages_to_load):
-        """Load the full text for portions that have multiple chunks. We do this by querying Elasticsearch again,
-        using the "provisions" and "pages" nested fields."""
+    def load_portion_details(self, portions, provisions_to_load, pages_to_load):
+        """Load additional details for portions. This includes titles for provisions, and full text for portions that
+        have multiple chunks. We do this by querying Elasticsearch again, using the "provisions" and "pages" nested
+        fields."""
 
         search = Search(using=self.engine.client, index=self.engine.index)
         search = search.source(["expression_frbr_uri"])
@@ -135,7 +136,11 @@ class PortionSearchView(APIView):
                             "name": f"provisions_{frbr_uri.expression_uri()}",
                             "size": 100,
                             "_source": {
-                                "includes": ["provisions.body", "provisions.id"]
+                                "includes": [
+                                    "provisions.body",
+                                    "provisions.id",
+                                    "provisions.title",
+                                ]
                             },
                         },
                     }
@@ -169,7 +174,7 @@ class PortionSearchView(APIView):
             es_response = search.execute()
 
             # build up a lookup dict
-            full_texts = {}
+            portion_details = {}
             for hit in es_response.hits.hits:
                 for inner_hit_key in hit.inner_hits:
                     inner_hit = hit.inner_hits[inner_hit_key]
@@ -178,16 +183,20 @@ class PortionSearchView(APIView):
                             # provision
                             portion_id = portion._source.id
                         else:
-                            # page - key in full_texts will be a string
+                            # page - key in portion_details will be a string
                             portion_id = str(portion._source.page_num)
                         key = (hit._source.expression_frbr_uri, portion_id)
-                        full_texts[key] = portion._source.body
+                        portion_details[key] = portion._source
 
-            # update portions with full text
+            # update portions
             for portion in portions:
                 key = (
                     portion.metadata.expression_frbr_uri,
                     portion.metadata.portion_id,
                 )
-                if key in full_texts:
-                    portion.content.text = full_texts[key]
+                if key in portion_details:
+                    details = portion_details[key]
+                    if hasattr(details, "title"):
+                        portion.metadata.portion_title = details.title
+                    if hasattr(details, "body"):
+                        portion.content.text = details.body
