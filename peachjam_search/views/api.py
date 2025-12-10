@@ -273,10 +273,11 @@ class PortionSearchView(APIView):
                             summary_parts.append(judgment.case_summary)
                         if judgment.issues:
                             summary_parts.append(
-                                "Issues:\n" + "\n - ".join(judgment.issues)
+                                "Issues:\n"
+                                + "\n".join(f"- {x}" for x in judgment.issues)
                             )
                         if judgment.held:
                             summary_parts.append(
-                                "Held:\n" + "\n - ".join(judgment.held)
+                                "Held:\n" + "\n".join(f"- {x}" for x in judgment.held)
                             )
                         portion.content.text = "\n\n".join(summary_parts)
