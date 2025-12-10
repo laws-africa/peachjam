@@ -170,7 +170,7 @@ class PortionSearchView(APIView):
                             "terms": {"pages.page_num": page_nums},
                         },
                         "inner_hits": {
-                            "name": f"provisions_{frbr_uri.expression_uri()}",
+                            "name": f"pages_{frbr_uri.expression_uri()}",
                             "size": 100,
                             "_source": {"includes": ["pages.body", "pages.page_num"]},
                         },
