@@ -736,7 +736,6 @@ class PortionSearchFilters(BaseModel):
     frbr_doctype__in: Optional[List[str]] = None
     frbr_subtype: Optional[str] = None
     frbr_subtype__in: Optional[List[str]] = None
-    # TODO: legislation only
     repealed: Optional[bool] = None
     commenced: Optional[bool] = None
     principal: Optional[bool] = None
