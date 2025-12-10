@@ -98,8 +98,14 @@
         {% trans 'Summary' %}
       </dt>
       <dd>
+        {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
+        {% if document.flynote %}
+          <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
+          <div class="mb-2 fst-italic">{{ document.flynote|safe }}</div>
+        {% endif %}
         <div hx-trigger="load"
-             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1">
+             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1"
+             hx-vals='{"mode":"judgment-detail"}'>
         </div>
       </dd>
     </dl>
