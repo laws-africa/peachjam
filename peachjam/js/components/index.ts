@@ -7,6 +7,7 @@ import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
 import FloatingHeader from './floating-header';
+import GlossaryFilter from './glossary';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
@@ -34,6 +35,7 @@ const components: Record<string, any> = {
   DocumentFilterForm,
   DocumentTable,
   FloatingHeader,
+  GlossaryFilter,
   DocumentUploader,
   NavigationSelect,
   RelationshipEnrichments,
