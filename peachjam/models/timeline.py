@@ -228,6 +228,7 @@ class TimelineEvent(models.Model):
             TimelineEvent.objects.attach_subject_documents(ev) for ev in events_qs
         ]
 
+        # FIX: group by (date → following → event_type)
         grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for ev in events_qs:
@@ -240,22 +241,16 @@ class TimelineEvent(models.Model):
 
         for date, by_follow in grouped.items():
             entries = []
-            for follow, by_event_type in by_follow.items():
 
-                for event_type, ev_doc_pairs in by_event_type.items():
-                    ev = ev_doc_pairs[0][0]  # safe: same event_type
+            for follow, by_event in by_follow.items():
+                for event_type, ev_doc_pairs in by_event.items():
+                    ev = ev_doc_pairs[0][0]
+                    docs_only = [doc for (_ev, doc) in ev_doc_pairs]
 
-                    docs_only = [d for (_ev, d) in ev_doc_pairs]
                     first = docs_only[:10]
                     rest = docs_only[10:]
 
-                    entries.append(
-                        (
-                            follow,
-                            ev.description_text(),
-                            (first, rest),
-                        )
-                    )
+                    entries.append((follow, ev.description_text(), (first, rest)))
 
             results[date] = entries
 
