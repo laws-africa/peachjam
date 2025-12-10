@@ -32,16 +32,13 @@
               </h5>
             </div>
             <div class="col-5 col-md-3">
-              <input hx-get="{% url 'glossary-letter' place_code=glossary.place_code letter=letter %}"
-                     hx-trigger="keyup changed delay:300ms"
-                     hx-target="#glossary-content-{{ letter }}"
-                     class="form-control"
+              <input class="form-control"
                      type="text"
                      name="q"
                      autocomplete="off"
                      aria-label="{% trans "Find a term..." %}"
                      placeholder="{% trans "Find a term..." %}"
-                     value="{{ form.q.value|default_if_none:'' }}"/>
+                     data-component="GlossaryFilter"/>
             </div>
           </div>
         </div>

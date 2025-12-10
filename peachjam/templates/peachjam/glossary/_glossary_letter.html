@@ -1,7 +1,7 @@
 {% load i18n %}
-<ol id="glossary-{{ letter }}" class="list-unstyled">
+<ol id="glossary-{{ letter }}" class="list-unstyled glossary-list">
   {% for term in terms %}
-    <li class="term">
+    <li class="term" data-term="{{ term.term }}">
       <div class="mb-1">
         <b>{{ term.term }}</b>
       </div>
