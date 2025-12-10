@@ -1,6 +1,6 @@
 import dataclasses
 from enum import Enum
-from typing import Optional, Type
+from typing import List, Optional, Type
 
 from django.conf import settings
 from django.utils.html import escape
@@ -282,7 +282,7 @@ class PydanticModelField(serializers.Field):
         if value is None:
             return None
         if isinstance(value, self.model_cls):
-            return value.model_dump(exclude_none=True)
+            return value.model_dump()
         # handle already-dict case
         return dict(value)
 
@@ -323,6 +323,8 @@ class PortionMetadata(BaseModel):
     portion_type: PortionType
     portion_id: Optional[str]
     portion_title: Optional[str]
+    portion_parent_ids: Optional[List[str]]
+    portion_parent_titles: Optional[List[str]]
     portion_public_url: Optional[str]
 
 
