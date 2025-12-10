@@ -327,7 +327,7 @@ class UserFollowing(models.Model):
 
         allowed_predicates = set(TimelineEvent.PREDICATE_MAP.keys())
 
-        if relationship.predicate not in allowed_predicates:
+        if relationship.predicate.slug not in allowed_predicates:
             log.info("Predicate %s not allowed", relationship.predicate.slug)
             return
 
