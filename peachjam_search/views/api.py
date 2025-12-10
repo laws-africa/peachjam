@@ -72,8 +72,8 @@ class PortionSearchView(APIView):
                 # we only return summaries for judgments
                 portions.append(
                     PortionHit(
-                        # this will be filled in later
                         score=1 - hit._score,
+                        # this will be filled in later
                         content=PortionContent(text=""),
                         metadata=PortionMetadata(
                             work_frbr_uri=frbr_uri.work_uri(),
