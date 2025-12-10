@@ -4,6 +4,8 @@ import re
 
 from django.db import migrations
 
+from peachjam_search.tasks import search_model_saved
+
 # handles starts at the start which don't need to preserve whitespace
 STARTING_STAR = re.compile(r"^\s*\*\s*")
 # handles stars in the middle which need to preserve at least one space
@@ -27,6 +29,8 @@ def forwards_func(apps, schema_editor):
         if cleaned != judgment.flynote:
             judgment.flynote = cleaned
             judgment.save(update_fields=["flynote"])
+            # ensure it's re-indexed for search
+            search_model_saved("peachjam.Judgment", judgment.pk)
 
 
 class Migration(migrations.Migration):
