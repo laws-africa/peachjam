@@ -4,8 +4,9 @@ from unittest.mock import patch
 from django.http import QueryDict
 from django.test import TestCase  # noqa
 
-from peachjam_search.engine import SearchEngine
+from peachjam_search.engine import PortionSearchEngine, SearchEngine
 from peachjam_search.forms import SearchForm
+from peachjam_search.serializers import PortionSearchRequestSerializer
 
 
 class TestSearchEngine(TestCase):
@@ -1363,4 +1364,367 @@ class TestSearchEngine(TestCase):
                 sort_keys=True,
             ),
             json.dumps(d, indent=2, sort_keys=True),
+        )
+
+    def test_portion_search(self):
+        serializer = PortionSearchRequestSerializer(
+            data={
+                "text": "example search",
+                "top_k": 5,
+                "pre_filters": {"frbr_doctype": "act"},
+                "filters": {"principal": True},
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        input_data = serializer.validated_data
+
+        engine = PortionSearchEngine()
+        engine.query = input_data["text"]
+        engine.knn_k = input_data["top_k"]
+
+        engine.filters = []
+        engine.filters.append(input_data["pre_filters"])
+        engine.filters.append(input_data["filters"])
+
+        with patch.object(engine, "get_query_embedding", return_value=[0.1, 0.2]):
+            search = engine.build_search()
+
+        self.assertDictEqual(
+            {
+                "_source": [
+                    "title",
+                    "expression_frbr_uri",
+                    "repealed",
+                    "commenced",
+                    "principal",
+                ],
+                "retriever": {
+                    "rrf": {
+                        "rank_window_size": 150,
+                        "rank_constant": 60,
+                        "retrievers": [
+                            {
+                                "standard": {
+                                    "query": {
+                                        "bool": {
+                                            "should": [
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["title^8"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["title_expanded^3"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["citation^2"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": [
+                                                            "alternative_names^4"
+                                                        ],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["content"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["summary^2"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["flynote^2"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "simple_query_string": {
+                                                        "query": "example search",
+                                                        "default_operator": "OR",
+                                                        "fields": ["blurb^2"],
+                                                        "minimum_should_match": "4<80%",
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "title": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 8,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "title_expanded": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 3,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "citation": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 2,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "alternative_names": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 4,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "content": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 4,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "summary": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 2,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "flynote": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 2,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "blurb": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 2,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "match_phrase": {
+                                                        "content": {
+                                                            "query": "example search",
+                                                            "slop": 0,
+                                                            "boost": 4,
+                                                        }
+                                                    }
+                                                },
+                                                {
+                                                    "nested": {
+                                                        "path": "pages",
+                                                        "query": {
+                                                            "bool": {
+                                                                "must": [
+                                                                    {
+                                                                        "simple_query_string": {
+                                                                            "query": "example search",
+                                                                            "default_operator": "OR",
+                                                                            "fields": [
+                                                                                "pages.body"
+                                                                            ],
+                                                                            "minimum_should_match": "4<80%",
+                                                                            "quote_field_suffix": ".exact",
+                                                                        }
+                                                                    }
+                                                                ],
+                                                                "should": [
+                                                                    {
+                                                                        "match_phrase": {
+                                                                            "pages.body": {
+                                                                                "query": "example search",
+                                                                                "slop": 0,
+                                                                                "boost": 4,
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                ],
+                                                            }
+                                                        },
+                                                        "inner_hits": {
+                                                            "_source": [
+                                                                "pages.page_num"
+                                                            ],
+                                                            "highlight": {
+                                                                "fields": {
+                                                                    "pages.body": {},
+                                                                    "pages.body.exact": {},
+                                                                },
+                                                                "pre_tags": ["<mark>"],
+                                                                "post_tags": [
+                                                                    "</mark>"
+                                                                ],
+                                                                "fragment_size": 80,
+                                                                "number_of_fragments": 2,
+                                                                "max_analyzed_offset": 999999,
+                                                            },
+                                                        },
+                                                    }
+                                                },
+                                                {
+                                                    "nested": {
+                                                        "path": "provisions",
+                                                        "query": {
+                                                            "bool": {
+                                                                "should": [
+                                                                    {
+                                                                        "match_phrase": {
+                                                                            "provisions.body": {
+                                                                                "query": "example search",
+                                                                                "slop": 0,
+                                                                                "boost": 4,
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "simple_query_string": {
+                                                                            "query": "example search",
+                                                                            "default_operator": "OR",
+                                                                            "fields": [
+                                                                                "provisions.body"
+                                                                            ],
+                                                                            "minimum_should_match": "4<80%",
+                                                                            "quote_field_suffix": ".exact",
+                                                                        }
+                                                                    },
+                                                                    {
+                                                                        "simple_query_string": {
+                                                                            "query": "example search",
+                                                                            "default_operator": "OR",
+                                                                            "fields": [
+                                                                                "provisions.title^4",
+                                                                                "provisions.parent_titles^2",
+                                                                            ],
+                                                                            "minimum_should_match": "4<80%",
+                                                                        }
+                                                                    },
+                                                                ]
+                                                            }
+                                                        },
+                                                        "inner_hits": {
+                                                            "_source": [
+                                                                "provisions.title",
+                                                                "provisions.id",
+                                                                "provisions.parent_titles",
+                                                                "provisions.parent_ids",
+                                                            ],
+                                                            "highlight": {
+                                                                "fields": {
+                                                                    "provisions.body": {},
+                                                                    "provisions.body.exact": {},
+                                                                },
+                                                                "pre_tags": ["<mark>"],
+                                                                "post_tags": [
+                                                                    "</mark>"
+                                                                ],
+                                                                "fragment_size": 80,
+                                                                "number_of_fragments": 2,
+                                                                "max_analyzed_offset": 999999,
+                                                            },
+                                                        },
+                                                    }
+                                                },
+                                            ],
+                                            "filter": [
+                                                {"term": {"is_most_recent": True}},
+                                                {"term": {"frbr_uri_doctype": "act"}},
+                                                {"term": {"principal": True}},
+                                            ],
+                                            "minimum_should_match": 1,
+                                        }
+                                    },
+                                    "_name": "text",
+                                }
+                            },
+                            {
+                                "standard": {
+                                    "query": {
+                                        "bool": {
+                                            "must": [
+                                                {
+                                                    "nested": {
+                                                        "path": "content_chunks",
+                                                        "inner_hits": {
+                                                            "_source": {
+                                                                "excludes": [
+                                                                    "content_chunks.text_embedding"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "score_mode": "max",
+                                                        "query": {
+                                                            "knn": {
+                                                                "field": "content_chunks.text_embedding",
+                                                                "k": 5,
+                                                                "num_candidates": 50,
+                                                                "similarity": 0.4,
+                                                                "query_vector": [
+                                                                    0.1,
+                                                                    0.2,
+                                                                ],
+                                                            }
+                                                        },
+                                                    }
+                                                }
+                                            ]
+                                        }
+                                    },
+                                    "filter": [
+                                        {"term": {"is_most_recent": True}},
+                                        {"term": {"frbr_uri_doctype": "act"}},
+                                        {"term": {"principal": True}},
+                                    ],
+                                    "_name": "semantic",
+                                }
+                            },
+                        ],
+                    }
+                },
+            },
+            search.to_dict(),
         )

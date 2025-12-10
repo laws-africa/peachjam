@@ -1,12 +1,15 @@
 import dataclasses
-from typing import Type
+from enum import Enum
+from typing import List, Optional, Type
 
 from django.conf import settings
 from django.utils.html import escape
+from pydantic import BaseModel, ValidationError
 from rest_framework import serializers
 
 from peachjam.models import CoreDocument
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
+from peachjam_search.engine import PortionSearchFilters
 from peachjam_search.models import SearchClick
 
 
@@ -148,7 +151,7 @@ class SearchHit:
                             self.pages.append(
                                 {
                                     "page_num": page_num,
-                                    "highlight": {"pages.body": [escape(info["text"])]},
+                                    "highlight": {"pages_body": [escape(info["text"])]},
                                     "score": chunk._score,
                                 }
                             )
@@ -206,7 +209,7 @@ class SearchHit:
                             # remove injected text at the start
                             text = text.split(TEXT_INJECTION_SEPARATOR, 1)[1]
 
-                        info["highlight"] = {"provisions.body": [escape(text)]}
+                        info["highlight"] = {"provisions_body": [escape(text)]}
                         info["id"] = info["portion"]
                         info["type"] = info["provision_type"]
                         self.provisions.append(info)
@@ -214,7 +217,7 @@ class SearchHit:
     def merge_exact_highlights(self, highlight):
         # fold .exact highlights into the main field to make life easier for the client
         for key, value in list(highlight.items()):
-            if key.endswith(".exact"):
+            if key.endswith("_exact"):
                 short = key[:-6]
                 if short not in highlight:
                     highlight[short] = value
@@ -253,3 +256,93 @@ class SearchClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
+
+
+class PydanticModelField(serializers.Field):
+    """Generic DRF field that wraps a Pydantic model. It validates incoming dicts using the model and returns the
+    model instance.
+    """
+
+    def __init__(self, model_cls, **kwargs):
+        assert model_cls is not None, "Pydantic model class is required"
+        self.model_cls = model_cls
+        super().__init__(**kwargs)
+
+    def to_internal_value(self, data):
+        if data in (None, ""):
+            return None
+        if not isinstance(data, dict):
+            raise serializers.ValidationError("Expected a JSON object for this field.")
+        try:
+            return self.model_cls.model_validate(data)
+        except ValidationError as e:
+            raise serializers.ValidationError(e.errors())
+
+    def to_representation(self, value):
+        if value is None:
+            return None
+        if isinstance(value, self.model_cls):
+            return value.model_dump()
+        # handle already-dict case
+        return dict(value)
+
+
+class PortionSearchRequestSerializer(serializers.Serializer):
+    text = serializers.CharField(help_text="The text to find matching items for")
+    top_k = serializers.IntegerField(
+        min_value=1, max_value=100, default=10, help_text="Number of results to return"
+    )
+    filters = PydanticModelField(PortionSearchFilters, required=False)
+    pre_filters = PydanticModelField(PortionSearchFilters, required=False)
+
+
+class PortionContent(BaseModel):
+    text: str
+
+
+class PortionType(str, Enum):
+    PAGE = "page"
+    PROVISION = "provision"
+    TEXT = "text"
+    SUMMARY = "summary"
+
+
+class PortionMetadata(BaseModel):
+    work_frbr_uri: str
+    frbr_place: str
+    frbr_country: str
+    frbr_doctype: str
+    frbr_subtype: Optional[str]
+    title: str
+    repealed: Optional[bool]
+    commenced: Optional[bool]
+    principal: Optional[bool]
+    expression_date: str
+    expression_frbr_uri: str
+    public_url: str
+    portion_type: PortionType
+    portion_id: Optional[str]
+    portion_title: Optional[str]
+    portion_parent_ids: Optional[List[str]]
+    portion_parent_titles: Optional[List[str]]
+    portion_public_url: Optional[str]
+
+
+class PortionHit(BaseModel):
+    content: PortionContent
+    metadata: PortionMetadata
+    score: float
+
+
+class PortionHitSerializer(serializers.Serializer):
+    content = PydanticModelField(PortionContent)
+    metadata = PydanticModelField(PortionMetadata)
+    score = serializers.FloatField(
+        min_value=0,
+        max_value=1.0,
+        help_text="The similarity score of the item (lower is better)",
+    )
+
+
+class PortionSearchResponseSerializer(serializers.Serializer):
+    results = PortionHitSerializer(many=True)
