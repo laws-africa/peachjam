@@ -1,0 +1,11 @@
+{% load i18n peachjam %}
+{% if collapse_summary %}
+  <details>
+    <summary class="mb-1">
+      {% trans 'Read full summary' %}
+    </summary>
+    {% include 'peachjam/document/_case_summary.html' %}
+  </details>
+{% else %}
+  {% include 'peachjam/document/_case_summary.html' %}
+{% endif %}
