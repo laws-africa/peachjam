@@ -1394,9 +1394,13 @@ class TestSearchEngine(TestCase):
                 "_source": [
                     "title",
                     "expression_frbr_uri",
+                    "frbr_uri_subtype",
+                    "frbr_uri_actor",
                     "repealed",
                     "commenced",
                     "principal",
+                    "flynote",
+                    "blurb",
                 ],
                 "retriever": {
                     "rrf": {
