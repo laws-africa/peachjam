@@ -151,7 +151,7 @@ class SearchHit:
                             self.pages.append(
                                 {
                                     "page_num": page_num,
-                                    "highlight": {"pages.body": [escape(info["text"])]},
+                                    "highlight": {"pages_body": [escape(info["text"])]},
                                     "score": chunk._score,
                                 }
                             )
@@ -209,7 +209,7 @@ class SearchHit:
                             # remove injected text at the start
                             text = text.split(TEXT_INJECTION_SEPARATOR, 1)[1]
 
-                        info["highlight"] = {"provisions.body": [escape(text)]}
+                        info["highlight"] = {"provisions_body": [escape(text)]}
                         info["id"] = info["portion"]
                         info["type"] = info["provision_type"]
                         self.provisions.append(info)
@@ -217,7 +217,7 @@ class SearchHit:
     def merge_exact_highlights(self, highlight):
         # fold .exact highlights into the main field to make life easier for the client
         for key, value in list(highlight.items()):
-            if key.endswith(".exact"):
+            if key.endswith("_exact"):
                 short = key[:-6]
                 if short not in highlight:
                     highlight[short] = value
