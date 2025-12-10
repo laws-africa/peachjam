@@ -274,10 +274,14 @@ class SearchableDocument(Document):
         return instance.work.frbr_uri_locality or ""
 
     def prepare_frbr_uri_subtype(self, instance):
-        return instance.work.frbr_uri_subtype or ""
+        # because subtype/actor are ambiguous when parsing an FRBR URI, use the explicit field from the document
+        # TODO: this used to be instance.work.frbr_uri_subtype which is incorrect for judgments; ES should be updated
+        return instance.frbr_uri_subtype or ""
 
     def prepare_frbr_uri_actor(self, instance):
-        return instance.work.frbr_uri_actor or ""
+        # because subtype/actor are ambiguous when parsing an FRBR URI, use the explicit field from the document
+        # TODO: this used to be instance.work.frbr_uri_actor which is incorrect for judgments; ES should be updated
+        return instance.frbr_uri_actor or ""
 
     def prepare_case_number(self, instance):
         if hasattr(instance, "case_numbers"):
