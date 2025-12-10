@@ -312,20 +312,24 @@ class PortionMetadata(BaseModel):
     frbr_place: str
     frbr_country: str
     frbr_doctype: str
-    frbr_subtype: Optional[str]
+    frbr_subtype: Optional[str] = None
+    # TODO: enable once data is backfilled correctly in ES
+    # frbr_actor: Optional[str] = None
     title: str
-    repealed: Optional[bool]
-    commenced: Optional[bool]
-    principal: Optional[bool]
+    repealed: Optional[bool] = None
+    commenced: Optional[bool] = None
+    principal: Optional[bool] = None
+    blurb: Optional[str] = None
+    flynote: Optional[str] = None
     expression_date: str
     expression_frbr_uri: str
     public_url: str
     portion_type: PortionType
-    portion_id: Optional[str]
-    portion_title: Optional[str]
-    portion_parent_ids: Optional[List[str]]
-    portion_parent_titles: Optional[List[str]]
-    portion_public_url: Optional[str]
+    portion_id: Optional[str] = None
+    portion_title: Optional[str] = None
+    portion_parent_ids: Optional[List[str]] = None
+    portion_parent_titles: Optional[List[str]] = None
+    portion_public_url: Optional[str] = None
 
 
 class PortionHit(BaseModel):
