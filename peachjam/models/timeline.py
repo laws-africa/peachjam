@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from typing import NamedTuple
 
 from django.db import models
 from django.db.models import Prefetch
@@ -56,7 +57,29 @@ class TimelineEvent(models.Model):
         NEW_CITATION = "new_citation", _("New Citation")
         NEW_AMENDMENT = "new_amendment", _("New Amendment")
         NEW_REPEAL = "new_repeal", _("New Repeal")
-        NEW_COMMENCEMENT = "new_commencement", _("New Commencment")
+        NEW_COMMENCEMENT = "new_commencement", _("New Commencement")
+        NEW_OVERTURN = "new_overturn", _("New Overturn")
+
+    class PredicateConfig(NamedTuple):
+        event_type: str
+        description: str
+
+    PREDICATE_MAP = {
+        "amended-by": PredicateConfig(
+            event_type=EventTypes.NEW_AMENDMENT,
+            description=_("New amendments published for"),
+        ),
+        "repealed-by": PredicateConfig(
+            event_type=EventTypes.NEW_REPEAL, description=_("New repeals for")
+        ),
+        "commenced-by": PredicateConfig(
+            event_type=EventTypes.NEW_COMMENCEMENT,
+            description=_("New commencement for"),
+        ),
+        "overturns": PredicateConfig(
+            event_type=EventTypes.NEW_OVERTURN, description=_("New overturn for")
+        ),
+    }
 
     objects = TimelineEventManager()
 
@@ -74,21 +97,24 @@ class TimelineEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
+    @classmethod
+    def event_for_predicate(cls, predicate_slug: str):
+        config = cls.PREDICATE_MAP.get(predicate_slug)
+        return config.event_type if config else None
+
     def description_text(self):
-        if self.event_type == self.EventTypes.NEW_DOCUMENTS:
-            return _("New documents added for")
-        elif self.event_type == self.EventTypes.SAVED_SEARCH:
-            return _("New search hits for")
-        elif self.event_type == self.EventTypes.NEW_CITATION:
-            return _("New citations for")
-        elif self.event_type == self.EventTypes.NEW_AMENDMENT:
-            return _("New amendments published for")
-        elif self.event_type == self.EventTypes.NEW_REPEAL:
-            return _("New repeal for")
-        elif self.event_type == self.EventTypes.NEW_COMMENCEMENT:
-            return _("New commencement for")
-        else:
-            return _("New updates for")
+        # relationship-based events
+        for cfg in self.PREDICATE_MAP.values():
+            if cfg.event_type == self.event_type:
+                return cfg.description
+
+        # everything else
+        other_events = {
+            self.EventTypes.NEW_DOCUMENTS: _("New documents added for"),
+            self.EventTypes.SAVED_SEARCH: _("New search hits for"),
+            self.EventTypes.NEW_CITATION: _("New citations of"),
+        }
+        return other_events.get(self.event_type, _("New updates for"))
 
     @property
     def subject_documents(self):
@@ -179,19 +205,9 @@ class TimelineEvent(models.Model):
 
     @classmethod
     def add_new_relationship_events(cls, follow, relationship):
-        predicate_name = relationship.predicate.name
-
-        predicate_to_event = {
-            "amended by": cls.EventTypes.NEW_AMENDMENT,
-            "repealed by": cls.EventTypes.NEW_REPEAL,
-            "commenced by": cls.EventTypes.NEW_COMMENCEMENT,
-        }
-
-        event_type = predicate_to_event.get(predicate_name)
+        event_type = cls.event_for_predicate(relationship.predicate.slug)
         if not event_type:
-            log.error(
-                "relationship predicate of type %s is not allowed", predicate_name
-            )
+            log.error("Predicate %s not allowed", relationship.predicate.slug)
             return None
 
         event, _ = TimelineEvent.objects.get_or_create(
