@@ -87,6 +87,8 @@ class PortionSearchView(APIView):
                         portion_type=chunk._source.type,
                         portion_id=portion_id,
                         portion_title=None,
+                        portion_parent_ids=None,
+                        portion_parent_titles=None,
                         portion_public_url=self.portion_public_url(
                             request, expression_frbr_uri, chunk._source.type, portion_id
                         ),
@@ -140,6 +142,8 @@ class PortionSearchView(APIView):
                                     "provisions.body",
                                     "provisions.id",
                                     "provisions.title",
+                                    "provisions.parent_ids",
+                                    "provisions.parent_titles",
                                 ]
                             },
                         },
@@ -198,5 +202,11 @@ class PortionSearchView(APIView):
                     details = portion_details[key]
                     if hasattr(details, "title"):
                         portion.metadata.portion_title = details.title
+                    if getattr(details, "parent_ids", None):
+                        portion.metadata.portion_parent_ids = list(details.parent_ids)
+                    if getattr(details, "parent_titles", None):
+                        portion.metadata.portion_parent_titles = list(
+                            details.parent_titles
+                        )
                     if hasattr(details, "body"):
                         portion.content.text = details.body
