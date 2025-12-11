@@ -1127,8 +1127,12 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
 
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
-    held = forms.CharField(widget=CKEditorWidget(), required=False)
-    issues = forms.CharField(widget=CKEditorWidget(), required=False)
+    held = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 15, "cols": 50}), required=False
+    )
+    issues = forms.CharField(
+        widget=forms.Textarea(attrs={"rows": 15, "cols": 50}), required=False
+    )
 
     class Meta:
         model = Judgment
@@ -1166,7 +1170,7 @@ class JudgmentAdminForm(DocumentForm):
             return ""
 
         if isinstance(value, list):
-            return "".join([f"{item}\n" for item in value])
+            return "\n".join(value)
 
         return value
 
