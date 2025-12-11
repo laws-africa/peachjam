@@ -76,7 +76,7 @@ User = get_user_model()
 
 class CustomManyToManyWidget(ManyToManyWidget):
     def render(self, value, **kwargs):
-        if value.instance.pk is None:
+        if not value or not value.instance or value.instance.pk is None:
             return ""
         return super().render(value, **kwargs)
 
