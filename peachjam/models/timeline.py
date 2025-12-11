@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from itertools import islice
+from typing import NamedTuple
 
 from django.db import models
 from django.db.models import Prefetch
@@ -56,6 +56,30 @@ class TimelineEvent(models.Model):
         SAVED_SEARCH = "saved_search", _("Saved Search")
         NEW_CITATION = "new_citation", _("New Citation")
         NEW_AMENDMENT = "new_amendment", _("New Amendment")
+        NEW_REPEAL = "new_repeal", _("New Repeal")
+        NEW_COMMENCEMENT = "new_commencement", _("New Commencement")
+        NEW_OVERTURN = "new_overturn", _("New Overturn")
+
+    class PredicateConfig(NamedTuple):
+        event_type: str
+        description: str
+
+    PREDICATE_MAP = {
+        "amended-by": PredicateConfig(
+            event_type=EventTypes.NEW_AMENDMENT,
+            description=_("New amendments published for"),
+        ),
+        "repealed-by": PredicateConfig(
+            event_type=EventTypes.NEW_REPEAL, description=_("New repeals for")
+        ),
+        "commenced-by": PredicateConfig(
+            event_type=EventTypes.NEW_COMMENCEMENT,
+            description=_("New commencement for"),
+        ),
+        "overturns": PredicateConfig(
+            event_type=EventTypes.NEW_OVERTURN, description=_("New overturn for")
+        ),
+    }
 
     objects = TimelineEventManager()
 
@@ -72,6 +96,25 @@ class TimelineEvent(models.Model):
     extra_data = models.JSONField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
+
+    @classmethod
+    def event_for_predicate(cls, predicate_slug: str):
+        config = cls.PREDICATE_MAP.get(predicate_slug)
+        return config.event_type if config else None
+
+    def description_text(self):
+        # relationship-based events
+        for cfg in self.PREDICATE_MAP.values():
+            if cfg.event_type == self.event_type:
+                return cfg.description
+
+        # everything else
+        event_map = {
+            self.EventTypes.NEW_DOCUMENTS: _("New documents added for"),
+            self.EventTypes.SAVED_SEARCH: _("New search hits for"),
+            self.EventTypes.NEW_CITATION: _("New citations of"),
+        }
+        return event_map.get(self.event_type, _("New updates for"))
 
     @property
     def subject_documents(self):
@@ -109,7 +152,7 @@ class TimelineEvent(models.Model):
     def add_new_documents_event(cls, follow, documents):
         event, _ = TimelineEvent.objects.get_or_create(
             user_following=follow,
-            event_type=follow.get_event_type(),
+            event_type=cls.EventTypes.NEW_DOCUMENTS,
             email_alert_sent_at__isnull=True,
         )
         event.append_documents(documents)
@@ -134,7 +177,7 @@ class TimelineEvent(models.Model):
 
         event, created = TimelineEvent.objects.get_or_create(
             user_following=follow,
-            event_type=follow.get_event_type(),
+            event_type=cls.EventTypes.SAVED_SEARCH,
             email_alert_sent_at__isnull=True,
             defaults={"extra_data": {"hits": new_hits}},
         )
@@ -161,6 +204,21 @@ class TimelineEvent(models.Model):
         return event
 
     @classmethod
+    def add_new_relationship_events(cls, follow, relationship):
+        event_type = cls.event_for_predicate(relationship.predicate.slug)
+        if not event_type:
+            log.error("Predicate %s not allowed", relationship.predicate.slug)
+            return None
+
+        event, _ = TimelineEvent.objects.get_or_create(
+            user_following=follow,
+            event_type=event_type,
+            email_alert_sent_at__isnull=True,
+        )
+        event.subject_works.add(relationship.object_work)
+        return event
+
+    @classmethod
     def get_user_timeline(cls, user, before=None, limit=5):
         qs = TimelineEvent.objects.filter(user_following__user=user).annotate(
             event_date=TruncDate("created_at")
@@ -170,7 +228,6 @@ class TimelineEvent(models.Model):
             qs = qs.filter(event_date__lt=before)
 
         dates = qs.values("event_date").distinct().order_by("-event_date")[:limit]
-
         date_list = [d["event_date"] for d in dates]
 
         events_qs = (
@@ -187,20 +244,30 @@ class TimelineEvent(models.Model):
             TimelineEvent.objects.attach_subject_documents(ev) for ev in events_qs
         ]
 
-        grouped = defaultdict(lambda: defaultdict(list))
+        # FIX: group by (date → following → event_type)
+        grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for ev in events_qs:
             for doc in ev.subject_documents:
-                grouped[ev.event_date][ev.user_following].append(doc)
+                grouped[ev.event_date][ev.user_following][ev.event_type].append(
+                    (ev, doc)
+                )
 
         results = {}
 
         for date, by_follow in grouped.items():
             entries = []
-            for follow, docs in by_follow.items():
-                first = list(islice(docs, 10))
-                rest = docs[10:]
-                entries.append((follow, (first, rest)))
+
+            for follow, by_event in by_follow.items():
+                for event_type, ev_doc_pairs in by_event.items():
+                    ev = ev_doc_pairs[0][0]
+                    docs_only = [doc for (_ev, doc) in ev_doc_pairs]
+
+                    first = docs_only[:10]
+                    rest = docs_only[10:]
+
+                    entries.append((follow, ev.description_text(), (first, rest)))
+
             results[date] = entries
 
         next_before = min(date_list) if date_list else None
