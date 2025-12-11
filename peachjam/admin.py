@@ -1140,12 +1140,12 @@ class JudgmentAdminForm(DocumentForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        if self.instance and self.instance.held:
-            self.initial["held"] = self.convert_to_paragraphs(self.instance.held)
-
-        if self.instance and self.instance.issues:
-            self.initial["issues"] = self.convert_to_paragraphs(self.instance.issues)
+        self.initial["held"] = self.convert_to_paragraphs(
+            self.instance.held if self.instance else []
+        )
+        self.initial["issues"] = self.convert_to_paragraphs(
+            self.instance.issues if self.instance else []
+        )
 
     def clean_held(self):
         return self.cleaned_data["held"].splitlines()
@@ -1207,17 +1207,23 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets[3][1]["fields"].extend(
-        [
-            "blurb",
-            "case_summary",
-            "case_summary_public",
-            "flynote",
-            "order",
-            "issues",
-            "held",
-        ]
-    )
+    fieldsets.insert(
+        4,
+        (
+            gettext_lazy("Summary"),
+            {
+                "fields": [
+                    "case_summary_public",
+                    "blurb",
+                    "flynote",
+                    "case_summary",
+                    "issues",
+                    "held",
+                    "order",
+                ]
+            },
+        ),
+    ),
     readonly_fields = [
         "mnc",
         "serial_number",
@@ -1236,6 +1242,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "Judges",
         "Additional details",
         "Content",
+        "Summary",
         "Alternative names",
         "Attached files",
         "Document topics",
