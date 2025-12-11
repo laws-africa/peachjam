@@ -115,6 +115,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         "search_alert",
         "user_following_alert",
         "new_citation_alert",
+        "new_relationship_alert",
     ]
 
     def __init__(self, *args, **kwargs):

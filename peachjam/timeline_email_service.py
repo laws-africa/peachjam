@@ -300,3 +300,14 @@ class TimelineEmailService:
             context["html_body"] = render_to_string(
                 "peachjam/emails/new_relationship_alert_body.html", context=context
             )
+
+            with override(user.userprofile.preferred_language.pk):
+                send_templated_mail(
+                    template_name="new_relationship_alert",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    context=context,
+                )
+
+        for ev in events:
+            ev.mark_as_sent()
