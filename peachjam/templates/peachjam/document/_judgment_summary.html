@@ -1,3 +1,2 @@
 {% load i18n %}
-<div id="metadata-summary-target" hx-swap-oob="true">{% include "peachjam/document/_case_summary.html" %}</div>
-<div id="sidebar-summary-target" hx-swap-oob="true">{% include "peachjam/document/_case_summary.html" %}</div>
+<div hx-swap-oob="outerHTML:.judgment-full-summary">{% include "peachjam/document/_case_summary.html" %}</div>
