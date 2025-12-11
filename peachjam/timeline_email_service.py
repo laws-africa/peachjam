@@ -1,7 +1,11 @@
+import logging
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.sites.models import Site
 from django.template.loader import render_to_string
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -12,8 +16,28 @@ from peachjam.tasks import (
     send_saved_search_email_alert,
 )
 
+log = logging.getLogger(__name__)
+
 
 class TimelineEmailService:
+    @staticmethod
+    def already_alerted_today(user, event_type):
+        last_24_hrs = timezone.now() - timedelta(hours=24)
+        email_sent = TimelineEvent.objects.filter(
+            email_alert_sent_at__gte=last_24_hrs,
+            event_type=event_type,
+            user_following__user=user,
+        ).exists()
+        if email_sent:
+            log.info(
+                "%s email for %s has been sent within the last 24hrs: %s",
+                event_type,
+                user,
+                last_24_hrs,
+            )
+            return True
+        return False
+
     @staticmethod
     def send_email_alerts():
         events = TimelineEvent.objects.filter(email_alert_sent_at__isnull=True)
@@ -48,6 +72,12 @@ class TimelineEmailService:
 
     @staticmethod
     def send_new_documents_email(user):
+
+        if TimelineEmailService.already_alerted_today(
+            user, TimelineEvent.EventTypes.NEW_DOCUMENTS
+        ):
+            return
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
@@ -55,39 +85,44 @@ class TimelineEmailService:
         )
 
         if not events.exists():
+            log.info("No new documents events to alert for %s", user)
             return
 
-        events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            events = [
+                TimelineEvent.objects.attach_subject_documents(ev) for ev in events
+            ]
 
-        follows_map = {}
-        for ev in events:
-            key = ev.user_following.followed_object
-            follows_map.setdefault(key, set()).update(ev.subject_documents)
+            follows_map = {}
+            for ev in events:
+                key = ev.user_following.followed_object
+                follows_map.setdefault(key, set()).update(ev.subject_documents)
 
-        follows = [
-            {"followed_object": key, "documents": list(docs)[:10]}
-            for key, docs in follows_map.items()
-        ]
+            follows = [
+                {"followed_object": key, "documents": list(docs)[:10]}
+                for key, docs in follows_map.items()
+            ]
 
-        context = {
-            "followed_documents": follows,
-            "user": user,
-            "manage_url_path": reverse("user_following_list"),
-        }
+            context = {
+                "followed_documents": follows,
+                "user": user,
+                "manage_url_path": reverse("user_following_list"),
+            }
 
-        with override(user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="user_following_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                context=context,
-            )
+            with override(user.userprofile.preferred_language.pk):
+                send_templated_mail(
+                    template_name="user_following_alert",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    context=context,
+                )
 
         for ev in events:
             ev.mark_as_sent()
 
     @staticmethod
     def send_saved_search_email(user):
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
@@ -95,29 +130,41 @@ class TimelineEmailService:
         )
 
         if not events.exists():
+            log.info("No saved search events to alert for %s", user)
             return
 
-        events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            events = [
+                TimelineEvent.objects.attach_subject_documents(ev) for ev in events
+            ]
+
+            for ev in events:
+                context = {
+                    "user": user,
+                    "hits": (ev.extra_data or {}).get("hits", []),
+                    "saved_search": ev.user_following.saved_search,
+                    "manage_url_path": reverse("search:saved_search_list"),
+                }
+
+                with override(user.userprofile.preferred_language.pk):
+                    send_templated_mail(
+                        template_name="search_alert",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[user.email],
+                        context=context,
+                    )
 
         for ev in events:
-            context = {
-                "user": user,
-                "hits": (ev.extra_data or {}).get("hits", []),
-                "saved_search": ev.user_following.saved_search,
-                "manage_url_path": reverse("search:saved_search_list"),
-            }
-
-            with override(user.userprofile.preferred_language.pk):
-                send_templated_mail(
-                    template_name="search_alert",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    context=context,
-                )
-                ev.mark_as_sent()
+            ev.mark_as_sent()
 
     @staticmethod
     def send_new_citation_email(user):
+
+        if TimelineEmailService.already_alerted_today(
+            user, TimelineEvent.EventTypes.NEW_CITATION
+        ):
+            return
+
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
@@ -125,60 +172,62 @@ class TimelineEmailService:
         )
 
         if not events.exists():
+            log.info("No new citation events to alert for %s", user)
             return
 
-        events = [TimelineEvent.objects.attach_subject_documents(ev) for ev in events]
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            events = [
+                TimelineEvent.objects.attach_subject_documents(ev) for ev in events
+            ]
 
-        context = {
-            "user": user,
-            "saved_documents": [],
-            "manage_url_path": reverse("folder_list"),
-        }
-
-        for ev in events:
-            citing_documents = []
-            for doc in ev.subject_documents[:5]:
-                provision_citations = ProvisionCitation.objects.filter(
-                    citing_document=doc,
-                    work=ev.user_following.saved_document.document.work,
-                    whole_work=False,
-                )[:2]
-                citing_documents.append(
-                    {
-                        "document": doc,
-                        "provision_citations": provision_citations,
-                    }
-                )
-
-            context["saved_documents"].append(
-                {
-                    "saved_document": ev.user_following.saved_document.document,
-                    "citing_documents": citing_documents,
-                }
-            )
-        site = Site.objects.get_current()
-        context["site_domain"] = f"https://{site.domain}"
-
-        # render html template string
-        context["html_body"] = render_to_string(
-            "peachjam/emails/new_citation_alert_body.html", context=context
-        )
-        subject_line = (
-            f"New citations for {context['saved_documents'][0]['saved_document'].title}"
-        )
-        saved_docs_length = len(context["saved_documents"])
-        if saved_docs_length > 1:
-            subject_line += f" and {saved_docs_length} more"
-
-        context["subject_line"] = subject_line
-
-        with override(user.userprofile.preferred_language.pk):
-            send_templated_mail(
-                template_name="new_citation_alert",
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                context=context,
-            )
+            context = {
+                "user": user,
+                "saved_documents": [],
+                "manage_url_path": reverse("folder_list"),
+            }
 
             for ev in events:
-                ev.mark_as_sent()
+                citing_documents = []
+                for doc in ev.subject_documents[:5]:
+                    provision_citations = ProvisionCitation.objects.filter(
+                        citing_document=doc,
+                        work=ev.user_following.saved_document.document.work,
+                        whole_work=False,
+                    )[:2]
+                    citing_documents.append(
+                        {
+                            "document": doc,
+                            "provision_citations": provision_citations,
+                        }
+                    )
+
+                context["saved_documents"].append(
+                    {
+                        "saved_document": ev.user_following.saved_document.document,
+                        "citing_documents": citing_documents,
+                    }
+                )
+            site = Site.objects.get_current()
+            context["site_domain"] = f"https://{site.domain}"
+
+            # render html template string
+            context["html_body"] = render_to_string(
+                "peachjam/emails/new_citation_alert_body.html", context=context
+            )
+            subject_line = f"New citations for {context['saved_documents'][0]['saved_document'].title}"
+            saved_docs_length = len(context["saved_documents"])
+            if saved_docs_length > 1:
+                subject_line += f" and {saved_docs_length} more"
+
+            context["subject_line"] = subject_line
+
+            with override(user.userprofile.preferred_language.pk):
+                send_templated_mail(
+                    template_name="new_citation_alert",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    context=context,
+                )
+
+        for ev in events:
+            ev.mark_as_sent()

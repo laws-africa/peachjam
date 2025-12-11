@@ -4,6 +4,7 @@ import sentry_sdk
 from background_task import background
 from background_task.signals import task_error
 from background_task.tasks import DBTaskRunner, Task, logger, tasks
+from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
 from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
@@ -37,8 +38,8 @@ class PatchedDBTaskRunner(DBTaskRunner):
         # wrap the task in a sentry transaction
         with sentry_sdk.start_transaction(
             op="queue.task", source=TRANSACTION_SOURCE_TASK, name=task.task_name
-        ) as transaction:
-            transaction.set_status("ok")
+        ) as tx:
+            tx.set_status("ok")
             super().run_task(tasks, task)
 
 
@@ -58,6 +59,7 @@ def on_task_error(*args, **kwargs):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def update_document(ingestor_id, document_id):
     from peachjam.models import Ingestor
 
@@ -81,6 +83,7 @@ def update_document(ingestor_id, document_id):
 
 
 @background(queue="peachjam", schedule=(60 * 5), remove_existing_tasks=True)
+@transaction.atomic
 def delete_document(ingestor_id, expression_frbr_uri):
     from peachjam.models import Ingestor
 
@@ -105,6 +108,7 @@ def delete_document(ingestor_id, expression_frbr_uri):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def run_ingestor(ingestor_id):
     """Run an ingestor."""
     from peachjam.models import Ingestor
@@ -125,6 +129,7 @@ def run_ingestor(ingestor_id):
 
 # this can be slow and is not urgent, run at a lower priority
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -5})
+@transaction.atomic
 def extract_citations(document_id):
     """Extract citations from a document in the background."""
 
@@ -149,6 +154,7 @@ def extract_citations(document_id):
 
 
 @background(queue="peachjam", schedule=60, remove_existing_tasks=True)
+@transaction.atomic
 def update_extracted_citations_for_a_work(work_id):
     """Update Extracted Citations for a work."""
 
@@ -169,12 +175,14 @@ def update_extracted_citations_for_a_work(work_id):
 
 
 @background(queue="peachjam", schedule=60 * 60, remove_existing_tasks=True)
+@transaction.atomic
 def re_extract_citations():
     cp = citations_processor()
     cp.re_extract_citations()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def convert_source_file_to_pdf(source_file_id):
     from peachjam.models import SourceFile
 
@@ -196,6 +204,7 @@ def convert_source_file_to_pdf(source_file_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def create_anonymised_source_file_pdf(doc_id):
     from peachjam.models import Judgment
 
@@ -209,6 +218,7 @@ def create_anonymised_source_file_pdf(doc_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def rank_works():
     from peachjam.analysis.ranker import GraphRanker
 
@@ -239,6 +249,7 @@ def update_user_follows():
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def update_follows_for_user(user_id):
     from django.contrib.auth import get_user_model
 
@@ -258,12 +269,11 @@ def send_timeline_email_alerts():
     from peachjam.timeline_email_service import TimelineEmailService
 
     log.info("Checking for pending timeline emails")
-    log.info("Temporarily disabled")
-    return
     TimelineEmailService.send_email_alerts()
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@transaction.atomic
 def send_new_document_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
@@ -280,6 +290,7 @@ def send_new_document_email_alert(user_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@transaction.atomic
 def send_saved_search_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
@@ -296,6 +307,7 @@ def send_saved_search_email_alert(user_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@transaction.atomic
 def send_new_citation_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
@@ -305,15 +317,13 @@ def send_new_citation_email_alert(user_id):
     if not user:
         log.info(f"No user with id {user_id} exists, ignoring.")
         return
-
-    log.info("Temporarily disabled")
-    return
     log.info(f"Sending new citation email alerts for user {user_id}")
     TimelineEmailService.send_new_citation_email(user)
     log.info("New citation email alerts sent")
 
 
 @background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
+@transaction.atomic
 def generate_judgment_summary(doc_id):
     from peachjam.models import Judgment
 
@@ -327,6 +337,7 @@ def generate_judgment_summary(doc_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
 def update_users_new_citation(citation_id):
     from peachjam.models import ExtractedCitation, UserFollowing
 

@@ -576,12 +576,19 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
         return context
 
 
+@method_decorator(never_cache, name="dispatch")
 class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
     model = Glossary
     slug_url_kwarg = "place_code"
     slug_field = "place_code"
     permission_required = "peachjam.view_glossary"
     template_name = "peachjam/glossary/glossary.html"
+
+    def get_subscription_required_context(self):
+        context = {"glossary": getattr(self, "object", self.get_object())}
+        country, locality = get_country_and_locality(context["glossary"].place_code)
+        context["place"] = locality or country
+        return context
 
     def get_subscription_required_template(self):
         return self.template_name
@@ -594,8 +601,7 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
             letters.append("0")
         context["letters"] = letters
         context["first_letter"] = letters[0] if letters else None
-        country, locality = get_country_and_locality(self.object.place_code)
-        context["place_name"] = locality.name if locality else country.name
+        context.update(self.get_subscription_required_context())
         return context
 
 
@@ -607,16 +613,10 @@ class PlaceGlossaryLetterView(PlaceGlossaryView):
         self.letter = kwargs.get("letter")
         return super().get(*args, **kwargs)
 
-    def get_filtered_terms(self, terms, q):
-        if not q:
-            return terms
-        return [t for t in terms if q.lower() in t["term_lc"]]
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["letter"] = self.letter
-        terms = self.object.data.get(self.letter, [])
-        context["terms"] = self.get_filtered_terms(terms, self.request.GET.get("q"))
+        context["terms"] = self.object.data.get(self.letter, [])
         return context
 
 
