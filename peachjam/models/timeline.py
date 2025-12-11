@@ -109,12 +109,12 @@ class TimelineEvent(models.Model):
                 return cfg.description
 
         # everything else
-        other_events = {
+        event_map = {
             self.EventTypes.NEW_DOCUMENTS: _("New documents added for"),
             self.EventTypes.SAVED_SEARCH: _("New search hits for"),
             self.EventTypes.NEW_CITATION: _("New citations of"),
         }
-        return other_events.get(self.event_type, _("New updates for"))
+        return event_map.get(self.event_type, _("New updates for"))
 
     @property
     def subject_documents(self):

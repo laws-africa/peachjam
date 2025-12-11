@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -13,6 +14,7 @@ from peachjam.models import ProvisionCitation, TimelineEvent
 from peachjam.tasks import (
     send_new_citation_email_alert,
     send_new_document_email_alert,
+    send_new_relationship_email_alert,
     send_saved_search_email_alert,
 )
 
@@ -22,12 +24,20 @@ log = logging.getLogger(__name__)
 class TimelineEmailService:
     @staticmethod
     def already_alerted_today(user, event_type):
+        q = Q()
         last_24_hrs = timezone.now() - timedelta(hours=24)
-        email_sent = TimelineEvent.objects.filter(
+
+        if type(event_type) == list:
+            q = Q(event_type__in=event_type)
+        elif type(event_type) == TimelineEvent.EventTypes:
+            q = Q(event_type=event_type)
+
+        q &= Q(
             email_alert_sent_at__gte=last_24_hrs,
-            event_type=event_type,
             user_following__user=user,
-        ).exists()
+        )
+
+        email_sent = TimelineEvent.objects.filter(q).exists()
         if email_sent:
             log.info(
                 "%s email for %s has been sent within the last 24hrs: %s",
@@ -61,6 +71,15 @@ class TimelineEmailService:
             .distinct()
         )
 
+        relationship_events_types = [
+            ev.event_type for ev in TimelineEvent.PREDICATE_MAP.values()
+        ]
+        new_relationship_user_ids = (
+            events.filter(event_type__in=relationship_events_types)
+            .values_list("user_following__user_id", flat=True)
+            .distinct()
+        )
+
         for user_id in new_doc_user_ids:
             send_new_document_email_alert(user_id)
 
@@ -69,6 +88,9 @@ class TimelineEmailService:
 
         for user_id in new_citation_user_ids:
             send_new_citation_email_alert(user_id)
+
+        for user_id in new_relationship_user_ids:
+            send_new_relationship_email_alert(user_id)
 
     @staticmethod
     def send_new_documents_email(user):
@@ -231,3 +253,50 @@ class TimelineEmailService:
 
         for ev in events:
             ev.mark_as_sent()
+
+    @staticmethod
+    def send_new_relationship_email(user):
+        relationship_events_types = [
+            ev.event_type for ev in TimelineEvent.PREDICATE_MAP.values()
+        ]
+
+        if TimelineEmailService.already_alerted_today(user, relationship_events_types):
+            return
+
+        events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
+            email_alert_sent_at__isnull=True,
+            event_type__in=relationship_events_types,
+            user_following__user=user,
+        )
+
+        if not events.exists():
+            log.info("No new relationship events to alert for %s", user)
+            return
+
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            events = [
+                TimelineEvent.objects.attach_subject_documents(ev) for ev in events
+            ]
+            saved_documents_map = {}
+            for ev in events:
+                key = ev.user_following.followed_object
+                saved_documents_map.setdefault(key, {}).setdefault(
+                    ev.description_text(), []
+                ).extend(ev.subject_documents)
+
+            saved_documents = [
+                {"saved_document": key, "relationships": value}
+                for key, value in saved_documents_map.items()
+            ]
+            site = Site.objects.get_current()
+
+            context = {
+                "saved_documents": saved_documents,
+                "user": user,
+                "manage_url_path": reverse("folder_list"),
+                "site_domain": f"https://{site.domain}",
+            }
+
+            context["html_body"] = render_to_string(
+                "peachjam/emails/new_relationship_alert_body.html", context=context
+            )

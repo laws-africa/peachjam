@@ -1,0 +1,16 @@
+{% for item in saved_documents %}
+  {% for description, documents in item.relationships.items %}
+    <div>
+      <p>
+        {{ description }} <a href="{{ site_domain }}{{ item.saved_document.get_absolute_url }}?utm_campaign=new_relationship&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.work.title }}</b></a>
+      </p>
+      {% for doc in documents %}
+        <div>
+          <a href="{{ site_domain }}{{ doc.get_absolute_url }}?utm_campaign=new_relationship&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
+          {% if doc.blurb %}<div>{{ doc.blurb }}</div>{% endif %}
+          {% if doc.flynote %}<div>{{ doc.flynote|safe }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endfor %}
+{% endfor %}
