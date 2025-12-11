@@ -110,8 +110,7 @@
           <div id="metadata-summary-target"></div>
         </details>
         <div hx-trigger="load"
-             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1"
-             hx-swap="none">
+             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1">
         </div>
       </dd>
     </dl>
