@@ -171,13 +171,6 @@ class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
 
-    def get_template_names(self):
-        mode = self.request.GET.get("mode")
-        if mode == "judgment-detail":
-            return ["peachjam/document/_judgment_summary_public.html"]
-        else:
-            return super().get_template_names()
-
     def has_permission(self):
         document = self.get_object()
         is_public = document.case_summary_public

@@ -102,9 +102,15 @@
           <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
           <div class="mb-2 fst-italic">{{ document.flynote|safe }}</div>
         {% endif %}
+        <details>
+          <summary class="mb-1">
+            {% trans 'Read full summary' %}
+          </summary>
+          <div id="metadata-summary-target"></div>
+        </details>
         <div hx-trigger="load"
              hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}?collapse=1"
-             hx-vals='{"mode":"judgment-detail"}'>
+             hx-swap="none">
         </div>
       </dd>
     {% endif %}
