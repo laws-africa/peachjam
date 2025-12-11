@@ -185,7 +185,7 @@ class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
         context = {}
         document = self.get_object()
         if hasattr(document, "case_summary"):
-            context = {"collapse_summary": False, "document": document}
+            context = {"document": document}
         return context
 
     def get_context_data(self, **kwargs):
