@@ -1,7 +1,10 @@
+import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Optional
+
+log = logging.getLogger(__name__)
 
 
 class QueryLabel(Enum):
@@ -77,11 +80,25 @@ class QueryClassifier:
 
     def classify_with_model(self, qclass: QueryClass):
         """Attempt to classify the query via the ML model if the rules failed."""
-        from .ml_classifier import get_ml_classifier
+        try:
+            from .ml_classifier import get_ml_classifier
+        except ImportError as e:
+            log.warning(
+                "ML classifier module not available, skipping ML classification.",
+                exc_info=e,
+            )
+            return
 
-        ml_classifier = get_ml_classifier()
+        try:
+            ml_classifier = get_ml_classifier()
+        except FileNotFoundError as e:
+            log.warning(
+                "ML classifier model file not found, skipping ML classification.",
+                exc_info=e,
+            )
+            return
+
         predictions = ml_classifier.predict_queries([qclass.query_clean or ""])
-
         if len(predictions) == 1:
             label, confidence = predictions[0]
             if confidence >= self.CONFIDENCE_THRESHOLD:
