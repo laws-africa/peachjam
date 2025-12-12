@@ -116,5 +116,4 @@ ml = [
 # necessary only for training peachjam_search ML classifiers
 ml_train = [
     "pandas>=2.2.3",
-    "scipy>=1.15.2",
 ]

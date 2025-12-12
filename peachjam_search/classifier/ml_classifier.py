@@ -2,9 +2,10 @@ import re
 from pathlib import Path
 from typing import List, Sequence, Tuple
 
-# NOTE: if numpy and sklearn are not installed, run: pip install -e '.[ml]'
+# NOTE: if these dependencies are not installed, run: pip install -e '.[ml]'
 import joblib
 import numpy as np
+from scipy import sparse
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
@@ -58,9 +59,7 @@ class MLQueryClassifier:
         self,
         queries: Sequence[str],
         stats: dict | None = None,
-    ) -> Tuple[any, dict]:
-        # NOTE: if scipy is not installed, run: pip install -e '.[ml_train]'
-        from scipy import sparse
+    ) -> Tuple[sparse.csr_matrix, dict]:
 
         counts = np.array(
             [len(str(q).split()) for q in queries],
@@ -83,9 +82,7 @@ class MLQueryClassifier:
         vectorizer: TfidfVectorizer,
         word_stats: dict | None = None,
         fit_vectorizer: bool = False,
-    ) -> Tuple[any, dict]:
-        from scipy import sparse
-
+    ) -> Tuple[sparse.csr_matrix, dict]:
         if fit_vectorizer:
             tfidf = vectorizer.fit_transform(queries)
         else:
