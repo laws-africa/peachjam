@@ -36,7 +36,7 @@ class QueryClassifier:
 
     # leading non-word characters
     LEADING_JUNK_RE = re.compile(r"^[^\w]+")
-    CONFIDENCE_THRESHOLD = 0.6
+    CONFIDENCE_THRESHOLD = 0.7
 
     def classify(self, query: str) -> QueryClass:
         qclass = self.clean_query(query)
