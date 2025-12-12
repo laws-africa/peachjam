@@ -191,7 +191,7 @@ class TimelineEmailService:
                 for doc in ev.subject_documents[:5]:
                     provision_citations = ProvisionCitation.objects.filter(
                         citing_document=doc,
-                        work=ev.user_following.saved_document.document.work,
+                        work=ev.user_following.saved_document.work,
                         whole_work=False,
                     )[:2]
                     citing_documents.append(
