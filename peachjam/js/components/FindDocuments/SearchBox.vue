@@ -29,6 +29,8 @@
         :aria-label="inputLabel"
         autocomplete="off"
         @input="handleInput"
+        @keydown.down.prevent="focusFirstDropdownItem"
+        @keydown.up.prevent="focusLastDropdownItem"
       >
       <button
         type="submit"
@@ -42,7 +44,7 @@
       </button>
     </form>
     <div v-if="dropdownItems.length" class="search-box__dropdown">
-      <ul class="list-group list-group-flush" role="listbox">
+      <ul ref="dropdownList" class="list-group list-group-flush" role="listbox">
         <li
           v-for="(item, index) in dropdownItems"
           :key="itemKey(item, index)"
@@ -52,6 +54,8 @@
           @click="handleSelect(item)"
           @keydown.enter.prevent="handleSelect(item)"
           @keydown.space.prevent="handleSelect(item)"
+          @keydown.down.prevent="focusNextItem($event)"
+          @keydown.up.prevent="focusPreviousItem($event)"
           @mousedown.prevent
         >
           <span class="search-box__item-icon d-flex align-items-center justify-content-center me-2">
@@ -182,6 +186,72 @@ export default {
     handleCancel () {
       this.$emit('cancel');
     },
+    focusFirstDropdownItem () {
+      if (!this.dropdownItems.length) {
+        return;
+      }
+      this.focusDropdownBoundaryItem('start');
+    },
+    focusLastDropdownItem () {
+      if (!this.dropdownItems.length) {
+        return;
+      }
+      this.focusDropdownBoundaryItem('end');
+    },
+    focusDropdownBoundaryItem (position) {
+      const list = this.$refs.dropdownList;
+      if (!list) {
+        return;
+      }
+      const items = Array.from(list.querySelectorAll('[role="option"]'));
+      if (!items.length) {
+        return;
+      }
+      const target = position === 'end' ? items[items.length - 1] : items[0];
+      if (target && typeof target.focus === 'function') {
+        target.focus();
+      }
+    },
+    focusNextItem (event) {
+      this.focusDropdownItem(event, 1);
+    },
+    focusPreviousItem (event) {
+      this.focusDropdownItem(event, -1);
+    },
+    focusDropdownItem (event, delta) {
+      const currentItem = event.currentTarget;
+      if (!currentItem) {
+        return;
+      }
+      const list = currentItem.parentElement;
+      if (!list) {
+        return;
+      }
+      const items = Array.from(list.querySelectorAll('[role=\"option\"]'));
+      if (!items.length) {
+        return;
+      }
+      const currentIndex = items.indexOf(currentItem);
+      if (currentIndex === -1) {
+        return;
+      }
+      if (delta > 0 && currentIndex === items.length - 1) {
+        this.focusInputFromDropdown();
+        return;
+      }
+      if (delta < 0 && currentIndex === 0) {
+        this.focusInputFromDropdown();
+        return;
+      }
+      const nextIndex = currentIndex + delta;
+      const nextItem = items[nextIndex];
+      if (nextItem && typeof nextItem.focus === 'function') {
+        nextItem.focus();
+      }
+    },
+    focusInputFromDropdown () {
+      this.focusInput();
+    },
     handleEscapeKey (event) {
       if (!this.isVisible) {
         return;
@@ -287,20 +357,21 @@ export default {
 
 .search-box--overlay {
   padding: 0;
-  border-radius: 0;
-  background-color: transparent;
+  border-radius: 0.5rem;
+  background-color: var(--bs-body-bg, #fff);
+  border: 1px solid var(--bs-border-color, #dee2e6);
   box-shadow: none;
 }
 
 .search-box--overlay .search-box__form {
-  background-color: var(--bs-body-bg, #fff);
-  border: 1px solid var(--bs-border-color, #dee2e6);
-  border-radius: 0.5rem;
   padding: 0.25rem 0.5rem;
 }
 
 .search-box--overlay .search-box__dropdown {
   margin-top: 0.25rem;
+  border: none;
+  border-top: 1px solid var(--bs-border-color, #dee2e6);
+  border-radius: 0;
 }
 
 .search-box__form {
@@ -374,7 +445,6 @@ export default {
 
   .search-box__form {
     padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
   }
 
   .search-box__dropdown {
