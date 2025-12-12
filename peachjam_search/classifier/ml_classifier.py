@@ -15,11 +15,7 @@ from sklearn.model_selection import train_test_split
 class MLQueryClassifier:
     """Trains and uses a machine learning model to classify search queries."""
 
-    MODEL_PATH = (
-        Path(__file__).resolve().parent.parent
-        / "ml_models"
-        / "query_classifier_model.joblib"
-    )
+    MODEL_PATH = Path(__file__).parent / "query_classifier_model.joblib"
     model_bundle = None
 
     def load_model(self, model_path: Path = None) -> dict:
