@@ -2,10 +2,9 @@ import re
 from pathlib import Path
 from typing import List, Sequence, Tuple
 
+# NOTE: if numpy and sklearn are not installed, run: pip install -e '.[ml]'
 import joblib
 import numpy as np
-import pandas as pd
-from scipy import sparse
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
@@ -59,7 +58,10 @@ class MLQueryClassifier:
         self,
         queries: Sequence[str],
         stats: dict | None = None,
-    ) -> Tuple[sparse.csr_matrix, dict]:
+    ) -> Tuple[any, dict]:
+        # NOTE: if scipy is not installed, run: pip install -e '.[ml_train]'
+        from scipy import sparse
+
         counts = np.array(
             [len(str(q).split()) for q in queries],
             dtype=np.float32,
@@ -81,7 +83,9 @@ class MLQueryClassifier:
         vectorizer: TfidfVectorizer,
         word_stats: dict | None = None,
         fit_vectorizer: bool = False,
-    ) -> Tuple[sparse.csr_matrix, dict]:
+    ) -> Tuple[any, dict]:
+        from scipy import sparse
+
         if fit_vectorizer:
             tfidf = vectorizer.fit_transform(queries)
         else:
@@ -104,7 +108,7 @@ class MLQueryClassifier:
     def preprocess_queries(self, queries: Sequence[str]) -> List[str]:
         return [self.preprocess_query(q) for q in queries]
 
-    def pre_clean_raw_data(self, data: pd.DataFrame):
+    def pre_clean_raw_data(self, data):
         """Clean up raw data exported from openrefine, used when training."""
         if "search_clean" in data.columns:
             data.rename(columns={"search_clean": "query"}, inplace=True)
@@ -123,6 +127,9 @@ class MLQueryClassifier:
         return data
 
     def train_model(self, train_csv: Path, model_path: Path | None = None):
+        # NOTE: if pandas is not installed, run: pip install -e '.[ml_train]'
+        import pandas as pd
+
         if model_path is None:
             model_path = self.MODEL_PATH
         if not train_csv.exists():
