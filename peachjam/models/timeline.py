@@ -73,6 +73,15 @@ class TimelineEvent(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     email_alert_sent_at = models.DateTimeField(null=True)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user_following", "event_type"],
+                condition=models.Q(email_alert_sent_at__isnull=True),
+                name="unique_user_following_email_alert",
+            )
+        ]
+
     @property
     def subject_documents(self):
         """
