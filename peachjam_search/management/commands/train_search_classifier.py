@@ -2,7 +2,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from peachjam_search.classifier import ModelQueryClassifier
+from peachjam_search.classifier.ml_classifier import MLQueryClassifier
 
 
 class Command(BaseCommand):
@@ -27,7 +27,7 @@ class Command(BaseCommand):
         model_path = (
             Path(model_path_option)
             if model_path_option
-            else ModelQueryClassifier.MODEL_PATH
+            else MLQueryClassifier.MODEL_PATH
         )
 
         if not csv_path.exists():
@@ -35,7 +35,7 @@ class Command(BaseCommand):
 
         model_path.parent.mkdir(parents=True, exist_ok=True)
 
-        classifier = ModelQueryClassifier()
+        classifier = MLQueryClassifier()
         try:
             classifier.train_model(csv_path, model_path=model_path)
         except (FileNotFoundError, ValueError) as exc:
