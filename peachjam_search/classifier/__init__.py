@@ -37,6 +37,7 @@ class QueryClassifier:
     # leading non-word characters
     LEADING_JUNK_RE = re.compile(r"^[^\w]+")
     CONFIDENCE_THRESHOLD = 0.7
+    NUM_RE = re.compile(r"^[\d -]+$")
 
     def classify(self, query: str) -> QueryClass:
         qclass = self.clean_query(query)
@@ -65,6 +66,10 @@ class QueryClassifier:
         numbers: 99, 99a, 55 2
         fixed list of classifications for 1-2 word queries?
         """
+        if self.NUM_RE.match(qclass.query_clean):
+            qclass.label = QueryLabel.NUMBERS
+            qclass.confidence = 1.0
+
         if qclass.n_chars == 0:
             qclass.label = QueryLabel.EMPTY
             qclass.confidence = 1.0
