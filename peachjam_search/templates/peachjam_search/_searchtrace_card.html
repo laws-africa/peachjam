@@ -25,6 +25,16 @@
       <td style="width: 40%">{{ trace.field_searches }}</td>
     </tr>
     <tr>
+      <th>{% trans "Cleaned query" %}</th>
+      <td>{{ trace.query_clean }}</td>
+      <th>{% trans "Classification" %}</th>
+      <td>
+        {{ trace.query_classification }} ({{ trace.query_classification_confidence|floatformat:2 }})
+        · {{ trace.query_clean_n_chars|default_if_none:"?" }} characters
+        · {{ trace.query_clean_n_words|default_if_none:"?" }} words
+      </td>
+    </tr>
+    <tr>
       <th>{% trans "Mode" %}</th>
       <td>{{ trace.mode }}</td>
       <th>{% trans "Ordering" %}</th>
@@ -71,7 +81,9 @@
               <td>
                 <a href="{{ click.frbr_uri }}" target="_blank">{{ click.frbr_uri }}</a>
               </td>
-              <td>{{ click.portion|default_if_none:"" }}</td>
+              <td>
+                {{ click.portion|default_if_none:"" }}
+              </td>
               <td>
                 + <span title="{{ click.created_at }}">{{ trace.created_at|timesince:click.created_at }}</span>
               </td>

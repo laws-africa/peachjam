@@ -25,8 +25,8 @@
 3. Install dependencies:
 
    ```bash
-   pip install -e .[dev]
-   pip install psycopg[binary]==3.2.12
+   pip install -e '.[dev]'
+   pip install 'psycopg[binary]==3.2.12'
    ```
 
 4. Ensure PostgreSQL is running, then create a `peachjam` user and database:
@@ -212,6 +212,23 @@ Copy only certain files into the project:
 
 ```
 cp t/favicon.ico t/favicon-16x16.png t/favicon-32x32.png t/favicon-96x96.png t/favicon-180x180.png lii-name/static/images/
+```
+
+## Search query classification models
+
+Peachjam Search uses machine learning models to classify user search queries. These models require large dependencies like numpy and scikit-learn to be installed,
+and so aren't included in the default set of dependencies.
+
+To set up dependencies for local use of the search query classification models, run:
+
+```bash
+pip install -e '.[dev,ml]'
+```
+
+To set up dependencies to train new models, run:
+
+```bash
+pip install -e '.[dev,ml,ml_train]'
 ```
 
 ## Admin theme
