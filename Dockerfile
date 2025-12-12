@@ -29,7 +29,7 @@ RUN npx puppeteer browsers install chrome
 COPY pyproject.toml /app/
 # this dir is needed by pip when processing pyproject.toml
 COPY bin /app/bin
-RUN pip install .
+RUN pip install '.[ml]'
 
 ENV NODE_PATH=/app/node_modules/
 
