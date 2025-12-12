@@ -34,21 +34,18 @@
       >
       <button
         type="submit"
-        class="btn btn-primary ms-2 search-box__submit"
+        class="btn btn-primary ms-2 search-box__submit d-none d-md-block"
         :disabled="!query.trim()"
       >
-        <span class="d-none d-md-inline">{{ $t('Search') }}</span>
-        <span class="d-md-none">
-          <i class="bi bi-search" aria-hidden="true" />
-        </span>
+        {{ $t('Search') }}
       </button>
     </form>
     <div v-if="dropdownItems.length" class="search-box__dropdown">
-      <ul ref="dropdownList" class="list-group list-group-flush" role="listbox">
+      <ul ref="dropdownList" class="list-unstyled mb-0" role="listbox">
         <li
           v-for="(item, index) in dropdownItems"
           :key="itemKey(item, index)"
-          class="list-group-item list-group-item-action d-flex align-items-center search-box__dropdown-item"
+          class="d-flex align-items-center search-box__dropdown-item"
           role="option"
           tabindex="0"
           @click="handleSelect(item)"
@@ -349,7 +346,7 @@ export default {
 
 <style scoped>
 .search-box {
-  background-color: var(--bs-body-bg, #fff);
+  background-color: var(--bs-body-bg);
   border-radius: 0.5rem;
   padding: 1rem;
   position: relative;
@@ -358,9 +355,9 @@ export default {
 .search-box--overlay {
   padding: 0;
   border-radius: 0.5rem;
-  background-color: var(--bs-body-bg, #fff);
-  border: 1px solid var(--bs-border-color, #dee2e6);
-  box-shadow: none;
+  background-color: var(--bs-body-bg);
+  border: 1px solid var(--bs-border-color);
+  box-shadow: 0 0.5rem 1.5rem rgba(33, 37, 41, 0.2);
 }
 
 .search-box--overlay .search-box__form {
@@ -369,9 +366,6 @@ export default {
 
 .search-box--overlay .search-box__dropdown {
   margin-top: 0.25rem;
-  border: none;
-  border-top: 1px solid var(--bs-border-color, #dee2e6);
-  border-radius: 0;
 }
 
 .search-box__form {
@@ -401,6 +395,15 @@ export default {
 
 .search-box__input {
   flex: 1;
+  border-radius: 0;
+  border: 1px solid var(--bs-border-color);
+  border-width: 0px 0px 1px 0px;
+  box-shadow: none;
+}
+
+.search-box__input:focus {
+  border-width: 0px 0px 1px 0px;
+  box-shadow: none;
 }
 
 .search-box__submit {
@@ -409,20 +412,17 @@ export default {
 
 .search-box__dropdown {
   margin-top: 0.75rem;
-  border: 1px solid var(--bs-border-color, #dee2e6);
-  border-radius: 0.5rem;
   overflow: hidden;
-  background-color: var(--bs-body-bg, #fff);
 }
 
 .search-box__dropdown-item {
   cursor: pointer;
-  padding: var(--bs-list-group-item-padding-y) 0.5rem;
+  padding: 0.25rem 0.5rem;
 }
 
 .search-box__dropdown-item:focus {
   outline: none;
-  background-color: rgba(13, 110, 253, 0.1);
+  background-color: var(--bg-brand-pale);
 }
 
 .search-box__item-icon {
@@ -455,8 +455,8 @@ export default {
     border-radius: 0;
   }
 
-  .search-box__dropdown .list-group-item {
-    border-width: 0 0 1px 0;
+  .search-box__dropdown-item {
+    padding-left: 0;
   }
 }
 </style>
