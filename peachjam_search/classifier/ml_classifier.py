@@ -1,5 +1,6 @@
 import re
 from pathlib import Path
+from threading import Lock
 from typing import List, Sequence, Tuple
 
 # NOTE: if these dependencies are not installed, run: pip install -e '.[ml]'
@@ -196,11 +197,16 @@ class MLQueryClassifier:
 
 
 _classifier = None
+_classifier_lock = Lock()
 
 
 def get_ml_classifier():
     global _classifier
     if _classifier is None:
-        _classifier = MLQueryClassifier()
-        _classifier.load_model()
+        # Ensure model loading only happens once even when accessed from multiple asyncio-driven threads.
+        with _classifier_lock:
+            if _classifier is None:
+                classifier = MLQueryClassifier()
+                classifier.load_model()
+                _classifier = classifier
     return _classifier
