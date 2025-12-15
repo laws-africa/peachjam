@@ -70,7 +70,7 @@ class QueryClassifier:
             qclass.label = QueryLabel.NUMBERS
             qclass.confidence = 1.0
 
-        if qclass.n_chars == 0:
+        elif qclass.n_chars == 0:
             qclass.label = QueryLabel.EMPTY
             qclass.confidence = 1.0
 
