@@ -1,3 +1,4 @@
+import logging
 import re
 from pathlib import Path
 from threading import Lock
@@ -11,6 +12,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
+
+log = logging.getLogger(__name__)
 
 
 class MLQueryClassifier:
@@ -134,9 +137,9 @@ class MLQueryClassifier:
             raise FileNotFoundError(f"Training file not found: {train_csv}")
 
         data = pd.read_csv(train_csv)
-        print(f"Number of rows: {len(data)}")
+        log.info(f"Number of rows: {len(data)}")
         data = self.pre_clean_raw_data(data)
-        print(f"Number of rows after pre-cleaning: {len(data)}")
+        log.info(f"Number of rows after pre-cleaning: {len(data)}")
 
         missing_columns = {"label", "query"} - set(data.columns)
         if missing_columns:
@@ -182,15 +185,15 @@ class MLQueryClassifier:
         )
         predictions = classifier.predict(X_test)
         report = classification_report(test_labels, predictions, zero_division=0)
-        print("Test classification report (20% split):")
-        print(report)
+        log.info("Test classification report (20% split):")
+        log.info(report)
         payload = {
             "vectorizer": vectorizer,
             "classifier": classifier,
             "word_count_stats": word_stats,
         }
         joblib.dump(payload, model_path)
-        print(
+        log.info(
             f"Model trained on {len(train_labels)} samples (tested on {len(test_labels)}) "
             f"and saved to {model_path}"
         )
