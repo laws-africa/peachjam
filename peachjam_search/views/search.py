@@ -41,6 +41,7 @@ from peachjam.resources import DownloadDocumentsResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
+from peachjam_search.classifier import QueryClassifier
 from peachjam_search.engine import SearchEngine
 from peachjam_search.forms import (
     SavedSearchCreateForm,
@@ -246,6 +247,8 @@ class DocumentSearchView(TemplateView):
         # ignore nulls
         search = search.replace("\00", " ")
 
+        qclass = self.classify_query(search)
+
         # save the search trace
         with transaction.atomic():
             return SearchTrace.objects.create(
@@ -263,7 +266,15 @@ class DocumentSearchView(TemplateView):
                 suggestion=self.request.GET.get("suggestion", "")[:1024],
                 ip_address=self.request.headers.get("x-forwarded-for"),
                 user_agent=self.request.headers.get("user-agent"),
+                query_clean=qclass.query_clean,
+                query_clean_n_words=qclass.n_words,
+                query_clean_n_chars=qclass.n_chars,
+                query_classification=(qclass.label.value if qclass.label else None),
+                query_classification_confidence=qclass.confidence,
             )
+
+    def classify_query(self, query):
+        return QueryClassifier().classify(query)
 
 
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
