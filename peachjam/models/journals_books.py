@@ -2,7 +2,7 @@ from django.db import models
 from martor.models import MartorField
 from martor.utils import markdownify
 
-from peachjam.decorators import BookDecorator, JournalDecorator
+from peachjam.decorators import BookDecorator, JournalArticleDecorator
 from peachjam.models import CoreDocument
 
 
@@ -31,15 +31,15 @@ class Book(CoreDocument):
         return super().pre_save()
 
 
-class Journal(CoreDocument):
+class JournalArticle(CoreDocument):
 
-    decorator = JournalDecorator()
+    decorator = JournalArticleDecorator()
 
     publisher = models.CharField(max_length=2048)
-    default_nature = ("journal", "Journal")
+    default_nature = ("journal article", "JournalArticle")
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
-        self.frbr_uri_subtype = "journal"
-        self.doc_type = "journal"
+        self.frbr_uri_subtype = "journal article"
+        self.doc_type = "journal article"
         return super().pre_save()
