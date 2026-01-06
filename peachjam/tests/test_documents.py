@@ -9,7 +9,7 @@ from peachjam.models import (
     Country,
     Gazette,
     GenericDocument,
-    Journal,
+    JournalArticle,
     Language,
     get_country_and_locality,
 )
@@ -108,7 +108,7 @@ ZAGPPHC 1063</a>.</p>
         self.assertEqual("book", book.frbr_uri_subtype)
 
     def test_journal(self):
-        journal = Journal(
+        journal = JournalArticle(
             jurisdiction=Country.objects.get(pk="ZM"),
             date=date(2020, 1, 1),
             language=Language.objects.get(pk="en"),
