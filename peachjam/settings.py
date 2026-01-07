@@ -314,6 +314,8 @@ LANGUAGES = [
     ("sw", _("Swahili")),
 ]
 
+MODELTRANSLATION_LANGUAGES = ("en", "fr", "pt", "sw")
+
 TIME_ZONE = "UTC"
 
 USE_I18N = True
