@@ -378,7 +378,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         ("legal_instrument", "Legal Instrument"),
         ("legislation", "Legislation"),
         ("book", "Book"),
-        ("journal", "JournalArticle"),
+        ("journal_article", "JournalArticle"),
         ("causelist", "Cause List"),
     )
 
