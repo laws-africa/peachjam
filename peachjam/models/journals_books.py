@@ -36,7 +36,7 @@ class JournalArticle(CoreDocument):
     decorator = JournalArticleDecorator()
 
     publisher = models.CharField(max_length=2048)
-    default_nature = ("journal_article", "JournalArticle")
+    default_nature = ("journal_article", "Journal article")
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
