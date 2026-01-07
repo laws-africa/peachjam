@@ -1783,7 +1783,7 @@ class BookAdmin(DocumentAdmin):
 
 
 @admin.register(JournalArticle)
-class JournalAdmin(DocumentAdmin):
+class JournalArticleAdmin(DocumentAdmin):
     pass
 
 

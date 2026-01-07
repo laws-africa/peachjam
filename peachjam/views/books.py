@@ -19,7 +19,7 @@ class BookDetailView(BaseDocumentDetailView):
     template_name = "peachjam/book_detail.html"
 
 
-class JournalListView(FilteredDocumentListView):
+class JournalArticleListView(FilteredDocumentListView):
     queryset = JournalArticle.objects.all()
     model = JournalArticle
     template_name = "peachjam/journal_list.html"
@@ -27,5 +27,5 @@ class JournalListView(FilteredDocumentListView):
 
 
 @registry.register_doc_type("journal")
-class JournalDetailView(BaseDocumentDetailView):
+class JournalArticleDetailView(BaseDocumentDetailView):
     model = JournalArticle
