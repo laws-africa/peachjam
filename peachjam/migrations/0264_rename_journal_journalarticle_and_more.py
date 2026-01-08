@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                     ("legal_instrument", "Legal Instrument"),
                     ("legislation", "Legislation"),
                     ("book", "Book"),
-                    ("journal_article", "JournalArticle"),
+                    ("journal_article", "Journal Article"),
                     ("causelist", "Cause List"),
                 ],
                 default="core_document",
