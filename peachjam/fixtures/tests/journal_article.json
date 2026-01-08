@@ -35,7 +35,10 @@
   "model": "peachjam.coredocument",
   "pk": 45113,
   "fields": {
-    "polymorphic_ctype": 108,
+    "polymorphic_ctype": [
+                "peachjam",
+                "journalarticle"
+            ],
     "work": 31410,
     "doc_type": "journal_article",
     "title": "Test Journal Article",

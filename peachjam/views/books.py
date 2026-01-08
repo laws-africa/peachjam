@@ -26,6 +26,6 @@ class JournalArticleListView(FilteredDocumentListView):
     navbar_link = "journals"
 
 
-@registry.register_doc_type("journal")
+@registry.register_doc_type("journal_article")
 class JournalArticleDetailView(BaseDocumentDetailView):
     model = JournalArticle
