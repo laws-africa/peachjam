@@ -35,6 +35,8 @@ def update_journal_article_metadata(apps, schema_editor):
         ),
     )
 
+    reindex_journal_articles(apps, schema_editor)
+
 
 def reverse_update(apps, schema_editor):
     # Optional: Logic to revert changes if you unapply the migration
@@ -64,6 +66,8 @@ def reverse_update(apps, schema_editor):
         ),
     )
 
+    reindex_journal_articles(apps, schema_editor)
+
 
 def reindex_journal_articles(apps, schema_editor):
     JournalArticle = apps.get_model("peachjam", "JournalArticle")
@@ -84,7 +88,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(
-            update_journal_article_metadata, reverse_update, reindex_journal_articles
-        ),
+        migrations.RunPython(update_journal_article_metadata, reverse_update),
     ]
