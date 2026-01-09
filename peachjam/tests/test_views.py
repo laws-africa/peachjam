@@ -26,7 +26,12 @@ from peachjam.views.robots import (
 
 
 class PeachjamViewsTest(TestCase):
-    fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
+    fixtures = [
+        "tests/countries",
+        "documents/sample_documents",
+        "tests/users",
+        "tests/journal_article",
+    ]
 
     def test_login_page(self):
         response = self.client.get(reverse("account_login"))
@@ -221,6 +226,23 @@ class PeachjamViewsTest(TestCase):
             "/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31",
         )
         self.assertTrue(hasattr(response.context["document"], "repealed"))
+
+    def test_journal_article_detail(self):
+        response = self.client.get(
+            reverse(
+                "document_detail",
+                kwargs={
+                    "frbr_uri": "akn/zm/doc/journal-article/2026-01-02/test-journal-article/eng@2026-01-02"
+                },
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.context["document"].doc_type, "journal_article")
+        self.assertEqual(
+            response.context["document"].expression_frbr_uri,
+            "/akn/zm/doc/journal-article/2026-01-02/test-journal-article/eng@2026-01-02",
+        )
 
     def test_generic_document_listing(self):
         response = self.client.get(reverse("generic_document_list"))

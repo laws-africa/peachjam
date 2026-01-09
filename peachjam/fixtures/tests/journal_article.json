@@ -1,0 +1,80 @@
+[
+  {
+        "model": "peachjam.documentnature",
+        "pk": 20,
+        "fields": {
+            "name": "Journal Article",
+            "code": "journal-article"
+        }
+    },
+  {
+  "model": "peachjam.work",
+  "pk": 31410,
+  "fields": {
+    "frbr_uri": "/akn/zm/doc/journal-article/2026-01-02/test-journal-article",
+    "frbr_uri_country": "zm",
+    "frbr_uri_locality": null,
+    "frbr_uri_place": "zm",
+    "frbr_uri_doctype": "doc",
+    "frbr_uri_subtype": "journal-article",
+    "frbr_uri_actor": null,
+    "frbr_uri_date": "2026-01-02",
+    "frbr_uri_number": "test-journal-article",
+    "title": "Test Journal Article",
+    "languages": "[\"eng\"]",
+    "partner": null,
+    "pagerank": 0.0,
+    "pagerank_normalized": 0.0,
+    "n_cited_works": 0,
+    "n_citing_works": 0,
+    "n_citing_works_normalized": 0.0,
+    "authority_score": 0.0
+  }
+},
+{
+  "model": "peachjam.coredocument",
+  "pk": 45113,
+  "fields": {
+    "polymorphic_ctype": [
+                "peachjam",
+                "journalarticle"
+            ],
+    "work": 31410,
+    "doc_type": "journal_article",
+    "title": "Test Journal Article",
+    "date": "2026-01-02",
+    "source_url": null,
+    "citation": null,
+    "content_html": "",
+    "content_html_is_akn": false,
+    "toc_json": null,
+    "language": "en",
+    "jurisdiction": "ZM",
+    "locality": null,
+    "nature": 20,
+    "work_frbr_uri": "/akn/zm/doc/journal-article/2026-01-02/test-journal-article",
+    "frbr_uri_doctype": "doc",
+    "frbr_uri_subtype": "journal-article",
+    "frbr_uri_actor": null,
+    "frbr_uri_date": "2026-01-02",
+    "frbr_uri_number": "test-journal-article",
+    "expression_frbr_uri": "/akn/zm/doc/journal-article/2026-01-02/test-journal-article/eng@2026-01-02",
+    "created_at": "2026-01-08T07:50:47.235Z",
+    "updated_at": "2026-01-08T07:50:47.275Z",
+    "created_by": 2,
+    "allow_robots": true,
+    "published": true,
+    "metadata_json": null,
+    "ingestor": null,
+    "restricted": false,
+    "labels": []
+  }
+},
+{
+  "model": "peachjam.journalarticle",
+  "pk": 45113,
+  "fields": {
+    "publisher": ""
+  }
+}
+]
