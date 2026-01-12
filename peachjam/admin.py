@@ -80,7 +80,7 @@ from peachjam.models import (
     Image,
     Ingestor,
     IngestorSetting,
-    Journal,
+    JournalArticle,
     Judge,
     Judgment,
     JurisdictionProfile,
@@ -1782,8 +1782,8 @@ class BookAdmin(DocumentAdmin):
         return resp
 
 
-@admin.register(Journal)
-class JournalAdmin(DocumentAdmin):
+@admin.register(JournalArticle)
+class JournalArticleAdmin(DocumentAdmin):
     pass
 
 
