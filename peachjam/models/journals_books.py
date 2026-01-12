@@ -1,4 +1,6 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from martor.models import MartorField
 from martor.utils import markdownify
 
@@ -31,15 +33,68 @@ class Book(CoreDocument):
         return super().pre_save()
 
 
+class Journal(models.Model):
+    # This is your NEW model
+    title = models.CharField(max_length=512)
+    doi = models.CharField(max_length=255, verbose_name="Directory of Indexing (DOI)")
+
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+
+    # "Editorial board" - Assuming text for now, but could be ManyToMany to Users
+    editorial_board = models.TextField(
+        help_text="Markdown or plain text listing board members"
+    )
+
+    peer_reviewed = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.title
+
+
 class JournalArticle(CoreDocument):
 
     decorator = JournalArticleDecorator()
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
+    journal = models.ForeignKey(
+        "Journal",
+        on_delete=models.PROTECT,  # or PROTECT, depending on safety needs
+        related_name="articles",
+        null=True,  # MUST be null initially because existing rows have no journal
+        blank=True,
+    )
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "journal-article"
         self.doc_type = "journal_article"
         return super().pre_save()
+
+
+class VolumeIssue(models.Model):
+
+    title = models.CharField(
+        max_length=255,
+        help_text="The volume and issue number (e.g., 'Vol 58, Issue 1' or 'Volume 58')",
+    )
+    issue = models.IntegerField()
+    journal = models.ForeignKey(
+        "Journal",  # String reference avoids circular import issues
+        on_delete=models.CASCADE,
+        related_name="volumes",
+    )
+    year = models.IntegerField(
+        help_text="Publication year used for sorting and faceting",
+        db_index=True,  # Indexing added since this is key for sorting/faceting
+    )
+
+    class Meta:
+        ordering = ["-year", "title"]
+        verbose_name = "Volume/Issue"
+        verbose_name_plural = "Volumes/Issues"
+
+    def __str__(self):
+        return f"{self.title} ({self.year})"
