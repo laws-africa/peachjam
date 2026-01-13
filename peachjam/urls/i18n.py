@@ -7,9 +7,12 @@ from peachjam.views import (
     BookListView,
     HomePageView,
     JournalArticleListView,
+    JournalListView,
     PlaceDetailView,
     PocketLawResources,
     TermsOfUsePageView,
+    VolumeIssueDetailView,
+    VolumeIssueListView,
 )
 from peachjam.views.metabase_stats import MetabaseStatsView
 
@@ -25,7 +28,18 @@ urlpatterns = [
     path("causelists/", include("peachjam.urls.causelists")),
     path("doc/", include("peachjam.urls.generic_documents")),
     path("gazettes/", include("peachjam.urls.gazettes")),
-    path("journals/", JournalArticleListView.as_view(), name="journal_articles_list"),
+    path("journals/", JournalListView.as_view(), name="journal_list"),
+    path(
+        "journals/volumes/articles/",
+        JournalArticleListView.as_view(),
+        name="journal_articles_list",
+    ),
+    path("journals/volumes/", VolumeIssueListView.as_view(), name="volumes_list"),
+    path(
+        "journals/volumes/<int:pk>/",
+        VolumeIssueDetailView.as_view(),
+        name="volume_detail",
+    ),
     path("judgments/", include("peachjam.urls.judgments")),
     path("taxonomy/", include("peachjam.urls.taxonomies")),
     # detail views
