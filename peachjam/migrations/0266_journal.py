@@ -29,13 +29,6 @@ class Migration(migrations.Migration):
                         max_length=255, verbose_name="Directory of Indexing (DOI)"
                     ),
                 ),
-                (
-                    "editorial_board",
-                    models.TextField(
-                        help_text="Markdown or plain text listing board members"
-                    ),
-                ),
-                ("peer_reviewed", models.BooleanField(default=True)),
             ],
         ),
     ]
