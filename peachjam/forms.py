@@ -335,6 +335,16 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
 
+class JournalArticleFilterForm(BaseDocumentFilterForm):
+    journals = PermissiveTypedListField(coerce=int, required=False)
+
+    filter_fields = BaseDocumentFilterForm.filter_fields + ["journals"]
+
+    def apply_filter_journals(self, queryset):
+        journals = self.cleaned_data.get("journals")
+        return queryset.filter(journal_id__in=journals) if journals else queryset
+
+
 class LegislationFilterForm(BaseDocumentFilterForm):
     def apply_filter_years(self, queryset):
         years = self.cleaned_data.get("years", [])

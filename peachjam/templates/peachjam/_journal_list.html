@@ -1,0 +1,31 @@
+{% load i18n %}
+{% if journals %}
+  <div class="flow-columns mb-3">
+    <div class="flow-columns-group mb-4">
+      <div class="card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h4 class="mb-0">{% trans "Journals" %}</h4>
+            {% if selected_journal_ids %}
+              <a href="{% url 'journal_articles_list' %}">{% trans "Clear" %}</a>
+            {% endif %}
+          </div>
+          <ul class="list-unstyled mb-0">
+            {% for journal in journals %}
+              <li class="d-flex justify-content-between align-items-center">
+                {% if journal.id in selected_journal_ids %}
+                  <span class="fw-semibold">{{ journal.title }}</span>
+                {% else %}
+                  <a href="{% url 'journal_articles_list' %}?journals={{ journal.id }}">{{ journal.title }}</a>
+                {% endif %}
+                <span class="text-muted">{{ journal.article_count }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+{% else %}
+  <div>{% trans 'No journals found.' %}</div>
+{% endif %}

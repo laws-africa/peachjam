@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from martor.models import MartorField
 from martor.utils import markdownify
@@ -36,18 +37,17 @@ class Book(CoreDocument):
 class Journal(models.Model):
     # This is your NEW model
     title = models.CharField(max_length=512)
+    slug = models.SlugField(max_length=512, unique=False, blank=True, null=True)
     doi = models.CharField(max_length=255, verbose_name="Directory of Indexing (DOI)")
 
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
 
-    # "Editorial board" - Assuming text for now, but could be ManyToMany to Users
-    editorial_board = models.TextField(
-        help_text="Markdown or plain text listing board members"
-    )
-
-    peer_reviewed = models.BooleanField(default=True)
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
@@ -61,9 +61,16 @@ class JournalArticle(CoreDocument):
     default_nature = ("journal_article", "Journal article")
     journal = models.ForeignKey(
         "Journal",
-        on_delete=models.PROTECT,  # or PROTECT, depending on safety needs
+        on_delete=models.PROTECT,
         related_name="articles",
         null=True,  # MUST be null initially because existing rows have no journal
+        blank=True,
+    )
+    volume = models.ForeignKey(
+        "VolumeIssue",
+        on_delete=models.PROTECT,
+        related_name="articles",
+        null=True,
         blank=True,
     )
 
@@ -80,6 +87,7 @@ class VolumeIssue(models.Model):
         max_length=255,
         help_text="The volume and issue number (e.g., 'Vol 58, Issue 1' or 'Volume 58')",
     )
+    slug = models.SlugField(max_length=255, unique=False, blank=True, null=True)
     issue = models.IntegerField()
     journal = models.ForeignKey(
         "Journal",  # String reference avoids circular import issues
@@ -95,6 +103,12 @@ class VolumeIssue(models.Model):
         ordering = ["-year", "title"]
         verbose_name = "Volume/Issue"
         verbose_name_plural = "Volumes/Issues"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} ({self.year})"
