@@ -60,14 +60,14 @@ class JournalArticle(CoreDocument):
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
     journal = models.ForeignKey(
-        "Journal",
+        "peachjam.Journal",
         on_delete=models.PROTECT,
         related_name="articles",
         null=True,  # MUST be null initially because existing rows have no journal
         blank=True,
     )
     volume = models.ForeignKey(
-        "VolumeIssue",
+        "peachjam.VolumeIssue",
         on_delete=models.PROTECT,
         related_name="articles",
         null=True,
@@ -90,7 +90,7 @@ class VolumeIssue(models.Model):
     slug = models.SlugField(max_length=255, unique=False, blank=True, null=True)
     issue = models.IntegerField()
     journal = models.ForeignKey(
-        "Journal",  # String reference avoids circular import issues
+        "peachjam.Journal",  # String reference avoids circular import issues
         on_delete=models.CASCADE,
         related_name="volumes",
     )
