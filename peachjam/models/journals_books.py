@@ -35,7 +35,6 @@ class Book(CoreDocument):
 
 
 class Journal(models.Model):
-    # This is your NEW model
     title = models.CharField(max_length=512)
     slug = models.SlugField(max_length=512, unique=False, blank=True, null=True)
     doi = models.CharField(max_length=255, verbose_name="Directory of Indexing (DOI)")
