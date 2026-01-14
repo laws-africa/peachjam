@@ -1,6 +1,6 @@
 import logging
 from collections import defaultdict
-from typing import NamedTuple
+from typing import Callable, NamedTuple
 
 from django.db import models
 from django.db.models import Prefetch
@@ -60,24 +60,36 @@ class TimelineEvent(models.Model):
         NEW_COMMENCEMENT = "new_commencement", _("New Commencement")
         NEW_OVERTURN = "new_overturn", _("New Overturn")
 
-    class PredicateConfig(NamedTuple):
+    class RelationshipEventRule(NamedTuple):
         event_type: str
         description: str
+        followed_work: Callable
+        event_work: Callable
 
-    PREDICATE_MAP = {
-        "amended-by": PredicateConfig(
+    RELATIONSHIP_EVENT_RULES = {
+        "amended-by": RelationshipEventRule(
             event_type=EventTypes.NEW_AMENDMENT,
             description=_("New amendments published for"),
+            followed_work=lambda r: r.subject_work,
+            event_work=lambda r: r.object_work,
         ),
-        "repealed-by": PredicateConfig(
-            event_type=EventTypes.NEW_REPEAL, description=_("New repeals for")
+        "repealed-by": RelationshipEventRule(
+            event_type=EventTypes.NEW_REPEAL,
+            description=_("New repeals for"),
+            followed_work=lambda r: r.subject_work,
+            event_work=lambda r: r.object_work,
         ),
-        "commenced-by": PredicateConfig(
+        "commenced-by": RelationshipEventRule(
             event_type=EventTypes.NEW_COMMENCEMENT,
             description=_("New commencement for"),
+            followed_work=lambda r: r.subject_work,
+            event_work=lambda r: r.object_work,
         ),
-        "overturns": PredicateConfig(
-            event_type=EventTypes.NEW_OVERTURN, description=_("New overturn for")
+        "overturns": RelationshipEventRule(
+            event_type=EventTypes.NEW_OVERTURN,
+            description=_("New overturn for"),
+            followed_work=lambda r: r.object_work,
+            event_work=lambda r: r.subject_work,
         ),
     }
 
@@ -204,18 +216,18 @@ class TimelineEvent(models.Model):
         return event
 
     @classmethod
-    def add_new_relationship_events(cls, follow, relationship):
-        event_type = cls.event_for_predicate(relationship.predicate.slug)
-        if not event_type:
-            log.error("Predicate %s not allowed", relationship.predicate.slug)
-            return None
+    def add_new_relationship_event(cls, follow, relationship, subject_work, event_type):
+        assert relationship.predicate.slug in cls.RELATIONSHIP_EVENT_RULES.keys()
+        event_type = cls.RELATIONSHIP_EVENT_RULES.get(
+            relationship.predicate.slug
+        ).event_type
 
         event, _ = TimelineEvent.objects.get_or_create(
             user_following=follow,
             event_type=event_type,
             email_alert_sent_at__isnull=True,
         )
-        event.subject_works.add(relationship.object_work)
+        event.subject_works.add(subject_work)
         return event
 
     @classmethod

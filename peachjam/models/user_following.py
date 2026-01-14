@@ -344,36 +344,24 @@ class UserFollowing(models.Model):
             return
         TimelineEvent.add_new_citation_events(self, citation.citing_work)
 
-    def _update_new_relationship(self, relationship):
-        assert self.saved_document
-
-        # check that we are passing a relationship to the saved document
-        assert relationship.subject_work == self.saved_document.work
-
-        allowed_predicates = set(TimelineEvent.PREDICATE_MAP.keys())
-
-        if relationship.predicate.slug not in allowed_predicates:
-            log.info("Predicate %s not allowed", relationship.predicate.slug)
-            return
-
-        # check if the user has ever been alerted about this relationship
-        event_type = TimelineEvent.event_for_predicate(relationship.predicate.slug)
+    def _update_new_relationship(self, relationship, rule):
+        event_work = rule.event_work(relationship)
 
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
-            event_type=event_type,
-            subject_works=relationship.object_work,
+            event_type=rule.event_type,
+            subject_works=event_work,
         ).exists()
 
         if already_alerted:
             log.info(
                 "User %s has already been alerted about relationship to work %s",
                 self.user,
-                relationship.object_work,
+                event_work,
             )
             return
 
-        TimelineEvent.add_new_relationship_events(self, relationship)
+        TimelineEvent.add_new_relationship_event(self, relationship, event_work)
 
     @classmethod
     def update_follows_for_user(cls, user):
@@ -392,10 +380,16 @@ class UserFollowing(models.Model):
 
     @classmethod
     def update_new_relationship_follows(cls, relationship):
+        rule = TimelineEvent.RELATIONSHIP_EVENT_RULES.get(relationship.predicate.slug)
+        if not rule:
+            return
+
         follows = cls.objects.filter(
-            saved_document__work=relationship.subject_work,
+            saved_document__work=rule.followed_work(relationship)
         )
-        log.info("Found %d follows for new relationship update", follows.count())
 
         for follow in follows:
-            follow._update_new_relationship(relationship)
+            follow._update_new_relationship(
+                relationship,
+                rule,
+            )

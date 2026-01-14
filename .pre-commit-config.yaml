@@ -1,33 +1,37 @@
+default_language_version:
+  python: python3.11
+
 repos:
--   repo: https://github.com/psf/black
-    rev: 22.3.0
-    hooks:
-    -   id: black
--   repo: https://github.com/pycqa/isort
-    rev: 5.12.0
-    hooks:
+- repo: https://github.com/psf/black
+  rev: 22.3.0
+  hooks:
+    - id: black
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
     - id: isort
       args: ["--profile", "black"]
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
-    hooks:
-    -   id: check-case-conflict
-    -   id: check-yaml
-    -   id: end-of-file-fixer
-        exclude_types: [pofile, javascript, map]
-    -   id: trailing-whitespace
-    -   id: mixed-line-ending
-        language_version: python3
--   repo: https://github.com/PyCQA/flake8
-    rev: 3.9.0
-    hooks:
-        - id: flake8
-          additional_dependencies: [flake8-isort]
-          args: [--config=.flake8]
-          language_version: python3
 
--   repo: https://github.com/Riverside-Healthcare/djLint
-    rev: v1.19.14
-    hooks:
-          - id: djlint-django
-            args: [--reformat, --lint]
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v2.3.0
+  hooks:
+    - id: check-case-conflict
+    - id: check-yaml
+    - id: end-of-file-fixer
+      exclude_types: [pofile, javascript, map]
+    - id: trailing-whitespace
+    - id: mixed-line-ending
+
+- repo: https://github.com/PyCQA/flake8
+  rev: 3.9.0
+  hooks:
+    - id: flake8
+      additional_dependencies: [flake8-isort]
+      args: [--config=.flake8]
+
+- repo: https://github.com/Riverside-Healthcare/djLint
+  rev: v1.19.14
+  hooks:
+    - id: djlint-django
+      args: [--reformat, --lint]
