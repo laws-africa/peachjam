@@ -344,12 +344,13 @@ class UserFollowing(models.Model):
             return
         TimelineEvent.add_new_citation_events(self, citation.citing_work)
 
-    def _update_new_relationship(self, relationship, rule):
-        event_work = rule.event_work(relationship)
+    def _update_new_relationship(self, relationship, relationship_event):
+        event_work = relationship_event.event_work(relationship)
+        event_type = relationship_event.event_type
 
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
-            event_type=rule.event_type,
+            event_type=event_type,
             subject_works=event_work,
         ).exists()
 
@@ -380,16 +381,16 @@ class UserFollowing(models.Model):
 
     @classmethod
     def update_new_relationship_follows(cls, relationship):
-        rule = TimelineEvent.RELATIONSHIP_EVENT_RULES.get(relationship.predicate.slug)
-        if not rule:
+        relationship_event = TimelineEvent.RELATIONSHIP_EVENT_MAP.get(relationship.predicate.slug)
+        if not relationship_event:
             return
 
         follows = cls.objects.filter(
-            saved_document__work=rule.followed_work(relationship)
+            saved_document__work=relationship_event.followed_work(relationship)
         )
 
         for follow in follows:
             follow._update_new_relationship(
                 relationship,
-                rule,
+                relationship_event,
             )

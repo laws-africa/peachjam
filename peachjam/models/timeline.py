@@ -60,32 +60,32 @@ class TimelineEvent(models.Model):
         NEW_COMMENCEMENT = "new_commencement", _("New Commencement")
         NEW_OVERTURN = "new_overturn", _("New Overturn")
 
-    class RelationshipEventRule(NamedTuple):
+    class RelationshipEvent(NamedTuple):
         event_type: str
         description: str
         followed_work: Callable
         event_work: Callable
 
-    RELATIONSHIP_EVENT_RULES = {
-        "amended-by": RelationshipEventRule(
+    RELATIONSHIP_EVENT_MAP = {
+        "amended-by": RelationshipEvent(
             event_type=EventTypes.NEW_AMENDMENT,
             description=_("New amendments published for"),
             followed_work=lambda r: r.subject_work,
             event_work=lambda r: r.object_work,
         ),
-        "repealed-by": RelationshipEventRule(
+        "repealed-by": RelationshipEvent(
             event_type=EventTypes.NEW_REPEAL,
             description=_("New repeals for"),
             followed_work=lambda r: r.subject_work,
             event_work=lambda r: r.object_work,
         ),
-        "commenced-by": RelationshipEventRule(
+        "commenced-by": RelationshipEvent(
             event_type=EventTypes.NEW_COMMENCEMENT,
             description=_("New commencement for"),
             followed_work=lambda r: r.subject_work,
             event_work=lambda r: r.object_work,
         ),
-        "overturns": RelationshipEventRule(
+        "overturns": RelationshipEvent(
             event_type=EventTypes.NEW_OVERTURN,
             description=_("New overturn for"),
             followed_work=lambda r: r.object_work,
@@ -118,16 +118,11 @@ class TimelineEvent(models.Model):
             )
         ]
 
-    @classmethod
-    def event_for_predicate(cls, predicate_slug: str):
-        config = cls.PREDICATE_MAP.get(predicate_slug)
-        return config.event_type if config else None
-
     def description_text(self):
         # relationship-based events
-        for cfg in self.PREDICATE_MAP.values():
-            if cfg.event_type == self.event_type:
-                return cfg.description
+        for rel in self.RELATIONSHIP_EVENT_MAP.values():
+            if rel.event_type == self.event_type:
+                return rel.description
 
         # everything else
         event_map = {
@@ -225,9 +220,10 @@ class TimelineEvent(models.Model):
         return event
 
     @classmethod
-    def add_new_relationship_event(cls, follow, relationship, subject_work, event_type):
-        assert relationship.predicate.slug in cls.RELATIONSHIP_EVENT_RULES.keys()
-        event_type = cls.RELATIONSHIP_EVENT_RULES.get(
+    def add_new_relationship_event(cls, follow, relationship, subject_work):
+        assert relationship.predicate.slug in cls.RELATIONSHIP_EVENT_MAP.keys()
+
+        event_type = cls.RELATIONSHIP_EVENT_MAP.get(
             relationship.predicate.slug
         ).event_type
 
