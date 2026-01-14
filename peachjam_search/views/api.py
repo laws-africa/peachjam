@@ -7,6 +7,7 @@ from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from peachjam.models import Judgment
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.engine import PortionSearchEngine
 from peachjam_search.serializers import (
@@ -15,6 +16,7 @@ from peachjam_search.serializers import (
     PortionMetadata,
     PortionSearchRequestSerializer,
     PortionSearchResponseSerializer,
+    PortionType,
 )
 
 
@@ -58,10 +60,43 @@ class PortionSearchView(APIView):
         # a list of portion ids to load full text for
         provisions_to_load = defaultdict(list)
         pages_to_load = defaultdict(list)
+        summaries_to_load = []
 
         for hit in es_response.hits.hits:
             expression_frbr_uri = hit._source.expression_frbr_uri
             frbr_uri = FrbrUri.parse(expression_frbr_uri)
+
+            if frbr_uri.doctype == "judgment":
+                summaries_to_load.append(expression_frbr_uri)
+
+                # we only return summaries for judgments
+                portions.append(
+                    PortionHit(
+                        score=1 - hit._score,
+                        # this will be filled in later
+                        content=PortionContent(text=""),
+                        metadata=PortionMetadata(
+                            work_frbr_uri=frbr_uri.work_uri(),
+                            frbr_place=frbr_uri.place,
+                            frbr_country=frbr_uri.country,
+                            frbr_doctype=frbr_uri.doctype,
+                            # use the source, because a parsed FRBR URI is ambiguous if there is an actor
+                            frbr_subtype=hit._source.frbr_uri_subtype,
+                            # TODO: enable once data is backfilled in ES
+                            # frbr_actor=hit._source.frbr_uri_actor,
+                            title=hit._source.title,
+                            expression_date=frbr_uri.expression_date[1:],
+                            expression_frbr_uri=expression_frbr_uri,
+                            flynote=getattr(hit._source, "flynote", None),
+                            blurb=getattr(hit._source, "blurb", None),
+                            public_url=self.request.build_absolute_uri(
+                                expression_frbr_uri
+                            ),
+                            portion_type=PortionType.SUMMARY,
+                        ),
+                    )
+                )
+                continue
 
             # TODO: merge in "provisions.hits"
 
@@ -78,6 +113,7 @@ class PortionSearchView(APIView):
                 seen.add((expression_frbr_uri, portion_id))
 
                 item = PortionHit(
+                    score=1 - chunk._score,
                     content=PortionContent(text=self.clean_text(chunk._source.text)),
                     metadata=PortionMetadata(
                         work_frbr_uri=frbr_uri.work_uri(),
@@ -94,18 +130,16 @@ class PortionSearchView(APIView):
                         public_url=self.request.build_absolute_uri(expression_frbr_uri),
                         portion_type=chunk._source.type,
                         portion_id=portion_id,
-                        portion_title=None,
-                        portion_parent_ids=None,
-                        portion_parent_titles=None,
                         portion_public_url=self.portion_public_url(
                             request, expression_frbr_uri, chunk._source.type, portion_id
                         ),
                     ),
-                    score=1 - chunk._score,
                 )
                 portions.append(item)
 
-        self.load_portion_details(portions, provisions_to_load, pages_to_load)
+        self.load_portion_details(
+            portions, provisions_to_load, pages_to_load, summaries_to_load
+        )
 
         portions.sort(key=lambda x: x.score)
 
@@ -126,7 +160,9 @@ class PortionSearchView(APIView):
             elif portion_type == "provision":
                 return request.build_absolute_uri(f"{expression_frbr_uri}#{portion_id}")
 
-    def load_portion_details(self, portions, provisions_to_load, pages_to_load):
+    def load_portion_details(
+        self, portions, provisions_to_load, pages_to_load, summaries_to_load
+    ):
         """Load additional details for portions. This includes titles for provisions, and full text for portions that
         have multiple chunks. We do this by querying Elasticsearch again, using the "provisions" and "pages" nested
         fields."""
@@ -218,3 +254,30 @@ class PortionSearchView(APIView):
                         )
                     if hasattr(details, "body"):
                         portion.content.text = details.body
+
+        # Load summaries for judgments
+        if summaries_to_load:
+            summaries = {
+                j.expression_frbr_uri: j
+                for j in Judgment.objects.filter(
+                    expression_frbr_uri__in=summaries_to_load
+                ).only("expression_frbr_uri", "case_summary", "issues", "held")
+            }
+
+            for portion in portions:
+                if portion.metadata.portion_type == PortionType.SUMMARY:
+                    judgment = summaries.get(portion.metadata.expression_frbr_uri)
+                    if judgment:
+                        summary_parts = []
+                        if judgment.case_summary:
+                            summary_parts.append(judgment.case_summary)
+                        if judgment.issues:
+                            summary_parts.append(
+                                "Issues:\n"
+                                + "\n".join(f"- {x}" for x in judgment.issues)
+                            )
+                        if judgment.held:
+                            summary_parts.append(
+                                "Held:\n" + "\n".join(f"- {x}" for x in judgment.held)
+                            )
+                        portion.content.text = "\n\n".join(summary_parts)

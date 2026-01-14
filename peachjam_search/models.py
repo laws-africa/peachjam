@@ -44,6 +44,12 @@ class SearchTrace(models.Model):
     ordering = models.CharField(max_length=1024, null=True)
     suggestion = models.CharField(max_length=1024, null=True)
 
+    query_clean = models.CharField(max_length=2048, null=True)
+    query_clean_n_words = models.IntegerField(null=True)
+    query_clean_n_chars = models.IntegerField(null=True)
+    query_classification = models.CharField(max_length=50, null=True)
+    query_classification_confidence = models.FloatField(null=True)
+
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
