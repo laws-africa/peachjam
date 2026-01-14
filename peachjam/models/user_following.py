@@ -381,13 +381,17 @@ class UserFollowing(models.Model):
 
     @classmethod
     def update_new_relationship_follows(cls, relationship):
-        relationship_event = TimelineEvent.RELATIONSHIP_EVENT_MAP.get(relationship.predicate.slug)
+        relationship_event = TimelineEvent.RELATIONSHIP_EVENT_MAP.get(
+            relationship.predicate.slug
+        )
         if not relationship_event:
+            log.info("No relationship event mapping found for %s", relationship)
             return
 
         follows = cls.objects.filter(
             saved_document__work=relationship_event.followed_work(relationship)
         )
+        log.info("Found %d follows for new relationship update", follows.count())
 
         for follow in follows:
             follow._update_new_relationship(

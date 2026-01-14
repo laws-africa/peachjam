@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -7,6 +8,7 @@ from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -29,7 +31,7 @@ class TimelineEmailService:
 
         if type(event_type) == list:
             q = Q(event_type__in=event_type)
-        elif type(event_type) == TimelineEvent.EventTypes:
+        else:
             q = Q(event_type=event_type)
 
         q &= Q(
@@ -239,7 +241,7 @@ class TimelineEmailService:
             subject_line = f"New citations for {context['saved_documents'][0]['saved_document'].title}"
             saved_docs_length = len(context["saved_documents"])
             if saved_docs_length > 1:
-                subject_line += f" and {saved_docs_length} more"
+                subject_line += f" and {saved_docs_length - 1} more"
 
             context["subject_line"] = subject_line
 
@@ -256,16 +258,44 @@ class TimelineEmailService:
 
     @staticmethod
     def send_new_relationship_email(user):
-        relationship_events_types = [
-            ev.event_type for ev in TimelineEvent.PREDICATE_MAP.values()
-        ]
+        class RelationshipEmail(NamedTuple):
+            event_types: list[str]
+            email_template: str
+            subject_line: str
 
-        if TimelineEmailService.already_alerted_today(user, relationship_events_types):
+        RELATIONSHIP_EMAIL = RelationshipEmail(
+            event_types=[
+                rel.event_type
+                for rel in TimelineEvent.RELATIONSHIP_EVENT_MAP.values()
+                if rel.event_type != TimelineEvent.EventTypes.NEW_OVERTURN
+            ],
+            email_template="new_relationship_alert",
+            subject_line=_("New updates for documents you have saved"),
+        )
+
+        OVERTURN_EMAIL = RelationshipEmail(
+            event_types=[TimelineEvent.EventTypes.NEW_OVERTURN],
+            email_template="new_overturn_alert",
+            subject_line=_("New overturn for judgments you have saved"),
+        )
+        TimelineEmailService._send_relationship_email(
+            user,
+            RELATIONSHIP_EMAIL,
+        )
+        TimelineEmailService._send_relationship_email(
+            user,
+            OVERTURN_EMAIL,
+        )
+
+    @staticmethod
+    def _send_relationship_email(user, email_config):
+
+        if TimelineEmailService.already_alerted_today(user, email_config.event_types):
             return
 
         events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
             email_alert_sent_at__isnull=True,
-            event_type__in=relationship_events_types,
+            event_type__in=email_config.event_types,
             user_following__user=user,
         )
 
@@ -295,6 +325,7 @@ class TimelineEmailService:
                 "user": user,
                 "manage_url_path": reverse("folder_list"),
                 "site_domain": f"https://{site.domain}",
+                "subject_line": email_config.subject_line,
             }
 
             context["html_body"] = render_to_string(
@@ -303,7 +334,7 @@ class TimelineEmailService:
 
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(
-                    template_name="new_relationship_alert",
+                    template_name=email_config.email_template,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
                     context=context,
