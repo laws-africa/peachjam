@@ -1,4 +1,7 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 from martor.models import MartorField
 from martor.utils import markdownify
 
@@ -31,15 +34,100 @@ class Book(CoreDocument):
         return super().pre_save()
 
 
+class Journal(models.Model):
+    # This is your NEW model
+    title = models.CharField(max_length=512, unique=True, blank=False, null=False)
+    slug = models.SlugField(
+        max_length=512, default="", unique=False, blank=False, null=False
+    )
+    doi = models.CharField(max_length=255, verbose_name="Directory of Indexing (DOI)")
+
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.title
+
+
 class JournalArticle(CoreDocument):
 
     decorator = JournalArticleDecorator()
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
+    journal = models.ForeignKey(
+        "peachjam.Journal",
+        on_delete=models.PROTECT,
+        related_name="articles",
+        null=True,  # MUST be null initially because existing rows have no journal
+        blank=True,
+    )
+    volume = models.ForeignKey(
+        "peachjam.VolumeIssue",
+        on_delete=models.PROTECT,
+        related_name="articles",
+        null=True,
+        blank=True,
+    )
+    authors = models.ManyToManyField(
+        "peachjam.Author",
+        blank=True,
+        related_name="articles",
+    )
+    page_range = models.CharField(
+        _("page range"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_("Page range, e.g. pages 17-24"),
+    )
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "journal-article"
         self.doc_type = "journal_article"
         return super().pre_save()
+
+    def author_list(self):
+        return list(self.authors.all())
+
+
+class VolumeIssue(models.Model):
+
+    title = models.CharField(
+        max_length=255,
+        help_text="The volume and issue number (e.g., 'Vol 58, Issue 1' or 'Volume 58')",
+    )
+    slug = models.SlugField(
+        max_length=255, default="", unique=False, blank=True, null=True
+    )
+    issue = models.IntegerField()
+    journal = models.ForeignKey(
+        "peachjam.Journal",  # String reference avoids circular import issues
+        on_delete=models.CASCADE,
+        related_name="volumes",
+    )
+    year = models.IntegerField(
+        help_text="Publication year used for sorting and faceting",
+        db_index=True,  # Indexing added since this is key for sorting/faceting
+    )
+
+    class Meta:
+        ordering = ["-year", "title"]
+        verbose_name = "Volume/Issue"
+        verbose_name_plural = "Volumes/Issues"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.title} ({self.year})"

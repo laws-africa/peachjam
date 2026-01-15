@@ -412,6 +412,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
     citation = models.CharField(_("citation"), max_length=4096, null=True, blank=True)
+    summary = models.TextField(_("summary"), null=True, blank=True)
     content_html = models.TextField(_("content HTML"), null=True, blank=True)
     content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
     toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)

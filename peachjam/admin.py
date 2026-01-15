@@ -80,6 +80,7 @@ from peachjam.models import (
     Image,
     Ingestor,
     IngestorSetting,
+    Journal,
     JournalArticle,
     Judge,
     Judgment,
@@ -106,6 +107,7 @@ from peachjam.models import (
     UnconstitutionalProvision,
     UserFollowing,
     UserProfile,
+    VolumeIssue,
     Work,
     citations_processor,
     pj_settings,
@@ -680,6 +682,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             gettext_lazy("Content"),
             {
                 "fields": [
+                    "summary",
                     "content_html",
                 ]
             },
@@ -1785,6 +1788,23 @@ class BookAdmin(DocumentAdmin):
 @admin.register(JournalArticle)
 class JournalArticleAdmin(DocumentAdmin):
     pass
+
+
+@admin.register(Journal)
+class JournalAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = (
+        "title",
+        "doi",
+    )
+    search_fields = ("title", "doi")
+
+
+@admin.register(VolumeIssue)
+class VolumeIssueAdmin(admin.ModelAdmin):
+    list_display = ("title", "journal", "year", "issue")
+    list_filter = ("journal", "year")
+    search_fields = ("title",)
 
 
 @admin.register(ExternalDocument)

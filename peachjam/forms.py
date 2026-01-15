@@ -234,11 +234,11 @@ class BaseDocumentFilterForm(forms.Form):
 
     def apply_filter_authors(self, queryset):
         authors = self.cleaned_data.get("authors")
-        return (
-            queryset.filter(author__name__in=authors)
-            if authors and hasattr(queryset.model, "author")
-            else queryset
-        )
+        if authors and hasattr(queryset.model, "author"):
+            return queryset.filter(author__name__in=authors)
+        if authors and hasattr(queryset.model, "authors"):
+            return queryset.filter(authors__name__in=authors).distinct()
+        return queryset
 
     def apply_filter_courts(self, queryset):
         courts = self.cleaned_data.get("courts", [])
@@ -333,6 +333,16 @@ class BaseDocumentFilterForm(forms.Form):
                 queries &= Q(Q(title__icontains=term) | Q(citation__icontains=term))
             queryset = queryset.filter(queries)
         return queryset
+
+
+class JournalArticleFilterForm(BaseDocumentFilterForm):
+    journals = PermissiveTypedListField(coerce=int, required=False)
+
+    filter_fields = BaseDocumentFilterForm.filter_fields + ["journals"]
+
+    def apply_filter_journals(self, queryset):
+        journals = self.cleaned_data.get("journals")
+        return queryset.filter(journal_id__in=journals) if journals else queryset
 
 
 class LegislationFilterForm(BaseDocumentFilterForm):

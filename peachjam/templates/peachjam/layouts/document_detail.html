@@ -472,6 +472,14 @@
               </div>
             {% endblock %}
             {% block extra-metadata %}{% endblock %}
+            {% block document-summary %}
+              {% if document.summary %}
+                <div class="mb-4">
+                  <h5>{% trans 'Summary' %}</h5>
+                  <div class="text-muted">{{ document.summary|linebreaksbr }}</div>
+                </div>
+              {% endif %}
+            {% endblock %}
             <hr class="mb-5" />
           </div>
           {% block content %}
@@ -533,7 +541,9 @@
                id="ratifications-tab"
                role="tabpanel"
                aria-labelledby="ratifications-tab">
-            <div class="container">{% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}</div>
+            <div class="container">
+              {% include 'peachjam/_ratifications.html' with ratification=document.work.ratification %}
+            </div>
           </div>
         {% endif %}
       {% endblock %}
