@@ -43,7 +43,7 @@ class JournalListView(TemplateView):
 
 
 class VolumeIssueListView(TemplateView):
-    template_name = "peachjam/volumes_list.html"
+    template_name = "peachjam/volume_list.html"
     navbar_link = "journals"
 
     def get_context_data(self, **kwargs):
@@ -80,7 +80,7 @@ class VolumeIssueDetailView(FilteredDocumentListView):
 
 class JournalArticleListView(FilteredDocumentListView):
     model = JournalArticle
-    template_name = "peachjam/journal_articles_list.html"
+    template_name = "peachjam/journal_article_list.html"
     navbar_link = "journals"
     form_class = JournalArticleFilterForm
 
@@ -118,3 +118,4 @@ class JournalArticleListView(FilteredDocumentListView):
 @registry.register_doc_type("journal_article")
 class JournalArticleDetailView(BaseDocumentDetailView):
     model = JournalArticle
+    template_name = "peachjam/journal_article_detail.html"

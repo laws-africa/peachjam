@@ -298,18 +298,29 @@ class FilteredDocumentListView(DocumentListView):
                     .distinct()
                     if a
                 )
-                context["doc_table_show_author"] = bool(authors)
-                # customise the authors label?
-                if authors:
-                    authors_label = getattr(
-                        self.model, "author_label_plural", authors_label
+            elif hasattr(self.model, "authors"):
+                authors = list(
+                    a
+                    for a in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="authors"
                     )
-                    context["facet_data"]["authors"] = {
-                        "label": authors_label,
-                        "type": "checkbox",
-                        "options": sorted([(a, a) for a in authors]),
-                        "values": self.request.GET.getlist("authors"),
-                    }
+                    .order_by()
+                    .values_list("authors__name", flat=True)
+                    .distinct()
+                    if a
+                )
+            context["doc_table_show_author"] = bool(authors)
+            # customise the authors label?
+            if authors:
+                authors_label = getattr(
+                    self.model, "author_label_plural", authors_label
+                )
+                context["facet_data"]["authors"] = {
+                    "label": authors_label,
+                    "type": "checkbox",
+                    "options": sorted([(a, a) for a in authors]),
+                    "values": self.request.GET.getlist("authors"),
+                }
 
     def add_years_facet(self, context):
         if "years" not in self.exclude_facets:

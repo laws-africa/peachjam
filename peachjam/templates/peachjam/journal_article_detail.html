@@ -1,0 +1,36 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+{% block document-metadata-custom-properties %}
+  <dt>
+    {% trans 'FRBR URI' %}
+  </dt>
+  <dd class="text-muted">
+    {{ document.work_frbr_uri }}
+    {% include 'peachjam/_copy_to_clipboard.html' with value=document.work_frbr_uri %}
+  </dd>
+  {% if document.journal %}
+    <dt>
+      {% trans 'Journal' %}
+    </dt>
+    <dd class="text-muted">
+      <a href="{% url 'journal_article_list' %}?journals={{ document.journal_id }}">{{ document.journal.title }}</a>
+    </dd>
+  {% endif %}
+  {% if document.volume %}
+    <dt>
+      {% trans 'Volume/issue' %}
+    </dt>
+    <dd class="text-muted">
+      <a href="{% url 'volume_detail' document.volume_id %}">{{ document.volume.title }}</a>
+    </dd>
+  {% endif %}
+  {% if document.page_range %}
+    <dt>
+      {% trans 'Page range' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.page_range }}
+    </dd>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

@@ -311,7 +311,7 @@ class JournalArticleDecorator(DocumentDecorator):
     def get_breadcrumbs(self, document):
         crumbs = super().get_breadcrumbs(document)
         crumbs.append(
-            BreadCrumb(_("Journal articles"), reverse("journal_articles_list"))
+            BreadCrumb(_("Journal articles"), reverse("journal_article_list"))
         )
         return crumbs
 

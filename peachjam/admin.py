@@ -682,6 +682,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             gettext_lazy("Content"),
             {
                 "fields": [
+                    "summary",
                     "content_html",
                 ]
             },
@@ -1791,6 +1792,7 @@ class JournalArticleAdmin(DocumentAdmin):
 
 @admin.register(Journal)
 class JournalAdmin(admin.ModelAdmin):
+    prepopulated_fields = {"slug": ("title",)}
     list_display = (
         "title",
         "doi",

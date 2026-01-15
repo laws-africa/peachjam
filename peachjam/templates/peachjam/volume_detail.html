@@ -8,7 +8,7 @@
     <span class="mx-2">|</span>
     <a href="{% url 'volumes_list' %}">{% trans 'Browse volumes' %}</a>
     <span class="mx-2">|</span>
-    <a href="{% url 'journal_articles_list' %}">{% trans 'Browse journal articles' %}</a>
+    <a href="{% url 'journal_article_list' %}">{% trans 'Browse journal articles' %}</a>
   </div>
   <div class="text-muted">
     {% blocktrans with journal=volume_issue.journal.title year=volume_issue.year %}
