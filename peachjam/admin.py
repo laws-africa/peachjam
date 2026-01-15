@@ -1128,11 +1128,11 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
     held = forms.CharField(
-        widget=forms.Textarea(attrs={"style": "width: 100%;", "wrap": "off"}),
+        widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
         required=False,
     )
     issues = forms.CharField(
-        widget=forms.Textarea(attrs={"style": "width: 100%;", "wrap": "off"}),
+        widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
         required=False,
     )
 
