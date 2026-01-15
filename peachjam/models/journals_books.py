@@ -7,6 +7,7 @@ from martor.utils import markdownify
 
 from peachjam.decorators import BookDecorator, JournalArticleDecorator
 from peachjam.models import CoreDocument
+from peachjam.models.author import Author
 
 
 class Book(CoreDocument):
@@ -35,8 +36,11 @@ class Book(CoreDocument):
 
 
 class Journal(models.Model):
-    title = models.CharField(max_length=512)
-    slug = models.SlugField(max_length=512, unique=False, blank=True, null=True)
+    # This is your NEW model
+    title = models.CharField(max_length=512, unique=True, blank=False, null=False)
+    slug = models.SlugField(
+        max_length=512, default="", unique=False, blank=False, null=False
+    )
     doi = models.CharField(max_length=255, verbose_name="Directory of Indexing (DOI)")
 
     entity_profile = GenericRelation(
@@ -58,6 +62,8 @@ class JournalArticle(CoreDocument):
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
+    author_label = Author.model_label
+    author_label_plural = Author.model_label_plural
     journal = models.ForeignKey(
         "peachjam.Journal",
         on_delete=models.PROTECT,
@@ -72,12 +78,27 @@ class JournalArticle(CoreDocument):
         null=True,
         blank=True,
     )
+    authors = models.ManyToManyField(
+        "peachjam.Author",
+        blank=True,
+        related_name="articles",
+    )
+    page_range = models.CharField(
+        _("page range"),
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text=_("Page range, e.g. pages 17-24"),
+    )
 
     def pre_save(self):
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "journal-article"
         self.doc_type = "journal_article"
         return super().pre_save()
+
+    def author_list(self):
+        return list(self.authors.all())
 
 
 class VolumeIssue(models.Model):
@@ -86,7 +107,9 @@ class VolumeIssue(models.Model):
         max_length=255,
         help_text="The volume and issue number (e.g., 'Vol 58, Issue 1' or 'Volume 58')",
     )
-    slug = models.SlugField(max_length=255, unique=False, blank=True, null=True)
+    slug = models.SlugField(
+        max_length=255, default="", unique=False, blank=True, null=True
+    )
     issue = models.IntegerField()
     journal = models.ForeignKey(
         "peachjam.Journal",  # String reference avoids circular import issues
