@@ -7,7 +7,6 @@ from martor.utils import markdownify
 
 from peachjam.decorators import BookDecorator, JournalArticleDecorator
 from peachjam.models import CoreDocument
-from peachjam.models.author import Author
 
 
 class Book(CoreDocument):
@@ -62,8 +61,6 @@ class JournalArticle(CoreDocument):
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
-    author_label = Author.model_label
-    author_label_plural = Author.model_label_plural
     journal = models.ForeignKey(
         "peachjam.Journal",
         on_delete=models.PROTECT,
