@@ -322,6 +322,22 @@ def send_new_citation_email_alert(user_id):
     log.info("New citation email alerts sent")
 
 
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@transaction.atomic
+def send_new_relationship_email_alert(user_id):
+    from django.contrib.auth import get_user_model
+
+    from peachjam.timeline_email_service import TimelineEmailService
+
+    user = get_user_model().objects.filter(pk=user_id).first()
+    if not user:
+        log.info(f"No user with id {user_id} exists, ignoring.")
+        return
+    log.info(f"Sending new relationship email alerts for user {user_id}")
+    TimelineEmailService.send_new_relationship_email(user)
+    log.info("New relationship email alerts sent")
+
+
 @background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
 @transaction.atomic
 def generate_judgment_summary(doc_id):
@@ -347,3 +363,16 @@ def update_users_new_citation(citation_id):
         return
     log.info(f"Updating users for new citation {citation_id}")
     UserFollowing.update_new_citation_follows(citation)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_users_new_relationship(relationship_id):
+    # update users when a new relationship is created: amendment, repeal, commencement.
+    from peachjam.models import Relationship, UserFollowing
+
+    relationship = Relationship.objects.filter(id=relationship_id).first()
+    if not relationship:
+        log.info(f"No relationship with id {relationship_id} exists, ignoring.")
+        return
+    log.info(f"Updating users for new citation {relationship_id}")
+    UserFollowing.update_new_relationship_follows(relationship)

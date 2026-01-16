@@ -15,6 +15,7 @@ from peachjam.models import (
     DocumentContent,
     ExtractedCitation,
     Folder,
+    Relationship,
     SavedDocument,
     SourceFile,
     UserFollowing,
@@ -237,3 +238,11 @@ def notify_new_citation(sender, instance, **kwargs):
 
     if not kwargs["raw"]:
         update_users_new_citation(instance.pk)
+
+
+@receiver(signals.post_save, sender=Relationship)
+def notify_new_relationship(sender, instance, **kwargs):
+    """Notify users following the subject work when a new relationship is created."""
+    from peachjam.tasks import update_users_new_relationship
+
+    update_users_new_relationship(instance.pk)
