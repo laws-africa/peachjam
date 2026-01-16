@@ -309,10 +309,21 @@ class TimelineEmailService:
             ]
             saved_documents_map = {}
             for ev in events:
-                key = ev.user_following.followed_object
-                saved_documents_map.setdefault(key, {}).setdefault(
-                    ev.description_text(), []
-                ).extend(ev.subject_documents)
+                followed = ev.user_following.followed_object
+                event_type = ev.event_type
+
+                saved_documents_map.setdefault(followed, {})
+                saved_documents_map[followed].setdefault(
+                    event_type,
+                    {
+                        "label": str(ev.description_text()),
+                        "documents": [],
+                    },
+                )
+
+                saved_documents_map[followed][event_type]["documents"].extend(
+                    ev.subject_documents
+                )
 
             saved_documents = [
                 {"saved_document": key, "relationships": value}
