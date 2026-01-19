@@ -8,19 +8,12 @@ from peachjam.views import (
 )
 
 urlpatterns = [
-    path("journals/", JournalListView.as_view(), name="journal_list"),
+    path("", JournalListView.as_view(), name="journal_list"),
+    path("articles/", JournalArticleListView.as_view(), name="journal_article_list"),
+    path("<slug:slug>/", JournalArticleListView.as_view(), name="journal_detail"),
+    path("<slug:slug>/volumes/", VolumeIssueListView.as_view(), name="volume_list"),
     path(
-        "journals/volumes/articles/",
-        JournalArticleListView.as_view(),
-        name="journal_article_list",
-    ),
-    path(
-        "journals/volumes/",
-        VolumeIssueListView.as_view(),
-        name="volumes_list",
-    ),
-    path(
-        "journals/volumes/<int:pk>/",
+        "<slug:slug>/volumes/<slug:volume_slug>/",
         VolumeIssueDetailView.as_view(),
         name="volume_detail",
     ),

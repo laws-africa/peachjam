@@ -8,11 +8,6 @@
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
       <h1 class="mb-0">{% trans 'Journals' %}</h1>
     </div>
-    <div class="mb-3">
-      <a href="{% url 'volumes_list' %}">{% trans 'Browse volumes' %}</a>
-      <span class="mx-2">|</span>
-      <a href="{% url 'journal_article_list' %}">{% trans 'Browse journal articles' %}</a>
-    </div>
     {% if journals %}
       <div class="text-muted mb-3">
         {% blocktrans count counter=journal_count %}{{ counter }} journal{% plural %}{{ counter }} journals{% endblocktrans %}
@@ -22,8 +17,7 @@
           <div class="list-group-item d-flex justify-content-between align-items-start">
             <div>
               <div class="d-flex align-items-center">
-                <a href="{% url 'journal_article_list' %}?journals={{ journal.id }}"
-                   class="fw-semibold">{{ journal.title }}</a>
+                <a href="{% url 'journal_detail' journal.slug %}" class="fw-semibold">{{ journal.title }}</a>
                 {% if journal.peer_reviewed %}
                   <span class="badge bg-success text-white ms-2">{% trans 'Peer reviewed' %}</span>
                 {% endif %}

@@ -1,15 +1,26 @@
 from django.db.models import Count, Q
+from django.http import Http404
 from django.shortcuts import get_object_or_404
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import TemplateView
 
 from peachjam.forms import JournalArticleFilterForm
+from peachjam.helpers import chunks
 from peachjam.models import Book, Journal, JournalArticle, VolumeIssue
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+
+
+def ensure_volume_slugs(volumes):
+    for volume in volumes:
+        slug = (volume.slug or "").strip().lower()
+        if not slug or slug in {"none", "null"}:
+            volume.slug = slugify(volume.title)
+            volume.save(update_fields=["slug"])
 
 
 class BookListView(FilteredDocumentListView):
@@ -30,13 +41,20 @@ class JournalListView(TemplateView):
     navbar_link = "journals"
 
     def get_journals(self):
-        return Journal.objects.annotate(
-            article_count=Count("articles", filter=Q(articles__published=True))
-        ).order_by("title")
+        return (
+            Journal.objects.annotate(
+                article_count=Count("articles", filter=Q(articles__published=True))
+            )
+            .prefetch_related("volumes")
+            .order_by("title")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         journals = self.get_journals()
+        for journal in journals:
+            volumes = list(journal.volumes.all())
+            journal.volume_groups = chunks(volumes, 3)
         context["journals"] = journals
         context["journal_count"] = journals.count()
         return context
@@ -48,11 +66,16 @@ class VolumeIssueListView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        volume_issues = VolumeIssue.objects.select_related("journal").order_by(
-            "journal__title", "-year", "title"
+        journal = get_object_or_404(Journal, slug=self.kwargs["slug"])
+        volume_issues = list(
+            VolumeIssue.objects.select_related("journal")
+            .filter(journal=journal)
+            .order_by("-year", "title")
         )
+        ensure_volume_slugs(volume_issues)
         context["volume_issues"] = volume_issues
-        context["volume_issue_count"] = volume_issues.count()
+        context["volume_issue_count"] = len(volume_issues)
+        context["journal"] = journal
         return context
 
 
@@ -63,14 +86,19 @@ class VolumeIssueDetailView(FilteredDocumentListView):
     form_class = JournalArticleFilterForm
 
     def get_base_queryset(self, *args, **kwargs):
-        self.volume_issue = get_object_or_404(
-            VolumeIssue.objects.select_related("journal"), pk=self.kwargs["pk"]
+        self.journal = get_object_or_404(Journal, slug=self.kwargs["slug"])
+        volume_qs = VolumeIssue.objects.select_related("journal").filter(
+            journal=self.journal, slug=self.kwargs["volume_slug"]
         )
+        self.volume_issue = volume_qs.order_by("pk").first()
+        if not self.volume_issue:
+            raise Http404()
         return super().get_base_queryset().filter(volume=self.volume_issue)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["volume_issue"] = self.volume_issue
+        context["journal"] = self.journal
         context["doc_count_noun"] = _("journal article")
         context["doc_count_noun_plural"] = _("journal articles")
         context["nature"] = "Journal article"
@@ -83,6 +111,17 @@ class JournalArticleListView(FilteredDocumentListView):
     template_name = "peachjam/journal_article_list.html"
     navbar_link = "journals"
     form_class = JournalArticleFilterForm
+
+    def get_base_queryset(self, *args, **kwargs):
+        queryset = super().get_base_queryset(*args, **kwargs)
+        self.journal = None
+        slug = self.kwargs.get("slug")
+        if slug:
+            self.journal = get_object_or_404(
+                Journal.objects.prefetch_related("volumes"), slug=slug
+            )
+            queryset = queryset.filter(journal=self.journal)
+        return queryset
 
     def add_facets(self, context):
         super().add_facets(context)
@@ -112,6 +151,11 @@ class JournalArticleListView(FilteredDocumentListView):
         context["doc_count_noun_plural"] = _("journal articles")
         context["nature"] = "Journal article"
         context["help_link"] = "journals"
+        context["journal"] = self.journal
+        if self.journal:
+            volumes = list(self.journal.volumes.all())
+            ensure_volume_slugs(volumes)
+            context["volume_groups"] = chunks(volumes, 3)
         return context
 
 

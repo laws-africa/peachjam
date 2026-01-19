@@ -6,7 +6,7 @@ from martor.models import MartorField
 from martor.utils import markdownify
 
 from peachjam.decorators import BookDecorator, JournalArticleDecorator
-from peachjam.models import CoreDocument
+from peachjam.models import Author, CoreDocument
 
 
 class Book(CoreDocument):
@@ -47,12 +47,22 @@ class Journal(models.Model):
     )
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        slug = (self.slug or "").strip().lower()
+        if not slug or slug in {"none", "null"}:
             self.slug = slugify(self.title)
+        self.slug = self.get_unique_slug(self.slug)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.title
+
+    def get_unique_slug(self, slug):
+        base_slug = slug
+        counter = 2
+        while Journal.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
 
 
 class JournalArticle(CoreDocument):
@@ -61,6 +71,8 @@ class JournalArticle(CoreDocument):
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
+    author_label = Author.model_label
+    author_label_plural = Author.model_label_plural
     journal = models.ForeignKey(
         "peachjam.Journal",
         on_delete=models.PROTECT,
@@ -124,10 +136,23 @@ class VolumeIssue(models.Model):
         verbose_name_plural = "Volumes/Issues"
 
     def save(self, *args, **kwargs):
-        if not self.slug:
+        slug = (self.slug or "").strip().lower()
+        if not slug or slug in {"none", "null"}:
             self.slug = slugify(self.title)
-
+        self.slug = self.get_unique_slug(self.slug)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} ({self.year})"
+
+    def get_unique_slug(self, slug):
+        base_slug = slug
+        counter = 2
+        while (
+            VolumeIssue.objects.filter(journal=self.journal, slug=slug)
+            .exclude(pk=self.pk)
+            .exists()
+        ):
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug

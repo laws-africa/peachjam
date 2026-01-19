@@ -1,15 +1,29 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}{{ volume_issue.title }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'journal_list' %}">{% trans 'Journals' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'journal_detail' journal.slug %}">{{ journal.title }}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'volume_list' journal.slug %}">{% trans 'Volumes' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ volume_issue.title }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
 {% block page-title %}
   <h1 class="my-4">{{ volume_issue.title }}</h1>
-  <div class="mb-3">
-    <a href="{% url 'journal_list' %}">{% trans 'Browse journals' %}</a>
-    <span class="mx-2">|</span>
-    <a href="{% url 'volumes_list' %}">{% trans 'Browse volumes' %}</a>
-    <span class="mx-2">|</span>
-    <a href="{% url 'journal_article_list' %}">{% trans 'Browse journal articles' %}</a>
-  </div>
   <div class="text-muted">
     {% blocktrans with journal=volume_issue.journal.title year=volume_issue.year %}
       {{ journal }} | {{ year }}

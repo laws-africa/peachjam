@@ -13,7 +13,7 @@
       {% trans 'Journal' %}
     </dt>
     <dd class="text-muted">
-      <a href="{% url 'journal_article_list' %}?journals={{ document.journal_id }}">{{ document.journal.title }}</a>
+      <a href="{% url 'journal_detail' document.journal.slug %}">{{ document.journal.title }}</a>
     </dd>
   {% endif %}
   {% if document.volume %}
@@ -21,7 +21,7 @@
       {% trans 'Volume/issue' %}
     </dt>
     <dd class="text-muted">
-      <a href="{% url 'volume_detail' document.volume_id %}">{{ document.volume.title }}</a>
+      <a href="{% url 'volume_detail' document.journal.slug document.volume.slug %}">{{ document.volume.title }}</a>
     </dd>
   {% endif %}
   {% if document.page_range %}

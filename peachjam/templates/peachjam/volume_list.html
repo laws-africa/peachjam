@@ -11,7 +11,7 @@
     <div class="mb-3">
       <a href="{% url 'journal_list' %}">{% trans 'Browse journals' %}</a>
       <span class="mx-2">|</span>
-      <a href="{% url 'journal_article_list' %}">{% trans 'Browse journal articles' %}</a>
+      <a href="{% url 'journal_detail' journal.slug %}">{% trans 'Browse journal articles' %}</a>
     </div>
     {% if volume_issues %}
       <div class="text-muted mb-3">
@@ -31,10 +31,10 @@
             {% for volume in volume_issues %}
               <tr>
                 <td>
-                  <a href="{% url 'volume_detail' volume.pk %}">{{ volume.title }}</a>
+                  <a href="{% url 'volume_detail' journal.slug volume.slug %}">{{ volume.title }}</a>
                 </td>
                 <td>
-                  <a href="{% url 'journal_article_list' %}?journals={{ volume.journal_id }}">{{ volume.journal.title }}</a>
+                  <a href="{% url 'journal_detail' journal.slug }}">{{ volume.journal.title }}</a>
                 </td>
                 <td>{{ volume.year }}</td>
                 <td>{{ volume.issue }}</td>
