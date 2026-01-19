@@ -1787,7 +1787,25 @@ class BookAdmin(DocumentAdmin):
 
 @admin.register(JournalArticle)
 class JournalArticleAdmin(DocumentAdmin):
-    pass
+    autocomplete_fields = [
+        "journal",
+        "volume",
+    ]
+
+    def get_fieldsets(self, request, obj=None):
+        fieldsets = super().get_fieldsets(request, obj)
+
+        journal_section = [
+            (
+                "Journal Details",
+                {
+                    "fields": ("journal", "volume", "page_range", "authors"),
+                    "classes": ("collapse",),
+                },
+            ),
+        ]
+
+        return fieldsets + journal_section
 
 
 @admin.register(Journal)
@@ -1797,7 +1815,7 @@ class JournalAdmin(admin.ModelAdmin):
         "title",
         "doi",
     )
-    search_fields = ("title", "doi")
+    search_fields = ("title", "slug", "doi")
 
 
 @admin.register(VolumeIssue)

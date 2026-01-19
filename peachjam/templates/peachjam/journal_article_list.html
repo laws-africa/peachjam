@@ -7,6 +7,25 @@
     {% trans 'Journal articles' %}
   {% endif %}
 {% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'journal_list' %}">{% trans 'Journals' %}</a>
+        </li>
+        {% if journal %}
+          <li class="breadcrumb-item active" aria-current="page">{{ journal.title }}</li>
+        {% else %}
+          <li class="breadcrumb-item active" aria-current="page">{% trans 'Journal articles' %}</li>
+        {% endif %}
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
 {% block page-title %}
   <h1 class="my-4">
     {% if journal %}
@@ -15,13 +34,6 @@
       {% trans 'Journal articles' %}
     {% endif %}
   </h1>
-  <div class="mb-3">
-    <a href="{% url 'journal_list' %}">{% trans 'Browse journals' %}</a>
-    {% if journal %}
-      <span class="mx-2">|</span>
-      <a href="{% url 'volume_list' journal.slug %}">{% trans 'Browse volumes' %}</a>
-    {% endif %}
-  </div>
   {% if volume_groups %}
     <div class="mb-4">
       <h4 class="mb-2">{% trans 'Volumes' %}</h4>

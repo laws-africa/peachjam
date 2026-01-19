@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from martor.models import MartorField
@@ -71,6 +72,7 @@ class JournalArticle(CoreDocument):
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
+    slug = models.SlugField(max_length=512, unique=True, blank=True, null=True)
     author_label = Author.model_label
     author_label_plural = Author.model_label_plural
     journal = models.ForeignKey(
@@ -108,6 +110,26 @@ class JournalArticle(CoreDocument):
 
     def author_list(self):
         return list(self.authors.all())
+
+    def get_absolute_url(self):
+        if self.slug:
+            return reverse("journal_article_detail", kwargs={"slug": self.slug})
+        return super().get_absolute_url()
+
+    def save(self, *args, **kwargs):
+        slug = (self.slug or "").strip().lower()
+        if not slug or slug in {"none", "null"}:
+            self.slug = slugify(self.title)
+        self.slug = self.get_unique_slug(self.slug)
+        super().save(*args, **kwargs)
+
+    def get_unique_slug(self, slug):
+        base_slug = slug
+        counter = 2
+        while JournalArticle.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
 
 
 class VolumeIssue(models.Model):

@@ -163,3 +163,14 @@ class JournalArticleListView(FilteredDocumentListView):
 class JournalArticleDetailView(BaseDocumentDetailView):
     model = JournalArticle
     template_name = "peachjam/journal_article_detail.html"
+
+
+class JournalArticleSlugDetailView(BaseDocumentDetailView):
+    model = JournalArticle
+    template_name = "peachjam/journal_article_detail.html"
+
+    def get_object(self, *args, **kwargs):
+        return get_object_or_404(self.model, slug=self.kwargs["slug"])
+
+    def get_queryset(self):
+        return super().get_queryset().select_related("journal", "volume")

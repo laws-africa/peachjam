@@ -14,9 +14,6 @@
         <li class="breadcrumb-item">
           <a href="{% url 'journal_detail' journal.slug %}">{{ journal.title }}</a>
         </li>
-        <li class="breadcrumb-item">
-          <a href="{% url 'volume_list' journal.slug %}">{% trans 'Volumes' %}</a>
-        </li>
         <li class="breadcrumb-item active" aria-current="page">{{ volume_issue.title }}</li>
       </ol>
     </nav>
