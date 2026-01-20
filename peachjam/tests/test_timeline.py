@@ -244,7 +244,9 @@ class TimelineRelationshipTests(TestCase):
         ):
             TimelineEmailService.send_new_relationship_email(self.user)
 
-        template_names = {call.kwargs["template_name"] for call in mailer.call_args_list}
+        template_names = {
+            call.kwargs["template_name"] for call in mailer.call_args_list
+        }
         self.assertEqual(
             {"new_relationship_alert", "new_overturn_alert"}, template_names
         )
