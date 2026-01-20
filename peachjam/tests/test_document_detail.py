@@ -8,6 +8,40 @@ from peachjam.models import Judgment
 User = get_user_model()
 
 
+class DocumentViewTestCase(WebTest):
+    fixtures = [
+        "tests/countries",
+        "tests/courts",
+        "tests/languages",
+        "documents/sample_documents",
+    ]
+
+    def test_document_citation_links(self):
+        doc = Judgment.objects.first()
+        response = self.app.get(doc.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            '<script id="citation-links" type="application/json">[]</script>',
+            html=True,
+        )
+        self.assertContains(
+            response,
+            '<script id="provision-relationships" type="application/json">[]</script>',
+            html=True,
+        )
+        self.assertContains(
+            response,
+            '<script id="provision-enrichments-json" type="application/json">[]</script>',
+            html=True,
+        )
+        self.assertContains(
+            response,
+            '<script id="incoming-citations-json" type="application/json">[]</script>',
+            html=True,
+        )
+
+
 class RestrictedDocumentsTestCase(WebTest):
     fixtures = [
         "tests/users",
