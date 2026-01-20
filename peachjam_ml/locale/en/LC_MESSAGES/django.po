@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2026-01-20 10:39+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -56,10 +56,25 @@ msgstr ""
 msgid "No documents found."
 msgstr ""
 
+#: templates/peachjam/layouts/document_detail.html:15
+#: templates/peachjam/layouts/document_detail.html:22
+#, python-format
+msgid "Ask %(name)s"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:17
+msgid "Ask questions and understand this document faster using AI."
+msgstr ""
+
 #: templates/peachjam/saved_document/_folders_list.html:16
 msgid "Saved documents"
 msgstr ""
 
 #: templates/peachjam/saved_document/_folders_list.html:30
 msgid "Suggested for this folder"
+msgstr ""
+
+#: templates/peachjam_ml/_chat_permission_denied.html:5
+#, python-format
+msgid "You've reached your limit of %(chat_limit)s chats per month. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats, or wait until next month."
 msgstr ""

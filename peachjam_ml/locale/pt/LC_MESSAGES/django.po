@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2026-01-20 10:39+0200\n"
 "PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -55,6 +55,16 @@ msgstr "Sugestões geradas pela IA."
 msgid "No documents found."
 msgstr "Nenhum documento encontrado."
 
+#: templates/peachjam/layouts/document_detail.html:15
+#: templates/peachjam/layouts/document_detail.html:22
+#, python-format
+msgid "Ask %(name)s"
+msgstr ""
+
+#: templates/peachjam/layouts/document_detail.html:17
+msgid "Ask questions and understand this document faster using AI."
+msgstr ""
+
 #: templates/peachjam/saved_document/_folders_list.html:16
 msgid "Saved documents"
 msgstr "Documentos salvos"
@@ -63,3 +73,7 @@ msgstr "Documentos salvos"
 msgid "Suggested for this folder"
 msgstr "Sugerido para esta pasta"
 
+#: templates/peachjam_ml/_chat_permission_denied.html:5
+#, python-format
+msgid "You've reached your limit of %(chat_limit)s chats per month. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats, or wait until next month."
+msgstr ""
