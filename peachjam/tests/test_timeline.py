@@ -152,34 +152,28 @@ class TimelineRelationshipTests(TestCase):
         self.saved_followed = SavedDocument.objects.create(
             user=self.user, work=self.followed_work
         )
-        self.follow_followed = UserFollowing.objects.create(
+        self.follow_followed = UserFollowing.objects.get(
             user=self.user, saved_document=self.saved_followed
         )
 
         self.saved_overturned = SavedDocument.objects.create(
             user=self.user, work=self.overturned_work
         )
-        self.follow_overturned = UserFollowing.objects.create(
+        self.follow_overturned = UserFollowing.objects.get(
             user=self.user, saved_document=self.saved_overturned
         )
 
         self.amended_predicate = Predicate.objects.create(
             name="amended by",
             slug="amended-by",
-            verb="is amended by",
-            reverse_verb="amends",
         )
-        self.repealed_predicate = Predicate.objects.create(
+        self.repealed_predicate, _ = Predicate.objects.get_or_create(
             name="repealed by",
             slug="repealed-by",
-            verb="is repealed by",
-            reverse_verb="repeals",
         )
-        self.overturns_predicate = Predicate.objects.create(
+        self.overturns_predicate, _ = Predicate.objects.get_or_create(
             name="overturns",
             slug="overturns",
-            verb="overturns",
-            reverse_verb="is overturned by",
         )
 
     def test_update_new_relationship_follows_creates_timeline_events(self):
