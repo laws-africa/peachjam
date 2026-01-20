@@ -20,6 +20,7 @@ from .external_document import *
 from .gazette import *
 from .generic_document import *
 from .home import *
+from .journals import *
 from .judgment import *
 from .legislation import *
 from .login import *
