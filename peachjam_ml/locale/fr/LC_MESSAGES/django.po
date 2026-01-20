@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-01-20 10:39+0200\n"
-"PO-Revision-Date: 2026-01-20 09:10\n"
+"PO-Revision-Date: 2026-01-20 10:05\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -59,11 +59,11 @@ msgstr "Aucun document trouvé."
 #: templates/peachjam/layouts/document_detail.html:22
 #, python-format
 msgid "Ask %(name)s"
-msgstr ""
+msgstr "Demandez %(name)s"
 
 #: templates/peachjam/layouts/document_detail.html:17
 msgid "Ask questions and understand this document faster using AI."
-msgstr ""
+msgstr "Posez des questions et comprenez ce document plus rapidement grâce à l'IA."
 
 #: templates/peachjam/saved_document/_folders_list.html:16
 msgid "Saved documents"
@@ -76,5 +76,5 @@ msgstr "Suggéré pour ce dossier"
 #: templates/peachjam_ml/_chat_permission_denied.html:5
 #, python-format
 msgid "You've reached your limit of %(chat_limit)s chats per month. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats, or wait until next month."
-msgstr ""
+msgstr "Vous avez atteint votre limite de %(chat_limit)s discussions par mois. Veuillez passer à <a href=\"%(upsell_url)s\">%(lowest_product)s</a> pour débloquer plus de discussions, ou patientez jusqu'au mois prochain."
 
