@@ -1,5 +1,24 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'journal_list' %}">{% trans 'Journals' %}</a>
+        </li>
+        {% if document.journal %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'journal_detail' document.journal.slug %}">{{ document.journal.title }}</a>
+          </li>
+        {% endif %}
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
 {% block document-metadata-custom-properties %}
   <dt>
     {% trans 'FRBR URI' %}
