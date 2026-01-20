@@ -23,6 +23,7 @@ from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
+    CitationLink,
     CoreDocument,
     DocumentNature,
     ProvisionCitationCount,
@@ -34,6 +35,7 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam_api.serializers import (
+    CitationLinkSerializer,
     RelationshipSerializer,
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
@@ -397,6 +399,13 @@ class BaseDocumentDetailView(DetailView):
         )
 
         doc = self.object
+
+        # citation links for a document
+        citation_links = CitationLink.objects.filter(document=doc)
+        context["citation_links"] = CitationLinkSerializer(
+            citation_links, many=True
+        ).data
+
         # get all versions that match current document work_frbr_uri
         all_versions = CoreDocument.objects.filter(
             work_frbr_uri=self.object.work_frbr_uri

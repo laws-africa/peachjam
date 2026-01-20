@@ -26,7 +26,6 @@ from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
-from peachjam_api.serializers import CitationLink, CitationLinkSerializer
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -317,12 +316,6 @@ class DocumentCitationsTabView(DocumentDetailView):
         context = super().get_context_data(**kwargs)
 
         doc = self.object
-
-        # citation links for a document
-        citation_links = CitationLink.objects.filter(document=doc)
-        context["citation_links"] = CitationLinkSerializer(
-            citation_links, many=True
-        ).data
 
         # This only runs when HTMX hits this specific endpoint
         # Citations
