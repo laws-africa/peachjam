@@ -261,7 +261,6 @@ class TimelineEvent(models.Model):
             TimelineEvent.objects.attach_subject_documents(ev) for ev in events_qs
         ]
 
-        # FIX: group by (date → following → event_type)
         grouped = defaultdict(lambda: defaultdict(lambda: defaultdict(list)))
 
         for ev in events_qs:
