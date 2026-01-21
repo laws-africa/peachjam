@@ -36,34 +36,16 @@ class Book(CoreDocument):
 
 
 class Journal(models.Model):
-    # This is your NEW model
     title = models.CharField(max_length=512, unique=True, blank=False, null=False)
-    slug = models.SlugField(
-        max_length=512, default="", unique=False, blank=False, null=False
-    )
+    slug = models.SlugField(max_length=512, unique=True)
     doi = models.CharField(max_length=255, verbose_name="Directory of Indexing (DOI)")
 
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
 
-    def save(self, *args, **kwargs):
-        slug = (self.slug or "").strip().lower()
-        if not slug or slug in {"none", "null"}:
-            self.slug = slugify(self.title)
-        self.slug = self.get_unique_slug(self.slug)
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.title
-
-    def get_unique_slug(self, slug):
-        base_slug = slug
-        counter = 2
-        while Journal.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-            slug = f"{base_slug}-{counter}"
-            counter += 1
-        return slug
 
 
 class JournalArticle(CoreDocument):
@@ -72,7 +54,7 @@ class JournalArticle(CoreDocument):
 
     publisher = models.CharField(max_length=2048)
     default_nature = ("journal_article", "Journal article")
-    slug = models.SlugField(max_length=512, unique=True, blank=True, null=True)
+    slug = models.SlugField(max_length=512, unique=True)
     author_label = Author.model_label
     author_label_plural = Author.model_label_plural
     journal = models.ForeignKey(
@@ -138,9 +120,7 @@ class VolumeIssue(models.Model):
         max_length=255,
         help_text="The volume and issue number (e.g., 'Vol 58, Issue 1' or 'Volume 58')",
     )
-    slug = models.SlugField(
-        max_length=255, default="", unique=False, blank=True, null=True
-    )
+    slug = models.SlugField(max_length=255, unique=False)
     issue = models.IntegerField()
     journal = models.ForeignKey(
         "peachjam.Journal",  # String reference avoids circular import issues
