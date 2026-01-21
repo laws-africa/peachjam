@@ -74,7 +74,7 @@ class TimelineEmailService:
         )
 
         relationship_events_types = [
-            ev.event_type for ev in TimelineEvent.PREDICATE_MAP.values()
+            ev.event_type for ev in TimelineEvent.RELATIONSHIP_EVENT_MAP.values()
         ]
         new_relationship_user_ids = (
             events.filter(event_type__in=relationship_events_types)
