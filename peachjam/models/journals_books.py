@@ -158,7 +158,7 @@ class VolumeIssue(models.Model):
         verbose_name_plural = "Volumes/Issues"
 
     def save(self, *args, **kwargs):
-        slug = (self.slug or "").strip().lower()
+        self.slug = slugify(self.title) # this should be enough
         if not slug or slug in {"none", "null"}:
             self.slug = slugify(self.title)
         self.slug = self.get_unique_slug(self.slug)
