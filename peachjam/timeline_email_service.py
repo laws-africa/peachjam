@@ -1,11 +1,14 @@
 import logging
 from datetime import timedelta
+from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db.models import Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.text import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -13,6 +16,7 @@ from peachjam.models import ProvisionCitation, TimelineEvent
 from peachjam.tasks import (
     send_new_citation_email_alert,
     send_new_document_email_alert,
+    send_new_relationship_email_alert,
     send_saved_search_email_alert,
 )
 
@@ -22,12 +26,20 @@ log = logging.getLogger(__name__)
 class TimelineEmailService:
     @staticmethod
     def already_alerted_today(user, event_type):
+        q = Q()
         last_24_hrs = timezone.now() - timedelta(hours=24)
-        email_sent = TimelineEvent.objects.filter(
+
+        if type(event_type) == list:
+            q = Q(event_type__in=event_type)
+        else:
+            q = Q(event_type=event_type)
+
+        q &= Q(
             email_alert_sent_at__gte=last_24_hrs,
-            event_type=event_type,
             user_following__user=user,
-        ).exists()
+        )
+
+        email_sent = TimelineEvent.objects.filter(q).exists()
         if email_sent:
             log.info(
                 "%s email for %s has been sent within the last 24hrs: %s",
@@ -61,6 +73,15 @@ class TimelineEmailService:
             .distinct()
         )
 
+        relationship_events_types = [
+            ev.event_type for ev in TimelineEvent.PREDICATE_MAP.values()
+        ]
+        new_relationship_user_ids = (
+            events.filter(event_type__in=relationship_events_types)
+            .values_list("user_following__user_id", flat=True)
+            .distinct()
+        )
+
         for user_id in new_doc_user_ids:
             send_new_document_email_alert(user_id)
 
@@ -69,6 +90,9 @@ class TimelineEmailService:
 
         for user_id in new_citation_user_ids:
             send_new_citation_email_alert(user_id)
+
+        for user_id in new_relationship_user_ids:
+            send_new_relationship_email_alert(user_id)
 
     @staticmethod
     def send_new_documents_email(user):
@@ -217,13 +241,111 @@ class TimelineEmailService:
             subject_line = f"New citations for {context['saved_documents'][0]['saved_document'].title}"
             saved_docs_length = len(context["saved_documents"])
             if saved_docs_length > 1:
-                subject_line += f" and {saved_docs_length} more"
+                subject_line += f" and {saved_docs_length - 1} more"
 
             context["subject_line"] = subject_line
 
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(
                     template_name="new_citation_alert",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[user.email],
+                    context=context,
+                )
+
+        for ev in events:
+            ev.mark_as_sent()
+
+    @staticmethod
+    def send_new_relationship_email(user):
+        class RelationshipEmail(NamedTuple):
+            event_types: list[str]
+            email_template: str
+            subject_line: str
+
+        RELATIONSHIP_EMAIL = RelationshipEmail(
+            event_types=[
+                rel.event_type
+                for rel in TimelineEvent.RELATIONSHIP_EVENT_MAP.values()
+                if rel.event_type != TimelineEvent.EventTypes.NEW_OVERTURN
+            ],
+            email_template="new_relationship_alert",
+            subject_line=_("New updates for documents you have saved"),
+        )
+
+        OVERTURN_EMAIL = RelationshipEmail(
+            event_types=[TimelineEvent.EventTypes.NEW_OVERTURN],
+            email_template="new_overturn_alert",
+            subject_line=_("New overturn for judgments you have saved"),
+        )
+        TimelineEmailService._send_relationship_email(
+            user,
+            RELATIONSHIP_EMAIL,
+        )
+        TimelineEmailService._send_relationship_email(
+            user,
+            OVERTURN_EMAIL,
+        )
+
+    @staticmethod
+    def _send_relationship_email(user, email_config):
+
+        if TimelineEmailService.already_alerted_today(user, email_config.event_types):
+            return
+
+        events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
+            email_alert_sent_at__isnull=True,
+            event_type__in=email_config.event_types,
+            user_following__user=user,
+        )
+
+        if not events.exists():
+            log.info("No new relationship events to alert for %s", user)
+            return
+
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+            events = [
+                TimelineEvent.objects.attach_subject_documents(ev) for ev in events
+            ]
+            saved_documents_map = {}
+            for ev in events:
+                followed = ev.user_following.followed_object
+                event_type = ev.event_type
+
+                saved_documents_map.setdefault(followed, {})
+                saved_documents_map[followed].setdefault(
+                    event_type,
+                    {
+                        "label": str(ev.description_text()),
+                        "documents": [],
+                    },
+                )
+
+                saved_documents_map[followed][event_type]["documents"].extend(
+                    ev.subject_documents
+                )
+
+            saved_documents = [
+                {"saved_document": key, "relationships": value}
+                for key, value in saved_documents_map.items()
+            ]
+            site = Site.objects.get_current()
+
+            context = {
+                "saved_documents": saved_documents,
+                "user": user,
+                "manage_url_path": reverse("folder_list"),
+                "site_domain": f"https://{site.domain}",
+                "subject_line": email_config.subject_line,
+            }
+
+            context["html_body"] = render_to_string(
+                "peachjam/emails/new_relationship_alert_body.html", context=context
+            )
+
+            with override(user.userprofile.preferred_language.pk):
+                send_templated_mail(
+                    template_name=email_config.email_template,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
                     context=context,

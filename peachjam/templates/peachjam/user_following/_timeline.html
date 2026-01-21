@@ -3,9 +3,9 @@
   <li>
     <div class="bg-white text-muted">{{ date }}</div>
     <ul class="list-unstyled">
-      {% for following, docs in groups %}
+      {% for following, description, docs in groups %}
         <li>
-          <span>{{ following.description_text }} <b><a href="{{ following.followed_object.get_absolute_url }}">{{ following.followed_object }}</a></b> </span>
+          <span>{{ description }} <b><a href="{{ following.followed_object.get_absolute_url }}">{{ following.followed_object }}</a></b> </span>
           <div class="ms-3">
             {% include "peachjam/_document_table.html" with doc_table_hide_thead=True doc_table_show_date=True documents=docs.0 %}
             {% if docs.1 %}
