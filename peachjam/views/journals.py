@@ -1,4 +1,4 @@
-from django.db.models import Count, Q
+from django.db.models import Count, Max, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.text import slugify
@@ -30,7 +30,10 @@ class JournalListView(TemplateView):
     def get_journals(self):
         return (
             Journal.objects.annotate(
-                article_count=Count("articles", filter=Q(articles__published=True))
+                article_count=Count("articles", filter=Q(articles__published=True)),
+                latest_article_created_at=Max(
+                    "articles__created_at", filter=Q(articles__published=True)
+                ),
             )
             .prefetch_related("volumes")
             .order_by("title")

@@ -27,7 +27,9 @@
               </div>
               <div class="text-muted small">{{ journal.doi }}</div>
             </div>
-            <span class="badge bg-light text-dark">{{ journal.article_count }}</span>
+            {% if journal.latest_article_created_at %}
+              <span class="badge bg-light text-dark">{{ journal.latest_article_created_at|date:"j M Y" }}</span>
+            {% endif %}
           </div>
         {% endfor %}
       </div>
