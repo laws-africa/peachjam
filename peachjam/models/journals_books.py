@@ -1,7 +1,6 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.urls import reverse
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from martor.models import MartorField
 from martor.utils import markdownify
@@ -98,21 +97,6 @@ class JournalArticle(CoreDocument):
             return reverse("journal_article_detail", kwargs={"slug": self.slug})
         return super().get_absolute_url()
 
-    def save(self, *args, **kwargs):
-        slug = (self.slug or "").strip().lower()
-        if not slug or slug in {"none", "null"}:
-            self.slug = slugify(self.title)
-        self.slug = self.get_unique_slug(self.slug)
-        super().save(*args, **kwargs)
-
-    def get_unique_slug(self, slug):
-        base_slug = slug
-        counter = 2
-        while JournalArticle.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-            slug = f"{base_slug}-{counter}"
-            counter += 1
-        return slug
-
 
 class VolumeIssue(models.Model):
 
@@ -137,24 +121,5 @@ class VolumeIssue(models.Model):
         verbose_name = "Volume/Issue"
         verbose_name_plural = "Volumes/Issues"
 
-    def save(self, *args, **kwargs):
-        self.slug = slugify(self.title) # this should be enough
-        if not slug or slug in {"none", "null"}:
-            self.slug = slugify(self.title)
-        self.slug = self.get_unique_slug(self.slug)
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.title} ({self.year})"
-
-    def get_unique_slug(self, slug):
-        base_slug = slug
-        counter = 2
-        while (
-            VolumeIssue.objects.filter(journal=self.journal, slug=slug)
-            .exclude(pk=self.pk)
-            .exists()
-        ):
-            slug = f"{base_slug}-{counter}"
-            counter += 1
-        return slug

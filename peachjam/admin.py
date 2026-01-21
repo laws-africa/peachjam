@@ -1821,6 +1821,7 @@ class JournalAdmin(admin.ModelAdmin):
 @admin.register(VolumeIssue)
 class VolumeIssueAdmin(admin.ModelAdmin):
     list_display = ("title", "journal", "year", "issue")
+    prepopulated_fields = {"slug": ("title",)}
     list_filter = ("journal", "year")
     search_fields = ("title",)
 
