@@ -112,7 +112,7 @@ class VolumeIssue(models.Model):
         related_name="volumes",
     )
     year = models.IntegerField(
-        help_text="Publication year used for sorting and faceting",
+        help_text=_("Publication year"),
         db_index=True,  # Indexing added since this is key for sorting/faceting
     )
 
