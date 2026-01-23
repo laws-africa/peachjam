@@ -367,6 +367,7 @@ class BaseDocumentDetailView(DetailView):
         if (
             self.object.restricted
             or self.object.updated_at >= timezone.now() - timezone.timedelta(hours=1)
+            or not self.object.is_most_recent()
         ):
             add_never_cache_headers(response)
         return response

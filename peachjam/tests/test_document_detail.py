@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
-from peachjam.models import Judgment
+from peachjam.models import Judgment, Legislation
 
 User = get_user_model()
 
@@ -40,6 +40,14 @@ class DocumentViewTestCase(WebTest):
             '<script id="incoming-citations-json" type="application/json">[]</script>',
             html=True,
         )
+
+    def test_document_non_latest_version_has_no_cache(self):
+        doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2010-08-09"
+        )
+        response = self.app.get(doc.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
 
 
 class RestrictedDocumentsTestCase(WebTest):
