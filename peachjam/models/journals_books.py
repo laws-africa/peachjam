@@ -118,8 +118,8 @@ class VolumeIssue(models.Model):
 
     class Meta:
         ordering = ["-year", "title"]
-        verbose_name = "Volume/Issue"
-        verbose_name_plural = "Volumes/Issues"
+        verbose_name = _("volume/issue")
+        verbose_name_plural = _("volumes/issues")
 
     def __str__(self):
         return f"{self.title} ({self.year})"
