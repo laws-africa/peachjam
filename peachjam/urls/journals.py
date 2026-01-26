@@ -2,7 +2,6 @@ from django.urls import path
 
 from peachjam.views import (
     JournalArticleListView,
-    JournalArticleSlugDetailView,
     JournalDetailView,
     JournalListView,
     VolumeIssueDetailView,
@@ -11,11 +10,6 @@ from peachjam.views import (
 urlpatterns = [
     path("", JournalListView.as_view(), name="journal_list"),
     path("articles/", JournalArticleListView.as_view(), name="journal_article_list"),
-    path(
-        "articles/<slug:slug>/",
-        JournalArticleSlugDetailView.as_view(),
-        name="journal_article_detail",
-    ),
     path("<slug:slug>/", JournalDetailView.as_view(), name="journal_detail"),
     path(
         "<slug:slug>/volumes/<slug:volume_slug>/",
