@@ -102,7 +102,6 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     template_name = "peachjam/legislation_detail.html"
     permission_required = "peachjam.can_view_historical_legislation"
 
-
     def get_object(self):
         # caching the object here to avoid multiple db hits
         if not hasattr(self, "_object"):
@@ -129,7 +128,6 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         self.object = self.get_object()
         response = super().handle_no_permission()
         return self.set_cache_headers(response)
-
 
     def get_subscription_required_template(self):
         return self.template_name
