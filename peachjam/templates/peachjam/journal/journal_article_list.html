@@ -1,0 +1,23 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Journal articles' %}
+{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'journal_list' %}">{% trans 'Journals' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans 'Journal articles' %}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  <h1 class="my-4">{% trans 'Journal articles' %}</h1>
+{% endblock %}

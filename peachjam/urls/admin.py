@@ -9,6 +9,7 @@ from peachjam.views import (
     JudgesAutocomplete,
     JudgmentWorksAutocomplete,
     PeachjamAdminLoginView,
+    VolumeIssueAutocomplete,
     WorkAutocomplete,
 )
 
@@ -33,6 +34,11 @@ urlpatterns = [
         "autocomplete/judgments",
         JudgmentWorksAutocomplete.as_view(),
         name="autocomplete-judgment-works",
+    ),
+    path(
+        "autocomplete/volume-issues",
+        VolumeIssueAutocomplete.as_view(),
+        name="autocomplete-volume-issues",
     ),
     path("anon/<int:pk>", DocumentAnonymiseView.as_view(), name="anon"),
     path("anon/<int:pk>/update", DocumentAnonymiseAPIView.as_view()),

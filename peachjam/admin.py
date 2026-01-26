@@ -682,7 +682,6 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             gettext_lazy("Content"),
             {
                 "fields": [
-                    "summary",
                     "content_html",
                 ]
             },
@@ -1789,11 +1788,24 @@ class BookAdmin(DocumentAdmin):
 class JournalArticleAdmin(DocumentAdmin):
     autocomplete_fields = [
         "journal",
-        "volume",
     ]
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "volume":
+            kwargs["widget"] = autocomplete.ModelSelect2(
+                url="autocomplete-volume-issues", forward=["journal"]
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
     def get_fieldsets(self, request, obj=None):
         fieldsets = super().get_fieldsets(request, obj)
+        updated_fieldsets = []
+        for title, options in fieldsets:
+            fields = list(options.get("fields", []))
+            if "summary" in fields:
+                fields = [field for field in fields if field != "summary"]
+            options["fields"] = tuple(fields)
+            updated_fieldsets.append((title, options))
 
         journal_section = [
             (
@@ -1805,11 +1817,12 @@ class JournalArticleAdmin(DocumentAdmin):
             ),
         ]
 
-        return fieldsets + journal_section
+        return updated_fieldsets + journal_section
 
 
 @admin.register(Journal)
 class JournalAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
     prepopulated_fields = {"slug": ("title",)}
     list_display = (
         "title",
@@ -1820,9 +1833,12 @@ class JournalAdmin(admin.ModelAdmin):
 
 @admin.register(VolumeIssue)
 class VolumeIssueAdmin(admin.ModelAdmin):
-    list_display = ("title", "journal", "year", "issue")
-    prepopulated_fields = {"slug": ("title",)}
-    list_filter = ("journal", "year")
+    list_display = (
+        "title",
+        "journal",
+    )
+    list_filter = ("journal",)
+    readonly_fields = ("slug",)
     search_fields = ("title",)
 
 

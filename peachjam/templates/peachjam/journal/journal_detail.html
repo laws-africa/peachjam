@@ -1,11 +1,8 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}
-  {% if journal %}
-    {{ journal.title }}
-  {% else %}
-    {% trans 'Journal articles' %}
-  {% endif %}
+  {{ journal.title }}
+  {% trans 'Journal articles' %}
 {% endblock %}
 {% block breadcrumbs %}
   <div class="container">
@@ -17,23 +14,16 @@
         <li class="breadcrumb-item">
           <a href="{% url 'journal_list' %}">{% trans 'Journals' %}</a>
         </li>
-        {% if journal %}
-          <li class="breadcrumb-item active" aria-current="page">{{ journal.title }}</li>
-        {% else %}
-          <li class="breadcrumb-item active" aria-current="page">{% trans 'Journal articles' %}</li>
-        {% endif %}
+        <li class="breadcrumb-item active" aria-current="page">{{ journal.title }}</li>
       </ol>
     </nav>
   </div>
 {% endblock %}
 {% block page-title %}
-  <h1 class="my-4">
-    {% if journal %}
-      {{ journal.title }}
-    {% else %}
-      {% trans 'Journal articles' %}
-    {% endif %}
-  </h1>
+  {% if not entity_profile %}<h1 class="my-4">{{ journal.title }}</h1>{% endif %}
+{% endblock %}
+{% block page-header %}
+  {{ block.super }}
   {% if volume_groups %}
     <div class="mb-4">
       <h4 class="mb-2">{% trans 'Volumes' %}</h4>

@@ -311,8 +311,28 @@ class JournalArticleDecorator(DocumentDecorator):
     def get_breadcrumbs(self, document):
         crumbs = super().get_breadcrumbs(document)
         crumbs.append(
-            BreadCrumb(_("Journal articles"), reverse("journal_article_list"))
+            BreadCrumb(_("Journals"), reverse("journal_list")),
         )
+
+        if document.journal:
+            crumbs.append(
+                BreadCrumb(
+                    document.journal.title,
+                    reverse("journal_detail", args=[document.journal.slug]),
+                ),
+            )
+
+        if document.volume:
+            crumbs.append(
+                BreadCrumb(
+                    document.volume.title,
+                    reverse(
+                        "volume_detail",
+                        args=[document.journal.slug, document.volume.slug],
+                    ),
+                )
+            )
+
         return crumbs
 
 
