@@ -114,20 +114,19 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
             return True
         return super().has_permission()
 
-    def set_cache_headers(self, response):
-        if hasattr(self, "_object") and not self._object.is_most_recent():
-            add_never_cache_headers(response)
-        return response
-
     def dispatch(self, request, *args, **kwargs):
         response = super().dispatch(request, *args, **kwargs)
-        return self.set_cache_headers(response)
+
+        # Historical legislation should never be cached
+        if hasattr(self, "_object") and not self._object.is_most_recent():
+            add_never_cache_headers(response)
+
+        return response
 
     def handle_no_permission(self):
-        # Ensure self.object exists for the response
-        self.object = self.get_object()
         response = super().handle_no_permission()
-        return self.set_cache_headers(response)
+        add_never_cache_headers(response)
+        return response
 
     def get_subscription_required_template(self):
         return self.template_name
