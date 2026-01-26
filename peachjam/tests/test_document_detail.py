@@ -42,13 +42,6 @@ class DocumentViewTestCase(WebTest):
             html=True,
         )
 
-    def test_document_non_latest_version_has_no_cache(self):
-        doc = Legislation.objects.get(
-            expression_frbr_uri="/akn/za/act/1979/70/eng@2010-08-09"
-        )
-        response = self.app.get(doc.get_absolute_url())
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
 
 
 class RestrictedDocumentsTestCase(WebTest):
@@ -113,3 +106,12 @@ class HistoricalLegislationCacheHeadersTestCase(TestCase):
         self.client.force_login(user)
         response = self.client.get(self.doc.get_absolute_url())
         self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
+
+    def test_most_recent_legislation_is_cacheable(self):
+        doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
+        )
+        response = self.client.get(doc.get_absolute_url())
+        cache_control = response.headers.get("Cache-Control", "")
+        self.assertIn("public", cache_control)
+        self.assertNotIn("no-cache", cache_control)
