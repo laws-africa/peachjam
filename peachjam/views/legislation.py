@@ -102,25 +102,34 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     template_name = "peachjam/legislation_detail.html"
     permission_required = "peachjam.can_view_historical_legislation"
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        if not self.object.is_most_recent():
+
+    def get_object(self):
+        # caching the object here to avoid multiple db hits
+        if not hasattr(self, "_object"):
+            self._object = super().get_object()
+        return self._object
+
+    def has_permission(self):
+        obj = self.get_object()
+        if obj.is_most_recent():
+            return True
+        return super().has_permission()
+
+    def set_cache_headers(self, response):
+        if hasattr(self, "_object") and not self._object.is_most_recent():
             add_never_cache_headers(response)
         return response
 
-    def handle_no_permission(self):
-        if not hasattr(self, "object"):
-            self.object = self.get_object()
-        response = super().handle_no_permission()
-        add_never_cache_headers(response)
-        return response
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+        return self.set_cache_headers(response)
 
-    def has_permission(self):
-        # if it's the most recent version, always allow
+    def handle_no_permission(self):
+        # Ensure self.object exists for the response
         self.object = self.get_object()
-        if self.object.is_most_recent():
-            return True
-        return super().has_permission()
+        response = super().handle_no_permission()
+        return self.set_cache_headers(response)
+
 
     def get_subscription_required_template(self):
         return self.template_name
