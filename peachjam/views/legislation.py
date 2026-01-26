@@ -105,8 +105,8 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     def get_object(self):
         # caching the object here to avoid multiple db hits
         if not hasattr(self, "_object"):
-            self._object = super().get_object()
-        return self._object
+            self.object = super().get_object()
+        return self.object
 
     def has_permission(self):
         obj = self.get_object()
@@ -118,7 +118,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         response = super().dispatch(request, *args, **kwargs)
 
         # Historical legislation should never be cached
-        if hasattr(self, "_object") and not self._object.is_most_recent():
+        if hasattr(self, "object") and not self.object.is_most_recent():
             add_never_cache_headers(response)
 
         return response
