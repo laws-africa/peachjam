@@ -43,7 +43,6 @@ class DocumentViewTestCase(WebTest):
         )
 
 
-
 class RestrictedDocumentsTestCase(WebTest):
     fixtures = [
         "tests/users",
