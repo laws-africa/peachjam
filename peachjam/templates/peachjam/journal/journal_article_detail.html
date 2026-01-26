@@ -1,13 +1,6 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load i18n %}
 {% block document-metadata-custom-properties %}
-  <dt>
-    {% trans 'FRBR URI' %}
-  </dt>
-  <dd class="text-muted">
-    {{ document.work_frbr_uri }}
-    {% include 'peachjam/_copy_to_clipboard.html' with value=document.work_frbr_uri %}
-  </dd>
   {% if document.journal %}
     <dt>
       {% trans 'Journal' %}

@@ -25,7 +25,7 @@ class JournalListView(ListView):
             self.model.objects.annotate(
                 article_count=Count("articles", filter=Q(articles__published=True)),
                 latest_article_created_at=Max(
-                    "articles__created_at", filter=Q(articles__published=True)
+                    "articles__date", filter=Q(articles__published=True)
                 ),
             )
             .prefetch_related("volumes")
@@ -41,10 +41,11 @@ class VolumeIssueDetailView(FilteredDocumentListView):
 
     def get_base_queryset(self, *args, **kwargs):
         self.journal = get_object_or_404(Journal, slug=self.kwargs["slug"])
+        volume_slug = self.kwargs["volume_slug"]
         volume_qs = VolumeIssue.objects.select_related("journal").filter(
-            journal=self.journal, slug=self.kwargs["volume_slug"]
+            journal=self.journal
         )
-        self.volume_issue = volume_qs.order_by("pk").first()
+        self.volume_issue = volume_qs.filter(slug=volume_slug).order_by("pk").first()
         if not self.volume_issue:
             raise Http404()
         return super().get_base_queryset().filter(volume=self.volume_issue)

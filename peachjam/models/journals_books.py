@@ -88,6 +88,12 @@ class JournalArticle(CoreDocument):
     )
 
     def pre_save(self):
+        if (
+            self.volume
+            and self.journal_id
+            and self.journal_id != self.volume.journal_id
+        ):
+            self.volume = None
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "journal-article"
         self.doc_type = "journal_article"
