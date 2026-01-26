@@ -108,6 +108,13 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
             add_never_cache_headers(response)
         return response
 
+    def handle_no_permission(self):
+        if not hasattr(self, "object"):
+            self.object = self.get_object()
+        response = super().handle_no_permission()
+        add_never_cache_headers(response)
+        return response
+
     def has_permission(self):
         # if it's the most recent version, always allow
         self.object = self.get_object()

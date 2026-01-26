@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.test import TestCase
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
@@ -88,3 +89,27 @@ class RestrictedDocumentsTestCase(WebTest):
         response = self.app.get(doc.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("public", response.headers.get("Cache-Control", ""))
+
+
+class HistoricalLegislationCacheHeadersTestCase(TestCase):
+    fixtures = [
+        "tests/users",
+        "tests/countries",
+        "tests/languages",
+        "documents/sample_documents",
+    ]
+
+    def setUp(self):
+        self.doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2010-08-09"
+        )
+
+    def test_anonymous_historical_legislation_has_no_cache(self):
+        response = self.client.get(self.doc.get_absolute_url())
+        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
+
+    def test_logged_in_historical_legislation_has_no_cache(self):
+        user = User.objects.get(username="user@example.com")
+        self.client.force_login(user)
+        response = self.client.get(self.doc.get_absolute_url())
+        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
