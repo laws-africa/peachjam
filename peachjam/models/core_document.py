@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 import re
 import shutil
 import tempfile
@@ -1091,9 +1092,15 @@ class DocumentContent(models.Model):
                     # convert document to pdf and then extract the text
                     pdf = document.source_file.as_pdf()
                     if pdf:
+                        pdf.seek(0)
                         shutil.copyfileobj(pdf, tmp)
                         pdf.seek(0)
                         tmp.flush()
+
+                        # ensure the file isn't empty, so that pdfjs_to_text doesn't fail
+                        size = os.fstat(tmp.fileno()).st_size
+                        assert size > 0, "Temporary PDF file is empty"
+
                         text = pdfjs_to_text(tmp.name)
                         # some PDFs have nulls, which breaks SQL insertion
                         # replace rather than deleting to keep string length the same
