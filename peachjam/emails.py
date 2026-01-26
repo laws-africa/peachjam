@@ -144,6 +144,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
             transactional_message_id=transactional_message_id,
             message_data=context,
             identifiers={"id": context["user"]["tracking_id"]},
+            attachments=context.get("attachments", {}),
             to=context["user"]["email"],
         )
         log.info(
