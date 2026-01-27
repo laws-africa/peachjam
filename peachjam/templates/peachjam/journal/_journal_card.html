@@ -1,13 +1,13 @@
 {% load i18n %}
 {% with profile=journal.entity_profile.first %}
-  <div class="list-card card h-100 border">
+  <div class="card h-100 border">
     <div class="card-body d-flex gap-3 align-items-start">
       {% if profile and profile.profile_photo %}
-        <img class="list-card__media border rounded"
+        <img class="journal-card__media border rounded"
              src="{{ profile.profile_photo.url }}"
              alt="{{ journal.title }}"/>
       {% else %}
-        <div class="list-card__media list-card__placeholder border rounded"
+        <div class="journal-card__media journal-card__placeholder border rounded"
              aria-hidden="true">
           <i class="bi bi-journal-text"></i>
         </div>
