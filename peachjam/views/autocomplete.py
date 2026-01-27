@@ -1,7 +1,7 @@
 from dal import autocomplete
 from django.db.models import Q
 
-from peachjam.models import Judge, Work
+from peachjam.models import Judge, VolumeIssue, Work
 
 
 class WorkAutocomplete(autocomplete.Select2QuerySetView):
@@ -36,4 +36,20 @@ class JudgesAutocomplete(autocomplete.Select2QuerySetView):
         qs = Judge.objects.all()
         if self.q:
             qs = qs.filter(Q(name__icontains=self.q))
+        return qs
+
+
+class VolumeIssueAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return VolumeIssue.objects.none()
+
+        qs = VolumeIssue.objects.select_related("journal")
+        journal_id = self.forwarded.get("journal")
+        if journal_id:
+            qs = qs.filter(journal_id=journal_id)
+        else:
+            qs = qs.none()
+        if self.q:
+            qs = qs.filter(Q(title__icontains=self.q))
         return qs

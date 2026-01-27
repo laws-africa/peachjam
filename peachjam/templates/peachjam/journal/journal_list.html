@@ -1,0 +1,27 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Journals' %}
+{% endblock %}
+{% block page-content %}
+  <section class="container pt-4 pb-5">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+      <h1 class="mb-0">{% trans 'Journals' %}</h1>
+    </div>
+    <div class="mb-3">
+      <a href="{% url 'journal_article_list' %}">{% trans 'Browse journal articles' %}</a>
+    </div>
+    {% if journals %}
+      <div class="text-muted mb-3">
+        {% blocktrans count counter=journals.count %}{{ counter }} Journal{% plural %}{{ counter }} Journals{% endblocktrans %}
+      </div>
+      <div class="row g-4">
+        {% for journal in journals %}
+          <div class="col-12 col-md-6">{% include "peachjam/journal/_journal_card.html" with journal=journal %}</div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>{% trans 'No journals found.' %}</p>
+    {% endif %}
+  </section>
+{% endblock %}

@@ -6,7 +6,6 @@ from peachjam.views import (
     AuthorDetailView,
     BookListView,
     HomePageView,
-    JournalArticleListView,
     PlaceDetailView,
     PocketLawResources,
     TermsOfUsePageView,
@@ -25,7 +24,7 @@ urlpatterns = [
     path("causelists/", include("peachjam.urls.causelists")),
     path("doc/", include("peachjam.urls.generic_documents")),
     path("gazettes/", include("peachjam.urls.gazettes")),
-    path("journals/", JournalArticleListView.as_view(), name="journal_articles_list"),
+    path("journals/", include("peachjam.urls.journals")),
     path("judgments/", include("peachjam.urls.judgments")),
     path("taxonomy/", include("peachjam.urls.taxonomies")),
     # detail views

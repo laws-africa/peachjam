@@ -1,0 +1,24 @@
+{% extends 'peachjam/layouts/document_detail.html' %}
+{% load i18n %}
+{% block document-metadata-custom-properties %}
+  {% if document.journal %}
+    <dt>
+      {% trans 'Journal' %}
+    </dt>
+    <dd class="text-muted">
+      <a href="{% url 'journal_detail' document.journal.slug %}">{{ document.journal.title }}</a>
+      {% if document.volume %}
+        <a href="{% url 'volume_detail' document.journal.slug document.volume.slug %}">{{ document.volume.title }}</a>
+      {% endif %}
+    </dd>
+  {% endif %}
+  {% if document.page_range %}
+    <dt>
+      {% trans 'Page range' %}
+    </dt>
+    <dd class="text-muted">
+      {{ document.page_range }}
+    </dd>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

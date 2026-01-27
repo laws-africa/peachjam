@@ -17,10 +17,12 @@
     <div class="entity-profile__body__info">
       <div>
         <h1>{{ entity_profile_title|default:entity_profile.title }}</h1>
-        <div class="my-2"
-             hx-get="{% url 'user_following_button' %}?{{ entity_profile.content_object|get_follow_params }}"
-             hx-trigger="load">
-        </div>
+        {% if not hide_follow_button %}
+          <div class="my-2"
+               hx-get="{% url 'user_following_button' %}?{{ entity_profile.content_object|get_follow_params }}"
+               hx-trigger="load">
+          </div>
+        {% endif %}
       </div>
       {% if entity_profile.about_html %}<div class="mb-2">{{ entity_profile.about_html|safe }}</div>{% endif %}
       <div class="row">

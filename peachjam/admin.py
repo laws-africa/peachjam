@@ -80,6 +80,7 @@ from peachjam.models import (
     Image,
     Ingestor,
     IngestorSetting,
+    Journal,
     JournalArticle,
     Judge,
     Judgment,
@@ -106,6 +107,7 @@ from peachjam.models import (
     UnconstitutionalProvision,
     UserFollowing,
     UserProfile,
+    VolumeIssue,
     Work,
     citations_processor,
     pj_settings,
@@ -1786,7 +1788,36 @@ class BookAdmin(DocumentAdmin):
 
 @admin.register(JournalArticle)
 class JournalArticleAdmin(DocumentAdmin):
-    pass
+    autocomplete_fields = [
+        "journal",
+    ]
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["journal", "volume", "page_range", "authors"])
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "volume":
+            kwargs["widget"] = autocomplete.ModelSelect2(
+                url="autocomplete-volume-issues", forward=["journal"]
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class VolumeIssueInline(admin.TabularInline):
+    model = VolumeIssue
+    extra = 1
+    fields = ("title", "slug")
+    readonly_fields = ("slug",)
+
+
+@admin.register(Journal)
+class JournalAdmin(admin.ModelAdmin):
+    inlines = [VolumeIssueInline, EntityProfileInline]
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = (
+        "title",
+        "doi",
+    )
+    search_fields = ("title", "slug", "doi")
 
 
 @admin.register(ExternalDocument)
