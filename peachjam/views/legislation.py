@@ -123,11 +123,6 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
 
         return response
 
-    def handle_no_permission(self):
-        response = super().handle_no_permission()
-        add_never_cache_headers(response)
-        return response
-
     def get_subscription_required_template(self):
         return self.template_name
 
