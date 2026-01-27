@@ -1,9 +1,6 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
-{% block title %}
-  {{ journal.title }}
-  {% trans 'Journal articles' %}
-{% endblock %}
+{% block title %}{{ journal.title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
