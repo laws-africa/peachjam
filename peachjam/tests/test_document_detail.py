@@ -98,6 +98,8 @@ class HistoricalLegislationCacheHeadersTestCase(TestCase):
 
     def test_anonymous_historical_legislation_has_no_cache(self):
         response = self.client.get(self.doc.get_absolute_url())
+        # ensure the document content is NOT there
+        self.assertNotIn('class="document-content"', response.content.decode())
         self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
 
     def test_logged_in_historical_legislation_has_no_cache(self):
@@ -106,6 +108,8 @@ class HistoricalLegislationCacheHeadersTestCase(TestCase):
         user.user_permissions.add(perm)
         self.client.force_login(user)
         response = self.client.get(self.doc.get_absolute_url())
+        # ensure the document content is there and not a "permission denied" error
+        self.assertIn('class="document-content"', response.content.decode())
         self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
 
     def test_most_recent_legislation_is_cacheable(self):
@@ -113,6 +117,8 @@ class HistoricalLegislationCacheHeadersTestCase(TestCase):
             expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
         )
         response = self.client.get(doc.get_absolute_url())
+        # ensure the document content is there and not a "permission denied" error
+        self.assertIn('class="document-content"', response.content.decode())
         cache_control = response.headers.get("Cache-Control", "")
         self.assertIn("public", cache_control)
         self.assertNotIn("no-cache", cache_control)
