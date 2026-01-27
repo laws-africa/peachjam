@@ -33,34 +33,6 @@ class JournalListView(ListView):
         )
 
 
-class VolumeIssueDetailView(FilteredDocumentListView):
-    model = JournalArticle
-    template_name = "peachjam/journal/volume_detail.html"
-    navbar_link = "journals"
-    form_class = JournalArticleFilterForm
-
-    def get_base_queryset(self, *args, **kwargs):
-        self.journal = get_object_or_404(Journal, slug=self.kwargs["slug"])
-        volume_slug = self.kwargs["volume_slug"]
-        volume_qs = VolumeIssue.objects.select_related("journal").filter(
-            journal=self.journal
-        )
-        self.volume_issue = volume_qs.filter(slug=volume_slug).order_by("pk").first()
-        if not self.volume_issue:
-            raise Http404()
-        return super().get_base_queryset().filter(volume=self.volume_issue)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["volume_issue"] = self.volume_issue
-        context["journal"] = self.journal
-        context["doc_count_noun"] = _("Article")
-        context["doc_count_noun_plural"] = _("Articles")
-        context["nature"] = "Journal article"
-        context["help_link"] = "journals"
-        return context
-
-
 class JournalArticleListView(FilteredDocumentListView):
     model = JournalArticle
     template_name = "peachjam/journal/journal_article_list.html"
@@ -129,18 +101,34 @@ class JournalDetailView(JournalArticleListView):
         return context
 
 
+class VolumeIssueDetailView(JournalDetailView):
+    model = JournalArticle
+    template_name = "peachjam/journal/volume_detail.html"
+    navbar_link = "journals"
+    form_class = JournalArticleFilterForm
+
+    def get_base_queryset(self, *args, **kwargs):
+        volume_slug = self.kwargs["volume_slug"]
+        volume_qs = VolumeIssue.objects.select_related("journal").filter(
+            journal=self.journal
+        )
+        self.volume_issue = volume_qs.filter(slug=volume_slug).order_by("pk").first()
+        if not self.volume_issue:
+            raise Http404()
+        return super().get_base_queryset().filter(volume=self.volume_issue)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["volume_issue"] = self.volume_issue
+        context["journal"] = self.journal
+        context["doc_count_noun"] = _("Article")
+        context["doc_count_noun_plural"] = _("Articles")
+        context["nature"] = "Journal article"
+        context["help_link"] = "journals"
+        return context
+
+
 @registry.register_doc_type("journal_article")
 class JournalArticleDetailView(BaseDocumentDetailView):
     model = JournalArticle
     template_name = "peachjam/journal/journal_article_detail.html"
-
-
-class JournalArticleSlugDetailView(BaseDocumentDetailView):
-    model = JournalArticle
-    template_name = "peachjam/journal/journal_article_detail.html"
-
-    def get_object(self, *args, **kwargs):
-        return get_object_or_404(self.model, slug=self.kwargs["slug"])
-
-    def get_queryset(self):
-        return super().get_queryset().select_related("journal", "volume")
