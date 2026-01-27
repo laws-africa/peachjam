@@ -21,9 +21,5 @@
 {% endblock %}
 {% block page-title %}
   <h1 class="my-4">{{ volume_issue.title }}</h1>
-  <div class="text-muted">
-    {% blocktrans with journal=volume_issue.journal.title year=volume_issue.year %}
-      {{ journal }} | {{ year }}
-    {% endblocktrans %}
-  </div>
+  <div class="text-muted">{{ journal }}</div>
 {% endblock %}

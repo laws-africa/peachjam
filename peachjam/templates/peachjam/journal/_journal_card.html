@@ -1,0 +1,31 @@
+{% load i18n %}
+{% with profile=journal.entity_profile.first %}
+  <div class="list-card card h-100 border">
+    <div class="card-body d-flex gap-3 align-items-start">
+      {% if profile and profile.profile_photo %}
+        <img class="list-card__media border rounded"
+             src="{{ profile.profile_photo.url }}"
+             alt="{{ journal.title }}"/>
+      {% else %}
+        <div class="list-card__media list-card__placeholder border rounded"
+             aria-hidden="true">
+          <i class="bi bi-journal-text"></i>
+        </div>
+      {% endif %}
+      <div>
+        <h2 class="h5 mb-2">
+          <a class="text-decoration-none"
+             href="{% url 'journal_detail' journal.slug %}">{{ journal.title }}</a>
+        </h2>
+        {% if profile and profile.about_html %}
+          <p class="text-muted mb-2">{{ profile.about_html|striptags|truncatewords:18 }}</p>
+        {% endif %}
+        {% if journal.latest_article_created_at %}
+          <div class="small text-muted">
+            {% trans "Most recent article:" %} {{ journal.latest_article_created_at|date:"d M Y" }}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endwith %}

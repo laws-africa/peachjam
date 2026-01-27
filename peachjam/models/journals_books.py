@@ -38,7 +38,10 @@ class Journal(models.Model):
     title = models.CharField(max_length=512, unique=True, blank=False, null=False)
     slug = models.SlugField(max_length=512, unique=True)
     doi = models.CharField(
-        max_length=255, verbose_name="Digital Object Identifier (DOI)"
+        max_length=255,
+        verbose_name="Digital Object Identifier (DOI)",
+        blank=True,
+        null=True,
     )
 
     entity_profile = GenericRelation(
@@ -114,16 +117,16 @@ class VolumeIssue(models.Model):
         on_delete=models.CASCADE,
         related_name="volumes",
     )
-    slug = models.SlugField(max_length=255, unique=True, blank=False)
+    slug = models.SlugField(max_length=255, unique=False, blank=False)
 
     class Meta:
         ordering = ["title"]
         verbose_name = "Volume/Issue"
         verbose_name_plural = "Volumes/Issues"
-        unique_together = [["journal", "title"]]
+        unique_together = [["journal", "title"], ["journal", "slug"]]
 
     def save(self, *args, **kwargs):
-        self.slug = slugify(f"{self.journal.title} {self.title}", "-")
+        self.slug = slugify(self.title, "-")
         super().save(*args, **kwargs)
 
     def __str__(self):

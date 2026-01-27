@@ -1789,6 +1789,8 @@ class JournalArticleAdmin(DocumentAdmin):
     autocomplete_fields = [
         "journal",
     ]
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["journal", "volume", "page_range", "authors"])
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "volume":
@@ -1797,49 +1799,23 @@ class JournalArticleAdmin(DocumentAdmin):
             )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
-    def get_fieldsets(self, request, obj=None):
-        fieldsets = super().get_fieldsets(request, obj)
-        updated_fieldsets = []
-        for title, options in fieldsets:
-            fields = list(options.get("fields", []))
-            if "summary" in fields:
-                fields = [field for field in fields if field != "summary"]
-            options["fields"] = tuple(fields)
-            updated_fieldsets.append((title, options))
 
-        journal_section = [
-            (
-                "Journal Details",
-                {
-                    "fields": ("journal", "volume", "page_range", "authors"),
-                    "classes": ("collapse",),
-                },
-            ),
-        ]
-
-        return updated_fieldsets + journal_section
+class VolumeIssueInline(admin.TabularInline):
+    model = VolumeIssue
+    extra = 1
+    fields = ("title", "slug")
+    readonly_fields = ("slug",)
 
 
 @admin.register(Journal)
 class JournalAdmin(admin.ModelAdmin):
-    inlines = [EntityProfileInline]
+    inlines = [VolumeIssueInline, EntityProfileInline]
     prepopulated_fields = {"slug": ("title",)}
     list_display = (
         "title",
         "doi",
     )
     search_fields = ("title", "slug", "doi")
-
-
-@admin.register(VolumeIssue)
-class VolumeIssueAdmin(admin.ModelAdmin):
-    list_display = (
-        "title",
-        "journal",
-    )
-    list_filter = ("journal",)
-    readonly_fields = ("slug",)
-    search_fields = ("title",)
 
 
 @admin.register(ExternalDocument)
