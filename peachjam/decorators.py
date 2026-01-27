@@ -210,7 +210,7 @@ class GazetteDecorator(DocumentDecorator):
                 BreadCrumb(
                     document.locality.name,
                     reverse(
-                        "gazettes_by_locality", args=[document.locality.place_code]
+                        "gazettes_by_locality", args=[document.locality.place_code()]
                     ),
                 )
             )
@@ -219,7 +219,7 @@ class GazetteDecorator(DocumentDecorator):
                     str(document.date.year),
                     reverse(
                         "gazettes_by_year",
-                        args=[document.locality.place_code, document.date.year],
+                        args=[document.locality.place_code(), document.date.year],
                     ),
                 )
             )
