@@ -6,6 +6,7 @@ from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
 from django.http import Http404
 from django.template.defaultfilters import date as format_date
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
@@ -112,6 +113,15 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         if obj.is_most_recent():
             return True
         return super().has_permission()
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+
+        # Historical legislation should never be cached
+        if hasattr(self, "object") and not self.object.is_most_recent():
+            add_never_cache_headers(response)
+
+        return response
 
     def get_subscription_required_template(self):
         return self.template_name

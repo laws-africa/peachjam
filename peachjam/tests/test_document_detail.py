@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
 from django.test import TestCase
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
@@ -102,6 +102,8 @@ class HistoricalLegislationCacheHeadersTestCase(TestCase):
 
     def test_logged_in_historical_legislation_has_no_cache(self):
         user = User.objects.get(username="user@example.com")
+        perm = Permission.objects.get(codename="can_view_historical_legislation")
+        user.user_permissions.add(perm)
         self.client.force_login(user)
         response = self.client.get(self.doc.get_absolute_url())
         self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
