@@ -1,16 +1,30 @@
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
 from elasticsearch_dsl.response import Response
+
+from peachjam_search.models import SearchTrace
 
 
 class SearchViewsTest(TestCase):
     fixtures = ["tests/countries", "tests/users"]
 
     def setUp(self):
-        self.user = User.objects.get(username="admin@example.com")
+        self.user = User.objects.get(username="officer@example.com")
+        # ensure user has the correct permission
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="can_download_search",
+                content_type=ContentType.objects.get_for_model(SearchTrace),
+            ),
+            Permission.objects.get(
+                codename="can_debug_search",
+                content_type=ContentType.objects.get_for_model(SearchTrace),
+            ),
+        )
 
     @patch("peachjam_search.engine.RetrieverSearch.execute")
     def test_explain(self, mock_search):

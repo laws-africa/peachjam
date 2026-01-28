@@ -86,7 +86,9 @@ class DocumentSearchView(TemplateView):
     use_explain = False
 
     def get(self, request, *args, **kwargs):
-        self.user_can_debug = self.request.user.has_perm("peachjam_search.debug_search")
+        self.user_can_debug = self.request.user.has_perm(
+            "peachjam_search.can_debug_search"
+        )
         return getattr(self, self.action)(request, *args, **kwargs)
 
     def prepare(self, request, facets=False):
@@ -182,7 +184,7 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        if not request.user.has_perm("peachjam_search.download_search"):
+        if not request.user.has_perm("peachjam_search.can_download_search"):
             if request.htmx:
                 # this is the initial request to download, show a friendly permission-denied box
                 self.template_name = "peachjam_search/_download_403.html"
