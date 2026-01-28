@@ -102,18 +102,26 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     template_name = "peachjam/legislation_detail.html"
     permission_required = "peachjam.can_view_historical_legislation"
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        if not self.object.is_most_recent():
-            add_never_cache_headers(response)
-        return response
+    def get_object(self):
+        # caching the object here to avoid multiple db hits
+        if not hasattr(self, "_object"):
+            self.object = super().get_object()
+        return self.object
 
     def has_permission(self):
-        # if it's the most recent version, always allow
-        self.object = self.get_object()
-        if self.object.is_most_recent():
+        obj = self.get_object()
+        if obj.is_most_recent():
             return True
         return super().has_permission()
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+
+        # Historical legislation should never be cached
+        if hasattr(self, "object") and not self.object.is_most_recent():
+            add_never_cache_headers(response)
+
+        return response
 
     def get_subscription_required_template(self):
         return self.template_name

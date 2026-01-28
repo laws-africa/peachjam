@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
+from django.test import TestCase
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
-from peachjam.models import Judgment
+from peachjam.models import Judgment, Legislation
 
 User = get_user_model()
 
@@ -80,3 +81,44 @@ class RestrictedDocumentsTestCase(WebTest):
         response = self.app.get(doc.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("public", response.headers.get("Cache-Control", ""))
+
+
+class HistoricalLegislationCacheHeadersTestCase(TestCase):
+    fixtures = [
+        "tests/users",
+        "tests/countries",
+        "tests/languages",
+        "documents/sample_documents",
+    ]
+
+    def setUp(self):
+        self.doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2010-08-09"
+        )
+
+    def test_anonymous_historical_legislation_has_no_cache(self):
+        response = self.client.get(self.doc.get_absolute_url())
+        # ensure the document content is NOT there
+        self.assertNotIn('class="document-content"', response.content.decode())
+        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
+
+    def test_logged_in_historical_legislation_has_no_cache(self):
+        user = User.objects.get(username="user@example.com")
+        perm = Permission.objects.get(codename="can_view_historical_legislation")
+        user.user_permissions.add(perm)
+        self.client.force_login(user)
+        response = self.client.get(self.doc.get_absolute_url())
+        # ensure the document content is there and not a "permission denied" error
+        self.assertIn('class="document-content"', response.content.decode())
+        self.assertIn("no-cache", response.headers.get("Cache-Control", ""))
+
+    def test_most_recent_legislation_is_cacheable(self):
+        doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
+        )
+        response = self.client.get(doc.get_absolute_url())
+        # ensure the document content is there and not a "permission denied" error
+        self.assertIn('class="document-content"', response.content.decode())
+        cache_control = response.headers.get("Cache-Control", "")
+        self.assertIn("public", cache_control)
+        self.assertNotIn("no-cache", cache_control)
