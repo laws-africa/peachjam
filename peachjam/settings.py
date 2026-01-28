@@ -675,6 +675,11 @@ else:
     # in general, cache most pages
     CACHE_MIDDLEWARE_SECONDS = 60 * 30
 
+# Prefix cache keys per deployment to avoid cross-site cache bleed.
+CACHE_MIDDLEWARE_KEY_PREFIX = os.environ.get(
+    "CACHE_KEY_PREFIX", slugify(PEACHJAM["APP_NAME"])
+)
+
 # ensure that our SanityCheckCacheMiddleware fails when sanity checks fail, even in production
 CACHE_SANITY_STRICT = True
 
