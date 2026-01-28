@@ -330,7 +330,11 @@ class BaseDocumentFilterForm(forms.Form):
             terms = q.split()
             queries = Q()
             for term in terms:
-                queries &= Q(Q(title__icontains=term) | Q(citation__icontains=term))
+                queries &= Q(
+                    Q(title__icontains=term)
+                    | Q(citation__icontains=term)
+                    | Q(alternative_names__title__icontains=term)
+                )
             queryset = queryset.filter(queries)
         return queryset
 
