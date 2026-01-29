@@ -26,8 +26,19 @@ class Bill(CoreDocument):
         return [self.author] if self.author else []
 
     def prepare_and_set_expression_frbr_uri(self):
-        self.frbr_uri_actor = f"c_{self.author.code}" if self.author else None
-        super().prepare_and_set_expression_frbr_uri()
+        if not self.frbr_uri_actor:
+            if self.author and self.author.code:
+                raw_code = str(self.author.code).lower()
+
+                prefix = "c_" if raw_code[0].isdigit() else ""
+                max_length = 100
+                max_code_length = max_length - len(prefix)
+
+                self.frbr_uri_actor = f"{prefix}{raw_code[:max_code_length]}"
+            else:
+                self.frbr_uri_actor = None
+
+        return super().prepare_and_set_expression_frbr_uri()
 
     def pre_save(self):
         self.doc_type = "bill"
