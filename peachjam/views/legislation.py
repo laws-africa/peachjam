@@ -606,15 +606,15 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        letters = ["0", *string.ascii_uppercase]
+        letters = [*string.ascii_lowercase, "0"]
         context["letters"] = letters
-        context["first_letter"] = "0"
         context.update(self.get_subscription_required_context())
         return context
 
 
 class PlaceGlossaryLetterView(PlaceGlossaryView):
     template_name = "peachjam/glossary/_glossary_letter.html"
+    queryset = Glossary.objects.all()
     letter = None
 
     def get(self, *args, **kwargs):
