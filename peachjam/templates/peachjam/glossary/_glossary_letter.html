@@ -75,5 +75,7 @@
       </div>
     </div>
   </li>
+{% empty %}
+  <li>{% trans "There are no terms for this letter." %}</li>
 {% endfor %}
 </ol>
