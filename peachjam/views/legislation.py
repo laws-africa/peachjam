@@ -635,6 +635,7 @@ class DocumentProvisionCitationView(
 ):
     permission_required = "peachjam.view_provisioncitation"
     template_name = "peachjam/provision_enrichment/provision_citations.html"
+    latest_expression_only = True
 
     def get_subscription_required_template(self):
         return self.template_name
