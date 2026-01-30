@@ -15,7 +15,7 @@
         </li>
         {% if place.jurisdiction %}
           <li class="breadcrumb-item">
-            <a href="{% url "locality_legislation_list" code=place.code %}">{{ place.name }}</a>
+            <a href="{% url "locality_legislation_list" code=place.place_code %}">{{ place.name }}</a>
           </li>
         {% endif %}
         <li class="breadcrumb-item">

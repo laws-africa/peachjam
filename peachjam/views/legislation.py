@@ -1,3 +1,4 @@
+import string
 from datetime import datetime, timedelta
 from functools import cached_property
 
@@ -587,6 +588,8 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
 @method_decorator(never_cache, name="dispatch")
 class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
     model = Glossary
+    # this is expensive and is not used
+    queryset = Glossary.objects.defer("data")
     slug_url_kwarg = "place_code"
     slug_field = "place_code"
     permission_required = "peachjam.view_glossary"
@@ -603,18 +606,15 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        letters = list(self.object.data.keys())
-        if letters and letters[0] == "0":
-            letters.pop(0)
-            letters.append("0")
+        letters = [*string.ascii_lowercase, "0"]
         context["letters"] = letters
-        context["first_letter"] = letters[0] if letters else None
         context.update(self.get_subscription_required_context())
         return context
 
 
 class PlaceGlossaryLetterView(PlaceGlossaryView):
     template_name = "peachjam/glossary/_glossary_letter.html"
+    queryset = Glossary.objects.all()
     letter = None
 
     def get(self, *args, **kwargs):
