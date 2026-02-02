@@ -586,6 +586,10 @@ class BaseDocumentDetailView(DetailView):
         root = document.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
+            # images should load lazily, otherwise they block page load
+            if "loading" not in img.attrib:
+                img.attrib["loading"] = "lazy"
+
             src = img.attrib["src"]
             if not src.startswith("/") and not src.startswith("data:"):
                 if not src.startswith("media/"):
