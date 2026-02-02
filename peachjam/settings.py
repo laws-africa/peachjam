@@ -559,16 +559,18 @@ JAZZMIN_UI_TWEAKS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
+    "filters": {"request_id": {"()": "log_request_id.filters.RequestIDFilter"}},
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "simple",
+            "filters": ["request_id"],
         },
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s",
+            "format": "%(asctime)s %(levelname)s %(name)s %(request_id)s %(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },
@@ -687,11 +689,6 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 # Setup request id logging
 LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
 REQUEST_ID_RESPONSE_HEADER = "X-Request-Id"
-LOGGING["filters"] = {"request_id": {"()": "log_request_id.filters.RequestIDFilter"}}
-LOGGING["formatters"]["simple"][
-    "format"
-] = "%(asctime)s %(levelname)s %(module)s %(request_id)s %(process)d %(thread)d %(message)s"
-LOGGING["handlers"]["console"]["filters"] = ["request_id"]
 
 
 # E-mail configuration
