@@ -3,21 +3,13 @@ from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.frbr_uri import validate_frbr_uri_component
-
 
 class Author(models.Model):
     model_label = _("Author")
     model_label_plural = _("Authors")
 
     name = models.CharField(_("name"), max_length=255, null=False, unique=True)
-    code = models.SlugField(
-        _("code"),
-        max_length=255,
-        null=False,
-        unique=True,
-        validators=[validate_frbr_uri_component],
-    )
+    code = models.SlugField(_("code"), max_length=255, null=False, unique=True)
 
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
