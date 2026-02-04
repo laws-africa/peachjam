@@ -22,6 +22,7 @@ from .generic_document import *
 from .home import *
 from .journals import *
 from .judgment import *
+from .law_reports import *
 from .legislation import *
 from .login import *
 from .my import *
