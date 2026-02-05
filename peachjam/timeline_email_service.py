@@ -4,7 +4,7 @@ from typing import NamedTuple
 
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.db.models import Q
+from django.db.models import Exists, OuterRef, Q
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -12,7 +12,7 @@ from django.utils.text import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
-from peachjam.models import ProvisionCitation, TimelineEvent
+from peachjam.models import CoreDocument, ProvisionCitation, TimelineEvent
 from peachjam.tasks import (
     send_new_citation_email_alert,
     send_new_document_email_alert,
@@ -189,10 +189,20 @@ class TimelineEmailService:
         ):
             return
 
-        events = TimelineEvent.objects.prefetch_subject_documents(user).filter(
-            email_alert_sent_at__isnull=True,
-            event_type=TimelineEvent.EventTypes.NEW_CITATION,
-            user_following__user=user,
+        doc_exists = CoreDocument.objects.filter(
+            work=OuterRef("user_following__saved_document__work")
+        )
+
+        events = (
+            TimelineEvent.objects.prefetch_subject_documents(user)
+            .annotate(has_document=Exists(doc_exists))
+            .filter(
+                has_document=True,
+                email_alert_sent_at__isnull=True,
+                event_type=TimelineEvent.EventTypes.NEW_CITATION,
+                user_following__user=user,
+                user_following__saved_document__isnull=False,
+            )
         )
 
         if not events.exists():
