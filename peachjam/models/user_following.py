@@ -356,6 +356,14 @@ class UserFollowing(models.Model):
         event_work = relationship_event.event_work(relationship)
         event_type = relationship_event.event_type
 
+        if not self.saved_document.document:
+            log.info(
+                "Saved document %s for user %s has no document expressions.",
+                self.saved_document,
+                self.user,
+            )
+            return
+
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
             event_type=event_type,
