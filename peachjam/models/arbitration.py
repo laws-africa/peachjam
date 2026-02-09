@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import CoreDocument
+from peachjam.models.core_document import CoreDocument
 
 
 class ArbitralInstitution(models.Model):

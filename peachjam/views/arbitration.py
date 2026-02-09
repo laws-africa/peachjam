@@ -1,7 +1,7 @@
 from functools import cached_property
 
 from django.shortcuts import get_object_or_404
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 
 from peachjam.models import ArbitralInstitution, ArbitrationAward
 from peachjam.registry import registry
@@ -9,6 +9,10 @@ from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+
+
+class ArbitrationHubPage(TemplateView):
+    template_name = "peachjam/arbitration/arbitration_hub.html"
 
 
 class ArbitralInstitutionListView(ListView):
