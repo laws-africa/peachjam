@@ -51,8 +51,6 @@ from cobalt.uri import FrbrUri
 from django.conf import settings
 from langfuse import Langfuse
 
-from peachjam.models import Judgment, Legislation
-
 from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
 
 # Langfuse uses environment variables to configure itself
@@ -139,60 +137,74 @@ class DocumentChat:
                 + "; ".join(an.title for an in alternative_names)
             )
 
-        if isinstance(self.document, Legislation):
-            if self.document.repealed:
-                metadata.append("This legislation has been repealed.")
-                repeal_info = self.document.metadata_json.get("repeal", None)
-                if repeal_info:
-                    metadata.append(
-                        f"Repealed on {repeal_info['date']} by {repeal_info['repealing_title']}."
-                    )
-
-            if self.document.commenced:
-                if self.document.metadata_json.get("commenced_in_full"):
-                    metadata.append(
-                        f"This legislation commenced on {self.document.metadata_json['commencement_date']}. "
-                        "Some provisions may have commenced after this date. "
-                        "More information on commencements may be available from other tools."
-                    )
-                else:
-                    metadata.append(
-                        f"This legislation partially commenced on {self.document.metadata_json['commencement_date']}. "
-                        "More information on commencements may be available from other tools."
-                    )
-            else:
-                metadata.append("This legislation has not yet commenced.")
-
-        elif isinstance(self.document, Judgment):
-            if self.document.anonymised:
-                metadata.append(
-                    "This judgment has anonymised to protect personal information in compliance with the law."
-                )
-            if self.document.court:
-                metadata.append(f"Court: {self.document.court.name}")
-            if self.document.judges:
-                metadata.append(
-                    "Judges: "
-                    + ", ".join(judge.name for judge in self.document.judges.all())
-                )
-            if self.document.blurb:
-                metadata.append(f"Short summary: {self.document.blurb}")
-            if self.document.flynote:
-                metadata.append(f"Flynote: {self.document.flynote}")
-            if self.document.case_summary:
-                metadata.append(f"Case summary: {self.document.case_summary}")
-            if self.document.issues:
-                metadata.append("Issues: \n  * " + "\n  * ".join(self.document.issues))
-            if self.document.held:
-                metadata.append("Held: \n  * " + "\n  * ".join(self.document.held))
-            if self.document.order:
-                metadata.append(f"Order: {self.document.order}")
+        doc_type = self.document.doc_type
+        handler_name = f"doc_metadata_{doc_type}"
+        handler = getattr(self, handler_name, None)
+        if callable(handler):
+            metadata.extend(handler())
 
         msg = (
             "Here is some information about the document to help answer questions:\n\n"
             + "\n".join(metadata)
         )
         return msg
+
+    def doc_metadata_legislation(self) -> list[str]:
+        metadata: list[str] = []
+
+        if self.document.repealed:
+            metadata.append("This legislation has been repealed.")
+            repeal_info = self.document.metadata_json.get("repeal", None)
+            if repeal_info:
+                metadata.append(
+                    f"Repealed on {repeal_info['date']} by {repeal_info['repealing_title']}."
+                )
+
+        if self.document.commenced:
+            if self.document.metadata_json.get("commenced_in_full"):
+                metadata.append(
+                    f"This legislation commenced on {self.document.metadata_json['commencement_date']}. "
+                    "Some provisions may have commenced after this date. "
+                    "More information on commencements may be available from other tools."
+                )
+            else:
+                metadata.append(
+                    f"This legislation partially commenced on {self.document.metadata_json['commencement_date']}. "
+                    "More information on commencements may be available from other tools."
+                )
+        else:
+            metadata.append("This legislation has not yet commenced.")
+
+        return metadata
+
+    def doc_metadata_judgment(self) -> list[str]:
+        metadata: list[str] = []
+
+        if self.document.anonymised:
+            metadata.append(
+                "This judgment has anonymised to protect personal information in compliance with the law."
+            )
+        if self.document.court:
+            metadata.append(f"Court: {self.document.court.name}")
+        if self.document.judges:
+            metadata.append(
+                "Judges: "
+                + ", ".join(judge.name for judge in self.document.judges.all())
+            )
+        if self.document.blurb:
+            metadata.append(f"Short summary: {self.document.blurb}")
+        if self.document.flynote:
+            metadata.append(f"Flynote: {self.document.flynote}")
+        if self.document.case_summary:
+            metadata.append(f"Case summary: {self.document.case_summary}")
+        if self.document.issues:
+            metadata.append("Issues: \n  * " + "\n  * ".join(self.document.issues))
+        if self.document.held:
+            metadata.append("Held: \n  * " + "\n  * ".join(self.document.held))
+        if self.document.order:
+            metadata.append(f"Order: {self.document.order}")
+
+        return metadata
 
     def markup_refs(self, text: str) -> str:
         """Markup refs in the AI response message."""
