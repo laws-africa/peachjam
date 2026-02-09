@@ -1,5 +1,44 @@
 """
-OpenAI Agents-based document chat helpers.
+This module defines the chat helpers for document-based chats using OpenAI Agents.
+
+# How a chat works
+
+A single chat interaction (human question + AI reply) is a run of an agent. The agent is configured
+with document-specific tools and uses a shared session to preserve conversation history.
+
+When a chat starts, the initial prompt is fetched from Langfuse and used as the agent instructions.
+Document metadata is added to the session as a developer message to provide context for the model.
+
+# Follow-up queries
+
+Follow-up queries in the same chat session re-use the same session ID. The session stores all prior
+messages, so the agent sees the full history without re-injecting the initial prompt or metadata.
+
+# Tools
+
+The agent is configured with tools. If the model decides to use a tool, the Agents runtime invokes
+it and includes the result in the conversation automatically.
+
+# Persistence
+
+Session state is stored in the primary database via SQLAlchemySession, using the Django database
+configuration. The session ID is the ChatThread UUID, so a user can resume the conversation across
+requests.
+
+# Langfuse
+
+The module integrates with Langfuse for prompt management and observability of chat interactions.
+
+# Configuration
+
+The following must be configured as ENV variables:
+
+* CHAT_ENABLED = true
+* LANGFUSE_HOST = https://cloud.langfuse.com
+* LANGFUSE_PUBLIC_KEY
+* LANGFUSE_SECRET_KEY
+* OPENAI_API_KEY
+* CHAT_ASSISTANT_NAME (optional)
 """
 
 import os
@@ -13,11 +52,8 @@ from django.conf import settings
 from langfuse import Langfuse
 
 from peachjam.models import Judgment, Legislation
-from peachjam_ml.chat.tools import (
-    DocumentChatContext,
-    get_citator_citations,
-    get_tools_for_document,
-)
+
+from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
 
 # TODO: better sessions
 DEFAULT_SESSION_DB_PATH = Path(settings.BASE_DIR) / "chat_sessions.sqlite3"

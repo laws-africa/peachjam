@@ -3,12 +3,15 @@ import hashlib
 import json
 
 from django import template
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from django.http import QueryDict
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from peachjam.auth import user_display
+from peachjam.models import ChatThread
 
 register = template.Library()
 
@@ -205,3 +208,24 @@ def color_for_user(user):
     h = hashlib.md5(user.username.encode("utf-8")).hexdigest()
     hue = int(h[:2], 16) % 360
     return f"hsl({hue}, 60%, 50%)"
+
+
+@register.simple_tag
+def recent_chats(user):
+    """Return the 10 most recent chat threads, one per document, for the supplied user."""
+    if not user or not getattr(user, "is_authenticated", False):
+        return ChatThread.objects.none()
+
+    return (
+        ChatThread.objects.filter(user=user)
+        .annotate(
+            document_rank=Window(
+                expression=RowNumber(),
+                partition_by=[F("document_id")],
+                order_by=F("updated_at").desc(),
+            )
+        )
+        .filter(document_rank=1)
+        .select_related("document")
+        .order_by("-updated_at")[:10]
+    )

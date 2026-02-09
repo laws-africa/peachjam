@@ -61,6 +61,7 @@ from peachjam.models import (
     CaseHistory,
     CaseNumber,
     CauseList,
+    ChatThread,
     CitationLink,
     CitationProcessing,
     CoreDocument,
@@ -1989,6 +1990,84 @@ class PartnerLogoInline(BaseAttachmentFileInline):
 class PartnerAdmin(admin.ModelAdmin):
     inlines = [PartnerLogoInline]
     form = PartnerForm
+
+
+@admin.register(ChatThread)
+class ChatThreadAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "document_link", "score", "updated_at")
+    readonly_fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    date_hierarchy = "updated_at"
+    list_select_related = ("user", "document")
+    search_fields = ("id", "user__username", "document__title")
+
+    def has_add_permission(self, request):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document
+        )
+
+    document_link.short_description = _("Document")
+
+    def messages_display(self, obj):
+        if not obj.messages_json:
+            return "-"
+        formatted = json.dumps(obj.messages_json, indent=2, sort_keys=True)
+        return format_html("<pre>{}</pre>", formatted)
+
+    messages_display.short_description = _("Messages JSON")
+
+
+class ChatThreadInline(admin.TabularInline):
+    model = ChatThread
+    extra = 0
+    can_delete = False
+    fields = ("updated_at", "document_link", "score")
+    readonly_fields = fields
+    show_change_link = True
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("document")
+            .defer("document__content_html")
+        )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document
+        )
+
+    document_link.short_description = _("Document")
+
+
+if ChatThreadInline not in UserAdminCustom.inlines:
+    UserAdminCustom.inlines.append(ChatThreadInline)
 
 
 admin.site.register(

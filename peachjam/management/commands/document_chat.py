@@ -6,9 +6,8 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
-from peachjam.models import CoreDocument
-from peachjam_ml.chat.agent import DocumentChat
-from peachjam_ml.models import ChatThread
+from peachjam.chat.agent import DocumentChat
+from peachjam.models import ChatThread, CoreDocument
 
 
 class Command(BaseCommand):

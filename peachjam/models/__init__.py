@@ -3,6 +3,7 @@ from .annotation import *
 from .article import *
 from .attachments import *
 from .author import *
+from .chat import *
 from .citations import *
 from .core_document import *
 from .custom_property import *
