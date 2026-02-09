@@ -235,7 +235,6 @@ if DEBUG:
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
     INSTALLED_APPS.append("django_extensions")
-    INSTALLED_APPS.append("elastic_panel")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
     import peachjam.debugging  # noqa
@@ -431,8 +430,6 @@ DEBUG_TOOLBAR_PANELS = (
     "debug_toolbar.panels.signals.SignalsPanel",
     "debug_toolbar.panels.logging.LoggingPanel",
     "debug_toolbar.panels.redirects.RedirectsPanel",
-    # Additional
-    "elastic_panel.panel.ElasticDebugPanel",
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
