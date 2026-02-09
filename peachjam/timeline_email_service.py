@@ -29,7 +29,7 @@ class TimelineEmailService:
         q = Q()
         last_24_hrs = timezone.now() - timedelta(hours=24)
 
-        if type(event_type) == list:
+        if isinstance(event_type, list):
             q = Q(event_type__in=event_type)
         else:
             q = Q(event_type=event_type)
