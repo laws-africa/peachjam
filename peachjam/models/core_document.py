@@ -840,9 +840,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 try:
                     # Read the image file and encode it as base64
                     base64_data = base64.b64encode(image.file.read()).decode("utf-8")
-                    img_tag.attrib[
-                        "src"
-                    ] = f"data:{image.mimetype};base64,{base64_data}"
+                    img_tag.attrib["src"] = (
+                        f"data:{image.mimetype};base64,{base64_data}"
+                    )
                 except Exception as e:
                     log.warning(f"Failed to inline image {src}: {e}", exc_info=e)
 
