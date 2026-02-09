@@ -4,16 +4,27 @@ from peachjam.models import Judgment, LawReport, LawReportEntry, LawReportVolume
 
 
 class LawReportModelTestCase(TestCase):
-    fixtures = ["tests/countries", "tests/languages", "tests/courts", "documents/sample_documents"]
+    fixtures = [
+        "tests/countries",
+        "tests/languages",
+        "tests/courts",
+        "documents/sample_documents",
+    ]
 
     def test_law_report_str_and_absolute_url(self):
-        law_report = LawReport.objects.create(title="Zambia Law Reports", slug="zambia-law-reports")
+        law_report = LawReport.objects.create(
+            title="Zambia Law Reports", slug="zambia-law-reports"
+        )
 
         self.assertEqual("Zambia Law Reports", str(law_report))
-        self.assertEqual("/law-reports/zambia-law-reports/", law_report.get_absolute_url())
+        self.assertEqual(
+            "/law-reports/zambia-law-reports/", law_report.get_absolute_url()
+        )
 
     def test_law_report_volume_and_entry_str_and_absolute_url(self):
-        law_report = LawReport.objects.create(title="Malawi Law Reports", slug="malawi-law-reports")
+        law_report = LawReport.objects.create(
+            title="Malawi Law Reports", slug="malawi-law-reports"
+        )
         volume = LawReportVolume.objects.create(
             title="Volume 1",
             slug="volume-1",
@@ -21,7 +32,9 @@ class LawReportModelTestCase(TestCase):
             year=2018,
         )
         judgment = Judgment.objects.filter(published=True).first()
-        entry = LawReportEntry.objects.create(judgment=judgment, law_report_volume=volume)
+        entry = LawReportEntry.objects.create(
+            judgment=judgment, law_report_volume=volume
+        )
 
         self.assertEqual("Malawi Law Reports - Volume 1", str(volume))
         self.assertEqual(
@@ -35,7 +48,12 @@ class LawReportModelTestCase(TestCase):
 
 
 class LawReportViewsTestCase(TestCase):
-    fixtures = ["tests/countries", "tests/languages", "tests/courts", "documents/sample_documents"]
+    fixtures = [
+        "tests/countries",
+        "tests/languages",
+        "tests/courts",
+        "documents/sample_documents",
+    ]
 
     def setUp(self):
         super().setUp()
@@ -83,7 +101,9 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.law_report.title)
         self.assertIn(self.law_report, response.context["law_reports"])
 
-    def test_law_report_detail_view_shows_law_report_judgments_and_non_empty_volumes_only(self):
+    def test_law_report_detail_view_shows_law_report_judgments_and_non_empty_volumes_only(
+        self,
+    ):
         response = self.client.get(self.law_report.get_absolute_url())
 
         self.assertEqual(response.status_code, 200)
