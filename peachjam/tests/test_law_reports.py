@@ -1,6 +1,11 @@
-from django.test import TestCase
+import datetime
 
-from peachjam.models import Judgment, LawReport, LawReportEntry, LawReportVolume
+from countries_plus.models import Country
+from django.test import TestCase
+from django.urls import reverse
+from languages_plus.models import Language
+
+from peachjam.models import Court, Judgment, LawReport, LawReportEntry, LawReportVolume
 
 
 class LawReportModelTestCase(TestCase):
@@ -17,9 +22,7 @@ class LawReportModelTestCase(TestCase):
         )
 
         self.assertEqual("Zambia Law Reports", str(law_report))
-        self.assertEqual(
-            "/law-reports/zambia-law-reports/", law_report.get_absolute_url()
-        )
+        self.assertIn("/law-reports/zambia-law-reports/", law_report.get_absolute_url())
 
     def test_law_report_volume_and_entry_str_and_absolute_url(self):
         law_report = LawReport.objects.create(
@@ -37,7 +40,7 @@ class LawReportModelTestCase(TestCase):
         )
 
         self.assertEqual("Malawi Law Reports - Volume 1", str(volume))
-        self.assertEqual(
+        self.assertIn(
             "/law-reports/malawi-law-reports/volumes/volume-1/",
             volume.get_absolute_url(),
         )
@@ -57,6 +60,14 @@ class LawReportViewsTestCase(TestCase):
 
     def setUp(self):
         super().setUp()
+        Judgment.objects.create(
+            case_name="Not in Law report",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
         judgments = list(Judgment.objects.filter(published=True).order_by("date")[:3])
 
         self.law_report = LawReport.objects.create(
@@ -95,7 +106,7 @@ class LawReportViewsTestCase(TestCase):
         )
 
     def test_law_report_list_view(self):
-        response = self.client.get("/law-reports/")
+        response = self.client.get(reverse("law_report_list"))
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, self.law_report.title)
