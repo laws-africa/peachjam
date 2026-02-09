@@ -1,11 +1,13 @@
 import asyncio
-from uuid import uuid4
 
+from agents import Runner
+from agents.stream_events import RawResponsesStreamEvent
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
+from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
 from peachjam.models import CoreDocument
-from peachjam_ml.chat.graphs import get_chat_config, get_chat_graph
+from peachjam_ml.chat.agent import DocumentChat
 from peachjam_ml.models import ChatThread
 
 
@@ -35,48 +37,43 @@ class Command(BaseCommand):
         self.stdout.write(f"Created chat thread {thread.id}")
 
         try:
-            with get_chat_graph(use_checkpointer=False) as graph:
-                config = get_chat_config(thread)
-                config["callbacks"] = []
-
-                while True:
+            while True:
+                if not message:
+                    message = self._prompt_for_message()
                     if not message:
-                        message = self._prompt_for_message()
-                        if not message:
-                            break
+                        break
 
-                    self._run_chat_iteration(graph, config, user, document, message)
-                    message = None
+                self._run_chat_iteration(thread, user, document, message)
+                message = None
         finally:
             thread.delete()
             self.stdout.write(self.style.WARNING("Chat thread deleted."))
 
-    def _run_chat_iteration(self, graph, config, user, document, message):
-        state = {
-            "user_id": user.pk,
-            "document_id": document.pk,
-            "user_message": {
-                "content": message,
-                "id": str(uuid4()),
-            },
-        }
-
+    def _run_chat_iteration(self, thread, user, document, message):
         self.stdout.write("\nStreaming response:\n")
         asyncio.run(
-            self._stream_response(graph, state, config),
+            self._stream_response(thread, user, document, message),
         )
 
         self.stdout.write("")  # newline after streaming finishes
         self.stdout.write(self.style.SUCCESS("Finished streaming response."))
 
-    async def _stream_response(self, graph, state, config):
-        async for chunk in graph.astream(
-            state,
-            config,
-            stream_mode=["updates", "messages"],
-            durability="exit",
-        ):
-            print(chunk)
+    async def _stream_response(self, thread, user, document, message):
+        chat = DocumentChat(thread)
+        await chat.setup()
+
+        result = Runner.run_streamed(
+            chat.agent,
+            input=message,
+            context=chat.context,
+            session=chat.session,
+        )
+        async for event in result.stream_events():
+            if isinstance(event, RawResponsesStreamEvent) and isinstance(
+                event.data, ResponseTextDeltaEvent
+            ):
+                if event.data.delta:
+                    print(event.data.delta, end="", flush=True)
 
     def _prompt_for_message(self):
         self.stdout.write("")

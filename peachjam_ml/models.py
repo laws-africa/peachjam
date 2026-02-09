@@ -500,14 +500,18 @@ class ChatThread(models.Model):
     class Meta:
         ordering = ["-updated_at"]
 
-    async def asave_message_history(self, graph, config):
-        # we just want the messages from the first snapshot
-        async for snapshot in graph.aget_state_history(config):
-            self.messages_json = [
-                message.to_json() for message in snapshot.values.get("messages", [])
-            ]
-            await self.asave()
-            break
+    async def asave_message_history(self, messages):
+        self.messages_json = messages
+        await self.asave()
+
+    def get_thread_messages(self) -> list[dict]:
+        return self.messages_json or []
+
+    def get_message_by_id(self, message_id: str) -> dict | None:
+        for message in self.get_thread_messages():
+            if message.get("id") == message_id:
+                return message
+        return None
 
     @classmethod
     def count_active_for_user(cls, user):
