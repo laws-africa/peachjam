@@ -42,9 +42,9 @@ The following must be configured as ENV variables:
 """
 
 import os
-from pathlib import Path
 
-from agents import Agent, SQLiteSession
+from agents import Agent
+from agents.extensions.memory import SQLAlchemySession
 from agents.items import MessageOutputItem
 from asgiref.sync import sync_to_async
 from cobalt.uri import FrbrUri
@@ -55,28 +55,27 @@ from peachjam.models import Judgment, Legislation
 
 from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
 
-# TODO: better sessions
-DEFAULT_SESSION_DB_PATH = Path(settings.BASE_DIR) / "chat_sessions.sqlite3"
-
-
 # Langfuse uses environment variables to configure itself
 # we block elasticsearch-api instrumentation which comes through from the opentelemetry data
 langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 
 
-def get_session_db_path() -> str:
-    db_path = (
-        settings.PEACHJAM.get("CHAT_SESSION_DB_PATH")
-        if hasattr(settings, "PEACHJAM")
-        else None
+def get_db_url() -> str:
+    db_config = settings.DATABASES["default"]
+    return (
+        f"postgresql+psycopg://{db_config['USER']}:{db_config['PASSWORD']}"
+        f"@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}"
     )
-    if not db_path:
-        db_path = DEFAULT_SESSION_DB_PATH
-    return str(db_path)
 
 
-def get_session(thread) -> SQLiteSession:
-    return SQLiteSession(str(thread.id), db_path=get_session_db_path())
+def get_session(thread) -> SQLAlchemySession:
+    return SQLAlchemySession.from_url(
+        session_id=str(thread.id),
+        url=get_db_url(),
+        sessions_table="openai_agent_sessions",
+        messages_table="openai_agent_messages",
+        create_tables=True,
+    )
 
 
 class DocumentChat:
