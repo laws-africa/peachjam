@@ -54,8 +54,7 @@ jobs:
         TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
       run: |
         pre-commit run --all-files
-        python manage.py test peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
-        python manage.py test peachjam_subs --settings=peachjam_subs.test_app.settings
+        python manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
 
     - name: Publish Test Results
       uses: EnricoMi/publish-unit-test-result-action/linux@v2
