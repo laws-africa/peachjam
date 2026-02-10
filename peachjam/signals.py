@@ -12,8 +12,8 @@ from django_comments.signals import comment_will_be_posted
 from peachjam.customerio import get_customerio
 from peachjam.models import (
     Annotation,
-    ChatThread,
     CoreDocument,
+    DocumentChatThread,
     DocumentContent,
     ExtractedCitation,
     Folder,
@@ -250,7 +250,7 @@ def notify_new_relationship(sender, instance, **kwargs):
     update_users_new_relationship(instance.pk)
 
 
-@receiver(signals.post_delete, sender=ChatThread)
+@receiver(signals.post_delete, sender=DocumentChatThread)
 def chat_thread_deleted(sender, instance, **kwargs):
     """Cleanup chat session data."""
     from peachjam.chat.agent import get_session

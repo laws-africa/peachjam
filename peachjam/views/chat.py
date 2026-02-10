@@ -12,7 +12,7 @@ from django.views.generic import DetailView
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
 from peachjam.chat.agent import DocumentChat, extract_assistant_response, langfuse
-from peachjam.models import ChatThread
+from peachjam.models import DocumentChatThread
 from peachjam.views.documents import DocumentDetailView
 from peachjam.views.mixins import AsyncDispatchMixin
 from peachjam_subs.mixins import SubscriptionRequiredMixin
@@ -42,7 +42,9 @@ class StartDocumentChatView(
         document = self.get_object()
 
         thread = (
-            ChatThread.objects.filter(user=self.request.user, core_document=document)
+            DocumentChatThread.objects.filter(
+                user=self.request.user, core_document=document
+            )
             .order_by("-created_at")
             .first()
         )
@@ -65,7 +67,7 @@ class StartDocumentChatView(
         if limit_response := self.check_limits(document):
             return limit_response
 
-        thread = ChatThread.objects.create(
+        thread = DocumentChatThread.objects.create(
             core_document=document,
             user=self.request.user,
         )
@@ -82,7 +84,7 @@ class StartDocumentChatView(
         )
 
     def build_usage_limit_html(self):
-        n_active = ChatThread.count_active_for_user(self.request.user)
+        n_active = DocumentChatThread.count_active_for_user(self.request.user)
         sub = Subscription.get_or_create_active_for_user(self.request.user)
         chat_limit = sub.product_offering.product.document_chat_limit
         if not chat_limit or chat_limit >= 999999:
@@ -109,7 +111,7 @@ class StartDocumentChatView(
         )
 
     def check_limits(self, document):
-        n_active = ChatThread.count_active_for_user(self.request.user)
+        n_active = DocumentChatThread.count_active_for_user(self.request.user)
         sub = Subscription.get_or_create_active_for_user(self.request.user)
 
         limit_reached, lowest_product = sub.get_feature_limit_status(
@@ -135,11 +137,13 @@ class StartDocumentChatView(
 
 
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
-    model = ChatThread
+    model = DocumentChatThread
     permission_required = "peachjam.add_chatthread"
 
     def get_queryset(self):
-        return ChatThread.objects.filter(user=self.request.user).select_related("user")
+        return DocumentChatThread.objects.filter(user=self.request.user).select_related(
+            "user"
+        )
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
@@ -240,7 +244,9 @@ class VoteChatMessageView(ChatThreadDetailMixin):
         if message and message.get("role") == "ai":
             # store locally
             increment = 1 if self.up else -1
-            ChatThread.objects.filter(pk=thread.pk).update(score=F("score") + increment)
+            DocumentChatThread.objects.filter(pk=thread.pk).update(
+                score=F("score") + increment
+            )
 
             # push to Langfuse
             trace_id = message.get("trace_id")

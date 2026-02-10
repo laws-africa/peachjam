@@ -7,7 +7,7 @@ from django.core.management.base import BaseCommand, CommandError
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
 from peachjam.chat.agent import DocumentChat
-from peachjam.models import ChatThread, CoreDocument
+from peachjam.models import CoreDocument, DocumentChatThread
 
 
 class Command(BaseCommand):
@@ -32,7 +32,7 @@ class Command(BaseCommand):
         document = self._get_document(options["document_id"])
         message = self._normalise_message(options.get("message"))
 
-        thread = ChatThread.objects.create(user=user, document=document)
+        thread = DocumentChatThread.objects.create(user=user, core_document=document)
         self.stdout.write(f"Created chat thread {thread.id}")
 
         try:

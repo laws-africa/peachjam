@@ -4,7 +4,7 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls.base import reverse
 
-from peachjam.models import ChatThread, Country, GenericDocument, Language
+from peachjam.models import Country, DocumentChatThread, GenericDocument, Language
 from peachjam_subs.models import (
     Feature,
     Product,
@@ -95,7 +95,7 @@ class TestStartDocumentChatPermissions(TestCase):
         self.client.force_login(self.user)
 
         for document in self.documents[:2]:
-            ChatThread.objects.create(user=self.user, document=document)
+            DocumentChatThread.objects.create(user=self.user, document=document)
 
         response = self.client.post(self.chat_url(self.documents[2]))
         self.assertEqual(403, response.status_code)

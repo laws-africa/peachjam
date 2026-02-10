@@ -6,7 +6,7 @@ from django.db import models
 from django.utils import timezone
 
 
-class ChatThread(models.Model):
+class DocumentChatThread(models.Model):
     id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_threads"

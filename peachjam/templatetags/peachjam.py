@@ -11,7 +11,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from peachjam.auth import user_display
-from peachjam.models import ChatThread
+from peachjam.models import DocumentChatThread
 
 register = template.Library()
 
@@ -214,10 +214,10 @@ def color_for_user(user):
 def recent_chats(user):
     """Return the 10 most recent chat threads, one per document, for the supplied user."""
     if not user or not getattr(user, "is_authenticated", False):
-        return ChatThread.objects.none()
+        return DocumentChatThread.objects.none()
 
     return (
-        ChatThread.objects.filter(user=user)
+        DocumentChatThread.objects.filter(user=user)
         .annotate(
             document_rank=Window(
                 expression=RowNumber(),

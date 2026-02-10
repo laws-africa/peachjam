@@ -61,7 +61,6 @@ from peachjam.models import (
     CaseHistory,
     CaseNumber,
     CauseList,
-    ChatThread,
     CitationLink,
     CitationProcessing,
     CoreDocument,
@@ -72,6 +71,7 @@ from peachjam.models import (
     CustomProperty,
     CustomPropertyLabel,
     DocumentAccessGroup,
+    DocumentChatThread,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -1992,7 +1992,7 @@ class PartnerAdmin(admin.ModelAdmin):
     form = PartnerForm
 
 
-@admin.register(ChatThread)
+@admin.register(DocumentChatThread)
 class ChatThreadAdmin(admin.ModelAdmin):
     list_display = ("id", "user", "document_link", "score", "updated_at")
     readonly_fields = (
@@ -2037,7 +2037,7 @@ class ChatThreadAdmin(admin.ModelAdmin):
 
 
 class ChatThreadInline(admin.TabularInline):
-    model = ChatThread
+    model = DocumentChatThread
     extra = 0
     can_delete = False
     fields = ("updated_at", "document_link", "score")
