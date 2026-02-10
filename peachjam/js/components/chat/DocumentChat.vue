@@ -4,53 +4,56 @@
       <div v-if="permissionDeniedHtml">
         <div class="text-center py-5" v-html="permissionDeniedHtml" />
       </div>
-      <div v-else-if="threadId === null" class="spinner-when-empty" />
       <template v-else>
-        <div v-if="messages.length === 0 && !streaming" class="text-center text-muted py-5">
-          {{ $t('Ask a question about this document.') }}
-        </div>
+        <div v-if="usageLimitHtml" v-html="usageLimitHtml" />
+        <div v-if="threadId === null" class="spinner-when-empty" />
+        <template v-else>
+          <div v-if="messages.length === 0 && !streaming" class="text-center text-muted my-3">
+            {{ $t('Ask a question about this document.') }}
+          </div>
 
-        <transition-group name="chat" tag="div">
-          <div
-            v-for="message in messages"
-            :key="message.id"
-            class="d-flex mb-2"
-            :class="message.role === 'human' ? 'justify-content-end' : 'justify-content-start'"
-          >
+          <transition-group name="chat" tag="div">
             <div
-              class="chat-bubble text-break"
-              :class="message.role === 'human' ? 'chat-bubble-user bg-brand-pale' : 'chat-bubble-agent'"
+              v-for="message in messages"
+              :key="message.id"
+              class="d-flex mb-2"
+              :class="message.role === 'human' ? 'justify-content-end' : 'justify-content-start'"
             >
-              <div v-if="message.content_html" v-html="message.content_html" class="chat-content chat-content-html" />
-              <div v-else class="chat-content">{{ message.content }}</div>
-              <div v-if="message.role === 'ai' && !message.streaming" class="d-flex align-items-center">
-                <button class="btn btn-sm btn-outline-secondary border-0" :title="$t('Upvote message')" @click="voteUp(message.id)">
-                  <i v-if="votingUp === message.id" class="bi bi-check"/>
-                  <i v-else class="bi bi-hand-thumbs-up"/>
-                </button>
-                <button class="btn btn-sm btn-outline-secondary border-0 ms-1" :title="$t('Downvote message')" @click="voteDown(message.id)">
-                  <i v-if="votingDown === message.id" class="bi bi-check"/>
-                  <i v-else class="bi bi-hand-thumbs-down"/>
-                </button>
-                <button class="btn btn-sm btn-outline-secondary border-0 ms-1" :title="$t('Copy to clipboard')" @click="copyToClipboard(message)">
-                  <i class="bi bi-copy"/>
-                </button>
+              <div
+                class="chat-bubble text-break"
+                :class="message.role === 'human' ? 'chat-bubble-user bg-brand-pale' : 'chat-bubble-agent'"
+              >
+                <div v-if="message.content_html" v-html="message.content_html" class="chat-content chat-content-html" />
+                <div v-else class="chat-content">{{ message.content }}</div>
+                <div v-if="message.role === 'ai' && !message.streaming" class="d-flex align-items-center">
+                  <button class="btn btn-sm btn-outline-secondary border-0" :title="$t('Upvote message')" @click="voteUp(message.id)">
+                    <i v-if="votingUp === message.id" class="bi bi-check"/>
+                    <i v-else class="bi bi-hand-thumbs-up"/>
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary border-0 ms-1" :title="$t('Downvote message')" @click="voteDown(message.id)">
+                    <i v-if="votingDown === message.id" class="bi bi-check"/>
+                    <i v-else class="bi bi-hand-thumbs-down"/>
+                  </button>
+                  <button class="btn btn-sm btn-outline-secondary border-0 ms-1" :title="$t('Copy to clipboard')" @click="copyToClipboard(message)">
+                    <i class="bi bi-copy"/>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </transition-group>
+          </transition-group>
 
-        <div v-if="streaming && awaitingFirstResponse" class="d-flex justify-content-start mb-3">
-          <div class="chat-bubble chat-bubble-agent text-muted d-flex align-items-center gap-2">
-            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
-            <span>{{ $t('Thinking...') }}</span>
+          <div v-if="streaming && awaitingFirstResponse" class="d-flex justify-content-start mb-3">
+            <div class="chat-bubble chat-bubble-agent text-muted d-flex align-items-center gap-2">
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"/>
+              <span>{{ $t('Thinking...') }}</span>
+            </div>
           </div>
-        </div>
 
-        <div v-if="error" class="alert alert-warning">{{ error }}</div>
-        <div v-if="error && !threadId" class="text-center">
-          <button class="btn btn-link" @click="load">{{ $t('Try again') }}</button>
-        </div>
+          <div v-if="error" class="alert alert-warning">{{ error }}</div>
+          <div v-if="error && !threadId" class="text-center">
+            <button class="btn btn-link" @click="load">{{ $t('Try again') }}</button>
+          </div>
+        </template>
       </template>
     </div>
 
@@ -111,6 +114,7 @@ export default {
       threadId: null,
       messages: [],
       permissionDeniedHtml: null,
+      usageLimitHtml: null,
       inputText: '',
       error: null,
       votingUp: null,
@@ -143,12 +147,19 @@ export default {
         } else if (resp.status === 404) {
           // no existing thread
           this.threadId = '';
+          try {
+            const data = await resp.json();
+            this.usageLimitHtml = data?.usage_limit_html || null;
+          } catch (err) {
+            this.usageLimitHtml = null;
+          }
         } else if (!resp.ok) {
           throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
         } else {
           const data = await resp.json();
           this.threadId = data.thread_id || '';
           this.mergeMessages(data.messages);
+          this.usageLimitHtml = data.usage_limit_html || null;
         }
         this.focusInputAndScroll();
       } catch (err) {
@@ -180,6 +191,7 @@ export default {
           this.threadId = data.thread_id;
           this.messages.splice(0, this.messages.length);
           this.mergeMessages(data.messages);
+          this.usageLimitHtml = data.usage_limit_html || null;
           this.focusInputAndScroll();
         }
       } catch (err) {
@@ -377,6 +389,7 @@ export default {
     },
     handlePermissionDenied (messageHtml) {
       this.permissionDeniedHtml = messageHtml;
+      this.usageLimitHtml = null;
       this.threadId = null;
       this.messages.splice(0, this.messages.length);
       this.error = null;
