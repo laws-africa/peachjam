@@ -1,4 +1,5 @@
 import uuid
+from functools import cached_property
 
 from django.conf import settings
 from django.db import models
@@ -10,7 +11,7 @@ class ChatThread(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_threads"
     )
-    document = models.ForeignKey("peachjam.CoreDocument", on_delete=models.CASCADE)
+    core_document = models.ForeignKey("peachjam.CoreDocument", on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     score = models.IntegerField(default=0)
@@ -32,6 +33,13 @@ class ChatThread(models.Model):
                 return message
         return None
 
+    @cached_property
+    def document(self):
+        # load the real (polymorphic) document, not just the CoreDocument object
+        from peachjam.models import CoreDocument
+
+        return CoreDocument.objects.get(id=self.core_document_id)
+
     @classmethod
     def count_active_for_user(cls, user):
         """How many active chat threads does the user have? Used to enforce monthly limits."""
@@ -48,7 +56,7 @@ class ChatThread(models.Model):
                 user=user,
                 updated_at__gte=month_start,
             )
-            .values("document_id")
+            .values("core_document_id")
             .distinct()
             .count()
         )

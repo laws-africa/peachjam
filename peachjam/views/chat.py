@@ -42,7 +42,7 @@ class StartDocumentChatView(
         document = self.get_object()
 
         thread = (
-            ChatThread.objects.filter(user=self.request.user, document=document)
+            ChatThread.objects.filter(user=self.request.user, core_document=document)
             .order_by("-created_at")
             .first()
         )
@@ -66,7 +66,7 @@ class StartDocumentChatView(
             return limit_response
 
         thread = ChatThread.objects.create(
-            document=document,
+            core_document=document,
             user=self.request.user,
         )
 
@@ -139,15 +139,13 @@ class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailV
     permission_required = "peachjam.add_chatthread"
 
     def get_queryset(self):
-        return (
-            ChatThread.objects.filter(user=self.request.user)
-            .select_related("document", "user")
-            .defer(
-                "document__content_html",
-                "document__toc_json",
-                "document__metadata_json",
-            )
-        )
+        return ChatThread.objects.filter(user=self.request.user).select_related("user")
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        # ensure the real document is loaded
+        obj.document
+        return obj
 
 
 class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
