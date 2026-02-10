@@ -95,7 +95,7 @@ class TestStartDocumentChatPermissions(TestCase):
         self.client.force_login(self.user)
 
         for document in self.documents[:2]:
-            DocumentChatThread.objects.create(user=self.user, document=document)
+            DocumentChatThread.objects.create(user=self.user, core_document=document)
 
         response = self.client.post(self.chat_url(self.documents[2]))
         self.assertEqual(403, response.status_code)
