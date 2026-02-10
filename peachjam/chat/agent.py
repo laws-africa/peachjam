@@ -43,6 +43,7 @@ The following must be configured as ENV variables:
 
 import os
 
+import nest_asyncio
 from agents import Agent
 from agents.extensions.memory import SQLAlchemySession
 from agents.items import MessageOutputItem
@@ -50,8 +51,16 @@ from asgiref.sync import sync_to_async
 from cobalt.uri import FrbrUri
 from django.conf import settings
 from langfuse import Langfuse
+from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
 from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
+
+# required for langfuse to work properly in Django views which may already have an event loop running
+# see https://langfuse.com/integrations/frameworks/openai-agents
+nest_asyncio.apply()
+
+# setup OpenAI Agents instrumentation for observability in Langfuse
+OpenAIAgentsInstrumentor().instrument()
 
 # Langfuse uses environment variables to configure itself
 # we block elasticsearch-api instrumentation which comes through from the opentelemetry data
