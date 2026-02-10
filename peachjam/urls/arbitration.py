@@ -1,6 +1,7 @@
 from django.urls import path
 
 from peachjam.views import (
+    ArbitralInstitutionDetailView,
     ArbitralInstitutionListView,
     ArbitrationAwardDetailView,
     ArbitrationAwardListView,
@@ -19,5 +20,10 @@ urlpatterns = [
         "institutions/",
         ArbitralInstitutionListView.as_view(),
         name="arbitral_institution_list",
+    ),
+    path(
+        "institutions/<str:acronym>/",
+        ArbitralInstitutionDetailView.as_view(),
+        name="arbitral_institution_detail",
     ),
 ]

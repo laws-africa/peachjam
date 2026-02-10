@@ -1,0 +1,18 @@
+{% extends "peachjam/layouts/document_detail.html" %}
+{% load i18n %}
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'arbitration_hub' %}">{% trans 'Arbitration' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'arbitration_award_list' %}">{% trans 'Arbitration Awards' %}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ document.title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
