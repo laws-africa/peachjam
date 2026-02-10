@@ -46,7 +46,7 @@ class TestStartDocumentChatPermissions(TestCase):
 
         permission = Permission.objects.get(
             content_type__app_label="peachjam",
-            codename="add_chatthread",
+            codename="add_documentchatthread",
         )
         feature = Feature.objects.create(name="Document chat")
         feature.permissions.add(permission)

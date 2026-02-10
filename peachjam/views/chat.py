@@ -27,13 +27,13 @@ class StartDocumentChatView(
     Enforces permissions and limits as follows, returning a 403 with HTML to display to the user explaining
     what they can do to gain access:
 
-    1. add_chatthread permission: user must create an account or upgrade their subscription
+    1. add_documentchatthread permission: user must create an account or upgrade their subscription
     2. monthly unique document chat limit: user must upgrade their subscription or wait until next month
     """
 
     slug_field = "pk"
     slug_url_kwarg = "pk"
-    permission_required = "peachjam.add_chatthread"
+    permission_required = "peachjam.add_documentchatthread"
     http_method_names = ["get", "post"]
     subscription_required_status = 403
     subscription_required_template = "peachjam/chat/_chat_permission_denied.html"
@@ -138,7 +138,7 @@ class StartDocumentChatView(
 
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):
     model = DocumentChatThread
-    permission_required = "peachjam.add_chatthread"
+    permission_required = "peachjam.add_documentchatthread"
 
     def get_queryset(self):
         return DocumentChatThread.objects.filter(user=self.request.user).select_related(
