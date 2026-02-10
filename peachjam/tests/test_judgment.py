@@ -19,20 +19,20 @@ class JudgmentTestCase(TestCase):
             jurisdiction=Country.objects.get(pk="ZA"),
         )
         j.assign_mnc()
-        self.assertEquals("[2019] EACJ 1", j.mnc)
+        self.assertEqual("[2019] EACJ 1", j.mnc)
 
         j.assign_frbr_uri()
-        self.assertEquals("/akn/za/judgment/eacj/2019/1", j.work_frbr_uri)
+        self.assertEqual("/akn/za/judgment/eacj/2019/1", j.work_frbr_uri)
 
         mnc = j.mnc
         # it should not change
         j.assign_mnc()
-        self.assertEquals(mnc, j.mnc)
+        self.assertEqual(mnc, j.mnc)
 
         # it should not change
         j.save()
         j.assign_mnc()
-        self.assertEquals(mnc, j.mnc)
+        self.assertEqual(mnc, j.mnc)
 
     def test_assign_mnc_sn_override(self):
         j = Judgment(
@@ -43,13 +43,13 @@ class JudgmentTestCase(TestCase):
         )
         j.save()
         j.refresh_from_db()
-        self.assertEquals("[2019] EACJ 1", j.mnc)
+        self.assertEqual("[2019] EACJ 1", j.mnc)
 
         j.serial_number_override = 999
         j.save()
         j.refresh_from_db()
-        self.assertEquals("[2019] EACJ 999", j.mnc)
-        self.assertEquals(999, j.serial_number)
+        self.assertEqual("[2019] EACJ 999", j.mnc)
+        self.assertEqual(999, j.serial_number)
 
     def test_clear_serial_number_override(self):
         j = Judgment(
@@ -61,14 +61,14 @@ class JudgmentTestCase(TestCase):
         j.serial_number_override = 999
         j.save()
         j.refresh_from_db()
-        self.assertEquals("[2019] EACJ 999", j.mnc)
+        self.assertEqual("[2019] EACJ 999", j.mnc)
 
         # clearing the override doesn't automatically force a re-assignment of the serial number
         j.serial_number_override = None
         j.save()
         j.refresh_from_db()
-        self.assertEquals("[2019] EACJ 999", j.mnc)
-        self.assertEquals(999, j.serial_number)
+        self.assertEqual("[2019] EACJ 999", j.mnc)
+        self.assertEqual(999, j.serial_number)
 
     def test_assign_mnc_re_save(self):
         j = Judgment(
@@ -79,8 +79,8 @@ class JudgmentTestCase(TestCase):
         )
         j.save()
         j.refresh_from_db()
-        self.assertEquals(1, j.serial_number)
-        self.assertEquals("[2019] EACJ 1", j.mnc)
+        self.assertEqual(1, j.serial_number)
+        self.assertEqual("[2019] EACJ 1", j.mnc)
 
         j2 = Judgment(
             language=Language.objects.get(pk="en"),
@@ -90,19 +90,19 @@ class JudgmentTestCase(TestCase):
         )
         j2.save()
         j2.refresh_from_db()
-        self.assertEquals(2, j2.serial_number)
-        self.assertEquals("[2019] EACJ 2", j2.mnc)
+        self.assertEqual(2, j2.serial_number)
+        self.assertEqual("[2019] EACJ 2", j2.mnc)
 
         # now re-save j
         j.save()
         j.refresh_from_db()
-        self.assertEquals(1, j.serial_number)
-        self.assertEquals("[2019] EACJ 1", j.mnc)
+        self.assertEqual(1, j.serial_number)
+        self.assertEqual("[2019] EACJ 1", j.mnc)
 
         j2.save()
         j2.refresh_from_db()
-        self.assertEquals(2, j2.serial_number)
-        self.assertEquals("[2019] EACJ 2", j2.mnc)
+        self.assertEqual(2, j2.serial_number)
+        self.assertEqual("[2019] EACJ 2", j2.mnc)
 
     def test_assign_title(self):
         j = Judgment(
@@ -116,7 +116,7 @@ class JudgmentTestCase(TestCase):
         j.case_numbers.add(CaseNumber(number=2, year=1980), bulk=False)
         j.assign_mnc()
         j.assign_title()
-        self.assertEquals(
+        self.assertEqual(
             "Foo v Bar (2 of 1980) [2019] EACJ 1 (1 January 2019)", j.title
         )
 
@@ -130,7 +130,7 @@ class JudgmentTestCase(TestCase):
         )
         j.assign_mnc()
         j.assign_title()
-        self.assertEquals("Foo v Bar [2019] EACJ 1 (1 January 2019)", j.title)
+        self.assertEqual("Foo v Bar [2019] EACJ 1 (1 January 2019)", j.title)
 
     def test_assign_title_string_override(self):
         j = Judgment(
@@ -146,7 +146,7 @@ class JudgmentTestCase(TestCase):
         )
         j.assign_mnc()
         j.assign_title()
-        self.assertEquals(
+        self.assertEqual(
             "Foo v Bar (FooBar 99) [2019] EACJ 1 (1 January 2019)", j.title
         )
 
@@ -160,4 +160,4 @@ class JudgmentTestCase(TestCase):
         )
         j.assign_mnc()
         j.assign_title()
-        self.assertEquals("Foo v Bar [2019] EACJ 1 (1 janvier 2019)", j.title)
+        self.assertEqual("Foo v Bar [2019] EACJ 1 (1 janvier 2019)", j.title)

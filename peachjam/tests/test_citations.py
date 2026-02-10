@@ -48,7 +48,7 @@ class CitationAnalyserTestCase(TestCase):
             doc.source_file.save()
             citation_analyser.extract_citations_from_source_file(doc)
 
-        self.assertEquals(
+        self.assertEqual(
             [
                 {
                     "target_id": "page-1",
