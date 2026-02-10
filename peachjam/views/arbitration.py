@@ -40,7 +40,7 @@ class ArbitrationAwardDetailView(BaseDocumentDetailView):
                 "institution",
                 "seat",
                 "claimants_country_of_origin",
-                "respondents_county_of_origin",
+                "respondents_country_of_origin",
                 "rules_of_arbitration",
             ),
             case_number=self.kwargs.get("case_number"),
