@@ -44,9 +44,9 @@ class ArbitrationTests(TestCase):
             outcome=ArbitrationAward.Outcome.CLAIMANT,
         )
 
-    def test_case_number_is_prefixed_with_institution(self):
-        award = self.create_award(self.institution, "ARB102024001", "LCIA Award")
-        self.assertEqual("lcia-arb102024001", award.case_number)
+    def test_case_number_is_preserved(self):
+        award = self.create_award(self.institution, "ARB/98/8", "LCIA Award")
+        self.assertEqual("ARB/98/8", award.case_number)
 
     def test_institution_list_links_to_detail(self):
         response = self.client.get(reverse("arbitral_institution_list"))
@@ -57,7 +57,7 @@ class ArbitrationTests(TestCase):
         )
 
     def test_institution_detail_lists_awards(self):
-        award = self.create_award(self.institution, "ARB102024001", "LCIA Award")
+        award = self.create_award(self.institution, "ARB/98/8", "LCIA Award")
         self.create_award(self.other_institution, "ICC2024/01", "ICC Award")
 
         response = self.client.get(
@@ -68,9 +68,9 @@ class ArbitrationTests(TestCase):
         self.assertNotContains(response, "ICC Award")
 
     def test_award_detail_shows_breadcrumbs(self):
-        award = self.create_award(self.institution, "ARB102024001", "LCIA Award")
+        award = self.create_award(self.institution, "ARB/98/8", "LCIA Award")
         response = self.client.get(
-            reverse("arbitration_award_detail", args=[award.case_number])
+            reverse("arbitration_award_detail", args=[award.work_frbr_uri[1:]])
         )
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Arbitration Awards")

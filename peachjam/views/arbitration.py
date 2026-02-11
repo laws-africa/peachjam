@@ -1,9 +1,12 @@
 from functools import cached_property
 
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, TemplateView
 
+from peachjam.helpers import add_slash, get_language
 from peachjam.models import ArbitralInstitution, ArbitrationAward
+from peachjam.models.core_document import CoreDocument
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -59,21 +62,24 @@ class ArbitrationAwardListView(FilteredDocumentListView):
 class ArbitrationAwardDetailView(BaseDocumentDetailView):
     model = ArbitrationAward
     template_name = "peachjam/arbitration/arbitration_award_detail.html"
-    slug_field = "case_number"
-    slug_url_kwarg = "case_number"
 
     @cached_property
     def arbitration_award(self):
-        return get_object_or_404(
-            ArbitrationAward.objects.select_related(
-                "institution",
-                "seat",
-                "claimants_country_of_origin",
-                "respondents_country_of_origin",
-                "rules_of_arbitration",
-            ),
-            case_number=self.kwargs.get("case_number"),
+        frbr_uri = add_slash(self.kwargs.get("frbr_uri"))
+        obj, _exact = CoreDocument.objects.best_for_frbr_uri(
+            frbr_uri, get_language(self.request)
         )
+        if not obj or not isinstance(obj, ArbitrationAward):
+            raise Http404()
+        if not obj.published:
+            raise Http404()
+        return ArbitrationAward.objects.select_related(
+            "institution",
+            "seat",
+            "claimants_country_of_origin",
+            "respondents_country_of_origin",
+            "rules_of_arbitration",
+        ).get(pk=obj.pk)
 
     def get_object(self, *args, **kwargs):
         return self.arbitration_award

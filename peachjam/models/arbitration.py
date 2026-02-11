@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.decorators import ArbitrationAwardDecorator
 from peachjam.models.core_document import CoreDocument
 
 
@@ -62,22 +63,24 @@ class ArbitrationSeat(models.Model):
 
 class ArbitrationAward(CoreDocument):
     class CaseType(models.TextChoices):
-        INVESTOR_STATE = "INVESTOR_STATE", "Investor State"
-        COMMERCIAL = "COMMERCIAL", "Commercial Arbitration"
-        INT_INVESTOR_AGREEMENT = "IIA", "International Investor Agreement"
+        INVESTOR_STATE = "INVESTOR_STATE", _("Investor State")
+        COMMERCIAL = "COMMERCIAL", _("Commercial Arbitration")
+        INT_INVESTOR_AGREEMENT = "IIA", _("International Investor Agreement")
 
     class AwardType(models.TextChoices):
-        FINAL = "FINAL", "Final Award"
-        INTERIM = "INTERIM", "Interim Award"
-        PARTIAL = "PARTIAL", "Partial Award"
+        FINAL = "FINAL", _("Final Award")
+        INTERIM = "INTERIM", _("Interim Award")
+        PARTIAL = "PARTIAL", _("Partial Award")
 
     class ArbitrationNature(models.TextChoices):
-        DOMESTIC = "DOMESTIC", "Domestic"
-        INTERNATIONAL = "INTERNATIONAL", "International"
+        DOMESTIC = "DOMESTIC", _("Domestic")
+        INTERNATIONAL = "INTERNATIONAL", _("International")
 
     class Outcome(models.TextChoices):
-        CLAIMANT = "CLAIMANT", "In Favour of Claimant"
-        RESPONDENT = "RESPONDENT", "In Favour of Respondent"
+        CLAIMANT = "CLAIMANT", _("In Favour of Claimant")
+        RESPONDENT = "RESPONDENT", _("In Favour of Respondent")
+
+    decorator = ArbitrationAwardDecorator()
 
     case_number = models.CharField(_("case number"), max_length=100, unique=True)
 
@@ -154,22 +157,23 @@ class ArbitrationAward(CoreDocument):
         verbose_name = _("arbitration award")
         verbose_name_plural = _("arbitration awards")
 
-    def build_case_number(self):
-        if not self.institution or not self.case_number:
-            return self.case_number
+    def generate_work_frbr_uri(self):
+        self.frbr_uri_doctype = "doc"
+        self.frbr_uri_subtype = "arbitration-award"
+        if self.institution and self.institution.acronym:
+            self.frbr_uri_actor = self.institution.acronym.lower()
+        if self.date:
+            self.frbr_uri_date = str(self.date.year)
+        if self.case_number:
+            self.frbr_uri_number = self.case_number.lower().replace("/", "-")
 
-        institution_part = self.institution.acronym or self.institution.name
-        prefix = slugify(institution_part)
-        if self.case_number.startswith(f"{prefix}-"):
-            return self.case_number
-        return slugify(f"{prefix}-{self.case_number}")
+        return super().generate_work_frbr_uri()
 
     def pre_save(self):
-        self.case_number = self.build_case_number()
+        if self.case_number:
+            self.case_number = self.case_number.strip()
+        self.doc_type = "arbitration_award"
         return super().pre_save()
 
     def __str__(self):
         return f"Award for {self.case_number} ({self.get_outcome_display()})"
-
-    def get_absolute_url(self):
-        return reverse("arbitration_award_detail", args=[self.case_number])
