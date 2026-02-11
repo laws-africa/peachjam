@@ -128,8 +128,14 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         return self.template_name
 
     def get_subscription_required_context(self):
+        all_versions = CoreDocument.objects.filter(
+            work_frbr_uri=self.object.work_frbr_uri
+        )
         return {
             "document": self.object,
+            "date_versions": all_versions.filter(
+                language=self.object.language
+            ).order_by("-date"),
         }
 
     def get_context_data(self, **kwargs):
