@@ -409,14 +409,17 @@ class Subscription(models.Model):
         self.status = Subscription.Status.CLOSED
         self.save()
 
-    def end_of_current_period(self):
-        """Returns the last day of the current subscription period."""
-        today = timezone.now().date()
-        start_date = self.active_at.date()
+    def period_bounds_for_date(self, date):
+        """Return the start and end dates for the subscription period containing the given date."""
+        start_date = (
+            self.active_at.date() if self.active_at else (self.starts_on or date)
+        )
+        if date < start_date:
+            date = start_date
         period = self.product_offering.pricing_plan.period
 
         # Step 1: Find how many whole periods have passed since start_date
-        elapsed = relativedelta(today, start_date)
+        elapsed = relativedelta(date, start_date)
         n = {
             PricingPlan.Period.MONTHLY: elapsed.years * 12 + elapsed.months,
             PricingPlan.Period.ANNUALLY: elapsed.years,
@@ -427,15 +430,15 @@ class Subscription(models.Model):
         current_period_start = start_date + n * delta
         current_period_end = current_period_start + delta - timedelta(days=1)
 
-        return current_period_end
+        return current_period_start, current_period_end
+
+    def end_of_current_period(self):
+        """Returns the last day of the current subscription period."""
+        return self.period_bounds_for_date(timezone.now().date())[1]
 
     def start_of_current_period(self):
         """Returns the first day of the current subscription period."""
-        return (
-            self.end_of_current_period()
-            - self.product_offering.pricing_plan.relative_delta()
-            + timedelta(days=1)
-        )
+        return self.period_bounds_for_date(timezone.now().date())[0]
 
     def next_billing_date(self):
         """This is always two days after the end of the current period, which is one day after the start of the next
