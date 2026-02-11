@@ -23,15 +23,15 @@
     </nav>
   </div>
 {% endblock %}
-{% block page-title %}
-  {% if not entity_profile %}
-    <div class="my-4">
-      <h1>{{ page_title }}</h1>
-      {% block follow-button %}{% endblock %}
-    </div>
-  {% endif %}
-{% endblock %}
 {% block page-header %}
+  {% block page-title %}
+    {% if not entity_profile %}
+      <div class="my-4">
+        <h1>{{ page_title }}</h1>
+        {% block follow-button %}{% endblock %}
+      </div>
+    {% endif %}
+  {% endblock %}
   {% if law_report_volumes %}
     <div class="flow-columns">
       {% for group in law_report_volume_groups %}
@@ -49,11 +49,6 @@
           </ul>
         </div>
       {% endfor %}
-    </div>
-  {% endif %}
-  {% if law_report_volume %}
-    <div class="mt-4">
-      <h3>{{ law_report_volume.title }}</h3>
     </div>
   {% endif %}
   {% include 'peachjam/_count_and_search.html' %}
