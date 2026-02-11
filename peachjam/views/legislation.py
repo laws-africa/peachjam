@@ -90,9 +90,9 @@ class LegislationListView(FilteredDocumentListView):
             UnconstitutionalProvision.objects.exists()
             or UncommencedProvision.objects.exists()
         )
-        context[
-            "show_unconstitutional_provisions"
-        ] = UnconstitutionalProvision.objects.exists()
+        context["show_unconstitutional_provisions"] = (
+            UnconstitutionalProvision.objects.exists()
+        )
         context["show_uncommenced_provisions"] = UncommencedProvision.objects.exists()
         return context
 

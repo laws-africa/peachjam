@@ -14,8 +14,7 @@ class MncMatcherTest(TestCase):
         self.frbr_uri = FrbrUri.parse("/akn/za-wc/act/2021/509")
 
     def test_html_matches(self):
-        html = lxml.html.fromstring(
-            """
+        html = lxml.html.fromstring("""
 <div>
   <p>2 Commissioner for the South African Revenue Service v Toneleria Nacional RSA (Pty) Ltd [2021] ZASCA 65; [2021] 3 All SA 299 (SCA); 2021 (5) SA 68 (SCA) para 25.</p>
   <p>Kenya: [2022] KESC 12</p>
@@ -24,8 +23,7 @@ class MncMatcherTest(TestCase):
   <p>Some string that has [2021] ZA SC 6</p>
   <p>A place that isn't trusted [1988] XXCC 12.</p>
 </div>
-"""  # noqa
-        )
+""")  # noqa
         self.marker.markup_html_matches(self.frbr_uri, html)
 
         self.assertMultiLineEqual(
@@ -41,14 +39,12 @@ class MncMatcherTest(TestCase):
         )
 
     def test_za_provincial_matches(self):
-        html = lxml.html.fromstring(
-            """
+        html = lxml.html.fromstring("""
 <div>
   <p>see, Grundler N.O. and Another v Zulu and Another (D8029/2021) [2023] ZAKZDHC 7 (20 February 2023).</p>
   <p>ted in Motshegoa v Motshegoa and Another (995/98) [2000] ZANWHC 6 (11 May 2000) at p19:</p>
 </div>
-"""  # noqa
-        )
+""")  # noqa
         self.marker.markup_html_matches(self.frbr_uri, html)
 
         self.assertMultiLineEqual(
@@ -62,13 +58,11 @@ class MncMatcherTest(TestCase):
     def test_gh_sc_mismatch(self):
         # In Ghana, "[2011] 1 SCGLR 505" is a law report, not a seychelles court
         self.frbr_uri = FrbrUri.parse("/akn/gh/judgment/ghsc/2025/509")
-        html = lxml.html.fromstring(
-            """
+        html = lxml.html.fromstring("""
 <div>
   <p>In Amoah v. Lokko &amp; Afred Quartey (substituted by) Gloria Quartey [2011] SCGLR 505, his Lordship Aryeetey JSC had this to say;</p>
 </div>
-"""  # noqa
-        )
+""")  # noqa
         self.marker.markup_html_matches(self.frbr_uri, html)
 
         self.assertMultiLineEqual(

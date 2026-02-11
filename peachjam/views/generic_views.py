@@ -599,16 +599,16 @@ class BaseDocumentDetailView(DetailView):
         document.content_html = html.tostring(root, encoding="unicode")
 
     def add_track_page_properties(self, context):
-        context[
-            "track_page_properties"
-        ] = get_customerio().get_document_track_properties(context["document"])
+        context["track_page_properties"] = (
+            get_customerio().get_document_track_properties(context["document"])
+        )
 
     def check_annotation_permission(self, context):
         if not self.request.user.has_perm("peachjam.add_annotation"):
             context["annotation_subscription_required"] = True
-            context[
-                "annotation_subscription_product"
-            ] = Product.get_lowest_product_for_permission("peachjam.add_annotation")
+            context["annotation_subscription_product"] = (
+                Product.get_lowest_product_for_permission("peachjam.add_annotation")
+            )
 
     def get_download_options(self):
         """Get the various formats that should be shown in the download menu. The first one will be the default."""

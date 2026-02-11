@@ -13,7 +13,8 @@ from peachjam.xmlutils import parse_html_str
 async def answer_document_question(config: RunnableConfig, question: str) -> str:
     """Answers a question about the content of the current document. It knows which document is active.
     It has no memory of previous questions. Only use it if you need to answer a specific question about the document
-    content. The document does not contain information about this website or its features."""
+    content. The document does not contain information about this website or its features.
+    """
     from .graphs import chat_llm
 
     @sync_to_async

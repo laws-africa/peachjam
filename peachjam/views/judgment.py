@@ -113,9 +113,11 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
         outgoing_histories = [
             {
                 "case_history": ch,
-                "document": ch.historical_judgment_work.documents.first()
-                if ch.historical_judgment_work
-                else None,
+                "document": (
+                    ch.historical_judgment_work.documents.first()
+                    if ch.historical_judgment_work
+                    else None
+                ),
             }
             for ch in document.work.case_histories.select_related(
                 "historical_judgment_work", "outcome"
