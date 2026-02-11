@@ -49,7 +49,7 @@ class LawReportEntry(models.Model):
         "peachjam.Judgment", related_name="law_report_entries", on_delete=models.CASCADE
     )
     law_report_volume = models.ForeignKey(
-        LawReportVolume, related_name="law_report_entries", on_delete=models.CASCADE
+        LawReportVolume, related_name="law_report_entries", on_delete=models.PROTECT
     )
 
     class Meta:
