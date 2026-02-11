@@ -235,7 +235,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
             if not points_in_time and latest_amendment_date > current_object_date:
                 self.set_unapplied_amendment_notice(notices)
 
-        if points_in_time and work_amendments:
+        if points_in_time:
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
@@ -246,7 +246,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                 return notices
 
             if index == len(point_in_time_dates) - 1:
-                if self.object.repealed and repeal:
+                if work_amendments and self.object.repealed and repeal:
                     if repeal["repealing_uri"]:
                         notices.append(
                             {
@@ -278,6 +278,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                     self.set_unapplied_amendment_notice(notices)
 
                 else:
+                    # show latest notice even if no amendments
                     notices.append(
                         {
                             "type": messages.INFO,
@@ -287,7 +288,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                             % {"friendly_type": friendly_type},
                         }
                     )
-            else:
+            elif work_amendments:
                 date = datetime.strptime(
                     point_in_time_dates[index + 1], "%Y-%m-%d"
                 ).date() - timedelta(days=1)
