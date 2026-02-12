@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 from countries_plus.models import Country
@@ -10,6 +10,8 @@ from languages_plus.models import Language
 from peachjam.models import (
     Court,
     Judgment,
+    Legislation,
+    Locality,
     Predicate,
     Relationship,
     SavedDocument,
@@ -142,12 +144,52 @@ class TimelineRelationshipTests(TestCase):
     def setUp(self):
         self.user = User.objects.first()
 
-        self.followed_work = Work.objects.get(pk=2433)
-        self.amending_work = Work.objects.get(pk=3704)
-        self.repealing_work = Work.objects.get(pk=3716)
+        amending_doc = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+            date=date.today(),
+            title="amending test",
+            frbr_uri_doctype="act",
+            metadata_json={"commenced": True},
+            language=Language.objects.first(),
+        )
+        repeal_doc = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+            title="repealing test",
+            frbr_uri_doctype="act",
+            date=date.today(),
+            metadata_json={"commenced": True},
+            language=Language.objects.first(),
+        )
 
-        self.overturning_work = Work.objects.get(pk=1132)
-        self.overturned_work = Work.objects.get(pk=1031)
+        overturning_doc = Judgment.objects.create(
+            case_name="Overturning Case",
+            court=Court.objects.get(code="ECOWASCJ"),
+            date=date.today(),
+            serial_number="52",
+            frbr_uri_date="2026",
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+        )
+
+        overturned_doc = Judgment.objects.create(
+            case_name="Overturned Case",
+            court=Court.objects.get(code="ECOWASCJ"),
+            date=date.today(),
+            serial_number="52",
+            frbr_uri_date="2016",
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+        )
+
+        self.followed_work = Work.objects.get(pk=2433)
+        self.amending_work = amending_doc.work
+        self.repealing_work = repeal_doc.work
+        self.overturning_work = overturning_doc.work
+        self.overturned_work = overturned_doc.work
 
         self.saved_followed = SavedDocument.objects.create(
             user=self.user, work=self.followed_work
