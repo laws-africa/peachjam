@@ -23,8 +23,8 @@ class LawReport(models.Model):
 
 class LawReportVolume(models.Model):
 
-    title = models.CharField(_("title"), max_length=2048, unique=True)
-    slug = models.CharField(max_length=2048, unique=True)
+    title = models.CharField(_("title"), max_length=2048)
+    slug = models.CharField(max_length=2048)
     year = models.PositiveIntegerField(null=True, blank=True)
     law_report = models.ForeignKey(
         LawReport, on_delete=models.CASCADE, related_name="volumes"
