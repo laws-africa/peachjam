@@ -24,7 +24,7 @@ from peachjam_ml.chat.graphs import (
 )
 from peachjam_ml.models import ChatThread, DocumentEmbedding
 from peachjam_subs.mixins import SubscriptionRequiredMixin
-from peachjam_subs.models import Subscription
+from peachjam_subs.models import Product, Subscription
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -103,7 +103,15 @@ class StartDocumentChatView(
         if thread:
             return self.build_thread_response(thread)
 
-        return HttpResponse(status=404)
+        # return usage limit info even if no thread, to inform the user of their limits before they start a chat
+        return JsonResponse(
+            {
+                "thread_id": "",
+                "messages": [],
+                "usage_limit_html": self.build_usage_limit_html(),
+            },
+            status=404,
+        )
 
     def post(self, request, *args, **kwargs):
         document = self.get_object()
@@ -130,7 +138,35 @@ class StartDocumentChatView(
                     for m in state.get("messages", [])
                     if m.type in ["ai", "human"]
                 ],
+                "usage_limit_html": self.build_usage_limit_html(),
             }
+        )
+
+    def build_usage_limit_html(self):
+        n_active = ChatThread.count_active_for_user(self.request.user)
+        sub = Subscription.get_or_create_active_for_user(self.request.user)
+        chat_limit = sub.product_offering.product.document_chat_limit
+        if not chat_limit or chat_limit >= 999999:
+            return None
+
+        lowest_product = Product.get_user_upgrade_products(
+            self.request.user,
+            feature="document_chat_limit",
+            count=chat_limit,
+        ).first()
+        if not lowest_product:
+            return None
+
+        context = {
+            "chats_used": n_active,
+            "chat_limit": chat_limit,
+            "lowest_product": lowest_product,
+        }
+
+        return render_to_string(
+            "peachjam_ml/_chat_usage_limit.html",
+            context,
+            request=self.request,
         )
 
     def check_limits(self, document):
