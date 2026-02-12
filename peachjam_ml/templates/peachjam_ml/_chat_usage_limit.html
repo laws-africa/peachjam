@@ -1,0 +1,10 @@
+{% load i18n peachjam_subs %}
+{% if lowest_product and chat_limit %}
+  {% upsell_url lowest_product as upsell_url %}
+  <div class="text-center text-muted mt-2 mb-4">
+    {% blocktrans trimmed with lowest_product=lowest_product.name %}
+      You've used {{ chats_used }} of your {{ chat_limit }} document chats this month.<br>
+      Upgrade to <a href="{{ upsell_url }}">{{ lowest_product }}</a> to unlock more chats.
+    {% endblocktrans %}
+  </div>
+{% endif %}
