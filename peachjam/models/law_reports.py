@@ -34,6 +34,7 @@ class LawReportVolume(models.Model):
         ordering = ("title",)
         verbose_name = _("law report volume")
         verbose_name_plural = _("law report volumes")
+        unique_together = ["law_report", "slug"]
 
     def __str__(self):
         return f"{self.law_report.title} - {self.title}"
