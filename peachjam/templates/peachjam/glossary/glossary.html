@@ -26,6 +26,9 @@
   </div>
   <div class="container">
     <h1>{% trans 'Glossary of defined terms' %}</h1>
+    {% block help %}
+      {% include "peachjam/_help_button.html" with help_link="legislation/glossary-of-defined-terms" %}
+    {% endblock %}
     <div class="mb-5">
       {% blocktrans trimmed with name=place.name %}
         Terms that have been defined in legislation across {{ name }}.

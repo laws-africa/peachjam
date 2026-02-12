@@ -1,0 +1,50 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Arbitral Institutions' %}
+{% endblock %}
+{% block page-content %}
+  <section class="container pt-4 pb-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'arbitration_hub' %}">{% trans 'Arbitration' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans 'Arbitral Institutions' %}</li>
+      </ol>
+    </nav>
+    <h1 class="my-4">{% trans 'Arbitral Institutions' %}</h1>
+    <div class="mb-3">
+      <a href="{% url 'arbitration_award_list' %}">{% trans 'Browse arbitration awards' %}</a>
+    </div>
+    {% if arbitral_institutions %}
+      <div class="text-muted mb-3">
+        {% blocktrans count counter=arbitral_institutions.count %}{{ counter }} Institution{% plural %}{{ counter }} Institutions{% endblocktrans %}
+      </div>
+      <div class="row g-4">
+        {% for institution in arbitral_institutions %}
+          <div class="col-12 col-md-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h5 mb-2">
+                  <a class="text-decoration-none"
+                     href="{% url 'arbitral_institution_detail' institution.acronym %}">{{ institution.name }}</a>
+                </h2>
+                {% if institution.acronym %}<div class="text-muted mb-2">{{ institution.acronym }}</div>{% endif %}
+                {% if institution.headquarters_city %}<div class="mb-2">{{ institution.headquarters_city }}</div>{% endif %}
+                {% if institution.is_internationally_recognized %}
+                  <div class="badge text-bg-success">{% trans 'Internationally recognized' %}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>{% trans 'No arbitral institutions found.' %}</p>
+    {% endif %}
+  </section>
+{% endblock %}

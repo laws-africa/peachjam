@@ -293,7 +293,7 @@
                           <dd class="text-muted">
                             {% for judge in judges %}
                               {# djlint:off #}
-                          {{ judge }}{% if not forloop.last %},{% endif %}
+                          <a href="{{ judge.get_absolute_url }}">{{ judge }}</a>{% if not forloop.last %},{% endif %}
                               {# djlint:on #}
                             {% endfor %}
                           </dd>
