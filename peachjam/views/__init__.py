@@ -4,6 +4,7 @@ from .accounts import *
 from .admin import *
 from .annotation import *
 from .anon import *
+from .arbitration import *
 from .article import *
 from .authors import *
 from .autocomplete import *
