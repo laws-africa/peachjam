@@ -69,8 +69,6 @@ class ArbitrationTests(TestCase):
 
     def test_award_detail_shows_breadcrumbs(self):
         award = self.create_award(self.institution, "ARB/98/8", "LCIA Award")
-        response = self.client.get(
-            reverse("arbitration_award_detail", args=[award.work_frbr_uri[1:]])
-        )
+        response = self.client.get(award.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Arbitration Awards")
