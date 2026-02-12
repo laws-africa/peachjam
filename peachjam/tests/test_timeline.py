@@ -231,9 +231,7 @@ class TimelineRelationshipTests(TestCase):
 
         UserFollowing.update_new_relationship_follows(amendment)
 
-        self.assertFalse(
-            TimelineEvent.objects.filter(user_following=follow).exists()
-        )
+        self.assertFalse(TimelineEvent.objects.filter(user_following=follow).exists())
 
     def test_update_new_relationship_skips_if_event_work_before_cutoff(self):
         old_doc = self.amending_work.documents.latest_expression().first()
