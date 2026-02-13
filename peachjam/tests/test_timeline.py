@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
 from countries_plus.models import Country
@@ -10,6 +10,8 @@ from languages_plus.models import Language
 from peachjam.models import (
     Court,
     Judgment,
+    Legislation,
+    Locality,
     Predicate,
     Relationship,
     SavedDocument,
@@ -142,12 +144,52 @@ class TimelineRelationshipTests(TestCase):
     def setUp(self):
         self.user = User.objects.first()
 
-        self.followed_work = Work.objects.get(pk=2433)
-        self.amending_work = Work.objects.get(pk=3704)
-        self.repealing_work = Work.objects.get(pk=3716)
+        amending_doc = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+            date=date.today(),
+            title="amending test",
+            frbr_uri_doctype="act",
+            metadata_json={"commenced": True},
+            language=Language.objects.first(),
+        )
+        repeal_doc = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+            title="repealing test",
+            frbr_uri_doctype="act",
+            date=date.today(),
+            metadata_json={"commenced": True},
+            language=Language.objects.first(),
+        )
 
-        self.overturning_work = Work.objects.get(pk=1132)
-        self.overturned_work = Work.objects.get(pk=1031)
+        overturning_doc = Judgment.objects.create(
+            case_name="Overturning Case",
+            court=Court.objects.get(code="ECOWASCJ"),
+            date=date.today(),
+            serial_number="52",
+            frbr_uri_date="2026",
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+        )
+
+        overturned_doc = Judgment.objects.create(
+            case_name="Overturned Case",
+            court=Court.objects.get(code="ECOWASCJ"),
+            date=date.today(),
+            serial_number="52",
+            frbr_uri_date="2016",
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="AA"),
+            locality=Locality.objects.get(code="au"),
+        )
+
+        self.followed_work = Work.objects.get(pk=2433)
+        self.amending_work = amending_doc.work
+        self.repealing_work = repeal_doc.work
+        self.overturning_work = overturning_doc.work
+        self.overturned_work = overturned_doc.work
 
         self.saved_followed = SavedDocument.objects.create(
             user=self.user, work=self.followed_work
@@ -215,6 +257,44 @@ class TimelineRelationshipTests(TestCase):
         )
         self.assertIn(self.overturning_work, overturn_event.subject_works.all())
 
+    def test_update_new_relationship_skips_if_saved_document_has_no_document(self):
+        undoc_work = Work.objects.create(
+            title="Undocumented Work",
+            frbr_uri="/akn/za/act/2024/undocumented",
+        )
+        saved_doc = SavedDocument.objects.create(user=self.user, work=undoc_work)
+        follow = UserFollowing.objects.get(saved_document=saved_doc)
+
+        amendment = Relationship.objects.create(
+            subject_work=undoc_work,
+            object_work=self.amending_work,
+            predicate=self.amended_predicate,
+        )
+
+        UserFollowing.update_new_relationship_follows(amendment)
+
+        self.assertFalse(TimelineEvent.objects.filter(user_following=follow).exists())
+
+    def test_update_new_relationship_skips_if_event_work_before_cutoff(self):
+        old_doc = self.amending_work.documents.latest_expression().first()
+        old_doc.date = self.follow_followed.cutoff_date - timedelta(days=1)
+        old_doc.save(update_fields=["date"])
+
+        amendment = Relationship.objects.create(
+            subject_work=self.followed_work,
+            object_work=self.amending_work,
+            predicate=self.amended_predicate,
+        )
+
+        UserFollowing.update_new_relationship_follows(amendment)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(
+                user_following=self.follow_followed,
+                event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            ).exists()
+        )
+
     def test_send_new_relationship_email_sends_separate_templates(self):
         amendment = Relationship.objects.create(
             subject_work=self.followed_work,
@@ -256,3 +336,28 @@ class TimelineRelationshipTests(TestCase):
         self.assertTrue(
             all(event.email_alert_sent_at for event in sent_events),
         )
+
+    def test_send_new_citation_email_skips_follow_without_documents(self):
+        undoc_work = Work.objects.create(
+            title="Undocumented Work",
+            frbr_uri="/akn/za/act/2024/no-docs",
+        )
+        saved_doc = SavedDocument.objects.create(user=self.user, work=undoc_work)
+        follow = UserFollowing.objects.get(saved_document=saved_doc)
+
+        TimelineEvent.add_new_citation_events(follow, self.amending_work)
+
+        with (
+            override_settings(
+                PEACHJAM={**settings.PEACHJAM, "EMAIL_ALERTS_ENABLED": True}
+            ),
+            patch("peachjam.timeline_email_service.send_templated_mail") as mailer,
+        ):
+            TimelineEmailService.send_new_citation_email(self.user)
+
+        self.assertFalse(mailer.called)
+        event = TimelineEvent.objects.get(
+            user_following=follow,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+        )
+        self.assertIsNone(event.email_alert_sent_at)
