@@ -89,6 +89,9 @@ from peachjam.models import (
     Judgment,
     JurisdictionProfile,
     Label,
+    LawReport,
+    LawReportEntry,
+    LawReportVolume,
     Legislation,
     Locality,
     LowerBench,
@@ -1182,6 +1185,11 @@ class JudgmentAdminForm(DocumentForm):
         return value
 
 
+class LawReportEntryInline(admin.TabularInline):
+    model = LawReportEntry
+    extra = 1
+
+
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
@@ -1193,6 +1201,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
+        LawReportEntryInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1880,6 +1889,18 @@ class ArbitrationAwardAdmin(DocumentAdmin):
         ]
     )
     fieldsets[1][1]["fields"].append("applicable_law")
+
+
+class LawReportVolumeInline(admin.StackedInline):
+    model = LawReportVolume
+    extra = 1
+    prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(LawReport)
+class LawReportAdmin(admin.ModelAdmin):
+    inlines = [LawReportVolumeInline, EntityProfileInline]
+    prepopulated_fields = {"slug": ("title",)}
 
 
 @admin.register(ExternalDocument)

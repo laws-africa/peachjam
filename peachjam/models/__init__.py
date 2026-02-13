@@ -15,6 +15,7 @@ from .generic_document import *
 from .ingestors import *
 from .journals_books import *
 from .judgment import *
+from .law_reports import *
 from .legislation import *
 from .partner import *
 from .profile import *
