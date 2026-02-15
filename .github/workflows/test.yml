@@ -1,17 +1,22 @@
 name: Test
+
 on: [push, pull_request]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         app:
           - peachjam
           - africanlii
           - liiweb
+
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -19,7 +24,6 @@ jobs:
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
-        ## db health checks
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -27,38 +31,47 @@ jobs:
           --health-retries 3
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python Environment
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
-        cache: 'pip'
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get -y update
-        sudo apt-get install -y libreoffice poppler-utils pandoc
-        python -m pip install --upgrade setuptools wheel
-        pip install .[dev]
-        pip install psycopg[binary]==3.2.12 unittest-xml-reporting
-        npm ci --no-audit --ignore-scripts --only=prod
-        npm i -g sass
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
-    - name: Run tests
-      env:
-        DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
-        TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
-      run: |
-        pre-commit run --all-files
-        python manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get install -y libreoffice poppler-utils pandoc
+          python -m pip install --upgrade setuptools wheel
+          pip install .[dev]
+          pip install psycopg[binary]==3.2.12 unittest-xml-reporting coverage
+          npm ci --no-audit --ignore-scripts --only=prod
+          npm i -g sass
 
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action/linux@v2
-      if: success() || failure()
-      continue-on-error: true
-      with:
-        files: test-reports/*.xml
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
+          TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
+        run: |
+          pre-commit run --all-files
+          coverage run --branch manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
+          coverage report --fail-under=85
+          coverage html
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: success() || failure()
+        continue-on-error: true
+        with:
+          files: test-reports/*.xml
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.app }}
+          path: htmlcov/
