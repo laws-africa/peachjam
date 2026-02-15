@@ -60,7 +60,7 @@ jobs:
         run: |
           pre-commit run --all-files
           coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
-          coverage report
+          coverage report --skip-covered > coverage_summary.txt
           coverage html
           coverage xml
 
@@ -73,10 +73,10 @@ jobs:
 
       - name: Post Coverage comment
         uses: marocchino/sticky-pull-request-comment@v2
-        if: success() || failure()
+        if: github.event_name == 'pull_request' && (success() || failure())
         continue-on-error: true
         with:
-          path: coverage.xml
+          path: coverage_summary.txt
           header: 'Coverage report'
 
       - name: Upload Coverage Report
