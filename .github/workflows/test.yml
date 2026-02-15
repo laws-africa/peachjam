@@ -62,6 +62,7 @@ jobs:
           coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
           coverage report
           coverage html
+          coverage xml
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
@@ -69,6 +70,13 @@ jobs:
         continue-on-error: true
         with:
           files: test-reports/*.xml
+
+      - name: Publish Coverage Results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: success() || failure()
+        continue-on-error: true
+        with:
+          files: coverage.xml
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
