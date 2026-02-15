@@ -71,12 +71,13 @@ jobs:
         with:
           files: test-reports/*.xml
 
-      - name: Publish Coverage Results
-        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+      - name: Post Coverage comment
+        uses: marocchino/sticky-pull-request-comment@v2
         if: success() || failure()
         continue-on-error: true
         with:
-          files: coverage.xml
+          path: coverage.xml
+          header: 'Coverage report'
 
       - name: Upload Coverage Report
         uses: actions/upload-artifact@v4
