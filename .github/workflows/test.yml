@@ -86,11 +86,11 @@ jobs:
           if [ -n "$CHANGED_FILES" ]; then
             coverage report --skip-covered --include="$CHANGED_FILES" > coverage_summary.txt
             echo '```' > coverage_pr_summary.txt.tmp
-            cat coverage_summary.txt >> coverage_pr_summary.txt.tmp
-            echo '```' >> coverage_pr_summary.txt.tmp
-            mv coverage_pr_summary.txt.tmp coverage_pr_summary.txt
+            cat coverage_summary.txt >> coverage_summary.txt.tmp
+            echo '```' >> coverage_summary.txt.tmp
+            mv coverage_summary.txt.tmp coverage_summary.txt
           else
-            echo "No changed files in coverage report" > coverage_pr_summary.txt
+            echo "No changed files in coverage report" > coverage_summary.txt
           fi
 
       - name: Post Coverage comment
