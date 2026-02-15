@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python
+      - name: Set up Python Environment
         uses: actions/setup-python@v5
         with:
           python-version: "3.10"
@@ -53,22 +53,18 @@ jobs:
           npm ci --no-audit --ignore-scripts --only=prod
           npm i -g sass
 
-      - name: Run tests with coverage and XML output
+      - name: Run tests with coverage
         env:
           DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
           TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
         run: |
           pre-commit run --all-files
-          mkdir -p test-reports
-          coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} \
-            --settings=${{ matrix.app }}.settings \
-            --testrunner=xmlrunner.extra.djangotestrunner.XMLTestRunner \
-            --output-dir=test-reports
+          coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
           coverage report
           coverage html
 
-      - name: Publish XML Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
         if: success() || failure()
         continue-on-error: true
         with:
