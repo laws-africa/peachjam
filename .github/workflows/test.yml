@@ -60,9 +60,7 @@ jobs:
         run: |
           pre-commit run --all-files
           coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
-          coverage report --skip-covered > coverage_summary.txt
           coverage html
-          coverage xml
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
@@ -70,6 +68,26 @@ jobs:
         continue-on-error: true
         with:
           files: test-reports/*.xml
+
+      # Get the changed files in the PR
+      - name: Get changed files in PR
+        id: files
+        uses: tj-actions/changed-files@v34
+
+      # Generate a small PR coverage summary
+      - name: Generate coverage summary for PR files
+        if: github.event_name == 'pull_request'
+        run: |
+          # Get changed files (comma-separated)
+          CHANGED_FILES=$(echo "${{ steps.files.outputs.all_changed_files }}" | tr ' ' ',')
+          echo "Files changed in PR: $CHANGED_FILES"
+
+          # Generate coverage report only for changed files
+          if [ -n "$CHANGED_FILES" ]; then
+            coverage report --skip-covered --include="$CHANGED_FILES" > coverage_summary.txt
+          else
+            echo "No changed files in coverage report" > coverage_pr_summary.txt
+          fi
 
       - name: Post Coverage comment
         uses: marocchino/sticky-pull-request-comment@v2
