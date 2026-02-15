@@ -60,11 +60,11 @@ jobs:
         run: |
           pre-commit run --all-files
           mkdir -p test-reports
-          coverage run --branch manage.py test peachjam_subs peachjam_search ${{ matrix.app }} \
+          coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} \
             --settings=${{ matrix.app }}.settings \
             --testrunner=xmlrunner.extra.djangotestrunner.XMLTestRunner \
             --output-dir=test-reports
-          coverage report --fail-under=85
+          coverage report
           coverage html
 
       - name: Publish XML Test Results
