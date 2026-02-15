@@ -85,7 +85,7 @@ jobs:
           # Generate coverage report only for changed files, include backticks for markdown
           if [ -n "$CHANGED_FILES" ]; then
             coverage report --skip-covered --include="$CHANGED_FILES" > coverage_summary.txt
-            echo '```' > coverage_pr_summary.txt.tmp
+            echo '```' > coverage_summary.txt.tmp
             cat coverage_summary.txt >> coverage_summary.txt.tmp
             echo '```' >> coverage_summary.txt.tmp
             mv coverage_summary.txt.tmp coverage_summary.txt
