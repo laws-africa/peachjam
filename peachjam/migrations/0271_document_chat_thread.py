@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ("peachjam", "0268_alter_volumeissue_unique_together"),
+        ("peachjam", "0270_lawreports"),
     ]
 
     operations = [
