@@ -2097,15 +2097,17 @@ class ChatThreadAdmin(admin.ModelAdmin):
         "messages_display",
     )
     date_hierarchy = "updated_at"
-    list_select_related = ("user", "document")
-    search_fields = ("id", "user__username", "document__title")
+    list_select_related = ("user", "core_document")
+    search_fields = ("id", "user__username", "core_document__title")
 
     def has_add_permission(self, request):
         return False
 
     def document_link(self, obj):
         return format_html(
-            "<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
         )
 
     document_link.short_description = _("Document")
@@ -2131,8 +2133,8 @@ class ChatThreadInline(admin.TabularInline):
         return (
             super()
             .get_queryset(request)
-            .select_related("document")
-            .defer("document__content_html")
+            .select_related("core_document")
+            .defer("core_document__content_html")
         )
 
     def has_add_permission(self, request, obj=None):
@@ -2143,7 +2145,9 @@ class ChatThreadInline(admin.TabularInline):
 
     def document_link(self, obj):
         return format_html(
-            "<a href='{}'>{}</a>", obj.document.get_absolute_url(), obj.document
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
         )
 
     document_link.short_description = _("Document")
