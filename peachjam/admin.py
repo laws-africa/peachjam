@@ -48,6 +48,9 @@ from peachjam.forms import (
 )
 from peachjam.models import (
     AlternativeName,
+    ArbitralInstitution,
+    ArbitrationAward,
+    ArbitrationSeat,
     Article,
     ArticleAttachment,
     AttachedFileNature,
@@ -87,6 +90,9 @@ from peachjam.models import (
     Judgment,
     JurisdictionProfile,
     Label,
+    LawReport,
+    LawReportEntry,
+    LawReportVolume,
     Legislation,
     Locality,
     LowerBench,
@@ -1180,6 +1186,11 @@ class JudgmentAdminForm(DocumentForm):
         return value
 
 
+class LawReportEntryInline(admin.TabularInline):
+    model = LawReportEntry
+    extra = 1
+
+
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
@@ -1191,6 +1202,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
+        LawReportEntryInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1819,6 +1831,77 @@ class JournalAdmin(admin.ModelAdmin):
         "doi",
     )
     search_fields = ("title", "slug", "doi")
+
+
+@admin.register(ArbitralInstitution)
+class ArbitralInstitutionAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+    list_display = (
+        "name",
+        "acronym",
+        "headquarters_city",
+        "is_internationally_recognized",
+    )
+    search_fields = ("name", "acronym")
+
+
+@admin.register(ArbitrationSeat)
+class ArbitrationSeatAdmin(admin.ModelAdmin):
+    list_display = (
+        "city",
+        "country",
+        "is_new_york_convention_signatory",
+    )
+    search_fields = ("city", "country__name", "country__iso")
+    prepopulated_fields = {"slug": ("city", "country")}
+
+
+@admin.register(ArbitrationAward)
+class ArbitrationAwardAdmin(DocumentAdmin):
+    list_display = ("case_number",) + DocumentAdmin.list_display
+    search_fields = ("title", "case_number", "date")
+    autocomplete_fields = [
+        "institution",
+        "seat",
+        "claimants_country_of_origin",
+        "respondents_country_of_origin",
+        "rules_of_arbitration",
+    ]
+    list_filter = DocumentAdmin.list_filter + (
+        "case_type",
+        "award_type",
+        "nature_of_proceedings",
+        "outcome",
+    )
+
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].insert(1, "case_number")
+    fieldsets[0][1]["fields"].extend(
+        [
+            "institution",
+            "seat",
+            "case_type",
+            "award_type",
+            "nature_of_proceedings",
+            "outcome",
+            "claimants_country_of_origin",
+            "respondents_country_of_origin",
+            "rules_of_arbitration",
+        ]
+    )
+    fieldsets[1][1]["fields"].append("applicable_law")
+
+
+class LawReportVolumeInline(admin.StackedInline):
+    model = LawReportVolume
+    extra = 1
+    prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(LawReport)
+class LawReportAdmin(admin.ModelAdmin):
+    inlines = [LawReportVolumeInline, EntityProfileInline]
+    prepopulated_fields = {"slug": ("title",)}
 
 
 @admin.register(ExternalDocument)

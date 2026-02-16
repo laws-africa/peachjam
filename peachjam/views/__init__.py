@@ -4,6 +4,7 @@ from .accounts import *
 from .admin import *
 from .annotation import *
 from .anon import *
+from .arbitration import *
 from .article import *
 from .authors import *
 from .autocomplete import *
@@ -22,6 +23,7 @@ from .generic_document import *
 from .home import *
 from .journals import *
 from .judgment import *
+from .law_reports import *
 from .legislation import *
 from .login import *
 from .my import *

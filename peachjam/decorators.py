@@ -300,6 +300,28 @@ class CauseListDecorator(DocumentDecorator):
         return crumbs
 
 
+class ArbitrationAwardDecorator(DocumentDecorator):
+    def get_breadcrumbs(self, document):
+        crumbs = super().get_breadcrumbs(document)
+        crumbs.append(
+            BreadCrumb(_("Arbitration Hub"), reverse("arbitration_hub")),
+        )
+
+        if document.title:
+            crumbs.append(
+                BreadCrumb(_("Arbitration Awards"), reverse("arbitration_award_list")),
+            )
+
+            crumbs.append(
+                BreadCrumb(
+                    document.title,
+                    None,
+                )
+            )
+
+        return crumbs
+
+
 class BookDecorator(DocumentDecorator):
     def get_breadcrumbs(self, document):
         crumbs = super().get_breadcrumbs(document)

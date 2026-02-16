@@ -1,4 +1,5 @@
 import logging
+from urllib.parse import quote
 
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
@@ -49,6 +50,10 @@ class Judge(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        base_url = reverse("court", kwargs={"code": "all"})
+        return f"{base_url}?judges={quote(self.name)}"
 
 
 class Outcome(models.Model):

@@ -1,0 +1,24 @@
+{% extends "peachjam/layouts/document_list.html" %}
+{% load i18n %}
+{% block title %}{{ arbitral_institution.name }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'arbitration_hub' %}">{% trans 'Arbitration' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'arbitral_institution_list' %}">{% trans 'Arbitral Institutions' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ arbitral_institution.name }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}<h1 class="my-4">{{ arbitral_institution.name }}</h1>{% endif %}
+{% endblock %}

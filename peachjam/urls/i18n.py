@@ -25,6 +25,8 @@ urlpatterns = [
     path("doc/", include("peachjam.urls.generic_documents")),
     path("gazettes/", include("peachjam.urls.gazettes")),
     path("journals/", include("peachjam.urls.journals")),
+    path("arbitration/", include("peachjam.urls.arbitration")),
+    path("law-reports/", include("peachjam.urls.law_reports")),
     path("judgments/", include("peachjam.urls.judgments")),
     path("taxonomy/", include("peachjam.urls.taxonomies")),
     # detail views
