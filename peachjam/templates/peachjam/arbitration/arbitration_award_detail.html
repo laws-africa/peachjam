@@ -1,3 +1,190 @@
 {% extends "peachjam/layouts/document_detail.html" %}
-{% load i18n %}
-{% block document-metadata-custom-properties %}{% endblock %}
+{% load i18n peachjam %}
+{% block document-metadata %}
+  <div class="row g-4">
+    <div class="col-xl-10 col-lg-8">
+      <dl class="document-metadata-list d-flex mb-4">
+        {% if MULTIPLE_JURISDICTIONS or document.locality %}
+          <dt>
+            {% trans "Jurisdiction" %}
+          </dt>
+          <dd class="text-muted">
+            {% if MULTIPLE_JURISDICTIONS %}
+              {{ document.jurisdiction }}
+              {% if document.locality %}·{% endif %}
+            {% endif %}
+            {{ document.locality|default_if_none:"" }}
+          </dd>
+        {% endif %}
+        <dt>
+          {% trans "Award date" %}
+        </dt>
+        <dd class="text-muted">
+          {{ document.date }}
+        </dd>
+        {% if document.institution %}
+          <dt>
+            {% trans "Institution" %}
+          </dt>
+          <dd class="text-muted">
+            <a class="text-decoration-none"
+               href="{{ document.institution.get_absolute_url }}">{{ document.institution }}</a>
+          </dd>
+        {% endif %}
+        {% if document.citation %}
+          <dt>
+            {% trans "Citation" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.citation }}
+            {% include "peachjam/_copy_to_clipboard.html" with value=document.citation %}
+          </dd>
+        {% endif %}
+        <dt>
+          {% trans "Language" %}
+        </dt>
+        <dd class="text-muted">
+          {% trans document.language.name %}
+        </dd>
+        {% if document.seat %}
+          <dt>
+            {% trans "Seat of arbitration" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.seat }}
+          </dd>
+        {% endif %}
+        {% if document.rules_of_arbitration %}
+          <dt>
+            {% trans "Rules of arbitration" %}
+          </dt>
+          <dd class="text-muted">
+            <a class="text-decoration-none"
+               href="{{ document.rules_of_arbitration.get_absolute_url }}">
+              {{ document.rules_of_arbitration.title }}
+            </a>
+          </dd>
+        {% endif %}
+      </dl>
+      <dl class="document-metadata-list d-flex mb-4">
+        <dt>
+          {% trans "Case number" %}
+        </dt>
+        <dd class="text-muted">
+          {{ document.case_number }}
+        </dd>
+        {% if document.case_type %}
+          <dt>
+            {% trans "Case type" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.get_case_type_display }}
+          </dd>
+        {% endif %}
+        {% if document.award_type %}
+          <dt>
+            {% trans "Award type" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.get_award_type_display }}
+          </dd>
+        {% endif %}
+        {% if document.nature_of_proceedings %}
+          <dt>
+            {% trans "Nature of proceedings" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.get_nature_of_proceedings_display }}
+          </dd>
+        {% endif %}
+        {% if document.outcome %}
+          <dt>
+            {% trans "Outcome" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.get_outcome_display }}
+          </dd>
+        {% endif %}
+        {% if document.claimants_country_of_origin %}
+          <dt>
+            {% trans "Claimants country of origin" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.claimants_country_of_origin }}
+          </dd>
+        {% endif %}
+        {% if document.respondents_country_of_origin %}
+          <dt>
+            {% trans "Respondents country of origin" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.respondents_country_of_origin }}
+          </dd>
+        {% endif %}
+        {% if document.applicable_law %}
+          <dt>
+            {% trans "Applicable law" %}
+          </dt>
+          <dd class="text-muted">
+            {{ document.applicable_law }}
+          </dd>
+        {% endif %}
+      </dl>
+    </div>
+    <div class="col-lg-4">
+      {% if n_relationships %}
+        <div class="card border-0 shadow-sm mb-4">
+          <div class="card-body">
+            <h3 class="h6 mb-3">
+              <i class="bi bi-link-45deg text-primary me-2"></i>
+              {% trans "Related documents" %}
+            </h3>
+            <ul class="list-unstyled mb-0">
+              {% for verb, rels in relationships_as_subject %}
+                {% for rel in rels %}
+                  {% if rel.object_work %}
+                    <li class="mb-2">
+                      <a class="text-decoration-none"
+                         href="{{ rel.object_work.get_absolute_url }}">{{ rel.object_work.title }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+              {% for verb, rels in relationships_as_object %}
+                {% for rel in rels %}
+                  {% if rel.subject_work %}
+                    <li class="mb-2">
+                      <a class="text-decoration-none"
+                         href="{{ rel.subject_work.get_absolute_url }}">{{ rel.subject_work.title }}</a>
+                    </li>
+                  {% endif %}
+                {% endfor %}
+              {% endfor %}
+              {% if n_relationships > relationship_limit %}
+                <li>
+                  <a class="text-decoration-none"
+                     href="#related-tab"
+                     data-component="ToggleTab">
+                    {% blocktrans %}{{ n_relationships }} related documents{% endblocktrans %}
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+      {% if taxonomies %}
+        <div class="card border-0 shadow-sm">
+          <div class="card-body">
+            <h3 class="h6 mb-3">{% trans "Topics" %}</h3>
+            <div class="d-flex flex-wrap gap-2">
+              {% for taxonomy in taxonomies %}
+                <span class="badge bg-light text-dark border">{{ taxonomy.taxonomy.name }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
