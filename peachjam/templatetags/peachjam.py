@@ -221,11 +221,11 @@ def recent_chats(user):
         .annotate(
             document_rank=Window(
                 expression=RowNumber(),
-                partition_by=[F("document_id")],
+                partition_by=[F("core_document_id")],
                 order_by=F("updated_at").desc(),
             )
         )
         .filter(document_rank=1)
-        .select_related("document")
+        .select_related("core_document")
         .order_by("-updated_at")[:10]
     )
