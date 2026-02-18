@@ -803,7 +803,7 @@ class Offence(models.Model):
         "peachjam.Work",
         on_delete=models.PROTECT,
         related_name="offences",
-        verbose_name=_("code work"),
+        verbose_name=_("work"),
         help_text=_(
             "The Work for the code (e.g., Penal Code) that defines this offence."
         ),
