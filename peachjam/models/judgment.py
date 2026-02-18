@@ -286,6 +286,10 @@ class LowerBench(models.Model):
 class Judgment(CoreDocument):
     decorator = JudgmentDecorator()
 
+    class CaseType(models.TextChoices):
+        CRIMINAL = "criminal", _("Criminal")
+        CIVIL = "civil", _("Civil")
+
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
     )
@@ -303,6 +307,19 @@ class Judgment(CoreDocument):
         blank=True,
         related_name="judgments",
         verbose_name=_("court division"),
+    )
+    case_type = models.CharField(
+        _("case type"),
+        max_length=512,
+        choices=CaseType.choices,
+        null=True,
+        blank=True,
+    )
+    filing_year = models.PositiveIntegerField(
+        _("filing year"),
+        null=True,
+        blank=True,
+        help_text=_("Year the matter was filed (YYYY only)."),
     )
     case_action = models.ForeignKey(
         CaseAction,
@@ -441,6 +458,13 @@ class Judgment(CoreDocument):
 
     def __str__(self):
         return self.title
+
+    @property
+    def case_duration(self):
+        # judgment_date__year minus filing_year
+        if self.date and self.filing_year:
+            return self.date.year - self.filing_year
+        return None
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
@@ -772,3 +796,117 @@ class Replacement(models.Model):
 
     def __str__(self):
         return f"{self.old_text} -> {self.new_text}"
+
+
+class Offence(models.Model):
+    work = models.ForeignKey(
+        "peachjam.Work",
+        on_delete=models.PROTECT,
+        related_name="offences",
+        verbose_name=_("code work"),
+        help_text=_(
+            "The Work for the code (e.g., Penal Code) that defines this offence."
+        ),
+    )
+    provision_eid = models.CharField(
+        _("provision EID"),
+        max_length=2048,
+        help_text=_(
+            "AKN element id / EID for the provision within the code (e.g., 'sec_296')."
+        ),
+    )
+    code = models.CharField(
+        _("offence code"),
+        max_length=2048,
+        help_text=_(
+            "Internal offence code / short identifier (often from the code or a local convention)."
+        ),
+    )
+    title = models.CharField(_("title"), max_length=4096)
+    description = models.TextField(_("description"), blank=True)
+    elements = models.JSONField(
+        _("elements"),
+        null=True,
+        blank=True,
+        help_text=_("JSON array of offence elements (actus reus, mens rea, etc.)."),
+    )
+    penalty = models.TextField(
+        _("recommended penalty"),
+        blank=True,
+        help_text=_("Human-readable recommended/typical penalty guidance."),
+    )
+
+    class Meta:
+        unique_together = (("work", "provision_eid"),)
+        ordering = ("title",)
+
+    def __str__(self):
+        return f"{self.title} ({self.code})"
+
+
+class JudgmentOffence(models.Model):
+    judgment = models.ForeignKey(
+        "Judgment",
+        on_delete=models.CASCADE,
+        related_name="criminal_counts",
+        verbose_name=_("judgment"),
+    )
+    offence = models.ForeignKey(
+        Offence,
+        on_delete=models.PROTECT,
+        related_name="counts",
+        verbose_name=_("offence"),
+    )
+
+    def __str__(self):
+        return f"JudgmentOffence {self.judgment} - {self.offence}"
+
+
+class Sentence(models.Model):
+    class SentenceType(models.TextChoices):
+        IMPRISONMENT = "imprisonment", _("Imprisonment")
+        FINE = "fine", _("Fine")
+        PROBATION = "probation", _("Probation")
+
+    # allows for multiple sentences per offence
+    offence = models.ForeignKey(
+        JudgmentOffence,
+        on_delete=models.CASCADE,
+        related_name="sentences",
+        verbose_name=_("offences"),
+    )
+    sentence_type = models.CharField(
+        _("sentence type"),
+        max_length=32,
+        choices=SentenceType.choices,
+    )
+
+    mandatory_minimum = models.BooleanField(
+        _("mandatory minimum"),
+        default=False,
+        help_text=_("True if the sentence reflects a mandatory minimum."),
+    )
+
+    duration_months = models.PositiveIntegerField(
+        _("duration (months)"),
+        null=True,
+        blank=True,
+        help_text=_("Imprisonment/probation duration in months, if applicable."),
+    )
+    suspended = models.BooleanField(
+        _("suspended"),
+        default=False,
+        help_text=_("True if the sentence is suspended (fully or partially)."),
+    )
+    fine_amount = models.PositiveIntegerField(
+        _("fine amount"),
+        null=True,
+        blank=True,
+        help_text=_("Fine amount"),
+    )
+
+    class Meta:
+        ordering = ("pk",)
+
+    def __str__(self):
+        return f"{self.get_sentence_type_display()} for {self.criminal_count}"
