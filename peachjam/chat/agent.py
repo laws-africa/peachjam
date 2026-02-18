@@ -83,6 +83,9 @@ def get_session(thread) -> SQLAlchemySession:
         sessions_table="openai_agent_sessions",
         messages_table="openai_agent_messages",
         create_tables=True,
+        # ensure that prepared statements are not used, since they don't play well with bgbouncer
+        # see https://github.com/psycopg/psycopg/issues/935
+        engine_kwargs={"connect_args": {"prepare_threshold": None}},
     )
 
 
