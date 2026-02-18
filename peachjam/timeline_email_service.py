@@ -184,9 +184,6 @@ class TimelineEmailService:
     @staticmethod
     def send_new_citation_email(user):
 
-        if not user.email:
-            return
-
         if TimelineEmailService.already_alerted_today(
             user, TimelineEvent.EventTypes.NEW_CITATION
         ):
