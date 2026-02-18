@@ -1,4 +1,5 @@
 import allauth.account.signals as allauth_signals
+from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
@@ -12,6 +13,7 @@ from peachjam.customerio import get_customerio
 from peachjam.models import (
     Annotation,
     CoreDocument,
+    DocumentChatThread,
     DocumentContent,
     ExtractedCitation,
     Folder,
@@ -246,3 +248,12 @@ def notify_new_relationship(sender, instance, **kwargs):
     from peachjam.tasks import update_users_new_relationship
 
     update_users_new_relationship(instance.pk)
+
+
+@receiver(signals.post_delete, sender=DocumentChatThread)
+def chat_thread_deleted(sender, instance, **kwargs):
+    """Cleanup chat session data."""
+    from peachjam.chat.agent import get_session
+
+    session = get_session(instance)
+    async_to_sync(session.clear_session)()

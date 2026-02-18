@@ -74,6 +74,7 @@ from peachjam.models import (
     CustomProperty,
     CustomPropertyLabel,
     DocumentAccessGroup,
+    DocumentChatThread,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -2072,6 +2073,88 @@ class PartnerLogoInline(BaseAttachmentFileInline):
 class PartnerAdmin(admin.ModelAdmin):
     inlines = [PartnerLogoInline]
     form = PartnerForm
+
+
+@admin.register(DocumentChatThread)
+class ChatThreadAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "document_link", "score", "updated_at")
+    readonly_fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    date_hierarchy = "updated_at"
+    list_select_related = ("user", "core_document")
+    search_fields = ("id", "user__username", "core_document__title")
+
+    def has_add_permission(self, request):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
+        )
+
+    document_link.short_description = _("Document")
+
+    def messages_display(self, obj):
+        if not obj.messages_json:
+            return "-"
+        formatted = json.dumps(obj.messages_json, indent=2, sort_keys=True)
+        return format_html("<pre>{}</pre>", formatted)
+
+    messages_display.short_description = _("Messages JSON")
+
+
+class ChatThreadInline(admin.TabularInline):
+    model = DocumentChatThread
+    extra = 0
+    can_delete = False
+    fields = ("updated_at", "document_link", "score")
+    readonly_fields = fields
+    show_change_link = True
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("core_document")
+            .defer("core_document__content_html")
+        )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
+        )
+
+    document_link.short_description = _("Document")
+
+
+if ChatThreadInline not in UserAdminCustom.inlines:
+    UserAdminCustom.inlines.append(ChatThreadInline)
 
 
 admin.site.register(

@@ -1,46 +1,64 @@
+from dataclasses import dataclass
+
 import requests
+from agents import Agent, Runner, function_tool
+from agents.run_context import RunContextWrapper
 from asgiref.sync import sync_to_async
 from django.conf import settings
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import tool
 
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
 
 
-@tool
-async def answer_document_question(config: RunnableConfig, question: str) -> str:
+@dataclass(frozen=True)
+class DocumentChatContext:
+    document_id: int
+    user_id: int
+    thread_id: str
+
+
+DOC_QA_AGENT = Agent(
+    name="document-qa",
+    instructions=(
+        "You are a question answering tool. Only use the document content for answers; if you cannot "
+        "answer the question based on the document content, say so."
+    ),
+    model="gpt-5-mini",
+)
+
+
+@function_tool
+async def answer_document_question(
+    ctx: RunContextWrapper[DocumentChatContext], question: str
+) -> str:
     """Answers a question about the content of the current document. It knows which document is active.
     It has no memory of previous questions. Only use it if you need to answer a specific question about the document
     content. The document does not contain information about this website or its features."""
-    from .graphs import chat_llm
 
     @sync_to_async
     def get_text():
-        doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+        doc = CoreDocument.objects.get(pk=ctx.context.document_id)
         return doc.get_content_as_text()
 
     text = await get_text()
     if len(text) > 1_250_000:
         return "Document text is too long to process."
 
-    response = await chat_llm.ainvoke(
-        [
-            SystemMessage(
-                content="You are a question answering tool. Only use the document content for answers; if you cannot"
-                " answer the question based on the document content, say so."
-            ),
-            HumanMessage(content="The document content is below:\n\n" + text),
-            HumanMessage(content=question),
-        ]
+    response = await Runner.run(
+        DOC_QA_AGENT,
+        input=[
+            {"role": "user", "content": "The document content is below:\n\n" + text},
+            {"role": "user", "content": question},
+        ],
     )
 
-    return response.content
+    return str(response.final_output or "")
 
 
-@tool
-def get_provision_eid(config: RunnableConfig, provision: str) -> str:
+@function_tool
+def get_provision_eid(
+    ctx: RunContextWrapper[DocumentChatContext], provision: str
+) -> str:
     """Tries to find the unique internal EID of a provision of a document, which can be used to find out additional
      information about the provision. The provision must be stated similar to the following:
 
@@ -49,7 +67,7 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
     - chapter 5
     - paragraph 4
     """
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    doc = CoreDocument.objects.get(pk=ctx.context.document_id)
     resp = get_citator_citations(doc.expression_frbr_uri, provision)
 
     # grab the first ref
@@ -78,10 +96,10 @@ def get_citator_citations(expression_frbr_uri, text):
     return resp.json()
 
 
-@tool
-def get_provision_text(config: RunnableConfig, eid: str) -> str:
+@function_tool
+def get_provision_text(ctx: RunContextWrapper[DocumentChatContext], eid: str) -> str:
     """Returns the text of a provision given its EID."""
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    doc = CoreDocument.objects.get(pk=ctx.context.document_id)
     provision_html = doc.get_provision_by_eid(eid)
     if not provision_html:
         return "No provision found with that EID."
@@ -92,10 +110,12 @@ def get_provision_text(config: RunnableConfig, eid: str) -> str:
     return f"The text of provision with EID {eid} is:\n\n{text}"
 
 
-@tool
-def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
+@function_tool
+def provision_commencement_info(
+    ctx: RunContextWrapper[DocumentChatContext], eid: str
+) -> str:
     """Provides information about the commencement status of a provision given its EID."""
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    doc = CoreDocument.objects.get(pk=ctx.context.document_id)
     if not isinstance(doc, Legislation):
         return "This tool can only be used for legislation documents."
 

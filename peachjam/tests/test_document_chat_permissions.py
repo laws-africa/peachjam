@@ -1,10 +1,10 @@
 from datetime import date
 
 from django.contrib.auth.models import Permission, User
-from django.test import TestCase, override_settings
+from django.test import TestCase
+from django.urls.base import reverse
 
-from peachjam.models import Country, GenericDocument, Language
-from peachjam_ml.models import ChatThread
+from peachjam.models import Country, DocumentChatThread, GenericDocument, Language
 from peachjam_subs.models import (
     Feature,
     Product,
@@ -14,7 +14,6 @@ from peachjam_subs.models import (
 )
 
 
-@override_settings(ROOT_URLCONF="peachjam_ml.tests.urls")
 class TestStartDocumentChatPermissions(TestCase):
     fixtures = ["tests/users", "tests/countries", "tests/languages", "tests/products"]
 
@@ -46,8 +45,8 @@ class TestStartDocumentChatPermissions(TestCase):
         sub_settings.save()
 
         permission = Permission.objects.get(
-            content_type__app_label="peachjam_ml",
-            codename="add_chatthread",
+            content_type__app_label="peachjam",
+            codename="add_documentchatthread",
         )
         feature = Feature.objects.create(name="Document chat")
         feature.permissions.add(permission)
@@ -59,7 +58,7 @@ class TestStartDocumentChatPermissions(TestCase):
         self.offering = ProductOffering.objects.get(pk=1)
 
     def chat_url(self, document):
-        return f"/api/documents/{document.pk}/chat"
+        return reverse("document_chat", kwargs={"pk": document.pk})
 
     def activate_subscription(self, user):
         subscription = Subscription.objects.create(
@@ -96,7 +95,7 @@ class TestStartDocumentChatPermissions(TestCase):
         self.client.force_login(self.user)
 
         for document in self.documents[:2]:
-            ChatThread.objects.create(user=self.user, document=document)
+            DocumentChatThread.objects.create(user=self.user, core_document=document)
 
         response = self.client.post(self.chat_url(self.documents[2]))
         self.assertEqual(403, response.status_code)

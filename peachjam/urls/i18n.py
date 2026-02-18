@@ -35,6 +35,7 @@ urlpatterns = [
     # documents
     path("", include("peachjam.urls.legislation")),
     path("", include("peachjam.urls.documents")),
+    path("", include("peachjam.urls.chat")),
     # general
     path("about/", AboutPageView.as_view(), name="about"),
     path(
