@@ -69,9 +69,10 @@ langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 
 def get_db_url() -> str:
     db_config = settings.DATABASES["default"]
+    port = db_config.get("PORT", 5432)  # default PostgreSQL port
     return (
         f"postgresql+psycopg://{db_config['USER']}:{db_config['PASSWORD']}"
-        f"@{db_config['HOST']}:{db_config['PORT']}/{db_config['NAME']}"
+        f"@{db_config['HOST']}:{port}/{db_config['NAME']}"
     )
 
 
