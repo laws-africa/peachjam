@@ -126,7 +126,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         )
 
     def send(self, template_name, from_email, recipient_list, context, **kwargs):
-        if len(recipient_list) == 0:
+        if len(recipient_list) == 0 or not any(recipient_list):
             return 0
 
         if template_name.endswith(f".{self.template_suffix}"):
