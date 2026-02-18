@@ -318,10 +318,6 @@ def send_new_citation_email_alert(user_id):
         log.info(f"No user with id {user_id} exists, ignoring.")
         return
 
-    if not user.email:
-        log.info("This user has no email address, ignoring.")
-        return
-
     log.info(f"Sending new citation email alerts for user {user_id}")
     TimelineEmailService.send_new_citation_email(user)
     log.info("New citation email alerts sent")
