@@ -3,6 +3,7 @@ from urllib.parse import quote
 
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.db import models
 from django.db.models import Max, Prefetch
@@ -201,6 +202,16 @@ class Court(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.locality.jurisdiction != self.country:
+            raise ValidationError(
+                {
+                    "locality": _(
+                        "The locality's jurisdiction and the court's country must be equal"
+                    )
+                }
+            )
 
     def get_absolute_url(self):
         return reverse("court", args=[self.code])
@@ -534,8 +545,7 @@ class Judgment(CoreDocument):
             if self.court.country:
                 self.jurisdiction = self.court.country
 
-            if self.court.locality:
-                self.locality = self.court.locality
+            self.locality = self.court.locality
 
         self.doc_type = "judgment"
         if self.auto_assign_details:
