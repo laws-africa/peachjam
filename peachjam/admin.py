@@ -97,6 +97,7 @@ from peachjam.models import (
     Locality,
     LowerBench,
     MatterType,
+    Offence,
     Outcome,
     Partner,
     PartnerLogo,
@@ -2170,6 +2171,7 @@ admin.site.register(
         ProvisionEnrichment,
         UncommencedProvision,
         UnconstitutionalProvision,
+        Offence,
     ]
 )
 admin.site.unregister(User)
