@@ -112,7 +112,7 @@ class TimelineEmailService:
             log.info("No new documents events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -157,7 +157,7 @@ class TimelineEmailService:
             log.info("No saved search events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -209,7 +209,7 @@ class TimelineEmailService:
             log.info("No new citation events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -313,7 +313,7 @@ class TimelineEmailService:
             log.info("No new relationship events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
