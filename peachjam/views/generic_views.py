@@ -343,9 +343,9 @@ class FilteredDocumentListView(DocumentListView):
 
     def add_facets(self, context):
         context["facet_data"] = {}
+        self.add_natures_facet(context)
         self.add_years_facet(context)
         self.add_authors_facet(context)
-        self.add_natures_facet(context)
         self.add_taxonomies_facet(context)
         self.add_alphabet_facet(context)
 
