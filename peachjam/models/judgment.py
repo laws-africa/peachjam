@@ -208,7 +208,7 @@ class Court(models.Model):
             raise ValidationError(
                 {
                     "locality": _(
-                        "The locality's jurisdiction and the court's country must be equal"
+                        "The locality's jurisdiction and the court's country must match."
                     )
                 }
             )
@@ -545,7 +545,8 @@ class Judgment(CoreDocument):
             if self.court.country:
                 self.jurisdiction = self.court.country
 
-            self.locality = self.court.locality
+            if self.court.country:
+                self.locality = self.court.locality
 
         self.doc_type = "judgment"
         if self.auto_assign_details:
