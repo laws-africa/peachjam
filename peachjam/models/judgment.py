@@ -1,9 +1,12 @@
 import logging
+from datetime import date
 from urllib.parse import quote
 
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.postgres.fields import ArrayField
 from django.core.files.base import File
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
@@ -320,6 +323,7 @@ class Judgment(CoreDocument):
         null=True,
         blank=True,
         help_text=_("Year the matter was filed (YYYY only)."),
+        validators=[MinValueValidator(1800), MaxValueValidator(date.today().year)],
     )
     case_action = models.ForeignKey(
         CaseAction,
@@ -824,11 +828,11 @@ class Offence(models.Model):
     )
     title = models.CharField(_("title"), max_length=4096)
     description = models.TextField(_("description"), blank=True)
-    elements = models.JSONField(
-        _("elements"),
-        null=True,
+    elements = ArrayField(
+        base_field=models.CharField(max_length=4096),
+        default=list,
         blank=True,
-        help_text=_("JSON array of offence elements (actus reus, mens rea, etc.)."),
+        help_text=_("List of offence elements (actus reus, mens rea, etc.)."),
     )
     penalty = models.TextField(
         _("recommended penalty"),
@@ -848,14 +852,14 @@ class JudgmentOffence(models.Model):
     judgment = models.ForeignKey(
         "Judgment",
         on_delete=models.CASCADE,
-        related_name="criminal_counts",
+        related_name="judgment_offence",
         verbose_name=_("judgment"),
     )
     offence = models.ForeignKey(
         Offence,
         on_delete=models.PROTECT,
-        related_name="counts",
-        verbose_name=_("offence"),
+        related_name="judgment_offence",
+        verbose_name=_("judgments"),
     )
 
     def __str__(self):
@@ -868,12 +872,20 @@ class Sentence(models.Model):
         FINE = "fine", _("Fine")
         PROBATION = "probation", _("Probation")
 
-    # allows for multiple sentences per offence
+    judgment = models.ForeignKey(
+        Judgment,
+        on_delete=models.CASCADE,
+        related_name="sentences",
+        verbose_name=_("offences"),
+    )
+
     offence = models.ForeignKey(
         JudgmentOffence,
         on_delete=models.CASCADE,
         related_name="sentences",
         verbose_name=_("offences"),
+        null=True,
+        blank=True,
     )
     sentence_type = models.CharField(
         _("sentence type"),
@@ -883,7 +895,8 @@ class Sentence(models.Model):
 
     mandatory_minimum = models.BooleanField(
         _("mandatory minimum"),
-        default=False,
+        null=True,
+        blank=True,
         help_text=_("True if the sentence reflects a mandatory minimum."),
     )
 
