@@ -37,7 +37,7 @@ export class DocumentChatFloatingButton {
   constructor (documentId: string) {
     if (peachjam.config.chat.enabled) {
       peachjam.whenUserLoaded().then((user) => {
-        if (user.perms.includes('peachjam_ml.add_chatthread')) {
+        if (peachjam.config.chat.public || user.perms.includes('peachjam_ml.add_chatthread')) {
           this.setup(documentId);
         }
       });
