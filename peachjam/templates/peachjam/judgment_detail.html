@@ -1,5 +1,8 @@
 {% extends 'peachjam/layouts/document_detail.html' %}
 {% load peachjam i18n %}
+{% block document-metadata-date-label %}
+  {% trans 'Judgment date' %}
+{% endblock %}
 {% block document-metadata-content-citation %}
   {{ block.super }}
   {% if document.mnc %}

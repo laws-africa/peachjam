@@ -302,11 +302,7 @@
                       {% block document-metadata-content-date %}
                         <dt>
                           {% block document-metadata-date-label %}
-                            {% if document.doc_type == "judgment" %}
-                              {% trans 'Judgment date' %}
-                            {% else %}
-                              {% trans 'Date' %}
-                            {% endif %}
+                            {% trans 'Date' %}
                           {% endblock %}
                         </dt>
                         {% if date_versions|length > 1 %}
