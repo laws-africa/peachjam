@@ -1,0 +1,15 @@
+[run]
+branch = True
+# Only measure your apps (replace with your actual app names)
+source =
+    peachjam
+    africanlii
+    liiweb
+
+[report]
+show_missing = True
+skip_covered = True
+# Omit settings and migrations from the report
+omit =
+    */migrations/*
+    */settings/*.py

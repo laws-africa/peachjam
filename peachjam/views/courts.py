@@ -60,6 +60,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
         return context
 
     def add_judges_facet(self, context):
+        # test comment for coverage
         if "judges" not in self.exclude_facets:
             judges = list(
                 judge

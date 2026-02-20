@@ -1,17 +1,22 @@
 name: Test
+
 on: [push, pull_request]
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
+
     strategy:
       matrix:
         app:
           - peachjam
           - africanlii
           - liiweb
+
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -19,7 +24,6 @@ jobs:
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
-        ## db health checks
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -27,38 +31,78 @@ jobs:
           --health-retries 3
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Set up Python Environment
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
-        cache: 'pip'
-    - uses: actions/setup-node@v3
-      with:
-        node-version: '18'
+      - name: Set up Python Environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get -y update
-        sudo apt-get install -y libreoffice poppler-utils pandoc
-        python -m pip install --upgrade setuptools wheel
-        pip install .[dev]
-        pip install psycopg[binary]==3.2.12 unittest-xml-reporting
-        npm ci --no-audit --ignore-scripts --only=prod
-        npm i -g sass
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "18"
 
-    - name: Run tests
-      env:
-        DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
-        TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
-      run: |
-        pre-commit run --all-files
-        python manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
+      - name: Install dependencies
+        run: |
+          sudo apt-get -y update
+          sudo apt-get install -y libreoffice poppler-utils pandoc
+          python -m pip install --upgrade setuptools wheel
+          pip install .[dev]
+          pip install psycopg[binary]==3.2.12 unittest-xml-reporting coverage
+          npm ci --no-audit --ignore-scripts --only=prod
+          npm i -g sass
 
-    - name: Publish Test Results
-      uses: EnricoMi/publish-unit-test-result-action/linux@v2
-      if: success() || failure()
-      continue-on-error: true
-      with:
-        files: test-reports/*.xml
+      - name: Run tests with coverage
+        env:
+          DATABASE_URL: "postgres://postgres:postgres@localhost:5432/peach-jam"
+          TEST_RUNNER: "xmlrunner.extra.djangotestrunner.XMLTestRunner"
+        run: |
+          pre-commit run --all-files
+          coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings
+          coverage html
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        if: success() || failure()
+        continue-on-error: true
+        with:
+          files: test-reports/*.xml
+
+      # Get the changed files in the PR
+      - name: Get changed files in PR
+        id: files
+        uses: tj-actions/changed-files@v34
+
+      # Generate a small PR coverage summary
+      - name: Generate coverage summary for PR files
+        if: github.event_name == 'pull_request'
+        run: |
+          # Get changed files (comma-separated)
+          CHANGED_FILES=$(echo "${{ steps.files.outputs.all_changed_files }}" | tr ' ' ',')
+          echo "Files changed in PR: $CHANGED_FILES"
+
+          # Generate coverage report only for changed files, include backticks for markdown
+          if [ -n "$CHANGED_FILES" ]; then
+            coverage report --skip-covered --include="$CHANGED_FILES" > coverage_summary.txt
+            echo '```' > coverage_summary.txt.tmp
+            cat coverage_summary.txt >> coverage_summary.txt.tmp
+            echo '```' >> coverage_summary.txt.tmp
+            mv coverage_summary.txt.tmp coverage_summary.txt
+          else
+            echo "No changed files in coverage report" > coverage_summary.txt
+          fi
+
+      - name: Post Coverage comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request' && (success() || failure())
+        continue-on-error: true
+        with:
+          path: coverage_summary.txt
+          header: 'Coverage report'
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report-${{ matrix.app }}
+          path: htmlcov/

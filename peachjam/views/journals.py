@@ -40,6 +40,7 @@ class JournalArticleListView(FilteredDocumentListView):
     form_class = JournalArticleFilterForm
 
     def add_facets(self, context):
+        # test comment for coverage
         super().add_facets(context)
         journals = list(
             self.form.filter_queryset(self.get_base_queryset(), exclude="journals")
