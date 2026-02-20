@@ -70,6 +70,7 @@ dependencies = [
     "google-auth-httplib2>=0.1.0",
     "google-auth-oauthlib>=0.5.1",
     "html2text>=2025.4.15",
+    "html-to-markdown>=2.25.1",
     "igraph>=0.10.4",
     "langfuse>=3.8.1",
     "llama-index-core>=0.12.19",

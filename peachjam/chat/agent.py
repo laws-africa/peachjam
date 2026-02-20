@@ -43,16 +43,20 @@ The following must be configured as ENV variables:
 
 import os
 
+import lxml
 import nest_asyncio
 from agents import Agent
 from agents.extensions.memory import SQLAlchemySession
 from agents.items import MessageOutputItem
 from asgiref.sync import sync_to_async
-from cobalt.uri import FrbrUri
 from django.conf import settings
+from html_to_markdown import convert as html_to_markdown
 from langfuse import Langfuse
+from martor.utils import markdownify
 from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
+from ..analysis.citations import citation_analyser
+from ..xmlutils import parse_html_str
 from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
 
 # required for langfuse to work properly in Django views which may already have an event loop running
@@ -224,30 +228,20 @@ class DocumentChat:
         if not text or len(text.strip()) <= 5:
             return text
 
-        resp = get_citator_citations(self.document.expression_frbr_uri, text)
-        # get citations, last one first
-        citations = sorted(resp["citations"], key=lambda c: c["end"], reverse=True)
-        for citation in citations:
-            href = citation["href"]
-            try:
-                uri = FrbrUri.parse(href)
-                # is it a local reference?
-                if uri.portion and uri.work_uri(False) == self.document.work_frbr_uri:
-                    href = f"#{uri.portion}"
-            except ValueError:
-                continue
+        # parse this as markdown first and then the HTML, to prevent marking up refs inside code blocks or links
+        html = parse_html_str(markdownify(text))
 
-            # wrap markdown-style links around cited text based on offset and length
-            text = (
-                text[: citation["start"]]
-                + "["
-                + citation["text"]
-                + "]("
-                + href
-                + ")"
-                + text[citation["end"] :]
-            )
+        # run local citation analyser
+        citation_analyser.markup_html_matches(self.document.expression_uri(), html)
 
+        # back to a string
+        html = lxml.html.tostring(html, encoding="unicode")
+
+        # run remote citation analyser
+        resp = get_citator_citations(self.document.expression_frbr_uri, html=html)
+
+        # turn back into markdown
+        text = html_to_markdown(resp["body"])
         return text
 
 
