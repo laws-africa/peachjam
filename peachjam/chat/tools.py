@@ -1,3 +1,4 @@
+import urllib
 from dataclasses import dataclass
 
 import requests
@@ -5,6 +6,7 @@ from agents import function_tool
 from agents.run_context import RunContextWrapper
 from asgiref.sync import sync_to_async
 from django.conf import settings
+from django.urls.base import reverse
 
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
@@ -117,9 +119,29 @@ def provision_commencement_info(
     return "That provision has not commenced."
 
 
+@function_tool
+def get_search_link(search_term: str) -> str:
+    """Returns a relative URL that the user can use to conduct a site-wide content search for a given term. The search
+    system uses simple keyword search across the legal data corpus and is not very smart.
+
+    Use markdown link formatting to make the returned URL clickable in the chat interface,
+    eg: [Search for "unlawful arrest"]({generated_search_link})
+
+    Tips for the search_terms string:
+
+    - Use specific search terms that are likely to appear in legislation, court judgments and case summaries
+    - Do not pose the search as a question.
+    - Wrap phrases in double quotes for more exact matches, eg "unlawful arrest"
+    - The default is to match all terms
+    - Use OR to search for multiple terms, eg: "unlawful arrest" OR "illegal detention"
+    """
+    return reverse("search:search") + "?q=" + urllib.parse.quote(search_term)
+
+
 def get_tools_for_document(document):
     tools = [
         get_document_text,
+        get_search_link,
     ]
 
     if isinstance(document, Legislation):
@@ -132,11 +154,3 @@ def get_tools_for_document(document):
         )
 
     return tools
-
-
-ALL_TOOLS = [
-    get_document_text,
-    get_provision_eid,
-    get_provision_text,
-    provision_commencement_info,
-]
