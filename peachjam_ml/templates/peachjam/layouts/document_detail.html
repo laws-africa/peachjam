@@ -4,8 +4,8 @@
   {{ block.super }}
   {% block ask-ai %}
     {% if PEACHJAM_JS_CONFIG.chat.enabled %}
-      <div class="d-inline-flex d-none mt-3 bg-brand-pale rounded p-2"
-           data-component="DocumentChatBanner">
+      <div class="d-inline-flex mt-3 bg-brand-pale rounded p-2 {% if not PEACHJAM_JS_CONFIG.chat.public %}d-none{% endif %}"
+           {% if not PEACHJAM_JS_CONFIG.chat.public %}data-component="DocumentChatBanner"{% endif %}>
         <div class="p-2 h3 m-0">
           <i class="bi-pj pj-ai"></i>
         </div>
