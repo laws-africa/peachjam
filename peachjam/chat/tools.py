@@ -120,7 +120,7 @@ def provision_commencement_info(
 
 
 @function_tool
-def build_search_link(search_term: str) -> str:
+def get_search_link(search_term: str) -> str:
     """Returns a relative URL that the user can use to conduct a site-wide content search for a given term. The search
     system uses simple keyword search across the legal data corpus and is not very smart.
 
@@ -141,7 +141,7 @@ def build_search_link(search_term: str) -> str:
 def get_tools_for_document(document):
     tools = [
         get_document_text,
-        build_search_link,
+        get_search_link,
     ]
 
     if isinstance(document, Legislation):
