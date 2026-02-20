@@ -300,15 +300,15 @@
                         {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-date %}
-                        {% if document.doc_type == "judgment" %}
-                          <dt>
-                            {% trans 'Judgment date' %}
-                          </dt>
-                        {% else %}
-                          <dt>
-                            {% trans 'Date' %}
-                          </dt>
-                        {% endif %}
+                        <dt>
+                          {% block document-metadata-date-label %}
+                            {% if document.doc_type == "judgment" %}
+                              {% trans 'Judgment date' %}
+                            {% else %}
+                              {% trans 'Date' %}
+                            {% endif %}
+                          {% endblock %}
+                        </dt>
                         {% if date_versions|length > 1 %}
                           <dd>
                             <div class="dropdown">

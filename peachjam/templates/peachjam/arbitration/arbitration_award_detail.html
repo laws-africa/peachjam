@@ -1,35 +1,7 @@
 {% extends "peachjam/layouts/document_detail.html" %}
 {% load i18n peachjam %}
-{% block document-metadata-content-date %}
-  <dt>
-    {% trans "Award date" %}
-  </dt>
-  {% if date_versions|length > 1 %}
-    <dd>
-      <div class="dropdown">
-        <a class="btn btn-outline-secondary btn-sm dropdown-toggle"
-           href="#"
-           role="button"
-           id="dropdownMenuLink"
-           data-bs-toggle="dropdown"
-           aria-expanded="false">
-          {{ document.date }}
-        </a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-          {% for version in date_versions %}
-            <li>
-              <a class="dropdown-item {% if version.pk == document.pk %}active{% endif %}"
-                 href="{{ version.get_absolute_url }}">{{ version.date }}</a>
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    </dd>
-  {% else %}
-    <dd class="text-muted">
-      {{ document.date }}
-    </dd>
-  {% endif %}
+{% block document-metadata-date-label %}
+  {% trans "Award date" %}
 {% endblock %}
 {% block document-metadata-content-publication %}
   {{ block.super }}
