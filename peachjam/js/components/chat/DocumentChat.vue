@@ -116,6 +116,7 @@ export default {
       messages: [],
       permissionDeniedHtml: null,
       usageLimitHtml: null,
+      limitReachedTracked: false,
       inputText: '',
       error: null,
       votingUp: null,
@@ -380,6 +381,10 @@ export default {
     async handle403 (response) {
       try {
         const data = await response.json();
+        if (data?.limit_reached && !this.limitReachedTracked) {
+          analytics.trackEvent('Document Chat', 'Limit reached');
+          this.limitReachedTracked = true;
+        }
         if (data && data.message_html) {
           this.handlePermissionDenied(data.message_html);
           return;
