@@ -472,6 +472,9 @@
               </div>
             {% endblock %}
             {% block extra-metadata %}{% endblock %}
+            {% block metadata-ask-ai %}
+              {% include "peachjam/document/_ask_ai_banner.html" %}
+            {% endblock %}
             <hr class="mb-5" />
           </div>
           {% block content %}
