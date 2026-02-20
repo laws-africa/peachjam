@@ -18,6 +18,7 @@ COURT_CODE_MAPPINGS = {"court-appeal-tanzania": "TZCA", "high-court-tanzania": "
 TEMPLATED_EMAIL_BACKEND = "peachjam.emails.CustomerIOTemplateBackend"
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
+PEACHJAM["CHAT_PUBLIC"] = True  # noqa
 
 # Custom middleware to force the I18N machinery to always choose settings.LANGUAGE_CODE
 # as the default initial language, unless another one is set via sessions or cookies
