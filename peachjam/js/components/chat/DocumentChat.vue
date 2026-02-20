@@ -91,6 +91,7 @@
 
 <script>
 import { csrfToken } from '../../api';
+import analytics from '../../analytics';
 import peachJam from '../../peachjam';
 import { marked } from 'marked';
 
@@ -218,6 +219,7 @@ export default {
       this.error = null;
       this.focusInputAndScroll();
       this.stream(userMessage);
+      analytics.trackEvent('Document Chat', 'Message');
     },
     stream (message) {
       if (this.eventSource) {
@@ -407,6 +409,7 @@ export default {
           'X-CSRFToken': await csrfToken()
         }
       });
+      analytics.trackEvent('Document Chat', 'Vote up');
     },
     async voteDown (messageId) {
       this.votingDown = messageId;
@@ -420,11 +423,13 @@ export default {
           'X-CSRFToken': await csrfToken()
         }
       });
+      analytics.trackEvent('Document Chat', 'Vote down');
     },
     async copyToClipboard (message) {
       const textBlob = new Blob([message?.content || ''], { type: 'text/plain' });
       const html = message?.content_html || message?.content || '';
       const htmlBlob = new Blob([html], { type: 'text/html' });
+      analytics.trackEvent('Document Chat', 'Copy to clipboard');
 
       if (navigator.clipboard?.write && window.ClipboardItem) {
         try {
