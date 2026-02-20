@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
 import requests
-from agents import Agent, Runner, function_tool
+from agents import function_tool
 from agents.run_context import RunContextWrapper
 from asgiref.sync import sync_to_async
 from django.conf import settings
@@ -17,23 +17,11 @@ class DocumentChatContext:
     thread_id: str
 
 
-DOC_QA_AGENT = Agent(
-    name="document-qa",
-    instructions=(
-        "You are a question answering tool. Only use the document content for answers; if you cannot "
-        "answer the question based on the document content, say so."
-    ),
-    model="gpt-5-mini",
-)
-
-
 @function_tool
-async def answer_document_question(
-    ctx: RunContextWrapper[DocumentChatContext], question: str
-) -> str:
-    """Answers a question about the content of the current document. It knows which document is active.
-    It has no memory of previous questions. Only use it if you need to answer a specific question about the document
-    content. The document does not contain information about this website or its features."""
+async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
+    """Returns the text of the entire document. Use this tool if you need to answer questions about the document
+    that you cannot answer using the summary information already provided.
+    """
 
     @sync_to_async
     def get_text():
@@ -41,18 +29,13 @@ async def answer_document_question(
         return doc.get_content_as_text()
 
     text = await get_text()
+    if not text.strip():
+        return "The document has no text content. Suggest that the user downloads the document to view its content."
+
     if len(text) > 1_250_000:
-        return "Document text is too long to process."
+        return "The document text is too large to include here. Suggest that the user downloads the document instead."
 
-    response = await Runner.run(
-        DOC_QA_AGENT,
-        input=[
-            {"role": "user", "content": "The document content is below:\n\n" + text},
-            {"role": "user", "content": question},
-        ],
-    )
-
-    return str(response.final_output or "")
+    return text
 
 
 @function_tool
@@ -136,7 +119,7 @@ def provision_commencement_info(
 
 def get_tools_for_document(document):
     tools = [
-        answer_document_question,
+        get_document_text,
     ]
 
     if isinstance(document, Legislation):
@@ -152,7 +135,7 @@ def get_tools_for_document(document):
 
 
 ALL_TOOLS = [
-    answer_document_question,
+    get_document_text,
     get_provision_eid,
     get_provision_text,
     provision_commencement_info,

@@ -35,6 +35,7 @@ def general(request):
             "chat": {
                 "enabled": settings.PEACHJAM["CHAT_ENABLED"],
                 "assistantName": settings.PEACHJAM["CHAT_ASSISTANT_NAME"],
+                "public": settings.PEACHJAM["CHAT_PUBLIC"],
             },
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],

@@ -165,8 +165,10 @@ PEACHJAM = {
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
     # Chat settings
-    "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
-    "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
+    "CHAT_ENABLED": False,
+    "CHAT_ASSISTANT_NAME": "AI",
+    # show the document chat button to all users, or only users with permissions?
+    "CHAT_PUBLIC": False,
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
 }
