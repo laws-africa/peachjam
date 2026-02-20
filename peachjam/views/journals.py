@@ -66,7 +66,6 @@ class JournalArticleListView(FilteredDocumentListView):
         context["doc_count_noun"] = _("Article")
         context["doc_count_noun_plural"] = _("Articles")
         context["nature"] = "Article"
-        context["help_link"] = "journals"
         return context
 
 
@@ -124,7 +123,6 @@ class VolumeIssueDetailView(JournalDetailView):
         context["doc_count_noun"] = _("Article")
         context["doc_count_noun_plural"] = _("Articles")
         context["nature"] = "Journal article"
-        context["help_link"] = "journals"
         return context
 
 
