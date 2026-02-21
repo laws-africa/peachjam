@@ -9,11 +9,7 @@
 {% endblock %}
 {% block content %}
   <div class="row justify-content-center">
-    <div class="col-12 col-sm-10 col-md-9 col-lg-8"
-         data-component="UserAuth"
-         data-password1-id="{{ signup_form.password1.id_for_label }}"
-         data-password2-id="{{ signup_form.password2.id_for_label }}"
-         data-mismatch-msg="{% trans 'Passwords do not match.' %}">
+    <div class="col-12 col-sm-10 col-md-9 col-lg-8" data-component="UserAuth">
       <div class="text-center mb-4">
         <h2>{% trans 'Check your email' %}</h2>
         <p class="text-muted mb-0">
@@ -149,63 +145,38 @@
               </div>
             {% endif %}
             <input type="hidden" name="email" value="{{ email }}" />
-            <div id="pw-step1">
-              <div class="mb-3">
-                <label class="form-label" for="{{ signup_form.password1.id_for_label }}">{% trans 'Password' %}</label>
-                <input type="password"
-                       class="form-control py-2 px-3 fs-6{% if signup_form.password1.errors %} is-invalid{% endif %}"
-                       name="{{ signup_form.password1.name }}"
-                       id="{{ signup_form.password1.id_for_label }}"
-                       autocomplete="new-password"
-                       minlength="8"
-                       required/>
-                {% if signup_form.password1.errors %}
-                  <div class="invalid-feedback">
-                    {% for error in signup_form.password1.errors %}{{ error }}{% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-              <div class="mb-3">
-                <label class="form-label" for="{{ signup_form.password2.id_for_label }}">{% trans 'Confirm password' %}</label>
-                <input type="password"
-                       class="form-control py-2 px-3 fs-6{% if signup_form.password2.errors %} is-invalid{% endif %}"
-                       name="{{ signup_form.password2.name }}"
-                       id="{{ signup_form.password2.id_for_label }}"
-                       autocomplete="new-password"
-                       required/>
-                {% if signup_form.password2.errors %}
-                  <div class="invalid-feedback">
-                    {% for error in signup_form.password2.errors %}{{ error }}{% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-              <div class="mb-3">{{ signup_form.captcha }}</div>
-              <div class="d-grid mb-3">
-                <button type="button" class="btn btn-primary py-2 fs-5" id="pw-continue-btn">{% trans 'Continue' %}</button>
-              </div>
+            <div class="mb-3">
+              <label class="form-label" for="{{ signup_form.password1.id_for_label }}">{% trans 'Password' %}</label>
+              <input type="password"
+                     class="form-control py-2 px-3 fs-6{% if signup_form.password1.errors %} is-invalid{% endif %}"
+                     name="{{ signup_form.password1.name }}"
+                     id="{{ signup_form.password1.id_for_label }}"
+                     autocomplete="new-password"
+                     minlength="8"
+                     required/>
+              {% if signup_form.password1.errors %}
+                <div class="invalid-feedback">
+                  {% for error in signup_form.password1.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
             </div>
-            <div id="pw-step2" style="display: none;">
-              <div class="mb-3">
-                <label class="form-label" for="id_pw_first_name">{% trans 'First name' %}</label>
-                <input type="text"
-                       class="form-control py-2 px-3 fs-6"
-                       name="{{ signup_form.first_name.name }}"
-                       id="id_pw_first_name"
-                       maxlength="40"
-                       required/>
-              </div>
-              <div class="mb-3">
-                <label class="form-label" for="id_pw_last_name">{% trans 'Last name' %}</label>
-                <input type="text"
-                       class="form-control py-2 px-3 fs-6"
-                       name="{{ signup_form.last_name.name }}"
-                       id="id_pw_last_name"
-                       maxlength="40"
-                       required/>
-              </div>
-              <div class="d-grid mb-3">
-                <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Sign up' %}</button>
-              </div>
+            <div class="mb-3">
+              <label class="form-label" for="{{ signup_form.password2.id_for_label }}">{% trans 'Confirm password' %}</label>
+              <input type="password"
+                     class="form-control py-2 px-3 fs-6{% if signup_form.password2.errors %} is-invalid{% endif %}"
+                     name="{{ signup_form.password2.name }}"
+                     id="{{ signup_form.password2.id_for_label }}"
+                     autocomplete="new-password"
+                     required/>
+              {% if signup_form.password2.errors %}
+                <div class="invalid-feedback">
+                  {% for error in signup_form.password2.errors %}{{ error }}{% endfor %}
+                </div>
+              {% endif %}
+            </div>
+            <div class="mb-3">{{ signup_form.captcha }}</div>
+            <div class="d-grid mb-3">
+              <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Sign up' %}</button>
             </div>
           </form>
         {% endif %}

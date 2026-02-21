@@ -86,6 +86,7 @@ class UserAuthView(AllauthConfirmLoginCodeView):
         form_class = self.get_form_class()
         verify_form = form_class(code=self._process.code)
         ctx = self.get_context_data(form=verify_form)
+        ctx["show_password_section"] = True
         return self.render_to_response(ctx)
 
     def get_context_data(self, **kwargs):
@@ -120,6 +121,7 @@ class CompleteProfileView(NextRedirectMixin, LoginRequiredMixin, UpdateView):
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
         form.fields["first_name"].required = True
+        form.fields["last_name"].required = True
         return form
 
     def get_default_success_url(self):

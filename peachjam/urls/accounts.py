@@ -10,9 +10,8 @@ from peachjam.views import (
 from peachjam.views.accounts import CompleteProfileView, UserAuthView
 
 urlpatterns = [
-    path("login/auth", UserAuthView.as_view(), name="account_confirm_login_code"),
-    path("login/code/confirm/", UserAuthView.as_view()),
     path("", include("allauth.urls")),
+    path("login/auth", UserAuthView.as_view(), name="account_confirm_login_code"),
     path("accept-terms/", AcceptTermsView.as_view(), name="account_accept_terms"),
     path(
         "complete-profile/",
