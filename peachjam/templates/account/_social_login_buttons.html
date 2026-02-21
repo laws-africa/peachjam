@@ -1,28 +1,36 @@
 {% load i18n socialaccount static %}
 {% get_providers as socialaccount_providers %}
 {% if PEACHJAM_SETTINGS.allow_social_logins and socialaccount_providers %}
-  <div class="mb-3">
-    {% url 'terms_of_use' as terms_url %}
-    {% blocktrans trimmed %}By signing up, you are agreeing to our <a href="{{ terms_url }}">Terms of Use</a>.{% endblocktrans %}
+  <div class="d-flex align-items-center mb-4">
+    <div class="flex-grow-1 border-bottom"></div>
+    <span class="mx-3 text-secondary text-uppercase"
+          style="font-size: 0.875rem">{% trans 'OR' %}</span>
+    <div class="flex-grow-1 border-bottom"></div>
   </div>
   {% for provider in socialaccount_providers %}
     <form method="post"
-          class="mt-4"
           action="{% provider_login_url provider.id process='login' %}">
       {% csrf_token %}
-      <button class="btn btn-block btn-outline-primary mb-3 socialaccount_provider {{ provider.id }}"
+      <button class="btn btn-block btn-outline-secondary mb-3 d-flex align-items-center justify-content-center w-100 bg-white py-2 fs-6"
+              style="color: #6c757d;
+                     border-color: #ced4da"
               type="submit">
         {% if provider.name == "Google" %}
           <img alt="google-logo"
                src="{% static 'images/google-logo.png' %}"
-               style="height: 16px;
-                      margin-right: 5px"/>
+               style="height: 20px;
+                      margin-right: 10px"/>
         {% else %}
-          <i class="bi bi-{{ provider.id }}"></i>
+          <i class="bi bi-{{ provider.id }} me-2"></i>
         {% endif %}
-        {% blocktrans with provider=provider.name %}Log in with {{provider}}{% endblocktrans %}
+        <span>{% blocktrans with provider=provider.name %}Log in with {{provider}}{% endblocktrans %}</span>
       </button>
     </form>
   {% endfor %}
-  <hr/>
+  <div class="text-center mt-4 text-secondary" style="font-size: 0.875rem;">
+    {% url 'terms_of_use' as terms_url %}
+    {% blocktrans trimmed %}
+      By continuing, you agree to our <a href="{{ terms_url }}" class="text-decoration-none">Terms of Use</a>.
+    {% endblocktrans %}
+  </div>
 {% endif %}
