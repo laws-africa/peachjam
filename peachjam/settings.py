@@ -746,7 +746,8 @@ CORS_URLS_REGEX = r"^$"
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
-    messages.SUCCESS: "info",
+    messages.SUCCESS: "primary",
+    messages.INFO: "primary",
 }
 
 
