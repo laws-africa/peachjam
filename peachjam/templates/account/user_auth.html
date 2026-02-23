@@ -9,14 +9,14 @@
 {% endblock %}
 {% block content %}
   <div data-component="UserAuth">
-    <div class="text-center mb-4">
-      <h2>{% trans 'Check your email' %}</h2>
-      <p class="text-muted mb-0">
-        {% trans 'Code sent to' %} <a href="{% url 'account_login' %}" class="text-decoration-none">{{ email }}</a>
-      </p>
-    </div>
     <div id="code-section"
          {% if show_password_section %} style="display: none;"{% endif %}>
+      <div class="mb-4">
+        <h2>{% trans 'Enter the one-time code' %}</h2>
+        <p>
+          {% blocktrans trimmed %}Please enter the verification code we sent to <b>{{ email }}</b>.{% endblocktrans %}
+        </p>
+      </div>
       <form method="post" action="{% url 'account_confirm_login_code' %}">
         {% csrf_token %}
         {% if verify_form.non_field_errors %}
@@ -26,7 +26,6 @@
         {% endif %}
         <div id="otp-code-step">
           <div class="mb-3">
-            <label class="form-label" for="{{ verify_form.code.id_for_label }}">{% trans 'Verification Code' %}</label>
             <input type="text"
                    class="form-control text-center fw-bold fs-5 tracking-wide py-2 px-3{% if verify_form.code.errors %} is-invalid{% endif %}"
                    name="{{ verify_form.code.name }}"
@@ -54,14 +53,12 @@
         </div>
       </form>
       <div class="text-center text-muted mb-3 small">
-        {% trans "Didn't receive it?" %}
         <form method="post"
               action="{% url 'account_confirm_login_code' %}"
               class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="action" value="resend" />
-          <button type="submit"
-                  class="btn btn-link p-0 align-baseline text-decoration-none">{% trans 'Resend code' %}</button>
+          <button type="submit" class="btn btn-link">{% trans 'Request a new code' %}</button>
         </form>
       </div>
       {% include 'account/_or.html' %}
@@ -73,14 +70,14 @@
                 class="d-grid">
             {% csrf_token %}
             <input type="hidden" name="email" value="{{ email }}" />
-            <button type="submit" class="btn btn-outline-primary">{% trans 'Use password instead' %}</button>
+            <button type="submit" class="btn btn-outline-primary">{% trans 'Use a password instead' %}</button>
           </form>
         {% else %}
           <a href="#" id="show-password-btn" class="btn btn-outline-primary">
             {% if is_existing_user %}
-              {% trans 'Use password instead' %}
+              {% trans 'Use a password instead' %}
             {% else %}
-              {% trans 'Sign up with password' %}
+              {% trans 'Sign up with a password' %}
             {% endif %}
           </a>
         {% endif %}
@@ -90,7 +87,10 @@
     <div id="password-section"
          {% if not show_password_section %} style="display: none;"{% endif %}>
       {% if is_existing_user and has_usable_password %}
-        <h5 class="text-center mb-4">{% trans 'Log in with password' %}</h5>
+        <h2>{% trans 'Enter your password' %}</h2>
+        <p>
+          {% blocktrans trimmed %}Log in with <b>{{ email }}</b>.{% endblocktrans %}
+        </p>
         <form method="post" action="{% url 'account_confirm_login_code' %}">
           {% csrf_token %}
           <input type="hidden" name="action" value="password_login" />
@@ -128,7 +128,10 @@
           </div>
         </form>
       {% else %}
-        <h5 class="text-center mb-4">{% trans 'Create your account' %}</h5>
+        <h2>{% trans 'Sign up' %}</h2>
+        <p>
+          {% blocktrans trimmed %}Sign up with <b>{{ email }}</b>.{% endblocktrans %}
+        </p>
         <form method="post" action="{% url 'account_confirm_login_code' %}">
           {% csrf_token %}
           <input type="hidden" name="action" value="signup_password" />
@@ -175,7 +178,7 @@
       {% endif %}
       {% include 'account/_or.html' %}
       <div class="d-grid text-center">
-        <a href="#" id="show-code-btn" class="btn btn-outline-primary">{% trans 'Use code instead' %}</a>
+        <a href="#" id="show-code-btn" class="btn btn-outline-primary">{% trans 'Use a code instead' %}</a>
       </div>
     </div>
     <form method="post" action="{% url 'account_logout' %}" class="text-center">
