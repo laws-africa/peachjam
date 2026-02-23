@@ -46,9 +46,9 @@
           {{ redirect_field }}
           <div class="d-grid mb-3">
             {% if is_existing_user %}
-              <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Log in' %}</button>
+              <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
             {% else %}
-              <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Sign up' %}</button>
+              <button class="btn btn-primary" type="submit">{% trans 'Sign up' %}</button>
             {% endif %}
           </div>
         </div>
@@ -73,12 +73,10 @@
                 class="d-grid">
             {% csrf_token %}
             <input type="hidden" name="email" value="{{ email }}" />
-            <button type="submit" class="btn btn-outline-primary py-2 fs-5">{% trans 'Use password instead' %}</button>
+            <button type="submit" class="btn btn-outline-primary">{% trans 'Use password instead' %}</button>
           </form>
         {% else %}
-          <a href="#"
-             id="show-password-btn"
-             class="btn btn-outline-primary py-2 fs-5 d-flex justify-content-center align-items-center">
+          <a href="#" id="show-password-btn" class="btn btn-outline-primary">
             {% if is_existing_user %}
               {% trans 'Use password instead' %}
             {% else %}
@@ -116,7 +114,7 @@
             {% endif %}
           </div>
           <div class="d-grid mb-3">
-            <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Log in' %}</button>
+            <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
           </div>
           <div class="text-center mb-3">
             <input type="hidden" name="email" value="{{ email }}" />
@@ -171,13 +169,13 @@
           </div>
           <div class="mb-3">{{ signup_form.captcha }}</div>
           <div class="d-grid mb-3">
-            <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Sign up' %}</button>
+            <button class="btn btn-primary" type="submit">{% trans 'Sign up' %}</button>
           </div>
         </form>
       {% endif %}
       {% include 'account/_or.html' %}
       <div class="d-grid text-center">
-        <a href="#" id="show-code-btn" class="btn btn-outline-primary py-2 fs-5">{% trans 'Use code instead' %}</a>
+        <a href="#" id="show-code-btn" class="btn btn-outline-primary">{% trans 'Use code instead' %}</a>
       </div>
     </div>
     <form method="post" action="{% url 'account_logout' %}" class="text-center">
