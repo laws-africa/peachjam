@@ -26,7 +26,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--max-sections",
             type=int,
-            default=50,
+            default=1000,
             help="Maximum number of sections to process.",
         )
 
@@ -43,9 +43,10 @@ class Command(BaseCommand):
         all_extracted = []
 
         for section in sections:
-            self.stdout.write(f"extracting section {section['eid']}")
+            self.stdout.write(f"Extracting section {section['eid']}")
 
-            offences = self.extract_offences(section["html"], model=options["model"])
+            offences = self.extract_offences(section["html"])
+            print(f"Found offences:{offences}")
             all_extracted.extend(offences)
 
         if not all_extracted:
@@ -104,7 +105,6 @@ class Command(BaseCommand):
     ):
         root = html.fromstring(akn_html)
 
-        # Find section-like provisions
         sections = root.xpath(".//section | .//article")
 
         results = []
@@ -113,7 +113,8 @@ class Command(BaseCommand):
             if len(results) >= max_sections:
                 break
 
-            eid = section.get("eId")
+            eid = section.get("data-eid")
+            print(eid)
             if not eid:
                 continue
 

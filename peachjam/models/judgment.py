@@ -841,7 +841,6 @@ class Offence(models.Model):
     )
 
     class Meta:
-        unique_together = (("work", "provision_eid"),)
         ordering = ("title",)
 
     def __str__(self):
