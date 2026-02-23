@@ -1,19 +1,18 @@
 import json
 import logging
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
-from django.conf import settings
 from openai import OpenAI
+from pydantic import BaseModel, Field
 
 from peachjam.models import JudgmentOffence, Offence
 
 log = logging.getLogger(__name__)
 
 
-@dataclass
-class ExtractedOffence:
-    name: str
+class MentionedOffences(BaseModel):
+    mentioned_offences: List[str]
 
 
 @dataclass
@@ -22,6 +21,15 @@ class OffenceOption:
     title: str
     provision_eid: str
     description: str
+
+
+class MatchedOffence(BaseModel):
+    extracted_offence: str
+    offence_id: Optional[int]
+
+
+class MatchOffenceResult(BaseModel):
+    mappings: list[MatchedOffence] = Field(default_factory=list)
 
 
 class JudgmentOffenceMentionExtractor:
@@ -35,10 +43,10 @@ class JudgmentOffenceMentionExtractor:
     """
 
     def __init__(self, judgment):
-        self.client = OpenAI(api_key=settings.OPENAI_API_KEY)
         self.judgment = judgment
 
-    def _offence_mention_prompt(self, judgment_text: str) -> str:
+    def _offence_mention_prompt(self) -> str:
+        judgment_text = self.judgment.get_content_as_text()
         return f"""
             You are a legal information extraction engine.
 
@@ -54,7 +62,6 @@ class JudgmentOffenceMentionExtractor:
             5. Do NOT include statutory numbers in the offence name.
             6. Do NOT include sentencing information.
             7. If none are mentioned, return an empty list.
-            8. Output valid JSON only.
 
             OUTPUT FORMAT:
             {{
@@ -70,34 +77,32 @@ class JudgmentOffenceMentionExtractor:
             \"\"\"
             """
 
-    def extract_offence_mentions(self, judgment_text: str) -> List[str]:
-        response = self.client.chat.completions.create(
+    def extract_offence_mentions(self) -> List[str]:
+        client = OpenAI()
+        response = client.responses.parse(
             model="gpt-4o-mini",
-            temperature=0,
-            messages=[
+            input=[
                 {
                     "role": "system",
                     "content": "You extract structured criminal offence data from court judgments.",
                 },
                 {
                     "role": "user",
-                    "content": self._offence_mention_prompt(judgment_text),
+                    "content": self._offence_mention_prompt(),
                 },
             ],
+            text_format=MentionedOffences,
         )
 
-        content = response.choices[0].message.content
-
-        try:
-            parsed = json.loads(content)
-            offences = parsed.get("mentioned_offences", [])
-        except json.JSONDecodeError:
-            return []
-
-        return list({o.strip().lower() for o in offences if o.strip()})
+        offences = response.output_parsed.mentioned_offences
+        result = list({o.strip().lower() for o in offences if o.strip()})
+        log.info(f"offence extraction results: {result}")
+        return result
 
     def extract_and_save_offence_mentions(self):
         offence_mentions = self.extract_offence_mentions()
+        if not self.judgment.metadata_json:
+            self.judgment.metadata_json = {}
         self.judgment.metadata_json["extracted_offences"] = offence_mentions
         self.judgment.save()
         return self.judgment
@@ -150,8 +155,9 @@ class JudgmentOffenceMentionExtractor:
                 """
 
     def match_offences(self) -> List[Offence]:
-        if not hasattr(self.judgment.metadata_json, "extracted_offences"):
+        if "extracted_offences" not in self.judgment.metadata_json:
             log.error(f"judgment {self.judgment} does not have extracted_offences")
+            raise
 
         offence_queryset = Offence.objects.all()
 
@@ -165,15 +171,15 @@ class JudgmentOffenceMentionExtractor:
             for o in offence_queryset
         ]
 
-        prompt = self._build_prompt(
+        prompt = self.match_offences_prompt(
             self.judgment.metadata_json["extracted_offences"],
             offence_options,
         )
 
-        response = self.client.chat.completions.create(
-            model="gpt-4o-mini",
-            temperature=0,
-            messages=[
+        client = OpenAI()
+        response = client.responses.parse(
+            model="gpt-5-mini",
+            input=[
                 {
                     "role": "system",
                     "content": "You perform strict ontology classification.",
@@ -183,18 +189,11 @@ class JudgmentOffenceMentionExtractor:
                     "content": prompt,
                 },
             ],
+            text_format=MatchOffenceResult,
         )
 
-        content = response.choices[0].message.content
-
-        try:
-            parsed = json.loads(content)
-            mappings = parsed.get("mappings", [])
-        except json.JSONDecodeError:
-            return []
-
-        offence_ids = [m["offence_id"] for m in mappings if m.get("offence_id")]
-
+        mappings = response.output_parsed.mappings
+        offence_ids = [m.offence_id for m in mappings if m.offence_id]
         return list(Offence.objects.filter(id__in=offence_ids))
 
     def match_and_create_judgment_offences(self):
