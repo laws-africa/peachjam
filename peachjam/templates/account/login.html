@@ -5,13 +5,12 @@
   {% trans 'Log In' %}
 {% endblock %}
 {% block content %}
-  <div class="text-center mb-4">
-    <h3 class="fw-bold mb-2">{% trans 'Welcome' %}</h3>
-    <p class="text-secondary" style="font-size: 0.95rem;">
-      {% trans 'Enter your email to log in or create an account.' %}
-    </p>
+  <div class="text-center">
+    <h2 class="mb-4">{% blocktrans trimmed %}Log in to {{ MY_LII }}{% endblocktrans %}</h2>
+    {% include "account/_social_login_buttons.html" %}
   </div>
   <form method="post" action="{% url 'account_login' %}" id="email-login">
+    <p>{% trans 'Enter your email address to log in or sign up.' %}</p>
     {% csrf_token %}
     {% if redirect_field_value %}
       <input type="hidden"
@@ -48,8 +47,13 @@
       {% endif %}
     </div>
     <div class="mb-4 d-grid">
-      <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Continue' %}</button>
+      <button class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
+    </div>
+    <div class="text-center mt-4 text-secondary">
+      {% url 'terms_of_use' as terms_url %}
+      {% blocktrans trimmed %}
+        By continuing, you agree to our <a href="{{ terms_url }}">Terms of Use</a>.
+      {% endblocktrans %}
     </div>
   </form>
-  {% include "account/_social_login_buttons.html" %}
 {% endblock %}
