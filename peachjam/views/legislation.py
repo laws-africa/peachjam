@@ -41,7 +41,7 @@ class LegislationListView(FilteredDocumentListView):
     navbar_link = "legislation"
     extra_context = {
         "nature": "Act",
-        "help_link": "legislation/",
+        "help_link": "legislation/finding-legislation",
         "doc_table_show_date": False,
     }
     form_defaults = {"sort": "title"}
