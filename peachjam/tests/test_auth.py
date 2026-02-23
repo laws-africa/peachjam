@@ -149,13 +149,13 @@ class CompleteProfileViewTests(TestCase):
         self.client.force_login(self.user)
 
     def test_redirects_unauthenticated(self):
-        response = self.client.get(reverse("complete_profile"))
+        response = self.client.get(reverse("account_onboard"))
         self.assertEqual(response.status_code, 302)
         self.assertIn("accounts", response["Location"])
 
     def test_shows_form_when_no_first_name(self):
         self._login()
-        response = self.client.get(reverse("complete_profile"))
+        response = self.client.get(reverse("account_onboard"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "first_name")
 
@@ -163,13 +163,13 @@ class CompleteProfileViewTests(TestCase):
         self.user.first_name = "Jane"
         self.user.save()
         self._login()
-        response = self.client.get(reverse("complete_profile"))
+        response = self.client.get(reverse("account_onboard"))
         self.assertEqual(response.status_code, 302)
 
     def test_submit_saves_name(self):
         self._login()
         response = self.client.post(
-            reverse("complete_profile"),
+            reverse("account_onboard"),
             data={"first_name": "Jane", "last_name": "Doe"},
         )
         self.assertEqual(response.status_code, 302)
@@ -181,7 +181,7 @@ class CompleteProfileViewTests(TestCase):
         self._login()
         next_url = reverse("home_page")
         response = self.client.post(
-            reverse("complete_profile") + f"?next={next_url}",
+            reverse("account_onboard") + f"?next={next_url}",
             data={"first_name": "Jane", "last_name": "Doe", "next": next_url},
         )
         self.assertEqual(response.status_code, 302)
@@ -190,7 +190,7 @@ class CompleteProfileViewTests(TestCase):
     def test_submit_requires_first_name(self):
         self._login()
         response = self.client.post(
-            reverse("complete_profile"),
+            reverse("account_onboard"),
             data={"first_name": "", "last_name": "Doe"},
         )
         self.assertEqual(response.status_code, 200)

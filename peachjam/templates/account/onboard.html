@@ -1,12 +1,12 @@
 {% extends "allauth/layouts/base.html" %}
 {% load i18n %}
 {% block title %}
-  {% trans 'Complete your profile' %}
+  {% trans 'Welcome' %}
 {% endblock %}
 {% block content %}
   <div class="text-center mb-4">
-    <h2>{% trans 'Complete your profile' %}</h2>
-    <p class="text-muted mb-0">{% trans 'Tell us your name to get started.' %}</p>
+    <h2>{% trans 'Welcome' %}</h2>
+    <p>{% trans 'Please tell us a bit about yourself to get started.' %}</p>
   </div>
   <form method="post">
     {% csrf_token %}
@@ -20,7 +20,7 @@
                id="{{ field.id_for_label }}"
                value="{{ field.value|default:'' }}"
                maxlength="150"
-               {% if forloop.first %}autofocus{% endif %}/>
+               {% if forloop.first %}autofocus required{% endif %}/>
         {% if field.errors %}
           <div class="invalid-feedback">
             {% for error in field.errors %}{{ error }}{% endfor %}
@@ -28,8 +28,8 @@
         {% endif %}
       </div>
     {% endfor %}
-    <div class="d-grid mb-3">
-      <button class="btn btn-primary fs-5" type="submit">{% trans 'Continue' %}</button>
+    <div class="d-grid">
+      <button class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
     </div>
   </form>
 {% endblock %}
