@@ -8,197 +8,183 @@
   {% endif %}
 {% endblock %}
 {% block content %}
-  <div class="row justify-content-center">
-    <div class="col-12 col-sm-10 col-md-9 col-lg-8" data-component="UserAuth">
-      <div class="text-center mb-4">
-        <h2>{% trans 'Check your email' %}</h2>
-        <p class="text-muted mb-0">
-          {% trans 'Code sent to' %} <a href="{% url 'account_login' %}" class="text-decoration-none">{{ email }}</a>
+  <div data-component="UserAuth">
+    <div id="code-section"
+         {% if show_password_section %} style="display: none;"{% endif %}>
+      <div class="mb-4">
+        <h2>{% trans 'Enter the one-time code' %}</h2>
+        <p>
+          {% blocktrans trimmed %}Please enter the verification code we sent to <b>{{ email }}</b>.{% endblocktrans %}
         </p>
       </div>
-      <div id="code-section"
-           {% if show_password_section %} style="display: none;"{% endif %}>
-        <form method="post" action="{% url 'account_confirm_login_code' %}">
-          {% csrf_token %}
-          {% if verify_form.non_field_errors %}
-            <div class="alert alert-danger mb-3">
-              {% for error in verify_form.non_field_errors %}{{ error }}{% endfor %}
-            </div>
-          {% endif %}
-          <div id="otp-code-step">
-            <div class="mb-3">
-              <label class="form-label" for="{{ verify_form.code.id_for_label }}">{% trans 'Verification Code' %}</label>
-              <input type="text"
-                     class="form-control text-center fw-bold fs-5 tracking-wide py-2 px-3{% if verify_form.code.errors %} is-invalid{% endif %}"
-                     name="{{ verify_form.code.name }}"
-                     id="{{ verify_form.code.id_for_label }}"
-                     required
-                     autofocus
-                     autocomplete="one-time-code"
-                     maxlength="10"
-                     placeholder="• • • • • •"
-                     style="letter-spacing: 0.3em"/>
-              {% if verify_form.code.errors %}
-                <div class="invalid-feedback text-center">
-                  {% for error in verify_form.code.errors %}{{ error }}{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            {{ redirect_field }}
-            <div class="d-grid mb-3">
-              {% if is_existing_user %}
-                <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Log in' %}</button>
-              {% else %}
-                <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Sign up' %}</button>
-              {% endif %}
-            </div>
+      <form method="post" action="{% url 'account_confirm_login_code' %}">
+        {% csrf_token %}
+        {% if verify_form.non_field_errors %}
+          <div class="alert alert-danger mb-3">
+            {% for error in verify_form.non_field_errors %}{{ error }}{% endfor %}
           </div>
-        </form>
-        <div class="text-center text-muted mb-3 small">
-          {% trans "Didn't receive it?" %}
-          <form method="post"
-                action="{% url 'account_confirm_login_code' %}"
-                class="d-inline">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="resend" />
-            <button type="submit"
-                    class="btn btn-link p-0 align-baseline text-decoration-none">{% trans 'Resend code' %}</button>
-          </form>
-        </div>
-        <div class="d-flex align-items-center my-4">
-          <hr class="flex-grow-1 my-0 bg-secondary-subtle" />
-          <span class="px-3 text-secondary small text-uppercase">{% trans 'or' %}</span>
-          <hr class="flex-grow-1 my-0 bg-secondary-subtle" />
-        </div>
-        <div class="d-grid">
-          {% if is_existing_user and not has_usable_password %}
-            {# No password set — clicking sends the reset email immediately #}
-            <form method="post"
-                  action="{% url 'account_reset_password' %}"
-                  class="d-grid">
-              {% csrf_token %}
-              <input type="hidden" name="email" value="{{ email }}" />
-              <button type="submit" class="btn btn-outline-primary py-2 fs-5">{% trans 'Use password instead' %}</button>
-            </form>
-          {% else %}
-            <a href="#"
-               id="show-password-btn"
-               class="btn btn-outline-primary py-2 fs-5 d-flex justify-content-center align-items-center">
-              {% if is_existing_user %}
-                {% trans 'Use password instead' %}
-              {% else %}
-                {% trans 'Sign up with password' %}
-              {% endif %}
-            </a>
-          {% endif %}
-        </div>
-      </div>
-      {# ── Password Section ── #}
-      <div id="password-section"
-           {% if not show_password_section %} style="display: none;"{% endif %}>
-        {% if is_existing_user and has_usable_password %}
-          <h5 class="text-center mb-4">{% trans 'Log in with password' %}</h5>
-          <form method="post" action="{% url 'account_confirm_login_code' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="password_login" />
-            {% if password_form.non_field_errors %}
-              <div class="alert alert-danger mb-3">
-                {% for error in password_form.non_field_errors %}{{ error }}{% endfor %}
+        {% endif %}
+        <div id="otp-code-step">
+          <div class="mb-3">
+            <input type="text"
+                   class="form-control text-center fw-bold fs-5 tracking-wide py-2 px-3{% if verify_form.code.errors %} is-invalid{% endif %}"
+                   name="{{ verify_form.code.name }}"
+                   id="{{ verify_form.code.id_for_label }}"
+                   required
+                   autofocus
+                   autocomplete="one-time-code"
+                   maxlength="10"
+                   placeholder="• • • • • •"
+                   style="letter-spacing: 0.3em"/>
+            {% if verify_form.code.errors %}
+              <div class="invalid-feedback text-center">
+                {% for error in verify_form.code.errors %}{{ error }}{% endfor %}
               </div>
             {% endif %}
-            <div class="mb-3">
-              <label class="form-label" for="{{ password_form.password.id_for_label }}">{% trans 'Password' %}</label>
-              <input type="password"
-                     class="form-control py-2 px-3 fs-6{% if password_form.password.errors %} is-invalid{% endif %}"
-                     name="{{ password_form.password.name }}"
-                     id="{{ password_form.password.id_for_label }}"
-                     autocomplete="current-password"
-                     required/>
-              {% if password_form.password.errors %}
-                <div class="invalid-feedback">
-                  {% for error in password_form.password.errors %}{{ error }}{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            <div class="d-grid mb-3">
-              <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Log in' %}</button>
-            </div>
-            <div class="text-center mb-3">
-              <input type="hidden" name="email" value="{{ email }}" />
-              <button type="submit"
-                      formnovalidate
-                      formaction="{% url 'account_reset_password' %}"
-                      formmethod="post"
-                      class="btn btn-link text-decoration-none small p-0 align-baseline">
-                {% trans 'Forgot password?' %}
-              </button>
-            </div>
+          </div>
+          {{ redirect_field }}
+          <div class="d-grid mb-3">
+            {% if is_existing_user %}
+              <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
+            {% else %}
+              <button class="btn btn-primary" type="submit">{% trans 'Sign up' %}</button>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+      <div class="text-center text-muted mb-3 small">
+        <form method="post"
+              action="{% url 'account_confirm_login_code' %}"
+              class="d-inline">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="resend" />
+          <button type="submit" class="btn btn-link">{% trans 'Request a new code' %}</button>
+        </form>
+      </div>
+      {% include 'account/_or.html' %}
+      <div class="d-grid">
+        {% if is_existing_user and not has_usable_password %}
+          {# No password set — clicking sends the reset email immediately #}
+          <form method="post"
+                action="{% url 'account_reset_password' %}"
+                class="d-grid">
+            {% csrf_token %}
+            <input type="hidden" name="email" value="{{ email }}" />
+            <button type="submit" class="btn btn-outline-primary">{% trans 'Use a password instead' %}</button>
           </form>
         {% else %}
-          <h5 class="text-center mb-4">{% trans 'Create your account' %}</h5>
-          <form method="post" action="{% url 'account_confirm_login_code' %}">
-            {% csrf_token %}
-            <input type="hidden" name="action" value="signup_password" />
-            {% if signup_form.non_field_errors %}
-              <div class="alert alert-danger mb-3">
-                {% for error in signup_form.non_field_errors %}{{ error }}{% endfor %}
-              </div>
+          <a href="#" id="show-password-btn" class="btn btn-outline-primary">
+            {% if is_existing_user %}
+              {% trans 'Use a password instead' %}
+            {% else %}
+              {% trans 'Sign up with a password' %}
             {% endif %}
-            <input type="hidden" name="email" value="{{ email }}" />
-            <div class="mb-3">
-              <label class="form-label" for="{{ signup_form.password1.id_for_label }}">{% trans 'Password' %}</label>
-              <input type="password"
-                     class="form-control py-2 px-3 fs-6{% if signup_form.password1.errors %} is-invalid{% endif %}"
-                     name="{{ signup_form.password1.name }}"
-                     id="{{ signup_form.password1.id_for_label }}"
-                     autocomplete="new-password"
-                     minlength="8"
-                     required/>
-              {% if signup_form.password1.errors %}
-                <div class="invalid-feedback">
-                  {% for error in signup_form.password1.errors %}{{ error }}{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="{{ signup_form.password2.id_for_label }}">{% trans 'Confirm password' %}</label>
-              <input type="password"
-                     class="form-control py-2 px-3 fs-6{% if signup_form.password2.errors %} is-invalid{% endif %}"
-                     name="{{ signup_form.password2.name }}"
-                     id="{{ signup_form.password2.id_for_label }}"
-                     autocomplete="new-password"
-                     required/>
-              {% if signup_form.password2.errors %}
-                <div class="invalid-feedback">
-                  {% for error in signup_form.password2.errors %}{{ error }}{% endfor %}
-                </div>
-              {% endif %}
-            </div>
-            <div class="mb-3">{{ signup_form.captcha }}</div>
-            <div class="d-grid mb-3">
-              <button class="btn btn-primary py-2 fs-5" type="submit">{% trans 'Sign up' %}</button>
-            </div>
-          </form>
+          </a>
         {% endif %}
-        <div class="d-flex align-items-center my-4">
-          <hr class="flex-grow-1 my-0 bg-secondary-subtle" />
-          <span class="px-3 text-secondary small text-uppercase">{% trans 'or' %}</span>
-          <hr class="flex-grow-1 my-0 bg-secondary-subtle" />
-        </div>
-        <div class="d-grid text-center">
-          <a href="#" id="show-code-btn" class="btn btn-outline-primary py-2 fs-5">{% trans 'Use code instead' %}</a>
-        </div>
-      </div>
-      <div class="text-center mt-4 pt-3 border-top">
-        <form method="post" action="{% url 'account_logout' %}" class="d-inline">
-          {% csrf_token %}
-          <input type="hidden" name="next" value="{% url 'account_login' %}" />
-          <button type="submit"
-                  class="btn btn-link text-decoration-none text-muted small p-0">
-            {% trans 'Back to login' %}
-          </button>
-        </form>
       </div>
     </div>
+    {# ── Password Section ── #}
+    <div id="password-section"
+         {% if not show_password_section %} style="display: none;"{% endif %}>
+      {% if is_existing_user and has_usable_password %}
+        <h2>{% trans 'Enter your password' %}</h2>
+        <p>
+          {% blocktrans trimmed %}Log in with <b>{{ email }}</b>.{% endblocktrans %}
+        </p>
+        <form method="post" action="{% url 'account_confirm_login_code' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="password_login" />
+          {% if password_form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+              {% for error in password_form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ password_form.password.id_for_label }}">{% trans 'Password' %}</label>
+            <input type="password"
+                   class="form-control py-2 px-3 fs-6{% if password_form.password.errors %} is-invalid{% endif %}"
+                   name="{{ password_form.password.name }}"
+                   id="{{ password_form.password.id_for_label }}"
+                   autocomplete="current-password"
+                   required/>
+            {% if password_form.password.errors %}
+              <div class="invalid-feedback">
+                {% for error in password_form.password.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="d-grid mb-3">
+            <button class="btn btn-primary" type="submit">{% trans 'Log in' %}</button>
+          </div>
+          <div class="text-center mb-3">
+            <input type="hidden" name="email" value="{{ email }}" />
+            <button type="submit"
+                    formnovalidate
+                    formaction="{% url 'account_reset_password' %}"
+                    formmethod="post"
+                    class="btn btn-link text-decoration-none small p-0 align-baseline">
+              {% trans 'Forgot your password?' %}
+            </button>
+          </div>
+        </form>
+      {% else %}
+        <h2>{% trans 'Sign up' %}</h2>
+        <p>
+          {% blocktrans trimmed %}Sign up with <b>{{ email }}</b>.{% endblocktrans %}
+        </p>
+        <form method="post" action="{% url 'account_confirm_login_code' %}">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="signup_password" />
+          {% if signup_form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+              {% for error in signup_form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+          <input type="hidden" name="email" value="{{ email }}" />
+          <div class="mb-3">
+            <label class="form-label" for="{{ signup_form.password1.id_for_label }}">{% trans 'Password' %}</label>
+            <input type="password"
+                   class="form-control py-2 px-3 fs-6{% if signup_form.password1.errors %} is-invalid{% endif %}"
+                   name="{{ signup_form.password1.name }}"
+                   id="{{ signup_form.password1.id_for_label }}"
+                   autocomplete="new-password"
+                   minlength="8"
+                   required/>
+            {% if signup_form.password1.errors %}
+              <div class="invalid-feedback">
+                {% for error in signup_form.password1.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ signup_form.password2.id_for_label }}">{% trans 'Confirm password' %}</label>
+            <input type="password"
+                   class="form-control py-2 px-3 fs-6{% if signup_form.password2.errors %} is-invalid{% endif %}"
+                   name="{{ signup_form.password2.name }}"
+                   id="{{ signup_form.password2.id_for_label }}"
+                   autocomplete="new-password"
+                   required/>
+            {% if signup_form.password2.errors %}
+              <div class="invalid-feedback">
+                {% for error in signup_form.password2.errors %}{{ error }}{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="mb-3">{{ signup_form.captcha }}</div>
+          <div class="d-grid mb-3">
+            <button class="btn btn-primary" type="submit">{% trans 'Sign up' %}</button>
+          </div>
+        </form>
+      {% endif %}
+      {% include 'account/_or.html' %}
+      <div class="d-grid text-center">
+        <a href="#" id="show-code-btn" class="btn btn-outline-primary">{% trans 'Use a code instead' %}</a>
+      </div>
+    </div>
+    <form method="post" action="{% url 'account_logout' %}" class="text-center">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{% url 'account_login' %}" />
+      <button type="submit" class="btn btn-link mt-4">{% trans 'Back to login' %}</button>
+    </form>
   </div>
 {% endblock %}

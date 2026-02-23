@@ -31,7 +31,7 @@ class UserAuthView(AllauthConfirmLoginCodeView):
     def get_next_url(self):
         email, user = self._get_email_and_user()
         if email and (user is None or not user.first_name):
-            return self.passthrough_next_url(reverse("complete_profile"))
+            return self.passthrough_next_url(reverse("account_onboard"))
         return super().get_next_url()
 
     def post(self, request, *args, **kwargs):
@@ -111,8 +111,8 @@ class UserAuthView(AllauthConfirmLoginCodeView):
         return ctx
 
 
-class CompleteProfileView(NextRedirectMixin, LoginRequiredMixin, UpdateView):
-    template_name = "account/complete_profile.html"
+class OnboardView(NextRedirectMixin, LoginRequiredMixin, UpdateView):
+    template_name = "account/onboard.html"
     fields = ["first_name", "last_name"]
 
     def get_object(self):
