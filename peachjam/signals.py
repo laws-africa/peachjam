@@ -105,7 +105,8 @@ def before_comment_posted(sender, comment, request, **kwargs):
 
 @receiver(user_logged_in)
 def set_user_language(sender, request, user, **kwargs):
-    setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    setattr(request, "set_language", profile.preferred_language.iso_639_1)
 
 
 @receiver(allauth_signals.email_changed)
