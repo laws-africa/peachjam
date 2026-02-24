@@ -171,6 +171,7 @@ PEACHJAM = {
     "CHAT_PUBLIC": False,
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
+    "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -208,6 +209,14 @@ ACCOUNT_FORMS = {
 }
 ACCOUNT_USER_DISPLAY = "peachjam.auth.user_display"
 ACCOUNT_USERNAME_REQUIRED = False
+
+ACCOUNT_LOGIN_BY_CODE_ENABLED = PEACHJAM["AUTH_OTP"]
+if PEACHJAM["AUTH_OTP"]:
+    ACCOUNT_LOGIN_BY_CODE_TIMEOUT = 600
+    ACCOUNT_LOGIN_BY_CODE_MAX_ATTEMPTS = 5
+    ACCOUNT_SIGNUP_FIELDS = ["email*"]
+else:
+    ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
