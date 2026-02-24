@@ -24,6 +24,7 @@ def general(request):
         "SEARCH_SEMANTIC": settings.PEACHJAM["SEARCH_SEMANTIC"],
         "CUSTOMERIO_JS_KEY": settings.PEACHJAM["CUSTOMERIO_JS_KEY"],
         "CUSTOMERIO_JOURNEYS_SITE_ID": settings.PEACHJAM["CUSTOMERIO_JOURNEYS_SITE_ID"],
+        "AUTH_OTP": settings.PEACHJAM["AUTH_OTP"],
         # this object will be injected into Javascript to provide configuration settings to the Javascript app
         "PEACHJAM_JS_CONFIG": {
             "appName": settings.PEACHJAM["APP_NAME"],
