@@ -29,8 +29,7 @@
         </div>
       {% endif %}
       <div class="mb-3">
-        <label class="form-label fw-bold text-dark"
-               for="{{ form.email.id_for_label }}">{% trans 'Email address' %}</label>
+        <label class="form-label" for="{{ form.email.id_for_label }}">{% trans 'Email address' %}</label>
         <input type="email"
                class="form-control"
                name="{{ form.email.name }}"
@@ -45,8 +44,7 @@
         {% endif %}
       </div>
       <div class="mb-3">
-        <label class="form-label fw-bold text-dark"
-               for="{{ form.password1.id_for_label }}">{% trans 'Password' %}</label>
+        <label class="form-label" for="{{ form.password1.id_for_label }}">{% trans 'Password' %}</label>
         <input type="password"
                class="form-control"
                name="{{ form.password1.name }}"
@@ -60,10 +58,7 @@
         {% endif %}
       </div>
       <div class="mb-3">
-        <label class="form-label fw-bold text-dark"
-               for="{{ form.password2.id_for_label }}">
-          {% trans 'Password (again)' %}
-        </label>
+        <label class="form-label" for="{{ form.password2.id_for_label }}">{% trans 'Password (again)' %}</label>
         <input type="password"
                class="form-control"
                name="{{ form.password2.name }}"
