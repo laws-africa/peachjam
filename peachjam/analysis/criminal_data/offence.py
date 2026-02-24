@@ -49,7 +49,7 @@ class OffenceMentionExtractor(BaseExtractor):
         offences = list(
             {o.strip().lower() for o in parsed.mentioned_offences if o.strip()}
         )
-        log.info(f"offences mentioned in {self.judgment}: {offences}")
+        log.info(f"Offences mentioned in {self.judgment.id}: {offences}")
 
         metadata = self.judgment.metadata_json or {}
         metadata["extracted_offences"] = offences
@@ -122,6 +122,8 @@ class OffenceMatcher(BaseExtractor):
                 offence=offence,
             )
             created_objs.append(obj)
-            log.info(f"Created JudgmentOffence {obj.id} for offence {offence}")
+            log.info(
+                f"Created JudgmentOffence {obj.id} for offence {offence} for judgment {self.judgment.id}"
+            )
 
         return created_objs

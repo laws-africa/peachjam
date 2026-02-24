@@ -73,9 +73,12 @@ class SentenceExtractor(BaseExtractor):
         return SentenceExtractionResult
 
     def save(self, parsed: SentenceExtractionResult):
-        created_objects = []
 
-        for s in parsed.sentences:
+        sentences = parsed.sentences
+        log.info(f"Found {len(sentences)} sentences for judgment {self.judgment.id}")
+
+        created_objects = []
+        for s in sentences:
             judgment_offence = None
 
             if s.offence_id:
