@@ -204,7 +204,7 @@ class Court(models.Model):
         return self.name
 
     def clean(self):
-        if self.locality.jurisdiction != self.country:
+        if self.locality and self.locality.jurisdiction != self.country:
             raise ValidationError(
                 {
                     "locality": _(
