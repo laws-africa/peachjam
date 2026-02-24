@@ -9,9 +9,9 @@ log = logging.getLogger(__name__)
 
 
 class SentenceExtractor(BaseExtractor):
-    def _build_prompt(self) -> str:
+    def build_prompt(self) -> str:
         judgment_text = self.judgment.get_content_as_text()
-        offences = JudgmentOffence.objects.filter(judgment=self.judgment) or []
+        offences = JudgmentOffence.objects.filter(judgment=self.judgment)
 
         if offences.exists():
             offences_block = "\n".join(
@@ -96,8 +96,7 @@ class SentenceExtractor(BaseExtractor):
 
             created_objects.append(sentence)
             log.info(
-                f"Created Sentence {sentence.id} "
-                f"(type={sentence.sentence_type}) "
+                f"Created Sentence (type={sentence.sentence_type})"
                 f"for judgment {self.judgment.id}"
             )
 

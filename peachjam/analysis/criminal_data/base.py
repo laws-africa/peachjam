@@ -47,7 +47,7 @@ class BaseExtractor(ABC):
                 {"role": "system", "content": self.system_prompt()},
                 {"role": "user", "content": prompt},
             ],
-            text_format=self.get_response_model(),
+            text_format=self.get_response_format(),
         )
 
         parsed = response.output_parsed

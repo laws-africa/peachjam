@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class OffenceMentionExtractor(BaseExtractor):
-    def _build_prompt(self) -> str:
+    def build_prompt(self) -> str:
         judgment_text = self.judgment.get_content_as_text()
         return f"""
             You are a legal information extraction engine.
@@ -54,7 +54,7 @@ class OffenceMentionExtractor(BaseExtractor):
         metadata = self.judgment.metadata_json or {}
         metadata["extracted_offences"] = offences
         self.judgment.metadata_json = metadata
-        self.judgment.save(updated_fields=["metadata_json"])
+        self.judgment.save(update_fields=["metadata_json"])
         return offences
 
 
@@ -122,6 +122,6 @@ class OffenceMatcher(BaseExtractor):
                 offence=offence,
             )
             created_objs.append(obj)
-            log.info(f"Created JudgmentOffence {obj.id} for offence {offence.id}")
+            log.info(f"Created JudgmentOffence {obj.id} for offence {offence}")
 
         return created_objs
