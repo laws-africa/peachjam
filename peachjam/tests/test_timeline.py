@@ -296,14 +296,17 @@ class TimelineRelationshipTests(TestCase):
             ).exists()
         )
 
-    def test_update_new_relationship_skips_if_event_work_date_is_missing(self):
-        old_doc = self.amending_work.documents.latest_expression().first()
-        old_doc.date = None
-        old_doc.save(update_fields=["date"])
+    def test_update_new_relationship_skips_if_event_work_has_no_document_expressions(
+        self,
+    ):
+        undoc_event_work = Work.objects.create(
+            title="Undocumented Event Work",
+            frbr_uri="/akn/za/act/2024/no-event-docs",
+        )
 
         amendment = Relationship.objects.create(
             subject_work=self.followed_work,
-            object_work=self.amending_work,
+            object_work=undoc_event_work,
             predicate=self.amended_predicate,
         )
 
@@ -316,14 +319,17 @@ class TimelineRelationshipTests(TestCase):
             ).exists()
         )
 
-    def test_update_new_citation_skips_if_citing_work_date_is_missing(self):
-        old_doc = self.amending_work.documents.latest_expression().first()
-        old_doc.date = None
-        old_doc.save(update_fields=["date"])
+    def test_update_new_citation_skips_if_citing_work_has_no_document_expressions(
+        self,
+    ):
+        undoc_citing_work = Work.objects.create(
+            title="Undocumented Citing Work",
+            frbr_uri="/akn/za/act/2024/no-citing-docs",
+        )
 
         citation = ExtractedCitation.objects.create(
             target_work=self.followed_work,
-            citing_work=self.amending_work,
+            citing_work=undoc_citing_work,
         )
 
         UserFollowing.update_new_citation_follows(citation)
