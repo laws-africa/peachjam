@@ -324,11 +324,12 @@ class UserFollowing(models.Model):
             )
             return
 
+        citing_work_date = self.latest_expression_date_for_work(citation.citing_work)
+        if citing_work_date is None:
+            return
+
         # avoid alerts for citations from documents older than cutoff
-        if (
-            citation.citing_work.documents.latest_expression().first().date
-            < self.cutoff_date
-        ):
+        if citing_work_date < self.cutoff_date:
             log.info(
                 "Citation from work %s is older than cutoff date %s for user %s",
                 citation.citing_work,
@@ -364,13 +365,17 @@ class UserFollowing(models.Model):
             )
             return
 
+        event_work_date = self.latest_expression_date_for_work(event_work)
+        if event_work_date is None:
+            return
+
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
             event_type=event_type,
             subject_works=event_work,
         ).exists()
 
-        if event_work.documents.latest_expression().first().date < self.cutoff_date:
+        if event_work_date < self.cutoff_date:
             log.info(
                 "relationship work %s is older than cutoff date %s for user %s",
                 event_work,
@@ -388,6 +393,18 @@ class UserFollowing(models.Model):
             return
 
         TimelineEvent.add_new_relationship_event(self, relationship, event_work)
+
+    def latest_expression_date_for_work(self, work):
+        latest_expression = work.documents.latest_expression().first()
+        if not latest_expression:
+            log.info("Work %s has no document expressions.", work)
+            return None
+
+        if latest_expression.date is None:
+            log.info("Work %s latest expression has no date.", work)
+            return None
+
+        return latest_expression.date
 
     @classmethod
     def update_follows_for_user(cls, user):
