@@ -9,6 +9,7 @@ from languages_plus.models import Language
 
 from peachjam.models import (
     Court,
+    ExtractedCitation,
     Judgment,
     Legislation,
     Locality,
@@ -292,6 +293,45 @@ class TimelineRelationshipTests(TestCase):
             TimelineEvent.objects.filter(
                 user_following=self.follow_followed,
                 event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            ).exists()
+        )
+
+    def test_update_new_relationship_skips_if_event_work_date_is_missing(self):
+        old_doc = self.amending_work.documents.latest_expression().first()
+        old_doc.date = None
+        old_doc.save(update_fields=["date"])
+
+        amendment = Relationship.objects.create(
+            subject_work=self.followed_work,
+            object_work=self.amending_work,
+            predicate=self.amended_predicate,
+        )
+
+        UserFollowing.update_new_relationship_follows(amendment)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(
+                user_following=self.follow_followed,
+                event_type=TimelineEvent.EventTypes.NEW_AMENDMENT,
+            ).exists()
+        )
+
+    def test_update_new_citation_skips_if_citing_work_date_is_missing(self):
+        old_doc = self.amending_work.documents.latest_expression().first()
+        old_doc.date = None
+        old_doc.save(update_fields=["date"])
+
+        citation = ExtractedCitation.objects.create(
+            target_work=self.followed_work,
+            citing_work=self.amending_work,
+        )
+
+        UserFollowing.update_new_citation_follows(citation)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(
+                user_following=self.follow_followed,
+                event_type=TimelineEvent.EventTypes.NEW_CITATION,
             ).exists()
         )
 
