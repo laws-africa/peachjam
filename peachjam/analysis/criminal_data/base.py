@@ -1,5 +1,3 @@
-# extraction/base.py
-
 import logging
 from abc import ABC, abstractmethod
 
