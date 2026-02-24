@@ -1,12 +1,91 @@
 {% extends "allauth/layouts/base.html" %}
-{% load i18n %}
+{% load account i18n %}
 {% block title %}
   {% trans 'Sign Up' %}
 {% endblock %}
 {% block content %}
-  <script>window.location.replace("{% url 'account_login' %}");</script>
-  <p class="text-center">
-    {% trans 'Redirecting to login...' %}
-    <a href="{% url 'account_login' %}">{% trans 'Click here' %}</a>
-  </p>
+  {% if AUTH_OTP %}
+    <script>window.location.replace("{% url 'account_login' %}");</script>
+    <p class="text-center">
+      {% trans 'Redirecting to login...' %}
+      <a href="{% url 'account_login' %}">{% trans 'Click here' %}</a>
+    </p>
+  {% else %}
+    <div class="text-center">
+      <h2 class="mb-4">{% blocktrans trimmed %}Sign up for {{ MY_LII }}{% endblocktrans %}</h2>
+      {% include "account/_social_login_buttons.html" %}
+    </div>
+    <form method="post" action="{% url 'account_signup' %}" id="signup-form">
+      <p>{% trans 'Create your account by filling in the form below.' %}</p>
+      {% csrf_token %}
+      {% if redirect_field_value %}
+        <input type="hidden"
+               name="{{ redirect_field_name }}"
+               value="{{ redirect_field_value }}"/>
+      {% endif %}
+      {% if form.non_field_errors %}
+        <div class="text-danger">
+          {% for error in form.non_field_errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+        </div>
+      {% endif %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.email.id_for_label }}">{% trans 'Email address' %}</label>
+        <input type="email"
+               class="form-control"
+               name="{{ form.email.name }}"
+               id="{{ form.email.id_for_label }}"
+               required
+               autofocus
+               placeholder="you@example.com"/>
+        {% if form.email.errors %}
+          <div class="text-danger">
+            {% for error in form.email.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password1.id_for_label }}">{% trans 'Password' %}</label>
+        <input type="password"
+               class="form-control"
+               name="{{ form.password1.name }}"
+               id="{{ form.password1.id_for_label }}"
+               autocomplete="new-password"
+               required/>
+        {% if form.password1.errors %}
+          <div class="text-danger">
+            {% for error in form.password1.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="{{ form.password2.id_for_label }}">{% trans 'Password (again)' %}</label>
+        <input type="password"
+               class="form-control"
+               name="{{ form.password2.name }}"
+               id="{{ form.password2.id_for_label }}"
+               autocomplete="new-password"
+               required/>
+        {% if form.password2.errors %}
+          <div class="text-danger">
+            {% for error in form.password2.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="mb-4">
+        {{ form.captcha }}
+        {% if form.captcha.errors %}
+          <div class="text-danger">
+            {% for error in form.captcha.errors %}<p class="m-1">{{ error }}</p>{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+      <div class="d-grid mb-3">
+        <button class="btn btn-primary" type="submit">{% trans 'Sign up' %}</button>
+      </div>
+      <div class="text-center">
+        {% trans 'Already have an account?' %}
+        <a href="{% url 'account_login' %}">{% trans 'Log in' %}</a>
+      </div>
+    </form>
+  {% endif %}
 {% endblock %}

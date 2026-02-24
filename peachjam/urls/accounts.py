@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.urls import include, path
 from django.views.generic import RedirectView
 
@@ -10,14 +11,10 @@ from peachjam.views import (
 )
 from peachjam.views.accounts import OnboardView, UserAuthView
 
-urlpatterns = [
-    path(
-        "login/code/",
-        RedirectView.as_view(pattern_name="account_login", query_string=True),
-        name="account_request_login_code",
-    ),
+urlpatterns = []
+
+urlpatterns += [
     path("", include("allauth.urls")),
-    path("login/auth", UserAuthView.as_view(), name="account_confirm_login_code"),
     path("accept-terms/", AcceptTermsView.as_view(), name="account_accept_terms"),
     path(
         "onboard",
@@ -40,3 +37,15 @@ urlpatterns = [
         ),
     ),
 ]
+
+# OTP-specific URLs: redirect allauth's "request a code" page to login,
+# and register our custom verification view.
+if settings.PEACHJAM["AUTH_OTP"]:
+    urlpatterns += [
+        path(
+            "login/code/",
+            RedirectView.as_view(pattern_name="account_login", query_string=True),
+            name="account_request_login_code",
+        ),
+        path("login/auth", UserAuthView.as_view(), name="account_confirm_login_code"),
+    ]
