@@ -921,4 +921,4 @@ class Sentence(models.Model):
         ordering = ("pk",)
 
     def __str__(self):
-        return f"{self.get_sentence_type_display()} for {self.criminal_count}"
+        return f"{self.get_sentence_type_display()} for {self.offence}"
