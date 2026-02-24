@@ -5,6 +5,7 @@ from urllib.parse import quote
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
+from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -204,6 +205,16 @@ class Court(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        if self.locality and self.locality.jurisdiction != self.country:
+            raise ValidationError(
+                {
+                    "locality": _(
+                        "The locality's jurisdiction and the court's country must match."
+                    )
+                }
+            )
 
     def get_absolute_url(self):
         return reverse("court", args=[self.code])
@@ -562,7 +573,7 @@ class Judgment(CoreDocument):
             if self.court.country:
                 self.jurisdiction = self.court.country
 
-            if self.court.locality:
+            if self.court.country:
                 self.locality = self.court.locality
 
         self.doc_type = "judgment"

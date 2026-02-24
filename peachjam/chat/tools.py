@@ -1,10 +1,12 @@
+import urllib
 from dataclasses import dataclass
 
 import requests
-from agents import Agent, Runner, function_tool
+from agents import function_tool
 from agents.run_context import RunContextWrapper
 from asgiref.sync import sync_to_async
 from django.conf import settings
+from django.urls.base import reverse
 
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
@@ -17,23 +19,11 @@ class DocumentChatContext:
     thread_id: str
 
 
-DOC_QA_AGENT = Agent(
-    name="document-qa",
-    instructions=(
-        "You are a question answering tool. Only use the document content for answers; if you cannot "
-        "answer the question based on the document content, say so."
-    ),
-    model="gpt-5-mini",
-)
-
-
 @function_tool
-async def answer_document_question(
-    ctx: RunContextWrapper[DocumentChatContext], question: str
-) -> str:
-    """Answers a question about the content of the current document. It knows which document is active.
-    It has no memory of previous questions. Only use it if you need to answer a specific question about the document
-    content. The document does not contain information about this website or its features."""
+async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
+    """Returns the text of the entire document. Use this tool if you need to answer questions about the document
+    that you cannot answer using the summary information already provided.
+    """
 
     @sync_to_async
     def get_text():
@@ -41,18 +31,13 @@ async def answer_document_question(
         return doc.get_content_as_text()
 
     text = await get_text()
+    if not text.strip():
+        return "The document has no text content. Suggest that the user downloads the document to view its content."
+
     if len(text) > 1_250_000:
-        return "Document text is too long to process."
+        return "The document text is too large to include here. Suggest that the user downloads the document instead."
 
-    response = await Runner.run(
-        DOC_QA_AGENT,
-        input=[
-            {"role": "user", "content": "The document content is below:\n\n" + text},
-            {"role": "user", "content": question},
-        ],
-    )
-
-    return str(response.final_output or "")
+    return text
 
 
 @function_tool
@@ -68,7 +53,7 @@ def get_provision_eid(
     - paragraph 4
     """
     doc = CoreDocument.objects.get(pk=ctx.context.document_id)
-    resp = get_citator_citations(doc.expression_frbr_uri, provision)
+    resp = get_citator_citations(doc.expression_frbr_uri, text=provision)
 
     # grab the first ref
     for ref in resp["citations"]:
@@ -79,15 +64,15 @@ def get_provision_eid(
     return f"Provision '{provision}' could not be identified."
 
 
-def get_citator_citations(expression_frbr_uri, text):
+def get_citator_citations(expression_frbr_uri, text=None, html=None):
     citator_url = settings.PEACHJAM["CITATOR_API"]
     citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
     resp = requests.post(
         citator_url + "get-citations",
         json={
             "frbr_uri": expression_frbr_uri,
-            "format": "text",
-            "body": text,
+            "format": "text" if text else "html",
+            "body": text or html,
         },
         headers={"Authorization": f"token {citator_key}"},
         timeout=60 * 10,
@@ -134,9 +119,29 @@ def provision_commencement_info(
     return "That provision has not commenced."
 
 
+@function_tool
+def get_search_link(search_term: str) -> str:
+    """Returns a relative URL that the user can use to conduct a site-wide content search for a given term. The search
+    system uses simple keyword search across the legal data corpus and is not very smart.
+
+    Use markdown link formatting to make the returned URL clickable in the chat interface,
+    eg: [Search for "unlawful arrest"]({generated_search_link})
+
+    Tips for the search_terms string:
+
+    - Use specific search terms that are likely to appear in legislation, court judgments and case summaries
+    - Do not pose the search as a question.
+    - Wrap phrases in double quotes for more exact matches, eg "unlawful arrest"
+    - The default is to match all terms
+    - Use OR to search for multiple terms, eg: "unlawful arrest" OR "illegal detention"
+    """
+    return reverse("search:search") + "?q=" + urllib.parse.quote(search_term)
+
+
 def get_tools_for_document(document):
     tools = [
-        answer_document_question,
+        get_document_text,
+        get_search_link,
     ]
 
     if isinstance(document, Legislation):
@@ -149,11 +154,3 @@ def get_tools_for_document(document):
         )
 
     return tools
-
-
-ALL_TOOLS = [
-    answer_document_question,
-    get_provision_eid,
-    get_provision_text,
-    provision_commencement_info,
-]

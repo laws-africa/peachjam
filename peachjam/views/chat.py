@@ -133,7 +133,10 @@ class StartDocumentChatView(
             context,
             request=self.request,
         )
-        return JsonResponse({"message_html": html}, status=403)
+        return JsonResponse(
+            {"message_html": html, "limit_reached": context.get("limit_reached")},
+            status=403,
+        )
 
 
 class ChatThreadDetailMixin(LoginRequiredMixin, PermissionRequiredMixin, DetailView):

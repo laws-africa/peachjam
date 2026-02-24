@@ -1,4 +1,8 @@
-from allauth.account.adapter import DefaultAccountAdapter
+import logging
+
+from allauth.account.adapter import DefaultAccountAdapter, get_adapter
+from allauth.account.internal.flows.code_verification import user_id_to_str
+from allauth.account.internal.flows.login_by_code import LoginCodeVerificationProcess
 from allauth.account.utils import perform_login
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
@@ -12,6 +16,43 @@ from templated_email import send_templated_mail
 
 from peachjam.models import pj_settings
 from peachjam.signals import password_reset_started
+
+logger = logging.getLogger(__name__)
+
+_original_send_by_email = LoginCodeVerificationProcess.send_by_email
+_original_finish = LoginCodeVerificationProcess.finish
+
+
+def _patched_send_by_email(self, email):
+    adapter = get_adapter()
+    code = adapter.generate_login_code()
+    context = {
+        "request": self.request,
+        "code": code,
+    }
+    adapter.send_mail("account/email/login_code", email, context)
+    self.state["code"] = code
+    self.add_sent_message({"email": email, "recipient": email})
+
+
+def _patched_finish(self, redirect_url):
+    if not self.user:
+        email = self.state.get("email")
+        if email:
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={"username": email},
+            )
+            if created:
+                user.set_unusable_password()
+                user.save()
+            self.state["user_id"] = user_id_to_str(user)
+            self._user = user
+    return _original_finish(self, redirect_url)
+
+
+LoginCodeVerificationProcess.send_by_email = _patched_send_by_email
+LoginCodeVerificationProcess.finish = _patched_finish
 
 
 def user_display(user):
@@ -56,6 +97,17 @@ class AccountAdapter(DefaultAccountAdapter):
                 send_templated_mail(**mail_kwargs)
         else:
             send_templated_mail(**mail_kwargs)
+
+    def generate_login_code(self):
+        code = super().generate_login_code()
+        if settings.DEBUG:
+            logger.info(
+                "\n"
+                "╔══════════════════════════════════════╗\n"
+                "║       LOGIN CODE: %-18s ║\n"
+                "╚══════════════════════════════════════╝" % code
+            )
+        return code
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):
