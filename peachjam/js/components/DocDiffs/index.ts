@@ -64,6 +64,13 @@ class DocDiffsManager {
       return;
     }
     if (this.inlineDiff) this.inlineDiff.close();
+
+    const target = document.createElement('div');
+    const anchorElement = document.querySelector(`[data-eid="${provision.id}"`);
+    if (anchorElement) {
+      anchorElement.after(target);
+    }
+
     this.inlineDiff = createAndMountApp({
       component: ProvisionDiffInline,
       props: {
@@ -73,7 +80,7 @@ class DocDiffsManager {
         serviceUrl: this.serviceUrl
       },
       use: [vueI18n],
-      mountTarget: document.createElement('div')
+      mountTarget: target
     });
     this.inlineDiff.$el.addEventListener('close', () => {
       this.inlineDiff = null;
