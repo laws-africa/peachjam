@@ -17,7 +17,6 @@ from peachjam.models import (
     DocumentContent,
     ExtractedCitation,
     Folder,
-    Judgment,
     Relationship,
     SavedDocument,
     SourceFile,
@@ -25,11 +24,9 @@ from peachjam.models import (
     UserProfile,
     Work,
 )
-from peachjam.models.lifecycle import after_attribute_changed
 from peachjam.tasks import (
     generate_judgment_summary,
     update_extracted_citations_for_a_work,
-    update_flynote_taxonomy,
 )
 from peachjam_search.models import SavedSearch
 
@@ -261,8 +258,3 @@ def chat_thread_deleted(sender, instance, **kwargs):
 
     session = get_session(instance)
     async_to_sync(session.clear_session)()
-
-
-@after_attribute_changed(Judgment, "flynote")
-def when_flynote_changed(judgment):
-    update_flynote_taxonomy(judgment.pk, schedule=5)

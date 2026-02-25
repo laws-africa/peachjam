@@ -2,7 +2,6 @@ from django.db.models import Q
 from django.views.generic import TemplateView
 
 from peachjam.models import Author, GenericDocument, Judgment, Legislation
-from peachjam.models.settings import pj_settings
 
 
 class HomePageView(TemplateView):
@@ -35,6 +34,5 @@ class HomePageView(TemplateView):
         context["recent_documents"] = recent_documents
         context["recent_legislation"] = recent_legislation
         context["authors"] = authors
-        context["has_flynote_topics"] = bool(pj_settings().flynote_taxonomy_root)
 
         return context

@@ -78,17 +78,6 @@
   {% block my-lii %}
     {% include 'peachjam/my/_frontpage_loader.html' %}
   {% endblock %}
-  {% if has_flynote_topics %}
-    {% block explore-topics %}
-      <section class="my-5 bg-light py-5">
-        <div class="container">
-          <h2 class="mb-3">{% trans 'Explore case law by topic' %}</h2>
-          <p>{% trans 'Browse judgments organised by legal topic and subject area.' %}</p>
-          <a href="{% url 'flynote_topic_list' %}" class="btn btn-primary">{% trans 'Explore topics' %} →</a>
-        </div>
-      </section>
-    {% endblock %}
-  {% endif %}
   {% block recent-documents %}
     <section class="my-5">
       <div class="container">
