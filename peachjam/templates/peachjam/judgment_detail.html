@@ -102,7 +102,10 @@
       </dt>
       <dd>
         {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
-        {% include 'peachjam/_flynote_display.html' %}
+        {% if document.flynote %}
+          <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
+          <div class="mb-2 fst-italic">{{ document.flynote|safe }}</div>
+        {% endif %}
         <details>
           <summary class="mb-1" data-track-event="Document | Toggle summary">
             {% trans 'Read full summary' %}
