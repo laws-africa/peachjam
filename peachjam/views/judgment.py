@@ -1,13 +1,16 @@
 from django.contrib import messages
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, TemplateView
+from django.views.generic.base import RedirectView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
+from peachjam.models.settings import pj_settings
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
 from peachjam_subs.mixins import SubscriptionRequiredMixin
@@ -41,6 +44,14 @@ class JudgmentListView(TemplateView):
         pass
 
 
+class FlynoteTopicListView(RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        root = pj_settings().flynote_taxonomy_root
+        if root:
+            return root.get_absolute_url()
+        return reverse("judgment_list")
+
+
 @registry.register_doc_type("judgment")
 class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
@@ -69,7 +80,30 @@ class JudgmentDetailView(BaseDocumentDetailView):
             bench.judge
             for bench in self.get_object().bench.select_related("judge").all()
         ]
+        self.add_flynote_taxonomies(context)
         return context
+
+    def add_flynote_taxonomies(self, context):
+        settings = pj_settings()
+        root = settings.flynote_taxonomy_root
+        if not root:
+            return
+
+        doc = self.object
+        all_topic_ids = set(doc.taxonomies.values_list("topic__pk", flat=True))
+        flynote_topics = root.get_descendants().filter(pk__in=all_topic_ids)
+
+        if not flynote_topics.exists():
+            return
+
+        flynote_pks = set(flynote_topics.values_list("pk", flat=True))
+        context["taxonomies"] = {
+            k: v
+            for k, v in context.get("taxonomies", {}).items()
+            if k.pk not in flynote_pks
+        }
+
+        context["flynote_taxonomies"] = flynote_topics
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
