@@ -319,9 +319,7 @@ class TimelineRelationshipTests(TestCase):
             ).exists()
         )
 
-    def test_update_new_citation_skips_if_citing_work_has_no_document_expressions(
-        self,
-    ):
+    def test_update_new_citation_skips_if_citing_work_has_no_documents(self):
         undoc_citing_work = Work.objects.create(
             title="Undocumented Citing Work",
             frbr_uri="/akn/za/act/2024/no-citing-docs",
@@ -340,6 +338,43 @@ class TimelineRelationshipTests(TestCase):
                 event_type=TimelineEvent.EventTypes.NEW_CITATION,
             ).exists()
         )
+
+    def test_update_new_citation_skips_if_citing_work_before_cutoff(self):
+        citing_doc = self.amending_work.documents.latest_expression().first()
+        citing_doc.date = self.follow_followed.cutoff_date - timedelta(days=1)
+        citing_doc.save(update_fields=["date"])
+
+        citation = ExtractedCitation.objects.create(
+            target_work=self.followed_work,
+            citing_work=self.amending_work,
+        )
+
+        UserFollowing.update_new_citation_follows(citation)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(
+                user_following=self.follow_followed,
+                event_type=TimelineEvent.EventTypes.NEW_CITATION,
+            ).exists()
+        )
+
+    def test_update_new_citation_creates_event_when_citing_work_after_cutoff(self):
+        citing_doc = self.amending_work.documents.latest_expression().first()
+        citing_doc.date = self.follow_followed.cutoff_date + timedelta(days=1)
+        citing_doc.save(update_fields=["date"])
+
+        citation = ExtractedCitation.objects.create(
+            target_work=self.followed_work,
+            citing_work=self.amending_work,
+        )
+
+        UserFollowing.update_new_citation_follows(citation)
+
+        event = TimelineEvent.objects.get(
+            user_following=self.follow_followed,
+            event_type=TimelineEvent.EventTypes.NEW_CITATION,
+        )
+        self.assertIn(self.amending_work, event.subject_works.all())
 
     def test_send_new_relationship_email_sends_separate_templates(self):
         amendment = Relationship.objects.create(
