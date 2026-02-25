@@ -54,12 +54,6 @@ def normalise_flynote_name(name):
 
 def get_or_create_taxonomy_node(parent, name):
 
-    target_slug = (f"{parent.slug}-" if parent else "") + slugify(name)
-
-    existing = Taxonomy.objects.filter(slug=target_slug).first()
-    if existing:
-        return existing
-
     children = parent.get_children() if parent else Taxonomy.get_root_nodes()
     normalised = normalise_flynote_name(name)
     for child in children:
@@ -67,11 +61,9 @@ def get_or_create_taxonomy_node(parent, name):
             return child
 
     if parent:
-        node = parent.add_child(name=name)
+        return parent.add_child(name=name)
     else:
-        node = Taxonomy.add_root(name=name)
-
-    return node
+        return Taxonomy.add_root(name=name)
 
 
 def update_flynote_taxonomy_for_judgment(judgment_id):
@@ -87,22 +79,15 @@ def update_flynote_taxonomy_for_judgment(judgment_id):
         log.warning("No flynote taxonomy root configured, skipping.")
         return
 
-    # 1. Remove existing flynote taxonomy links for this judgment
-    flynote_descendant_ids = set(
-        Taxonomy.objects.filter(
-            path__startswith=root.path, depth__gt=root.depth
-        ).values_list("pk", flat=True)
-    )
+    flynote_descendant_ids = set(root.get_descendants().values_list("pk", flat=True))
     DocumentTopic.objects.filter(
         document=judgment, topic_id__in=flynote_descendant_ids
     ).delete()
 
-    # 2. Parse flynote text
     paths = parse_flynote_text(judgment.flynote)
     if not paths:
         return
 
-    # 3 & 4. Walk hierarchy and link leaf nodes
     leaf_topics = set()
     for path in paths:
         current_parent = root
