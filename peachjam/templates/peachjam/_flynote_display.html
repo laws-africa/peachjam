@@ -4,7 +4,12 @@
   <div class="mb-2 fst-italic">
     {% for topic in flynote_taxonomies %}
       {% if not forloop.first %};{% endif %}
-      <a href="{{ topic.get_absolute_url }}">{{ topic.path_name }}</a>
+      {% for ancestor in topic.get_ancestors %}
+        {% if ancestor.depth > flynote_root.depth %}
+          <a href="{{ ancestor.get_absolute_url }}">{{ ancestor.name }}</a> —
+        {% endif %}
+      {% endfor %}
+      <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
     {% endfor %}
     .
   </div>

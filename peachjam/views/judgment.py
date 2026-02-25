@@ -96,14 +96,17 @@ class JudgmentDetailView(BaseDocumentDetailView):
         if not flynote_topics.exists():
             return
 
-        flynote_pks = set(flynote_topics.values_list("pk", flat=True))
+        # Exclude all flynote taxonomy nodes (root + all descendants) from Collections
+        all_flynote_pks = set(root.get_descendants().values_list("pk", flat=True))
+        all_flynote_pks.add(root.pk)
         context["taxonomies"] = {
             k: v
             for k, v in context.get("taxonomies", {}).items()
-            if k.pk not in flynote_pks
+            if k.pk not in all_flynote_pks
         }
 
         context["flynote_taxonomies"] = flynote_topics
+        context["flynote_root"] = root
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")

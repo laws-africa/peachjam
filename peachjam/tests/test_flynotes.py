@@ -336,6 +336,7 @@ class JudgmentDetailFlynoteContextTest(TestCase):
         view.add_flynote_taxonomies(context)
 
         self.assertIn("flynote_taxonomies", context)
+        self.assertIn("flynote_root", context)
         topics = context["flynote_taxonomies"]
         self.assertEqual(topics.count(), 1)
         topic = topics.first()
