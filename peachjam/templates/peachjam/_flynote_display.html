@@ -2,9 +2,12 @@
 {% if flynote_taxonomies %}
   <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
   <div class="mb-2 fst-italic">
-    {% for topic in flynote_taxonomies %}
+    {% for path in flynote_taxonomies %}
       {% if not forloop.first %};{% endif %}
-      <a href="{{ topic.get_absolute_url }}">{{ topic.path_name }}</a>
+      {% for node in path %}
+        {% if not forloop.first %}—{% endif %}
+        <a href="{{ node.url }}">{{ node.name }}</a>
+      {% endfor %}
     {% endfor %}
     .
   </div>

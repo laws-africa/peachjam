@@ -11,6 +11,7 @@ from django.views.generic.base import RedirectView
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
 from peachjam.models.settings import pj_settings
+from peachjam.models.taxonomies import Taxonomy
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
 from peachjam_subs.mixins import SubscriptionRequiredMixin
@@ -33,6 +34,7 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun"] = _("judgment")
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
+        context["has_flynote_topics"] = bool(pj_settings().flynote_taxonomy_root)
         self.add_entity_profile(context)
         self.get_court_classes(context)
         return context
@@ -91,19 +93,30 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
         doc = self.object
         all_topic_ids = set(doc.taxonomies.values_list("topic__pk", flat=True))
-        flynote_topics = root.get_descendants().filter(pk__in=all_topic_ids)
+        flynote_topics = Taxonomy.objects.filter(
+            pk__in=all_topic_ids, path__startswith=root.path, depth__gt=root.depth
+        )
 
         if not flynote_topics.exists():
             return
 
-        flynote_pks = set(flynote_topics.values_list("pk", flat=True))
-        context["taxonomies"] = {
-            k: v
-            for k, v in context.get("taxonomies", {}).items()
-            if k.pk not in flynote_pks
-        }
+        non_flynote_ids = all_topic_ids - set(
+            flynote_topics.values_list("pk", flat=True)
+        )
+        context["taxonomies"] = Taxonomy.get_tree_for_items(
+            Taxonomy.objects.filter(pk__in=non_flynote_ids)
+        )
 
-        context["flynote_taxonomies"] = flynote_topics
+        context["flynote_taxonomies"] = self.build_flynote_display(flynote_topics, root)
+
+    def build_flynote_display(self, leaf_topics, root):
+        paths = []
+        for topic in leaf_topics:
+            ancestors = topic.get_ancestors().filter(depth__gt=root.depth)
+            path = [{"name": a.name, "url": a.get_absolute_url()} for a in ancestors]
+            path.append({"name": topic.name, "url": topic.get_absolute_url()})
+            paths.append(path)
+        return paths
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
