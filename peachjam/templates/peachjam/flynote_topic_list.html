@@ -1,0 +1,38 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Explore case law by topic' %}
+{% endblock %}
+{% block page-content %}
+  <section class="container py-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans 'Explore case law by topic' %}</li>
+      </ol>
+    </nav>
+    <h1 class="mb-2">{% trans 'Explore case law by topic' %}</h1>
+    <p class="text-muted mb-4">{% trans 'Browse judgments organised by legal topic and subject area.' %}</p>
+    {% if topics %}
+      <div class="row">
+        {% for item in topics %}
+          <div class="col-md-4 mb-3">
+            <a href="{{ item.topic.get_absolute_url }}" class="text-decoration-none">
+              <div class="p-3 border rounded h-100">
+                <span class="fw-semibold">{{ item.topic.name }}</span>
+                <span class="text-muted ms-1">({{ item.count }})</span>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-muted">{% trans 'No topics found.' %}</p>
+    {% endif %}
+  </section>
+{% endblock %}

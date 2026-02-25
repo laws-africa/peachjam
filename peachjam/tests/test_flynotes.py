@@ -289,10 +289,11 @@ class FlynoteTopicListViewTest(TestCase):
         settings.flynote_taxonomy_root = self.root
         settings.save()
 
-    def test_redirects_to_taxonomy_page(self):
+    def test_renders_topic_list_page(self):
         response = self.client.get(reverse("flynote_topic_list"))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, self.root.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "peachjam/flynote_topic_list.html")
+        self.assertIn("topics", response.context)
 
     def test_redirects_to_judgment_list_when_no_root(self):
         settings = PeachJamSettings.load()

@@ -1,4 +1,5 @@
 from django.contrib import messages
+from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
@@ -6,11 +7,11 @@ from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, TemplateView
-from django.views.generic.base import RedirectView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
 from peachjam.models.settings import pj_settings
+from peachjam.models.taxonomies import DocumentTopic
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
 from peachjam_subs.mixins import SubscriptionRequiredMixin
@@ -44,12 +45,35 @@ class JudgmentListView(TemplateView):
         pass
 
 
-class FlynoteTopicListView(RedirectView):
-    def get_redirect_url(self, *args, **kwargs):
+class FlynoteTopicListView(TemplateView):
+    template_name = "peachjam/flynote_topic_list.html"
+
+    def get(self, request, *args, **kwargs):
         root = pj_settings().flynote_taxonomy_root
-        if root:
-            return root.get_absolute_url()
-        return reverse("judgment_list")
+        if not root:
+            return redirect(reverse("judgment_list"))
+        return super().get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        root = pj_settings().flynote_taxonomy_root
+
+        children = root.get_children()
+        topics = []
+        for child in children:
+            descendant_ids = list(child.get_descendants().values_list("pk", flat=True))
+            descendant_ids.append(child.pk)
+            count = (
+                DocumentTopic.objects.filter(topic_id__in=descendant_ids)
+                .values("document_id")
+                .distinct()
+                .count()
+            )
+            topics.append({"topic": child, "count": count})
+
+        context["topics"] = topics
+        context["root"] = root
+        return context
 
 
 @registry.register_doc_type("judgment")
