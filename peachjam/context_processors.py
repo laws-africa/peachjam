@@ -42,5 +42,6 @@ def general(request):
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
             },
+            "helpscoutBeaconId": pj_settings().helpscout_beacon_id,
         },
     }
