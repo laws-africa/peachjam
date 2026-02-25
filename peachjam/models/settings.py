@@ -173,6 +173,15 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("ID of a Google custom search engine."),
     )
+    flynote_taxonomy_root = models.ForeignKey(
+        "peachjam.Taxonomy",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name=_("flynote taxonomy root"),
+        help_text=_("Root taxonomy node for automatically managed flynote topics."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")

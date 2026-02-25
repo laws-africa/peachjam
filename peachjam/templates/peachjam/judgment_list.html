@@ -14,6 +14,17 @@
       <a href="{% url 'court' 'all' %}" class="ms-3">{% trans "Explore all courts" %} →</a>
     </div>
   {% endblock %}
+  {% if has_flynote_topics %}
+    {% block explore-topics %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <h5 class="card-title">{% trans "Explore case law by topic" %}</h5>
+          <p class="card-text">{% trans "Browse judgments organised by legal topic." %}</p>
+          <a href="{% url 'flynote_topic_list' %}" class="btn btn-primary">{% trans "Explore topics" %} →</a>
+        </div>
+      </div>
+    {% endblock %}
+  {% endif %}
   {% include 'peachjam/_court_list.html' %}
   {% block after-courts %}{% endblock %}
   <h4 class="mb-2 mt-5">
