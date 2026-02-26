@@ -5,7 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 from languages_plus.models import Language
 
-from peachjam.flynotes import (
+from peachjam.analysis.flynotes import (
     get_or_create_taxonomy_node,
     normalise_flynote_name,
     parse_flynote_text,
@@ -174,7 +174,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         )
 
     def test_creates_taxonomy_nodes(self):
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
 
         self.assertTrue(Taxonomy.objects.filter(name="Criminal law").exists())
         self.assertTrue(Taxonomy.objects.filter(name="admissibility").exists())
@@ -185,7 +185,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertTrue(Taxonomy.objects.filter(name="Blom principles").exists())
 
     def test_links_judgment_to_leaf_nodes_only(self):
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
 
         linked_topics = set(
             DocumentTopic.objects.filter(document=self.judgment).values_list(
@@ -199,7 +199,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertNotIn("circumstantial evidence", linked_topics)
 
     def test_taxonomy_tree_structure(self):
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
 
         criminal = Taxonomy.objects.get(name="Criminal law")
         self.assertEqual(criminal.get_parent().pk, self.root.pk)
@@ -214,13 +214,13 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertEqual(circumstantial.get_parent().pk, criminal.pk)
 
     def test_clears_old_links_on_reprocess(self):
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
         initial_count = DocumentTopic.objects.filter(document=self.judgment).count()
         self.assertEqual(initial_count, 2)
 
         self.judgment.flynote = "Contract law \u2014 breach of contract"
         self.judgment.save()
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
 
         linked_topics = set(
             DocumentTopic.objects.filter(document=self.judgment).values_list(
@@ -230,7 +230,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertEqual(linked_topics, {"breach of contract"})
 
     def test_reuses_existing_taxonomy_nodes(self):
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
         criminal_pk = Taxonomy.objects.get(name="Criminal law").pk
 
         judgment2 = Judgment.objects.create(
@@ -241,7 +241,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
             language=Language.objects.first(),
             flynote="Criminal law \u2014 sentencing",
         )
-        update_flynote_taxonomy_for_judgment(judgment2.pk)
+        update_flynote_taxonomy_for_judgment(judgment2)
 
         self.assertEqual(Taxonomy.objects.filter(name="Criminal law").count(), 1)
         self.assertEqual(Taxonomy.objects.get(name="Criminal law").pk, criminal_pk)
@@ -251,7 +251,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         settings.flynote_taxonomy_root = None
         settings.save()
 
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
         self.assertEqual(
             DocumentTopic.objects.filter(document=self.judgment).count(), 0
         )
@@ -260,7 +260,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.judgment.flynote = ""
         self.judgment.save()
 
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
         self.assertEqual(
             DocumentTopic.objects.filter(document=self.judgment).count(), 0
         )
@@ -269,7 +269,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.judgment.flynote = "This is a plain prose description of the case."
         self.judgment.save()
 
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
         self.assertEqual(
             DocumentTopic.objects.filter(document=self.judgment).count(), 0
         )
@@ -326,7 +326,7 @@ class JudgmentDetailFlynoteContextTest(TestCase):
             flynote="Criminal law \u2014 admissibility \u2014 trial within a trial",
             case_summary="Test summary",
         )
-        update_flynote_taxonomy_for_judgment(self.judgment.pk)
+        update_flynote_taxonomy_for_judgment(self.judgment)
 
     def test_add_flynote_taxonomies_builds_paths(self):
         from peachjam.views.judgment import JudgmentDetailView
@@ -363,17 +363,10 @@ class JudgmentDetailFlynoteContextTest(TestCase):
         view = JudgmentDetailView()
         view.object = self.judgment
 
-        all_topic_ids = set(
-            self.judgment.taxonomies.values_list("topic__pk", flat=True)
-        )
-        context = {
-            "taxonomies": Taxonomy.get_tree_for_items(
-                Taxonomy.objects.filter(pk__in=all_topic_ids)
-            )
-        }
-        view.add_flynote_taxonomies(context)
+        qs = view.get_taxonomy_queryset()
+        tree = Taxonomy.get_tree_for_items(qs)
 
-        for taxonomy_node in context["taxonomies"]:
+        for taxonomy_node in tree:
             self.assertNotEqual(taxonomy_node.name, "Criminal law")
             self.assertNotEqual(taxonomy_node.name, "admissibility")
             self.assertNotEqual(taxonomy_node.name, "trial within a trial")

@@ -4,7 +4,6 @@ import re
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 
-from peachjam.models import Judgment
 from peachjam.models.settings import pj_settings
 from peachjam.models.taxonomies import DocumentTopic, Taxonomy
 
@@ -66,12 +65,7 @@ def get_or_create_taxonomy_node(parent, name):
         return Taxonomy.add_root(name=name)
 
 
-def update_flynote_taxonomy_for_judgment(judgment_id):
-
-    judgment = Judgment.objects.filter(pk=judgment_id).first()
-    if not judgment:
-        log.info(f"Judgment {judgment_id} not found, skipping flynote processing.")
-        return
+def update_flynote_taxonomy_for_judgment(judgment):
 
     settings = pj_settings()
     root = settings.flynote_taxonomy_root
@@ -99,5 +93,5 @@ def update_flynote_taxonomy_for_judgment(judgment_id):
         DocumentTopic.objects.get_or_create(document=judgment, topic=topic)
 
     log.info(
-        f"Linked judgment {judgment_id} to {len(leaf_topics)} flynote taxonomy topics."
+        f"Linked judgment {judgment.pk} to {len(leaf_topics)} flynote taxonomy topics."
     )

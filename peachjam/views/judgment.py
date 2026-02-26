@@ -107,6 +107,16 @@ class JudgmentDetailView(BaseDocumentDetailView):
         self.add_flynote_taxonomies(context)
         return context
 
+    def get_taxonomy_queryset(self):
+        qs = super().get_taxonomy_queryset()
+        settings = pj_settings()
+        root = settings.flynote_taxonomy_root
+        if root:
+            flynote_pks = set(root.get_descendants().values_list("pk", flat=True))
+            flynote_pks.add(root.pk)
+            qs = qs.exclude(pk__in=flynote_pks)
+        return qs
+
     def add_flynote_taxonomies(self, context):
         settings = pj_settings()
         root = settings.flynote_taxonomy_root
@@ -119,15 +129,6 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
         if not flynote_topics.exists():
             return
-
-        # Exclude all flynote taxonomy nodes (root + all descendants) from Collections
-        all_flynote_pks = set(root.get_descendants().values_list("pk", flat=True))
-        all_flynote_pks.add(root.pk)
-        context["taxonomies"] = {
-            k: v
-            for k, v in context.get("taxonomies", {}).items()
-            if k.pk not in all_flynote_pks
-        }
 
         context["flynote_taxonomies"] = flynote_topics
         context["flynote_root"] = root

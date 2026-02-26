@@ -177,7 +177,7 @@ class PeachJamSettings(SingletonModel):
         "peachjam.Taxonomy",
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,
         related_name="+",
         verbose_name=_("flynote taxonomy root"),
         help_text=_("Root taxonomy node for automatically managed flynote topics."),
