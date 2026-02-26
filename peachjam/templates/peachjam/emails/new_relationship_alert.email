@@ -3,31 +3,5 @@
 {% block subject %}{{subject_line}}{% endblock %}
 {% block alert-body %}
   <p>{% trans "There are new updates for documents that you have saved." %}</p>
-  {% for item in saved_documents %}
-    {% for rel in item.relationships.values %}
-      <div style="margin-top: 1rem;">
-        <p>
-          {{ rel.label }}
-          <a href="{{ site.domain }}{{ item.saved_document.get_absolute_url }}?utm_campaign=new_relationship&utm_source=alert&utm_medium=email">
-            <b>{{ item.saved_document.work.title }}</b>
-          </a>
-        </p>
-        <ul>
-          {% for doc in rel.documents %}
-            <li style="margin-bottom: 1rem">
-              <a href="{{ site.domain }}{{ doc.get_absolute_url }}?utm_campaign=new_relationship&utm_source=alert&utm_medium=email">
-                {{ doc.title }}
-              </a>
-              {% if doc.blurb %}<div>{{ doc.blurb | safe }}</div>{% endif %}
-              {% if doc.flynote %}
-                <div>
-                  <em>{{ doc.flynote | safe }}</em>
-                </div>
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endfor %}
-  {% endfor %}
+  {% include 'peachjam/emails/_new_relationship_alert_body.html' %}
 {% endblock %}
