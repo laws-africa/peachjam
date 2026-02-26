@@ -165,13 +165,21 @@ class PeachJamSettings(SingletonModel):
         help_text=_("Show the contact form."),
     )
     robots_txt = models.TextField(
-        null=True, blank=True, help_text=_("Additional robots.txt rules.")
+        null=True,
+        blank=True,
+        help_text=_("Additional robots.txt rules."),
     )
     google_search_engine_id = models.CharField(
         max_length=100,
         null=True,
         blank=True,
         help_text=_("ID of a Google custom search engine."),
+    )
+    helpscout_beacon_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("ID of a helpscout contact us beacon."),
     )
 
     class Meta:
