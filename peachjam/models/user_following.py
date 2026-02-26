@@ -371,6 +371,14 @@ class UserFollowing(models.Model):
             )
             return
 
+        if not event_work.documents.latest_expression().exists():
+            log.info(
+                "Event work %s has no document expressions for user %s; skipping citation alert.",
+                event_work,
+                self.user,
+            )
+            return
+
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
             event_type=event_type,
