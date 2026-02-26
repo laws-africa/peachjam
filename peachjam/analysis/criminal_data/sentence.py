@@ -1,11 +1,26 @@
 import logging
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
 
 from peachjam.models import JudgmentOffence, Sentence
 
 from .base import BaseExtractor
-from .types import SentenceExtractionResult
 
 log = logging.getLogger(__name__)
+
+
+class ExtractedSentence(BaseModel):
+    offence_id: Optional[int] = None
+    sentence_type: str
+    duration_months: Optional[int] = None
+    fine_amount: Optional[int] = None
+    mandatory_minimum: Optional[bool] = None
+    suspended: Optional[bool] = False
+
+
+class SentenceExtractionResult(BaseModel):
+    sentences: List[ExtractedSentence] = Field(default_factory=list)
 
 
 class SentenceExtractor(BaseExtractor):

@@ -1,12 +1,27 @@
 import json
 import logging
+from typing import List, Optional
+
+from pydantic import BaseModel, Field
 
 from peachjam.models import JudgmentOffence, Offence
 
 from .base import BaseExtractor
-from .types import MatchOffenceResult, MentionedOffences
 
 log = logging.getLogger(__name__)
+
+
+class MentionedOffences(BaseModel):
+    mentioned_offences: List[str]
+
+
+class MatchedOffence(BaseModel):
+    extracted_offence: str
+    offence_id: Optional[int]
+
+
+class MatchOffenceResult(BaseModel):
+    mappings: List[MatchedOffence] = Field(default_factory=list)
 
 
 class OffenceMentionExtractor(BaseExtractor):
