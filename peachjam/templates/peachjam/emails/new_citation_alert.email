@@ -1,6 +1,37 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
 {% load i18n %}
-{% block subject %}{{ subject_line }}{% endblock %}
+{% block subject %}
+  {% if saved_documents|length > 1 %}
+    {% blocktrans trimmed with title=saved_documents.0.saved_document.title %}New citations for {{ title }} and more{% endblocktrans %}
+  {% else %}
+    {% blocktrans trimmed with title=saved_documents.0.saved_document.title %}New citations for {{ title }}{% endblocktrans %}
+  {% endif %}
+{% endblock %}
 {% block alert-body %}
-  {% include "peachjam/emails/new_citation_alert_body.html"  %}
+  {% for item in saved_documents %}
+    <p>
+      <a href="{{ site.domain }}{{ item.saved_document.get_absolute_url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>
+    </p>
+    <ul>
+      {% for citing in item.citing_documents %}
+        <li style="margin-bottom: 1rem">
+          <a href="{{ site.domain }}{{ citing.document.get_absolute_url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
+          {% if citing.document.blurb %}<div>{{ citing.blurb | safe }}</div>{% endif %}
+          {% if citing.document.flynote %}
+            <div>
+              <em>{{ citing.document.flynote | safe }}</em>
+            </div>
+          {% endif %}
+        </li>
+        <ul>
+          {% for pc in citing.provision_citations %}
+            <li>
+              [...] {{ pc.prefix }}<strong>{{ pc.exact }}</strong>{{ pc.suffix }} [...]
+            </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+    </ul>
+    <hr/>
+  {% endfor %}
 {% endblock %}

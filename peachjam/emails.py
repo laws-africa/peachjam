@@ -6,14 +6,9 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
-from django.db.models import QuerySet
 from templated_email.backends.vanilla_django import (
     TemplateBackend as BaseTemplateBackend,
 )
-
-from peachjam.models import CoreDocument, ProvisionCitation
-from peachjam_search.models import SavedSearch
-from peachjam_search.serializers import SearchHit
 
 log = logging.getLogger(__name__)
 
@@ -64,59 +59,22 @@ class TemplateBackend(BaseTemplateBackend):
         )
 
 
-def document_serializer(context, doc):
-    return {
-        "title": doc.title,
-        "url_path": doc.get_absolute_url(),
-        "blurb": getattr(doc, "blurb", None),
-        "flynote": getattr(doc, "flynote", None),
-    }
-
-
-def search_hit_serializer(context, hit):
-    d = hit.as_dict()
-    d["document"] = document_serializer(context, hit.document) if hit.document else None
-    return d
-
-
 class CustomerIOTemplateBackend(TemplateBackend):
     """Sends emails using CustomerIO if enabled, falling back to the usual Django email system otherwise.
 
-    This requires us to serialise the context to JSON and send it to CustomerIO, and to add additional context
-    such as site information.
-
-    When serialising, if a key called xxx_url_path is found, a new key called xxx_url is added which is the site's URL
-    plus the path.
+    The rendering is always done using Django templates, but for certain templates the rendered context is sent to
+    CustomerIO to send the email instead of using Django's email system. This allows us to use CustomerIO's
+    transactional messaging features, such as automatically retrying failed emails and tracking opens and clicks.
     """
 
-    serializers = {
-        CoreDocument: document_serializer,
-        SearchHit: search_hit_serializer,
-        SavedSearch: lambda context, obj: {
-            "q": obj.q,
-            "name": str(obj),
-            "url_path": obj.get_absolute_url(),
-        },
-        User: lambda context, user: {
-            "email": user.email,
-            "tracking_id": user.userprofile.tracking_id_str,
-        },
-        ProvisionCitation: lambda context, pc: {
-            "document": document_serializer(context, pc.citing_document),
-            "prefix": pc.prefix,
-            "suffix": pc.suffix,
-            "exact": pc.exact,
-            "provision_eid": pc.provision_eid,
-        },
-    }
-
-    # use CustomerIO for these templates, otherwise fall back to the usual system
-    transactional_message_ids = [
+    # use CustomerIO for these templates, otherwise send using Django's email system
+    transactional_templates = [
         "search_alert",
         "user_following_alert",
         "new_citation_alert",
         "new_relationship_alert",
         "new_overturn_alert",
+        "account/email/login_code",
     ]
 
     def __init__(self, *args, **kwargs):
@@ -132,80 +90,39 @@ class CustomerIOTemplateBackend(TemplateBackend):
         if template_name.endswith(f".{self.template_suffix}"):
             template_name = template_name[: -len(self.template_suffix) - 1]
 
-        if template_name not in self.transactional_message_ids:
+        if template_name not in self.transactional_templates:
             log.info(f"Sending email using Django: {template_name}")
-            # tell supplement_context not to serialise the context
-            context["USE_SERIALISERS"] = False
             return super().send(
                 template_name, from_email, recipient_list, context, **kwargs
             )
 
-        transactional_message_id = f"{settings.PEACHJAM['APP_NAME']}/{template_name}"
-        self.supplement_context(context)
+        self.send_with_customerio(template_name, recipient_list, context)
+
+    def send_with_customerio(self, template_name, recipient_list, context):
+        assert (
+            len(recipient_list) == 1
+        ), "CustomerIO transactional emails must have exactly one recipient"
+        user = recipient_list[0]
+        if isinstance(user, User):
+            email = user.email
+            identifiers = {"id": user.userprofile.tracking_id_str}
+        else:
+            email = recipient_list[0]
+            identifiers = {"email": email}
+
+        # render the email
+        parts = self._render_email(template_name, context)
+
+        context["html_body"] = parts["html"]
+        transactional_message_id = f"{settings.PEACHJAM['APP_NAME']}/generic"
 
         request = SendEmailRequest(
             transactional_message_id=transactional_message_id,
+            subject=parts["subject"],
             message_data=context,
-            identifiers={"id": context["user"]["tracking_id"]},
+            identifiers=identifiers,
             attachments=context.get("attachments", {}),
-            to=context["user"]["email"],
+            to=email,
         )
-        log.info(
-            f"Sending email using CustomerIO: {transactional_message_id} to {context['user']}"
-        )
+        log.info(f"Sending email using CustomerIO: {template_name} to {email}")
         self.client.send_email(request)
-
-    def supplement_context(self, context):
-        super().supplement_context(context)
-
-        if context.get("USE_SERIALISERS") is False:
-            return
-
-        if not context.get("user"):
-            raise Exception("Context must contain a user")
-
-        # inject this first so the other serializers can use the site details
-        context["site"] = {
-            "name": context["APP_NAME"],
-            "domain": context["site"].domain,
-            "url": f'https://{context["site"].domain}',
-        }
-
-        for key, value in context.items():
-            context[key] = self.serialize(context, value)
-
-        self.rewrite_url_paths(context)
-
-    def serialize(self, context, obj):
-        if isinstance(obj, (list, QuerySet)):
-            return [self.serialize(context, item) for item in obj]
-
-        if isinstance(obj, dict):
-            return {key: self.serialize(context, value) for key, value in obj.items()}
-
-        # walk up the object's class hierarchy to find the first serializer
-        for cls in obj.__class__.mro():
-            if cls in self.serializers:
-                # custom serializer
-                return self.serializers[cls](context, obj)
-
-        return str(obj)
-
-    def rewrite_url_paths(self, context):
-        """Recursively prepend the site's URL to any [xxx_]url_path keys in the context."""
-
-        def rewrite(info):
-            for key, value in list(info.items()):
-                if isinstance(value, dict):
-                    rewrite(value)
-
-                if isinstance(value, list):
-                    for x in value:
-                        if isinstance(x, dict):
-                            rewrite(x)
-
-                elif isinstance(value, str) and key.endswith("url_path"):
-                    # add a new member xxx_url which is the site's URL plus the path
-                    info[key[:-8] + "url"] = f'{context["site"]["url"]}{value}'
-
-        rewrite(context)
