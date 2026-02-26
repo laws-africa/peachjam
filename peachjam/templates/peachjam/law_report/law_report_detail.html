@@ -1,0 +1,48 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n peachjam %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'law_report_list' %}">{% trans 'Law reports' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ law_report.title }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-header %}
+  {% block page-title %}
+    {% if not entity_profile %}
+      <div class="my-4">
+        <h1>{{ page_title }}</h1>
+        {% block follow-button %}{% endblock %}
+      </div>
+    {% endif %}
+  {% endblock %}
+  {% if law_report_volumes %}
+    <div class="flow-columns">
+      {% for group in law_report_volume_groups %}
+        <div class="flow-columns-group">
+          <ul class="list-unstyled">
+            {% for volume in group %}
+              {% if law_report_volume and law_report_volume.slug == volume.slug %}
+                <li>{{ volume.title }}</li>
+              {% else %}
+                <li>
+                  <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
+                </li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% include 'peachjam/_count_and_search.html' %}
+{% endblock %}

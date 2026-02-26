@@ -57,7 +57,7 @@
                   <td>
                     {% for judge in entry.document.judges.all %}
                       {# djlint:off #}
-          <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
+          <span class="text-nowrap"><a href="{{ judge.get_absolute_url }}">{{ judge }}</a>{% if not forloop.last %},{% endif %}</span>
                       {# djlint:on #}
                     {% endfor %}
                   </td>
@@ -82,7 +82,7 @@
                     <td>
                       {% for judge in child.info.judges.all %}
                         {# djlint:off #}
-            <span class="text-nowrap">{{ judge }}{% if not forloop.last %},{% endif %}</span>
+            <span class="text-nowrap"><a href="{{ judge.get_absolute_url }}">{{ judge }}</a>{% if not forloop.last %},{% endif %}</span>
                         {# djlint:on #}
                       {% endfor %}
                     </td>

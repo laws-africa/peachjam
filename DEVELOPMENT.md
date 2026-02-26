@@ -62,6 +62,29 @@
    python manage.py runserver
    ```
 
+## Running Specific Sites
+
+To run a specific country site (e.g. TanzLII), set the `DJANGO_SETTINGS_MODULE` environment variable:
+
+```bash
+export DJANGO_SETTINGS_MODULE=tanzlii.settings
+python manage.py runserver
+```
+
+## Compiling SCSS
+
+Ensure you have sass installed globally:
+
+```bash
+npm install -g sass
+```
+
+If you need to manually compile the SCSS files:
+
+```bash
+python manage.py compilescss
+```
+
 ## Setup pre-commit
 
 The project has linting enabled using pre-commit. It runs on the CI pipeline, so you need to enable locally as well. Run

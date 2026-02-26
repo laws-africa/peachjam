@@ -165,10 +165,13 @@ PEACHJAM = {
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
     # Chat settings
-    "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
-    "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
+    "CHAT_ENABLED": False,
+    "CHAT_ASSISTANT_NAME": "AI",
+    # show the document chat button to all users, or only users with permissions?
+    "CHAT_PUBLIC": False,
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
+    "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -207,6 +210,14 @@ ACCOUNT_FORMS = {
 ACCOUNT_USER_DISPLAY = "peachjam.auth.user_display"
 ACCOUNT_USERNAME_REQUIRED = False
 
+ACCOUNT_LOGIN_BY_CODE_ENABLED = PEACHJAM["AUTH_OTP"]
+if PEACHJAM["AUTH_OTP"]:
+    ACCOUNT_LOGIN_BY_CODE_TIMEOUT = 600
+    ACCOUNT_LOGIN_BY_CODE_MAX_ATTEMPTS = 5
+    ACCOUNT_SIGNUP_FIELDS = ["email*"]
+else:
+    ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
+
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
     "google": {
@@ -235,7 +246,6 @@ if DEBUG:
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
     INSTALLED_APPS.append("django_extensions")
-    INSTALLED_APPS.append("elastic_panel")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
     import peachjam.debugging  # noqa
@@ -431,8 +441,6 @@ DEBUG_TOOLBAR_PANELS = (
     "debug_toolbar.panels.signals.SignalsPanel",
     "debug_toolbar.panels.logging.LoggingPanel",
     "debug_toolbar.panels.redirects.RedirectsPanel",
-    # Additional
-    "elastic_panel.panel.ElasticDebugPanel",
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
@@ -747,7 +755,8 @@ CORS_URLS_REGEX = r"^$"
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
-    messages.SUCCESS: "info",
+    messages.SUCCESS: "primary",
+    messages.INFO: "primary",
 }
 
 

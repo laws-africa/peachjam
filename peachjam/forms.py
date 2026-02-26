@@ -1,7 +1,9 @@
 import copy
 import logging
 
-from allauth.account.forms import LoginForm, SignupForm
+from allauth.account.adapter import get_adapter
+from allauth.account.fields import PasswordField
+from allauth.account.forms import LoginForm, PasswordVerificationMixin, SignupForm
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -641,6 +643,22 @@ class PeachjamSignupForm(SignupForm):
 
 class PeachjamLoginForm(LoginForm):
     captcha = get_recaptcha_field()
+
+
+class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
+    password1 = PasswordField(label=_("Password"), autocomplete="new-password")
+    password2 = PasswordField(label=_("Password (again)"), autocomplete="new-password")
+
+    def clean(self):
+        # PasswordVerificationMixin.clean() checks password1 == password2
+        cleaned = super().clean()
+        password = cleaned.get("password1")
+        if password:
+            try:
+                get_adapter().clean_password(password)
+            except forms.ValidationError as e:
+                self.add_error("password1", e)
+        return cleaned
 
 
 class UserProfileForm(forms.Form):

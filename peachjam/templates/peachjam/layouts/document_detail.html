@@ -293,22 +293,18 @@
                           <dd class="text-muted">
                             {% for judge in judges %}
                               {# djlint:off #}
-                          {{ judge }}{% if not forloop.last %},{% endif %}
+                          <a href="{{ judge.get_absolute_url }}">{{ judge }}</a>{% if not forloop.last %},{% endif %}
                               {# djlint:on #}
                             {% endfor %}
                           </dd>
                         {% endif %}
                       {% endblock %}
                       {% block document-metadata-content-date %}
-                        {% if document.doc_type == "judgment" %}
-                          <dt>
-                            {% trans 'Judgment date' %}
-                          </dt>
-                        {% else %}
-                          <dt>
+                        <dt>
+                          {% block document-metadata-date-label %}
                             {% trans 'Date' %}
-                          </dt>
-                        {% endif %}
+                          {% endblock %}
+                        </dt>
                         {% if date_versions|length > 1 %}
                           <dd>
                             <div class="dropdown">
@@ -472,6 +468,9 @@
               </div>
             {% endblock %}
             {% block extra-metadata %}{% endblock %}
+            {% block metadata-ask-ai %}
+              {% include "peachjam/document/_ask_ai_banner.html" %}
+            {% endblock %}
             <hr class="mb-5" />
           </div>
           {% block content %}

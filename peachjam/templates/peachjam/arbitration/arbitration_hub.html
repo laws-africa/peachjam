@@ -1,0 +1,68 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load static %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Arbitration' %}
+{% endblock %}
+{% block page-content %}
+  <section class="container pt-4 pb-5">
+    <div class="mb-4">
+      <h1 class="mb-2">{% trans 'Arbitration Hub' %}</h1>
+      <p class="text-muted mb-0">{% trans 'Browse arbitration awards and arbitral institutions.' %}</p>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-md-6">
+        <a class="card h-100 text-decoration-none text-reset group"
+           href="{% url 'arbitration_award_list' %}">
+          <div class="ratio ratio-16x9 overflow-hidden bg-light">
+            <img src="{% static 'images/arbitration-statute-justice.jpeg' %}"
+                 alt="{% trans 'Arbitration Awards' %}"
+                 class="w-100 h-100 object-fit-cover"/>
+          </div>
+          <div class="p-4">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+              <div class="bg-body-secondary p-3 rounded">
+                <i class="bi bi-file-earmark-text fs-4"></i>
+              </div>
+              <i class="bi bi-arrow-right fs-5 text-muted"></i>
+            </div>
+            <h2 class="h5 mb-2">{% trans 'Arbitration Awards' %}</h2>
+            <p class="text-muted mb-3">
+              {% trans 'Browse arbitration decisions, awards, and related documentation from various jurisdictions and institutions.' %}
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="px-3 py-1 bg-body-secondary text-sm rounded-pill">{% trans 'Awards' %}</span>
+              <span class="px-3 py-1 bg-body-secondary text-sm rounded-pill">{% trans 'Decisions' %}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="col-12 col-md-6">
+        <a class="card h-100 text-decoration-none text-reset group"
+           href="{% url 'arbitral_institution_list' %}">
+          <div class="ratio ratio-16x9 overflow-hidden bg-light">
+            <img src="{% static 'images/arbitration-institute.jpeg' %}"
+                 alt="{% trans 'Arbitration Institutions' %}"
+                 class="w-100 h-100 object-fit-cover"/>
+          </div>
+          <div class="p-4">
+            <div class="d-flex align-items-start justify-content-between mb-3">
+              <div class="bg-body-secondary p-3 rounded">
+                <i class="bi bi-building fs-4"></i>
+              </div>
+              <i class="bi bi-arrow-right fs-5 text-muted"></i>
+            </div>
+            <h2 class="h5 mb-2">{% trans 'Arbitral Institutions' %}</h2>
+            <p class="text-muted mb-3">
+              {% trans 'Explore profiles, rules, and documentation from international and domestic arbitration institutions.' %}
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="px-3 py-1 bg-body-secondary text-sm rounded-pill">{% trans 'Profiles' %}</span>
+              <span class="px-3 py-1 bg-body-secondary text-sm rounded-pill">{% trans 'Rules' %}</span>
+            </div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+{% endblock %}
