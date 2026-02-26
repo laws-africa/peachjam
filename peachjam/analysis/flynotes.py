@@ -11,6 +11,43 @@ log = logging.getLogger(__name__)
 
 
 def parse_flynote_text(text):
+    """Parse flynote text into a list of taxonomy paths.
+
+    The parsing works as follows:
+
+    1. HTML tags and entities are stripped, whitespace is normalised, and trailing periods are removed.
+    2. If no dash characters (em-dash, en-dash, or spaced hyphen) are found,
+       the text is treated as plain prose and an empty list is returned.
+    3. The text is split on semicolons into segments.
+    4. Each segment is split on dashes into parts, forming a hierarchy from general to specific.
+    5. For the first segment, the parts become the initial path.
+    6. For each subsequent segment, the number of dash-separated parts (n) determines how many
+       levels from the bottom of the current path are replaced. This allows sibling or cousin branches
+       to share a common prefix.
+
+    Examples::
+
+        # Single chain: three levels deep
+        >>> parse_flynote_text("Criminal law — admissibility — trial within a trial")
+        [['Criminal law', 'admissibility', 'trial within a trial']]
+
+        # Semicolons create sibling branches (1 part replaces the last level)
+        >>> parse_flynote_text("Criminal law — admissibility — trial within a trial; right to representation")
+        [['Criminal law', 'admissibility', 'trial within a trial'],
+         ['Criminal law', 'admissibility', 'right to representation']]
+
+        # Two dash-separated parts replace the last two levels
+        >>> parse_flynote_text("Criminal law — admissibility — trial; circumstantial evidence — Blom principles")
+        [['Criminal law', 'admissibility', 'trial'],
+         ['Criminal law', 'circumstantial evidence', 'Blom principles']]
+
+    Args:
+        text: Raw flynote string, potentially containing HTML markup and entities.
+
+    Returns:
+        A list of paths, where each path is a list of strings from root to leaf.
+        Returns an empty list if the text is empty, has no dashes, or is plain prose.
+    """
     if not text:
         return []
 
