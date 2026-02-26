@@ -400,10 +400,10 @@ class PeachJam {
         // If no beacon configured, allow normal link behaviour (mailto fallback)
         if (!beaconId) return;
         // @ts-ignore
-	const beacon = window.Beacon
+        const beacon = window.Beacon;
         if (typeof beacon !== 'function') return;
-	// @ts-ignore
-	if (Array.isArray(beacon.readyQueue)) return;
+        // @ts-ignore
+        if (Array.isArray(beacon.readyQueue)) return;
 
         e.preventDefault();
         // @ts-ignore
