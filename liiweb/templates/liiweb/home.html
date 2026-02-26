@@ -1,4 +1,3 @@
-{# djlint:off #}
 {% extends "peachjam/home.html" %}
 {% load i18n static %}
 {% block survey-banner %}{% endblock %}
@@ -14,13 +13,19 @@
         <div class="row">
           <div class="col-9">
             {% block hero-headings %}
-              <h2>{% block hero-headings-title %}{% endblock %}</h2>
-              <p class="h4 mt-4">{% block hero-headings-welcome %}{% endblock %}</p>
+              <h2>
+                {% block hero-headings-title %}{% endblock %}
+              </h2>
+              <p class="h4 mt-4">
+                {% block hero-headings-welcome %}{% endblock %}
+              </p>
             {% endblock %}
           </div>
           <div class="col-3 col-lg-2 offset-lg-1 text-center">
             {% block hero-images %}
-              <img src="{% static 'images/logo.png' %}" class="img-fluid" alt="{{ APP_NAME }} logo"/>
+              <img src="{% static 'images/logo.png' %}"
+                   class="img-fluid"
+                   alt="{{ APP_NAME }} logo"/>
             {% endblock %}
           </div>
         </div>
@@ -137,11 +142,15 @@
         <div class="container">
           <div class="row">
             <div class="col-sm-3 mb-3">
-              <img src="{% static 'images/pocketlaw-logo.png' %}" alt="Pocket Law" class="img-fluid"/>
+              <img src="{% static 'images/pocketlaw-logo.png' %}"
+                   alt="Pocket Law"
+                   class="img-fluid"/>
             </div>
             <div class="col-sm-9 ps-sm-5">
               <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
-              <p class="lead">{% blocktrans trimmed %}Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.{% endblocktrans %}</p>
+              <p class="lead">
+                {% blocktrans trimmed %}Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.{% endblocktrans %}
+              </p>
               <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
             </div>
           </div>
