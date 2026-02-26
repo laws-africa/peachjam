@@ -105,7 +105,6 @@ export default {
   data: () => ({
     user: null,
     canViewDiffs: false,
-    loadingUser: true,
     diffsets: [],
     diffset: null,
     sideBySide: window.matchMedia('(min-width: 992px)').matches,
@@ -118,16 +117,9 @@ export default {
     try {
       const user = await peachjam.whenUserLoaded();
       this.user = user;
-      this.loadingUser = false;
-
       this.canViewDiffs = user?.perms?.includes('peachjam.can_view_provision_changes') || false;
-
-      if (this.canViewDiffs) {
-        await this.loadDiffContentsets();
-      }
     } catch (err) {
       console.error('Error loading user info:', err);
-      this.loadingUser = false;
     }
 
     // Setup wrapping logic only if original element exists
@@ -144,6 +136,10 @@ export default {
 
       this.originalElement.insertAdjacentElement('beforebegin', this.wrapperElement);
       this.wrapperElement.append(this.originalElement, this.$el);
+    }
+
+    if (this.canViewDiffs) {
+      await this.loadDiffContentsets();
     }
   },
 
