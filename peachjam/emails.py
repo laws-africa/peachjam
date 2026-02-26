@@ -99,16 +99,19 @@ class CustomerIOTemplateBackend(TemplateBackend):
         self.send_with_customerio(template_name, recipient_list, context)
 
     def send_with_customerio(self, template_name, recipient_list, context):
-        assert (
-            len(recipient_list) == 1
-        ), "CustomerIO transactional emails must have exactly one recipient"
-        user = recipient_list[0]
-        if isinstance(user, User):
-            email = user.email
-            identifiers = {"id": user.userprofile.tracking_id_str}
-        else:
-            email = recipient_list[0]
-            identifiers = {"email": email}
+        # recipient_list can be a user or a mixture of a user and email addresses, so work out how to track it
+        identifiers = None
+        to = []
+        for recipient in recipient_list:
+            if isinstance(recipient, User):
+                if recipient.email:
+                    to.append(recipient.email)
+                # override any other identifiers
+                identifiers = {"id": recipient.userprofile.tracking_id_str}
+            else:
+                to.append(recipient)
+                if not identifiers:
+                    identifiers = {"email": recipient}
 
         # render the email
         parts = self._render_email(template_name, context)
@@ -122,7 +125,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
             message_data=context,
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
-            to=email,
+            to=to,
         )
-        log.info(f"Sending email using CustomerIO: {template_name} to {email}")
+        log.info(f"Sending email using CustomerIO: {template_name} to {to}")
         self.client.send_email(request)
