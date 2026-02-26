@@ -1,7 +1,6 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView
 
@@ -119,15 +118,6 @@ class UserFollowingCreateView(
         kwargs["instance"] = instance
         kwargs["data"] = self.request.GET or self.request.POST
         return kwargs
-
-    def post(self, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            obj, _ = UserFollowing.objects.get_or_create(
-                user=self.request.user, **form.cleaned_data
-            )
-            self.object = obj
-            return redirect(self.get_success_url())
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
