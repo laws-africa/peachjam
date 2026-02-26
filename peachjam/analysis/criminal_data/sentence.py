@@ -9,18 +9,8 @@ log = logging.getLogger(__name__)
 
 
 class SentenceExtractor(BaseExtractor):
-    def build_prompt(self) -> str:
-        judgment_text = self.judgment.get_content_as_text()
-        offences = JudgmentOffence.objects.filter(judgment=self.judgment)
-
-        if offences.exists():
-            offences_block = "\n".join(
-                [f"- ID: {o.id} | TITLE: {o.offence.title}" for o in offences]
-            )
-        else:
-            offences_block = "No structured offences available."
-
-        return f"""
+    def system_prompt(self) -> str:
+        return """
             You are a legal sentencing extraction engine.
 
             TASK:
@@ -45,21 +35,20 @@ class SentenceExtractor(BaseExtractor):
             - imprisonment
             - fine
             - probation
+            """
 
-            OUTPUT FORMAT:
-            {{
-              "sentences": [
-                {{
-                  "offence_id": <integer or null>,
-                  "sentence_type": "imprisonment|fine|probation",
-                  "duration_months": <integer or null>,
-                  "fine_amount": <integer or null>,
-                  "mandatory_minimum": <true|false|null>,
-                  "suspended": <true|false>
-                }}
-              ]
-            }}
+    def build_prompt(self) -> str:
+        judgment_text = self.judgment.get_content_as_text()
+        offences = JudgmentOffence.objects.filter(judgment=self.judgment)
 
+        if offences.exists():
+            offences_block = "\n".join(
+                [f"- ID: {o.id} | TITLE: {o.offence.title}" for o in offences]
+            )
+        else:
+            offences_block = "No structured offences available."
+
+        return f"""
             OFFENCE_OPTIONS:
             {offences_block}
 

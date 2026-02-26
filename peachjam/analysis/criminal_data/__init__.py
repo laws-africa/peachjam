@@ -1,10 +1,10 @@
 from .base import BaseExtractor
+from .extractor import CriminalDataExtractor
 from .offence import OffenceMatcher, OffenceMentionExtractor
-from .pipeline import CriminalDataExtractionPipeline
 from .sentence import SentenceExtractor
 
 __all__ = [
-    "CriminalDataExtractionPipeline",
+    "CriminalDataExtractor",
     "BaseExtractor",
     "OffenceMentionExtractor",
     "OffenceMatcher",

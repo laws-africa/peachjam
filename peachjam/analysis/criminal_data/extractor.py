@@ -1,32 +1,32 @@
 import logging
-from typing import List, Type
 
 from django.db import transaction
 
 from peachjam.models import Judgment
 
-from .base import BaseExtractor
+from .offence import OffenceMatcher, OffenceMentionExtractor
+from .sentence import SentenceExtractor
 
 log = logging.getLogger(__name__)
 
 
-class CriminalDataExtractionPipeline:
+class CriminalDataExtractor:
     """
     Orchestrates all extraction stages in order.
 
-    Each stage must inherit from BaseExtractionService.
+    Each stage must inherit from BaseExtractor.
     """
 
-    default_stages: List[Type[BaseExtractor]] = []
-
-    def __init__(
-        self, judgment: Judgment, stages: List[Type[BaseExtractor]] | None = None
-    ):
+    def __init__(self, judgment: Judgment):
         self.judgment = judgment
-        self.stages = stages or self.default_stages
+        self.stages = [
+            OffenceMentionExtractor,
+            OffenceMatcher,
+            SentenceExtractor,
+        ]
 
     def run(self):
-        log.info(f"Starting extraction pipeline for judgment {self.judgment.id}")
+        log.info(f"Starting criminal extraction for judgment {self.judgment.id}")
 
         with transaction.atomic():
             for stage_cls in self.stages:
@@ -38,5 +38,5 @@ class CriminalDataExtractionPipeline:
 
                 log.info(f"Completed stage: {stage_name}")
 
-        log.info(f"Pipeline complete for judgment {self.judgment.id}")
+        log.info(f"Criminal data extraction complete for judgment {self.judgment.id}")
         return self.judgment

@@ -362,17 +362,9 @@ def extract_criminal_data(doc_id):
         log.info(f"No judgment with id {doc_id} exists, ignoring.")
         return
     log.info(f"Extracting criminal data from judgment {doc_id}")
-    from peachjam.analysis.criminal_data import (
-        CriminalDataExtractionPipeline,
-        OffenceMatcher,
-        OffenceMentionExtractor,
-        SentenceExtractor,
-    )
+    from peachjam.analysis.criminal_data import CriminalDataExtractor
 
-    pipeline = CriminalDataExtractionPipeline(
-        doc, stages=[OffenceMentionExtractor, OffenceMatcher, SentenceExtractor]
-    )
-    pipeline.run()
+    CriminalDataExtractor(doc).run()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

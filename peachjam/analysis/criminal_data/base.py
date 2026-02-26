@@ -39,14 +39,11 @@ class BaseExtractor(ABC):
         """
         Call the LLM service
         """
-        prompt = self.build_prompt()
 
         response = self.client.responses.parse(
             model=self.model,
-            input=[
-                {"role": "system", "content": self.system_prompt()},
-                {"role": "user", "content": prompt},
-            ],
+            instructions=self.system_prompt(),
+            input=self.build_prompt(),
             text_format=self.get_response_format(),
         )
 

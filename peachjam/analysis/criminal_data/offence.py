@@ -10,9 +10,8 @@ log = logging.getLogger(__name__)
 
 
 class OffenceMentionExtractor(BaseExtractor):
-    def build_prompt(self) -> str:
-        judgment_text = self.judgment.get_content_as_text()
-        return f"""
+    def system_prompt(self) -> str:
+        return """
             You are a legal information extraction engine.
 
             TASK:
@@ -27,15 +26,11 @@ class OffenceMentionExtractor(BaseExtractor):
             5. Do NOT include statutory numbers in the offence name.
             6. Do NOT include sentencing information.
             7. If no offences are mentioned, return an empty list.
+            """
 
-            OUTPUT FORMAT:
-            {{
-              "mentioned_offences": [
-                "<offence name 1>",
-                "<offence name 2>"
-              ]
-            }}
-
+    def build_prompt(self) -> str:
+        judgment_text = self.judgment.get_content_as_text()
+        return f"""
             JUDGMENT_TEXT:
             \"\"\"
             {judgment_text}
@@ -60,7 +55,21 @@ class OffenceMentionExtractor(BaseExtractor):
 
 class OffenceMatcher(BaseExtractor):
     def system_prompt(self) -> str:
-        return "You perform strict ontology classification."
+        return """
+                You are a legal ontology mapping engine.
+                You perform strict ontology classification.
+
+                TASK:
+                Map each EXTRACTED_OFFENCE to the correct offence
+                from OFFENCE_OPTIONS.
+
+                STRICT RULES:
+                1. You must only return IDs from OFFENCE_OPTIONS.
+                2. Do NOT invent new offences.
+                3. If no suitable match exists, return null for that entry.
+                4. Use semantic meaning, not exact string matching.
+                5. Return valid JSON only. No commentary.
+                """
 
     def build_prompt(self) -> str:
         extracted_offences = self.judgment.metadata_json.get("extracted_offences", [])
@@ -77,29 +86,6 @@ class OffenceMatcher(BaseExtractor):
         )
 
         return f"""
-                You are a legal ontology mapping engine.
-
-                TASK:
-                Map each EXTRACTED_OFFENCE to the correct offence
-                from OFFENCE_OPTIONS.
-
-                STRICT RULES:
-                1. You must only return IDs from OFFENCE_OPTIONS.
-                2. Do NOT invent new offences.
-                3. If no suitable match exists, return null for that entry.
-                4. Use semantic meaning, not exact string matching.
-                5. Return valid JSON only. No commentary.
-
-                OUTPUT FORMAT:
-                {{
-                  "mappings": [
-                    {{
-                      "extracted": "<original extracted string>",
-                      "offence_id": <integer or null>
-                    }}
-                  ]
-                }}
-
                 EXTRACTED_OFFENCES:
                 {json.dumps(extracted_offences, indent=2)}
 
