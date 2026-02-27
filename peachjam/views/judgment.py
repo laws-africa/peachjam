@@ -69,9 +69,14 @@ class FlynoteTopicListView(TemplateView):
                 .distinct()
                 .count()
             )
-            topics.append({"topic": child, "count": count})
+            child_names = list(child.get_children().values_list("name", flat=True)[:3])
+            topics.append({"topic": child, "count": count, "child_names": child_names})
 
-        context["topics"] = topics
+        # popular: top 12 by count; all: full list alphabetically
+        sorted_by_count = sorted(topics, key=lambda x: x["count"], reverse=True)
+        context["popular_topics"] = sorted_by_count[:12]
+        context["all_topics"] = sorted(topics, key=lambda x: x["topic"].name)
+        context["total_judgment_count"] = sum(t["count"] for t in topics)
         context["root"] = root
         return context
 
