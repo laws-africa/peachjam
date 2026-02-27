@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-27 10:35+0300\n"
-"PO-Revision-Date: 2025-11-25 12:42\n"
+"PO-Revision-Date: 2026-02-27 08:52\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -27,11 +27,11 @@ msgstr "Anglais"
 
 #: templates/liiweb/home.html:5
 msgid "La mémoire du droit en Côte d'Ivoire."
-msgstr ""
+msgstr "La mémoire du droit en Côte d'Ivoire."
 
 #: templates/peachjam/_header.html:7
 msgid "Help"
-msgstr ""
+msgstr "Aide"
 
 #: templates/peachjam/_header.html:14
 msgid "Home"
@@ -93,8 +93,3 @@ msgstr "Contactez-nous"
 msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 
-#~ msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
-#~ msgstr "Bienvenue à l'Institut d'information juridique de Côte d'Ivoire"
-
-#~ msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-#~ msgstr "Accès libre au droit ivoirien. CIVLII est membre de la communauté des institutions juridiques africaines et du Mouvement pour le libre accès au droit."
