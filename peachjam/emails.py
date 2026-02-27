@@ -115,7 +115,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         request = SendEmailRequest(
             transactional_message_id=transactional_message_id,
             subject=parts["subject"],
-            message_data=context,
+            message_data={"html_body": parts["html"]},
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
             to=recipient_list,
