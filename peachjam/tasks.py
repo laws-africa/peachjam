@@ -352,6 +352,21 @@ def generate_judgment_summary(doc_id):
     doc.generate_summary()
 
 
+@background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
+@transaction.atomic
+def extract_criminal_data(doc_id):
+    from peachjam.models import Judgment
+
+    doc = Judgment.objects.filter(id=doc_id).first()
+    if not doc:
+        log.info(f"No judgment with id {doc_id} exists, ignoring.")
+        return
+    log.info(f"Extracting criminal data from judgment {doc_id}")
+    from peachjam.analysis.criminal_data import CriminalDataExtractor
+
+    CriminalDataExtractor(doc).run()
+
+
 @background(queue="peachjam", remove_existing_tasks=True)
 @transaction.atomic
 def update_users_new_citation(citation_id):
