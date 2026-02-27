@@ -100,7 +100,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
 
     def send_with_customerio(self, template_name, recipient_list, context):
         # recipient_list is a list of email addresses; the user must be pulled from the context
-        user = context.get("user")
+        user = context.pop("user", None)
         if user:
             identifiers = {"id": user.userprofile.tracking_id_str}
         else:
@@ -115,7 +115,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         request = SendEmailRequest(
             transactional_message_id=transactional_message_id,
             subject=parts["subject"],
-            message_data=context,
+            message_data={"html_body": parts["html"]},
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
             to=recipient_list,
