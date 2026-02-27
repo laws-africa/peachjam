@@ -48,6 +48,9 @@ from peachjam.forms import (
 )
 from peachjam.models import (
     AlternativeName,
+    ArbitralInstitution,
+    ArbitrationAward,
+    ArbitrationSeat,
     Article,
     ArticleAttachment,
     AttachedFileNature,
@@ -71,6 +74,7 @@ from peachjam.models import (
     CustomProperty,
     CustomPropertyLabel,
     DocumentAccessGroup,
+    DocumentChatThread,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -86,6 +90,9 @@ from peachjam.models import (
     Judgment,
     JurisdictionProfile,
     Label,
+    LawReport,
+    LawReportEntry,
+    LawReportVolume,
     Legislation,
     Locality,
     LowerBench,
@@ -1179,6 +1186,11 @@ class JudgmentAdminForm(DocumentForm):
         return value
 
 
+class LawReportEntryInline(admin.TabularInline):
+    model = LawReportEntry
+    extra = 1
+
+
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
@@ -1190,6 +1202,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
+        LawReportEntryInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1820,6 +1833,77 @@ class JournalAdmin(admin.ModelAdmin):
     search_fields = ("title", "slug", "doi")
 
 
+@admin.register(ArbitralInstitution)
+class ArbitralInstitutionAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
+    list_display = (
+        "name",
+        "acronym",
+        "headquarters_city",
+        "is_internationally_recognized",
+    )
+    search_fields = ("name", "acronym")
+
+
+@admin.register(ArbitrationSeat)
+class ArbitrationSeatAdmin(admin.ModelAdmin):
+    list_display = (
+        "city",
+        "country",
+        "is_new_york_convention_signatory",
+    )
+    search_fields = ("city", "country__name", "country__iso")
+    prepopulated_fields = {"slug": ("city", "country")}
+
+
+@admin.register(ArbitrationAward)
+class ArbitrationAwardAdmin(DocumentAdmin):
+    list_display = ("case_number",) + DocumentAdmin.list_display
+    search_fields = ("title", "case_number", "date")
+    autocomplete_fields = [
+        "institution",
+        "seat",
+        "claimants_country_of_origin",
+        "respondents_country_of_origin",
+        "rules_of_arbitration",
+    ]
+    list_filter = DocumentAdmin.list_filter + (
+        "case_type",
+        "award_type",
+        "nature_of_proceedings",
+        "outcome",
+    )
+
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].insert(1, "case_number")
+    fieldsets[0][1]["fields"].extend(
+        [
+            "institution",
+            "seat",
+            "case_type",
+            "award_type",
+            "nature_of_proceedings",
+            "outcome",
+            "claimants_country_of_origin",
+            "respondents_country_of_origin",
+            "rules_of_arbitration",
+        ]
+    )
+    fieldsets[1][1]["fields"].append("applicable_law")
+
+
+class LawReportVolumeInline(admin.StackedInline):
+    model = LawReportVolume
+    extra = 1
+    prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(LawReport)
+class LawReportAdmin(admin.ModelAdmin):
+    inlines = [LawReportVolumeInline, EntityProfileInline]
+    prepopulated_fields = {"slug": ("title",)}
+
+
 @admin.register(ExternalDocument)
 class ExternalDocumentAdmin(DocumentAdmin):
     prepopulated_fields = {"frbr_uri_number": ("title",)}
@@ -1989,6 +2073,88 @@ class PartnerLogoInline(BaseAttachmentFileInline):
 class PartnerAdmin(admin.ModelAdmin):
     inlines = [PartnerLogoInline]
     form = PartnerForm
+
+
+@admin.register(DocumentChatThread)
+class ChatThreadAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "document_link", "score", "updated_at")
+    readonly_fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    date_hierarchy = "updated_at"
+    list_select_related = ("user", "core_document")
+    search_fields = ("id", "user__username", "core_document__title")
+
+    def has_add_permission(self, request):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
+        )
+
+    document_link.short_description = _("Document")
+
+    def messages_display(self, obj):
+        if not obj.messages_json:
+            return "-"
+        formatted = json.dumps(obj.messages_json, indent=2, sort_keys=True)
+        return format_html("<pre>{}</pre>", formatted)
+
+    messages_display.short_description = _("Messages JSON")
+
+
+class ChatThreadInline(admin.TabularInline):
+    model = DocumentChatThread
+    extra = 0
+    can_delete = False
+    fields = ("updated_at", "document_link", "score")
+    readonly_fields = fields
+    show_change_link = True
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("core_document")
+            .defer("core_document__content_html")
+        )
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
+        )
+
+    document_link.short_description = _("Document")
+
+
+if ChatThreadInline not in UserAdminCustom.inlines:
+    UserAdminCustom.inlines.append(ChatThreadInline)
 
 
 admin.site.register(

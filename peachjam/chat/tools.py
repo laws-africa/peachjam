@@ -1,47 +1,49 @@
+import urllib
+from dataclasses import dataclass
+
 import requests
+from agents import function_tool
+from agents.run_context import RunContextWrapper
 from asgiref.sync import sync_to_async
 from django.conf import settings
-from langchain_core.messages import HumanMessage, SystemMessage
-from langchain_core.runnables import RunnableConfig
-from langchain_core.tools import tool
+from django.urls.base import reverse
 
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
 
 
-@tool
-async def answer_document_question(config: RunnableConfig, question: str) -> str:
-    """Answers a question about the content of the current document. It knows which document is active.
-    It has no memory of previous questions. Only use it if you need to answer a specific question about the document
-    content. The document does not contain information about this website or its features.
+@dataclass(frozen=True)
+class DocumentChatContext:
+    document_id: int
+    user_id: int
+    thread_id: str
+
+
+@function_tool
+async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
+    """Returns the text of the entire document. Use this tool if you need to answer questions about the document
+    that you cannot answer using the summary information already provided.
     """
-    from .graphs import chat_llm
 
     @sync_to_async
     def get_text():
-        doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+        doc = CoreDocument.objects.get(pk=ctx.context.document_id)
         return doc.get_content_as_text()
 
     text = await get_text()
+    if not text.strip():
+        return "The document has no text content. Suggest that the user downloads the document to view its content."
+
     if len(text) > 1_250_000:
-        return "Document text is too long to process."
+        return "The document text is too large to include here. Suggest that the user downloads the document instead."
 
-    response = await chat_llm.ainvoke(
-        [
-            SystemMessage(
-                content="You are a question answering tool. Only use the document content for answers; if you cannot"
-                " answer the question based on the document content, say so."
-            ),
-            HumanMessage(content="The document content is below:\n\n" + text),
-            HumanMessage(content=question),
-        ]
-    )
-
-    return response.content
+    return text
 
 
-@tool
-def get_provision_eid(config: RunnableConfig, provision: str) -> str:
+@function_tool
+def get_provision_eid(
+    ctx: RunContextWrapper[DocumentChatContext], provision: str
+) -> str:
     """Tries to find the unique internal EID of a provision of a document, which can be used to find out additional
      information about the provision. The provision must be stated similar to the following:
 
@@ -50,8 +52,8 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
     - chapter 5
     - paragraph 4
     """
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
-    resp = get_citator_citations(doc.expression_frbr_uri, provision)
+    doc = CoreDocument.objects.get(pk=ctx.context.document_id)
+    resp = get_citator_citations(doc.expression_frbr_uri, text=provision)
 
     # grab the first ref
     for ref in resp["citations"]:
@@ -62,15 +64,15 @@ def get_provision_eid(config: RunnableConfig, provision: str) -> str:
     return f"Provision '{provision}' could not be identified."
 
 
-def get_citator_citations(expression_frbr_uri, text):
+def get_citator_citations(expression_frbr_uri, text=None, html=None):
     citator_url = settings.PEACHJAM["CITATOR_API"]
     citator_key = settings.PEACHJAM["LAWSAFRICA_API_KEY"]
     resp = requests.post(
         citator_url + "get-citations",
         json={
             "frbr_uri": expression_frbr_uri,
-            "format": "text",
-            "body": text,
+            "format": "text" if text else "html",
+            "body": text or html,
         },
         headers={"Authorization": f"token {citator_key}"},
         timeout=60 * 10,
@@ -79,10 +81,10 @@ def get_citator_citations(expression_frbr_uri, text):
     return resp.json()
 
 
-@tool
-def get_provision_text(config: RunnableConfig, eid: str) -> str:
+@function_tool
+def get_provision_text(ctx: RunContextWrapper[DocumentChatContext], eid: str) -> str:
     """Returns the text of a provision given its EID."""
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    doc = CoreDocument.objects.get(pk=ctx.context.document_id)
     provision_html = doc.get_provision_by_eid(eid)
     if not provision_html:
         return "No provision found with that EID."
@@ -93,10 +95,12 @@ def get_provision_text(config: RunnableConfig, eid: str) -> str:
     return f"The text of provision with EID {eid} is:\n\n{text}"
 
 
-@tool
-def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
+@function_tool
+def provision_commencement_info(
+    ctx: RunContextWrapper[DocumentChatContext], eid: str
+) -> str:
     """Provides information about the commencement status of a provision given its EID."""
-    doc = CoreDocument.objects.get(pk=config["configurable"]["document_id"])
+    doc = CoreDocument.objects.get(pk=ctx.context.document_id)
     if not isinstance(doc, Legislation):
         return "This tool can only be used for legislation documents."
 
@@ -115,9 +119,29 @@ def provision_commencement_info(config: RunnableConfig, eid: str) -> str:
     return "That provision has not commenced."
 
 
+@function_tool
+def get_search_link(search_term: str) -> str:
+    """Returns a relative URL that the user can use to conduct a site-wide content search for a given term. The search
+    system uses simple keyword search across the legal data corpus and is not very smart.
+
+    Use markdown link formatting to make the returned URL clickable in the chat interface,
+    eg: [Search for "unlawful arrest"]({generated_search_link})
+
+    Tips for the search_terms string:
+
+    - Use specific search terms that are likely to appear in legislation, court judgments and case summaries
+    - Do not pose the search as a question.
+    - Wrap phrases in double quotes for more exact matches, eg "unlawful arrest"
+    - The default is to match all terms
+    - Use OR to search for multiple terms, eg: "unlawful arrest" OR "illegal detention"
+    """
+    return reverse("search:search") + "?q=" + urllib.parse.quote(search_term)
+
+
 def get_tools_for_document(document):
     tools = [
-        answer_document_question,
+        get_document_text,
+        get_search_link,
     ]
 
     if isinstance(document, Legislation):
@@ -130,11 +154,3 @@ def get_tools_for_document(document):
         )
 
     return tools
-
-
-ALL_TOOLS = [
-    answer_document_question,
-    get_provision_eid,
-    get_provision_text,
-    provision_commencement_info,
-]

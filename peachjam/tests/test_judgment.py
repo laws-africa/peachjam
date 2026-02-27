@@ -1,10 +1,11 @@
 import datetime
 
 from countries_plus.models import Country
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from languages_plus.models import Language
 
-from peachjam.models import CaseNumber, Court, Judgment
+from peachjam.models import CaseNumber, Court, CourtClass, Judgment, Locality
 
 
 class JudgmentTestCase(TestCase):
@@ -161,3 +162,64 @@ class JudgmentTestCase(TestCase):
         j.assign_mnc()
         j.assign_title()
         self.assertEqual("Foo v Bar [2019] EACJ 1 (1 janvier 2019)", j.title)
+
+    def test_court_rejects_locality_from_different_jurisdiction(self):
+        za = Country.objects.get(pk="ZA")
+        zm = Country.objects.get(pk="ZM")
+        court_class = CourtClass.objects.first()
+        locality = Locality.objects.create(
+            name="Cape Town", code="cpt", jurisdiction=za
+        )
+        court = Court(
+            name="Mismatched Court",
+            code="mismatched-court",
+            court_class=court_class,
+            country=zm,
+            locality=locality,
+        )
+
+        with self.assertRaises(ValidationError) as cm:
+            court.full_clean()
+
+        self.assertIn("locality", cm.exception.message_dict)
+
+    def test_court_accepts_locality_from_same_jurisdiction(self):
+        za = Country.objects.get(pk="ZA")
+        court_class = CourtClass.objects.first()
+        locality = Locality.objects.create(
+            name="Johannesburg", code="jhb", jurisdiction=za
+        )
+        court = Court(
+            name="Matching Court",
+            code="matching-court",
+            court_class=court_class,
+            country=za,
+            locality=locality,
+        )
+
+        court.full_clean()
+
+    def test_judgment_save_clears_locality_when_court_has_none(self):
+        za = Country.objects.get(pk="ZA")
+        old_locality = Locality.objects.create(
+            name="Durban", code="dbn", jurisdiction=za
+        )
+        court_without_locality = Court.objects.create(
+            name="Court Without Locality",
+            code="court-without-locality",
+            country=za,
+            locality=None,
+        )
+
+        judgment = Judgment(
+            language=Language.objects.get(pk="en"),
+            court=court_without_locality,
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=za,
+            locality=old_locality,
+        )
+        judgment.save()
+        judgment.refresh_from_db()
+
+        self.assertEqual(za, judgment.jurisdiction)
+        self.assertIsNone(judgment.locality)

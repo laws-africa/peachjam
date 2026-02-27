@@ -381,6 +381,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         ("book", "Book"),
         ("journal_article", "Journal Article"),
         ("causelist", "Cause List"),
+        ("arbitration_award", "Arbitration Award"),
     )
 
     # The name of the default nature to use for this type of document, if one is not set. This allows us to ensure

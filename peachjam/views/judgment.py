@@ -65,11 +65,10 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["judges"] = (
-            self.get_object()
-            .bench.prefetch_related("judge")
-            .values_list("judge__name", flat=True)
-        )
+        context["judges"] = [
+            bench.judge
+            for bench in self.get_object().bench.select_related("judge").all()
+        ]
         return context
 
 

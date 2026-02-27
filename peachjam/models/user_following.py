@@ -316,7 +316,22 @@ class UserFollowing(models.Model):
         # check that we are passing a citation to the saved document
         assert citation.target_work == self.saved_document.work
 
-        # avoid alerts for citations from documents older than cutoff
+        if not self.saved_document.document:
+            log.info(
+                "Saved document %s for user %s has no document expressions.",
+                self.saved_document,
+                self.user,
+            )
+            return
+
+        if not citation.citing_work.documents.latest_expression().exists():
+            log.info(
+                "Citing work %s has no document expressions for user %s; skipping citation alert.",
+                citation.citing_work,
+                self.user,
+            )
+            return
+
         if (
             citation.citing_work.documents.latest_expression().first().date
             < self.cutoff_date
@@ -348,11 +363,36 @@ class UserFollowing(models.Model):
         event_work = relationship_event.event_work(relationship)
         event_type = relationship_event.event_type
 
+        if not self.saved_document.document:
+            log.info(
+                "Saved document %s for user %s has no document expressions.",
+                self.saved_document,
+                self.user,
+            )
+            return
+
+        if not event_work.documents.latest_expression().exists():
+            log.info(
+                "Event work %s has no document expressions for user %s; skipping citation alert.",
+                event_work,
+                self.user,
+            )
+            return
+
         already_alerted = TimelineEvent.objects.filter(
             user_following=self,
             event_type=event_type,
             subject_works=event_work,
         ).exists()
+
+        if event_work.documents.latest_expression().first().date < self.cutoff_date:
+            log.info(
+                "relationship work %s is older than cutoff date %s for user %s",
+                event_work,
+                self.cutoff_date,
+                self.user,
+            )
+            return
 
         if already_alerted:
             log.info(

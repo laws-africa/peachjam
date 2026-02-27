@@ -13,6 +13,7 @@
     "model": "auth.user",
     "fields": {
       "username": "user@example.com",
+      "email": "user@example.com",
       "first_name": "user",
       "last_name": "",
       "is_active": true,
