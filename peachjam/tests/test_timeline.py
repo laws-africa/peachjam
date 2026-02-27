@@ -393,17 +393,46 @@ class TimelineRelationshipTests(TestCase):
 
         with (
             override_settings(
-                PEACHJAM={**settings.PEACHJAM, "EMAIL_ALERTS_ENABLED": True}
+                PEACHJAM={
+                    **settings.PEACHJAM,
+                    "EMAIL_ALERTS_ENABLED": True,
+                    "CUSTOMERIO_EMAIL_API_KEY": "test",
+                },
+                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
             ),
-            patch("peachjam.timeline_email_service.send_templated_mail") as mailer,
+            patch("peachjam.emails.APIClient.send_email") as mailer,
         ):
             TimelineEmailService.send_new_relationship_email(self.user)
 
-        template_names = {
-            call.kwargs["template_name"] for call in mailer.call_args_list
-        }
+        self.assertEqual(2, mailer.call_count)
+        transactional_message_ids = set()
+        recipient_emails = set()
+        subject_lines = set()
+
+        for call in mailer.call_args_list:
+            request = call.args[0]
+            transactional_message_ids.add(request.transactional_message_id)
+            recipient_emails.update(request.to)
+            subject_lines.add(str(request.message_data["subject_line"]))
+            self.assertEqual(
+                {"id": self.user.userprofile.tracking_id_str},
+                request.identifiers,
+            )
+            self.assertTrue(request.subject)
+            self.assertTrue(request.message_data["html_body"])
+            self.assertEqual({}, request.attachments)
+
         self.assertEqual(
-            {"new_relationship_alert", "new_overturn_alert"}, template_names
+            {f"{settings.PEACHJAM['APP_NAME']}/generic"},
+            transactional_message_ids,
+        )
+        self.assertEqual({self.user.email}, recipient_emails)
+        self.assertEqual(
+            {
+                "New updates for documents you have saved",
+                "New overturn for judgments you have saved",
+            },
+            subject_lines,
         )
 
         sent_events = TimelineEvent.objects.filter(
@@ -430,9 +459,14 @@ class TimelineRelationshipTests(TestCase):
 
         with (
             override_settings(
-                PEACHJAM={**settings.PEACHJAM, "EMAIL_ALERTS_ENABLED": True}
+                PEACHJAM={
+                    **settings.PEACHJAM,
+                    "EMAIL_ALERTS_ENABLED": True,
+                    "CUSTOMERIO_EMAIL_API_KEY": "test",
+                },
+                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
             ),
-            patch("peachjam.timeline_email_service.send_templated_mail") as mailer,
+            patch("peachjam.emails.APIClient.send_email") as mailer,
         ):
             TimelineEmailService.send_new_citation_email(self.user)
 

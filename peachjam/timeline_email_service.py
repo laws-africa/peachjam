@@ -3,9 +3,7 @@ from datetime import timedelta
 from typing import NamedTuple
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.db.models import Exists, OuterRef, Q
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.text import gettext_lazy as _
@@ -137,7 +135,7 @@ class TimelineEmailService:
                 send_templated_mail(
                     template_name="user_following_alert",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
+                    recipient_list=[user],
                     context=context,
                 )
 
@@ -174,7 +172,7 @@ class TimelineEmailService:
                     send_templated_mail(
                         template_name="search_alert",
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[user.email],
+                        recipient_list=[user],
                         context=context,
                     )
 
@@ -241,25 +239,12 @@ class TimelineEmailService:
                         "citing_documents": citing_documents,
                     }
                 )
-            site = Site.objects.get_current()
-            context["site_domain"] = f"https://{site.domain}"
-
-            # render html template string
-            context["html_body"] = render_to_string(
-                "peachjam/emails/new_citation_alert_body.html", context=context
-            )
-            subject_line = f"New citations for {context['saved_documents'][0]['saved_document'].title}"
-            saved_docs_length = len(context["saved_documents"])
-            if saved_docs_length > 1:
-                subject_line += f" and {saved_docs_length - 1} more"
-
-            context["subject_line"] = subject_line
 
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(
                     template_name="new_citation_alert",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
+                    recipient_list=[user],
                     context=context,
                 )
 
@@ -339,25 +324,19 @@ class TimelineEmailService:
                 {"saved_document": key, "relationships": value}
                 for key, value in saved_documents_map.items()
             ]
-            site = Site.objects.get_current()
 
             context = {
                 "saved_documents": saved_documents,
                 "user": user,
                 "manage_url_path": reverse("folder_list"),
-                "site_domain": f"https://{site.domain}",
                 "subject_line": email_config.subject_line,
             }
-
-            context["html_body"] = render_to_string(
-                "peachjam/emails/new_relationship_alert_body.html", context=context
-            )
 
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(
                     template_name=email_config.email_template,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
+                    recipient_list=[user],
                     context=context,
                 )
 

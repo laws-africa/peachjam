@@ -3,6 +3,5 @@
 {% block subject %}{{subject_line}}{% endblock %}
 {% block alert-body %}
   <p>{% trans "Some judgments you have saved have been overturned." %}</p>
-  {% include "peachjam/emails/new_relationship_alert_body.html" %}
-  {% endfor %}
+  {% include 'peachjam/emails/_new_relationship_alert_body.html' %}
 {% endblock %}

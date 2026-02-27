@@ -88,7 +88,7 @@ class AccountAdapter(DefaultAccountAdapter):
         mail_kwargs = dict(
             template_name=template_prefix,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[email],
+            recipient_list=[user or email],
             context=context,
         )
 
