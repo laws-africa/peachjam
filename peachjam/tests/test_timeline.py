@@ -452,8 +452,8 @@ class TimelineRelationshipTests(TestCase):
         self.assertEqual({self.user.email}, recipient_emails)
         self.assertEqual(
             {
-                "New updates for documents you have saved",
-                "New overturn for judgments you have saved",
+                f"New updates for {self.saved_followed.work.title}",
+                f"New overturn for {self.saved_overturned.work.title}",
             },
             subject_lines,
         )

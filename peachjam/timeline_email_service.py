@@ -6,7 +6,6 @@ from django.conf import settings
 from django.db.models import Exists, OuterRef, Q
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.text import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -256,7 +255,6 @@ class TimelineEmailService:
         class RelationshipEmail(NamedTuple):
             event_types: list[str]
             email_template: str
-            subject_line: str
 
         RELATIONSHIP_EMAIL = RelationshipEmail(
             event_types=[
@@ -265,13 +263,11 @@ class TimelineEmailService:
                 if rel.event_type != TimelineEvent.EventTypes.NEW_OVERTURN
             ],
             email_template="new_relationship_alert",
-            subject_line=_("New updates for documents you have saved"),
         )
 
         OVERTURN_EMAIL = RelationshipEmail(
             event_types=[TimelineEvent.EventTypes.NEW_OVERTURN],
             email_template="new_overturn_alert",
-            subject_line=_("New overturn for judgments you have saved"),
         )
         TimelineEmailService._send_relationship_email(
             user,
@@ -329,7 +325,6 @@ class TimelineEmailService:
                 "saved_documents": saved_documents,
                 "user": user,
                 "manage_url_path": reverse("folder_list"),
-                "subject_line": email_config.subject_line,
             }
 
             with override(user.userprofile.preferred_language.pk):
