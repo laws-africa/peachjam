@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import Group, Permission, User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -40,6 +41,77 @@ See workflow here: https://mermaid.live/edit#pako:eNqNUs1um0AQfpXRXEsse4HURmoujc
 """  # noqa
 
 log = logging.getLogger(__name__)
+
+
+def validate_selectable_offering_catalog(product_offering_pairs):
+    """Validate cross-product assumptions for user-selectable offerings."""
+    entries = []
+    for product, offerings in product_offering_pairs:
+        offerings = list(offerings)
+        offerings_by_period = {}
+        for offering in offerings:
+            period = offering.pricing_plan.period
+            if period in offerings_by_period:
+                raise ValidationError(
+                    _(
+                        "Product '%(product)s' has more than one selectable %(period)s offering."
+                    )
+                    % {"product": product.name, "period": period}
+                )
+            offerings_by_period[period] = offering
+
+        monthly = offerings_by_period.get(PricingPlan.Period.MONTHLY)
+        annual = offerings_by_period.get(PricingPlan.Period.ANNUALLY)
+        if (
+            monthly
+            and annual
+            and monthly.pricing_plan.price > 0
+            and annual.pricing_plan.price <= monthly.pricing_plan.price
+        ):
+            raise ValidationError(
+                _(
+                    "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly "
+                    "(%(monthly)s)."
+                )
+                % {
+                    "product": product.name,
+                    "annual": annual.pricing_plan.price,
+                    "monthly": monthly.pricing_plan.price,
+                }
+            )
+
+        for period, offering in offerings_by_period.items():
+            entries.append(
+                {
+                    "product_name": product.name,
+                    "tier": product.tier,
+                    "period": period,
+                    "price": offering.pricing_plan.price,
+                }
+            )
+
+    for period in PricingPlan.Period.values:
+        period_entries = sorted(
+            [entry for entry in entries if entry["period"] == period],
+            key=lambda item: item["tier"],
+        )
+        prev = None
+        for entry in period_entries:
+            if prev and entry["price"] <= prev["price"]:
+                raise ValidationError(
+                    _(
+                        "Selectable %(period)s pricing must increase with tier: "
+                        "'%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
+                    )
+                    % {
+                        "period": period,
+                        "product": entry["product_name"],
+                        "price": entry["price"],
+                        "prev_product": prev["product_name"],
+                        "prev_price": prev["price"],
+                    }
+                )
+            prev = entry
 
 
 class Feature(models.Model):

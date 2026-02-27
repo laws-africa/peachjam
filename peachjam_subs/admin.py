@@ -1,5 +1,7 @@
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import path, reverse
@@ -18,7 +20,77 @@ from .models import (
     Subscription,
     SubscriptionSettings,
     subscription_settings,
+    validate_selectable_offering_catalog,
 )
+
+
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        selectable_offerings = cleaned_data.get("selectable_offerings")
+        instance = self.instance
+
+        if selectable_offerings is None:
+            return cleaned_data
+
+        if not instance.pk and selectable_offerings.exists():
+            raise ValidationError(
+                _("Save the product first, then configure selectable offerings.")
+            )
+
+        if instance.pk:
+            mismatched = selectable_offerings.exclude(product=instance)
+            if mismatched.exists():
+                raise ValidationError(
+                    _(
+                        "Selectable offerings for '%(product)s' must belong to that product."
+                    )
+                    % {"product": instance.name}
+                )
+
+        pairs = []
+        for product in Product.objects.prefetch_related(
+            "selectable_offerings__pricing_plan"
+        ):
+            offerings = (
+                list(selectable_offerings)
+                if instance.pk and product.pk == instance.pk
+                else list(product.selectable_offerings.all())
+            )
+            pairs.append((product, offerings))
+
+        validate_selectable_offering_catalog(pairs)
+        return cleaned_data
+
+
+class SubscriptionSettingsAdminForm(forms.ModelForm):
+    class Meta:
+        model = SubscriptionSettings
+        fields = "__all__"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        key_products = cleaned_data.get("key_products")
+        if key_products is None:
+            return cleaned_data
+
+        missing = [
+            product.name
+            for product in key_products
+            if not product.selectable_offerings.exists()
+        ]
+        if missing:
+            raise ValidationError(
+                _(
+                    "Key products must have at least one selectable offering configured: %(products)s"
+                )
+                % {"products": ", ".join(missing)}
+            )
+        return cleaned_data
 
 
 @admin.register(Feature)
@@ -30,6 +102,7 @@ class FeatureAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductAdminForm
     list_display = ("name", "description", "tier")
     search_fields = ("name",)
     readonly_fields = ("group",)
@@ -122,6 +195,8 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(SubscriptionSettings)
 class SubscriptionSettingsAdmin(admin.ModelAdmin):
+    form = SubscriptionSettingsAdminForm
+
     def has_add_permission(self, request):
         return False
 
