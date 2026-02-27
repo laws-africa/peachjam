@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-27 10:35+0300\n"
-"PO-Revision-Date: 2025-11-20 10:24\n"
+"PO-Revision-Date: 2026-02-27 08:52\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -134,22 +134,18 @@ msgid "Active since"
 msgstr "Ativo desde"
 
 #: templates/peachjam_subs/_subscription_required.html:11
-#, fuzzy, python-format
-#| msgid "This content is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and <a href=\"%(upsell_url)s\">subscribe to %(lowest_product)s</a> to unlock access."
+#, python-format
 msgid "This feature is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
-msgstr "Este conteúdo está disponível apenas para subscritores. <a href=\"%(login_url)s\">Faça login</a> ou <a href=\"%(signup_url)s\">Registe-se</a> e <a href=\"%(upsell_url)s\">subscreva %(lowest_product)s</a> para desbloquear o acesso."
+msgstr "Esta funcionalidade está disponível apenas para assinantes. <a href=\"%(login_url)s\">Faça login</a> ou <a href=\"%(signup_url)s\">Registe-se</a> e subscreva <a href=\"%(upsell_url)s\">%(lowest_product)s</a> para desbloquear o acesso."
 
 #: templates/peachjam_subs/_subscription_required.html:24
-#, fuzzy, python-format
-#| msgid "Your current subscription doesn’t include this content. Please <a href=\"%(upsell_url)s\">upgrade to %(lowest_product)s</a> to unlock access."
+#, python-format
 msgid "Your current subscription doesn’t include this feature. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
-msgstr "A sua subscrição atual não inclui este conteúdo. Por favor, <a href=\"%(upsell_url)s\">atualize para %(lowest_product)s</a> para desbloquear o acesso."
+msgstr "A sua assinatura atual não inclui esta funcionalidade. Atualize para <a href=\"%(upsell_url)s\">%(lowest_product)s</a> para desbloquear o acesso."
 
 #: templates/peachjam_subs/_subscription_required.html:33
-#, fuzzy
-#| msgid "This content is not currently available."
 msgid "This feature is not currently available."
-msgstr "Este conteúdo não está disponível de momento."
+msgstr "Esta funcionalidade não está disponível de momento."
 
 #: templates/peachjam_subs/subscribe.html:9
 msgid "Your personal research space"
@@ -239,3 +235,4 @@ msgstr "Subscrição"
 #: views.py:29
 msgid "Your pending subscription change has been cancelled."
 msgstr "A sua alteração de subscrição pendente foi cancelada."
+
