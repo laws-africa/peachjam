@@ -114,6 +114,7 @@ class PricingPlanAdmin(admin.ModelAdmin):
     list_display = ("name", "price", "period")
     search_fields = ("name",)
     list_filter = ("period",)
+    ordering = ("name",)
 
 
 @admin.register(ProductOffering)
@@ -121,6 +122,7 @@ class ProductOfferingAdmin(GuardedModelAdmin):
     list_display = ("product", "pricing_plan")
     search_fields = ("product__name", "pricing_plan__name")
     list_filter = ("product", "pricing_plan")
+    ordering = ("product__name", "pricing_plan__name")
 
 
 @admin.register(Subscription)
