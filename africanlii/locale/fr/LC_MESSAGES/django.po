@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-02-27 10:35+0300\n"
-"PO-Revision-Date: 2025-11-20 10:24\n"
+"PO-Revision-Date: 2026-02-27 08:52\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -621,3 +621,4 @@ msgstr "Années"
 #: views/taxonomy.py:147
 msgid "Alphabet"
 msgstr "Alphabet"
+
