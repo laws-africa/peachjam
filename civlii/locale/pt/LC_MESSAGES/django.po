@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-25 14:25+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: 2025-11-25 12:42\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -17,59 +17,59 @@ msgstr ""
 "X-Crowdin-File: /main/civlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 277\n"
 
-#: settings.py:13
+#: settings.py:15
 msgid "French"
 msgstr "Francês"
 
-#: settings.py:14
+#: settings.py:16
 msgid "English"
 msgstr "Inglês"
 
-#: templates/liiweb/home.html:4
-msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
-msgstr "Bem-vindo ao Instituto de Informação Jurídica da Costa do Marfim"
+#: templates/liiweb/home.html:5
+msgid "La mémoire du droit en Côte d'Ivoire."
+msgstr ""
 
-#: templates/liiweb/home.html:7
-msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-msgstr "Acesso livre à legislação da Costa do Marfim. A CIVLII é membro da comunidade das Instituições de Acesso Livre à Justiça Africanas e do Movimento de Acesso Livre à Justiça."
+#: templates/peachjam/_header.html:7
+msgid "Help"
+msgstr ""
 
-#: templates/peachjam/_header.html:11
+#: templates/peachjam/_header.html:14
 msgid "Home"
 msgstr "Página inicial"
 
-#: templates/peachjam/_header.html:16
+#: templates/peachjam/_header.html:19
 msgid "Judgments"
 msgstr "Julgamentos"
 
-#: templates/peachjam/_header.html:22
+#: templates/peachjam/_header.html:25
 msgid "Legislation"
 msgstr "Legislação"
 
-#: templates/peachjam/_header.html:31
+#: templates/peachjam/_header.html:34
 msgid "African Union and ECOWAS"
 msgstr "União Africana e CEDEAO"
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:40
 msgid "African Court of Human and People's Rights"
 msgstr "Tribunal Africano dos Direitos Humanos e dos Povos"
 
-#: templates/peachjam/_header.html:43
+#: templates/peachjam/_header.html:46
 msgid "African Commission on Human and People's Rights"
 msgstr "Comissão Africana dos Direitos Humanos e dos Povos"
 
-#: templates/peachjam/_header.html:49
+#: templates/peachjam/_header.html:52
 msgid "Economic Community of West African States (ECOWAS)"
 msgstr "Comunidade Económica dos Estados da África Ocidental (CEDEAO)"
 
-#: templates/peachjam/_header.html:55
+#: templates/peachjam/_header.html:58
 msgid "ECOWAS Community Court of Justice"
 msgstr "Tribunal de Justiça da Comunidade da CEDEAO"
 
-#: templates/peachjam/_header.html:61
+#: templates/peachjam/_header.html:64
 msgid "AU Charters and Treaties"
 msgstr "Cartas e Tratados da UA"
 
-#: templates/peachjam/_header.html:69
+#: templates/peachjam/_header.html:72
 msgid "About"
 msgstr "Sobre"
 
@@ -93,3 +93,8 @@ msgstr "Contate-nos"
 msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 
+#~ msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
+#~ msgstr "Bem-vindo ao Instituto de Informação Jurídica da Costa do Marfim"
+
+#~ msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
+#~ msgstr "Acesso livre à legislação da Costa do Marfim. A CIVLII é membro da comunidade das Instituições de Acesso Livre à Justiça Africanas e do Movimento de Acesso Livre à Justiça."

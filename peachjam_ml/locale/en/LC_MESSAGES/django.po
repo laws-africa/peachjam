@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-20 10:39+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,28 +18,20 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:18
+#: admin.py:14
 msgid "Updating document chunks and embeddings in the background."
 msgstr ""
 
-#: admin.py:23
+#: admin.py:19
 msgid "Update document chunks and embeddings (background)"
 msgstr ""
 
-#: admin.py:38
+#: admin.py:34
 msgid "Re-calculated document embeddings."
 msgstr ""
 
-#: admin.py:42
+#: admin.py:38
 msgid "Re-calculate average document embeddings"
-msgstr ""
-
-#: admin.py:84 admin.py:122
-msgid "Document"
-msgstr ""
-
-#: admin.py:92
-msgid "Messages JSON"
 msgstr ""
 
 #: templates/peachjam/_related_documents.html:6
@@ -56,25 +48,10 @@ msgstr ""
 msgid "No documents found."
 msgstr ""
 
-#: templates/peachjam/layouts/document_detail.html:15
-#: templates/peachjam/layouts/document_detail.html:22
-#, python-format
-msgid "Ask %(name)s"
-msgstr ""
-
-#: templates/peachjam/layouts/document_detail.html:17
-msgid "Ask questions and understand this document faster using AI."
-msgstr ""
-
 #: templates/peachjam/saved_document/_folders_list.html:16
 msgid "Saved documents"
 msgstr ""
 
 #: templates/peachjam/saved_document/_folders_list.html:30
 msgid "Suggested for this folder"
-msgstr ""
-
-#: templates/peachjam_ml/_chat_permission_denied.html:5
-#, python-format
-msgid "You've reached your limit of %(chat_limit)s chats per month. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats, or wait until next month."
 msgstr ""

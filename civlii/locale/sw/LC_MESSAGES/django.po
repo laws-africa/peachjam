@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-25 14:25+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: 2025-11-25 12:42\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,59 +17,59 @@ msgstr ""
 "X-Crowdin-File: /main/civlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 277\n"
 
-#: settings.py:13
+#: settings.py:15
 msgid "French"
 msgstr "Kifaransa"
 
-#: settings.py:14
+#: settings.py:16
 msgid "English"
 msgstr "Kiingereza"
 
-#: templates/liiweb/home.html:4
-msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
-msgstr "Karibu katika Taasisi ya Taarifa za Kisheria ya Côte d'Ivoire"
+#: templates/liiweb/home.html:5
+msgid "La mémoire du droit en Côte d'Ivoire."
+msgstr ""
 
-#: templates/liiweb/home.html:7
-msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-msgstr "Ufikiaji bila malipo kwa sheria ya Côte d'Ivoire. CIVLII ni mwanachama wa jumuiya ya LII za Kiafrika na Ufikiaji Huru wa Vuguvugu la Sheria."
+#: templates/peachjam/_header.html:7
+msgid "Help"
+msgstr ""
 
-#: templates/peachjam/_header.html:11
+#: templates/peachjam/_header.html:14
 msgid "Home"
 msgstr "Nyumbani"
 
-#: templates/peachjam/_header.html:16
+#: templates/peachjam/_header.html:19
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: templates/peachjam/_header.html:22
+#: templates/peachjam/_header.html:25
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/peachjam/_header.html:31
+#: templates/peachjam/_header.html:34
 msgid "African Union and ECOWAS"
 msgstr "Umoja wa Afrika na ECOWAS"
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:40
 msgid "African Court of Human and People's Rights"
 msgstr "Mahakama ya Afrika ya Haki za Binadamu na Watu"
 
-#: templates/peachjam/_header.html:43
+#: templates/peachjam/_header.html:46
 msgid "African Commission on Human and People's Rights"
 msgstr "Tume ya Afrika ya Haki za Binadamu na Watu"
 
-#: templates/peachjam/_header.html:49
+#: templates/peachjam/_header.html:52
 msgid "Economic Community of West African States (ECOWAS)"
 msgstr "Jumuiya ya Kiuchumi ya Nchi za Afrika Magharibi (ECOWAS)"
 
-#: templates/peachjam/_header.html:55
+#: templates/peachjam/_header.html:58
 msgid "ECOWAS Community Court of Justice"
 msgstr "Mahakama ya Haki ya Jumuiya ya ECOWAS"
 
-#: templates/peachjam/_header.html:61
+#: templates/peachjam/_header.html:64
 msgid "AU Charters and Treaties"
 msgstr "Mikataba na Mikataba ya AU"
 
-#: templates/peachjam/_header.html:69
+#: templates/peachjam/_header.html:72
 msgid "About"
 msgstr "Kuhusu"
 
@@ -93,3 +93,8 @@ msgstr "Wasiliana nasi"
 msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr ""
 
+#~ msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
+#~ msgstr "Karibu katika Taasisi ya Taarifa za Kisheria ya Côte d'Ivoire"
+
+#~ msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
+#~ msgstr "Ufikiaji bila malipo kwa sheria ya Côte d'Ivoire. CIVLII ni mwanachama wa jumuiya ya LII za Kiafrika na Ufikiaji Huru wa Vuguvugu la Sheria."

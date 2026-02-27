@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-25 14:25+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,59 +17,60 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-#: settings.py:13
+
+#: settings.py:15
 msgid "French"
 msgstr ""
 
-#: settings.py:14
+#: settings.py:16
 msgid "English"
 msgstr ""
 
-#: templates/liiweb/home.html:4
-msgid "Welcome to the Côte d'Ivoire Legal Information Institute"
+#: templates/liiweb/home.html:5
+msgid "La mémoire du droit en Côte d'Ivoire."
 msgstr ""
 
-#: templates/liiweb/home.html:7
-msgid "Free access to the law of Côte d'Ivoire. CIVLII is a member of the community of African LIIs and of the Free Access to Law Movement."
+#: templates/peachjam/_header.html:7
+msgid "Help"
 msgstr ""
 
-#: templates/peachjam/_header.html:11
+#: templates/peachjam/_header.html:14
 msgid "Home"
 msgstr ""
 
-#: templates/peachjam/_header.html:16
+#: templates/peachjam/_header.html:19
 msgid "Judgments"
 msgstr ""
 
-#: templates/peachjam/_header.html:22
+#: templates/peachjam/_header.html:25
 msgid "Legislation"
 msgstr ""
 
-#: templates/peachjam/_header.html:31
+#: templates/peachjam/_header.html:34
 msgid "African Union and ECOWAS"
 msgstr ""
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:40
 msgid "African Court of Human and People's Rights"
 msgstr ""
 
-#: templates/peachjam/_header.html:43
+#: templates/peachjam/_header.html:46
 msgid "African Commission on Human and People's Rights"
 msgstr ""
 
-#: templates/peachjam/_header.html:49
+#: templates/peachjam/_header.html:52
 msgid "Economic Community of West African States (ECOWAS)"
 msgstr ""
 
-#: templates/peachjam/_header.html:55
+#: templates/peachjam/_header.html:58
 msgid "ECOWAS Community Court of Justice"
 msgstr ""
 
-#: templates/peachjam/_header.html:61
+#: templates/peachjam/_header.html:64
 msgid "AU Charters and Treaties"
 msgstr ""
 
-#: templates/peachjam/_header.html:69
+#: templates/peachjam/_header.html:72
 msgid "About"
 msgstr ""
 

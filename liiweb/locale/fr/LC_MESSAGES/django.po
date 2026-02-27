@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -46,68 +46,62 @@ msgstr "Recherche"
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
-#: templates/liiweb/home.html:4
-#: templates/liiweb/locality_legislation_list.html:9
-#: templates/peachjam/_header.html:8
-msgid "Home"
-msgstr "Accueil"
-
-#: templates/liiweb/home.html:42 templates/peachjam/_header.html:13
+#: templates/liiweb/home.html:39 templates/peachjam/_header.html:13
 msgid "Judgments"
 msgstr "Jugements"
 
-#: templates/liiweb/home.html:45 templates/liiweb/legislation_list.html:4
+#: templates/liiweb/home.html:42 templates/liiweb/legislation_list.html:4
 #: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:19
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/liiweb/home.html:90
+#: templates/liiweb/home.html:87
 msgid "Recent Judgments"
 msgstr "Jugements récents"
 
-#: templates/liiweb/home.html:91
+#: templates/liiweb/home.html:88
 msgid "View more judgments"
 msgstr "Voir plus de jugements"
 
-#: templates/liiweb/home.html:97
+#: templates/liiweb/home.html:94
 msgid "Recent Legislation"
 msgstr "Législation récente"
 
-#: templates/liiweb/home.html:98
+#: templates/liiweb/home.html:95
 msgid "View more legislation"
 msgstr "Voir plus de législation"
 
-#: templates/liiweb/home.html:105
+#: templates/liiweb/home.html:102
 msgid "Recent Gazettes"
 msgstr "Gazettes récentes"
 
-#: templates/liiweb/home.html:106
+#: templates/liiweb/home.html:103
 msgid "View more gazettes"
 msgstr "Voir plus de gazettes"
 
-#: templates/liiweb/home.html:118
+#: templates/liiweb/home.html:115
 msgid "Courts"
 msgstr "Cours"
 
-#: templates/liiweb/home.html:126
+#: templates/liiweb/home.html:123
 msgid "Collections"
 msgstr "Collections"
 
-#: templates/liiweb/home.html:142
+#: templates/liiweb/home.html:139
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
 msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
 
-#: templates/liiweb/home.html:144
+#: templates/liiweb/home.html:141
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
 msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
 
-#: templates/liiweb/home.html:159
+#: templates/liiweb/home.html:156
 msgid "Latest Articles"
 msgstr "Derniers articles"
 
-#: templates/liiweb/home.html:161
+#: templates/liiweb/home.html:158
 msgid "View more articles"
 msgstr "Voir plus d'articles"
 
@@ -155,6 +149,11 @@ msgstr "Législation abrogée"
 msgid "All legislation"
 msgstr "Toutes les lois"
 
+#: templates/liiweb/locality_legislation_list.html:9
+#: templates/peachjam/_header.html:8
+msgid "Home"
+msgstr "Accueil"
+
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
 msgstr "Loi de poche"
@@ -172,9 +171,9 @@ msgstr "Utilisez %(APP_NAME)s hors ligne avec <a href=\"%(pocket_law_url)s\">Poc
 msgid "Site Statistics"
 msgstr "Statistiques du site"
 
-#: templates/peachjam/_footer.html:25
-msgid "Terms of Use"
-msgstr "Termes et conditions d'utilisation"
+#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:29
+msgid "Help"
+msgstr ""
 
 #: templates/peachjam/_footer.html:28
 msgid "About us"
@@ -184,11 +183,15 @@ msgstr "À propos de nous"
 msgid "Contact us"
 msgstr "Contactez-nous"
 
-#: templates/peachjam/_footer.html:37
+#: templates/peachjam/_footer.html:34
+msgid "Terms of Use"
+msgstr "Termes et conditions d'utilisation"
+
+#: templates/peachjam/_footer.html:40
 msgid "Our partners"
 msgstr "Nos partenaires"
 
-#: templates/peachjam/_footer.html:46
+#: templates/peachjam/_footer.html:49
 msgid "Other African Legal Information Institutions"
 msgstr "Autres Institutions Africaines d'information Juridique"
 
@@ -196,4 +199,3 @@ msgstr "Autres Institutions Africaines d'information Juridique"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
-

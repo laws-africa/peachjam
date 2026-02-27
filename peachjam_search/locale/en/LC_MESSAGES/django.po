@@ -1,16 +1,16 @@
-#: models.py:167
+#: models.py:174
 msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:255
+#: models.py:262
 msgid "feedback"
 msgstr ""
 
-#: models.py:257
+#: models.py:264
 msgid "name"
 msgstr ""
 
-#: models.py:262
+#: models.py:269
 msgid "email address"
 msgstr ""
 
@@ -87,7 +87,7 @@ msgid "Raw"
 msgstr ""
 
 #: templates/peachjam_search/_search_hit.html:115
-#: templates/peachjam_search/_searchtrace_card.html:34
+#: templates/peachjam_search/_searchtrace_card.html:44
 #: templates/peachjam_search/searchtrace_list.html:34
 msgid "Page"
 msgstr ""
@@ -111,38 +111,46 @@ msgid "Advanced search"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:28
-msgid "Mode"
+msgid "Cleaned query"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:30
-msgid "Ordering"
+msgid "Classification"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:36
-msgid "Number of results"
+#: templates/peachjam_search/_searchtrace_card.html:38
+msgid "Mode"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:40
+msgid "Ordering"
+msgstr ""
+
+#: templates/peachjam_search/_searchtrace_card.html:46
+msgid "Number of results"
+msgstr ""
+
+#: templates/peachjam_search/_searchtrace_card.html:50
 msgid "Filters"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:42
+#: templates/peachjam_search/_searchtrace_card.html:52
 msgid "User"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:51
+#: templates/peachjam_search/_searchtrace_card.html:61
 msgid "staff"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:57
+#: templates/peachjam_search/_searchtrace_card.html:67
 msgid "Config version"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:59
+#: templates/peachjam_search/_searchtrace_card.html:69
 msgid "Request ID"
 msgstr ""
 
-#: templates/peachjam_search/_searchtrace_card.html:66
+#: templates/peachjam_search/_searchtrace_card.html:76
 msgid "Clicks"
 msgstr ""
 
@@ -215,11 +223,11 @@ msgstr ""
 msgid "No search traces found."
 msgstr ""
 
-#: views.py:61
+#: views/search.py:65
 #, python-format
 msgid "Search %(app_name)s"
 msgstr ""
 
-#: views.py:286
+#: views/search.py:303
 msgid "Search trace not found"
 msgstr ""

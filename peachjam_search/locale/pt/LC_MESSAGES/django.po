@@ -1,30 +1,32 @@
 msgid ""
 msgstr ""
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
+"PO-Revision-Date: 2025-11-20 10:24\n"
+"Language-Team: Portuguese\n"
+"Language: pt_PT\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: pt\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"Content-Type: text/plain; charset=UTF-8\n"
-"Language-Team: Portuguese\n"
-"Language: pt_PT\n"
-"PO-Revision-Date: 2025-11-20 10:24\n"
 
-#: models.py:167
+#: models.py:174
 msgid "Search alert limit reached"
 msgstr "Limite de alerta de pesquisa atingido"
 
-#: models.py:255
+#: models.py:262
 msgid "feedback"
 msgstr "opinião"
 
-#: models.py:257
+#: models.py:264
 msgid "name"
 msgstr "Nome"
 
-#: models.py:262
+#: models.py:269
 msgid "email address"
 msgstr "endereço de e-mail"
 
@@ -101,7 +103,7 @@ msgid "Raw"
 msgstr "Cru"
 
 #: templates/peachjam_search/_search_hit.html:115
-#: templates/peachjam_search/_searchtrace_card.html:34
+#: templates/peachjam_search/_searchtrace_card.html:44
 #: templates/peachjam_search/searchtrace_list.html:34
 msgid "Page"
 msgstr "Página"
@@ -125,38 +127,46 @@ msgid "Advanced search"
 msgstr "Pesquisa avançada"
 
 #: templates/peachjam_search/_searchtrace_card.html:28
+msgid "Cleaned query"
+msgstr ""
+
+#: templates/peachjam_search/_searchtrace_card.html:30
+msgid "Classification"
+msgstr ""
+
+#: templates/peachjam_search/_searchtrace_card.html:38
 msgid "Mode"
 msgstr "Modo"
 
-#: templates/peachjam_search/_searchtrace_card.html:30
+#: templates/peachjam_search/_searchtrace_card.html:40
 msgid "Ordering"
 msgstr "Encomenda"
 
-#: templates/peachjam_search/_searchtrace_card.html:36
+#: templates/peachjam_search/_searchtrace_card.html:46
 msgid "Number of results"
 msgstr "Número de resultados"
 
-#: templates/peachjam_search/_searchtrace_card.html:40
+#: templates/peachjam_search/_searchtrace_card.html:50
 msgid "Filters"
 msgstr "Filtros"
 
-#: templates/peachjam_search/_searchtrace_card.html:42
+#: templates/peachjam_search/_searchtrace_card.html:52
 msgid "User"
 msgstr "Usuário"
 
-#: templates/peachjam_search/_searchtrace_card.html:51
+#: templates/peachjam_search/_searchtrace_card.html:61
 msgid "staff"
 msgstr "funcionários"
 
-#: templates/peachjam_search/_searchtrace_card.html:57
+#: templates/peachjam_search/_searchtrace_card.html:67
 msgid "Config version"
 msgstr "Versão de configuração"
 
-#: templates/peachjam_search/_searchtrace_card.html:59
+#: templates/peachjam_search/_searchtrace_card.html:69
 msgid "Request ID"
 msgstr "ID da solicitação"
 
-#: templates/peachjam_search/_searchtrace_card.html:66
+#: templates/peachjam_search/_searchtrace_card.html:76
 msgid "Clicks"
 msgstr "Cliques"
 
@@ -229,12 +239,11 @@ msgstr "Criado em"
 msgid "No search traces found."
 msgstr "Nenhum vestígio de busca encontrado."
 
-#: views.py:61
+#: views/search.py:65
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Pesquisar %(app_name)s"
 
-#: views.py:286
+#: views/search.py:303
 msgid "Search trace not found"
 msgstr "Rastreamento de pesquisa não encontrado"
-
