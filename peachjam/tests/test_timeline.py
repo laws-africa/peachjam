@@ -412,13 +412,13 @@ class TimelineRelationshipTests(TestCase):
         for call in mailer.call_args_list:
             request = call.args[0]
             transactional_message_ids.add(request.transactional_message_id)
-            recipient_emails.update(request.to)
+            recipient_emails.add(request.to)
             subject_lines.add(str(request.subject))
             self.assertEqual(
                 {"id": self.user.userprofile.tracking_id_str},
                 request.identifiers,
             )
-            self.assertTrue(request.message_data["html_body"])
+            self.assertIn("<html", request.body)
             self.assertEqual({}, request.attachments)
 
         self.assertEqual(
