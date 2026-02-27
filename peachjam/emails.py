@@ -37,6 +37,15 @@ class TemplateBackend(BaseTemplateBackend):
             # inline CSS styles into the HTML
             parts["html"] = css_inline.inline(parts["html"])
 
+        if parts.get("subject"):
+            parts["subject"] = (
+                parts["subject"]
+                .strip("\n\r")
+                .replace("\n", " ")
+                .replace("\r", " ")
+                .strip()
+            )
+
         return parts
 
     def get_primary_colour(self):
