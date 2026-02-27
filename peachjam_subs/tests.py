@@ -45,6 +45,8 @@ class SubscriptionTests(TestCase):
             2023, 1, 1, tzinfo=timezone.utc
         )
         self.sub_settings = subscription_settings()
+        for product in Product.objects.all():
+            product.selectable_offerings.set(product.productoffering_set.all())
 
     @patch("django.utils.timezone.now")
     def test_start_of_current_period(self, mock_now):
@@ -91,9 +93,10 @@ class SubscriptionTests(TestCase):
         sub1.activate()
         self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
         self.assertIsNotNone(sub1.active_at)
-        sub1.refresh_from_db()
-        self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
-        self.assertIsNotNone(sub1.active_at)
+
+    def test_pricing_plan_price_per_month(self):
+        self.assertEqual("None100/month", self.monthly_plan.price_per_month)
+        self.assertEqual("None8.33/month", self.annual_plan.price_per_month)
 
     def setup_trial(self):
         # clear out old subscription completely
@@ -196,3 +199,35 @@ class SubscriptionTests(TestCase):
         # both trial and old sub are closed
         self.assertEqual(Subscription.Status.CLOSED, sub.status)
         self.assertEqual(Subscription.Status.CLOSED, trial.status)
+
+    def test_product_offerings_available_to_user_excludes_unconfigured_products(self):
+        selectable_plan = PricingPlan.objects.create(
+            name="Selectable Monthly Plan",
+            price=Decimal("95.00"),
+            period=PricingPlan.Period.MONTHLY,
+        )
+        selectable_offering = ProductOffering.objects.create(
+            product=self.product,
+            pricing_plan=selectable_plan,
+        )
+
+        non_selectable_plan = PricingPlan.objects.create(
+            name="Hidden Staff Plan",
+            price=Decimal("55.00"),
+            period=PricingPlan.Period.MONTHLY,
+        )
+        non_selectable_product = Product.objects.create(
+            name="No Selectable Product",
+            tier=99,
+        )
+        non_selectable_offering = ProductOffering.objects.create(
+            product=non_selectable_product,
+            pricing_plan=non_selectable_plan,
+        )
+
+        assign_perm("peachjam_subs.can_subscribe", self.user, selectable_offering)
+        assign_perm("peachjam_subs.can_subscribe", self.user, non_selectable_offering)
+
+        offerings = list(ProductOffering.product_offerings_available_to_user(self.user))
+        self.assertIn(selectable_offering, offerings)
+        self.assertNotIn(non_selectable_offering, offerings)

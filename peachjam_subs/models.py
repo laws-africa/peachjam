@@ -65,12 +65,13 @@ class Product(models.Model):
         help_text="These features are highlighted in the product listing.",
         related_name="+",
     )
-    default_offering = models.ForeignKey(
+    selectable_offerings = models.ManyToManyField(
         "peachjam_subs.ProductOffering",
-        on_delete=models.CASCADE,
-        null=True,
         blank=True,
-        related_name="+",
+        related_name="selectable_for_products",
+        help_text=_(
+            "Offerings explicitly available to users for this product (for example monthly and annual)."
+        ),
     )
     # used to compare products
     tier = models.IntegerField(default=10)
@@ -178,8 +179,8 @@ class Product(models.Model):
 
 class PricingPlan(models.Model):
     class Period(models.TextChoices):
-        MONTHLY = "monthly", _("Monthly")
         ANNUALLY = "annually", _("Annually")
+        MONTHLY = "monthly", _("Monthly")
 
     name = models.CharField(max_length=100, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -216,6 +217,16 @@ class PricingPlan(models.Model):
     def price_per_period(self):
         return self.format_price_per_period()
 
+    @property
+    def price_per_month(self):
+        if self.price:
+            if self.period == self.Period.MONTHLY:
+                return self.price_per_period
+            if self.period == self.Period.ANNUALLY:
+                monthly_price = self.price / Decimal("12")
+                return f"{self.format_price(monthly_price)}/{_('month')}"
+        return _("FREE")
+
     def relative_delta(self):
         return {
             PricingPlan.Period.MONTHLY: relativedelta(months=1),
@@ -244,12 +255,17 @@ class ProductOffering(models.Model):
         """Return a queryset of ProductOffering objects available to the user."""
         return (
             get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
+            .filter(
+                # only show offerings for products that explicitly configured selectable offerings
+                product__selectable_offerings__isnull=False
+            )
             .exclude(
                 # exclude currently active (non-trial) subscription
                 pk__in=Subscription.objects.active_for_user(user)
                 .filter(is_trial=False)
                 .values_list("product_offering", flat=True)
             )
+            .distinct()
             .order_by("-pricing_plan__price")
         )
 
