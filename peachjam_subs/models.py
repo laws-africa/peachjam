@@ -13,33 +13,6 @@ from guardian.shortcuts import get_objects_for_user
 
 from peachjam.models import SingletonModel
 
-"""
-The subscriptions work as follows:
-
-1. A feature is a permission that is included in a product. A feature is usually associated with multiple Django
-   permissions which enable access to the feature.
-2. A product is a collection of features, such as "Team Plan".
-3. A pricing plan is a way to charge for a product, such as X per month.
-4. A product offering is a product with a pricing plan. The same product may be offered under different pricing plans
-   to reflect discounts, etc.
-5. A subscription is a user's access to a product offering.
-
-The SubscriptionSettings singleton model holds global settings for subscriptions, such as the default product offering
-for new users (should be free). The key products are the ones that should be shown on the pricing page. This allows
-us to exclude certain products that are only available by special arrangement.
-
-Per-object permissions are used to control access to product offerings. A user must have the "can_subscribe" permission
-for a product offering to be able to subscribe to it. This is managed by django-guardian.
-
-Trial subscriptions are supported. They are activated the first time a user subscribes to a paid product, if the
-product is a higher tier than the user's current product. The trial subscription is linked to the paid subscription
-it replaces. The paid subscription is configured to activate when the trial subscription ends. When the real
-subscription truly activates, the trial is closed. If the user upgrades in the mean time, both the trial and the
-replaced subscription are closed.
-
-See workflow here: https://mermaid.live/edit#pako:eNqNUs1um0AQfpXRXEsse4HURmoujcQD4FOFVG3ZsbMq7JL9SZpafvfOQmwldiIVLuzo-93hgJ1VhBV6eoxkOrrXcu_k0Brgx9hA0NMugN1B01SwdVr24OMv3zk9Bm1Na2boKF3QnR6lCYwE6aF5g4JG90_krqHbOkFn2XeE2vbqA-X6SnkGztCmubm7SzllF_STDHQx7nrrCWx4IHeGqHd1_BvGtmaGI8Yk05AyZtBr8xuCZUQGZBRf0TN8gVVxwfskwDSmnzLAt8TMYGQNbfYZ-MA1_UmuPDW62sAUIzn7_yk9VUil59knmnHklSsCFR1nmS1eReqkzSKjfOFcFw71tcNMaM6z9GKGe6cVVsFFynAgN8h0xEPitMjrGKjFij8V7WTsQ4utOTKNd_7D2uHEdDbuH7Dayd7zKY6Ko7z-r-ep46sh991GE7ASy-VmUsHqgH_4XIiFyIu1KEVZFsVquc7wBavbfCHEKt_cliJfF_lGHDP8O_kuF-uv5fEfQkABYw
-"""  # noqa
-
 log = logging.getLogger(__name__)
 
 
