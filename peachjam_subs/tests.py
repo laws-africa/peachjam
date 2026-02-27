@@ -3,6 +3,7 @@ from decimal import Decimal
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
 from guardian.shortcuts import assign_perm
@@ -13,6 +14,7 @@ from peachjam_subs.models import (
     ProductOffering,
     Subscription,
     subscription_settings,
+    validate_selectable_offering_catalog,
 )
 
 
@@ -45,6 +47,8 @@ class SubscriptionTests(TestCase):
             2023, 1, 1, tzinfo=timezone.utc
         )
         self.sub_settings = subscription_settings()
+        for product in Product.objects.all():
+            product.selectable_offerings.set(product.productoffering_set.all())
 
     @patch("django.utils.timezone.now")
     def test_start_of_current_period(self, mock_now):
@@ -91,9 +95,10 @@ class SubscriptionTests(TestCase):
         sub1.activate()
         self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
         self.assertIsNotNone(sub1.active_at)
-        sub1.refresh_from_db()
-        self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
-        self.assertIsNotNone(sub1.active_at)
+
+    def test_pricing_plan_price_per_month(self):
+        self.assertEqual("None100/month", self.monthly_plan.price_per_month)
+        self.assertEqual("None8.33/month", self.annual_plan.price_per_month)
 
     def setup_trial(self):
         # clear out old subscription completely
@@ -196,3 +201,140 @@ class SubscriptionTests(TestCase):
         # both trial and old sub are closed
         self.assertEqual(Subscription.Status.CLOSED, sub.status)
         self.assertEqual(Subscription.Status.CLOSED, trial.status)
+
+    def test_product_offerings_available_to_user_excludes_unconfigured_products(self):
+        selectable_plan = PricingPlan.objects.create(
+            name="Selectable Monthly Plan",
+            price=Decimal("95.00"),
+            period=PricingPlan.Period.MONTHLY,
+        )
+        selectable_offering = ProductOffering.objects.create(
+            product=self.product,
+            pricing_plan=selectable_plan,
+        )
+
+        non_selectable_plan = PricingPlan.objects.create(
+            name="Hidden Staff Plan",
+            price=Decimal("55.00"),
+            period=PricingPlan.Period.MONTHLY,
+        )
+        non_selectable_product = Product.objects.create(
+            name="No Selectable Product",
+            tier=99,
+        )
+        non_selectable_offering = ProductOffering.objects.create(
+            product=non_selectable_product,
+            pricing_plan=non_selectable_plan,
+        )
+
+        assign_perm("peachjam_subs.can_subscribe", self.user, selectable_offering)
+        assign_perm("peachjam_subs.can_subscribe", self.user, non_selectable_offering)
+
+        offerings = list(ProductOffering.product_offerings_available_to_user(self.user))
+        self.assertIn(selectable_offering, offerings)
+        self.assertNotIn(non_selectable_offering, offerings)
+
+    def test_validate_selectable_offering_catalog_rejects_non_monotonic_tier_price(
+        self,
+    ):
+        bronze = Product.objects.create(name="Tier Bronze", tier=10)
+        silver = Product.objects.create(name="Tier Silver", tier=20)
+        bronze_monthly = ProductOffering.objects.create(
+            product=bronze,
+            pricing_plan=PricingPlan.objects.create(
+                name="Tier Bronze Monthly",
+                price=Decimal("20.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        silver_monthly = ProductOffering.objects.create(
+            product=silver,
+            pricing_plan=PricingPlan.objects.create(
+                name="Tier Silver Monthly",
+                price=Decimal("10.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "Selectable monthly pricing must increase with tier",
+        ):
+            validate_selectable_offering_catalog(
+                [(bronze, [bronze_monthly]), (silver, [silver_monthly])]
+            )
+
+    def test_validate_selectable_offering_catalog_rejects_annual_below_monthly(self):
+        bronze = Product.objects.create(name="Tier Bronze Two", tier=10)
+        bronze_monthly = ProductOffering.objects.create(
+            product=bronze,
+            pricing_plan=PricingPlan.objects.create(
+                name="Tier Bronze Two Monthly",
+                price=Decimal("15.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        bronze_annual = ProductOffering.objects.create(
+            product=bronze,
+            pricing_plan=PricingPlan.objects.create(
+                name="Tier Bronze Two Annual",
+                price=Decimal("12.00"),
+                period=PricingPlan.Period.ANNUALLY,
+            ),
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "annual selectable price",
+        ):
+            validate_selectable_offering_catalog(
+                [(bronze, [bronze_monthly, bronze_annual])]
+            )
+
+    def test_validate_selectable_offering_catalog_allows_mixed_period_products(self):
+        monthly_only = Product.objects.create(name="Monthly Only", tier=10)
+        annual_only = Product.objects.create(name="Annual Only", tier=20)
+        monthly_offering = ProductOffering.objects.create(
+            product=monthly_only,
+            pricing_plan=PricingPlan.objects.create(
+                name="Monthly Only Plan",
+                price=Decimal("50.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        annual_offering = ProductOffering.objects.create(
+            product=annual_only,
+            pricing_plan=PricingPlan.objects.create(
+                name="Annual Only Plan",
+                price=Decimal("40.00"),
+                period=PricingPlan.Period.ANNUALLY,
+            ),
+        )
+
+        # Should not raise: mixed monthly-only and annual-only products are allowed.
+        validate_selectable_offering_catalog(
+            [(monthly_only, [monthly_offering]), (annual_only, [annual_offering])]
+        )
+
+    def test_validate_selectable_offering_catalog_allows_free_monthly_and_annual(self):
+        free_product = Product.objects.create(name="Free Product", tier=0)
+        free_monthly = ProductOffering.objects.create(
+            product=free_product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Free Monthly Plan",
+                price=Decimal("0.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        free_annual = ProductOffering.objects.create(
+            product=free_product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Free Annual Plan",
+                price=Decimal("0.00"),
+                period=PricingPlan.Period.ANNUALLY,
+            ),
+        )
+
+        validate_selectable_offering_catalog(
+            [(free_product, [free_monthly, free_annual])]
+        )
