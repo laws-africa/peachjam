@@ -118,7 +118,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
             message_data={"html_body": parts["html"]},
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
-            to=recipient_list,
+            to=",".join(recipient_list),
         )
         log.info(
             f"Sending email using CustomerIO: {template_name} to {recipient_list} for {user}"
