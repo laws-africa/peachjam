@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-20 10:39+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,29 +17,21 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_ml/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 265\n"
 
-#: admin.py:18
+#: admin.py:14
 msgid "Updating document chunks and embeddings in the background."
 msgstr "Inasasisha vipande vya hati na upachikaji chinichini."
 
-#: admin.py:23
+#: admin.py:19
 msgid "Update document chunks and embeddings (background)"
 msgstr "Sasisha vipande vya hati na upachikaji (chinichini)"
 
-#: admin.py:38
+#: admin.py:34
 msgid "Re-calculated document embeddings."
 msgstr "Imekokotoa upya upachikaji wa hati."
 
-#: admin.py:42
+#: admin.py:38
 msgid "Re-calculate average document embeddings"
 msgstr "Kokotoa upya wastani wa upachikaji wa hati"
-
-#: admin.py:84 admin.py:122
-msgid "Document"
-msgstr "Hati"
-
-#: admin.py:92
-msgid "Messages JSON"
-msgstr "Ujumbe kwa JSON"
 
 #: templates/peachjam/_related_documents.html:6
 msgid "More documents like this one"
@@ -55,16 +47,6 @@ msgstr "Mapendekezo yanayotolewa na AI."
 msgid "No documents found."
 msgstr "Hakuna nyaraka zilizopatikana."
 
-#: templates/peachjam/layouts/document_detail.html:15
-#: templates/peachjam/layouts/document_detail.html:22
-#, python-format
-msgid "Ask %(name)s"
-msgstr ""
-
-#: templates/peachjam/layouts/document_detail.html:17
-msgid "Ask questions and understand this document faster using AI."
-msgstr ""
-
 #: templates/peachjam/saved_document/_folders_list.html:16
 msgid "Saved documents"
 msgstr "Hati zilizohifadhiwa"
@@ -73,7 +55,8 @@ msgstr "Hati zilizohifadhiwa"
 msgid "Suggested for this folder"
 msgstr "Imependekezwa kwa folda hii"
 
-#: templates/peachjam_ml/_chat_permission_denied.html:5
-#, python-format
-msgid "You've reached your limit of %(chat_limit)s chats per month. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats, or wait until next month."
-msgstr ""
+#~ msgid "Document"
+#~ msgstr "Hati"
+
+#~ msgid "Messages JSON"
+#~ msgstr "Ujumbe kwa JSON"

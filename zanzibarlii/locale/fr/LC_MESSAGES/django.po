@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: 2025-11-20 10:24\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -74,6 +74,10 @@ msgstr "Journaux officiels"
 msgid "About"
 msgstr "À propos"
 
+#: templates/peachjam/_header.html:41
+msgid "Help"
+msgstr ""
+
 #: templates/peachjam/about.html:12
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
 msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> fait partie de l'unité <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Gouvernance démocratique et droits</a> de la Faculté de droit de l'Université de Cape Town (UCT), Afrique du Sud. AfricanLII aide les individus, les organisations et les gouvernements à créer et à maintenir un accès libre et durable aux portails juridiques et à atteindre les peuples d'Afrique et d'ailleurs."
@@ -89,4 +93,3 @@ msgstr "Contactez-nous"
 #: templates/peachjam/about.html:31
 msgid "Contact us on <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> for more information."
 msgstr "Contactez-nous au <a href=\"mailto:info@zanzibarlii.org\">info@zanzibarlii.org</a> pour plus d'informations."
-
