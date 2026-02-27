@@ -135,7 +135,7 @@ class TimelineEmailService:
                 send_templated_mail(
                     template_name="user_following_alert",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user],
+                    recipient_list=[user.email],
                     context=context,
                 )
 
@@ -172,7 +172,7 @@ class TimelineEmailService:
                     send_templated_mail(
                         template_name="search_alert",
                         from_email=settings.DEFAULT_FROM_EMAIL,
-                        recipient_list=[user],
+                        recipient_list=[user.email],
                         context=context,
                     )
 
@@ -244,7 +244,7 @@ class TimelineEmailService:
                 send_templated_mail(
                     template_name="new_citation_alert",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user],
+                    recipient_list=[user.email],
                     context=context,
                 )
 
@@ -336,7 +336,7 @@ class TimelineEmailService:
                 send_templated_mail(
                     template_name=email_config.email_template,
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user],
+                    recipient_list=[user.email],
                     context=context,
                 )
 

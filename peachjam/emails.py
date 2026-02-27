@@ -3,7 +3,6 @@ import logging
 import css_inline
 from customerio import APIClient, Regions, SendEmailRequest
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.contrib.sites.models import Site
 from django.contrib.staticfiles import finders
 from templated_email.backends.vanilla_django import (
@@ -84,6 +83,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         )
 
     def send(self, template_name, from_email, recipient_list, context, **kwargs):
+        # recipient list is a list of email addresses
         if len(recipient_list) == 0 or not any(recipient_list):
             return 0
 
@@ -99,19 +99,12 @@ class CustomerIOTemplateBackend(TemplateBackend):
         self.send_with_customerio(template_name, recipient_list, context)
 
     def send_with_customerio(self, template_name, recipient_list, context):
-        # recipient_list can be a user or a mixture of a user and email addresses, so work out how to track it
-        identifiers = None
-        to = []
-        for recipient in recipient_list:
-            if isinstance(recipient, User):
-                if recipient.email:
-                    to.append(recipient.email)
-                # override any other identifiers
-                identifiers = {"id": recipient.userprofile.tracking_id_str}
-            else:
-                to.append(recipient)
-                if not identifiers:
-                    identifiers = {"email": recipient}
+        # recipient_list is a list of email addresses; the user must be pulled from the context
+        user = context.get("user")
+        if user:
+            identifiers = {"id": user.userprofile.tracking_id_str}
+        else:
+            identifiers = {"email": recipient_list[0]}
 
         # render the email
         parts = self._render_email(template_name, context)
@@ -125,7 +118,9 @@ class CustomerIOTemplateBackend(TemplateBackend):
             message_data=context,
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
-            to=to,
+            to=recipient_list,
         )
-        log.info(f"Sending email using CustomerIO: {template_name} to {to}")
+        log.info(
+            f"Sending email using CustomerIO: {template_name} to {recipient_list} for {user}"
+        )
         self.client.send_email(request)
