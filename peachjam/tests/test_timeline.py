@@ -418,7 +418,7 @@ class TimelineRelationshipTests(TestCase):
                 {"id": self.user.userprofile.tracking_id_str},
                 request.identifiers,
             )
-            self.assertTrue(request.message_data["html_body"])
+            self.assertIn("<html", request.body)
             self.assertEqual({}, request.attachments)
 
         self.assertEqual(
