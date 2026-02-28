@@ -727,7 +727,14 @@ class TestSearchEngine(TestCase):
                     "post_filter": {"terms": {"nature": ["Act"]}},
                     "query": {
                         "bool": {
-                            "filter": [{"term": {"is_most_recent": True}}],
+                            "filter": [
+                                {"term": {"is_most_recent": True}},
+                                {
+                                    "range": {
+                                        "created_at": {"gte": "2025-01-01T00:00:00Z"}
+                                    }
+                                },
+                            ],
                             "minimum_should_match": 1,
                             "should": [
                                 {

@@ -29,6 +29,7 @@ In summary:
 * Bootstrap is used to toggle a single, global Saved Document modal
 * HTMX is used to inject the correct content into the modal when it is shown
 """
+
 import re
 
 from django.contrib.auth import get_user_model

@@ -28,7 +28,8 @@ class OfflineView(TemplateView):
 
 class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
     """This view tells the offline system what pages need to be cached for this taxonomy topic. This includes
-    the documents in the topic (and its children), and the pages for browsing the topic."""
+    the documents in the topic (and its children), and the pages for browsing the topic.
+    """
 
     model = Taxonomy
     queryset = Taxonomy.objects.filter(allow_offline=True)

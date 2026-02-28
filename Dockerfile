@@ -1,16 +1,29 @@
-FROM python:3.10-bullseye
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+FROM ubuntu:24.04
 
-# LibreOffice
-RUN apt-get update && apt-get install -y libreoffice poppler-utils pandoc
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# LibreOffice, pdftotext, pandoc
+RUN apt-get update && apt-get install -y \
+    libreoffice poppler-utils pandoc
+
+# python 3.12
+#   "file" is for python-magic
+RUN apt-get install -y --no-install-recommends \
+    python3.12 python3.12-venv python3.12-dev \
+    git ca-certificates build-essential file \
+    nodejs npm \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create and activate venv
+RUN python3.12 -m venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+# upgrade pip and friends
+RUN python -m pip install --upgrade pip setuptools wheel
 
 # Production-only dependencies, or dependencies that take a long time to install.
 RUN pip install psycopg==3.2.12 gunicorn==21.2.0 scikit-learn==1.6.1 numpy==2.1.3
-
-# node
-RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
-RUN apt-get install -y nodejs
 
 # install sass for compiling assets before deploying
 RUN npm i -g sass

@@ -10,9 +10,7 @@ class Migration(migrations.Migration):
         ("peachjam", "0169_ratification_ratificationcountry_and_more"),
     ]
 
-    operations = [
-        migrations.RunSQL(
-            """
+    operations = [migrations.RunSQL("""
 INSERT INTO
   peachjam_ratification (id, source_url, last_updated, work_id)
   SELECT id, source_url, last_updated, work_id FROM africanlii_ratification;
@@ -20,6 +18,4 @@ INSERT INTO
 INSERT INTO
   peachjam_ratificationcountry (id, ratification_id, ratification_date, deposit_date, signature_date, country_id)
   SELECT id, ratification_id, ratification_date, deposit_date, signature_date, country_id FROM africanlii_ratificationcountry;
-"""
-        )
-    ]
+""")]

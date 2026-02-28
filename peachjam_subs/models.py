@@ -503,7 +503,8 @@ class Subscription(models.Model):
 
     def next_billing_date(self):
         """This is always two days after the end of the current period, which is one day after the start of the next
-        period. This avoids issues with billing on the same day as a subscription starts or ends."""
+        period. This avoids issues with billing on the same day as a subscription starts or ends.
+        """
         return self.end_of_current_period() + timedelta(days=2)
 
     def prorate(self):
