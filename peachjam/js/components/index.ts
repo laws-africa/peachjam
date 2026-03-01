@@ -6,6 +6,7 @@ import DocumentFilterForm from './document-filter-form';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
+import FlynoteSearch from './flynote-search';
 import FloatingHeader from './floating-header';
 import GlossaryFilter from './glossary';
 import DocumentUploader from './document-uploader';
@@ -35,6 +36,7 @@ const components: Record<string, any> = {
   DocumentDetail,
   DocumentFilterForm,
   DocumentTable,
+  FlynoteSearch,
   FloatingHeader,
   GlossaryFilter,
   DocumentUploader,

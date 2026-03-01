@@ -12,9 +12,31 @@ from peachjam.views import (
     CourtYearView,
     JudgmentListView,
 )
+from peachjam.views.judgment import (
+    FlynoteMappingProgressView,
+    FlynoteMergeProgressView,
+    FlynoteTopicListView,
+    ReviewFlynoteMappingView,
+)
 
 urlpatterns = [
     path("", JudgmentListView.as_view(), name="judgment_list"),
+    path("topics/", FlynoteTopicListView.as_view(), name="flynote_topic_list"),
+    path(
+        "topics/review-mapping/",
+        ReviewFlynoteMappingView.as_view(),
+        name="review_flynote_mapping",
+    ),
+    path(
+        "topics/review-mapping/progress/",
+        FlynoteMappingProgressView.as_view(),
+        name="flynote_mapping_progress",
+    ),
+    path(
+        "topics/review-mapping/merge-progress/",
+        FlynoteMergeProgressView.as_view(),
+        name="flynote_merge_progress",
+    ),
     path(
         "court-class/<str:court_class>/",
         CourtClassDetailView.as_view(),

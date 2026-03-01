@@ -1,0 +1,729 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans "Flynote AI Cleaning Tool" %}
+{% endblock %}
+{% block page-content %}
+  <div class="container-fluid py-4 px-4" id="flynote-app">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans "Judgments" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'flynote_topic_list' %}">{% trans "Topics" %}</a>
+        </li>
+        <li class="breadcrumb-item active">{% trans "AI Cleaning" %}</li>
+      </ol>
+    </nav>
+    <h1 class="mb-2">{% trans "Flynote AI Cleaning Tool" %}</h1>
+    <p class="text-muted mb-4">
+      {% trans "Let the AI find duplicate flynote topics, then review, drag to reorganise, rename, and merge." %}
+    </p>
+    <div id="alert-area"></div>
+    <div class="card mb-4 border-primary">
+      <div class="card-body d-flex align-items-center justify-content-between">
+        <div>
+          <h5 class="card-title mb-1 text-primary">
+            <i class="bi bi-robot me-1"></i>{% trans "Clean Data with AI" %}
+          </h5>
+          <p class="card-text text-muted mb-0 small">
+            {% trans "Scan all flynote topics for duplicates (casing, plurals, spacing, etc)." %}
+          </p>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <div>
+            <label for="topic-limit" class="form-label mb-0 small text-muted">{% trans "Topics to scan" %}</label>
+            <select class="form-select form-select-sm" id="topic-limit">
+              <option value="10">
+                10
+              </option>
+              <option value="20">
+                20
+              </option>
+              <option value="50">
+                50
+              </option>
+              <option value="100">
+                100
+              </option>
+              <option value="0" selected>
+                {% trans "All" %}
+              </option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-primary btn-lg" id="btn-generate">
+            <i class="bi bi-search me-1"></i>{% trans "Clean Data with AI" %}
+          </button>
+        </div>
+      </div>
+    </div>
+    <div id="stats-area" class="d-none">
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <h3 class="text-primary mb-0" id="stat-groups">0</h3>
+              <small class="text-muted">{% trans "Groups suggested" %}</small>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card text-center border-0 shadow-sm">
+            <div class="card-body">
+              <h3 class="text-success mb-0" id="stat-topics">0</h3>
+              <small class="text-muted">{% trans "Topics affected" %}</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      {# ── Left: AI suggestions ── #}
+      <div class="col-lg-7">
+        <div id="groups-area"></div>
+        <div id="apply-area" class="d-none mt-4">
+          <div class="p-3 bg-light rounded border border-primary d-flex align-items-center justify-content-between">
+            <div>
+              <h5 class="mb-1">
+                <i class="bi bi-database-check me-1 text-primary"></i>{% trans "Apply Changes" %}
+              </h5>
+              <p class="text-muted mb-0 small">
+                {% trans "Merge all duplicate topics. Documents will be re-linked automatically." %}
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary btn-lg" id="btn-apply">
+              <i class="bi bi-check-circle me-1"></i>{% trans "Merge All" %}
+            </button>
+          </div>
+        </div>
+        <div id="empty-state"
+             class="alert alert-info d-flex justify-content-between align-items-center">
+          <span>
+            <i class="bi bi-info-circle me-1"></i>
+            {% trans "No proposals yet. Click 'Clean Data with AI' above to get started." %}
+          </span>
+          <a href="{% url 'flynote_topic_list' %}"
+             class="btn btn-outline-primary btn-sm">
+            <i class="bi bi-list-nested me-1"></i>{% trans "Browse Topics" %}
+          </a>
+        </div>
+      </div>
+      {# ── Right: All DB topics ── #}
+      <div class="col-lg-5">
+        <div class="card" id="db-topics-panel">
+          <div class="card-header bg-white">
+            <h6 class="mb-2">
+              <i class="bi bi-database me-1"></i>{% trans "All Topics in Database" %}
+            </h6>
+            <input type="text"
+                   class="form-control form-control-sm"
+                   id="db-topic-search"
+                   placeholder="{% trans 'Search topics...' %}"/>
+          </div>
+          <div class="card-body p-0" id="db-topics-scroll">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">{% trans "ID" %}</th>
+                  <th>{% trans "Topic Name" %}</th>
+                </tr>
+              </thead>
+              <tbody id="db-topics-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {# ── Scan Progress Modal ── #}
+  <div class="modal fade"
+       id="scan-modal"
+       data-bs-backdrop="static"
+       data-bs-keyboard="false"
+       tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-robot me-2"></i>{% trans "AI is scanning for duplicates..." %}
+          </h5>
+          <button type="button"
+                  class="btn btn-sm btn-outline-light"
+                  id="btn-cancel-scan">
+            <i class="bi bi-x-lg me-1"></i>{% trans "Cancel" %}
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="fw-bold" id="scan-label">{% trans "Initialising..." %}</small>
+              <small class="fw-bold" id="scan-percent">0%</small>
+            </div>
+            <div class="progress" style="height: 24px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                   id="scan-bar"
+                   role="progressbar"
+                   style="width: 0%">
+              </div>
+            </div>
+          </div>
+          <div class="row text-center mb-3">
+            <div class="col">
+              <div class="border rounded p-2">
+                <div class="h5 mb-0 text-primary" id="scan-batch">0/0</div>
+                <small class="text-muted">{% trans "Batches" %}</small>
+              </div>
+            </div>
+            <div class="col">
+              <div class="border rounded p-2">
+                <div class="h5 mb-0 text-success" id="scan-found">0</div>
+                <small class="text-muted">{% trans "Groups found" %}</small>
+              </div>
+            </div>
+          </div>
+          <div class="border rounded p-3 bg-dark text-light"
+               style="height: 200px;
+                      overflow-y: auto;
+                      font-family: monospace;
+                      font-size: 0.85rem"
+               id="scan-log">
+            <div class="text-muted">{% trans "Waiting for AI..." %}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {# ── Merge Progress Modal ── #}
+  <div class="modal fade"
+       id="merge-modal"
+       data-bs-backdrop="static"
+       data-bs-keyboard="false"
+       tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">
+            <i class="bi bi-database-check me-2"></i>{% trans "Merging topics..." %}
+          </h5>
+        </div>
+        <div class="modal-body">
+          <div class="mb-3">
+            <div class="d-flex justify-content-between mb-1">
+              <small class="fw-bold" id="merge-label">{% trans "Starting merge..." %}</small>
+              <small class="fw-bold" id="merge-percent">0%</small>
+            </div>
+            <div class="progress" style="height: 24px;">
+              <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                   id="merge-bar"
+                   role="progressbar"
+                   style="width: 0%">
+              </div>
+            </div>
+          </div>
+          <p class="text-center text-muted mb-0" id="merge-detail">
+            {% trans "Processing..." %}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <style>
+  #db-topics-scroll { overflow-y: auto; max-height: 70vh; }
+  #db-topics-panel { position: sticky; top: 10px; }
+  .group-card { cursor: pointer; transition: border-color 0.15s; }
+  .group-card.border-primary { border-width: 2px !important; }
+  .db-topic-row { cursor: grab; }
+  .db-topic-row.table-secondary { opacity: 0.7; }
+  .drop-zone.drag-over { background-color: rgba(13, 110, 253, 0.08) !important; }
+  </style>
+  <script>
+(function () {
+  'use strict';
+
+  const CSRF = '{{ csrf_token }}';
+  const URL_BASE = '{{ request.path }}';
+  const URL_PROGRESS = '{% url "flynote_mapping_progress" %}';
+  const URL_MERGE_PROGRESS = '{% url "flynote_merge_progress" %}';
+
+  let proposals = [];
+  let dragState = null;
+  const allDbTopics = JSON.parse('{{ all_topics_json|escapejs }}');
+  let activeGroupIndex = -1;
+
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => document.querySelectorAll(sel);
+
+  // ── Utility ──
+
+  function esc(text) {
+    const d = document.createElement('div');
+    d.textContent = text;
+    return d.innerHTML;
+  }
+
+  function cancelScan() {
+    const form = new FormData();
+    form.append('action', 'cancel');
+    form.append('csrfmiddlewaretoken', CSRF);
+    navigator.sendBeacon ? navigator.sendBeacon(URL_BASE, form) : fetch(URL_BASE, { method: 'POST', body: form });
+  }
+
+  window.addEventListener('beforeunload', function () {
+    if (window._scanRunning) cancelScan();
+  });
+
+  function postJSON(url, data) {
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': CSRF,
+      },
+      body: JSON.stringify(data),
+    }).then(r => r.json());
+  }
+
+  function showAlert(msg, type) {
+    const area = $('#alert-area');
+    area.innerHTML =
+      '<div class="alert alert-' + type + ' alert-dismissible fade show">' +
+      '<i class="bi bi-' + (type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill') + ' me-1"></i>' +
+      esc(msg) +
+      '<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>';
+  }
+
+  // ── Right panel: All DB topics ──
+
+  function getClaimedTopicMap() {
+    const map = {};
+    proposals.forEach(function (g, gi) {
+      (g.duplicates || []).forEach(function (d) { map[d.id] = gi; });
+    });
+    return map;
+  }
+
+  function renderDbTopics(filter) {
+    const tbody = $('#db-topics-body');
+    filter = (filter || '').toLowerCase();
+    const highlightIds = getActiveGroupIds();
+    const claimedMap = getClaimedTopicMap();
+
+    let html = '';
+    allDbTopics.forEach(function (t) {
+      if (filter && t.name.toLowerCase().indexOf(filter) === -1 && String(t.id).indexOf(filter) === -1) return;
+      const isHighlighted = highlightIds.has(t.id);
+      const inGroup = claimedMap.hasOwnProperty(t.id);
+      const cls = isHighlighted ? ' table-warning' : inGroup ? ' table-secondary' : '';
+      html += '<tr class="db-topic-row' + cls + '" draggable="true" '; html += 'data-topic-id="' + t.id + '" data-topic-name="' + esc(t.name) + '">';
+      html += '<td class="ps-3"><small class="text-muted">' + t.id + '</small></td>';
+      html += '<td>';
+      if (inGroup) {
+        html += '<i class="bi bi-link-45deg text-primary me-1" title="In Group ' + (claimedMap[t.id] + 1) + '"></i>';
+      }
+      html += esc(t.name) + '</td>';
+      html += '</tr>';
+    });
+    if (!html) {
+      html = '<tr><td colspan="2" class="text-center text-muted py-3">{% trans "No topics found." %}</td></tr>';
+    }
+    tbody.innerHTML = html;
+    bindDbTopicEvents();
+
+    if (highlightIds.size) {
+      const first = tbody.querySelector('.table-warning');
+      if (first) first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+
+  function bindDbTopicEvents() {
+    $$('.db-topic-row').forEach(function (row) {
+      row.addEventListener('dragstart', function (e) {
+        e.dataTransfer.effectAllowed = 'copy';
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+          id: parseInt(this.dataset.topicId),
+          name: this.dataset.topicName,
+        }));
+        this.classList.add('opacity-50');
+      });
+      row.addEventListener('dragend', function () {
+        this.classList.remove('opacity-50');
+      });
+      row.addEventListener('click', function () {
+        const tid = parseInt(this.dataset.topicId);
+        const claimedMap = getClaimedTopicMap();
+        if (claimedMap.hasOwnProperty(tid)) {
+          setActiveGroup(claimedMap[tid]);
+          const card = document.querySelector('.group-card[data-group="' + claimedMap[tid] + '"]');
+          if (card) card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        }
+      });
+    });
+  }
+
+  function getActiveGroupIds() {
+    const ids = new Set();
+    if (activeGroupIndex >= 0 && proposals[activeGroupIndex]) {
+      (proposals[activeGroupIndex].duplicates || []).forEach(function (d) { ids.add(d.id); });
+    }
+    return ids;
+  }
+
+  function setActiveGroup(gi) {
+    activeGroupIndex = (activeGroupIndex === gi) ? -1 : gi;
+    $$('.group-card').forEach(function (card, i) {
+      card.classList.toggle('border-primary', i === activeGroupIndex);
+      card.classList.toggle('border-2', i === activeGroupIndex);
+    });
+    renderDbTopics($('#db-topic-search').value);
+  }
+
+  $('#db-topic-search').addEventListener('input', function () {
+    renderDbTopics(this.value);
+  });
+
+  renderDbTopics('');
+
+  // ── Render proposals table ──
+
+  function render() {
+    const groupsArea = $('#groups-area');
+    const emptyState = $('#empty-state');
+    const statsArea = $('#stats-area');
+    const applyArea = $('#apply-area');
+
+    if (!proposals.length) {
+      groupsArea.innerHTML = '';
+      emptyState.classList.remove('d-none');
+      statsArea.classList.add('d-none');
+      applyArea.classList.add('d-none');
+      return;
+    }
+
+    emptyState.classList.add('d-none');
+    statsArea.classList.remove('d-none');
+    applyArea.classList.remove('d-none');
+
+    let totalTopics = 0;
+    proposals.forEach(function (g) {
+      totalTopics += (g.duplicates || []).length;
+    });
+    $('#stat-groups').textContent = proposals.length;
+    $('#stat-topics').textContent = totalTopics;
+
+    let html = '';
+    proposals.forEach(function (group, gi) {
+      const dups = group.duplicates || [];
+      const canonName = group.canonical || '';
+      html += '<div class="card mb-3 group-card" data-group="' + gi + '">';
+      html += '<div class="card-header d-flex align-items-center justify-content-between bg-white">';
+      html += '<div class="d-flex align-items-center gap-2 flex-grow-1">';
+      html += '<span class="badge bg-primary">Group ' + (gi + 1) + '</span>';
+      html += '<span class="text-muted me-1">→</span>';
+      html += '<input type="text" class="form-control form-control-sm fw-bold canonical-input" '; html += 'data-group="' + gi + '" value="' + esc(canonName) + '">';
+      html += '</div>';
+      html += '<button type="button" class="btn btn-outline-danger btn-sm remove-group" data-group="' + gi + '" title="{% trans "Remove group" %}">';
+      html += '<i class="bi bi-trash"></i></button>';
+      html += '</div>';
+
+      html += '<div class="card-body p-0">';
+      html += '<table class="table table-sm mb-0 align-middle">';
+      html += '<thead class="table-light"><tr>';
+      html += '<th class="ps-3" style="width: 50%">{% trans "Original topic" %}</th>';
+      html += '<th style="width: 15%">{% trans "ID" %}</th>';
+      html += '<th style="width: 35%"></th>';
+      html += '</tr></thead>';
+      html += '<tbody class="drop-zone" data-group="' + gi + '">';
+
+      dups.forEach(function (dup, di) {
+        const isKeep = dup.id === group.keep_id;
+        html += '<tr class="topic-row" '; html += 'draggable="true" data-group="' + gi + '" data-dup="' + di + '" data-id="' + dup.id + '">';
+        html += '<td class="ps-3">';
+        html += '<i class="bi bi-grip-vertical text-muted me-2" style="cursor: grab;"></i>';
+        html += esc(dup.name);
+        html += '</td>';
+        html += '<td><small class="text-muted">' + dup.id + '</small></td>';
+        html += '<td class="text-end pe-3">';
+        if (!isKeep && dups.length > 1) {
+          html += '<button type="button" class="btn btn-outline-success btn-sm set-keep" '; html += 'data-group="' + gi + '" data-id="' + dup.id + '" title="{% trans "Use this as the main topic" %}">';
+          html += '<i class="bi bi-check-lg"></i> {% trans "Keep this" %}</button>';
+        }
+        html += '</td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table>';
+      html += '</div></div>';
+    });
+
+    groupsArea.innerHTML = html;
+    bindGroupEvents();
+    renderDbTopics($('#db-topic-search').value);
+  }
+
+  // ── Group events (rename, remove, set-keep, drag) ──
+
+  function bindGroupEvents() {
+    $$('.group-card').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+        if (e.target.closest('button, input')) return;
+        setActiveGroup(parseInt(this.dataset.group));
+      });
+    });
+    $$('.canonical-input').forEach(function (input) {
+      input.addEventListener('change', function () {
+        const gi = parseInt(this.dataset.group);
+        proposals[gi].canonical = this.value.trim();
+        saveProposals();
+      });
+    });
+
+    $$('.remove-group').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const gi = parseInt(this.dataset.group);
+        proposals.splice(gi, 1);
+        render();
+        saveProposals();
+      });
+    });
+
+    $$('.set-keep').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        const gi = parseInt(this.dataset.group);
+        const newKeepId = parseInt(this.dataset.id);
+        proposals[gi].keep_id = newKeepId;
+        render();
+        saveProposals();
+      });
+    });
+
+    // Drag and drop
+    $$('.topic-row').forEach(function (row) {
+      row.addEventListener('dragstart', function (e) {
+        dragState = {
+          fromGroup: parseInt(this.dataset.group),
+          dupIndex: parseInt(this.dataset.dup),
+          id: parseInt(this.dataset.id),
+        };
+        this.classList.add('opacity-50');
+        e.dataTransfer.effectAllowed = 'move';
+      });
+      row.addEventListener('dragend', function () {
+        this.classList.remove('opacity-50');
+        $$('.group-card').forEach(function (c) { c.classList.remove('drag-over'); });
+        dragState = null;
+      });
+    });
+
+    $$('.group-card').forEach(function (card) {
+      card.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = dragState ? 'move' : 'copy';
+        this.classList.add('drag-over');
+      });
+      card.addEventListener('dragleave', function (e) {
+        if (!this.contains(e.relatedTarget)) this.classList.remove('drag-over');
+      });
+      card.addEventListener('drop', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        this.classList.remove('drag-over');
+        const toGroup = parseInt(this.dataset.group);
+
+        // Drop from right-side DB panel
+        var externalData = e.dataTransfer.getData('text/plain');
+        if (!dragState && externalData) {
+          try {
+            var ext = JSON.parse(externalData);
+            if (ext && ext.id) {
+              proposals.forEach(function (g) {
+                g.duplicates = (g.duplicates || []).filter(function (d) { return d.id !== ext.id; });
+              });
+              proposals = proposals.filter(function (g) { return (g.duplicates || []).length > 0; });
+              var targetIdx = Math.min(toGroup, proposals.length - 1);
+              if (targetIdx >= 0) {
+                proposals[targetIdx].duplicates.push({ id: ext.id, name: ext.name });
+              }
+              render();
+              saveProposals();
+              return;
+            }
+          } catch (ignored) {}
+        }
+
+        // Drop from within groups (left-side drag)
+        if (!dragState) return;
+
+        const fromGroup = dragState.fromGroup;
+        if (toGroup === fromGroup) return;
+
+        const fromDups = proposals[fromGroup].duplicates;
+        const item = fromDups[dragState.dupIndex];
+        if (!item) return;
+
+        fromDups.splice(dragState.dupIndex, 1);
+
+        if (proposals[fromGroup].keep_id === item.id && fromDups.length) {
+          proposals[fromGroup].keep_id = fromDups[0].id;
+        }
+
+        if (fromDups.length <= 1) {
+          proposals.splice(fromGroup, 1);
+        }
+
+        proposals[toGroup > fromGroup && fromDups.length <= 1 ? toGroup - 1 : toGroup].duplicates.push(item);
+
+        dragState = null;
+        render();
+        saveProposals();
+      });
+    });
+  }
+
+  function saveProposals() {
+    postJSON(URL_BASE, { action: 'save', proposals: proposals });
+  }
+
+  // ── Generate (scan) ──
+
+  $('#btn-generate').addEventListener('click', function () {
+    const btn = this;
+    btn.disabled = true;
+    window._scanRunning = true;
+
+    const limit = $('#topic-limit').value;
+    const form = new FormData();
+    form.append('action', 'generate');
+    form.append('limit', limit);
+    form.append('csrfmiddlewaretoken', CSRF);
+    fetch(URL_BASE, { method: 'POST', body: form });
+
+    const scanModal = new bootstrap.Modal($('#scan-modal'));
+    scanModal.show();
+
+    const poll = setInterval(function () {
+      fetch(URL_PROGRESS).then(function (r) { return r.json(); }).then(function (data) {
+        const pct = data.percent || 0;
+        $('#scan-bar').style.width = pct + '%';
+        $('#scan-percent').textContent = pct + '%';
+        $('#scan-found').textContent = data.groups_found || 0;
+
+        if (data.batch && data.total_batches) {
+          $('#scan-batch').textContent = data.batch + '/' + data.total_batches;
+          var phase = data.phase || 'Processing';
+          $('#scan-label').textContent = phase + ' — step ' + data.batch + ' of ' + data.total_batches;
+        }
+
+        if (data.activities && data.activities.length) {
+          let logHtml = '';
+          data.activities.forEach(function (a) {
+            const icon = a.type === 'scan' ? 'search' : a.type === 'found' ? 'arrow-repeat' : a.type === 'error' ? 'exclamation-triangle' : 'check-circle';
+            const cls = a.type === 'scan' ? 'text-info' : a.type === 'found' ? 'text-warning' : a.type === 'error' ? 'text-danger' : 'text-success';
+            logHtml += '<div class="' + cls + ' mb-1"><i class="bi bi-' + icon + ' me-1"></i>' + esc(a.text) + '</div>';
+          });
+          $('#scan-log').innerHTML = logHtml;
+          $('#scan-log').scrollTop = $('#scan-log').scrollHeight;
+        }
+
+        if (data.status === 'done') {
+          clearInterval(poll);
+          window._scanRunning = false;
+          $('#scan-bar').classList.remove('progress-bar-animated');
+          $('#scan-bar').classList.add('bg-success');
+          $('#scan-label').textContent = 'Complete!';
+          $('#btn-cancel-scan').classList.add('d-none');
+
+          if (data.proposals) {
+            proposals = data.proposals;
+            render();
+          }
+          setTimeout(function () {
+            scanModal.hide();
+            btn.disabled = false;
+            if (proposals.length) {
+              showAlert('Found ' + proposals.length + ' duplicate group(s). Review below, then click Merge All.', 'success');
+            }
+          }, 1200);
+        } else if (data.status === 'cancelled') {
+          clearInterval(poll);
+          window._scanRunning = false;
+          $('#scan-bar').classList.remove('progress-bar-animated');
+          $('#scan-bar').classList.add('bg-warning');
+          $('#scan-label').textContent = 'Cancelled';
+          $('#btn-cancel-scan').classList.add('d-none');
+          setTimeout(function () {
+            scanModal.hide();
+            btn.disabled = false;
+          }, 800);
+        } else if (data.status === 'error') {
+          clearInterval(poll);
+          window._scanRunning = false;
+          $('#scan-bar').classList.remove('progress-bar-animated');
+          $('#scan-bar').classList.add('bg-danger');
+          $('#scan-label').textContent = 'Error!';
+          $('#btn-cancel-scan').classList.add('d-none');
+          btn.disabled = false;
+        }
+      });
+    }, 2000);
+
+    $('#btn-cancel-scan').addEventListener('click', function () {
+      cancelScan();
+      this.disabled = true;
+      this.textContent = 'Cancelling...';
+    });
+  });
+
+  // ── Apply (merge) ──
+
+  $('#btn-apply').addEventListener('click', function () {
+    if (!confirm('Are you sure you want to merge all ' + proposals.length + ' duplicate groups? This cannot be undone.')) return;
+
+    const mergeModal = new bootstrap.Modal($('#merge-modal'));
+    mergeModal.show();
+
+    postJSON(URL_BASE, { action: 'apply', proposals: proposals }).then(function () {
+      const poll = setInterval(function () {
+        fetch(URL_MERGE_PROGRESS).then(function (r) { return r.json(); }).then(function (data) {
+          const pct = data.total ? Math.round((data.current / data.total) * 100) : 0;
+          $('#merge-bar').style.width = pct + '%';
+          $('#merge-percent').textContent = pct + '%';
+          $('#merge-label').textContent = 'Merging group ' + (data.current || 0) + ' of ' + (data.total || 0) + '...';
+          $('#merge-detail').textContent = data.current_group
+            ? 'Current: ' + data.current_group + ' (' + (data.merged || 0) + ' topics merged)'
+            : (data.merged || 0) + ' topics merged';
+
+          if (data.status === 'done') {
+            clearInterval(poll);
+            $('#merge-bar').classList.remove('progress-bar-animated');
+            $('#merge-bar').classList.add('bg-success');
+            $('#merge-label').textContent = 'Complete!';
+            $('#merge-detail').textContent = 'Successfully merged ' + (data.merged || 0) + ' duplicate topic(s).';
+
+            proposals = [];
+            setTimeout(function () {
+              mergeModal.hide();
+              window.location.reload();
+            }, 1500);
+          }
+        });
+      }, 1000);
+    });
+  });
+
+  // ── Init: load existing proposals if any ──
+
+  const initialProposals = {{ proposals|safe }};
+  if (initialProposals && initialProposals.length) {
+    proposals = initialProposals;
+    render();
+  }
+
+  const isRunning = {{ is_running|yesno:"true,false" }};
+  if (isRunning) {
+    $('#btn-generate').click();
+  }
+})();
+  </script>
+{% endblock %}

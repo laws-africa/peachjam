@@ -1,0 +1,19 @@
+{% load i18n %}
+{% if flynote_taxonomies %}
+  <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
+  <div class="mb-2 fst-italic">
+    {% for topic in flynote_taxonomies %}
+      {% if not forloop.first %};{% endif %}
+      {% for ancestor in topic.get_ancestors %}
+        {% if ancestor.depth > flynote_root.depth %}
+          <a href="{{ ancestor.get_absolute_url }}">{{ ancestor.name }}</a> —
+        {% endif %}
+      {% endfor %}
+      <a href="{{ topic.get_absolute_url }}">{{ topic.name }}</a>
+    {% endfor %}
+    .
+  </div>
+{% elif document.flynote %}
+  <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
+  <div class="mb-2 fst-italic">{{ document.flynote|safe }}</div>
+{% endif %}
