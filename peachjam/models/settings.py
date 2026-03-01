@@ -183,6 +183,7 @@ class PeachJamSettings(SingletonModel):
         related_name="+",
         verbose_name=_("flynote taxonomy root"),
         help_text=_("Root taxonomy node for automatically managed flynote topics."),
+    )
     helpscout_beacon_id = models.CharField(
         max_length=100,
         null=True,

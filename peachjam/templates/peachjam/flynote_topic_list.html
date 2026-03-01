@@ -23,8 +23,7 @@
       <div>
         <h1 class="h3 fw-bold mb-1">{% trans "Browse Judgments by Topic" %}</h1>
         <p class="mb-0 opacity-75">
-          {% trans "Start with high-level topics, then drill down into child
-          topics and related judgments." %}
+          {% trans "Start with high-level topics, then drill down into child topics and related judgments." %}
         </p>
       </div>
       {% if total_judgment_count %}
@@ -68,43 +67,46 @@
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
           <div>
             <h2 class="h5 fw-bold mb-1">{% trans "All Topics" %}</h2>
-            <p class="text-muted small mb-0">
-              {% trans "Search or browse the full list, including long-tail topics."
-              %}
-            </p>
+            <p class="text-muted small mb-0">{% trans "Search or browse the full list, including long-tail topics." %}</p>
           </div>
-          <div class="flex-grow-1" style="max-width: 320px">
+          <div class="flex-grow-1 ms-md-auto w-100" style="max-width: 400px;">
             <input id="flynote-search"
                    type="search"
+                   name="q"
                    class="form-control"
                    placeholder="{% trans 'e.g. constitutional law' %}"
-                   aria-label="{% trans 'Search topics' %}"/>
+                   aria-label="{% trans 'Search topics' %}"
+                   hx-get="{{ request.path }}"
+                   hx-trigger="keyup changed delay:300ms, search"
+                   hx-target="#flynote-all-list-container"
+                   hx-select="#flynote-all-list-container"
+                   hx-swap="outerHTML"/>
           </div>
         </div>
-        {% if all_topics %}
-          <div id="flynote-all-list"
-               class="list-group list-group-flush border rounded">
-            {% for item in all_topics %}
-              <a href="{{ item.topic.get_absolute_url }}"
-                 class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
-                 data-name="{{ item.topic.name|lower }}">
-                <div>
-                  <div class="fw-semibold">{{ item.topic.name }}</div>
-                  {% if item.child_names %}
-                    <div class="text-muted small">{{ item.child_names|join:"; " }}</div>
-                  {% else %}
-                    <div class="text-muted small fst-italic">{% trans "No subtopics" %}</div>
-                  {% endif %}
-                </div>
-                <span class="badge bg-light text-dark border ms-3 flex-shrink-0">{{ item.count }}</span
-                  >
-                </a>
-              {% endfor %}
-            </div>
-            <p id="flynote-no-results" class="text-muted mt-3 d-none">{% trans "No matching topics found." %}</p>
-          {% else %}
-            <p class="text-muted">{% trans "No topics found." %}</p>
-          {% endif %}
+        <div id="flynote-all-list-container">
+          {% if all_topics %}
+            <div id="flynote-all-list"
+                 class="list-group list-group-flush border rounded">
+              {% for item in all_topics %}
+                <a href="{{ item.topic.get_absolute_url }}"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                   data-name="{{ item.topic.name|lower }}">
+                  <div>
+                    <div class="fw-semibold">{{ item.topic.name }}</div>
+                    {% if item.child_names %}
+                      <div class="text-muted small">{{ item.child_names|join:"; " }}</div>
+                    {% else %}
+                      <div class="text-muted small fst-italic">{% trans "No subtopics" %}</div>
+                    {% endif %}
+                  </div>
+                  <span class="badge bg-light text-dark border ms-3 flex-shrink-0">{{ item.count }}</span
+                    >
+                  </a>
+                {% endfor %}
+              </div>
+              <p class="text-muted mt-3">{% trans "No matching topics found." %}</p>
+            {% endif %}
+          </div>
         </div>
       </section>
     {% endblock %}

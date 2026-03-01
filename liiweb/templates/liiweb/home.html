@@ -66,8 +66,8 @@
           <div class="col-12 col-lg-6">
             <div class="hero-logos row justify-content-center justify-content-lg-end">
               {% block hero-logos %}
-                <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
-                <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa" />
+                <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+                <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
               {% endblock %}
             </div>
           </div>
@@ -77,17 +77,6 @@
   {% endblock %}
   {% block my-lii %}
     {% include 'peachjam/my/_frontpage_loader.html' %}
-  {% endblock %}
-  {% block explore-topics %}
-    {% if PEACHJAM_SETTINGS.flynote_taxonomy_root %}
-      <section class="my-5 bg-light py-5">
-        <div class="container">
-          <h2 class="mb-3">{% trans 'Explore case law by topic' %}</h2>
-          <p>{% trans 'Browse judgments organised by legal topic and subject area.' %}</p>
-          <a href="{% url 'flynote_topic_list' %}" class="btn btn-primary">{% trans 'Explore topics' %} →</a>
-        </div>
-      </section>
-    {% endif %}
   {% endblock %}
   {% block recent-documents %}
     <section class="my-5">
@@ -149,7 +138,9 @@
             <div class="col-sm-9 ps-sm-5">
               <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
               <p class="lead">
-                {% blocktrans trimmed %}Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.{% endblocktrans %}
+                {% blocktrans trimmed %}
+                  Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
+                {% endblocktrans %}
               </p>
               <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
             </div>
@@ -170,4 +161,3 @@
     {% endif %}
   {% endblock %}
 {% endblock %}
-{# djlint:on #}
