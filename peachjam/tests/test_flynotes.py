@@ -5,32 +5,30 @@ from django.test import TestCase
 from django.urls import reverse
 from languages_plus.models import Language
 
-from peachjam.analysis.flynotes import (
-    get_or_create_taxonomy_node,
-    normalise_flynote_name,
-    parse_flynote_text,
-    update_flynote_taxonomy_for_judgment,
-)
+from peachjam.analysis.flynotes import FlynoteParser, FlynoteTaxonomyUpdater
 from peachjam.models import Court, Judgment, PeachJamSettings
 from peachjam.models.taxonomies import DocumentTopic, Taxonomy
 
 
 class ParseFlynoteTextTest(TestCase):
+    def setUp(self):
+        self.parser = FlynoteParser()
+
     def test_empty_input(self):
-        self.assertEqual(parse_flynote_text(""), [])
-        self.assertEqual(parse_flynote_text(None), [])
+        self.assertEqual(self.parser.parse(""), [])
+        self.assertEqual(self.parser.parse(None), [])
 
     def test_prose_flynote_skipped(self):
         text = "Contract between a lender and a borrower purporting to be a contract of sale."
-        self.assertEqual(parse_flynote_text(text), [])
+        self.assertEqual(self.parser.parse(text), [])
 
     def test_html_prose_flynote_skipped(self):
         text = '<p><span style="color:#000000">Contract between a lender and borrower.</span></p>'
-        self.assertEqual(parse_flynote_text(text), [])
+        self.assertEqual(self.parser.parse(text), [])
 
     def test_simple_chain_with_em_dashes(self):
         text = "Criminal law \u2014 admissibility \u2014 trial within a trial"
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 1)
         self.assertEqual(
             paths[0], ["Criminal law", "admissibility", "trial within a trial"]
@@ -38,13 +36,13 @@ class ParseFlynoteTextTest(TestCase):
 
     def test_simple_chain_with_en_dashes(self):
         text = "Employment law \u2013 Severance pay \u2013 Jurisdiction"
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 1)
         self.assertEqual(paths[0], ["Employment law", "Severance pay", "Jurisdiction"])
 
     def test_simple_chain_with_hyphens(self):
         text = "Administrative law - retrospective application - discrimination"
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 1)
         self.assertEqual(
             paths[0],
@@ -53,7 +51,7 @@ class ParseFlynoteTextTest(TestCase):
 
     def test_semicolons_create_sibling_branches(self):
         text = "Criminal law \u2014 admissibility \u2014 trial within a trial; right to legal representation"
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 2)
         self.assertEqual(
             paths[0], ["Criminal law", "admissibility", "trial within a trial"]
@@ -68,7 +66,7 @@ class ParseFlynoteTextTest(TestCase):
             "circumstantial evidence \u2014 Blom principles; "
             "self-defence plea"
         )
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 3)
         self.assertEqual(
             paths[0], ["Criminal law", "admissibility", "trial within a trial"]
@@ -89,7 +87,7 @@ class ParseFlynoteTextTest(TestCase):
             "self-defence plea and evidential burden; "
             "appellate review of factual findings."
         )
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 5)
         self.assertEqual(paths[0][0], "Criminal law")
         self.assertEqual(paths[0][1], "admissibility of confessions/ admissions")
@@ -103,52 +101,55 @@ class ParseFlynoteTextTest(TestCase):
 
     def test_html_tags_stripped(self):
         text = "<p>Employment law \u2013 Severance pay \u2013 Jurisdiction</p>"
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(len(paths), 1)
         self.assertEqual(paths[0], ["Employment law", "Severance pay", "Jurisdiction"])
 
     def test_trailing_period_stripped(self):
         text = "Employment law \u2013 Severance pay."
-        paths = parse_flynote_text(text)
+        paths = self.parser.parse(text)
         self.assertEqual(paths[0][-1], "Severance pay")
 
 
 class NormaliseFlynoteNameTest(TestCase):
     def test_basic_normalisation(self):
-        self.assertEqual(normalise_flynote_name("Criminal Law"), "criminal-law")
+        self.assertEqual(FlynoteParser.normalise_name("Criminal Law"), "criminal-law")
 
     def test_strips_whitespace(self):
-        self.assertEqual(normalise_flynote_name("  Criminal Law  "), "criminal-law")
+        self.assertEqual(
+            FlynoteParser.normalise_name("  Criminal Law  "), "criminal-law"
+        )
 
     def test_consistent_slugs(self):
         self.assertEqual(
-            normalise_flynote_name("Right to fair hearing"),
-            normalise_flynote_name("right to fair hearing"),
+            FlynoteParser.normalise_name("Right to fair hearing"),
+            FlynoteParser.normalise_name("right to fair hearing"),
         )
 
 
 class GetOrCreateTaxonomyNodeTest(TestCase):
     def setUp(self):
         self.root = Taxonomy.add_root(name="Flynotes")
+        self.updater = FlynoteTaxonomyUpdater()
 
     def test_creates_new_child(self):
-        node = get_or_create_taxonomy_node(self.root, "Criminal law")
+        node = self.updater.get_or_create_node(self.root, "Criminal law")
         self.assertEqual(node.name, "Criminal law")
         self.assertEqual(node.get_parent().pk, self.root.pk)
 
     def test_returns_existing_child_by_slug(self):
         original = self.root.add_child(name="Criminal law")
-        found = get_or_create_taxonomy_node(self.root, "Criminal law")
+        found = self.updater.get_or_create_node(self.root, "Criminal law")
         self.assertEqual(found.pk, original.pk)
 
     def test_returns_existing_child_by_normalised_name(self):
         original = self.root.add_child(name="Criminal Law")
-        found = get_or_create_taxonomy_node(self.root, "criminal law")
+        found = self.updater.get_or_create_node(self.root, "criminal law")
         self.assertEqual(found.pk, original.pk)
 
     def test_creates_nested_nodes(self):
-        parent = get_or_create_taxonomy_node(self.root, "Criminal law")
-        child = get_or_create_taxonomy_node(parent, "admissibility")
+        parent = self.updater.get_or_create_node(self.root, "Criminal law")
+        child = self.updater.get_or_create_node(parent, "admissibility")
         self.assertEqual(child.get_parent().pk, parent.pk)
 
 
@@ -160,6 +161,8 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         settings = PeachJamSettings.load()
         settings.flynote_taxonomy_root = self.root
         settings.save()
+
+        self.updater = FlynoteTaxonomyUpdater()
 
         self.judgment = Judgment.objects.create(
             case_name="Test Case",
@@ -174,7 +177,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         )
 
     def test_creates_taxonomy_nodes(self):
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
 
         self.assertTrue(Taxonomy.objects.filter(name="Criminal law").exists())
         self.assertTrue(Taxonomy.objects.filter(name="admissibility").exists())
@@ -185,7 +188,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertTrue(Taxonomy.objects.filter(name="Blom principles").exists())
 
     def test_links_judgment_to_leaf_nodes_only(self):
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
 
         linked_topics = set(
             DocumentTopic.objects.filter(document=self.judgment).values_list(
@@ -199,7 +202,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertNotIn("circumstantial evidence", linked_topics)
 
     def test_taxonomy_tree_structure(self):
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
 
         criminal = Taxonomy.objects.get(name="Criminal law")
         self.assertEqual(criminal.get_parent().pk, self.root.pk)
@@ -214,13 +217,13 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertEqual(circumstantial.get_parent().pk, criminal.pk)
 
     def test_clears_old_links_on_reprocess(self):
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
         initial_count = DocumentTopic.objects.filter(document=self.judgment).count()
         self.assertEqual(initial_count, 2)
 
         self.judgment.flynote = "Contract law \u2014 breach of contract"
         self.judgment.save()
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
 
         linked_topics = set(
             DocumentTopic.objects.filter(document=self.judgment).values_list(
@@ -230,7 +233,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.assertEqual(linked_topics, {"breach of contract"})
 
     def test_reuses_existing_taxonomy_nodes(self):
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
         criminal_pk = Taxonomy.objects.get(name="Criminal law").pk
 
         judgment2 = Judgment.objects.create(
@@ -241,7 +244,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
             language=Language.objects.first(),
             flynote="Criminal law \u2014 sentencing",
         )
-        update_flynote_taxonomy_for_judgment(judgment2)
+        self.updater.update_for_judgment(judgment2)
 
         self.assertEqual(Taxonomy.objects.filter(name="Criminal law").count(), 1)
         self.assertEqual(Taxonomy.objects.get(name="Criminal law").pk, criminal_pk)
@@ -251,7 +254,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         settings.flynote_taxonomy_root = None
         settings.save()
 
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
         self.assertEqual(
             DocumentTopic.objects.filter(document=self.judgment).count(), 0
         )
@@ -260,7 +263,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.judgment.flynote = ""
         self.judgment.save()
 
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
         self.assertEqual(
             DocumentTopic.objects.filter(document=self.judgment).count(), 0
         )
@@ -269,7 +272,7 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         self.judgment.flynote = "This is a plain prose description of the case."
         self.judgment.save()
 
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
         self.assertEqual(
             DocumentTopic.objects.filter(document=self.judgment).count(), 0
         )
@@ -317,6 +320,8 @@ class JudgmentDetailFlynoteContextTest(TestCase):
         settings.flynote_taxonomy_root = self.root
         settings.save()
 
+        self.updater = FlynoteTaxonomyUpdater()
+
         self.judgment = Judgment.objects.create(
             case_name="Flynote Detail Test",
             jurisdiction=Country.objects.first(),
@@ -326,7 +331,7 @@ class JudgmentDetailFlynoteContextTest(TestCase):
             flynote="Criminal law \u2014 admissibility \u2014 trial within a trial",
             case_summary="Test summary",
         )
-        update_flynote_taxonomy_for_judgment(self.judgment)
+        self.updater.update_for_judgment(self.judgment)
 
     def test_add_flynote_taxonomies_builds_paths(self):
         from peachjam.views.judgment import JudgmentDetailView

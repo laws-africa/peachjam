@@ -375,10 +375,10 @@ def update_flynote_taxonomy(judgment_id):
         log.info(f"No judgment with id {judgment_id} exists, ignoring.")
         return
 
-    from peachjam.analysis.flynotes import update_flynote_taxonomy_for_judgment
+    from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
 
     log.info(f"Updating flynote taxonomy for judgment {judgment_id}")
-    update_flynote_taxonomy_for_judgment(judgment)
+    FlynoteTaxonomyUpdater().update_for_judgment(judgment)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
