@@ -1,6 +1,12 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
 {% load i18n %}
-{% block subject %}{{subject_line}}{% endblock %}
+{% block subject %}
+  {% if saved_documents|length > 1 %}
+    {% blocktrans with title=saved_documents.0.saved_document.work.title %}New overturn for {{ title }} and more{% endblocktrans %}
+  {% else %}
+    {% blocktrans with title=saved_documents.0.saved_document.work.title %}New overturn for {{ title }}{% endblocktrans %}
+  {% endif %}
+{% endblock %}
 {% block alert-body %}
   <p>{% trans "Some judgments you have saved have been overturned." %}</p>
   {% include 'peachjam/emails/_new_relationship_alert_body.html' %}

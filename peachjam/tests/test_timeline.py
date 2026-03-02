@@ -16,6 +16,7 @@ from peachjam.models import (
     Predicate,
     Relationship,
     SavedDocument,
+    Taxonomy,
     TimelineEvent,
     UserFollowing,
     Work,
@@ -132,6 +133,29 @@ class TimelineViewTest(TestCase):
         ).values_list("subject_works__documents__id", flat=True)
         self.assertEqual(4, subject_docs.count())
         self.assertIn(j.pk, subject_docs)
+
+    def test_send_new_documents_email_includes_first_topic_in_subject(self):
+        topic = Taxonomy.add_root(name="Employment Law")
+        topic_follow = UserFollowing.objects.create(user=self.user, taxonomy=topic)
+        doc = Judgment.objects.first()
+        TimelineEvent.add_new_documents_event(topic_follow, [doc])
+
+        with (
+            override_settings(
+                PEACHJAM={
+                    **settings.PEACHJAM,
+                    "EMAIL_ALERTS_ENABLED": True,
+                    "CUSTOMERIO_EMAIL_API_KEY": "test",
+                },
+                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
+            ),
+            patch("peachjam.emails.APIClient.send_email") as mailer,
+        ):
+            TimelineEmailService.send_new_documents_email(self.user)
+
+        self.assertEqual(1, mailer.call_count)
+        request = mailer.call_args[0][0]
+        self.assertEqual(f"New documents for {topic}", str(request.subject))
 
 
 class TimelineRelationshipTests(TestCase):
@@ -428,8 +452,8 @@ class TimelineRelationshipTests(TestCase):
         self.assertEqual({self.user.email}, recipient_emails)
         self.assertEqual(
             {
-                "New updates for documents you have saved",
-                "New overturn for judgments you have saved",
+                f"New updates for {self.saved_followed.work.title}",
+                f"New overturn for {self.saved_overturned.work.title}",
             },
             subject_lines,
         )
