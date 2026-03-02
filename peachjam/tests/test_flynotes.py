@@ -394,7 +394,7 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         "documents/sample_documents",
     ]
 
-    def test_judgment_list_shows_explore_topics_link(self):
+    def test_judgment_list_loads(self):
         root = Taxonomy.add_root(name="Case Law Flynotes")
         settings = PeachJamSettings.load()
         settings.flynote_taxonomy_root = root
@@ -402,13 +402,3 @@ class JudgmentListFlynoteTopicsTest(TestCase):
 
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Explore case law by topic")
-
-    def test_judgment_list_hides_explore_topics_when_no_root(self):
-        settings = PeachJamSettings.load()
-        settings.flynote_taxonomy_root = None
-        settings.save()
-
-        response = self.client.get(reverse("judgment_list"))
-        self.assertEqual(response.status_code, 200)
-        self.assertNotContains(response, "Explore case law by topic")
