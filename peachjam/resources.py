@@ -283,6 +283,7 @@ class BaseDocumentResource(resources.ModelResource):
         widget=ForeignKeyWidget(Locality, field="code"),
     )
     source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
+    source_html = fields.Field(attribute="source_html", widget=CharWidget())
     taxonomies = ManyToManyField(
         attribute="taxonomies",
         widget=TaxonomiesWidget(DocumentTopic, separator="|", field="topic"),
@@ -392,24 +393,19 @@ class BaseDocumentResource(resources.ModelResource):
         super().save_m2m(instance, row, **kwargs)
 
         if not kwargs.get("dry_run", ""):
-            # only re-extract content if the content explicitly changed, or the source file changed (next block)
-            extract_content = "content_html" in row
+            source_html_changed = "source_html" in row or "content_html" in row
 
-            # attach source file, but only if it was explicitly provided during import
-            # the preferred source URL was set during import by the SourceFileWidget
             if (
                 instance.source_url
                 and row.get("source_url")
                 and instance.source_url in row.get("source_url")
             ):
                 self.attach_source_file(instance, instance.source_url)
-                extract_content = True
 
-            if extract_content:
-                # try to extract content from docx files
-                instance.extract_content_from_source_file()
-                # extract citations
-                instance.extract_citations()
+            if source_html_changed:
+                source_html = row.get("source_html") or row.get("content_html")
+                instance.set_source_html(source_html)
+                instance.set_content_html(instance.source_html)
                 instance.save()
 
     def after_save_instance(self, instance, row, **kwargs):
