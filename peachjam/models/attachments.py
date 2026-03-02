@@ -12,6 +12,7 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
 from docpipe.soffice import soffice_convert
 
 from peachjam.helpers import html_to_png
@@ -91,7 +92,7 @@ class Image(AttachmentAbstractModel):
         )
 
 
-class SourceFile(AttachmentAbstractModel):
+class SourceFile(LifecycleModelMixin, AttachmentAbstractModel):
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
@@ -187,6 +188,21 @@ class SourceFile(AttachmentAbstractModel):
         if not pk:
             # first save, set the download filename
             self.set_download_filename()
+
+    @hook(BEFORE_SAVE, when="file", has_changed=True)
+    def clear_stale_pdf_on_file_change(self):
+        if self.file_as_pdf:
+            try:
+                self.file_as_pdf.delete(False)
+            except Exception as e:
+                log.warning("Ignoring error when deleting file as pdf: %s", e)
+            self.file_as_pdf = None
+
+    @hook(AFTER_SAVE, when="file", has_changed=True)
+    def file_changed(self):
+        self.ensure_file_as_pdf()
+        if self.document.extract_content_from_source_file():
+            self.document.save()
 
     def get_duplicate_documents(self):
         """Return a list of documents that have the same SHA256 hash as this source file."""
