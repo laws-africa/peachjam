@@ -333,6 +333,6 @@ class TaxonomyDocumentCount(models.Model):
 
         log.info(
             "Refreshed document counts for taxonomy tree rooted at '%s' (pk=%s)",
-            root.name,
+            root.slug,
             root.pk,
         )

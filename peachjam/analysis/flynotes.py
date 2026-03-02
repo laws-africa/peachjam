@@ -261,3 +261,7 @@ class FlynoteTaxonomyUpdater:
             f"Linked judgment {judgment.pk} to "
             f"{len(leaf_topics)} flynote taxonomy topics."
         )
+
+        from peachjam.models.taxonomies import TaxonomyDocumentCount
+
+        TaxonomyDocumentCount.refresh_for_taxonomy(root)
