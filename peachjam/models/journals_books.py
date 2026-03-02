@@ -1,6 +1,7 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import BEFORE_SAVE, hook
 from markdown.extensions.toc import slugify
 from martor.models import MartorField
 from martor.utils import markdownify
@@ -24,10 +25,14 @@ class Book(CoreDocument):
         if self.content_markdown:
             self.convert_content_markdown()
 
+    @hook(BEFORE_SAVE, when="content_markdown", has_changed=True)
     def convert_content_markdown(self):
-        self.set_content_html(markdownify(self.content_markdown or ""))
+        self.set_source_html(markdownify(self.content_markdown or ""))
+        self.set_content_html(self.source_html)
 
     def pre_save(self):
+        if self.content_markdown and not self.source_html:
+            self.convert_content_markdown()
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "book"
         self.doc_type = "book"
