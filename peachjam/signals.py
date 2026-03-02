@@ -204,7 +204,10 @@ def password_reset_customerio(sender, request, user, **kwargs):
 
 
 @receiver(signals.post_save, sender=DocumentContent)
-def judgment_content_changed_generate_summary(sender, instance, **kwargs):
+def judgment_content_changed_generate_summary(sender, instance, raw, **kwargs):
+    if raw:
+        return
+
     if not instance.document.doc_type == "judgment":
         return
     judgment = instance.document
