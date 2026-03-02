@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
@@ -959,13 +960,16 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def get_content_as_text(self):
         """Get the document content as plain text."""
-        if not hasattr(self, "document_content"):
+        doc_content = self._document_content()
+        if not doc_content or doc_content.content_text is None:
             self.update_text_content()
-        return self.document_content.content_text
+            doc_content = self._document_content()
+        return doc_content.content_text if doc_content else None
 
     def update_text_content(self):
         """Update the extracted text content."""
         self.document_content = DocumentContent.update_or_create_for_document(self)
+        self._document_content_cache = self.document_content
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
@@ -1178,10 +1182,19 @@ class DocumentContent(LifecycleModelMixin, models.Model):
                         size = os.fstat(tmp.fileno()).st_size
                         assert size > 0, "Temporary PDF file is empty"
 
-                        text = pdfjs_to_text(tmp.name)
-                        # some PDFs have nulls, which breaks SQL insertion
-                        # replace rather than deleting to keep string length the same
-                        text = text.replace("\0", " ")
+                        try:
+                            text = pdfjs_to_text(tmp.name)
+                            # some PDFs have nulls, which breaks SQL insertion
+                            # replace rather than deleting to keep string length the same
+                            text = text.replace("\0", " ")
+                        except (subprocess.CalledProcessError, AssertionError) as e:
+                            # Keep source-file uploads usable even when test fixtures or
+                            # malformed PDFs can't be text-extracted.
+                            log.warning(
+                                "Could not extract text from source file for document %s",
+                                document.pk,
+                                exc_info=e,
+                            )
 
         doc_content = DocumentContent.objects.update_or_create(
             document=document, defaults={"content_text": text}
