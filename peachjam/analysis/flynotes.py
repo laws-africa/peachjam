@@ -21,6 +21,7 @@ Two classes are exposed:
 import logging
 import re
 
+from django.db import IntegrityError, transaction
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 
@@ -46,6 +47,7 @@ class FlynoteParser:
     """
 
     DASH_PATTERN = r"\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+"
+    MAX_NAME_LENGTH = 255
 
     def parse(self, text):
         """Parse flynote text into a list of taxonomy paths.
@@ -123,7 +125,9 @@ class FlynoteParser:
 
         for segment in segments:
             parts = [
-                p.strip() for p in re.split(self.DASH_PATTERN, segment) if p.strip()
+                p.strip()[: self.MAX_NAME_LENGTH]
+                for p in re.split(self.DASH_PATTERN, segment)
+                if p.strip()
             ]
             if not parts:
                 continue
@@ -176,18 +180,37 @@ class FlynoteTaxonomyUpdater:
         Matching is case- and whitespace-insensitive (via
         ``FlynoteParser.normalise_name``), so "Criminal Law" will match an
         existing "Criminal law" node rather than creating a duplicate.
+
+        If the slug already exists in the database (collision from a
+        different tree path producing the same slug), the existing node
+        is returned instead of raising an error.
+
+        Returns ``None`` if the name produces an empty slug (e.g.
+        punctuation-only strings).
         """
-        children = parent.get_children() if parent else Taxonomy.get_root_nodes()
         normalised = FlynoteParser.normalise_name(name)
+        if not normalised:
+            return None
+
+        children = parent.get_children() if parent else Taxonomy.get_root_nodes()
         for child in children:
             if FlynoteParser.normalise_name(child.name) == normalised:
                 return child
 
-        if parent:
-            return parent.add_child(name=name)
-        else:
-            return Taxonomy.add_root(name=name)
+        expected_slug = f"{parent.slug}-{normalised}" if parent else normalised
+        existing = Taxonomy.objects.filter(slug=expected_slug).first()
+        if existing:
+            return existing
 
+        try:
+            if parent:
+                return parent.add_child(name=name)
+            else:
+                return Taxonomy.add_root(name=name)
+        except IntegrityError:
+            return Taxonomy.objects.filter(slug=expected_slug).first()
+
+    @transaction.atomic
     def update_for_judgment(self, judgment):
         """Parse a judgment's flynote and sync its taxonomy links.
 
@@ -197,6 +220,9 @@ class FlynoteTaxonomyUpdater:
         3. For each path, walks (or creates) ``Taxonomy`` nodes from root
            to leaf.
         4. Links the judgment to the leaf node of every path.
+
+        Runs inside a database transaction so that a failure for one
+        judgment does not leave the taxonomy tree in a corrupt state.
 
         Does nothing if no ``flynote_taxonomy_root`` is configured or if
         the flynote text cannot be parsed (plain prose, empty, etc.).
@@ -222,8 +248,12 @@ class FlynoteTaxonomyUpdater:
         for path in paths:
             current_parent = root
             for name in path:
-                current_parent = self.get_or_create_node(current_parent, name)
-            leaf_topics.add(current_parent)
+                node = self.get_or_create_node(current_parent, name)
+                if node is None:
+                    break
+                current_parent = node
+            else:
+                leaf_topics.add(current_parent)
 
         for topic in leaf_topics:
             DocumentTopic.objects.get_or_create(document=judgment, topic=topic)
