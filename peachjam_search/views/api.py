@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from cobalt.uri import FrbrUri
+from django.utils.html import strip_tags
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.query import Bool
 from rest_framework.permissions import BasePermission
@@ -65,77 +66,159 @@ class PortionSearchView(APIView):
         for hit in es_response.hits.hits:
             expression_frbr_uri = hit._source.expression_frbr_uri
             frbr_uri = FrbrUri.parse(expression_frbr_uri)
+            common_metadata = {
+                "work_frbr_uri": frbr_uri.work_uri(),
+                "frbr_place": frbr_uri.place,
+                "frbr_country": frbr_uri.country,
+                "frbr_doctype": frbr_uri.doctype,
+                "frbr_subtype": frbr_uri.subtype,
+                "title": hit._source.title,
+                "expression_date": frbr_uri.expression_date[1:],
+                "expression_frbr_uri": expression_frbr_uri,
+                "repealed": getattr(hit._source, "repealed", None),
+                "commenced": getattr(hit._source, "commenced", None),
+                "principal": getattr(hit._source, "principal", None),
+                "public_url": self.request.build_absolute_uri(expression_frbr_uri),
+            }
 
             if frbr_uri.doctype == "judgment":
                 summaries_to_load.append(expression_frbr_uri)
+                judgment_metadata = {
+                    **common_metadata,
+                    # use the source, because a parsed FRBR URI is ambiguous if there is an actor
+                    "frbr_subtype": hit._source.frbr_uri_subtype,
+                    # TODO: enable once data is backfilled in ES
+                    # "frbr_actor": hit._source.frbr_uri_actor,
+                    "flynote": getattr(hit._source, "flynote", None),
+                    "blurb": getattr(hit._source, "blurb", None),
+                }
 
                 # we only return summaries for judgments
                 portions.append(
-                    PortionHit(
+                    self.make_portion_hit(
+                        common_metadata=judgment_metadata,
                         score=1 - hit._score,
                         # this will be filled in later
-                        content=PortionContent(text=""),
-                        metadata=PortionMetadata(
-                            work_frbr_uri=frbr_uri.work_uri(),
-                            frbr_place=frbr_uri.place,
-                            frbr_country=frbr_uri.country,
-                            frbr_doctype=frbr_uri.doctype,
-                            # use the source, because a parsed FRBR URI is ambiguous if there is an actor
-                            frbr_subtype=hit._source.frbr_uri_subtype,
-                            # TODO: enable once data is backfilled in ES
-                            # frbr_actor=hit._source.frbr_uri_actor,
-                            title=hit._source.title,
-                            expression_date=frbr_uri.expression_date[1:],
-                            expression_frbr_uri=expression_frbr_uri,
-                            flynote=getattr(hit._source, "flynote", None),
-                            blurb=getattr(hit._source, "blurb", None),
-                            public_url=self.request.build_absolute_uri(
-                                expression_frbr_uri
-                            ),
-                            portion_type=PortionType.SUMMARY,
-                        ),
+                        text="",
+                        portion_type=PortionType.SUMMARY,
                     )
                 )
                 continue
 
-            # TODO: merge in "provisions.hits"
+            if hasattr(hit, "inner_hits") and hasattr(hit.inner_hits, "content_chunks"):
+                for chunk in hit.inner_hits.content_chunks.hits.hits:
+                    if chunk._source.portion:
+                        if chunk._source.type == "provision":
+                            provisions_to_load[frbr_uri].append(chunk._source.portion)
+                        elif (
+                            chunk._source.type == "page" and chunk._source.n_chunks > 1
+                        ):
+                            pages_to_load[frbr_uri].append(chunk._source.portion)
 
-            for chunk in hit.inner_hits.content_chunks.hits.hits:
-                if chunk._source.portion:
-                    if chunk._source.type == "provision":
-                        provisions_to_load[frbr_uri].append(chunk._source.portion)
-                    elif chunk._source.type == "page" and chunk._source.n_chunks > 1:
-                        pages_to_load[frbr_uri].append(chunk._source.portion)
+                    portion_id = getattr(chunk._source, "portion", None)
+                    if (expression_frbr_uri, portion_id) in seen:
+                        continue
+                    seen.add((expression_frbr_uri, portion_id))
 
-                portion_id = getattr(chunk._source, "portion", None)
-                if (expression_frbr_uri, portion_id) in seen:
-                    continue
-                seen.add((expression_frbr_uri, portion_id))
-
-                item = PortionHit(
-                    score=1 - chunk._score,
-                    content=PortionContent(text=self.clean_text(chunk._source.text)),
-                    metadata=PortionMetadata(
-                        work_frbr_uri=frbr_uri.work_uri(),
-                        frbr_place=frbr_uri.place,
-                        frbr_country=frbr_uri.country,
-                        frbr_doctype=frbr_uri.doctype,
-                        frbr_subtype=frbr_uri.subtype,
-                        title=hit._source.title,
-                        expression_date=frbr_uri.expression_date[1:],
-                        expression_frbr_uri=expression_frbr_uri,
-                        repealed=getattr(hit._source, "repealed", None),
-                        commenced=getattr(hit._source, "commenced", None),
-                        principal=getattr(hit._source, "principal", None),
-                        public_url=self.request.build_absolute_uri(expression_frbr_uri),
+                    item = self.make_portion_hit(
+                        common_metadata=common_metadata,
+                        # retriever-based scores are always [0, 1]
+                        score=1 - chunk._score,
+                        text=self.clean_text(chunk._source.text),
                         portion_type=chunk._source.type,
                         portion_id=portion_id,
                         portion_public_url=self.portion_public_url(
                             request, expression_frbr_uri, chunk._source.type, portion_id
                         ),
-                    ),
-                )
-                portions.append(item)
+                    )
+                    portions.append(item)
+
+            elif hasattr(hit, "inner_hits") and hasattr(hit.inner_hits, "provisions"):
+                for provision in hit.inner_hits.provisions.hits.hits:
+                    portion_id = getattr(provision._source, "id", None)
+                    if portion_id:
+                        provisions_to_load[frbr_uri].append(portion_id)
+
+                    if (expression_frbr_uri, portion_id) in seen:
+                        continue
+                    seen.add((expression_frbr_uri, portion_id))
+
+                    text = ""
+                    if hasattr(provision, "highlight"):
+                        highlight = provision.highlight.to_dict()
+                        body = (
+                            highlight.get("provisions.body")
+                            or highlight.get("provisions.body.exact")
+                            or []
+                        )
+                        if body:
+                            text = strip_tags(body[0])
+
+                    item = self.make_portion_hit(
+                        common_metadata=common_metadata,
+                        # retriever-based scores are always [0, 1]
+                        score=(
+                            provision._score
+                            if self.engine.mode == "text"
+                            else 1 - provision._score
+                        ),
+                        text=text,
+                        portion_type=PortionType.PROVISION,
+                        portion_id=portion_id,
+                        portion_title=getattr(provision._source, "title", None),
+                        portion_parent_ids=list(
+                            getattr(provision._source, "parent_ids", []) or []
+                        ),
+                        portion_parent_titles=list(
+                            getattr(provision._source, "parent_titles", []) or []
+                        ),
+                        portion_public_url=self.portion_public_url(
+                            request,
+                            expression_frbr_uri,
+                            PortionType.PROVISION,
+                            portion_id,
+                        ),
+                    )
+                    portions.append(item)
+
+            elif hasattr(hit, "inner_hits") and hasattr(hit.inner_hits, "pages"):
+                for page in hit.inner_hits.pages.hits.hits:
+                    page_num = getattr(page._source, "page_num", None)
+                    if page_num is not None:
+                        pages_to_load[frbr_uri].append(page_num)
+
+                    portion_id = str(page_num) if page_num is not None else None
+                    if (expression_frbr_uri, portion_id) in seen:
+                        continue
+                    seen.add((expression_frbr_uri, portion_id))
+
+                    text = ""
+                    if hasattr(page, "highlight"):
+                        highlight = page.highlight.to_dict()
+                        body = (
+                            highlight.get("pages.body")
+                            or highlight.get("pages.body.exact")
+                            or []
+                        )
+                        if body:
+                            text = strip_tags(body[0])
+
+                    item = self.make_portion_hit(
+                        common_metadata=common_metadata,
+                        # retriever-based scores are always [0, 1]
+                        score=(
+                            page._score
+                            if self.engine.mode == "text"
+                            else 1 - page._score
+                        ),
+                        text=text,
+                        portion_type=PortionType.PAGE,
+                        portion_id=portion_id,
+                        portion_public_url=self.portion_public_url(
+                            request, expression_frbr_uri, PortionType.PAGE, portion_id
+                        ),
+                    )
+                    portions.append(item)
 
         self.load_portion_details(
             portions, provisions_to_load, pages_to_load, summaries_to_load
@@ -148,6 +231,32 @@ class PortionSearchView(APIView):
     def clean_text(self, text):
         # strip the additional context, if present
         return text.split(TEXT_INJECTION_SEPARATOR, 1)[-1]
+
+    def make_portion_hit(
+        self,
+        common_metadata,
+        score,
+        text,
+        portion_type,
+        portion_id=None,
+        portion_title=None,
+        portion_parent_ids=None,
+        portion_parent_titles=None,
+        portion_public_url=None,
+    ):
+        return PortionHit(
+            score=score,
+            content=PortionContent(text=text),
+            metadata=PortionMetadata(
+                **common_metadata,
+                portion_type=portion_type,
+                portion_id=portion_id,
+                portion_title=portion_title,
+                portion_parent_ids=portion_parent_ids,
+                portion_parent_titles=portion_parent_titles,
+                portion_public_url=portion_public_url,
+            ),
+        )
 
     def portion_public_url(
         self, request, expression_frbr_uri, portion_type, portion_id
