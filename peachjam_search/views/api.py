@@ -97,7 +97,7 @@ class PortionSearchView(APIView):
                 portions.append(
                     self.make_portion_hit(
                         common_metadata=judgment_metadata,
-                        score=1 - hit._score,
+                        score=hit._score,
                         # this will be filled in later
                         text="",
                         portion_type=PortionType.SUMMARY,
@@ -122,8 +122,7 @@ class PortionSearchView(APIView):
 
                     item = self.make_portion_hit(
                         common_metadata=common_metadata,
-                        # retriever-based scores are always [0, 1]
-                        score=1 - chunk._score,
+                        score=chunk._score,
                         text=self.clean_text(chunk._source.text),
                         portion_type=chunk._source.type,
                         portion_id=portion_id,
@@ -156,12 +155,7 @@ class PortionSearchView(APIView):
 
                     item = self.make_portion_hit(
                         common_metadata=common_metadata,
-                        # retriever-based scores are always [0, 1]
-                        score=(
-                            provision._score
-                            if self.engine.mode == "text"
-                            else 1 - provision._score
-                        ),
+                        score=provision._score,
                         text=text,
                         portion_type=PortionType.PROVISION,
                         portion_id=portion_id,
@@ -205,12 +199,7 @@ class PortionSearchView(APIView):
 
                     item = self.make_portion_hit(
                         common_metadata=common_metadata,
-                        # retriever-based scores are always [0, 1]
-                        score=(
-                            page._score
-                            if self.engine.mode == "text"
-                            else 1 - page._score
-                        ),
+                        score=page._score,
                         text=text,
                         portion_type=PortionType.PAGE,
                         portion_id=portion_id,
@@ -224,7 +213,8 @@ class PortionSearchView(APIView):
             portions, provisions_to_load, pages_to_load, summaries_to_load
         )
 
-        portions.sort(key=lambda x: x.score)
+        # sort by score, higher is better
+        portions.sort(key=lambda x: x.score, reverse=True)
 
         return portions
 
