@@ -90,7 +90,7 @@ class FlynoteTopicListView(ListView):
         all_enriched = self.enrich_topics(root.get_children())
 
         sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
-        context["popular_topics"] = sorted_by_count[:12]
+        context["popular_topics"] = sorted_by_count[:16]
 
         enriched_lookup = {item["topic"].pk: item for item in all_enriched}
         context["all_topics"] = [
