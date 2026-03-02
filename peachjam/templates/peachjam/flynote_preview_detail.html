@@ -20,5 +20,14 @@
         </div>
       </dd>
     </dl>
+  {% elif flynote_taxonomies or document.flynote %}
+    <dl class="document-metadata-list d-md-flex">
+      <dt>
+        {% trans 'Summary' %}
+      </dt>
+      <dd>
+        {% include 'peachjam/_flynote_display.html' %}
+      </dd>
+    </dl>
   {% endif %}
 {% endblock %}

@@ -110,6 +110,7 @@ class FlynoteParser:
         text = strip_tags(text).strip()
         text = re.sub(r"&nbsp;", " ", text)
         text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"^[\-\u2022\u2023\u25E6\u2043\s]+", "", text)
         text = text.strip().rstrip(".")
 
         if not text:
