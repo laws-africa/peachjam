@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import BEFORE_SAVE, LifecycleModelMixin, hook
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from docpipe.xmlutils import unwrap_element
@@ -48,6 +49,7 @@ from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
 
 log = logging.getLogger(__name__)
+UNSET = object()
 
 
 @dataclass
@@ -303,7 +305,7 @@ class Work(models.Model):
 class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
-        return super().get_queryset().defer("content_html", "toc_json", "metadata_json")
+        return super().get_queryset().defer("toc_json", "metadata_json")
 
     def get_qs_no_defer(self):
         return super().get_queryset()
@@ -414,7 +416,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
     citation = models.CharField(_("citation"), max_length=4096, null=True, blank=True)
-    content_html = models.TextField(_("content HTML"), null=True, blank=True)
     content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
     toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
     language = models.ForeignKey(
@@ -538,6 +539,8 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     # for caching parsed html
     _content_html_tree = None
+    _content_html = UNSET
+    _source_html = UNSET
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -556,6 +559,15 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def __str__(self):
         return f"{self.doc_type} - {self.title}"
+
+    def __init__(self, *args, **kwargs):
+        content_html = kwargs.pop("content_html", UNSET)
+        source_html = kwargs.pop("source_html", UNSET)
+        super().__init__(*args, **kwargs)
+        if content_html is not UNSET:
+            self.content_html = content_html
+        if source_html is not UNSET:
+            self.source_html = source_html
 
     def get_all_fields(self):
         return self._meta.get_fields()
@@ -581,6 +593,45 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             self.content_html = self.clean_content_html(content_html)
             self.update_toc_json_from_html()
             self._content_html_tree = None
+
+    def set_source_html(self, source_html):
+        self.source_html = self.clean_html_field(source_html)
+
+    def _document_content(self):
+        if hasattr(self, "_document_content_cache"):
+            return self._document_content_cache
+        if hasattr(self, "document_content"):
+            self._document_content_cache = self.document_content
+            return self._document_content_cache
+        if self.pk:
+            self._document_content_cache = DocumentContent.objects.filter(
+                document=self
+            ).first()
+            return self._document_content_cache
+        return None
+
+    @property
+    def content_html(self):
+        if self._content_html is not UNSET:
+            return self._content_html
+        doc_content = self._document_content()
+        return doc_content.content_html if doc_content else None
+
+    @content_html.setter
+    def content_html(self, value):
+        self._content_html = value
+        self._content_html_tree = None
+
+    @property
+    def source_html(self):
+        if self._source_html is not UNSET:
+            return self._source_html
+        doc_content = self._document_content()
+        return doc_content.source_html if doc_content else None
+
+    @source_html.setter
+    def source_html(self, value):
+        self._source_html = value
 
     @property
     def content_html_tree(self) -> html.HtmlElement:
@@ -734,7 +785,22 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         # in case full_clean() has not yet been called
         self.pre_save()
         super().save(*args, **kwargs)
+        self.save_document_content()
         self.post_save()
+
+    def save_document_content(self):
+        defaults = {}
+        if self._content_html is not UNSET:
+            defaults["content_html"] = self._content_html
+        if self._source_html is not UNSET:
+            defaults["source_html"] = self._source_html
+        if defaults:
+            self.document_content = DocumentContent.objects.update_or_create(
+                document=self, defaults=defaults
+            )[0]
+            self._document_content_cache = self.document_content
+            self._content_html = self.document_content.content_html
+            self._source_html = self.document_content.source_html
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,
@@ -800,7 +866,8 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            self.set_content_html(context.html_text)
+            self.set_source_html(context.html_text)
+            self.set_content_html(self.source_html)
 
             for img in self.images.all():
                 img.delete()
@@ -1045,7 +1112,7 @@ class AlternativeName(models.Model):
         return self.title
 
 
-class DocumentContent(models.Model):
+class DocumentContent(LifecycleModelMixin, models.Model):
     """Support model for storing the actual content of the document. This means it is never loaded in listing views
     which makes queries faster.
     """
@@ -1056,6 +1123,8 @@ class DocumentContent(models.Model):
         related_name="document_content",
         verbose_name=_("document"),
     )
+    source_html = models.TextField(_("Source HTML"), null=True, blank=True)
+    content_html = models.TextField(_("Content HTML"), null=True, blank=True)
     # the raw text of the document, extracted either from the source file or the HTML
     # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
     content_text = models.TextField(
@@ -1076,6 +1145,13 @@ class DocumentContent(models.Model):
             return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
                 self.content_xml
             )
+
+    @hook(BEFORE_SAVE, when="content_html", has_changed=True)
+    def trigger_extract_citations(self):
+        if self.document_id:
+            from peachjam.tasks import extract_citations
+
+            extract_citations(self.document_id)
 
     @classmethod
     def update_or_create_for_document(cls, document):
