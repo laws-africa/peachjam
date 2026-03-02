@@ -376,9 +376,14 @@ def update_flynote_taxonomy(judgment_id):
         return
 
     from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
+    from peachjam.models.settings import pj_settings
+    from peachjam.models.taxonomies import TaxonomyDocumentCount
 
     log.info(f"Updating flynote taxonomy for judgment {judgment_id}")
     FlynoteTaxonomyUpdater().update_for_judgment(judgment)
+
+    root = pj_settings().flynote_taxonomy_root
+    TaxonomyDocumentCount.refresh_for_taxonomy(root)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

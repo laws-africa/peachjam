@@ -7,7 +7,7 @@ from languages_plus.models import Language
 
 from peachjam.analysis.flynotes import FlynoteParser, FlynoteTaxonomyUpdater
 from peachjam.models import Court, Judgment, PeachJamSettings
-from peachjam.models.taxonomies import DocumentTopic, Taxonomy
+from peachjam.models.taxonomies import DocumentTopic, Taxonomy, TaxonomyDocumentCount
 
 
 class ParseFlynoteTextTest(TestCase):
@@ -278,6 +278,63 @@ class UpdateFlynoteTaxonomyForJudgmentTest(TestCase):
         )
 
 
+class TaxonomyDocumentCountTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.root = Taxonomy.add_root(name="Case Law Flynotes")
+        settings = PeachJamSettings.load()
+        settings.flynote_taxonomy_root = self.root
+        settings.save()
+
+        self.updater = FlynoteTaxonomyUpdater()
+
+    def test_refresh_populates_counts_for_top_level_topics(self):
+        judgment = Judgment.objects.create(
+            case_name="Count Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law \u2014 admissibility",
+        )
+        self.updater.update_for_judgment(judgment)
+        TaxonomyDocumentCount.refresh_for_taxonomy(self.root)
+
+        criminal = Taxonomy.objects.get(name="Criminal law")
+        count_row = TaxonomyDocumentCount.objects.get(taxonomy=criminal)
+        self.assertEqual(count_row.count, 1)
+
+    def test_ancestor_count_includes_descendant_documents(self):
+        judgment1 = Judgment.objects.create(
+            case_name="Case 1",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law \u2014 admissibility \u2014 trial within a trial",
+        )
+        judgment2 = Judgment.objects.create(
+            case_name="Case 2",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 2, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law \u2014 sentencing",
+        )
+        self.updater.update_for_judgment(judgment1)
+        self.updater.update_for_judgment(judgment2)
+        TaxonomyDocumentCount.refresh_for_taxonomy(self.root)
+
+        criminal = Taxonomy.objects.get(name="Criminal law")
+        count_row = TaxonomyDocumentCount.objects.get(taxonomy=criminal)
+        self.assertEqual(count_row.count, 2)
+
+    def test_refresh_with_none_root_skips(self):
+        TaxonomyDocumentCount.refresh_for_taxonomy(None)
+        self.assertEqual(TaxonomyDocumentCount.objects.count(), 0)
+
+
 class FlynoteTopicListViewTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -297,6 +354,28 @@ class FlynoteTopicListViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "peachjam/flynote_topic_list.html")
         self.assertIn("all_topics", response.context)
+
+    def test_uses_precalculated_counts(self):
+        updater = FlynoteTaxonomyUpdater()
+        judgment = Judgment.objects.create(
+            case_name="View Count Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Administrative law \u2014 judicial review",
+        )
+        updater.update_for_judgment(judgment)
+        TaxonomyDocumentCount.refresh_for_taxonomy(self.root)
+
+        response = self.client.get(reverse("flynote_topic_list"))
+        self.assertEqual(response.status_code, 200)
+        popular = response.context["popular_topics"]
+        admin_item = next(
+            (p for p in popular if p["topic"].name == "Administrative law"), None
+        )
+        self.assertIsNotNone(admin_item)
+        self.assertEqual(admin_item["count"], 1)
 
     def test_redirects_to_judgment_list_when_no_root(self):
         settings = PeachJamSettings.load()

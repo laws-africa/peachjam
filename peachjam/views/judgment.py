@@ -11,7 +11,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
 from peachjam.models.settings import pj_settings
-from peachjam.models.taxonomies import DocumentTopic, Taxonomy
+from peachjam.models.taxonomies import Taxonomy, TaxonomyDocumentCount
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
 from peachjam_subs.mixins import SubscriptionRequiredMixin
@@ -65,29 +65,27 @@ class FlynoteTopicListView(ListView):
             qs = qs.filter(name__icontains=q)
         return qs
 
-    def enrich_topics(self, topics):
-        """Add document counts and child names to a list of Taxonomy nodes."""
-        enriched = []
-        for child in topics:
-            descendant_ids = list(child.get_descendants().values_list("pk", flat=True))
-            descendant_ids.append(child.pk)
-            count = (
-                DocumentTopic.objects.filter(topic_id__in=descendant_ids)
-                .values("document_id")
-                .distinct()
-                .count()
-            )
-            child_names = list(child.get_children().values_list("name", flat=True)[:3])
-            enriched.append(
-                {"topic": child, "count": count, "child_names": child_names}
-            )
-        return enriched
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         root = pj_settings().flynote_taxonomy_root
+        children = root.get_children()
 
-        all_enriched = self.enrich_topics(root.get_children())
+        count_map = dict(
+            TaxonomyDocumentCount.objects.filter(taxonomy__in=children).values_list(
+                "taxonomy_id", "count"
+            )
+        )
+
+        all_enriched = []
+        for child in children:
+            child_names = list(child.get_children().values_list("name", flat=True)[:3])
+            all_enriched.append(
+                {
+                    "topic": child,
+                    "count": count_map.get(child.pk, 0),
+                    "child_names": child_names,
+                }
+            )
 
         sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
         context["popular_topics"] = sorted_by_count[:16]
