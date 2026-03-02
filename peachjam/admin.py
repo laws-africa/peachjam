@@ -372,7 +372,7 @@ class DocumentForm(forms.ModelForm):
     )
     edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput())
     edit_activity_stage = forms.CharField(widget=forms.HiddenInput())
-    content_html = forms.CharField(
+    source_html = forms.CharField(
         widget=CKEditorWidget(
             extra_plugins=["lawwidgets"],
             external_plugin_resources=[
@@ -422,7 +422,7 @@ class DocumentForm(forms.ModelForm):
             ]
 
         if self.instance and self.instance.content_html_is_akn:
-            self.fields["content_html"].widget.attrs["readonly"] = True
+            self.fields["source_html"].widget.attrs["readonly"] = True
 
         self.fields["edit_activity_start"].initial = timezone.now()
         self.fields["edit_activity_stage"].initial = (
@@ -438,17 +438,18 @@ class DocumentForm(forms.ModelForm):
 
     def full_clean(self):
         super().full_clean()
-        if "content_html" in self.changed_data:
-            # if the content_html has changed, set it and update related attributes
-            self.instance.set_content_html(self.instance.content_html)
+        if "source_html" in self.changed_data:
+            # source_html is the editable source and content_html is derived from it
+            self.instance.set_source_html(self.instance.source_html)
+            self.instance.set_content_html(self.instance.source_html)
             if self.instance.pk:
                 self.instance.update_text_content()
 
-    def clean_content_html(self):
+    def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML
         if self.instance.content_html_is_akn:
-            return self.instance.content_html
-        return self.cleaned_data["content_html"]
+            return self.instance.source_html
+        return self.cleaned_data["source_html"]
 
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])
@@ -689,7 +690,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             gettext_lazy("Content"),
             {
                 "fields": [
-                    "content_html",
+                    "source_html",
                 ]
             },
         ),
@@ -2130,12 +2131,7 @@ class ChatThreadInline(admin.TabularInline):
     show_change_link = True
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("core_document")
-            .defer("core_document__content_html")
-        )
+        return super().get_queryset(request).select_related("core_document")
 
     def has_add_permission(self, request, obj=None):
         return False
