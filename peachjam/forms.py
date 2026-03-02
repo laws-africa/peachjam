@@ -86,7 +86,6 @@ class NewDocumentFormMixin:
         super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
-            self.run_analysis()
 
     def process_upload_file(self, upload_file):
         # store the uploaded file
@@ -97,10 +96,6 @@ class NewDocumentFormMixin:
             filename=upload_file.name,
             mimetype=upload_file.content_type,
         ).save()
-
-        # extract content, if we can
-        if self.instance.extract_content_from_source_file():
-            self.instance.save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
