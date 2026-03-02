@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, re_path
 
 from peachjam.views import (
     CourtClassDetailView,
@@ -12,11 +12,16 @@ from peachjam.views import (
     CourtYearView,
     JudgmentListView,
 )
-from peachjam.views.judgment import FlynoteTopicListView
+from peachjam.views.judgment import FlynotePreviewDetailView, FlynoteTopicListView
 
 urlpatterns = [
     path("", JudgmentListView.as_view(), name="judgment_list"),
     path("topics/", FlynoteTopicListView.as_view(), name="flynote_topic_list"),
+    re_path(
+        r"^topics/preview/(?P<frbr_uri>akn/.*)$",
+        FlynotePreviewDetailView.as_view(),
+        name="flynote_preview_detail",
+    ),
     path(
         "court-class/<str:court_class>/",
         CourtClassDetailView.as_view(),

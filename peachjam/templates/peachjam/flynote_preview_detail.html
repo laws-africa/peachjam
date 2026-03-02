@@ -1,0 +1,24 @@
+{% extends 'peachjam/judgment_detail.html' %}
+{% load peachjam i18n %}
+{% block extra-metadata %}
+  {% if document.case_summary %}
+    <dl class="document-metadata-list d-md-flex">
+      <dt>
+        {% trans 'Summary' %}
+      </dt>
+      <dd>
+        {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
+        {% include 'peachjam/_flynote_display.html' %}
+        <details>
+          <summary class="mb-1" data-track-event="Document | Toggle summary">
+            {% trans 'Read full summary' %}
+          </summary>
+          <div class="judgment-full-summary"></div>
+        </details>
+        <div hx-trigger="load"
+             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}">
+        </div>
+      </dd>
+    </dl>
+  {% endif %}
+{% endblock %}

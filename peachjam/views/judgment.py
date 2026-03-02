@@ -146,6 +146,18 @@ class JudgmentDetailView(BaseDocumentDetailView):
         context["flynote_root"] = root
 
 
+class FlynotePreviewDetailView(JudgmentDetailView):
+    """Standalone preview page for testing clickable flynote taxonomies
+    without modifying the main judgment detail page."""
+
+    template_name = "peachjam/flynote_preview_detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.add_flynote_taxonomies(context)
+        return context
+
+
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 @method_decorator(never_cache, name="dispatch")
 class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
