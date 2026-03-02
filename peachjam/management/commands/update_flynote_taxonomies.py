@@ -54,7 +54,7 @@ class Command(BaseCommand):
         qs = (
             Judgment.objects.exclude(flynote__isnull=True)
             .exclude(flynote="")
-            .order_by("pk")
+            .order_by("-pk")
         )
         total = qs.count()
 

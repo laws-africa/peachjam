@@ -178,6 +178,8 @@ class FlynoteTaxonomyUpdater:
         """Find an existing child of *parent* whose normalised name matches,
         or create a new child node.
 
+        *parent* must be a ``Taxonomy`` instance (never ``None``).
+
         Matching is case- and whitespace-insensitive (via
         ``FlynoteParser.normalise_name``), so "Criminal Law" will match an
         existing "Criminal law" node rather than creating a duplicate.
@@ -193,21 +195,17 @@ class FlynoteTaxonomyUpdater:
         if not normalised:
             return None
 
-        children = parent.get_children() if parent else Taxonomy.get_root_nodes()
-        for child in children:
+        for child in parent.get_children():
             if FlynoteParser.normalise_name(child.name) == normalised:
                 return child
 
-        expected_slug = f"{parent.slug}-{normalised}" if parent else normalised
+        expected_slug = f"{parent.slug}-{normalised}"
         existing = Taxonomy.objects.filter(slug=expected_slug).first()
         if existing:
             return existing
 
         try:
-            if parent:
-                return parent.add_child(name=name)
-            else:
-                return Taxonomy.add_root(name=name)
+            return parent.add_child(name=name)
         except IntegrityError:
             return Taxonomy.objects.filter(slug=expected_slug).first()
 

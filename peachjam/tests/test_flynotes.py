@@ -309,8 +309,7 @@ class FlynoteTopicListViewTest(TestCase):
 
 
 class JudgmentDetailFlynoteContextTest(TestCase):
-    """Test the flynote context logic on JudgmentDetailView without rendering the full template
-    (avoids pre-existing NoReverseMatch for 'document_similar_docs')."""
+    """Test that flynote taxonomy nodes are excluded from the regular taxonomy queryset."""
 
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
@@ -333,35 +332,6 @@ class JudgmentDetailFlynoteContextTest(TestCase):
         )
         self.updater.update_for_judgment(self.judgment)
 
-    def test_add_flynote_taxonomies_builds_paths(self):
-        from peachjam.views.judgment import JudgmentDetailView
-
-        view = JudgmentDetailView()
-        view.object = self.judgment
-        context = {"taxonomies": {}}
-        view.add_flynote_taxonomies(context)
-
-        self.assertIn("flynote_taxonomies", context)
-        self.assertIn("flynote_root", context)
-        topics = context["flynote_taxonomies"]
-        self.assertEqual(topics.count(), 1)
-        topic = topics.first()
-        # Because path_name is generated automatically on save()
-        self.assertEqual(
-            topic.path_name, "Criminal law — admissibility — trial within a trial"
-        )
-
-    def test_flynote_taxonomies_have_urls(self):
-        from peachjam.views.judgment import JudgmentDetailView
-
-        view = JudgmentDetailView()
-        view.object = self.judgment
-        context = {"taxonomies": {}}
-        view.add_flynote_taxonomies(context)
-
-        for topic in context["flynote_taxonomies"]:
-            self.assertTrue(topic.get_absolute_url().startswith("/"))
-
     def test_flynote_topics_excluded_from_regular_taxonomies(self):
         from peachjam.views.judgment import JudgmentDetailView
 
@@ -375,20 +345,6 @@ class JudgmentDetailFlynoteContextTest(TestCase):
             self.assertNotEqual(taxonomy_node.name, "Criminal law")
             self.assertNotEqual(taxonomy_node.name, "admissibility")
             self.assertNotEqual(taxonomy_node.name, "trial within a trial")
-
-    def test_no_flynote_root_returns_no_context(self):
-        from peachjam.views.judgment import JudgmentDetailView
-
-        settings = PeachJamSettings.load()
-        settings.flynote_taxonomy_root = None
-        settings.save()
-
-        view = JudgmentDetailView()
-        view.object = self.judgment
-        context = {"taxonomies": {}}
-        view.add_flynote_taxonomies(context)
-
-        self.assertNotIn("flynote_taxonomies", context)
 
 
 class JudgmentListFlynoteTopicsTest(TestCase):
