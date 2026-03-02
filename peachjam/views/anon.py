@@ -24,6 +24,9 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
     replacements = ReplacementSerializer(many=True)
     activity_start = serializers.DateTimeField()
     activity_end = serializers.DateTimeField()
+    content_html = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True
+    )
 
     class Meta:
         model = Judgment
@@ -38,6 +41,8 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
+        if "content_html" in validated_data:
+            validated_data["source_html"] = validated_data["content_html"]
 
         # force anonymised flag
         validated_data["anonymised"] = True
