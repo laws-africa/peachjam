@@ -276,7 +276,7 @@ class PublicationFileInline(BaseAttachmentFileInline):
 
 class TopicChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        return f"{'-'*(obj.depth-1)} {obj.name}"
+        return f"{'-' * (obj.depth - 1)} {obj.name}"
 
 
 class TopicForm(forms.ModelForm):
@@ -407,13 +407,13 @@ class DocumentForm(forms.ModelForm):
             if site_settings.document_languages.exists():
                 self.fields["language"].queryset = site_settings.document_languages
         if "jurisdiction" in self.fields:
-            self.fields[
-                "jurisdiction"
-            ].initial = site_settings.default_document_jurisdiction
+            self.fields["jurisdiction"].initial = (
+                site_settings.default_document_jurisdiction
+            )
             if site_settings.document_jurisdictions.exists():
-                self.fields[
-                    "jurisdiction"
-                ].queryset = site_settings.document_jurisdictions
+                self.fields["jurisdiction"].queryset = (
+                    site_settings.document_jurisdictions
+                )
 
         if "frbr_uri_doctype" in self.fields:
             # customise doctype options for different document models
@@ -756,9 +756,9 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     def render_change_form(self, request, context, *args, **kwargs):
         # this is our only chance to inject a pre-filled field from the querystring for both add and change
         if request.GET.get("stage"):
-            context["adminform"].form.fields[
-                "edit_activity_stage"
-            ].initial = request.GET["stage"]
+            context["adminform"].form.fields["edit_activity_stage"].initial = (
+                request.GET["stage"]
+            )
         return super().render_change_form(request, context, *args, **kwargs)
 
     def save_model(self, request, obj, form, change):

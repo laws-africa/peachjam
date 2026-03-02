@@ -97,7 +97,7 @@ class JudgmentBulkImportTestCase(TestCase):
         )
         judgment = Judgment.objects.first()
         self.assertFalse(result.has_errors())
-        self.assertEquals(judgment.case_numbers.first().year, 2021)
+        self.assertEqual(judgment.case_numbers.first().year, 2021)
         self.assertEqual(judgment.created_by, user)
 
     @mock.patch("peachjam.resources.requests.get", side_effect=mocked_response)
