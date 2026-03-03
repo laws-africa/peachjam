@@ -69,7 +69,7 @@ class ContentHtmlIsAknMigrationTestCase(TestCase):
 
     def test_migration_backfills_documentcontent_content_html_is_akn(self):
         migration = import_module(
-            "peachjam.migrations.0276_migrate_content_html_is_akn_to_documentcontent"
+            "peachjam.migrations.0277_migrate_content_html_is_akn_to_documentcontent"
         )
 
         true_doc = self.make_doc("Migration True", is_akn=True)
