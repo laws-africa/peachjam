@@ -16,7 +16,7 @@ def forwards_func(apps, schema_editor):
     Judgment = apps.get_model("peachjam", "Judgment")
     judgments = Judgment.objects.filter(flynote__isnull=False, flynote__contains="<")
 
-    for judgment in judgments.all():
+    for judgment in judgments.only("flynote").all():
         cleaned = clean_flynote(judgment.flynote)
         if cleaned != judgment.flynote:
             judgment.flynote = cleaned
