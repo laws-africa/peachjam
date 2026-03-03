@@ -381,7 +381,7 @@ class DocumentForm(forms.ModelForm):
         ),
         required=False,
     )
-    flynote = forms.CharField(widget=CKEditorWidget(), required=False)
+    flynote = forms.CharField(widget=forms.Textarea(), required=False)
     case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
     order = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
