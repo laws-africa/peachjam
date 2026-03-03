@@ -1168,6 +1168,8 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         verbose_name = _("document content")
         verbose_name_plural = _("document contents")
 
+    _content_html_tree = None
+
     def akn_doc(self):
         """Get a cobalt StructureDocument instance for this document's XML, assuming it is AKN XML."""
         if self.content_xml:
@@ -1175,14 +1177,23 @@ class DocumentContent(LifecycleModelMixin, models.Model):
                 self.content_xml
             )
 
+    @property
+    def content_html_tree(self) -> html.HtmlElement:
+        """A parsed version of content HTML cached for this instance."""
+        if self._content_html_tree is None:
+            self._content_html_tree = parse_html_str(self.content_html)
+        return self._content_html_tree
+
     def set_source_html(self, source_html):
         self.source_html = self.document.clean_html_field(source_html)
 
     def set_content_html(self, content_html):
         if self.document.content_html_is_akn:
             self.content_html = content_html
+            self._content_html_tree = None
             return
         self.content_html = self.document.clean_content_html(content_html)
+        self._content_html_tree = None
 
     def apply_source_to_content(self):
         self.set_content_html(self.source_html)
@@ -1191,17 +1202,18 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         if self.document.content_html_is_akn:
             return
         if self.content_html:
-            root = parse_html_str(self.content_html)
+            root = self.content_html_tree
             toc_json = generate_toc_json_from_html(root)
             wrap_toc_entries_in_divs(root, toc_json)
             self.content_html = html.tostring(root, encoding="unicode")
+            self._content_html_tree = None
         else:
             toc_json = []
         self.document.toc_json = toc_json
 
     def update_content_text_from_html(self):
         if self.content_html:
-            root = parse_html_str(self.content_html)
+            root = self.content_html_tree
             self.content_text = " ".join(root.itertext())
         else:
             self.content_text = ""
@@ -1219,6 +1231,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
     def sync_html_derived_fields(self):
+        self._content_html_tree = None
         self.update_toc_json_from_content_html()
         self.update_content_text_from_html()
         self.sync_document_html_cache()
