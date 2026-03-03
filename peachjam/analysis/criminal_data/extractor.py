@@ -1,7 +1,5 @@
 import logging
 
-from django.db import transaction
-
 from peachjam.models import Judgment
 
 from .case_type import CaseTypeExtractor
@@ -21,7 +19,6 @@ class CriminalDataExtractor:
 
     def __init__(self, judgment: Judgment, force: bool = False):
         self.judgment = judgment
-        self.force = force
         self.stages = [
             OffenceMentionExtractor,
             OffenceMatcher,
@@ -32,29 +29,22 @@ class CriminalDataExtractor:
     def run(self):
         log.info(f"Starting criminal extraction for judgment {self.judgment.id}")
 
-        with transaction.atomic():
+        case_type = CaseTypeExtractor(self.judgment).run()
 
-            case_type = CaseTypeExtractor(self.judgment).run()
+        if case_type != "criminal":
+            log.info(
+                f"{self.judgment} is not criminal, skipping criminal data extraction."
+            )
+            return self.judgment
 
-            if case_type != "criminal" and not self.force:
-                log.info(
-                    f"{self.judgment} is not criminal, skipping criminal data extraction."
-                )
-                return self.judgment
+        for stage_cls in self.stages:
+            stage_name = stage_cls.__name__
+            log.info(f"Running stage: {stage_name}")
 
-            if self.force and case_type != "criminal":
-                log.info(
-                    f"Forcing criminal data extraction for {self.judgment}: case type: {case_type}"
-                )
+            stage = stage_cls(judgment=self.judgment)
+            stage.run()
 
-            for stage_cls in self.stages:
-                stage_name = stage_cls.__name__
-                log.info(f"Running stage: {stage_name}")
-
-                stage = stage_cls(judgment=self.judgment)
-                stage.run()
-
-                log.info(f"Completed stage: {stage_name}")
+            log.info(f"Completed stage: {stage_name}")
 
         log.info(f"Criminal data extraction complete for judgment {self.judgment.id}")
         return self.judgment
