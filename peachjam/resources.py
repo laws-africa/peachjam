@@ -336,6 +336,12 @@ class BaseDocumentResource(resources.ModelResource):
         clean_model_instances = True
 
     def before_import(self, dataset, **kwargs):
+        if "content_html" in dataset.headers and "source_html" not in dataset.headers:
+            logger.warning(
+                "Deprecated import header 'content_html' detected. Use 'source_html' instead; "
+                "'content_html' fallback will be removed in a future release."
+            )
+
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
         dataset.headers.append("expression_frbr_uri")
@@ -393,7 +399,8 @@ class BaseDocumentResource(resources.ModelResource):
         super().save_m2m(instance, row, **kwargs)
 
         if not kwargs.get("dry_run", ""):
-            source_html_changed = "source_html" in row or "content_html" in row
+            source_html = None
+            source_html_changed = False
 
             if (
                 instance.source_url
@@ -402,10 +409,19 @@ class BaseDocumentResource(resources.ModelResource):
             ):
                 self.attach_source_file(instance, instance.source_url)
 
+            if "source_html" in row:
+                source_html = row.get("source_html")
+                source_html_changed = True
+            elif "content_html" in row:
+                logger.warning(
+                    "Deprecated import column 'content_html' used for document '%s'; use 'source_html' instead.",
+                    instance.expression_frbr_uri or instance.pk,
+                )
+                source_html = row.get("content_html")
+                source_html_changed = True
+
             if source_html_changed:
-                source_html = row.get("source_html") or row.get("content_html")
-                instance.set_source_html(source_html)
-                instance.set_content_html(instance.source_html)
+                instance.set_content_html_from_source_html(source_html)
                 instance.save()
 
     def after_save_instance(self, instance, row, **kwargs):
