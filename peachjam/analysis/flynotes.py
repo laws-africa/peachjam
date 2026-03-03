@@ -1,4 +1,4 @@
-"""Flynote text parsing.
+"""Flynote text parsing and taxonomy synchronisation.
 
 Judgments in Southern/East African legal databases carry a short structured
 summary called a *flynote*.  Flynotes use dashes to express hierarchy and
@@ -7,17 +7,28 @@ semicolons to separate sibling branches::
     Criminal law — admissibility — trial within a trial;
     right to legal representation
 
-This module converts that notation into taxonomy paths.
+This module converts that notation into taxonomy paths and keeps the
+Django ``Taxonomy`` / ``DocumentTopic`` tables in sync with each judgment's
+flynote field.
 
-One class is exposed:
+Two classes are exposed:
 
-* **FlynoteParser** – stateless text-to-paths converter with HTML cleaning.
+* **FlynoteParser** – stateless text-to-paths converter.
+* **FlynoteTaxonomyUpdater** – creates/reuses ``Taxonomy`` nodes and links
+  them to a ``Judgment`` via ``DocumentTopic``.
 """
 
+import logging
 import re
 
+from django.db import IntegrityError, transaction
 from django.utils.html import strip_tags
 from django.utils.text import slugify
+
+from peachjam.models.settings import pj_settings
+from peachjam.models.taxonomies import DocumentTopic, Taxonomy, TaxonomyDocumentCount
+
+log = logging.getLogger(__name__)
 
 
 class FlynoteParser:
@@ -111,6 +122,7 @@ class FlynoteParser:
             has no dashes, or is plain prose.
         """
         text = self.clean(text)
+
         if not text:
             return []
 
@@ -153,3 +165,111 @@ class FlynoteParser:
             'right-to-fair-hearing'
         """
         return slugify(name)
+
+
+class FlynoteTaxonomyUpdater:
+    """Manages the taxonomy tree for flynote-derived topics.
+
+    Reads the configured ``flynote_taxonomy_root`` from
+    ``PeachJamSettings``, builds (or reuses) ``Taxonomy`` nodes for each
+    path segment, and creates ``DocumentTopic`` links so that the judgment
+    appears under the correct leaf topics.
+
+    Usage::
+
+        updater = FlynoteTaxonomyUpdater()
+        updater.update_for_judgment(judgment)
+    """
+
+    def __init__(self):
+        self.parser = FlynoteParser()
+
+    def get_or_create_node(self, parent, name):
+        """Find an existing child of *parent* whose normalised name matches,
+        or create a new child node.
+
+        *parent* must be a ``Taxonomy`` instance (never ``None``).
+
+        Matching is case- and whitespace-insensitive (via
+        ``FlynoteParser.normalise_name``), so "Criminal Law" will match an
+        existing "Criminal law" node rather than creating a duplicate.
+
+        If the slug already exists in the database (collision from a
+        different tree path producing the same slug), the existing node
+        is returned instead of raising an error.
+
+        Returns ``None`` if the name produces an empty slug (e.g.
+        punctuation-only strings).
+        """
+        normalised = FlynoteParser.normalise_name(name)
+        if not normalised:
+            return None
+
+        for child in parent.get_children():
+            if FlynoteParser.normalise_name(child.name) == normalised:
+                return child
+
+        expected_slug = f"{parent.slug}-{normalised}"
+        existing = Taxonomy.objects.filter(slug=expected_slug).first()
+        if existing:
+            return existing
+
+        try:
+            return parent.add_child(name=name)
+        except IntegrityError:
+            return Taxonomy.objects.filter(slug=expected_slug).first()
+
+    @transaction.atomic
+    def update_for_judgment(self, judgment):
+        """Parse a judgment's flynote and sync its taxonomy links.
+
+        1. Deletes all existing ``DocumentTopic`` links between the judgment
+           and any descendant of the flynote taxonomy root.
+        2. Parses ``judgment.flynote`` into hierarchical paths.
+        3. For each path, walks (or creates) ``Taxonomy`` nodes from root
+           to leaf.
+        4. Links the judgment to the leaf node of every path.
+
+        Runs inside a database transaction so that a failure for one
+        judgment does not leave the taxonomy tree in a corrupt state.
+
+        Does nothing if no ``flynote_taxonomy_root`` is configured or if
+        the flynote text cannot be parsed (plain prose, empty, etc.).
+        """
+        settings = pj_settings()
+        root = settings.flynote_taxonomy_root
+        if not root:
+            log.warning("No flynote taxonomy root configured, skipping.")
+            return
+
+        flynote_descendant_ids = set(
+            root.get_descendants().values_list("pk", flat=True)
+        )
+        DocumentTopic.objects.filter(
+            document=judgment, topic_id__in=flynote_descendant_ids
+        ).delete()
+
+        paths = self.parser.parse(judgment.flynote)
+        if not paths:
+            return
+
+        leaf_topics = set()
+        for path in paths:
+            current_parent = root
+            for name in path:
+                node = self.get_or_create_node(current_parent, name)
+                if node is None:
+                    break
+                current_parent = node
+            else:
+                leaf_topics.add(current_parent)
+
+        for topic in leaf_topics:
+            DocumentTopic.objects.get_or_create(document=judgment, topic=topic)
+
+        log.info(
+            f"Linked judgment {judgment.pk} to "
+            f"{len(leaf_topics)} flynote taxonomy topics."
+        )
+
+        TaxonomyDocumentCount.refresh_for_taxonomy(root)

@@ -366,6 +366,21 @@ def update_users_new_citation(citation_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+@transaction.atomic
+def update_flynote_taxonomy(judgment_id):
+    from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
+    from peachjam.models import Judgment
+
+    judgment = Judgment.objects.filter(pk=judgment_id).first()
+    if not judgment:
+        log.info(f"No judgment with id {judgment_id} exists, ignoring.")
+        return
+
+    log.info(f"Updating flynote taxonomy for judgment {judgment_id}")
+    FlynoteTaxonomyUpdater().update_for_judgment(judgment)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
 def update_users_new_relationship(relationship_id):
     # update users when a new relationship is created: amendment, repeal, commencement.
     from peachjam.models import Relationship, UserFollowing

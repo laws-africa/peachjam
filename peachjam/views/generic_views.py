@@ -445,9 +445,7 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = Taxonomy.get_tree_for_items(
-            Taxonomy.objects.filter(
-                pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
-            )
+            self.get_taxonomy_queryset()
         )
         context["labels"] = doc.labels.all()
 
@@ -576,6 +574,12 @@ class BaseDocumentDetailView(DetailView):
         )
         context["provision_enrichments_json"] = (
             unconstitutional_provisions_json + uncommenced_provisions_json
+        )
+
+    def get_taxonomy_queryset(self):
+        doc = self.object
+        return Taxonomy.objects.filter(
+            pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
         )
 
     def get_notices(self):

@@ -1,13 +1,17 @@
 from django.contrib import messages
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
+from peachjam.models.settings import pj_settings
+from peachjam.models.taxonomies import Taxonomy, TaxonomyDocumentCount
 from peachjam.registry import registry
 from peachjam.views.generic_views import BaseDocumentDetailView
 from peachjam_subs.mixins import SubscriptionRequiredMixin
@@ -41,6 +45,62 @@ class JudgmentListView(TemplateView):
         pass
 
 
+class FlynoteTopicListView(ListView):
+    model = Taxonomy
+    template_name = "peachjam/flynote_topic_list.html"
+    context_object_name = "all_topics"
+    paginate_by = 50
+
+    def get(self, request, *args, **kwargs):
+        root = pj_settings().flynote_taxonomy_root
+        if not root:
+            return redirect(reverse("judgment_list"))
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        root = pj_settings().flynote_taxonomy_root
+        qs = root.get_children().order_by("name")
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(name__icontains=q)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        root = pj_settings().flynote_taxonomy_root
+        children = root.get_children()
+
+        count_map = dict(
+            TaxonomyDocumentCount.objects.filter(taxonomy__in=children).values_list(
+                "taxonomy_id", "count"
+            )
+        )
+
+        all_enriched = []
+        for child in children:
+            child_names = list(child.get_children().values_list("name", flat=True)[:3])
+            all_enriched.append(
+                {
+                    "topic": child,
+                    "count": count_map.get(child.pk, 0),
+                    "child_names": child_names,
+                }
+            )
+
+        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
+        context["popular_topics"] = sorted_by_count[:16]
+
+        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
+        context["all_topics"] = [
+            enriched_lookup[topic.pk]
+            for topic in context["all_topics"]
+            if topic.pk in enriched_lookup
+        ]
+        context["total_judgment_count"] = sum(t["count"] for t in all_enriched)
+        context["root"] = root
+        return context
+
+
 @registry.register_doc_type("judgment")
 class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
@@ -70,6 +130,16 @@ class JudgmentDetailView(BaseDocumentDetailView):
             for bench in self.get_object().bench.select_related("judge").all()
         ]
         return context
+
+    def get_taxonomy_queryset(self):
+        qs = super().get_taxonomy_queryset()
+        settings = pj_settings()
+        root = settings.flynote_taxonomy_root
+        if root:
+            flynote_pks = set(root.get_descendants().values_list("pk", flat=True))
+            flynote_pks.add(root.pk)
+            qs = qs.exclude(pk__in=flynote_pks)
+        return qs
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
