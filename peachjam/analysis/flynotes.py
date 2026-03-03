@@ -49,13 +49,30 @@ class FlynoteParser:
     DASH_PATTERN = r"\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+"
     MAX_NAME_LENGTH = 255
 
+    @staticmethod
+    def clean(text):
+        """Clean HTML tags and normalise whitespace in a flynote.
+
+        Strips HTML tags and entities, collapses whitespace, removes leading
+        bullet characters, and strips trailing periods.
+        """
+        if not text:
+            return ""
+
+        text = strip_tags(text).strip()
+        text = re.sub(r"&nbsp;", " ", text)
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"^[\-\u2022\u2023\u25E6\u2043\s]+", "", text)
+        text = text.strip().rstrip(".")
+        return text
+
     def parse(self, text):
         """Parse flynote text into a list of taxonomy paths.
 
         The parsing works as follows:
 
         1. HTML tags and entities are stripped, whitespace is normalised,
-           and trailing periods are removed.
+           and trailing periods are removed (via ``clean``).
         2. If no dash characters (em-dash, en-dash, or spaced hyphen) are
            found, the text is treated as plain prose and an empty list is
            returned.
@@ -104,14 +121,7 @@ class FlynoteParser:
             root to leaf.  Returns an empty list if the text is empty,
             has no dashes, or is plain prose.
         """
-        if not text:
-            return []
-
-        text = strip_tags(text).strip()
-        text = re.sub(r"&nbsp;", " ", text)
-        text = re.sub(r"\s+", " ", text)
-        text = re.sub(r"^[\-\u2022\u2023\u25E6\u2043\s]+", "", text)
-        text = text.strip().rstrip(".")
+        text = self.clean(text)
 
         if not text:
             return []

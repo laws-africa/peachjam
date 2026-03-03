@@ -9,7 +9,6 @@ from django.db.utils import OperationalError
 from django.dispatch import receiver
 from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
 
-from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
 from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
@@ -369,6 +368,7 @@ def update_users_new_citation(citation_id):
 @background(queue="peachjam", remove_existing_tasks=True)
 @transaction.atomic
 def update_flynote_taxonomy(judgment_id):
+    from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
     from peachjam.models import Judgment
 
     judgment = Judgment.objects.filter(pk=judgment_id).first()
