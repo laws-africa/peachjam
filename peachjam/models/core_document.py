@@ -21,7 +21,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import BEFORE_SAVE, LifecycleModelMixin, hook
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from docpipe.xmlutils import unwrap_element
@@ -590,13 +590,34 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
     def set_content_html(self, content_html):
         """Update the content HTML for this document. This cleans the HTML and generates a TOC if necessary. This is
         the preferred way of setting the content_html field."""
-        if not self.content_html_is_akn:
-            self.content_html = self.clean_content_html(content_html)
-            self.update_toc_json_from_html()
-            self._content_html_tree = None
+        doc_content = self.get_or_create_document_content()
+        doc_content.set_content_html(content_html)
+        doc_content.update_toc_json_from_content_html()
+        self._content_html = doc_content.content_html
+        self._content_html_tree = None
 
     def set_source_html(self, source_html):
-        self.source_html = self.clean_html_field(source_html)
+        doc_content = self.get_or_create_document_content()
+        doc_content.set_source_html(source_html)
+        self._source_html = doc_content.source_html
+
+    def set_content_html_from_source_html(self, source_html):
+        doc_content = self.get_or_create_document_content()
+        doc_content.set_source_html(source_html)
+        doc_content.apply_source_to_content()
+        doc_content.update_toc_json_from_content_html()
+        self._source_html = doc_content.source_html
+        self._content_html = doc_content.content_html
+        self._content_html_tree = None
+
+    def get_or_create_document_content(self):
+        doc_content = self._document_content()
+        if doc_content:
+            return doc_content
+        doc_content = DocumentContent(document=self)
+        self._document_content_cache = doc_content
+        self.document_content = doc_content
+        return doc_content
 
     def _document_content(self):
         if hasattr(self, "_document_content_cache"):
@@ -646,7 +667,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             root = self.content_html_tree
             self.toc_json = generate_toc_json_from_html(root)
             wrap_toc_entries_in_divs(root, self.toc_json)
-            self.content_html = html.tostring(root, encoding="unicode")
+            doc_content = self.get_or_create_document_content()
+            doc_content.content_html = html.tostring(root, encoding="unicode")
+            doc_content.sync_document_html_cache()
         else:
             self.toc_json = []
 
@@ -851,7 +874,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 unwrap_element(a)
                 deleted = True
             if deleted:
-                self.content_html = html.tostring(root, encoding="unicode")
+                doc_content = self.get_or_create_document_content()
+                doc_content.content_html = html.tostring(root, encoding="unicode")
+                doc_content.sync_document_html_cache()
 
     def extract_content_from_source_file(self):
         """Re-extract content from DOCX source files, overwriting anything in content_html and associated images.
@@ -867,8 +892,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            self.set_source_html(context.html_text)
-            self.set_content_html(self.source_html)
+            self.set_content_html_from_source_html(context.html_text)
 
             for img in self.images.all():
                 img.delete()
@@ -1127,6 +1151,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         related_name="document_content",
         verbose_name=_("document"),
     )
+    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
     source_html = models.TextField(_("Source HTML"), null=True, blank=True)
     content_html = models.TextField(_("Content HTML"), null=True, blank=True)
     # the raw text of the document, extracted either from the source file or the HTML
@@ -1148,6 +1173,61 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         if self.content_xml:
             return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
                 self.content_xml
+            )
+
+    def set_source_html(self, source_html):
+        self.source_html = self.document.clean_html_field(source_html)
+
+    def set_content_html(self, content_html):
+        if self.document.content_html_is_akn:
+            self.content_html = content_html
+            return
+        self.content_html = self.document.clean_content_html(content_html)
+
+    def apply_source_to_content(self):
+        self.set_content_html(self.source_html)
+
+    def update_toc_json_from_content_html(self):
+        if self.document.content_html_is_akn:
+            return
+        if self.content_html:
+            root = parse_html_str(self.content_html)
+            toc_json = generate_toc_json_from_html(root)
+            wrap_toc_entries_in_divs(root, toc_json)
+            self.content_html = html.tostring(root, encoding="unicode")
+        else:
+            toc_json = []
+        self.document.toc_json = toc_json
+
+    def update_content_text_from_html(self):
+        if self.content_html:
+            root = parse_html_str(self.content_html)
+            self.content_text = " ".join(root.itertext())
+        else:
+            self.content_text = ""
+
+    def sync_document_html_cache(self):
+        self.document._document_content_cache = self
+        self.document._content_html = self.content_html
+        self.document._source_html = self.source_html
+        self.document._content_html_tree = None
+
+    @hook(BEFORE_SAVE, when="source_html", has_changed=True)
+    def sync_content_html_from_source_html(self):
+        if not self.document.content_html_is_akn:
+            self.apply_source_to_content()
+
+    @hook(BEFORE_SAVE, when="content_html", has_changed=True)
+    def sync_html_derived_fields(self):
+        self.update_toc_json_from_content_html()
+        self.update_content_text_from_html()
+        self.sync_document_html_cache()
+
+    @hook(AFTER_SAVE, when="content_html", has_changed=True)
+    def persist_document_toc_json(self):
+        if self.document_id:
+            CoreDocument.objects.filter(pk=self.document_id).update(
+                toc_json=self.document.toc_json
             )
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
