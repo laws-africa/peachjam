@@ -421,7 +421,16 @@ class DocumentForm(forms.ModelForm):
                 (x, x) for x in self.Meta.model.frbr_uri_doctypes
             ]
 
-        if self.instance and self.instance.content_html_is_akn:
+        doc_content = None
+        if self.instance and self.instance.pk:
+            try:
+                doc_content = self.instance.document_content
+            except self.instance.__class__.document_content.RelatedObjectDoesNotExist:
+                pass
+        if doc_content:
+            self.fields["source_html"].initial = doc_content.source_html
+
+        if doc_content and doc_content.content_html_is_akn:
             self.fields["source_html"].widget.attrs["readonly"] = True
 
         self.fields["edit_activity_start"].initial = timezone.now()
@@ -440,15 +449,25 @@ class DocumentForm(forms.ModelForm):
         super().full_clean()
         if "source_html" in self.changed_data:
             # source_html is the editable source and content_html is derived from it
-            self.instance.set_source_html(self.instance.source_html)
-            self.instance.set_content_html(self.instance.source_html)
+            doc_content = self.instance.get_or_create_document_content()
+            doc_content.set_source_html(self.cleaned_data["source_html"])
+            if not doc_content.content_html_is_akn:
+                doc_content.apply_source_to_content()
+                doc_content.update_toc_json_from_content_html()
+            doc_content.sync_document_html_cache()
             if self.instance.pk:
                 self.instance.update_text_content()
 
     def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML
-        if self.instance.content_html_is_akn:
-            return self.instance.source_html
+        doc_content = None
+        if self.instance and self.instance.pk:
+            try:
+                doc_content = self.instance.document_content
+            except self.instance.__class__.document_content.RelatedObjectDoesNotExist:
+                pass
+        if doc_content and doc_content.content_html_is_akn:
+            return doc_content.source_html
         return self.cleaned_data["source_html"]
 
     def create_topics(self, instance):
