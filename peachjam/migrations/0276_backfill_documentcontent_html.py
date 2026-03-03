@@ -32,7 +32,7 @@ def backfill_document_content_html(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0274_add_documentcontent_source_html_and_more"),
+        ("peachjam", "0275_add_documentcontent_source_html_and_more"),
     ]
 
     operations = [

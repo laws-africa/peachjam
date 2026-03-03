@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0273_peachjam_settings_helpscout_beacon_fix"),
+        ("peachjam", "0274_clean_flynotes"),
     ]
 
     operations = [
