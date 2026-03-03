@@ -9,6 +9,7 @@ from django.db.utils import OperationalError
 from django.dispatch import receiver
 from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
 
+from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
 from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
@@ -374,8 +375,6 @@ def update_flynote_taxonomy(judgment_id):
     if not judgment:
         log.info(f"No judgment with id {judgment_id} exists, ignoring.")
         return
-
-    from peachjam.analysis.flynotes import FlynoteTaxonomyUpdater
 
     log.info(f"Updating flynote taxonomy for judgment {judgment_id}")
     FlynoteTaxonomyUpdater().update_for_judgment(judgment)

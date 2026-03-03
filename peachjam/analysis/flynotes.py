@@ -26,7 +26,7 @@ from django.utils.html import strip_tags
 from django.utils.text import slugify
 
 from peachjam.models.settings import pj_settings
-from peachjam.models.taxonomies import DocumentTopic, Taxonomy
+from peachjam.models.taxonomies import DocumentTopic, Taxonomy, TaxonomyDocumentCount
 
 log = logging.getLogger(__name__)
 
@@ -261,7 +261,5 @@ class FlynoteTaxonomyUpdater:
             f"Linked judgment {judgment.pk} to "
             f"{len(leaf_topics)} flynote taxonomy topics."
         )
-
-        from peachjam.models.taxonomies import TaxonomyDocumentCount
 
         TaxonomyDocumentCount.refresh_for_taxonomy(root)
