@@ -460,7 +460,11 @@ class BaseDocumentDetailView(DetailView):
         self.add_provision_relationships(context)
         self.add_provision_enrichments(context)
 
-        if context["document"].content_html:
+        try:
+            doc_content = context["document"].document_content
+        except context["document"].__class__.document_content.RelatedObjectDoesNotExist:
+            doc_content = None
+        if doc_content and doc_content.content_html:
             context["display_type"] = (
                 "akn" if context["document"].content_html_is_akn else "html"
             )
@@ -627,7 +631,9 @@ class BaseDocumentDetailView(DetailView):
                     src = "media/" + src
                 img.attrib["src"] = document.expression_frbr_uri + "/" + src
 
-        document.content_html = html.tostring(root, encoding="unicode")
+        doc_content = document.get_or_create_document_content()
+        doc_content.content_html = html.tostring(root, encoding="unicode")
+        doc_content.sync_document_html_cache()
 
     def add_track_page_properties(self, context):
         context["track_page_properties"] = (
