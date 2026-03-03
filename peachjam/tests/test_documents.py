@@ -33,8 +33,9 @@ class CoreDocumentTestCase(TestCase):
         )
 
         # change the source and update
-        doc.content_html = "<p>test</p>"
-        doc._content_html_tree = None
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html = "<p>test</p>"
+        doc_content.sync_document_html_cache()
         doc.update_text_content()
         self.assertEqual("test", doc.get_content_as_text())
 
@@ -76,7 +77,8 @@ class CoreDocumentTestCase(TestCase):
         doc = CoreDocument.objects.get(
             expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
         )
-        doc.content_html = """<div>
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html = """<div>
 <p><a class="sdfootnotesym" href="#sdfootnote5anc" name="sdfootnote5sym">5</a> <em>Motata v Minister of Justice and
 Constitutional Development and Others </em><a href="/akn/za/judgment/zagpphc/2012/196" aria-expanded="false">[2012]
 ZAGPPHC 196</a> para 6.</p>
@@ -86,6 +88,7 @@ ZAGPPHC 196</a> para 6.</p>
 Constitutional Development and Another </em><a href="/akn/za/judgment/zagpphc/2016/1063" aria-expanded="false">[2016]
 ZAGPPHC 1063</a>.</p>
 </div>"""
+        doc_content.sync_document_html_cache()
         doc.content_html_is_akn = False
 
         frbr_uris = sorted(list(doc.get_cited_work_frbr_uris()))
