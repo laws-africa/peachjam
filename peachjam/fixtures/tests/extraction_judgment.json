@@ -1,0 +1,127 @@
+[
+  {
+    "model": "peachjam.work",
+    "pk": 990001,
+    "fields": {
+      "frbr_uri": "/akn/zm/act/code/1956/penal-code",
+      "frbr_uri_country": "zm",
+      "frbr_uri_locality": null,
+      "frbr_uri_place": "zm",
+      "frbr_uri_doctype": "act",
+      "frbr_uri_subtype": "code",
+      "frbr_uri_actor": null,
+      "frbr_uri_date": "1956",
+      "frbr_uri_number": "penal-code",
+      "title": "Penal Code",
+      "languages": "[\"eng\"]",
+      "partner": null,
+      "pagerank": 0.0,
+      "pagerank_normalized": 0.0,
+      "n_cited_works": 0,
+      "n_citing_works": 0,
+      "n_citing_works_normalized": 0.0,
+      "authority_score": 0.0
+    }
+  },
+  {
+    "model": "peachjam.offence",
+    "pk": 990101,
+    "fields": {
+      "work": 990001,
+      "provision_eid": "sec_294_2",
+      "code": "robbery-with-violence",
+      "title": "Robbery with violence",
+      "description": "Stealing accompanied by violence or threat of violence.",
+      "elements": ["theft", "violence"],
+      "penalty": "Imprisonment"
+    }
+  },
+  {
+    "model": "peachjam.offence",
+    "pk": 990102,
+    "fields": {
+      "work": 990001,
+      "provision_eid": "sec_301",
+      "code": "housebreaking",
+      "title": "Housebreaking",
+      "description": "Breaking and entering a dwelling unlawfully.",
+      "elements": ["breaking", "entry"],
+      "penalty": "Fine or imprisonment"
+    }
+  },
+  {
+    "model": "peachjam.work",
+    "pk": 990010,
+    "fields": {
+      "frbr_uri": "/akn/zm/judgment/eacj/2024/99",
+      "frbr_uri_country": "zm",
+      "frbr_uri_locality": null,
+      "frbr_uri_place": "zm",
+      "frbr_uri_doctype": "judgment",
+      "frbr_uri_subtype": null,
+      "frbr_uri_actor": "eacj",
+      "frbr_uri_date": "2024",
+      "frbr_uri_number": "99",
+      "title": "State v John Doe [2024] EACJ 99",
+      "languages": "[\"eng\"]",
+      "partner": null,
+      "pagerank": 0.0,
+      "pagerank_normalized": 0.0,
+      "n_cited_works": 0,
+      "n_citing_works": 0,
+      "n_citing_works_normalized": 0.0,
+      "authority_score": 0.0
+    }
+  },
+  {
+    "model": "peachjam.coredocument",
+    "pk": 990010,
+    "fields": {
+      "polymorphic_ctype": ["peachjam", "judgment"],
+      "work": 990010,
+      "doc_type": "judgment",
+      "title": "State v John Doe [2024] EACJ 99",
+      "date": "2024-06-10",
+      "source_url": null,
+      "citation": null,
+      "content_html": "<p>The Republic charged the accused, John Doe, with robbery with violence and housebreaking.</p><p>He was convicted on both counts.</p><p>For robbery with violence, he is sentenced to ten years imprisonment.</p><p>For housebreaking, he is sentenced to a fine of K5000.</p><p>The criminal matter was filed in 2021 under CRB 123/2021.</p>",
+      "content_html_is_akn": false,
+      "toc_json": null,
+      "language": "en",
+      "jurisdiction": "ZM",
+      "locality": null,
+      "nature": 3,
+      "work_frbr_uri": "/akn/zm/judgment/eacj/2024/99",
+      "frbr_uri_doctype": "judgment",
+      "frbr_uri_subtype": null,
+      "frbr_uri_actor": "eacj",
+      "frbr_uri_date": "2024",
+      "frbr_uri_number": "99",
+      "expression_frbr_uri": "/akn/zm/judgment/eacj/2024/99/eng@2024-06-10",
+      "created_at": "2024-06-10T10:00:00Z",
+      "updated_at": "2024-06-10T10:00:00Z",
+      "created_by": null,
+      "allow_robots": true,
+      "published": true,
+      "metadata_json": null,
+      "ingestor": null,
+      "restricted": false,
+      "labels": []
+    }
+  },
+  {
+    "model": "peachjam.judgment",
+    "pk": 990010,
+    "fields": {
+      "case_name": "State v John Doe",
+      "court": 1,
+      "flynote": "",
+      "case_summary": "",
+      "hearing_date": null,
+      "judges": [],
+      "mnc": "[2024] EACJ 99",
+      "serial_number": 99,
+      "serial_number_override": null
+    }
+  }
+]
