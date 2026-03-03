@@ -50,7 +50,6 @@ from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
 
 log = logging.getLogger(__name__)
-UNSET = object()
 
 
 @dataclass
@@ -540,8 +539,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     # for caching parsed html
     _content_html_tree = None
-    _content_html = UNSET
-    _source_html = UNSET
+    _document_content_dirty = False
 
     class Meta:
         ordering = ["doc_type", "title"]
@@ -560,15 +558,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def __str__(self):
         return f"{self.doc_type} - {self.title}"
-
-    def __init__(self, *args, **kwargs):
-        content_html = kwargs.pop("content_html", UNSET)
-        source_html = kwargs.pop("source_html", UNSET)
-        super().__init__(*args, **kwargs)
-        if content_html is not UNSET:
-            self.content_html = content_html
-        if source_html is not UNSET:
-            self.source_html = source_html
 
     def get_all_fields(self):
         return self._meta.get_fields()
@@ -593,21 +582,20 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         doc_content = self.get_or_create_document_content()
         doc_content.set_content_html(content_html)
         doc_content.update_toc_json_from_content_html()
-        self._content_html = doc_content.content_html
+        self._document_content_dirty = True
         self._content_html_tree = None
 
     def set_source_html(self, source_html):
         doc_content = self.get_or_create_document_content()
         doc_content.set_source_html(source_html)
-        self._source_html = doc_content.source_html
+        self._document_content_dirty = True
 
     def set_content_html_from_source_html(self, source_html):
         doc_content = self.get_or_create_document_content()
         doc_content.set_source_html(source_html)
         doc_content.apply_source_to_content()
         doc_content.update_toc_json_from_content_html()
-        self._source_html = doc_content.source_html
-        self._content_html = doc_content.content_html
+        self._document_content_dirty = True
         self._content_html_tree = None
 
     def get_or_create_document_content(self):
@@ -634,26 +622,26 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     @property
     def content_html(self):
-        if self._content_html is not UNSET:
-            return self._content_html
         doc_content = self._document_content()
         return doc_content.content_html if doc_content else None
 
     @content_html.setter
     def content_html(self, value):
-        self._content_html = value
+        doc_content = self.get_or_create_document_content()
+        doc_content.content_html = value
+        self._document_content_dirty = True
         self._content_html_tree = None
 
     @property
     def source_html(self):
-        if self._source_html is not UNSET:
-            return self._source_html
         doc_content = self._document_content()
         return doc_content.source_html if doc_content else None
 
     @source_html.setter
     def source_html(self, value):
-        self._source_html = value
+        doc_content = self.get_or_create_document_content()
+        doc_content.source_html = value
+        self._document_content_dirty = True
 
     @property
     def content_html_tree(self) -> html.HtmlElement:
@@ -669,6 +657,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             wrap_toc_entries_in_divs(root, self.toc_json)
             doc_content = self.get_or_create_document_content()
             doc_content.content_html = html.tostring(root, encoding="unicode")
+            self._document_content_dirty = True
             doc_content.sync_document_html_cache()
         else:
             self.toc_json = []
@@ -813,18 +802,18 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.post_save()
 
     def save_document_content(self):
-        defaults = {}
-        if self._content_html is not UNSET:
-            defaults["content_html"] = self._content_html
-        if self._source_html is not UNSET:
-            defaults["source_html"] = self._source_html
-        if defaults:
-            self.document_content = DocumentContent.objects.update_or_create(
-                document=self, defaults=defaults
-            )[0]
-            self._document_content_cache = self.document_content
-            self._content_html = self.document_content.content_html
-            self._source_html = self.document_content.source_html
+        doc_content = self._document_content()
+        if not doc_content:
+            return
+
+        if doc_content.pk and not self._document_content_dirty:
+            return
+
+        doc_content.document = self
+        doc_content.save()
+        self.document_content = doc_content
+        self._document_content_cache = doc_content
+        self._document_content_dirty = False
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,
@@ -876,6 +865,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             if deleted:
                 doc_content = self.get_or_create_document_content()
                 doc_content.content_html = html.tostring(root, encoding="unicode")
+                self._document_content_dirty = True
                 doc_content.sync_document_html_cache()
 
     def extract_content_from_source_file(self):
@@ -1220,8 +1210,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
 
     def sync_document_html_cache(self):
         self.document._document_content_cache = self
-        self.document._content_html = self.content_html
-        self.document._source_html = self.source_html
+        self.document._document_content_dirty = True
         self.document._content_html_tree = None
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)

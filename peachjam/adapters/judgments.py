@@ -137,7 +137,6 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "mnc": doc["mnc"],
             "date": doc["date"],
             "metadata_json": doc,
-            "content_html": self.get_content_html(doc),
             "content_html_is_akn": doc["content_html_is_akn"],
             "allow_robots": doc["allow_robots"],
             "published": doc["published"],
@@ -149,6 +148,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "flynote": doc["flynote"],
             "case_summary": doc["case_summary"],
         }
+        content_html = self.get_content_html(doc)
 
         document = Judgment(**data)
         document.work_frbr_uri = document.generate_work_frbr_uri()
@@ -162,6 +162,10 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         created_doc, new = Judgment.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults=data
         )
+        doc_content = created_doc.get_or_create_document_content()
+        if doc_content.content_html != content_html:
+            doc_content.content_html = content_html
+            doc_content.save()
 
         self.get_case_numbers(doc["case_numbers"], created_doc)
         self.get_judges(doc["judges"], created_doc)
