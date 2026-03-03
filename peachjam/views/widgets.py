@@ -94,14 +94,21 @@ class DocumentPopupView(DetailView):
         context = super().get_context_data(**kwargs)
 
         if self.portion:
-            if not (self.object.content_html and self.object.content_html_is_akn):
+            try:
+                doc_content = self.object.document_content
+            except self.object.__class__.document_content.RelatedObjectDoesNotExist:
+                doc_content = None
+            if not (
+                doc_content
+                and doc_content.content_html
+                and self.object.content_html_is_akn
+            ):
                 raise Http404()
 
             # try to find the portion within the object
             try:
-                elems = self.object.content_html_tree.xpath(
-                    f'//*[@id="{self.portion}"]'
-                )
+                root = lxml.html.fromstring(doc_content.content_html)
+                elems = root.xpath(f'//*[@id="{self.portion}"]')
                 if elems:
                     context["portion_html"] = lxml.html.tostring(
                         elems[0], encoding="unicode"

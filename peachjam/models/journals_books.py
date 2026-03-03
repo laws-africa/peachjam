@@ -27,11 +27,16 @@ class Book(CoreDocument):
 
     @hook(BEFORE_SAVE, when="content_markdown", has_changed=True)
     def convert_content_markdown(self):
-        self.set_source_html(markdownify(self.content_markdown or ""))
-        self.set_content_html(self.source_html)
+        self.set_content_html_from_source_html(markdownify(self.content_markdown or ""))
 
     def pre_save(self):
-        if self.content_markdown and not self.source_html:
+        doc_content = None
+        if self.pk:
+            try:
+                doc_content = self.document_content
+            except self.__class__.document_content.RelatedObjectDoesNotExist:
+                pass
+        if self.content_markdown and not (doc_content and doc_content.source_html):
             self.convert_content_markdown()
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "book"

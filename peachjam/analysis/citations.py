@@ -19,13 +19,21 @@ class CitationAnalyser:
     context_not_above = ["p", "section", "div", "td", "th"]
     context_length = 100
 
+    @staticmethod
+    def get_document_content(document):
+        try:
+            return document.document_content
+        except document.__class__.document_content.RelatedObjectDoesNotExist:
+            return None
+
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
         if document.content_html_is_akn:
             # don't markup AKN HTML
             return False
 
-        if document.content_html:
+        doc_content = self.get_document_content(document)
+        if doc_content and doc_content.content_html:
             # markup html
             return self.extract_citations_from_html(document)
         else:
@@ -33,17 +41,22 @@ class CitationAnalyser:
             return self.extract_citations_from_source_file(document)
 
     def extract_citations_from_html(self, document):
+        doc_content = self.get_document_content(document)
+        if not doc_content or not doc_content.content_html:
+            return False
+
         try:
-            html = document.content_html_tree
+            html = lxml.html.fromstring(doc_content.content_html)
         except ParseError as e:
             log.warning(
-                f"Could not parse HTML for document {document.expression_uri()}: {document.content_html}",
+                f"Could not parse HTML for document {document.expression_uri()}: {doc_content.content_html}",
                 exc_info=e,
             )
             return False
 
         html = self.markup_html_matches(document.expression_uri(), html)
-        document.content_html = lxml.html.tostring(html, encoding="unicode")
+        doc_content.content_html = lxml.html.tostring(html, encoding="unicode")
+        doc_content.sync_document_html_cache()
         return True
 
     def markup_html_matches(self, frbr_uri, html):
@@ -90,7 +103,8 @@ class CitationAnalyser:
         return citation
 
     def update_provision_citations(self, document):
-        if document.content_html:
+        doc_content = self.get_document_content(document)
+        if doc_content and doc_content.content_html:
             self.create_from_html(document)
         else:
             self.create_from_citation_links(document)
@@ -105,7 +119,8 @@ class CitationAnalyser:
         """Create citation contexts from an HTML document."""
         from peachjam.models import Work
 
-        if not document.content_html:
+        doc_content = self.get_document_content(document)
+        if not doc_content or not doc_content.content_html:
             log.warning("No HTML content to extract citation contexts from.")
             return
 
@@ -119,7 +134,8 @@ class CitationAnalyser:
             xpath = '//a[starts-with(@href, "/akn")]'
             attr = "href"
 
-        for a in document.content_html_tree.xpath(xpath):
+        root = lxml.html.fromstring(doc_content.content_html)
+        for a in root.xpath(xpath):
             try:
                 href = a.attrib[attr]
                 log.debug(f"Processing citation link to: {href}")
