@@ -294,10 +294,10 @@ class IndigoAdapter(RequestsAdapter):
             ),
             "language": language,
             "toc_json": toc_json,
-            "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
             "ingestor": self.ingestor,
         }
+        content_html = self.get_content_html(document)
 
         frbr_uri_data = {
             "jurisdiction": jurisdiction,
@@ -375,6 +375,10 @@ class IndigoAdapter(RequestsAdapter):
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
+        doc_content = created_doc.get_or_create_document_content()
+        if doc_content.content_html != content_html:
+            doc_content.content_html = content_html
+            doc_content.save()
 
         logger.info(f"New document: {new}")
 
