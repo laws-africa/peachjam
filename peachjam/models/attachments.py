@@ -162,12 +162,13 @@ class SourceFile(AttachmentAbstractModel):
 
     def set_download_filename(self):
         """For S3-backed storages, set the content-disposition header to a filename suitable for download. This is
-        only when serving the file from S3 or some other CDN backed by S3 (including CloudFront and CloudFlare)."""
+        only when serving the file from S3 or some other CDN backed by S3 (including CloudFront and CloudFlare).
+        """
         if not self.source_url and getattr(self.file.storage, "bucket_name", None):
             metadata = self.file.storage.get_object_parameters(self.file.name)
-            metadata[
-                "ContentDisposition"
-            ] = f'attachment; filename="{self.filename_for_download()}"'
+            metadata["ContentDisposition"] = (
+                f'attachment; filename="{self.filename_for_download()}"'
+            )
             src = {"Bucket": self.file.storage.bucket_name, "Key": self.file.name}
             self.file.storage.connection.meta.client.copy_object(
                 CopySource=src, MetadataDirective="REPLACE", **src, **metadata

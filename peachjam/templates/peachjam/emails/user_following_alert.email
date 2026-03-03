@@ -1,6 +1,12 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
 {% load i18n %}
-{% block subject %}{% trans "New documents for topics that you are following" %}{% endblock %}
+{% block subject %}
+  {% if followed_documents|length > 1 %}
+    {% blocktrans trimmed with title=followed_documents.0.followed_object %}New documents for {{ title }} and more{% endblocktrans %}
+  {% else %}
+    {% blocktrans trimmed with title=followed_documents.0.followed_object %}New documents for {{ title }}{% endblocktrans %}
+  {% endif %}
+{% endblock %}
 {% block alert-body %}
   <p>{% trans "We have found new documents for topics that you are following." %}</p>
   {% for item in followed_documents %}

@@ -10,7 +10,8 @@ def update_extracted_citations(
     work_obj, work_model, extracted_citation_model, citation_link_model
 ):
     """Returns a set of work_frbr_uris,
-    taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links."""
+    taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
+    """
     for doc in work_obj.documents.all():
 
         work_frbr_uris = set()

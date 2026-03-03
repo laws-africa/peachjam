@@ -727,7 +727,14 @@ class TestSearchEngine(TestCase):
                     "post_filter": {"terms": {"nature": ["Act"]}},
                     "query": {
                         "bool": {
-                            "filter": [{"term": {"is_most_recent": True}}],
+                            "filter": [
+                                {"term": {"is_most_recent": True}},
+                                {
+                                    "range": {
+                                        "created_at": {"gte": "2025-01-01T00:00:00Z"}
+                                    }
+                                },
+                            ],
                             "minimum_should_match": 1,
                             "should": [
                                 {
@@ -1366,7 +1373,7 @@ class TestSearchEngine(TestCase):
             json.dumps(d, indent=2, sort_keys=True),
         )
 
-    def test_portion_search(self):
+    def test_portion_search_hybrid(self):
         serializer = PortionSearchRequestSerializer(
             data={
                 "text": "example search",
@@ -1379,6 +1386,7 @@ class TestSearchEngine(TestCase):
         input_data = serializer.validated_data
 
         engine = PortionSearchEngine()
+        engine.mode = "hybrid"
         engine.query = input_data["text"]
         engine.knn_k = input_data["top_k"]
 

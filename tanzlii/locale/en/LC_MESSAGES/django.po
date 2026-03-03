@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-20 11:48+0200\n"
+"POT-Creation-Date: 2026-02-27 10:35+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: settings.py:27
+#: settings.py:30
 msgid "English"
 msgstr ""
 
-#: settings.py:28
+#: settings.py:31
 msgid "Swahili"
 msgstr ""
 
@@ -138,6 +138,10 @@ msgstr ""
 msgid "AU Charters and Treaties"
 msgstr ""
 
+#: templates/peachjam/_header.html:151
+msgid "Help"
+msgstr ""
+
 #: templates/peachjam/about.html:11
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
 msgstr ""
@@ -166,50 +170,50 @@ msgstr ""
 msgid "This section of TanzLII brings together practical tools, training materials, and simplified legal information to support the work of paralegals across Tanzania. It is designed to provide quick access to reliable, up-to-date resources for use in daily practice and professional development. The Paralegal Hub is developed as a kiSwahili-first resource and is available on your device as an off-line resource."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:14
+#: templates/tanzlii/paralegals.html:16
 msgid "The TanzLII Digital Paralegal Knowledge Hub is published under the authority of the Ministry of Constitutional and Legal Affairs of Tanzania (MoCLA), with support from ENABEL and the GIZ Tanzania and East Africa."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:17
+#: templates/tanzlii/paralegals.html:19
 msgid "Content is contributed by the MoCLA, the LHRC, Tanganyika Law Society, Tanzania School of Law, and other institutions in Tanzania."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:20
+#: templates/tanzlii/paralegals.html:22
 msgid "All materials are freely accessible, regularly updated, and tailored to the needs of the Tanzanian paralegal community."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:28
+#: templates/tanzlii/paralegals.html:39
 msgid "Research when you're offline"
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:30
+#: templates/tanzlii/paralegals.html:41
 msgid "Enable offline access for these resources. Once enabled, you can use these resources at any time without an internet connection."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:42
+#: templates/tanzlii/paralegals.html:53
 msgid "Resources"
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:52 templates/tanzlii/paralegals.html:55
+#: templates/tanzlii/paralegals.html:63 templates/tanzlii/paralegals.html:66
 msgid "Training manuals"
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:53
+#: templates/tanzlii/paralegals.html:64
 msgid "Paralegal manuals, updated for quick reference."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:68 templates/tanzlii/paralegals.html:73
+#: templates/tanzlii/paralegals.html:79 templates/tanzlii/paralegals.html:84
 msgid "Guides and best practices"
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:70
+#: templates/tanzlii/paralegals.html:81
 msgid "Step-by-step resources on common legal issues such as land rights, family law, and criminal justice."
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:86 templates/tanzlii/paralegals.html:89
+#: templates/tanzlii/paralegals.html:97 templates/tanzlii/paralegals.html:100
 msgid "Legal information"
 msgstr ""
 
-#: templates/tanzlii/paralegals.html:87
+#: templates/tanzlii/paralegals.html:98
 msgid "Curated summaries of laws and court decisions most relevant to paralegal work."
 msgstr ""

@@ -2,12 +2,14 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 
 from peachjam.models import CoreDocument
 from peachjam_search.models import SearchTrace
+from peachjam_search.views.api import PortionSearchView
 
 
 class SearchViewsTest(TestCase):
@@ -141,3 +143,144 @@ class SearchViewsTest(TestCase):
         response = self.client.get(reverse("search:search_documents") + "?search=test")
         self.assertEqual(response.status_code, 200)
         self.assertIn("max-age=900", response.headers["Cache-Control"])
+
+
+class PortionSearchViewTest(TestCase):
+    fixtures = ["tests/countries", "tests/users", "documents/sample_documents"]
+
+    def setUp(self):
+        self.request_factory = RequestFactory()
+
+    def test_build_portions_falls_back_to_provision_inner_hits(self):
+        expression_frbr_uri = "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
+        search = Search()
+        es_response = Response(
+            search,
+            {
+                "_shards": {"failed": 0},
+                "hits": {
+                    "hits": [
+                        {
+                            "_score": 0.2,
+                            "_source": {
+                                "expression_frbr_uri": expression_frbr_uri,
+                                "title": "Charter on Democracy, Elections and Governance",
+                                "repealed": False,
+                                "commenced": True,
+                                "principal": True,
+                            },
+                            "inner_hits": {
+                                "provisions": {
+                                    "hits": {
+                                        "hits": [
+                                            {
+                                                "_score": 0.25,
+                                                "_source": {
+                                                    "id": "sec_1",
+                                                    "title": "Section 1",
+                                                    "parent_ids": ["chp_1"],
+                                                    "parent_titles": ["Chapter 1"],
+                                                },
+                                                "highlight": {
+                                                    "provisions.body": [
+                                                        "Foo <mark>bar</mark> baz"
+                                                    ]
+                                                },
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                        }
+                    ]
+                },
+            },
+        )
+
+        view = PortionSearchView()
+        request = self.request_factory.get("/api/v1/search/portions")
+        view.request = request
+
+        with patch.object(view, "load_portion_details") as load_portion_details:
+            portions = view.build_portions(es_response, request)
+
+        self.assertEqual(1, len(portions))
+        portion = portions[0]
+        self.assertEqual("Foo bar baz", portion.content.text)
+        self.assertEqual("provision", portion.metadata.portion_type)
+        self.assertEqual("sec_1", portion.metadata.portion_id)
+        self.assertEqual("Section 1", portion.metadata.portion_title)
+        self.assertEqual(["chp_1"], portion.metadata.portion_parent_ids)
+        self.assertEqual(["Chapter 1"], portion.metadata.portion_parent_titles)
+        self.assertEqual(
+            request.build_absolute_uri(f"{expression_frbr_uri}#sec_1"),
+            portion.metadata.portion_public_url,
+        )
+
+        self.assertTrue(load_portion_details.called)
+        provisions_to_load = load_portion_details.call_args[0][1]
+        self.assertIn(
+            "sec_1", [pid for ids in provisions_to_load.values() for pid in ids]
+        )
+
+    def test_build_portions_falls_back_to_page_inner_hits(self):
+        expression_frbr_uri = "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
+        search = Search()
+        es_response = Response(
+            search,
+            {
+                "_shards": {"failed": 0},
+                "hits": {
+                    "hits": [
+                        {
+                            "_score": 0.2,
+                            "_source": {
+                                "expression_frbr_uri": expression_frbr_uri,
+                                "title": "Charter on Democracy, Elections and Governance",
+                                "repealed": False,
+                                "commenced": True,
+                                "principal": True,
+                            },
+                            "inner_hits": {
+                                "pages": {
+                                    "hits": {
+                                        "hits": [
+                                            {
+                                                "_score": 0.25,
+                                                "_source": {"page_num": 12},
+                                                "highlight": {
+                                                    "pages.body": [
+                                                        "Foo <mark>bar</mark> baz"
+                                                    ]
+                                                },
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                        }
+                    ]
+                },
+            },
+        )
+
+        view = PortionSearchView()
+        request = self.request_factory.get("/api/v1/search/portions")
+        view.request = request
+
+        with patch.object(view, "load_portion_details") as load_portion_details:
+            portions = view.build_portions(es_response, request)
+
+        self.assertEqual(1, len(portions))
+        portion = portions[0]
+        self.assertEqual("Foo bar baz", portion.content.text)
+        self.assertEqual("page", portion.metadata.portion_type)
+        self.assertEqual("12", portion.metadata.portion_id)
+        self.assertEqual(
+            request.build_absolute_uri(f"{expression_frbr_uri}#page-12"),
+            portion.metadata.portion_public_url,
+        )
+
+        self.assertTrue(load_portion_details.called)
+        pages_to_load = load_portion_details.call_args[0][2]
+        self.assertIn(12, [pid for ids in pages_to_load.values() for pid in ids])
