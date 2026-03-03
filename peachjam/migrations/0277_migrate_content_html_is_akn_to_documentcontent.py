@@ -28,7 +28,7 @@ def reverse_migrate_content_html_is_akn(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0275_backfill_documentcontent_html"),
+        ("peachjam", "0276_backfill_documentcontent_html"),
     ]
 
     operations = [
