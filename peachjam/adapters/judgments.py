@@ -137,7 +137,6 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "mnc": doc["mnc"],
             "date": doc["date"],
             "metadata_json": doc,
-            "content_html_is_akn": doc["content_html_is_akn"],
             "allow_robots": doc["allow_robots"],
             "published": doc["published"],
             "registry": registry,
@@ -163,8 +162,17 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             expression_frbr_uri=expression_frbr_uri, defaults=data
         )
         doc_content = created_doc.get_or_create_document_content()
+        should_save_content = False
+        if (
+            doc.get("content_html_is_akn") is not None
+            and doc_content.content_html_is_akn != doc["content_html_is_akn"]
+        ):
+            doc_content.content_html_is_akn = doc["content_html_is_akn"]
+            should_save_content = True
         if doc_content.content_html != content_html:
             doc_content.content_html = content_html
+            should_save_content = True
+        if should_save_content:
             doc_content.save()
 
         self.get_case_numbers(doc["case_numbers"], created_doc)

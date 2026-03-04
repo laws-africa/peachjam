@@ -286,14 +286,12 @@ class IndigoAdapter(RequestsAdapter):
             "title": title,
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
-            "content_html_is_akn": True,
             "source_url": (
                 document["publication_document"]["url"]
                 if document["publication_document"]
                 else None
             ),
             "language": language,
-            "toc_json": toc_json,
             "citation": document["numbered_title"],
             "ingestor": self.ingestor,
         }
@@ -376,8 +374,17 @@ class IndigoAdapter(RequestsAdapter):
             defaults={**field_data, **frbr_uri_data},
         )
         doc_content = created_doc.get_or_create_document_content()
+        should_save_content = False
         if doc_content.content_html != content_html:
             doc_content.content_html = content_html
+            should_save_content = True
+        if not doc_content.content_html_is_akn:
+            doc_content.content_html_is_akn = True
+            should_save_content = True
+        if doc_content.toc_json != toc_json:
+            doc_content.toc_json = toc_json
+            should_save_content = True
+        if should_save_content:
             doc_content.save()
 
         logger.info(f"New document: {new}")
