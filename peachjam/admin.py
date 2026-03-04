@@ -455,8 +455,6 @@ class DocumentForm(forms.ModelForm):
                 doc_content.apply_source_to_content()
                 doc_content.update_toc_json_from_content_html()
             doc_content.sync_document_html_cache()
-            if self.instance.pk:
-                self.instance.update_text_content()
 
     def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML
