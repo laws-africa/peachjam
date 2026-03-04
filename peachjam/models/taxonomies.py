@@ -44,6 +44,14 @@ class Taxonomy(MP_Node):
             "Allow users to make this taxonomy and its descendants available offline."
         ),
     )
+    hidden = models.BooleanField(
+        _("hidden"),
+        default=False,
+        null=False,
+        help_text=_(
+            "Hide this taxonomy and its descendants from public taxonomy listings."
+        ),
+    )
 
     class Meta:
         verbose_name = _("taxonomy")
@@ -195,7 +203,11 @@ class Taxonomy(MP_Node):
         node_ids = []
 
         def filter_nodes(node):
-            is_restricted = node.get("data", {}).get("restricted", False)
+            data = node.get("data", {})
+            is_hidden = data.get("hidden", False)
+            if is_hidden:
+                return None
+            is_restricted = data.get("restricted", False)
             is_allowed = node.get("id") in allowed_taxonomies
             if is_restricted and not is_allowed:
                 return None
