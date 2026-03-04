@@ -96,7 +96,7 @@ class DocumentPopupView(DetailView):
         if self.portion:
             try:
                 doc_content = self.object.document_content
-            except self.object.__class__.document_content.RelatedObjectDoesNotExist:
+            except DocumentContent.DoesNotExist:
                 doc_content = None
             if not (
                 doc_content
