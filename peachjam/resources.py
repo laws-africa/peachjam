@@ -16,6 +16,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Group
 from django.contrib.sites.models import Site
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files.base import File
 from django.forms import ValidationError
 from django.urls import reverse
@@ -283,7 +284,13 @@ class BaseDocumentResource(resources.ModelResource):
         widget=ForeignKeyWidget(Locality, field="code"),
     )
     source_url = fields.Field(attribute="source_url", widget=SourceFileWidget())
-    source_html = fields.Field(attribute="source_html", widget=CharWidget())
+    # This column is backed by DocumentContent.source_html, not CoreDocument.
+    source_html = fields.Field(
+        attribute="document_content__source_html",
+        column_name="source_html",
+        readonly=True,
+        widget=CharWidget(),
+    )
     taxonomies = ManyToManyField(
         attribute="taxonomies",
         widget=TaxonomiesWidget(DocumentTopic, separator="|", field="topic"),
@@ -301,7 +308,7 @@ class BaseDocumentResource(resources.ModelResource):
     def get_queryset(self):
         return (
             self._meta.model.objects.get_qs_no_defer()
-            .select_related("jurisdiction", "locality", "language")
+            .select_related("jurisdiction", "locality", "language", "document_content")
             .prefetch_related("custom_properties", "taxonomies")
         )
 
@@ -322,6 +329,12 @@ class BaseDocumentResource(resources.ModelResource):
                 for prop in obj.custom_properties.all()
             )
 
+    def dehydrate_source_html(self, obj):
+        try:
+            return obj.document_content.source_html
+        except ObjectDoesNotExist:
+            return ""
+
     class Meta:
         exclude = (
             "updated_at",
@@ -330,7 +343,6 @@ class BaseDocumentResource(resources.ModelResource):
             "doc_type",
             "polymorphic_ctype",
             "work",
-            "toc_json",
         )
         import_id_fields = ("expression_frbr_uri",)
         clean_model_instances = True

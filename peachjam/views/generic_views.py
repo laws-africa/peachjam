@@ -460,13 +460,10 @@ class BaseDocumentDetailView(DetailView):
         self.add_provision_relationships(context)
         self.add_provision_enrichments(context)
 
-        try:
-            doc_content = context["document"].document_content
-        except context["document"].__class__.document_content.RelatedObjectDoesNotExist:
-            doc_content = None
+        doc_content = context["document"].get_or_create_document_content()
         if doc_content and doc_content.content_html:
             context["display_type"] = (
-                "akn" if context["document"].content_html_is_akn else "html"
+                "akn" if doc_content.content_html_is_akn else "html"
             )
             self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
@@ -618,7 +615,12 @@ class BaseDocumentDetailView(DetailView):
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""
-        root = document.content_html_tree
+        doc_content = document.get_or_create_document_content()
+
+        if not doc_content.content_html:
+            return
+
+        root = doc_content.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
             # images should load lazily, otherwise they block page load

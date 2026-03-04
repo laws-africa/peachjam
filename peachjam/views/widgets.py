@@ -11,7 +11,7 @@ from django.utils.translation import get_language
 from django.views.generic import DetailView
 
 from peachjam.helpers import add_slash
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, DocumentContent
 from peachjam.resolver import RedirectResolver, resolver
 
 
@@ -101,7 +101,7 @@ class DocumentPopupView(DetailView):
             if not (
                 doc_content
                 and doc_content.content_html
-                and self.object.content_html_is_akn
+                and doc_content.content_html_is_akn
             ):
                 raise Http404()
 

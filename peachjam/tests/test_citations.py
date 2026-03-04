@@ -105,8 +105,9 @@ class CitationAnalyserTestCase(TestCase):
         )
 
     def test_delete_citations(self):
-        doc = CoreDocument(content_html_is_akn=False)
+        doc = CoreDocument()
         doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = False
         doc_content.content_html = """
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
@@ -125,8 +126,9 @@ class CitationAnalyserTestCase(TestCase):
         )
 
     def test_delete_citations_should_not_change_akn(self):
-        doc = CoreDocument(content_html_is_akn=True)
+        doc = CoreDocument()
         doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
         doc_content.content_html = """
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>

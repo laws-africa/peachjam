@@ -89,7 +89,7 @@ Constitutional Development and Another </em><a href="/akn/za/judgment/zagpphc/20
 ZAGPPHC 1063</a>.</p>
 </div>"""
         doc_content.sync_document_html_cache()
-        doc.content_html_is_akn = False
+        doc_content.content_html_is_akn = False
 
         frbr_uris = sorted(list(doc.get_cited_work_frbr_uris()))
         self.assertEqual(

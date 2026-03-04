@@ -307,8 +307,11 @@ class SearchableDocument(Document):
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
-        if instance.content_html and (
-            not instance.content_html_is_akn or not instance.toc_json
+        doc_content = instance.get_or_create_document_content()
+        if (
+            doc_content
+            and doc_content.content_html
+            and (not doc_content.content_html_is_akn or not doc_content.toc_json)
         ):
             text = instance.get_content_as_text()
             if text and len(text) > self.MAX_TEXT_LENGTH:
@@ -357,7 +360,8 @@ class SearchableDocument(Document):
 
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
-        if not instance.content_html:
+        doc_content = instance.get_or_create_document_content()
+        if not doc_content or not doc_content.content_html:
             text = instance.get_content_as_text()
             if text and len(text) > self.MAX_TEXT_LENGTH:
                 log.warning(
@@ -409,12 +413,18 @@ class SearchableDocument(Document):
                 for child in item["children"] or []:
                     prepare_provision(child, parents)
 
-        if instance.content_html and instance.content_html_is_akn and instance.toc_json:
+        doc_content = instance.get_or_create_document_content()
+        if (
+            doc_content
+            and doc_content.content_html
+            and doc_content.content_html_is_akn
+            and doc_content.toc_json
+        ):
             # index each provision separately
             provisions = []
-            root = instance.content_html_tree
+            root = doc_content.content_html_tree
             strip_remarks(root)
-            for item in instance.toc_json:
+            for item in doc_content.toc_json:
                 prepare_provision(item, [])
 
             return provisions

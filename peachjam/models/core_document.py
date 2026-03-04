@@ -305,7 +305,7 @@ class Work(models.Model):
 class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
-        return super().get_queryset().defer("toc_json", "metadata_json")
+        return super().get_queryset().defer("metadata_json")
 
     def get_qs_no_defer(self):
         return super().get_queryset()
@@ -416,6 +416,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
     citation = models.CharField(_("citation"), max_length=4096, null=True, blank=True)
+    # Legacy DB column retained during transition; DocumentContent is the authoritative source.
     content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
     toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
     language = models.ForeignKey(
@@ -537,8 +538,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         help_text=_("Restrict access to this document to selected groups."),
     )
 
-    # for caching parsed html
-    _content_html_tree = None
     _document_content_dirty = False
 
     class Meta:
@@ -583,7 +582,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         doc_content.set_content_html(content_html)
         doc_content.update_toc_json_from_content_html()
         self._document_content_dirty = True
-        self._content_html_tree = None
 
     def set_source_html(self, source_html):
         doc_content = self.get_or_create_document_content()
@@ -596,71 +594,38 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         doc_content.apply_source_to_content()
         doc_content.update_toc_json_from_content_html()
         self._document_content_dirty = True
-        self._content_html_tree = None
 
     def get_or_create_document_content(self):
-        doc_content = self._document_content()
-        if doc_content:
-            return doc_content
-        doc_content = DocumentContent(document=self)
-        self._document_content_cache = doc_content
-        self.document_content = doc_content
-        return doc_content
-
-    def _document_content(self):
         if hasattr(self, "_document_content_cache"):
             return self._document_content_cache
-        if hasattr(self, "document_content"):
-            self._document_content_cache = self.document_content
-            return self._document_content_cache
-        if self.pk:
-            self._document_content_cache = DocumentContent.objects.filter(
-                document=self
-            ).first()
-            return self._document_content_cache
-        return None
 
-    @property
-    def content_html(self):
-        doc_content = self._document_content()
-        return doc_content.content_html if doc_content else None
+        try:
+            doc_content = self.document_content
+        except DocumentContent.DoesNotExist:
+            if self.pk:
+                doc_content, _ = DocumentContent.objects.get_or_create(document=self)
+            else:
+                doc_content = DocumentContent(document=self)
 
-    @content_html.setter
-    def content_html(self, value):
-        doc_content = self.get_or_create_document_content()
-        doc_content.content_html = value
-        self._document_content_dirty = True
-        self._content_html_tree = None
+            # Keep relation/cache consistent for callers that mutate content before save.
+            self.document_content = doc_content
 
-    @property
-    def source_html(self):
-        doc_content = self._document_content()
-        return doc_content.source_html if doc_content else None
-
-    @source_html.setter
-    def source_html(self, value):
-        doc_content = self.get_or_create_document_content()
-        doc_content.source_html = value
-        self._document_content_dirty = True
-
-    @property
-    def content_html_tree(self) -> html.HtmlElement:
-        """A parsed version of the content HTML. This is cached for performance."""
-        if self._content_html_tree is None:
-            self._content_html_tree = parse_html_str(self.content_html)
-        return self._content_html_tree
+        self._document_content_cache = doc_content
+        return doc_content
 
     def update_toc_json_from_html(self):
-        if self.content_html:
-            root = self.content_html_tree
-            self.toc_json = generate_toc_json_from_html(root)
-            wrap_toc_entries_in_divs(root, self.toc_json)
-            doc_content = self.get_or_create_document_content()
+        doc_content = self.get_or_create_document_content()
+
+        if doc_content.content_html:
+            root = doc_content.content_html_tree
+            toc_json = generate_toc_json_from_html(root)
+            wrap_toc_entries_in_divs(root, toc_json)
             doc_content.content_html = html.tostring(root, encoding="unicode")
-            self._document_content_dirty = True
-            doc_content.sync_document_html_cache()
+            doc_content.toc_json = toc_json
         else:
-            self.toc_json = []
+            doc_content.toc_json = []
+
+        self._document_content_dirty = True
 
     def clean_html_field(self, html):
         if not html:
@@ -802,9 +767,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.post_save()
 
     def save_document_content(self):
-        doc_content = self._document_content()
-        if not doc_content:
-            return
+        doc_content = self.get_or_create_document_content()
 
         if doc_content.pk and not self._document_content_dirty:
             return
@@ -855,15 +818,16 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
         CitationLink.objects.filter(document=self).delete()
 
-        if self.content_html and not self.content_html_is_akn:
+        doc_content = self.get_or_create_document_content()
+
+        if doc_content.content_html and not doc_content.content_html_is_akn:
             # delete existing citations in html
-            root = self.content_html_tree
+            root = doc_content.content_html_tree
             deleted = False
             for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
                 unwrap_element(a)
                 deleted = True
             if deleted:
-                doc_content = self.get_or_create_document_content()
                 doc_content.content_html = html.tostring(root, encoding="unicode")
                 self._document_content_dirty = True
                 doc_content.sync_document_html_cache()
@@ -874,8 +838,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         This requires that the document has already been saved, in order to associate image attachments.
         """
         result = False
+        doc_content = self.get_or_create_document_content()
         if (
-            not self.content_html_is_akn
+            not doc_content.content_html_is_akn
             and hasattr(self, "source_file")
             and self.source_file.mimetype in DOC_MIMETYPES
         ):
@@ -903,11 +868,13 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def prepare_content_html_for_pdf(self):
         """Prepare the content HTML for PDF generation by inlining images as base64."""
-        if not self.content_html:
+        doc_content = self.get_or_create_document_content()
+
+        if not doc_content.content_html:
             return None
 
         # Parse the HTML content
-        root = parse_html_str(self.content_html)
+        root = parse_html_str(doc_content.content_html)
         images = {i.filename: i for i in self.images.all()}
 
         # inline images
@@ -961,12 +928,14 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         )
 
     def get_provision_by_eid(self, eid):
-        if not self.content_html or not self.content_html_is_akn:
+        doc_content = self.get_or_create_document_content()
+
+        if not doc_content.content_html or not doc_content.content_html_is_akn:
             return None
 
         # Find element with data-eId
         xpath = f"//*[@data-eid='{eid}']"
-        elements = self.content_html_tree.xpath(xpath)
+        elements = doc_content.content_html_tree.xpath(xpath)
 
         if elements:
             return etree.tostring(elements[0], encoding="unicode", method="html")
@@ -974,10 +943,12 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def get_content_as_text(self):
         """Get the document content as plain text."""
-        doc_content = self._document_content()
-        if not doc_content or doc_content.content_text is None:
+        doc_content = self.get_or_create_document_content()
+
+        if doc_content.content_text is None:
             self.update_text_content()
-            doc_content = self._document_content()
+            doc_content = self.get_or_create_document_content()
+
         return doc_content.content_text if doc_content else None
 
     def update_text_content(self):
@@ -988,10 +959,11 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
         work_frbr_uris = {}
+        doc_content = self.get_or_create_document_content()
 
-        if self.content_html:
-            root = html.fromstring(self.content_html)
-            if self.content_html_is_akn:
+        if doc_content and doc_content.content_html:
+            root = html.fromstring(doc_content.content_html)
+            if doc_content.content_html_is_akn:
                 # get AKN links in the document content, except those in remarks or in the generated
                 # coverpage (which is outside the akn-akomaNtoso root)
                 xpath = (
@@ -1047,7 +1019,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         """Generate a friendly title for the provision with the given eid. This assumes the document is AKN HTML
         and has a TOC JSON.
         """
-        if self.toc_json:
+        doc_content = self.get_or_create_document_content()
+        toc_json = doc_content.toc_json if doc_content else None
+        if toc_json:
 
             def find_toc_item(toc, eid):
                 for item in toc:
@@ -1065,14 +1039,18 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                         return item
 
             # walk down the TOC and try to find the item, or the closest entry to it
-            item = find_toc_item(self.toc_json, provision_eid)
+            item = find_toc_item(toc_json, provision_eid)
             if item:
                 if item["id"] == provision_eid:
                     return item["title"]
 
                 # we didn't find it, so join up the gap between the item we did find and the real provision
-                if self.content_html and self.content_html_is_akn:
-                    root = self.content_html_tree
+                if (
+                    doc_content
+                    and doc_content.content_html
+                    and doc_content.content_html_is_akn
+                ):
+                    root = doc_content.content_html_tree
                     element = root.get_element_by_id(provision_eid, None)
                     nums = []
 
@@ -1144,6 +1122,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
     content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
     source_html = models.TextField(_("Source HTML"), null=True, blank=True)
     content_html = models.TextField(_("Content HTML"), null=True, blank=True)
+    toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
     # the raw text of the document, extracted either from the source file or the HTML
     # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
     content_text = models.TextField(
@@ -1178,7 +1157,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         self.source_html = self.document.clean_html_field(source_html)
 
     def set_content_html(self, content_html):
-        if self.document.content_html_is_akn:
+        if self.content_html_is_akn:
             self.content_html = content_html
             self._content_html_tree = None
             return
@@ -1189,7 +1168,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         self.set_content_html(self.source_html)
 
     def update_toc_json_from_content_html(self):
-        if self.document.content_html_is_akn:
+        if self.content_html_is_akn:
             return
         if self.content_html:
             root = self.content_html_tree
@@ -1199,7 +1178,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
             self._content_html_tree = None
         else:
             toc_json = []
-        self.document.toc_json = toc_json
+        self.toc_json = toc_json
 
     def update_content_text_from_html(self):
         if self.content_html:
@@ -1211,11 +1190,10 @@ class DocumentContent(LifecycleModelMixin, models.Model):
     def sync_document_html_cache(self):
         self.document._document_content_cache = self
         self.document._document_content_dirty = True
-        self.document._content_html_tree = None
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
-        if not self.document.content_html_is_akn:
+        if not self.content_html_is_akn:
             self.apply_source_to_content()
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
@@ -1225,14 +1203,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         self.update_content_text_from_html()
         self.sync_document_html_cache()
 
-    @hook(AFTER_SAVE, when="content_html", has_changed=True)
-    def persist_document_toc_json(self):
-        if self.document_id:
-            CoreDocument.objects.filter(pk=self.document_id).update(
-                toc_json=self.document.toc_json
-            )
-
-    @hook(BEFORE_SAVE, when="content_html", has_changed=True)
+    @hook(AFTER_SAVE, when="source_html", has_changed=True)
     def trigger_extract_citations(self):
         if self.document_id:
             from peachjam.tasks import extract_citations
@@ -1243,9 +1214,10 @@ class DocumentContent(LifecycleModelMixin, models.Model):
     def update_or_create_for_document(cls, document):
         """Extract the content from a document, whatever its format is."""
         text = ""
-        if document.content_html:
+        doc_content = document.get_or_create_document_content()
+        if doc_content and doc_content.content_html:
             # it's html, grab the text from the html tree
-            root = document.content_html_tree
+            root = doc_content.content_html_tree
             text = " ".join(root.itertext())
 
         elif hasattr(document, "source_file"):
