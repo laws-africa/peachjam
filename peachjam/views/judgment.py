@@ -152,6 +152,10 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
 
         enriched_lookup = {item["topic"].pk: item for item in all_enriched}
 
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            children = children.filter(name__icontains=q)
+
         all_topics = [
             enriched_lookup[topic.pk]
             for topic in children
