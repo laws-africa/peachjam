@@ -14,7 +14,7 @@
           <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'flynote_topic_list' %}">{% trans 'Flynotes' %}</a>
+          <a href="{% url 'flynote_topic_list' %}">{% trans 'Explore by topic' %}</a>
         </li>
         {% for ancestor in ancestors %}
           {% if ancestor.pk != root.pk %}
