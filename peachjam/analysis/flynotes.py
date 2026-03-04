@@ -220,7 +220,7 @@ class FlynoteTaxonomyUpdater:
             return Taxonomy.objects.filter(slug=expected_slug).first()
 
     @transaction.atomic
-    def update_for_judgment(self, judgment):
+    def update_for_judgment(self, judgment, refresh_counts=True):
         """Parse a judgment's flynote and sync its taxonomy links.
 
         1. Deletes all existing ``DocumentTopic`` links between the judgment
@@ -235,6 +235,12 @@ class FlynoteTaxonomyUpdater:
 
         Does nothing if no ``flynote_taxonomy_root`` is configured or if
         the flynote text cannot be parsed (plain prose, empty, etc.).
+
+        Args:
+            judgment: The judgment instance to process.
+            refresh_counts: If True (default), refresh the taxonomy document
+                counts after updating. Set to False when running in batch
+                mode to avoid repeated expensive count recalculations.
         """
         settings = pj_settings()
         root = settings.flynote_taxonomy_root
@@ -272,4 +278,5 @@ class FlynoteTaxonomyUpdater:
             f"{len(leaf_topics)} flynote taxonomy topics."
         )
 
-        TaxonomyDocumentCount.refresh_for_taxonomy(root)
+        if refresh_counts:
+            TaxonomyDocumentCount.refresh_for_taxonomy(root)

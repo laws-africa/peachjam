@@ -1,6 +1,8 @@
 import datetime
+from io import StringIO
 
 from countries_plus.models import Country
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from languages_plus.models import Language
@@ -442,3 +444,116 @@ class JudgmentListFlynoteTopicsTest(TestCase):
 
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+
+
+class UpdateFlynoteTaxonomiesCommandTest(TestCase):
+    """Tests for the update_flynote_taxonomies management command flags."""
+
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.root = Taxonomy.add_root(name="Case Law Flynotes")
+        settings = PeachJamSettings.load()
+        settings.flynote_taxonomy_root = self.root
+        settings.save()
+
+        country = Country.objects.first()
+        court = Court.objects.first()
+        lang = Language.objects.first()
+
+        self.j1 = Judgment.objects.create(
+            case_name="Case A",
+            jurisdiction=country,
+            court=court,
+            date=datetime.date(2025, 1, 1),
+            language=lang,
+            flynote="Criminal law \u2014 admissibility",
+        )
+        self.j2 = Judgment.objects.create(
+            case_name="Case B",
+            jurisdiction=country,
+            court=court,
+            date=datetime.date(2025, 2, 1),
+            language=lang,
+            flynote="Contract law \u2014 breach of contract",
+        )
+        self.j3 = Judgment.objects.create(
+            case_name="Case C",
+            jurisdiction=country,
+            court=court,
+            date=datetime.date(2025, 3, 1),
+            language=lang,
+            flynote="Employment law \u2014 unfair dismissal",
+        )
+
+    def test_skip_counts_flag(self):
+        """--skip-counts should prevent taxonomy count refresh."""
+        out = StringIO()
+        call_command(
+            "update_flynote_taxonomies", skip_counts=True, stdout=out, stderr=StringIO()
+        )
+        output = out.getvalue()
+
+        self.assertIn("Skipping taxonomy count updates", output)
+        self.assertNotIn("Refreshing taxonomy document counts", output)
+        self.assertEqual(TaxonomyDocumentCount.objects.count(), 0)
+
+    def test_default_refreshes_counts(self):
+        """Without --skip-counts, taxonomy counts should be refreshed."""
+        out = StringIO()
+        call_command("update_flynote_taxonomies", stdout=out, stderr=StringIO())
+        output = out.getvalue()
+
+        self.assertIn("Refreshing taxonomy document counts", output)
+        self.assertIn("Taxonomy counts refreshed", output)
+        self.assertGreater(TaxonomyDocumentCount.objects.count(), 0)
+
+    def test_start_id_filters_judgments(self):
+        """--start-id should only process judgments with pk <= start_id."""
+        out = StringIO()
+        call_command(
+            "update_flynote_taxonomies",
+            start_id=self.j2.pk,
+            skip_counts=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+        output = out.getvalue()
+
+        self.assertIn(f"Starting from judgment pk={self.j2.pk}", output)
+        # j3 has a higher pk than j2, so it should NOT have been processed
+        self.assertFalse(
+            DocumentTopic.objects.filter(document=self.j3).exists(),
+            "Judgment with pk > start_id should not be processed",
+        )
+        # j1 and j2 should have been processed
+        self.assertTrue(DocumentTopic.objects.filter(document=self.j1).exists())
+        self.assertTrue(DocumentTopic.objects.filter(document=self.j2).exists())
+
+    def test_start_id_with_limit(self):
+        """--start-id combined with --limit should cap the number processed."""
+        out = StringIO()
+        call_command(
+            "update_flynote_taxonomies",
+            start_id=self.j3.pk,
+            limit=1,
+            skip_counts=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+        output = out.getvalue()
+
+        self.assertIn("Processed 1 judgments", output)
+
+    def test_reports_last_pk_processed(self):
+        """Output should include the last pk so users know where to resume."""
+        out = StringIO()
+        call_command(
+            "update_flynote_taxonomies",
+            skip_counts=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+        output = out.getvalue()
+
+        self.assertIn("Last pk processed:", output)
