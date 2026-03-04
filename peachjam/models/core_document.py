@@ -15,7 +15,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db import models
+from django.db import connection, models
 from django.http import Http404
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -599,6 +599,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         if hasattr(self, "_document_content_cache"):
             return self._document_content_cache
 
+        should_save_doc_content = False
         try:
             doc_content = self.document_content
         except DocumentContent.DoesNotExist:
@@ -610,8 +611,38 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             # Keep relation/cache consistent for callers that mutate content before save.
             self.document_content = doc_content
 
+        if self.pk and not doc_content.content_html:
+            legacy_content_html = self._legacy_content_html()
+            if legacy_content_html:
+                doc_content.content_html = legacy_content_html
+                if not doc_content.source_html:
+                    doc_content.source_html = legacy_content_html
+                should_save_doc_content = True
+
+        if doc_content.content_html_is_akn != self.content_html_is_akn:
+            doc_content.content_html_is_akn = self.content_html_is_akn
+            should_save_doc_content = True
+
+        if doc_content.pk and should_save_doc_content:
+            doc_content.save()
+
         self._document_content_cache = doc_content
         return doc_content
+
+    def _legacy_content_html(self):
+        """Read legacy CoreDocument.content_html directly from DB during transition."""
+        if not self.pk:
+            return None
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    "SELECT content_html FROM peachjam_coredocument WHERE id = %s",
+                    [self.pk],
+                )
+                row = cursor.fetchone()
+                return row[0] if row else None
+        except Exception:
+            return None
 
     def update_toc_json_from_html(self):
         doc_content = self.get_or_create_document_content()
