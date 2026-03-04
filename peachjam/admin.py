@@ -15,7 +15,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -646,7 +646,8 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         "created_at",
         "updated_at",
         "work_frbr_uri",
-        "toc_json",
+        "document_content_html_is_akn",
+        "document_content_toc_json",
         "metadata_json",
         "work_link",
         "document_access_link",
@@ -718,11 +719,11 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             {
                 "classes": ("collapse",),
                 "fields": [
-                    "content_html_is_akn",
+                    "document_content_html_is_akn",
                     "allow_robots",
                     "restricted",
                     "document_access_link",
-                    "toc_json",
+                    "document_content_toc_json",
                     "metadata_json",
                 ],
             },
@@ -758,6 +759,20 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
 
         return fieldsets
+
+    @admin.display(description=gettext_lazy("TOC JSON"))
+    def document_content_toc_json(self, obj):
+        try:
+            return obj.document_content.toc_json
+        except ObjectDoesNotExist:
+            return None
+
+    @admin.display(boolean=True, description=gettext_lazy("content HTML is AKN"))
+    def document_content_html_is_akn(self, obj):
+        try:
+            return obj.document_content.content_html_is_akn
+        except ObjectDoesNotExist:
+            return False
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -1785,8 +1800,8 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     )
     fieldsets[1][1]["fields"].remove("citation")
     fieldsets[1][1]["fields"].remove("source_url")
-    fieldsets[4][1]["fields"].remove("toc_json")
-    fieldsets[4][1]["fields"].remove("content_html_is_akn")
+    fieldsets[4][1]["fields"].remove("document_content_toc_json")
+    fieldsets[4][1]["fields"].remove("document_content_html_is_akn")
     fieldsets[4][1]["fields"].extend(["publication", "sub_publication"])
     # remove content fieldset
     fieldsets.pop(3)

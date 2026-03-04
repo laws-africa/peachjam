@@ -562,8 +562,13 @@ class Judgment(CoreDocument):
     def ensure_anonymised_source_file(self):
         """If this judgment is anonymised but its source file isn't, then queue up a task to generate a PDF
         from the anonymised file."""
+        doc_content = self.get_or_create_document_content()
         if self.anonymised:
-            if self.content_html and not self.content_html_is_akn:
+            if (
+                doc_content
+                and doc_content.content_html
+                and not doc_content.content_html_is_akn
+            ):
                 if (
                     not hasattr(self, "source_file")
                     or not self.source_file.file_is_anonymised
@@ -589,7 +594,13 @@ class Judgment(CoreDocument):
         """Create an anonymised source file from the HTML of this judgment. If there is already a source file,
         store this new one as the anonymised pdf. Otherwise, create a new source file using this PDF and set
         the anonymised flag."""
-        if self.anonymised and self.content_html and not self.content_html_is_akn:
+        doc_content = self.get_or_create_document_content()
+        if (
+            self.anonymised
+            and doc_content
+            and doc_content.content_html
+            and not doc_content.content_html_is_akn
+        ):
             pdf = self.convert_html_to_pdf()
             f = File(pdf, name=f"{slugify(self.case_name)}.pdf")
 

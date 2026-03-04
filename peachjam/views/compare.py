@@ -36,7 +36,9 @@ class ComparePortionsView(TemplateView):
             raise Http404()
 
         # root the primary document's TOC at portion-a
-        doc_a.toc_json = [t for t in doc_a.toc_json if t["id"] == portion_a]
+        doc_a_content.toc_json = [
+            t for t in (doc_a_content.toc_json or []) if t["id"] == portion_a
+        ]
 
         context["display_type"] = "html"
 
