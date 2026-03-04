@@ -1,5 +1,7 @@
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.core.paginator import Paginator
+from django.http import Http404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
@@ -13,7 +15,10 @@ from peachjam.models import CourtClass, Judgment
 from peachjam.models.settings import pj_settings
 from peachjam.models.taxonomies import Taxonomy, TaxonomyDocumentCount
 from peachjam.registry import registry
-from peachjam.views.generic_views import BaseDocumentDetailView
+from peachjam.views.generic_views import (
+    BaseDocumentDetailView,
+    FilteredDocumentListView,
+)
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -49,7 +54,7 @@ class FlynoteTopicListView(ListView):
     model = Taxonomy
     template_name = "peachjam/flynote_topic_list.html"
     context_object_name = "all_topics"
-    paginate_by = 50
+    paginate_by = 20
 
     def get(self, request, *args, **kwargs):
         root = pj_settings().flynote_taxonomy_root
@@ -98,6 +103,72 @@ class FlynoteTopicListView(ListView):
         ]
         context["total_judgment_count"] = sum(t["count"] for t in all_enriched)
         context["root"] = root
+        return context
+
+
+class FlynoteTopicDetailView(FilteredDocumentListView):
+    template_name = "peachjam/flynote_topic_detail.html"
+    navbar_link = "judgments"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["slug"])
+        root = pj_settings().flynote_taxonomy_root
+        if not root or self.taxonomy.get_root() != root:
+            raise Http404()
+
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_base_queryset(self):
+        topics = self.taxonomy.get_descendants().values_list("pk", flat=True)
+        topics = list(topics) + [self.taxonomy.pk]
+        return (
+            super().get_base_queryset().filter(taxonomies__topic__in=topics).distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        children = self.taxonomy.get_children()
+
+        count_map = dict(
+            TaxonomyDocumentCount.objects.filter(taxonomy__in=children).values_list(
+                "taxonomy_id", "count"
+            )
+        )
+
+        all_enriched = []
+        for child in children:
+            child_names = list(child.get_children().values_list("name", flat=True)[:3])
+            all_enriched.append(
+                {
+                    "topic": child,
+                    "count": count_map.get(child.pk, 0),
+                    "child_names": child_names,
+                }
+            )
+
+        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
+        context["popular_topics"] = sorted_by_count[:16]
+
+        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
+
+        all_topics = [
+            enriched_lookup[topic.pk]
+            for topic in children
+            if topic.pk in enriched_lookup
+        ]
+
+        paginator = Paginator(all_topics, 20)
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        context["all_topics"] = page_obj.object_list
+        context["page_obj"] = page_obj
+
+        context["taxonomy"] = self.taxonomy
+        context["ancestors"] = self.taxonomy.get_ancestors()
+        context["root"] = pj_settings().flynote_taxonomy_root
+
         return context
 
 

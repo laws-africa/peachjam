@@ -8,6 +8,7 @@ import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
 import FloatingHeader from './floating-header';
 import GlossaryFilter from './glossary';
+import FlynoteTopicFilter from './flynote-topic-filter';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
@@ -37,6 +38,7 @@ const components: Record<string, any> = {
   DocumentTable,
   FloatingHeader,
   GlossaryFilter,
+  FlynoteTopicFilter,
   DocumentUploader,
   NavigationSelect,
   RelationshipEnrichments,

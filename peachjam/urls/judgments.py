@@ -12,11 +12,16 @@ from peachjam.views import (
     CourtYearView,
     JudgmentListView,
 )
-from peachjam.views.judgment import FlynoteTopicListView
+from peachjam.views.judgment import FlynoteTopicDetailView, FlynoteTopicListView
 
 urlpatterns = [
     path("", JudgmentListView.as_view(), name="judgment_list"),
     path("topics/", FlynoteTopicListView.as_view(), name="flynote_topic_list"),
+    path(
+        "topics/<slug:slug>/",
+        FlynoteTopicDetailView.as_view(),
+        name="flynote_topic_detail",
+    ),
     path(
         "court-class/<str:court_class>/",
         CourtClassDetailView.as_view(),
