@@ -180,7 +180,9 @@ class GitbookAdapter(Adapter):
         toc = self.build_toc(summary_html)
         self.compile_pages(book, toc, repo_path)
         self.clean_toc(toc)
-        book.toc_json = toc
+        doc_content = book.get_or_create_document_content()
+        doc_content.toc_json = toc
+        book._document_content_dirty = True
         self.fetch_images(book, repo_path)
 
     def compile_pages(self, book, toc, repo_path):
