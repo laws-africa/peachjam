@@ -187,4 +187,4 @@ class TestDocumentAdminHtmlEdit(WebTest):
         )
         self.assertIn("Edited body", self.document.document_content.content_html)
         self.assertIn("Edited Heading", self.document.document_content.content_text)
-        self.assertTrue(self.document.toc_json)
+        self.assertTrue(self.document.document_content.toc_json)

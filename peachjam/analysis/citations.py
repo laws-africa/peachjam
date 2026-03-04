@@ -21,11 +21,11 @@ class CitationAnalyser:
 
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
-        if document.content_html_is_akn:
+        doc_content = document.get_or_create_document_content()
+        if doc_content.content_html_is_akn:
             # don't markup AKN HTML
             return False
 
-        doc_content = document.get_or_create_document_content()
         if doc_content.content_html:
             # markup html
             return self.extract_citations_from_html(document)
@@ -117,7 +117,7 @@ class CitationAnalyser:
             log.warning("No HTML content to extract citation contexts from.")
             return
 
-        if document.content_html_is_akn:
+        if doc_content.content_html_is_akn:
             xpath = (
                 '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
                 'not(ancestor::*[contains(@class, "akn-remark")])]'

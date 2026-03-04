@@ -29,7 +29,7 @@
                   <h2>{{ doc_a.title }}</h2>
                   <div class="content content__html frbr-doctype-{{ doc_a.frbr_uri_doctype }} frbr-subtype-{{ doc_a.frbr_uri_subtype }}"
                        lang="{{ doc_a.language.iso }}">
-                    {{ doc_a.content_html|safe }}
+                    {{ doc_a.document_content.content_html|safe }}
                   </div>
                 </div>
               </div>
@@ -38,7 +38,7 @@
                   <h2>{{ doc_b.title }}</h2>
                   <div class="content content__html frbr-doctype-{{ doc_b.frbr_uri_doctype }} frbr-subtype-{{ doc_b.frbr_uri_subtype }}"
                        lang="{{ doc_b.language.iso }}">
-                    {{ doc_b.content_html|safe }}
+                    {{ doc_b.document_content.content_html|safe }}
                   </div>
                 </div>
               </div>

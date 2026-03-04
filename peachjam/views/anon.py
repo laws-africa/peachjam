@@ -44,7 +44,7 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
         if "content_html" in validated_data:
             doc_content = instance.get_or_create_document_content()
             doc_content.set_source_html(validated_data.pop("content_html"))
-            if not instance.content_html_is_akn:
+            if not doc_content.content_html_is_akn:
                 doc_content.apply_source_to_content()
                 doc_content.update_toc_json_from_content_html()
             doc_content.sync_document_html_cache()
@@ -84,9 +84,8 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
             doc_content = document.document_content
         except document.__class__.document_content.RelatedObjectDoesNotExist:
             doc_content = None
-        if (
-            not (doc_content and doc_content.content_html)
-            or document.content_html_is_akn
+        if not (doc_content and doc_content.content_html) or (
+            doc_content and doc_content.content_html_is_akn
         ):
             # redirect back to the referrer
             messages.warning(

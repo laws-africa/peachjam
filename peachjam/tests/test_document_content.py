@@ -1,7 +1,5 @@
 from datetime import date
-from importlib import import_module
 
-from django.apps import apps
 from django.test import TestCase
 
 from peachjam.models import Country, GenericDocument, Language
@@ -17,8 +15,10 @@ class DocumentContentHooksTestCase(TestCase):
             language=Language.objects.get(pk="en"),
             frbr_uri_doctype="doc",
             title=title,
-            content_html_is_akn=is_akn,
         )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = is_akn
+        doc_content.save()
         return doc
 
     def test_source_change_derives_content_html_and_text(self):
@@ -58,20 +58,19 @@ class ContentHtmlIsAknMigrationTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
     def make_doc(self, title, is_akn=False):
-        return GenericDocument.objects.create(
+        doc = GenericDocument.objects.create(
             jurisdiction=Country.objects.get(pk="ZA"),
             date=date(2022, 1, 1),
             language=Language.objects.get(pk="en"),
             frbr_uri_doctype="doc",
             title=title,
-            content_html_is_akn=is_akn,
         )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = is_akn
+        doc_content.save()
+        return doc
 
-    def test_migration_backfills_documentcontent_content_html_is_akn(self):
-        migration = import_module(
-            "peachjam.migrations.0277_migrate_content_html_is_akn_to_documentcontent"
-        )
-
+    def test_get_or_create_uses_documentcontent_content_html_is_akn(self):
         true_doc = self.make_doc("Migration True", is_akn=True)
         false_doc = self.make_doc("Migration False", is_akn=False)
 
@@ -80,9 +79,9 @@ class ContentHtmlIsAknMigrationTestCase(TestCase):
         false_content.content_html_is_akn = False
         false_content.save()
 
-        migration.migrate_content_html_is_akn(apps, None)
-
         true_doc.refresh_from_db()
         false_doc.refresh_from_db()
+        true_doc.get_or_create_document_content()
+        false_doc.get_or_create_document_content()
         self.assertTrue(true_doc.document_content.content_html_is_akn)
         self.assertFalse(false_doc.document_content.content_html_is_akn)
