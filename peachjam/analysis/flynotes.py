@@ -16,36 +16,6 @@ Two classes are exposed:
 * **FlynoteParser** – stateless text-to-paths converter.
 * **FlynoteUpdater** – creates/reuses ``Flynote`` nodes and links
   them to a ``Judgment`` via ``JudgmentFlynote``.
-
-Parsing rules
--------------
-
-Dashes (em-dash ``—``, en-dash ``–``, or spaced hyphen `` - ``) separate
-levels::
-
-    Criminal law — admissibility — trial within a trial
-    → ['Criminal law', 'admissibility', 'trial within a trial']
-
-Semicolons split sibling branches.  The tail portion of the current
-path is replaced so that sibling or cousin branches share a common
-prefix.
-
-Examples::
-
-    Criminal law — admissibility — trial within a trial;
-    right to legal representation
-    →  path 1: ['Criminal law', 'admissibility', 'trial within a trial']
-       path 2: ['Criminal law', 'admissibility', 'right to legal representation']
-
-    Criminal law — admissibility — trial within a trial;
-    circumstantial evidence — Blom principles
-    →  path 1: ['Criminal law', 'admissibility', 'trial within a trial']
-       path 2: ['Criminal law', 'circumstantial evidence', 'Blom principles']
-
-    Criminal law — admissibility — trial within a trial;
-    self-defence plea
-    →  path 1: ['Criminal law', 'admissibility', 'trial within a trial']
-       path 2: ['Criminal law', 'admissibility', 'self-defence plea']
 """
 
 import logging
@@ -98,7 +68,52 @@ class FlynoteParser:
     def parse(self, text):
         """Parse flynote text into a list of paths.
 
-        See module docstring for full parsing rules.
+        The parsing works as follows:
+
+        1. HTML tags and entities are stripped, whitespace is normalised,
+           and trailing periods are removed (via ``clean``).
+        2. If no dash characters (em-dash, en-dash, or spaced hyphen) are
+           found, the text is treated as plain prose and an empty list is
+           returned.
+        3. The text is split on semicolons into segments.
+        4. Each segment is split on dashes into parts, forming a hierarchy
+           from general to specific.
+        5. For the first segment, the parts become the initial path.
+        6. For each subsequent segment, the number of dash-separated parts
+           (n) determines how many levels from the bottom of the current
+           path are replaced.  This allows sibling or cousin branches to
+           share a common prefix.
+
+        Examples::
+
+            >>> parser = FlynoteParser()
+
+            # Single chain – three levels deep
+            >>> parser.parse("Criminal law — admissibility — trial within a trial")
+            [['Criminal law', 'admissibility', 'trial within a trial']]
+
+            # Semicolons create sibling branches (1 part replaces the last level)
+            >>> parser.parse(
+            ...     "Criminal law — admissibility — trial within a trial; "
+            ...     "right to representation"
+            ... )
+            [['Criminal law', 'admissibility', 'trial within a trial'],
+             ['Criminal law', 'admissibility', 'right to representation']]
+
+            # Two dash-separated parts replace the last two levels
+            >>> parser.parse(
+            ...     "Criminal law — admissibility — trial; "
+            ...     "circumstantial evidence — Blom principles"
+            ... )
+            [['Criminal law', 'admissibility', 'trial'],
+             ['Criminal law', 'circumstantial evidence', 'Blom principles']]
+
+            # Plain prose (no dashes) returns an empty list
+            >>> parser.parse("Contract between a lender and a borrower.")
+            []
+
+        Args:
+            text: Raw flynote string, potentially containing HTML markup.
 
         Returns:
             A list of paths, where each path is a list of strings from
@@ -228,7 +243,6 @@ class FlynoteUpdater:
         if refresh_counts and leaf_flynotes:
             roots_to_refresh = set()
             for flynote in leaf_flynotes:
-                root = flynote.get_root()
-                roots_to_refresh.add(root)
+                roots_to_refresh.add(flynote.get_root())
             for root in roots_to_refresh:
                 FlynoteDocumentCount.refresh_for_flynote(root)
