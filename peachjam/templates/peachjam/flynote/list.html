@@ -1,0 +1,46 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans "Explore case law by topic" %}
+{% endblock %}
+{% block page-content %}
+  <section class="container pt-4 pb-5">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans "Judgments" %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Explore by topic" %}</li>
+      </ol>
+    </nav>
+    <h1>{% trans "Explore case law by topic" %}</h1>
+    <p class="lead">
+      {% trans "Browse judgments organised by legal subject. Popular topics highlight where most decisions have been delivered, or explore all available topics below." %}
+    </p>
+    {% if popular_topics %}
+      <h2>{% trans "Popular topics" %}</h2>
+      {% include 'peachjam/flynote/_popular_topics.html' %}
+    {% endif %}
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2 class="mb-0">{% trans "All topics" %}</h2>
+      <div>
+        <input id="flynote-search"
+               type="search"
+               name="q"
+               class="form-control"
+               placeholder="{% trans 'Filter topics' %}"
+               aria-label="{% trans 'Filter topics' %}"
+               value="{{ request.GET.q|default_if_none:'' }}"
+               hx-get="{{ request.path }}"
+               hx-trigger="keyup changed delay:300ms, search"
+               hx-target="#flynote-all-list-container"
+               hx-select="#flynote-all-list-container"
+               hx-swap="outerHTML"/>
+      </div>
+    </div>
+    <div id="flynote-all-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
+  </section>
+{% endblock %}

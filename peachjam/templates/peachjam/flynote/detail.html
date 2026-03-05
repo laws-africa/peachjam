@@ -1,0 +1,63 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+{% block title %}
+  {{ topic.name }} - {% trans "Flynotes" %}
+{% endblock %}
+{% block breadcrumbs %}
+  <div class="container pt-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'flynote_topic_list' %}">{% trans 'Explore by topic' %}</a>
+        </li>
+        {% for ancestor in ancestors %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'flynote_topic_detail' ancestor.slug %}">{{ ancestor.name }}</a>
+          </li>
+        {% endfor %}
+        <li class="breadcrumb-item active" aria-current="page">{{ topic.name }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-header %}
+  <div class="mb-4">
+    <h1>{{ topic.name }}</h1>
+    {% if popular_topics %}
+      <h2 class="h4">{% trans "Subtopics" %}</h2>
+      {% include 'peachjam/flynote/_popular_topics.html' with show_explore_all=True row_classes="mb-4" %}
+      {% if all_topics|length > popular_topics|length %}
+        <div class="collapse mb-5" id="allSubtopicsCollapse">
+          <div class="card card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h3 class="h5 mb-0">{% trans "All subtopics" %}</h3>
+              <div>
+                <input id="flynote-search"
+                       type="search"
+                       name="q"
+                       class="form-control form-control-sm"
+                       placeholder="{% trans 'Filter topics' %}"
+                       aria-label="{% trans 'Filter topics' %}"
+                       value="{{ request.GET.q|default_if_none:'' }}"
+                       hx-get="{% url 'flynote_topic_detail' topic.slug %}"
+                       hx-trigger="keyup changed delay:300ms, search"
+                       hx-target="#flynote-subtopics-container"
+                       hx-select="#flynote-subtopics-container"
+                       hx-swap="outerHTML"/>
+              </div>
+            </div>
+            <div id="flynote-subtopics-container">{% include 'peachjam/flynote/_list.html' %}</div>
+          </div>
+        </div>
+      {% endif %}
+    {% endif %}
+    <h2 class="h4">{% trans "Judgments" %}</h2>
+    {% include 'peachjam/_count_and_search.html' %}
+  </div>
+{% endblock %}
