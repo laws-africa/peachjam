@@ -113,8 +113,14 @@ class Command(BaseCommand):
     # Section selection + cleaning
     # ----------------------------
     OFFENCE_CUES_RE = re.compile(
-        r"\b(commits?\s+(an\s+)?offence|is\s+guilty\s+of\s+an?\s+offence|shall\s+be\s+guilty|"
-        r"on\s+conviction|shall\s+be\s+liable\s+to)\b",
+        r"\b("
+        r"commits?\s+(an\s+)?offence"
+        r"|commits?\s+the\s+offence\s+of\s+[a-z][a-z\s-]{0,60}"
+        r"|is\s+guilty\s+of\s+an?\s+offence"
+        r"|shall\s+be\s+guilty"
+        r"|it\s+is\s+an?\s+offence\s+(for\s+[^.]{0,80}\s+)?to"  # NEW
+        r"|is\s+an?\s+offence\s+(for\s+[^.]{0,80}\s+)?to"  # NEW
+        r")\b",
         re.IGNORECASE,
     )
 
@@ -296,6 +302,7 @@ Exclude (do NOT output an offence) when the section is purely:
 - “Omitted”, “Repealed”
 - procedural (e.g. consent to prosecute)
 - defensive (e.g. “... as defence ...”) unless it ALSO defines an offence.
+- only discusses the punishment for an offence, defined in another section
 
 Provision ID rules (VERY IMPORTANT)
 - provision_eid MUST be copied from an existing @data-eid value in the snippet.
@@ -316,6 +323,7 @@ Penalty rules
 
 Title rules
 - Use the section heading text as the title when it is specific (e.g. “Treason”).
+- Do not include the numbering of the heading
 - If the heading is generic, create a precise title from the offence clause.
 - Do not use “Omitted” or “Repealed” as a title.
 

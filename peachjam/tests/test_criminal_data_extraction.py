@@ -3,86 +3,83 @@ import unittest
 
 from django.test import TestCase
 
-from peachjam.analysis.criminal_data import SentenceExtractor
-from peachjam.analysis.criminal_data.extractor import CriminalDataExtractor
-from peachjam.analysis.criminal_data.offence import (
-    OffenceMatcher,
-    OffenceMentionExtractor,
-)
-from peachjam.analysis.criminal_data.offence_tool import OffenceToolMatcher
-from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence
+from peachjam.analysis.criminal_data.agent import extract_offences_and_sentences
+from peachjam.models import Offence, Work
+
+JUDGMENT_TEXT = """
+The appellant, John Mrema, was convicted of robbery with violence
+contrary to section 296(2) of the Penal Code.
+
+The prosecution alleged that on the night of 14th March 2019 at
+Moshi town, the appellant together with others not before court
+robbed the complainant of a mobile phone and cash while armed
+with a knife and threatened to use violence.
+
+After hearing the evidence, the trial court found the appellant
+guilty of the offence of robbery with violence and sentenced him
+to twenty years imprisonment.
+
+Being dissatisfied with the conviction and sentence, the appellant
+filed the present appeal challenging both conviction and sentence.
+""".strip()
 
 
 @unittest.skipIf(not os.environ.get("OPENAI_API_KEY"), "OPENAI_API_KEY not set")
-class CriminalDataExtractionTests(TestCase):
+class SearchOffencesTests(TestCase):
+    """
+    Tests for the database search tool only.
+    These do not call the LLM.
+    """
+
     fixtures = [
         "tests/courts",
         "tests/countries",
         "tests/languages",
         "tests/extraction_judgment",
+        "documents/sample_documents",
     ]
 
-    def setUp(self):
-        self.judgment = Judgment.objects.get(pk=990010)
-        self.robbery = Offence.objects.get(pk=990101)
-        self.housebreaking = Offence.objects.get(pk=990102)
-
-    def assert_offence_links_created(self):
-        self.assertQuerySetEqual(
-            JudgmentOffence.objects.filter(judgment=self.judgment)
-            .order_by("offence_id")
-            .values_list("offence_id", flat=True),
-            [self.robbery.id, self.housebreaking.id],
-            transform=lambda x: x,
+    @classmethod
+    def setUpTestData(cls):
+        cls.robbery = Offence.objects.create(
+            work=Work.objects.first(),
+            title="Robbery with violence",
+            description="""
+            A person who steals anything and, at or immediately before or after the time of stealing it,
+            uses or threatens to use actual violence to any person or property in order to obtain or retain
+            the thing stolen or to prevent or overcome resistance to its being stolen
+            or retained, commits robbery.
+            """,
         )
 
-    def test_offence_mention_extractor(self):
-        offences = OffenceMentionExtractor(self.judgment).run()
-
-        self.assertIn("robbery with violence", offences)
-        self.assertIn("housebreaking", offences)
-
-    def test_offence_matcher(self):
-        OffenceMentionExtractor(self.judgment).run()
-        OffenceMatcher(self.judgment).run()
-
-        self.assert_offence_links_created()
-
-    def test_sentence_extractor(self):
-        JudgmentOffence.objects.create(judgment=self.judgment, offence=self.robbery)
-        JudgmentOffence.objects.create(
-            judgment=self.judgment, offence=self.housebreaking
+        cls.trespass = Offence.objects.create(
+            work=Work.objects.first(),
+            title="Criminal trespass",
+            description="""
+            A person who unlawfully enters into or upon property in the possession of another with "
+            intent to commit an offence or to intimidate, insult or annoy any person in possession of
+            the property, or who, having lawfully entered, unlawfully remains there with such intent,
+            commits criminal trespass.
+            """,
         )
 
-        SentenceExtractor(self.judgment).run()
+    def test_extract_robbery_with_violence(self):
 
-        self.assertEqual(2, Sentence.objects.filter(judgment=self.judgment).count())
-        self.assertTrue(
-            Sentence.objects.filter(
-                judgment=self.judgment,
-                sentence_type=Sentence.SentenceType.IMPRISONMENT,
-                duration_months=120,
-            ).exists()
-        )
-        self.assertTrue(
-            Sentence.objects.filter(
-                judgment=self.judgment,
-                sentence_type=Sentence.SentenceType.FINE,
-                fine_amount=5000,
-            ).exists()
-        )
+        result = extract_offences_and_sentences(JUDGMENT_TEXT)
 
-    def test_offence_tool_matcher(self):
-        OffenceToolMatcher(self.judgment).run()
+        self.assertTrue(result.offences)
 
-        self.assert_offence_links_created()
+        offence = result.offences[0]
 
-    def test_full_extraction_pipeline(self):
-        CriminalDataExtractor(self.judgment).run()
+        self.assertEqual(offence.offence_id, self.robbery.id)
+        self.assertIn("robbery", offence.extracted_offence.lower())
+        self.assertNotIn("trespass", offence.extracted_offence.lower())
 
-        self.judgment.refresh_from_db()
+        self.assertTrue(offence.sentences)
 
-        self.assertEqual(Judgment.CaseType.CRIMINAL, self.judgment.case_type)
-        self.assertEqual(2021, self.judgment.filing_year)
-        self.assert_offence_links_created()
-        self.assertTrue(Sentence.objects.filter(judgment=self.judgment).exists())
+        sentence = offence.sentences[0]
+
+        self.assertEqual(sentence.sentence_type, "imprisonment")
+
+        expected_months = 240  # 20 years -> 240 months
+        self.assertEqual(sentence.duration_months, expected_months)

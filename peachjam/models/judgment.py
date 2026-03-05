@@ -855,7 +855,7 @@ class Offence(models.Model):
         ordering = ("title",)
 
     def __str__(self):
-        return f"{self.title} ({self.code})"
+        return self.title
 
 
 class JudgmentOffence(models.Model):

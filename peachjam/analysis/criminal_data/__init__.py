@@ -1,16 +1,6 @@
-from .base import BaseExtractor
-from .case_type import CaseTypeExtractor
-from .extractor import CriminalDataExtractor
-from .filing_year import FilingYearExtractor
-from .offence import OffenceMatcher, OffenceMentionExtractor
-from .sentence import SentenceExtractor
+from .agent import extract_offences_and_sentences, search_offences
 
 __all__ = [
-    "CriminalDataExtractor",
-    "BaseExtractor",
-    "OffenceMentionExtractor",
-    "OffenceMatcher",
-    "SentenceExtractor",
-    "CaseTypeExtractor",
-    "FilingYearExtractor",
+    "extract_offences_and_sentences",
+    "search_offences",
 ]
