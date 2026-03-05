@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.http import Http404
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -12,8 +12,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
-from peachjam.models.settings import pj_settings
-from peachjam.models.taxonomies import Taxonomy, TaxonomyDocumentCount
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -51,20 +50,18 @@ class JudgmentListView(TemplateView):
 
 
 class FlynoteTopicListView(ListView):
-    model = Taxonomy
+    model = Flynote
     template_name = "peachjam/flynote_topic_list.html"
     context_object_name = "all_topics"
     paginate_by = 20
 
     def get(self, request, *args, **kwargs):
-        root = pj_settings().flynote_taxonomy_root
-        if not root:
+        if not Flynote.objects.filter(depth=0).exists():
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        root = pj_settings().flynote_taxonomy_root
-        qs = root.get_children().order_by("name")
+        qs = Flynote.objects.filter(depth=0).order_by("name")
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(name__icontains=q)
@@ -72,12 +69,11 @@ class FlynoteTopicListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        root = pj_settings().flynote_taxonomy_root
-        children = root.get_children()
+        children = Flynote.objects.filter(depth=0).order_by("name")
 
         count_map = dict(
-            TaxonomyDocumentCount.objects.filter(taxonomy__in=children).values_list(
-                "taxonomy_id", "count"
+            FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
+                "flynote_id", "count"
             )
         )
 
@@ -102,7 +98,7 @@ class FlynoteTopicListView(ListView):
             if topic.pk in enriched_lookup
         ]
         context["total_judgment_count"] = sum(t["count"] for t in all_enriched)
-        context["root"] = root
+        context["root"] = None
         return context
 
 
@@ -111,28 +107,28 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
     navbar_link = "judgments"
 
     def dispatch(self, request, *args, **kwargs):
-        self.taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["slug"])
-        root = pj_settings().flynote_taxonomy_root
-        if not root or self.taxonomy.get_root() != root:
-            raise Http404()
-
+        self.flynote = get_object_or_404(Flynote, path=self.kwargs["topic_path"])
         return super().dispatch(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        topics = self.taxonomy.get_descendants().values_list("pk", flat=True)
-        topics = list(topics) + [self.taxonomy.pk]
+        descendant_qs = Flynote.objects.filter(
+            Q(pk=self.flynote.pk) | Q(path__startswith=self.flynote.path + "/")
+        )
         return (
-            super().get_base_queryset().filter(taxonomies__topic__in=topics).distinct()
+            super()
+            .get_base_queryset()
+            .filter(judgment__flynotes__flynote__in=descendant_qs)
+            .distinct()
         )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        children = self.taxonomy.get_children()
+        children = self.flynote.get_children()
 
         count_map = dict(
-            TaxonomyDocumentCount.objects.filter(taxonomy__in=children).values_list(
-                "taxonomy_id", "count"
+            FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
+                "flynote_id", "count"
             )
         )
 
@@ -169,9 +165,9 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
         context["all_topics"] = page_obj.object_list
         context["page_obj"] = page_obj
 
-        context["taxonomy"] = self.taxonomy
-        context["ancestors"] = self.taxonomy.get_ancestors()
-        context["root"] = pj_settings().flynote_taxonomy_root
+        context["topic"] = self.flynote
+        context["ancestors"] = self.flynote.get_ancestors()
+        context["root"] = None
 
         return context
 
@@ -207,14 +203,7 @@ class JudgmentDetailView(BaseDocumentDetailView):
         return context
 
     def get_taxonomy_queryset(self):
-        qs = super().get_taxonomy_queryset()
-        settings = pj_settings()
-        root = settings.flynote_taxonomy_root
-        if root:
-            flynote_pks = set(root.get_descendants().values_list("pk", flat=True))
-            flynote_pks.add(root.pk)
-            qs = qs.exclude(pk__in=flynote_pks)
-        return qs
+        return super().get_taxonomy_queryset()
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")

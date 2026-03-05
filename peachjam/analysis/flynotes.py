@@ -1,4 +1,4 @@
-"""Flynote text parsing and taxonomy synchronisation.
+"""Flynote text parsing and Flynote model synchronisation.
 
 Judgments in Southern/East African legal databases carry a short structured
 summary called a *flynote*.  Flynotes use dashes to express hierarchy and
@@ -7,15 +7,15 @@ semicolons to separate sibling branches::
     Criminal law — admissibility — trial within a trial;
     right to legal representation
 
-This module converts that notation into taxonomy paths and keeps the
-Django ``Taxonomy`` / ``DocumentTopic`` tables in sync with each judgment's
+This module converts that notation into paths and keeps the
+Django ``Flynote`` / ``JudgmentFlynote`` tables in sync with each judgment's
 flynote field.
 
 Two classes are exposed:
 
 * **FlynoteParser** – stateless text-to-paths converter.
-* **FlynoteTaxonomyUpdater** – creates/reuses ``Taxonomy`` nodes and links
-  them to a ``Judgment`` via ``DocumentTopic``.
+* **FlynoteUpdater** – creates/reuses ``Flynote`` nodes and links
+  them to a ``Judgment`` via ``JudgmentFlynote``.
 """
 
 import logging
@@ -25,14 +25,13 @@ from django.db import IntegrityError, transaction
 from django.utils.html import strip_tags
 from django.utils.text import slugify
 
-from peachjam.models.settings import pj_settings
-from peachjam.models.taxonomies import DocumentTopic, Taxonomy, TaxonomyDocumentCount
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 
 log = logging.getLogger(__name__)
 
 
 class FlynoteParser:
-    """Parses raw flynote text into structured taxonomy paths.
+    """Parses raw flynote text into structured paths.
 
     Handles HTML stripping, dash/semicolon splitting, and hierarchical
     path construction from legal flynote conventions.
@@ -67,54 +66,9 @@ class FlynoteParser:
         return text
 
     def parse(self, text):
-        """Parse flynote text into a list of taxonomy paths.
+        """Parse flynote text into a list of paths.
 
-        The parsing works as follows:
-
-        1. HTML tags and entities are stripped, whitespace is normalised,
-           and trailing periods are removed (via ``clean``).
-        2. If no dash characters (em-dash, en-dash, or spaced hyphen) are
-           found, the text is treated as plain prose and an empty list is
-           returned.
-        3. The text is split on semicolons into segments.
-        4. Each segment is split on dashes into parts, forming a hierarchy
-           from general to specific.
-        5. For the first segment, the parts become the initial path.
-        6. For each subsequent segment, the number of dash-separated parts
-           (n) determines how many levels from the bottom of the current
-           path are replaced.  This allows sibling or cousin branches to
-           share a common prefix.
-
-        Examples::
-
-            >>> parser = FlynoteParser()
-
-            # Single chain – three levels deep
-            >>> parser.parse("Criminal law — admissibility — trial within a trial")
-            [['Criminal law', 'admissibility', 'trial within a trial']]
-
-            # Semicolons create sibling branches (1 part replaces the last level)
-            >>> parser.parse(
-            ...     "Criminal law — admissibility — trial within a trial; "
-            ...     "right to representation"
-            ... )
-            [['Criminal law', 'admissibility', 'trial within a trial'],
-             ['Criminal law', 'admissibility', 'right to representation']]
-
-            # Two dash-separated parts replace the last two levels
-            >>> parser.parse(
-            ...     "Criminal law — admissibility — trial; "
-            ...     "circumstantial evidence — Blom principles"
-            ... )
-            [['Criminal law', 'admissibility', 'trial'],
-             ['Criminal law', 'circumstantial evidence', 'Blom principles']]
-
-            # Plain prose (no dashes) returns an empty list
-            >>> parser.parse("Contract between a lender and a borrower.")
-            []
-
-        Args:
-            text: Raw flynote string, potentially containing HTML markup.
+        See module docstring for full parsing rules.
 
         Returns:
             A list of paths, where each path is a list of strings from
@@ -155,128 +109,104 @@ class FlynoteParser:
 
     @staticmethod
     def normalise_name(name):
-        """Convert a topic name to a slug for deduplication matching.
-
-        Examples::
-
-            >>> FlynoteParser.normalise_name("Criminal Law")
-            'criminal-law'
-            >>> FlynoteParser.normalise_name("  Right to fair hearing  ")
-            'right-to-fair-hearing'
-        """
+        """Convert a topic name to a slug for deduplication matching."""
         return slugify(name)
 
 
-class FlynoteTaxonomyUpdater:
-    """Manages the taxonomy tree for flynote-derived topics.
+class FlynoteUpdater:
+    """Manages the Flynote tree for flynote-derived topics.
 
-    Reads the configured ``flynote_taxonomy_root`` from
-    ``PeachJamSettings``, builds (or reuses) ``Taxonomy`` nodes for each
-    path segment, and creates ``DocumentTopic`` links so that the judgment
-    appears under the correct leaf topics.
+    Builds (or reuses) ``Flynote`` nodes for each path segment, and creates
+    ``JudgmentFlynote`` links so that the judgment appears under the correct
+    leaf topics. Uses path-based hierarchy to avoid loading the full tree.
 
     Usage::
 
-        updater = FlynoteTaxonomyUpdater()
+        updater = FlynoteUpdater()
         updater.update_for_judgment(judgment)
     """
 
     def __init__(self):
         self.parser = FlynoteParser()
 
-    def get_or_create_node(self, parent, name):
-        """Find an existing child of *parent* whose normalised name matches,
-        or create a new child node.
+    def get_or_create_node(self, parent_path, parent_depth, name):
+        """Find an existing Flynote whose path matches, or create a new one.
 
-        *parent* must be a ``Taxonomy`` instance (never ``None``).
+        *parent_path* is the path of the parent (empty string for top-level).
+        *parent_depth* is the parent's depth (-1 for top-level).
 
-        Matching is case- and whitespace-insensitive (via
-        ``FlynoteParser.normalise_name``), so "Criminal Law" will match an
-        existing "Criminal law" node rather than creating a duplicate.
-
-        If the slug already exists in the database (collision from a
-        different tree path producing the same slug), the existing node
-        is returned instead of raising an error.
-
-        Returns ``None`` if the name produces an empty slug (e.g.
-        punctuation-only strings).
+        Returns ``None`` if the name produces an empty slug.
         """
         normalised = FlynoteParser.normalise_name(name)
         if not normalised:
             return None
 
-        for child in parent.get_children():
-            if FlynoteParser.normalise_name(child.name) == normalised:
-                return child
+        if parent_path:
+            expected_path = f"{parent_path}/{normalised}"
+        else:
+            expected_path = normalised
 
-        expected_slug = f"{parent.slug}-{normalised}"
-        existing = Taxonomy.objects.filter(slug=expected_slug).first()
+        existing = Flynote.objects.filter(path=expected_path).first()
         if existing:
             return existing
 
         try:
-            return parent.add_child(name=name)
+            slug = expected_path.replace("/", "-")
+            return Flynote.objects.create(
+                name=name,
+                slug=slug,
+                path=expected_path,
+                depth=parent_depth + 1,
+            )
         except IntegrityError:
-            return Taxonomy.objects.filter(slug=expected_slug).first()
+            return Flynote.objects.filter(path=expected_path).first()
 
     @transaction.atomic
     def update_for_judgment(self, judgment, refresh_counts=True):
-        """Parse a judgment's flynote and sync its taxonomy links.
+        """Parse a judgment's flynote and sync its Flynote links.
 
-        1. Deletes all existing ``DocumentTopic`` links between the judgment
-           and any descendant of the flynote taxonomy root.
+        1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
         2. Parses ``judgment.flynote`` into hierarchical paths.
-        3. For each path, walks (or creates) ``Taxonomy`` nodes from root
-           to leaf.
+        3. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
         4. Links the judgment to the leaf node of every path.
 
-        Runs inside a database transaction so that a failure for one
-        judgment does not leave the taxonomy tree in a corrupt state.
-
-        Does nothing if no ``flynote_taxonomy_root`` is configured or if
-        the flynote text cannot be parsed (plain prose, empty, etc.).
-
-        Args:
-            judgment: The judgment instance to process.
-            refresh_counts: If True (default), refresh the taxonomy document
-                counts after updating. Set to False when running in batch
-                mode to avoid repeated expensive count recalculations.
+        Does nothing if the flynote text cannot be parsed (plain prose, empty, etc.).
         """
-        settings = pj_settings()
-        root = settings.flynote_taxonomy_root
-        if not root:
-            log.warning("No flynote taxonomy root configured, skipping.")
-            return
-
-        flynote_descendant_ids = set(
-            root.get_descendants().values_list("pk", flat=True)
-        )
-        DocumentTopic.objects.filter(
-            document=judgment, topic_id__in=flynote_descendant_ids
-        ).delete()
+        JudgmentFlynote.objects.filter(document=judgment).delete()
 
         paths = self.parser.parse(judgment.flynote)
         if not paths:
             return
 
-        leaf_topics = set()
+        leaf_flynotes = set()
         for path in paths:
-            current_parent = root
+            parent_path = ""
+            parent_depth = -1
             for name in path:
-                node = self.get_or_create_node(current_parent, name)
+                node = self.get_or_create_node(parent_path, parent_depth, name)
                 if node is None:
                     break
-                current_parent = node
+                parent_path = node.path
+                parent_depth = node.depth
             else:
-                leaf_topics.add(current_parent)
+                leaf_flynotes.add(node)
 
-        for topic in leaf_topics:
-            DocumentTopic.objects.get_or_create(document=judgment, topic=topic)
+        for flynote in leaf_flynotes:
+            JudgmentFlynote.objects.get_or_create(document=judgment, flynote=flynote)
 
         log.info(
-            f"Linked judgment {judgment.pk} to "
-            f"{len(leaf_topics)} flynote taxonomy topics."
+            "Linked judgment %s to %s flynote topics.",
+            judgment.pk,
+            len(leaf_flynotes),
         )
 
-        if refresh_counts:
-            TaxonomyDocumentCount.refresh_for_taxonomy(root)
+        if refresh_counts and leaf_flynotes:
+            roots_to_refresh = set()
+            for flynote in leaf_flynotes:
+                if flynote.depth == 0:
+                    roots_to_refresh.add(flynote)
+                else:
+                    root = flynote.get_ancestors().order_by("depth").first()
+                    roots_to_refresh.add(root if root else flynote)
+            for root in roots_to_refresh:
+                FlynoteDocumentCount.refresh_for_flynote(root)

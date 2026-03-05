@@ -11,6 +11,7 @@ from .custom_property import *
 from .document_access_group import *
 from .enrichments import *
 from .external_document import *
+from .flynote import *
 from .gazette import *
 from .generic_document import *
 from .ingestors import *
