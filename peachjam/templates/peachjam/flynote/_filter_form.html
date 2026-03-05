@@ -1,0 +1,15 @@
+{% load i18n %}
+<form class="d-flex {{ form_class|default:'' }}"
+      hx-get="{{ htmx_url }}"
+      hx-trigger="input from:input delay:300ms"
+      hx-target="{{ htmx_target }}"
+      hx-select="{{ htmx_target }}"
+      hx-swap="outerHTML">
+  <input id="flynote-search"
+         type="search"
+         name="q"
+         class="form-control {{ input_class|default:'' }}"
+         placeholder="{% trans 'Filter topics' %}"
+         aria-label="{% trans 'Filter topics' %}"
+         value="{{ request.GET.q|default_if_none:'' }}"/>
+</form>
