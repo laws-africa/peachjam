@@ -879,6 +879,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             context.source_file = self.source_file.file
             word_pipeline(context)
             self.set_content_html_from_source_html(context.html_text)
+            # Persist extracted HTML before text extraction to avoid update_text_content()
+            # creating/updating DocumentContent with empty HTML fields.
+            self._document_content_dirty = True
+            self.save_document_content()
 
             for img in self.images.all():
                 img.delete()
