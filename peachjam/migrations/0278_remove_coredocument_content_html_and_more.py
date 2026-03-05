@@ -9,71 +9,6 @@ class Migration(migrations.Migration):
         ("peachjam", "0277_taxonomy_hidden_field"),
     ]
 
-    # Backfill DocumentContent from legacy CoreDocument columns using set-based SQL.
-    # This avoids Django row iteration, which can behave poorly behind pgBouncer.
-    BACKFILL_DOCUMENT_CONTENT_SQL = """
-        -- Create missing document_content rows where legacy content exists.
-        INSERT INTO peachjam_documentcontent (
-            document_id,
-            content_html,
-            source_html,
-            content_html_is_akn,
-            toc_json
-        )
-        SELECT
-            d.id,
-            d.content_html,
-            d.content_html,
-            COALESCE(d.content_html_is_akn, FALSE),
-            d.toc_json
-        FROM peachjam_coredocument d
-        LEFT JOIN peachjam_documentcontent dc ON dc.document_id = d.id
-        WHERE dc.document_id IS NULL
-          AND (
-            d.content_html IS NOT NULL
-            OR d.toc_json IS NOT NULL
-            OR COALESCE(d.content_html_is_akn, FALSE) = TRUE
-          );
-
-        -- Backfill missing/blank content_html and source_html from legacy content_html.
-        UPDATE peachjam_documentcontent dc
-        SET
-            content_html = CASE
-                WHEN (dc.content_html IS NULL OR dc.content_html = '')
-                     AND d.content_html IS NOT NULL
-                THEN d.content_html
-                ELSE dc.content_html
-            END,
-            source_html = CASE
-                WHEN (dc.source_html IS NULL OR dc.source_html = '')
-                     AND d.content_html IS NOT NULL
-                THEN d.content_html
-                ELSE dc.source_html
-            END
-        FROM peachjam_coredocument d
-        WHERE dc.document_id = d.id
-          AND (
-            ((dc.content_html IS NULL OR dc.content_html = '') AND d.content_html IS NOT NULL)
-            OR ((dc.source_html IS NULL OR dc.source_html = '') AND d.content_html IS NOT NULL)
-          );
-
-        -- Backfill toc_json only when currently null and legacy toc_json exists.
-        UPDATE peachjam_documentcontent dc
-        SET toc_json = d.toc_json
-        FROM peachjam_coredocument d
-        WHERE dc.document_id = d.id
-          AND dc.toc_json IS NULL
-          AND d.toc_json IS NOT NULL;
-
-        -- Backfill AKN flag to true when legacy document was marked as AKN.
-        UPDATE peachjam_documentcontent dc
-        SET content_html_is_akn = TRUE
-        FROM peachjam_coredocument d
-        WHERE dc.document_id = d.id
-          AND dc.content_html_is_akn = FALSE
-          AND COALESCE(d.content_html_is_akn, FALSE) = TRUE;
-    """
-
     operations = [
         migrations.AddField(
             model_name="documentcontent",
@@ -97,5 +32,4 @@ class Migration(migrations.Migration):
             name="toc_json",
             field=models.JSONField(blank=True, null=True, verbose_name="TOC JSON"),
         ),
-        migrations.RunSQL(BACKFILL_DOCUMENT_CONTENT_SQL, migrations.RunSQL.noop),
     ]
