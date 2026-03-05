@@ -341,7 +341,7 @@ class FlynoteTopicListViewTest(TestCase):
 
         response = self.client.get(reverse("flynote_topic_list"))
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "peachjam/flynote_topic_list.html")
+        self.assertTemplateUsed(response, "peachjam/flynote/list.html")
         self.assertIn("all_topics", response.context)
 
     def test_uses_precalculated_counts(self):
