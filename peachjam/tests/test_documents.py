@@ -165,3 +165,45 @@ ZAGPPHC 1063</a>.</p>
         )
         doc.save()
         self.assertEqual("my-test", doc.frbr_uri_number)
+
+    def test_get_provision_by_eid_returns_none_for_non_akn(self):
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = False
+        result = doc.get_provision_by_eid("some-eid")
+        self.assertIsNone(result)
+
+    def test_get_provision_by_eid_returns_none_when_no_content(self):
+        doc = GenericDocument(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="No content",
+        )
+        doc.save()
+        result = doc.get_provision_by_eid("some-eid")
+        self.assertIsNone(result)
+
+    def test_get_cited_work_frbr_uris_returns_empty_when_no_content_html(self):
+        doc = GenericDocument(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="No citations",
+        )
+        doc.save()
+        result = doc.get_cited_work_frbr_uris()
+        self.assertEqual({}, result)
+
+    def test_update_text_content_also_updates_cache(self):
+        """update_text_content() must keep _document_content_cache in sync."""
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        doc.update_text_content()
+        # After update, the cache should point at the freshly-saved DocumentContent
+        self.assertIs(doc._document_content_cache, doc.document_content)
