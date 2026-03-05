@@ -24,31 +24,17 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("name", models.CharField(max_length=255, verbose_name="name")),
-                ("slug", models.SlugField(max_length=1024, verbose_name="slug")),
                 (
-                    "path",
-                    models.CharField(
-                        db_index=True,
-                        help_text="Slug path from root, e.g. 'criminal-law/sentencing'.",
-                        max_length=2048,
-                        unique=True,
-                        verbose_name="path",
-                    ),
+                    "slug",
+                    models.SlugField(max_length=1024, unique=True, verbose_name="slug"),
                 ),
-                (
-                    "depth",
-                    models.PositiveIntegerField(
-                        db_index=True,
-                        default=0,
-                        help_text="0 = top level, 1 = one level down, etc.",
-                        verbose_name="depth",
-                    ),
-                ),
+                ("path", models.CharField(max_length=255, unique=True)),
+                ("depth", models.PositiveIntegerField()),
+                ("numchild", models.PositiveIntegerField(default=0)),
             ],
             options={
                 "verbose_name": "flynote",
                 "verbose_name_plural": "flynotes",
-                "ordering": ["path"],
             },
         ),
         migrations.CreateModel(

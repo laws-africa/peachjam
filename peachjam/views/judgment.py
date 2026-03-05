@@ -50,7 +50,7 @@ class JudgmentListView(TemplateView):
 
 class FlynoteTopicListView(ListView):
     model = Flynote
-    template_name = "peachjam/flynote_topic_list.html"
+    template_name = "peachjam/flynote/list.html"
     context_object_name = "all_topics"
     paginate_by = 20
 
@@ -102,7 +102,7 @@ class FlynoteTopicListView(ListView):
 
 
 class FlynoteTopicDetailView(FilteredDocumentListView):
-    template_name = "peachjam/flynote_topic_detail.html"
+    template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
 
     def dispatch(self, request, *args, **kwargs):
@@ -200,9 +200,6 @@ class JudgmentDetailView(BaseDocumentDetailView):
             for bench in self.get_object().bench.select_related("judge").all()
         ]
         return context
-
-    def get_taxonomy_queryset(self):
-        return super().get_taxonomy_queryset()
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")

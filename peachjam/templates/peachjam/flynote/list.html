@@ -22,7 +22,7 @@
     </p>
     {% if popular_topics %}
       <h2>{% trans "Popular topics" %}</h2>
-      {% include 'peachjam/_flynote_popular_topics.html' %}
+      {% include 'peachjam/flynote/_popular_topics.html' %}
     {% endif %}
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">{% trans "All topics" %}</h2>
@@ -41,6 +41,6 @@
                hx-swap="outerHTML"/>
       </div>
     </div>
-    <div id="flynote-all-list-container">{% include 'peachjam/_flynote_topics_list.html' %}</div>
+    <div id="flynote-all-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
   </section>
 {% endblock %}

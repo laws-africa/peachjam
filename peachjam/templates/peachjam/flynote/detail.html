@@ -31,7 +31,7 @@
     <h1>{{ topic.name }}</h1>
     {% if popular_topics %}
       <h2 class="h4">{% trans "Subtopics" %}</h2>
-      {% include 'peachjam/_flynote_popular_topics.html' with show_explore_all=True row_classes="mb-4" %}
+      {% include 'peachjam/flynote/_popular_topics.html' with show_explore_all=True row_classes="mb-4" %}
       {% if all_topics|length > popular_topics|length %}
         <div class="collapse mb-5" id="allSubtopicsCollapse">
           <div class="card card-body">
@@ -52,7 +52,7 @@
                        hx-swap="outerHTML"/>
               </div>
             </div>
-            <div id="flynote-subtopics-container">{% include 'peachjam/_flynote_topics_list.html' %}</div>
+            <div id="flynote-subtopics-container">{% include 'peachjam/flynote/_list.html' %}</div>
           </div>
         </div>
       {% endif %}
