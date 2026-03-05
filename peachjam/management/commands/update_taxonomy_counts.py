@@ -7,7 +7,7 @@ class Command(BaseCommand):
     help = "Recalculate pre-computed document counts for the flynote tree."
 
     def handle(self, *args, **options):
-        roots = Flynote.objects.filter(depth=0)
+        roots = Flynote.get_root_nodes()
         if not roots.exists():
             self.stderr.write(
                 self.style.ERROR(

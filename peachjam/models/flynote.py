@@ -4,42 +4,31 @@ Flynotes are hierarchical topics derived from judgment flynote text (e.g.
 "Criminal law — sentencing — trial within a trial"). This model is separate
 from Taxonomy to avoid loading huge trees into memory on sites like Tanzlii.
 
-Uses path-based hierarchy (path = slug segments joined by "/") for efficient
-queries without tree traversal.
+Extends treebeard's MP_Node (materialised path) for efficient hierarchical
+queries, just like the Taxonomy model.
 """
 
 import logging
 
 from django.db import connection, models, transaction
 from django.urls import reverse
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from treebeard.mp_tree import MP_Node
 
 log = logging.getLogger(__name__)
 
 __all__ = ["Flynote", "JudgmentFlynote", "FlynoteDocumentCount"]
 
 
-class Flynote(models.Model):
-    """Hierarchical flynote topic, path-based for scalable queries."""
+class Flynote(MP_Node):
+    """Hierarchical flynote topic using treebeard's materialised path."""
 
     name = models.CharField(_("name"), max_length=255)
-    slug = models.SlugField(_("slug"), max_length=1024)
-    path = models.CharField(
-        _("path"),
-        max_length=2048,
-        unique=True,
-        db_index=True,
-        help_text=_("Slug path from root, e.g. 'criminal-law/sentencing'."),
-    )
-    depth = models.PositiveIntegerField(
-        _("depth"),
-        default=0,
-        db_index=True,
-        help_text=_("0 = top level, 1 = one level down, etc."),
-    )
+    slug = models.SlugField(_("slug"), max_length=1024, unique=True)
+    node_order_by = ["name"]
 
     class Meta:
-        ordering = ["path"]
         verbose_name = _("flynote")
         verbose_name_plural = _("flynotes")
 
@@ -47,31 +36,18 @@ class Flynote(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("flynote_topic_detail", kwargs={"topic_path": self.path})
+        return reverse("flynote_topic_detail", kwargs={"slug": self.slug})
 
-    def get_children(self):
-        """Direct children only. Single query, no tree load."""
-        if self.path:
-            prefix = self.path + "/"
-        else:
-            prefix = ""
-        return Flynote.objects.filter(
-            path__startswith=prefix, depth=self.depth + 1
-        ).exclude(path=self.path)
+    def update_slug(self):
+        """Build a unique slug from the ancestor chain, just like Taxonomy."""
+        old_slug = self.slug
+        parent = self.get_parent()
+        self.slug = (f"{parent.slug}-" if parent else "") + slugify(self.name)
+        return old_slug != self.slug
 
-    def get_descendants(self):
-        """All descendants. Single query by path prefix."""
-        if not self.path:
-            return Flynote.objects.exclude(path="")
-        return Flynote.objects.filter(path__startswith=self.path + "/")
-
-    def get_ancestors(self):
-        """Ancestors from root to parent. Queries by path prefix."""
-        if not self.path or "/" not in self.path:
-            return Flynote.objects.none()
-        parts = self.path.split("/")[:-1]
-        ancestor_paths = ["/".join(parts[: i + 1]) for i in range(len(parts))]
-        return Flynote.objects.filter(path__in=ancestor_paths).order_by("depth")
+    def save(self, *args, **kwargs):
+        self.update_slug()
+        super().save(*args, **kwargs)
 
 
 class JudgmentFlynote(models.Model):
@@ -119,13 +95,18 @@ class FlynoteDocumentCount(models.Model):
         return f"{self.flynote.name}: {self.count}"
 
     @classmethod
-    def refresh_for_flynote(cls, flynote):
-        """Recompute document counts for this flynote and all its descendants."""
-        if flynote is None:
+    def refresh_for_flynote(cls, root):
+        """Recompute document counts for a flynote tree rooted at *root*.
+
+        Each node's count includes documents linked directly to it plus
+        documents linked to any of its descendants. Uses treebeard's
+        materialised path to walk ancestors efficiently in a single SQL
+        query, following the same pattern as TaxonomyDocumentCount.
+        """
+        if root is None:
             return
 
-        prefix = flynote.path + "/" if flynote.path else ""
-        path_pattern = prefix + "%"
+        root_path = root.path
 
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -134,10 +115,10 @@ class FlynoteDocumentCount(models.Model):
                     DELETE FROM peachjam_flynotedocumentcount
                     WHERE flynote_id IN (
                         SELECT id FROM peachjam_flynote
-                        WHERE path = %s OR path LIKE %s
+                        WHERE path LIKE %s
                     )
                     """,
-                    [flynote.path, path_pattern],
+                    [root_path + "%"],
                 )
 
                 cursor.execute(
@@ -148,18 +129,17 @@ class FlynoteDocumentCount(models.Model):
                         COUNT(DISTINCT jf.document_id)
                     FROM peachjam_flynote ancestor
                     INNER JOIN peachjam_flynote descendant
-                        ON descendant.path = ancestor.path
-                        OR descendant.path LIKE ancestor.path || '/%%'
+                        ON descendant.path LIKE ancestor.path || '%%'
                     INNER JOIN peachjam_judgmentflynote jf
                         ON jf.flynote_id = descendant.id
-                    WHERE ancestor.path = %s OR ancestor.path LIKE %s
+                    WHERE ancestor.path LIKE %s
                     GROUP BY ancestor.id
                     """,
-                    [flynote.path, path_pattern],
+                    [root_path + "%"],
                 )
 
         log.info(
-            "Refreshed document counts for flynote '%s' (pk=%s)",
-            flynote.slug,
-            flynote.pk,
+            "Refreshed document counts for flynote tree rooted at '%s' (pk=%s)",
+            root.slug,
+            root.pk,
         )

@@ -6,7 +6,7 @@
         <div class="card h-100 border">
           <div class="card-body d-flex justify-content-between align-items-start gap-2">
             <div>
-              <a href="{% url 'flynote_topic_detail' item.topic.path %}"
+              <a href="{% url 'flynote_topic_detail' item.topic.slug %}"
                  class="stretched-link mb-1">{{ item.topic.name }}</a>
               {% if item.child_names %}<div class="text-muted small">{{ item.child_names|join:"; " }}</div>{% endif %}
             </div>

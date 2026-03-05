@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -56,12 +55,12 @@ class FlynoteTopicListView(ListView):
     paginate_by = 20
 
     def get(self, request, *args, **kwargs):
-        if not Flynote.objects.filter(depth=0).exists():
+        if not Flynote.get_root_nodes().exists():
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        qs = Flynote.objects.filter(depth=0).order_by("name")
+        qs = Flynote.get_root_nodes().order_by("name")
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(name__icontains=q)
@@ -69,7 +68,7 @@ class FlynoteTopicListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        children = Flynote.objects.filter(depth=0).order_by("name")
+        children = Flynote.get_root_nodes().order_by("name")
 
         count_map = dict(
             FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
@@ -107,17 +106,17 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
     navbar_link = "judgments"
 
     def dispatch(self, request, *args, **kwargs):
-        self.flynote = get_object_or_404(Flynote, path=self.kwargs["topic_path"])
+        self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
         return super().dispatch(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        descendant_qs = Flynote.objects.filter(
-            Q(pk=self.flynote.pk) | Q(path__startswith=self.flynote.path + "/")
-        )
+        descendant_ids = list(
+            self.flynote.get_descendants().values_list("pk", flat=True)
+        ) + [self.flynote.pk]
         return (
             super()
             .get_base_queryset()
-            .filter(judgment__flynotes__flynote__in=descendant_qs)
+            .filter(judgment__flynotes__flynote__in=descendant_ids)
             .distinct()
         )
 

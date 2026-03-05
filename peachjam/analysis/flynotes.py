@@ -16,6 +16,36 @@ Two classes are exposed:
 * **FlynoteParser** – stateless text-to-paths converter.
 * **FlynoteUpdater** – creates/reuses ``Flynote`` nodes and links
   them to a ``Judgment`` via ``JudgmentFlynote``.
+
+Parsing rules
+-------------
+
+Dashes (em-dash ``—``, en-dash ``–``, or spaced hyphen `` - ``) separate
+levels::
+
+    Criminal law — admissibility — trial within a trial
+    → ['Criminal law', 'admissibility', 'trial within a trial']
+
+Semicolons split sibling branches.  The tail portion of the current
+path is replaced so that sibling or cousin branches share a common
+prefix.
+
+Examples::
+
+    Criminal law — admissibility — trial within a trial;
+    right to legal representation
+    →  path 1: ['Criminal law', 'admissibility', 'trial within a trial']
+       path 2: ['Criminal law', 'admissibility', 'right to legal representation']
+
+    Criminal law — admissibility — trial within a trial;
+    circumstantial evidence — Blom principles
+    →  path 1: ['Criminal law', 'admissibility', 'trial within a trial']
+       path 2: ['Criminal law', 'circumstantial evidence', 'Blom principles']
+
+    Criminal law — admissibility — trial within a trial;
+    self-defence plea
+    →  path 1: ['Criminal law', 'admissibility', 'trial within a trial']
+       path 2: ['Criminal law', 'admissibility', 'self-defence plea']
 """
 
 import logging
@@ -118,7 +148,7 @@ class FlynoteUpdater:
 
     Builds (or reuses) ``Flynote`` nodes for each path segment, and creates
     ``JudgmentFlynote`` links so that the judgment appears under the correct
-    leaf topics. Uses path-based hierarchy to avoid loading the full tree.
+    leaf topics. Uses treebeard's MP_Node for tree management.
 
     Usage::
 
@@ -129,11 +159,10 @@ class FlynoteUpdater:
     def __init__(self):
         self.parser = FlynoteParser()
 
-    def get_or_create_node(self, parent_path, parent_depth, name):
-        """Find an existing Flynote whose path matches, or create a new one.
+    def get_or_create_node(self, parent, name):
+        """Find an existing Flynote whose slug matches, or create a new one.
 
-        *parent_path* is the path of the parent (empty string for top-level).
-        *parent_depth* is the parent's depth (-1 for top-level).
+        *parent* is the parent Flynote node, or None for top-level.
 
         Returns ``None`` if the name produces an empty slug.
         """
@@ -141,25 +170,23 @@ class FlynoteUpdater:
         if not normalised:
             return None
 
-        if parent_path:
-            expected_path = f"{parent_path}/{normalised}"
+        if parent:
+            expected_slug = f"{parent.slug}-{normalised}"
         else:
-            expected_path = normalised
+            expected_slug = normalised
 
-        existing = Flynote.objects.filter(path=expected_path).first()
+        existing = Flynote.objects.filter(slug=expected_slug).first()
         if existing:
             return existing
 
         try:
-            slug = expected_path.replace("/", "-")
-            return Flynote.objects.create(
-                name=name,
-                slug=slug,
-                path=expected_path,
-                depth=parent_depth + 1,
-            )
+            if parent:
+                node = parent.add_child(name=name, slug=expected_slug)
+            else:
+                node = Flynote.add_root(name=name, slug=expected_slug)
+            return node
         except IntegrityError:
-            return Flynote.objects.filter(path=expected_path).first()
+            return Flynote.objects.filter(slug=expected_slug).first()
 
     @transaction.atomic
     def update_for_judgment(self, judgment, refresh_counts=True):
@@ -180,14 +207,12 @@ class FlynoteUpdater:
 
         leaf_flynotes = set()
         for path in paths:
-            parent_path = ""
-            parent_depth = -1
+            parent = None
             for name in path:
-                node = self.get_or_create_node(parent_path, parent_depth, name)
+                node = self.get_or_create_node(parent, name)
                 if node is None:
                     break
-                parent_path = node.path
-                parent_depth = node.depth
+                parent = node
             else:
                 leaf_flynotes.add(node)
 
@@ -203,10 +228,7 @@ class FlynoteUpdater:
         if refresh_counts and leaf_flynotes:
             roots_to_refresh = set()
             for flynote in leaf_flynotes:
-                if flynote.depth == 0:
-                    roots_to_refresh.add(flynote)
-                else:
-                    root = flynote.get_ancestors().order_by("depth").first()
-                    roots_to_refresh.add(root if root else flynote)
+                root = flynote.get_root()
+                roots_to_refresh.add(root)
             for root in roots_to_refresh:
                 FlynoteDocumentCount.refresh_for_flynote(root)

@@ -134,39 +134,30 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         self.updater = FlynoteUpdater()
 
     def test_creates_new_top_level(self):
-        node = self.updater.get_or_create_node("", -1, "Criminal law")
+        node = self.updater.get_or_create_node(None, "Criminal law")
+        self.assertIsNotNone(node)
         self.assertEqual(node.name, "Criminal law")
-        self.assertEqual(node.path, "criminal-law")
-        self.assertEqual(node.depth, 0)
+        self.assertEqual(node.slug, "criminal-law")
+        self.assertTrue(node.is_root())
 
-    def test_returns_existing_by_path(self):
-        Flynote.objects.create(
-            name="Criminal law",
-            slug="criminal-law",
-            path="criminal-law",
-            depth=0,
-        )
-        found = self.updater.get_or_create_node("", -1, "Criminal law")
-        self.assertEqual(Flynote.objects.filter(path="criminal-law").count(), 1)
+    def test_returns_existing_by_slug(self):
+        Flynote.add_root(name="Criminal law", slug="criminal-law")
+        found = self.updater.get_or_create_node(None, "Criminal law")
+        self.assertEqual(Flynote.objects.filter(slug="criminal-law").count(), 1)
         self.assertEqual(found.name, "Criminal law")
 
     def test_returns_existing_by_normalised_name(self):
-        Flynote.objects.create(
-            name="Criminal Law",
-            slug="criminal-law",
-            path="criminal-law",
-            depth=0,
-        )
-        found = self.updater.get_or_create_node("", -1, "criminal law")
+        Flynote.add_root(name="Criminal Law", slug="criminal-law")
+        found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
 
     def test_creates_nested_nodes(self):
-        parent = self.updater.get_or_create_node("", -1, "Criminal law")
-        child = self.updater.get_or_create_node(
-            parent.path, parent.depth, "admissibility"
-        )
-        self.assertEqual(child.path, "criminal-law/admissibility")
-        self.assertEqual(child.depth, 1)
+        parent = self.updater.get_or_create_node(None, "Criminal law")
+        child = self.updater.get_or_create_node(parent, "admissibility")
+        self.assertIsNotNone(child)
+        self.assertEqual(child.slug, "criminal-law-admissibility")
+        self.assertFalse(child.is_root())
+        self.assertEqual(child.get_parent().pk, parent.pk)
 
 
 class UpdateFlynoteForJudgmentTest(TestCase):
@@ -214,14 +205,13 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         self.updater.update_for_judgment(self.judgment)
 
         criminal = Flynote.objects.get(name="Criminal law")
-        self.assertEqual(criminal.depth, 0)
-        self.assertEqual(criminal.path, "criminal-law")
+        self.assertTrue(criminal.is_root())
 
         admissibility = Flynote.objects.get(name="admissibility")
-        self.assertEqual(admissibility.path, "criminal-law/admissibility")
+        self.assertEqual(admissibility.get_parent().pk, criminal.pk)
 
         trial = Flynote.objects.get(name="trial within a trial")
-        self.assertEqual(trial.path, "criminal-law/admissibility/trial-within-a-trial")
+        self.assertEqual(trial.get_parent().pk, admissibility.pk)
 
     def test_clears_old_links_on_reprocess(self):
         self.updater.update_for_judgment(self.judgment)

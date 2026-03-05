@@ -18,7 +18,7 @@
         </li>
         {% for ancestor in ancestors %}
           <li class="breadcrumb-item">
-            <a href="{% url 'flynote_topic_detail' ancestor.path %}">{{ ancestor.name }}</a>
+            <a href="{% url 'flynote_topic_detail' ancestor.slug %}">{{ ancestor.name }}</a>
           </li>
         {% endfor %}
         <li class="breadcrumb-item active" aria-current="page">{{ topic.name }}</li>
@@ -45,7 +45,7 @@
                        placeholder="{% trans 'Filter topics' %}"
                        aria-label="{% trans 'Filter topics' %}"
                        value="{{ request.GET.q|default_if_none:'' }}"
-                       hx-get="{% url 'flynote_topic_detail' topic.path %}"
+                       hx-get="{% url 'flynote_topic_detail' topic.slug %}"
                        hx-trigger="keyup changed delay:300ms, search"
                        hx-target="#flynote-subtopics-container"
                        hx-select="#flynote-subtopics-container"

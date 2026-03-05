@@ -105,7 +105,7 @@ class Command(BaseCommand):
 
         if not skip_counts and processed > 0:
             self.stdout.write("Refreshing flynote document counts...")
-            for root in Flynote.objects.filter(depth=0):
+            for root in Flynote.get_root_nodes():
                 FlynoteDocumentCount.refresh_for_flynote(root)
             msg += " Flynote counts refreshed."
 
