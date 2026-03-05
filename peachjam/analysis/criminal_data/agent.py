@@ -1,15 +1,14 @@
 import logging
 import re
-from typing import Any, Dict, List, Optional, Sequence, Union
+from typing import Any, Dict, List, Literal, Optional, Sequence, Union
 
 from agents import Agent, Runner, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, conint
 
 from peachjam.models import Offence, Sentence
 
 log = logging.getLogger(__name__)
-
 
 KeywordInput = Union[str, Sequence[str]]
 _SPLIT = re.compile(r"[,\n;|]+")
@@ -240,13 +239,70 @@ class JudgmentOffenceExtraction(BaseModel):
     offences: List[OffenceMatch] = []
 
 
-agent = Agent(
-    name="Offence + Sentence Extractor",
-    instructions=PROMPT,
-    tools=[search_offences],
-    output_type=JudgmentOffenceExtraction,
-)
-
-
 def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtraction:
+    agent = Agent(
+        name="Offence + Sentence Extractor",
+        instructions=PROMPT,
+        tools=[search_offences],
+        output_type=JudgmentOffenceExtraction,
+    )
+    return Runner.run_sync(agent, judgment_text).final_output
+
+
+CaseTypeLiteral = Literal["criminal", "civil"]
+
+
+class CaseMetaExtraction(BaseModel):
+    case_type: Optional[CaseTypeLiteral] = Field(
+        default=None,
+        description="Case type for the matter: criminal, civil, or null if unclear.",
+    )
+    filing_year: Optional[conint(ge=1800, le=2200)] = Field(
+        default=None,
+        description="Year the case/appeal was filed (4-digit), or null if not stated/unclear.",
+    )
+    basis: str = Field(
+        description="Short quote (<=25 words) supporting case_type and/or filing_year. If neither is found, "
+        "explain briefly why (<=25 words)."
+    )
+
+
+CASE_META_PROMPT = """
+<ROLE>
+You extract filing year and case type from judgment text.
+</ROLE>
+
+<TASK>
+Return:
+- case_type: criminal | civil | null (unknown)
+- filing_year: 4-digit year | null
+- basis: <=25 words supporting the extracted values (or why unknown)
+
+<CASE TYPE RULES>
+- criminal: accused/appellant convicted/acquitted/sentenced; criminal charges; Penal Code; Criminal Appeal;
+prosecution/State.
+- civil: plaintiff/defendant; contract/tort/property; damages; injunction; constitutional petition is NOT
+ automatically civil unless clearly framed as civil.
+- If mixed/unclear, return null.
+
+<FILING YEAR RULES>
+Extract the filing year ONLY if the text clearly indicates filing/registration year, e.g.:
+- "Criminal Appeal No. 12 of 2019"
+- "Civil Appeal No. 3 of 2020"
+- "filed in 2018"
+- "lodged in 2021"
+If you only see incident dates (e.g. offence date 14 March 2019) or judgment date without a filing signal,
+filing_year = null.
+
+<OUTPUT>
+Return structured data only.
+"""
+
+
+def extract_case_type_filing_year(judgment_text: str) -> CaseMetaExtraction:
+    agent = Agent(
+        name="Case Type + Filing Year Extractor",
+        instructions=CASE_META_PROMPT,
+        output_type=CaseMetaExtraction,
+    )
     return Runner.run_sync(agent, judgment_text).final_output
