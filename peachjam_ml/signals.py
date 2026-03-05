@@ -3,7 +3,11 @@ from django.dispatch.dispatcher import receiver
 
 from peachjam.models import DocumentContent, Judgment
 from peachjam.models.lifecycle import after_attribute_changed
-from peachjam_ml.tasks import update_document_embeddings, update_summary_embeddings
+from peachjam_ml.tasks import (
+    update_document_embeddings,
+    update_flynote_taxonomy,
+    update_summary_embeddings,
+)
 
 
 @receiver(signals.post_save, sender=DocumentContent)
@@ -18,3 +22,9 @@ def document_content_saved(sender, instance, **kwargs):
 )
 def when_case_summary_changed(judgment):
     update_summary_embeddings(judgment.id, schedule=5)
+
+
+@after_attribute_changed(Judgment, "flynote")
+def when_flynote_changed(judgment):
+    """Automatically map the flynote to taxonomy topics when it changes."""
+    update_flynote_taxonomy(judgment.id, schedule=10)
