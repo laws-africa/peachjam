@@ -36,3 +36,36 @@ Use short, present-tense commit subjects (e.g., `simplify account page`); append
 
 ## Caching Guardrails
 Cacheable views must omit session access, `Set-Cookie`, and inline CSRF tokens. Load personalised islands via htmx endpoints and rely on the caching sanity middleware to catch leaks—fix violations before merging.
+
+## Data Components (HTML `data-component` + JS class)
+Use data-components when you need to bind behaviour to a specific HTML node without creating a Vue app.
+
+How the system works:
+- Templates declare a component name on an element: `data-component="ComponentName"`.
+- The name must exist in `peachjam/js/components/index.ts` in the exported `components` map.
+- Runtime boot starts in `peachjam/js/app.ts`, which calls `peachJam.setup()`.
+- `peachjam/js/peachjam.ts` then:
+  - scans the page for `[data-component]`,
+  - instantiates with `new components[name](el)`,
+  - stores the instance on the node as `el.component`,
+  - repeats this for htmx-inserted content via `htmx:load`.
+
+How to add a new data-component:
+1. Create a class in `peachjam/js/components/...` (usually `.ts`, `.js` also exists in legacy files) with a constructor that accepts the root element, e.g. `constructor(root: HTMLElement)`.
+2. Read config from `root.dataset.*` when needed (template `data-foo-bar` becomes `root.dataset.fooBar`).
+3. Add `data-component="YourComponentName"` to the target template node.
+4. Import and register the class in `peachjam/js/components/index.ts` under the same key string used in the template.
+5. Ensure initialization is idempotent/safe for dynamic content, because components are auto-created for htmx loads as well as first page load.
+
+Examples in this repo:
+- `peachjam/templates/peachjam/_copy_to_clipboard.html` + `peachjam/js/components/clipboard.ts` (`CopyToClipboard`).
+- `peachjam/templates/peachjam/_document_table.html` + `peachjam/js/components/document-table.ts` (`DocumentTable`).
+- `peachjam/templates/peachjam/_taxonomy_tree_facet.html` + `peachjam/js/components/taxonomy-tree.ts` (`TaxonomyTree`).
+
+## Frontend style guide
+
+* Use vanilla Bootstrap CSS where possible.
+* Prefer Bootstrap components and building blocks (buttons, cards, lists, tables, etc.) over rolling your own, unless the layout or instructions really call for it.
+* Use "Sentence case" not "Title Case" for headings, labels and buttons.
+* Prefer default styling for buttons. Don't adjust padding, font weight or custom colours. Use btn-primary for primary buttons or btn-secondary.
+* The default heading margins are usually fine, only adjust them if really necessary for spacing.
