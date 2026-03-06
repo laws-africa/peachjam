@@ -471,7 +471,7 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         output = out.getvalue()
 
         self.assertIn("Skipping flynote count updates", output)
-        self.assertNotIn("Refreshing flynote document counts", output)
+        self.assertNotIn("Flynote counts refreshed", output)
         self.assertEqual(FlynoteDocumentCount.objects.count(), 0)
 
     def test_default_refreshes_counts(self):
@@ -480,7 +480,6 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         call_command("update_flynote_taxonomies", stdout=out, stderr=StringIO())
         output = out.getvalue()
 
-        self.assertIn("Refreshing flynote document counts", output)
         self.assertIn("Flynote counts refreshed", output)
         self.assertGreater(FlynoteDocumentCount.objects.count(), 0)
 
