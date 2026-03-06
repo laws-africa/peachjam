@@ -348,6 +348,11 @@ class BaseDocumentResource(resources.ModelResource):
         clean_model_instances = True
 
     def before_import(self, dataset, **kwargs):
+        if "content_html" in dataset.headers:
+            logger.warning(
+                "Deprecated import header 'content_html'; use 'source_html' instead."
+            )
+
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
         dataset.headers.append("expression_frbr_uri")
@@ -392,6 +397,10 @@ class BaseDocumentResource(resources.ModelResource):
             row[k] = v.strip() if isinstance(v, str) else v
         if kwargs.get("user"):
             row["created_by"] = kwargs["user"].id
+        if row.get("content_html") and not row.get("source_html"):
+            logger.warning(
+                "Deprecated import column 'content_html' used; value will be treated as 'source_html'."
+            )
         if not row.get("skip"):
             logger.info(f"Importing row: {row}")
 
@@ -406,6 +415,7 @@ class BaseDocumentResource(resources.ModelResource):
 
         if not kwargs.get("dry_run", ""):
             source_html_changed = "source_html" in row
+            legacy_content_html_changed = "content_html" in row
 
             if (
                 instance.source_url
@@ -414,8 +424,8 @@ class BaseDocumentResource(resources.ModelResource):
             ):
                 self.attach_source_file(instance, instance.source_url)
 
-            if source_html_changed:
-                source_html = row.get("source_html")
+            if source_html_changed or legacy_content_html_changed:
+                source_html = row.get("source_html") or row.get("content_html")
                 doc_content = instance.get_or_create_document_content()
                 doc_content.set_source_html(source_html)
                 doc_content.apply_source_to_content()
