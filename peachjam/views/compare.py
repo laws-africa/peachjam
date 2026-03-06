@@ -25,24 +25,34 @@ class ComparePortionsView(TemplateView):
         doc_b = context["doc_b"] = get_object_or_404(
             CoreDocument.objects, expression_frbr_uri=frbr_uri_b
         )
-        doc_a.content_html = self.get_portion_html(doc_a, portion_a)
-        doc_b.content_html = self.get_portion_html(doc_b, portion_b)
+        doc_a_content = doc_a.get_or_create_document_content()
+        doc_a_content.set_content_html(self.get_portion_html(doc_a, portion_a))
+        doc_b_content = doc_b.get_or_create_document_content()
+        doc_b_content.set_content_html(self.get_portion_html(doc_b, portion_b))
 
-        if not doc_a.content_html or not doc_b.content_html:
+        if not doc_a_content.content_html or not doc_b_content.content_html:
             raise Http404()
 
         # root the primary document's TOC at portion-a
-        doc_a.toc_json = [t for t in doc_a.toc_json if t["id"] == portion_a]
+        doc_a_content.toc_json = [
+            t for t in (doc_a_content.toc_json or []) if t["id"] == portion_a
+        ]
 
         context["display_type"] = "html"
 
         return context
 
     def get_portion_html(self, doc, portion):
-        if doc.content_html:
-            root = doc.content_html_tree
-            try:
-                el = root.get_element_by_id(portion)
-                return lxml.html.tostring(el, encoding="unicode")
-            except KeyError:
-                return None
+        try:
+            doc_content = doc.document_content
+        except doc.__class__.document_content.RelatedObjectDoesNotExist:
+            return None
+        if not doc_content.content_html:
+            return None
+
+        root = lxml.html.fromstring(doc_content.content_html)
+        try:
+            el = root.get_element_by_id(portion)
+            return lxml.html.tostring(el, encoding="unicode")
+        except KeyError:
+            return None

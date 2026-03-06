@@ -86,7 +86,6 @@ class NewDocumentFormMixin:
         super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
-            self.run_analysis()
 
     def process_upload_file(self, upload_file):
         # store the uploaded file
@@ -97,15 +96,6 @@ class NewDocumentFormMixin:
             filename=upload_file.name,
             mimetype=upload_file.content_type,
         ).save()
-
-        # extract content, if we can
-        if self.instance.extract_content_from_source_file():
-            self.instance.save()
-
-    def run_analysis(self):
-        """Apply analysis pipelines for this newly created document."""
-        if self.instance.extract_citations():
-            self.instance.save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
@@ -461,16 +451,6 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
         model = SourceFile
         fields = "__all__"
         exclude = ("file_as_pdf",)
-
-    def _save_m2m(self):
-        super()._save_m2m()
-        if "file" in self.changed_data:
-            if self.instance.document.extract_content_from_source_file():
-                self.instance.document.save()
-
-                # if the file is changed, we need delete the existing pdf and re-generate
-                self.instance.file_as_pdf.delete()
-                self.instance.ensure_file_as_pdf()
 
 
 class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):
