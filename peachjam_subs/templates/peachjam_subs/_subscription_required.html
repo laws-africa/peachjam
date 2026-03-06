@@ -8,18 +8,18 @@
           {% login_url_with_next upsell_url as login_url %}
           {% block anonymous-user %}
             <h5 class="card-title">
-              {% if lowest_product.price %}
-                {% trans "Unlock this feature" %}
-              {% else %}
+              {% if lowest_offering_is_free %}
                 {% trans "Create a free account" %}
+              {% else %}
+                {% trans "Unlock this feature" %}
               {% endif %}
             </h5>
             <p>{% trans "Sign up to save documents, read summaries and access more features." %}</p>
             <a class="btn btn-primary mb-1" href="{{ login_url }}">
-              {% if lowest_product.price %}
-                {% trans "Start" %} {{ lowest_product.name }}
-              {% else %}
+              {% if lowest_offering_is_free %}
                 {% trans "Create a free account" %}
+              {% else %}
+                {% trans "Start" %} {{ lowest_product.name }}
               {% endif %}
             </a>
             <p>

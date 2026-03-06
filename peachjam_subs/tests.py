@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AnonymousUser, User
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.utils import timezone
@@ -302,6 +302,22 @@ class SubscriptionTests(TestCase):
 
         best = product.get_best_available_offering_for_user(self.user)
         self.assertEqual(selectable_offering, best)
+
+    def test_get_best_available_offering_for_user_anonymous_user_no_crash(self):
+        anonymous_user = AnonymousUser()
+        product = Product.objects.create(name="Anonymous Product", tier=60)
+        free_offering = ProductOffering.objects.create(
+            product=product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Anonymous Free Monthly",
+                price=Decimal("0.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        product.selectable_offerings.set([free_offering])
+
+        best = product.get_best_available_offering_for_user(anonymous_user)
+        self.assertEqual(free_offering, best)
 
     def test_validate_selectable_offering_catalog_rejects_non_monotonic_tier_price(
         self,
