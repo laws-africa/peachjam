@@ -348,12 +348,6 @@ class BaseDocumentResource(resources.ModelResource):
         clean_model_instances = True
 
     def before_import(self, dataset, **kwargs):
-        if "content_html" in dataset.headers and "source_html" not in dataset.headers:
-            logger.warning(
-                "Deprecated import header 'content_html' detected. Use 'source_html' instead; "
-                "'content_html' fallback will be removed in a future release."
-            )
-
         # clear out rows with 'skip' set; we don't remove them, so that the row numbers match the source, but
         # instead set all the columns (except skipped) to None
         dataset.headers.append("expression_frbr_uri")
@@ -411,8 +405,7 @@ class BaseDocumentResource(resources.ModelResource):
         super().save_m2m(instance, row, **kwargs)
 
         if not kwargs.get("dry_run", ""):
-            source_html = None
-            source_html_changed = False
+            source_html_changed = "source_html" in row
 
             if (
                 instance.source_url
@@ -421,19 +414,12 @@ class BaseDocumentResource(resources.ModelResource):
             ):
                 self.attach_source_file(instance, instance.source_url)
 
-            if "source_html" in row:
-                source_html = row.get("source_html")
-                source_html_changed = True
-            elif "content_html" in row:
-                logger.warning(
-                    "Deprecated import column 'content_html' used for document '%s'; use 'source_html' instead.",
-                    instance.expression_frbr_uri or instance.pk,
-                )
-                source_html = row.get("content_html")
-                source_html_changed = True
-
             if source_html_changed:
-                instance.set_content_html_from_source_html(source_html)
+                source_html = row.get("source_html")
+                doc_content = instance.get_or_create_document_content()
+                doc_content.set_source_html(source_html)
+                doc_content.apply_source_to_content()
+                doc_content.update_toc_json_from_content_html()
                 instance.save()
 
     def after_save_instance(self, instance, row, **kwargs):

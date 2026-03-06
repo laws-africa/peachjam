@@ -52,8 +52,8 @@ class JudgmentSummariser:
     def summarise_judgment(self, document) -> JudgmentSummary:
         if not self.enabled():
             raise SummariserError("Summariser service not configured")
-
-        text = document.get_content_as_text()
+        doc_content = document.get_or_create_document_content()
+        text = doc_content.get_content_as_text()
         if not text:
             raise SummariserError("Document doesn't have any text to summarise.")
 

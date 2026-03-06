@@ -206,8 +206,8 @@ class DocumentEmbedding(models.Model):
         """
         if not settings.PEACHJAM["DOCUMENT_EMBEDDINGS"]:
             return
-
-        text = document.get_content_as_text()
+        doc_content = document.get_or_create_document_content()
+        text = doc_content.get_content_as_text()
         text_md5 = hashlib.md5(text.encode()).hexdigest() if text else None
 
         doc_embedding = cls.objects.filter(document=document).first()
@@ -388,7 +388,8 @@ class ContentChunk(models.Model):
 
         else:
             # plain html or PDF text
-            text = (document.get_content_as_text() or "").strip()
+            doc_content = document.get_or_create_document_content()
+            text = (doc_content.get_content_as_text() or "").strip()
             if text:
                 if "\f" in text:
                     # pages

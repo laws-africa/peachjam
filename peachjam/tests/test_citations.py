@@ -108,13 +108,12 @@ class CitationAnalyserTestCase(TestCase):
         doc = CoreDocument()
         doc_content = doc.get_or_create_document_content()
         doc_content.content_html_is_akn = False
-        doc_content.content_html = """
+        doc_content.set_content_html("""
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
 <p>Some text <a href="https://example.com">Example</a></p>
 </div>
-"""
-        doc_content.sync_document_html_cache()
+""")
         doc.delete_citations()
         self.assertEqual(
             """<div>
@@ -129,13 +128,12 @@ class CitationAnalyserTestCase(TestCase):
         doc = CoreDocument()
         doc_content = doc.get_or_create_document_content()
         doc_content.content_html_is_akn = True
-        doc_content.content_html = """
+        doc_content.set_content_html("""
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
 <p>Some text <a href="https://example.com">Example</a></p>
 </div>
-"""
-        doc_content.sync_document_html_cache()
+""")
         doc.delete_citations()
         self.assertEqual(
             """

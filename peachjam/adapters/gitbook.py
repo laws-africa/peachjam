@@ -182,7 +182,6 @@ class GitbookAdapter(Adapter):
         self.clean_toc(toc)
         doc_content = book.get_or_create_document_content()
         doc_content.toc_json = toc
-        book._document_content_dirty = True
         self.fetch_images(book, repo_path)
 
     def compile_pages(self, book, toc, repo_path):
@@ -214,8 +213,7 @@ class GitbookAdapter(Adapter):
             return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
 
         doc_content = book.get_or_create_document_content()
-        doc_content.content_html = "\n".join(process_entry(e) for e in toc)
-        doc_content.sync_document_html_cache()
+        doc_content.set_content_html("\n".join(process_entry(e) for e in toc))
 
     def compile_page(self, markdown_text):
         # preprocess with jinja

@@ -48,8 +48,7 @@ class CitationAnalyser:
             return False
 
         html = self.markup_html_matches(document.expression_uri(), html)
-        doc_content.content_html = lxml.html.tostring(html, encoding="unicode")
-        doc_content.sync_document_html_cache()
+        doc_content.set_content_html(lxml.html.tostring(html, encoding="unicode"))
         return True
 
     def markup_html_matches(self, frbr_uri, html):
@@ -60,7 +59,8 @@ class CitationAnalyser:
         return html
 
     def extract_citations_from_source_file(self, document):
-        text = document.get_content_as_text()
+        doc_content = document.get_or_create_document_content()
+        text = doc_content.get_content_as_text()
         if text:
             for matcher in self.matchers:
                 matcher = matcher()

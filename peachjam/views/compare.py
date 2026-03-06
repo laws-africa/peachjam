@@ -26,11 +26,9 @@ class ComparePortionsView(TemplateView):
             CoreDocument.objects, expression_frbr_uri=frbr_uri_b
         )
         doc_a_content = doc_a.get_or_create_document_content()
-        doc_a_content.content_html = self.get_portion_html(doc_a, portion_a)
-        doc_a_content.sync_document_html_cache()
+        doc_a_content.set_content_html(self.get_portion_html(doc_a, portion_a))
         doc_b_content = doc_b.get_or_create_document_content()
-        doc_b_content.content_html = self.get_portion_html(doc_b, portion_b)
-        doc_b_content.sync_document_html_cache()
+        doc_b_content.set_content_html(self.get_portion_html(doc_b, portion_b))
 
         if not doc_a_content.content_html or not doc_b_content.content_html:
             raise Http404()
