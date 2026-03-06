@@ -47,7 +47,6 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
             if not doc_content.content_html_is_akn:
                 doc_content.apply_source_to_content()
                 doc_content.update_toc_json_from_content_html()
-            doc_content.sync_document_html_cache()
 
         # force anonymised flag
         validated_data["anonymised"] = True
@@ -138,8 +137,9 @@ class DocumentAnonymiseSuggestionsAPIView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
+        doc_content = document.get_or_create_document_content()
         suggestions = self.get_suggestions(
-            document.get_content_as_text(), document.jurisdiction.pk
+            doc_content.get_content_as_text(), document.jurisdiction.pk
         )
         return Response({"suggestions": suggestions})
 

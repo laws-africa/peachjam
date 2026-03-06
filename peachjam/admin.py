@@ -75,6 +75,7 @@ from peachjam.models import (
     CustomPropertyLabel,
     DocumentAccessGroup,
     DocumentChatThread,
+    DocumentContent,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -425,13 +426,15 @@ class DocumentForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             try:
                 doc_content = self.instance.document_content
-            except self.instance.__class__.document_content.RelatedObjectDoesNotExist:
-                pass
+            except DocumentContent.DoesNotExist:
+                doc_content = DocumentContent.objects.get_or_create(
+                    document=self.instance
+                )[0]
+
         if doc_content:
             self.fields["source_html"].initial = doc_content.source_html
-
-        if doc_content and doc_content.content_html_is_akn:
-            self.fields["source_html"].widget.attrs["readonly"] = True
+            if doc_content.content_html_is_akn:
+                self.fields["source_html"].widget.attrs["readonly"] = True
 
         self.fields["edit_activity_start"].initial = timezone.now()
         self.fields["edit_activity_stage"].initial = (
@@ -454,7 +457,6 @@ class DocumentForm(forms.ModelForm):
             if not doc_content.content_html_is_akn:
                 doc_content.apply_source_to_content()
                 doc_content.update_toc_json_from_content_html()
-            doc_content.sync_document_html_cache()
 
     def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML

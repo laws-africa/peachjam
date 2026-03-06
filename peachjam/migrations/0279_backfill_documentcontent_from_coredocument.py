@@ -136,7 +136,7 @@ class Migration(migrations.Migration):
     atomic = False
 
     dependencies = [
-        ("peachjam", "0278_remove_coredocument_content_html_and_more"),
+        ("peachjam", "0278_add_coredocument_content_html_and_more"),
     ]
 
     operations = [

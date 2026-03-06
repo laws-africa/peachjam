@@ -416,9 +416,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
     citation = models.CharField(_("citation"), max_length=4096, null=True, blank=True)
-    # Legacy DB column retained during transition; DocumentContent is the authoritative source.
-    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
-    toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
     language = models.ForeignKey(
         Language,
         on_delete=models.PROTECT,
@@ -538,8 +535,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         help_text=_("Restrict access to this document to selected groups."),
     )
 
-    _document_content_dirty = False
-
     class Meta:
         ordering = ["doc_type", "title"]
         permissions = [
@@ -575,26 +570,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
-    def set_content_html(self, content_html):
-        """Update the content HTML for this document. This cleans the HTML and generates a TOC if necessary. This is
-        the preferred way of setting the content_html field."""
-        doc_content = self.get_or_create_document_content()
-        doc_content.set_content_html(content_html)
-        doc_content.update_toc_json_from_content_html()
-        self._document_content_dirty = True
-
-    def set_source_html(self, source_html):
-        doc_content = self.get_or_create_document_content()
-        doc_content.set_source_html(source_html)
-        self._document_content_dirty = True
-
-    def set_content_html_from_source_html(self, source_html):
-        doc_content = self.get_or_create_document_content()
-        doc_content.set_source_html(source_html)
-        doc_content.apply_source_to_content()
-        doc_content.update_toc_json_from_content_html()
-        self._document_content_dirty = True
-
     def get_or_create_document_content(self):
         if hasattr(self, "_document_content_cache"):
             return self._document_content_cache
@@ -618,10 +593,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 if not doc_content.source_html:
                     doc_content.source_html = legacy_content_html
                 should_save_doc_content = True
-
-        if doc_content.content_html_is_akn != self.content_html_is_akn:
-            doc_content.content_html_is_akn = self.content_html_is_akn
-            should_save_doc_content = True
 
         if doc_content.pk and should_save_doc_content:
             doc_content.save()
@@ -655,8 +626,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             doc_content.toc_json = toc_json
         else:
             doc_content.toc_json = []
-
-        self._document_content_dirty = True
 
     def clean_html_field(self, html):
         if not html:
@@ -800,14 +769,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
     def save_document_content(self):
         doc_content = self.get_or_create_document_content()
 
-        if doc_content.pk and not self._document_content_dirty:
-            return
-
         doc_content.document = self
         doc_content.save()
         self.document_content = doc_content
         self._document_content_cache = doc_content
-        self._document_content_dirty = False
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,
@@ -859,12 +824,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 unwrap_element(a)
                 deleted = True
             if deleted:
-                doc_content.content_html = html.tostring(root, encoding="unicode")
-                self._document_content_dirty = True
-                doc_content.sync_document_html_cache()
+                doc_content.set_content_html(html.tostring(root, encoding="unicode"))
 
     def extract_content_from_source_file(self):
-        """Re-extract content from DOCX source files, overwriting anything in content_html and associated images.
+        """Re-extract content from DOCX source files, overwriting anything in source_html and associated images.
 
         This requires that the document has already been saved, in order to associate image attachments.
         """
@@ -878,10 +841,11 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
             word_pipeline(context)
-            self.set_content_html_from_source_html(context.html_text)
+            doc_content.set_source_html(context.html_text)
+            doc_content.apply_source_to_content()
+            doc_content.update_toc_json_from_content_html()
             # Persist extracted HTML before text extraction to avoid update_text_content()
             # creating/updating DocumentContent with empty HTML fields.
-            self._document_content_dirty = True
             self.save_document_content()
 
             for img in self.images.all():
@@ -897,7 +861,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             result = True
 
         # always update document text
-        self.update_text_content()
+        self.document_content.update_text_content()
 
         return result
 
@@ -978,58 +942,17 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def get_content_as_text(self):
         """Get the document content as plain text."""
-        doc_content = self.get_or_create_document_content()
-
-        if doc_content.content_text is None:
-            self.update_text_content()
-            doc_content = self.get_or_create_document_content()
-
-        return doc_content.content_text if doc_content else None
+        return self.get_or_create_document_content().get_content_as_text()
 
     def update_text_content(self):
-        """Update the extracted text content."""
-        self.document_content = DocumentContent.update_or_create_for_document(self)
-        self._document_content_cache = self.document_content
+        """Update the extracted text content and keep the in-instance cache in sync."""
+        doc_content = self.get_or_create_document_content().update_text_content()
+        self.document_content = doc_content
+        self._document_content_cache = doc_content
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
-        work_frbr_uris = {}
-        doc_content = self.get_or_create_document_content()
-
-        if doc_content and doc_content.content_html:
-            root = html.fromstring(doc_content.content_html)
-            if doc_content.content_html_is_akn:
-                # get AKN links in the document content, except those in remarks or in the generated
-                # coverpage (which is outside the akn-akomaNtoso root)
-                xpath = (
-                    '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
-                    'not(ancestor::*[contains(@class, "akn-remark")])]'
-                )
-                attr = "data-href"
-            else:
-                xpath = '//a[starts-with(@href, "/akn")]'
-                attr = "href"
-
-            for a in root.xpath(xpath):
-                try:
-                    work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
-                    # here we can add a list of citation treatments as values
-                    work_frbr_uris[work_frbr_uri] = []
-                except ValueError:
-                    # ignore malformed FRBR URIs
-                    pass
-        else:
-            for citation_link in CitationLink.objects.filter(document_id=self.pk):
-                try:
-                    uri = FrbrUri.parse(citation_link.url)
-                    uri.portion = None
-                    work_frbr_uri = uri.work_uri()
-                    work_frbr_uris[work_frbr_uri] = []
-                except ValueError:
-                    # ignore malformed FRBR URIs
-                    pass
-
-        return work_frbr_uris
+        return self.get_or_create_document_content().get_cited_work_frbr_uris()
 
     def search_penalty(self):
         """Optionally provide a penalty for this document in search results. This cannot be zero or None."""
@@ -1054,64 +977,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         """Generate a friendly title for the provision with the given eid. This assumes the document is AKN HTML
         and has a TOC JSON.
         """
-        doc_content = self.get_or_create_document_content()
-        toc_json = doc_content.toc_json if doc_content else None
-        if toc_json:
-
-            def find_toc_item(toc, eid):
-                for item in toc:
-                    if item["id"] == eid:
-                        return item
-
-                    if item["id"] and eid.startswith(f"{item['id']}__"):
-                        if item["children"]:
-                            # descend into children
-                            found = find_toc_item(item["children"], eid)
-                            if found:
-                                return found
-
-                        # closest match
-                        return item
-
-            # walk down the TOC and try to find the item, or the closest entry to it
-            item = find_toc_item(toc_json, provision_eid)
-            if item:
-                if item["id"] == provision_eid:
-                    return item["title"]
-
-                # we didn't find it, so join up the gap between the item we did find and the real provision
-                if (
-                    doc_content
-                    and doc_content.content_html
-                    and doc_content.content_html_is_akn
-                ):
-                    root = doc_content.content_html_tree
-                    element = root.get_element_by_id(provision_eid, None)
-                    nums = []
-
-                    # walk upwards from our actual element up to item, gathering akn-nums along the way
-                    while element is not None:
-                        for kid in element:
-                            if "akn-num" in (kid.get("class") or ""):
-                                if kid.text:
-                                    nums.append(kid.text)
-                                break
-
-                        # have we topped out, either at the item or above it (and their ids no longer match)
-                        if element.get("id") and (
-                            element.get("id") == item["id"]
-                            or not element.get("id").startswith(item["id"])
-                        ):
-                            break
-
-                        element = element.getparent()
-
-                    nums.append(item["title"])
-                    nums.reverse()
-                    return " ".join(nums)
-
-        # fallback to the eid
-        return provision_eid
+        return self.get_or_create_document_content().friendly_provision_title(
+            provision_eid
+        )
 
     def get_breadcrumbs(self):
         """Get a list of breadcrumbs for this document, suitable for rendering in a template."""
@@ -1222,9 +1090,152 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         else:
             self.content_text = ""
 
-    def sync_document_html_cache(self):
-        self.document._document_content_cache = self
-        self.document._document_content_dirty = True
+    def get_cited_work_frbr_uris(self):
+        """Get a list of parsed FRBR URIs of works cited by this document content."""
+        work_frbr_uris = {}
+        html_content = self.content_html or self.source_html
+        if html_content:
+            root = html.fromstring(html_content)
+            is_akn_html = self.content_html_is_akn or bool(
+                root.xpath('//*[contains(@class, "akn-akomaNtoso")]')
+            )
+            if is_akn_html:
+                # get AKN links in the document content, except those in remarks or in the generated
+                # coverpage (which is outside the akn-akomaNtoso root)
+                xpath = (
+                    '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
+                    'not(ancestor::*[contains(@class, "akn-remark")])]'
+                )
+                attr = "data-href"
+            else:
+                xpath = '//a[starts-with(@href, "/akn")]'
+                attr = "href"
+
+            for a in root.xpath(xpath):
+                try:
+                    work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
+                    work_frbr_uris[work_frbr_uri] = []
+                except ValueError:
+                    # ignore malformed FRBR URIs
+                    pass
+            return work_frbr_uris
+
+        if self.document_id:
+            for citation_link in CitationLink.objects.filter(
+                document_id=self.document_id
+            ):
+                try:
+                    uri = FrbrUri.parse(citation_link.url)
+                    uri.portion = None
+                    work_frbr_uri = uri.work_uri()
+                    work_frbr_uris[work_frbr_uri] = []
+                except ValueError:
+                    # ignore malformed FRBR URIs
+                    pass
+
+        return work_frbr_uris
+
+    def friendly_provision_title(self, provision_eid):
+        """Generate a friendly title for the provision with the given eid."""
+        toc_json = self.toc_json
+        if toc_json:
+
+            def find_toc_item(toc, eid):
+                for item in toc:
+                    if item["id"] == eid:
+                        return item
+
+                    if item["id"] and eid.startswith(f"{item['id']}__"):
+                        if item["children"]:
+                            # descend into children
+                            found = find_toc_item(item["children"], eid)
+                            if found:
+                                return found
+
+                        # closest match
+                        return item
+
+            # walk down the TOC and try to find the item, or the closest entry to it
+            item = find_toc_item(toc_json, provision_eid)
+            if item:
+                if item["id"] == provision_eid:
+                    return item["title"]
+
+                # we didn't find it, so join up the gap between the item we did find and the real provision
+                if self.content_html and self.content_html_is_akn:
+                    root = self.content_html_tree
+                    element = root.get_element_by_id(provision_eid, None)
+                    nums = []
+
+                    # walk upwards from our actual element up to item, gathering akn-nums along the way
+                    while element is not None:
+                        for kid in element:
+                            if "akn-num" in (kid.get("class") or ""):
+                                if kid.text:
+                                    nums.append(kid.text)
+                                break
+
+                        # have we topped out, either at the item or above it (and their ids no longer match)
+                        if element.get("id") and (
+                            element.get("id") == item["id"]
+                            or not element.get("id").startswith(item["id"])
+                        ):
+                            break
+
+                        element = element.getparent()
+
+                    nums.append(item["title"])
+                    nums.reverse()
+                    return " ".join(nums)
+
+        # fallback to the eid
+        return provision_eid
+
+    def get_content_as_text(self):
+        """Get the document content as plain text."""
+        if self.content_text is None:
+            self.update_text_content()
+        return self.content_text
+
+    def update_text_content(self):
+        """Update the extracted text content."""
+        text = ""
+        if self.content_html:
+            root = self.content_html_tree
+            text = " ".join(root.itertext())
+        elif hasattr(self.document, "source_file") and self.document.source_file.pk:
+            # get the text from the source file, via PDF if necessary
+            with tempfile.NamedTemporaryFile() as tmp:
+                pdf = self.document.source_file.as_pdf()
+                if pdf:
+                    pdf.seek(0)
+                    shutil.copyfileobj(pdf, tmp)
+                    pdf.seek(0)
+                    tmp.flush()
+
+                    # ensure the file isn't empty, so that pdfjs_to_text doesn't fail
+                    size = os.fstat(tmp.fileno()).st_size
+                    assert size > 0, "Temporary PDF file is empty"
+
+                    try:
+                        text = pdfjs_to_text(tmp.name)
+                        # some PDFs have nulls, which breaks SQL insertion
+                        # replace rather than deleting to keep string length the same
+                        text = text.replace("\0", " ")
+                    except (subprocess.CalledProcessError, AssertionError) as e:
+                        # Keep source-file uploads usable even when test fixtures or
+                        # malformed PDFs can't be text-extracted.
+                        log.warning(
+                            "Could not extract text from source file for document %s",
+                            self.document.pk,
+                            exc_info=e,
+                        )
+
+        self.content_text = text
+        if self.pk:
+            self.save(update_fields=["content_text"])
+        self._content_html_tree = None
+        return self
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
@@ -1236,7 +1247,6 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         self._content_html_tree = None
         self.update_toc_json_from_content_html()
         self.update_content_text_from_html()
-        self.sync_document_html_cache()
 
     @hook(AFTER_SAVE, when="source_html", has_changed=True)
     def trigger_extract_citations(self):
@@ -1244,52 +1254,6 @@ class DocumentContent(LifecycleModelMixin, models.Model):
             from peachjam.tasks import extract_citations
 
             extract_citations(self.document_id)
-
-    @classmethod
-    def update_or_create_for_document(cls, document):
-        """Extract the content from a document, whatever its format is."""
-        text = ""
-        doc_content = document.get_or_create_document_content()
-        if doc_content and doc_content.content_html:
-            # it's html, grab the text from the html tree
-            root = doc_content.content_html_tree
-            text = " ".join(root.itertext())
-
-        elif hasattr(document, "source_file"):
-            if document.source_file.pk:
-                # get the text from the source file, via PDF if necessary
-                with tempfile.NamedTemporaryFile() as tmp:
-                    # convert document to pdf and then extract the text
-                    pdf = document.source_file.as_pdf()
-                    if pdf:
-                        pdf.seek(0)
-                        shutil.copyfileobj(pdf, tmp)
-                        pdf.seek(0)
-                        tmp.flush()
-
-                        # ensure the file isn't empty, so that pdfjs_to_text doesn't fail
-                        size = os.fstat(tmp.fileno()).st_size
-                        assert size > 0, "Temporary PDF file is empty"
-
-                        try:
-                            text = pdfjs_to_text(tmp.name)
-                            # some PDFs have nulls, which breaks SQL insertion
-                            # replace rather than deleting to keep string length the same
-                            text = text.replace("\0", " ")
-                        except (subprocess.CalledProcessError, AssertionError) as e:
-                            # Keep source-file uploads usable even when test fixtures or
-                            # malformed PDFs can't be text-extracted.
-                            log.warning(
-                                "Could not extract text from source file for document %s",
-                                document.pk,
-                                exc_info=e,
-                            )
-
-        doc_content = DocumentContent.objects.update_or_create(
-            document=document, defaults={"content_text": text}
-        )[0]
-        document.document_content = doc_content
-        return doc_content
 
 
 def get_country_and_locality(code):

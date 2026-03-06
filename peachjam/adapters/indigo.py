@@ -374,18 +374,10 @@ class IndigoAdapter(RequestsAdapter):
             defaults={**field_data, **frbr_uri_data},
         )
         doc_content = created_doc.get_or_create_document_content()
-        should_save_content = False
-        if doc_content.content_html != content_html:
-            doc_content.content_html = content_html
-            should_save_content = True
-        if not doc_content.content_html_is_akn:
-            doc_content.content_html_is_akn = True
-            should_save_content = True
-        if doc_content.toc_json != toc_json:
-            doc_content.toc_json = toc_json
-            should_save_content = True
-        if should_save_content:
-            doc_content.save()
+        doc_content.content_html = content_html
+        doc_content.content_html_is_akn = True
+        doc_content.toc_json = toc_json
+        doc_content.save()
 
         logger.info(f"New document: {new}")
 

@@ -308,12 +308,10 @@ class SearchableDocument(Document):
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""
         doc_content = instance.get_or_create_document_content()
-        if (
-            doc_content
-            and doc_content.content_html
-            and (not doc_content.content_html_is_akn or not doc_content.toc_json)
+        if doc_content.content_html and (
+            not doc_content.content_html_is_akn or not doc_content.toc_json
         ):
-            text = instance.get_content_as_text()
+            text = doc_content.get_content_as_text()
             if text and len(text) > self.MAX_TEXT_LENGTH:
                 log.warning(
                     f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
@@ -361,8 +359,8 @@ class SearchableDocument(Document):
     def prepare_pages(self, instance):
         """Text content of pages extracted from PDF."""
         doc_content = instance.get_or_create_document_content()
-        if not doc_content or not doc_content.content_html:
-            text = instance.get_content_as_text()
+        if not doc_content.content_html:
+            text = doc_content.get_content_as_text()
             if text and len(text) > self.MAX_TEXT_LENGTH:
                 log.warning(
                     f"Limiting text content of {instance} to {self.MAX_TEXT_LENGTH} (length is {len(text)})"
@@ -376,6 +374,7 @@ class SearchableDocument(Document):
                 if page:
                     pages.append({"page_num": i, "body": page})
             return pages
+        return None
 
     def prepare_provisions(self, instance):
         """Text content of provisions from AKN HTML."""
