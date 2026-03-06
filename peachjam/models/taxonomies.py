@@ -1,7 +1,9 @@
+import logging
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import connection, models, transaction
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -9,6 +11,8 @@ from guardian.shortcuts import get_objects_for_user
 from treebeard.mp_tree import MP_Node
 
 from peachjam.models import CoreDocument, EntityProfile
+
+log = logging.getLogger(__name__)
 
 
 class Taxonomy(MP_Node):
@@ -38,6 +42,14 @@ class Taxonomy(MP_Node):
         null=False,
         help_text=_(
             "Allow users to make this taxonomy and its descendants available offline."
+        ),
+    )
+    hidden = models.BooleanField(
+        _("hidden"),
+        default=False,
+        null=False,
+        help_text=_(
+            "Hide this taxonomy and its descendants from public taxonomy listings."
         ),
     )
 
@@ -191,7 +203,11 @@ class Taxonomy(MP_Node):
         node_ids = []
 
         def filter_nodes(node):
-            is_restricted = node.get("data", {}).get("restricted", False)
+            data = node.get("data", {})
+            is_hidden = data.get("hidden", False)
+            if is_hidden:
+                return None
+            is_restricted = data.get("restricted", False)
             is_allowed = node.get("id") in allowed_taxonomies
             if is_restricted and not is_allowed:
                 return None
@@ -258,3 +274,77 @@ class DocumentTopic(models.Model):
 
     def __str__(self):
         return f"{self.topic.name} - {self.document.title}"
+
+
+class TaxonomyDocumentCount(models.Model):
+    """Pre-calculated count of distinct documents linked to a taxonomy node
+    and all its descendants. Follows the ProvisionCitationCount pattern."""
+
+    taxonomy = models.OneToOneField(
+        Taxonomy,
+        on_delete=models.CASCADE,
+        related_name="document_count_cache",
+        verbose_name=_("taxonomy"),
+    )
+    count = models.PositiveIntegerField(_("count"), default=0)
+
+    class Meta:
+        verbose_name = _("taxonomy document count")
+        verbose_name_plural = _("taxonomy document counts")
+
+    def __str__(self):
+        return f"{self.taxonomy.name}: {self.count}"
+
+    @classmethod
+    def refresh_for_taxonomy(cls, root):
+        """Recompute document counts for all descendants of root.
+
+        Each node's count includes documents linked directly to it plus documents
+        linked to any of its descendants. Uses treebeard's materialised path
+        (steplen=4) to walk ancestors efficiently in a single SQL query.
+        """
+        if root is None:
+            return
+
+        root_path = root.path
+
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                # Delete existing counts for this tree
+                cursor.execute(
+                    """
+                    DELETE FROM peachjam_taxonomydocumentcount
+                    WHERE taxonomy_id IN (
+                        SELECT id FROM peachjam_taxonomy WHERE path LIKE %s
+                    )
+                    """,
+                    [root_path + "%"],
+                )
+
+                # For each taxonomy node in the tree, count distinct documents
+                # linked to it or any of its descendants. We do this by joining
+                # DocumentTopic (leaf links) back to all ancestor nodes using
+                # the materialised path: a node is an ancestor of another if
+                # the descendant's path starts with the ancestor's path.
+                cursor.execute(
+                    """
+                    INSERT INTO peachjam_taxonomydocumentcount (taxonomy_id, count)
+                    SELECT
+                        ancestor.id,
+                        COUNT(DISTINCT dt.document_id)
+                    FROM peachjam_taxonomy ancestor
+                    INNER JOIN peachjam_taxonomy descendant
+                        ON descendant.path LIKE ancestor.path || '%%'
+                    INNER JOIN peachjam_documenttopic dt
+                        ON dt.topic_id = descendant.id
+                    WHERE ancestor.path LIKE %s
+                    GROUP BY ancestor.id
+                    """,
+                    [root_path + "%"],
+                )
+
+        log.info(
+            "Refreshed document counts for taxonomy tree rooted at '%s' (pk=%s)",
+            root.slug,
+            root.pk,
+        )

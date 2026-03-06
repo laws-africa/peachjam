@@ -15,16 +15,14 @@ class GitbookAdapterTest(TestCase):
         )
 
     def test_build_toc(self):
-        toc = self.adapter.build_toc(
-            """
+        toc = self.adapter.build_toc("""
 <h1>Table of contents</h1>
 <ul>
 <li><a href="README.md">Frontmatter</a></li>
 <li><a href="unit-1-administration-of-law.md">Unit 1: Administration of Law</a></li>
 <li><a href="unit-2-the-composition-of-courts.md">Unit 2: The Composition of Courts</a></li>
 </ul>
-"""
-        )
+""")
         self.assertListEqual(
             [
                 {
@@ -73,9 +71,7 @@ class GitbookAdapterTest(TestCase):
 Hello :)
 
 ## Subheading
-""".encode(
-                "utf-8"
-            )
+""".encode("utf-8")
 
         self.adapter.get_repo_file = content
         self.adapter.compile_pages(book, toc, "book1")
@@ -138,14 +134,12 @@ Subheading
         )
 
     def test_rewrite_images(self):
-        root = parse_html_str(
-            """
+        root = parse_html_str("""
 <div>
 <img src=".gitbook/assets/foo.png">
 <img src="../.gitbook/assets/bar.png">
 </div>
-"""
-        )
+""")
         self.adapter.munge_page_html({"id": "test"}, root)
 
         self.assertHTMLEqual(
@@ -159,13 +153,11 @@ Subheading
         )
 
     def test_fix_footnotes(self):
-        root = parse_html_str(
-            """
+        root = parse_html_str("""
 <div>
 <p>to enforce<sup>[</sup><a href="#user-content-fn-1"><sup>1</sup></a><a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a><sup>]</sup></p>
 </div>
-"""  # noqa
-        )
+""")  # noqa
         self.adapter.munge_page_html({"id": "test"}, root)
 
         self.assertHTMLEqual(

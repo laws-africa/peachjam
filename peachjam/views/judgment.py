@@ -1,15 +1,22 @@
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
-from django.views.generic import DetailView, TemplateView
+from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 from peachjam.registry import registry
-from peachjam.views.generic_views import BaseDocumentDetailView
+from peachjam.views.generic_views import (
+    BaseDocumentDetailView,
+    FilteredDocumentListView,
+)
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -39,6 +46,139 @@ class JudgmentListView(TemplateView):
 
     def add_entity_profile(self, context):
         pass
+
+
+class FlynoteTopicListView(ListView):
+    model = Flynote
+    template_name = "peachjam/flynote/list.html"
+    context_object_name = "all_topics"
+    paginate_by = 20
+
+    def get(self, request, *args, **kwargs):
+        if not Flynote.get_root_nodes().exists():
+            return redirect(reverse("judgment_list"))
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        qs = Flynote.get_root_nodes().order_by("name")
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(name__icontains=q)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        children = Flynote.get_root_nodes().order_by("name")
+
+        count_map = dict(
+            FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
+                "flynote_id", "count"
+            )
+        )
+
+        all_enriched = []
+        for child in children:
+            child_names = list(child.get_children().values_list("name", flat=True)[:3])
+            all_enriched.append(
+                {
+                    "topic": child,
+                    "count": count_map.get(child.pk, 0),
+                    "child_names": child_names,
+                }
+            )
+
+        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
+        context["popular_topics"] = sorted_by_count[:16]
+
+        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
+        context["all_topics"] = [
+            enriched_lookup[topic.pk]
+            for topic in context["all_topics"]
+            if topic.pk in enriched_lookup
+        ]
+        context["total_judgment_count"] = sum(t["count"] for t in all_enriched)
+        context["root"] = None
+        return context
+
+
+class FlynoteTopicDetailView(FilteredDocumentListView):
+    template_name = "peachjam/flynote/detail.html"
+    navbar_link = "judgments"
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/_document_table.html"]
+            if self.request.htmx.target == "flynote-subtopics-container":
+                return [self.template_name]
+            return ["peachjam/_document_table_form.html"]
+        return super().get_template_names()
+
+    def dispatch(self, request, *args, **kwargs):
+        self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_base_queryset(self):
+        descendant_ids = list(
+            self.flynote.get_descendants().values_list("pk", flat=True)
+        ) + [self.flynote.pk]
+        return (
+            super()
+            .get_base_queryset()
+            .filter(judgment__flynotes__flynote__in=descendant_ids)
+            .distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        children = self.flynote.get_children()
+
+        count_map = dict(
+            FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
+                "flynote_id", "count"
+            )
+        )
+
+        all_enriched = []
+        for child in children:
+            child_names = list(child.get_children().values_list("name", flat=True)[:3])
+            all_enriched.append(
+                {
+                    "topic": child,
+                    "count": count_map.get(child.pk, 0),
+                    "child_names": child_names,
+                }
+            )
+
+        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
+        context["popular_topics"] = sorted_by_count[:16]
+        context["has_more_topics"] = len(all_enriched) > len(context["popular_topics"])
+
+        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
+
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            children = children.filter(name__icontains=q)
+
+        all_topics = [
+            enriched_lookup[topic.pk]
+            for topic in children
+            if topic.pk in enriched_lookup
+        ]
+
+        paginator = Paginator(all_topics, 20)
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+
+        context["all_topics"] = page_obj.object_list
+        context["page_obj"] = page_obj
+
+        context["topic"] = self.flynote
+        context["ancestors"] = self.flynote.get_ancestors()
+        context["root"] = None
+
+        return context
 
 
 @registry.register_doc_type("judgment")
@@ -112,9 +252,11 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
         outgoing_histories = [
             {
                 "case_history": ch,
-                "document": ch.historical_judgment_work.documents.first()
-                if ch.historical_judgment_work
-                else None,
+                "document": (
+                    ch.historical_judgment_work.documents.first()
+                    if ch.historical_judgment_work
+                    else None
+                ),
             }
             for ch in document.work.case_histories.select_related(
                 "historical_judgment_work", "outcome"

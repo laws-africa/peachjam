@@ -193,7 +193,7 @@ class DateWidget(CharWidget):
             raise ValueError("Date is required")
 
         if value:
-            if type(value) == datetime:
+            if isinstance(value, datetime):
                 return value
             return parse(value)
 
@@ -478,7 +478,7 @@ class ManyToManyRequiredWidget(ManyToManyWidget):
                 try:
                     self.model.objects.get(**{self.field: item})
                 except self.model.DoesNotExist:
-                    raise ValueError(f"{item } does not exist in {self.model.__name__}")
+                    raise ValueError(f"{item} does not exist in {self.model.__name__}")
 
             lookup = f"{self.field}__in"
             return self.model.objects.filter(**{lookup: items})

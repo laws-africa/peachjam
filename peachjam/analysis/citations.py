@@ -62,7 +62,7 @@ class CitationAnalyser:
                 # get the indexes of all newlines in text, by page
                 newlines = [
                     [i for i, c in enumerate(page) if c == "\n"]
-                    for page in text.split("\x0C")
+                    for page in text.split("\x0c")
                 ]
                 self.store_text_citation_links(document, matcher, newlines)
             return True
