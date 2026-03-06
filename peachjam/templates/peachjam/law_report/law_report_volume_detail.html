@@ -24,27 +24,31 @@
   {% block page-title %}
     <div class="my-4">
       <h1>{{ page_title }}</h1>
-      {% block follow-button %}{% endblock %}
     </div>
   {% endblock %}
-  {% if law_report_volumes %}
-    <div class="flow-columns">
-      {% for group in law_report_volume_groups %}
-        <div class="flow-columns-group">
-          <ul class="list-unstyled">
-            {% for volume in group %}
-              {% if law_report_volume.slug == volume.slug %}
-                <li>{{ volume.title }}</li>
-              {% else %}
-                <li>
-                  <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
-                </li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        </div>
-      {% endfor %}
-    </div>
+  <a href="{{ law_report.get_absolute_url }}"
+     class="btn btn-sm btn-outline-secondary mb-3">
+    <i class="bi bi-arrow-left me-1"></i>{% trans 'Back to law report' %}
+  </a>
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'judgments' %}active{% endif %}"
+         href="{{ law_report_volume.get_absolute_url }}">{% trans 'Judgments' %}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'cases' %}active{% endif %}"
+         href="{{ law_report_volume.get_absolute_url }}?tab=cases">{% trans 'Cited cases' %}</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link {% if active_tab == 'legislation' %}active{% endif %}"
+         href="{{ law_report_volume.get_absolute_url }}?tab=legislation">{% trans 'Cited legislation' %}</a>
+    </li>
+  </ul>
+  {% include 'peachjam/_document_count.html' %}
+{% endblock %}
+{% block document-table %}
+  {% if active_tab != 'judgments' %}
+    <input type="hidden" name="tab" value="{{ active_tab }}" form="filter-form" />
   {% endif %}
-  {% include 'peachjam/_count_and_search.html' %}
+  {{ block.super }}
 {% endblock %}
