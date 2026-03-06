@@ -1,0 +1,21 @@
+{% load i18n %}
+<form role="search">
+  <div class="d-flex">
+    <input id="flynote-search"
+           type="search"
+           name="q"
+           class="form-control"
+           placeholder="{% trans 'Filter topics' %}"
+           aria-label="{% trans 'Filter topics' %}"
+           value="{{ request.GET.q|default:'' }}"
+           hx-get="{{ request.path }}"
+           hx-trigger="input changed delay:400ms, search"
+           hx-target="{{ htmx_target }}"
+           hx-select="{{ htmx_target }}"
+           hx-swap="outerHTML"
+           hx-indicator=".htmx-progress"/>
+  </div>
+  <div class="htmx-progress progress mb-2">
+    <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+  </div>
+</form>

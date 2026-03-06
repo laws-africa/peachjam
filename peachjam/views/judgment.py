@@ -105,6 +105,15 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
 
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/_document_table.html"]
+            if self.request.htmx.target == "flynote-subtopics-container":
+                return [self.template_name]
+            return ["peachjam/_document_table_form.html"]
+        return super().get_template_names()
+
     def dispatch(self, request, *args, **kwargs):
         self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
         return super().dispatch(request, *args, **kwargs)
@@ -144,6 +153,7 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
 
         sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
         context["popular_topics"] = sorted_by_count[:16]
+        context["has_more_topics"] = len(all_enriched) > len(context["popular_topics"])
 
         enriched_lookup = {item["topic"].pk: item for item in all_enriched}
 
