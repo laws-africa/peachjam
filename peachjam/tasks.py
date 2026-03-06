@@ -364,7 +364,7 @@ def extract_criminal_data(doc_id):
     log.info(f"Extracting criminal data from judgment {doc_id}")
     from peachjam.analysis.criminal_data import CriminalDataExtractor
 
-    CriminalDataExtractor(doc).run()
+    CriminalDataExtractor.extract(doc)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

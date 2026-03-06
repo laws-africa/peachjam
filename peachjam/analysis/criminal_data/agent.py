@@ -1,69 +1,49 @@
 import logging
 import re
-from typing import Any, Dict, List, Literal, Optional, Sequence, Union
+from typing import Any, Dict, List, Literal, Optional
 
 from agents import Agent, Runner, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.db import close_old_connections, connection
 from pydantic import BaseModel, Field, conint
 
 from peachjam.models import Offence, Sentence
 
 log = logging.getLogger(__name__)
 
-KeywordInput = Union[str, Sequence[str]]
-_SPLIT = re.compile(r"[,\n;|]+")
-
 
 @function_tool
-def search_offences(
-    keywords: KeywordInput,
-    *,
-    limit: int = 20,
-    min_rank: Optional[float] = None,
-    config: str = "english",
-) -> List[Dict[str, Any]]:
+def search_offences(search_terms: str) -> List[Dict[str, Any]]:
     """
-    Perform a full-text search against the offence database using one or
-    more offence-related keywords or phrases extracted from a judgment.
+    Search the offence database for offences matching one or more offence-related terms.
 
     Purpose
     -------
-    This tool is used to match offence mentions found in a judgment
-    against canonical offences stored in the database.
+    This tool maps offence mentions found in a judgment to canonical offences
+    stored in the database.
 
-    It supports providing MULTIPLE keywords or alternative phrases in
-    order to cast a broader search net (for example, synonyms, shortened
-    forms, or variations of the offence name).
+    Input
+    -----
+    search_terms : str
 
-    When to Use
-    -----------
-    - Call this tool for each distinct offence mention identified in the judgment.
-    - If the offence wording is ambiguous or long, provide multiple concise
-      keyword variants to improve recall.
-    - Always attempt a database search before concluding that no match exists.
-    - Never invent offence IDs without calling this tool.
+        A single string containing one or more offence search terms.
 
-    Parameters
-    ----------
-    keywords : str
-        A string containing one or more keywords or short phrases describing
-        the offence. Multiple alternatives may be included, separated by commas.
+        If multiple terms are needed, separate them with commas.
 
         Examples:
             "robbery with violence"
-            "defilement, sexual assault"
-            "obtaining by false pretences, fraud"
+            "robbery with violence, robbery, theft"
+            "criminal trespass, trespass, unlawful entry"
 
-        Guidelines:
-        - Keep each keyword concise (avoid full sentences).
-        - Include statutory section numbers if present (e.g. "296(2)").
-        - Include synonyms or simplified versions if helpful.
-        - Do NOT include procedural phrases like "contrary to" or
-          "as read with".
+    Agent Guidance
+    --------------
+    - Always call this tool before assigning an offence_id.
+    - Provide 3–5 concise keyword variants when possible.
+    - Never invent offence IDs.
 
     Returns
     -------
-    A ranked list (maximum 20) of candidate offences:
+    A ranked list of offence candidates:
 
         [
             {
@@ -74,69 +54,62 @@ def search_offences(
             ...
         ]
 
-    Result Interpretation
-    ---------------------
-    - Results are ranked by PostgreSQL full-text search relevance.
-    - Higher-ranked results are more likely to match the intended offence.
-    - Prefer candidates that:
-        * closely match the offence wording
-        * align with any mentioned statutory section
-        * align with contextual clues in the judgment
-
-    Matching Strategy (Agent Guidance)
-    -----------------------------------
-    - If unsure, try multiple variations of the offence name
-      (e.g., full name + shortened name).
-    - If the first search does not return a strong match,
-      refine the keywords and call the tool again.
-    - If multiple counts refer to the same offence, the same
-      offence ID may be reused.
-    - If no reasonable candidate appears, treat the offence
-      as unmatched and assign low confidence.
-
-    Constraints
-    -----------
-    - Never fabricate offence IDs.
-    - Always base selections strictly on returned results.
-    - If no keywords are provided, the tool returns an empty list.
+    Notes
+    -----
+    - Results are ranked using PostgreSQL full-text search over the offence
+      title and description.
+    - Sorting is deterministic: rank DESC, title ASC, id ASC.
     """
-    log.info(f"search for offences keywords: {keywords}")
 
-    if isinstance(keywords, str):
-        terms = [t.strip() for t in _SPLIT.split(keywords)]
-    else:
-        terms = [str(t).strip() for t in (keywords or [])]
-        terms = [p.strip() for t in terms for p in _SPLIT.split(t)]
-    terms = list(dict.fromkeys([t for t in terms if t]))  # dedupe, preserve order
-    if not terms:
-        return []
+    close_old_connections()
+    try:
+        log.info("search for offences terms: %s", search_terms)
 
-    vector = SearchVector("title", weight="A", config=config) + SearchVector(
-        "description", weight="B", config=config
-    )
+        _SPLIT = re.compile(r"[,\n;|]+")
 
-    ts_query = None
-    for t in terms:
-        q = SearchQuery(t, search_type="plain", config=config)
-        ts_query = q if ts_query is None else (ts_query | q)
+        terms = [t.strip() for t in _SPLIT.split(search_terms or "")]
+        terms = list(dict.fromkeys([t for t in terms if t]))
+        if not terms:
+            return []
 
-    rank = SearchRank(vector, ts_query)
-    qs = Offence.objects.annotate(rank=rank).order_by("-rank")
-    if min_rank is not None:
-        qs = qs.filter(rank__gte=min_rank)
+        config = "english"
+        limit = 10
+        min_rank = 0.01
 
-    results: List[Dict[str, Any]] = []
-    for o in qs[:limit]:
-        desc = (o.description or "").strip()
-        results.append(
-            {
-                "id": o.id,
-                "title": o.title,
-                "description_snippet": (desc[:220] + "…") if len(desc) > 220 else desc,
-            }
+        vector = SearchVector("title", weight="A", config=config) + SearchVector(
+            "description", weight="B", config=config
         )
-    log.info(f"results:{results}")
-    return results
+
+        ts_query = None
+        for term in terms:
+            q = SearchQuery(term, search_type="plain", config=config)
+            ts_query = q if ts_query is None else (ts_query | q)
+
+        rank = SearchRank(vector, ts_query)
+
+        qs = (
+            Offence.objects.annotate(rank=rank)
+            .filter(rank__gte=min_rank)
+            .order_by("-rank", "title", "id")  # stable ordering
+        )
+
+        results: List[Dict[str, Any]] = []
+
+        for offence in qs[:limit]:
+            results.append(
+                {
+                    "id": offence.id,
+                    "title": offence.title,
+                    "description": (offence.description or "").strip(),
+                }
+            )
+
+        log.info("offence search results: %s", results)
+
+        return results
+
+    finally:
+        connection.close()
 
 
 PROMPT = """
@@ -195,21 +168,6 @@ Return structured data only.
 TEXT:
 "The appellant was convicted of robbery with violence contrary to section 296(2)
 and sentenced to ten years imprisonment."
-
-OUTPUT (shape only):
-{
-  "offences": [
-    {
-      "offence_id": 123,
-      "extracted_offence": "robbery with violence",
-      "basis": "convicted of robbery with violence contrary to section 296(2)",
-      "sentences": [
-        {"sentence_type":"imprisonment",
-        "duration_months":120,"suspended":false,"mandatory_minimum":null,"basis":"sentenced to ten years imprisonment"}
-      ]
-    }
-  ]
-}
 """
 
 
