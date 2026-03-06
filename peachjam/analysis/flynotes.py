@@ -204,7 +204,7 @@ class FlynoteUpdater:
             return Flynote.objects.filter(slug=expected_slug).first()
 
     @transaction.atomic
-    def update_for_judgment(self, judgment, refresh_counts=True):
+    def update_for_judgment(self, judgment, refresh_counts=False):
         """Parse a judgment's flynote and sync its Flynote links.
 
         1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
