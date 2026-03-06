@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0277_taxonomy_hidden_field"),
+        ("peachjam", "0279_remove_flynote_taxonomy_root"),
     ]
 
     operations = [
