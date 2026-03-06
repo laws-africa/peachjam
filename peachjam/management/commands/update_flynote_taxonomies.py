@@ -1,5 +1,3 @@
-import time
-
 from django.core.management.base import BaseCommand
 
 from peachjam.analysis.flynotes import FlynoteUpdater
@@ -106,11 +104,7 @@ class Command(BaseCommand):
             msg += f" Last pk processed: {last_pk}."
 
         if not skip_counts and processed > 0:
-            self.stdout.write("Refreshing flynote document counts...")
-            start = time.time()
             FlynoteDocumentCount.refresh_for_flynote(None)
-            elapsed = time.time() - start
-            total = FlynoteDocumentCount.objects.count()
-            msg += f" Flynote counts refreshed ({total} nodes in {elapsed:.1f}s)."
+            msg += " Flynote counts refreshed."
 
         self.stdout.write(self.style.SUCCESS(msg))
