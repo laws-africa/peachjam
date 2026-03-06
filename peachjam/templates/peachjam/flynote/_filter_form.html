@@ -1,14 +1,14 @@
 {% load i18n %}
 <form role="search">
-  <div class="d-flex {{ form_class|default:'' }}">
+  <div class="d-flex">
     <input id="flynote-search"
            type="search"
            name="q"
-           class="form-control {{ input_class|default:'' }}"
+           class="form-control"
            placeholder="{% trans 'Filter topics' %}"
            aria-label="{% trans 'Filter topics' %}"
            value="{{ request.GET.q|default:'' }}"
-           hx-get="{{ htmx_url|default:request.path }}"
+           hx-get="{{ request.path }}"
            hx-trigger="input changed delay:400ms, search"
            hx-target="{{ htmx_target }}"
            hx-select="{{ htmx_target }}"

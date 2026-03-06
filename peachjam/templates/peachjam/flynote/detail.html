@@ -37,7 +37,7 @@
           <div class="card card-body">
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h3 class="h5 mb-0">{% trans "All subtopics" %}</h3>
-              {% include 'peachjam/flynote/_filter_form.html' with htmx_url=request.path htmx_target='#flynote-subtopics-container' input_class='form-control-sm' %}
+              {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-subtopics-container' %}
             </div>
             <div id="flynote-subtopics-container">{% include 'peachjam/flynote/_list.html' %}</div>
           </div>

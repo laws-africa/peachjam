@@ -26,7 +26,7 @@
     {% endif %}
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">{% trans "All topics" %}</h2>
-      {% include 'peachjam/flynote/_filter_form.html' with htmx_url=request.path htmx_target='#flynote-all-list-container' %}
+      {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-all-list-container' %}
     </div>
     <div id="flynote-all-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
   </section>
