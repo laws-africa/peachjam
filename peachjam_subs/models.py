@@ -221,6 +221,28 @@ class Product(models.Model):
 
         return products.order_by("tier")
 
+    def get_best_available_offering_for_user(self, user):
+        """Return the best available selectable offering for the user.
+
+        If the user has a current subscription, prefer offerings with the same
+        billing period, then pick the lowest-priced option (with pk as tie-breaker).
+        """
+        offerings = ProductOffering.product_offerings_available_to_user(user).filter(
+            pk__in=self.selectable_offerings.values("pk")
+        )
+
+        current_subscription = Subscription.get_or_create_active_for_user(user)
+        preferred_period = current_subscription.product_offering.pricing_plan.period
+        preferred_offering = (
+            offerings.filter(pricing_plan__period=preferred_period)
+            .order_by("pricing_plan__price", "pk")
+            .first()
+        )
+        if preferred_offering:
+            return preferred_offering
+
+        return offerings.order_by("pricing_plan__price", "pk").first()
+
 
 class PricingPlan(models.Model):
     class Period(models.TextChoices):

@@ -234,6 +234,75 @@ class SubscriptionTests(TestCase):
         self.assertIn(selectable_offering, offerings)
         self.assertNotIn(non_selectable_offering, offerings)
 
+    def test_get_best_available_offering_for_user_prefers_current_period(self):
+        monthly_product = Product.objects.create(name="Plan With Periods", tier=30)
+        monthly_offering = ProductOffering.objects.create(
+            product=monthly_product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Plan With Periods Monthly",
+                price=Decimal("30.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        annual_offering = ProductOffering.objects.create(
+            product=monthly_product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Plan With Periods Annual",
+                price=Decimal("20.00"),
+                period=PricingPlan.Period.ANNUALLY,
+            ),
+        )
+        monthly_product.selectable_offerings.set([monthly_offering, annual_offering])
+        assign_perm("peachjam_subs.can_subscribe", self.user, monthly_offering)
+        assign_perm("peachjam_subs.can_subscribe", self.user, annual_offering)
+
+        best = monthly_product.get_best_available_offering_for_user(self.user)
+        self.assertEqual(monthly_offering, best)
+
+    def test_get_best_available_offering_for_user_falls_back_to_lowest_price(self):
+        annual_only_product = Product.objects.create(name="Annual Preferred", tier=40)
+        annual_offering = ProductOffering.objects.create(
+            product=annual_only_product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Annual Preferred Annual",
+                price=Decimal("15.00"),
+                period=PricingPlan.Period.ANNUALLY,
+            ),
+        )
+        annual_only_product.selectable_offerings.set([annual_offering])
+        assign_perm("peachjam_subs.can_subscribe", self.user, annual_offering)
+
+        best = annual_only_product.get_best_available_offering_for_user(self.user)
+        self.assertEqual(annual_offering, best)
+
+    def test_get_best_available_offering_for_user_ignores_non_selectable_offerings(
+        self,
+    ):
+        product = Product.objects.create(name="Selectable Only", tier=50)
+        selectable_offering = ProductOffering.objects.create(
+            product=product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Selectable Only Monthly",
+                price=Decimal("25.00"),
+                period=PricingPlan.Period.MONTHLY,
+            ),
+        )
+        non_selectable_offering = ProductOffering.objects.create(
+            product=product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Selectable Only Hidden Annual",
+                price=Decimal("5.00"),
+                period=PricingPlan.Period.ANNUALLY,
+            ),
+        )
+        product.selectable_offerings.set([selectable_offering])
+
+        assign_perm("peachjam_subs.can_subscribe", self.user, selectable_offering)
+        assign_perm("peachjam_subs.can_subscribe", self.user, non_selectable_offering)
+
+        best = product.get_best_available_offering_for_user(self.user)
+        self.assertEqual(selectable_offering, best)
+
     def test_validate_selectable_offering_catalog_rejects_non_monotonic_tier_price(
         self,
     ):

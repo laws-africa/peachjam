@@ -1,33 +1,48 @@
 {% load i18n peachjam_subs %}
 {% if lowest_product %}
-  {% upsell_url lowest_product as upsell_url %}
-  {% if not request.user.is_authenticated %}
-    {% url 'account_login' as base_login_url %}
-    {% url 'account_signup' as signup_url %}
-    {% with next_url=request.htmx.current_url|default:request.path %}
-      {% with login_url=base_login_url|add:"?next="|add:next_url %}
-        {% block anonymous-user %}
-          <p>
-            {% blocktrans trimmed with lowest_product=lowest_product.name login_url=login_url signup_url=signup_url %}
-              This feature is available only to subscribers.
-              <a href="{{ login_url }}">Log in</a> or
-              <a href="{{ signup_url }}">Sign up</a>
-              and subscribe to <a href="{{ upsell_url }}">{{ lowest_product }}</a> to unlock access.
-            {% endblocktrans %}
-          </p>
-        {% endblock %}
-      {% endwith %}
-    {% endwith %}
-  {% else %}
-    {% block authenticated-user %}
-      <p>
-        {% blocktrans trimmed with lowest_product=lowest_product.name %}
-          Your current subscription doesn’t include this feature.
-          Please upgrade to <a href="{{ upsell_url }}">{{ lowest_product }}</a> to unlock access.
-        {% endblocktrans %}
-      </p>
-    {% endblock %}
-  {% endif %}
+  {% with next_url=request.htmx.current_url|default:request.path %}
+    {% upsell_url lowest_product next_url as upsell_url %}
+    <div class="card w-100 mx-auto" style="max-width: 35rem;">
+      <div class="card-body">
+        {% if not request.user.is_authenticated %}
+          {% login_url_with_next upsell_url as login_url %}
+          {% block anonymous-user %}
+            <h5 class="card-title">
+              {% if lowest_product.price %}
+                {% trans "Unlock this feature" %}
+              {% else %}
+                {% trans "Create a free account" %}
+              {% endif %}
+            </h5>
+            <p>{% trans "Sign up to save documents, read summaries and access more features." %}</p>
+            <a class="btn btn-primary mb-1" href="{{ login_url }}">
+              {% if lowest_product.price %}
+                {% trans "Start" %} {{ lowest_product.name }}
+              {% else %}
+                {% trans "Create a free account" %}
+              {% endif %}
+            </a>
+            <p>
+              <small>
+                {% trans "Already have an account?" %}
+                <a href="{{ login_url }}">{% trans "Log in" %}</a>.
+              </small>
+            </p>
+          {% endblock %}
+        {% else %}
+          {% block authenticated-user %}
+            <h5 class="card-title">{% trans "Unlock this feature" %}</h5>
+            <p>
+              {% blocktrans trimmed with lowest_product=lowest_product.name %}
+                This feature is available with {{ lowest_product }}.
+              {% endblocktrans %}
+            </p>
+            <a class="btn btn-primary" href="{{ upsell_url }}">{% trans "Upgrade to" %} {{ lowest_product.name }}</a>
+          {% endblock %}
+        {% endif %}
+      </div>
+    </div>
+  {% endwith %}
 {% else %}
   {% block no-product %}
     <p>{% trans "This feature is not currently available." %}</p>
