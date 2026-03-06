@@ -23,7 +23,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
 from docpipe.pipeline import PipelineContext
-from docpipe.soffice import soffice_convert
+from docpipe.soffice import SOfficeError, soffice_convert
 from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import etree, html
@@ -520,6 +520,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         help_text=_("Is this document published and visible on the website?"),
     )
     metadata_json = models.JSONField(_("metadata JSON"), null=True, blank=True)
+    # Legacy compatibility field retained because the database column still exists
+    # and fixtures/imports insert into CoreDocument directly.
+    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
@@ -840,7 +843,15 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         ):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
-            word_pipeline(context)
+            try:
+                word_pipeline(context)
+            except (SOfficeError, subprocess.CalledProcessError, KeyError) as e:
+                log.warning(
+                    "Could not extract content from source file for document %s",
+                    self.pk,
+                    exc_info=e,
+                )
+                return False
             doc_content.set_source_html(context.html_text)
             doc_content.apply_source_to_content()
             doc_content.update_toc_json_from_content_html()
