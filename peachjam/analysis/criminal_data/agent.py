@@ -73,8 +73,8 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
             return []
 
         config = "english"
-        limit = 10
-        min_rank = 0.01
+        limit = 5
+        min_rank = 0.08
 
         vector = SearchVector("title", weight="A", config=config) + SearchVector(
             "description", weight="B", config=config
@@ -132,9 +132,16 @@ Only extract CASE OFFENCES.
 <MANDATORY TOOL USE>
 For EACH extracted offence you MUST call search_offences to obtain candidate offence IDs.
 - Call search_offences with 3–5 concise keyword variants, comma-separated.
-- Choose the best matching offence_id from the results.
-- Never invent an offence_id.
-- If no clear match exists, offence_id = null.
+- Use the search results only to map the already-extracted offence to a database offence.
+- Assign offence_id only if a candidate is a clear semantic match to the extracted offence text.
+- A candidate is a clear match only if its title or description closely matches the extracted offence wording.
+
+<IMPORTANT>
+- You are not allowed to invent offence_id
+- You are not allowed to output any offence_id unless that exact ID appears in the search_offences results for that
+offence.
+- If search_offences returns no results, offence_id must be null.
+- If search_offences returns results but none clearly match, offence_id must be null.
 
 Example call:
 search_offences("robbery with violence, robbery, theft, stealing")

@@ -162,6 +162,96 @@ class CriminalDataExtractionTests(TestCase):
         self.assertEqual(robbery_imprisonment.duration_months, 120)
         self.assertTrue(robbery_imprisonment.mandatory_minimum is True)
 
+    def test_extract_unmatched_offence_for_other_crime(self):
+        judgment_text = """
+        The appellant was charged with assault causing actual bodily harm.
+
+        The prosecution evidence was that the appellant attacked the complainant
+        during a quarrel and caused bodily injuries.
+
+        After hearing the evidence, the trial court convicted the appellant
+        of assault and sentenced him to twelve months imprisonment.
+        """.strip()
+
+        result = extract_offences_and_sentences(judgment_text)
+        log.info(f"test_extract_unmatched_offence_for_other_crime: {result}")
+
+        extracted = " ".join(o.extracted_offence.lower() for o in result.offences)
+
+        self.assertIn("assault", extracted)
+        self.assertNotIn("robbery", extracted)
+        self.assertNotIn("trespass", extracted)
+
+        offence = result.offences[0]
+        self.assertIsNone(offence.offence_id)
+
+        sentence = offence.sentences[0]
+        self.assertEqual(sentence.sentence_type, "imprisonment")
+        self.assertEqual(sentence.duration_months, 12)
+
+    def test_extract_no_offences_for_civil_judgment(self):
+        judgment_text = """
+        IN THE HIGH COURT OF TANZANIA
+        AT DAR ES SALAAM
+        CIVIL APPEAL NO. 8 OF 2021
+
+        The appellant challenges the judgment of the lower court on liability
+        and damages arising from breach of contract.
+
+        After considering the record and submissions, the court dismisses the appeal.
+        """.strip()
+
+        result = extract_offences_and_sentences(judgment_text)
+        log.info(f"test_extract_no_offences_for_civil_judgment: {result}")
+
+        self.assertEqual(result.offences, [])
+
+    def test_extract_unmatched_offence_for_incidental_mentions_only(self):
+        judgment_text = """
+        The appellant was charged with assault.
+
+        In his submissions, counsel cited authorities discussing robbery with violence
+        and criminal trespass as examples of offences requiring strict proof.
+
+        However, in the present case the appellant was only charged with assault
+        and was sentenced to six months imprisonment.
+        """.strip()
+
+        result = extract_offences_and_sentences(judgment_text)
+        log.info(
+            f"test_extract_unmatched_offence_for_incidental_mentions_only: {result}"
+        )
+
+        extracted = " ".join(o.extracted_offence.lower() for o in result.offences)
+
+        self.assertIn("assault", extracted)
+        self.assertNotIn("robbery", extracted)
+        self.assertNotIn("trespass", extracted)
+
+        offence = result.offences[0]
+        self.assertIsNone(offence.offence_id)
+
+        sentence = offence.sentences[0]
+        self.assertEqual(sentence.duration_months, 6)
+
+    def test_extract_unclear_text_does_not_match_seeded_offences(self):
+        judgment_text = """
+        The appellant was convicted and sentenced by the trial court.
+
+        He now appeals against both conviction and sentence, arguing that
+        the prosecution failed to prove the case beyond reasonable doubt.
+
+        The court has considered the record and submissions of the parties.
+        """.strip()
+
+        result = extract_offences_and_sentences(judgment_text)
+        log.info(f"test_extract_unclear_text_does_not_match_seeded_offences: {result}")
+
+        extracted = " ".join(o.extracted_offence.lower() for o in result.offences)
+
+        self.assertNotIn("robbery", extracted)
+        self.assertNotIn("trespass", extracted)
+
     def test_extract_criminal_case_type_and_filing_year(self):
         CRIMINAL_TEXT_WITH_FILING_YEAR = """
         IN THE HIGH COURT OF TANZANIA
