@@ -48,15 +48,6 @@ class SubscriptionRequiredMixin(PermissionRequiredMixin):
         context.update(self.get_subscription_required_context())
         if extra_context:
             context.update(extra_context)
-
-        if "lowest_offering" not in context or "lowest_product" in extra_context:
-            context["lowest_offering"] = self.get_lowest_offering_for_product(
-                context.get("lowest_product")
-            )
-        context["lowest_offering_is_free"] = bool(
-            context.get("lowest_offering")
-            and context["lowest_offering"].pricing_plan.price == 0
-        )
         return context
 
     def get_lowest_offering_for_product(self, product):
