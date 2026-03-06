@@ -27,7 +27,10 @@ class Book(CoreDocument):
 
     @hook(BEFORE_SAVE, when="content_markdown", has_changed=True)
     def convert_content_markdown(self):
-        self.set_content_html_from_source_html(markdownify(self.content_markdown or ""))
+        doc_content = self.get_or_create_document_content()
+        doc_content.set_source_html(markdownify(self.content_markdown or ""))
+        doc_content.apply_source_to_content()
+        doc_content.update_toc_json_from_content_html()
 
     def pre_save(self):
         doc_content = None

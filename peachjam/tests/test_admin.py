@@ -164,9 +164,10 @@ class TestDocumentAdminHtmlEdit(WebTest):
             frbr_uri_doctype="doc",
             title="Admin source_html integration",
         )
-        self.document.set_content_html_from_source_html(
-            "<h1>Initial</h1><p>Initial</p>"
-        )
+        doc_content = self.document.get_or_create_document_content()
+        doc_content.set_source_html("<h1>Initial</h1><p>Initial</p>")
+        doc_content.apply_source_to_content()
+        doc_content.update_toc_json_from_content_html()
         self.document.save()
 
     def test_admin_edit_source_html_updates_content_text_and_toc(self):

@@ -128,35 +128,6 @@ class GetOrCreateDocumentContentTestCase(TestCase):
         doc.save()
         self.assertEqual(count_before, DocumentContent.objects.count())
 
-    def test_dirty_flag_reset_after_save(self):
-        """After CoreDocument.save(), _document_content_dirty is reset to False."""
-        doc = _make_doc("Dirty flag reset")
-        doc.set_content_html("<p>Hello</p>")
-        self.assertTrue(doc._document_content_dirty)
-        doc.save()
-        self.assertFalse(doc._document_content_dirty)
-
-    def test_dirty_flag_set_by_set_content_html(self):
-        """set_content_html() marks document content as dirty."""
-        doc = _make_doc("Dirty via set_content_html")
-        doc._document_content_dirty = False
-        doc.set_content_html("<p>Changed</p>")
-        self.assertTrue(doc._document_content_dirty)
-
-    def test_dirty_flag_set_by_set_source_html(self):
-        """set_source_html() marks document content as dirty."""
-        doc = _make_doc("Dirty via set_source_html")
-        doc._document_content_dirty = False
-        doc.set_source_html("<p>Source changed</p>")
-        self.assertTrue(doc._document_content_dirty)
-
-    def test_dirty_flag_set_by_set_content_html_from_source_html(self):
-        """set_content_html_from_source_html() marks document content as dirty."""
-        doc = _make_doc("Dirty via set_content_html_from_source_html")
-        doc._document_content_dirty = False
-        doc.set_content_html_from_source_html("<p>Source</p>")
-        self.assertTrue(doc._document_content_dirty)
-
     def test_get_or_create_after_refresh_from_db_returns_consistent_pk(self):
         """After refresh_from_db(), get_or_create_document_content() returns a DocumentContent
         with the same pk as before (cache may survive refresh, but pk is stable)."""
@@ -171,26 +142,32 @@ class SetContentHtmlTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
     def test_set_content_html_persisted_after_doc_save(self):
-        """Content set via set_content_html() is written to DB when the document is saved."""
+        """Content set via DocumentContent.set_content_html() is written to DB when the document is saved."""
         doc = _make_doc("Persist set_content_html")
-        doc.set_content_html("<p>Persisted</p>")
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_content_html("<p>Persisted</p>")
+        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         self.assertIn("Persisted", doc.document_content.content_html)
 
     def test_set_content_html_cleans_empty_html(self):
-        """set_content_html() with effectively-empty HTML leaves content_html as None."""
+        """DocumentContent.set_content_html() with effectively-empty HTML leaves content_html as None."""
         doc = _make_doc("Empty HTML cleanup")
-        doc.set_content_html("<div>   \n&nbsp;  \n</div>")
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_content_html("<div>   \n&nbsp;  \n</div>")
+        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         self.assertIsNone(doc.document_content.content_html)
 
     def test_set_content_html_akn_skips_cleaning(self):
-        """For AKN documents, set_content_html() stores the raw HTML without cleaning."""
+        """For AKN documents, DocumentContent.set_content_html() stores the raw HTML without cleaning."""
         doc = _make_doc("AKN skip clean", is_akn=True)
         raw_akn = "<div class='akn-akomaNtoso'><p>AKN content</p></div>"
-        doc.set_content_html(raw_akn)
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_content_html(raw_akn)
+        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         self.assertEqual(raw_akn, doc.document_content.content_html)
@@ -200,9 +177,12 @@ class SetContentHtmlFromSourceHtmlTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
     def test_sets_source_html_and_derives_content(self):
-        """set_content_html_from_source_html() stores source_html and derives content_html."""
+        """Setting source_html on DocumentContent stores source_html and derives content_html."""
         doc = _make_doc("Source-derived content")
-        doc.set_content_html_from_source_html("<p>Source text</p>")
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_source_html("<p>Source text</p>")
+        doc_content.apply_source_to_content()
+        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         doc_content = doc.document_content
@@ -210,9 +190,12 @@ class SetContentHtmlFromSourceHtmlTestCase(TestCase):
         self.assertIn("Source text", doc_content.content_html)
 
     def test_generates_toc_from_headings(self):
-        """set_content_html_from_source_html() with heading tags generates a non-empty TOC."""
+        """Setting source_html on DocumentContent with heading tags generates a non-empty TOC."""
         doc = _make_doc("TOC generation")
-        doc.set_content_html_from_source_html("<h1>Chapter 1</h1><p>Introduction</p>")
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_source_html("<h1>Chapter 1</h1><p>Introduction</p>")
+        doc_content.apply_source_to_content()
+        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         doc_content = doc.document_content
@@ -220,11 +203,14 @@ class SetContentHtmlFromSourceHtmlTestCase(TestCase):
         self.assertTrue(len(doc_content.toc_json) > 0)
 
     def test_set_content_html_from_source_html_akn_stores_raw(self):
-        """For AKN documents, set_content_html_from_source_html() stores source_html raw as
+        """For AKN documents, setting source_html on DocumentContent stores source_html raw as
         content_html (no cleaning), because source_html IS the canonical AKN HTML."""
         doc = _make_doc("AKN raw source", is_akn=True)
         raw_akn = "<div class='akn-akomaNtoso'><p>AKN source</p></div>"
-        doc.set_content_html_from_source_html(raw_akn)
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_source_html(raw_akn)
+        doc_content.apply_source_to_content()
+        doc_content.update_toc_json_from_content_html()
         doc.save()
 
         doc.refresh_from_db()
@@ -323,25 +309,6 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         self.assertEqual("", doc_content.content_text)
 
 
-class SyncDocumentHtmlCacheTestCase(TestCase):
-    fixtures = ["tests/countries", "tests/languages"]
-
-    def test_sync_sets_dirty_flag_on_document(self):
-        """sync_document_html_cache() marks the owning document as dirty."""
-        doc = _make_doc("Sync dirty")
-        doc_content = doc.get_or_create_document_content()
-        doc._document_content_dirty = False
-        doc_content.sync_document_html_cache()
-        self.assertTrue(doc._document_content_dirty)
-
-    def test_sync_updates_document_cache_reference(self):
-        """sync_document_html_cache() points the document's cache at this DocumentContent."""
-        doc = _make_doc("Sync cache ref")
-        doc_content = doc.get_or_create_document_content()
-        doc_content.sync_document_html_cache()
-        self.assertIs(doc._document_content_cache, doc_content)
-
-
 class GetContentAsTextTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
@@ -351,7 +318,7 @@ class GetContentAsTextTestCase(TestCase):
         doc_content = doc.get_or_create_document_content()
         doc_content.content_text = "Pre-extracted text"
         doc_content.save()
-        self.assertEqual("Pre-extracted text", doc.get_content_as_text())
+        self.assertEqual("Pre-extracted text", doc_content.get_content_as_text())
 
     def test_get_content_as_text_triggers_extraction_when_none(self):
         """get_content_as_text() triggers update_text_content() when content_text is None."""
@@ -360,7 +327,7 @@ class GetContentAsTextTestCase(TestCase):
         doc_content.content_html = "<p>Auto-extracted</p>"
         doc_content.content_text = None
         doc_content.save()
-        result = doc.get_content_as_text()
+        result = doc_content.get_content_as_text()
         self.assertIsNotNone(result)
         self.assertIn("Auto-extracted", result)
 
