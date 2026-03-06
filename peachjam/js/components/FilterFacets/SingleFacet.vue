@@ -19,10 +19,22 @@
         </div>
       </div>
       <div :class="`${facet.type === 'letter-radio' ? '' : 'facets-scrollable'}`">
+        <div
+          v-if="showFacetSearch"
+          class="facet-search-sticky mb-2"
+        >
+          <input
+            v-model.trim="facetSearchProxy"
+            type="search"
+            class="form-control form-control-sm"
+            :placeholder="`${$t('Search by')} ${facet.title}`"
+            :aria-label="`${$t('Search')} ${facet.title}`"
+          >
+        </div>
         <template v-if="facet.type === 'checkboxes'">
           <div
-            v-for="(option, optIndex) in facet.options"
-            :key="optIndex"
+            v-for="(option, optIndex) in displayedOptions"
+            :key="`${facet.name}_${option.value}`"
             class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check flex-grow-1">
@@ -49,8 +61,8 @@
         </template>
         <template v-if="facet.type === 'radio'">
           <div
-            v-for="(option, optIndex) in facet.options"
-            :key="optIndex"
+            v-for="(option, optIndex) in displayedOptions"
+            :key="`${facet.name}_${option.value}`"
             class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check flex-grow-1">
@@ -146,10 +158,50 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+    searchTerm: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
-  emits: ['clear-facet', 'on-change'],
+  emits: ['clear-facet', 'on-change', 'facet-search-change'],
   computed: {
+    showFacetSearch () {
+      return ['checkboxes', 'radio'].includes(this.facet.type) && this.facet.options.length > 8;
+    },
+    facetSearchProxy: {
+      get () {
+        return this.searchTerm;
+      },
+      set (value) {
+        this.$emit('facet-search-change', { name: this.facet.name, term: value });
+      }
+    },
+    displayedOptions () {
+      if (!this.showFacetSearch || !this.searchTerm) {
+        return this.facet.options;
+      }
+
+      const searchTerm = this.searchTerm.toLowerCase();
+      const filteredOptions = this.facet.options.filter(
+        (option) => String(option.label).toLowerCase().includes(searchTerm)
+      );
+
+      const isSelected = (option) => {
+        if (this.facet.type === 'checkboxes') {
+          return this.facet.value.some((value) => String(value) === String(option.value));
+        }
+        if (this.facet.type === 'radio') {
+          return String(this.facet.value) === String(option.value);
+        }
+        return false;
+      };
+
+      const selectedOptions = filteredOptions.filter(isSelected);
+      const unselectedOptions = filteredOptions.filter((option) => !isSelected(option));
+      return [...selectedOptions, ...unselectedOptions];
+    },
     showClearFilter () {
       if (this.facet.type === 'checkboxes') {
         return this.facet.value.length;
@@ -165,5 +217,13 @@ export default {
 .facets-scrollable {
   max-height: 25vh;
   overflow-y: auto;
+}
+
+.facet-search-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: #fff;
+  padding-bottom: 0.25rem;
 }
 </style>
