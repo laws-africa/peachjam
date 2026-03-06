@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 
 from peachjam.analysis.flynotes import FlynoteUpdater
 from peachjam.models import Judgment
-from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+from peachjam.models.flynote import FlynoteDocumentCount
 
 
 class Command(BaseCommand):
@@ -104,9 +104,7 @@ class Command(BaseCommand):
             msg += f" Last pk processed: {last_pk}."
 
         if not skip_counts and processed > 0:
-            self.stdout.write("Refreshing flynote document counts...")
-            for root in Flynote.get_root_nodes():
-                FlynoteDocumentCount.refresh_for_flynote(root)
+            FlynoteDocumentCount.refresh_for_flynote(None)
             msg += " Flynote counts refreshed."
 
         self.stdout.write(self.style.SUCCESS(msg))

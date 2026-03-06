@@ -95,18 +95,18 @@ class FlynoteDocumentCount(models.Model):
         return f"{self.flynote.name}: {self.count}"
 
     @classmethod
-    def refresh_for_flynote(cls, root):
-        """Recompute document counts for a flynote tree rooted at *root*.
+    def refresh_for_flynote(cls, root=None):
+        """Recompute document counts for flynotes.
+
+        If root is None, updates all FlynoteDocumentCount rows in bulk
+        (one transaction). Otherwise updates only the subtree rooted at root.
 
         Each node's count includes documents linked directly to it plus
         documents linked to any of its descendants. Uses treebeard's
         materialised path to walk ancestors efficiently in a single SQL
         query, following the same pattern as TaxonomyDocumentCount.
         """
-        if root is None:
-            return
-
-        root_path = root.path
+        root_path = root.path if root else ""
 
         with transaction.atomic():
             with connection.cursor() as cursor:
@@ -138,8 +138,12 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%"],
                 )
 
-        log.info(
-            "Refreshed document counts for flynote tree rooted at '%s' (pk=%s)",
-            root.slug,
-            root.pk,
-        )
+        if root:
+            log.info(
+                "Refreshed document counts for flynote tree rooted at '%s' (pk=%s)",
+                root.slug,
+                root.pk,
+            )
+        else:
+            count = cls.objects.count()
+            log.info("Refreshed document counts for all flynotes (%d rows).", count)

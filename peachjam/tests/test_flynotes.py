@@ -312,9 +312,51 @@ class FlynoteDocumentCountTest(TestCase):
         count_row = FlynoteDocumentCount.objects.get(flynote=criminal)
         self.assertEqual(count_row.count, 2)
 
-    def test_refresh_with_none_root_skips(self):
+    def test_refresh_with_none_root_updates_all(self):
+        """refresh_for_flynote(None) updates counts for all flynotes in one go."""
         FlynoteDocumentCount.refresh_for_flynote(None)
         self.assertEqual(FlynoteDocumentCount.objects.count(), 0)
+
+        judgment = Judgment.objects.create(
+            case_name="All Refresh Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law \u2014 admissibility",
+        )
+        self.updater.update_for_judgment(judgment)
+        FlynoteDocumentCount.refresh_for_flynote(None)
+        criminal = Flynote.objects.get(name="Criminal law")
+        count_row = FlynoteDocumentCount.objects.get(flynote=criminal)
+        self.assertEqual(count_row.count, 1)
+
+    def test_refresh_with_none_root_updates_multiple_hierarchies(self):
+        """refresh_for_flynote(None) correctly updates counts across multiple roots."""
+        judgment1 = Judgment.objects.create(
+            case_name="Case 1",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law \u2014 sentencing; Administrative law \u2014 judicial review",
+        )
+        judgment2 = Judgment.objects.create(
+            case_name="Case 2",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 2, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law \u2014 admissibility",
+        )
+        self.updater.update_for_judgment(judgment1)
+        self.updater.update_for_judgment(judgment2)
+        FlynoteDocumentCount.refresh_for_flynote(None)
+
+        criminal = Flynote.objects.get(name="Criminal law")
+        admin = Flynote.objects.get(name="Administrative law")
+        self.assertEqual(FlynoteDocumentCount.objects.get(flynote=criminal).count, 2)
+        self.assertEqual(FlynoteDocumentCount.objects.get(flynote=admin).count, 1)
 
 
 class FlynoteTopicListViewTest(TestCase):
@@ -429,7 +471,7 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         output = out.getvalue()
 
         self.assertIn("Skipping flynote count updates", output)
-        self.assertNotIn("Refreshing flynote document counts", output)
+        self.assertNotIn("Flynote counts refreshed", output)
         self.assertEqual(FlynoteDocumentCount.objects.count(), 0)
 
     def test_default_refreshes_counts(self):
@@ -438,7 +480,6 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         call_command("update_flynote_taxonomies", stdout=out, stderr=StringIO())
         output = out.getvalue()
 
-        self.assertIn("Refreshing flynote document counts", output)
         self.assertIn("Flynote counts refreshed", output)
         self.assertGreater(FlynoteDocumentCount.objects.count(), 0)
 

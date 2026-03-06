@@ -16,13 +16,5 @@ class Command(BaseCommand):
             )
             return
 
-        for root in roots:
-            self.stdout.write(
-                f"Refreshing document counts for flynote: {root.name} (pk={root.pk})"
-            )
-            FlynoteDocumentCount.refresh_for_flynote(root)
-
-        total = FlynoteDocumentCount.objects.count()
-        self.stdout.write(
-            self.style.SUCCESS(f"Done. Updated counts for {total} flynote nodes.")
-        )
+        FlynoteDocumentCount.refresh_for_flynote(None)
+        self.stdout.write(self.style.SUCCESS("Done."))
