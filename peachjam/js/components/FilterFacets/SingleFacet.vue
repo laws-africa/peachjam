@@ -27,7 +27,7 @@
             v-model.trim="facetSearchProxy"
             type="search"
             class="form-control form-control-sm"
-            :placeholder="`${$t('Search by')} ${facet.title}`"
+            :placeholder="`${$t('Search')} ${facet.title}`"
             :aria-label="`${$t('Search')} ${facet.title}`"
           >
         </div>
