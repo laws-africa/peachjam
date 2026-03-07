@@ -88,6 +88,7 @@ from peachjam.models import (
     JournalArticle,
     Judge,
     Judgment,
+    JudgmentOffence,
     JurisdictionProfile,
     Label,
     LawReport,
@@ -97,6 +98,7 @@ from peachjam.models import (
     Locality,
     LowerBench,
     MatterType,
+    Offence,
     Outcome,
     Partner,
     PartnerLogo,
@@ -107,6 +109,7 @@ from peachjam.models import (
     Ratification,
     RatificationCountry,
     Relationship,
+    Sentence,
     SourceFile,
     Taxonomy,
     Treatment,
@@ -1191,6 +1194,16 @@ class LawReportEntryInline(admin.TabularInline):
     extra = 1
 
 
+class JudgmentOffenceInline(admin.TabularInline):
+    model = JudgmentOffence
+    extra = 1
+
+
+class SentenceInline(admin.StackedInline):
+    model = Sentence
+    extra = 1
+
+
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
@@ -1203,6 +1216,8 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
         LawReportEntryInline,
+        JudgmentOffenceInline,
+        SentenceInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1455,6 +1470,17 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         obj.ensure_anonymised_source_file()
+
+
+@admin.register(Offence)
+class OffenceAdmin(admin.ModelAdmin):
+    def get_form(self, request, obj=None, **kwargs):
+        return super().get_form(
+            request,
+            obj,
+            widgets={"work": autocomplete.ModelSelect2(url="autocomplete-works")},
+            **kwargs,
+        )
 
 
 @admin.register(CauseList)
