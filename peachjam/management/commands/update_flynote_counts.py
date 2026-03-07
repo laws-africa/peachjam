@@ -16,5 +16,5 @@ class Command(BaseCommand):
             )
             return
 
-        FlynoteDocumentCount.refresh_for_flynote(None)
+        FlynoteDocumentCount.refresh_for_all_flynotes()
         self.stdout.write(self.style.SUCCESS("Done."))
