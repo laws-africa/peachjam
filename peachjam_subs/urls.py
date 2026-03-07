@@ -8,5 +8,10 @@ urlpatterns = [
         views.CancelSubscriptionView.as_view(),
         name="cancel_subscription",
     ),
+    path(
+        "accounts/subscription/check",
+        views.CheckSubscriptionView.as_view(),
+        name="check_subscription",
+    ),
     path("subscribe", views.SubscribeView.as_view(), name="subscribe"),
 ]
