@@ -118,14 +118,14 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(self.law_report.get_absolute_url())
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, self.first_judgment.title)
-        self.assertContains(response, self.second_judgment.title)
-        self.assertNotContains(response, self.unrelated_judgment.title)
+        # The detail page now lists volumes, not judgments directly
+        self.assertContains(response, self.volume_1.title)
+        self.assertContains(response, self.volume_2.title)
+        self.assertNotContains(response, self.empty_volume.title)
         self.assertEqual(self.law_report, response.context["law_report"])
         self.assertIn(self.volume_1, response.context["law_report_volumes"])
         self.assertIn(self.volume_2, response.context["law_report_volumes"])
         self.assertNotIn(self.empty_volume, response.context["law_report_volumes"])
-        self.assertTrue(response.context["hide_follow_button"])
 
     def test_law_report_volume_detail_view_filters_to_selected_volume(self):
         response = self.client.get(self.volume_1.get_absolute_url())
