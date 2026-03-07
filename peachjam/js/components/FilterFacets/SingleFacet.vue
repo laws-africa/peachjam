@@ -179,14 +179,7 @@ export default {
       }
     },
     displayedOptions () {
-      if (!this.showFacetSearch || !this.searchTerm) {
-        return this.facet.options;
-      }
-
-      const searchTerm = this.searchTerm.toLowerCase();
-      const filteredOptions = this.facet.options.filter(
-        (option) => String(option.label).toLowerCase().includes(searchTerm)
-      );
+      let options = this.facet.options;
 
       const isSelected = (option) => {
         if (this.facet.type === 'checkboxes') {
@@ -198,8 +191,15 @@ export default {
         return false;
       };
 
-      const selectedOptions = filteredOptions.filter(isSelected);
-      const unselectedOptions = filteredOptions.filter((option) => !isSelected(option));
+      if (this.showFacetSearch && this.searchTerm) {
+        const searchTerm = this.searchTerm.toLowerCase();
+        options = this.facet.options.filter(
+          (option) => String(option.label).toLowerCase().includes(searchTerm)
+        );
+      }
+
+      const selectedOptions = options.filter(isSelected);
+      const unselectedOptions = options.filter((option) => !isSelected(option));
       return [...selectedOptions, ...unselectedOptions];
     },
     showClearFilter () {
