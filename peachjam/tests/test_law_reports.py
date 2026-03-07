@@ -135,3 +135,27 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotContains(response, self.second_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
+        self.assertEqual("judgments", response.context["active_tab"])
+
+    def test_law_report_volume_detail_view_cases_tab(self):
+        url = self.volume_1.get_absolute_url() + "?tab=cases"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("cases", response.context["active_tab"])
+        self.assertTrue(response.context.get("doc_table_toggle"))
+
+    def test_law_report_volume_detail_view_legislation_tab(self):
+        url = self.volume_1.get_absolute_url() + "?tab=legislation"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("legislation", response.context["active_tab"])
+        self.assertTrue(response.context.get("doc_table_toggle"))
+
+    def test_law_report_volume_detail_view_invalid_tab_defaults_to_judgments(self):
+        url = self.volume_1.get_absolute_url() + "?tab=invalid"
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual("judgments", response.context["active_tab"])
