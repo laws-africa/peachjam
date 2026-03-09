@@ -2,7 +2,7 @@ from collections import defaultdict
 
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import IntegerField, Sum, Value
+from django.db.models import F, IntegerField, Q, Sum, Value
 from django.db.models.functions import Coalesce
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -55,15 +55,9 @@ class JudgmentListView(TemplateView):
 class FlynoteTopicMixin:
     @staticmethod
     def annotate_with_counts(qs):
-        from django.db.models import OuterRef, Subquery
-
         return qs.annotate(
             doc_count=Coalesce(
-                Subquery(
-                    FlynoteDocumentCount.objects.filter(flynote=OuterRef("pk")).values(
-                        "count"
-                    )[:1]
-                ),
+                F("document_count_cache__count"),
                 Value(0),
                 output_field=IntegerField(),
             )
@@ -75,8 +69,6 @@ class FlynoteTopicMixin:
             return {}
 
         child_depth = parent_topics[0].depth + 1
-
-        from django.db.models import Q
 
         q = Q()
         for t in parent_topics:
@@ -129,7 +121,7 @@ class FlynoteTopicListView(FlynoteTopicMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         popular_qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
-            "-doc_count"
+            "-doc_count", "name"
         )[:16]
         popular_topics = list(popular_qs)
         child_names_map = self.get_top_children_by_count(popular_topics)
@@ -195,7 +187,7 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
         children_qs = self.annotate_with_counts(self.flynote.get_children())
 
         # Top 16 by count – single DB query
-        popular_qs = children_qs.order_by("-doc_count")[:16]
+        popular_qs = children_qs.order_by("-doc_count", "name")[:16]
         popular_topics = list(popular_qs)
         child_names_map = self.get_top_children_by_count(popular_topics)
         total_children = children_qs.count()
