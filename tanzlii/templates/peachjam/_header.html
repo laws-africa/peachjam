@@ -91,6 +91,11 @@
         </a>
       </li>
       <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'paralegals' %}active{% endif %}"
+           href="{% url 'paralegals' %}">{% trans 'Paralegal Knowledge Hub' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
         <a class=" nav-link px-0 {% if request.path == '/taxonomy' %}active{% endif %}"
            href="{% url 'top_level_taxonomy_list' %}">{% trans 'Collections' %}
         </a>
@@ -146,5 +151,8 @@
         </a>
       </li>
     </ul>
+  </li>
+  <li class="nav-item ms-auto">
+    <a class="nav-link" href="{{ PEACHJAM_SETTINGS.user_help_link }}">{% trans 'Help' %}</a>
   </li>
 {% endblock %}

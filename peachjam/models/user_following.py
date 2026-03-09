@@ -324,7 +324,14 @@ class UserFollowing(models.Model):
             )
             return
 
-        # avoid alerts for citations from documents older than cutoff
+        if not citation.citing_work.documents.latest_expression().exists():
+            log.info(
+                "Citing work %s has no document expressions for user %s; skipping citation alert.",
+                citation.citing_work,
+                self.user,
+            )
+            return
+
         if (
             citation.citing_work.documents.latest_expression().first().date
             < self.cutoff_date
@@ -360,6 +367,14 @@ class UserFollowing(models.Model):
             log.info(
                 "Saved document %s for user %s has no document expressions.",
                 self.saved_document,
+                self.user,
+            )
+            return
+
+        if not event_work.documents.latest_expression().exists():
+            log.info(
+                "Event work %s has no document expressions for user %s; skipping citation alert.",
+                event_work,
                 self.user,
             )
             return

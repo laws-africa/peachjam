@@ -17,6 +17,9 @@ COURT_CODE_MAPPINGS = {"court-appeal-tanzania": "TZCA", "high-court-tanzania": "
 
 TEMPLATED_EMAIL_BACKEND = "peachjam.emails.CustomerIOTemplateBackend"
 
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+PEACHJAM["CHAT_PUBLIC"] = True  # noqa
+
 # Custom middleware to force the I18N machinery to always choose settings.LANGUAGE_CODE
 # as the default initial language, unless another one is set via sessions or cookies
 # MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
@@ -32,5 +35,5 @@ LANGUAGES = [
 if not DEBUG:  # noqa
     # Tanzlii media files are stored on S3 and served via a Cloudflare CDN (via copying to R2).
     # We can therefore set long-lived cache headers and serve them from a custom domain.
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400*5}"}
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400 * 5}"}
     AWS_S3_CUSTOM_DOMAIN = "media.tanzlii.org"

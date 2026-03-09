@@ -42,12 +42,16 @@ class CitationAnalyser:
             )
             return False
 
-        for matcher in self.matchers:
-            # the matcher can either manipulate the html, or return a new tree
-            res = matcher().markup_html_matches(document.expression_uri(), html)
-            html = html if res is None else res
+        html = self.markup_html_matches(document.expression_uri(), html)
         document.content_html = lxml.html.tostring(html, encoding="unicode")
         return True
+
+    def markup_html_matches(self, frbr_uri, html):
+        for matcher in self.matchers:
+            # the matcher can either manipulate the html, or return a new tree
+            res = matcher().markup_html_matches(frbr_uri, html)
+            html = html if res is None else res
+        return html
 
     def extract_citations_from_source_file(self, document):
         text = document.get_content_as_text()
@@ -58,7 +62,7 @@ class CitationAnalyser:
                 # get the indexes of all newlines in text, by page
                 newlines = [
                     [i for i, c in enumerate(page) if c == "\n"]
-                    for page in text.split("\x0C")
+                    for page in text.split("\x0c")
                 ]
                 self.store_text_citation_links(document, matcher, newlines)
             return True

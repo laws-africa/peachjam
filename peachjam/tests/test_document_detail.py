@@ -53,32 +53,27 @@ class RestrictedDocumentsTestCase(WebTest):
     ]
 
     def setUp(self):
-        judgment = Judgment.objects.get(
-            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+        self.judgment = Judgment.objects.order_by("pk").first()
+        self.assertIsNotNone(
+            self.judgment, "Expected at least one judgment in fixtures"
         )
-        judgment.restricted = True
-        judgment.save()
+        self.judgment.restricted = True
+        self.judgment.save()
 
         group = Group.objects.get(name="Officers")
-        assign_perm("view_judgment", group, judgment)
+        assign_perm("view_judgment", group, self.judgment)
 
     def test_restricted_document_unauthorized(self):
-        doc = Judgment.objects.get(
-            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
-        )
         unauthorized_user = User.objects.get(username="user@example.com")
         response = self.app.get(
-            doc.get_absolute_url(), user=unauthorized_user, expect_errors=True
+            self.judgment.get_absolute_url(), user=unauthorized_user, expect_errors=True
         )
         self.assertIn("Permission denied", response.text)
         self.assertEqual(response.status_code, 403)
 
     def test_restricted_document_authorized(self):
-        doc = Judgment.objects.get(
-            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
-        )
         authorized_user = User.objects.get(username="officer@example.com")
-        response = self.app.get(doc.get_absolute_url(), user=authorized_user)
+        response = self.app.get(self.judgment.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("public", response.headers.get("Cache-Control", ""))
 

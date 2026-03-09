@@ -23,21 +23,17 @@ def remove_s3_bucket(apps, schema_editor):
         model = apps.get_model("peachjam", model_name)
 
         with connection.cursor() as cursor:
-            cursor.execute(
-                f"""
+            cursor.execute(f"""
 UPDATE {model._meta.db_table}
 SET file = SUBSTRING(file FROM 4 + POSITION(':' IN SUBSTRING(file FROM 4)))
 WHERE file like 's3:%'
-"""
-            )
+""")
 
-            cursor.execute(
-                f"""
+            cursor.execute(f"""
 UPDATE {model._meta.db_table}
 SET file = SUBSTRING(file FROM 6)
 WHERE file like 'file:%'
-"""
-            )
+""")
 
 
 class Migration(migrations.Migration):

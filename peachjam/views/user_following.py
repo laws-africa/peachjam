@@ -29,6 +29,15 @@ class UserFollowingForm(forms.ModelForm):
         for field in self.fields:
             self.fields[field].widget = forms.HiddenInput()
 
+    def save(self, commit=True):
+        if commit and not self.instance.pk:
+            # only create if it doesn't already exist
+            self.instance, created = UserFollowing.objects.get_or_create(
+                **self.cleaned_data, user=self.instance.user
+            )
+            return self.instance
+        return super().save(commit)
+
 
 class UserFollowingButtonForm(forms.Form):
     court = forms.IntegerField(required=False)

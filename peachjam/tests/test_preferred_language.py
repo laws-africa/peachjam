@@ -1,8 +1,10 @@
-from django.test import TestCase
+from django.contrib.auth.models import User
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from languages_plus.models import Language
 
-from peachjam.models import Legislation
+from peachjam.models import Legislation, UserProfile
+from peachjam.signals import set_user_language
 
 
 class TestPreferredLanguage(TestCase):
@@ -41,3 +43,18 @@ class TestPreferredLanguage(TestCase):
         doc2.delete()
         work.refresh_from_db()
         self.assertEqual(["eng"], sorted(work.languages))
+
+
+class TestSetUserLanguageSignal(TestCase):
+    fixtures = ["tests/users", "tests/languages"]
+
+    def test_creates_missing_profile_before_setting_language(self):
+        user = User.objects.get(pk=1)
+        UserProfile.objects.filter(user=user).delete()
+        self.assertFalse(UserProfile.objects.filter(user=user).exists())
+
+        request = RequestFactory().get("/")
+        set_user_language(sender=User, request=request, user=user)
+
+        self.assertTrue(UserProfile.objects.filter(user=user).exists())
+        self.assertEqual("en", request.set_language)

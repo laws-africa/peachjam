@@ -3,12 +3,9 @@ from datetime import timedelta
 from typing import NamedTuple
 
 from django.conf import settings
-from django.contrib.sites.models import Site
 from django.db.models import Exists, OuterRef, Q
-from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.text import gettext_lazy as _
 from django.utils.translation import override
 from templated_email import send_templated_mail
 
@@ -29,7 +26,7 @@ class TimelineEmailService:
         q = Q()
         last_24_hrs = timezone.now() - timedelta(hours=24)
 
-        if type(event_type) == list:
+        if isinstance(event_type, list):
             q = Q(event_type__in=event_type)
         else:
             q = Q(event_type=event_type)
@@ -112,7 +109,7 @@ class TimelineEmailService:
             log.info("No new documents events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -157,7 +154,7 @@ class TimelineEmailService:
             log.info("No saved search events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -209,7 +206,7 @@ class TimelineEmailService:
             log.info("No new citation events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -241,19 +238,6 @@ class TimelineEmailService:
                         "citing_documents": citing_documents,
                     }
                 )
-            site = Site.objects.get_current()
-            context["site_domain"] = f"https://{site.domain}"
-
-            # render html template string
-            context["html_body"] = render_to_string(
-                "peachjam/emails/new_citation_alert_body.html", context=context
-            )
-            subject_line = f"New citations for {context['saved_documents'][0]['saved_document'].title}"
-            saved_docs_length = len(context["saved_documents"])
-            if saved_docs_length > 1:
-                subject_line += f" and {saved_docs_length - 1} more"
-
-            context["subject_line"] = subject_line
 
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(
@@ -271,7 +255,6 @@ class TimelineEmailService:
         class RelationshipEmail(NamedTuple):
             event_types: list[str]
             email_template: str
-            subject_line: str
 
         RELATIONSHIP_EMAIL = RelationshipEmail(
             event_types=[
@@ -280,13 +263,11 @@ class TimelineEmailService:
                 if rel.event_type != TimelineEvent.EventTypes.NEW_OVERTURN
             ],
             email_template="new_relationship_alert",
-            subject_line=_("New updates for documents you have saved"),
         )
 
         OVERTURN_EMAIL = RelationshipEmail(
             event_types=[TimelineEvent.EventTypes.NEW_OVERTURN],
             email_template="new_overturn_alert",
-            subject_line=_("New overturn for judgments you have saved"),
         )
         TimelineEmailService._send_relationship_email(
             user,
@@ -313,7 +294,7 @@ class TimelineEmailService:
             log.info("No new relationship events to alert for %s", user)
             return
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"]:
+        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
             events = [
                 TimelineEvent.objects.attach_subject_documents(ev) for ev in events
             ]
@@ -339,19 +320,12 @@ class TimelineEmailService:
                 {"saved_document": key, "relationships": value}
                 for key, value in saved_documents_map.items()
             ]
-            site = Site.objects.get_current()
 
             context = {
                 "saved_documents": saved_documents,
                 "user": user,
                 "manage_url_path": reverse("folder_list"),
-                "site_domain": f"https://{site.domain}",
-                "subject_line": email_config.subject_line,
             }
-
-            context["html_body"] = render_to_string(
-                "peachjam/emails/new_relationship_alert_body.html", context=context
-            )
 
             with override(user.userprofile.preferred_language.pk):
                 send_templated_mail(

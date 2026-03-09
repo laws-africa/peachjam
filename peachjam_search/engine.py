@@ -776,7 +776,6 @@ class PortionSearchEngine(SearchEngine):
         "blurb",
     ]
 
-    mode = "hybrid"
     filters: Optional[List[PortionSearchFilters]] = None
 
     def build_search(self):

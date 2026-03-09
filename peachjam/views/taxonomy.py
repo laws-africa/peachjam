@@ -40,6 +40,7 @@ class AllowedTaxonomyMixin:
 class TaxonomyFirstLevelView(AllowedTaxonomyMixin, DetailView):
     template_name = "peachjam/taxonomy_first_level_detail.html"
     model = Taxonomy
+    queryset = Taxonomy.objects.filter(hidden=False)
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
     navbar_link = "taxonomy"

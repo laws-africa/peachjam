@@ -4,6 +4,7 @@ from decimal import Decimal
 
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import Group, Permission, User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -12,34 +13,78 @@ from guardian.shortcuts import get_objects_for_user
 
 from peachjam.models import SingletonModel
 
-"""
-The subscriptions work as follows:
-
-1. A feature is a permission that is included in a product. A feature is usually associated with multiple Django
-   permissions which enable access to the feature.
-2. A product is a collection of features, such as "Team Plan".
-3. A pricing plan is a way to charge for a product, such as X per month.
-4. A product offering is a product with a pricing plan. The same product may be offered under different pricing plans
-   to reflect discounts, etc.
-5. A subscription is a user's access to a product offering.
-
-The SubscriptionSettings singleton model holds global settings for subscriptions, such as the default product offering
-for new users (should be free). The key products are the ones that should be shown on the pricing page. This allows
-us to exclude certain products that are only available by special arrangement.
-
-Per-object permissions are used to control access to product offerings. A user must have the "can_subscribe" permission
-for a product offering to be able to subscribe to it. This is managed by django-guardian.
-
-Trial subscriptions are supported. They are activated the first time a user subscribes to a paid product, if the
-product is a higher tier than the user's current product. The trial subscription is linked to the paid subscription
-it replaces. The paid subscription is configured to activate when the trial subscription ends. When the real
-subscription truly activates, the trial is closed. If the user upgrades in the mean time, both the trial and the
-replaced subscription are closed.
-
-See workflow here: https://mermaid.live/edit#pako:eNqNUs1um0AQfpXRXEsse4HURmoujcQD4FOFVG3ZsbMq7JL9SZpafvfOQmwldiIVLuzo-93hgJ1VhBV6eoxkOrrXcu_k0Brgx9hA0NMugN1B01SwdVr24OMv3zk9Bm1Na2boKF3QnR6lCYwE6aF5g4JG90_krqHbOkFn2XeE2vbqA-X6SnkGztCmubm7SzllF_STDHQx7nrrCWx4IHeGqHd1_BvGtmaGI8Yk05AyZtBr8xuCZUQGZBRf0TN8gVVxwfskwDSmnzLAt8TMYGQNbfYZ-MA1_UmuPDW62sAUIzn7_yk9VUil59knmnHklSsCFR1nmS1eReqkzSKjfOFcFw71tcNMaM6z9GKGe6cVVsFFynAgN8h0xEPitMjrGKjFij8V7WTsQ4utOTKNd_7D2uHEdDbuH7Dayd7zKY6Ko7z-r-ep46sh991GE7ASy-VmUsHqgH_4XIiFyIu1KEVZFsVquc7wBavbfCHEKt_cliJfF_lGHDP8O_kuF-uv5fEfQkABYw
-"""  # noqa
-
 log = logging.getLogger(__name__)
+
+
+def validate_selectable_offering_catalog(product_offering_pairs):
+    """Validate cross-product assumptions for user-selectable offerings."""
+    entries = []
+    for product, offerings in product_offering_pairs:
+        offerings = list(offerings)
+        offerings_by_period = {}
+        for offering in offerings:
+            period = offering.pricing_plan.period
+            if period in offerings_by_period:
+                raise ValidationError(
+                    _(
+                        "Product '%(product)s' has more than one selectable %(period)s offering."
+                    )
+                    % {"product": product.name, "period": period}
+                )
+            offerings_by_period[period] = offering
+
+        monthly = offerings_by_period.get(PricingPlan.Period.MONTHLY)
+        annual = offerings_by_period.get(PricingPlan.Period.ANNUALLY)
+        if (
+            monthly
+            and annual
+            and monthly.pricing_plan.price > 0
+            and annual.pricing_plan.price <= monthly.pricing_plan.price
+        ):
+            raise ValidationError(
+                _(
+                    "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly "
+                    "(%(monthly)s)."
+                )
+                % {
+                    "product": product.name,
+                    "annual": annual.pricing_plan.price,
+                    "monthly": monthly.pricing_plan.price,
+                }
+            )
+
+        for period, offering in offerings_by_period.items():
+            entries.append(
+                {
+                    "product_name": product.name,
+                    "tier": product.tier,
+                    "period": period,
+                    "price": offering.pricing_plan.price,
+                }
+            )
+
+    for period in PricingPlan.Period.values:
+        period_entries = sorted(
+            [entry for entry in entries if entry["period"] == period],
+            key=lambda item: item["tier"],
+        )
+        prev = None
+        for entry in period_entries:
+            if prev and entry["price"] <= prev["price"]:
+                raise ValidationError(
+                    _(
+                        "Selectable %(period)s pricing must increase with tier: "
+                        "'%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
+                    )
+                    % {
+                        "period": period,
+                        "product": entry["product_name"],
+                        "price": entry["price"],
+                        "prev_product": prev["product_name"],
+                        "prev_price": prev["price"],
+                    }
+                )
+            prev = entry
 
 
 class Feature(models.Model):
@@ -65,12 +110,13 @@ class Product(models.Model):
         help_text="These features are highlighted in the product listing.",
         related_name="+",
     )
-    default_offering = models.ForeignKey(
+    selectable_offerings = models.ManyToManyField(
         "peachjam_subs.ProductOffering",
-        on_delete=models.CASCADE,
-        null=True,
         blank=True,
-        related_name="+",
+        related_name="selectable_for_products",
+        help_text=_(
+            "Offerings explicitly available to users for this product (for example monthly and annual)."
+        ),
     )
     # used to compare products
     tier = models.IntegerField(default=10)
@@ -178,8 +224,8 @@ class Product(models.Model):
 
 class PricingPlan(models.Model):
     class Period(models.TextChoices):
-        MONTHLY = "monthly", _("Monthly")
         ANNUALLY = "annually", _("Annually")
+        MONTHLY = "monthly", _("Monthly")
 
     name = models.CharField(max_length=100, unique=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -216,6 +262,16 @@ class PricingPlan(models.Model):
     def price_per_period(self):
         return self.format_price_per_period()
 
+    @property
+    def price_per_month(self):
+        if self.price:
+            if self.period == self.Period.MONTHLY:
+                return self.price_per_period
+            if self.period == self.Period.ANNUALLY:
+                monthly_price = self.price / Decimal("12")
+                return f"{self.format_price(monthly_price)}/{_('month')}"
+        return _("FREE")
+
     def relative_delta(self):
         return {
             PricingPlan.Period.MONTHLY: relativedelta(months=1),
@@ -244,12 +300,17 @@ class ProductOffering(models.Model):
         """Return a queryset of ProductOffering objects available to the user."""
         return (
             get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
+            .filter(
+                # only show offerings for products that explicitly configured selectable offerings
+                product__selectable_offerings__isnull=False
+            )
             .exclude(
                 # exclude currently active (non-trial) subscription
                 pk__in=Subscription.objects.active_for_user(user)
                 .filter(is_trial=False)
                 .values_list("product_offering", flat=True)
             )
+            .distinct()
             .order_by("-pricing_plan__price")
         )
 
@@ -442,7 +503,8 @@ class Subscription(models.Model):
 
     def next_billing_date(self):
         """This is always two days after the end of the current period, which is one day after the start of the next
-        period. This avoids issues with billing on the same day as a subscription starts or ends."""
+        period. This avoids issues with billing on the same day as a subscription starts or ends.
+        """
         return self.end_of_current_period() + timedelta(days=2)
 
     def prorate(self):

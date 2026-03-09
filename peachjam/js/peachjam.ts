@@ -26,9 +26,11 @@ export interface PeachJamConfig {
   urlLangPrefix: string;
   language: string;
   languages: string[];
+  helpscoutBeaconId: string | null;
   chat: {
     enabled: boolean;
     assistantName: string;
+    public: boolean;
   }
   sentry: {
     dsn: string | null;
@@ -46,9 +48,11 @@ class PeachJam {
     language: 'en',
     languages: ['en'],
     urlLangPrefix: '',
+    helpscoutBeaconId: null,
     chat: {
       enabled: false,
-      assistantName: 'AI'
+      assistantName: 'AI',
+      public: false
     },
     sentry: {
       dsn: null,
@@ -89,6 +93,7 @@ class PeachJam {
     this.setupProvisionClick();
     this.setupFormCSRF();
     this.loaded();
+    this.setupHelpScoutBeacon();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -382,6 +387,28 @@ class PeachJam {
           });
         }
       }
+    });
+  }
+
+  setupHelpScoutBeacon () {
+    const triggers = document.querySelectorAll('[data-contact-us-beacon]');
+    if (!triggers.length) return;
+
+    triggers.forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const beaconId = this.config.helpscoutBeaconId;
+        // If no beacon configured, allow normal link behaviour (mailto fallback)
+        if (!beaconId) return;
+        // @ts-ignore
+        const beacon = window.Beacon;
+        if (typeof beacon !== 'function') return;
+        // @ts-ignore
+        if (Array.isArray(beacon.readyQueue)) return;
+
+        e.preventDefault();
+        // @ts-ignore
+        beacon('open');
+      });
     });
   }
 

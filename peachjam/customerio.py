@@ -57,6 +57,7 @@ class CustomerIO:
             "last_name": user.last_name,
             "is_staff": user.is_staff,
             "language": user.userprofile.preferred_language.iso,
+            "created_at": int(user.date_joined.timestamp()),
         }
         details.update(self.get_common_details())
         return details

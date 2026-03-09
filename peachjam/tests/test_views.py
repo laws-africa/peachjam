@@ -586,3 +586,51 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"anon")
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUPPORT_EMAIL": "support@example.com",
+        }
+    )
+    def test_homepage_with_helpscout_beacon_renders_script_and_footer_trigger(self):
+        pj_settings = PeachJamSettings.load()
+        pj_settings.helpscout_beacon_id = "beacon-123"
+        # Ensure footer social/contact block renders
+        pj_settings.facebook_link = "https://facebook.com/example"
+        pj_settings.save()
+
+        response = self.client.get(reverse("home_page"))
+        self.assertEqual(response.status_code, 200)
+
+        # Beacon script/init should be present
+        self.assertContains(response, "https://beacon-v2.helpscout.net")
+        self.assertContains(response, "window.Beacon(")
+        self.assertContains(response, '"helpscoutBeaconId": "beacon-123"')
+        self.assertContains(response, "data-contact-us-beacon")
+        # Footer contact button should include beacon trigger + mailto fallback href
+        self.assertContains(response, 'href="mailto:support@example.com"')
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUPPORT_EMAIL": "support@example.com",
+        }
+    )
+    def test_homepage_without_helpscout_beacon_has_plain_mailto_contact_link(self):
+        pj_settings = PeachJamSettings.load()
+        pj_settings.helpscout_beacon_id = ""
+        # Ensure footer social/contact block renders
+        pj_settings.facebook_link = "https://facebook.com/example"
+        pj_settings.save()
+
+        response = self.client.get(reverse("home_page"))
+        self.assertEqual(response.status_code, 200)
+
+        # Beacon script/init should not be present
+        self.assertNotContains(response, "https://beacon-v2.helpscout.net")
+        self.assertNotContains(response, 'window.Beacon("init"')
+
+        # Contact button should be plain mailto (no beacon trigger attr)
+        self.assertContains(response, 'href="mailto:support@example.com"')
+        self.assertNotContains(response, "data-contact-us-beacon")

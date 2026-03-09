@@ -343,9 +343,9 @@ class FilteredDocumentListView(DocumentListView):
 
     def add_facets(self, context):
         context["facet_data"] = {}
+        self.add_natures_facet(context)
         self.add_years_facet(context)
         self.add_authors_facet(context)
-        self.add_natures_facet(context)
         self.add_taxonomies_facet(context)
         self.add_alphabet_facet(context)
 
@@ -445,9 +445,7 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = Taxonomy.get_tree_for_items(
-            Taxonomy.objects.filter(
-                pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
-            )
+            self.get_taxonomy_queryset()
         )
         context["labels"] = doc.labels.all()
 
@@ -578,6 +576,12 @@ class BaseDocumentDetailView(DetailView):
             unconstitutional_provisions_json + uncommenced_provisions_json
         )
 
+    def get_taxonomy_queryset(self):
+        doc = self.object
+        return Taxonomy.objects.filter(
+            pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
+        )
+
     def get_notices(self):
         return []
 
@@ -599,16 +603,16 @@ class BaseDocumentDetailView(DetailView):
         document.content_html = html.tostring(root, encoding="unicode")
 
     def add_track_page_properties(self, context):
-        context[
-            "track_page_properties"
-        ] = get_customerio().get_document_track_properties(context["document"])
+        context["track_page_properties"] = (
+            get_customerio().get_document_track_properties(context["document"])
+        )
 
     def check_annotation_permission(self, context):
         if not self.request.user.has_perm("peachjam.add_annotation"):
             context["annotation_subscription_required"] = True
-            context[
-                "annotation_subscription_product"
-            ] = Product.get_lowest_product_for_permission("peachjam.add_annotation")
+            context["annotation_subscription_product"] = (
+                Product.get_lowest_product_for_permission("peachjam.add_annotation")
+            )
 
     def get_download_options(self):
         """Get the various formats that should be shown in the download menu. The first one will be the default."""

@@ -1,0 +1,35 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Welcome' %}
+{% endblock %}
+{% block content %}
+  <div class="text-center mb-4">
+    <h2>{% trans 'Welcome' %}</h2>
+    <p>{% trans 'Please tell us a bit about yourself to get started.' %}</p>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    {{ redirect_field }}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <input type="text"
+               class="form-control py-2 px-3 fs-6{% if field.errors %} is-invalid{% endif %}"
+               name="{{ field.name }}"
+               id="{{ field.id_for_label }}"
+               value="{{ field.value|default:'' }}"
+               maxlength="150"
+               {% if forloop.first %}autofocus required{% endif %}/>
+        {% if field.errors %}
+          <div class="invalid-feedback">
+            {% for error in field.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    <div class="d-grid">
+      <button class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
+    </div>
+  </form>
+{% endblock %}

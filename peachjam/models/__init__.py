@@ -4,12 +4,14 @@ from .arbitration import *
 from .article import *
 from .attachments import *
 from .author import *
+from .chat import *
 from .citations import *
 from .core_document import *
 from .custom_property import *
 from .document_access_group import *
 from .enrichments import *
 from .external_document import *
+from .flynote import *
 from .gazette import *
 from .generic_document import *
 from .ingestors import *
