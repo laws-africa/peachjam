@@ -2,8 +2,8 @@ from collections import defaultdict
 
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import F, IntegerField, Q, Sum, Value
-from django.db.models.functions import Coalesce
+from django.db.models import F, IntegerField, Sum, Value, Window
+from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -68,36 +68,35 @@ class FlynoteTopicMixin:
         if not parent_topics:
             return {}
 
-        child_depth = parent_topics[0].depth + 1
+        parent_paths = [t.path for t in parent_topics]
 
-        q = Q()
-        for t in parent_topics:
-            q |= Q(path__startswith=t.path)
-
-        children_qs = Flynote.objects.filter(q, depth=child_depth)
-
-        count_map = dict(
-            FlynoteDocumentCount.objects.filter(flynote__in=children_qs).values_list(
-                "flynote_id", "count"
+        children_qs = (
+            Flynote.objects.annotate(
+                parent_path=Substr("path", 1, Length("path") - Flynote.steplen),
+                doc_count=Coalesce(
+                    F("document_count_cache__count"),
+                    Value(0),
+                    output_field=IntegerField(),
+                ),
             )
+            .filter(parent_path__in=parent_paths)
+            .annotate(
+                rank=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("parent_path")],
+                    order_by=[F("doc_count").desc(), F("name").asc()],
+                ),
+            )
+            .order_by("parent_path", "rank")
         )
 
-        step_len = Flynote.steplen
-        parent_children = defaultdict(list)
+        children_by_parent = defaultdict(list)
         for child in children_qs:
-            parent_path = child.path[: (child.depth - 1) * step_len]
-            for t in parent_topics:
-                if t.path == parent_path:
-                    parent_children[t.pk].append(
-                        (count_map.get(child.pk, 0), child.name)
-                    )
-                    break
+            if child.rank <= 3:
+                children_by_parent[child.parent_path].append(child.name)
 
-        result = {}
-        for pk, items in parent_children.items():
-            items.sort(key=lambda x: x[0], reverse=True)
-            result[pk] = [name for _, name in items[:3]]
-        return result
+        path_to_pk = {t.path: t.pk for t in parent_topics}
+        return {path_to_pk[path]: names for path, names in children_by_parent.items()}
 
 
 class FlynoteTopicListView(FlynoteTopicMixin, ListView):
