@@ -270,7 +270,6 @@ class CriminalDataExtractionTests(TestCase):
 
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
-        self.assertLessEqual(len(result.basis.split()), 25)
 
     def test_extract_civil_case_type_and_filing_year(self):
         CIVIL_TEXT_WITH_FILING_YEAR = """
@@ -289,7 +288,6 @@ class CriminalDataExtractionTests(TestCase):
 
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
-        self.assertLessEqual(len(result.basis.split()), 25)
 
     def test_extract_unknown_when_unclear(self):
         UNCLEAR_TEXT = """
@@ -304,4 +302,3 @@ class CriminalDataExtractionTests(TestCase):
 
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
-        self.assertLessEqual(len(result.basis.split()), 25)

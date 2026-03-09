@@ -161,11 +161,20 @@ An offence ID may only be assigned if one of the returned results is a clear sem
 wording. A clear match means that the candidate offence’s title or description closely corresponds to the offence
 described in the judgment.
 
+
 You are not allowed to invent offence IDs. You are also not allowed to output an offence ID unless that exact ID
 appears in the results returned by the `search_offences` tool.
 
 If the search returns no results, or if none of the results clearly match the extracted offence, the `offence_id`
 must be set to `null`.
+
+You must NOT assign an offence_id when:
+- the search returns no results
+- the returned offences are related but not the same
+- the result is merely the “closest” available offence
+- the wording in the judgment and the wording in the result refer to different offences
+
+
 
 Example tool call:
 
@@ -197,15 +206,8 @@ Some judgments state a sentence without explicitly linking it to a particular of
 attempt to attach the sentence to the offence that most clearly corresponds to the conviction described in the judgment.
 
 If the relationship between the sentence and the offence cannot be determined with confidence, attach the sentence to
-the first extracted offence and ensure that the supporting quotation reflects the ambiguity.
+the first extracted offence.
 
-# Supporting Quotes
-
-For each extracted offence, include a short quotation from the judgment text showing the charge, conviction, acquittal,
-or sentence related to that offence. The quotation must contain no more than twenty-five words.
-
-For each extracted sentence, also include a quotation of no more than twenty-five words showing where the sentence was
-imposed.
 
 # Example 1: Simple Conviction and Sentence
 
@@ -304,11 +306,51 @@ the trial court.
 </text>
 
 The offence **defilement** must be extracted because it is the conviction being appealed. The sentence of fifteen years
-imprisonment must also be extracted and converted to 180 months.ntenced to ten years imprisonment."
+imprisonment must also be extracted and converted to 180 months.
+
+# Example 9: Extracted Offence With No Database Match
+
+<text>
+The appellant was charged with assault causing actual bodily harm and sentenced to twelve months imprisonment.
+</text>
+
+Tool call:
+
+<tool-call>
+search_offences("assault causing actual bodily harm, assault, actual bodily harm, bodily injury")
+</tool-call>
+
+Tool result:
+
+<tool-output>
+[]
+</tool-output>
+
+Extraction:
+
+[
+  {
+    "offence_id": null,
+    "offence_title": null,
+    "extracted_offence": "assault causing actual bodily harm",
+    "sentences": [
+      {
+        "sentence_type": "imprisonment",
+        "duration_months": 12,
+        "fine_amount": null,
+        "suspended": false,
+        "mandatory_minimum": null
+      }
+    ]
+  }
+]
+
+Because the offence is clearly present in the judgment but no matching database offence exists,
+the offence must still be extracted, but the offence_id must be null.
 """
 
 
-class SentenceOutput(BaseModel):
+class SentenceExtraction(BaseModel):
     sentence_type: Sentence.SentenceType
     duration_months: Optional[int] = Field(
         description="Duration of the sentence in months. Convert years to months (e.g., 10 years -> 120 months)."
@@ -324,24 +366,20 @@ class SentenceOutput(BaseModel):
         description="Whether the sentence is explicitly stated as the mandatory minimum for the offence.",
         default=None,
     )
-    basis: str = Field(description="Short quote (<=25 words) supporting this sentence.")
 
 
-class OffenceMatch(BaseModel):
+class OffenceExtraction(BaseModel):
     offence_id: Optional[int] = Field(
         description="Offence ID from the database (from search_offences). Null if no clear match."
     )
     extracted_offence: str = Field(
         description="Clean offence label as written/normalized (no statute numbers)."
     )
-    basis: str = Field(
-        description="Short quote (<=25 words) showing charge/conviction/acquittal/sentence for this offence."
-    )
-    sentences: List[SentenceOutput] = []
+    sentences: List[SentenceExtraction] = []
 
 
 class JudgmentOffenceExtraction(BaseModel):
-    offences: List[OffenceMatch] = []
+    offences: List[OffenceExtraction] = []
 
 
 def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtraction:
@@ -365,10 +403,6 @@ class CaseMetaExtraction(BaseModel):
     filing_year: Optional[conint(ge=1800, le=2200)] = Field(
         default=None,
         description="Year the case/appeal was filed (4-digit), or null if not stated/unclear.",
-    )
-    basis: str = Field(
-        description="Short quote (<=25 words) supporting case_type and/or filing_year. If neither is found, "
-        "explain briefly why (<=25 words)."
     )
 
 
