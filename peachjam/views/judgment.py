@@ -87,13 +87,13 @@ class FlynoteTopicMixin:
                     order_by=[F("doc_count").desc(), F("name").asc()],
                 ),
             )
+            .filter(rank__lte=3)
             .order_by("parent_path", "rank")
         )
 
         children_by_parent = defaultdict(list)
         for child in children_qs:
-            if child.rank <= 3:
-                children_by_parent[child.parent_path].append(child.name)
+            children_by_parent[child.parent_path].append(child.name)
 
         path_to_pk = {t.path: t.pk for t in parent_topics}
         return {path_to_pk[path]: names for path, names in children_by_parent.items()}
