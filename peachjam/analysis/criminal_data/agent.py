@@ -113,6 +113,91 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
 
 
 PROMPT = """
+You are a legal information extraction system that is extracting structured data on case offences and sentencing from
+the text of a court judgment.
+
+# Task
+
+Your task is to identify the specific offences that the accused/appellant was charged with, convicted of,
+acquitted of, or sentenced for, and to extract any sentences imposed on the accused/appellant, ensuring that each
+sentence is correctly matched to the relevant offence.
+
+# Instructions
+
+## Extracting offences
+
+Extract only CASE OFFENCES, which are offences directly related to the accused/appellant's charges, convictions,
+acquittals, or sentences.
+
+Do not extract INCIDENTAL mentions of offences that are not directly related to the accused/appellant's case.
+These include general legal discussions, examples, hypotheticals, or offences committed by other individuals that
+are not part of the charges against the accused/appellant.
+
+### Use the search_offences tool for mapping offences to IDs
+
+For each extracted offence, you MUST the search_offences tool to find candidate offence IDs from the database. Provide
+3–5 concise keyword variants for each offence when calling search_offences. Use the search results solely to map the
+already-extracted offence to a database offence. Assign an offence_id only if there is a clear semantic match between
+the extracted offence text and the title or description of a candidate offence from search_offences.
+
+If search_offences returns no results, or if none of the results clearly match the extracted offence, set offence_id
+to null. Do not invent offence IDs or assign an ID that does not appear in the search results.
+
+## Extracting sentences and matching to offences
+
+If a sentence is present in the text, extract it and associate it to the corresponding offence.
+
+If a sentence is a general one that is not clearly linked to a specific offence, try to attach it to the most clearly
+convicted offence(s). If it is still unclear, attach it to the first offence mentioned.
+
+Only extract sentences that are actually imposed on the accused/appellant. Do not extract sentences mentioned in
+general discussion or that are not clearly linked to the accused/appellant.
+
+The possible sentence types that can be extracted are:
+
+- imprisonment: Look for phrases like "sentenced to X years/months" or "imprisonment for X".
+- fine: Look for phrases like "fined <currency> X" or "fine of X".
+- probation: Look for phrases like "placed on probation for X years/months".
+
+Also extract the following information about the sentence, if available. If not available, use null for that field.
+
+- duration_months: the duration (in months) of the sentence. Convert years to months (e.g., 10 years -> 120 months).
+- fine_amount: the amount of the fine (if a fine was imposed). Use a number only, without currency symbols.
+- suspended: set to True if the sentence is stated as suspended, otherwise False.
+- mandatory_minimum: set to True only if the sentence is explicitly stated as the mandatory minimum for the offence.
+
+# Examples
+
+## Example 1
+
+<text>
+The appellant was convicted of robbery with violence contrary to section 296(2) and sentenced to ten years imprisonment.
+</text>
+
+The search_offences tool is called with the input "robbery with violence, robbery, theft, stealing" and the tool
+returns:
+
+<tool-output>
+[{
+  "id": 123,
+  "title": "Robbery with Violence",
+  "description": "An offence involving robbery with the use of violence, as defined in section 296
+}]
+</tool-output>
+
+Since this is a clear semantic match to the extracted offence "robbery with violence", offence_id 123 is used.
+
+The sentence "ten years imprisonment" is extracted and attached to this offence, with:
+
+- sentence_type="imprisonment",
+- duration_months=120 (10 years * 12 months)
+- fine_amount=null
+- suspended=False
+- mandatory_minimum=null
+"""
+
+
+PROMPT2 = """
 <ROLE>
 You extract case offences and sentencing from judgment text and map offences to database IDs.
 </ROLE>
@@ -180,10 +265,20 @@ and sentenced to ten years imprisonment."
 
 class SentenceOutput(BaseModel):
     sentence_type: Sentence.SentenceType
-    duration_months: Optional[int] = None
-    fine_amount: Optional[int] = None
-    suspended: bool = False
-    mandatory_minimum: Optional[bool] = None
+    duration_months: Optional[int] = Field(
+        description="Duration of the sentence in months. Convert years to months (e.g., 10 years -> 120 months)."
+    )
+    fine_amount: Optional[int] = Field(
+        description="Amount of the fine (if a fine was imposed). Use a number only, without currency symbols."
+    )
+    suspended: bool = Field(
+        description="Whether the sentence is suspended or not.",
+        default=False,
+    )
+    mandatory_minimum: Optional[bool] = Field(
+        description="Whether the sentence is explicitly stated as the mandatory minimum for the offence.",
+        default=None,
+    )
     basis: str = Field(description="Short quote (<=25 words) supporting this sentence.")
 
 
