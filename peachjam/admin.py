@@ -75,7 +75,6 @@ from peachjam.models import (
     CustomPropertyLabel,
     DocumentAccessGroup,
     DocumentChatThread,
-    DocumentContent,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
@@ -422,16 +421,8 @@ class DocumentForm(forms.ModelForm):
                 (x, x) for x in self.Meta.model.frbr_uri_doctypes
             ]
 
-        doc_content = None
         if self.instance and self.instance.pk:
-            try:
-                doc_content = self.instance.document_content
-            except DocumentContent.DoesNotExist:
-                doc_content = DocumentContent.objects.get_or_create(
-                    document=self.instance
-                )[0]
-
-        if doc_content:
+            doc_content = self.instance.get_or_create_document_content()
             self.fields["source_html"].initial = doc_content.source_html
             if doc_content.content_html_is_akn:
                 self.fields["source_html"].widget.attrs["readonly"] = True
@@ -460,14 +451,10 @@ class DocumentForm(forms.ModelForm):
 
     def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML
-        doc_content = None
         if self.instance and self.instance.pk:
-            try:
-                doc_content = self.instance.document_content
-            except self.instance.__class__.document_content.RelatedObjectDoesNotExist:
-                pass
-        if doc_content and doc_content.content_html_is_akn:
-            return doc_content.source_html
+            doc_content = self.instance.get_or_create_document_content()
+            if doc_content.content_html_is_akn:
+                return doc_content.source_html
         return self.cleaned_data["source_html"]
 
     def create_topics(self, instance):

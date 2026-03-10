@@ -89,11 +89,8 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
             for image in doc.images.all():
                 urls.append(doc.get_absolute_url() + "/media/" + image.filename)
 
-            try:
-                doc_content = doc.document_content
-            except doc.__class__.document_content.RelatedObjectDoesNotExist:
-                doc_content = None
-            if not (doc_content and doc_content.content_html):
+            doc_content = doc.get_or_create_document_content()
+            if not doc_content.content_html:
                 # PDF
                 urls.append(
                     reverse("document_source_pdf", args=[doc.expression_frbr_uri[1:]])

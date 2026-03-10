@@ -43,16 +43,12 @@ class ComparePortionsView(TemplateView):
         return context
 
     def get_portion_html(self, doc, portion):
-        try:
-            doc_content = doc.document_content
-        except doc.__class__.document_content.RelatedObjectDoesNotExist:
-            return None
+        doc_content = doc.get_or_create_document_content()
         if not doc_content.content_html:
             return None
 
-        root = lxml.html.fromstring(doc_content.content_html)
         try:
-            el = root.get_element_by_id(portion)
+            el = doc_content.content_html_tree.get_element_by_id(portion)
             return lxml.html.tostring(el, encoding="unicode")
         except KeyError:
             return None

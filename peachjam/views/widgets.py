@@ -11,7 +11,7 @@ from django.utils.translation import get_language
 from django.views.generic import DetailView
 
 from peachjam.helpers import add_slash
-from peachjam.models import CoreDocument, DocumentContent
+from peachjam.models import CoreDocument
 from peachjam.resolver import RedirectResolver, resolver
 
 
@@ -94,21 +94,15 @@ class DocumentPopupView(DetailView):
         context = super().get_context_data(**kwargs)
 
         if self.portion:
-            try:
-                doc_content = self.object.document_content
-            except DocumentContent.DoesNotExist:
-                doc_content = None
-            if not (
-                doc_content
-                and doc_content.content_html
-                and doc_content.content_html_is_akn
-            ):
+            doc_content = self.object.get_or_create_document_content()
+            if not (doc_content.content_html and doc_content.content_html_is_akn):
                 raise Http404()
 
             # try to find the portion within the object
             try:
-                root = lxml.html.fromstring(doc_content.content_html)
-                elems = root.xpath(f'//*[@id="{self.portion}"]')
+                elems = doc_content.content_html_tree.xpath(
+                    f'//*[@id="{self.portion}"]'
+                )
                 if elems:
                     context["portion_html"] = lxml.html.tostring(
                         elems[0], encoding="unicode"
