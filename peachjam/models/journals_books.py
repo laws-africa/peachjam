@@ -33,13 +33,7 @@ class Book(CoreDocument):
         doc_content.update_toc_json_from_content_html()
 
     def pre_save(self):
-        doc_content = None
-        if self.pk:
-            try:
-                doc_content = self.document_content
-            except self.__class__.document_content.RelatedObjectDoesNotExist:
-                pass
-        if self.content_markdown and not (doc_content and doc_content.source_html):
+        if not self.pk and self.content_markdown:
             self.convert_content_markdown()
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "book"
