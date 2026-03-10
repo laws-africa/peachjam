@@ -43,6 +43,30 @@
   </section>
   <section class="py-4">
     <div class="container">
+      <h2>Training videos</h2>
+      <p class="lead">Watch short walkthroughs on using the Paralegal Hub and related materials.</p>
+      <div class="row row-cols-1 row-cols-md-2 g-4">
+        {% for video in videos %}
+          <div class="col">
+            <div class="card h-100">
+              <div class="ratio ratio-16x9 overflow-hidden bg-light">
+                <iframe src="{{ video.embed_url }}"
+                        title="{{ video.title }}"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allowfullscreen></iframe>
+              </div>
+              <div class="card-body">
+                <h3 class="h5 card-title mb-0">{{ video.title }}</h3>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+  <section class="py-4">
+    <div class="container">
       <h2>Resources</h2>
       <div class="row row-cols-1 row-cols-md-3 g-4">
         <div class="col">
