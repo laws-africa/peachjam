@@ -24,12 +24,12 @@ from peachjam.models import (
     SourceFile,
     UserFollowing,
 )
-from peachjam_search.models import SavedSearch
 from peachjam.views.robots import (
     _language_prefixes,
     _place_codes,
     _prefixed_place_rules,
 )
+from peachjam_search.models import SavedSearch
 
 
 class PeachjamViewsTest(TestCase):

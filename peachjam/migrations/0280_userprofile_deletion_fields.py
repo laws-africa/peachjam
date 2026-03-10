@@ -10,12 +10,16 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="userprofile",
             name="deleted_at",
-            field=models.DateTimeField(blank=True, null=True, verbose_name="deleted at"),
+            field=models.DateTimeField(
+                blank=True, null=True, verbose_name="deleted at"
+            ),
         ),
         migrations.AddField(
             model_name="userprofile",
             name="deleted_reason",
-            field=models.TextField(blank=True, null=True, verbose_name="deleted reason"),
+            field=models.TextField(
+                blank=True, null=True, verbose_name="deleted reason"
+            ),
         ),
         migrations.AddField(
             model_name="userprofile",

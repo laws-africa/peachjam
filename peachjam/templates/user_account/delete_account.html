@@ -12,9 +12,7 @@
           {% trans "You have a paid subscription. Deleting your account will remove your billing information and active subscription access." %}
         </div>
       {% else %}
-        <div class="alert alert-secondary" role="alert">
-          {% trans "You have a free account." %}
-        </div>
+        <div class="alert alert-secondary" role="alert">{% trans "You have a free account." %}</div>
       {% endif %}
       <p>
         {% trans "This action is permanent. Your annotations, follows, saved searches and saved documents will be deleted, and your personal information will be removed from your account." %}
@@ -25,17 +23,21 @@
           <label class="form-label" for="{{ form.deleted_reason.id_for_label }}">{{ form.deleted_reason.label }}</label>
           {{ form.deleted_reason }}
           {% if form.deleted_reason.errors %}
-            <div class="text-danger">{% for error in form.deleted_reason.errors %}<p>{{ error }}</p>{% endfor %}</div>
+            <div class="text-danger">
+              {% for error in form.deleted_reason.errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
           {% endif %}
         </div>
         <div class="form-check mb-3">
           {{ form.confirm_delete }}
           <label class="form-check-label" for="{{ form.confirm_delete.id_for_label }}">{{ form.confirm_delete.label }}</label>
           {% if form.confirm_delete.errors %}
-            <div class="text-danger">{% for error in form.confirm_delete.errors %}<p>{{ error }}</p>{% endfor %}</div>
+            <div class="text-danger">
+              {% for error in form.confirm_delete.errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
           {% endif %}
         </div>
-        <button type="submit" class="btn btn-primary">{% trans "Delete account" %}</button>
+        <button type="submit" class="btn btn-danger">{% trans "Delete account" %}</button>
       </form>
     </div>
   </div>
