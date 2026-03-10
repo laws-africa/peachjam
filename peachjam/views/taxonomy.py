@@ -1,5 +1,5 @@
-from django.core.exceptions import PermissionDenied
 from django.shortcuts import Http404, get_object_or_404
+from django.template.response import TemplateResponse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -30,7 +30,12 @@ class AllowedTaxonomyMixin:
         )
         if self.taxonomy.restricted or any(is_ancestor_restricted):
             if not request.user.has_perm("peachjam.view_taxonomy", self.taxonomy):
-                raise PermissionDenied
+                return TemplateResponse(
+                    request,
+                    "peachjam/taxonomy_restricted.html",
+                    {"taxonomy": self.taxonomy},
+                    status=403,
+                )
         self.allowed_taxonomies = Taxonomy.get_allowed_taxonomies(
             request.user, root=self.taxonomy
         )
