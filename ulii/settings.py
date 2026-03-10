@@ -4,6 +4,8 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["ulii.apps.ULIIConfig"] + INSTALLED_APPS  # noqa
 
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+
 
 LANGUAGES = [
     ("sw", _("Swahili")),
