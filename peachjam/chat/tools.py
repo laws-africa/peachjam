@@ -34,7 +34,7 @@ async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
     if not text.strip():
         return "The document has no text content. Suggest that the user downloads the document to view its content."
 
-    if len(text) > 1_250_000:
+    if len(text) > 750_000:
         return "The document text is too large to include here. Suggest that the user downloads the document instead."
 
     return text
