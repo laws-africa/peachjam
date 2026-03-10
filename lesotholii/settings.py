@@ -4,6 +4,8 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["lesotholii.apps.LesothoLIIConfig"] + INSTALLED_APPS  # noqa
 
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+
 
 JAZZMIN_SETTINGS["site_title"] = "LesothoLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "LesothoLII"  # noqa
