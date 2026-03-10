@@ -1,5 +1,7 @@
 import datetime
 
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.auth.models import Permission, User
@@ -10,14 +12,19 @@ from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.models import (
+    Annotation,
     CaseHistory,
     CoreDocument,
     Court,
+    Folder,
     Judgment,
     Outcome,
     PeachJamSettings,
+    SavedDocument,
     SourceFile,
+    UserFollowing,
 )
+from peachjam_search.models import SavedSearch
 from peachjam.views.robots import (
     _language_prefixes,
     _place_codes,
@@ -340,6 +347,63 @@ class PeachjamViewsTest(TestCase):
         )
         response = self.client.get(reverse("my_account"))
         self.assertEqual(response.status_code, 200)
+
+    def test_delete_account_page(self):
+        self.client._login(
+            User.objects.first(), "django.contrib.auth.backends.ModelBackend"
+        )
+        response = self.client.get(reverse("delete_account"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Delete account")
+
+    def test_delete_account_anonymises_user(self):
+        user = User.objects.first()
+        doc = CoreDocument.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+
+        EmailAddress.objects.create(
+            user=user, email=user.email, verified=True, primary=True
+        )
+        SocialAccount.objects.create(
+            user=user, provider="test", uid=f"social-{user.pk}"
+        )
+        Annotation.objects.create(user=user, document=doc, text="note")
+        folder = Folder.objects.create(user=user, name="My folder")
+        saved_document = SavedDocument.objects.create(user=user, work=doc.work)
+        saved_document.folders.add(folder)
+        SavedSearch.objects.create(user=user, q="test")
+        UserFollowing.objects.create(user=user, court=Court.objects.first())
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "deleted_reason": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("account_logged_out"))
+
+        user.refresh_from_db()
+        profile = user.userprofile
+        self.assertTrue(user.username.startswith("deleted-"))
+        self.assertEqual(user.email, "")
+        self.assertEqual(user.first_name, "")
+        self.assertEqual(user.last_name, "")
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.has_usable_password())
+
+        self.assertIsNotNone(profile.deleted_at)
+        self.assertEqual(profile.deleted_reason, "No longer needed")
+        self.assertEqual(len(profile.email_hash), 64)
+
+        self.assertEqual(Annotation.objects.filter(user=user).count(), 0)
+        self.assertEqual(Folder.objects.filter(user=user).count(), 0)
+        self.assertEqual(SavedDocument.objects.filter(user=user).count(), 0)
+        self.assertEqual(SavedSearch.objects.filter(user=user).count(), 0)
+        self.assertEqual(UserFollowing.objects.filter(user=user).count(), 0)
+        self.assertEqual(EmailAddress.objects.filter(user=user).count(), 0)
+        self.assertEqual(SocialAccount.objects.filter(user=user).count(), 0)
 
     def test_case_history(self):
         self.user = User.objects.first()

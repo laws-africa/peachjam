@@ -13,7 +13,13 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView, UpdateView
 from django.views.generic.base import TemplateView
 
-from peachjam.forms import PasswordSignupForm, TermsAcceptanceForm, UserProfileForm
+from peachjam.account_deletion import delete_and_anonymise_user
+from peachjam.forms import (
+    DeleteAccountForm,
+    PasswordSignupForm,
+    TermsAcceptanceForm,
+    UserProfileForm,
+)
 from peachjam.models import DocumentAccessGroup, UserProfile
 from peachjam.views.mixins import AtomicPostMixin
 
@@ -171,6 +177,32 @@ class EditAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
             ),
         )
         return context
+
+
+class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
+    template_name = "user_account/delete_account.html"
+    form_class = DeleteAccountForm
+
+    def get_success_url(self):
+        return reverse("account_logged_out")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        has_paid_subscription = self.request.user.subscriptions.filter(
+            status__in=["active", "pending"],
+            is_trial=False,
+            product_offering__pricing_plan__price__gt=0,
+        ).exists()
+        context["has_paid_subscription"] = has_paid_subscription
+        return context
+
+    def form_valid(self, form):
+        delete_and_anonymise_user(
+            self.request.user,
+            deleted_reason=form.cleaned_data["deleted_reason"],
+        )
+        messages.success(self.request, _("Your account has been deleted."))
+        return redirect(self.get_success_url())
 
 
 class LoggedOutView(TemplateView):

@@ -689,6 +689,19 @@ class UserProfileForm(forms.Form):
         return self.user
 
 
+class DeleteAccountForm(forms.Form):
+    confirm_delete = forms.BooleanField(
+        label=_("I understand this action cannot be undone"),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        error_messages={"required": _("Please confirm account deletion.")},
+    )
+    deleted_reason = forms.CharField(
+        label=_("Why are you deleting your account?"),
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+        max_length=2000,
+    )
+
+
 class TermsAcceptanceForm(forms.Form):
     accepted_terms = forms.BooleanField(
         label=_("I agree to the Terms of Use"),

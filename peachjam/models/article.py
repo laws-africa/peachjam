@@ -112,6 +112,9 @@ class UserProfile(models.Model):
         null=True,
         blank=True,
     )
+    deleted_at = models.DateTimeField(_("deleted at"), null=True, blank=True)
+    deleted_reason = models.TextField(_("deleted reason"), null=True, blank=True)
+    email_hash = models.CharField(_("email hash"), max_length=64, null=True, blank=True)
 
     class Meta:
         verbose_name = _("user profile")
