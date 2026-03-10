@@ -23,10 +23,15 @@ class SubscriptionRequiredMixin(PermissionRequiredMixin):
         )
 
         lowest_product = Product.get_lowest_product_for_permission(perm)
+        lowest_offering = self.get_lowest_offering_for_product(lowest_product)
 
         return {
             "subscription_required": True,
             "lowest_product": lowest_product,
+            "lowest_offering": lowest_offering,
+            "lowest_offering_is_free": bool(
+                lowest_offering and lowest_offering.pricing_plan.price == 0
+            ),
         }
 
     def get_subscription_required_context(self):
@@ -44,6 +49,13 @@ class SubscriptionRequiredMixin(PermissionRequiredMixin):
         if extra_context:
             context.update(extra_context)
         return context
+
+    def get_lowest_offering_for_product(self, product):
+        if not product:
+            return None
+        return product.get_best_available_offering_for_user(
+            self.request.user if self.request.user.is_authenticated else None
+        )
 
     def render_subscription_required(self, context):
         return render(

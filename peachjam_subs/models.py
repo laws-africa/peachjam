@@ -221,6 +221,36 @@ class Product(models.Model):
 
         return products.order_by("tier")
 
+    def get_best_available_offering_for_user(self, user):
+        """Return the best available selectable offering for the user.
+
+        If the user has a current subscription, prefer offerings with the same
+        billing period, then pick the lowest-priced option (with pk as tie-breaker).
+        """
+        if not user:
+            return self.selectable_offerings.order_by(
+                "pricing_plan__price", "pk"
+            ).first()
+
+        offerings = self.get_available_offerings_for_user(user)
+
+        current_subscription = Subscription.get_or_create_active_for_user(user)
+        preferred_period = current_subscription.product_offering.pricing_plan.period
+        preferred_offering = (
+            offerings.filter(pricing_plan__period=preferred_period)
+            .order_by("pricing_plan__price", "pk")
+            .first()
+        )
+        if preferred_offering:
+            return preferred_offering
+
+        return offerings.order_by("pricing_plan__price", "pk").first()
+
+    def get_available_offerings_for_user(self, user):
+        return ProductOffering.product_offerings_available_to_user(user).filter(
+            pk__in=self.selectable_offerings.values("pk")
+        )
+
 
 class PricingPlan(models.Model):
     class Period(models.TextChoices):
@@ -298,21 +328,20 @@ class ProductOffering(models.Model):
     @classmethod
     def product_offerings_available_to_user(cls, user):
         """Return a queryset of ProductOffering objects available to the user."""
-        return (
-            get_objects_for_user(user, "peachjam_subs.can_subscribe", klass=cls)
-            .filter(
-                # only show offerings for products that explicitly configured selectable offerings
-                product__selectable_offerings__isnull=False
-            )
-            .exclude(
-                # exclude currently active (non-trial) subscription
-                pk__in=Subscription.objects.active_for_user(user)
-                .filter(is_trial=False)
-                .values_list("product_offering", flat=True)
-            )
-            .distinct()
-            .order_by("-pricing_plan__price")
+        qs = get_objects_for_user(
+            user, "peachjam_subs.can_subscribe", klass=cls
+        ).filter(
+            # only show offerings for products that explicitly configured selectable offerings
+            product__selectable_offerings__isnull=False
         )
+        qs = qs.exclude(
+            # exclude currently active (non-trial) subscription
+            pk__in=Subscription.objects.active_for_user(user)
+            .filter(is_trial=False)
+            .values_list("product_offering", flat=True)
+        )
+
+        return qs.distinct().order_by("-pricing_plan__price")
 
 
 class SubscriptionManager(models.Manager):
