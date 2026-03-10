@@ -33,6 +33,9 @@ class DocumentChatThread(models.Model):
                 return message
         return None
 
+    def __str__(self):
+        return f"DocumentChatThread(id={self.id}, user_id={self.user_id}, core_document_id={self.core_document_id})"
+
     @cached_property
     def document(self):
         # load the real (polymorphic) document, not just the CoreDocument object
