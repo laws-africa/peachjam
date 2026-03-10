@@ -5,11 +5,94 @@ from typing import Any, Dict, List, Literal, Optional
 from agents import Agent, Runner, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
+from django.db.models import Case, FloatField, Q, Value, When
 from pydantic import BaseModel, Field, conint
 
 from peachjam.models import Offence, Sentence
 
 log = logging.getLogger(__name__)
+
+
+def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
+
+    _SPLIT = re.compile(r"[,\n;|]+")
+    _WS = re.compile(r"\s+")
+    _WORDS = re.compile(r"[a-z0-9]+")
+
+    def _normalize_term(term: str) -> str:
+        return _WS.sub(" ", (term or "").strip().lower())
+
+    def _term_words(term: str) -> List[str]:
+        return _WORDS.findall(_normalize_term(term))
+
+    close_old_connections()
+    try:
+        log.info("search for offences terms: %s", search_terms)
+
+        terms = [_normalize_term(t) for t in _SPLIT.split(search_terms or "")]
+        terms = [t for t in terms if t]
+        terms = list(dict.fromkeys(terms))
+
+        if not terms:
+            return []
+
+        primary_term = terms[0]
+        query_terms = terms[:3]
+
+        config = "english"
+        limit = 5
+        min_rank = 0.05
+
+        vector = SearchVector("title", weight="A", config=config) + SearchVector(
+            "description", weight="C", config=config
+        )
+
+        ts_query = None
+        for term in query_terms:
+            q = SearchQuery(term, search_type="plain", config=config)
+            ts_query = q if ts_query is None else (ts_query | q)
+
+        rank = SearchRank(vector, ts_query)
+
+        title_word_score_parts = []
+        for word in _term_words(primary_term):
+            title_word_score_parts.append(
+                Case(
+                    When(title__icontains=word, then=Value(1.0)),
+                    default=Value(0.0),
+                    output_field=FloatField(),
+                )
+            )
+
+        qs = Offence.objects.annotate(rank=rank)
+
+        if title_word_score_parts:
+            title_word_score = title_word_score_parts[0]
+            for extra_score in title_word_score_parts[1:]:
+                title_word_score = title_word_score + extra_score
+            qs = qs.annotate(title_word_score=title_word_score)
+        else:
+            qs = qs.annotate(title_word_score=Value(0.0, output_field=FloatField()))
+
+        qs = qs.filter(Q(title_word_score__gt=0) | Q(rank__gte=min_rank)).order_by(
+            "-title_word_score", "-rank", "title", "id"
+        )
+
+        results: List[Dict[str, Any]] = []
+        for offence in qs[:limit]:
+            results.append(
+                {
+                    "id": offence.id,
+                    "title": offence.title,
+                    "description": (offence.description or "").strip(),
+                }
+            )
+
+        log.info("offence search results: %s", results)
+        return results
+
+    finally:
+        connection.close()
 
 
 @function_tool
@@ -21,6 +104,9 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
     -------
     This tool maps offence mentions found in a judgment to canonical offences
     stored in the database.
+
+    The first comma-separated term is treated as the main offence label.
+    Additional terms are treated as optional variants.
 
     Input
     -----
@@ -58,58 +144,13 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
     -----
     - Results are ranked using PostgreSQL full-text search over the offence
       title and description.
+    Ranking prefers:
+    1. titles containing more words from the main term
+    2. PostgreSQL full-text relevance
+    3. stable ordering by title and id
     - Sorting is deterministic: rank DESC, title ASC, id ASC.
     """
-
-    close_old_connections()
-    try:
-        log.info("search for offences terms: %s", search_terms)
-
-        _SPLIT = re.compile(r"[,\n;|]+")
-
-        terms = [t.strip() for t in _SPLIT.split(search_terms or "")]
-        terms = list(dict.fromkeys([t for t in terms if t]))
-        if not terms:
-            return []
-
-        config = "english"
-        limit = 5
-        min_rank = 0.08
-
-        vector = SearchVector("title", weight="A", config=config) + SearchVector(
-            "description", weight="B", config=config
-        )
-
-        ts_query = None
-        for term in terms:
-            q = SearchQuery(term, search_type="plain", config=config)
-            ts_query = q if ts_query is None else (ts_query | q)
-
-        rank = SearchRank(vector, ts_query)
-
-        qs = (
-            Offence.objects.annotate(rank=rank)
-            .filter(rank__gte=min_rank)
-            .order_by("-rank", "title", "id")  # stable ordering
-        )
-
-        results: List[Dict[str, Any]] = []
-
-        for offence in qs[:limit]:
-            results.append(
-                {
-                    "id": offence.id,
-                    "title": offence.title,
-                    "description": (offence.description or "").strip(),
-                }
-            )
-
-        log.info("offence search results: %s", results)
-
-        return results
-
-    finally:
-        connection.close()
+    return search_offences_tool(search_terms)
 
 
 PROMPT = """

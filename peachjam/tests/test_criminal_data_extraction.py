@@ -9,6 +9,9 @@ from peachjam.analysis.criminal_data.agent import (
     extract_case_type_filing_year,
     extract_offences_and_sentences,
 )
+from peachjam.analysis.criminal_data.agent import (
+    search_offences_tool as search_offences,
+)
 from peachjam.models import Offence, Work
 
 log = logging.getLogger(__name__)
@@ -302,3 +305,155 @@ class CriminalDataExtractionTests(TestCase):
 
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
+
+
+class SearchOffencesTests(TestCase):
+    def setUp(self):
+        self.work = Work.objects.create(
+            title="Test Work", frbr_uri="/akn/tz/act/2010/11"
+        )
+
+        self.abduction = Offence.objects.create(
+            work=self.work,
+            title="Abduction",
+            description=(
+                "Taking away or detaining a woman against her will with intent to marry "
+                "or have sexual intercourse with her."
+            ),
+        )
+
+        self.abduction_of_girls = Offence.objects.create(
+            work=self.work,
+            title="Abduction of girls under sixteen",
+            description=(
+                "A person who unlawfully takes an unmarried girl under the age of sixteen "
+                "years out of lawful custody commits an offence."
+            ),
+        )
+
+        self.assaults_causing_abh = Offence.objects.create(
+            work=self.work,
+            title="Assaults causing actual bodily harm",
+            description=(
+                "A person who commits an assault that occasions actual bodily harm "
+                "commits an offence under this provision."
+            ),
+        )
+
+        self.attempt_armed_robbery = Offence.objects.create(
+            work=self.work,
+            title="Attempt armed robbery",
+            description=(
+                "A person who, with intent to steal, is armed and threatens or attempts "
+                "to threaten violence commits the offence of attempted armed robbery."
+            ),
+        )
+
+        self.armed_robbery = Offence.objects.create(
+            work=self.work,
+            title="Armed robbery",
+            description=(
+                "A person who steals and is armed with a dangerous or offensive weapon "
+                "and uses or threatens violence commits armed robbery."
+            ),
+        )
+
+        self.obtaining_goods_false_pretences = Offence.objects.create(
+            work=self.work,
+            title="Obtaining goods by false pretences",
+            description=(
+                "A person who by false pretence and with intent to defraud obtains from "
+                "another person anything capable of being stolen commits an offence."
+            ),
+        )
+
+        self.obtaining_credit_false_pretences = Offence.objects.create(
+            work=self.work,
+            title="Obtaining credit, etc., by false pretences",
+            description=(
+                "A person who by false pretence or other fraud obtains credit commits an offence."
+            ),
+        )
+
+    def test_search_offences_empty_input_returns_empty_list(self):
+        results = search_offences("")
+        log.info("test_search_offences_empty_input_returns_empty_list: %s", results)
+
+        self.assertEqual(results, [])
+
+    def test_search_offences_abduction_returns_abduction_in_results(self):
+        results = search_offences("abduction")
+        log.info(
+            "test_search_offences_abduction_returns_abduction_in_results: %s", results
+        )
+
+        titles = [r["title"] for r in results]
+
+        self.assertIn("Abduction", titles)
+
+    def test_search_offences_abduction_prefers_abduction_over_abduction_of_girls(self):
+        results = search_offences("abduction")
+        log.info(
+            "test_search_offences_abduction_prefers_abduction_over_abduction_of_girls: %s",
+            results,
+        )
+
+        self.assertTrue(results)
+        self.assertEqual(results[0]["id"], self.abduction.id)
+
+    def test_search_offences_assault_singular_matches_plural_title(self):
+        results = search_offences("assault causing actual bodily harm")
+        log.info(
+            "test_search_offences_assault_singular_matches_plural_title: %s", results
+        )
+
+        titles = [r["title"].lower() for r in results]
+
+        self.assertIn("assaults causing actual bodily harm", titles)
+
+    def test_search_offences_attempted_armed_robbery_matches_attempt_title(self):
+        results = search_offences("attempted armed robbery")
+        log.info(
+            "test_search_offences_attempted_armed_robbery_matches_attempt_title: %s",
+            results,
+        )
+
+        titles = [r["title"].lower() for r in results]
+
+        self.assertIn("attempt armed robbery", titles)
+
+    def test_search_offences_false_pretences_returns_related_offences(self):
+        results = search_offences("false pretences")
+        log.info(
+            "test_search_offences_false_pretences_returns_related_offences: %s", results
+        )
+
+        titles = [r["title"].lower() for r in results]
+
+        self.assertIn("obtaining goods by false pretences", titles)
+        self.assertIn("obtaining credit, etc., by false pretences", titles)
+
+    def test_search_offences_multiple_terms_still_returns_abduction(self):
+        results = search_offences("abduction, unlawful taking, taking away")
+        log.info(
+            "test_search_offences_multiple_terms_still_returns_abduction: %s", results
+        )
+
+        titles = [r["title"] for r in results]
+
+        self.assertIn("Abduction", titles)
+
+    def test_search_offences_returns_full_description(self):
+        results = search_offences("abduction")
+        log.info("test_search_offences_returns_full_description: %s", results)
+
+        self.assertTrue(results)
+        self.assertIn("description", results[0])
+        self.assertTrue(results[0]["description"])
+
+    def test_search_offences_results_are_stable_and_ordered(self):
+        results = search_offences("abduction")
+        log.info("test_search_offences_results_are_stable_and_ordered: %s", results)
+
+        self.assertTrue(results)
+        self.assertEqual(results[0]["title"], "Abduction")
