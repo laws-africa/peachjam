@@ -1,5 +1,9 @@
+from collections import defaultdict
+
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import F, IntegerField, Sum, Value, Window
+from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -48,7 +52,54 @@ class JudgmentListView(TemplateView):
         pass
 
 
-class FlynoteTopicListView(ListView):
+class FlynoteTopicMixin:
+    @staticmethod
+    def annotate_with_counts(qs):
+        return qs.annotate(
+            doc_count=Coalesce(
+                F("document_count_cache__count"),
+                Value(0),
+                output_field=IntegerField(),
+            )
+        )
+
+    @staticmethod
+    def get_top_children_by_count(parent_topics):
+        if not parent_topics:
+            return {}
+
+        parent_paths = [t.path for t in parent_topics]
+
+        children_qs = (
+            Flynote.objects.annotate(
+                parent_path=Substr("path", 1, Length("path") - Flynote.steplen),
+                doc_count=Coalesce(
+                    F("document_count_cache__count"),
+                    Value(0),
+                    output_field=IntegerField(),
+                ),
+            )
+            .filter(parent_path__in=parent_paths)
+            .annotate(
+                rank=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("parent_path")],
+                    order_by=[F("doc_count").desc(), F("name").asc()],
+                ),
+            )
+            .filter(rank__lte=3)
+            .order_by("parent_path", "rank")
+        )
+
+        children_by_parent = defaultdict(list)
+        for child in children_qs:
+            children_by_parent[child.parent_path].append(child.name)
+
+        path_to_pk = {t.path: t.pk for t in parent_topics}
+        return {path_to_pk[path]: names for path, names in children_by_parent.items()}
+
+
+class FlynoteTopicListView(FlynoteTopicMixin, ListView):
     model = Flynote
     template_name = "peachjam/flynote/list.html"
     context_object_name = "all_topics"
@@ -60,48 +111,48 @@ class FlynoteTopicListView(ListView):
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        qs = Flynote.get_root_nodes().order_by("name")
+        qs = self.annotate_with_counts(Flynote.get_root_nodes())
         q = self.request.GET.get("q", "").strip()
         if q:
             qs = qs.filter(name__icontains=q)
-        return qs
+        return qs.order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        children = Flynote.get_root_nodes().order_by("name")
+        popular_qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
+            "-doc_count", "name"
+        )[:16]
+        popular_topics = list(popular_qs)
+        child_names_map = self.get_top_children_by_count(popular_topics)
 
-        count_map = dict(
-            FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
-                "flynote_id", "count"
-            )
-        )
-
-        all_enriched = []
-        for child in children:
-            child_names = list(child.get_children().values_list("name", flat=True)[:3])
-            all_enriched.append(
-                {
-                    "topic": child,
-                    "count": count_map.get(child.pk, 0),
-                    "child_names": child_names,
-                }
-            )
-
-        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
-        context["popular_topics"] = sorted_by_count[:16]
-
-        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
-        context["all_topics"] = [
-            enriched_lookup[topic.pk]
-            for topic in context["all_topics"]
-            if topic.pk in enriched_lookup
+        context["popular_topics"] = [
+            {
+                "topic": t,
+                "count": t.doc_count,
+                "child_names": child_names_map.get(t.pk, []),
+            }
+            for t in popular_topics
         ]
-        context["total_judgment_count"] = sum(t["count"] for t in all_enriched)
+
+        page_topics = list(context["all_topics"])
+        page_child_names = self.get_top_children_by_count(page_topics)
+        context["all_topics"] = [
+            {
+                "topic": t,
+                "count": t.doc_count,
+                "child_names": page_child_names.get(t.pk, []),
+            }
+            for t in page_topics
+        ]
+
+        context["total_judgment_count"] = FlynoteDocumentCount.objects.filter(
+            flynote__in=Flynote.get_root_nodes()
+        ).aggregate(total=Coalesce(Sum("count"), Value(0)))["total"]
         context["root"] = None
         return context
 
 
-class FlynoteTopicDetailView(FilteredDocumentListView):
+class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
 
@@ -132,46 +183,45 @@ class FlynoteTopicDetailView(FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        children = self.flynote.get_children()
+        children_qs = self.annotate_with_counts(self.flynote.get_children())
 
-        count_map = dict(
-            FlynoteDocumentCount.objects.filter(flynote__in=children).values_list(
-                "flynote_id", "count"
-            )
-        )
+        # Top 16 by count – single DB query
+        popular_qs = children_qs.order_by("-doc_count", "name")[:16]
+        popular_topics = list(popular_qs)
+        child_names_map = self.get_top_children_by_count(popular_topics)
+        total_children = children_qs.count()
 
-        all_enriched = []
-        for child in children:
-            child_names = list(child.get_children().values_list("name", flat=True)[:3])
-            all_enriched.append(
-                {
-                    "topic": child,
-                    "count": count_map.get(child.pk, 0),
-                    "child_names": child_names,
-                }
-            )
-
-        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
-        context["popular_topics"] = sorted_by_count[:16]
-        context["has_more_topics"] = len(all_enriched) > len(context["popular_topics"])
-
-        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
-
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            children = children.filter(name__icontains=q)
-
-        all_topics = [
-            enriched_lookup[topic.pk]
-            for topic in children
-            if topic.pk in enriched_lookup
+        context["popular_topics"] = [
+            {
+                "topic": t,
+                "count": t.doc_count,
+                "child_names": child_names_map.get(t.pk, []),
+            }
+            for t in popular_topics
         ]
+        context["has_more_topics"] = total_children > len(popular_topics)
 
-        paginator = Paginator(all_topics, 20)
+        # Paginated list — filtered and sorted in the DB
+        q = self.request.GET.get("q", "").strip()
+        paginated_qs = children_qs
+        if q:
+            paginated_qs = paginated_qs.filter(name__icontains=q)
+        paginated_qs = paginated_qs.order_by("name")
+
+        paginator = Paginator(paginated_qs, 20)
         page_number = self.request.GET.get("page")
         page_obj = paginator.get_page(page_number)
 
-        context["all_topics"] = page_obj.object_list
+        page_topics = list(page_obj.object_list)
+        page_child_names = self.get_top_children_by_count(page_topics)
+        context["all_topics"] = [
+            {
+                "topic": t,
+                "count": t.doc_count,
+                "child_names": page_child_names.get(t.pk, []),
+            }
+            for t in page_topics
+        ]
         context["page_obj"] = page_obj
 
         context["topic"] = self.flynote

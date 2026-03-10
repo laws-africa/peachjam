@@ -107,6 +107,47 @@ class ParseFlynoteTextTest(TestCase):
         self.assertEqual(len(paths), 1)
         self.assertEqual(paths[0], ["Employment law", "Severance pay", "Jurisdiction"])
 
+    def test_semicolons_inside_parentheses_not_split(self):
+        """Semicolons inside (...) should NOT create sibling branches."""
+        text = (
+            "Labour law \u2013 Mediation irregularities "
+            "(change of mediators; confidentiality; 30-day limit) "
+            "\u2013 Arbitration independent of mediation; "
+            "Termination of employment \u2013 substantive fairness \u2013 "
+            "termination letter must reflect charge; "
+            "employer\u2019s burden to prove fairness under ELRA"
+        )
+        paths = self.parser.parse(text)
+        self.assertEqual(len(paths), 3)
+        # First path keeps the parenthetical intact
+        self.assertEqual(
+            paths[0],
+            [
+                "Labour law",
+                "Mediation irregularities "
+                "(change of mediators; confidentiality; 30-day limit)",
+                "Arbitration independent of mediation",
+            ],
+        )
+        # Second path is a sibling branch (semicolon outside parens)
+        self.assertEqual(paths[1][0], "Termination of employment")
+        self.assertEqual(paths[1][1], "substantive fairness")
+        self.assertEqual(paths[1][2], "termination letter must reflect charge")
+        # Third path
+        self.assertEqual(
+            paths[2][-1], "employer\u2019s burden to prove fairness under ELRA"
+        )
+
+    def test_semicolons_inside_nested_parentheses(self):
+        """Semicolons inside nested brackets should not split."""
+        text = "Tax law \u2014 exemptions (see also (a; b; c)) \u2014 compliance"
+        paths = self.parser.parse(text)
+        self.assertEqual(len(paths), 1)
+        self.assertEqual(
+            paths[0],
+            ["Tax law", "exemptions (see also (a; b; c))", "compliance"],
+        )
+
     def test_trailing_period_stripped(self):
         text = "Employment law \u2013 Severance pay."
         paths = self.parser.parse(text)
