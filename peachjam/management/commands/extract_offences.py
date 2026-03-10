@@ -302,7 +302,7 @@ Exclude (do NOT output an offence) when the section is purely:
 - “Omitted”, “Repealed”
 - procedural (e.g. consent to prosecute)
 - defensive (e.g. “... as defence ...”) unless it ALSO defines an offence.
-- only discusses the punishment for an offence, defined in another section
+- only discusses the punishment for an offence, defined in another section (e.g "Punishment for ...")
 
 Provision ID rules (VERY IMPORTANT)
 - provision_eid MUST be copied from an existing @data-eid value in the snippet.
