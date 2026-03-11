@@ -68,12 +68,6 @@ export default class DocumentFilterForm {
   setupFacetOptionOrdering () {
     this.root.querySelectorAll('.facets-scrollable').forEach((facet) => {
       const facetEl = facet as HTMLElement;
-      facetEl.addEventListener('change', (e: Event) => {
-        const target = e.target as HTMLElement | null;
-        if (target && target.matches('input[type="checkbox"], input[type="radio"]')) {
-          this.reorderFacetOptions(facetEl);
-        }
-      });
       this.reorderFacetOptions(facetEl);
     });
   }
