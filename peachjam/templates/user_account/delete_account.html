@@ -37,7 +37,12 @@
             </div>
           {% endif %}
         </div>
-        <button type="submit" class="btn btn-danger">{% trans "Delete account" %}</button>
+        <button type="submit"
+                class="btn btn-danger"
+                data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}"
+                hx-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
+          {% trans "Delete account" %}
+        </button>
       </form>
     </div>
   </div>

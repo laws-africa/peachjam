@@ -24,7 +24,7 @@ urlpatterns += [
     ),
     path("profile/", AccountView.as_view(), name="my_account"),
     path("profile/edit", EditAccountView.as_view(), name="edit_account"),
-    path("profile/delete", DeleteAccountView.as_view(), name="delete_account"),
+    path("offboarding", DeleteAccountView.as_view(), name="delete_account"),
     path("logged-out", LoggedOutView.as_view(), name="account_logged_out"),
     path(
         "document-access-groups/",

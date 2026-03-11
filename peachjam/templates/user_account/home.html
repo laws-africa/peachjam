@@ -52,7 +52,6 @@
             </dd>
           </dl>
           <a href="{% url 'edit_account' %}" class="d-block mb-3">{% trans "Update details" %}</a>
-          <a href="{% url 'delete_account' %}" class="text-danger d-block mb-3">{% trans "Delete account" %}</a>
         {% endblock %}
         {% block account-content-third-party %}
           <hr class="my-5"/>
@@ -79,6 +78,12 @@
               {% endfor %}
             </ul>
           </div>
+        {% endblock %}
+        {% block account-content-delete %}
+          <hr class="my-5"/>
+          <h3>{% trans "Delete account" %}</h3>
+          <p>{% trans "Permanently delete your account and remove your personal information." %}</p>
+          <a href="{% url 'delete_account' %}" class="btn btn-danger mb-3">{% trans "Delete account" %}</a>
         {% endblock %}
       {% endblock %}
     </div>
