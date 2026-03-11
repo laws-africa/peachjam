@@ -13,7 +13,6 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView, UpdateView
 from django.views.generic.base import TemplateView
 
-from peachjam.account_deletion import delete_and_anonymise_user
 from peachjam.forms import (
     DeleteAccountForm,
     PasswordSignupForm,
@@ -196,9 +195,8 @@ class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
-        delete_and_anonymise_user(
-            self.request.user,
-            deleted_reason=form.cleaned_data["deleted_reason"],
+        self.request.user.userprofile.delete_account(
+            deleted_reason=form.cleaned_data["deleted_reason"]
         )
         messages.success(self.request, _("Your account has been deleted."))
         return redirect(self.get_success_url())
