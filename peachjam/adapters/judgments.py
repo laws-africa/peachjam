@@ -162,8 +162,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             expression_frbr_uri=expression_frbr_uri, defaults=data
         )
         doc_content = created_doc.get_or_create_document_content()
-        if doc.get("content_html_is_akn") is not None:
-            doc_content.content_html_is_akn = doc["content_html_is_akn"]
+        doc_content.content_html_is_akn = doc.get("content_html_is_akn", False)
         doc_content.content_html = content_html
         doc_content.save()
 

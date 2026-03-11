@@ -428,8 +428,6 @@ class BaseDocumentResource(resources.ModelResource):
                 source_html = row.get("source_html") or row.get("content_html")
                 doc_content = instance.get_or_create_document_content()
                 doc_content.set_source_html(source_html)
-                doc_content.apply_source_to_content()
-                doc_content.update_toc_json_from_content_html()
                 instance.save()
 
     def after_save_instance(self, instance, row, **kwargs):
