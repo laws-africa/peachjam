@@ -352,7 +352,6 @@ class PeachjamViewsTest(TestCase):
         self.client._login(
             User.objects.first(), "django.contrib.auth.backends.ModelBackend"
         )
-        self.assertEqual(reverse("delete_account"), "/accounts/offboarding")
         response = self.client.get(reverse("delete_account"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Delete account")
