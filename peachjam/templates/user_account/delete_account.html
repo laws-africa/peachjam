@@ -7,13 +7,15 @@
   <div class="row">
     <div class="col-lg-8 offset-lg-2">
       <h2>{% trans "Delete account" %}</h2>
-      {% if has_paid_subscription %}
-        <div class="alert alert-warning" role="alert">
-          {% trans "You have a paid subscription. Deleting your account will remove your billing information and active subscription access." %}
-        </div>
-      {% else %}
-        <div class="alert alert-secondary" role="alert">{% trans "You have a free account." %}</div>
-      {% endif %}
+      {% block paid-account %}
+        {% if has_paid_subscription %}
+          <div class="alert alert-warning" role="alert">
+            {% trans "You have a paid subscription. Deleting your account will remove your billing information and active subscription access." %}
+          </div>
+        {% else %}
+          <div class="alert alert-secondary" role="alert">{% trans "You have a free account." %}</div>
+        {% endif %}
+      {% endblock %}
       <p>
         {% trans "This action is permanent. Your annotations, follows, saved searches and saved documents will be deleted, and your personal information will be removed from your account." %}
       </p>
@@ -39,8 +41,7 @@
         </div>
         <button type="submit"
                 class="btn btn-danger"
-                data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}"
-                hx-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
+                data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
           {% trans "Delete account" %}
         </button>
       </form>

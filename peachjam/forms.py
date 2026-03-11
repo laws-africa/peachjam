@@ -696,7 +696,7 @@ class DeleteAccountForm(forms.Form):
         error_messages={"required": _("Please confirm account deletion.")},
     )
     deleted_reason = forms.CharField(
-        label=_("Why are you deleting your account?"),
+        label=_("Please tell us briefly why you are deleting your account."),
         widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
         max_length=2000,
     )
