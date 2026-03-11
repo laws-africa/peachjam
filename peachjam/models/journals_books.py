@@ -29,12 +29,8 @@ class Book(CoreDocument):
     def convert_content_markdown(self):
         doc_content = self.get_or_create_document_content()
         doc_content.set_source_html(markdownify(self.content_markdown or ""))
-        doc_content.apply_source_to_content()
-        doc_content.update_toc_json_from_content_html()
 
     def pre_save(self):
-        if not self.pk and self.content_markdown:
-            self.convert_content_markdown()
         self.frbr_uri_doctype = "doc"
         self.frbr_uri_subtype = "book"
         self.doc_type = "book"

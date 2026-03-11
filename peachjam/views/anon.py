@@ -24,15 +24,11 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
     replacements = ReplacementSerializer(many=True)
     activity_start = serializers.DateTimeField()
     activity_end = serializers.DateTimeField()
-    content_html = serializers.CharField(
-        required=False, allow_blank=True, allow_null=True
-    )
 
     class Meta:
         model = Judgment
         fields = [
             "case_name",
-            "content_html",
             "replacements",
             "published",
             "activity_start",
@@ -41,12 +37,6 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
-        if "content_html" in validated_data:
-            doc_content = instance.get_or_create_document_content()
-            doc_content.set_source_html(validated_data.pop("content_html"))
-            if not doc_content.content_html_is_akn:
-                doc_content.apply_source_to_content()
-                doc_content.update_toc_json_from_content_html()
 
         # force anonymised flag
         validated_data["anonymised"] = True
@@ -79,13 +69,8 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
-        try:
-            doc_content = document.document_content
-        except document.__class__.document_content.RelatedObjectDoesNotExist:
-            doc_content = None
-        if not (doc_content and doc_content.content_html) or (
-            doc_content and doc_content.content_html_is_akn
-        ):
+        doc_content = document.get_or_create_document_content()
+        if not doc_content.content_html or doc_content.content_html_is_akn:
             # redirect back to the referrer
             messages.warning(
                 request, _("Only judgments with HTML content can be anonymised.")

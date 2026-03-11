@@ -445,9 +445,6 @@ class DocumentForm(forms.ModelForm):
             # source_html is the editable source and content_html is derived from it
             doc_content = self.instance.get_or_create_document_content()
             doc_content.set_source_html(self.cleaned_data["source_html"])
-            if not doc_content.content_html_is_akn:
-                doc_content.apply_source_to_content()
-                doc_content.update_toc_json_from_content_html()
 
     def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML

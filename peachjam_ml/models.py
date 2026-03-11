@@ -101,10 +101,11 @@ class DocumentEmbedding(models.Model):
         self.text_embedding = None
 
         qs = ContentChunk.objects.filter(document=self.document)
+        doc_content = self.document.get_or_create_document_content()
         if (
-            self.document.content_html
-            and self.document.content_html_is_akn
-            and self.document.toc_json
+            doc_content.content_html
+            and doc_content.content_html_is_akn
+            and doc_content.toc_json
         ):
             # The document is AKN with a TOC and has been chunked recursively based on the TOC.
             # This means that, for example, a chapter has been chunked and embeddings calculated, and then
@@ -120,7 +121,7 @@ class DocumentEmbedding(models.Model):
             #
             # So, instead we only get the embeddings for the top-level TOC containers and take the average of those.
             top_level_ids = [
-                item["id"] or item["type"] for item in self.document.toc_json
+                item["id"] or item["type"] for item in doc_content.toc_json
             ]
             qs = qs.filter(Q(portion__in=top_level_ids) | Q(type="summary"))
 
@@ -364,7 +365,12 @@ class ContentChunk(models.Model):
         from peachjam_search.documents import SearchableDocument
 
         chunks = []
-        if document.content_html and document.content_html_is_akn and document.toc_json:
+        doc_content = document.get_or_create_document_content()
+        if (
+            doc_content.content_html
+            and doc_content.content_html_is_akn
+            and doc_content.toc_json
+        ):
             # AKN provisions
             provisions = SearchableDocument().prepare_provisions(document)
             for provision in provisions:
