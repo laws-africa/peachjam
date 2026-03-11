@@ -794,10 +794,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                     self.images.add(img)
 
             result = True
-
-        # always update document text
-        self.document_content.update_text_content()
-
         return result
 
     def prepare_content_html_for_pdf(self):
