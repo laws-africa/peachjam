@@ -196,12 +196,3 @@ ZAGPPHC 1063</a>.</p>
         doc.save()
         result = doc.get_cited_work_frbr_uris()
         self.assertEqual({}, result)
-
-    def test_update_text_content_also_updates_cache(self):
-        """update_text_content() must keep _document_content_cache in sync."""
-        doc = CoreDocument.objects.get(
-            expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
-        )
-        doc.update_text_content()
-        # After update, the cache should point at the freshly-saved DocumentContent
-        self.assertIs(doc._document_content_cache, doc.document_content)

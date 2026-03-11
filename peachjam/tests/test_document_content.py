@@ -42,10 +42,9 @@ class DocumentContentHooksTestCase(TestCase):
         self.assertIn("Heading", doc_content.content_text)
         self.assertIn("Body", doc_content.content_text)
 
-    def test_source_change_does_not_overwrite_akn_content_html(self):
-        doc = self.make_doc("Hook AKN bypass", is_akn=True)
+    def test_source_change_updates_akn_content_html(self):
+        doc = self.make_doc("Hook AKN source update", is_akn=True)
         doc_content = doc.get_or_create_document_content()
-        doc_content.content_html = "<div><p>Original AKN HTML</p></div>"
         doc_content.source_html = "<p>Source 1</p>"
         doc_content.save()
 
@@ -53,9 +52,7 @@ class DocumentContentHooksTestCase(TestCase):
         doc_content.save()
         doc_content.refresh_from_db()
 
-        self.assertEqual(
-            "<div><p>Original AKN HTML</p></div>", doc_content.content_html
-        )
+        self.assertEqual("<p>Source 2</p>", doc_content.content_html)
 
 
 class ContentHtmlIsAknMigrationTestCase(TestCase):
@@ -181,8 +178,6 @@ class SetContentHtmlFromSourceHtmlTestCase(TestCase):
         doc = _make_doc("Source-derived content")
         doc_content = doc.get_or_create_document_content()
         doc_content.set_source_html("<p>Source text</p>")
-        doc_content.apply_source_to_content()
-        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         doc_content = doc.document_content
@@ -194,8 +189,6 @@ class SetContentHtmlFromSourceHtmlTestCase(TestCase):
         doc = _make_doc("TOC generation")
         doc_content = doc.get_or_create_document_content()
         doc_content.set_source_html("<h1>Chapter 1</h1><p>Introduction</p>")
-        doc_content.apply_source_to_content()
-        doc_content.update_toc_json_from_content_html()
         doc.save()
         doc.refresh_from_db()
         doc_content = doc.document_content
@@ -209,8 +202,6 @@ class SetContentHtmlFromSourceHtmlTestCase(TestCase):
         raw_akn = "<div class='akn-akomaNtoso'><p>AKN source</p></div>"
         doc_content = doc.get_or_create_document_content()
         doc_content.set_source_html(raw_akn)
-        doc_content.apply_source_to_content()
-        doc_content.update_toc_json_from_content_html()
         doc.save()
 
         doc.refresh_from_db()

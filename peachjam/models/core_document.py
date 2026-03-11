@@ -3,7 +3,6 @@ import logging
 import os
 import re
 import shutil
-import subprocess
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
@@ -15,7 +14,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
-from django.db import connection, models
+from django.db import models
 from django.http import Http404
 from django.urls import reverse
 from django.utils.functional import cached_property
@@ -23,7 +22,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
 from docpipe.pipeline import PipelineContext
-from docpipe.soffice import SOfficeError, soffice_convert
+from docpipe.soffice import soffice_convert
 from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import etree, html
@@ -520,9 +519,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         help_text=_("Is this document published and visible on the website?"),
     )
     metadata_json = models.JSONField(_("metadata JSON"), null=True, blank=True)
-    # Legacy compatibility field retained because the database column still exists
-    # and fixtures/imports insert into CoreDocument directly.
-    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
 
     # options for the FRBR URI doctypes
     frbr_uri_doctypes = FRBR_URI_DOCTYPES
@@ -574,10 +570,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         super().full_clean(*args, **kwargs)
 
     def get_or_create_document_content(self):
-        if hasattr(self, "_document_content_cache"):
-            return self._document_content_cache
-
-        should_save_doc_content = False
         try:
             doc_content = self.document_content
         except DocumentContent.DoesNotExist:
@@ -585,74 +577,21 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 doc_content, _ = DocumentContent.objects.get_or_create(document=self)
             else:
                 doc_content = DocumentContent(document=self)
-
-            # Keep relation/cache consistent for callers that mutate content before save.
             self.document_content = doc_content
 
-        if self.pk and not doc_content.content_html:
-            legacy_content_html = self._legacy_content_html()
-            if legacy_content_html:
-                doc_content.content_html = legacy_content_html
-                if not doc_content.source_html:
-                    doc_content.source_html = legacy_content_html
-                should_save_doc_content = True
-
-        if doc_content.pk and should_save_doc_content:
-            doc_content.save()
-
-        self._document_content_cache = doc_content
         return doc_content
 
-    def _legacy_content_html(self):
-        """Read legacy CoreDocument.content_html directly from DB during transition."""
-        if not self.pk:
-            return None
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(
-                    "SELECT content_html FROM peachjam_coredocument WHERE id = %s",
-                    [self.pk],
-                )
-                row = cursor.fetchone()
-                return row[0] if row else None
-        except Exception:
-            return None
-
-    def update_toc_json_from_html(self):
+    def save_document_content(self):
         doc_content = self.get_or_create_document_content()
-
-        if doc_content.content_html:
-            root = doc_content.content_html_tree
-            toc_json = generate_toc_json_from_html(root)
-            wrap_toc_entries_in_divs(root, toc_json)
-            doc_content.content_html = html.tostring(root, encoding="unicode")
-            doc_content.toc_json = toc_json
-        else:
-            doc_content.toc_json = []
+        doc_content.document = self
+        doc_content.save()
+        self.document_content = doc_content
 
     def clean_html_field(self, html):
-        if not html:
-            return None
-
-        # return None if the HTML doesn't have any content
-        try:
-            root = parse_html_str(html)
-            iframes = root.xpath("//iframe")
-            if iframes:
-                return html
-
-            text = "".join(root.itertext()).strip()
-            text = re.sub(r"\s", "", text)
-            if not text:
-                return None
-        except (ValueError, ParserError):
-            return None
-
-        return html
+        return DocumentContent.clean_html_field(html)
 
     def clean_content_html(self, content_html):
-        """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
-        return self.clean_html_field(content_html)
+        return DocumentContent.clean_html_field(content_html)
 
     def clean(self):
         super().clean()
@@ -769,14 +708,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.save_document_content()
         self.post_save()
 
-    def save_document_content(self):
-        doc_content = self.get_or_create_document_content()
-
-        doc_content.document = self
-        doc_content.save()
-        self.document_content = doc_content
-        self._document_content_cache = doc_content
-
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,
         extraction will be run on that. Otherwise, if the document as a PDF source file,
@@ -843,21 +774,11 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         ):
             context = PipelineContext(word_pipeline)
             context.source_file = self.source_file.file
-            try:
-                word_pipeline(context)
-            except (SOfficeError, subprocess.CalledProcessError, KeyError) as e:
-                log.warning(
-                    "Could not extract content from source file for document %s",
-                    self.pk,
-                    exc_info=e,
-                )
-                return False
+            word_pipeline(context)
             doc_content.set_source_html(context.html_text)
-            doc_content.apply_source_to_content()
-            doc_content.update_toc_json_from_content_html()
             # Persist extracted HTML before text extraction to avoid update_text_content()
             # creating/updating DocumentContent with empty HTML fields.
-            self.save_document_content()
+            doc_content.save()
 
             for img in self.images.all():
                 img.delete()
@@ -956,10 +877,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         return self.get_or_create_document_content().get_content_as_text()
 
     def update_text_content(self):
-        """Update the extracted text content and keep the in-instance cache in sync."""
-        doc_content = self.get_or_create_document_content().update_text_content()
-        self.document_content = doc_content
-        self._document_content_cache = doc_content
+        self.get_or_create_document_content().update_text_content()
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
@@ -1067,15 +985,38 @@ class DocumentContent(LifecycleModelMixin, models.Model):
             self._content_html_tree = parse_html_str(self.content_html)
         return self._content_html_tree
 
+    @staticmethod
+    def clean_html_field(html_content):
+        """Return None if html_content is empty or contains only whitespace, otherwise return it unchanged."""
+        if not html_content:
+            return None
+        try:
+            root = parse_html_str(html_content)
+            iframes = root.xpath("//iframe")
+            if iframes:
+                return html_content
+            text = "".join(root.itertext()).strip()
+            text = re.sub(r"\s", "", text)
+            if not text:
+                return None
+        except (ValueError, ParserError):
+            return None
+        return html_content
+
+    def clean_content_html(self, content_html):
+        return self.clean_html_field(content_html)
+
     def set_source_html(self, source_html):
-        self.source_html = self.document.clean_html_field(source_html)
+        self.source_html = self.clean_html_field(source_html)
+        if self.content_html_is_akn:
+            # For AKN docs, source_html IS the canonical HTML; mirror it to content_html directly.
+            self.content_html = self.source_html
+            self._content_html_tree = None
+        else:
+            self.apply_source_to_content()
 
     def set_content_html(self, content_html):
-        if self.content_html_is_akn:
-            self.content_html = content_html
-            self._content_html_tree = None
-            return
-        self.content_html = self.document.clean_content_html(content_html)
+        self.content_html = self.clean_content_html(content_html)
         self._content_html_tree = None
 
     def apply_source_to_content(self):
@@ -1104,13 +1045,10 @@ class DocumentContent(LifecycleModelMixin, models.Model):
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document content."""
         work_frbr_uris = {}
-        html_content = self.content_html or self.source_html
-        if html_content:
-            root = html.fromstring(html_content)
-            is_akn_html = self.content_html_is_akn or bool(
-                root.xpath('//*[contains(@class, "akn-akomaNtoso")]')
-            )
-            if is_akn_html:
+
+        if self.content_html:
+            root = html.fromstring(self.content_html)
+            if self.content_html_is_akn:
                 # get AKN links in the document content, except those in remarks or in the generated
                 # coverpage (which is outside the akn-akomaNtoso root)
                 xpath = (
@@ -1129,9 +1067,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
                 except ValueError:
                     # ignore malformed FRBR URIs
                     pass
-            return work_frbr_uris
-
-        if self.document_id:
+        else:
             for citation_link in CitationLink.objects.filter(
                 document_id=self.document_id
             ):
@@ -1228,19 +1164,10 @@ class DocumentContent(LifecycleModelMixin, models.Model):
                     size = os.fstat(tmp.fileno()).st_size
                     assert size > 0, "Temporary PDF file is empty"
 
-                    try:
-                        text = pdfjs_to_text(tmp.name)
-                        # some PDFs have nulls, which breaks SQL insertion
-                        # replace rather than deleting to keep string length the same
-                        text = text.replace("\0", " ")
-                    except (subprocess.CalledProcessError, AssertionError) as e:
-                        # Keep source-file uploads usable even when test fixtures or
-                        # malformed PDFs can't be text-extracted.
-                        log.warning(
-                            "Could not extract text from source file for document %s",
-                            self.document.pk,
-                            exc_info=e,
-                        )
+                    text = pdfjs_to_text(tmp.name)
+                    # some PDFs have nulls, which breaks SQL insertion
+                    # replace rather than deleting to keep string length the same
+                    text = text.replace("\0", " ")
 
         self.content_text = text
         if self.pk:
@@ -1250,8 +1177,7 @@ class DocumentContent(LifecycleModelMixin, models.Model):
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
-        if not self.content_html_is_akn:
-            self.apply_source_to_content()
+        self.apply_source_to_content()
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
     def sync_html_derived_fields(self):
