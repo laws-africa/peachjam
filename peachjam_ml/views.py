@@ -50,5 +50,16 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
             .latest_expression()
             .values_list("id", flat=True)
         )
-        context["similar_documents"] = DocumentEmbedding.get_similar_documents(doc_ids)
+        similar_documents = DocumentEmbedding.get_similar_documents(doc_ids)
+        # get the actual documents so the standard document table template can render them
+        docs = {
+            d.id: d
+            for d in CoreDocument.objects.filter(
+                pk__in=[sd["document_id"] for sd in similar_documents]
+            )
+        }
+        # preserve ordering
+        context["similar_documents"] = [
+            docs.get(sd["document_id"]) for sd in similar_documents
+        ]
         return context
