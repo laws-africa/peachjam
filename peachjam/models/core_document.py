@@ -533,6 +533,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         default=False,
         help_text=_("Restrict access to this document to selected groups."),
     )
+    # Legacy compatibility field retained because fixtures and some schemas still
+    # load CoreDocument rows with this column before DocumentContent takes over.
+    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
 
     class Meta:
         ordering = ["doc_type", "title"]
