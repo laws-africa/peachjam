@@ -10,7 +10,6 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from languages_plus.models import Language
 
-from peachjam.customerio import get_customerio
 from peachjam_search.models import SavedSearch
 from peachjam_subs.models import Subscription
 
@@ -86,8 +85,6 @@ class UserProfile(models.Model):
         sub = Subscription.get_or_create_active_for_user(self.user)
         if sub:
             sub.close()
-
-        get_customerio().track_user_deleted(self.user)
 
         self.deleted_at = timezone.now()
         self.deleted_reason = deleted_reason
