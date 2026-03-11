@@ -619,7 +619,9 @@ class Subscription(models.Model):
             "saved_document_limit": self.user.saved_documents,
             "folder_limit": self.user.folders,
             "search_alert_limit": self.user.saved_searches,
-            "following_limit": self.user.following.exclude(saved_search__isnull=False),
+            "following_limit": self.user.following.filter(
+                saved_search__isnull=True, saved_document__isnull=True
+            ),
         }[feature]
 
         count = manager.count()

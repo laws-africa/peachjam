@@ -17,6 +17,14 @@ class CustomerIO:
             "app_name": settings.PEACHJAM["APP_NAME"],
         }
 
+    def track_user_deleted(self, user):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "User Deleted",
+                self.get_common_details(),
+            )
+
     def get_document_track_properties(self, doc):
         """Get the properties for this document that are included with its tracking events."""
         uri = doc.expression_uri()
