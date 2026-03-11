@@ -13,7 +13,7 @@ from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
 
-from peachjam.analysis.summariser import SummariserError, SummariserService
+from peachjam.analysis.summariser import JudgmentSummariser, SummariserError
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
 from peachjam.models import (
@@ -433,7 +433,7 @@ class DocumentSummaryView(DocumentDebugViewBase):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        summariser = SummariserService()
+        summariser = JudgmentSummariser()
         try:
             context["summary"] = summariser.summarise_judgment(self.object)["summary"]
         except SummariserError as e:

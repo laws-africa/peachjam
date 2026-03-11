@@ -12,7 +12,8 @@ from django.template.loader import render_to_string
 from django.views.generic import DetailView
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
-from peachjam.chat.agent import DocumentChat, extract_assistant_response, langfuse
+from peachjam.chat.agent import DocumentChat, extract_assistant_response
+from peachjam.langfuse import langfuse
 from peachjam.models import DocumentChatThread
 from peachjam.views.documents import DocumentDetailView
 from peachjam.views.mixins import AsyncDispatchMixin

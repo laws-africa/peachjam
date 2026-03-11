@@ -144,6 +144,7 @@ PEACHJAM = {
     "EXTRACTOR_API": os.environ.get(
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
+    "SUMMARISE_JUDGMENTS": True,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
