@@ -41,7 +41,7 @@ def delete_and_anonymise_user(user, deleted_reason):
     Subscription.objects.filter(user=user).delete()
 
     # Remove from customer.io before identifiers are removed.
-    get_customerio().delete_user(user)
+    get_customerio().track_user_deleted(user)
 
     # Step 2: anonymise and remove PII.
     profile.deleted_at = timezone.now()
