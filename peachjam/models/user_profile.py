@@ -82,7 +82,10 @@ class UserProfile(models.Model):
         SavedDocument.objects.filter(user=self.user).delete()
         Folder.objects.filter(user=self.user).delete()
         DocumentChatThread.objects.filter(user=self.user).delete()
-        Subscription.objects.filter(user=self.user).delete()
+
+        sub = Subscription.get_or_create_active_for_user(self.user)
+        if sub:
+            sub.close()
 
         get_customerio().track_user_deleted(self.user)
 

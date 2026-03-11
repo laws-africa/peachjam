@@ -30,6 +30,7 @@ from peachjam.views.robots import (
     _prefixed_place_rules,
 )
 from peachjam_search.models import SavedSearch
+from peachjam_subs.models import Subscription
 
 
 class PeachjamViewsTest(TestCase):
@@ -38,6 +39,7 @@ class PeachjamViewsTest(TestCase):
         "documents/sample_documents",
         "tests/users",
         "tests/journal_article",
+        "tests/products",
     ]
 
     def test_login_page(self):
@@ -358,6 +360,7 @@ class PeachjamViewsTest(TestCase):
 
     def test_delete_account_anonymises_user(self):
         user = User.objects.first()
+        sub = Subscription.get_or_create_active_for_user(user)
         doc = CoreDocument.objects.first()
         self.client._login(user, "django.contrib.auth.backends.ModelBackend")
 
@@ -373,6 +376,7 @@ class PeachjamViewsTest(TestCase):
         saved_document.folders.add(folder)
         SavedSearch.objects.create(user=user, q="test")
         UserFollowing.objects.create(user=user, court=Court.objects.first())
+        self.assertEqual(sub.status, Subscription.Status.ACTIVE)
 
         response = self.client.post(
             reverse("delete_account"),
@@ -404,6 +408,9 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(UserFollowing.objects.filter(user=user).count(), 0)
         self.assertEqual(EmailAddress.objects.filter(user=user).count(), 0)
         self.assertEqual(SocialAccount.objects.filter(user=user).count(), 0)
+
+        sub.refresh_from_db()
+        self.assertEqual(sub.status, Subscription.Status.CLOSED)
 
     def test_case_history(self):
         self.user = User.objects.first()
