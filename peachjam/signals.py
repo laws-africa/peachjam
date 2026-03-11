@@ -145,11 +145,6 @@ def userprofile_saved_updated_customerio(sender, instance, **kwargs):
     get_customerio().update_user_details(instance.user)
 
 
-@receiver(signals.pre_delete, sender=User)
-def user_deleted_update_customerio(sender, instance, **kwargs):
-    get_customerio().track_user_deleted(instance)
-
-
 @receiver(user_logged_in)
 @receiver(allauth_signals.user_logged_in)
 def user_logged_in_update_customerio(sender, request, user, **kwargs):
