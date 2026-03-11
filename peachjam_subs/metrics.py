@@ -20,6 +20,7 @@ class SubscriptionDetailsMixin:
                 {
                     "is_paid": sub.product_offering.pricing_plan.price > 0,
                     "subscription_product": sub.product_offering.product.name,
+                    "subscription_billing_period": sub.product_offering.pricing_plan.period,
                     "subscription_is_trial": sub.is_trial,
                     "subscription_ends_on": (
                         date_to_timestamp(sub.ends_on) if sub.ends_on else None
@@ -37,6 +38,7 @@ class SubscriptionDetailsMixin:
                 {
                     "is_paid": False,
                     "subscription_product": None,
+                    "subscription_billing_period": None,
                     "subscription_is_trial": False,
                     "subscription_ends_on": None,
                     "subscription_pricing_plan": None,
@@ -51,6 +53,7 @@ class SubscriptionDetailsMixin:
         details.update(
             {
                 "product": subscription.product_offering.product.name,
+                "billing_period": subscription.product_offering.pricing_plan.period,
                 "pricing_plan": str(subscription.product_offering.pricing_plan),
                 "is_trial": subscription.is_trial,
                 "ends_on": (
