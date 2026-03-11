@@ -1,5 +1,6 @@
 from customerio import analytics
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 analytics.write_key = settings.PEACHJAM["CUSTOMERIO_PYTHON_KEY"]
 analytics.host = "https://cdp-eu.customer.io"
@@ -181,5 +182,6 @@ _customerio = None
 def get_customerio():
     global _customerio
     if _customerio is None:
-        _customerio = CustomerIO()
+        customerio_class = import_string(settings.PEACHJAM["CUSTOMERIO_CLASS"])
+        _customerio = customerio_class()
     return _customerio

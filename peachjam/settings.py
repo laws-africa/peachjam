@@ -162,6 +162,7 @@ PEACHJAM = {
     "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
     "CUSTOMERIO_EMAIL_API_KEY": os.environ.get("CUSTOMERIO_EMAIL_API_KEY"),
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
+    "CUSTOMERIO_CLASS": "peachjam_subs.customerio.CustomerIO",
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
     # Chat settings

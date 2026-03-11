@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-import peachjam.customerio
+from peachjam.customerio import CustomerIO as PeachjamCustomerIO
 from peachjam.customerio import analytics
 from peachjam_subs.models import Subscription
 
@@ -9,11 +9,10 @@ def date_to_timestamp(date):
     return int(datetime.combine(date, time(0)).timestamp())
 
 
-class SubscriptionDetailsMixin:
+class CustomerIO(PeachjamCustomerIO):
     def get_user_details(self, user):
         details = super().get_user_details(user)
 
-        # Add subscription details
         sub = Subscription.objects.active_for_user(user).first()
         if sub:
             details.update(
@@ -87,12 +86,3 @@ class SubscriptionDetailsMixin:
                 "Subscription closed",
                 self.get_subscription_details(subscription),
             )
-
-
-def with_mixin(base, mixin):
-    return type(f"{mixin.__name__}{base.__name__}", (mixin, base), {})
-
-
-peachjam.customerio.CustomerIO = with_mixin(
-    peachjam.customerio.CustomerIO, SubscriptionDetailsMixin
-)
