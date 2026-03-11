@@ -1,8 +1,12 @@
+import logging
+
 from django.db import transaction
 
 from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence
 
 from .agent import extract_case_type_filing_year, extract_offences_and_sentences
+
+log = logging.getLogger(__name__)
 
 
 class CriminalDataExtractor:
@@ -10,8 +14,10 @@ class CriminalDataExtractor:
     Runs extraction and saves results to the DB.
     """
 
+    @classmethod
     @transaction.atomic
-    def extract(self, judgment: Judgment, judgment_text: str):
+    def extract(cls, judgment: Judgment):
+        judgment_text = judgment.get_content_as_text()
         meta_out = extract_case_type_filing_year(judgment_text)
 
         if meta_out.case_type is not None:
@@ -34,6 +40,9 @@ class CriminalDataExtractor:
 
         for match in offence_out.offences:
             if match.offence_id is None:
+                log.info(
+                    f"extracted offence {match.extracted_offence} not matched to offence"
+                )
                 continue
 
             offence = Offence.objects.get(id=match.offence_id)
@@ -41,19 +50,19 @@ class CriminalDataExtractor:
             jo = JudgmentOffence.objects.create(
                 judgment=judgment,
                 offence=offence,
-                extracted_label=match.extracted_offence,
-                basis=match.basis,
             )
+            log.info(f"Created {jo}")
 
             for s in match.sentences:
-                Sentence.objects.create(
-                    judgment_offence=jo,
+                sentence = Sentence.objects.create(
+                    judgment=judgment,
+                    offence=jo,
                     sentence_type=s.sentence_type,
                     duration_months=s.duration_months,
                     fine_amount=s.fine_amount,
                     suspended=s.suspended,
                     mandatory_minimum=s.mandatory_minimum,
-                    basis=s.basis,
                 )
+                log.info(f"Created {sentence}")
 
         return offence_out, meta_out

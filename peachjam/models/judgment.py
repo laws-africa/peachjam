@@ -873,7 +873,7 @@ class JudgmentOffence(models.Model):
     )
 
     def __str__(self):
-        return f"JudgmentOffence {self.judgment} - {self.offence}"
+        return f"JudgmentOffence {self.offence} - {self.judgment}"
 
 
 class Sentence(models.Model):

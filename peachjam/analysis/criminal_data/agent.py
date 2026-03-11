@@ -153,7 +153,7 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
     return search_offences_tool(search_terms)
 
 
-PROMPT = """
+JUDGMENT_EXTRACTION_PROMPT = """
 # Role
 
 You are a legal information extraction system. Your task is to extract structured information about offences and
@@ -423,14 +423,22 @@ class JudgmentOffenceExtraction(BaseModel):
     offences: List[OffenceExtraction] = []
 
 
+offence_extraction_agent = Agent(
+    name="Offence + Sentence Extractor",
+    instructions=JUDGMENT_EXTRACTION_PROMPT,
+    tools=[search_offences],
+    output_type=JudgmentOffenceExtraction,
+    model="gpt-5-mini",
+)
+
+
 def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtraction:
-    agent = Agent(
-        name="Offence + Sentence Extractor",
-        instructions=PROMPT,
-        tools=[search_offences],
-        output_type=JudgmentOffenceExtraction,
+    result = Runner.run_sync(
+        offence_extraction_agent,
+        judgment_text,
     )
-    return Runner.run_sync(agent, judgment_text).final_output
+    log.info("Extraction result: %s", result.final_output)
+    return result.final_output
 
 
 CaseTypeLiteral = Literal["criminal", "civil"]
@@ -605,11 +613,18 @@ Extraction:
 - `filing_year = null`
 """
 
+case_type_extraction_agent = Agent(
+    name="Case Type + Filing Year Extractor",
+    instructions=CASE_META_PROMPT,
+    output_type=CaseMetaExtraction,
+    model="gpt-5-mini",
+)
+
 
 def extract_case_type_filing_year(judgment_text: str) -> CaseMetaExtraction:
-    agent = Agent(
-        name="Case Type + Filing Year Extractor",
-        instructions=CASE_META_PROMPT,
-        output_type=CaseMetaExtraction,
+    result = Runner.run_sync(
+        case_type_extraction_agent,
+        judgment_text,
     )
-    return Runner.run_sync(agent, judgment_text).final_output
+    log.debug("Extraction result: %s", result.final_output)
+    return result.final_output
