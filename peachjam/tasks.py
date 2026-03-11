@@ -352,7 +352,7 @@ def generate_judgment_summary(doc_id):
     doc.generate_summary()
 
 
-@background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
+@background(queue="peachjam", schedule=60 * 60, remove_existing_tasks=True)
 @transaction.atomic
 def extract_criminal_data(doc_id):
     from peachjam.models import Judgment
@@ -364,7 +364,7 @@ def extract_criminal_data(doc_id):
     log.info(f"Extracting criminal data from judgment {doc_id}")
     from peachjam.analysis.criminal_data import CriminalDataExtractor
 
-    CriminalDataExtractor.extract(doc)
+    CriminalDataExtractor().extract(doc)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

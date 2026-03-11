@@ -1,8 +1,9 @@
 import logging
+import os
 
 from django.db import transaction
 
-from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence
+from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence, pj_settings
 
 from .agent import extract_case_type_filing_year, extract_offences_and_sentences
 
@@ -14,9 +15,15 @@ class CriminalDataExtractor:
     Runs extraction and saves results to the DB.
     """
 
-    @classmethod
+    def __init__(self):
+        if not pj_settings().allow_criminal_data_extraction:
+            raise ValueError("Criminal data extraction is disabled.")
+
+        if not os.environ.get("OPENAI_API_KEY"):
+            raise ValueError("OPENAI_API_KEY is not configured.")
+
     @transaction.atomic
-    def extract(cls, judgment: Judgment):
+    def extract(self, judgment: Judgment):
         judgment_text = judgment.get_content_as_text()
         meta_out = extract_case_type_filing_year(judgment_text)
 
