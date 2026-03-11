@@ -212,7 +212,14 @@
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
                     <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
                       &nbsp;
-                    <a href="#" @click.prevent="download" hx-swap="outerHTML" class="d-none d-md-inline">{{ $t('Download to Excel') }}</a>
+                    <a
+                      href="#"
+                      @click.prevent="download"
+                      hx-swap="outerHTML"
+                      class="d-none d-md-inline"
+                    >
+                      {{ $t('Download to Excel') }}
+                    </a>
                   </div>
                   <select
                     v-model="ordering"
@@ -533,6 +540,23 @@ export default {
       return buckets;
     },
 
+    sortFacetOptionsBySelectedValues (facet) {
+      const selectedValues = Array.isArray(facet.value)
+        ? facet.value
+        : (facet.value ? [facet.value] : []);
+      const selected = new Set(selectedValues.map(value => String(value)));
+
+      if (!selected.size) {
+        return;
+      }
+
+      facet.options = [...facet.options].sort((a, b) => {
+        const aSelected = selected.has(String(a.value)) ? 0 : 1;
+        const bSelected = selected.has(String(b.value)) ? 0 : 1;
+        return aSelected - bSelected;
+      });
+    },
+
     handlePageChange (newPage) {
       this.page = newPage;
       this.search();
@@ -681,7 +705,7 @@ export default {
             facet.options = generateOptions(
               this.sortBuckets(
                 facetInfo[`_filter_${facet.name}`][facet.name].buckets,
-               false,
+                false,
                 // sort nature by descending count, everything else alphabetically
                 facet.name === 'nature'
               ),
@@ -697,6 +721,8 @@ export default {
           const availableOptions = facet.options.map(option => option.value);
           facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
         }
+
+        this.sortFacetOptionsBySelectedValues(facet);
       });
     },
 

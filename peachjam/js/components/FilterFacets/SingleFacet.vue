@@ -181,16 +181,6 @@ export default {
     displayedOptions () {
       let options = this.facet.options;
 
-      const isSelected = (option) => {
-        if (this.facet.type === 'checkboxes') {
-          return this.facet.value.some((value) => String(value) === String(option.value));
-        }
-        if (this.facet.type === 'radio') {
-          return String(this.facet.value) === String(option.value);
-        }
-        return false;
-      };
-
       if (this.showFacetSearch && this.searchTerm) {
         const searchTerm = this.searchTerm.toLowerCase();
         options = this.facet.options.filter(
@@ -198,9 +188,7 @@ export default {
         );
       }
 
-      const selectedOptions = options.filter(isSelected);
-      const unselectedOptions = options.filter((option) => !isSelected(option));
-      return [...selectedOptions, ...unselectedOptions];
+      return options;
     },
     showClearFilter () {
       if (this.facet.type === 'checkboxes') {

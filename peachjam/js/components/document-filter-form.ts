@@ -9,7 +9,6 @@ export default class DocumentFilterForm {
     const observer = new ResizeObserver(() => this.moveFilters());
     observer.observe(this.root);
     this.moveFilters();
-    this.setupFacetOptionOrdering();
     this.setupFacetSearch();
   }
 
@@ -65,13 +64,6 @@ export default class DocumentFilterForm {
     });
   }
 
-  setupFacetOptionOrdering () {
-    this.root.querySelectorAll('.facets-scrollable').forEach((facet) => {
-      const facetEl = facet as HTMLElement;
-      this.reorderFacetOptions(facetEl);
-    });
-  }
-
   filterFacetOptions (facet: HTMLElement, term: string) {
     const searchTerm = term.trim().toLowerCase();
     facet.querySelectorAll('[data-facet-option]').forEach((option) => {
@@ -81,33 +73,5 @@ export default class DocumentFilterForm {
 
       optionEl.classList.toggle('d-none', !isVisible);
     });
-  }
-
-  reorderFacetOptions (facet: HTMLElement) {
-    const options = (Array.from(facet.querySelectorAll('[data-facet-option]')) as HTMLElement[]).map((option) => {
-      return {
-        option,
-        selected: this.optionIsSelected(option),
-        order: Number(option.dataset.facetOptionOrder || 0)
-      };
-    });
-
-    options.sort((a, b) => {
-      const aSelected = a.selected ? 0 : 1;
-      const bSelected = b.selected ? 0 : 1;
-      if (aSelected !== bSelected) {
-        return aSelected - bSelected;
-      }
-
-      return a.order - b.order;
-    });
-
-    options.forEach(({ option }) => {
-      facet.appendChild(option);
-    });
-  }
-
-  optionIsSelected (option: HTMLElement) {
-    return !!option.querySelector<HTMLInputElement>('input:checked');
   }
 }
