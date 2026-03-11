@@ -22,6 +22,7 @@ from peachjam.forms import (
 )
 from peachjam.models import DocumentAccessGroup, UserProfile
 from peachjam.views.mixins import AtomicPostMixin
+from peachjam_subs.models import Subscription
 
 User = get_user_model()
 
@@ -188,12 +189,10 @@ class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        has_paid_subscription = self.request.user.subscriptions.filter(
-            status__in=["active", "pending"],
-            is_trial=False,
-            product_offering__pricing_plan__price__gt=0,
-        ).exists()
-        context["has_paid_subscription"] = has_paid_subscription
+        subscription = Subscription.get_or_create_active_for_user(self.request.user)
+        context["has_paid_subscription"] = (
+            subscription.product_offering.pricing_plan.price > 0
+        )
         return context
 
     def form_valid(self, form):
