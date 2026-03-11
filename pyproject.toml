@@ -72,7 +72,7 @@ dependencies = [
     "html2text>=2025.4.15",
     "html-to-markdown>=2.25.1",
     "igraph>=0.10.4",
-    "langfuse>=3.8.1",
+    "langfuse<4.0.0",
     "llama-index-core>=0.12.19",
     "lxml>=4.8.0,<6.0.0",
     "martor<1.7",
