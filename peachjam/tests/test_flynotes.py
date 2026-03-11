@@ -107,6 +107,47 @@ class ParseFlynoteTextTest(TestCase):
         self.assertEqual(len(paths), 1)
         self.assertEqual(paths[0], ["Employment law", "Severance pay", "Jurisdiction"])
 
+    def test_semicolons_inside_parentheses_not_split(self):
+        """Semicolons inside (...) should NOT create sibling branches."""
+        text = (
+            "Labour law \u2013 Mediation irregularities "
+            "(change of mediators; confidentiality; 30-day limit) "
+            "\u2013 Arbitration independent of mediation; "
+            "Termination of employment \u2013 substantive fairness \u2013 "
+            "termination letter must reflect charge; "
+            "employer\u2019s burden to prove fairness under ELRA"
+        )
+        paths = self.parser.parse(text)
+        self.assertEqual(len(paths), 3)
+        # First path keeps the parenthetical intact
+        self.assertEqual(
+            paths[0],
+            [
+                "Labour law",
+                "Mediation irregularities "
+                "(change of mediators; confidentiality; 30-day limit)",
+                "Arbitration independent of mediation",
+            ],
+        )
+        # Second path is a sibling branch (semicolon outside parens)
+        self.assertEqual(paths[1][0], "Termination of employment")
+        self.assertEqual(paths[1][1], "substantive fairness")
+        self.assertEqual(paths[1][2], "termination letter must reflect charge")
+        # Third path
+        self.assertEqual(
+            paths[2][-1], "employer\u2019s burden to prove fairness under ELRA"
+        )
+
+    def test_semicolons_inside_nested_parentheses(self):
+        """Semicolons inside nested brackets should not split."""
+        text = "Tax law \u2014 exemptions (see also (a; b; c)) \u2014 compliance"
+        paths = self.parser.parse(text)
+        self.assertEqual(len(paths), 1)
+        self.assertEqual(
+            paths[0],
+            ["Tax law", "exemptions (see also (a; b; c))", "compliance"],
+        )
+
     def test_trailing_period_stripped(self):
         text = "Employment law \u2013 Severance pay."
         paths = self.parser.parse(text)
@@ -312,9 +353,9 @@ class FlynoteDocumentCountTest(TestCase):
         count_row = FlynoteDocumentCount.objects.get(flynote=criminal)
         self.assertEqual(count_row.count, 2)
 
-    def test_refresh_with_none_root_updates_all(self):
-        """refresh_for_flynote(None) updates counts for all flynotes in one go."""
-        FlynoteDocumentCount.refresh_for_flynote(None)
+    def test_refresh_for_all_flynotes_updates_all(self):
+        """refresh_for_all_flynotes() updates counts for all flynotes in one go."""
+        FlynoteDocumentCount.refresh_for_all_flynotes()
         self.assertEqual(FlynoteDocumentCount.objects.count(), 0)
 
         judgment = Judgment.objects.create(
@@ -326,13 +367,13 @@ class FlynoteDocumentCountTest(TestCase):
             flynote="Criminal law \u2014 admissibility",
         )
         self.updater.update_for_judgment(judgment)
-        FlynoteDocumentCount.refresh_for_flynote(None)
+        FlynoteDocumentCount.refresh_for_all_flynotes()
         criminal = Flynote.objects.get(name="Criminal law")
         count_row = FlynoteDocumentCount.objects.get(flynote=criminal)
         self.assertEqual(count_row.count, 1)
 
-    def test_refresh_with_none_root_updates_multiple_hierarchies(self):
-        """refresh_for_flynote(None) correctly updates counts across multiple roots."""
+    def test_refresh_for_all_flynotes_updates_multiple_hierarchies(self):
+        """refresh_for_all_flynotes() correctly updates counts across multiple roots."""
         judgment1 = Judgment.objects.create(
             case_name="Case 1",
             jurisdiction=Country.objects.first(),
@@ -351,12 +392,16 @@ class FlynoteDocumentCountTest(TestCase):
         )
         self.updater.update_for_judgment(judgment1)
         self.updater.update_for_judgment(judgment2)
-        FlynoteDocumentCount.refresh_for_flynote(None)
+        FlynoteDocumentCount.refresh_for_all_flynotes()
 
         criminal = Flynote.objects.get(name="Criminal law")
         admin = Flynote.objects.get(name="Administrative law")
         self.assertEqual(FlynoteDocumentCount.objects.get(flynote=criminal).count, 2)
         self.assertEqual(FlynoteDocumentCount.objects.get(flynote=admin).count, 1)
+
+    def test_refresh_for_flynote_requires_root(self):
+        with self.assertRaises(ValueError):
+            FlynoteDocumentCount.refresh_for_flynote(None)
 
 
 class FlynoteTopicListViewTest(TestCase):

@@ -713,7 +713,7 @@ class Migration(migrations.Migration):
             field=models.ImageField(
                 blank=True,
                 null=True,
-                upload_to=peachjam.models.profile.entity_profile_photo_filename,
+                upload_to=peachjam.models.entity_profile.entity_profile_photo_filename,
                 verbose_name="background photo",
             ),
         ),
@@ -723,7 +723,7 @@ class Migration(migrations.Migration):
             field=models.ImageField(
                 blank=True,
                 null=True,
-                upload_to=peachjam.models.profile.entity_profile_photo_filename,
+                upload_to=peachjam.models.entity_profile.entity_profile_photo_filename,
                 verbose_name="profile photo",
             ),
         ),

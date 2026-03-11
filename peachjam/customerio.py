@@ -1,5 +1,6 @@
 from customerio import analytics
 from django.conf import settings
+from django.utils.module_loading import import_string
 
 analytics.write_key = settings.PEACHJAM["CUSTOMERIO_PYTHON_KEY"]
 analytics.host = "https://cdp-eu.customer.io"
@@ -15,6 +16,14 @@ class CustomerIO:
         return {
             "app_name": settings.PEACHJAM["APP_NAME"],
         }
+
+    def track_user_deleted(self, user):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "User Deleted",
+                self.get_common_details(),
+            )
 
     def get_document_track_properties(self, doc):
         """Get the properties for this document that are included with its tracking events."""
@@ -181,5 +190,6 @@ _customerio = None
 def get_customerio():
     global _customerio
     if _customerio is None:
-        _customerio = CustomerIO()
+        customerio_class = import_string(settings.PEACHJAM["CUSTOMERIO_CLASS"])
+        _customerio = customerio_class()
     return _customerio

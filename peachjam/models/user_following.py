@@ -231,10 +231,6 @@ class UserFollowing(models.Model):
                 f"Only one of: {' '.join(self.follow_fields)} can be set."
             )
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
     def documents_for_followed_topic(self):
         qs = CoreDocument.objects
 

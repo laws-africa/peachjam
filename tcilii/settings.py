@@ -4,6 +4,8 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["tcilii.apps.TCILIIConfig"] + INSTALLED_APPS  # noqa
 
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+
 
 JAZZMIN_SETTINGS["site_title"] = "TCILII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "TCILII"  # noqa

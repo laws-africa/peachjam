@@ -10,6 +10,7 @@ from .core_document import *
 from .custom_property import *
 from .document_access_group import *
 from .enrichments import *
+from .entity_profile import *
 from .external_document import *
 from .flynote import *
 from .gazette import *
@@ -20,7 +21,6 @@ from .judgment import *
 from .law_reports import *
 from .legislation import *
 from .partner import *
-from .profile import *
 from .ratification import *
 from .relationships import *
 from .save_document import *
@@ -28,5 +28,6 @@ from .settings import *
 from .taxonomies import *
 from .timeline import *
 from .user_following import *
+from .user_profile import *
 
 from .bill import *  # isort:skip

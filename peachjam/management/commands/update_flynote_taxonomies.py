@@ -104,7 +104,7 @@ class Command(BaseCommand):
             msg += f" Last pk processed: {last_pk}."
 
         if not skip_counts and processed > 0:
-            FlynoteDocumentCount.refresh_for_flynote(None)
+            FlynoteDocumentCount.refresh_for_all_flynotes()
             msg += " Flynote counts refreshed."
 
         self.stdout.write(self.style.SUCCESS(msg))

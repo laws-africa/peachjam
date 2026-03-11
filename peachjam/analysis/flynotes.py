@@ -128,7 +128,7 @@ class FlynoteParser:
         if not re.search(self.DASH_PATTERN, text):
             return []
 
-        segments = [s.strip() for s in text.split(";") if s.strip()]
+        segments = [s.strip() for s in self._split_segments(text) if s.strip()]
 
         current_path = []
         paths = []
@@ -151,6 +151,27 @@ class FlynoteParser:
             paths.append(list(current_path))
 
         return paths
+
+    @staticmethod
+    def _split_segments(text):
+        segments = []
+        current = []
+        depth = 0
+        for ch in text:
+            if ch == "(":
+                depth += 1
+                current.append(ch)
+            elif ch == ")":
+                depth = max(depth - 1, 0)
+                current.append(ch)
+            elif ch == ";" and depth == 0:
+                segments.append("".join(current))
+                current = []
+            else:
+                current.append(ch)
+        if current:
+            segments.append("".join(current))
+        return segments
 
     @staticmethod
     def normalise_name(name):

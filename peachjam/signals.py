@@ -40,6 +40,13 @@ User = get_user_model()
 password_reset_started = Signal()
 
 
+@receiver(signals.post_save, sender=get_user_model())
+def user_saved(sender, instance, created, **kwargs):
+    if created:
+        # ensure a user profile exists
+        UserProfile.objects.get_or_create(user=instance)
+
+
 @receiver(signals.post_save)
 def doc_saved_update_language(sender, instance, **kwargs):
     """Update language list on related work when a subclass of CoreDocument is saved."""

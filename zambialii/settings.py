@@ -4,6 +4,8 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["zambialii.apps.ZambiaLIIConfig"] + INSTALLED_APPS  # noqa
 
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+
 ROOT_URLCONF = "zambialii.urls"
 
 JAZZMIN_SETTINGS["site_title"] = "ZambiaLII"  # noqa
