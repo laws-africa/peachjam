@@ -5,6 +5,7 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["namiblii.apps.NamibLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
+PEACHJAM["CHAT_PUBLIC"] = True  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "NamibLII"  # noqa

@@ -5,6 +5,7 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["ghalii.apps.GhaLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
+PEACHJAM["CHAT_PUBLIC"] = True  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "GhaLII"  # noqa
