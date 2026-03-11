@@ -206,12 +206,4 @@ export default {
   max-height: 25vh;
   overflow-y: auto;
 }
-
-.facet-search-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  background-color: #fff;
-  padding-bottom: 0.25rem;
-}
 </style>
