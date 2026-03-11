@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 
@@ -56,14 +57,12 @@ class JudgmentSummariser:
         if not text:
             raise SummariserError("Document doesn't have any text to summarise.")
 
-        log.info("Generating judgment summary locally")
         try:
             result = self.summarise(
                 expression_frbr_uri=document.expression_frbr_uri,
                 text=text,
                 language=self.summary_language,
             )
-            log.info("Done")
         except Exception as exc:
             raise SummariserError(f"Error generating judgment summary: {exc}") from exc
 
@@ -80,6 +79,8 @@ class JudgmentSummariser:
         )
 
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
+        log.info("Generating judgment summary locally")
+
         with langfuse.start_as_current_observation(
             name="summarise_judgment",
             as_type="generation",
@@ -97,16 +98,22 @@ class JudgmentSummariser:
             summary = response.output_parsed
 
             if language and language != "English":
+                log.info(f"Translating judgment summary into {language}")
                 # build on the original input for the translation, to give the model more context to work with
-                input.extend(response.output)
-                input.append(
-                    {
-                        "role": "developer",
-                        "content": (
-                            "Now translate all fields of your summary into {{language}}. Do not translate Latin words, "
-                            "keep them in their original form."
-                        ),
-                    }
+                input.extend(
+                    [
+                        {
+                            "role": "assistant",
+                            "content": json.dumps(summary.model_dump(), indent=2),
+                        },
+                        {
+                            "role": "developer",
+                            "content": (
+                                f"Now translate all fields of your summary into {language}. Do not translate Latin"
+                                f" words, keep them in their original form."
+                            ),
+                        },
+                    ]
                 )
 
                 completion = self.openai.responses.parse(
@@ -118,4 +125,5 @@ class JudgmentSummariser:
                 summary = completion.output_parsed
 
             generation.update(output=summary.model_dump())
+            log.info("Done")
             return summary

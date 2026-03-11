@@ -14,6 +14,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
 
 from peachjam.analysis.summariser import JudgmentSummariser, SummariserError
+from peachjam.forms import DocumentSummaryForm
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
 from peachjam.models import (
@@ -426,16 +427,32 @@ class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
 class DocumentDebugView(DocumentDebugViewBase):
     template_name = "peachjam/document/_debug.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["summary_form"] = DocumentSummaryForm.build()
+        return context
+
 
 class DocumentSummaryView(DocumentDebugViewBase):
     template_name = "peachjam/document/_summary.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         summariser = JudgmentSummariser()
+        form = DocumentSummaryForm.build(self.request.GET or None)
+        context["form"] = form
+
+        if not form.is_bound or not form.is_valid():
+            return context
+
+        summariser.summary_prompt_str = form.cleaned_data["summary_prompt_str"] or None
+        summariser.llm_model = form.cleaned_data["llm_model"] or None
+        summariser.summary_language = (
+            form.cleaned_data["language"] or summariser.summary_language
+        )
+
         try:
-            context["summary"] = summariser.summarise_judgment(self.object)["summary"]
+            context["summary"] = summariser.summarise_judgment(self.object)
         except SummariserError as e:
             context["error"] = e
 

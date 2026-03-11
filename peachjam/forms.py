@@ -23,6 +23,7 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 from languages_plus.models import Language
 
+from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.models import (
     Annotation,
     AttachedFiles,
@@ -483,6 +484,57 @@ class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
         model = AttachedFiles
         fields = "__all__"
+
+
+class DocumentSummaryForm(forms.Form):
+    summary_prompt_str = forms.CharField(
+        label=_("Summary prompt"),
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": 12,
+            }
+        ),
+        help_text=_("Optional. Overrides the default summary prompt."),
+    )
+    llm_model = forms.CharField(
+        label=_("Model"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+        help_text=_("Optional. Overrides the configured model."),
+    )
+    language = forms.CharField(
+        label=_("Translation language"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+        help_text=_(
+            "Optional. Translates the summary when set to a non-English language."
+        ),
+    )
+
+    @classmethod
+    def build(cls, data=None):
+        summariser = JudgmentSummariser()
+        try:
+            summary_prompt_str = summariser.get_summary_prompt_str()
+        except Exception:
+            summary_prompt_str = ""
+
+        initial = {
+            "summary_prompt_str": summary_prompt_str,
+            "llm_model": summariser.llm_model or summariser.default_llm_model,
+            "language": summariser.summary_language,
+        }
+        return cls(data=data, initial=initial)
 
 
 class DocumentProblemForm(forms.Form):
