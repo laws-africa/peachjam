@@ -63,7 +63,7 @@ class FlynoteParser:
         r"(?:Act|Ordinance|Rules?|Code|Regulations?|Agreement)"
         r"(?:,?\s+\d{4})?"
         r"|[A-Z][A-Za-z'()]+(?:\s+[A-Z][A-Za-z'()]+){0,8}\s+Order in Council"
-        r"|(?:Section|Sections|Order|Rule|Rules|Cap\.)\b"
+        r"|(?:Section|Sections|Order|Rule|Rules|Cap\.)\s*[\dIVXLCM]"
         r"|s\.\s*\d"
         r"|O\.\s*\d"
         r"|r\.\s*\d"
@@ -289,7 +289,14 @@ class FlynoteParser:
 
     def _starts_new_flynote(self, text):
         head = text[:120]
-        return bool(re.search(self.DASH_PATTERN, head))
+        if not re.search(self.DASH_PATTERN, head):
+            return False
+
+        parts = [p.strip() for p in self._split_dash_parts(text) if p.strip()]
+        if len(parts) < 2:
+            return False
+
+        return self._looks_like_heading_phrase(parts[0], allow_single_word=True)
 
     def _clean_candidate(self, text):
         text = text.strip().rstrip(".;,")
@@ -301,6 +308,9 @@ class FlynoteParser:
         boundaries = []
         for match in self.TOPIC_RESTART_PATTERN.finditer(text):
             if match.start() == 0:
+                continue
+
+            if re.search(self.DASH_PATTERN + r"$", text[: match.start()]):
                 continue
 
             if not self._looks_like_topic_restart(text, match):
@@ -327,7 +337,7 @@ class FlynoteParser:
 
     def _looks_like_topic_restart(self, text, match):
         phrase = match.group("phrase").strip()
-        if not self._looks_like_heading_phrase(phrase):
+        if not self._looks_like_heading_phrase(phrase, allow_single_word=False):
             return False
 
         tail = text[match.start() :].strip()
@@ -337,7 +347,7 @@ class FlynoteParser:
         return True
 
     @staticmethod
-    def _looks_like_heading_phrase(phrase):
+    def _looks_like_heading_phrase(phrase, allow_single_word):
         words = re.findall(r"[A-Za-z][A-Za-z/&'()]+", phrase)
         if not 1 <= len(words) <= 8:
             return False
@@ -363,6 +373,43 @@ class FlynoteParser:
         ):
             return False
 
+        connector_words = {
+            "and",
+            "of",
+            "the",
+            "in",
+            "on",
+            "for",
+            "to",
+            "at",
+            "by",
+            "under",
+            "with",
+            "or",
+            "v",
+        }
+
+        has_title_word = False
+        title_word_count = 0
+        for word in words:
+            if word.islower():
+                if word.casefold() not in connector_words:
+                    return False
+                continue
+
+            if word[0].isupper():
+                has_title_word = True
+                title_word_count += 1
+                continue
+
+            return False
+
+        if not has_title_word:
+            return False
+
+        if not allow_single_word and title_word_count < 2:
+            return False
+
         return True
 
     def _trim_reference_tail(self, parts):
@@ -383,7 +430,15 @@ class FlynoteParser:
 
         # Don't drop substantive issue statements that merely cite a section.
         if text.lower().startswith(
-            ("whether ", "when ", "if ", "where ", "duty ", "right ")
+            (
+                "whether ",
+                "when ",
+                "if ",
+                "where ",
+                "duty ",
+                "right ",
+                "application under ",
+            )
         ):
             return False
 
