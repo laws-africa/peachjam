@@ -19,9 +19,8 @@ def normalise_multiline_flynotes(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ("peachjam", "0279_remove_flynote_taxonomy_root"),
+        ("peachjam", "0280_userprofile_deletion_fields"),
     ]
 
     operations = [
