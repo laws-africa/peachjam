@@ -1,5 +1,4 @@
 import logging
-from datetime import date
 from urllib.parse import quote
 
 from countries_plus.models import Country
@@ -17,6 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
+from peachjam.helpers import current_year
 from peachjam.models import CoreDocument, Locality, SourceFile
 from peachjam.tasks import create_anonymised_source_file_pdf
 
@@ -334,7 +334,10 @@ class Judgment(CoreDocument):
         null=True,
         blank=True,
         help_text=_("Year the matter was filed (YYYY only)."),
-        validators=[MinValueValidator(1800), MaxValueValidator(date.today().year)],
+        validators=[
+            MinValueValidator(1800),
+            MaxValueValidator(limit_value=current_year),
+        ],
     )
     case_action = models.ForeignKey(
         CaseAction,
