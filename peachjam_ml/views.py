@@ -25,7 +25,7 @@ class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
         # get the actual documents
         docs = {
             d.id: d
-            for d in CoreDocument.objects.filter(
+            for d in CoreDocument.objects.for_document_table().filter(
                 pk__in=[sd["document_id"] for sd in similar_documents]
             )
         }
@@ -54,7 +54,7 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         # get the actual documents so the standard document table template can render them
         docs = {
             d.id: d
-            for d in CoreDocument.objects.filter(
+            for d in CoreDocument.objects.for_document_table().filter(
                 pk__in=[sd["document_id"] for sd in similar_documents]
             )
         }
