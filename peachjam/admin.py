@@ -131,6 +131,7 @@ from peachjam.resources import (
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
+    OffenceResource,
     RatificationResource,
     UserResource,
 )
@@ -1473,7 +1474,9 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
 
 @admin.register(Offence)
-class OffenceAdmin(admin.ModelAdmin):
+class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_classes = [OffenceResource]
+
     def get_form(self, request, obj=None, **kwargs):
         return super().get_form(
             request,

@@ -5,8 +5,12 @@ import tablib
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from peachjam.models import GenericDocument, Judgment, Taxonomy
-from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.models import GenericDocument, Judgment, Offence, Taxonomy, Work
+from peachjam.resources import (
+    GenericDocumentResource,
+    JudgmentResource,
+    OffenceResource,
+)
 
 judgment_import_headers = [
     "skip",
@@ -182,3 +186,62 @@ class JudgmentBulkImportTestCase(TestCase):
         self.assertEqual(0, result.totals["update"])
         self.assertEqual(1, result.totals["skip"])
         self.assertIsNone(GenericDocument.objects.first())
+
+
+class OffenceBulkImportTestCase(TestCase):
+    def setUp(self):
+        self.work = Work.objects.create(
+            title="Penal Code",
+            frbr_uri="/akn/tz/act/2002/16",
+        )
+
+    def test_offence_import(self):
+        headers = [
+            "work",
+            "provision_eid",
+            "code",
+            "title",
+            "description",
+            "elements",
+            "penalty",
+        ]
+        row = [
+            self.work.frbr_uri,
+            "sec_296",
+            "ROB-296",
+            "Robbery with violence",
+            "The accused steals while armed with a dangerous weapon.",
+            "stealing property|armed with a dangerous weapon",
+            "Imprisonment for life",
+        ]
+
+        dataset = tablib.Dataset(row, headers=headers)
+        result = OffenceResource().import_data(dataset=dataset, dry_run=False)
+
+        self.assertEqual([], result.invalid_rows)
+        self.assertFalse(result.has_errors())
+
+        offence = Offence.objects.get(code="ROB-296")
+        self.assertEqual(self.work, offence.work)
+        self.assertEqual(
+            ["stealing property", "armed with a dangerous weapon"], offence.elements
+        )
+
+    def test_offence_export(self):
+        offence = Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_296",
+            code="ROB-296",
+            title="Robbery with violence",
+            description="The accused steals while armed with a dangerous weapon.",
+            elements=["stealing property", "armed with a dangerous weapon"],
+            penalty="Imprisonment for life",
+        )
+
+        dataset = OffenceResource().export(Offence.objects.filter(pk=offence.pk))
+
+        self.assertEqual(self.work.frbr_uri, dataset.dict[0]["work"])
+        self.assertEqual(
+            "stealing property|armed with a dangerous weapon",
+            dataset.dict[0]["elements"],
+        )
