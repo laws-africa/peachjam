@@ -52,18 +52,33 @@ class FlynoteParser:
     def clean(text):
         """Clean HTML tags and normalise whitespace in a flynote.
 
-        Strips HTML tags and entities, collapses whitespace, removes leading
-        bullet characters, and strips trailing periods.
+        Preserves line breaks so multi-line flynotes can be interpreted as one
+        flynote per line. Within each line, whitespace is normalised, leading
+        bullet characters are removed, and trailing periods are stripped.
         """
         if not text:
             return ""
 
+        text = re.sub(r"(?i)<br\s*/?>", "\n", text)
+        text = re.sub(r"(?i)</(?:p|div|li|ul|ol|tr|td|th|h[1-6])\s*>", "\n", text)
         text = strip_tags(text).strip()
         text = re.sub(r"&nbsp;", " ", text)
-        text = re.sub(r"\s+", " ", text)
-        text = re.sub(r"^[\-\u2022\u2023\u25E6\u2043\s]+", "", text)
-        text = text.strip().rstrip(".")
-        return text
+        lines = []
+        for line in text.splitlines():
+            line = re.sub(r"\s+", " ", line)
+            line = re.sub(r"^[\-\u2022\u2023\u25E6\u2043\s]+", "", line)
+            line = line.strip().rstrip(".")
+            if line:
+                lines.append(line)
+        return "\n".join(lines)
+
+    def normalise_multiline_text(self, text):
+        """Normalise flynote text into one flynote per line."""
+        text = self.clean(text)
+        if not text:
+            return ""
+
+        return "\n".join(line.strip() for line in text.splitlines() if line.strip())
 
     def parse(self, text):
         """Parse flynote text into a list of paths.
@@ -75,14 +90,17 @@ class FlynoteParser:
         2. If no dash characters (em-dash, en-dash, or spaced hyphen) are
            found, the text is treated as plain prose and an empty list is
            returned.
-        3. The text is split on semicolons into segments.
-        4. Each segment is split on dashes into parts, forming a hierarchy
+        3. The text is split into lines and each line is treated as a separate
+           flynote.
+        4. Within each flynote, the text is split on semicolons into segments.
+        5. Each segment is split on dashes into parts, forming a hierarchy
            from general to specific.
-        5. For the first segment, the parts become the initial path.
-        6. For each subsequent segment, the number of dash-separated parts
-           (n) determines how many levels from the bottom of the current
-           path are replaced.  This allows sibling or cousin branches to
-           share a common prefix.
+        6. For the first segment in a flynote, the parts become the initial
+           path.
+        7. For each subsequent segment in that flynote, the number of
+           dash-separated parts (n) determines how many levels from the bottom
+           of the current path are replaced. This allows sibling or cousin
+           branches to share a common prefix.
 
         Examples::
 
@@ -128,27 +146,27 @@ class FlynoteParser:
         if not re.search(self.DASH_PATTERN, text):
             return []
 
-        segments = [s.strip() for s in self._split_segments(text) if s.strip()]
-
-        current_path = []
         paths = []
+        for line in text.splitlines():
+            segments = [s.strip() for s in self._split_segments(line) if s.strip()]
+            current_path = []
 
-        for segment in segments:
-            parts = [
-                p.strip()[: self.MAX_NAME_LENGTH]
-                for p in re.split(self.DASH_PATTERN, segment)
-                if p.strip()
-            ]
-            if not parts:
-                continue
+            for segment in segments:
+                parts = [
+                    p.strip()[: self.MAX_NAME_LENGTH]
+                    for p in self._split_dash_parts(segment)
+                    if p.strip()
+                ]
+                if not parts:
+                    continue
 
-            n = len(parts)
-            if not current_path:
-                current_path = parts
-            else:
-                current_path = current_path[: max(len(current_path) - n, 0)] + parts
+                n = len(parts)
+                if not current_path:
+                    current_path = parts
+                else:
+                    current_path = current_path[: max(len(current_path) - n, 0)] + parts
 
-            paths.append(list(current_path))
+                paths.append(list(current_path))
 
         return paths
 
@@ -172,6 +190,42 @@ class FlynoteParser:
         if current:
             segments.append("".join(current))
         return segments
+
+    def _split_dash_parts(self, text):
+        """Split a hierarchy segment on dashes, ignoring dashes inside parentheses."""
+        parts = []
+        current = []
+        depth = 0
+        i = 0
+
+        while i < len(text):
+            ch = text[i]
+            if ch == "(":
+                depth += 1
+                current.append(ch)
+                i += 1
+                continue
+            if ch == ")":
+                depth = max(depth - 1, 0)
+                current.append(ch)
+                i += 1
+                continue
+
+            if depth == 0:
+                match = re.match(self.DASH_PATTERN, text[i:])
+                if match:
+                    parts.append("".join(current))
+                    current = []
+                    i += match.end()
+                    continue
+
+            current.append(ch)
+            i += 1
+
+        if current:
+            parts.append("".join(current))
+
+        return parts
 
     @staticmethod
     def normalise_name(name):
