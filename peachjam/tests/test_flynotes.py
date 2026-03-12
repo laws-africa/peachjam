@@ -214,6 +214,116 @@ class ParseFlynoteTextTest(TestCase):
         )
         self.assertEqual(self.parser.normalise_multiline_text(text), text)
 
+    def test_normalise_multiline_text_splits_repeated_sentence_flynotes(self):
+        text = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. "
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+            "Agreement is silent on mode of delivery - Delivery in one lot presumed."
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Contract - Contract of sale of goods - Whether and under what circumstances "
+                "a mere purchase order may amount to an agreement to sell\n"
+                "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+                "Agreement is silent on mode of delivery - Delivery in one lot presumed"
+            ),
+        )
+
+    def test_normalise_multiline_text_strips_held_section(self):
+        text = (
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery. "
+            "Held: (i) The buyer was at liberty to rescind the contract."
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery",
+        )
+
+    def test_normalise_multiline_text_removes_report_markers_and_dedupes(self):
+        text = (
+            "A Contract - Contract of sale of goods - Delivery - Mode of delivery. "
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery."
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery",
+        )
+
+    def test_parse_repeated_sentence_flynotes_as_separate_paths(self):
+        text = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. "
+            "Contract - Contract of sale of goods - Rules governing delivery of goods - "
+            "Whether Buyer is bound to accept delivery in instalments."
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Contract",
+                    "Contract of sale of goods",
+                    "Whether and under what circumstances a mere purchase order may amount to an agreement to sell",
+                ],
+                [
+                    "Contract",
+                    "Contract of sale of goods",
+                    "Rules governing delivery of goods",
+                    "Whether Buyer is bound to accept delivery in instalments",
+                ],
+            ],
+        )
+
+    def test_normalise_multiline_text_splits_mid_line_topic_restarts(self):
+        text = (
+            "Civil Practice and Procedure - Proceedings against a corporate body - "
+            "Court action against the decision of a meeting of an organ of a cooperative union - "
+            "Whether proceedings may be instituted against that particular organ "
+            "Civil Practice and Procedure - Non-joinder of parties - Whether an essential "
+            "party not joined to an action may be joined at the stage of formulating the judgment - "
+            "Order I rule 10(2) of the Civil Procedure Code 1966 "
+            "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+            "Whether the meeting had jurisdiction to make valid decisions"
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Civil Practice and Procedure - Proceedings against a corporate body - "
+                "Court action against the decision of a meeting of an organ of a cooperative union - "
+                "Whether proceedings may be instituted against that particular organ\n"
+                "Civil Practice and Procedure - Non-joinder of parties - Whether an essential "
+                "party not joined to an action may be joined at the stage of formulating the judgment - "
+                "Order I rule 10(2) of the Civil Procedure Code 1966\n"
+                "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+                "Whether the meeting had jurisdiction to make valid decisions"
+            ),
+        )
+
+    def test_parse_mid_line_topic_restarts_as_separate_paths(self):
+        text = (
+            "Civil Practice and Procedure - Proceedings against a corporate body - "
+            "Whether proceedings may be instituted against that particular organ "
+            "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+            "Whether the meeting had jurisdiction to make valid decisions"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Civil Practice and Procedure",
+                    "Proceedings against a corporate body",
+                    "Whether proceedings may be instituted against that particular organ",
+                ],
+                [
+                    "Administrative Law",
+                    "Jurisdiction of an administrative body",
+                    "Requirement of quorum",
+                    "Whether the meeting had jurisdiction to make valid decisions",
+                ],
+            ],
+        )
+
 
 class NormaliseFlynoteNameTest(TestCase):
     def test_basic_normalisation(self):

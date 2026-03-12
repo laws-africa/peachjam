@@ -20,6 +20,7 @@ Two classes are exposed:
 
 import logging
 import re
+from html import unescape
 
 from django.db import IntegrityError, transaction
 from django.utils.html import strip_tags
@@ -47,6 +48,55 @@ class FlynoteParser:
 
     DASH_PATTERN = r"\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+"
     MAX_NAME_LENGTH = 255
+    HELD_PATTERN = re.compile(r"\bHeld:\s*", re.IGNORECASE)
+    SENTENCE_BOUNDARY_PATTERN = re.compile(r"(?<=\.)\s+(?=[A-Z])")
+    REPORT_MARKER_PATTERN = re.compile(
+        r"^(?:[A-Z])\s+(?=[A-Z][^-–—]{1,80}(?:\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+))"
+    )
+    TOPIC_RESTART_PATTERN = re.compile(
+        r"(?P<phrase>[A-Z][A-Za-z/&'()]+(?:\s+[A-Za-z][A-Za-z/&'()]+){0,6})"
+        r"(?:\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+)"
+    )
+    TOP_LEVEL_HEADWORDS = {
+        "administrative",
+        "admiralty",
+        "advocates",
+        "agency",
+        "arbitration",
+        "bail",
+        "banking",
+        "caution",
+        "civil",
+        "company",
+        "constitutional",
+        "contract",
+        "cooperative",
+        "criminal",
+        "customary",
+        "employment",
+        "environmental",
+        "evidence",
+        "family",
+        "insurance",
+        "international",
+        "jurisdiction",
+        "justice",
+        "labour",
+        "land",
+        "landlord",
+        "limitation",
+        "murder",
+        "natural",
+        "probate",
+        "procedure",
+        "prerogative",
+        "property",
+        "public",
+        "sale",
+        "succession",
+        "tax",
+        "tort",
+    }
 
     @staticmethod
     def clean(text):
@@ -59,10 +109,10 @@ class FlynoteParser:
         if not text:
             return ""
 
+        text = unescape(text)
         text = re.sub(r"(?i)<br\s*/?>", "\n", text)
         text = re.sub(r"(?i)</(?:p|div|li|ul|ol|tr|td|th|h[1-6])\s*>", "\n", text)
         text = strip_tags(text).strip()
-        text = re.sub(r"&nbsp;", " ", text)
         lines = []
         for line in text.splitlines():
             line = re.sub(r"\s+", " ", line)
@@ -78,7 +128,12 @@ class FlynoteParser:
         if not text:
             return ""
 
-        return "\n".join(line.strip() for line in text.splitlines() if line.strip())
+        text = self._strip_held_section(text)
+        candidates = []
+        for line in text.splitlines():
+            candidates.extend(self._split_line_into_candidates(line))
+
+        return "\n".join(self._dedupe_candidates(candidates))
 
     def parse(self, text):
         """Parse flynote text into a list of paths.
@@ -147,7 +202,7 @@ class FlynoteParser:
             return []
 
         paths = []
-        for line in text.splitlines():
+        for line in self.normalise_multiline_text(text).splitlines():
             segments = [s.strip() for s in self._split_segments(line) if s.strip()]
             current_path = []
 
@@ -226,6 +281,105 @@ class FlynoteParser:
             parts.append("".join(current))
 
         return parts
+
+    def _strip_held_section(self, text):
+        return self.HELD_PATTERN.split(text, maxsplit=1)[0].strip()
+
+    def _split_line_into_candidates(self, line):
+        if not line:
+            return []
+
+        parts = self.SENTENCE_BOUNDARY_PATTERN.split(line)
+        candidates = []
+        current = ""
+
+        for part in parts:
+            part = self._clean_candidate(part)
+            if not part:
+                continue
+
+            if current and self._starts_new_flynote(part):
+                candidates.append(current)
+                current = part
+            else:
+                current = f"{current}. {part}" if current else part
+
+        if current:
+            candidates.append(current)
+
+        split_candidates = []
+        for candidate in candidates:
+            split_candidates.extend(self._split_topic_restarts(candidate))
+
+        return split_candidates
+
+    def _starts_new_flynote(self, text):
+        head = text[:120]
+        return bool(re.search(self.DASH_PATTERN, head))
+
+    def _clean_candidate(self, text):
+        text = text.strip().rstrip(".;,")
+        text = self.REPORT_MARKER_PATTERN.sub("", text)
+        text = re.sub(r"\s+", " ", text)
+        return text.strip()
+
+    def _split_topic_restarts(self, text):
+        boundaries = []
+        for match in self.TOPIC_RESTART_PATTERN.finditer(text):
+            if match.start() == 0:
+                continue
+
+            phrase = match.group("phrase").strip()
+            if not self._looks_like_top_level_heading(phrase):
+                continue
+
+            boundaries.append(match.start())
+
+        if not boundaries:
+            return [text]
+
+        parts = []
+        start = 0
+        for boundary in boundaries:
+            part = text[start:boundary].strip()
+            if part:
+                parts.append(part)
+            start = boundary
+
+        tail = text[start:].strip()
+        if tail:
+            parts.append(tail)
+
+        return parts
+
+    def _looks_like_top_level_heading(self, phrase):
+        words = [word.casefold() for word in phrase.split()]
+        return any(word in self.TOP_LEVEL_HEADWORDS for word in words)
+
+    def _dedupe_candidates(self, candidates):
+        seen = set()
+        deduped = []
+
+        for candidate in candidates:
+            candidate = self._clean_candidate(candidate)
+            if not candidate:
+                continue
+
+            canonical = self._canonicalise_candidate(candidate)
+            if canonical in seen:
+                continue
+
+            seen.add(canonical)
+            deduped.append(candidate)
+
+        return deduped
+
+    @staticmethod
+    def _canonicalise_candidate(text):
+        text = text.casefold()
+        text = re.sub(r"\s+", " ", text)
+        text = re.sub(r"\s*[\u2014\u2013-]\s*", " - ", text)
+        return text.strip(" .;,")
 
     @staticmethod
     def normalise_name(name):
