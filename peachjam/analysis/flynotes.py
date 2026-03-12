@@ -57,46 +57,19 @@ class FlynoteParser:
         r"(?P<phrase>[A-Z][A-Za-z/&'()]+(?:\s+[A-Za-z][A-Za-z/&'()]+){0,6})"
         r"(?:\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+)"
     )
-    TOP_LEVEL_HEADWORDS = {
-        "administrative",
-        "admiralty",
-        "advocates",
-        "agency",
-        "arbitration",
-        "bail",
-        "banking",
-        "caution",
-        "civil",
-        "company",
-        "constitutional",
-        "contract",
-        "cooperative",
-        "criminal",
-        "customary",
-        "employment",
-        "environmental",
-        "evidence",
-        "family",
-        "insurance",
-        "international",
-        "jurisdiction",
-        "justice",
-        "labour",
-        "land",
-        "landlord",
-        "limitation",
-        "murder",
-        "natural",
-        "probate",
-        "procedure",
-        "prerogative",
-        "property",
-        "public",
-        "sale",
-        "succession",
-        "tax",
-        "tort",
-    }
+    REFERENCE_TAIL_PATTERN = re.compile(
+        r"^(?:"
+        r"[A-Z][A-Za-z'()]+(?:\s+[A-Z][A-Za-z'()]+){0,8}\s+"
+        r"(?:Act|Ordinance|Rules?|Code|Regulations?|Agreement)"
+        r"(?:,?\s+\d{4})?"
+        r"|[A-Z][A-Za-z'()]+(?:\s+[A-Z][A-Za-z'()]+){0,8}\s+Order in Council"
+        r"|(?:Section|Sections|Order|Rule|Rules|Cap\.)\b"
+        r"|s\.\s*\d"
+        r"|O\.\s*\d"
+        r"|r\.\s*\d"
+        r")",
+        re.IGNORECASE,
+    )
 
     @staticmethod
     def clean(text):
@@ -212,6 +185,7 @@ class FlynoteParser:
                     for p in self._split_dash_parts(segment)
                     if p.strip()
                 ]
+                parts = self._trim_reference_tail(parts)
                 if not parts:
                     continue
 
@@ -329,8 +303,7 @@ class FlynoteParser:
             if match.start() == 0:
                 continue
 
-            phrase = match.group("phrase").strip()
-            if not self._looks_like_top_level_heading(phrase):
+            if not self._looks_like_topic_restart(text, match):
                 continue
 
             boundaries.append(match.start())
@@ -352,9 +325,69 @@ class FlynoteParser:
 
         return parts
 
-    def _looks_like_top_level_heading(self, phrase):
-        words = [word.casefold() for word in phrase.split()]
-        return any(word in self.TOP_LEVEL_HEADWORDS for word in words)
+    def _looks_like_topic_restart(self, text, match):
+        phrase = match.group("phrase").strip()
+        if not self._looks_like_heading_phrase(phrase):
+            return False
+
+        tail = text[match.start() :].strip()
+        if len([p for p in self._split_dash_parts(tail) if p.strip()]) < 2:
+            return False
+
+        return True
+
+    @staticmethod
+    def _looks_like_heading_phrase(phrase):
+        words = re.findall(r"[A-Za-z][A-Za-z/&'()]+", phrase)
+        if not 1 <= len(words) <= 8:
+            return False
+
+        phrase_lc = phrase.casefold()
+        if phrase_lc.startswith(
+            (
+                "whether ",
+                "when ",
+                "where ",
+                "if ",
+                "right to ",
+                "duty to ",
+                "failure to ",
+                "requirement of ",
+                "application for ",
+                "submission on ",
+                "scope of ",
+                "independence of ",
+                "recognition of ",
+                "conclusion:",
+            )
+        ):
+            return False
+
+        return True
+
+    def _trim_reference_tail(self, parts):
+        trimmed = []
+        for idx, part in enumerate(parts):
+            if idx >= 2 and self._looks_like_reference_tail(part):
+                break
+            trimmed.append(part)
+        return trimmed
+
+    def _looks_like_reference_tail(self, part):
+        text = part.strip()
+        if not text:
+            return False
+
+        if not self.REFERENCE_TAIL_PATTERN.search(text):
+            return False
+
+        # Don't drop substantive issue statements that merely cite a section.
+        if text.lower().startswith(
+            ("whether ", "when ", "if ", "where ", "duty ", "right ")
+        ):
+            return False
+
+        return True
 
     def _dedupe_candidates(self, candidates):
         seen = set()

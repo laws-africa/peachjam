@@ -324,6 +324,49 @@ class ParseFlynoteTextTest(TestCase):
             ],
         )
 
+    def test_parse_stops_before_statute_reference_tail(self):
+        text = (
+            "Jurisdiction - Buganda courts - Suit for damages - Car collision - "
+            "Both parties Africans - Suit filed in the High Court - "
+            "Submission on appeal that case should have been transferred to Buganda court - "
+            "Jurisdiction of High Court - When High Court must transfer case to Buganda court - "
+            "Civil Procedure Rules, O. 9, r. 24 and O. 42 (U.) - "
+            "Civil Procedure Ordinance, s. 11 (7) and s. 69 (1) (U.)"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Jurisdiction",
+                    "Buganda courts",
+                    "Suit for damages",
+                    "Car collision",
+                    "Both parties Africans",
+                    "Suit filed in the High Court",
+                    "Submission on appeal that case should have been transferred to Buganda court",
+                    "Jurisdiction of High Court",
+                    "When High Court must transfer case to Buganda court",
+                ]
+            ],
+        )
+
+    def test_reference_tail_preserves_issue_statement_with_section(self):
+        text = (
+            "Natural Justice - Right to be heard - "
+            "Whether that failure amounts to forfeiture of the Committee's right to be heard - "
+            "Section 106 of the Cooperative Societies Act 1982"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Natural Justice",
+                    "Right to be heard",
+                    "Whether that failure amounts to forfeiture of the Committee's right to be heard",
+                ]
+            ],
+        )
+
 
 class NormaliseFlynoteNameTest(TestCase):
     def test_basic_normalisation(self):
