@@ -2,10 +2,13 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
-INSTALLED_APPS = ["ghalii.apps.GhaLIIConfig"] + INSTALLED_APPS  # noqa
+INSTALLED_APPS = ["ghalii.apps.GhaLIIConfig", "peachjam_ml"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
 PEACHJAM["CHAT_PUBLIC"] = True  # noqa
+
+# turn on document embeddings for document similarity without semantic search
+PEACHJAM["DOCUMENT_EMBEDDINGS"] = True  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "GhaLII"  # noqa
