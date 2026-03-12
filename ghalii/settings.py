@@ -10,6 +10,8 @@ PEACHJAM["CHAT_PUBLIC"] = True  # noqa
 # turn on document embeddings for document similarity without semantic search
 PEACHJAM["DOCUMENT_EMBEDDINGS"] = True  # noqa
 
+ROOT_URLCONF = "ghalii.urls"
+
 
 JAZZMIN_SETTINGS["site_title"] = "GhaLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "GhaLII"  # noqa
