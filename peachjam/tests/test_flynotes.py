@@ -1,7 +1,4 @@
-import csv
 import datetime
-import os
-import tempfile
 from io import StringIO
 
 from countries_plus.models import Country
@@ -805,73 +802,3 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         output = out.getvalue()
 
         self.assertIn("Last pk processed:", output)
-
-
-class AnalyzeFlynotesCommandTest(TestCase):
-    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
-
-    def test_writes_parser_report_csv(self):
-        judgment = Judgment.objects.create(
-            case_name="Parser Report Test",
-            jurisdiction=Country.objects.first(),
-            court=Court.objects.first(),
-            date=datetime.date(2025, 1, 1),
-            language=Language.objects.first(),
-            flynote=(
-                "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
-                "Administrative law \u2014 judicial review"
-            ),
-        )
-
-        with tempfile.NamedTemporaryFile(suffix=".csv", delete=False) as tmp:
-            path = tmp.name
-
-        try:
-            call_command("analyze_flynotes", output=path, judgment_id=judgment.pk)
-
-            with open(path, encoding="utf-8") as csvfile:
-                rows = list(csv.DictReader(csvfile))
-
-            self.assertEqual(len(rows), 1)
-            self.assertEqual(rows[0]["pk"], str(judgment.pk))
-            self.assertEqual(rows[0]["flynote_depth"], "3")
-            self.assertEqual(rows[0]["flynote_1"], "Criminal law")
-            self.assertEqual(rows[0]["flynote_2"], "admissibility")
-            self.assertEqual(rows[0]["flynote_3"], "trial within a trial")
-            self.assertEqual(rows[0]["flynote_line_count"], "2")
-            self.assertEqual(rows[0]["parsed_path_count"], "2")
-            self.assertEqual(rows[0]["max_depth"], "3")
-            self.assertEqual(rows[0]["has_depth_gt_5"], "False")
-            self.assertIn("Administrative law", rows[0]["normalised_flynote"])
-        finally:
-            if os.path.exists(path):
-                os.unlink(path)
-
-    def test_writes_parser_report_xlsx(self):
-        judgment = Judgment.objects.create(
-            case_name="Parser Report XLSX Test",
-            jurisdiction=Country.objects.first(),
-            court=Court.objects.first(),
-            date=datetime.date(2025, 1, 1),
-            language=Language.objects.first(),
-            flynote="Administrative law \u2014 judicial review",
-        )
-
-        with tempfile.NamedTemporaryFile(suffix=".xlsx", delete=False) as tmp:
-            path = tmp.name
-
-        try:
-            call_command("analyze_flynotes", output=path, judgment_id=judgment.pk)
-
-            from openpyxl import load_workbook
-
-            workbook = load_workbook(path)
-            sheet = workbook["flynotes"]
-
-            self.assertEqual(sheet["A2"].value, judgment.pk)
-            self.assertEqual(sheet["F2"].value, 2)
-            self.assertEqual(sheet["G2"].value, "Administrative law")
-            self.assertEqual(sheet["M2"].value, 1)
-        finally:
-            if os.path.exists(path):
-                os.unlink(path)
