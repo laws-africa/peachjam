@@ -5,7 +5,15 @@ from django.test import TestCase
 from django.urls import reverse
 from languages_plus.models import Language
 
-from peachjam.models import Court, Judgment, LawReport, LawReportEntry, LawReportVolume
+from peachjam.models import (
+    Court,
+    ExtractedCitation,
+    Judgment,
+    LawReport,
+    LawReportEntry,
+    LawReportVolume,
+    Legislation,
+)
 
 
 class LawReportModelTestCase(TestCase):
@@ -95,6 +103,11 @@ class LawReportViewsTestCase(TestCase):
         self.first_judgment = judgments[0]
         self.second_judgment = judgments[1]
         self.unrelated_judgment = judgments[2]
+        legislations = list(
+            Legislation.objects.filter(published=True).order_by("title")[:2]
+        )
+        self.cited_legislation = legislations[0]
+        self.other_legislation = legislations[1]
 
         LawReportEntry.objects.create(
             judgment=self.first_judgment,
@@ -103,6 +116,23 @@ class LawReportViewsTestCase(TestCase):
         LawReportEntry.objects.create(
             judgment=self.second_judgment,
             law_report_volume=self.volume_2,
+        )
+
+        ExtractedCitation.objects.create(
+            citing_work=self.first_judgment.work,
+            target_work=self.second_judgment.work,
+        )
+        ExtractedCitation.objects.create(
+            citing_work=self.first_judgment.work,
+            target_work=self.cited_legislation.work,
+        )
+        ExtractedCitation.objects.create(
+            citing_work=self.second_judgment.work,
+            target_work=self.unrelated_judgment.work,
+        )
+        ExtractedCitation.objects.create(
+            citing_work=self.second_judgment.work,
+            target_work=self.other_legislation.work,
         )
 
     def test_law_report_list_view(self):
@@ -138,20 +168,34 @@ class LawReportViewsTestCase(TestCase):
         self.assertEqual("judgments", response.context["active_tab"])
 
     def test_law_report_volume_detail_view_cases_tab(self):
-        url = self.volume_1.get_absolute_url() + "?tab=cases"
+        url = reverse(
+            "law_report_volume_cases_index",
+            args=[self.law_report.slug, self.volume_1.slug],
+        )
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual("cases", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
+        self.assertEqual("case", str(response.context["doc_count_noun"]))
+        self.assertContains(response, self.second_judgment.title)
+        self.assertContains(response, self.first_judgment.title)
+        self.assertNotContains(response, self.unrelated_judgment.title)
 
     def test_law_report_volume_detail_view_legislation_tab(self):
-        url = self.volume_1.get_absolute_url() + "?tab=legislation"
+        url = reverse(
+            "law_report_volume_legislation_index",
+            args=[self.law_report.slug, self.volume_1.slug],
+        )
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual("legislation", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
+        self.assertEqual("documents", str(response.context["doc_count_noun_plural"]))
+        self.assertContains(response, self.cited_legislation.title)
+        self.assertContains(response, self.first_judgment.title)
+        self.assertNotContains(response, self.other_legislation.title)
 
     def test_law_report_volume_detail_view_invalid_tab_defaults_to_judgments(self):
         url = self.volume_1.get_absolute_url() + "?tab=invalid"
