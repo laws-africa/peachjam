@@ -242,7 +242,7 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         doc = _make_doc("Text extraction")
         doc_content = doc.get_or_create_document_content()
         doc_content.content_html = "<div><p>First</p><p>Second</p></div>"
-        doc_content.update_content_text_from_html()
+        doc_content.update_text_content()
         self.assertIn("First", doc_content.content_text)
         self.assertIn("Second", doc_content.content_text)
 
@@ -251,7 +251,7 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         doc = _make_doc("No content text")
         doc_content = doc.get_or_create_document_content()
         doc_content.content_html = None
-        doc_content.update_content_text_from_html()
+        doc_content.update_text_content()
         self.assertEqual("", doc_content.content_text)
 
     def test_source_html_derives_content_html(self):

@@ -822,9 +822,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         """Get the document content as plain text."""
         return self.get_or_create_document_content().get_content_as_text()
 
-    def update_text_content(self):
-        self.get_or_create_document_content().update_text_content()
-
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
         return self.get_or_create_document_content().get_cited_work_frbr_uris()
@@ -1007,13 +1004,6 @@ class DocumentContent(AttributeHooksMixin, models.Model):
             toc_json = []
         self.toc_json = toc_json
 
-    def update_content_text_from_html(self):
-        if self.content_html:
-            root = self.content_html_tree
-            self.content_text = " ".join(root.itertext())
-        else:
-            self.content_text = ""
-
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document content."""
         work_frbr_uris = {}
@@ -1119,9 +1109,10 @@ class DocumentContent(AttributeHooksMixin, models.Model):
     def update_text_content(self):
         """Update the text content extracted either from content_html or from the source file."""
         text = ""
+
         if self.content_html:
-            root = self.content_html_tree
-            text = " ".join(root.itertext())
+            text = " ".join(self.content_html_tree.itertext())
+
         elif hasattr(self.document, "source_file") and self.document.source_file.pk:
             # get the text from the source file, via PDF if necessary
             with tempfile.NamedTemporaryFile() as tmp:
@@ -1154,7 +1145,7 @@ class DocumentContent(AttributeHooksMixin, models.Model):
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
     def sync_html_derived_fields(self):
         self.update_toc_json_from_content_html()
-        self.update_content_text_from_html()
+        self.update_text_content()
 
     @hook(AFTER_SAVE, when="source_html", has_changed=True)
     def trigger_extract_citations(self):
