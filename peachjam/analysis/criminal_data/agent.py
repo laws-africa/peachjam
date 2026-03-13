@@ -96,7 +96,7 @@ def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
 
 
 @function_tool
-def search_offences(search_terms: str) -> List[Dict[str, Any]]:
+def search_offences(search_terms: str):
     """
     Search the offence database for offences matching one or more offence-related terms.
 
@@ -133,9 +133,9 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
 
         [
             {
-                "id": str,                     # canonical offence ID
-                "title": str,                  # official offence title
-                "description_snippet": str     # short excerpt from description
+                "id": str,             # canonical offence ID
+                "title": str,          # official offence title
+                "description": str     # short excerpt from description
             },
             ...
         ]
@@ -150,7 +150,14 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
     3. stable ordering by title and id
     - Sorting is deterministic: rank DESC, title ASC, id ASC.
     """
-    return search_offences_tool(search_terms)
+    matches = search_offences_tool(search_terms)
+    if not matches:
+        return (
+            "There are no offences in the database that match those search terms. You can try again with different"
+            " search terms if you think the offence should be in the database. You must only try 2-3 times before"
+            " concluding that there is no match."
+        )
+    return matches
 
 
 JUDGMENT_EXTRACTION_PROMPT = """
@@ -201,7 +208,6 @@ offence in the database.
 An offence ID may only be assigned if one of the returned results is a clear semantic match to the extracted offence
 wording. A clear match means that the candidate offence’s title or description closely corresponds to the offence
 described in the judgment.
-
 
 You are not allowed to invent offence IDs. You are also not allowed to output an offence ID unless that exact ID
 appears in the results returned by the `search_offences` tool.
@@ -367,6 +373,9 @@ Tool result:
 []
 </tool-output>
 
+Because the offence is clearly present in the judgment but no matching database offence exists,
+the offence must still be extracted, but the offence_id must be null.
+
 Extraction:
 
 [
@@ -385,9 +394,6 @@ Extraction:
     ]
   }
 ]
-
-Because the offence is clearly present in the judgment but no matching database offence exists,
-the offence must still be extracted, but the offence_id must be null.
 """
 
 
