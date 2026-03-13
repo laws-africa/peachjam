@@ -1120,7 +1120,7 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         return self.content_text
 
     def update_text_content(self):
-        """Update the extracted text content."""
+        """Update the text content extracted either from content_html or from the source file."""
         text = ""
         if self.content_html:
             root = self.content_html_tree
@@ -1147,8 +1147,6 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         self.content_text = text
         if self.pk:
             self.save(update_fields=["content_text"])
-        self._content_html_tree = None
-        return self
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
