@@ -98,7 +98,7 @@ Subheading
 </h2>
 </div>
 </div>""",
-            book.document_content.content_html,
+            book.document_content.source_html,
         )
 
         self.assertEqual(
