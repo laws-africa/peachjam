@@ -37,18 +37,13 @@
     </li>
     <li class="nav-item">
       <a class="nav-link {% if active_tab == 'cases' %}active{% endif %}"
-         href="{{ law_report_volume.get_absolute_url }}?tab=cases">{% trans 'Cited cases' %}</a>
+         href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">{% trans 'Cited cases' %}</a>
     </li>
     <li class="nav-item">
       <a class="nav-link {% if active_tab == 'legislation' %}active{% endif %}"
-         href="{{ law_report_volume.get_absolute_url }}?tab=legislation">{% trans 'Cited legislation' %}</a>
+         href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">{% trans 'Cited legislation' %}</a>
     </li>
   </ul>
   {% include 'peachjam/_document_count.html' %}
 {% endblock %}
-{% block document-table %}
-  {% if active_tab != 'judgments' %}
-    <input type="hidden" name="tab" value="{{ active_tab }}" form="filter-form" />
-  {% endif %}
-  {{ block.super }}
-{% endblock %}
+{% block document-table %}{{ block.super }}{% endblock %}

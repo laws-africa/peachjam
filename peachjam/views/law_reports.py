@@ -2,6 +2,7 @@ from collections import defaultdict
 from functools import cached_property
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
 from peachjam.models import (
@@ -39,8 +40,30 @@ class LawReportDetailView(DetailView):
 class LawReportVolumeDetailView(FilteredJudgmentView):
     template_name = "peachjam/law_report/law_report_volume_detail.html"
     navbar_link = "law_report"
+    tab_name = "judgments"
 
     CITATION_TABS = {"cases": Judgment, "legislation": Legislation}
+    TAB_METADATA = {
+        "judgments": {
+            "doc_count_noun": _("judgment"),
+            "doc_count_noun_plural": _("judgments"),
+            "doc_table_date_label": _("Judgment date"),
+            "page_title": None,
+        },
+        "cases": {
+            "doc_count_noun": _("case"),
+            "doc_count_noun_plural": _("cases"),
+            "doc_table_date_label": _("Judgment date"),
+            "page_title": _("Cited cases"),
+        },
+        "legislation": {
+            "doc_count_noun": _("document"),
+            "doc_count_noun_plural": _("documents"),
+            "doc_table_date_label": _("Date"),
+            "page_title": _("Cited legislation"),
+            "nature": _("Legislation"),
+        },
+    }
 
     @cached_property
     def law_report(self):
@@ -61,6 +84,8 @@ class LawReportVolumeDetailView(FilteredJudgmentView):
 
     @cached_property
     def active_tab(self):
+        if self.tab_name in {"judgments", *self.CITATION_TABS.keys()}:
+            return self.tab_name
         tab = self.request.GET.get("tab")
         return tab if tab in self.CITATION_TABS else "judgments"
 
@@ -87,10 +112,17 @@ class LawReportVolumeDetailView(FilteredJudgmentView):
         context["law_report"] = self.law_report
         context["law_report_volume"] = self.law_report_volume
         context["active_tab"] = self.active_tab
+        metadata = self.TAB_METADATA[self.active_tab]
+        context["doc_count_noun"] = metadata["doc_count_noun"]
+        context["doc_count_noun_plural"] = metadata["doc_count_noun_plural"]
+        context["doc_table_date_label"] = metadata["doc_table_date_label"]
+        context["page_title"] = metadata["page_title"] or self.page_title()
+        if metadata.get("nature"):
+            context["nature"] = metadata["nature"]
 
         if self.active_tab in self.CITATION_TABS:
             context["doc_table_toggle"] = True
-            self._attach_citing_judgments(context.get("documents", []))
+            self.attach_citing_judgments(context.get("documents", []))
 
         return context
 
@@ -101,7 +133,7 @@ class LawReportVolumeDetailView(FilteredJudgmentView):
         else:
             super().add_facets(context)
 
-    def _attach_citing_judgments(self, cited_docs):
+    def attach_citing_judgments(self, cited_docs):
         """Attach citing judgments from this volume as .children for toggle."""
         work_ids = [d.work_id for d in cited_docs if hasattr(d, "work_id")]
         if not work_ids:
