@@ -12,10 +12,11 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, hook
 from docpipe.soffice import soffice_convert
 
 from peachjam.helpers import html_to_png
+from peachjam.models import AttributeHooksMixin
 from peachjam.storage import DynamicStorageFileField
 
 log = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class Image(AttachmentAbstractModel):
         )
 
 
-class SourceFile(LifecycleModelMixin, AttachmentAbstractModel):
+class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
