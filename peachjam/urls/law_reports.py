@@ -14,4 +14,14 @@ urlpatterns = [
         LawReportVolumeDetailView.as_view(),
         name="law_report_volume_detail",
     ),
+    path(
+        "<slug:slug>/volumes/<slug:volume_slug>/cases-index/",
+        LawReportVolumeDetailView.as_view(tab_name="cases"),
+        name="law_report_volume_cases_index",
+    ),
+    path(
+        "<slug:slug>/volumes/<slug:volume_slug>/legislation-index/",
+        LawReportVolumeDetailView.as_view(tab_name="legislation"),
+        name="law_report_volume_legislation_index",
+    ),
 ]
