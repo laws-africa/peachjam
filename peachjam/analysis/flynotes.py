@@ -20,10 +20,8 @@ Two classes are exposed:
 
 import logging
 import re
-from html import unescape
 
 from django.db import IntegrityError, transaction
-from django.utils.html import strip_tags
 from django.utils.text import slugify
 
 from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
@@ -34,8 +32,8 @@ log = logging.getLogger(__name__)
 class FlynoteParser:
     """Parses raw flynote text into structured paths.
 
-    Handles HTML stripping, dash/semicolon splitting, and hierarchical
-    path construction from legal flynote conventions.
+    Handles dash/semicolon splitting and hierarchical path construction from
+    legal flynote conventions.
 
     Usage::
 
@@ -73,7 +71,7 @@ class FlynoteParser:
 
     @staticmethod
     def clean(text):
-        """Clean HTML tags and normalise whitespace in a flynote.
+        """Normalise whitespace in a flynote.
 
         Preserves line breaks so multi-line flynotes can be interpreted as one
         flynote per line. Within each line, whitespace is normalised, leading
@@ -82,12 +80,8 @@ class FlynoteParser:
         if not text:
             return ""
 
-        text = unescape(text)
-        text = re.sub(r"(?i)<br\s*/?>", "\n", text)
-        text = re.sub(r"(?i)</(?:p|div|li|ul|ol|tr|td|th|h[1-6])\s*>", "\n", text)
-        text = strip_tags(text).strip()
         lines = []
-        for line in text.splitlines():
+        for line in text.strip().splitlines():
             line = re.sub(r"\s+", " ", line)
             line = re.sub(r"^[\-\u2022\u2023\u25E6\u2043\s]+", "", line)
             line = line.strip().rstrip(".")
@@ -113,8 +107,8 @@ class FlynoteParser:
 
         The parsing works as follows:
 
-        1. HTML tags and entities are stripped, whitespace is normalised,
-           and trailing periods are removed (via ``clean``).
+        1. Whitespace is normalised and trailing periods are removed
+           (via ``clean``).
         2. If no dash characters (em-dash, en-dash, or spaced hyphen) are
            found, the text is treated as plain prose and an empty list is
            returned.
@@ -159,7 +153,7 @@ class FlynoteParser:
             []
 
         Args:
-            text: Raw flynote string, potentially containing HTML markup.
+            text: Raw flynote string.
 
         Returns:
             A list of paths, where each path is a list of strings from

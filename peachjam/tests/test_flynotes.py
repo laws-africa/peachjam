@@ -24,10 +24,6 @@ class ParseFlynoteTextTest(TestCase):
         text = "Contract between a lender and a borrower purporting to be a contract of sale."
         self.assertEqual(self.parser.parse(text), [])
 
-    def test_html_prose_flynote_skipped(self):
-        text = '<p><span style="color:#000000">Contract between a lender and borrower.</span></p>'
-        self.assertEqual(self.parser.parse(text), [])
-
     def test_simple_chain_with_em_dashes(self):
         text = "Criminal law \u2014 admissibility \u2014 trial within a trial"
         paths = self.parser.parse(text)
@@ -100,12 +96,6 @@ class ParseFlynoteTextTest(TestCase):
         self.assertEqual(paths[2][2], "Blom and Chabalala principles")
         self.assertEqual(paths[3][-1], "self-defence plea and evidential burden")
         self.assertEqual(paths[4][-1], "appellate review of factual findings")
-
-    def test_html_tags_stripped(self):
-        text = "<p>Employment law \u2013 Severance pay \u2013 Jurisdiction</p>"
-        paths = self.parser.parse(text)
-        self.assertEqual(len(paths), 1)
-        self.assertEqual(paths[0], ["Employment law", "Severance pay", "Jurisdiction"])
 
     def test_semicolons_inside_parentheses_not_split(self):
         """Semicolons inside (...) should NOT create sibling branches."""
@@ -180,20 +170,6 @@ class ParseFlynoteTextTest(TestCase):
         text = (
             "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
             "Administrative law \u2014 judicial review"
-        )
-        paths = self.parser.parse(text)
-        self.assertEqual(
-            paths,
-            [
-                ["Criminal law", "admissibility", "trial within a trial"],
-                ["Administrative law", "judicial review"],
-            ],
-        )
-
-    def test_html_block_tags_preserve_multiline_flynotes(self):
-        text = (
-            "<p>Criminal law \u2014 admissibility \u2014 trial within a trial</p>"
-            "<p>Administrative law \u2014 judicial review</p>"
         )
         paths = self.parser.parse(text)
         self.assertEqual(

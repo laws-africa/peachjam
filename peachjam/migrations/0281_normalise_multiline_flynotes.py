@@ -10,11 +10,8 @@ def normalise_multiline_flynotes(apps, schema_editor):
     Judgment = apps.get_model("peachjam", "Judgment")
     parser = FlynoteParser()
 
-    candidate_filter = (
-        Q(flynote__regex=r"\.[[:space:]]+[A-Z]")
-        | Q(flynote__contains="\n")
-        | Q(flynote__iregex=r"<br\s*/?>")
-        | Q(flynote__iregex=r"</(?:p|div|li|ul|ol|tr|td|th|h[1-6])\s*>")
+    candidate_filter = Q(flynote__regex=r"\.[[:space:]]+[A-Z]") | Q(
+        flynote__contains="\n"
     )
 
     judgments = (
