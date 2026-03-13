@@ -2,15 +2,30 @@ import logging
 import re
 from typing import Any, Dict, List, Literal, Optional
 
-from agents import Agent, Runner, function_tool
+from agents import (
+    Agent,
+    ModelSettings,
+    ReasoningItem,
+    Runner,
+    RunResult,
+    function_tool,
+)
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
 from django.db.models import Case, FloatField, Q, Value, When
+from openai.types import Reasoning
 from pydantic import BaseModel, Field, conint
 
 from peachjam.models import Offence, Sentence
 
 log = logging.getLogger(__name__)
+
+
+def log_agent_reasoning(result: RunResult):
+    for item in result.new_items:
+        if isinstance(item, ReasoningItem):
+            for entry in item.raw_item.summary:
+                log.debug("LLM reasoning: %s", entry.text)
 
 
 def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
@@ -434,6 +449,7 @@ offence_extraction_agent = Agent(
     instructions=JUDGMENT_EXTRACTION_PROMPT,
     tools=[search_offences],
     output_type=JudgmentOffenceExtraction,
+    model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
     model="gpt-5-mini",
 )
 
@@ -443,6 +459,7 @@ def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtract
         offence_extraction_agent,
         judgment_text,
     )
+    log_agent_reasoning(result)
     log.info("Extraction result: %s", result.final_output)
     return result.final_output
 
@@ -623,6 +640,7 @@ case_type_extraction_agent = Agent(
     name="Case Type + Filing Year Extractor",
     instructions=CASE_META_PROMPT,
     output_type=CaseMetaExtraction,
+    model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
     model="gpt-5-mini",
 )
 
@@ -632,5 +650,6 @@ def extract_case_type_filing_year(judgment_text: str) -> CaseMetaExtraction:
         case_type_extraction_agent,
         judgment_text,
     )
+    log_agent_reasoning(result)
     log.debug("Extraction result: %s", result.final_output)
     return result.final_output
