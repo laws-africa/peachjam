@@ -743,39 +743,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
         CitationLink.objects.filter(document=self).delete()
 
-    def extract_content_from_source_file(self):
-        """Re-extract content from DOCX source files, overwriting anything in source_html and associated images.
-
-        This requires that the document has already been saved, in order to associate image attachments.
-        """
-        result = False
-        doc_content = self.get_or_create_document_content()
-        if (
-            not doc_content.content_html_is_akn
-            and hasattr(self, "source_file")
-            and self.source_file.mimetype in DOC_MIMETYPES
-        ):
-            context = PipelineContext(word_pipeline)
-            context.source_file = self.source_file.file
-            word_pipeline(context)
-            doc_content.set_source_html(context.html_text)
-            # Persist extracted HTML before text extraction to avoid update_text_content()
-            # creating/updating DocumentContent with empty HTML fields.
-            doc_content.save()
-
-            for img in self.images.all():
-                img.delete()
-
-            for attachment in context.attachments:
-                if attachment.content_type.startswith("image/"):
-                    img = Image.from_docpipe_attachment(attachment)
-                    img.document = self
-                    img.save()
-                    self.images.add(img)
-
-            result = True
-        return result
-
     def prepare_content_html_for_pdf(self):
         """Prepare the content HTML for PDF generation by inlining images as base64."""
         doc_content = self.get_or_create_document_content()
@@ -996,6 +963,36 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         # clean to prevent saving empty or whitespace-only HTML
         self.content_html = self.clean_content_html(content_html)
         self._content_html_tree = None
+
+    def extract_content_from_source_file(self):
+        """Re-extract content from a Word source file, overwriting source_html and related images."""
+        document = self.document
+        if (
+            self.content_html_is_akn
+            or not hasattr(document, "source_file")
+            or document.source_file.mimetype not in DOC_MIMETYPES
+        ):
+            return False
+
+        context = PipelineContext(word_pipeline)
+        context.source_file = document.source_file.file
+        word_pipeline(context)
+        self.set_source_html(context.html_text)
+        # Persist extracted HTML before text extraction to avoid update_text_content()
+        # creating/updating DocumentContent with empty HTML fields.
+        self.save()
+
+        for img in document.images.all():
+            img.delete()
+
+        for attachment in context.attachments:
+            if attachment.content_type.startswith("image/"):
+                img = Image.from_docpipe_attachment(attachment)
+                img.document = document
+                img.save()
+                document.images.add(img)
+
+        return True
 
     def update_toc_json_from_content_html(self):
         if self.content_html_is_akn:

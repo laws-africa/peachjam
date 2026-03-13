@@ -868,7 +868,8 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         count = 0
         with transaction.atomic():
             for doc in queryset.only("pk"):
-                if doc.extract_content_from_source_file():
+                doc_content = doc.get_or_create_document_content()
+                if doc_content.extract_content_from_source_file():
                     count += 1
                     doc.extract_citations()
                     doc.save()
