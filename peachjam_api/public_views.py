@@ -78,11 +78,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     def source_txt(self, request, expression_frbr_uri=None):
         """Source document in text form (if available)."""
         obj = self.get_object()
-        # we only allow certain formats
-        try:
-            content = getattr(obj, "document_content")
-        except AttributeError:
-            raise Http404()
+        content = obj.get_or_create_document_content()
 
         # return content.content_text as a normal drf response object
         return HttpResponse(content.content_text, content_type="text/plain")
@@ -91,7 +87,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, url_path=".html")
     def content_html(self, request, expression_frbr_uri=None):
         obj = self.get_object()
-        content = obj.content_html
+        content = obj.get_or_create_document_content().content_html
         if not content:
             raise Http404()
         return HttpResponse(content, content_type="text/html")

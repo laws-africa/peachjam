@@ -28,7 +28,8 @@ async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
     @sync_to_async
     def get_text():
         doc = CoreDocument.objects.get(pk=ctx.context.document_id)
-        return doc.get_content_as_text()
+        doc_content = doc.document_content
+        return doc_content.get_content_as_text()
 
     text = await get_text()
     if not text.strip():

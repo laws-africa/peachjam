@@ -460,9 +460,10 @@ class BaseDocumentDetailView(DetailView):
         self.add_provision_relationships(context)
         self.add_provision_enrichments(context)
 
-        if context["document"].content_html:
+        doc_content = context["document"].get_or_create_document_content()
+        if doc_content and doc_content.content_html:
             context["display_type"] = (
-                "akn" if context["document"].content_html_is_akn else "html"
+                "akn" if doc_content.content_html_is_akn else "html"
             )
             self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
@@ -614,7 +615,12 @@ class BaseDocumentDetailView(DetailView):
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""
-        root = document.content_html_tree
+        doc_content = document.get_or_create_document_content()
+
+        if not doc_content.content_html:
+            return
+
+        root = doc_content.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
             # images should load lazily, otherwise they block page load
@@ -627,7 +633,7 @@ class BaseDocumentDetailView(DetailView):
                     src = "media/" + src
                 img.attrib["src"] = document.expression_frbr_uri + "/" + src
 
-        document.content_html = html.tostring(root, encoding="unicode")
+        doc_content.set_content_html(html.tostring(root, encoding="unicode"))
 
     def add_track_page_properties(self, context):
         context["track_page_properties"] = (

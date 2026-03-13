@@ -15,7 +15,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
@@ -372,7 +372,7 @@ class DocumentForm(forms.ModelForm):
     )
     edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput())
     edit_activity_stage = forms.CharField(widget=forms.HiddenInput())
-    content_html = forms.CharField(
+    source_html = forms.CharField(
         widget=CKEditorWidget(
             extra_plugins=["lawwidgets"],
             external_plugin_resources=[
@@ -421,8 +421,11 @@ class DocumentForm(forms.ModelForm):
                 (x, x) for x in self.Meta.model.frbr_uri_doctypes
             ]
 
-        if self.instance and self.instance.content_html_is_akn:
-            self.fields["content_html"].widget.attrs["readonly"] = True
+        if self.instance and self.instance.pk:
+            doc_content = self.instance.get_or_create_document_content()
+            self.fields["source_html"].initial = doc_content.source_html
+            if doc_content.content_html_is_akn:
+                self.fields["source_html"].widget.attrs["readonly"] = True
 
         self.fields["edit_activity_start"].initial = timezone.now()
         self.fields["edit_activity_stage"].initial = (
@@ -438,17 +441,18 @@ class DocumentForm(forms.ModelForm):
 
     def full_clean(self):
         super().full_clean()
-        if "content_html" in self.changed_data:
-            # if the content_html has changed, set it and update related attributes
-            self.instance.set_content_html(self.instance.content_html)
-            if self.instance.pk:
-                self.instance.update_text_content()
+        if "source_html" in self.changed_data:
+            # source_html is the editable source and content_html is derived from it
+            doc_content = self.instance.get_or_create_document_content()
+            doc_content.set_source_html(self.cleaned_data["source_html"])
 
-    def clean_content_html(self):
+    def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML
-        if self.instance.content_html_is_akn:
-            return self.instance.content_html
-        return self.cleaned_data["content_html"]
+        if self.instance and self.instance.pk:
+            doc_content = self.instance.get_or_create_document_content()
+            if doc_content.content_html_is_akn:
+                return doc_content.source_html
+        return self.cleaned_data["source_html"]
 
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])
@@ -626,7 +630,8 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         "created_at",
         "updated_at",
         "work_frbr_uri",
-        "toc_json",
+        "document_content_html_is_akn",
+        "document_content_toc_json",
         "metadata_json",
         "work_link",
         "document_access_link",
@@ -689,7 +694,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             gettext_lazy("Content"),
             {
                 "fields": [
-                    "content_html",
+                    "source_html",
                 ]
             },
         ),
@@ -698,11 +703,11 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             {
                 "classes": ("collapse",),
                 "fields": [
-                    "content_html_is_akn",
+                    "document_content_html_is_akn",
                     "allow_robots",
                     "restricted",
                     "document_access_link",
-                    "toc_json",
+                    "document_content_toc_json",
                     "metadata_json",
                 ],
             },
@@ -738,6 +743,20 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             fieldsets = self.new_document_form_mixin.adjust_fieldsets(fieldsets)
 
         return fieldsets
+
+    @admin.display(description=gettext_lazy("TOC JSON"))
+    def document_content_toc_json(self, obj):
+        try:
+            return obj.document_content.toc_json
+        except ObjectDoesNotExist:
+            return None
+
+    @admin.display(boolean=True, description=gettext_lazy("content HTML is AKN"))
+    def document_content_html_is_akn(self, obj):
+        try:
+            return obj.document_content.content_html_is_akn
+        except ObjectDoesNotExist:
+            return False
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -1765,8 +1784,8 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     )
     fieldsets[1][1]["fields"].remove("citation")
     fieldsets[1][1]["fields"].remove("source_url")
-    fieldsets[4][1]["fields"].remove("toc_json")
-    fieldsets[4][1]["fields"].remove("content_html_is_akn")
+    fieldsets[4][1]["fields"].remove("document_content_toc_json")
+    fieldsets[4][1]["fields"].remove("document_content_html_is_akn")
     fieldsets[4][1]["fields"].extend(["publication", "sub_publication"])
     # remove content fieldset
     fieldsets.pop(3)
@@ -2130,12 +2149,7 @@ class ChatThreadInline(admin.TabularInline):
     show_change_link = True
 
     def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("core_document")
-            .defer("core_document__content_html")
-        )
+        return super().get_queryset(request).select_related("core_document")
 
     def has_add_permission(self, request, obj=None):
         return False

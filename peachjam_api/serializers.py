@@ -254,6 +254,7 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     case_numbers = CaseNumbersSerializer(many=True, read_only=True)
     locality = LocalitySerializer(read_only=True)
     topics = serializers.SerializerMethodField()
+    content_html_is_akn = serializers.SerializerMethodField()
 
     class Meta:
         model = Judgment
@@ -291,6 +292,9 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
 
     def get_topics(self, instance):
         return [t.topic.slug for t in instance.taxonomies.all()]
+
+    def get_content_html_is_akn(self, instance):
+        return instance.get_or_create_document_content().content_html_is_akn
 
 
 class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):

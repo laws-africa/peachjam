@@ -29,7 +29,6 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
         model = Judgment
         fields = [
             "case_name",
-            "content_html",
             "replacements",
             "published",
             "activity_start",
@@ -70,7 +69,8 @@ class DocumentAnonymiseView(PermissionRequiredMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
-        if not document.content_html or document.content_html_is_akn:
+        doc_content = document.get_or_create_document_content()
+        if not doc_content.content_html or doc_content.content_html_is_akn:
             # redirect back to the referrer
             messages.warning(
                 request, _("Only judgments with HTML content can be anonymised.")
@@ -122,8 +122,9 @@ class DocumentAnonymiseSuggestionsAPIView(generics.GenericAPIView):
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
+        doc_content = document.get_or_create_document_content()
         suggestions = self.get_suggestions(
-            document.get_content_as_text(), document.jurisdiction.pk
+            doc_content.get_content_as_text(), document.jurisdiction.pk
         )
         return Response({"suggestions": suggestions})
 

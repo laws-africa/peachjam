@@ -22,7 +22,6 @@ class CoreDocumentTestCase(TestCase):
         doc = CoreDocument.objects.get(
             expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
         )
-        self.assertFalse(hasattr(doc, "document_content"))
         self.assertEqual(
             "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             doc.get_content_as_text().strip()[:69],
@@ -34,13 +33,13 @@ class CoreDocumentTestCase(TestCase):
         )
 
         # change the source and update
-        doc.content_html = "<p>test</p>"
-        doc._content_html_tree = None
+        doc_content = doc.get_or_create_document_content()
+        doc_content.set_content_html("<p>test</p>")
         doc.update_text_content()
-        self.assertEqual("test", doc.get_content_as_text())
+        self.assertEqual("test", doc_content.get_content_as_text())
 
         doc.refresh_from_db()
-        self.assertEqual("test", doc.get_content_as_text())
+        self.assertEqual("test", doc_content.get_content_as_text())
 
     def test_get_cited_work_frbr_uris(self):
         doc = CoreDocument.objects.get(
@@ -77,7 +76,9 @@ class CoreDocumentTestCase(TestCase):
         doc = CoreDocument.objects.get(
             expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
         )
-        doc.content_html = """<div>
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = False
+        doc_content.set_content_html("""<div>
 <p><a class="sdfootnotesym" href="#sdfootnote5anc" name="sdfootnote5sym">5</a> <em>Motata v Minister of Justice and
 Constitutional Development and Others </em><a href="/akn/za/judgment/zagpphc/2012/196" aria-expanded="false">[2012]
 ZAGPPHC 196</a> para 6.</p>
@@ -86,8 +87,7 @@ ZAGPPHC 196</a> para 6.</p>
 <p><a class="sdfootnotesym" href="#sdfootnote6anc" name="sdfootnote6sym">6</a> <em>Motata v Minister of Justice and
 Constitutional Development and Another </em><a href="/akn/za/judgment/zagpphc/2016/1063" aria-expanded="false">[2016]
 ZAGPPHC 1063</a>.</p>
-</div>"""
-        doc.content_html_is_akn = False
+</div>""")
 
         frbr_uris = sorted(list(doc.get_cited_work_frbr_uris()))
         self.assertEqual(
@@ -163,3 +163,36 @@ ZAGPPHC 1063</a>.</p>
         )
         doc.save()
         self.assertEqual("my-test", doc.frbr_uri_number)
+
+    def test_get_provision_by_eid_returns_none_for_non_akn(self):
+        doc = CoreDocument.objects.get(
+            expression_frbr_uri="/akn/aa-au/doc/activity-report/2017/nn/eng@2017-07-03"
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = False
+        result = doc.get_provision_by_eid("some-eid")
+        self.assertIsNone(result)
+
+    def test_get_provision_by_eid_returns_none_when_no_content(self):
+        doc = GenericDocument(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="No content",
+        )
+        doc.save()
+        result = doc.get_provision_by_eid("some-eid")
+        self.assertIsNone(result)
+
+    def test_get_cited_work_frbr_uris_returns_empty_when_no_content_html(self):
+        doc = GenericDocument(
+            jurisdiction=Country.objects.get(pk="ZM"),
+            date=date(2020, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="No citations",
+        )
+        doc.save()
+        result = doc.get_cited_work_frbr_uris()
+        self.assertEqual({}, result)

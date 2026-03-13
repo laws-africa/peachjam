@@ -9,7 +9,7 @@ from docpipe.matchers import ExtractedCitation
 from lxml.etree import ParseError
 
 from peachjam.models import CitationLink, ProvisionCitation
-from peachjam.xmlutils import get_following_text, get_preceding_text
+from peachjam.xmlutils import get_following_text, get_preceding_text, parse_html_str
 
 log = logging.getLogger(__name__)
 
@@ -21,11 +21,12 @@ class CitationAnalyser:
 
     def extract_citations(self, document):
         """Run matchers across the HTML or text in this document."""
-        if document.content_html_is_akn:
+        doc_content = document.get_or_create_document_content()
+        if doc_content.content_html_is_akn:
             # don't markup AKN HTML
             return False
 
-        if document.content_html:
+        if doc_content.source_html:
             # markup html
             return self.extract_citations_from_html(document)
         else:
@@ -33,17 +34,21 @@ class CitationAnalyser:
             return self.extract_citations_from_source_file(document)
 
     def extract_citations_from_html(self, document):
+        doc_content = document.get_or_create_document_content()
+        if not doc_content.source_html:
+            return False
+
         try:
-            html = document.content_html_tree
+            html = parse_html_str(doc_content.source_html)
         except ParseError as e:
             log.warning(
-                f"Could not parse HTML for document {document.expression_uri()}: {document.content_html}",
+                f"Could not parse HTML for document {document.expression_uri()}: {doc_content.source_html}",
                 exc_info=e,
             )
             return False
 
         html = self.markup_html_matches(document.expression_uri(), html)
-        document.content_html = lxml.html.tostring(html, encoding="unicode")
+        doc_content.set_content_html(lxml.html.tostring(html, encoding="unicode"))
         return True
 
     def markup_html_matches(self, frbr_uri, html):
@@ -54,7 +59,8 @@ class CitationAnalyser:
         return html
 
     def extract_citations_from_source_file(self, document):
-        text = document.get_content_as_text()
+        doc_content = document.get_or_create_document_content()
+        text = doc_content.get_content_as_text()
         if text:
             for matcher in self.matchers:
                 matcher = matcher()
@@ -90,7 +96,8 @@ class CitationAnalyser:
         return citation
 
     def update_provision_citations(self, document):
-        if document.content_html:
+        doc_content = document.get_or_create_document_content()
+        if doc_content.content_html:
             self.create_from_html(document)
         else:
             self.create_from_citation_links(document)
@@ -105,11 +112,12 @@ class CitationAnalyser:
         """Create citation contexts from an HTML document."""
         from peachjam.models import Work
 
-        if not document.content_html:
+        doc_content = document.get_or_create_document_content()
+        if not doc_content.content_html:
             log.warning("No HTML content to extract citation contexts from.")
             return
 
-        if document.content_html_is_akn:
+        if doc_content.content_html_is_akn:
             xpath = (
                 '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
                 'not(ancestor::*[contains(@class, "akn-remark")])]'
@@ -119,7 +127,7 @@ class CitationAnalyser:
             xpath = '//a[starts-with(@href, "/akn")]'
             attr = "href"
 
-        for a in document.content_html_tree.xpath(xpath):
+        for a in doc_content.content_html_tree.xpath(xpath):
             try:
                 href = a.attrib[attr]
                 log.debug(f"Processing citation link to: {href}")
