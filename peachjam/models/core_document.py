@@ -590,12 +590,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         doc_content.save()
         self.document_content = doc_content
 
-    def clean_html_field(self, html):
-        return DocumentContent.clean_html_field(html)
-
-    def clean_content_html(self, content_html):
-        return DocumentContent.clean_html_field(content_html)
-
     def clean(self):
         super().clean()
         try:
