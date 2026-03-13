@@ -1,7 +1,44 @@
 <div>
-  {% if error %}
-    <div class="alert alert-danger">{{ error }}</div>
-  {% else %}
+  {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
+  <form method="get"
+        action="{% url 'document_summary' document.id %}"
+        class="mb-4"
+        hx-get="{% url 'document_summary' document.id %}"
+        hx-indicator=".htmx-progress"
+        hx-target="#debug-summary-content">
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+      </div>
+    {% endif %}
+    <div class="mb-3">
+      <label class="form-label" for="{{ form.summary_prompt_str.id_for_label }}">{{ form.summary_prompt_str.label }}</label>
+      {{ form.summary_prompt_str }}
+      {% if form.summary_prompt_str.help_text %}
+        <div class="form-text">{{ form.summary_prompt_str.help_text }}</div>
+      {% endif %}
+      {% for error in form.summary_prompt_str.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+    </div>
+    <div class="row">
+      <div class="col-12 col-md-6 mb-3">
+        <label class="form-label" for="{{ form.llm_model.id_for_label }}">{{ form.llm_model.label }}</label>
+        {{ form.llm_model }}
+        {% if form.llm_model.help_text %}<div class="form-text">{{ form.llm_model.help_text }}</div>{% endif %}
+        {% for error in form.llm_model.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+      <div class="col-12 col-md-6 mb-3">
+        <label class="form-label" for="{{ form.language.id_for_label }}">{{ form.language.label }}</label>
+        {{ form.language }}
+        {% if form.language.help_text %}<div class="form-text">{{ form.language.help_text }}</div>{% endif %}
+        {% for error in form.language.errors %}<div class="invalid-feedback d-block">{{ error }}</div>{% endfor %}
+      </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Generate summary</button>
+    <div class="htmx-progress progress mt-2">
+      <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+    </div>
+  </form>
+  {% if summary %}
     <dl class="document-metadata-list d-flex">
       <dt>
         Title
