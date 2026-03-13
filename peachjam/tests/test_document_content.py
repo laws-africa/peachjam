@@ -19,7 +19,7 @@ def _make_doc(title, is_akn=False):
     return doc
 
 
-class DocumentContentHooksTestCase(TestCase):
+class DocumentContentTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
     def make_doc(self, title, is_akn=False):
@@ -54,13 +54,6 @@ class DocumentContentHooksTestCase(TestCase):
 
         self.assertEqual("<p>Source 2</p>", doc_content.content_html)
 
-
-class ContentHtmlIsAknMigrationTestCase(TestCase):
-    fixtures = ["tests/countries", "tests/languages"]
-
-    def make_doc(self, title, is_akn=False):
-        return _make_doc(title, is_akn)
-
     def test_get_or_create_uses_documentcontent_content_html_is_akn(self):
         true_doc = self.make_doc("Migration True", is_akn=True)
         false_doc = self.make_doc("Migration False", is_akn=False)
@@ -76,6 +69,15 @@ class ContentHtmlIsAknMigrationTestCase(TestCase):
         false_doc.get_or_create_document_content()
         self.assertTrue(true_doc.document_content.content_html_is_akn)
         self.assertFalse(false_doc.document_content.content_html_is_akn)
+
+    def test_clean_content_html(self):
+        content = DocumentContent()
+        self.assertIsNone(content.clean_content_html(""""""))
+        self.assertIsNone(content.clean_content_html("""<aoeu"""))
+        self.assertIsNone(content.clean_content_html("""<div>   \n&nbsp;  \n</div>"""))
+        self.assertEqual(
+            content.clean_content_html("""<div>test</div>"""), """<div>test</div>"""
+        )
 
 
 class GetOrCreateDocumentContentTestCase(TestCase):
