@@ -1,10 +1,9 @@
 import json
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import List
 
 import igraph
-from django_lifecycle import AFTER_SAVE, LifecycleModelMixin, hook
+from django_lifecycle import LifecycleModelMixin, hook
 
 
 class AttributeHooksMixin(LifecycleModelMixin):
@@ -45,26 +44,6 @@ class AttributeHooksMixin(LifecycleModelMixin):
         if not self._tracking_changes:
             self._reset_initial_state()
             self._tracking_changes = True
-
-
-def lifecycle_hook(target_cls, *hook_args, **hook_kwargs):
-    """Decorator to install django-lifecycle attribute hooks from outside the class.
-
-    The obj.track_changes() must be called on the object before this will be triggered.
-
-    Example usage:
-
-        @lifecycle_hook(Judgment, AFTER_SAVE, when="case_summary", has_changed=True)
-        def when_case_summary_changed(obj):
-            ...
-    """
-
-    def decorator(func):
-        wrapped = hook(*hook_args, **hook_kwargs)(func)
-        setattr(target_cls, f"_attr_hook_{func.__name__}", wrapped)
-        return wrapped
-
-    return decorator
 
 
 @dataclass(frozen=True)
@@ -359,19 +338,3 @@ def on_attribute_changed(*args):
         return Descriptor(func)
 
     return decorator
-
-
-def after_attribute_changed(target_cls, attr: str | List[str]):
-    """Decorator to install an AFTER_SAVE django-lifecycle hook when one on more attributes change on a class.
-
-    The obj.track_changes() must be called on the object before this will be triggered.
-
-    Example usage:
-
-        @after_attribute_changed(Judgment, "case_summary"):
-        def when_case_summary_changed(obj):
-            ...
-    """
-    if not isinstance(attr, list):
-        attr = [attr]
-    return lifecycle_hook(target_cls, AFTER_SAVE, when_any=attr, has_changed=True)
