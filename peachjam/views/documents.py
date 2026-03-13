@@ -436,6 +436,12 @@ class DocumentDebugView(DocumentDebugViewBase):
 
 class DocumentSummaryView(DocumentDebugViewBase):
     template_name = "peachjam/document/_summary.html"
+    http_method_names = ["get", "post"]
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data()
+        return self.render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -443,7 +449,8 @@ class DocumentSummaryView(DocumentDebugViewBase):
             raise Http404()
 
         summariser = JudgmentSummariser()
-        form = DocumentSummaryForm.build(self.request.GET or None)
+        data = self.request.POST if self.request.method == "POST" else None
+        form = DocumentSummaryForm.build(data)
         context["form"] = form
 
         if not form.is_bound or not form.is_valid():

@@ -1,11 +1,12 @@
 <div>
   {% if error %}<div class="alert alert-danger">{{ error }}</div>{% endif %}
-  <form method="get"
+  <form method="post"
         action="{% url 'document_summary' document.id %}"
         class="mb-4"
-        hx-get="{% url 'document_summary' document.id %}"
+        hx-post="{% url 'document_summary' document.id %}"
         hx-indicator=".htmx-progress"
         hx-target="#debug-summary-content">
+    {% csrf_token %}
     {% if form.non_field_errors %}
       <div class="alert alert-danger">
         {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
