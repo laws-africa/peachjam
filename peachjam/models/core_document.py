@@ -1153,6 +1153,8 @@ class DocumentContent(AttributeHooksMixin, models.Model):
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
         self.set_content_html(self.source_html)
+        # TODO: hooks don't currently cascade, so fake it
+        self.sync_html_derived_fields()
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
     def sync_html_derived_fields(self):
