@@ -23,7 +23,6 @@ from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
-from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import etree, html
 from lxml.etree import ParserError
@@ -744,18 +743,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         from peachjam.models.citations import CitationLink
 
         CitationLink.objects.filter(document=self).delete()
-
-        doc_content = self.get_or_create_document_content()
-
-        if doc_content.content_html and not doc_content.content_html_is_akn:
-            # delete existing citations in html
-            root = doc_content.content_html_tree
-            deleted = False
-            for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
-                unwrap_element(a)
-                deleted = True
-            if deleted:
-                doc_content.set_content_html(html.tostring(root, encoding="unicode"))
 
     def extract_content_from_source_file(self):
         """Re-extract content from DOCX source files, overwriting anything in source_html and associated images.
