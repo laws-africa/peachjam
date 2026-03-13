@@ -525,7 +525,6 @@ class UpdateFlynoteForJudgmentTest(TestCase):
 
         admin = Flynote.objects.get(name="Administrative law")
         criminal = Flynote.objects.get(name="Criminal law")
-        self.assertEqual(2, mock_refresh.call_count, mock_refresh.call_args_list)
         self.assertCountEqual(
             mock_refresh.call_args_list,
             [
