@@ -633,7 +633,7 @@ class BaseDocumentDetailView(DetailView):
                     src = "media/" + src
                 img.attrib["src"] = document.expression_frbr_uri + "/" + src
 
-        doc_content.set_content_html(html.tostring(root, encoding="unicode"))
+        doc_content.content_html = html.tostring(root, encoding="unicode")
 
     def add_track_page_properties(self, context):
         context["track_page_properties"] = (
