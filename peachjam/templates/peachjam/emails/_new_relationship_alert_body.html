@@ -17,7 +17,7 @@
             {% if doc.blurb %}<div>{{ doc.blurb | safe }}</div>{% endif %}
             {% if doc.flynote %}
               <div>
-                <em>{{ doc.flynote | safe }}</em>
+                <em>{{ doc.flynote | linebreaksbr }}</em>
               </div>
             {% endif %}
           </li>

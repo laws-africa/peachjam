@@ -381,6 +381,19 @@ def update_flynote_taxonomy(judgment_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
+def refresh_flynote_document_count(root_id):
+    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+
+    root = Flynote.objects.filter(pk=root_id).first()
+    if not root:
+        log.info(f"No flynote root with id {root_id} exists, ignoring.")
+        return
+
+    log.info(f"Refreshing flynote counts for root {root_id}")
+    FlynoteDocumentCount.refresh_for_flynote(root)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
 def update_users_new_relationship(relationship_id):
     # update users when a new relationship is created: amendment, repeal, commencement.
     from peachjam.models import Relationship, UserFollowing
