@@ -429,7 +429,8 @@ class DocumentDebugView(DocumentDebugViewBase):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["summary_form"] = DocumentSummaryForm.build()
+        if self.object.doc_type == "judgment":
+            context["summary_form"] = DocumentSummaryForm.build()
         return context
 
 
@@ -438,6 +439,9 @@ class DocumentSummaryView(DocumentDebugViewBase):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if self.object.doc_type != "judgment":
+            raise Http404()
+
         summariser = JudgmentSummariser()
         form = DocumentSummaryForm.build(self.request.GET or None)
         context["form"] = form
