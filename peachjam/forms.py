@@ -452,6 +452,11 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
         fields = "__all__"
         exclude = ("file_as_pdf",)
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # start attribute-level tracking
+        self.instance.track_changes()
+
 
 class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
