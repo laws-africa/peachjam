@@ -1,13 +1,14 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import BEFORE_SAVE, hook
+from django_lifecycle import BEFORE_SAVE
 from markdown.extensions.toc import slugify
 from martor.models import MartorField
 from martor.utils import markdownify
 
 from peachjam.decorators import BookDecorator, JournalArticleDecorator
 from peachjam.models import Author, CoreDocument
+from peachjam.models.lifecycle import on_attribute_changed
 
 
 class Book(CoreDocument):
@@ -18,7 +19,11 @@ class Book(CoreDocument):
     content_markdown = MartorField(blank=True, null=True)
     default_nature = ("book", "Book")
 
-    @hook(BEFORE_SAVE, when="content_markdown", has_changed=True)
+    @on_attribute_changed(
+        BEFORE_SAVE,
+        ["content_markdown"],
+        ["DocumentContent.source_html"],
+    )
     def convert_content_markdown(self):
         doc_content = self.get_or_create_document_content()
         doc_content.set_source_html(markdownify(self.content_markdown or ""))

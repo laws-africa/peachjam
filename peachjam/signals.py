@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.dispatch.dispatcher import Signal
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
+from django_lifecycle import AFTER_SAVE
 
 from peachjam.customerio import get_customerio
 from peachjam.models import (
@@ -24,7 +25,7 @@ from peachjam.models import (
     UserProfile,
     Work,
 )
-from peachjam.models.lifecycle import after_attribute_changed
+from peachjam.models.lifecycle import on_attribute_changed
 from peachjam.tasks import (
     generate_judgment_summary,
     update_extracted_citations_for_a_work,
@@ -265,6 +266,6 @@ def chat_thread_deleted(sender, instance, **kwargs):
     async_to_sync(session.clear_session)()
 
 
-@after_attribute_changed(Judgment, "flynote")
+@on_attribute_changed(Judgment, AFTER_SAVE, ["flynote"], ["flynote_taxonomy"])
 def when_flynote_changed(judgment):
     update_flynote_taxonomy(judgment.pk, schedule=5)

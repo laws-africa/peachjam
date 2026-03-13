@@ -20,7 +20,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, hook
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
@@ -42,7 +42,7 @@ from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.enrichments import ProvisionCitation, ProvisionCitationCount
-from peachjam.models.lifecycle import AttributeHooksMixin
+from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -1136,18 +1136,20 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         if self.pk:
             self.save(update_fields=["content_text"])
 
-    @hook(BEFORE_SAVE, when="source_html", has_changed=True)
+    @on_attribute_changed(BEFORE_SAVE, ["source_html"], ["content_html"])
     def sync_content_html_from_source_html(self):
         self.set_content_html(self.source_html)
         # TODO: hooks don't currently cascade, so fake it
         self.sync_html_derived_fields()
 
-    @hook(BEFORE_SAVE, when="content_html", has_changed=True)
+    @on_attribute_changed(BEFORE_SAVE, ["content_html"], ["toc_json", "content_text"])
     def sync_html_derived_fields(self):
         self.update_toc_json_from_content_html()
         self.update_text_content()
 
-    @hook(AFTER_SAVE, when="source_html", has_changed=True)
+    @on_attribute_changed(
+        AFTER_SAVE, ["source_html"], ["CoreDocument.citations", "content_html"]
+    )
     def trigger_extract_citations(self):
         if self.document_id:
             from peachjam.tasks import extract_citations
