@@ -4,6 +4,8 @@ from django.test.utils import isolate_apps
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
 from peachjam.models.lifecycle import (
+    AttributeCycleError,
+    AttributeDAG,
     AttributeHooksMixin,
     attribute_dag,
     on_attribute_changed,
@@ -126,3 +128,38 @@ class OnAttributeChangedTestCase(TransactionTestCase):
             {"record_source_change", "record_source_change_again"},
             {item.function_name for item in metadata},
         )
+
+    def test_attribute_dag_assert_acyclic_passes_for_acyclic_graph(self):
+        attribute_dag.assert_acyclic()
+
+    def test_attribute_dag_assert_acyclic_raises_for_cycle(self):
+        dag = AttributeDAG()
+        dag.add_rule(
+            owner_class=self.OnClassHookModel,
+            function_name="first",
+            timing=AFTER_SAVE,
+            declaration_mode="off-class",
+            trigger_attributes=["A.one"],
+            target_attributes=["B.two"],
+        )
+        dag.add_rule(
+            owner_class=self.OnClassHookModel,
+            function_name="second",
+            timing=AFTER_SAVE,
+            declaration_mode="off-class",
+            trigger_attributes=["B.two"],
+            target_attributes=["A.one"],
+        )
+
+        with self.assertRaises(AttributeCycleError) as exc:
+            dag.assert_acyclic()
+
+        self.assertIn("Attribute DAG contains a cycle", str(exc.exception))
+
+    def test_attribute_dag_to_igraph_includes_basic_metadata(self):
+        graph = attribute_dag.to_igraph()
+
+        self.assertGreaterEqual(graph.vcount(), 2)
+        self.assertGreaterEqual(graph.ecount(), 1)
+        self.assertIn("label", graph.vertex_attributes())
+        self.assertIn("metadata_json", graph.edge_attributes())

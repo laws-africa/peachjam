@@ -1,7 +1,9 @@
+import json
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import List
 
+import igraph
 from django_lifecycle import AFTER_SAVE, LifecycleModelMixin, hook
 
 
@@ -75,6 +77,10 @@ class AttributeHookMetadata:
     target_attributes: tuple[str, ...]
 
 
+class AttributeCycleError(ValueError):
+    """Raised when the attribute DAG contains a cycle."""
+
+
 class AttributeDAG:
     """A lightweight in-memory registry of attribute dependency edges."""
 
@@ -133,6 +139,73 @@ class AttributeDAG:
                 for (source, target), metadata in sorted(self._edges.items())
             ],
         }
+
+    def to_igraph(self):
+        """Return the DAG as an ``igraph.Graph`` with basic vertex and edge metadata."""
+        nodes = sorted(self.nodes())
+        graph = igraph.Graph(directed=True)
+        graph.add_vertices(nodes)
+        graph.add_edges(list(self._edges))
+        graph.vs["name"] = nodes
+        graph.vs["label"] = nodes
+        graph.vs["class_name"] = [name.split(".", 1)[0] for name in nodes]
+        graph.vs["attribute_name"] = [name.split(".", 1)[1] for name in nodes]
+
+        edge_metadata = [self._edges[edge] for edge in self._edges]
+        graph.es["hook_count"] = [len(metadata) for metadata in edge_metadata]
+        graph.es["metadata_json"] = [
+            json.dumps([vars(item) for item in metadata], sort_keys=True)
+            for metadata in edge_metadata
+        ]
+        graph.es["label"] = [str(len(metadata)) for metadata in edge_metadata]
+        return graph
+
+    def _find_cycle_path(self):
+        adjacency = defaultdict(list)
+        for source, target in self._edges:
+            adjacency[source].append(target)
+
+        visited = set()
+        active = set()
+        stack = []
+
+        def visit(node):
+            visited.add(node)
+            active.add(node)
+            stack.append(node)
+
+            for neighbour in adjacency[node]:
+                if neighbour not in visited:
+                    cycle = visit(neighbour)
+                    if cycle:
+                        return cycle
+                elif neighbour in active:
+                    start = stack.index(neighbour)
+                    return stack[start:] + [neighbour]
+
+            stack.pop()
+            active.remove(node)
+            return None
+
+        for node in sorted(self.nodes()):
+            if node not in visited:
+                cycle = visit(node)
+                if cycle:
+                    return cycle
+        return None
+
+    def assert_acyclic(self):
+        """Raise ``AttributeCycleError`` if the attribute DAG contains a cycle."""
+        graph = self.to_igraph()
+        if graph.is_dag():
+            return
+
+        cycle = self._find_cycle_path() or []
+        if cycle:
+            detail = " -> ".join(cycle)
+        else:
+            detail = "cycle detected, but no path could be reconstructed"
+        raise AttributeCycleError(f"Attribute DAG contains a cycle: {detail}")
 
 
 attribute_dag = AttributeDAG()
