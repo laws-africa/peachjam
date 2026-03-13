@@ -2,15 +2,30 @@ import logging
 import re
 from typing import Any, Dict, List, Literal, Optional
 
-from agents import Agent, Runner, function_tool
+from agents import (
+    Agent,
+    ModelSettings,
+    ReasoningItem,
+    Runner,
+    RunResult,
+    function_tool,
+)
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
 from django.db.models import Case, FloatField, Q, Value, When
+from openai.types import Reasoning
 from pydantic import BaseModel, Field, conint
 
 from peachjam.models import Offence, Sentence
 
 log = logging.getLogger(__name__)
+
+
+def log_agent_reasoning(result: RunResult):
+    for item in result.new_items:
+        if isinstance(item, ReasoningItem):
+            for entry in item.raw_item.summary:
+                log.debug("LLM reasoning: %s", entry.text)
 
 
 def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
@@ -96,7 +111,7 @@ def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
 
 
 @function_tool
-def search_offences(search_terms: str) -> List[Dict[str, Any]]:
+def search_offences(search_terms: str):
     """
     Search the offence database for offences matching one or more offence-related terms.
 
@@ -133,9 +148,9 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
 
         [
             {
-                "id": str,                     # canonical offence ID
-                "title": str,                  # official offence title
-                "description_snippet": str     # short excerpt from description
+                "id": str,             # canonical offence ID
+                "title": str,          # official offence title
+                "description": str     # short excerpt from description
             },
             ...
         ]
@@ -150,7 +165,14 @@ def search_offences(search_terms: str) -> List[Dict[str, Any]]:
     3. stable ordering by title and id
     - Sorting is deterministic: rank DESC, title ASC, id ASC.
     """
-    return search_offences_tool(search_terms)
+    matches = search_offences_tool(search_terms)
+    if not matches:
+        return (
+            "There are no offences in the database that match those search terms. You can try again with different"
+            " search terms if you think the offence should be in the database. You must only try 2-3 times before"
+            " concluding that there is no match."
+        )
+    return matches
 
 
 JUDGMENT_EXTRACTION_PROMPT = """
@@ -201,7 +223,6 @@ offence in the database.
 An offence ID may only be assigned if one of the returned results is a clear semantic match to the extracted offence
 wording. A clear match means that the candidate offence’s title or description closely corresponds to the offence
 described in the judgment.
-
 
 You are not allowed to invent offence IDs. You are also not allowed to output an offence ID unless that exact ID
 appears in the results returned by the `search_offences` tool.
@@ -367,6 +388,9 @@ Tool result:
 []
 </tool-output>
 
+Because the offence is clearly present in the judgment but no matching database offence exists,
+the offence must still be extracted, but the offence_id must be null.
+
 Extraction:
 
 [
@@ -385,9 +409,6 @@ Extraction:
     ]
   }
 ]
-
-Because the offence is clearly present in the judgment but no matching database offence exists,
-the offence must still be extracted, but the offence_id must be null.
 """
 
 
@@ -428,6 +449,7 @@ offence_extraction_agent = Agent(
     instructions=JUDGMENT_EXTRACTION_PROMPT,
     tools=[search_offences],
     output_type=JudgmentOffenceExtraction,
+    model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
     model="gpt-5-mini",
 )
 
@@ -437,6 +459,7 @@ def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtract
         offence_extraction_agent,
         judgment_text,
     )
+    log_agent_reasoning(result)
     log.info("Extraction result: %s", result.final_output)
     return result.final_output
 
@@ -617,6 +640,7 @@ case_type_extraction_agent = Agent(
     name="Case Type + Filing Year Extractor",
     instructions=CASE_META_PROMPT,
     output_type=CaseMetaExtraction,
+    model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
     model="gpt-5-mini",
 )
 
@@ -626,5 +650,6 @@ def extract_case_type_filing_year(judgment_text: str) -> CaseMetaExtraction:
         case_type_extraction_agent,
         judgment_text,
     )
+    log_agent_reasoning(result)
     log.debug("Extraction result: %s", result.final_output)
     return result.final_output
