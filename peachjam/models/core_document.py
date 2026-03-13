@@ -20,7 +20,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, hook
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
@@ -571,7 +571,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
-    def get_or_create_document_content(self):
+    def get_or_create_document_content(self, track_changes=False):
+        """Get a DocumentContent instance for this document. If you are going to make changes to the content,
+        set track_changes to True to ensure change tracking is enabled on the returned object.
+        """
         try:
             doc_content = self.document_content
         except DocumentContent.DoesNotExist:
@@ -581,13 +584,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 doc_content = DocumentContent(document=self)
             self.document_content = doc_content
 
-        return doc_content
+        if track_changes:
+            doc_content.track_changes()
 
-    def save_document_content(self):
-        doc_content = self.get_or_create_document_content()
-        doc_content.document = self
-        doc_content.save()
-        self.document_content = doc_content
+        return doc_content
 
     def clean(self):
         super().clean()
@@ -701,7 +701,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         # in case full_clean() has not yet been called
         self.pre_save()
         super().save(*args, **kwargs)
-        self.save_document_content()
         self.post_save()
 
     def extract_citations(self):
@@ -920,7 +919,7 @@ class AlternativeName(models.Model):
         return self.title
 
 
-class DocumentContent(LifecycleModelMixin, models.Model):
+class DocumentContent(AttributeHooksMixin, models.Model):
     """Support model for storing the actual content of the document. This means it is never loaded in listing views
     which makes queries faster.
     """
@@ -987,20 +986,16 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         return self.clean_html_field(content_html)
 
     def set_source_html(self, source_html):
+        """Set and clean the source HTML. This is the primary source of HTML content, which can then be processed
+        by other methods to set the content HTML, which is shown to the user."""
+        # clean to prevent saving empty or whitespace-only HTML
         self.source_html = self.clean_html_field(source_html)
-        if self.content_html_is_akn:
-            # For AKN docs, source_html IS the canonical HTML; mirror it to content_html directly.
-            self.content_html = self.source_html
-            self._content_html_tree = None
-        else:
-            self.apply_source_to_content()
 
     def set_content_html(self, content_html):
+        """Used to set the content HTML after processing the source HTML."""
+        # clean to prevent saving empty or whitespace-only HTML
         self.content_html = self.clean_content_html(content_html)
         self._content_html_tree = None
-
-    def apply_source_to_content(self):
-        self.set_content_html(self.source_html)
 
     def update_toc_json_from_content_html(self):
         if self.content_html_is_akn:
@@ -1157,11 +1152,10 @@ class DocumentContent(LifecycleModelMixin, models.Model):
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
-        self.apply_source_to_content()
+        self.set_content_html(self.source_html)
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
     def sync_html_derived_fields(self):
-        self._content_html_tree = None
         self.update_toc_json_from_content_html()
         self.update_content_text_from_html()
 

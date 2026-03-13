@@ -161,9 +161,9 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         created_doc, new = Judgment.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults=data
         )
-        doc_content = created_doc.get_or_create_document_content()
+        doc_content = created_doc.get_or_create_document_content(True)
         doc_content.content_html_is_akn = doc.get("content_html_is_akn", False)
-        doc_content.content_html = content_html
+        doc_content.set_source_html(content_html)
         doc_content.save()
 
         self.get_case_numbers(doc["case_numbers"], created_doc)

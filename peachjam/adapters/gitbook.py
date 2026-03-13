@@ -180,7 +180,7 @@ class GitbookAdapter(Adapter):
         toc = self.build_toc(summary_html)
         self.compile_pages(book, toc, repo_path)
         self.clean_toc(toc)
-        doc_content = book.get_or_create_document_content()
+        doc_content = book.get_or_create_document_content(True)
         doc_content.toc_json = toc
         self.fetch_images(book, repo_path)
 
@@ -212,8 +212,8 @@ class GitbookAdapter(Adapter):
             # combined html for this entry
             return f'<div id="{entry["id"]}">\n{entry_html}\n</div>'
 
-        doc_content = book.get_or_create_document_content()
-        doc_content.set_content_html("\n".join(process_entry(e) for e in toc))
+        doc_content = book.get_or_create_document_content(True)
+        doc_content.set_source_html("\n".join(process_entry(e) for e in toc))
 
     def compile_page(self, markdown_text):
         # preprocess with jinja

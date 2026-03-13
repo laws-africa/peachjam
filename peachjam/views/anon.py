@@ -47,7 +47,7 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
         validated_data["anonymised"] = True
         super().update(instance, validated_data)
 
-        doc_content = instance.get_or_create_document_content()
+        doc_content = instance.get_or_create_document_content(True)
         doc_content.set_source_html(content_html)
         doc_content.save()
 

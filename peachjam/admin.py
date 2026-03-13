@@ -443,7 +443,7 @@ class DocumentForm(forms.ModelForm):
         super().full_clean()
         if "source_html" in self.changed_data:
             # source_html is the editable source and content_html is derived from it
-            doc_content = self.instance.get_or_create_document_content()
+            doc_content = self.instance.get_or_create_document_content(True)
             doc_content.set_source_html(self.cleaned_data["source_html"])
 
     def clean_source_html(self):
@@ -470,6 +470,7 @@ class DocumentForm(forms.ModelForm):
 
     def _save_m2m(self):
         super()._save_m2m()
+        self.instance.document_content.save()
         self.create_topics(self.instance)
 
     @property

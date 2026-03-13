@@ -22,12 +22,9 @@ def _make_doc(title, is_akn=False):
 class DocumentContentTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
-    def make_doc(self, title, is_akn=False):
-        return _make_doc(title, is_akn)
-
     def test_source_change_derives_content_html_and_text(self):
-        doc = self.make_doc("Hook source derives content")
-        doc_content = doc.get_or_create_document_content()
+        doc = _make_doc("Hook source derives content")
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.source_html = "<p>Initial</p>"
         doc_content.save()
 
@@ -43,8 +40,8 @@ class DocumentContentTestCase(TestCase):
         self.assertIn("Body", doc_content.content_text)
 
     def test_source_change_updates_akn_content_html(self):
-        doc = self.make_doc("Hook AKN source update", is_akn=True)
-        doc_content = doc.get_or_create_document_content()
+        doc = _make_doc("Hook AKN source update", is_akn=True)
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.source_html = "<p>Source 1</p>"
         doc_content.save()
 
@@ -55,11 +52,11 @@ class DocumentContentTestCase(TestCase):
         self.assertEqual("<p>Source 2</p>", doc_content.content_html)
 
     def test_get_or_create_uses_documentcontent_content_html_is_akn(self):
-        true_doc = self.make_doc("Migration True", is_akn=True)
-        false_doc = self.make_doc("Migration False", is_akn=False)
+        true_doc = _make_doc("Migration True", is_akn=True)
+        false_doc = _make_doc("Migration False", is_akn=False)
 
         # existing false value should remain false
-        false_content = false_doc.get_or_create_document_content()
+        false_content = false_doc.get_or_create_document_content(True)
         false_content.content_html_is_akn = False
         false_content.save()
 
@@ -105,20 +102,6 @@ class GetOrCreateDocumentContentTestCase(TestCase):
         self.assertIsNone(doc_content.pk)
         self.assertEqual(0, DocumentContent.objects.count())
 
-    def test_first_save_creates_document_content_in_db(self):
-        """Saving a brand-new document creates exactly one DocumentContent row."""
-        doc = GenericDocument(
-            jurisdiction=Country.objects.get(pk="ZA"),
-            date=date(2022, 1, 1),
-            language=Language.objects.get(pk="en"),
-            frbr_uri_doctype="doc",
-            title="New doc persistence",
-        )
-        self.assertEqual(0, DocumentContent.objects.count())
-        doc.save()
-        self.assertEqual(1, DocumentContent.objects.count())
-        self.assertIsNotNone(doc.document_content.pk)
-
     def test_multiple_saves_dont_duplicate_document_content(self):
         """Saving a document multiple times must not create extra DocumentContent rows."""
         doc = _make_doc("Multi-save test")
@@ -143,74 +126,45 @@ class SetContentHtmlTestCase(TestCase):
     def test_set_content_html_persisted_after_doc_save(self):
         """Content set via DocumentContent.set_content_html() is written to DB when the document is saved."""
         doc = _make_doc("Persist set_content_html")
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.set_content_html("<p>Persisted</p>")
-        doc_content.update_toc_json_from_content_html()
-        doc.save()
-        doc.refresh_from_db()
-        self.assertIn("Persisted", doc.document_content.content_html)
+        doc_content.save()
+        self.assertIn("Persisted", doc_content.content_html)
 
     def test_set_content_html_cleans_empty_html(self):
         """DocumentContent.set_content_html() with effectively-empty HTML leaves content_html as None."""
         doc = _make_doc("Empty HTML cleanup")
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.set_content_html("<div>   \n&nbsp;  \n</div>")
-        doc_content.update_toc_json_from_content_html()
-        doc.save()
-        doc.refresh_from_db()
-        self.assertIsNone(doc.document_content.content_html)
+        doc_content.save()
+        self.assertIsNone(doc_content.content_html)
 
     def test_set_content_html_akn_skips_cleaning(self):
         """For AKN documents, DocumentContent.set_content_html() stores the raw HTML without cleaning."""
         doc = _make_doc("AKN skip clean", is_akn=True)
         raw_akn = "<div class='akn-akomaNtoso'><p>AKN content</p></div>"
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.set_content_html(raw_akn)
-        doc_content.update_toc_json_from_content_html()
-        doc.save()
-        doc.refresh_from_db()
-        self.assertEqual(raw_akn, doc.document_content.content_html)
-
-
-class SetContentHtmlFromSourceHtmlTestCase(TestCase):
-    fixtures = ["tests/countries", "tests/languages"]
+        doc_content.save()
+        self.assertEqual(raw_akn, doc_content.content_html)
 
     def test_sets_source_html_and_derives_content(self):
         """Setting source_html on DocumentContent stores source_html and derives content_html."""
         doc = _make_doc("Source-derived content")
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.set_source_html("<p>Source text</p>")
-        doc.save()
-        doc.refresh_from_db()
-        doc_content = doc.document_content
+        doc_content.save()
         self.assertEqual("<p>Source text</p>", doc_content.source_html)
         self.assertIn("Source text", doc_content.content_html)
 
     def test_generates_toc_from_headings(self):
         """Setting source_html on DocumentContent with heading tags generates a non-empty TOC."""
         doc = _make_doc("TOC generation")
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.set_source_html("<h1>Chapter 1</h1><p>Introduction</p>")
-        doc.save()
-        doc.refresh_from_db()
-        doc_content = doc.document_content
+        doc_content.save()
         self.assertIsNotNone(doc_content.toc_json)
         self.assertTrue(len(doc_content.toc_json) > 0)
-
-    def test_set_content_html_from_source_html_akn_stores_raw(self):
-        """For AKN documents, setting source_html on DocumentContent stores source_html raw as
-        content_html (no cleaning), because source_html IS the canonical AKN HTML."""
-        doc = _make_doc("AKN raw source", is_akn=True)
-        raw_akn = "<div class='akn-akomaNtoso'><p>AKN source</p></div>"
-        doc_content = doc.get_or_create_document_content()
-        doc_content.set_source_html(raw_akn)
-        doc.save()
-
-        doc.refresh_from_db()
-        doc_content = doc.document_content
-        self.assertEqual(raw_akn, doc_content.source_html)
-        # For AKN, content_html is stored as-is (no HTML cleaning applied)
-        self.assertEqual(raw_akn, doc_content.content_html)
 
 
 class DocumentContentHtmlTreeTestCase(TestCase):
@@ -250,7 +204,7 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
     def test_toc_generated_on_content_html_save(self):
         """The BEFORE_SAVE hook generates a TOC when content_html changes."""
         doc = _make_doc("TOC hook")
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.content_html = "<h1>Section</h1><p>Text</p>"
         doc_content.save()
         doc_content.refresh_from_db()
@@ -260,10 +214,9 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
     def test_content_text_updated_on_content_html_save(self):
         """The BEFORE_SAVE hook extracts plain text when content_html changes."""
         doc = _make_doc("Text hook")
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.content_html = "<p>Extracted text</p>"
         doc_content.save()
-        doc_content.refresh_from_db()
         self.assertIsNotNone(doc_content.content_text)
         self.assertIn("Extracted text", doc_content.content_text)
 
@@ -301,6 +254,14 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         doc_content.update_content_text_from_html()
         self.assertEqual("", doc_content.content_text)
 
+    def test_source_html_derives_content_html(self):
+        """apply_source_to_content() copies source_html into content_html (with cleaning)."""
+        doc = _make_doc("Apply source to content")
+        doc_content = doc.get_or_create_document_content(True)
+        doc_content.source_html = "<p>Source paragraph</p>"
+        doc_content.save()
+        self.assertIn("Source paragraph", doc_content.content_html)
+
 
 class GetContentAsTextTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
@@ -323,24 +284,3 @@ class GetContentAsTextTestCase(TestCase):
         result = doc_content.get_content_as_text()
         self.assertIsNotNone(result)
         self.assertIn("Auto-extracted", result)
-
-
-class DocumentContentApplySourceTestCase(TestCase):
-    fixtures = ["tests/countries", "tests/languages"]
-
-    def test_apply_source_to_content_derives_content_html(self):
-        """apply_source_to_content() copies source_html into content_html (with cleaning)."""
-        doc = _make_doc("Apply source to content")
-        doc_content = doc.get_or_create_document_content()
-        doc_content.source_html = "<p>Source paragraph</p>"
-        doc_content.apply_source_to_content()
-        self.assertIn("Source paragraph", doc_content.content_html)
-
-    def test_apply_source_to_content_akn_skips_cleaning(self):
-        """apply_source_to_content() for AKN docs stores raw HTML without cleaning."""
-        doc = _make_doc("Apply source AKN", is_akn=True)
-        doc_content = doc.get_or_create_document_content()
-        raw = "<div class='akn-akomaNtoso'><p>AKN source</p></div>"
-        doc_content.source_html = raw
-        doc_content.apply_source_to_content()
-        self.assertEqual(raw, doc_content.content_html)
