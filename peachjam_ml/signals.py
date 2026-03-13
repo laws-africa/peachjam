@@ -1,8 +1,9 @@
 from django.db.models import signals
 from django.dispatch.dispatcher import receiver
+from django_lifecycle import AFTER_SAVE
 
 from peachjam.models import DocumentContent, Judgment
-from peachjam.models.lifecycle import after_attribute_changed
+from peachjam.models.lifecycle import on_attribute_changed
 from peachjam_ml.tasks import update_document_embeddings, update_summary_embeddings
 
 
@@ -13,8 +14,11 @@ def document_content_saved(sender, instance, **kwargs):
         update_document_embeddings(instance.document_id, schedule=5)
 
 
-@after_attribute_changed(
-    Judgment, ["blurb", "case_summary", "flynote", "held", "issues", "order"]
+@on_attribute_changed(
+    Judgment,
+    AFTER_SAVE,
+    ["blurb", "case_summary", "flynote", "held", "issues", "order"],
+    ["Judgment.summary_embeddings"],
 )
 def when_case_summary_changed(judgment):
     update_summary_embeddings(judgment.id, schedule=5)
