@@ -10,6 +10,8 @@ class AttributeHooksMixin(LifecycleModelMixin):
     When we know an object will be changed and want to respond to attribute changes, call obj.track_changes()
     """
 
+    _tracking_changes = False
+
     def __init__(self, *args, **kwargs):
         # explicitly skip the __init__ from LifecycleModelMixin
         super(LifecycleModelMixin, self).__init__(*args, **kwargs)
@@ -35,8 +37,10 @@ class AttributeHooksMixin(LifecycleModelMixin):
             self._reset_initial_state()
 
     def track_changes(self):
-        """Enables state tracking which is required for hooks to work."""
-        self._reset_initial_state()
+        """Enables state tracking which is required for hooks to work. Idempotent."""
+        if not self._tracking_changes:
+            self._reset_initial_state()
+            self._tracking_changes = True
 
 
 def lifecycle_hook(target_cls, *hook_args, **hook_kwargs):
