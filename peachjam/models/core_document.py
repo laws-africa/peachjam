@@ -20,10 +20,9 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin, hook
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, hook
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
-from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import etree, html
 from lxml.etree import ParserError
@@ -572,7 +571,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
-    def get_or_create_document_content(self):
+    def get_or_create_document_content(self, track_changes=False):
+        """Get a DocumentContent instance for this document. If you are going to make changes to the content,
+        set track_changes to True to ensure change tracking is enabled on the returned object.
+        """
         try:
             doc_content = self.document_content
         except DocumentContent.DoesNotExist:
@@ -582,19 +584,10 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                 doc_content = DocumentContent(document=self)
             self.document_content = doc_content
 
+        if track_changes:
+            doc_content.track_changes()
+
         return doc_content
-
-    def save_document_content(self):
-        doc_content = self.get_or_create_document_content()
-        doc_content.document = self
-        doc_content.save()
-        self.document_content = doc_content
-
-    def clean_html_field(self, html):
-        return DocumentContent.clean_html_field(html)
-
-    def clean_content_html(self, content_html):
-        return DocumentContent.clean_html_field(content_html)
 
     def clean(self):
         super().clean()
@@ -708,7 +701,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         # in case full_clean() has not yet been called
         self.pre_save()
         super().save(*args, **kwargs)
-        self.save_document_content()
         self.post_save()
 
     def extract_citations(self):
@@ -750,51 +742,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         from peachjam.models.citations import CitationLink
 
         CitationLink.objects.filter(document=self).delete()
-
-        doc_content = self.get_or_create_document_content()
-
-        if doc_content.content_html and not doc_content.content_html_is_akn:
-            # delete existing citations in html
-            root = doc_content.content_html_tree
-            deleted = False
-            for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
-                unwrap_element(a)
-                deleted = True
-            if deleted:
-                doc_content.set_content_html(html.tostring(root, encoding="unicode"))
-
-    def extract_content_from_source_file(self):
-        """Re-extract content from DOCX source files, overwriting anything in source_html and associated images.
-
-        This requires that the document has already been saved, in order to associate image attachments.
-        """
-        result = False
-        doc_content = self.get_or_create_document_content()
-        if (
-            not doc_content.content_html_is_akn
-            and hasattr(self, "source_file")
-            and self.source_file.mimetype in DOC_MIMETYPES
-        ):
-            context = PipelineContext(word_pipeline)
-            context.source_file = self.source_file.file
-            word_pipeline(context)
-            doc_content.set_source_html(context.html_text)
-            # Persist extracted HTML before text extraction to avoid update_text_content()
-            # creating/updating DocumentContent with empty HTML fields.
-            doc_content.save()
-
-            for img in self.images.all():
-                img.delete()
-
-            for attachment in context.attachments:
-                if attachment.content_type.startswith("image/"):
-                    img = Image.from_docpipe_attachment(attachment)
-                    img.document = self
-                    img.save()
-                    self.images.add(img)
-
-            result = True
-        return result
 
     def prepare_content_html_for_pdf(self):
         """Prepare the content HTML for PDF generation by inlining images as base64."""
@@ -875,9 +822,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         """Get the document content as plain text."""
         return self.get_or_create_document_content().get_content_as_text()
 
-    def update_text_content(self):
-        self.get_or_create_document_content().update_text_content()
-
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
         return self.get_or_create_document_content().get_cited_work_frbr_uris()
@@ -939,7 +883,7 @@ class AlternativeName(models.Model):
         return self.title
 
 
-class DocumentContent(LifecycleModelMixin, models.Model):
+class DocumentContent(AttributeHooksMixin, models.Model):
     """Support model for storing the actual content of the document. This means it is never loaded in listing views
     which makes queries faster.
     """
@@ -1006,20 +950,46 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         return self.clean_html_field(content_html)
 
     def set_source_html(self, source_html):
+        """Set and clean the source HTML. This is the primary source of HTML content, which can then be processed
+        by other methods to set the content HTML, which is shown to the user."""
+        # clean to prevent saving empty or whitespace-only HTML
         self.source_html = self.clean_html_field(source_html)
-        if self.content_html_is_akn:
-            # For AKN docs, source_html IS the canonical HTML; mirror it to content_html directly.
-            self.content_html = self.source_html
-            self._content_html_tree = None
-        else:
-            self.apply_source_to_content()
 
     def set_content_html(self, content_html):
+        """Used to set the content HTML after processing the source HTML."""
+        # clean to prevent saving empty or whitespace-only HTML
         self.content_html = self.clean_content_html(content_html)
         self._content_html_tree = None
 
-    def apply_source_to_content(self):
-        self.set_content_html(self.source_html)
+    def extract_content_from_source_file(self):
+        """Re-extract content from a Word source file, overwriting source_html and related images. This saves
+        the object."""
+        document = self.document
+        if (
+            self.content_html_is_akn
+            or not hasattr(document, "source_file")
+            or document.source_file.mimetype not in DOC_MIMETYPES
+        ):
+            return False
+
+        context = PipelineContext(word_pipeline)
+        context.source_file = document.source_file.file
+        word_pipeline(context)
+
+        for img in document.images.all():
+            img.delete()
+
+        for attachment in context.attachments:
+            if attachment.content_type.startswith("image/"):
+                img = Image.from_docpipe_attachment(attachment)
+                img.document = document
+                img.save()
+                document.images.add(img)
+
+        self.set_source_html(context.html_text)
+        self.save()
+
+        return True
 
     def update_toc_json_from_content_html(self):
         if self.content_html_is_akn:
@@ -1033,13 +1003,6 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         else:
             toc_json = []
         self.toc_json = toc_json
-
-    def update_content_text_from_html(self):
-        if self.content_html:
-            root = self.content_html_tree
-            self.content_text = " ".join(root.itertext())
-        else:
-            self.content_text = ""
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document content."""
@@ -1144,11 +1107,12 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         return self.content_text
 
     def update_text_content(self):
-        """Update the extracted text content."""
+        """Update the text content extracted either from content_html or from the source file."""
         text = ""
+
         if self.content_html:
-            root = self.content_html_tree
-            text = " ".join(root.itertext())
+            text = " ".join(self.content_html_tree.itertext())
+
         elif hasattr(self.document, "source_file") and self.document.source_file.pk:
             # get the text from the source file, via PDF if necessary
             with tempfile.NamedTemporaryFile() as tmp:
@@ -1171,18 +1135,17 @@ class DocumentContent(LifecycleModelMixin, models.Model):
         self.content_text = text
         if self.pk:
             self.save(update_fields=["content_text"])
-        self._content_html_tree = None
-        return self
 
     @hook(BEFORE_SAVE, when="source_html", has_changed=True)
     def sync_content_html_from_source_html(self):
-        self.apply_source_to_content()
+        self.set_content_html(self.source_html)
+        # TODO: hooks don't currently cascade, so fake it
+        self.sync_html_derived_fields()
 
     @hook(BEFORE_SAVE, when="content_html", has_changed=True)
     def sync_html_derived_fields(self):
-        self._content_html_tree = None
         self.update_toc_json_from_content_html()
-        self.update_content_text_from_html()
+        self.update_text_content()
 
     @hook(AFTER_SAVE, when="source_html", has_changed=True)
     def trigger_extract_citations(self):

@@ -33,9 +33,9 @@ class CoreDocumentTestCase(TestCase):
         )
 
         # change the source and update
-        doc_content = doc.get_or_create_document_content()
+        doc_content = doc.get_or_create_document_content(True)
         doc_content.set_content_html("<p>test</p>")
-        doc.update_text_content()
+        doc_content.save()
         self.assertEqual("test", doc_content.get_content_as_text())
 
         doc.refresh_from_db()
@@ -118,15 +118,6 @@ ZAGPPHC 1063</a>.</p>
         journal.save()
         self.assertEqual("doc", journal.frbr_uri_doctype)
         self.assertEqual("journal-article", journal.frbr_uri_subtype)
-
-    def test_clean_content_html(self):
-        doc = CoreDocument()
-        self.assertIsNone(doc.clean_content_html(""""""))
-        self.assertIsNone(doc.clean_content_html("""<aoeu"""))
-        self.assertIsNone(doc.clean_content_html("""<div>   \n&nbsp;  \n</div>"""))
-        self.assertEqual(
-            doc.clean_content_html("""<div>test</div>"""), """<div>test</div>"""
-        )
 
     def test_gazette(self):
         frbr_uri = FrbrUri.parse(

@@ -414,9 +414,6 @@ class BaseDocumentResource(resources.ModelResource):
         super().save_m2m(instance, row, **kwargs)
 
         if not kwargs.get("dry_run", ""):
-            source_html_changed = "source_html" in row
-            legacy_content_html_changed = "content_html" in row
-
             if (
                 instance.source_url
                 and row.get("source_url")
@@ -424,11 +421,13 @@ class BaseDocumentResource(resources.ModelResource):
             ):
                 self.attach_source_file(instance, instance.source_url)
 
+            source_html_changed = "source_html" in row
+            legacy_content_html_changed = "content_html" in row
             if source_html_changed or legacy_content_html_changed:
                 source_html = row.get("source_html") or row.get("content_html")
-                doc_content = instance.get_or_create_document_content()
+                doc_content = instance.get_or_create_document_content(True)
                 doc_content.set_source_html(source_html)
-                instance.save()
+                doc_content.save()
 
     def after_save_instance(self, instance, row, **kwargs):
         if not kwargs.get("dry_run", ""):

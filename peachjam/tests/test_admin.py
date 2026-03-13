@@ -6,7 +6,12 @@ from django.urls import reverse
 from django_webtest import WebTest
 from webtest import Upload
 
-from peachjam.models import Country, GenericDocument, Judgment, Language
+from peachjam.models import (
+    Country,
+    GenericDocument,
+    Judgment,
+    Language,
+)
 
 
 class TestJudgmentAdmin(WebTest):

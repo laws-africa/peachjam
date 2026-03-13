@@ -34,7 +34,7 @@ class CitationAnalyser:
             return self.extract_citations_from_source_file(document)
 
     def extract_citations_from_html(self, document):
-        doc_content = document.get_or_create_document_content()
+        doc_content = document.get_or_create_document_content(True)
         if not doc_content.source_html:
             return False
 

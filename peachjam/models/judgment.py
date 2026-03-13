@@ -14,7 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
-from peachjam.models import CoreDocument, Locality, SourceFile
+from peachjam.models import CoreDocument, DocumentContent, Locality, SourceFile
 from peachjam.tasks import create_anonymised_source_file_pdf
 
 log = logging.getLogger(__name__)
@@ -497,9 +497,9 @@ class Judgment(CoreDocument):
     def clean(self):
         if self.auto_assign_details:
             self.assign_mnc()
-        self.flynote = self.clean_html_field(self.flynote)
-        self.case_summary = self.clean_html_field(self.case_summary)
-        self.order = self.clean_html_field(self.order)
+        self.flynote = DocumentContent.clean_html_field(self.flynote)
+        self.case_summary = DocumentContent.clean_html_field(self.case_summary)
+        self.order = DocumentContent.clean_html_field(self.order)
         super().clean()
 
     def assign_title(self):

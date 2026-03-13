@@ -18,13 +18,6 @@ class Book(CoreDocument):
     content_markdown = MartorField(blank=True, null=True)
     default_nature = ("book", "Book")
 
-    def delete_citations(self):
-        super().delete_citations()
-        # reset the HTML back to the original from markdown, because delete_citations()
-        # removes any embedded akn links
-        if self.content_markdown:
-            self.convert_content_markdown()
-
     @hook(BEFORE_SAVE, when="content_markdown", has_changed=True)
     def convert_content_markdown(self):
         doc_content = self.get_or_create_document_content()

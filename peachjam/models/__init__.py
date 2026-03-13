@@ -20,6 +20,7 @@ from .journals_books import *
 from .judgment import *
 from .law_reports import *
 from .legislation import *
+from .lifecycle import *
 from .partner import *
 from .ratification import *
 from .relationships import *

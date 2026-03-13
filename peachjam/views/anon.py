@@ -22,6 +22,9 @@ class ReplacementSerializer(serializers.ModelSerializer):
 
 class DocumentAnonymiseSerializer(serializers.ModelSerializer):
     replacements = ReplacementSerializer(many=True)
+    content_html = serializers.CharField(
+        required=False, allow_blank=True, allow_null=True, write_only=True
+    )
     activity_start = serializers.DateTimeField()
     activity_end = serializers.DateTimeField()
 
@@ -29,6 +32,7 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
         model = Judgment
         fields = [
             "case_name",
+            "content_html",
             "replacements",
             "published",
             "activity_start",
@@ -37,10 +41,15 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         replacements_data = validated_data.pop("replacements")
+        content_html = validated_data.pop("content_html", serializers.empty)
 
         # force anonymised flag
         validated_data["anonymised"] = True
         super().update(instance, validated_data)
+
+        doc_content = instance.get_or_create_document_content(True)
+        doc_content.set_source_html(content_html)
+        doc_content.save()
 
         # replace existing replacements
         instance.replacements.all().delete()
@@ -55,8 +64,6 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
             end=validated_data["activity_end"],
             stage="anonymisation",
         )
-
-        instance.update_text_content()
 
         return instance
 
