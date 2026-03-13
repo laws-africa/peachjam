@@ -19,10 +19,22 @@
         </div>
       </div>
       <div :class="`${facet.type === 'letter-radio' ? '' : 'facets-scrollable'}`">
+        <div
+          v-if="showFacetSearch"
+          class="facet-search-sticky mb-2"
+        >
+          <input
+            v-model.trim="facetSearchProxy"
+            type="search"
+            class="form-control form-control-sm"
+            :placeholder="`${$t('Search')} ${facet.title}`"
+            :aria-label="`${$t('Search')} ${facet.title}`"
+          >
+        </div>
         <template v-if="facet.type === 'checkboxes'">
           <div
-            v-for="(option, optIndex) in facet.options"
-            :key="optIndex"
+            v-for="(option, optIndex) in displayedOptions"
+            :key="`${facet.name}_${option.value}`"
             class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check flex-grow-1">
@@ -49,8 +61,8 @@
         </template>
         <template v-if="facet.type === 'radio'">
           <div
-            v-for="(option, optIndex) in facet.options"
-            :key="optIndex"
+            v-for="(option, optIndex) in displayedOptions"
+            :key="`${facet.name}_${option.value}`"
             class="d-flex justify-content-between align-items-center"
           >
             <div class="form-check flex-grow-1">
@@ -146,10 +158,38 @@ export default {
       type: Boolean,
       required: false,
       default: false
+    },
+    searchTerm: {
+      type: String,
+      required: false,
+      default: ''
     }
   },
-  emits: ['clear-facet', 'on-change'],
+  emits: ['clear-facet', 'on-change', 'facet-search-change'],
   computed: {
+    showFacetSearch () {
+      return ['checkboxes', 'radio'].includes(this.facet.type) && this.facet.options.length > 8;
+    },
+    facetSearchProxy: {
+      get () {
+        return this.searchTerm;
+      },
+      set (value) {
+        this.$emit('facet-search-change', { name: this.facet.name, term: value });
+      }
+    },
+    displayedOptions () {
+      let options = this.facet.options;
+
+      if (this.showFacetSearch && this.searchTerm) {
+        const searchTerm = this.searchTerm.toLowerCase();
+        options = this.facet.options.filter(
+          (option) => String(option.label).toLowerCase().includes(searchTerm)
+        );
+      }
+
+      return options;
+    },
     showClearFilter () {
       if (this.facet.type === 'checkboxes') {
         return this.facet.value.length;

@@ -12,6 +12,7 @@ class PeachJamConfig(AppConfig):
         from docpipe.matchers import CitationMatcher
 
         import peachjam.adapters  # noqa
+        import peachjam.checks  # noqa
         import peachjam.signals  # noqa
         from peachjam.helpers import get_country_absolute_url
 

@@ -178,6 +178,8 @@ PEACHJAM = {
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
 PEACHJAM["MY_LII"] = f"My {PEACHJAM['APP_NAME']}"
+# tie document embeddings to semantic search, although embeddings can be enabled separately
+PEACHJAM["DOCUMENT_EMBEDDINGS"] = PEACHJAM["SEARCH_SEMANTIC"]
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
