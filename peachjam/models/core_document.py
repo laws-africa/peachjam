@@ -965,7 +965,8 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         self._content_html_tree = None
 
     def extract_content_from_source_file(self):
-        """Re-extract content from a Word source file, overwriting source_html and related images."""
+        """Re-extract content from a Word source file, overwriting source_html and related images. This saves
+        the object."""
         document = self.document
         if (
             self.content_html_is_akn
@@ -977,10 +978,6 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         context = PipelineContext(word_pipeline)
         context.source_file = document.source_file.file
         word_pipeline(context)
-        self.set_source_html(context.html_text)
-        # Persist extracted HTML before text extraction to avoid update_text_content()
-        # creating/updating DocumentContent with empty HTML fields.
-        self.save()
 
         for img in document.images.all():
             img.delete()
@@ -991,6 +988,9 @@ class DocumentContent(AttributeHooksMixin, models.Model):
                 img.document = document
                 img.save()
                 document.images.add(img)
+
+        self.set_source_html(context.html_text)
+        self.save()
 
         return True
 
