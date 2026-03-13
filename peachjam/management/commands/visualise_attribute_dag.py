@@ -23,7 +23,7 @@ class Command(BaseCommand):
         )
         parser.add_argument(
             "--format",
-            choices=["auto", "json", "text", "igraph"],
+            choices=["auto", "json", "text", "mermaid", "igraph"],
             default="auto",
             help="Export mode. 'auto' infers from the filename extension.",
         )
@@ -40,6 +40,8 @@ class Command(BaseCommand):
                 mode = "json"
             elif suffix in {".txt", ".text"}:
                 mode = "text"
+            elif suffix in {".mmd", ".mermaid"}:
+                mode = "mermaid"
             elif output is None:
                 mode = "text"
             else:
@@ -66,6 +68,18 @@ class Command(BaseCommand):
                 output.write_text(rendered)
                 self.stdout.write(
                     self.style.SUCCESS(f"Exported attribute DAG text to {output}.")
+                )
+            else:
+                self.stdout.write(rendered, ending="")
+            return
+
+        if mode == "mermaid":
+            rendered = self.render_mermaid()
+            if output:
+                output.parent.mkdir(parents=True, exist_ok=True)
+                output.write_text(rendered)
+                self.stdout.write(
+                    self.style.SUCCESS(f"Exported attribute DAG Mermaid to {output}.")
                 )
             else:
                 self.stdout.write(rendered, ending="")
@@ -99,10 +113,33 @@ class Command(BaseCommand):
             source, target = edge
             lines.append(f"{source} -> {target}")
             for item in metadata:
+                function_label = item.function_name
+                if item.declaration_mode == "on-class":
+                    function_label = f"{item.owner_class}.{item.function_name}"
                 lines.append(
-                    f"  - {item.function_name} [{item.timing}] "
-                    f"{item.declaration_mode} owner={item.owner_class}"
+                    f"  - {function_label} [{item.timing}] {item.declaration_mode}"
                 )
+                lines.append("")
         if not lines:
             lines.append("(attribute DAG is empty)")
+        return "\n".join(lines) + "\n"
+
+    def render_mermaid(self):
+        lines = ["flowchart TD"]
+        edges = attribute_dag.edges()
+        node_ids = {}
+
+        def node_id(name):
+            if name not in node_ids:
+                node_ids[name] = f"N{len(node_ids)}"
+            return node_ids[name]
+
+        for source, target in sorted(edges):
+            src_id = node_id(source)
+            tgt_id = node_id(target)
+            lines.append(f'  {src_id}["{source}"] --> {tgt_id}["{target}"]')
+
+        if len(lines) == 1:
+            lines.append("  Empty[attribute DAG is empty]")
+
         return "\n".join(lines) + "\n"
