@@ -531,24 +531,22 @@ class FlynoteUpdater:
         if not paths:
             return
 
-        roots_to_refresh = {
-            root.pk
-            for path in paths
-            if path
-            for root in [self.get_or_create_node(None, path[0])]
-            if root is not None
-        }
-
         leaf_flynotes = set()
+        roots_to_refresh = set()
         for path in paths:
             parent = None
-            for name in path:
+            root_id = None
+            for index, name in enumerate(path):
                 node = self.get_or_create_node(parent, name)
                 if node is None:
                     break
+                if index == 0:
+                    root_id = node.pk
                 parent = node
             else:
                 leaf_flynotes.add(node)
+                if root_id is not None:
+                    roots_to_refresh.add(root_id)
 
         for flynote in leaf_flynotes:
             JudgmentFlynote.objects.get_or_create(document=judgment, flynote=flynote)
