@@ -365,7 +365,7 @@ def update_users_new_citation(citation_id):
     UserFollowing.update_new_citation_follows(citation)
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 @transaction.atomic
 def update_flynote_taxonomy(judgment_id):
     from peachjam.analysis.flynotes import FlynoteUpdater
@@ -377,7 +377,7 @@ def update_flynote_taxonomy(judgment_id):
         return
 
     log.info(f"Updating flynotes for judgment {judgment_id}")
-    FlynoteUpdater().update_for_judgment(judgment)
+    FlynoteUpdater().update_for_judgment(judgment, refresh_counts=True)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
