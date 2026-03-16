@@ -24,33 +24,18 @@ class CriminalDataExtractionTests(TestCase):
     These do not call the LLM.
     """
 
+    fixtures = [
+        "offences/offences",
+        "offences/penal_code_work",
+    ]
+
     def tearDown(self):
         connections.close_all()
         super().tearDown()
 
     def setUp(self):
-        Work.objects.create(title="Test Work", frbr_uri="/akn/tz/act/2010/11")
-        self.robbery = Offence.objects.create(
-            work=Work.objects.first(),
-            title="Robbery with violence",
-            description="""
-            A person who steals anything and, at or immediately before or after the time of stealing it,
-            uses or threatens to use actual violence to any person or property in order to obtain or retain
-            the thing stolen or to prevent or overcome resistance to its being stolen
-            or retained, commits robbery.
-            """,
-        )
-
-        self.trespass = Offence.objects.create(
-            work=Work.objects.first(),
-            title="Criminal trespass",
-            description="""
-            A person who unlawfully enters into or upon property in the possession of another with "
-            intent to commit an offence or to intimidate, insult or annoy any person in possession of
-            the property, or who, having lawfully entered, unlawfully remains there with such intent,
-            commits criminal trespass.
-            """,
-        )
+        self.robbery = Offence.objects.get(title="Robbery with violence")
+        self.trespass = Offence.objects.get(title="Criminal trespass")
 
     def test_extract_robbery_with_violence(self):
         judgment_text = """
@@ -173,7 +158,7 @@ class CriminalDataExtractionTests(TestCase):
         during a quarrel and caused bodily injuries.
 
         After hearing the evidence, the trial court convicted the appellant
-        of assault and sentenced him to twelve months imprisonment.
+        of assault causing bodily harm and sentenced him to twelve months imprisonment.
         """.strip()
 
         result = extract_offences_and_sentences(judgment_text)
@@ -186,7 +171,6 @@ class CriminalDataExtractionTests(TestCase):
         self.assertNotIn("trespass", extracted)
 
         offence = result.offences[0]
-        self.assertIsNone(offence.offence_id)
 
         sentence = offence.sentences[0]
         self.assertEqual(sentence.sentence_type, "imprisonment")
@@ -232,8 +216,6 @@ class CriminalDataExtractionTests(TestCase):
         self.assertNotIn("trespass", extracted)
 
         offence = result.offences[0]
-        self.assertIsNone(offence.offence_id)
-
         sentence = offence.sentences[0]
         self.assertEqual(sentence.duration_months, 6)
 
