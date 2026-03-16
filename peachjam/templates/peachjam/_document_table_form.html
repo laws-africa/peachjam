@@ -80,9 +80,20 @@
                     </div>
                   </div>
                 {% else %}
-                  <div class="facets-scrollable">
+                  <div class="facets-scrollable"
+                       {% if facet.options|length > 8 %}data-facet-search{% endif %}>
+                    {% if facet.options|length > 8 %}
+                      <div class="facet-search-sticky mb-2">
+                        <input type="search"
+                               class="form-control form-control-sm"
+                               placeholder="{% trans 'Search' %} {{ facet.label }}"
+                               aria-label="{% trans 'Search' %} {{ facet.label }}"
+                               data-facet-search-input/>
+                      </div>
+                    {% endif %}
                     {% for value, label in facet.options %}
-                      <div class="d-flex justify-content-between align-items-center">
+                      <div class="d-flex justify-content-between align-items-center"
+                           data-facet-option>
                         <div class="form-check flex-grow-1"
                              data-track-event="Listing | Filter | {{ facet_name }}">
                           <input id="{{ facet_name }}_{{ forloop.counter0 }}"
@@ -95,7 +106,10 @@
                                  hx-include="#filter-form"
                                  value="{{ value }}"/>
                           <label class="form-check-label"
-                                 for="{{ facet_name }}_{{ forloop.counter0 }}">{{ label }}</label>
+                                 data-facet-option-label
+                                 for="{{ facet_name }}_{{ forloop.counter0 }}">
+                            {{ label }}
+                          </label>
                         </div>
                       </div>
                     {% endfor %}

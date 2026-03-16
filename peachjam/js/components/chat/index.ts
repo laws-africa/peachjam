@@ -16,7 +16,7 @@ export class DocumentChatBanner {
     this.root = root;
 
     peachjam.whenUserLoaded().then((user) => {
-      if (user.perms.includes('peachjam_ml.add_chatthread')) {
+      if (user.perms.includes('peachjam.add_documentchatthread')) {
         this.root.classList.remove('d-none');
       }
     });
@@ -37,7 +37,7 @@ export class DocumentChatFloatingButton {
   constructor (documentId: string) {
     if (peachjam.config.chat.enabled) {
       peachjam.whenUserLoaded().then((user) => {
-        if (peachjam.config.chat.public || user.perms.includes('peachjam_ml.add_chatthread')) {
+        if (peachjam.config.chat.public || user.perms.includes('peachjam.add_documentchatthread')) {
           this.setup(documentId);
         }
       });

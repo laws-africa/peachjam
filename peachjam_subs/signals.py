@@ -4,6 +4,7 @@ from django.dispatch import receiver
 from django_fsm import post_transition
 
 from peachjam.customerio import get_customerio
+from peachjam.models import UserProfile
 
 from .models import Feature, Product, Subscription
 
@@ -50,4 +51,6 @@ User = get_user_model()
 @receiver(post_save, sender=User)
 def create_default_subscription(sender, instance, created, **kwargs):
     if created:
+        # there is a signal handler for this on User.post_save, but sometimes this runs before it does
+        UserProfile.objects.get_or_create(user=instance)
         Subscription.get_or_create_active_for_user(instance)

@@ -7,7 +7,7 @@ from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
-from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
+from sentry_sdk.tracing import TransactionSource
 
 from peachjam.models import CoreDocument, Work, citations_processor
 
@@ -37,7 +37,7 @@ class PatchedDBTaskRunner(DBTaskRunner):
     def run_task(self, tasks, task):
         # wrap the task in a sentry transaction
         with sentry_sdk.start_transaction(
-            op="queue.task", source=TRANSACTION_SOURCE_TASK, name=task.task_name
+            op="queue.task", source=TransactionSource.TASK, name=task.task_name
         ) as tx:
             tx.set_status("ok")
             super().run_task(tasks, task)
@@ -380,7 +380,7 @@ def update_users_new_citation(citation_id):
     UserFollowing.update_new_citation_follows(citation)
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 @transaction.atomic
 def update_flynote_taxonomy(judgment_id):
     from peachjam.analysis.flynotes import FlynoteUpdater
@@ -392,7 +392,20 @@ def update_flynote_taxonomy(judgment_id):
         return
 
     log.info(f"Updating flynotes for judgment {judgment_id}")
-    FlynoteUpdater().update_for_judgment(judgment)
+    FlynoteUpdater().update_for_judgment(judgment, refresh_counts=True)
+
+
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+def refresh_flynote_document_count(root_id):
+    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+
+    root = Flynote.objects.filter(pk=root_id).first()
+    if not root:
+        log.info(f"No flynote root with id {root_id} exists, ignoring.")
+        return
+
+    log.info(f"Refreshing flynote counts for root {root_id}")
+    FlynoteDocumentCount.refresh_for_flynote(root)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
