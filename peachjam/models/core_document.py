@@ -962,29 +962,36 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         self._content_html_tree = None
 
     def extract_content_from_source_file(self):
-        """Re-extract content from a Word source file, overwriting source_html and related images. This saves
-        the object."""
+        """Refresh content from the attached source file.
+
+        Word-like source files are converted into ``source_html`` and related images. Other source
+        files are treated as PDF-rendered sources and are used only to refresh ``content_text``.
+        """
         document = self.document
-        if (
-            self.content_html_is_akn
-            or not hasattr(document, "source_file")
-            or document.source_file.mimetype not in DOC_MIMETYPES
-        ):
+        if self.content_html_is_akn or not hasattr(document, "source_file"):
             return False
 
+        if document.source_file.mimetype not in DOC_MIMETYPES:
+            self.update_text_content_from_source_file_pdf()
+            return True
+
+        return self.extract_content_from_source_file_doc()
+
+    def extract_content_from_source_file_doc(self):
+        """Extract HTML and images from a Word-like source file and save the result."""
         context = PipelineContext(word_pipeline)
-        context.source_file = document.source_file.file
+        context.source_file = self.document.source_file.file
         word_pipeline(context)
 
-        for img in document.images.all():
+        for img in self.document.images.all():
             img.delete()
 
         for attachment in context.attachments:
             if attachment.content_type.startswith("image/"):
                 img = Image.from_docpipe_attachment(attachment)
-                img.document = document
+                img.document = self.document
                 img.save()
-                document.images.add(img)
+                self.document.images.add(img)
 
         self.set_source_html(context.html_text)
         self.save()
@@ -1107,13 +1114,16 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         return self.content_text
 
     def update_text_content(self):
-        """Update the text content extracted either from content_html or from the source file."""
-        text = ""
-
+        """Update ``content_text`` from ``content_html`` or, if absent, from the source file PDF."""
         if self.content_html:
-            text = " ".join(self.content_html_tree.itertext())
+            self.update_text_content_from_html()
+        else:
+            self.update_text_content_from_source_file_pdf()
 
-        elif hasattr(self.document, "source_file") and self.document.source_file.pk:
+    def update_text_content_from_source_file_pdf(self):
+        """Update ``content_text`` from the PDF version of the source file."""
+        text = ""
+        if hasattr(self.document, "source_file") and self.document.source_file.pk:
             # get the text from the source file, via PDF if necessary
             with tempfile.NamedTemporaryFile() as tmp:
                 pdf = self.document.source_file.as_pdf()
@@ -1131,6 +1141,16 @@ class DocumentContent(AttributeHooksMixin, models.Model):
                     # some PDFs have nulls, which breaks SQL insertion
                     # replace rather than deleting to keep string length the same
                     text = text.replace("\0", " ")
+
+        self.content_text = text
+        if self.pk:
+            self.save(update_fields=["content_text"])
+
+    def update_text_content_from_html(self):
+        """Update ``content_text`` by extracting plain text from ``content_html``."""
+        text = ""
+        if self.content_html:
+            text = " ".join(self.content_html_tree.itertext())
 
         self.content_text = text
         if self.pk:

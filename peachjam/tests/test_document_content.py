@@ -1,8 +1,17 @@
+import os
 from datetime import date
 
+from django.core.files.base import File
 from django.test import TestCase
+from docpipe.soffice import SOfficeError
 
-from peachjam.models import Country, DocumentContent, GenericDocument, Language
+from peachjam.models import (
+    Country,
+    DocumentContent,
+    GenericDocument,
+    Language,
+    SourceFile,
+)
 
 
 def _make_doc(title, is_akn=False):
@@ -50,6 +59,75 @@ class DocumentContentTestCase(TestCase):
         doc_content.refresh_from_db()
 
         self.assertEqual("<p>Source 2</p>", doc_content.content_html)
+
+    def test_extract_content_from_source_file_skips_akn_without_changing_content(self):
+        doc = _make_doc("AKN extraction skip", is_akn=True)
+        doc_content = doc.get_or_create_document_content(True)
+        doc_content.source_html = "<p>Existing source</p>"
+        doc_content.save()
+
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/zagpjhc_judgment.docx"),
+            "rb",
+        ) as fixture:
+            SourceFile.objects.create(
+                document=doc,
+                filename="zagpjhc_judgment.docx",
+                mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                file=File(fixture, name="zagpjhc_judgment.docx"),
+            )
+
+        doc_content.refresh_from_db()
+
+        self.assertEqual("<p>Existing source</p>", doc_content.source_html)
+        self.assertEqual("Existing source", doc_content.content_text)
+
+    def test_extract_content_from_source_file_extracts_docx_content(self):
+        doc = _make_doc("DOCX extraction")
+        doc_content = doc.get_or_create_document_content(True)
+        expected_text = "The second count is robbery, in that on or about near the place mentioned in count"
+
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/zagpjhc_judgment.docx"),
+            "rb",
+        ) as fixture:
+            try:
+                SourceFile.objects.create(
+                    document=doc,
+                    filename="zagpjhc_judgment.docx",
+                    mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    file=File(fixture, name="zagpjhc_judgment.docx"),
+                )
+            except SOfficeError:
+                self.skipTest("LibreOffice conversion unavailable in this environment")
+
+        doc_content.refresh_from_db()
+
+        self.assertIn(expected_text, doc_content.source_html)
+        self.assertIn(expected_text, doc_content.content_html)
+        self.assertIn(expected_text, doc_content.content_text)
+
+    def test_extract_content_from_source_file_extracts_pdf_text_only(self):
+        doc = _make_doc("PDF extraction")
+        doc_content = doc.get_or_create_document_content(True)
+        expected_text = "THE SUPREME COURT OF APPEAL OF SOUTH AFRICA"
+
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"),
+            "rb",
+        ) as fixture:
+            SourceFile.objects.create(
+                document=doc,
+                filename="gauteng_judgment.pdf",
+                mimetype="application/pdf",
+                file=File(fixture, name="gauteng_judgment.pdf"),
+            )
+
+        doc_content.refresh_from_db()
+
+        self.assertIsNone(doc_content.source_html)
+        self.assertIsNone(doc_content.content_html)
+        self.assertIn(expected_text, doc_content.content_text)
 
     def test_get_or_create_uses_documentcontent_content_html_is_akn(self):
         true_doc = _make_doc("Migration True", is_akn=True)

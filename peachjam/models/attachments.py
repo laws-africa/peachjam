@@ -202,7 +202,7 @@ class SourceFile(LifecycleModelMixin, AttachmentAbstractModel):
     @on_attribute_changed(
         AFTER_SAVE,
         ["file"],
-        ["file_as_pdf", "DocumentContent.source_html"],
+        ["file_as_pdf", "DocumentContent.source_html", "DocumentContent.content_text"],
     )
     def file_changed(self):
         self.ensure_file_as_pdf()
