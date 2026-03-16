@@ -380,7 +380,7 @@ def update_flynote_taxonomy(judgment_id):
     FlynoteUpdater().update_for_judgment(judgment, refresh_counts=True)
 
 
-@background(queue="peachjam", remove_existing_tasks=True)
+@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def refresh_flynote_document_count(root_id):
     from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 
