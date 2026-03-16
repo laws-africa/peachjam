@@ -7,7 +7,7 @@ from background_task.tasks import DBTaskRunner, Task, logger, tasks
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
-from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
+from sentry_sdk.tracing import TransactionSource
 
 from peachjam.models import CoreDocument, Work, citations_processor
 
@@ -37,7 +37,7 @@ class PatchedDBTaskRunner(DBTaskRunner):
     def run_task(self, tasks, task):
         # wrap the task in a sentry transaction
         with sentry_sdk.start_transaction(
-            op="queue.task", source=TRANSACTION_SOURCE_TASK, name=task.task_name
+            op="queue.task", source=TransactionSource.TASK, name=task.task_name
         ) as tx:
             tx.set_status("ok")
             super().run_task(tasks, task)
