@@ -1,3 +1,5 @@
+import logging
+
 import allauth.account.signals as allauth_signals
 from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
@@ -25,6 +27,7 @@ from peachjam.models import (
     UserFollowing,
     UserProfile,
     Work,
+    pj_settings,
 )
 from peachjam.models.lifecycle import after_attribute_changed
 from peachjam.tasks import (
@@ -36,6 +39,8 @@ from peachjam.tasks import (
 from peachjam_search.models import SavedSearch
 
 User = get_user_model()
+
+log = logging.getLogger(__name__)
 
 
 # a user has requested a password reset
@@ -230,6 +235,10 @@ def judgment_content_changed_generate_summary(sender, instance, **kwargs):
 
 @receiver(signals.pre_save, sender=DocumentContent)
 def judgment_content_changed_extract_criminal_data(sender, instance, **kwargs):
+    if not pj_settings().allow_criminal_data_extraction:
+        log.info("Criminal data extraction is disabled.")
+        return
+
     if instance.document.doc_type != "judgment":
         return
 

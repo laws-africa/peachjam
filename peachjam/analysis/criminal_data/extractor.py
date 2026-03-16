@@ -3,7 +3,7 @@ import os
 
 from django.db import transaction
 
-from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence, pj_settings
+from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence
 
 from .agent import extract_case_type_filing_year, extract_offences_and_sentences
 
@@ -16,9 +16,6 @@ class CriminalDataExtractor:
     """
 
     def __init__(self):
-        if not pj_settings().allow_criminal_data_extraction:
-            raise ValueError("Criminal data extraction is disabled.")
-
         if not os.environ.get("OPENAI_API_KEY"):
             raise ValueError("OPENAI_API_KEY is not configured.")
 
