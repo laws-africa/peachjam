@@ -375,7 +375,7 @@ class IndigoAdapter(RequestsAdapter):
             defaults={**field_data, **frbr_uri_data},
         )
         doc_content = created_doc.get_or_create_document_content(True)
-        doc_content.source_html = content_html
+        doc_content.set_source_html(content_html)
         doc_content.content_html_is_akn = True
         doc_content.toc_json = toc_json
         doc_content.save()
