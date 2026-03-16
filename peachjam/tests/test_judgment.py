@@ -269,9 +269,11 @@ class JudgmentTestCase(TestCase):
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
             case_name="Foo v Bar",
-            content_html="<p>This is the judgment text.</p>",
         )
         judgment.save()
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
 
         judgment.generate_summary()
         judgment.refresh_from_db()
