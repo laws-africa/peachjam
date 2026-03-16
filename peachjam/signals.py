@@ -15,7 +15,6 @@ from peachjam.models import (
     Annotation,
     CoreDocument,
     DocumentChatThread,
-    DocumentContent,
     ExtractedCitation,
     Folder,
     Judgment,
@@ -27,7 +26,6 @@ from peachjam.models import (
 )
 from peachjam.models.lifecycle import on_attribute_changed
 from peachjam.tasks import (
-    generate_judgment_summary,
     update_extracted_citations_for_a_work,
     update_flynote_taxonomy,
 )
@@ -202,24 +200,6 @@ def password_reset_started_customerio(sender, request, user, **kwargs):
 @receiver(allauth_signals.password_reset, sender=User)
 def password_reset_customerio(sender, request, user, **kwargs):
     get_customerio().track_password_reset(user)
-
-
-@receiver(signals.post_save, sender=DocumentContent)
-def judgment_content_changed_generate_summary(sender, instance, raw, **kwargs):
-    if raw:
-        return
-
-    if not instance.document.doc_type == "judgment":
-        return
-    judgment = instance.document
-    should_generate = (
-        not judgment.case_summary  # No summary at all
-        or judgment.summary_ai_generated  # Summary exists but is AI-generated
-    ) and (
-        not judgment.must_be_anonymised or judgment.anonymised  # Anonymization OK
-    )
-    if should_generate:
-        generate_judgment_summary(judgment.pk)
 
 
 @receiver(signals.post_save, sender=SavedDocument)

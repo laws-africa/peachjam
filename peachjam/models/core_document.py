@@ -1190,6 +1190,28 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         if self.document_id and not self.content_html_is_akn and not self.source_html:
             extract_citations(self.document_id)
 
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["content_text"],
+        [
+            "Judgment.blurb",
+            "Judgment.case_summary",
+            "Judgment.flynote",
+            "Judgment.held",
+            "Judgment.issues",
+            "Judgment.order",
+        ],
+    )
+    def trigger_generate_judgment_summary(self):
+        """Trigger summary generation when the content text changes, and clear existing summary fields."""
+        from peachjam.models import CoreDocument, Judgment
+
+        if self.document_id:
+            if self.document.doc_type == "judgment":
+                document = CoreDocument.objects.get(pk=self.document_id)
+                if isinstance(document, Judgment):
+                    document.potentially_generate_summary()
+
 
 def get_country_and_locality(code):
     if not code:
