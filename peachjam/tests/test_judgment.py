@@ -1,10 +1,14 @@
 import datetime
+import os
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from languages_plus.models import Language
 
+from peachjam.analysis.summariser import JudgmentSummary
 from peachjam.models import CaseNumber, Court, CourtClass, Judgment, Locality
 
 
@@ -223,3 +227,66 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(za, judgment.jurisdiction)
         self.assertIsNone(judgment.locality)
+
+    @patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test-openai-key",
+            "LANGFUSE_PUBLIC_KEY": "test-langfuse-public-key",
+            "LANGFUSE_SECRET_KEY": "test-langfuse-secret-key",
+        },
+        clear=False,
+    )
+    @patch("peachjam.analysis.summariser.langfuse.get_prompt")
+    @patch("peachjam.analysis.summariser.OpenAI")
+    def test_generate_summary_updates_judgment_fields(
+        self,
+        openai_cls,
+        get_prompt,
+    ):
+        fake_summary = JudgmentSummary(
+            issues=["Whether the appeal should succeed"],
+            held=["The appeal was dismissed"],
+            order="Appeal dismissed with costs.",
+            summary="The court found no basis to interfere with the lower court's decision.",
+            flynote="Appeal dismissed after no misdirection was shown.",
+            blurb="Appeal dismissed.",
+        )
+        fake_response = SimpleNamespace(output_parsed=fake_summary)
+
+        fake_openai = MagicMock()
+        fake_openai.responses.parse.return_value = fake_response
+        openai_cls.return_value = fake_openai
+
+        fake_prompt = MagicMock()
+        fake_prompt.compile.return_value = "Summarise this judgment."
+        fake_prompt.config = {"model": "gpt-5-mini"}
+        get_prompt.return_value = fake_prompt
+
+        judgment = Judgment(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        judgment.save()
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        judgment.generate_summary()
+        judgment.refresh_from_db()
+
+        self.assertEqual(fake_summary.blurb, judgment.blurb)
+        self.assertEqual(fake_summary.summary, judgment.case_summary)
+        self.assertEqual(fake_summary.flynote, judgment.flynote)
+        self.assertEqual(fake_summary.held, judgment.held)
+        self.assertEqual(fake_summary.issues, judgment.issues)
+        self.assertEqual(fake_summary.order, judgment.order)
+        self.assertTrue(judgment.summary_ai_generated)
+        get_prompt.assert_called_once_with(
+            "summarise/judgment",
+            cache_ttl_seconds=30,
+        )
+        fake_openai.responses.parse.assert_called_once()

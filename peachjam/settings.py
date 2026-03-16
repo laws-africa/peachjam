@@ -144,6 +144,7 @@ PEACHJAM = {
     "EXTRACTOR_API": os.environ.get(
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
+    "SUMMARISE_JUDGMENTS": True,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
@@ -177,6 +178,8 @@ PEACHJAM = {
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
 PEACHJAM["MY_LII"] = f"My {PEACHJAM['APP_NAME']}"
+# tie document embeddings to semantic search, although embeddings can be enabled separately
+PEACHJAM["DOCUMENT_EMBEDDINGS"] = PEACHJAM["SEARCH_SEMANTIC"]
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "

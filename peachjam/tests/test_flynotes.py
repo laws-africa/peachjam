@@ -1,5 +1,6 @@
 import datetime
 from io import StringIO
+from unittest.mock import call, patch
 
 from countries_plus.models import Country
 from django.core.management import call_command
@@ -22,10 +23,6 @@ class ParseFlynoteTextTest(TestCase):
 
     def test_prose_flynote_skipped(self):
         text = "Contract between a lender and a borrower purporting to be a contract of sale."
-        self.assertEqual(self.parser.parse(text), [])
-
-    def test_html_prose_flynote_skipped(self):
-        text = '<p><span style="color:#000000">Contract between a lender and borrower.</span></p>'
         self.assertEqual(self.parser.parse(text), [])
 
     def test_simple_chain_with_em_dashes(self):
@@ -101,12 +98,6 @@ class ParseFlynoteTextTest(TestCase):
         self.assertEqual(paths[3][-1], "self-defence plea and evidential burden")
         self.assertEqual(paths[4][-1], "appellate review of factual findings")
 
-    def test_html_tags_stripped(self):
-        text = "<p>Employment law \u2013 Severance pay \u2013 Jurisdiction</p>"
-        paths = self.parser.parse(text)
-        self.assertEqual(len(paths), 1)
-        self.assertEqual(paths[0], ["Employment law", "Severance pay", "Jurisdiction"])
-
     def test_semicolons_inside_parentheses_not_split(self):
         """Semicolons inside (...) should NOT create sibling branches."""
         text = (
@@ -148,10 +139,207 @@ class ParseFlynoteTextTest(TestCase):
             ["Tax law", "exemptions (see also (a; b; c))", "compliance"],
         )
 
+    def test_dashes_inside_parentheses_do_not_create_new_levels(self):
+        text = (
+            "Civil procedure \u2014 Extension of time to challenge arbitral award "
+            "\u2014 Application under Limitation Act sections 14 and 21(2) "
+            "\u2014 Lyamuya criteria (accounting for delay, inordinate delay, diligence, other sufficient reasons) "
+            "\u2014 Illegality apparent on face of record (Arbitration Act s.59(2)(c) \u2014 seat of arbitration) "
+            "can constitute good cause \u2014 Court will not determine substantive merits in extension application"
+        )
+        paths = self.parser.parse(text)
+        self.assertEqual(len(paths), 1)
+        self.assertEqual(
+            paths[0],
+            [
+                "Civil procedure",
+                "Extension of time to challenge arbitral award",
+                "Application under Limitation Act sections 14 and 21(2)",
+                "Lyamuya criteria (accounting for delay, inordinate delay, diligence, other sufficient reasons)",
+                "Illegality apparent on face of record (Arbitration Act s.59(2)(c) "
+                "— seat of arbitration) can constitute good cause",
+                "Court will not determine substantive merits in extension application",
+            ],
+        )
+
     def test_trailing_period_stripped(self):
         text = "Employment law \u2013 Severance pay."
         paths = self.parser.parse(text)
         self.assertEqual(paths[0][-1], "Severance pay")
+
+    def test_newlines_start_new_flynotes(self):
+        text = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        paths = self.parser.parse(text)
+        self.assertEqual(
+            paths,
+            [
+                ["Criminal law", "admissibility", "trial within a trial"],
+                ["Administrative law", "judicial review"],
+            ],
+        )
+
+    def test_normalise_multiline_text_preserves_existing_lines(self):
+        text = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        self.assertEqual(self.parser.normalise_multiline_text(text), text)
+
+    def test_normalise_multiline_text_splits_repeated_sentence_flynotes(self):
+        text = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. "
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+            "Agreement is silent on mode of delivery - Delivery in one lot presumed."
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Contract - Contract of sale of goods - Whether and under what circumstances "
+                "a mere purchase order may amount to an agreement to sell\n"
+                "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+                "Agreement is silent on mode of delivery - Delivery in one lot presumed"
+            ),
+        )
+
+    def test_normalise_multiline_text_strips_held_section(self):
+        text = (
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery. "
+            "Held: (i) The buyer was at liberty to rescind the contract."
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery",
+        )
+
+    def test_normalise_multiline_text_removes_report_markers_and_dedupes(self):
+        text = (
+            "A Contract - Contract of sale of goods - Delivery - Mode of delivery. "
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery."
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery",
+        )
+
+    def test_parse_repeated_sentence_flynotes_as_separate_paths(self):
+        text = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. "
+            "Contract - Contract of sale of goods - Rules governing delivery of goods - "
+            "Whether Buyer is bound to accept delivery in instalments."
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Contract",
+                    "Contract of sale of goods",
+                    "Whether and under what circumstances a mere purchase order may amount to an agreement to sell",
+                ],
+                [
+                    "Contract",
+                    "Contract of sale of goods",
+                    "Rules governing delivery of goods",
+                    "Whether Buyer is bound to accept delivery in instalments",
+                ],
+            ],
+        )
+
+    def test_normalise_multiline_text_splits_mid_line_topic_restarts(self):
+        text = (
+            "Civil Practice and Procedure - Proceedings against a corporate body - "
+            "Court action against the decision of a meeting of an organ of a cooperative union - "
+            "Whether proceedings may be instituted against that particular organ "
+            "Civil Practice and Procedure - Non-joinder of parties - Whether an essential "
+            "party not joined to an action may be joined at the stage of formulating the judgment - "
+            "Order I rule 10(2) of the Civil Procedure Code 1966 "
+            "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+            "Whether the meeting had jurisdiction to make valid decisions"
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Civil Practice and Procedure - Proceedings against a corporate body - "
+                "Court action against the decision of a meeting of an organ of a cooperative union - "
+                "Whether proceedings may be instituted against that particular organ\n"
+                "Civil Practice and Procedure - Non-joinder of parties - Whether an essential "
+                "party not joined to an action may be joined at the stage of formulating the judgment - "
+                "Order I rule 10(2) of the Civil Procedure Code 1966\n"
+                "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+                "Whether the meeting had jurisdiction to make valid decisions"
+            ),
+        )
+
+    def test_parse_mid_line_topic_restarts_as_separate_paths(self):
+        text = (
+            "Civil Practice and Procedure - Proceedings against a corporate body - "
+            "Whether proceedings may be instituted against that particular organ "
+            "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+            "Whether the meeting had jurisdiction to make valid decisions"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Civil Practice and Procedure",
+                    "Proceedings against a corporate body",
+                    "Whether proceedings may be instituted against that particular organ",
+                ],
+                [
+                    "Administrative Law",
+                    "Jurisdiction of an administrative body",
+                    "Requirement of quorum",
+                    "Whether the meeting had jurisdiction to make valid decisions",
+                ],
+            ],
+        )
+
+    def test_parse_stops_before_statute_reference_tail(self):
+        text = (
+            "Jurisdiction - Buganda courts - Suit for damages - Car collision - "
+            "Both parties Africans - Suit filed in the High Court - "
+            "Submission on appeal that case should have been transferred to Buganda court - "
+            "Jurisdiction of High Court - When High Court must transfer case to Buganda court - "
+            "Civil Procedure Rules, O. 9, r. 24 and O. 42 (U.) - "
+            "Civil Procedure Ordinance, s. 11 (7) and s. 69 (1) (U.)"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Jurisdiction",
+                    "Buganda courts",
+                    "Suit for damages",
+                    "Car collision",
+                    "Both parties Africans",
+                    "Suit filed in the High Court",
+                    "Submission on appeal that case should have been transferred to Buganda court",
+                    "Jurisdiction of High Court",
+                    "When High Court must transfer case to Buganda court",
+                ]
+            ],
+        )
+
+    def test_reference_tail_preserves_issue_statement_with_section(self):
+        text = (
+            "Natural Justice - Right to be heard - "
+            "Whether that failure amounts to forfeiture of the Committee's right to be heard - "
+            "Section 106 of the Cooperative Societies Act 1982"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Natural Justice",
+                    "Right to be heard",
+                    "Whether that failure amounts to forfeiture of the Committee's right to be heard",
+                ]
+            ],
+        )
 
 
 class NormaliseFlynoteNameTest(TestCase):
@@ -304,6 +492,57 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         self.assertEqual(
             JudgmentFlynote.objects.filter(document=self.judgment).count(), 0
         )
+
+    def test_multiline_flynotes_link_separate_leaf_nodes(self):
+        self.judgment.flynote = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        self.judgment.save()
+
+        self.updater.update_for_judgment(self.judgment)
+
+        linked_flynotes = set(
+            JudgmentFlynote.objects.filter(document=self.judgment).values_list(
+                "flynote__name", flat=True
+            )
+        )
+        self.assertEqual(linked_flynotes, {"trial within a trial", "judicial review"})
+
+    def test_refresh_counts_queues_delayed_refresh_per_root(self):
+        with (
+            patch.object(
+                self.updater.parser,
+                "parse",
+                return_value=[
+                    ["Criminal law", "admissibility", "trial within a trial"],
+                    ["Administrative law", "judicial review"],
+                ],
+            ),
+            patch(
+                "peachjam.analysis.flynotes.refresh_flynote_document_count"
+            ) as mock_refresh,
+        ):
+            self.updater.update_for_judgment(self.judgment, refresh_counts=True)
+
+        admin = Flynote.objects.get(name="Administrative law")
+        criminal = Flynote.objects.get(name="Criminal law")
+        self.assertCountEqual(
+            mock_refresh.call_args_list,
+            [
+                call(admin.pk, schedule=30 * 60),
+                call(criminal.pk, schedule=30 * 60),
+            ],
+        )
+
+    def test_refresh_counts_queues_once_for_shared_root(self):
+        with patch(
+            "peachjam.analysis.flynotes.refresh_flynote_document_count"
+        ) as mock_refresh:
+            self.updater.update_for_judgment(self.judgment, refresh_counts=True)
+
+        criminal = Flynote.objects.get(name="Criminal law")
+        mock_refresh.assert_called_once_with(criminal.pk, schedule=30 * 60)
 
 
 class FlynoteDocumentCountTest(TestCase):

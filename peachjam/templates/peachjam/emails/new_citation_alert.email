@@ -19,7 +19,7 @@
           {% if citing.document.blurb %}<div>{{ citing.blurb | safe }}</div>{% endif %}
           {% if citing.document.flynote %}
             <div>
-              <em>{{ citing.document.flynote | safe }}</em>
+              <em>{{ citing.document.flynote | linebreaksbr }}</em>
             </div>
           {% endif %}
         </li>

@@ -13,6 +13,7 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 
+from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.models import CoreDocument, DocumentContent, Locality, SourceFile
 from peachjam.tasks import create_anonymised_source_file_pdf
@@ -619,9 +620,7 @@ class Judgment(CoreDocument):
 
     def generate_summary(self):
         """Generate an AI summary for this judgment."""
-        from peachjam.analysis.summariser import SummariserService
-
-        summariser = SummariserService()
+        summariser = JudgmentSummariser()
         if not summariser.enabled():
             log.warning(
                 "Summariser service is not enabled, skipping AI summary generation."
@@ -629,17 +628,16 @@ class Judgment(CoreDocument):
             return
 
         try:
-            response = summariser.summarise_judgment(self)
-            summary = response.get("summary", {})
-            if not summary:
+            summary = summariser.summarise_judgment(self)
+            if not summary.summary:
                 log.warning(f"No summary found in response {self.pk}, skipping.")
                 return
-            self.blurb = summary.get("blurb", "")
-            self.case_summary = summary.get("summary", "")
-            self.flynote = summary.get("flynote", "")
-            self.held = summary.get("held", [])
-            self.issues = summary.get("issues", [])
-            self.order = summary.get("order", "")
+            self.blurb = summary.blurb
+            self.case_summary = summary.summary
+            self.flynote = summary.flynote
+            self.held = summary.held
+            self.issues = summary.issues
+            self.order = summary.order
             self.summary_ai_generated = True
             self.save()
         except Exception as e:

@@ -1157,6 +1157,11 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
 
 class JudgmentAdminForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
+    flynote = forms.CharField(
+        widget=forms.Textarea(attrs={"style": "width: 100%;"}),
+        required=False,
+        help_text=_("Enter one flynote per line."),
+    )
     held = forms.CharField(
         widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
         required=False,
@@ -1181,6 +1186,11 @@ class JudgmentAdminForm(DocumentForm):
 
     def clean_held(self):
         return self.cleaned_data["held"].splitlines()
+
+    def clean_flynote(self):
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        return FlynoteParser().normalise_multiline_text(self.cleaned_data["flynote"])
 
     def clean_issues(self):
         return self.cleaned_data["issues"].splitlines()

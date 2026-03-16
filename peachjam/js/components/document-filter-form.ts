@@ -5,10 +5,15 @@ export default class DocumentFilterForm {
   constructor (root: HTMLElement) {
     this.root = root;
 
+    // ensure the bootstrap offcanvas element is closed before htmx swaps the content, otherwise it can end up in a
+    // broken state
+    this.root.addEventListener('htmx:beforeSwap', () => this.cleanupOffcanvas());
+
     // setup a resize observer to move the filters when the window is resized
     const observer = new ResizeObserver(() => this.moveFilters());
     observer.observe(this.root);
     this.moveFilters();
+    this.setupFacetSearch();
   }
 
   moveFilters () {
@@ -44,5 +49,43 @@ export default class DocumentFilterForm {
         });
       }
     }
+  }
+
+  cleanupOffcanvas () {
+    const offcanvasElement = this.root.querySelector('#document-list-filters-offcanvas') as HTMLElement | null;
+    if (!offcanvasElement) {
+      return;
+    }
+
+    const offcanvas = window.bootstrap?.Offcanvas?.getInstance(offcanvasElement);
+    offcanvas?.hide();
+  }
+
+  setupFacetSearch () {
+    this.root.querySelectorAll('[data-facet-search]').forEach((facet) => {
+      const facetEl = facet as HTMLElement;
+      const input = facetEl.querySelector('[data-facet-search-input]') as HTMLInputElement | null;
+      if (!input) {
+        return;
+      }
+
+      const filterOptions = () => {
+        this.filterFacetOptions(facetEl, input.value);
+      };
+
+      input.addEventListener('input', filterOptions);
+      filterOptions();
+    });
+  }
+
+  filterFacetOptions (facet: HTMLElement, term: string) {
+    const searchTerm = term.trim().toLowerCase();
+    facet.querySelectorAll('[data-facet-option]').forEach((option) => {
+      const optionEl = option as HTMLElement;
+      const labelText = optionEl.querySelector('[data-facet-option-label]')?.textContent?.toLowerCase() || '';
+      const isVisible = !searchTerm || labelText.includes(searchTerm);
+
+      optionEl.classList.toggle('d-none', !isVisible);
+    });
   }
 }

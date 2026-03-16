@@ -172,7 +172,7 @@ class DocumentEmbedding(models.Model):
         """Refresh summary chunks and document-level embedding for a document, if they don't exist or the document
         summary has changed.
         """
-        if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
+        if not settings.PEACHJAM["DOCUMENT_EMBEDDINGS"]:
             return
 
         summary_text = ContentChunk.get_summary_text(document)
@@ -205,7 +205,7 @@ class DocumentEmbedding(models.Model):
         """Refresh content chunks and document-level embedding for a document, if they don't exist or the document
         text has changed.
         """
-        if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
+        if not settings.PEACHJAM["DOCUMENT_EMBEDDINGS"]:
             return
         doc_content = document.get_or_create_document_content()
         text = doc_content.get_content_as_text()
