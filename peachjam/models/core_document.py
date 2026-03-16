@@ -1202,7 +1202,7 @@ class DocumentContent(AttributeHooksMixin, models.Model):
             "Judgment.order",
         ],
     )
-    def trigger_generate_judgment_summary(self):
+    def potentially_generate_judgment_summary(self):
         """Trigger summary generation when the content text changes, and clear existing summary fields."""
         from peachjam.models import CoreDocument, Judgment
 
