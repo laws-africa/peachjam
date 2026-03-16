@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0280_userprofile_deletion_fields"),
+        ("peachjam", "0281_normalise_multiline_flynotes"),
     ]
 
     operations = [

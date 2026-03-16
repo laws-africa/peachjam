@@ -2,16 +2,7 @@ from django.db import migrations
 
 
 def reverse_backfill_document_content(apps, schema_editor):
-    conn = schema_editor.connection
-
-    with conn.cursor() as cursor:
-        cursor.execute("LOCK TABLE peachjam_documentcontent IN ACCESS EXCLUSIVE MODE")
-        cursor.execute("""
-            DELETE FROM peachjam_documentcontent
-            WHERE document_id IN (
-                SELECT id FROM peachjam_coredocument WHERE content_html IS NOT NULL
-            )
-        """)
+    pass
 
 
 def backfill_document_content(apps, schema_editor):
@@ -45,7 +36,7 @@ def backfill_document_content(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0281_add_coredocument_content_html_and_more"),
+        ("peachjam", "0282_add_coredocument_content_html_and_more"),
     ]
 
     operations = [
