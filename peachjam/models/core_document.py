@@ -1170,10 +1170,24 @@ class DocumentContent(AttributeHooksMixin, models.Model):
     @on_attribute_changed(
         AFTER_SAVE, ["source_html"], ["CoreDocument.citations", "content_html"]
     )
-    def trigger_extract_citations(self):
-        if self.document_id:
-            from peachjam.tasks import extract_citations
+    def trigger_extract_citations_from_source_html(self):
+        from peachjam.tasks import extract_citations
 
+        if self.document_id:
+            extract_citations(self.document_id)
+
+    @on_attribute_changed(AFTER_SAVE, ["content_text"], ["CoreDocument.citations"])
+    def trigger_extract_citations_from_content_text(self):
+        """If citation extraction will be done on content_text instead of content_html, trigger it when content_text
+        changes.
+
+        This cannot be merged with trigger_extract_citations because that declares that it will update content_html,
+        which this path will not, otherwise it will create a circular dependency between the content_html and
+        content_text.
+        """
+        from peachjam.tasks import extract_citations
+
+        if self.document_id and not self.content_html_is_akn and not self.source_html:
             extract_citations(self.document_id)
 
 
