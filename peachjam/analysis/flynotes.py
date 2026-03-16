@@ -24,7 +24,8 @@ import re
 from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 
-from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
+from peachjam.models.flynote import Flynote, JudgmentFlynote
+from peachjam.tasks import refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
 
@@ -532,15 +533,21 @@ class FlynoteUpdater:
             return
 
         leaf_flynotes = set()
+        roots_to_refresh = set()
         for path in paths:
             parent = None
-            for name in path:
+            root_id = None
+            for index, name in enumerate(path):
                 node = self.get_or_create_node(parent, name)
                 if node is None:
                     break
+                if index == 0:
+                    root_id = node.pk
                 parent = node
             else:
                 leaf_flynotes.add(node)
+                if root_id is not None:
+                    roots_to_refresh.add(root_id)
 
         for flynote in leaf_flynotes:
             JudgmentFlynote.objects.get_or_create(document=judgment, flynote=flynote)
@@ -552,8 +559,5 @@ class FlynoteUpdater:
         )
 
         if refresh_counts and leaf_flynotes:
-            roots_to_refresh = set()
-            for flynote in leaf_flynotes:
-                roots_to_refresh.add(flynote.get_root())
-            for root in roots_to_refresh:
-                FlynoteDocumentCount.refresh_for_flynote(root)
+            for root_id in roots_to_refresh:
+                refresh_flynote_document_count(root_id, schedule=30 * 60)

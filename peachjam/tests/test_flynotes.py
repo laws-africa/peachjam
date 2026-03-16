@@ -1,5 +1,6 @@
 import datetime
 from io import StringIO
+from unittest.mock import call, patch
 
 from countries_plus.models import Country
 from django.core.management import call_command
@@ -507,6 +508,41 @@ class UpdateFlynoteForJudgmentTest(TestCase):
             )
         )
         self.assertEqual(linked_flynotes, {"trial within a trial", "judicial review"})
+
+    def test_refresh_counts_queues_delayed_refresh_per_root(self):
+        with (
+            patch.object(
+                self.updater.parser,
+                "parse",
+                return_value=[
+                    ["Criminal law", "admissibility", "trial within a trial"],
+                    ["Administrative law", "judicial review"],
+                ],
+            ),
+            patch(
+                "peachjam.analysis.flynotes.refresh_flynote_document_count"
+            ) as mock_refresh,
+        ):
+            self.updater.update_for_judgment(self.judgment, refresh_counts=True)
+
+        admin = Flynote.objects.get(name="Administrative law")
+        criminal = Flynote.objects.get(name="Criminal law")
+        self.assertCountEqual(
+            mock_refresh.call_args_list,
+            [
+                call(admin.pk, schedule=30 * 60),
+                call(criminal.pk, schedule=30 * 60),
+            ],
+        )
+
+    def test_refresh_counts_queues_once_for_shared_root(self):
+        with patch(
+            "peachjam.analysis.flynotes.refresh_flynote_document_count"
+        ) as mock_refresh:
+            self.updater.update_for_judgment(self.judgment, refresh_counts=True)
+
+        criminal = Flynote.objects.get(name="Criminal law")
+        mock_refresh.assert_called_once_with(criminal.pk, schedule=30 * 60)
 
 
 class FlynoteDocumentCountTest(TestCase):
