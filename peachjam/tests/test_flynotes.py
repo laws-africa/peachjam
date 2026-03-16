@@ -519,7 +519,9 @@ class UpdateFlynoteForJudgmentTest(TestCase):
                     ["Administrative law", "judicial review"],
                 ],
             ),
-            patch("peachjam.tasks.refresh_flynote_document_count") as mock_refresh,
+            patch(
+                "peachjam.analysis.flynotes.refresh_flynote_document_count"
+            ) as mock_refresh,
         ):
             self.updater.update_for_judgment(self.judgment, refresh_counts=True)
 
@@ -534,7 +536,9 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_refresh_counts_queues_once_for_shared_root(self):
-        with patch("peachjam.tasks.refresh_flynote_document_count") as mock_refresh:
+        with patch(
+            "peachjam.analysis.flynotes.refresh_flynote_document_count"
+        ) as mock_refresh:
             self.updater.update_for_judgment(self.judgment, refresh_counts=True)
 
         criminal = Flynote.objects.get(name="Criminal law")
