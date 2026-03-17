@@ -28,6 +28,7 @@ from peachjam.models import (
     Work,
     pj_settings,
 )
+from peachjam.models.core_document import DocumentContent
 from peachjam.models.lifecycle import on_attribute_changed
 from peachjam.tasks import (
     extract_criminal_data,
