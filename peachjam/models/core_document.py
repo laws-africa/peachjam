@@ -20,7 +20,7 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, hook
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
 from languages_plus.models import Language
@@ -42,7 +42,7 @@ from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.enrichments import ProvisionCitation, ProvisionCitationCount
-from peachjam.models.lifecycle import AttributeHooksMixin
+from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -962,29 +962,36 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         self._content_html_tree = None
 
     def extract_content_from_source_file(self):
-        """Re-extract content from a Word source file, overwriting source_html and related images. This saves
-        the object."""
+        """Refresh content from the attached source file.
+
+        Word-like source files are converted into ``source_html`` and related images. Other source
+        files are treated as PDF-rendered sources and are used only to refresh ``content_text``.
+        """
         document = self.document
-        if (
-            self.content_html_is_akn
-            or not hasattr(document, "source_file")
-            or document.source_file.mimetype not in DOC_MIMETYPES
-        ):
+        if self.content_html_is_akn or not hasattr(document, "source_file"):
             return False
 
+        if document.source_file.mimetype not in DOC_MIMETYPES:
+            self.update_text_content_from_source_file_pdf()
+            return True
+
+        return self.extract_content_from_source_file_doc()
+
+    def extract_content_from_source_file_doc(self):
+        """Extract HTML and images from a Word-like source file and save the result."""
         context = PipelineContext(word_pipeline)
-        context.source_file = document.source_file.file
+        context.source_file = self.document.source_file.file
         word_pipeline(context)
 
-        for img in document.images.all():
+        for img in self.document.images.all():
             img.delete()
 
         for attachment in context.attachments:
             if attachment.content_type.startswith("image/"):
                 img = Image.from_docpipe_attachment(attachment)
-                img.document = document
+                img.document = self.document
                 img.save()
-                document.images.add(img)
+                self.document.images.add(img)
 
         self.set_source_html(context.html_text)
         self.save()
@@ -1107,13 +1114,16 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         return self.content_text
 
     def update_text_content(self):
-        """Update the text content extracted either from content_html or from the source file."""
-        text = ""
-
+        """Update ``content_text`` from ``content_html`` or, if absent, from the source file PDF."""
         if self.content_html:
-            text = " ".join(self.content_html_tree.itertext())
+            self.update_text_content_from_html()
+        else:
+            self.update_text_content_from_source_file_pdf()
 
-        elif hasattr(self.document, "source_file") and self.document.source_file.pk:
+    def update_text_content_from_source_file_pdf(self):
+        """Update ``content_text`` from the PDF version of the source file."""
+        text = ""
+        if hasattr(self.document, "source_file") and self.document.source_file.pk:
             # get the text from the source file, via PDF if necessary
             with tempfile.NamedTemporaryFile() as tmp:
                 pdf = self.document.source_file.as_pdf()
@@ -1136,23 +1146,71 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         if self.pk:
             self.save(update_fields=["content_text"])
 
-    @hook(BEFORE_SAVE, when="source_html", has_changed=True)
+    def update_text_content_from_html(self):
+        """Update ``content_text`` by extracting plain text from ``content_html``."""
+        text = ""
+        if self.content_html:
+            text = " ".join(self.content_html_tree.itertext())
+
+        self.content_text = text
+        if self.pk:
+            self.save(update_fields=["content_text"])
+
+    @on_attribute_changed(BEFORE_SAVE, ["source_html"], ["content_html"])
     def sync_content_html_from_source_html(self):
         self.set_content_html(self.source_html)
         # TODO: hooks don't currently cascade, so fake it
         self.sync_html_derived_fields()
 
-    @hook(BEFORE_SAVE, when="content_html", has_changed=True)
+    @on_attribute_changed(BEFORE_SAVE, ["content_html"], ["toc_json", "content_text"])
     def sync_html_derived_fields(self):
         self.update_toc_json_from_content_html()
         self.update_text_content()
 
-    @hook(AFTER_SAVE, when="source_html", has_changed=True)
-    def trigger_extract_citations(self):
-        if self.document_id:
-            from peachjam.tasks import extract_citations
+    @on_attribute_changed(
+        AFTER_SAVE, ["source_html"], ["CoreDocument.citations", "content_html"]
+    )
+    def trigger_extract_citations_from_source_html(self):
+        from peachjam.tasks import extract_citations
 
+        if self.document_id:
             extract_citations(self.document_id)
+
+    @on_attribute_changed(AFTER_SAVE, ["content_text"], ["CoreDocument.citations"])
+    def trigger_extract_citations_from_content_text(self):
+        """If citation extraction will be done on content_text instead of content_html, trigger it when content_text
+        changes.
+
+        This cannot be merged with trigger_extract_citations because that declares that it will update content_html,
+        which this path will not, otherwise it will create a circular dependency between the content_html and
+        content_text.
+        """
+        from peachjam.tasks import extract_citations
+
+        if self.document_id and not self.content_html_is_akn and not self.source_html:
+            extract_citations(self.document_id)
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["content_text"],
+        [
+            "Judgment.blurb",
+            "Judgment.case_summary",
+            "Judgment.flynote",
+            "Judgment.held",
+            "Judgment.issues",
+            "Judgment.order",
+        ],
+    )
+    def potentially_generate_judgment_summary(self):
+        """Trigger summary generation when the content text changes, and clear existing summary fields."""
+        from peachjam.models import CoreDocument, Judgment
+
+        if self.document_id:
+            if self.document.doc_type == "judgment":
+                document = CoreDocument.objects.get(pk=self.document_id)
+                if isinstance(document, Judgment):
+                    document.potentially_generate_summary()
 
 
 def get_country_and_locality(code):

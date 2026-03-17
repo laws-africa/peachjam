@@ -14,12 +14,19 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
+from django_lifecycle import AFTER_SAVE
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
+from peachjam.models import (
+    CoreDocument,
+    DocumentContent,
+    Locality,
+    SourceFile,
+    on_attribute_changed,
+)
+from peachjam.tasks import create_anonymised_source_file_pdf, generate_judgment_summary
 from peachjam.helpers import current_year
-from peachjam.models import CoreDocument, DocumentContent, Locality, SourceFile
-from peachjam.tasks import create_anonymised_source_file_pdf
 
 log = logging.getLogger(__name__)
 
@@ -648,6 +655,21 @@ class Judgment(CoreDocument):
                     mimetype="application/pdf",
                     file_is_anonymised=True,
                 )
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["must_be_anonymised", "anonymised"],
+        ["blurb", "case_summary", "flynote", "held", "issues", "order"],
+    )
+    def potentially_generate_summary(self):
+        should_generate = (
+            not self.case_summary  # No summary at all
+            or self.summary_ai_generated  # Summary exists but is AI-generated
+        ) and (
+            not self.must_be_anonymised or self.anonymised  # Anonymization OK
+        )
+        if should_generate:
+            generate_judgment_summary(self.pk)
 
     def generate_summary(self):
         """Generate an AI summary for this judgment."""
