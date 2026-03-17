@@ -28,7 +28,6 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -427,6 +426,10 @@ if not DEBUG:
         send_default_pii=True,
         # sample x% of requests for performance metrics
         traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.1")),
+        profile_session_sample_rate=float(
+            os.environ.get("SENTRY_PROFILE_SESSION_SAMPLE_RATE", "0.0")
+        ),
+        profile_lifecycle="trace",
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
