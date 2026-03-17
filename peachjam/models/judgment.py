@@ -18,6 +18,7 @@ from django_lifecycle import AFTER_SAVE
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
+from peachjam.helpers import current_year
 from peachjam.models import (
     CoreDocument,
     DocumentContent,
@@ -26,7 +27,6 @@ from peachjam.models import (
     on_attribute_changed,
 )
 from peachjam.tasks import create_anonymised_source_file_pdf, generate_judgment_summary
-from peachjam.helpers import current_year
 
 log = logging.getLogger(__name__)
 
