@@ -81,6 +81,22 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
+    journal = models.ForeignKey(
+        "peachjam.Journal",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("journal"),
+    )
+    law_report = models.ForeignKey(
+        "peachjam.LawReport",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("law report"),
+    )
     saved_search = models.ForeignKey(
         SavedSearch,
         null=True,
@@ -111,6 +127,8 @@ class UserFollowing(models.Model):
         "country",
         "locality",
         "taxonomy",
+        "journal",
+        "law_report",
         "saved_search",
         "saved_document",
     ]
@@ -153,6 +171,16 @@ class UserFollowing(models.Model):
                 name="unique_user_taxonomy",
             ),
             models.UniqueConstraint(
+                fields=["user", "journal"],
+                condition=models.Q(journal__isnull=False),
+                name="unique_user_journal",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "law_report"],
+                condition=models.Q(law_report__isnull=False),
+                name="unique_user_law_report",
+            ),
+            models.UniqueConstraint(
                 fields=["user", "saved_search"],
                 condition=models.Q(saved_search__isnull=False),
                 name="unique_user_saved_search",
@@ -190,6 +218,8 @@ class UserFollowing(models.Model):
             "country",
             "locality",
             "taxonomy",
+            "journal",
+            "law_report",
         ]
 
     @property
@@ -255,6 +285,14 @@ class UserFollowing(models.Model):
         if self.taxonomy:
             topics = [self.taxonomy] + list(self.taxonomy.get_descendants())
             return qs.filter(taxonomies__topic__in=topics)
+
+        if self.journal:
+            return qs.filter(journalarticle__journal=self.journal)
+
+        if self.law_report:
+            return qs.filter(
+                judgment__law_report_entries__law_report_volume__law_report=self.law_report
+            ).distinct()
 
         return qs.none()
 

@@ -121,7 +121,13 @@ def split(value, sep=None):
 @register.filter
 def get_follow_params(obj):
     # this would be better as a model method
-    return f"{obj._meta.model_name}={obj.pk}"
+    field_map = {
+        "courtclass": "court_class",
+        "courtregistry": "court_registry",
+        "lawreport": "law_report",
+    }
+    field_name = field_map.get(obj._meta.model_name, obj._meta.model_name)
+    return f"{field_name}={obj.pk}"
 
 
 @register.simple_tag
