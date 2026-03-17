@@ -30,6 +30,7 @@ from import_export.widgets import (
     CharWidget,
     ForeignKeyWidget,
     ManyToManyWidget,
+    SimpleArrayWidget,
 )
 from languages_plus.models import Language
 
@@ -59,6 +60,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     MatterType,
+    Offence,
     Outcome,
     Ratification,
     RatificationCountry,
@@ -787,6 +789,32 @@ class AttorneyResource(resources.ModelResource):
 
     class Meta:
         model = Attorney
+
+
+class OffenceResource(resources.ModelResource):
+    work = fields.Field(
+        column_name="work",
+        attribute="work",
+        widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
+    )
+    elements = fields.Field(
+        column_name="elements",
+        attribute="elements",
+        widget=SimpleArrayWidget(separator="|"),
+    )
+
+    class Meta:
+        model = Offence
+        import_id_fields = ("work", "provision_eid", "code")
+        fields = (
+            "work",
+            "provision_eid",
+            "code",
+            "title",
+            "description",
+            "elements",
+            "penalty",
+        )
 
 
 class RatificationField(ForeignKeyWidget):

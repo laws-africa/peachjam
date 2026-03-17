@@ -36,7 +36,7 @@ def backfill_document_content(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0282_add_coredocument_content_html_and_more"),
+        ("peachjam", "0284_add_coredocument_content_html_and_more"),
     ]
 
     operations = [

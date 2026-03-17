@@ -181,6 +181,11 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("ID of a helpscout contact us beacon."),
     )
+    allow_criminal_data_extraction = models.BooleanField(
+        verbose_name=_("allow criminal data extraction"),
+        default=False,
+        help_text=_("Allow AI-based criminal data extraction for judgments."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
