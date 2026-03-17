@@ -145,6 +145,7 @@ class FlynoteTopicListView(FlynoteTopicMixin, ListView):
             for t in page_topics
         ]
 
+        context["total_topic_count"] = Flynote.get_root_nodes().count()
         context["total_judgment_count"] = FlynoteDocumentCount.objects.filter(
             flynote__in=Flynote.get_root_nodes()
         ).aggregate(total=Coalesce(Sum("count"), Value(0)))["total"]
@@ -226,6 +227,7 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
 
         context["topic"] = self.flynote
         context["ancestors"] = self.flynote.get_ancestors()
+        context["total_subtopic_count"] = total_children
         context["root"] = None
 
         return context
