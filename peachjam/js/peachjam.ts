@@ -205,10 +205,10 @@ class PeachJam {
         })
       ],
       allowUrls: [
-        new RegExp(window.location.host.replace('.', '\\.') + '/static/')
+        new RegExp(window.location.host.replace(/\./g, '\\.') + '/static/')
       ],
       denyUrls: [
-        new RegExp(window.location.host.replace('.', '\\.') + '/static/lib/pdfjs/')
+        new RegExp(window.location.host.replace(/\./g, '\\.') + '/static/lib/pdfjs/')
       ],
       beforeSend (event) {
         try {
