@@ -85,7 +85,7 @@ class FlynoteDocumentCount(models.Model):
         related_name="document_count_cache",
         verbose_name=_("flynote"),
     )
-    count = models.PositiveIntegerField(_("count"), default=0)
+    count = models.PositiveIntegerField(_("count"), default=0, db_index=True)
 
     class Meta:
         verbose_name = _("flynote document count")
