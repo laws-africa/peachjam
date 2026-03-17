@@ -17,8 +17,8 @@ from django.utils.translation import override as lang_override
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
-from peachjam.models import CoreDocument, DocumentContent, Locality, SourceFile
 from peachjam.helpers import current_year
+from peachjam.models import CoreDocument, DocumentContent, Locality, SourceFile
 from peachjam.tasks import create_anonymised_source_file_pdf
 
 log = logging.getLogger(__name__)

@@ -269,6 +269,8 @@ class JudgmentBulkImportTestCase(TestCase):
         doc = GenericDocument.objects.get(title="legacy html fallback")
         self.assertEqual(
             "<p>Legacy content_html value</p>", doc.document_content.source_html
+        )
+
 
 class OffenceBulkImportTestCase(TestCase):
     def setUp(self):
