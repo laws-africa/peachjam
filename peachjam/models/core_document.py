@@ -1143,8 +1143,6 @@ class DocumentContent(AttributeHooksMixin, models.Model):
                     text = text.replace("\0", " ")
 
         self.content_text = text
-        if self.pk:
-            self.save(update_fields=["content_text"])
 
     def update_text_content_from_html(self):
         """Update ``content_text`` by extracting plain text from ``content_html``."""
@@ -1153,8 +1151,6 @@ class DocumentContent(AttributeHooksMixin, models.Model):
             text = " ".join(self.content_html_tree.itertext())
 
         self.content_text = text
-        if self.pk:
-            self.save(update_fields=["content_text"])
 
     @on_attribute_changed(BEFORE_SAVE, ["source_html"], ["content_html"])
     def sync_content_html_from_source_html(self):
