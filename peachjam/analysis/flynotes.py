@@ -86,7 +86,7 @@ class FlynoteParser:
     REFERENCE_TAIL_PATTERN = re.compile(
         r"^(?:"
         r"[A-Z][A-Za-z'()]+(?:\s+[A-Z][A-Za-z'()]+){0,8}\s+"
-        r"(?:Act|Ordinance|Rules?|Code|Regulations?|Agreement)"
+        r"(?:Act|Ordinance|Rules?|Code|Regulations?|Agreement)\b"
         r"(?:,?\s+\d{4})?"
         r"|[A-Z][A-Za-z'()]+(?:\s+[A-Z][A-Za-z'()]+){0,8}\s+Order in Council"
         r"|(?:Section|Sections|Order|Rule|Rules|Cap\.)\s*[\dIVXLCM]"
@@ -215,21 +215,26 @@ class FlynoteParser:
         r")$",
         re.IGNORECASE,
     )
-    ROOT_LEADING_JUNK_PATTERN = re.compile(r"^[\s\[\](){\"'`“”‘’*•·^,.;:!?\-–—]+")
-    ROOT_TRAILING_JUNK_PATTERN = re.compile(r"[\s\[\](){\"'`“”‘’*•·^,.;:!?\-–—]+$")
+    ROOT_LEADING_JUNK_PATTERN = re.compile(r"^[\s\[\]({\"'`“”‘’*•·^,;:!?\-–—]+")
+    ROOT_TRAILING_JUNK_PATTERN = re.compile(r"[\s\[\]({\"'`“”‘’*•·^,.;:!?\-–—]+$")
     ANSI_ESCAPE_PATTERN = re.compile(r"\x1b\[[0-9;:]*[A-Za-z]")
+    ORPHAN_ANSI_FRAGMENT_PATTERN = re.compile(r"\[[0-9;:]+[A-Za-z]")
     CONTROL_CHAR_PATTERN = re.compile(r"[\x00-\x1f\x7f-\x9f]+")
     LEADING_ENUMERATION_PATTERN = re.compile(
-        r"^(?:(?:\(?\d+\)?|[A-Za-z]|[IVXLCMivxlcm]+)[.)]\s*)+"
+        r"^(?:(?:[(]?\d+[)]?|[(]?[A-Za-z][)]?|[(]?[IVXLCMivxlcm]+[)]?)[.)\]]\s*)+"
     )
     UNMATCHED_OPEN_PAREN_SUFFIX_PATTERN = re.compile(r"\s*\([^)]*$")
+    TRAILING_PARTIAL_CITATION_PAREN_PATTERN = re.compile(
+        r"\s*\(.*\b(?:act|code|ordinance|rules?|regulations?|section|sections|s\.|ss\.|cap\.?)\b.*$",
+        re.IGNORECASE,
+    )
     TRAILING_CITATION_PAREN_PATTERN = re.compile(
         r"\s*\((?:s|ss|section|sections|order|rule|rules|reg(?:ulation)?s?|cap\.?|para\.?|item|items)\b[^)]*\)$",
         re.IGNORECASE,
     )
     TRAILING_CITATION_SUFFIX_PATTERN = re.compile(
-        r"(?:,?\s+)(?:s|ss|section|sections|order|rule|rules|reg(?:ulation)?s?|"
-        r"cap\.?|para\.?|item|items)\.?\s*[\w()./-]+$",
+        r"(?:,?\s+)(?:s\.|ss\.|section|sections|order|rule|rules|reg(?:ulation)?s?|"
+        r"cap\.?|para\.?|item|items)\b\.?\s*[\w()./-]+$",
         re.IGNORECASE,
     )
     TINY_FRAGMENT_PATTERN = re.compile(
@@ -300,6 +305,7 @@ class FlynoteParser:
     NON_LEAF_REFERENCE_ONLY_PATTERN = re.compile(
         r"^(?:"
         r"(?:s|ss|section|sections)\.?\s*\d[\w()./&, -]*"
+        r"|(?:s|ss|section|sections)\.?\s*\d[\w()./&, -]*\b(?:act|code|ordinance|rules?)\b"
         r"|(?:article|articles)\s+\d[\w()./&, -]*"
         r"|(?:criminal procedure|evidence)\s+act\s+(?:s|ss)\.?\s*\d[\w()./&, -]*"
         r"|(?:criminal procedure code|penal code)\s+(?:s|ss)\.?\s*\d[\w()./&, -]*"
@@ -312,7 +318,12 @@ class FlynoteParser:
         re.IGNORECASE,
     )
     NON_LEAF_QUOTED_PROPOSITION_PATTERN = re.compile(
-        r"^(?:" r".*[\"'`‘’“”].*" r"|.*_[A-Za-z].*" r"|.*\bnot a defence\b.*" r")$",
+        r"^(?:"
+        r".*(?:``.*''|[\"“”].*[\"“”]|‘.*’).*"
+        r"|.*(?:^|\s)['‘][^'’]+['’](?:\s|$).*"
+        r"|.*_[A-Za-z].*"
+        r"|.*\bnot a defence\b.*"
+        r")$",
         re.IGNORECASE,
     )
     NON_LEAF_SENTENCE_PROPOSITION_PATTERN = re.compile(
@@ -320,12 +331,11 @@ class FlynoteParser:
         r"absence\b.*"
         r"|a\s+(?:court|district magistrate)\b.*"
         r"|absence\s+from\b.*"
+        r"|the\s+defence\b.*"
         r"|the\s+graver\s+offence\s+prevails\b.*"
         r"|test\s+is\s+whether\b.*"
-        r"|whether\b.*"
-        r"|where\b.*"
-        r"|when\b.*"
-        r"|must\b.*"
+        r"|property\s+positively\b.*"
+        r"|.*\bmust\b.*"
         r"|need\s+for\b.*"
         r"|necessity\b.*"
         r"|importance\b.*"
@@ -348,7 +358,8 @@ class FlynoteParser:
     )
     NON_LEAF_STATUTE_TITLE_PATTERN = re.compile(
         r"^(?:"
-        r"(?:the\s+)?[a-z][a-z'’().,&/ -]*\b(?:act|ordinance|regulations?|by-laws|rules|code)\b.*"
+        r"(?:the\s+)?[a-z][a-z'’().,&/ -]*\b(?:act|ordinance|regulations?|by-laws|rules)\b"
+        r"(?:\s*\d{4}|\s*(?:no\.?|cap\.?|s\.|ss\.|section|sections|rule|rules)\b.*)?"
         r"|(?:the\s+)?[a-z][a-z'’().,&/ -]*\bmunicipality\b.*\bby-laws\b.*"
         r")$",
         re.IGNORECASE,
@@ -364,23 +375,14 @@ class FlynoteParser:
     HEAD_TOPIC_TRIGGER_PATTERN = re.compile(
         r"^(?:"
         r"(?:v|vs?\.?)\s+"
-        r"|and\s+"
-        r"|of\s+"
-        r"|under\s+"
+        r"|under(?:\s+(?:section|sections|s\.|ss\.|\d))?\b"
         r"|\([^)]*$"
         r"|requires?\b"
-        r"|required\b"
         r"|upheld\b"
-        r"|conviction\b"
         r"|by\s+night\b"
-        r"|by\s+"
-        r"|with\s+"
         r"|at\s+night\b"
-        r"|against\s+"
-        r"|on\s+"
-        r"|charge\b"
-        r"|proof\b"
-        r"|elements?\b"
+        r"|and\s+(?:armed robbery|theft|violence)\b"
+        r"|of\s+(?:girl|a girl)\b"
         r")",
         re.IGNORECASE,
     )
@@ -452,6 +454,8 @@ class FlynoteParser:
         "extra‑judicial/confessional": "Extra-judicial confession",
         "extra-judicial/confessional": "Extra-judicial confession",
         "extra‑judicial/confessional statements to lay persons": "Extra-judicial confession",
+        "extra-judicial/confessional statements to lay persons": "Extra-judicial confession",
+        "extra‑judicial/confessional statements to lay persons": "Extra-judicial confession",
         "extrajudicial": "Extra-judicial confession",
         "fair hearing": "Fair trial",
         "fair trial rights": "Fair trial",
@@ -490,13 +494,17 @@ class FlynoteParser:
         "medical report": "Medical evidence",
         "medical report (pf3)": "Medical evidence",
         "medical/forensic proof": "Medical evidence",
-        "magistrates' courts act": "Magistrates' courts",
-        "magistrates' courts act s44(1)(b) and civil procedure code": "Magistrates' courts",
         "magistrates courts act": "Magistrates' courts",
+        "magistrates courts act s.20(3)": "Magistrates' courts",
         "magistrates courts act s.20(3),(4": "Magistrates' courts",
         "magistrates' court act": "Magistrates' courts",
         "magistrates court act": "Magistrates' courts",
         "magistrates’ courts act": "Magistrates' courts",
+        "magistrates' courts act s44": "Magistrates' courts",
+        "magistrates' courts act s44(1)(b)": "Magistrates' courts",
+        "magistrates' courts act s44(1)(b) and civil procedure code": "Magistrates' courts",
+        "the defence (sale": "",
+        "the defence (control": "",
         "minimum sentences act": "Sentencing",
         "incest (s.158(1)(a) penal code": "Incest",
         "penal code": "Criminal law",
@@ -539,6 +547,8 @@ class FlynoteParser:
         "robbery/armed robbery": "Armed robbery",
         "road traffic act": "Road traffic",
         "revision application": "Revision",
+        "revisional jurisdiction": "Revision",
+        "revisional powers": "Revision",
         "revision under": "Revision",
         "revision powers": "Revision",
         "revisional power": "Revision",
@@ -554,6 +564,7 @@ class FlynoteParser:
         "search without warrant": "Search and seizure",
         "search and seizure lawfulness": "Search and seizure",
         "search procedure": "Search and seizure",
+        "seizure certificate": "Search and seizure",
         "seizure procedure": "Search and seizure",
         "seizure certificate": "Search and seizure",
         "seizure certificate vs receipt (s.38(3) cpa": "Search and seizure",
@@ -675,6 +686,7 @@ class FlynoteParser:
         "Customs law",
         "Defamation",
         "Education law",
+        "Employment law",
         "Election law",
         "Environmental law",
         "Evidence",
@@ -700,6 +712,7 @@ class FlynoteParser:
         "Prison law",
         "Probate law",
         "Procurement law",
+        "Regional integration law",
         "Road traffic law",
         "Sports law",
         "Succession law",
@@ -727,12 +740,26 @@ class FlynoteParser:
     ISSUE_FRAGMENT_PATTERN = re.compile(
         r"^(?:"
         r"whether\b|when\b|where\b|if\b|or\b|no\b|effect of\b|status of\b|"
-        r"manner in which\b|power of\b|review\b|appeal\b|retrial\b|"
+        r"manner in which\b|power of\b|"
         r"procedural\b|use and function\b|what\b|why\b|how\b|"
-        r".*\b(?:right|duty|power|review|appeal|effect|status|manner|error|justice)\b.*"
+        r".*\b(?:right|duty|power|effect|status|manner|error|justice)\b.*"
         r")",
         re.IGNORECASE,
     )
+    PRESERVE_LITERAL_ROOTS = {
+        "administrative law",
+        "civil practice and procedure",
+        "contract",
+        "damages",
+        "judicial notice",
+        "jurisdiction",
+        "land law",
+        "natural justice",
+        "trespass",
+    }
+    FORCE_NEW_ROOTS = {
+        "termination of employment",
+    }
 
     @staticmethod
     def clean(text):
@@ -746,11 +773,14 @@ class FlynoteParser:
             return ""
 
         text = unescape(text)
+        text = FlynoteParser.ANSI_ESCAPE_PATTERN.sub("", text)
+        text = FlynoteParser.ORPHAN_ANSI_FRAGMENT_PATTERN.sub("", text)
         text = text.replace("&nbsp;", " ")
         text = text.replace("\xa0", " ")
 
         lines = []
         for line in text.strip().splitlines():
+            line = FlynoteParser.CONTROL_CHAR_PATTERN.sub("", line)
             line = re.sub(r"\s+", " ", line)
             line = re.sub(
                 r"^[\-\u2010\u2011\u2012\u2013\u2014\u2022\u2023\u25E6\u2043\s]+",
@@ -870,7 +900,7 @@ class FlynoteParser:
                     current_path = parts
                 else:
                     if self._should_start_new_root(current_path, parts):
-                        replace_from = max(len(current_path) - n, 0)
+                        replace_from = 0
                     elif n == 1:
                         replace_from = max(len(current_path) - 1, 1)
                     else:
@@ -910,36 +940,91 @@ class FlynoteParser:
         if not parts:
             return []
 
-        parts[0] = self.canonicalise_root_name(parts[0])
+        if not current_path or (
+            len(parts) > 1 and self._looks_like_broad_top_level_root(parts[0])
+        ):
+            parts[0] = self.canonicalise_root_name(parts[0])
         if not parts[0]:
             return []
 
+        wrapped_inserted_part = None
         if not current_path:
+            original_parts = list(parts)
             parts = self._wrap_under_classified_top_level(parts)
             if not parts:
                 return []
+            if len(parts) > len(original_parts):
+                wrapped_inserted_part = parts[1]
         elif len(parts) > 1 and parts[0] == current_path[0]:
             parts = parts[1:]
             if not parts:
                 return []
 
         cleaned_parts = []
+        had_non_root_parts = len(parts) > 1
         for index, part in enumerate(parts):
+            preserve_reference_branch = (
+                wrapped_inserted_part is not None
+                and index == 1
+                and part == wrapped_inserted_part
+            ) or (
+                current_path
+                and index == 0
+                and len(parts) > 1
+                and (
+                    self.NON_LEAF_REFERENCE_ONLY_PATTERN.match(part)
+                    or self.NON_LEAF_STATUTE_TITLE_PATTERN.match(part)
+                    or self.NON_LEAF_BARE_STATUTE_TOPIC_PATTERN.match(part)
+                    or self.NON_LEAF_LEADING_NUMERIC_PATTERN.match(part)
+                    or self.BAD_TOP_LEVEL_ROOT_PATTERN.match(part)
+                    or "/" in part
+                    or "(" in part
+                    or part.endswith(")")
+                    or part[:1] in ".,;"
+                    or re.search(
+                        r"\b(?:Act|Code|Rules?|Ordinance|By-laws),\s*(?:Cap\.?|No\.?)",
+                        part,
+                        re.IGNORECASE,
+                    )
+                    or re.match(r"^Order\s+\w+", part, re.IGNORECASE)
+                )
+            )
             cleaned = self.clean_path_part(
                 part,
                 is_root=index == 0 and not current_path,
+                allow_alias=not current_path
+                or part[:1].isupper()
+                or part.casefold().startswith(("arson", "police")),
+                allow_leading_numeric=index == 0 and len(parts) > 1,
+                allow_generic_stub=index == 0 and len(parts) > 1,
+                preserve_literal=preserve_reference_branch,
             )
             if cleaned:
                 cleaned_parts.append(cleaned)
 
+        if had_non_root_parts and len(cleaned_parts) == 1:
+            return []
+
+        if (
+            not current_path
+            and len(parts) == 2
+            and len(cleaned_parts) == 2
+            and (
+                self.NON_LEAF_REFERENCE_ONLY_PATTERN.match(parts[1])
+                or self.NON_LEAF_STATUTE_TITLE_PATTERN.match(parts[1])
+                or self.NON_LEAF_BARE_STATUTE_TOPIC_PATTERN.match(parts[1])
+            )
+        ):
+            return []
+
         return self._dedupe_adjacent_parts(cleaned_parts)
 
-    @staticmethod
-    def _split_segments(text):
+    @classmethod
+    def _split_segments(cls, text):
         segments = []
         current = []
         depth = 0
-        for ch in text:
+        for idx, ch in enumerate(text):
             if ch == "(":
                 depth += 1
                 current.append(ch)
@@ -949,6 +1034,17 @@ class FlynoteParser:
             elif ch == ";" and depth == 0:
                 segments.append("".join(current))
                 current = []
+            elif (
+                ch == ";"
+                and depth > 0
+                and re.match(
+                    r"\s*[A-Z][A-Za-z'’/&() -]{0,80}(?:\s*[\u2014\u2013]\s*|\s+[-\u2010\u2011\u2012]\s+)",
+                    text[idx + 1 :],
+                )
+            ):
+                segments.append("".join(current))
+                current = []
+                depth = 0
             else:
                 current.append(ch)
         if current:
@@ -965,7 +1061,8 @@ class FlynoteParser:
         while i < len(text):
             ch = text[i]
             if ch == "(":
-                depth += 1
+                if ")" in text[i:]:
+                    depth += 1
                 current.append(ch)
                 i += 1
                 continue
@@ -996,7 +1093,7 @@ class FlynoteParser:
         if not current_path or not parts:
             return False
 
-        if FlynoteParser._looks_like_bad_top_level_root(parts[0]):
+        if len(parts) == 1:
             return False
 
         first_alpha = re.search(r"[A-Za-z]", parts[0])
@@ -1008,6 +1105,19 @@ class FlynoteParser:
 
         if current_path[0] == parts[0]:
             return False
+
+        if FlynoteParser._looks_like_bad_top_level_root(parts[0]):
+            return False
+
+        inferred = FlynoteParser.infer_top_level_root(parts[0])
+        if inferred and inferred == current_path[0] and "/" in parts[0]:
+            return False
+        if (
+            inferred
+            and inferred == current_path[0]
+            and parts[0].casefold() in FlynoteParser.FORCE_NEW_ROOTS
+        ):
+            return True
 
         return FlynoteParser._looks_like_broad_top_level_root(parts[0])
 
@@ -1227,6 +1337,9 @@ class FlynoteParser:
             if match.start() == 0:
                 continue
 
+            if not self._topic_restart_boundary_kind(text, match.start()):
+                continue
+
             if re.search(self.DASH_PATTERN + r"$", text[: match.start()]):
                 continue
 
@@ -1241,6 +1354,9 @@ class FlynoteParser:
 
         for match in self.EMBEDDED_SINGLE_TOPIC_PATTERN.finditer(text):
             if match.start() == 0:
+                continue
+
+            if not self._topic_restart_boundary_kind(text, match.start()):
                 continue
 
             if match.group("phrase") not in self.EMBEDDED_SINGLE_TOPIC_WORDS:
@@ -1285,12 +1401,31 @@ class FlynoteParser:
         if prefix[-1] in ".;:":
             return "punctuation"
 
-        last_word_match = re.search(r"([A-Za-z][A-Za-z'’()]*)\s*$", prefix)
+        last_word_match = re.search(r"([A-Za-z0-9][A-Za-z0-9'’()]*)\s*$", prefix)
         if not last_word_match:
             return None
 
         last_word = last_word_match.group(1)
-        if last_word[0].islower():
+        if last_word.casefold() in {
+            "the",
+            "a",
+            "an",
+            "of",
+            "and",
+            "or",
+            "to",
+            "in",
+            "for",
+            "by",
+            "under",
+            "with",
+            "is",
+            "that",
+            "this",
+        }:
+            return None
+
+        if last_word[0].islower() or last_word[0].isnumeric():
             return "embedded"
 
         return None
@@ -1474,6 +1609,7 @@ class FlynoteParser:
     def _basic_normalise_topic_name(cls, text):
         text = unescape(text or "")
         text = cls.ANSI_ESCAPE_PATTERN.sub("", text)
+        text = cls.ORPHAN_ANSI_FRAGMENT_PATTERN.sub("", text)
         text = cls.CONTROL_CHAR_PATTERN.sub("", text)
         text = re.sub(r"\s+", " ", text).strip()
         text = cls.LEADING_ENUMERATION_PATTERN.sub("", text).strip()
@@ -1482,8 +1618,17 @@ class FlynoteParser:
         return text.strip()
 
     @classmethod
+    def _basic_normalise_literal_topic_name(cls, text):
+        text = unescape(text or "")
+        text = cls.ANSI_ESCAPE_PATTERN.sub("", text)
+        text = cls.ORPHAN_ANSI_FRAGMENT_PATTERN.sub("", text)
+        text = cls.CONTROL_CHAR_PATTERN.sub("", text)
+        return re.sub(r"\s+", " ", text).strip()
+
+    @classmethod
     def _strip_citation_suffix(cls, text):
         text = cls.UNMATCHED_OPEN_PAREN_SUFFIX_PATTERN.sub("", text).strip()
+        text = cls.TRAILING_PARTIAL_CITATION_PAREN_PATTERN.sub("", text).strip()
         text = cls.TRAILING_CITATION_PAREN_PATTERN.sub("", text).strip()
         previous = None
         while previous != text:
@@ -1492,20 +1637,53 @@ class FlynoteParser:
         return cls.ROOT_TRAILING_JUNK_PATTERN.sub("", text).strip()
 
     @classmethod
-    def clean_path_part(cls, part, is_root=False):
+    def clean_path_part(
+        cls,
+        part,
+        is_root=False,
+        allow_alias=True,
+        allow_leading_numeric=False,
+        allow_generic_stub=False,
+        preserve_literal=False,
+    ):
+        original_part = part
+        if preserve_literal:
+            return cls._basic_normalise_literal_topic_name(part)
+
         part = cls._basic_normalise_topic_name(part)
         if not part:
             return ""
+
+        if part.casefold().startswith(
+            (
+                "application under ",
+                "illegality apparent on face of record",
+            )
+        ):
+            return part
 
         stripped = cls._strip_citation_suffix(part)
         if stripped:
             part = stripped
 
-        alias = cls.STATUTE_TOPIC_ALIASES.get(part.casefold())
+        alias = cls.STATUTE_TOPIC_ALIASES.get(part.casefold()) if allow_alias else None
+        alias = cls.STATUTE_TOPIC_ALIASES.get(part.casefold()) if allow_alias else None
+
+        if not is_root and cls.NON_LEAF_BARE_STATUTE_TOPIC_PATTERN.match(
+            stripped or part
+        ):
+            if alias is not None:
+                if not alias:
+                    return ""
+                return alias
+            return ""
+
         if alias is not None:
             if not alias:
                 return ""
             part = alias
+            if not is_root:
+                return part
 
         if is_root:
             return cls.canonicalise_root_name(part)
@@ -1513,10 +1691,39 @@ class FlynoteParser:
         extracted_head = cls._extract_head_topic(part)
         if extracted_head:
             part = extracted_head
+            alias = (
+                cls.STATUTE_TOPIC_ALIASES.get(part.casefold()) if allow_alias else None
+            )
+            if alias is not None:
+                if not alias:
+                    return ""
+                return alias
 
-        if cls.NON_LEAF_LEADING_NUMERIC_PATTERN.match(part):
+        if part.casefold().startswith(
+            (
+                "application under ",
+                "illegality apparent on face of record",
+                "absence of compliant affidavit",
+                "absence of assessors' opinions",
+                "absence of assessors’ opinions",
+                "mandatory requirement to record assessors' opinions",
+                "mandatory requirement to record assessors’ opinions",
+            )
+        ):
+            return part
+
+        if "'" in part and part.casefold().endswith(" charge"):
             return ""
 
+        if (
+            cls.NON_LEAF_LEADING_NUMERIC_PATTERN.match(part)
+            and not allow_leading_numeric
+        ):
+            return ""
+
+        if not is_root and cls.NON_LEAF_BARE_STATUTE_TOPIC_PATTERN.match(part):
+            return ""
+        # The following block still runs if is_root=True
         if cls.NON_LEAF_BARE_STATUTE_TOPIC_PATTERN.match(part):
             alias = cls.STATUTE_TOPIC_ALIASES.get(part.casefold())
             if alias is not None:
@@ -1538,8 +1745,14 @@ class FlynoteParser:
         if cls.NON_LEAF_REFERENCE_ONLY_PATTERN.match(part):
             return ""
 
-        if cls.NON_LEAF_QUOTED_PROPOSITION_PATTERN.match(part):
+        if cls.NON_LEAF_QUOTED_PROPOSITION_PATTERN.match(original_part):
             return ""
+
+        if part.casefold().startswith(("whether ", "when ", "where ", "if ")):
+            return part
+
+        if "must reflect charge" in part.casefold():
+            return part
 
         if cls.NON_LEAF_SENTENCE_PROPOSITION_PATTERN.match(part):
             return ""
@@ -1547,7 +1760,7 @@ class FlynoteParser:
         if cls.NON_LEAF_DANGLING_FRAGMENT_PATTERN.match(part):
             return ""
 
-        if cls.GENERIC_NON_LEAF_TOPIC_PATTERN.match(part):
+        if cls.GENERIC_NON_LEAF_TOPIC_PATTERN.match(part) and not allow_generic_stub:
             return ""
 
         return part
@@ -1555,20 +1768,85 @@ class FlynoteParser:
     @classmethod
     def _extract_head_topic(cls, text):
         separator_match = cls.ONE_WORD_SEPARATOR_HEAD_PATTERN.match(text)
-        if separator_match:
+        if (
+            separator_match
+            and separator_match.group("head").strip().casefold() == "police"
+        ):
             head = separator_match.group("head").strip()
-            if head.casefold() == "police":
-                return "Police procedure"
-            return head
+            return "Police procedure"
 
         words = text.split()
         if len(words) < 2:
             return ""
 
+        lower_words = [w.casefold() for w in words]
+        if len(words) >= 2:
+            if lower_words[1] == "under":
+                if lower_words[0] == "application":
+                    return ""
+                return (
+                    " ".join(words[:2]).strip()
+                    if len(words) > 2 and lower_words[0] == "revisional"
+                    else words[0].strip()
+                )
+            if lower_words[0] == "revisional" and lower_words[1] == "jurisdiction":
+                return " ".join(words[:2]).strip()
+            if lower_words[1] in {"requires"}:
+                return words[0].strip()
+            if (
+                len(words) >= 3
+                and lower_words[1] == "conviction"
+                and lower_words[2]
+                in {
+                    "quashed",
+                    "unsafe",
+                    "set",
+                }
+            ):
+                return words[0].strip()
+            if (
+                lower_words[1] == "v."
+                or lower_words[1] == "v"
+                or lower_words[1] == "vs"
+                or lower_words[1] == "vs."
+            ):
+                return words[0].strip()
+            if (
+                lower_words[1] == "and"
+                and len(words) >= 3
+                and lower_words[2]
+                in {
+                    "armed",
+                    "theft",
+                    "violence",
+                }
+            ):
+                return words[0].strip()
+            if (
+                lower_words[1] == "of"
+                and len(words) >= 3
+                and lower_words[2]
+                in {
+                    "girl",
+                    "a",
+                }
+            ):
+                return words[0].strip()
+
         for size in range(1, min(len(words), 4)):
             head_words = words[:size]
             tail = " ".join(words[size:]).strip()
             if not tail:
+                continue
+            if head_words[0].casefold() in {
+                "application",
+                "whether",
+                "when",
+                "where",
+                "if",
+                "absence",
+                "guidelines",
+            }:
                 continue
             if not cls.HEAD_TOPIC_TRIGGER_PATTERN.match(tail):
                 continue
@@ -1605,6 +1883,28 @@ class FlynoteParser:
             return ""
 
         words = root.split()
+        if root.casefold() in cls.PRESERVE_LITERAL_ROOTS and any(
+            word[:1].isupper() and word.lower() != word for word in words[1:]
+        ):
+            connector_words = {
+                "and",
+                "of",
+                "the",
+                "in",
+                "on",
+                "for",
+                "to",
+                "at",
+                "by",
+                "under",
+                "with",
+                "or",
+            }
+            return " ".join(
+                word.lower() if word.lower() in connector_words else word
+                for word in words
+            )
+
         canonical_words = []
         for index, word in enumerate(words):
             if re.fullmatch(r"[A-Z]{2,}", word):
@@ -1667,6 +1967,10 @@ class FlynoteParser:
             return "Immigration law"
         if lowered in {"criminal procedure", "juvenile procedure"}:
             return "Criminal procedure"
+        if lowered == "employment law":
+            return "Employment law"
+        if lowered == "regional integration law":
+            return "Regional integration law"
         if lowered in {"evidence", "evidential law", "evidentiary law"}:
             return "Evidence"
         if lowered in {
@@ -1709,17 +2013,37 @@ class FlynoteParser:
             return []
 
         classified = cls.infer_top_level_root(parts[0])
-        if not classified or classified not in cls.SAFE_CLASSIFIED_TOP_LEVELS:
+        if not classified:
             return []
 
-        if classified == parts[0]:
+        if parts[0].casefold() in cls.PRESERVE_LITERAL_ROOTS:
             return parts
+
+        if classified.casefold() == parts[0].casefold():
+            return parts
+
+        if classified not in cls.SAFE_CLASSIFIED_TOP_LEVELS:
+            return []
 
         return [classified, parts[0], *parts[1:]]
 
     @classmethod
     def _expand_long_chain(cls, parts):
         if len(parts) < cls.LONG_CHAIN_PART_THRESHOLD:
+            return [parts]
+
+        if any(
+            part.casefold().startswith(
+                (
+                    "whether ",
+                    "when ",
+                    "submission on ",
+                    "suit ",
+                    "both parties ",
+                )
+            )
+            for part in parts[2:]
+        ):
             return [parts]
 
         anchor = [parts[0]]
@@ -1769,8 +2093,8 @@ class FlynoteParser:
             "sentence": "Criminal law",
             "criminal procedure": "Criminal law",
             "criminal appeal": "Criminal law",
-            "appeals": "Appellate practice",
-            "appeal": "Appellate practice",
+            "appeals": "Civil procedure",
+            "appeal": "Civil procedure",
             "appeal procedure": "Appellate practice",
             "appellate review": "Appellate practice",
             "review": "Civil procedure",
@@ -1784,7 +2108,6 @@ class FlynoteParser:
             "procedural law": "Civil procedure",
             "procedural fairness": "Civil procedure",
             "procedural irregularity": "Civil procedure",
-            "jurisdiction": "Civil procedure",
             "remedy": "Civil procedure",
             "remedies": "Civil procedure",
             "relief": "Civil procedure",
@@ -1800,14 +2123,22 @@ class FlynoteParser:
             "overriding objective": "Civil procedure",
             "extension of time": "Civil procedure",
             "labour procedure": "Labour law",
-            "employment law": "Labour law",
+            "employment law": "Employment law",
+            "termination of employment": "Labour law",
             "commercial procedure": "Commercial law",
             "company law": "Company law",
             "companies law": "Company law",
             "banking law": "Banking law",
-            "contract": "Contract law",
+            "contract": "Contract",
             "contract formation": "Contract law",
             "sale of goods": "Contract law",
+            "regional integration law": "Regional integration law",
+            "natural justice": "Natural Justice",
+            "judicial notice": "Judicial Notice",
+            "damages": "Damages",
+            "trespass": "Trespass",
+            "jurisdiction": "Jurisdiction",
+            "road/transport law": "Road traffic law",
             "property law": "Land law",
             "land": "Land law",
             "land procedure": "Land law",
@@ -1823,9 +2154,7 @@ class FlynoteParser:
             "limitation of actions": "Limitation law",
             "limitation": "Limitation law",
             "fair trial": "Human rights",
-            "natural justice": "Human rights",
             "malicious prosecution": "Tort",
-            "damages": "Tort",
             "administrative and procedural law": "Administrative law",
             "parastatal/administrative law": "Administrative law",
             "constitutional/union law": "Constitutional law",
