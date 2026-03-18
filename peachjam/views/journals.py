@@ -6,12 +6,19 @@ from django.views.generic import ListView
 
 from peachjam.forms import JournalArticleFilterForm
 from peachjam.helpers import chunks
-from peachjam.models import Journal, JournalArticle, VolumeIssue
+from peachjam.models import VOLUME_ISSUE_TITLE_RE, Journal, JournalArticle, VolumeIssue
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+
+
+def _volume_sort_key(volume):
+    m = VOLUME_ISSUE_TITLE_RE.search(volume.title)
+    if m:
+        return int(m.group(3)), int(m.group(1)), int(m.group(2))
+    return 0, 0, 0
 
 
 class JournalListView(ListView):
@@ -95,7 +102,12 @@ class JournalDetailView(JournalArticleListView):
         context["hide_follow_button"] = True
         context["entity_profile"] = self.journal.entity_profile.first()
         context["journal"] = self.journal
-        volumes = list(self.journal.volumes.all())
+        volumes = list(
+            self.journal.volumes.annotate(article_count=Count("articles")).filter(
+                article_count__gt=0
+            )
+        )
+        volumes.sort(key=_volume_sort_key)
         context["volume_groups"] = chunks(volumes, 3)
         return context
 
