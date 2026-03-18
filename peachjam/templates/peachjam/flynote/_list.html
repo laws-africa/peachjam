@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load humanize i18n %}
 {% if all_topics %}
   <div class="list-group list-group-flush">
     {% for item in all_topics %}
@@ -8,7 +8,7 @@
           {{ item.topic.name }}
           {% if item.child_names %}<small class="text-muted d-block">{{ item.child_names|join:", " }}</small>{% endif %}
         </div>
-        <span class="badge bg-secondary">{{ item.count }}</span>
+        <span class="badge bg-secondary">{{ item.count|intcomma }}</span>
       </a>
     {% endfor %}
   </div>
