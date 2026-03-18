@@ -22,6 +22,8 @@ JAZZMIN_SETTINGS["site_title"] = "ULII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "ULII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "ulii.org"  # noqa
 
+TEMPLATED_EMAIL_BACKEND = "peachjam.emails.CustomerIOTemplateBackend"
+
 COURT_CODE_MAPPINGS = {
     "leadership-code-tribunal-uganda": "UGLCT",
     "supreme-court-uganda": "UGSC",
