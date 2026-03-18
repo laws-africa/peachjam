@@ -269,9 +269,11 @@ class JudgmentTestCase(TestCase):
             date=datetime.date(2019, 1, 1),
             jurisdiction=Country.objects.get(pk="ZA"),
             case_name="Foo v Bar",
-            content_html="<p>This is the judgment text.</p>",
         )
         judgment.save()
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
 
         judgment.generate_summary()
         judgment.refresh_from_db()
@@ -288,3 +290,86 @@ class JudgmentTestCase(TestCase):
             cache_ttl_seconds=30,
         )
         fake_openai.responses.parse.assert_called_once()
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_content_text_change_triggers_summary_generation(
+        self, generate_summary_task
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        self.assertTrue(
+            any(
+                call.args == (judgment.pk,)
+                for call in generate_summary_task.call_args_list
+            )
+        )
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_content_text_change_does_not_trigger_summary_until_anonymised(
+        self, generate_summary_task
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        initial_calls = len(generate_summary_task.call_args_list)
+
+        judgment.track_changes()
+        judgment.must_be_anonymised = True
+        judgment.save()
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+        judgment.refresh_from_db()
+        judgment.track_changes()
+        judgment.anonymised = True
+        judgment.save()
+
+        self.assertTrue(
+            any(
+                call.args == (judgment.pk,)
+                for call in generate_summary_task.call_args_list
+            )
+        )
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_existing_human_summary_blocks_auto_generation(self, generate_summary_task):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+            case_summary="Editor-written summary",
+            summary_ai_generated=False,
+        )
+        initial_calls = len(generate_summary_task.call_args_list)
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+        judgment.anonymised = True
+        judgment.save()
+
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))

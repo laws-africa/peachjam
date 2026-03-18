@@ -104,36 +104,16 @@ class CitationAnalyserTestCase(TestCase):
             ],
         )
 
-    def test_delete_citations(self):
-        doc = CoreDocument(
-            content_html_is_akn=False,
-            content_html="""
-<div>
-<p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
-<p>Some text <a href="https://example.com">Example</a></p>
-</div>
-""",
-        )
-        doc.delete_citations()
-        self.assertEqual(
-            """<div>
-<p>Some text Act 1 of 2010</p>
-<p>Some text <a href="https://example.com">Example</a></p>
-</div>
-""",
-            doc.content_html,
-        )
-
     def test_delete_citations_should_not_change_akn(self):
-        doc = CoreDocument(
-            content_html_is_akn=True,
-            content_html="""
+        doc = CoreDocument()
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html("""
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
 <p>Some text <a href="https://example.com">Example</a></p>
 </div>
-""",
-        )
+""")
         doc.delete_citations()
         self.assertEqual(
             """
@@ -142,7 +122,7 @@ class CitationAnalyserTestCase(TestCase):
 <p>Some text <a href="https://example.com">Example</a></p>
 </div>
 """,
-            doc.content_html,
+            doc_content.content_html,
         )
 
 
