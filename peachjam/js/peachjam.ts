@@ -99,6 +99,10 @@ class PeachJam {
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
 
+  triggerSentryTest () {
+    throw new Error('[Peachjam] Sentry sanity check — first-party error trigger');
+  }
+
   setupConfig () {
     const data = document.getElementById('peachjam-config')?.innerText;
     if (data) {
@@ -443,4 +447,5 @@ class PeachJam {
 }
 
 const peachJam = new PeachJam();
+(window as any).peachJam = peachJam;
 export default peachJam;
