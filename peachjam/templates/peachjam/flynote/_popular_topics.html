@@ -24,11 +24,7 @@
                 data-bs-target="#allSubtopicsCollapse"
                 aria-expanded="false"
                 aria-controls="allSubtopicsCollapse">
-          {% if topic %}
-            {{ topic.name }}
-          {% else %}
-            {% trans "Explore all subtopics" %}
-          {% endif %}
+          {% trans "All subtopics" %}
           <i class="bi bi-chevron-down ms-1"></i>
         </button>
       </div>
