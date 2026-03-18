@@ -119,13 +119,13 @@ npx webpack -w --mode development
 from the project root to watch and rebuild assets whenever you save. Do not commit the generated files in
 `peachjam/static/js/`, that will be built automatically on `main` as described below.
 
-Any time a change lands on `main`, [the build workflow](.github/workflows/build.yml) runs webpack and compares the
+Any time a change lands on `main`, [the build workflow](../.github/workflows/build.yml) runs webpack and compares the
 compiled output with the previous commit. If real differences are detected, the workflow commits the updated bundles
 back to `main`. That follow-up commit is what ultimately lands the production-ready JavaScript in the repository, so
 developers do not need to worry about checking in built assets themselves. This commit includes `[nobuild]` in the
 commit message to prevent a circular build loop.
 
-The same push to `main` also triggers [the deployment workflow](.github/workflows/deploy.yml) which pushes the code to
+The same push to `main` also triggers [the deployment workflow](../.github/workflows/deploy.yml) which pushes the code to
 each Dokku target in turn. If you are merging a pull request and want to avoid that deploy, include `nodeploy` anywhere
 in your merge commit message so that the workflow skips its jobs.
 
