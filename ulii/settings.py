@@ -2,11 +2,15 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
-INSTALLED_APPS = ["ulii.apps.ULIIConfig"] + INSTALLED_APPS  # noqa
+INSTALLED_APPS = ["ulii.apps.ULIIConfig", "peachjam_ml"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
 PEACHJAM["CHAT_PUBLIC"] = True  # noqa
 
+# turn on document embeddings for document similarity without semantic search
+PEACHJAM["DOCUMENT_EMBEDDINGS"] = True  # noqa
+
+ROOT_URLCONF = "ulii.urls"
 
 LANGUAGES = [
     ("sw", _("Swahili")),
