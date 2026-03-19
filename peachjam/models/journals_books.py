@@ -1,5 +1,6 @@
 from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import BEFORE_SAVE
 from markdown.extensions.toc import slugify
@@ -54,6 +55,9 @@ class Journal(models.Model):
 
     def __str__(self):
         return self.title
+
+    def get_absolute_url(self):
+        return reverse("journal_detail", args=[self.slug])
 
 
 class JournalArticle(CoreDocument):

@@ -92,7 +92,6 @@ class JournalDetailView(JournalArticleListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["hide_follow_button"] = True
         context["entity_profile"] = self.journal.entity_profile.first()
         context["journal"] = self.journal
         volumes = list(self.journal.volumes.all())

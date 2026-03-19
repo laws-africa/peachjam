@@ -125,7 +125,10 @@ class LawReportViewsTestCase(TestCase):
         self.assertIn(self.volume_1, response.context["law_report_volumes"])
         self.assertIn(self.volume_2, response.context["law_report_volumes"])
         self.assertNotIn(self.empty_volume, response.context["law_report_volumes"])
-        self.assertTrue(response.context["hide_follow_button"])
+        self.assertContains(
+            response,
+            reverse("user_following_button") + f"?law_report={self.law_report.pk}",
+        )
 
     def test_law_report_volume_detail_view_filters_to_selected_volume(self):
         response = self.client.get(self.volume_1.get_absolute_url())

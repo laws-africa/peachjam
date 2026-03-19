@@ -21,6 +21,8 @@ class UserFollowingForm(forms.ModelForm):
             "country",
             "locality",
             "taxonomy",
+            "journal",
+            "law_report",
         )
 
     def __init__(self, *args, **kwargs):
@@ -47,6 +49,8 @@ class UserFollowingButtonForm(forms.Form):
     country = forms.IntegerField(required=False)
     locality = forms.IntegerField(required=False)
     taxonomy = forms.IntegerField(required=False)
+    journal = forms.IntegerField(required=False)
+    law_report = forms.IntegerField(required=False)
 
     def clean(self):
         cleaned_data = super().clean()
