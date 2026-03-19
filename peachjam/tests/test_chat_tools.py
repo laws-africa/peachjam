@@ -2,7 +2,6 @@ from datetime import date
 
 from django.test import TestCase
 
-from peachjam.chat.tools import get_document_text_for_document
 from peachjam.models import Country, DocumentContent, JournalArticle, Language
 
 
@@ -24,7 +23,7 @@ class DocumentChatToolsTestCase(TestCase):
 
         self.assertFalse(DocumentContent.objects.filter(document=article).exists())
 
-        text = get_document_text_for_document(article)
+        text = article.get_content_as_text()
 
         self.assertEqual("", text)
         self.assertTrue(DocumentContent.objects.filter(document=article).exists())
