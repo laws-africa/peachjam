@@ -91,12 +91,14 @@ class NewDocumentFormMixin:
     def process_upload_file(self, upload_file):
         # store the uploaded file
         upload_file.seek(0)
-        SourceFile(
+        source_file = SourceFile(
             document=self.instance,
-            file=File(upload_file, name=upload_file.name),
             filename=upload_file.name,
             mimetype=upload_file.content_type,
-        ).save()
+        )
+        source_file.track_changes()
+        source_file.file = File(upload_file, name=upload_file.name)
+        source_file.save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
@@ -452,6 +454,10 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
         model = SourceFile
         fields = "__all__"
         exclude = ("file_as_pdf",)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.track_changes()
 
 
 class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):

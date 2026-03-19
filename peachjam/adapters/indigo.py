@@ -604,14 +604,14 @@ class IndigoAdapter(RequestsAdapter):
                 filename = f"{slugify(title)}.pdf"
             f.write(r.content)
 
-            SourceFile.objects.update_or_create(
-                document=doc,
-                defaults={
-                    "file": File(f, name=filename),
-                    "mimetype": magic.from_file(f.name, mime=True),
-                    "size": len(r.content),
-                },
-            )
+            # there is a small race condition here if SourceFile is created in the db while we do this. In that case
+            # the task will fail and be re-tried.
+            source_file = getattr(doc, "source_file", None) or SourceFile(document=doc)
+            source_file.track_changes()
+            source_file.file = File(f, name=filename)
+            source_file.mimetype = magic.from_file(f.name, mime=True)
+            source_file.size = len(r.content)
+            source_file.save()
 
     def get_size_from_url(self, url):
         logger.info("  Getting the file size ...")

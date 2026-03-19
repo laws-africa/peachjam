@@ -12,11 +12,11 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 from docpipe.soffice import soffice_convert
 
 from peachjam.helpers import html_to_png
-from peachjam.models.lifecycle import on_attribute_changed
+from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
 from peachjam.storage import DynamicStorageFileField
 
 log = logging.getLogger(__name__)
@@ -93,7 +93,14 @@ class Image(AttachmentAbstractModel):
         )
 
 
-class SourceFile(LifecycleModelMixin, AttachmentAbstractModel):
+class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
+    """A file that was uploaded as the source file for a document. This is typically the original Word or PDF file.
+
+    The file field is a DynamicStorageFileField and so its state during __init__ differs to just after __init__,
+    so we can't rely on LifecycleModelMixin to automatically track changes. Instead, we use AttributeHooksMixin and
+    must explicitly start change tracking with track_changes().
+    """
+
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
