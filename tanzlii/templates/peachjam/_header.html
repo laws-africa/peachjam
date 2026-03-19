@@ -69,6 +69,12 @@
         </a>
       </li>
       <li class="dropdown-item">
+        <a class=" nav-link px-0 {% if view.navbar_link == 'law_report' %}active{% endif %}"
+           href="{% url 'law_report_detail' 'tanzania-law-report' %}">
+          {% trans 'Tanzania Law Report' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
         <a class="nav-link px-0 {% if request.path == '/authors/TZLRC/' %}active{% endif %}"
            href="{% url 'author' 'TZLRC' %}">
           {% trans 'Law Reform Commission Reports' %}
