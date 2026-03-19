@@ -474,7 +474,7 @@ class DocumentForm(forms.ModelForm):
 
     def _save_m2m(self):
         super()._save_m2m()
-        self.instance.document_content.save()
+        self.instance.get_or_create_document_content().save()
         self.create_topics(self.instance)
 
     @property
