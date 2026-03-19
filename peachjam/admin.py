@@ -84,7 +84,6 @@ from peachjam.models import (
     ExternalDocument,
     Gazette,
     GenericDocument,
-    Image,
     Ingestor,
     IngestorSetting,
     Journal,
@@ -492,10 +491,6 @@ class DocumentForm(forms.ModelForm):
 class AttachedFilesInline(BaseAttachmentFileInline):
     model = AttachedFiles
     form = AttachedFilesForm
-
-
-class ImageInline(BaseAttachmentFileInline):
-    model = Image
 
 
 class BackgroundTaskInline(GenericTabularInline):
