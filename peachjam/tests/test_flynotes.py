@@ -77,6 +77,733 @@ class ParseFlynoteTextTest(TestCase):
             paths[2], ["Criminal law", "circumstantial evidence", "self-defence plea"]
         )
 
+    def test_lowercase_semicolon_branch_keeps_existing_root(self):
+        text = (
+            "Criminal law \u2014 burden of proof beyond reasonable doubt; "
+            "evidence \u2014 exhibits not tendered or admitted expunged; "
+            "procedure \u2014 change of magistrate and I.K.S. notation; "
+            "appellate review \u2014 new ground not entertained on second appeal; "
+            "citation of registry not fatal"
+        )
+        paths = self.parser.parse(text)
+        self.assertEqual(
+            paths,
+            [
+                ["Criminal law", "burden of proof beyond reasonable doubt"],
+                [
+                    "Criminal law",
+                    "evidence",
+                    "exhibits not tendered or admitted expunged",
+                ],
+                [
+                    "Criminal law",
+                    "procedure",
+                    "change of magistrate and I.K.S. notation",
+                ],
+                [
+                    "Criminal law",
+                    "appellate review",
+                    "new ground not entertained on second appeal",
+                ],
+                ["Criminal law", "appellate review", "citation of registry not fatal"],
+            ],
+        )
+
+    def test_capitalized_semicolon_branch_can_still_start_new_root(self):
+        text = (
+            "Criminal law \u2014 burden of proof beyond reasonable doubt; "
+            "Administrative law \u2014 judicial review"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "burden of proof beyond reasonable doubt"],
+                ["Administrative law", "judicial review"],
+            ],
+        )
+
+    def test_reference_like_semicolon_branch_does_not_create_new_root(self):
+        text = (
+            "Criminal law \u2014 drug trafficking; "
+            "No. 64/2007 \u2014 certificate of analysis"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "drug trafficking"],
+                ["Criminal law", "No. 64/2007", "certificate of analysis"],
+            ],
+        )
+
+    def test_reference_like_initial_root_is_skipped(self):
+        text = "Section 18 \u2014 jurisdiction of the court"
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_semicolon_branches_stay_under_existing_area_of_law_root(self):
+        text = (
+            "Criminal law \u2014 guilty plea \u2014 unequivocal plea and admissions; "
+            "sentencing \u2014 unnatural offence on a child under 18 \u2014 mandatory life imprisonment; "
+            "appeals \u2014 enhancement of sentence"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "guilty plea", "unequivocal plea and admissions"],
+                [
+                    "Criminal law",
+                    "sentencing",
+                    "unnatural offence on a child under 18",
+                    "mandatory life imprisonment",
+                ],
+                ["Criminal law", "appeals", "enhancement of sentence"],
+            ],
+        )
+
+    def test_title_case_narrow_branch_does_not_start_new_root(self):
+        text = (
+            "Civil procedure \u2014 stay of execution; "
+            "Electronic filing \u2014 late upload does not invalidate application"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                [
+                    "Civil procedure",
+                    "Electronic filing",
+                    "late upload does not invalidate application",
+                ],
+            ],
+        )
+
+    def test_root_is_canonicalised_before_counting_and_branching(self):
+        text = (
+            "Civil Procedure \u2014 stay of execution; "
+            "Civil procedure \u2014 leave to appeal"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                ["Civil procedure", "leave to appeal"],
+            ],
+        )
+
+    def test_repeated_canonical_root_is_not_duplicated_in_path(self):
+        text = (
+            "Criminal Law \u2014 charge and conviction; "
+            "Criminal law \u2014 sentence review"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "charge and conviction"],
+                ["Criminal law", "sentence review"],
+            ],
+        )
+
+    def test_single_segment_narrow_root_is_wrapped_under_broad_head(self):
+        text = "Civil procedure code, order VI r.17 \u2014 amendment of pleadings"
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Civil procedure",
+                    "Civil procedure code, order VI r.17",
+                    "amendment of pleadings",
+                ]
+            ],
+        )
+
+    def test_multi_segment_narrow_root_is_wrapped_under_broad_head(self):
+        text = (
+            "Appeal \u2014 leave to appeal; jurisdiction \u2014 extension application"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "Appeal", "leave to appeal"],
+                ["Civil procedure", "jurisdiction", "extension application"],
+            ],
+        )
+
+    def test_noncanonical_root_is_wrapped_under_canonical_head(self):
+        text = "Company law \u2014 derivative action"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Company law", "derivative action"]],
+        )
+
+    def test_legal_profession_root_is_wrapped(self):
+        text = "Advocate remuneration \u2014 instruction fee"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Legal profession", "Advocate remuneration", "instruction fee"]],
+        )
+
+    def test_evidence_root_is_wrapped(self):
+        text = "Burden \u2014 proof beyond reasonable doubt"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Evidence", "Burden", "proof beyond reasonable doubt"]],
+        )
+
+    def test_nonsense_generic_root_is_dropped(self):
+        text = "National \u2014 policy \u2014 implementation"
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_road_traffic_root_is_classified_as_canonical_head(self):
+        text = "Street traffic \u2014 careless driving"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Road traffic law", "Street traffic", "careless driving"]],
+        )
+
+    def test_long_single_segment_chain_is_flattened(self):
+        text = (
+            "Regional integration law \u2013 EAC Treaty \u2013 rule of law \u2013 property rights "
+            "\u2013 judicial review of national court decisions \u2013 international responsibility of Partner States "
+            "\u2013 jurisdiction of the EACJ \u2013 time bar \u2013 res judicata \u2013 standard of proof"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Regional integration law", "EAC Treaty"],
+                ["Regional integration law", "EAC Treaty", "rule of law"],
+                ["Regional integration law", "EAC Treaty", "property rights"],
+                [
+                    "Regional integration law",
+                    "EAC Treaty",
+                    "judicial review of national court decisions",
+                ],
+                [
+                    "Regional integration law",
+                    "EAC Treaty",
+                    "international responsibility of Partner States",
+                ],
+                ["Regional integration law", "EAC Treaty", "jurisdiction of the EACJ"],
+                ["Regional integration law", "EAC Treaty", "time bar"],
+                ["Regional integration law", "EAC Treaty", "res judicata"],
+                ["Regional integration law", "EAC Treaty", "standard of proof"],
+            ],
+        )
+
+    def test_root_canonicalisation_strips_leading_junk(self):
+        text = '* "Civil Procedure" \u2014 stay of execution'
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Civil procedure", "stay of execution"]],
+        )
+
+    def test_statute_and_order_roots_are_not_top_level(self):
+        text = (
+            "Civil procedure \u2014 stay of execution; "
+            "Appellate Jurisdiction Act s.5(2)(d) \u2014 leave to appeal; "
+            "Advocates Remuneration Order 2015 \u2014 instruction fees"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                [
+                    "Civil procedure",
+                    "Appellate Jurisdiction Act s.5(2)(d)",
+                    "leave to appeal",
+                ],
+                [
+                    "Civil procedure",
+                    "Advocates Remuneration Order 2015",
+                    "instruction fees",
+                ],
+            ],
+        )
+
+    def test_institutional_and_fragment_roots_are_not_top_level(self):
+        text = (
+            "Land law \u2014 title dispute; "
+            "Disputes Courts \u2014 jurisdiction; "
+            "Cause of action \u2014 pleading requirements"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Land law", "title dispute"],
+                ["Land law", "Disputes Courts", "jurisdiction"],
+                ["Land law", "Cause of action", "pleading requirements"],
+            ],
+        )
+
+    def test_slash_parenthetical_and_statute_fragment_roots_are_not_top_level(self):
+        text = (
+            "Civil procedure \u2014 stay of execution; "
+            "Execution/attachment \u2014 attachment before judgment; "
+            "Summary procedure (Order XXXV) \u2014 summary judgment; "
+            "Probate/Administration \u2014 grant of letters; "
+            "Evidence Act s.143 \u2014 corroboration not required"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                [
+                    "Civil procedure",
+                    "Execution/attachment",
+                    "attachment before judgment",
+                ],
+                [
+                    "Civil procedure",
+                    "Summary procedure (Order XXXV)",
+                    "summary judgment",
+                ],
+                ["Civil procedure", "Probate/Administration", "grant of letters"],
+                ["Civil procedure", "Evidence Act s.143", "corroboration not required"],
+            ],
+        )
+
+    def test_deeper_levels_strip_statute_tail_citations(self):
+        text = "Criminal law \u2014 Evidence Act s.127(2) \u2014 child witness evidence"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "Evidence", "child witness evidence"]],
+        )
+
+    def test_deeper_levels_strip_unmatched_parenthetical_suffixes(self):
+        text = "Criminal law \u2014 Medical evidence (PF3 \u2014 admissibility"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "Medical evidence", "admissibility"]],
+        )
+
+    def test_deeper_levels_drop_generic_noise_after_cleanup(self):
+        text = "Criminal law \u2014 Procedure \u2014 change of magistrate"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "change of magistrate"]],
+        )
+
+    def test_deeper_levels_drop_dangling_fragment_topics(self):
+        text = "Criminal law \u2014 housebreaking and \u2014 identification evidence"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "identification evidence"]],
+        )
+
+    def test_deeper_levels_drop_source_only_reference_topics(self):
+        text = "Criminal law \u2014 s.127(7) evidence act \u2014 child witness evidence"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "child witness evidence"]],
+        )
+
+    def test_deeper_levels_alias_pf3_and_strip_control_characters(self):
+        text = "Criminal law \u2014 PF3 \u2014 Dr\x1b[118;1:3uug offences"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "Medical evidence", "Drug offences"]],
+        )
+
+    def test_deeper_levels_extract_head_topic_from_citation_and_fragment_forms(self):
+        text = (
+            "Criminal law \u2014 Abduction under section 134 Penal Code; "
+            "Criminal law \u2014 Abduction under; "
+            "Criminal law \u2014 Abduction of girl under 16; "
+            "Criminal law \u2014 Abduction of a girl under 16; "
+            "Criminal law \u2014 Abduction (s.130(a) Penal Act"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Abduction"],
+                ["Criminal law", "Abduction"],
+                ["Criminal law", "Abduction"],
+                ["Criminal law", "Abduction"],
+                ["Criminal law", "Abduction"],
+            ],
+        )
+
+    def test_deeper_levels_extract_head_topic_from_comparison_and_proposition_forms(
+        self,
+    ):
+        text = (
+            "Criminal law \u2014 Burglary v. theft; "
+            "Criminal law \u2014 Burglary requires proof of breaking at night; "
+            "Criminal law \u2014 Burglary conviction quashed for lack of breaking; "
+            "Criminal law \u2014 Burglary and armed robbery"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Burglary"],
+                ["Criminal law", "Burglary"],
+                ["Criminal law", "Burglary"],
+                ["Criminal law", "Burglary"],
+            ],
+        )
+
+    def test_deeper_levels_drop_quoted_proposition_style_labels(self):
+        text = (
+            "Criminal law \u2014 ``sufficient cause'' not a defence; "
+            "Criminal law \u2014 'armed with intent' charge"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_deeper_levels_drop_sentence_style_and_numeric_fragments(self):
+        text = (
+            "Criminal law \u2014 Absence of age evidence invalidates conviction; "
+            "Criminal law \u2014 A court may revisit orders procured by concealment or fraud; "
+            "Criminal law \u2014 229 CPA; "
+            "Criminal law \u2014 12 months' imprisonment not excessive"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_deeper_levels_drop_statute_only_topics(self):
+        text = (
+            "Criminal law \u2014 s.127(7) evidence act; "
+            "Criminal law \u2014 Section 127(2) evidence act; "
+            "Criminal law \u2014 Evidence act ss.127(5), 142, 143; "
+            "Criminal law \u2014 Criminal procedure act ss.378 & 379(1)"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_deeper_levels_canonicalise_common_duplicate_buckets(self):
+        text = (
+            "Criminal law \u2014 Fair-trial rights; "
+            "Criminal law \u2014 Fair trial rights; "
+            "Criminal law \u2014 Right to legal representation; "
+            "Criminal law \u2014 Extra-judicial/confessional; "
+            "Criminal law \u2014 Extra-judicial/confessional statements to lay persons; "
+            "Criminal law \u2014 Child sexual offence; "
+            "Criminal law \u2014 Child sexual offences; "
+            "Criminal law \u2014 PF3/medical report; "
+            "Criminal law \u2014 Robbery/armed"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Fair trial"],
+                ["Criminal law", "Fair trial"],
+                ["Criminal law", "Fair trial"],
+                ["Criminal law", "Extra-judicial confession"],
+                ["Criminal law", "Extra-judicial confession"],
+                ["Criminal law", "Sexual offences involving children"],
+                ["Criminal law", "Sexual offences involving children"],
+                ["Criminal law", "Medical evidence"],
+                ["Criminal law", "Armed robbery"],
+            ],
+        )
+
+    def test_deeper_levels_drop_generic_stub_topics(self):
+        text = (
+            "Criminal law \u2014 Proof; "
+            "Criminal law \u2014 Requirement; "
+            "Criminal law \u2014 Standard; "
+            "Criminal law \u2014 Unlawful"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_deeper_levels_canonicalise_revision_search_and_right_variants(self):
+        text = (
+            "Criminal law \u2014 Revision application; "
+            "Criminal law \u2014 Revisional powers under s.4(2) AJA; "
+            "Criminal law \u2014 Search without warrant; "
+            "Criminal law \u2014 Seizure certificate vs receipt (s.38(3) CPA; "
+            "Criminal law \u2014 Right to cross-examination; "
+            "Criminal law \u2014 Right to interpretation"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Revision"],
+                ["Criminal law", "Revision"],
+                ["Criminal law", "Search and seizure"],
+                ["Criminal law", "Search and seizure"],
+                ["Criminal law", "Fair trial"],
+                ["Criminal law", "Fair trial"],
+            ],
+        )
+
+    def test_deeper_levels_canonicalise_identification_and_trial_variants(self):
+        text = (
+            "Criminal law \u2014 Identification procedures; "
+            "Criminal law \u2014 Identification parades; "
+            "Criminal law \u2014 Identification parade collateral; "
+            "Criminal law \u2014 Identification evidence in night-time offences; "
+            "Criminal law \u2014 Trial in absentia after accused absconds; "
+            "Criminal law \u2014 Trial-within-trial procedure; "
+            "Criminal law \u2014 Unsafe convictions"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Identification"],
+                ["Criminal law", "Identification parade"],
+                ["Criminal law", "Identification parade"],
+                ["Criminal law", "Visual identification"],
+                ["Criminal law", "Trial in absentia"],
+                ["Criminal law", "Trial-within-trial"],
+                ["Criminal law", "Unsafe conviction"],
+            ],
+        )
+
+    def test_deeper_levels_drop_more_section_and_holding_fragments(self):
+        text = (
+            "Criminal law \u2014 s.383; "
+            "Criminal law \u2014 Rule 75; "
+            "Criminal law \u2014 Section 231(1) CPA is mandatory; "
+            "Criminal law \u2014 4) stolen item must be subject of charge"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_deeper_levels_drop_statute_title_noise_and_map_safe_topic_forms(self):
+        text = (
+            "Criminal law \u2014 The Nairobi Municipality (Amendment) By-laws 1944-11j-1aw 212; "
+            "Criminal law \u2014 The Defence (Sale; "
+            "Criminal law \u2014 The defence (control; "
+            "Criminal law \u2014 The graver offence prevails; "
+            "Criminal law \u2014 Test is whether a prima facie case exists"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_deeper_levels_drop_article_currency_and_numeric_reference_noise(self):
+        text = (
+            "Criminal law \u2014 Article 108(2) constitution; "
+            "Criminal law \u2014 Tzs.1,000,000/= bond; "
+            "Criminal law \u2014 371(1)(a) criminal procedure act; "
+            "Criminal law \u2014 12 months' imprisonment not excessive"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_single_segment_numeric_and_article_roots_do_not_wrap_under_classified_root(
+        self,
+    ):
+        text = (
+            "388 CPA cannot cure jurisdictional defect; "
+            "31 evidence act; "
+            "295; "
+            "Article 108(2) constitution; "
+            "Tzs.1,000,000/= bond"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_semicolon_branches_do_not_promote_numeric_noise_to_second_level(self):
+        text = (
+            "Criminal law \u2014 admissibility; "
+            "388 CPA cannot cure jurisdictional defect; "
+            "295; "
+            "30-year sentence upheld; "
+            "Article 108(2) constitution; "
+            "Tzs.1,000,000/= bond"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "admissibility"]],
+        )
+
+    def test_deeper_levels_map_statute_decorated_topic_labels_to_safe_heads(self):
+        text = (
+            "Criminal law \u2014 Magistrates' courts act s44(1)(b) and civil procedure code; "
+            "Criminal law \u2014 Magistrates courts act s.20(3),(4; "
+            "Criminal law \u2014 Incest (s.158(1)(a) Penal Code; "
+            "Criminal law \u2014 Revisional jurisdiction (s.37(1) Criminal Procedure Code; "
+            "Criminal law \u2014 Attempted rape (s.132(1)"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Magistrates' courts"],
+                ["Criminal law", "Magistrates' courts"],
+                ["Criminal law", "Incest"],
+                ["Criminal law", "Revision"],
+                ["Criminal law", "Attempted rape"],
+            ],
+        )
+
+    def test_deeper_levels_group_safe_arson_and_police_variants(self):
+        text = (
+            "Criminal law \u2014 Arson/offences relating to setting fire; "
+            "Criminal law \u2014 Arson/destruction; "
+            "Criminal law \u2014 arson, burglary; "
+            "Criminal law \u2014 Arson (s. 519(a) Penal Code; "
+            "Criminal law \u2014 Police/anti-corruption squad conduct; "
+            "Criminal law \u2014 Police procedure; "
+            "Criminal law \u2014 Police powers; "
+            "Criminal law \u2014 Police-station identifications versus in-court identification; "
+            "Criminal law \u2014 Police identification"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "Arson"],
+                ["Criminal law", "Arson"],
+                ["Criminal law", "Arson"],
+                ["Criminal law", "Arson"],
+                ["Criminal law", "Police procedure"],
+                ["Criminal law", "Police procedure"],
+                ["Criminal law", "Police procedure"],
+                ["Criminal law", "Identification"],
+                ["Criminal law", "Identification"],
+            ],
+        )
+
+    def test_deeper_levels_strip_numbered_list_markers_and_curly_quotes(self):
+        text = (
+            "Criminal law \u2014 4) stolen thing in accused's possession is subject of the charge; "
+            "Criminal law \u2014 2) property positively the complainant's; "
+            "Criminal law \u2014 ``sufficient cause''; "
+            "Criminal law \u2014 \u201clegal personality\u201d not a defence"
+        )
+        self.assertEqual(self.parser.parse(text), [])
+
+    def test_rule_and_dangling_fragment_roots_are_not_top_level(self):
+        text = (
+            "Civil procedure \u2014 stay of execution; "
+            "Order XXI Rule 39 \u2014 execution pending appeal; "
+            "Arbitration & \u2014 stay of proceedings; "
+            "Republic) \u2014 public law point"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                ["Civil procedure", "Order XXI Rule 39", "execution pending appeal"],
+                ["Civil procedure", "Arbitration &", "stay of proceedings"],
+                ["Civil procedure", "Republic)", "public law point"],
+            ],
+        )
+
+    def test_prose_like_roots_are_not_top_level(self):
+        text = (
+            "Criminal law \u2014 charge and conviction; "
+            "appeal lodged without leave incompetent \u2014 striking out; "
+            "mandatory requirement to record assessors' opinions \u2014 departure invalid"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "charge and conviction"],
+                [
+                    "Criminal law",
+                    "appeal lodged without leave incompetent",
+                    "striking out",
+                ],
+                [
+                    "Criminal law",
+                    "mandatory requirement to record assessors' opinions",
+                    "departure invalid",
+                ],
+            ],
+        )
+
+    def test_slash_act_section_and_holding_roots_are_not_top_level(self):
+        text = (
+            "Civil procedure \u2014 stay of execution; "
+            "Civil procedure/material law \u2014 overlap of remedies; "
+            "Evidence Act, s.123 \u2014 corroboration rule; "
+            "absence of assessors' opinions on record is a serious irregularity rendering proceedings nullity "
+            "\u2014 conviction unsafe"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                [
+                    "Civil procedure",
+                    "Civil procedure/material law",
+                    "overlap of remedies",
+                ],
+                ["Civil procedure", "Evidence Act, s.123", "corroboration rule"],
+                [
+                    "Civil procedure",
+                    "absence of assessors' opinions on record is a serious irregularity rendering proceedings nullity",
+                    "conviction unsafe",
+                ],
+            ],
+        )
+
+    def test_dangling_rules_and_labour_fragments_are_not_top_level(self):
+        text = (
+            "Employment law \u2014 unfair dismissal; "
+            "Labour Relations Act) \u2014 collective bargaining; "
+            "No. 42 of 2007, Rules 13 & 14 and \u2014 filing requirements; "
+            "Guidelines) \u2014 compliance; "
+            "Labour practice \u2014 disciplinary code; "
+            "absence of compliant affidavit renders application incompetent \u2014 striking out"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Employment law", "unfair dismissal"],
+                ["Employment law", "Labour Relations Act)", "collective bargaining"],
+                [
+                    "Employment law",
+                    "No. 42 of 2007, Rules 13 & 14 and",
+                    "filing requirements",
+                ],
+                ["Employment law", "Guidelines)", "compliance"],
+                ["Employment law", "Labour practice", "disciplinary code"],
+                [
+                    "Employment law",
+                    "absence of compliant affidavit renders application incompetent",
+                    "striking out",
+                ],
+            ],
+        )
+
+    def test_rule_section_cap_and_generic_procedural_roots_are_not_top_level(self):
+        text = (
+            "Civil procedure \u2014 stay of execution; "
+            "Order XXI Rule 10 \u2014 execution mechanics; "
+            "Companies Act, Cap 212 \u2014 minority protection; "
+            "Use of section 95 CPC \u2014 inherent powers; "
+            "Evidentiary value of PF3 \u2014 proof of injuries"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Civil procedure", "stay of execution"],
+                ["Civil procedure", "Order XXI Rule 10", "execution mechanics"],
+                ["Civil procedure", "Companies Act, Cap 212", "minority protection"],
+                ["Civil procedure", "Use of section 95 CPC", "inherent powers"],
+                ["Civil procedure", "Evidentiary value of PF3", "proof of injuries"],
+            ],
+        )
+
+    def test_non_latin_numeric_fact_and_rule_date_roots_are_not_top_level(self):
+        text = (
+            "Criminal law \u2014 drug trafficking; "
+            "\u062d\u0642\u0648\u0642 \u0627\u0644\u0625\u0646\u0633\u0627\u0646 \u2014 fair trial rights; "
+            "174.77 kg heroin seized \u2014 evidential weight; "
+            ". 1927, Order 19, Rule 63 \u2014 procedural history"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Criminal law", "drug trafficking"],
+                [
+                    "Criminal law",
+                    "\u062d\u0642\u0648\u0642 \u0627\u0644\u0625\u0646\u0633\u0627\u0646",
+                    "fair trial rights",
+                ],
+                ["Criminal law", "174.77 kg heroin seized", "evidential weight"],
+                ["Criminal law", ". 1927, Order 19, Rule 63", "procedural history"],
+            ],
+        )
+
+    def test_broad_area_roots_are_not_treated_as_prose_fragments(self):
+        text = (
+            "Election law \u2014 inspection of documents\n"
+            "Civil procedure \u2014 stay of execution\n"
+            "Criminal law \u2014 charge and conviction"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                ["Election law", "inspection of documents"],
+                ["Civil procedure", "stay of execution"],
+                ["Criminal law", "charge and conviction"],
+            ],
+        )
+
     def test_full_spec_example(self):
         text = (
             "Criminal law \u2014 admissibility of confessions/ admissions \u2014 "
@@ -167,6 +894,13 @@ class ParseFlynoteTextTest(TestCase):
         paths = self.parser.parse(text)
         self.assertEqual(paths[0][-1], "Severance pay")
 
+    def test_clean_strips_leading_unicode_hyphens(self):
+        text = "\u2014 Criminal law \u2014 admissibility \u2014 trial within a trial"
+        self.assertEqual(
+            self.parser.parse(text),
+            [["Criminal law", "admissibility", "trial within a trial"]],
+        )
+
     def test_newlines_start_new_flynotes(self):
         text = (
             "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
@@ -203,6 +937,99 @@ class ParseFlynoteTextTest(TestCase):
                 "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
                 "Agreement is silent on mode of delivery - Delivery in one lot presumed"
             ),
+        )
+
+    def test_normalise_multiline_text_splits_sentence_case_topic_restarts(self):
+        text = (
+            "Arbitration - Arbitration clause in a contract - Whether such an arbitration clause can operate "
+            "to oust the jurisdiction of the Courts. "
+            "Civil practice and procedure - Preliminary point of objection - Whether such objection can be sustained. "
+            "Civil practice and procedure - Arbitration clause - Party filing a suit in court in defiance of an "
+            "arbitration clause"
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Arbitration - Arbitration clause in a contract - Whether such an arbitration clause can operate "
+                "to oust the jurisdiction of the Courts\n"
+                "Civil practice and procedure - Preliminary point of objection - "
+                "Whether such objection can be sustained\n"
+                "Civil practice and procedure - Arbitration clause - Party filing a suit in court in defiance of an "
+                "arbitration clause"
+            ),
+        )
+
+    def test_normalise_multiline_text_does_not_split_mid_path_title_phrase(self):
+        text = (
+            "Civil practice and procedure - Preliminary point of objection - Parties subjecting themselves "
+            "exclusively to the jurisdiction of the Kenya Courts - Objection to Tanzania Courts' having "
+            "jurisdiction - Whether such objection can be sustained. "
+            "Civil practice and procedure - Arbitration clause - Party filing a suit in court in defiance of "
+            "an arbitration clause"
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Civil practice and procedure - Preliminary point of objection - Parties subjecting themselves "
+                "exclusively to the jurisdiction of the Kenya Courts - Objection to Tanzania Courts' having "
+                "jurisdiction - Whether such objection can be sustained\n"
+                "Civil practice and procedure - Arbitration clause - Party filing a suit in court in defiance of "
+                "an arbitration clause"
+            ),
+        )
+
+    def test_normalise_multiline_text_splits_embedded_topic_restarts(self):
+        text = (
+            "Land Law - Acquisition of Title to Land - Whether the title is valid "
+            "Judicial Notice - Explanatory Notes to subsidiary legislation "
+            "Land Law - Possession of land - Whether that owner is in possession "
+            "Trespass - Trespass to land - Whether it is intrusion upon land in the possession of another "
+            "Damages - Damages for trespass - Damages payable without proof of actual loss or damage"
+        )
+        self.assertEqual(
+            self.parser.normalise_multiline_text(text),
+            (
+                "Land Law - Acquisition of Title to Land - Whether the title is valid\n"
+                "Judicial Notice - Explanatory Notes to subsidiary legislation\n"
+                "Land Law - Possession of land - Whether that owner is in possession\n"
+                "Trespass - Trespass to land - Whether it is intrusion upon land in the possession of another\n"
+                "Damages - Damages for trespass - Damages payable without proof of actual loss or damage"
+            ),
+        )
+
+    def test_parse_splits_hidden_restarts_without_punctuation(self):
+        text = (
+            "Land Law - Acquisition of Title to Land - Whether the title is valid "
+            "Judicial Notice - Explanatory Notes to subsidiary legislation "
+            "Land Law - Possession of land - Whether that owner is in possession "
+            "Trespass - Trespass to land - Whether it is intrusion upon land in the possession of another "
+            "Damages - Damages for trespass - Damages payable without proof of actual loss or damage"
+        )
+        self.assertEqual(
+            self.parser.parse(text),
+            [
+                [
+                    "Land Law",
+                    "Acquisition of Title to Land",
+                    "Whether the title is valid",
+                ],
+                ["Judicial Notice", "Explanatory Notes to subsidiary legislation"],
+                [
+                    "Land Law",
+                    "Possession of land",
+                    "Whether that owner is in possession",
+                ],
+                [
+                    "Trespass",
+                    "Trespass to land",
+                    "Whether it is intrusion upon land in the possession of another",
+                ],
+                [
+                    "Damages",
+                    "Damages for trespass",
+                    "Damages payable without proof of actual loss or damage",
+                ],
+            ],
         )
 
     def test_normalise_multiline_text_strips_held_section(self):
@@ -355,6 +1182,45 @@ class NormaliseFlynoteNameTest(TestCase):
         self.assertEqual(
             FlynoteParser.normalise_name("Right to fair hearing"),
             FlynoteParser.normalise_name("right to fair hearing"),
+        )
+
+    def test_canonicalises_root_name(self):
+        self.assertEqual(
+            FlynoteParser.canonicalise_root_name('* "Civil Procedure"'),
+            "Civil procedure",
+        )
+
+    def test_classifies_generic_root(self):
+        self.assertEqual(
+            FlynoteParser.classify_top_level_root("Civil Procedure"),
+            "Civil procedure",
+        )
+        self.assertEqual(
+            FlynoteParser.classify_top_level_root("Sentencing"),
+            "Criminal law",
+        )
+
+    def test_rejects_authority_and_citation_style_roots(self):
+        self.assertTrue(
+            FlynoteParser._looks_like_bad_top_level_root(
+                "Authorities: bushiri amiri v r"
+            )
+        )
+        self.assertTrue(FlynoteParser._looks_like_bad_top_level_root("Article 107A"))
+        self.assertTrue(FlynoteParser._looks_like_bad_top_level_root("Read with s43"))
+
+    def test_infers_remaining_narrow_heads(self):
+        self.assertEqual(
+            FlynoteParser.infer_top_level_root("Road/transport law"),
+            "Road traffic law",
+        )
+        self.assertEqual(
+            FlynoteParser.infer_top_level_root("Public corporations"),
+            "Administrative law",
+        )
+        self.assertEqual(
+            FlynoteParser.infer_top_level_root("Murder"),
+            "Criminal law",
         )
 
 

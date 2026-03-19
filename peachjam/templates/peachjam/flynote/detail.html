@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n %}
+{% load humanize i18n %}
 {% block title %}
   {{ topic.name }} - {% trans "Flynotes" %}
 {% endblock %}
@@ -30,13 +30,19 @@
   <div class="mb-4">
     <h1>{{ topic.name }}</h1>
     {% if popular_topics %}
-      <h2 class="h4">{% trans "Subtopics" %}</h2>
+      <h2 class="h4">
+        {% trans "Subtopics" %}
+        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
+      </h2>
       {% include 'peachjam/flynote/_popular_topics.html' with show_explore_all=True row_classes="mb-4" %}
       {% if has_more_topics %}
         <div class="collapse mb-5" id="allSubtopicsCollapse">
-          <div class="card card-body">
+          <div class="card card-body shadow-sm">
             <div class="d-flex justify-content-between align-items-center mb-3">
-              <h3 class="h5 mb-0">{% trans "All subtopics" %}</h3>
+              <h3 class="h5 mb-0">
+                {{ topic.name }}
+                <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
+              </h3>
               {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-subtopics-container' %}
             </div>
             <div id="flynote-subtopics-container">{% include 'peachjam/flynote/_list.html' %}</div>

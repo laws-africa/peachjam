@@ -187,6 +187,90 @@ class JudgmentBulkImportTestCase(TestCase):
         self.assertEqual(1, result.totals["skip"])
         self.assertIsNone(GenericDocument.objects.first())
 
+    def test_source_html_import_export_round_trip(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+            "source_html",
+        ]
+        row = [
+            "",
+            "ZA",
+            "2022-09-14",
+            "eng",
+            "thing",
+            "source html round trip",
+            "doc",
+            "<h1>Heading</h1><p>Body</p>",
+        ]
+
+        resource = GenericDocumentResource()
+        result = resource.import_data(
+            dataset=tablib.Dataset(row, headers=headers), dry_run=False
+        )
+        self.assertFalse(result.has_errors())
+
+        doc = GenericDocument.objects.get(title="source html round trip")
+        self.assertEqual(
+            "<h1>Heading</h1><p>Body</p>", doc.document_content.source_html
+        )
+        self.assertIn("Body", doc.document_content.content_html)
+
+        exported = resource.export(GenericDocument.objects.filter(pk=doc.pk))
+        self.assertIn("source_html", exported.headers)
+        self.assertNotIn("content_html", exported.headers)
+        self.assertEqual("<h1>Heading</h1><p>Body</p>", exported.dict[0]["source_html"])
+
+    def test_content_html_import_is_legacy_fallback_with_warning(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+            "content_html",
+        ]
+        row = [
+            "",
+            "ZA",
+            "2022-09-15",
+            "eng",
+            "thing",
+            "legacy html fallback",
+            "doc",
+            "<p>Legacy content_html value</p>",
+        ]
+
+        with self.assertLogs("peachjam.resources", level="WARNING") as captured:
+            result = GenericDocumentResource().import_data(
+                dataset=tablib.Dataset(row, headers=headers), dry_run=False
+            )
+
+        self.assertFalse(result.has_errors())
+        self.assertTrue(
+            any(
+                "Deprecated import header 'content_html'" in line
+                for line in captured.output
+            )
+        )
+        self.assertTrue(
+            any(
+                "Deprecated import column 'content_html'" in line
+                for line in captured.output
+            )
+        )
+        doc = GenericDocument.objects.get(title="legacy html fallback")
+        self.assertEqual(
+            "<p>Legacy content_html value</p>", doc.document_content.source_html
+        )
+
 
 class OffenceBulkImportTestCase(TestCase):
     def setUp(self):

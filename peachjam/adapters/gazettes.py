@@ -128,9 +128,9 @@ class GazetteAPIAdapter(RequestsAdapter):
         # force the dynamic file field to be set correctly
         SourceFile.objects.filter(pk=sf.pk).update(file=s3_file)
 
-        # ensure gazette.source_file is up to date
-        gazette.refresh_from_db()
-        gazette.update_text_content()
+        # we update directly in the db, so fake the file_changed hook
+        sf.refresh_from_db()
+        sf.file_changed()
 
         logger.info("Done.")
 

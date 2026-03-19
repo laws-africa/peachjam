@@ -1,5 +1,8 @@
 # Repository Guidelines
 
+## Agent context
+Use `docs/ARCHITECTURE.md` to build system context before making non-trivial code changes. Treat this file as the working instructions for how to operate in the repository, and treat `docs/ARCHITECTURE.md` as the reference for how the platform is structured.
+
 ## Project Structure & Module Organization
 The core Django app lives in `peachjam/`, which includes templates, templatetags, migrations, locale data, and the TypeScript/Vue source under `peachjam/js`.
 

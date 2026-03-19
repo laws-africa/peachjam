@@ -1,4 +1,5 @@
 import datetime
+import os
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
@@ -41,6 +42,14 @@ class PeachjamViewsTest(TestCase):
         "tests/journal_article",
         "tests/products",
     ]
+
+    @staticmethod
+    def pdf_fixture_content():
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            return fixture.read()
 
     def test_login_page(self):
         response = self.client.get(reverse("account_login"))
@@ -488,9 +497,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
         )
         self.assertEqual(
@@ -498,7 +508,7 @@ class PeachjamViewsTest(TestCase):
         )
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.content, b"test")
+        self.assertEqual(resp.content, pdf_content)
 
     def test_document_source_unpublished(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
@@ -521,9 +531,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -555,9 +566,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -586,9 +598,10 @@ class PeachjamViewsTest(TestCase):
         )
 
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -628,9 +641,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file is anonymised
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             file_is_anonymised=True,
         )

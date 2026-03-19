@@ -33,6 +33,7 @@ from peachjam.models import (
     Predicate,
     ProvisionEnrichment,
     Relationship,
+    SourceFile,
     Taxonomy,
     UncommencedProvision,
     UnconstitutionalProvision,
@@ -286,18 +287,16 @@ class IndigoAdapter(RequestsAdapter):
             "title": title,
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
-            "content_html_is_akn": True,
             "source_url": (
                 document["publication_document"]["url"]
                 if document["publication_document"]
                 else None
             ),
             "language": language,
-            "toc_json": toc_json,
-            "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
             "ingestor": self.ingestor,
         }
+        content_html = self.get_content_html(document)
 
         frbr_uri_data = {
             "jurisdiction": jurisdiction,
@@ -375,6 +374,11 @@ class IndigoAdapter(RequestsAdapter):
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
+        doc_content = created_doc.get_or_create_document_content(True)
+        doc_content.set_source_html(content_html)
+        doc_content.content_html_is_akn = True
+        doc_content.toc_json = toc_json
+        doc_content.save()
 
         logger.info(f"New document: {new}")
 
@@ -392,7 +396,6 @@ class IndigoAdapter(RequestsAdapter):
         self.download_and_save_document_images(document, created_doc)
         if model is Legislation:
             self.get_provision_enrichments(url, created_doc.work)
-        created_doc.update_text_content()
 
     def get_provision_enrichments(self, url, work):
         logger.info(
@@ -589,8 +592,6 @@ class IndigoAdapter(RequestsAdapter):
         return toc_json
 
     def download_source_file(self, url, doc, title):
-        from peachjam.models import SourceFile
-
         logger.info(f"Downloading source file from {url}")
 
         with NamedTemporaryFile() as f:

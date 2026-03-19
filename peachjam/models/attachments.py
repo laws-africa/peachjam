@@ -12,9 +12,11 @@ from django.db import models
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE, LifecycleModelMixin
 from docpipe.soffice import soffice_convert
 
 from peachjam.helpers import html_to_png
+from peachjam.models.lifecycle import on_attribute_changed
 from peachjam.storage import DynamicStorageFileField
 
 log = logging.getLogger(__name__)
@@ -91,7 +93,7 @@ class Image(AttachmentAbstractModel):
         )
 
 
-class SourceFile(AttachmentAbstractModel):
+class SourceFile(LifecycleModelMixin, AttachmentAbstractModel):
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
@@ -187,6 +189,26 @@ class SourceFile(AttachmentAbstractModel):
         if not pk:
             # first save, set the download filename
             self.set_download_filename()
+
+    @on_attribute_changed(BEFORE_SAVE, ["file"], ["file_as_pdf"])
+    def clear_stale_pdf_on_file_change(self):
+        if self.file_as_pdf:
+            try:
+                self.file_as_pdf.delete(False)
+            except Exception as e:
+                log.warning("Ignoring error when deleting file as pdf: %s", e)
+            self.file_as_pdf = None
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["file"],
+        ["file_as_pdf", "DocumentContent.source_html", "DocumentContent.content_text"],
+    )
+    def file_changed(self):
+        self.ensure_file_as_pdf()
+        self.document.get_or_create_document_content(
+            True
+        ).extract_content_from_source_file()
 
     def get_duplicate_documents(self):
         """Return a list of documents that have the same SHA256 hash as this source file."""

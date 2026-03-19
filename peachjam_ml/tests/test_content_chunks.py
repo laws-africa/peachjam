@@ -271,8 +271,10 @@ class TestContentChunks(TestCase):
             frbr_uri_number="test",
             frbr_uri_date="2024",
             metadata_json={"commenced": True},
-            content_html_is_akn=True,
-            content_html="""
+        )
+        doc_content = self.document.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.content_html = """
 <section id="chp_1">
   <h1>Chapter 1</h1>
   <p>Chapter text</p>
@@ -281,26 +283,26 @@ class TestContentChunks(TestCase):
     <p>Section text</p>
   </div>
 </section>
-            """,
-            toc_json=[
-                {
-                    "id": "chp_1",
-                    "title": "Chapter 1",
-                    "type": "chapter",
-                    "num": "1",
-                    "basic_unit": False,
-                    "children": [
-                        {
-                            "id": "chp_1__sec_1",
-                            "type": "section",
-                            "num": "1",
-                            "basic_unit": True,
-                            "title": None,
-                        }
-                    ],
-                }
-            ],
-        )
+            """
+        doc_content.toc_json = [
+            {
+                "id": "chp_1",
+                "title": "Chapter 1",
+                "type": "chapter",
+                "num": "1",
+                "basic_unit": False,
+                "children": [
+                    {
+                        "id": "chp_1__sec_1",
+                        "type": "section",
+                        "num": "1",
+                        "basic_unit": True,
+                        "title": None,
+                    }
+                ],
+            }
+        ]
+        doc_content.save()
 
         settings.PEACHJAM["SEARCH_SEMANTIC"] = True
         try:
