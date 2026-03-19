@@ -16,7 +16,9 @@ class CriminalDataSignalTests(TestCase):
         self.settings.allow_criminal_data_extraction = True
         self.settings.save()
         self.judgment = Judgment.objects.first()
-        self.judgment.get_or_create_document_content().update_text_content()
+        doc_content = self.judgment.get_or_create_document_content()
+        doc_content.update_text_content()
+        doc_content.save()
         Task.objects.all().delete()
 
     def test_changed_judgment_content_schedules_extraction(self):

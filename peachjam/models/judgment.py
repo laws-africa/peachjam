@@ -662,17 +662,25 @@ class Judgment(CoreDocument):
         ["blurb", "case_summary", "flynote", "held", "issues", "order"],
     )
     def potentially_generate_summary(self):
-        should_generate = (
+        if self.should_have_summary():
+            generate_judgment_summary(self.pk)
+
+    def should_have_summary(self):
+        return (
             not self.case_summary  # No summary at all
             or self.summary_ai_generated  # Summary exists but is AI-generated
         ) and (
             not self.must_be_anonymised or self.anonymised  # Anonymization OK
         )
-        if should_generate:
-            generate_judgment_summary(self.pk)
 
     def generate_summary(self):
         """Generate an AI summary for this judgment."""
+        if not self.should_have_summary():
+            log.warning(
+                f"Judgment {self} does not meet criteria for summary generation, skipping."
+            )
+            return
+
         summariser = JudgmentSummariser()
         if not summariser.enabled():
             log.warning(
