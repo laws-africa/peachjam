@@ -21,6 +21,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.defaultfilters import filesizeformat
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
@@ -618,7 +619,6 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         PublicationFileInline,
         AlternativeNameInline,
         AttachedFilesInline,
-        ImageInline,
         CustomPropertyInline,
     ]
     list_display = (
@@ -643,6 +643,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         "work_link",
         "document_access_link",
         "background_tasks",
+        "images",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -703,6 +704,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             {
                 "fields": [
                     "source_html",
+                    "images",
                 ]
             },
         ),
@@ -797,6 +799,32 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                         task.attempts,
                     )
                     for task in tasks
+                ),
+            ),
+        )
+
+    @admin.display(description=gettext_lazy("Images"))
+    def images(self, obj):
+        if not obj or not obj.pk:
+            return "-"
+
+        images = obj.images.all().order_by("pk")
+        if not images.exists():
+            return "-"
+
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}" target="_blank">{}</a> ({}, {})</li>',
+                (
+                    (
+                        image.file.url,
+                        image.filename or image.file.name,
+                        image.mimetype,
+                        filesizeformat(image.size),
+                    )
+                    for image in images
                 ),
             ),
         )
