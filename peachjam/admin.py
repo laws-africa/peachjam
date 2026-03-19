@@ -875,8 +875,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                 doc_content = doc.get_or_create_document_content()
                 if doc_content.extract_content_from_source_file():
                     count += 1
-                    doc.extract_citations()
-                    doc.save()
+                    doc_content.save()
         self.message_user(
             request,
             _("Re-imported content from %(count)d documents.") % {"count": count},
