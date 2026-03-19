@@ -844,6 +844,10 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def render_change_form(self, request, context, *args, **kwargs):
+        # The document admin form is complex. Sometimes we get validation errors that are about hidden fields.
+        # So here we check for validation errors in the form and any inlines and add a non-field error to the main
+        # form with a summary of the fields that have errors. We also log the validation errors with some context to
+        # help with debugging.
         if request.method == "POST" and not getattr(
             request, "_document_admin_validation_reported", False
         ):
