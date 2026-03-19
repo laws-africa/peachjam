@@ -19,11 +19,6 @@ class DocumentChatContext:
     thread_id: str
 
 
-def get_document_text_for_document(document: CoreDocument) -> str:
-    doc_content = document.get_or_create_document_content()
-    return doc_content.get_content_as_text()
-
-
 @function_tool
 async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
     """Returns the text of the entire document. Use this tool if you need to answer questions about the document
@@ -33,7 +28,8 @@ async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
     @sync_to_async
     def get_text():
         doc = CoreDocument.objects.get(pk=ctx.context.document_id)
-        return get_document_text_for_document(doc)
+        doc_content = doc.get_or_create_document_content()
+        return doc_content.get_content_as_text()
 
     text = await get_text()
     if not text.strip():
