@@ -17,7 +17,7 @@ from peachjam.views.generic_views import (
 def _volume_sort_key(volume):
     m = VOLUME_ISSUE_TITLE_RE.search(volume.title)
     if m:
-        return int(m.group(3)), int(m.group(1)), int(m.group(2))
+        return -int(m.group(3)), int(m.group(1)), int(m.group(2))
     return 0, 0, 0
 
 
