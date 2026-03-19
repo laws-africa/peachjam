@@ -994,7 +994,6 @@ class DocumentContent(AttributeHooksMixin, models.Model):
                 self.document.images.add(img)
 
         self.set_source_html(context.html_text)
-        self.save()
 
         return True
 
