@@ -12,6 +12,7 @@ class LawReportListView(ListView):
     template_name = "peachjam/law_report/law_report_list.html"
     model = LawReport
     context_object_name = "law_reports"
+    navbar_link = "law_report"
 
 
 class LawReportDetailView(FilteredJudgmentView):
