@@ -26,7 +26,7 @@ from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -620,7 +620,6 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         AttachedFilesInline,
         ImageInline,
         CustomPropertyInline,
-        BackgroundTaskInline,
     ]
     list_display = (
         "title",
@@ -643,6 +642,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         "metadata_json",
         "work_link",
         "document_access_link",
+        "background_tasks",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -715,6 +715,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                     "allow_robots",
                     "restricted",
                     "document_access_link",
+                    "background_tasks",
                     "document_content_toc_json",
                     "metadata_json",
                 ],
@@ -765,6 +766,40 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             return obj.document_content.content_html_is_akn
         except ObjectDoesNotExist:
             return False
+
+    @admin.display(description=gettext_lazy("Background tasks"))
+    def background_tasks(self, obj):
+        if not obj or not obj.pk:
+            return "-"
+
+        tasks = Task.objects.filter(
+            creator_content_type=ContentType.objects.get_for_model(
+                obj, for_concrete_model=False
+            ),
+            creator_object_id=obj.pk,
+        ).order_by("run_at", "pk")
+        if not tasks.exists():
+            return "-"
+
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}">{}</a> ({}, attempts: {})</li>',
+                (
+                    (
+                        reverse(
+                            "admin:background_task_task_change",
+                            kwargs={"object_id": task.pk},
+                        ),
+                        task.task_name,
+                        task.run_at,
+                        task.attempts,
+                    )
+                    for task in tasks
+                ),
+            ),
+        )
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
@@ -1910,7 +1945,6 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     resource_classes = [GazetteResource]
     inlines = [
         SourceFileInline,
-        BackgroundTaskInline,
     ]
     prepopulated_fields = {}
 
