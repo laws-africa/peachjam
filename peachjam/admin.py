@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 from datetime import date
 
 from background_task.models import Task
@@ -9,6 +10,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -144,6 +146,7 @@ from peachjam_search.models import SavedSearch
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
+log = logging.getLogger(__name__)
 
 
 class BaseAdmin(admin.ModelAdmin):
@@ -778,12 +781,112 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def render_change_form(self, request, context, *args, **kwargs):
+        if request.method == "POST" and not getattr(
+            request, "_document_admin_validation_reported", False
+        ):
+            adminform = context.get("adminform")
+            report = self._build_validation_error_report(context)
+            if adminform and report["summary_fields"]:
+                request._document_admin_validation_reported = True
+                model_label = (
+                    f"{self.model._meta.app_label}.{self.model._meta.model_name}"
+                )
+                object_id = getattr(context.get("original"), "pk", None)
+                user = getattr(request, "user", None)
+                summary_message = _(
+                    "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
+                ) % {"fields": ", ".join(report["summary_fields"])}
+                log.warning(
+                    "Admin validation errors for %s object_id=%s user=%s path=%s details=%s",
+                    model_label,
+                    object_id,
+                    user,
+                    request.path,
+                    report["details"],
+                )
+                form = adminform.form
+                if summary_message not in form.non_field_errors():
+                    form.add_error(None, summary_message)
+                    context["errors"] = helpers.AdminErrorList(
+                        form,
+                        [
+                            inline_admin_formset.formset
+                            for inline_admin_formset in context.get(
+                                "inline_admin_formsets", []
+                            )
+                        ],
+                    )
+                self.message_user(
+                    request,
+                    summary_message,
+                    level=messages.ERROR,
+                )
+
         # this is our only chance to inject a pre-filled field from the querystring for both add and change
         if request.GET.get("stage"):
             context["adminform"].form.fields["edit_activity_stage"].initial = (
                 request.GET["stage"]
             )
         return super().render_change_form(request, context, *args, **kwargs)
+
+    def _build_validation_error_report(self, context):
+        report = {"summary_fields": [], "details": {"form": {}, "formsets": []}}
+        adminform = context.get("adminform")
+        if not adminform:
+            return report
+
+        def add_summary(label):
+            if label not in report["summary_fields"]:
+                report["summary_fields"].append(label)
+
+        form = adminform.form
+        if form.errors:
+            report["details"]["form"]["fields"] = {
+                field: [str(error) for error in errors]
+                for field, errors in form.errors.items()
+            }
+            for field in form.errors:
+                add_summary(field)
+
+        non_field_errors = [str(error) for error in form.non_field_errors()]
+        if non_field_errors:
+            report["details"]["form"]["non_field_errors"] = non_field_errors
+            add_summary(_("main form (non-field)"))
+
+        for inline_admin_formset in context.get("inline_admin_formsets", []):
+            formset = inline_admin_formset.formset
+            formset_report = {
+                "prefix": formset.prefix,
+                "non_form_errors": [str(error) for error in formset.non_form_errors()],
+                "forms": [],
+            }
+            if formset_report["non_form_errors"]:
+                add_summary(f"{formset.prefix} (non-form)")
+
+            for index, inline_form in enumerate(formset.forms):
+                form_errors = {
+                    field: [str(error) for error in errors]
+                    for field, errors in inline_form.errors.items()
+                }
+                inline_non_field_errors = [
+                    str(error) for error in inline_form.non_field_errors()
+                ]
+                if form_errors or inline_non_field_errors:
+                    entry = {
+                        "index": index,
+                        "fields": form_errors,
+                        "non_field_errors": inline_non_field_errors,
+                    }
+                    formset_report["forms"].append(entry)
+                    for field in form_errors:
+                        add_summary(f"{formset.prefix}[{index}].{field}")
+                    if inline_non_field_errors:
+                        add_summary(f"{formset.prefix}[{index}] (non-field)")
+
+            if formset_report["non_form_errors"] or formset_report["forms"]:
+                report["details"]["formsets"].append(formset_report)
+
+        return report
 
     def save_model(self, request, obj, form, change):
         if not change:
