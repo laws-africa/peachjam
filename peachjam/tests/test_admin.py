@@ -1,16 +1,23 @@
 import os
 from datetime import date
 
+from django.contrib import admin
+from django.contrib.admin.utils import flatten_fieldsets
 from django.contrib.auth.models import User
+from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from django_webtest import WebTest
 from webtest import Upload
 
+from peachjam.admin import JournalArticleAdmin
 from peachjam.models import (
     Country,
     GenericDocument,
+    Journal,
+    JournalArticle,
     Judgment,
     Language,
+    VolumeIssue,
 )
 
 
@@ -192,3 +199,84 @@ class TestDocumentAdminHtmlEdit(WebTest):
         self.assertIn("Edited body", self.document.document_content.content_html)
         self.assertIn("Edited Heading", self.document.document_content.content_text)
         self.assertTrue(self.document.document_content.toc_json)
+
+
+class TestJournalArticleAdmin(TestCase):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.get(username="admin@example.com")
+        self.factory = RequestFactory()
+        self.journal = Journal.objects.create(
+            title="Contemporary Labour Law",
+            slug="contemporary-labour-law",
+        )
+        self.volume = VolumeIssue.objects.create(
+            title="Volume 1",
+            journal=self.journal,
+        )
+
+    def test_add_journal_article_with_journal_and_volume(self):
+        request = self.factory.get(reverse("admin:peachjam_journalarticle_add"))
+        request.user = self.user
+        model_admin = JournalArticleAdmin(JournalArticle, admin.site)
+        form_class = model_admin.get_form(
+            request,
+            obj=None,
+            fields=flatten_fieldsets(model_admin.get_fieldsets(request, obj=None)),
+        )
+        form = form_class(
+            data={
+                "title": "New journal article",
+                "jurisdiction": "ZA",
+                "language": "en",
+                "journal": str(self.journal.pk),
+                "volume": str(self.volume.pk),
+                "date_0": "19",
+                "date_1": "3",
+                "date_2": "2026",
+                "frbr_uri_doctype": "doc",
+                "frbr_uri_subtype": "",
+                "frbr_uri_actor": "",
+                "frbr_uri_date": "2026-03-19",
+                "frbr_uri_number": "new-journal-article",
+                "published": "",
+                "citation": "",
+                "source_url": "",
+                "source_html": "",
+                "allow_robots": "on",
+                "restricted": "",
+                "edit_activity_stage": "initial",
+                "edit_activity_start": "2026-03-19 00:00:00",
+                "publication_file-TOTAL_FORMS": "0",
+                "publication_file-INITIAL_FORMS": "0",
+                "publication_file-MIN_NUM_FORMS": "0",
+                "publication_file-MAX_NUM_FORMS": "1000",
+                "alternative_names-TOTAL_FORMS": "0",
+                "alternative_names-INITIAL_FORMS": "0",
+                "alternative_names-MIN_NUM_FORMS": "0",
+                "alternative_names-MAX_NUM_FORMS": "1000",
+                "attachedfiles_set-TOTAL_FORMS": "0",
+                "attachedfiles_set-INITIAL_FORMS": "0",
+                "attachedfiles_set-MIN_NUM_FORMS": "0",
+                "attachedfiles_set-MAX_NUM_FORMS": "1000",
+                "images-TOTAL_FORMS": "0",
+                "images-INITIAL_FORMS": "0",
+                "images-MIN_NUM_FORMS": "0",
+                "images-MAX_NUM_FORMS": "1000",
+                "custom_properties-TOTAL_FORMS": "0",
+                "custom_properties-INITIAL_FORMS": "0",
+                "custom_properties-MIN_NUM_FORMS": "0",
+                "custom_properties-MAX_NUM_FORMS": "1000",
+                "background_task-task-creator_content_type-creator_object_id-TOTAL_FORMS": "0",
+                "background_task-task-creator_content_type-creator_object_id-INITIAL_FORMS": "0",
+                "background_task-task-creator_content_type-creator_object_id-MIN_NUM_FORMS": "0",
+                "background_task-task-creator_content_type-creator_object_id-MAX_NUM_FORMS": "1000",
+            }
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        article = form.save()
+        self.assertEqual(self.journal.pk, article.journal_id)
+        self.assertEqual(self.volume.pk, article.volume_id)
+        self.assertTrue(hasattr(article, "document_content"))
