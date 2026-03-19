@@ -206,9 +206,9 @@ class SourceFile(LifecycleModelMixin, AttachmentAbstractModel):
     )
     def file_changed(self):
         self.ensure_file_as_pdf()
-        self.document.get_or_create_document_content(
-            True
-        ).extract_content_from_source_file()
+        doc_content = self.document.get_or_create_document_content(True)
+        doc_content.extract_content_from_source_file()
+        doc_content.save()
 
     def get_duplicate_documents(self):
         """Return a list of documents that have the same SHA256 hash as this source file."""
