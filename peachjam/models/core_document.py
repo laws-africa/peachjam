@@ -976,6 +976,10 @@ class DocumentContent(AttributeHooksMixin, models.Model):
 
     def extract_content_from_source_file_doc(self):
         """Extract HTML and images from a Word-like source file and save the result."""
+        log.debug(
+            f"Extracting content HTML from source file for document {self.document}"
+        )
+
         context = PipelineContext(word_pipeline)
         context.source_file = self.document.source_file.file
         word_pipeline(context)
@@ -1118,6 +1122,10 @@ class DocumentContent(AttributeHooksMixin, models.Model):
 
     def update_text_content_from_source_file_pdf(self):
         """Update ``content_text`` from the PDF version of the source file."""
+        log.debug(
+            f"Extracting text content from source file PDF for document {self.document}"
+        )
+
         text = ""
         if hasattr(self.document, "source_file") and self.document.source_file.pk:
             # get the text from the source file, via PDF if necessary
@@ -1137,14 +1145,22 @@ class DocumentContent(AttributeHooksMixin, models.Model):
                     # some PDFs have nulls, which breaks SQL insertion
                     # replace rather than deleting to keep string length the same
                     text = text.replace("\0", " ")
+                else:
+                    log.debug("Document has no PDF source file, text will be empty")
+        else:
+            log.debug("Document has no source file, text will be empty")
 
         self.content_text = text
 
     def update_text_content_from_html(self):
         """Update ``content_text`` by extracting plain text from ``content_html``."""
+        log.debug(f"Extracting text content from HTML for document {self.document}")
+
         text = ""
         if self.content_html:
             text = " ".join(self.content_html_tree.itertext())
+        else:
+            log.debug("Document has no HTML, text will be empty")
 
         self.content_text = text
 

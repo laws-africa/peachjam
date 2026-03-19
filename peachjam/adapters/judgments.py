@@ -247,13 +247,14 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             ext = guess_extension(mimetype) or ""
             filename = f"{slugify(doc['title'])[:200]}{ext}"
 
-            sf, _ = SourceFile.objects.update_or_create(
-                document=created_doc,
-                defaults={
-                    "file": File(f, filename),
-                    "mimetype": mimetype,
-                },
+            source_file = getattr(created_doc, "source_file", None) or SourceFile(
+                document=created_doc
             )
+            source_file.track_changes()
+            source_file.file = File(f, filename)
+            source_file.mimetype = mimetype
+            source_file.save()
+            sf = source_file
             sf.ensure_file_as_pdf()
 
     def get_content_html(self, doc):

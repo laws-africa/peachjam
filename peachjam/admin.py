@@ -1,5 +1,6 @@
 import copy
 import json
+import logging
 from datetime import date
 
 from background_task.models import Task
@@ -9,6 +10,7 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
@@ -19,12 +21,13 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.defaultfilters import filesizeformat
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -81,7 +84,6 @@ from peachjam.models import (
     ExternalDocument,
     Gazette,
     GenericDocument,
-    Image,
     Ingestor,
     IngestorSetting,
     Journal,
@@ -144,6 +146,7 @@ from peachjam_search.models import SavedSearch
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
+log = logging.getLogger(__name__)
 
 
 class BaseAdmin(admin.ModelAdmin):
@@ -490,10 +493,6 @@ class AttachedFilesInline(BaseAttachmentFileInline):
     form = AttachedFilesForm
 
 
-class ImageInline(BaseAttachmentFileInline):
-    model = Image
-
-
 class BackgroundTaskInline(GenericTabularInline):
     model = Task
     ct_field = "creator_content_type"
@@ -615,9 +614,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         PublicationFileInline,
         AlternativeNameInline,
         AttachedFilesInline,
-        ImageInline,
         CustomPropertyInline,
-        BackgroundTaskInline,
     ]
     list_display = (
         "title",
@@ -640,6 +637,8 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         "metadata_json",
         "work_link",
         "document_access_link",
+        "background_tasks",
+        "images",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -700,6 +699,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             {
                 "fields": [
                     "source_html",
+                    "images",
                 ]
             },
         ),
@@ -712,6 +712,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
                     "allow_robots",
                     "restricted",
                     "document_access_link",
+                    "background_tasks",
                     "document_content_toc_json",
                     "metadata_json",
                 ],
@@ -763,6 +764,66 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         except ObjectDoesNotExist:
             return False
 
+    @admin.display(description=gettext_lazy("Background tasks"))
+    def background_tasks(self, obj):
+        if not obj or not obj.pk:
+            return "-"
+
+        tasks = Task.objects.filter(
+            creator_content_type=ContentType.objects.get_for_model(
+                obj, for_concrete_model=False
+            ),
+            creator_object_id=obj.pk,
+        ).order_by("run_at", "pk")
+        if not tasks.exists():
+            return "-"
+
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}">{}</a> ({}, attempts: {})</li>',
+                (
+                    (
+                        reverse(
+                            "admin:background_task_task_change",
+                            kwargs={"object_id": task.pk},
+                        ),
+                        task.task_name,
+                        task.run_at,
+                        task.attempts,
+                    )
+                    for task in tasks
+                ),
+            ),
+        )
+
+    @admin.display(description=gettext_lazy("Images"))
+    def images(self, obj):
+        if not obj or not obj.pk:
+            return "-"
+
+        images = obj.images.all().order_by("pk")
+        if not images.exists():
+            return "-"
+
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}" target="_blank">{}</a> ({}, {})</li>',
+                (
+                    (
+                        image.file.url,
+                        image.filename or image.file.name,
+                        image.mimetype,
+                        filesizeformat(image.size),
+                    )
+                    for image in images
+                ),
+            ),
+        )
+
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
             kwargs["fields"] = self.new_document_form_mixin.adjust_fields(
@@ -778,12 +839,116 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def render_change_form(self, request, context, *args, **kwargs):
+        # The document admin form is complex. Sometimes we get validation errors that are about hidden fields.
+        # So here we check for validation errors in the form and any inlines and add a non-field error to the main
+        # form with a summary of the fields that have errors. We also log the validation errors with some context to
+        # help with debugging.
+        if request.method == "POST" and not getattr(
+            request, "_document_admin_validation_reported", False
+        ):
+            adminform = context.get("adminform")
+            report = self._build_validation_error_report(context)
+            if adminform and report["summary_fields"]:
+                request._document_admin_validation_reported = True
+                model_label = (
+                    f"{self.model._meta.app_label}.{self.model._meta.model_name}"
+                )
+                object_id = getattr(context.get("original"), "pk", None)
+                user = getattr(request, "user", None)
+                summary_message = _(
+                    "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
+                ) % {"fields": ", ".join(report["summary_fields"])}
+                log.warning(
+                    "Admin validation errors for %s object_id=%s user=%s path=%s details=%s",
+                    model_label,
+                    object_id,
+                    user,
+                    request.path,
+                    report["details"],
+                )
+                form = adminform.form
+                if summary_message not in form.non_field_errors():
+                    form.add_error(None, summary_message)
+                    context["errors"] = helpers.AdminErrorList(
+                        form,
+                        [
+                            inline_admin_formset.formset
+                            for inline_admin_formset in context.get(
+                                "inline_admin_formsets", []
+                            )
+                        ],
+                    )
+                self.message_user(
+                    request,
+                    summary_message,
+                    level=messages.ERROR,
+                )
+
         # this is our only chance to inject a pre-filled field from the querystring for both add and change
         if request.GET.get("stage"):
             context["adminform"].form.fields["edit_activity_stage"].initial = (
                 request.GET["stage"]
             )
         return super().render_change_form(request, context, *args, **kwargs)
+
+    def _build_validation_error_report(self, context):
+        report = {"summary_fields": [], "details": {"form": {}, "formsets": []}}
+        adminform = context.get("adminform")
+        if not adminform:
+            return report
+
+        def add_summary(label):
+            if label not in report["summary_fields"]:
+                report["summary_fields"].append(label)
+
+        form = adminform.form
+        if form.errors:
+            report["details"]["form"]["fields"] = {
+                field: [str(error) for error in errors]
+                for field, errors in form.errors.items()
+            }
+            for field in form.errors:
+                add_summary(field)
+
+        non_field_errors = [str(error) for error in form.non_field_errors()]
+        if non_field_errors:
+            report["details"]["form"]["non_field_errors"] = non_field_errors
+            add_summary(_("main form (non-field)"))
+
+        for inline_admin_formset in context.get("inline_admin_formsets", []):
+            formset = inline_admin_formset.formset
+            formset_report = {
+                "prefix": formset.prefix,
+                "non_form_errors": [str(error) for error in formset.non_form_errors()],
+                "forms": [],
+            }
+            if formset_report["non_form_errors"]:
+                add_summary(f"{formset.prefix} (non-form)")
+
+            for index, inline_form in enumerate(formset.forms):
+                form_errors = {
+                    field: [str(error) for error in errors]
+                    for field, errors in inline_form.errors.items()
+                }
+                inline_non_field_errors = [
+                    str(error) for error in inline_form.non_field_errors()
+                ]
+                if form_errors or inline_non_field_errors:
+                    entry = {
+                        "index": index,
+                        "fields": form_errors,
+                        "non_field_errors": inline_non_field_errors,
+                    }
+                    formset_report["forms"].append(entry)
+                    for field in form_errors:
+                        add_summary(f"{formset.prefix}[{index}].{field}")
+                    if inline_non_field_errors:
+                        add_summary(f"{formset.prefix}[{index}] (non-field)")
+
+            if formset_report["non_form_errors"] or formset_report["forms"]:
+                report["details"]["formsets"].append(formset_report)
+
+        return report
 
     def save_model(self, request, obj, form, change):
         if not change:
@@ -1807,7 +1972,6 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     resource_classes = [GazetteResource]
     inlines = [
         SourceFileInline,
-        BackgroundTaskInline,
     ]
     prepopulated_fields = {}
 

@@ -92,12 +92,14 @@ class DocumentContentTestCase(TestCase):
             "rb",
         ) as fixture:
             try:
-                SourceFile.objects.create(
+                sf = SourceFile(
                     document=doc,
                     filename="zagpjhc_judgment.docx",
                     mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    file=File(fixture, name="zagpjhc_judgment.docx"),
                 )
+                sf.track_changes()
+                sf.file = File(fixture, name="zagpjhc_judgment.docx")
+                sf.save()
             except SOfficeError:
                 self.skipTest("LibreOffice conversion unavailable in this environment")
 
@@ -116,12 +118,14 @@ class DocumentContentTestCase(TestCase):
             os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"),
             "rb",
         ) as fixture:
-            SourceFile.objects.create(
+            sf = SourceFile(
                 document=doc,
                 filename="gauteng_judgment.pdf",
                 mimetype="application/pdf",
-                file=File(fixture, name="gauteng_judgment.pdf"),
             )
+            sf.track_changes()
+            sf.file = File(fixture, name="gauteng_judgment.pdf")
+            sf.save()
 
         doc_content.refresh_from_db()
 

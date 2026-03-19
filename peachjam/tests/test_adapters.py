@@ -1,11 +1,20 @@
-from django.test import TestCase
+import datetime
+import os
+from types import SimpleNamespace
+from unittest.mock import patch
 
-from peachjam.adapters import IndigoAdapter
-from peachjam.models import Taxonomy
+from countries_plus.models import Country
+from django.test import TestCase
+from django.utils.text import slugify
+from languages_plus.models import Language
+
+from peachjam.adapters import IndigoAdapter, JudgmentAdapter
+from peachjam.models import Court, GenericDocument, Judgment, SourceFile, Taxonomy
 
 
 class IndigoAdapterTest(TestCase):
     maxDiff = None
+    fixtures = ["tests/countries", "tests/languages"]
 
     def setUp(self):
         self.adapter = IndigoAdapter(
@@ -234,3 +243,90 @@ class IndigoAdapterTest(TestCase):
             ],
             local_tree,
         )
+
+    @patch("peachjam.adapters.indigo.SourceFile.track_changes", autospec=True)
+    def test_download_source_file_creates_tracked_source_file(self, track_changes):
+        document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2022, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Fixture PDF",
+        )
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            pdf_content = fixture.read()
+
+        self.adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            content=pdf_content,
+            headers={},
+        )
+
+        self.adapter.download_source_file(
+            "http://example.com/source.pdf",
+            document,
+            "Fixture PDF",
+        )
+
+        document.refresh_from_db()
+        source_file = SourceFile.objects.get(document=document)
+        self.assertEqual("fixture-pdf.pdf", source_file.filename)
+        self.assertEqual("application/pdf", source_file.mimetype)
+        self.assertEqual(len(pdf_content), source_file.size)
+        track_changes.assert_called_once_with(source_file)
+
+
+class JudgmentAdapterTest(TestCase):
+    fixtures = ["tests/countries", "tests/languages", "tests/courts"]
+
+    def setUp(self):
+        self.adapter = JudgmentAdapter(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "court_code": "eacj",
+            },
+        )
+
+    @patch("peachjam.adapters.judgments.SourceFile.track_changes", autospec=True)
+    @patch("peachjam.adapters.judgments.SourceFile.ensure_file_as_pdf", autospec=True)
+    def test_attach_source_file_creates_tracked_source_file(
+        self, ensure_file_as_pdf, track_changes
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2022, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Fixture judgment",
+        )
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            pdf_content = fixture.read()
+
+        self.adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            content=pdf_content,
+        )
+
+        self.adapter.attach_source_file(
+            {
+                "expression_frbr_uri": judgment.expression_frbr_uri,
+                "title": judgment.title,
+            },
+            judgment,
+        )
+
+        judgment.refresh_from_db()
+        source_file = SourceFile.objects.get(document=judgment)
+        self.assertEqual(
+            f"{os.path.splitext(slugify(judgment.title))[0]}.pdf",
+            source_file.filename,
+        )
+        self.assertEqual("application/pdf", source_file.mimetype)
+        track_changes.assert_called_once_with(source_file)
+        ensure_file_as_pdf.assert_called_once_with(source_file)
