@@ -21,6 +21,7 @@ Two classes are exposed:
 import logging
 import re
 from html import unescape
+from time import perf_counter
 
 from django.db import IntegrityError, transaction
 from django.utils.text import slugify
@@ -2628,6 +2629,7 @@ class FlynoteUpdater:
 
     def __init__(self):
         self.parser = FlynoteParser()
+        self.node_cache = {}
 
     def get_or_create_node(self, parent, name):
         """Find an existing Flynote whose slug matches, or create a new one.
@@ -2645,8 +2647,13 @@ class FlynoteUpdater:
         else:
             expected_slug = normalised
 
+        cached = self.node_cache.get(expected_slug)
+        if cached is not None:
+            return cached
+
         existing = Flynote.objects.filter(slug=expected_slug).first()
         if existing:
+            self.node_cache[expected_slug] = existing
             return existing
 
         try:
@@ -2654,9 +2661,13 @@ class FlynoteUpdater:
                 node = parent.add_child(name=name, slug=expected_slug)
             else:
                 node = Flynote.add_root(name=name, slug=expected_slug)
+            self.node_cache[expected_slug] = node
             return node
         except IntegrityError:
-            return Flynote.objects.filter(slug=expected_slug).first()
+            existing = Flynote.objects.filter(slug=expected_slug).first()
+            if existing:
+                self.node_cache[expected_slug] = existing
+            return existing
 
     @transaction.atomic
     def update_for_judgment(self, judgment, refresh_counts=False):
@@ -2669,12 +2680,22 @@ class FlynoteUpdater:
 
         Does nothing if the flynote text cannot be parsed (plain prose, empty, etc.).
         """
+        overall_start = perf_counter()
         JudgmentFlynote.objects.filter(document=judgment).delete()
 
+        parse_start = perf_counter()
         paths = self.parser.parse(judgment.flynote)
+        parse_ms = (perf_counter() - parse_start) * 1000
         if not paths:
+            log.info(
+                "Linked judgment %s to 0 flynote topics (parse=%.2fms, nodes=0.00ms, links=0.00ms, total=%.2fms).",
+                judgment.pk,
+                parse_ms,
+                (perf_counter() - overall_start) * 1000,
+            )
             return
 
+        node_start = perf_counter()
         leaf_flynotes = set()
         roots_to_refresh = set()
         for path in paths:
@@ -2691,14 +2712,25 @@ class FlynoteUpdater:
                 leaf_flynotes.add(node)
                 if root_id is not None:
                     roots_to_refresh.add(root_id)
+        node_ms = (perf_counter() - node_start) * 1000
 
-        for flynote in leaf_flynotes:
-            JudgmentFlynote.objects.get_or_create(document=judgment, flynote=flynote)
+        link_start = perf_counter()
+        JudgmentFlynote.objects.bulk_create(
+            [
+                JudgmentFlynote(document=judgment, flynote=flynote)
+                for flynote in leaf_flynotes
+            ]
+        )
+        link_ms = (perf_counter() - link_start) * 1000
 
         log.info(
-            "Linked judgment %s to %s flynote topics.",
+            "Linked judgment %s to %s flynote topics (parse=%.2fms, nodes=%.2fms, links=%.2fms, total=%.2fms).",
             judgment.pk,
             len(leaf_flynotes),
+            parse_ms,
+            node_ms,
+            link_ms,
+            (perf_counter() - overall_start) * 1000,
         )
 
         if refresh_counts and leaf_flynotes:
