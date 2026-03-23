@@ -16,7 +16,20 @@ from peachjam_search.engine import SearchEngine
 
 def is_doc_index_topic(topic):
     """Return True if the topic is a doc index topic."""
-    return topic.get_root().slug in settings.FEDERATED_DOC_INDEX_ROOTS
+    if topic.slug in settings.FEDERATED_DOC_INDEX_ROOTS:
+        return True
+    return any(
+        topic.slug.startswith(f"{root_slug}-")
+        for root_slug in settings.FEDERATED_DOC_INDEX_ROOTS
+    )
+
+
+def get_doc_index_root_slug(topic):
+    """Return the configured doc-index root slug for a topic, if any."""
+    for root_slug in settings.FEDERATED_DOC_INDEX_ROOTS:
+        if topic.slug == root_slug or topic.slug.startswith(f"{root_slug}-"):
+            return root_slug
+    return None
 
 
 class DocIndexesListView(TemplateView):
@@ -65,7 +78,7 @@ class DocIndexDetailView(TaxonomyDetailView):
         # send non-indexes topics back to the normal taxonomy view
         if not is_doc_index_topic(taxonomy):
             return redirect(
-                "taxonomy_detail", topic=taxonomy.get_root().slug, child=taxonomy.slug
+                "taxonomy_detail", topic=self.kwargs["topic"], child=taxonomy.slug
             )
         return super().get(request, *args, **kwargs)
 
@@ -168,7 +181,6 @@ class CustomTaxonomyDetailView(TaxonomyDetailView):
     def get(self, request, *args, **kwargs):
         taxonomy = self.get_taxonomy()
         if is_doc_index_topic(taxonomy):
-            return redirect(
-                "doc_index_detail", topic=taxonomy.get_root().slug, child=taxonomy.slug
-            )
+            root_slug = get_doc_index_root_slug(taxonomy)
+            return redirect("doc_index_detail", topic=root_slug, child=taxonomy.slug)
         return super().get(request, *args, **kwargs)

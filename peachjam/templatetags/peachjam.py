@@ -95,9 +95,17 @@ def user_name(user):
 @register.simple_tag
 def build_taxonomy_url(item, prefix="taxonomy"):
     items = []
-    root = item.root if hasattr(item, "root") else item.get_root()
-    if root != item:
-        items.append(root.slug)
+    root_slug = getattr(item, "root_slug", None)
+    if root_slug is None:
+        root = getattr(item, "root", None)
+        if root is not None:
+            root_slug = root.slug
+        elif hasattr(item, "is_root") and item.is_root():
+            root_slug = item.slug
+        else:
+            root_slug = item.get_root().slug
+    if root_slug != item.slug:
+        items.append(root_slug)
     items.append(item.slug)
     return f"/{prefix}/" + "/".join(items)
 
