@@ -447,5 +447,4 @@ class PeachJam {
 }
 
 const peachJam = new PeachJam();
-(window as any).peachJam = peachJam;
 export default peachJam;
