@@ -2658,6 +2658,10 @@ class FlynoteUpdater:
 
         try:
             if parent:
+                # Treebeard uses parent state such as numchild when adding a child.
+                # Cached parent instances can go stale across multiple judgments,
+                # so refresh before inserting under an existing node.
+                parent.refresh_from_db(fields=["path", "depth", "numchild"])
                 node = parent.add_child(name=name, slug=expected_slug)
             else:
                 node = Flynote.add_root(name=name, slug=expected_slug)
