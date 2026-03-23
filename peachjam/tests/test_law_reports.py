@@ -166,6 +166,8 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
         self.assertEqual("judgments", response.context["active_tab"])
+        self.assertContains(response, "Sort by")
+        self.assertNotContains(response, 'placeholder="Filter documents"')
 
     def test_law_report_volume_detail_view_cases_tab(self):
         url = reverse(
@@ -181,6 +183,8 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
+        self.assertContains(response, "Sort by")
+        self.assertNotContains(response, 'placeholder="Filter documents"')
 
     def test_law_report_volume_detail_view_legislation_tab(self):
         url = reverse(
@@ -196,6 +200,8 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.cited_legislation.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
+        self.assertContains(response, "Sort by")
+        self.assertNotContains(response, 'placeholder="Filter documents"')
 
     def test_law_report_volume_detail_view_invalid_tab_defaults_to_judgments(self):
         url = self.volume_1.get_absolute_url() + "?tab=invalid"

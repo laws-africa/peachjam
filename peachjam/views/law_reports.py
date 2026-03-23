@@ -26,6 +26,7 @@ class LawReportListView(ListView):
 class LawReportDetailView(FilteredJudgmentView):
     template_name = "peachjam/law_report/law_report_detail.html"
     navbar_link = "law_report"
+
     @cached_property
     def law_report(self):
         return get_object_or_404(
@@ -122,6 +123,7 @@ class LawReportVolumeDetailView(LawReportDetailView):
         context["law_report"] = self.law_report
         context["law_report_volume"] = self.law_report_volume
         context["active_tab"] = self.active_tab
+        context["hide_filter_documents_search"] = True
         metadata = self.TAB_METADATA[self.active_tab]
         context["doc_count_noun"] = metadata["doc_count_noun"]
         context["doc_count_noun_plural"] = metadata["doc_count_noun_plural"]
