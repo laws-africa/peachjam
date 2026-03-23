@@ -148,14 +148,19 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(self.law_report.get_absolute_url())
 
         self.assertEqual(response.status_code, 200)
-        # The detail page now lists volumes, not judgments directly
+        self.assertContains(response, "Volumes")
         self.assertContains(response, self.volume_1.title)
         self.assertContains(response, self.volume_2.title)
         self.assertNotContains(response, self.empty_volume.title)
+        self.assertNotContains(response, self.first_judgment.title)
+        self.assertNotContains(response, 'placeholder="Filter documents"', html=False)
         self.assertEqual(self.law_report, response.context["law_report"])
         self.assertIn(self.volume_1, response.context["law_report_volumes"])
         self.assertIn(self.volume_2, response.context["law_report_volumes"])
         self.assertNotIn(self.empty_volume, response.context["law_report_volumes"])
+        self.assertEqual(
+            [self.volume_2, self.volume_1], list(response.context["law_report_volumes"])
+        )
 
     def test_law_report_volume_detail_view_filters_to_selected_volume(self):
         response = self.client.get(self.volume_1.get_absolute_url())
@@ -166,8 +171,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
         self.assertEqual("judgments", response.context["active_tab"])
-        self.assertContains(response, "Sort by")
-        self.assertNotContains(response, 'placeholder="Filter documents"')
+        self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_cases_tab(self):
         url = reverse(
@@ -183,8 +187,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
-        self.assertContains(response, "Sort by")
-        self.assertNotContains(response, 'placeholder="Filter documents"')
+        self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_legislation_tab(self):
         url = reverse(
@@ -200,8 +203,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.cited_legislation.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
-        self.assertContains(response, "Sort by")
-        self.assertNotContains(response, 'placeholder="Filter documents"')
+        self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_invalid_tab_defaults_to_judgments(self):
         url = self.volume_1.get_absolute_url() + "?tab=invalid"
