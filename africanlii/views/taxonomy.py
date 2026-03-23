@@ -16,12 +16,7 @@ from peachjam_search.engine import SearchEngine
 
 def is_doc_index_topic(topic):
     """Return True if the topic is a doc index topic."""
-    if topic.slug in settings.FEDERATED_DOC_INDEX_ROOTS:
-        return True
-    return any(
-        topic.slug.startswith(f"{root_slug}-")
-        for root_slug in settings.FEDERATED_DOC_INDEX_ROOTS
-    )
+    return get_doc_index_root_slug(topic) is not None
 
 
 def get_doc_index_root_slug(topic):
