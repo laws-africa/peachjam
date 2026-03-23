@@ -47,23 +47,23 @@ class AfricanliiViewsTest(TestCase):
 
     @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
     def test_is_doc_index_topic_uses_hierarchical_slug(self):
-        root = Taxonomy.add_root(name="Case Indexes")
-        child = root.add_child(name="Environment")
-        other_root = Taxonomy.add_root(name="Collections")
+        indexes = Taxonomy.add_root(name="Case Indexes", slug="case-indexes")
+        child = indexes.add_child(name="Environment")
+        other_root = Taxonomy.add_root(name="Collections", slug="collections")
 
-        self.assertTrue(is_doc_index_topic(root))
+        self.assertTrue(is_doc_index_topic(indexes))
         self.assertTrue(is_doc_index_topic(child))
         self.assertFalse(is_doc_index_topic(other_root))
 
     @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
     def test_taxonomy_detail_redirects_doc_index_topics_to_indexes_url(self):
-        root = Taxonomy.add_root(name="Case Indexes")
-        child = root.add_child(name="Environment")
+        indexes = Taxonomy.add_root(name="Case Indexes", slug="case-indexes")
+        child = indexes.add_child(name="Environment")
 
         response = self.client.get(
             reverse(
                 "taxonomy_detail",
-                kwargs={"topic": root.slug, "child": child.slug},
+                kwargs={"topic": indexes.slug, "child": child.slug},
             )
         )
 
@@ -71,7 +71,7 @@ class AfricanliiViewsTest(TestCase):
             response,
             reverse(
                 "doc_index_detail",
-                kwargs={"topic": root.slug, "child": child.slug},
+                kwargs={"topic": indexes.slug, "child": child.slug},
             ),
             fetch_redirect_response=False,
         )

@@ -21,8 +21,12 @@ def is_doc_index_topic(topic):
 
 def get_doc_index_root_slug(topic):
     """Return the configured doc-index root slug for a topic, if any."""
+    if topic.slug in settings.FEDERATED_DOC_INDEX_ROOTS:
+        return topic.slug
+
+    ancestor_slugs = topic.get_ancestors().values_list("slug", flat=True)
     for root_slug in settings.FEDERATED_DOC_INDEX_ROOTS:
-        if topic.slug == root_slug or topic.slug.startswith(f"{root_slug}-"):
+        if root_slug in ancestor_slugs:
             return root_slug
     return None
 
