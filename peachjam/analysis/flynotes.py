@@ -2723,7 +2723,8 @@ class FlynoteUpdater:
             [
                 JudgmentFlynote(document=judgment, flynote=flynote)
                 for flynote in leaf_flynotes
-            ]
+            ],
+            ignore_conflicts=True,
         )
         link_ms = (perf_counter() - link_start) * 1000
 

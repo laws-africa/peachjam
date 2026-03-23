@@ -54,3 +54,45 @@ class AfricanliiViewsTest(TestCase):
         self.assertTrue(is_doc_index_topic(root))
         self.assertTrue(is_doc_index_topic(child))
         self.assertFalse(is_doc_index_topic(other_root))
+
+    @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
+    def test_taxonomy_detail_redirects_doc_index_topics_to_indexes_url(self):
+        root = Taxonomy.add_root(name="Case Indexes")
+        child = root.add_child(name="Environment")
+
+        response = self.client.get(
+            reverse(
+                "taxonomy_detail",
+                kwargs={"topic": root.slug, "child": child.slug},
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse(
+                "doc_index_detail",
+                kwargs={"topic": root.slug, "child": child.slug},
+            ),
+            fetch_redirect_response=False,
+        )
+
+    @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
+    def test_doc_index_detail_redirects_non_index_topics_back_to_taxonomy_url(self):
+        non_index_root = Taxonomy.add_root(name="Collections")
+        child = non_index_root.add_child(name="Environment")
+
+        response = self.client.get(
+            reverse(
+                "doc_index_detail",
+                kwargs={"topic": non_index_root.slug, "child": child.slug},
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse(
+                "taxonomy_detail",
+                kwargs={"topic": non_index_root.slug, "child": child.slug},
+            ),
+            fetch_redirect_response=False,
+        )

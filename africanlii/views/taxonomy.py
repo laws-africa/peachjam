@@ -175,7 +175,7 @@ class CustomTaxonomyDetailView(TaxonomyDetailView):
 
     def get(self, request, *args, **kwargs):
         taxonomy = self.get_taxonomy()
-        if is_doc_index_topic(taxonomy):
-            root_slug = get_doc_index_root_slug(taxonomy)
+        root_slug = get_doc_index_root_slug(taxonomy)
+        if root_slug is not None:
             return redirect("doc_index_detail", topic=root_slug, child=taxonomy.slug)
         return super().get(request, *args, **kwargs)

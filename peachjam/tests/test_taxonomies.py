@@ -93,3 +93,17 @@ class TaxonomyTestCase(WebTest):
         self.assertEqual(response.status_code, 200)
         self.assertIn("/taxonomy/collections", response.text)
         self.assertIn("/taxonomy/collections/collections-land-rights", response.text)
+
+    def test_taxonomy_detail_404s_for_mismatched_root_and_child(self):
+        other_root = Taxonomy.add_root(name="Other collections")
+        environment = Taxonomy.objects.get(name="Environment")
+
+        response = self.app.get(
+            reverse(
+                "taxonomy_detail",
+                kwargs={"topic": other_root.slug, "child": environment.slug},
+            ),
+            expect_errors=True,
+        )
+
+        self.assertEqual(response.status_code, 404)
