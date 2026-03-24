@@ -1246,6 +1246,13 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
 
+    def test_caches_nodes_by_slug(self):
+        found = self.updater.get_or_create_node(None, "Criminal law")
+        self.assertEqual(self.updater.node_cache["criminal-law"].pk, found.pk)
+
+        again = self.updater.get_or_create_node(None, "Criminal law")
+        self.assertEqual(again.pk, found.pk)
+
     def test_creates_nested_nodes(self):
         parent = self.updater.get_or_create_node(None, "Criminal law")
         child = self.updater.get_or_create_node(parent, "admissibility")

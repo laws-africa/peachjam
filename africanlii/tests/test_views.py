@@ -1,5 +1,8 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls.base import reverse
+
+from africanlii.views.taxonomy import is_doc_index_topic
+from peachjam.models import Taxonomy
 
 
 class AfricanliiViewsTest(TestCase):
@@ -41,3 +44,55 @@ class AfricanliiViewsTest(TestCase):
     def test_legal_instrument_listing(self):
         response = self.client.get(reverse("agp_legal_instrument_list"))
         self.assertEqual(response.status_code, 301)
+
+    @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
+    def test_is_doc_index_topic_uses_hierarchical_slug(self):
+        indexes = Taxonomy.add_root(name="Case Indexes", slug="case-indexes")
+        child = indexes.add_child(name="Environment")
+        other_root = Taxonomy.add_root(name="Collections", slug="collections")
+
+        self.assertTrue(is_doc_index_topic(indexes))
+        self.assertTrue(is_doc_index_topic(child))
+        self.assertFalse(is_doc_index_topic(other_root))
+
+    @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
+    def test_taxonomy_detail_redirects_doc_index_topics_to_indexes_url(self):
+        indexes = Taxonomy.add_root(name="Case Indexes", slug="case-indexes")
+        child = indexes.add_child(name="Environment")
+
+        response = self.client.get(
+            reverse(
+                "taxonomy_detail",
+                kwargs={"topic": indexes.slug, "child": child.slug},
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse(
+                "doc_index_detail",
+                kwargs={"topic": indexes.slug, "child": child.slug},
+            ),
+            fetch_redirect_response=False,
+        )
+
+    @override_settings(FEDERATED_DOC_INDEX_ROOTS=["case-indexes"])
+    def test_doc_index_detail_redirects_non_index_topics_back_to_taxonomy_url(self):
+        non_index_root = Taxonomy.add_root(name="Collections")
+        child = non_index_root.add_child(name="Environment")
+
+        response = self.client.get(
+            reverse(
+                "doc_index_detail",
+                kwargs={"topic": non_index_root.slug, "child": child.slug},
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse(
+                "taxonomy_detail",
+                kwargs={"topic": non_index_root.slug, "child": child.slug},
+            ),
+            fetch_redirect_response=False,
+        )
