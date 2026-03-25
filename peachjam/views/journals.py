@@ -6,19 +6,47 @@ from django.views.generic import ListView
 
 from peachjam.forms import JournalArticleFilterForm
 from peachjam.helpers import chunks
-from peachjam.models import VOLUME_ISSUE_TITLE_RE, Journal, JournalArticle, VolumeIssue
+from peachjam.models import (
+    MONTH_NAMES,
+    VOLUME_ISSUE_TITLE_RE,
+    Journal,
+    JournalArticle,
+    VolumeIssue,
+)
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
 
+_MONTH_ORDER = {
+    "january": 1,
+    "february": 2,
+    "march": 3,
+    "april": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "august": 8,
+    "september": 9,
+    "october": 10,
+    "november": 11,
+    "december": 12,
+}
+
 
 def _volume_sort_key(volume):
     m = VOLUME_ISSUE_TITLE_RE.search(volume.title)
     if m:
-        return -int(m.group(3)), int(m.group(1)), int(m.group(2))
-    return 0, 0, 0
+        year = int(m.group(3))
+        vol = int(m.group(1))
+        issue = int(m.group(2))
+        month_word = next(
+            (w for w in volume.title.split() if w.lower() in MONTH_NAMES), None
+        )
+        month = _MONTH_ORDER[month_word.lower()] if month_word else 0
+        return -year, -month, vol, issue
+    return 0, 0, 0, 0
 
 
 class JournalListView(ListView):

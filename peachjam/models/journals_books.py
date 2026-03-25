@@ -115,8 +115,23 @@ class JournalArticle(CoreDocument):
 
 
 VOLUME_ISSUE_TITLE_RE = re.compile(
-    r"Vol[.\s]*(\d+)[,\s]*No[.\s]*(\d+)[\s,\-–]*\(?(\d{4})\)?", re.IGNORECASE
+    r"Vol[.\s]*(\d+)[,\s]*No[.\s]*(\d+).*?(\d{4})", re.IGNORECASE
 )
+
+MONTH_NAMES = {
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+}
 
 
 class VolumeIssue(models.Model):
@@ -139,15 +154,25 @@ class VolumeIssue(models.Model):
         unique_together = [["journal", "title"], ["journal", "slug"]]
 
     def clean(self):
-        if self.title and not VOLUME_ISSUE_TITLE_RE.search(self.title):
-            raise ValidationError(
-                {
-                    "title": _(
-                        "Title must include a volume number, issue number, and year, "
-                        "e.g. 'Vol. 3 No.1 1993' or 'Vol. 3 No.1 - 1993'."
-                    )
-                }
-            )
+        if self.title:
+            if not VOLUME_ISSUE_TITLE_RE.search(self.title):
+                raise ValidationError(
+                    {
+                        "title": _(
+                            "Title must include a volume number, issue number, month, and year, "
+                            "e.g. 'Vol. 3 No.1 - January 1993'."
+                        )
+                    }
+                )
+            if not any(w.lower() in MONTH_NAMES for w in self.title.split()):
+                raise ValidationError(
+                    {
+                        "title": _(
+                            "Title must include a month name, "
+                            "e.g. 'Vol. 3 No.1 - January 1993'."
+                        )
+                    }
+                )
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title, "-")
