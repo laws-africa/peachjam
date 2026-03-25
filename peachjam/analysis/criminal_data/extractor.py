@@ -3,7 +3,7 @@ import os
 
 from django.db import transaction
 
-from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence
+from peachjam.models import Judgment, JudgmentOffence, Offence, Outcome, Sentence
 
 from .agent import extract_case_type_filing_year, extract_offences_and_sentences
 
@@ -35,12 +35,26 @@ class CriminalDataExtractor:
         # clear old extracted criminal data first
         Sentence.objects.filter(judgment=judgment).delete()
         JudgmentOffence.objects.filter(judgment=judgment).delete()
+        judgment.outcomes.clear()
 
         # criminal judgments should get offence/sentence extraction
         if judgment.case_type != Judgment.CaseType.CRIMINAL:
             return None, meta_out
 
         offence_out = extract_offences_and_sentences(judgment_text)
+
+        outcome_ids = []
+        for outcome_match in offence_out.outcomes:
+            if outcome_match.outcome_id is None:
+                log.info(
+                    "extracted outcome %s not matched to outcome",
+                    outcome_match.extracted_outcome,
+                )
+                continue
+            outcome_ids.append(outcome_match.outcome_id)
+
+        if outcome_ids:
+            judgment.outcomes.set(Outcome.objects.filter(id__in=set(outcome_ids)))
 
         for match in offence_out.offences:
             if match.offence_id is None:

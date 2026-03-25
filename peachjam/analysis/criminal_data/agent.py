@@ -16,7 +16,7 @@ from django.db.models import Case, FloatField, Q, Value, When
 from openai.types import Reasoning
 from pydantic import BaseModel, Field, conint
 
-from peachjam.models import Offence, Sentence
+from peachjam.models import Offence, Outcome, Sentence
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +28,15 @@ def log_agent_reasoning(result: RunResult):
                 log.debug("LLM reasoning: %s", entry.text)
 
 
-def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
+def search_canonical_records_tool(
+    *,
+    model_class,
+    primary_field: str,
+    result_label: str,
+    description_field: str,
+    search_terms: str,
+    log_label: str,
+) -> List[Dict[str, Any]]:
 
     _SPLIT = re.compile(r"[,\n;|]+")
     _WS = re.compile(r"\s+")
@@ -42,7 +50,7 @@ def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
 
     close_old_connections()
     try:
-        log.info("search for offences terms: %s", search_terms)
+        log.info("search for %s terms: %s", log_label, search_terms)
 
         terms = [_normalize_term(t) for t in _SPLIT.split(search_terms or "")]
         terms = [t for t in terms if t]
@@ -58,8 +66,8 @@ def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
         limit = 5
         min_rank = 0.05
 
-        vector = SearchVector("title", weight="A", config=config) + SearchVector(
-            "description", weight="C", config=config
+        vector = SearchVector(primary_field, weight="A", config=config) + SearchVector(
+            description_field, weight="C", config=config
         )
 
         ts_query = None
@@ -73,41 +81,63 @@ def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
         for word in _term_words(primary_term):
             title_word_score_parts.append(
                 Case(
-                    When(title__icontains=word, then=Value(1.0)),
+                    When(**{f"{primary_field}__icontains": word}, then=Value(1.0)),
                     default=Value(0.0),
                     output_field=FloatField(),
                 )
             )
 
-        qs = Offence.objects.annotate(rank=rank)
+        qs = model_class.objects.annotate(rank=rank)
 
         if title_word_score_parts:
             title_word_score = title_word_score_parts[0]
             for extra_score in title_word_score_parts[1:]:
                 title_word_score = title_word_score + extra_score
-            qs = qs.annotate(title_word_score=title_word_score)
+            qs = qs.annotate(primary_word_score=title_word_score)
         else:
-            qs = qs.annotate(title_word_score=Value(0.0, output_field=FloatField()))
+            qs = qs.annotate(primary_word_score=Value(0.0, output_field=FloatField()))
 
-        qs = qs.filter(Q(title_word_score__gt=0) | Q(rank__gte=min_rank)).order_by(
-            "-title_word_score", "-rank", "title", "id"
+        qs = qs.filter(Q(primary_word_score__gt=0) | Q(rank__gte=min_rank)).order_by(
+            "-primary_word_score", "-rank", primary_field, "id"
         )
 
         results: List[Dict[str, Any]] = []
-        for offence in qs[:limit]:
+        for record in qs[:limit]:
             results.append(
                 {
-                    "id": offence.id,
-                    "title": offence.title,
-                    "description": (offence.description or "").strip(),
+                    "id": record.id,
+                    result_label: getattr(record, primary_field),
+                    "description": (getattr(record, description_field) or "").strip(),
                 }
             )
 
-        log.info("offence search results: %s", results)
+        log.info("%s search results: %s", log_label, results)
         return results
 
     finally:
         connection.close()
+
+
+def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
+    return search_canonical_records_tool(
+        model_class=Offence,
+        primary_field="title",
+        result_label="title",
+        description_field="description",
+        search_terms=search_terms,
+        log_label="offences",
+    )
+
+
+def search_outcomes_tool(search_terms: str) -> List[Dict[str, Any]]:
+    return search_canonical_records_tool(
+        model_class=Outcome,
+        primary_field="name",
+        result_label="name",
+        description_field="description",
+        search_terms=search_terms,
+        log_label="outcomes",
+    )
 
 
 @function_tool
@@ -175,11 +205,50 @@ def search_offences(search_terms: str):
     return matches
 
 
+@function_tool
+def search_outcomes(search_terms: str):
+    """
+    Search the outcome database for one or more candidate case outcomes.
+
+    Purpose
+    -------
+    This tool maps outcome wording found in a criminal judgment to canonical
+    `Outcome` records stored in the database.
+
+    Input
+    -----
+    search_terms : str
+
+        A single string containing one or more concise outcome search terms.
+        If multiple terms are needed, separate them with commas.
+
+        Examples:
+            "conviction upheld"
+            "appeal allowed, conviction quashed, sentence set aside"
+
+    Agent Guidance
+    --------------
+    - Always call this tool before assigning an outcome_id.
+    - Provide 2-4 concise outcome variants when possible.
+    - Never invent outcome IDs.
+    - Outcomes may be multiple when the judgment clearly records multiple
+      dispositive results.
+    """
+    matches = search_outcomes_tool(search_terms)
+    if not matches:
+        return (
+            "There are no outcomes in the database that match those search terms. You can try again with different"
+            " search terms if you think the outcome should be in the database. You must only try 2-3 times before"
+            " concluding that there is no match."
+        )
+    return matches
+
+
 JUDGMENT_EXTRACTION_PROMPT = """
 # Role
 
-You are a legal information extraction system. Your task is to extract structured information about offences and
-sentencing from the text of a court judgment.
+You are a legal information extraction system. Your task is to extract structured information about offences,
+sentencing, and case outcomes from the text of a court judgment.
 
 # Task
 
@@ -189,6 +258,9 @@ using the `search_offences` tool.
 
 You must also extract any sentences imposed on the accused or appellant and ensure that each sentence is correctly
 associated with the relevant offence.
+
+You must extract any case outcomes clearly stated in the judgment, and map them to canonical outcome IDs using the
+`search_outcomes` tool.
 
 Only return offences and sentences that relate directly to the accused or appellant in the case.
 
@@ -210,6 +282,20 @@ For example, offences appearing in statements such as *“the appellant was char
 
 Mentions of offences in explanations of legal principles, summaries of earlier authorities, or hypothetical examples
 must be ignored.
+
+# Identifying Case Outcomes
+
+You must extract only outcomes that describe the actual result of the present judgment or the result being affirmed,
+varied, or overturned on appeal.
+
+Typical examples include outcomes such as an appeal being dismissed or allowed, a conviction being upheld or quashed,
+a sentence being affirmed, reduced, enhanced, or set aside, or an acquittal being entered.
+
+Outcomes may be multiple. For example, a judgment may dismiss an appeal against conviction but allow an appeal against
+sentence, or it may quash a conviction and set aside the sentence. Return each distinct canonical outcome that is
+clearly supported by the judgment text.
+
+Do not extract generic narrative statements that are not dispositive outcomes.
 
 # Mapping Offences to Database IDs
 
@@ -235,6 +321,22 @@ You must NOT assign an offence_id when:
 - the returned offences are related but not the same
 - the result is merely the “closest” available offence
 - the wording in the judgment and the wording in the result refer to different offences
+
+# Mapping Outcomes to Database IDs
+
+After identifying a case outcome in the judgment, you must map it to a canonical outcome using the `search_outcomes`
+tool.
+
+For each extracted outcome, call `search_outcomes` using two to four concise variants that describe the outcome.
+
+An outcome ID may only be assigned if one of the returned results is a clear semantic match to the outcome described
+in the judgment.
+
+You are not allowed to invent outcome IDs. You are also not allowed to output an outcome ID unless that exact ID
+appears in the results returned by the `search_outcomes` tool.
+
+If the search returns no results, or if none of the results clearly match the extracted outcome, the `outcome_id`
+must be set to `null`.
 
 
 
@@ -440,14 +542,24 @@ class OffenceExtraction(BaseModel):
     sentences: List[SentenceExtraction] = []
 
 
+class OutcomeExtraction(BaseModel):
+    outcome_id: Optional[int] = Field(
+        description="Outcome ID from the database (from search_outcomes). Null if no clear match."
+    )
+    extracted_outcome: str = Field(
+        description="Clean outcome label as written or normalized from the judgment."
+    )
+
+
 class JudgmentOffenceExtraction(BaseModel):
     offences: List[OffenceExtraction] = []
+    outcomes: List[OutcomeExtraction] = []
 
 
 offence_extraction_agent = Agent(
     name="Offence + Sentence Extractor",
     instructions=JUDGMENT_EXTRACTION_PROMPT,
-    tools=[search_offences],
+    tools=[search_offences, search_outcomes],
     output_type=JudgmentOffenceExtraction,
     model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
     model="gpt-5-mini",
