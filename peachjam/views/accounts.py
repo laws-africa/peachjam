@@ -1,6 +1,8 @@
 from allauth.account.forms import ReauthenticateForm
 from allauth.account.mixins import NextRedirectMixin
 from allauth.account.views import ConfirmLoginCodeView as AllauthConfirmLoginCodeView
+from allauth.account.views import SignupView as AllauthSignupView
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -24,6 +26,13 @@ from peachjam.views.mixins import AtomicPostMixin
 from peachjam_subs.models import Subscription
 
 User = get_user_model()
+
+
+class SignupView(AllauthSignupView):
+    def dispatch(self, request, *args, **kwargs):
+        if settings.PEACHJAM["AUTH_OTP"]:
+            return redirect("account_login")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class UserAuthView(AllauthConfirmLoginCodeView):
