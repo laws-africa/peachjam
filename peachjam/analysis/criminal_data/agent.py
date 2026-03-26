@@ -247,8 +247,8 @@ def search_outcomes(search_terms: str):
 JUDGMENT_EXTRACTION_PROMPT = """
 # Role
 
-You are a legal information extraction system. Your task is to extract structured information about offences,
-sentencing, and case outcomes from the text of a court judgment.
+You are a legal information extraction system. Your task is to extract structured information about offences
+and sentencing from the text of a court judgment.
 
 # Task
 
@@ -258,9 +258,6 @@ using the `search_offences` tool.
 
 You must also extract any sentences imposed on the accused or appellant and ensure that each sentence is correctly
 associated with the relevant offence.
-
-You must extract any case outcomes clearly stated in the judgment, and map them to canonical outcome IDs using the
-`search_outcomes` tool.
 
 Only return offences and sentences that relate directly to the accused or appellant in the case.
 
@@ -282,20 +279,6 @@ For example, offences appearing in statements such as *“the appellant was char
 
 Mentions of offences in explanations of legal principles, summaries of earlier authorities, or hypothetical examples
 must be ignored.
-
-# Identifying Case Outcomes
-
-You must extract only outcomes that describe the actual result of the present judgment or the result being affirmed,
-varied, or overturned on appeal.
-
-Typical examples include outcomes such as an appeal being dismissed or allowed, a conviction being upheld or quashed,
-a sentence being affirmed, reduced, enhanced, or set aside, or an acquittal being entered.
-
-Outcomes may be multiple. For example, a judgment may dismiss an appeal against conviction but allow an appeal against
-sentence, or it may quash a conviction and set aside the sentence. Return each distinct canonical outcome that is
-clearly supported by the judgment text.
-
-Do not extract generic narrative statements that are not dispositive outcomes.
 
 # Mapping Offences to Database IDs
 
@@ -321,24 +304,6 @@ You must NOT assign an offence_id when:
 - the returned offences are related but not the same
 - the result is merely the “closest” available offence
 - the wording in the judgment and the wording in the result refer to different offences
-
-# Mapping Outcomes to Database IDs
-
-After identifying a case outcome in the judgment, you must map it to a canonical outcome using the `search_outcomes`
-tool.
-
-For each extracted outcome, call `search_outcomes` using two to four concise variants that describe the outcome.
-
-An outcome ID may only be assigned if one of the returned results is a clear semantic match to the outcome described
-in the judgment.
-
-You are not allowed to invent outcome IDs. You are also not allowed to output an outcome ID unless that exact ID
-appears in the results returned by the `search_outcomes` tool.
-
-If the search returns no results, or if none of the results clearly match the extracted outcome, the `outcome_id`
-must be set to `null`.
-
-
 
 Example tool call:
 
@@ -553,13 +518,16 @@ class OutcomeExtraction(BaseModel):
 
 class JudgmentOffenceExtraction(BaseModel):
     offences: List[OffenceExtraction] = []
+
+
+class JudgmentOutcomeExtraction(BaseModel):
     outcomes: List[OutcomeExtraction] = []
 
 
 offence_extraction_agent = Agent(
     name="Offence + Sentence Extractor",
     instructions=JUDGMENT_EXTRACTION_PROMPT,
-    tools=[search_offences, search_outcomes],
+    tools=[search_offences],
     output_type=JudgmentOffenceExtraction,
     model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
     model="gpt-5-mini",
@@ -573,6 +541,102 @@ def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtract
     )
     log_agent_reasoning(result)
     log.info("Extraction result: %s", result.final_output)
+    return result.final_output
+
+
+OUTCOME_EXTRACTION_PROMPT = """
+# Role
+
+You are a legal information extraction system. Your task is to extract structured information about case outcomes
+from the text of a court judgment.
+
+# Task
+
+From the judgment text, identify the dispositive outcomes for the present case and map them to canonical outcome IDs
+in the database using the `search_outcomes` tool.
+
+Only extract outcomes that describe the actual result of the present judgment or the result being affirmed, varied,
+or overturned on appeal.
+
+# Identifying Case Outcomes
+
+Typical examples include outcomes such as an appeal being dismissed or allowed, a conviction being upheld or quashed,
+a sentence being affirmed, reduced, enhanced, or set aside, or an acquittal being entered.
+
+Outcomes may be multiple. For example, a judgment may dismiss an appeal against conviction but allow an appeal against
+sentence, or it may quash a conviction and set aside the sentence. Return each distinct canonical outcome that is
+clearly supported by the judgment text.
+
+Do not extract generic narrative statements that are not dispositive outcomes.
+
+Focus on the final operative result, not every intermediate discussion.
+
+# Mapping Outcomes to Database IDs
+
+After identifying a case outcome in the judgment, you must map it to a canonical outcome using the `search_outcomes`
+tool.
+
+For each extracted outcome, call `search_outcomes` using two to four concise variants that describe the outcome.
+
+An outcome ID may only be assigned if one of the returned results is a clear semantic match to the outcome described
+in the judgment.
+
+You are not allowed to invent outcome IDs. You are also not allowed to output an outcome ID unless that exact ID
+appears in the results returned by the `search_outcomes` tool.
+
+If the search returns no results, or if none of the results clearly match the extracted outcome, the `outcome_id`
+must be set to `null`.
+
+# Examples
+
+Example 1
+
+<text>
+The appeal against conviction is dismissed, but the sentence is reduced from ten years to five years.
+</text>
+
+Return both of these outcomes if supported by the canonical list:
+- conviction upheld / appeal dismissed
+- sentence reduced
+
+Example 2
+
+<text>
+The conviction is quashed and the sentence set aside. The appellant shall be set at liberty unless otherwise lawfully
+held.
+</text>
+
+Return both of these outcomes if supported by the canonical list:
+- conviction quashed
+- sentence set aside
+
+Example 3
+
+<text>
+Counsel cited authorities where convictions were quashed in unrelated cases.
+</text>
+
+Do not extract any outcome from this text because it is not the result in the present case.
+"""
+
+
+outcome_extraction_agent = Agent(
+    name="Outcome Extractor",
+    instructions=OUTCOME_EXTRACTION_PROMPT,
+    tools=[search_outcomes],
+    output_type=JudgmentOutcomeExtraction,
+    model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
+    model="gpt-5-mini",
+)
+
+
+def extract_outcomes(judgment_text: str) -> JudgmentOutcomeExtraction:
+    result = Runner.run_sync(
+        outcome_extraction_agent,
+        judgment_text,
+    )
+    log_agent_reasoning(result)
+    log.info("Outcome extraction result: %s", result.final_output)
     return result.final_output
 
 

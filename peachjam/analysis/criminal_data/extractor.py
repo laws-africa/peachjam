@@ -5,7 +5,11 @@ from django.db import transaction
 
 from peachjam.models import Judgment, JudgmentOffence, Offence, Outcome, Sentence
 
-from .agent import extract_case_type_filing_year, extract_offences_and_sentences
+from .agent import (
+    extract_case_type_filing_year,
+    extract_offences_and_sentences,
+    extract_outcomes,
+)
 
 log = logging.getLogger(__name__)
 
@@ -42,9 +46,10 @@ class CriminalDataExtractor:
             return None, meta_out
 
         offence_out = extract_offences_and_sentences(judgment_text)
+        outcome_out = extract_outcomes(judgment_text)
 
         outcome_ids = []
-        for outcome_match in offence_out.outcomes:
+        for outcome_match in outcome_out.outcomes:
             if outcome_match.outcome_id is None:
                 log.info(
                     "extracted outcome %s not matched to outcome",
@@ -83,4 +88,4 @@ class CriminalDataExtractor:
                 )
                 log.info(f"Created {sentence}")
 
-        return offence_out, meta_out
+        return offence_out, outcome_out, meta_out

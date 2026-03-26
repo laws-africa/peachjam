@@ -9,11 +9,13 @@ from django.test import TransactionTestCase as TestCase
 from peachjam.analysis.criminal_data.agent import (
     CaseMetaExtraction,
     JudgmentOffenceExtraction,
+    JudgmentOutcomeExtraction,
     OffenceExtraction,
     OutcomeExtraction,
     SentenceExtraction,
     extract_case_type_filing_year,
     extract_offences_and_sentences,
+    extract_outcomes,
 )
 from peachjam.analysis.criminal_data.agent import (
     search_offences_tool as search_offences,
@@ -298,6 +300,17 @@ class CriminalDataExtractionTests(TestCase):
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
 
+    def test_extract_outcomes_for_split_result(self):
+        judgment_text = """
+        The appeal against conviction is dismissed.
+        However, the sentence of ten years imprisonment is reduced to five years.
+        """.strip()
+
+        result = extract_outcomes(judgment_text)
+        log.info("test_extract_outcomes_for_split_result: %s", result)
+
+        self.assertTrue(result.outcomes)
+
 
 class SearchOffencesTests(TestCase):
     def setUp(self):
@@ -511,6 +524,7 @@ class CriminalDataExtractorTests(TestCase):
         )
 
     @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
     @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
     @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
     @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
@@ -519,6 +533,7 @@ class CriminalDataExtractorTests(TestCase):
         mock_get_content_as_text,
         mock_extract_case_type_filing_year,
         mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
     ):
         mock_get_content_as_text.return_value = "Criminal appeal text"
         mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
@@ -540,7 +555,9 @@ class CriminalDataExtractorTests(TestCase):
                         )
                     ],
                 )
-            ],
+            ]
+        )
+        mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(
             outcomes=[
                 OutcomeExtraction(
                     outcome_id=self.conviction_upheld.id,
@@ -550,7 +567,7 @@ class CriminalDataExtractorTests(TestCase):
                     outcome_id=self.sentence_reduced.id,
                     extracted_outcome="sentence reduced",
                 ),
-            ],
+            ]
         )
 
         CriminalDataExtractor().extract(self.judgment)
@@ -566,6 +583,7 @@ class CriminalDataExtractorTests(TestCase):
         self.assertEqual(self.judgment.sentences.count(), 1)
 
     @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
     @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
     @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
     @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
@@ -574,6 +592,7 @@ class CriminalDataExtractorTests(TestCase):
         mock_get_content_as_text,
         mock_extract_case_type_filing_year,
         mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
     ):
         self.judgment.outcomes.add(self.conviction_upheld, self.sentence_reduced)
 
@@ -590,3 +609,4 @@ class CriminalDataExtractorTests(TestCase):
         self.assertEqual(self.judgment.filing_year, 2020)
         self.assertEqual(self.judgment.outcomes.count(), 0)
         self.assertFalse(mock_extract_offences_and_sentences.called)
+        self.assertFalse(mock_extract_outcomes.called)
