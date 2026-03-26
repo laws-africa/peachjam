@@ -98,12 +98,10 @@ class LegislationListView(FilteredDocumentListView):
         return context
 
 
-class LegislationSubsidiaryView(FilteredDocumentListView):
-    model = Legislation
-    template_name = "peachjam/legislation_subsidiary.html"
+class LegislationSubsidiaryView(LegislationListView):
+    template_name = "peachjam/document/_legislation_subsidiary.html"
     latest_expression_only = True
-    form_class = LegislationFilterForm
-    form_defaults = {"sort": "title"}
+    paginate_by = None
 
     @cached_property
     def legislation(self):
