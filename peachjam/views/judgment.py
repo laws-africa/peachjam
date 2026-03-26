@@ -171,13 +171,13 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
         return super().dispatch(request, *args, **kwargs)
 
     def get_base_queryset(self):
-        descendant_ids = list(
-            self.flynote.get_descendants().values_list("pk", flat=True)
-        ) + [self.flynote.pk]
         return (
             super()
             .get_base_queryset()
-            .filter(judgment__flynotes__flynote__in=descendant_ids)
+            .filter(
+                judgment__flynotes__flynote__path__startswith=self.flynote.path,
+                judgment__flynotes__flynote__depth__gte=self.flynote.depth,
+            )
             .distinct()
         )
 
