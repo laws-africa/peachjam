@@ -1,8 +1,10 @@
+import operator
 from collections import defaultdict
+from functools import reduce
 
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.db.models import F, IntegerField, Sum, Value, Window
+from django.db.models import F, IntegerField, Q, Sum, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -68,10 +70,16 @@ class FlynoteTopicMixin:
         if not parent_topics:
             return {}
 
-        parent_paths = [t.path for t in parent_topics]
+        depth = parent_topics[0].depth
+        direct_child_filter = reduce(
+            operator.or_,
+            (Q(path__startswith=topic.path) for topic in parent_topics),
+        )
 
         children_qs = (
-            Flynote.objects.annotate(
+            Flynote.objects.filter(depth=depth + 1)
+            .filter(direct_child_filter)
+            .annotate(
                 parent_path=Substr("path", 1, Length("path") - Flynote.steplen),
                 doc_count=Coalesce(
                     F("document_count_cache__count"),
@@ -79,7 +87,6 @@ class FlynoteTopicMixin:
                     output_field=IntegerField(),
                 ),
             )
-            .filter(parent_path__in=parent_paths)
             .annotate(
                 rank=Window(
                     expression=RowNumber(),
