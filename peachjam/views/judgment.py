@@ -176,7 +176,6 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
             .get_base_queryset()
             .filter(
                 judgment__flynotes__flynote__path__startswith=self.flynote.path,
-                judgment__flynotes__flynote__depth__gte=self.flynote.depth,
             )
             .distinct()
         )
@@ -202,7 +201,7 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
         ]
         context["has_more_topics"] = total_children > len(popular_topics)
 
-        # Paginated list — filtered and sorted in the DB
+        # Paginated list of child topics — filtered and sorted in the DB
         q = self.request.GET.get("q", "").strip()
         paginated_qs = children_qs
         if q:
