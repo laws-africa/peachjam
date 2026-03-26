@@ -3,7 +3,9 @@ from django.urls import path
 from peachjam.views import (
     LawReportDetailView,
     LawReportListView,
+    LawReportVolumeCasesIndexView,
     LawReportVolumeDetailView,
+    LawReportVolumeLegislationIndexView,
 )
 
 urlpatterns = [
@@ -16,12 +18,12 @@ urlpatterns = [
     ),
     path(
         "<slug:slug>/volumes/<slug:volume_slug>/cases-index/",
-        LawReportVolumeDetailView.as_view(tab_name="cases"),
+        LawReportVolumeCasesIndexView.as_view(),
         name="law_report_volume_cases_index",
     ),
     path(
         "<slug:slug>/volumes/<slug:volume_slug>/legislation-index/",
-        LawReportVolumeDetailView.as_view(tab_name="legislation"),
+        LawReportVolumeLegislationIndexView.as_view(),
         name="law_report_volume_legislation_index",
     ),
 ]

@@ -166,9 +166,13 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(self.volume_1.get_absolute_url())
 
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response, "peachjam/law_report/law_report_volume_detail.html"
+        )
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.second_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
+        self.assertNotContains(response, "Back to law report")
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
         self.assertEqual("judgments", response.context["active_tab"])
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
@@ -181,6 +185,9 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response, "peachjam/law_report/law_report_volume_detail.html"
+        )
         self.assertEqual("cases", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
         self.assertEqual("case", str(response.context["doc_count_noun"]))
@@ -197,6 +204,9 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response, "peachjam/law_report/law_report_volume_detail.html"
+        )
         self.assertEqual("legislation", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
         self.assertEqual("documents", str(response.context["doc_count_noun_plural"]))
@@ -205,7 +215,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotContains(response, self.other_legislation.title)
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
-    def test_law_report_volume_detail_view_invalid_tab_defaults_to_judgments(self):
+    def test_law_report_volume_detail_view_ignores_tab_query_param(self):
         url = self.volume_1.get_absolute_url() + "?tab=invalid"
         response = self.client.get(url)
 

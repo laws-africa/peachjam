@@ -13,6 +13,7 @@ from peachjam.models import (
     Legislation,
 )
 from peachjam.views.courts import FilteredJudgmentView
+from peachjam.views.generic_views import FilteredDocumentListView
 
 
 class LawReportListView(ListView):
@@ -38,33 +39,9 @@ class LawReportDetailView(DetailView):
         return context
 
 
-class LawReportVolumeDetailView(FilteredJudgmentView):
-    template_name = "peachjam/law_report/law_report_volume_detail.html"
+class LawReportVolumeViewMixin:
     navbar_link = "law_report"
-    tab_name = "judgments"
-
-    CITATION_TABS = {"cases": Judgment, "legislation": Legislation}
-    TAB_METADATA = {
-        "judgments": {
-            "doc_count_noun": _("judgment"),
-            "doc_count_noun_plural": _("judgments"),
-            "doc_table_date_label": _("Judgment date"),
-            "page_title": None,
-        },
-        "cases": {
-            "doc_count_noun": _("case"),
-            "doc_count_noun_plural": _("cases"),
-            "doc_table_date_label": _("Judgment date"),
-            "page_title": _("Cited cases"),
-        },
-        "legislation": {
-            "doc_count_noun": _("document"),
-            "doc_count_noun_plural": _("documents"),
-            "doc_table_date_label": _("Date"),
-            "page_title": _("Cited legislation"),
-            "nature": _("Legislation"),
-        },
-    }
+    active_tab = None
 
     def base_view_name(self):
         return self.law_report_volume.title
@@ -83,56 +60,66 @@ class LawReportVolumeDetailView(FilteredJudgmentView):
             slug=self.kwargs.get("volume_slug"),
         )
 
-    @cached_property
-    def active_tab(self):
-        if self.tab_name in {"judgments", *self.CITATION_TABS.keys()}:
-            return self.tab_name
-        tab = self.request.GET.get("tab")
-        return tab if tab in self.CITATION_TABS else "judgments"
-
-    def get_base_queryset(self, exclude=None):
-        if self.active_tab in self.CITATION_TABS:
-            model = self.CITATION_TABS[self.active_tab]
-            volume_lookup = (
-                "work__incoming_citations__citing_work__documents"
-                "__judgment__law_report_entries__law_report_volume"
-            )
-            return (
-                model.objects.filter(
-                    **{volume_lookup: self.law_report_volume},
-                    published=True,
-                )
-                .distinct()
-                .order_by("title")
-            )
-        qs = super().get_base_queryset(exclude=exclude)
-        return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["law_report"] = self.law_report
         context["law_report_volume"] = self.law_report_volume
         context["active_tab"] = self.active_tab
-        metadata = self.TAB_METADATA[self.active_tab]
-        context["doc_count_noun"] = metadata["doc_count_noun"]
-        context["doc_count_noun_plural"] = metadata["doc_count_noun_plural"]
-        context["doc_table_date_label"] = metadata["doc_table_date_label"]
-        context["page_title"] = metadata["page_title"] or self.page_title()
-        if metadata.get("nature"):
-            context["nature"] = metadata["nature"]
-
-        if self.active_tab in self.CITATION_TABS:
-            context["doc_table_toggle"] = True
-            self.attach_citing_judgments(context.get("documents", []))
-
         return context
 
+
+class LawReportVolumeDetailView(LawReportVolumeViewMixin, FilteredJudgmentView):
+    template_name = "peachjam/law_report/law_report_volume_detail.html"
+    active_tab = "judgments"
+
+    def get_base_queryset(self, exclude=None):
+        qs = super().get_base_queryset(exclude=exclude)
+        return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
+
+
+class LawReportVolumeCitationIndexBaseView(
+    LawReportVolumeViewMixin, FilteredDocumentListView
+):
+    form_defaults = {"sort": "title"}
+    doc_table_toggle = True
+    doc_table_show_jurisdiction = False
+    page_title_text = None
+    doc_count_noun = None
+    doc_count_noun_plural = None
+    doc_table_title_label = None
+    doc_table_date_label = _("Date")
+    nature = None
+
+    def get_base_queryset(self, exclude=None):
+        volume_lookup = (
+            "work__incoming_citations__citing_work__documents"
+            "__judgment__law_report_entries__law_report_volume"
+        )
+        return (
+            self.get_model_queryset()
+            .filter(**{volume_lookup: self.law_report_volume})
+            .distinct()
+        )
+
     def add_facets(self, context):
-        if self.active_tab in self.CITATION_TABS:
-            context["facet_data"] = {}
-            self.add_alphabet_facet(context)
-        else:
-            super().add_facets(context)
+        context["facet_data"] = {}
+        self.add_alphabet_facet(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = self.page_title_text
+        context["doc_count_noun"] = self.doc_count_noun
+        context["doc_count_noun_plural"] = self.doc_count_noun_plural
+        context["doc_table_date_label"] = self.doc_table_date_label
+        context["doc_table_toggle"] = self.doc_table_toggle
+        context["doc_table_show_jurisdiction"] = self.doc_table_show_jurisdiction
+        context["documents"] = self.group_documents(context["documents"])
+        if self.doc_table_title_label:
+            context["doc_table_title_label"] = self.doc_table_title_label
+        if self.nature:
+            context["nature"] = self.nature
+        self.attach_citing_judgments(context["documents"])
+        return context
 
     def attach_citing_judgments(self, cited_docs):
         """Attach citing judgments from this volume as .children for toggle."""
@@ -176,3 +163,28 @@ class LawReportVolumeDetailView(FilteredJudgmentView):
                     ],
                     key=lambda d: d.title,
                 )
+
+
+class LawReportVolumeCasesIndexView(LawReportVolumeCitationIndexBaseView):
+    template_name = "peachjam/law_report/law_report_volume_detail.html"
+    active_tab = "cases"
+    model = Judgment
+    queryset = Judgment.objects.prefetch_related(
+        "judges", "labels", "attorneys", "outcomes"
+    ).select_related("work")
+    page_title_text = _("Cited cases")
+    doc_count_noun = _("case")
+    doc_count_noun_plural = _("cases")
+    doc_table_title_label = _("Citation")
+    doc_table_date_label = _("Judgment date")
+    nature = "Judgment"
+
+
+class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
+    template_name = "peachjam/law_report/law_report_volume_detail.html"
+    active_tab = "legislation"
+    model = Legislation
+    page_title_text = _("Cited legislation")
+    doc_count_noun = _("document")
+    doc_count_noun_plural = _("documents")
+    nature = "Legislation"

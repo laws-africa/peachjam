@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n peachjam %}
+{% load i18n %}
 {% block title %}{{ page_title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
@@ -20,17 +20,14 @@
   </div>
 {% endblock %}
 {% block entity-profile %}{% endblock %}
-{% block page-header %}
-  {% block page-title %}
-    <div class="my-4">
-      <h1>{{ page_title }}</h1>
-    </div>
-  {% endblock %}
-  <a href="{{ law_report.get_absolute_url }}"
-     class="btn btn-sm btn-outline-secondary mb-3">
-    <i class="bi bi-arrow-left me-1"></i>{% trans 'Back to law report' %}
-  </a>
-  <ul class="nav nav-tabs mb-3">
+{% block page-title %}
+  <div class="my-4">
+    <h1>{{ page_title }}</h1>
+  </div>
+{% endblock %}
+{% block count-and-search %}{% endblock %}
+{% block nav-tabs %}
+  <nav class="nav nav-tabs mb-3">
     <li class="nav-item">
       <a class="nav-link {% if active_tab == 'judgments' %}active{% endif %}"
          href="{{ law_report_volume.get_absolute_url }}">{% trans 'Judgments' %}</a>
@@ -43,7 +40,5 @@
       <a class="nav-link {% if active_tab == 'legislation' %}active{% endif %}"
          href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">{% trans 'Cited legislation' %}</a>
     </li>
-  </ul>
-  {% include 'peachjam/_document_count.html' %}
+  </nav>
 {% endblock %}
-{% block document-table %}{{ block.super }}{% endblock %}
