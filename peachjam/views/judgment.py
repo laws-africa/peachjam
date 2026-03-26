@@ -117,6 +117,11 @@ class FlynoteTopicListView(FlynoteTopicMixin, ListView):
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam/flynote/_list.html"]
+        return super().get_template_names()
+
     def get_queryset(self):
         qs = self.annotate_with_counts(Flynote.get_root_nodes())
 
@@ -177,7 +182,7 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
             if self.request.htmx.target == "doc-table":
                 return ["peachjam/_document_table.html"]
             if self.request.htmx.target == "flynote-subtopics-container":
-                return [self.template_name]
+                return ["peachjam/flynote/_list.html"]
             return ["peachjam/_document_table_form.html"]
         return super().get_template_names()
 
@@ -200,7 +205,44 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
 
         children_qs = self.annotate_with_counts(self.flynote.get_children())
 
-        # Top 16 by count – single DB query
+        if not self.request.htmx:
+            self.popular_subtopics(context, children_qs)
+
+        if (
+            not self.request.htmx
+            or self.request.htmx.target == "flynote-subtopics-container"
+        ):
+            # Paginated list of child topics — filtered and sorted in the DB
+            q = self.request.GET.get("q", "").strip()
+            paginated_qs = children_qs
+            if q:
+                paginated_qs = paginated_qs.filter(name__icontains=q)
+            paginated_qs = paginated_qs.order_by("name")
+
+            paginator = Paginator(paginated_qs, 20)
+            page_number = self.request.GET.get("page")
+            page_obj = paginator.get_page(page_number)
+
+            page_topics = list(page_obj.object_list)
+            page_child_names = self.get_top_children_by_count(page_topics)
+            context["all_topics"] = [
+                {
+                    "topic": t,
+                    "count": t.doc_count,
+                    "child_names": page_child_names.get(t.pk, []),
+                }
+                for t in page_topics
+            ]
+            context["page_obj"] = page_obj
+
+        context["topic"] = self.flynote
+        context["ancestors"] = self.flynote.get_ancestors()
+        context["root"] = None
+
+        return context
+
+    def popular_subtopics(self, context, children_qs):
+        # Top 16 subtopcis by count – single DB query
         popular_qs = children_qs.order_by("-doc_count", "name")[:16]
         popular_topics = list(popular_qs)
         child_names_map = self.get_top_children_by_count(popular_topics)
@@ -215,36 +257,7 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
             for t in popular_topics
         ]
         context["has_more_topics"] = total_children > len(popular_topics)
-
-        # Paginated list of child topics — filtered and sorted in the DB
-        q = self.request.GET.get("q", "").strip()
-        paginated_qs = children_qs
-        if q:
-            paginated_qs = paginated_qs.filter(name__icontains=q)
-        paginated_qs = paginated_qs.order_by("name")
-
-        paginator = Paginator(paginated_qs, 20)
-        page_number = self.request.GET.get("page")
-        page_obj = paginator.get_page(page_number)
-
-        page_topics = list(page_obj.object_list)
-        page_child_names = self.get_top_children_by_count(page_topics)
-        context["all_topics"] = [
-            {
-                "topic": t,
-                "count": t.doc_count,
-                "child_names": page_child_names.get(t.pk, []),
-            }
-            for t in page_topics
-        ]
-        context["page_obj"] = page_obj
-
-        context["topic"] = self.flynote
-        context["ancestors"] = self.flynote.get_ancestors()
         context["total_subtopic_count"] = total_children
-        context["root"] = None
-
-        return context
 
 
 @registry.register_doc_type("judgment")
