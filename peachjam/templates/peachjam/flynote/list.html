@@ -31,6 +31,9 @@
       </h2>
       {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-all-list-container' %}
     </div>
+    <div class="htmx-progress progress mb-2">
+      <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+    </div>
     <div id="flynote-all-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
   </section>
 {% endblock %}

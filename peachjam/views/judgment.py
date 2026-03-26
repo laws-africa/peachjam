@@ -119,27 +119,19 @@ class FlynoteTopicListView(FlynoteTopicMixin, ListView):
 
     def get_queryset(self):
         qs = self.annotate_with_counts(Flynote.get_root_nodes())
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            qs = qs.filter(name__icontains=q)
+
+        if self.request.htmx:
+            q = self.request.GET.get("q", "").strip()
+            if q:
+                qs = qs.filter(name__icontains=q)
+
         return qs.order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        popular_qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
-            "-doc_count", "name"
-        )[:16]
-        popular_topics = list(popular_qs)
-        child_names_map = self.get_top_children_by_count(popular_topics)
 
-        context["popular_topics"] = [
-            {
-                "topic": t,
-                "count": t.doc_count,
-                "child_names": child_names_map.get(t.pk, []),
-            }
-            for t in popular_topics
-        ]
+        if not self.request.htmx:
+            self.popular_topics(context)
 
         page_topics = list(context["all_topics"])
         page_child_names = self.get_top_children_by_count(page_topics)
@@ -158,6 +150,22 @@ class FlynoteTopicListView(FlynoteTopicMixin, ListView):
         ).aggregate(total=Coalesce(Sum("count"), Value(0)))["total"]
         context["root"] = None
         return context
+
+    def popular_topics(self, context):
+        popular_qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
+            "-doc_count", "name"
+        )[:16]
+        popular_topics = list(popular_qs)
+        child_names_map = self.get_top_children_by_count(popular_topics)
+
+        context["popular_topics"] = [
+            {
+                "topic": t,
+                "count": t.doc_count,
+                "child_names": child_names_map.get(t.pk, []),
+            }
+            for t in popular_topics
+        ]
 
 
 class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
