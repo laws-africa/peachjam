@@ -36,7 +36,7 @@ class Flynote(MP_Node):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("flynote_topic_detail", kwargs={"slug": self.slug})
+        return reverse("flynote_detail", kwargs={"slug": self.slug})
 
     def update_slug(self):
         """Build a unique slug from the ancestor chain, just like Taxonomy."""
