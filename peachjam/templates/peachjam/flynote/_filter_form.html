@@ -9,7 +9,7 @@
            aria-label="{% trans 'Filter topics' %}"
            value="{{ request.GET.q|default:'' }}"
            hx-get="{% url 'flynote_list' %}{% if flynote %}?flynote={{ flynote.slug }}{% endif %}"
-           hx-trigger="input changed delay:400ms, search"
+           hx-trigger="input changed delay:400ms, search{% if onload %}, load{% endif %}"
            hx-target="{{ htmx_target }}"
            hx-indicator=".flynote-htmx-progress"/>
   </div>

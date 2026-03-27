@@ -125,7 +125,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     model = Flynote
     template_name = "peachjam/flynote/list.html"
     context_object_name = "flynotes"
-    paginate_by = 40
+    paginate_by = 30
 
     def get(self, request, *args, **kwargs):
         if not Flynote.get_root_nodes().exists():
@@ -155,7 +155,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         if q:
             qs = qs.filter(name__icontains=q)
 
-        return self.annotate_with_counts(qs).order_by("-doc_count", "name")
+        return self.annotate_with_counts(qs).order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -205,14 +205,13 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
         if not self.request.htmx:
             self.popular_subtopics(context)
-
-        context["flynote"] = self.flynote
-        context["ancestors"] = self.flynote.get_ancestors()
+            context["flynote"] = self.flynote
+            context["ancestors"] = self.flynote.get_ancestors()
 
         return context
 
     def popular_subtopics(self, context):
-        # Top 16 subtopcis by count – single DB query
+        # Top 16 subtopcis by count
         children_qs = self.annotate_with_counts(self.flynote.get_children())
         total_children = children_qs.count()
         popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])

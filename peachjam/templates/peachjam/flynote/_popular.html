@@ -37,7 +37,7 @@
           {{ flynote.name }}
           <span class="badge rounded-pill text-bg-secondary ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
         </h3>
-        {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-subtopics-container' %}
+        {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-subtopics-container' onload=True %}
       </div>
       <div class="htmx-progress flynote-htmx-progress progress mb-2">
         <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
