@@ -145,6 +145,8 @@ class FlynoteDocumentCount(models.Model):
                         ON jf.flynote_id = descendant.id
                     WHERE ancestor.path LIKE %s
                     GROUP BY ancestor.id
+                    ON CONFLICT (flynote_id)
+                    DO UPDATE SET count = EXCLUDED.count
                     """,
                     [root_path + "%", root_path + "%"],
                 )
