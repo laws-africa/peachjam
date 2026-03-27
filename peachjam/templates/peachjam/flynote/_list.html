@@ -1,11 +1,11 @@
 {% load humanize i18n %}
-{% if all_topics %}
+{% if flynotes %}
   <div class="list-group list-group-flush">
-    {% for item in all_topics %}
-      <a href="{% url 'flynote_topic_detail' item.topic.slug %}"
+    {% for item in flynotes %}
+      <a href="{% url 'flynote_detail' item.flynote.slug %}"
          class="list-group-item list-group-item-action d-flex justify-content-between align-items-center text-primary">
         <div>
-          {{ item.topic.name }}
+          {{ item.flynote.name }}
           {% if item.child_names %}<small class="text-muted d-block">{{ item.child_names|join:", " }}</small>{% endif %}
         </div>
         <span class="badge bg-secondary">{{ item.count|intcomma }}</span>

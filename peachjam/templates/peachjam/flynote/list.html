@@ -20,18 +20,16 @@
     <p class="lead">
       {% trans "Browse judgments organised by legal subject. Popular topics highlight where most decisions have been delivered, or explore all available topics below." %}
     </p>
-    {% if popular_topics %}
-      <h2>{% trans "Popular topics" %}</h2>
-      {% include 'peachjam/flynote/_popular_topics.html' %}
-    {% endif %}
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <h2 class="mt-4">{% trans "Popular topics" %}</h2>
+    {% include 'peachjam/flynote/_popular.html' %}
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
       <h2 class="mb-0">
         {% trans "All topics" %}
-        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ total_topic_count|intcomma }}</span>
+        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ paginator.count|intcomma }}</span>
       </h2>
       {% include 'peachjam/flynote/_filter_form.html' with htmx_target='#flynote-all-list-container' %}
     </div>
-    <div class="htmx-progress progress mb-2">
+    <div class="htmx-progress flynote-htmx-progress progress mb-2">
       <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
     </div>
     <div id="flynote-all-list-container">{% include 'peachjam/flynote/_list.html' %}</div>

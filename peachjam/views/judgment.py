@@ -3,12 +3,12 @@ from collections import defaultdict
 from functools import reduce
 
 from django.contrib import messages
-from django.core.paginator import Paginator
-from django.db.models import F, IntegerField, Q, Sum, Value, Window
+from django.db.models import F, IntegerField, Q, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
@@ -17,7 +17,7 @@ from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
-from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+from peachjam.models.flynote import Flynote
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
@@ -54,7 +54,7 @@ class JudgmentListView(TemplateView):
         pass
 
 
-class FlynoteTopicMixin:
+class FlynoteViewMixin:
     @staticmethod
     def annotate_with_counts(qs):
         return qs.annotate(
@@ -66,14 +66,14 @@ class FlynoteTopicMixin:
         )
 
     @staticmethod
-    def get_top_children_by_count(parent_topics):
-        if not parent_topics:
+    def get_top_children_by_count(parent_flynotes):
+        if not parent_flynotes:
             return {}
 
-        depth = parent_topics[0].depth
+        depth = parent_flynotes[0].depth
         direct_child_filter = reduce(
             operator.or_,
-            (Q(path__startswith=topic.path) for topic in parent_topics),
+            (Q(path__startswith=flynote.path) for flynote in parent_flynotes),
         )
 
         children_qs = (
@@ -102,15 +102,30 @@ class FlynoteTopicMixin:
         for child in children_qs:
             children_by_parent[child.parent_path].append(child.name)
 
-        path_to_pk = {t.path: t.pk for t in parent_topics}
+        path_to_pk = {f.path: f.pk for f in parent_flynotes}
         return {path_to_pk[path]: names for path, names in children_by_parent.items()}
 
+    def make_flynote_list(self, flynotes):
+        child_names = self.get_top_children_by_count(flynotes)
+        return [
+            {
+                "flynote": f,
+                "count": f.doc_count,
+                "child_names": child_names.get(f.pk, []),
+            }
+            for f in flynotes
+        ]
 
-class FlynoteTopicListView(FlynoteTopicMixin, ListView):
+
+class FlynoteListView(FlynoteViewMixin, ListView):
+    """Lists flynotes. By default, it lists popular top-level flynotes. With htmx, it lists paginated top-level
+    flynotes, or subtopics if a root flynote is given.
+    """
+
     model = Flynote
     template_name = "peachjam/flynote/list.html"
-    context_object_name = "all_topics"
-    paginate_by = 20
+    context_object_name = "flynotes"
+    paginate_by = 40
 
     def get(self, request, *args, **kwargs):
         if not Flynote.get_root_nodes().exists():
@@ -122,68 +137,53 @@ class FlynoteTopicListView(FlynoteTopicMixin, ListView):
             return ["peachjam/flynote/_list.html"]
         return super().get_template_names()
 
+    @cached_property
+    def flynote(self):
+        """In htmx mode, the ?flynote=slug parameter anchors the list of subtopics."""
+        if self.request.GET.get("flynote"):
+            return get_object_or_404(Flynote, slug=self.request.GET.get("flynote"))
+
     def get_queryset(self):
-        qs = self.annotate_with_counts(Flynote.get_root_nodes())
+        if self.flynote:
+            # children of the provided root
+            qs = self.flynote.get_children()
+        else:
+            # all roots
+            qs = Flynote.get_root_nodes()
 
-        if self.request.htmx:
-            q = self.request.GET.get("q", "").strip()
-            if q:
-                qs = qs.filter(name__icontains=q)
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(name__icontains=q)
 
-        return qs.order_by("name")
+        return self.annotate_with_counts(qs).order_by("-doc_count", "name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context["flynotes"] = self.make_flynote_list(list(context["flynotes"]))
+
         if not self.request.htmx:
-            self.popular_topics(context)
+            # for non-htmx, load popular flynotes
+            self.popular_flynotes(context)
 
-        page_topics = list(context["all_topics"])
-        page_child_names = self.get_top_children_by_count(page_topics)
-        context["all_topics"] = [
-            {
-                "topic": t,
-                "count": t.doc_count,
-                "child_names": page_child_names.get(t.pk, []),
-            }
-            for t in page_topics
-        ]
-
-        context["total_topic_count"] = Flynote.get_root_nodes().count()
-        context["total_judgment_count"] = FlynoteDocumentCount.objects.filter(
-            flynote__in=Flynote.get_root_nodes()
-        ).aggregate(total=Coalesce(Sum("count"), Value(0)))["total"]
-        context["root"] = None
         return context
 
-    def popular_topics(self, context):
-        popular_qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
+    def popular_flynotes(self, context):
+        qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
             "-doc_count", "name"
         )[:16]
-        popular_topics = list(popular_qs)
-        child_names_map = self.get_top_children_by_count(popular_topics)
-
-        context["popular_topics"] = [
-            {
-                "topic": t,
-                "count": t.doc_count,
-                "child_names": child_names_map.get(t.pk, []),
-            }
-            for t in popular_topics
-        ]
+        context["popular_flynotes"] = self.make_flynote_list(list(qs))
 
 
-class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
+class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
+    """List of documents and children under a flynote. In HTMX mode, updates the document list."""
+
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
 
     def get_template_names(self):
         if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/_document_table.html"]
-            if self.request.htmx.target == "flynote-subtopics-container":
-                return ["peachjam/flynote/_list.html"]
-            return ["peachjam/_document_table_form.html"]
+            return ["peachjam/_document_table.html"]
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
@@ -203,60 +203,22 @@ class FlynoteTopicDetailView(FlynoteTopicMixin, FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        children_qs = self.annotate_with_counts(self.flynote.get_children())
-
         if not self.request.htmx:
-            self.popular_subtopics(context, children_qs)
+            self.popular_subtopics(context)
 
-        if (
-            not self.request.htmx
-            or self.request.htmx.target == "flynote-subtopics-container"
-        ):
-            # Paginated list of child topics — filtered and sorted in the DB
-            q = self.request.GET.get("q", "").strip()
-            paginated_qs = children_qs
-            if q:
-                paginated_qs = paginated_qs.filter(name__icontains=q)
-            paginated_qs = paginated_qs.order_by("name")
-
-            paginator = Paginator(paginated_qs, 20)
-            page_number = self.request.GET.get("page")
-            page_obj = paginator.get_page(page_number)
-
-            page_topics = list(page_obj.object_list)
-            page_child_names = self.get_top_children_by_count(page_topics)
-            context["all_topics"] = [
-                {
-                    "topic": t,
-                    "count": t.doc_count,
-                    "child_names": page_child_names.get(t.pk, []),
-                }
-                for t in page_topics
-            ]
-            context["page_obj"] = page_obj
-
-        context["topic"] = self.flynote
+        context["flynote"] = self.flynote
         context["ancestors"] = self.flynote.get_ancestors()
-        context["root"] = None
 
         return context
 
-    def popular_subtopics(self, context, children_qs):
+    def popular_subtopics(self, context):
         # Top 16 subtopcis by count – single DB query
-        popular_qs = children_qs.order_by("-doc_count", "name")[:16]
-        popular_topics = list(popular_qs)
-        child_names_map = self.get_top_children_by_count(popular_topics)
+        children_qs = self.annotate_with_counts(self.flynote.get_children())
         total_children = children_qs.count()
+        popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])
 
-        context["popular_topics"] = [
-            {
-                "topic": t,
-                "count": t.doc_count,
-                "child_names": child_names_map.get(t.pk, []),
-            }
-            for t in popular_topics
-        ]
-        context["has_more_topics"] = total_children > len(popular_topics)
+        context["popular_flynotes"] = self.make_flynote_list(popular_flynotes)
+        context["has_more_topics"] = total_children > len(popular_flynotes)
         context["total_subtopic_count"] = total_children
 
 

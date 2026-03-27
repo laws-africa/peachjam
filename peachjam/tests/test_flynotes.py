@@ -1538,7 +1538,7 @@ class FlynoteTopicListViewTest(TestCase):
         )
         self.updater.update_for_judgment(judgment)
 
-        response = self.client.get(reverse("flynote_topic_list"))
+        response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "peachjam/flynote/list.html")
         self.assertIn("all_topics", response.context)
@@ -1556,7 +1556,7 @@ class FlynoteTopicListViewTest(TestCase):
         admin_flynote = Flynote.objects.get(name="Administrative law")
         FlynoteDocumentCount.refresh_for_flynote(admin_flynote)
 
-        response = self.client.get(reverse("flynote_topic_list"))
+        response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 200)
         popular = response.context["popular_topics"]
         admin_item = next(
@@ -1566,7 +1566,7 @@ class FlynoteTopicListViewTest(TestCase):
         self.assertEqual(admin_item["count"], 1)
 
     def test_redirects_to_judgment_list_when_no_flynotes(self):
-        response = self.client.get(reverse("flynote_topic_list"))
+        response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("judgment_list"))
 
