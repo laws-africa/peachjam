@@ -161,6 +161,8 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         context = super().get_context_data(**kwargs)
 
         context["flynotes"] = self.make_flynote_list(list(context["flynotes"]))
+        # ensure that the template appends, rather than replaces, when "load more" is clicked
+        context["more"] = "more" in self.request.GET
 
         if not self.request.htmx:
             # for non-htmx, load popular flynotes

@@ -25,10 +25,9 @@
     <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
       <h2 class="mb-0">
         {% trans "All topics" %}
-        <span class="badge rounded-pill text-bg-secondary ms-2 align-middle">{{ paginator.count|intcomma }}</span>
+        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ paginator.count|intcomma }}</span>
       </h2>
     </div>
     {% include 'peachjam/flynote/_filter_form.html' %}
-    <div id="flynote-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
   </section>
 {% endblock %}

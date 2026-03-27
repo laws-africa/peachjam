@@ -1,19 +1,17 @@
 {% load i18n %}
 <form role="search">
-  <div class="d-flex">
-    <input id="flynote-search"
-           type="search"
-           name="q"
-           class="form-control"
-           placeholder="{% trans 'Filter topics' %}"
-           aria-label="{% trans 'Filter topics' %}"
-           value="{{ request.GET.q|default:'' }}"
-           hx-get="{% url 'flynote_list' %}{% if flynote %}?flynote={{ flynote.slug }}{% endif %}"
-           hx-trigger="input changed delay:400ms, search{% if onload %}, load{% endif %}"
-           hx-target="#flynote-list-container"
-           hx-indicator=".flynote-htmx-progress"/>
-  </div>
+  <input type="search"
+         name="q"
+         class="form-control"
+         placeholder="{% trans 'Filter topics' %}"
+         aria-label="{% trans 'Filter topics' %}"
+         value="{{ request.GET.q|default:'' }}"
+         hx-get="{% url 'flynote_list' %}{% if flynote %}?flynote={{ flynote.slug }}{% endif %}"
+         hx-trigger="input changed delay:400ms, search{% if onload %}, load{% endif %}"
+         hx-target="#flynote-list-container"
+         hx-indicator=".flynote-htmx-progress"/>
 </form>
 <div class="htmx-progress flynote-htmx-progress progress my-2">
   <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
 </div>
+<div id="flynote-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
