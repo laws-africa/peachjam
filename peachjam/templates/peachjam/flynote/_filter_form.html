@@ -10,7 +10,10 @@
            value="{{ request.GET.q|default:'' }}"
            hx-get="{% url 'flynote_list' %}{% if flynote %}?flynote={{ flynote.slug }}{% endif %}"
            hx-trigger="input changed delay:400ms, search{% if onload %}, load{% endif %}"
-           hx-target="{{ htmx_target }}"
+           hx-target="#flynote-list-container"
            hx-indicator=".flynote-htmx-progress"/>
   </div>
 </form>
+<div class="htmx-progress flynote-htmx-progress progress my-2">
+  <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+</div>

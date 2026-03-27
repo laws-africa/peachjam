@@ -1,10 +1,8 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load humanize i18n %}
-{% block title %}
-  {{ flynote.name }} - {% trans "Flynotes" %}
-{% endblock %}
+{% block title %}{{ flynote.name }}{% endblock %}
 {% block breadcrumbs %}
-  <div class="container pt-4">
+  <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -29,7 +27,7 @@
 {% block page-header %}
   <div class="mb-4">
     <h1 class="mb-4">
-      {% for ancestor in ancestors %}{{ ancestor.name }} —{% endfor %}
+      {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
       {{ flynote.name }}
     </h1>
     {% if popular_flynotes %}
@@ -40,6 +38,6 @@
       {% include 'peachjam/flynote/_popular.html' %}
     {% endif %}
     <h2 class="h4 mt-4">{% trans "Judgments" %}</h2>
-    {% include 'peachjam/_count_and_search.html' %}
+    {% include 'peachjam/_count_and_search.html' with hide_search=True %}
   </div>
 {% endblock %}
