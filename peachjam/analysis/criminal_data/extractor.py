@@ -48,18 +48,20 @@ class CriminalDataExtractor:
         offence_out = extract_offences_and_sentences(judgment_text)
         outcome_out = extract_outcomes(judgment_text)
 
-        outcome_ids = []
+        outcome_names = set()
         for outcome_match in outcome_out.outcomes:
-            if outcome_match.outcome_id is None:
-                log.info(
-                    "extracted outcome %s not matched to outcome",
-                    outcome_match.extracted_outcome,
-                )
-                continue
-            outcome_ids.append(outcome_match.outcome_id)
+            outcome_names.add(outcome_match.extracted_outcome)
 
-        if outcome_ids:
-            judgment.outcomes.set(Outcome.objects.filter(id__in=set(outcome_ids)))
+        if outcome_names:
+            matched_outcomes = Outcome.objects.filter(name__in=outcome_names)
+            matched_names = set(matched_outcomes.values_list("name", flat=True))
+            missing_names = outcome_names - matched_names
+            for missing_name in sorted(missing_names):
+                log.info(
+                    "extracted outcome %s not found in canonical outcomes", missing_name
+                )
+
+            judgment.outcomes.set(matched_outcomes)
 
         for match in offence_out.offences:
             if match.offence_id is None:

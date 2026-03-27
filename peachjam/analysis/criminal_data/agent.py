@@ -2,14 +2,7 @@ import logging
 import re
 from typing import Any, Dict, List, Literal, Optional
 
-from agents import (
-    Agent,
-    ModelSettings,
-    ReasoningItem,
-    Runner,
-    RunResult,
-    function_tool,
-)
+from agents import Agent, ModelSettings, ReasoningItem, Runner, RunResult, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
 from django.db.models import Case, FloatField, Q, Value, When
@@ -129,17 +122,6 @@ def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
     )
 
 
-def search_outcomes_tool(search_terms: str) -> List[Dict[str, Any]]:
-    return search_canonical_records_tool(
-        model_class=Outcome,
-        primary_field="name",
-        result_label="name",
-        description_field="description",
-        search_terms=search_terms,
-        log_label="outcomes",
-    )
-
-
 @function_tool
 def search_offences(search_terms: str):
     """
@@ -200,45 +182,6 @@ def search_offences(search_terms: str):
         return (
             "There are no offences in the database that match those search terms. You can try again with different"
             " search terms if you think the offence should be in the database. You must only try 2-3 times before"
-            " concluding that there is no match."
-        )
-    return matches
-
-
-@function_tool
-def search_outcomes(search_terms: str):
-    """
-    Search the outcome database for one or more candidate case outcomes.
-
-    Purpose
-    -------
-    This tool maps outcome wording found in a criminal judgment to canonical
-    `Outcome` records stored in the database.
-
-    Input
-    -----
-    search_terms : str
-
-        A single string containing one or more concise outcome search terms.
-        If multiple terms are needed, separate them with commas.
-
-        Examples:
-            "conviction upheld"
-            "appeal allowed, conviction quashed, sentence set aside"
-
-    Agent Guidance
-    --------------
-    - Always call this tool before assigning an outcome_id.
-    - Provide 2-4 concise outcome variants when possible.
-    - Never invent outcome IDs.
-    - Outcomes may be multiple when the judgment clearly records multiple
-      dispositive results.
-    """
-    matches = search_outcomes_tool(search_terms)
-    if not matches:
-        return (
-            "There are no outcomes in the database that match those search terms. You can try again with different"
-            " search terms if you think the outcome should be in the database. You must only try 2-3 times before"
             " concluding that there is no match."
         )
     return matches
@@ -508,11 +451,10 @@ class OffenceExtraction(BaseModel):
 
 
 class OutcomeExtraction(BaseModel):
-    outcome_id: Optional[int] = Field(
-        description="Outcome ID from the database (from search_outcomes). Null if no clear match."
-    )
     extracted_outcome: str = Field(
-        description="Clean outcome label as written or normalized from the judgment."
+        description="""Canonical outcome label. Must exactly match one of the canonical outcome names provided in the
+                        prompt.
+                    """
     )
 
 
@@ -552,11 +494,14 @@ from the text of a court judgment.
 
 # Task
 
-From the judgment text, identify the dispositive outcomes for the present case and map them to canonical outcome IDs
-in the database using the `search_outcomes` tool.
+From the judgment text, identify the dispositive outcomes for the present case.
 
 Only extract outcomes that describe the actual result of the present judgment or the result being affirmed, varied,
 or overturned on appeal.
+
+The outcome labels you return must come from this canonical list only:
+
+{allowed_case_outcomes}
 
 # Identifying Case Outcomes
 
@@ -571,21 +516,10 @@ Do not extract generic narrative statements that are not dispositive outcomes.
 
 Focus on the final operative result, not every intermediate discussion.
 
-# Mapping Outcomes to Database IDs
+When you return `extracted_outcome`, it must be exactly one of the canonical outcome labels above.
 
-After identifying a case outcome in the judgment, you must map it to a canonical outcome using the `search_outcomes`
-tool.
-
-For each extracted outcome, call `search_outcomes` using two to four concise variants that describe the outcome.
-
-An outcome ID may only be assigned if one of the returned results is a clear semantic match to the outcome described
-in the judgment.
-
-You are not allowed to invent outcome IDs. You are also not allowed to output an outcome ID unless that exact ID
-appears in the results returned by the `search_outcomes` tool.
-
-If the search returns no results, or if none of the results clearly match the extracted outcome, the `outcome_id`
-must be set to `null`.
+Do not invent new labels, paraphrase the labels, or return near-matches. If none of the canonical labels fit, return
+no outcome for that point.
 
 # Examples
 
@@ -595,9 +529,7 @@ Example 1
 The appeal against conviction is dismissed, but the sentence is reduced from ten years to five years.
 </text>
 
-Return both of these outcomes if supported by the canonical list:
-- conviction upheld / appeal dismissed
-- sentence reduced
+Return the exact matching canonical labels from the provided list only.
 
 Example 2
 
@@ -606,9 +538,7 @@ The conviction is quashed and the sentence set aside. The appellant shall be set
 held.
 </text>
 
-Return both of these outcomes if supported by the canonical list:
-- conviction quashed
-- sentence set aside
+Return the exact matching canonical labels from the provided list only.
 
 Example 3
 
@@ -620,17 +550,29 @@ Do not extract any outcome from this text because it is not the result in the pr
 """
 
 
-outcome_extraction_agent = Agent(
-    name="Outcome Extractor",
-    instructions=OUTCOME_EXTRACTION_PROMPT,
-    tools=[search_outcomes],
-    output_type=JudgmentOutcomeExtraction,
-    model_settings=ModelSettings(reasoning=Reasoning(effort="medium", summary="auto")),
-    model="gpt-5-mini",
-)
-
-
 def extract_outcomes(judgment_text: str) -> JudgmentOutcomeExtraction:
+    canonical_outcome_names = list(
+        Outcome.objects.order_by("name").values_list("name", flat=True)
+    )
+    if not canonical_outcome_names:
+        log.info("No canonical outcomes configured; skipping outcome extraction.")
+        return JudgmentOutcomeExtraction()
+
+    outcome_extraction_agent = Agent(
+        name="Outcome Extractor",
+        instructions=OUTCOME_EXTRACTION_PROMPT.format(
+            allowed_case_outcomes="\n".join(
+                f"- {outcome}" for outcome in canonical_outcome_names
+            )
+        ),
+        tools=[],
+        output_type=JudgmentOutcomeExtraction,
+        model_settings=ModelSettings(
+            reasoning=Reasoning(effort="medium", summary="auto")
+        ),
+        model="gpt-5-mini",
+    )
+
     result = Runner.run_sync(
         outcome_extraction_agent,
         judgment_text,

@@ -1,10 +1,13 @@
+import datetime
 import logging
 import os
 import unittest
 from unittest.mock import patch
 
+from countries_plus.models import Country
 from django.db import connections
 from django.test import TransactionTestCase as TestCase
+from languages_plus.models import Language
 
 from peachjam.analysis.criminal_data.agent import (
     CaseMetaExtraction,
@@ -20,11 +23,8 @@ from peachjam.analysis.criminal_data.agent import (
 from peachjam.analysis.criminal_data.agent import (
     search_offences_tool as search_offences,
 )
-from peachjam.analysis.criminal_data.agent import (
-    search_outcomes_tool as search_outcomes,
-)
 from peachjam.analysis.criminal_data.extractor import CriminalDataExtractor
-from peachjam.models import Judgment, Offence, Outcome, Work
+from peachjam.models import Court, Judgment, Offence, Outcome, Work
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +48,8 @@ class CriminalDataExtractionTests(TestCase):
     def setUp(self):
         self.robbery = Offence.objects.get(title="Robbery with violence")
         self.trespass = Offence.objects.get(title="Criminal trespass")
+        Outcome.objects.get_or_create(name="Dismissed")
+        Outcome.objects.get_or_create(name="Sentence reduced")
 
     def test_extract_robbery_with_violence(self):
         judgment_text = """
@@ -464,55 +466,23 @@ class SearchOffencesTests(TestCase):
         self.assertEqual(results[0]["title"], "Abduction")
 
 
-class SearchOutcomesTests(TestCase):
-    def setUp(self):
-        self.conviction_upheld = Outcome.objects.create(
-            name="Conviction upheld",
-            description="The appellate court affirms the conviction.",
-        )
-        self.conviction_quashed = Outcome.objects.create(
-            name="Conviction quashed",
-            description="The conviction is quashed or overturned on appeal.",
-        )
-        self.sentence_set_aside = Outcome.objects.create(
-            name="Sentence set aside",
-            description="The sentence is vacated or set aside.",
-        )
-
-    def test_search_outcomes_empty_input_returns_empty_list(self):
-        results = search_outcomes("")
-        log.info("test_search_outcomes_empty_input_returns_empty_list: %s", results)
-
-        self.assertEqual(results, [])
-
-    def test_search_outcomes_returns_clear_match_first(self):
-        results = search_outcomes("conviction upheld, appeal dismissed")
-        log.info("test_search_outcomes_returns_clear_match_first: %s", results)
-
-        self.assertTrue(results)
-        self.assertEqual(results[0]["id"], self.conviction_upheld.id)
-        self.assertEqual(results[0]["name"], "Conviction upheld")
-
-    def test_search_outcomes_returns_related_results(self):
-        results = search_outcomes("sentence set aside, conviction quashed")
-        log.info("test_search_outcomes_returns_related_results: %s", results)
-
-        names = [r["name"] for r in results]
-
-        self.assertIn("Sentence set aside", names)
-        self.assertIn("Conviction quashed", names)
-
-
 class CriminalDataExtractorTests(TestCase):
     fixtures = [
         "tests/countries",
-        "documents/sample_documents",
+        "tests/courts",
+        "tests/languages",
         "offences/offences",
         "offences/penal_code_work",
     ]
 
     def setUp(self):
-        self.judgment = Judgment.objects.first()
+        self.judgment = Judgment.objects.create(
+            case_name="Test criminal appeal",
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
         self.robbery = Offence.objects.get(title="Robbery with violence")
         self.conviction_upheld = Outcome.objects.create(
             name="Conviction upheld",
@@ -560,12 +530,10 @@ class CriminalDataExtractorTests(TestCase):
         mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(
             outcomes=[
                 OutcomeExtraction(
-                    outcome_id=self.conviction_upheld.id,
-                    extracted_outcome="conviction upheld",
+                    extracted_outcome="Conviction upheld",
                 ),
                 OutcomeExtraction(
-                    outcome_id=self.sentence_reduced.id,
-                    extracted_outcome="sentence reduced",
+                    extracted_outcome="Sentence reduced",
                 ),
             ]
         )
