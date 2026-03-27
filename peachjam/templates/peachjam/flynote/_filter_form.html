@@ -1,5 +1,5 @@
 {% load i18n %}
-<form role="search">
+<form role="search" class="sticky-top pt-1 bg-white">
   <input type="search"
          name="q"
          class="form-control"
@@ -10,8 +10,8 @@
          hx-trigger="input changed delay:400ms, search{% if onload %}, load{% endif %}"
          hx-target="#flynote-list-container"
          hx-indicator=".flynote-htmx-progress"/>
+  <div class="htmx-progress flynote-htmx-progress progress mt-1">
+    <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+  </div>
 </form>
-<div class="htmx-progress flynote-htmx-progress progress my-2">
-  <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
-</div>
-<div id="flynote-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
+<div id="flynote-list-container" class="mt-1">{% include 'peachjam/flynote/_list.html' %}</div>
