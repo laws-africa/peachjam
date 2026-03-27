@@ -7,7 +7,7 @@
         <li class="d-flex">
           <i class="bi bi-folder me-2"></i>
           <div class="flex-grow-1">
-            <a href="{{ folder.get_absolute_url }}">{{ folder }}</a>
+            <a href="{{ folder.get_absolute_url }}" data-key-link="folder">{{ folder }}</a>
             <span class="badge bg-secondary">{{ folder.n_saved_documents }}</span>
             {% if folder.note %}<div class="text-muted">{{ folder.note }}</div>{% endif %}
           </div>

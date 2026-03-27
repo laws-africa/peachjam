@@ -491,6 +491,7 @@ class BaseDocumentDetailView(DetailView):
         ]
 
         context["download_options"] = self.get_download_options()
+        context["KEY_LINK_PAGE"] = "document_detail"
 
         # provide extra context for analytics
         self.get_subscription_permissions_context(context)

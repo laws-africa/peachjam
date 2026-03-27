@@ -82,14 +82,14 @@
     <section class="my-5">
       <div class="container">
         <div class="row row-cols-1 row-cols-lg-2">
-          <div class="col mb-5">
+          <div class="col mb-5" data-key-link-feature="recent_judgments">
             {% block recent-judgments %}
               <h2 class="mb-4">{% trans 'Recent Judgments' %}</h2>
               {% trans 'View more judgments' as text %}
               {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments view_more_text=text view_more_url_name='judgment_list' %}
             {% endblock %}
           </div>
-          <div class="col mb-5">
+          <div class="col mb-5" data-key-link-feature="recent_legislation">
             {% block recent-legislation %}
               <h2 class="mb-4">{% trans 'Recent Legislation' %}</h2>
               {% trans 'View more legislation' as text %}
@@ -97,7 +97,7 @@
             {% endblock %}
           </div>
           {% if recent_gazettes %}
-            <div class="col mb-5">
+            <div class="col mb-5" data-key-link-feature="recent_gazettes">
               {% block recent-gazettes %}
                 <h2 class="mb-4">{% trans 'Recent Gazettes' %}</h2>
                 {% trans 'View more gazettes' as text %}
@@ -111,7 +111,7 @@
   {% endblock %}
   {% block courts %}
     <section class="my-5 bg-brand-pale py-5">
-      <div class="container">
+      <div class="container" data-key-link-feature="courts">
         <h2 class="mb-4">{% trans 'Courts' %}</h2>
         {% include 'peachjam/_court_list.html' %}
       </div>
@@ -119,7 +119,7 @@
   {% endblock %}
   {% block collections %}
     <section class="my-5">
-      <div class="container">
+      <div class="container" data-key-link-feature="taxonomies">
         <h2 class="mb-4">{% trans 'Collections' %}</h2>
         {% include 'peachjam/_taxonomy_list.html' %}
       </div>

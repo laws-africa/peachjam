@@ -62,6 +62,7 @@
   </head>
   <body class="{% block body-class %}{% endblock %}"
         {% block body-tags %}
+        {% if KEY_LINK_PAGE %}data-key-link-page="{{ KEY_LINK_PAGE }}"{% endif %}
         {% endblock %}>
     {% block header %}{% endblock %}
     {% block body-content %}{% endblock %}

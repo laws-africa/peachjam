@@ -2,7 +2,7 @@
 <ul {% if root %}class="list-unstyled"{% endif %}>
   {% for topic, children in taxonomies.items %}
     <li>
-      <a href="{% build_taxonomy_url topic %}">{{ topic }}</a>
+      <a href="{% build_taxonomy_url topic %}" data-key-link="topic">{{ topic }}</a>
       {% if children %}
         {% include 'peachjam/_taxonomies_tree.html' with taxonomies=children root=False %}
       {% endif %}
