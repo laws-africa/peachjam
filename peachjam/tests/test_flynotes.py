@@ -1516,7 +1516,7 @@ class FlynoteDocumentCountTest(TestCase):
             FlynoteDocumentCount.refresh_for_flynote(None)
 
 
-class FlynoteTopicListViewTest(TestCase):
+class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",
         "tests/courts",
@@ -1541,7 +1541,7 @@ class FlynoteTopicListViewTest(TestCase):
         response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "peachjam/flynote/list.html")
-        self.assertIn("all_topics", response.context)
+        self.assertIn("flynotes", response.context)
 
     def test_uses_precalculated_counts(self):
         judgment = Judgment.objects.create(
@@ -1558,9 +1558,9 @@ class FlynoteTopicListViewTest(TestCase):
 
         response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 200)
-        popular = response.context["popular_topics"]
+        popular = response.context["flynotes"]
         admin_item = next(
-            (p for p in popular if p["topic"].name == "Administrative law"), None
+            (p for p in popular if p["flynote"].name == "Administrative law"), None
         )
         self.assertIsNotNone(admin_item)
         self.assertEqual(admin_item["count"], 1)
