@@ -21,15 +21,7 @@ def log_agent_reasoning(result: RunResult):
                 log.debug("LLM reasoning: %s", entry.text)
 
 
-def search_canonical_records_tool(
-    *,
-    model_class,
-    primary_field: str,
-    result_label: str,
-    description_field: str,
-    search_terms: str,
-    log_label: str,
-) -> List[Dict[str, Any]]:
+def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
 
     _SPLIT = re.compile(r"[,\n;|]+")
     _WS = re.compile(r"\s+")
@@ -43,7 +35,7 @@ def search_canonical_records_tool(
 
     close_old_connections()
     try:
-        log.info("search for %s terms: %s", log_label, search_terms)
+        log.info("search for offences terms: %s", search_terms)
 
         terms = [_normalize_term(t) for t in _SPLIT.split(search_terms or "")]
         terms = [t for t in terms if t]
@@ -59,8 +51,8 @@ def search_canonical_records_tool(
         limit = 5
         min_rank = 0.05
 
-        vector = SearchVector(primary_field, weight="A", config=config) + SearchVector(
-            description_field, weight="C", config=config
+        vector = SearchVector("title", weight="A", config=config) + SearchVector(
+            "description", weight="C", config=config
         )
 
         ts_query = None
@@ -74,52 +66,41 @@ def search_canonical_records_tool(
         for word in _term_words(primary_term):
             title_word_score_parts.append(
                 Case(
-                    When(**{f"{primary_field}__icontains": word}, then=Value(1.0)),
+                    When(title__icontains=word, then=Value(1.0)),
                     default=Value(0.0),
                     output_field=FloatField(),
                 )
             )
 
-        qs = model_class.objects.annotate(rank=rank)
+        qs = Offence.objects.annotate(rank=rank)
 
         if title_word_score_parts:
             title_word_score = title_word_score_parts[0]
             for extra_score in title_word_score_parts[1:]:
                 title_word_score = title_word_score + extra_score
-            qs = qs.annotate(primary_word_score=title_word_score)
+            qs = qs.annotate(title_word_score=title_word_score)
         else:
-            qs = qs.annotate(primary_word_score=Value(0.0, output_field=FloatField()))
+            qs = qs.annotate(title_word_score=Value(0.0, output_field=FloatField()))
 
-        qs = qs.filter(Q(primary_word_score__gt=0) | Q(rank__gte=min_rank)).order_by(
-            "-primary_word_score", "-rank", primary_field, "id"
+        qs = qs.filter(Q(title_word_score__gt=0) | Q(rank__gte=min_rank)).order_by(
+            "-title_word_score", "-rank", "title", "id"
         )
 
         results: List[Dict[str, Any]] = []
-        for record in qs[:limit]:
+        for offence in qs[:limit]:
             results.append(
                 {
-                    "id": record.id,
-                    result_label: getattr(record, primary_field),
-                    "description": (getattr(record, description_field) or "").strip(),
+                    "id": offence.id,
+                    "title": offence.title,
+                    "description": (offence.description or "").strip(),
                 }
             )
 
-        log.info("%s search results: %s", log_label, results)
+        log.info("offence search results: %s", results)
         return results
 
     finally:
         connection.close()
-
-
-def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:
-    return search_canonical_records_tool(
-        model_class=Offence,
-        primary_field="title",
-        result_label="title",
-        description_field="description",
-        search_terms=search_terms,
-        log_label="offences",
-    )
 
 
 @function_tool
