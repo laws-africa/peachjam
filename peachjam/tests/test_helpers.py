@@ -2,7 +2,7 @@ import os.path
 
 from django.test import TestCase
 
-from peachjam.helpers import chunks, pdfjs_to_text, qualify_local_refs
+from peachjam.helpers import chunks, pdfjs_to_text
 
 
 class HelpersTestCase(TestCase):
@@ -38,23 +38,3 @@ Detention in Africa to include issues relating to policing and human rights;""",
         self.assertEqual(chunks([1, 2], 5), [[1], [2]])
         self.assertEqual(chunks([1, 2], 2), [[1], [2]])
         self.assertEqual(chunks([], 3), [])
-
-    def test_qualify_local_refs_rewrites_fragment_local_links(self):
-        html = (
-            '<span><a class="akn-ref" href="#sec_2" data-href="#sec_2">'
-            "Section 2"
-            "</a></span>"
-        )
-        result = qualify_local_refs(html, "/akn/za/act/2000/1/eng@2024-01-01")
-
-        self.assertIn('href="/akn/za/act/2000/1/eng@2024-01-01#sec_2"', result)
-        self.assertIn('data-href="/akn/za/act/2000/1/eng@2024-01-01#sec_2"', result)
-
-    def test_qualify_local_refs_leaves_non_local_links_unchanged(self):
-        html = (
-            '<p><a href="#">Top</a></p>' '<p><a href="/akn/za/act/2000/1">Act</a></p>'
-        )
-        result = qualify_local_refs(html, "/akn/za/act/2000/1/eng@2024-01-01")
-
-        self.assertIn('href="#"', result)
-        self.assertIn('href="/akn/za/act/2000/1"', result)

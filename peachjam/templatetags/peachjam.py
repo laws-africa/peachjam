@@ -11,8 +11,8 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from peachjam.auth import user_display
-from peachjam.helpers import qualify_local_refs as qualify_local_refs_html
 from peachjam.models import DocumentChatThread
+from peachjam.xmlutils import qualify_local_refs as qualify_local_refs_html
 
 register = template.Library()
 

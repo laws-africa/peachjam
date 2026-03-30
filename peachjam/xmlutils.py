@@ -1,6 +1,7 @@
 from typing import List
 
 import lxml.html
+from lxml.etree import ParserError
 
 html_parser = lxml.html.HTMLParser(encoding="utf-8")
 
@@ -14,6 +15,32 @@ def strip_remarks(root: lxml.html.HtmlElement):
     """Removes akn-remark elements from the HTML tree."""
     for remark in root.xpath("//*[@class='akn-remark']"):
         remark.getparent().remove(remark)
+
+
+def qualify_local_refs(html_content, frbr_uri):
+    """Rewrite fragment-only refs in extracted HTML so they resolve on the full document page."""
+    if not html_content or not frbr_uri:
+        return html_content
+
+    frbr_uri = frbr_uri if frbr_uri.startswith("/") else f"/{frbr_uri}"
+
+    try:
+        root = parse_html_str(f"<div>{html_content}</div>")
+    except (ParserError, ValueError):
+        return html_content
+
+    for anchor in root.xpath(".//a[@href or @data-href]"):
+        for attr in ("href", "data-href"):
+            href = anchor.get(attr)
+            if href and href.startswith("#") and len(href) > 1:
+                anchor.set(attr, f"{frbr_uri}{href}")
+
+    parts = []
+    if root.text:
+        parts.append(root.text)
+    for child in root:
+        parts.append(lxml.html.tostring(child, encoding="unicode"))
+    return "".join(parts)
 
 
 def get_preceding_text(
