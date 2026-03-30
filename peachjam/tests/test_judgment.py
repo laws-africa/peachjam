@@ -244,12 +244,24 @@ class JudgmentTestCase(TestCase):
         openai_cls,
         get_prompt,
     ):
+        raw_flynote = (
+            "  * Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. "
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+            "Agreement is silent on mode of delivery - Delivery in one lot presumed. "
+        )
+        expected_flynote = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell\n"
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+            "Agreement is silent on mode of delivery - Delivery in one lot presumed"
+        )
         fake_summary = JudgmentSummary(
             issues=["Whether the appeal should succeed"],
             held=["The appeal was dismissed"],
             order="Appeal dismissed with costs.",
             summary="The court found no basis to interfere with the lower court's decision.",
-            flynote="Appeal dismissed after no misdirection was shown.",
+            flynote=raw_flynote,
             blurb="Appeal dismissed.",
         )
         fake_response = SimpleNamespace(output_parsed=fake_summary)
@@ -280,7 +292,7 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(fake_summary.blurb, judgment.blurb)
         self.assertEqual(fake_summary.summary, judgment.case_summary)
-        self.assertEqual(fake_summary.flynote, judgment.flynote)
+        self.assertEqual(expected_flynote, judgment.flynote)
         self.assertEqual(fake_summary.held, judgment.held)
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
