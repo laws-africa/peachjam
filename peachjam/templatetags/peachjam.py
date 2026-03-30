@@ -11,6 +11,7 @@ from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
 from peachjam.auth import user_display
+from peachjam.helpers import qualify_local_refs as qualify_local_refs_html
 from peachjam.models import DocumentChatThread
 
 register = template.Library()
@@ -124,6 +125,11 @@ def jurisdiction_icon(doc):
 @register.filter
 def split(value, sep=None):
     return [v.strip() for v in value.split(sep)]
+
+
+@register.filter
+def qualify_local_refs(value, frbr_uri):
+    return qualify_local_refs_html(value, frbr_uri)
 
 
 @register.filter

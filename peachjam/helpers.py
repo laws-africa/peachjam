@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.utils.translation import get_language_from_request
 from languages_plus.models import Language
 from lxml import html as lxml_html
+from lxml.etree import ParserError
 
 from peachjam.xmlutils import parse_html_str
 
@@ -132,6 +133,34 @@ def markdownify_llm_response(text):
             el.set("class", "table")
         return lxml_html.tostring(root, encoding="unicode")
     return text
+
+
+def qualify_local_refs(html_content, frbr_uri):
+    """Rewrite fragment-only refs in extracted HTML so they resolve on the full document page."""
+    if not html_content or not frbr_uri:
+        return html_content
+
+    try:
+        root = lxml_html.fragment_fromstring(html_content, create_parent=True)
+    except (ParserError, ValueError):
+        return html_content
+
+    frbr_uri = add_slash(frbr_uri)
+    if not frbr_uri:
+        return html_content
+
+    for anchor in root.xpath(".//a[@href or @data-href]"):
+        for attr in ("href", "data-href"):
+            href = anchor.get(attr)
+            if href and href.startswith("#") and len(href) > 1:
+                anchor.set(attr, f"{frbr_uri}{href}")
+
+    parts = []
+    if root.text:
+        parts.append(root.text)
+    for child in root:
+        parts.append(lxml_html.tostring(child, encoding="unicode"))
+    return "".join(parts)
 
 
 def get_update_or_create(model, defaults, **kwargs):
