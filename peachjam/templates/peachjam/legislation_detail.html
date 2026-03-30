@@ -3,28 +3,32 @@
 {% block sub-title %}<h2 class="h5 text-muted">{{ document.citation|default_if_none:"" }}</h2>{% endblock %}
 {% block document-tabs %}
   {{ block.super }}
-  {% if child_documents %}
+  {% if child_documents_count %}
     <li class="nav-item" role="presentation">
       <button class="nav-link"
               data-bs-toggle="tab"
               data-bs-target="#children-tab"
               type="button"
               role="tab"
-              aria-controls="children-tab">
+              aria-controls="children-tab"
+              hx-get="{% url 'legislation_subsidiary' document.expression_frbr_uri|strip_first_character %}"
+              hx-target="#children-tab"
+              hx-swap="innerHTML"
+              hx-trigger="click once">
         {{ PEACHJAM_SETTINGS.subleg_label }}
-        <span class="badge bg-secondary">{{ child_documents|length }}</span>
+        <span class="badge bg-secondary">{{ child_documents_count }}</span>
       </button>
     </li>
   {% endif %}
 {% endblock %}
 {% block document-tab-panes %}
   {{ block.super }}
-  {% if child_documents %}
+  {% if child_documents_count %}
     <div class="tab-pane"
          id="children-tab"
          role="tabpanel"
+         data-key-link-feature="subleg"
          aria-labelledby="children-tab">
-      <div class="container" data-key-link-feature="subleg">{% include 'peachjam/_child_documents.html' %}</div>
     </div>
   {% endif %}
 {% endblock %}

@@ -25,6 +25,7 @@ from peachjam.views import (
     DocumentSourceView,
     DocumentSummaryView,
     DocumentTextContentView,
+    LegislationSubsidiaryView,
     PartnerLogoView,
 )
 
@@ -84,6 +85,11 @@ urlpatterns = [
         r"^(?P<frbr_uri>akn/.*)/social-image.png$",
         cache_page(CACHE_DURATION)(DocumentSocialImageView.as_view()),
         name="document_social_image",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.*)/subsidiary$",
+        LegislationSubsidiaryView.as_view(),
+        name="legislation_subsidiary",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/?.*)$",
