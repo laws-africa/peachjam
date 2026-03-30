@@ -88,9 +88,8 @@ class JudgmentSummariser:
         return FlynoteParser().normalise_multiline_text(flynote)
 
     def normalise_summary(self, summary):
-        return summary.model_copy(
-            update={"flynote": self.normalise_flynote_text(summary.flynote)}
-        )
+        summary.flynote = self.normalise_flynote_text(summary.flynote)
+        return summary
 
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
         log.info("Generating judgment summary locally")
