@@ -120,6 +120,7 @@ class LegislationSubsidiaryView(LegislationListView):
         context = super().get_context_data(**kwargs)
         context["legislation"] = self.legislation
         context["doc_table_show_date"] = False
+        context["doc_table_disable_push_url"] = True
         return context
 
 

@@ -41,7 +41,7 @@
                    data-track-event="Listing | Clear filter | all"
                    hx-get="{{ request.path }}"
                    hx-params="none"
-                   hx-push-url="true">{% trans 'Clear all' %}</a>
+                   {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>{% trans 'Clear all' %}</a>
               </div>
             {% endif %}
           </li>
@@ -56,7 +56,7 @@
                          data-track-event="Listing | Clear filter | {{ facet_name }}"
                          hx-get="{{ request.path }}"
                          hx-params="not {{ facet_name }}"
-                         hx-push-url="true">{% trans 'Clear' %}</a>
+                         {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>{% trans 'Clear' %}</a>
                     </div>
                   {% endif %}
                 </div>
@@ -69,7 +69,7 @@
                                  name="{{ facet_name }}"
                                  type="{{ facet.type }}"
                                  hx-get="{{ request.path }}"
-                                 hx-push-url="true"
+                                 {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
                                  {% if value == facet.values %}checked{% endif %}
                                  hx-include="#filter-form"
                                  value="{{ value }}"/>
@@ -101,7 +101,7 @@
                                  name="{{ facet_name }}"
                                  type="{{ facet.type }}"
                                  hx-get="{{ request.path }}"
-                                 hx-push-url="true"
+                                 {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
                                  {% if value in facet.values %}checked{% endif %}
                                  hx-include="#filter-form"
                                  value="{{ value }}"/>
@@ -127,7 +127,7 @@
           {% block filter-documents %}
             <div class="mb-2 d-flex pocketlaw-hidden"
                  hx-target="#doc-table"
-                 hx-push-url="true">
+                 {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
               <div class="flex-grow-1 me-2">
                 <input id="filter-input"
                        hx-get="{{ request.path }}"
