@@ -501,33 +501,6 @@ When you return `extracted_outcome`, it must be exactly one of the canonical out
 
 Do not invent new labels, paraphrase the labels, or return near-matches. If none of the canonical labels fit, return
 no outcome for that point.
-
-# Examples
-
-Example 1
-
-<text>
-The appeal against conviction is dismissed, but the sentence is reduced from ten years to five years.
-</text>
-
-Return the exact matching canonical labels from the provided list only.
-
-Example 2
-
-<text>
-The conviction is quashed and the sentence set aside. The appellant shall be set at liberty unless otherwise lawfully
-held.
-</text>
-
-Return the exact matching canonical labels from the provided list only.
-
-Example 3
-
-<text>
-Counsel cited authorities where convictions were quashed in unrelated cases.
-</text>
-
-Do not extract any outcome from this text because it is not the result in the present case.
 """
 
 
