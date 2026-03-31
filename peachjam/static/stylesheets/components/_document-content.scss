@@ -45,6 +45,18 @@
         border-bottom: 2px solid $gray-200;
       }
 
+      .pdf-sidebar-progress {
+        .progress {
+          height: 0.2rem;
+          border-radius: 0;
+          background-color: transparent;
+        }
+
+        .progress-bar {
+          border-radius: 0;
+        }
+      }
+
       .search__clear-btn {
         width: 35px;
         border-top-left-radius: 0;
@@ -449,13 +461,21 @@
     }
   }
 
-  &[data-pdf-standby], &[data-pdf-loading], &[data-pdf-error] {
+  &[data-pdf-standby], &[data-pdf-error] {
     .navigation {
       opacity: 0;
     }
+  }
 
+  &[data-pdf-standby], &[data-pdf-loading], &[data-pdf-error] {
     .pdf-content {
       display: none;
+    }
+  }
+
+  &[data-pdf-loading] {
+    .tab-content {
+      visibility: hidden;
     }
   }
 
