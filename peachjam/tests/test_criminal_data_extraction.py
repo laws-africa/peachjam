@@ -1,18 +1,30 @@
+import datetime
 import logging
 import os
 import unittest
+from unittest.mock import patch
 
+from countries_plus.models import Country
 from django.db import connections
 from django.test import TransactionTestCase as TestCase
+from languages_plus.models import Language
 
 from peachjam.analysis.criminal_data.agent import (
+    CaseMetaExtraction,
+    JudgmentOffenceExtraction,
+    JudgmentOutcomeExtraction,
+    OffenceExtraction,
+    OutcomeExtraction,
+    SentenceExtraction,
     extract_case_type_filing_year,
     extract_offences_and_sentences,
+    extract_outcomes,
 )
 from peachjam.analysis.criminal_data.agent import (
     search_offences_tool as search_offences,
 )
-from peachjam.models import Offence, Work
+from peachjam.analysis.criminal_data.extractor import CriminalDataExtractor
+from peachjam.models import Court, Judgment, Offence, Outcome, Work
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +48,8 @@ class CriminalDataExtractionTests(TestCase):
     def setUp(self):
         self.robbery = Offence.objects.get(title="Robbery with violence")
         self.trespass = Offence.objects.get(title="Criminal trespass")
+        Outcome.objects.get_or_create(name="Dismissed")
+        Outcome.objects.get_or_create(name="Sentence reduced")
 
     def test_extract_robbery_with_violence(self):
         judgment_text = """
@@ -288,6 +302,17 @@ class CriminalDataExtractionTests(TestCase):
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
 
+    def test_extract_outcomes_for_split_result(self):
+        judgment_text = """
+        The appeal against conviction is dismissed.
+        However, the sentence of ten years imprisonment is reduced to five years.
+        """.strip()
+
+        result = extract_outcomes(judgment_text)
+        log.info("test_extract_outcomes_for_split_result: %s", result)
+
+        self.assertTrue(result.outcomes)
+
 
 class SearchOffencesTests(TestCase):
     def setUp(self):
@@ -439,3 +464,117 @@ class SearchOffencesTests(TestCase):
 
         self.assertTrue(results)
         self.assertEqual(results[0]["title"], "Abduction")
+
+
+class CriminalDataExtractorTests(TestCase):
+    fixtures = [
+        "tests/countries",
+        "tests/courts",
+        "tests/languages",
+        "offences/offences",
+        "offences/penal_code_work",
+    ]
+
+    def setUp(self):
+        self.judgment = Judgment.objects.create(
+            case_name="Test criminal appeal",
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        self.robbery = Offence.objects.get(title="Robbery with violence")
+        self.conviction_upheld = Outcome.objects.create(
+            name="Conviction upheld",
+            description="The conviction is affirmed on appeal.",
+        )
+        self.sentence_reduced = Outcome.objects.create(
+            name="Sentence reduced",
+            description="The sentence is reduced or varied downward.",
+        )
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_sets_canonical_outcomes(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        mock_get_content_as_text.return_value = "Criminal appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="criminal",
+            filing_year=2019,
+        )
+        mock_extract_offences_and_sentences.return_value = JudgmentOffenceExtraction(
+            offences=[
+                OffenceExtraction(
+                    offence_id=self.robbery.id,
+                    extracted_offence="robbery with violence",
+                    sentences=[
+                        SentenceExtraction(
+                            sentence_type="imprisonment",
+                            duration_months=120,
+                            fine_amount=None,
+                            suspended=False,
+                            mandatory_minimum=None,
+                        )
+                    ],
+                )
+            ]
+        )
+        mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(
+            outcomes=[
+                OutcomeExtraction(
+                    extracted_outcome="Conviction upheld",
+                ),
+                OutcomeExtraction(
+                    extracted_outcome="Sentence reduced",
+                ),
+            ]
+        )
+
+        CriminalDataExtractor().extract(self.judgment)
+        self.judgment.refresh_from_db()
+
+        self.assertEqual(self.judgment.case_type, Judgment.CaseType.CRIMINAL)
+        self.assertEqual(self.judgment.filing_year, 2019)
+        self.assertCountEqual(
+            self.judgment.outcomes.values_list("id", flat=True),
+            [self.conviction_upheld.id, self.sentence_reduced.id],
+        )
+        self.assertEqual(self.judgment.judgment_offence.count(), 1)
+        self.assertEqual(self.judgment.sentences.count(), 1)
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_clears_outcomes_for_non_criminal_case(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        self.judgment.outcomes.add(self.conviction_upheld, self.sentence_reduced)
+
+        mock_get_content_as_text.return_value = "Civil appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="civil",
+            filing_year=2020,
+        )
+
+        CriminalDataExtractor().extract(self.judgment)
+        self.judgment.refresh_from_db()
+
+        self.assertEqual(self.judgment.case_type, Judgment.CaseType.CIVIL)
+        self.assertEqual(self.judgment.filing_year, 2020)
+        self.assertEqual(self.judgment.outcomes.count(), 0)
+        self.assertFalse(mock_extract_offences_and_sentences.called)
+        self.assertFalse(mock_extract_outcomes.called)

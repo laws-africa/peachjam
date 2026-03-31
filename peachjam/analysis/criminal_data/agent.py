@@ -2,21 +2,14 @@ import logging
 import re
 from typing import Any, Dict, List, Literal, Optional
 
-from agents import (
-    Agent,
-    ModelSettings,
-    ReasoningItem,
-    Runner,
-    RunResult,
-    function_tool,
-)
+from agents import Agent, ModelSettings, ReasoningItem, Runner, RunResult, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
 from django.db.models import Case, FloatField, Q, Value, When
 from openai.types import Reasoning
 from pydantic import BaseModel, Field, conint
 
-from peachjam.models import Offence, Sentence
+from peachjam.models import Offence, Outcome, Sentence
 
 log = logging.getLogger(__name__)
 
@@ -178,8 +171,8 @@ def search_offences(search_terms: str):
 JUDGMENT_EXTRACTION_PROMPT = """
 # Role
 
-You are a legal information extraction system. Your task is to extract structured information about offences and
-sentencing from the text of a court judgment.
+You are a legal information extraction system. Your task is to extract structured information about offences
+and sentencing from the text of a court judgment.
 
 # Task
 
@@ -235,8 +228,6 @@ You must NOT assign an offence_id when:
 - the returned offences are related but not the same
 - the result is merely the “closest” available offence
 - the wording in the judgment and the wording in the result refer to different offences
-
-
 
 Example tool call:
 
@@ -440,8 +431,20 @@ class OffenceExtraction(BaseModel):
     sentences: List[SentenceExtraction] = []
 
 
+class OutcomeExtraction(BaseModel):
+    extracted_outcome: str = Field(
+        description="""Canonical outcome label. Must exactly match one of the canonical outcome names provided in the
+                        prompt.
+                    """
+    )
+
+
 class JudgmentOffenceExtraction(BaseModel):
     offences: List[OffenceExtraction] = []
+
+
+class JudgmentOutcomeExtraction(BaseModel):
+    outcomes: List[OutcomeExtraction] = []
 
 
 offence_extraction_agent = Agent(
@@ -461,6 +464,75 @@ def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtract
     )
     log_agent_reasoning(result)
     log.info("Extraction result: %s", result.final_output)
+    return result.final_output
+
+
+OUTCOME_EXTRACTION_PROMPT = """
+# Role
+
+You are a legal information extraction system. Your task is to extract structured information about case outcomes
+from the text of a court judgment.
+
+# Task
+
+From the judgment text, identify the dispositive outcomes for the present case.
+
+Only extract outcomes that describe the actual result of the present judgment or the result being affirmed, varied,
+or overturned on appeal.
+
+The outcome labels you return must come from this canonical list only:
+
+{allowed_case_outcomes}
+
+# Identifying Case Outcomes
+
+Typical examples include outcomes such as an appeal being dismissed or allowed, a conviction being upheld or quashed,
+a sentence being affirmed, reduced, enhanced, or set aside, or an acquittal being entered.
+
+Outcomes may be multiple. For example, a judgment may dismiss an appeal against conviction but allow an appeal against
+sentence, or it may quash a conviction and set aside the sentence. Return each distinct canonical outcome that is
+clearly supported by the judgment text.
+
+Do not extract generic narrative statements that are not dispositive outcomes.
+
+Focus on the final operative result, not every intermediate discussion.
+
+When you return `extracted_outcome`, it must be exactly one of the canonical outcome labels above.
+
+Do not invent new labels, paraphrase the labels, or return near-matches. If none of the canonical labels fit, return
+no outcome for that point.
+"""
+
+
+def extract_outcomes(judgment_text: str) -> JudgmentOutcomeExtraction:
+    canonical_outcome_names = list(
+        Outcome.objects.order_by("name").values_list("name", flat=True)
+    )
+    if not canonical_outcome_names:
+        log.info("No canonical outcomes configured; skipping outcome extraction.")
+        return JudgmentOutcomeExtraction()
+
+    outcome_extraction_agent = Agent(
+        name="Outcome Extractor",
+        instructions=OUTCOME_EXTRACTION_PROMPT.format(
+            allowed_case_outcomes="\n".join(
+                f"- {outcome}" for outcome in canonical_outcome_names
+            )
+        ),
+        tools=[],
+        output_type=JudgmentOutcomeExtraction,
+        model_settings=ModelSettings(
+            reasoning=Reasoning(effort="medium", summary="auto")
+        ),
+        model="gpt-5-mini",
+    )
+
+    result = Runner.run_sync(
+        outcome_extraction_agent,
+        judgment_text,
+    )
+    log_agent_reasoning(result)
+    log.info("Outcome extraction result: %s", result.final_output)
     return result.final_output
 
 

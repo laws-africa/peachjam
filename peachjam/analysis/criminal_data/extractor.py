@@ -3,9 +3,13 @@ import os
 
 from django.db import transaction
 
-from peachjam.models import Judgment, JudgmentOffence, Offence, Sentence
+from peachjam.models import Judgment, JudgmentOffence, Offence, Outcome, Sentence
 
-from .agent import extract_case_type_filing_year, extract_offences_and_sentences
+from .agent import (
+    extract_case_type_filing_year,
+    extract_offences_and_sentences,
+    extract_outcomes,
+)
 
 log = logging.getLogger(__name__)
 
@@ -35,12 +39,29 @@ class CriminalDataExtractor:
         # clear old extracted criminal data first
         Sentence.objects.filter(judgment=judgment).delete()
         JudgmentOffence.objects.filter(judgment=judgment).delete()
+        judgment.outcomes.clear()
 
         # criminal judgments should get offence/sentence extraction
         if judgment.case_type != Judgment.CaseType.CRIMINAL:
             return None, meta_out
 
         offence_out = extract_offences_and_sentences(judgment_text)
+        outcome_out = extract_outcomes(judgment_text)
+
+        outcome_names = set()
+        for outcome_match in outcome_out.outcomes:
+            outcome_names.add(outcome_match.extracted_outcome)
+
+        if outcome_names:
+            matched_outcomes = Outcome.objects.filter(name__in=outcome_names)
+            matched_names = set(matched_outcomes.values_list("name", flat=True))
+            missing_names = outcome_names - matched_names
+            for missing_name in sorted(missing_names):
+                log.info(
+                    "extracted outcome %s not found in canonical outcomes", missing_name
+                )
+
+            judgment.outcomes.set(matched_outcomes)
 
         for match in offence_out.offences:
             if match.offence_id is None:
@@ -69,4 +90,4 @@ class CriminalDataExtractor:
                 )
                 log.info(f"Created {sentence}")
 
-        return offence_out, meta_out
+        return offence_out, outcome_out, meta_out
