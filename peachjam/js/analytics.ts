@@ -7,6 +7,7 @@ export interface AnalyticsProvider {
   trackPageLoad: () => void;
   trackPageView: () => void;
   trackEvent: (category: string, action: string, name?: string, value?: number) => void;
+  trackKeyLink: (link: string, href: string, page: string, feature: string) => void;
   trackSiteSearch: (keyword: string, category: string, searchCount: number) => void;
   identifyUser: (trackingId: string) => void;
 }
@@ -16,6 +17,7 @@ export class Analytics {
 
   start () {
     this.setupButtonEvents();
+    this.setupKeyLinkEvents();
     this.trackPageLoad();
   }
 
@@ -43,6 +45,12 @@ export class Analytics {
     }
   }
 
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+    for (const provider of this.providers) {
+      provider.trackKeyLink(link, href, page, feature);
+    }
+  }
+
   /**
    * Submit analytics events for clickable elements with data-track-event="Cat | Action | Name" attributes.
    */
@@ -59,6 +67,27 @@ export class Analytics {
           }
         }
       }
+    });
+  }
+
+  setupKeyLinkEvents () {
+    const page = document.body.dataset.keyLinkPage;
+    if (!page) return;
+
+    document.addEventListener('click', (e) => {
+      if (!(e.target instanceof Element)) return;
+
+      const link = e.target.closest('a[data-key-link]');
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if (!link.dataset.keyLink?.trim()) return;
+
+      const featureRoot = link.closest('[data-key-link-feature]');
+      this.trackKeyLink(
+        link.dataset.keyLink.trim(),
+        link.getAttribute('href') || link.href,
+        page,
+        featureRoot?.getAttribute('data-key-link-feature') || 'none'
+      );
     });
   }
 
@@ -86,6 +115,9 @@ export class GA4 implements AnalyticsProvider {
     window.gtag('event', action, { event_category: category, event_name: name, value });
   }
 
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+  }
+
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
     // @ts-ignore
     window.gtag('event', 'site_search', { keyword, category, searchCount });
@@ -108,6 +140,9 @@ export class Matomo implements AnalyticsProvider {
   trackEvent (category: string, action: string, name?: string, value?: number) {
     // @ts-ignore
     window._paq.push(['trackEvent', category, action, name, value]);
+  }
+
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
@@ -159,6 +194,19 @@ export class CustomerIO implements AnalyticsProvider {
     };
     // @ts-ignore
     window.cioanalytics.track(`${category} ${action}`, props);
+  }
+
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+    // Keep the key-link event flat and explicit so it is easy to query in Customer.io.
+    // @ts-ignore
+    window.cioanalytics.track('Key link clicked', {
+      ...this.pageProperties,
+      ...this.commonProperties,
+      link,
+      href,
+      page,
+      feature
+    });
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
