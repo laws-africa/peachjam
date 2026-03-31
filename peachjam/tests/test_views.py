@@ -18,6 +18,7 @@ from peachjam.models import (
     CoreDocument,
     Court,
     Folder,
+    GenericDocument,
     Judgment,
     Outcome,
     PeachJamSettings,
@@ -719,3 +720,36 @@ class PeachjamViewsTest(TestCase):
         # Contact button should be plain mailto (no beacon trigger attr)
         self.assertContains(response, 'href="mailto:support@example.com"')
         self.assertNotContains(response, "data-contact-us-beacon")
+
+
+class DocumentPopupViewTestCase(TestCase):
+    fixtures = ["tests/countries", "tests/languages"]
+
+    def test_popup_portion_qualifies_local_internal_refs(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Popup test document",
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html(
+            (
+                '<section id="sec_1" data-eid="sec_1">'
+                '<a class="akn-ref" href="#sec_2" data-href="#sec_2">section 2</a>'
+                "</section>"
+                '<section id="sec_2" data-eid="sec_2"><p>Target</p></section>'
+            )
+        )
+        doc_content.save()
+
+        response = self.client.get(
+            f"/en/p/localhost/e/popup{doc.expression_frbr_uri}/~sec_1"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected = f"{doc.expression_frbr_uri}#sec_2"
+        self.assertContains(response, f'href="{expected}"')
+        self.assertContains(response, f'data-href="{expected}"')
