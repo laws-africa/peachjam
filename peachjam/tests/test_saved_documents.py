@@ -30,6 +30,7 @@ class SavedDocumentViewsTest(TestCase):
         self.user.user_permissions.add(
             Permission.objects.get(codename="delete_saveddocument")
         )
+        self.user.user_permissions.add(Permission.objects.get(codename="delete_folder"))
         self.folder = Folder.objects.create(user=self.user, name="test")
 
         Subscription.get_or_create_active_for_user(self.user)
@@ -226,3 +227,21 @@ class SavedDocumentViewsTest(TestCase):
             response, reverse("folder_list"), fetch_redirect_response=False
         )
         self.assertFalse(SavedDocument.objects.filter(pk=sd.pk).exists())
+
+    def test_delete_folder_keeps_saved_documents_in_other_folders(self):
+        extra_folder = Folder.objects.create(user=self.user, name="extra")
+        sd = SavedDocument.objects.create(
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
+        )
+        sd.folders.set([self.folder, extra_folder])
+
+        response = self.client.post(
+            reverse("folder_delete", kwargs={"pk": self.folder.pk})
+        )
+
+        self.assertRedirects(
+            response, reverse("folder_list"), fetch_redirect_response=False
+        )
+        self.assertFalse(Folder.objects.filter(pk=self.folder.pk).exists())
+        sd.refresh_from_db()
+        self.assertEqual(list(sd.folders.all()), [extra_folder])
