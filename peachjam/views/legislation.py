@@ -103,6 +103,13 @@ class LegislationSubsidiaryView(LegislationListView):
     latest_expression_only = True
     paginate_by = None
 
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/_document_table.html"]
+            return [self.template_name]
+        return super().get_template_names()
+
     @cached_property
     def legislation(self):
         return get_object_or_404(
