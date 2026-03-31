@@ -21,10 +21,10 @@
       </button>
       <button class="btn btn-link text-danger p-0 ms-2"
               type="button"
-              title="{% trans "Delete" %}"
-              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
+              title="{% trans "Remove from folder" %}"
+              hx-post="{% url 'saved_document_remove_from_folder' saved_document.id folder.id %}?next={% url 'folder_list' %}"
               hx-target="#folders-list"
-              hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
+              hx-confirm="{% trans "Are you sure you want to remove this document from this folder?" %}">
         <i class="bi bi-trash"></i>
       </button>
     </div>
