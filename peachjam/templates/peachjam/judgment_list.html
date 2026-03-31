@@ -7,13 +7,28 @@
   <h1 class="mt-4">{% trans 'Judgments' %}</h1>
 {% endblock %}
 {% block document-table %}
-  {% block all-courts %}
-    <h4 class="mt-3 mb-2">{% trans "All courts" %}</h4>
-    <div class="mb-4">
-      {% trans "Explore judgments from all courts." %}
-      <a href="{% url 'court' 'all' %}" class="ms-3">{% trans "Explore all courts" %} →</a>
+  <div class="row row-cols-1 row-cols-lg-2 g-3 mt-3 mb-4">
+    {% block all-courts %}
+      <div class="col">
+        <div class="card shadow-sm h-100 position-relative">
+          <div class="card-body">
+            <h4 class="card-title mb-2">{% trans "All courts" %}</h4>
+            <p class="card-text mb-3">{% trans "Explore judgments from all courts." %}</p>
+            <a href="{% url 'court' 'all' %}" class="stretched-link">{% trans "Explore all courts" %} →</a>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+    <div class="col">
+      <div class="card shadow-sm h-100 position-relative">
+        <div class="card-body">
+          <h4 class="card-title mb-2">{% trans "Explore by topic" %}</h4>
+          <p class="card-text mb-3">{% trans "Browse judgments organised by legal subject." %}</p>
+          <a href="{% url 'flynote_list' %}" class="stretched-link">{% trans "Explore case law by topic" %} →</a>
+        </div>
+      </div>
     </div>
-  {% endblock %}
+  </div>
   {% include 'peachjam/_court_list.html' %}
   {% block after-courts %}{% endblock %}
   <h4 class="mb-2 mt-5">

@@ -228,6 +228,21 @@ class JudgmentDetailView(BaseDocumentDetailView):
     model = Judgment
     template_name = "peachjam/judgment_detail.html"
 
+    @staticmethod
+    def linked_flynotes(document):
+        linked = []
+        for judgment_flynote in document.flynotes.select_related("flynote").order_by(
+            "flynote__path"
+        ):
+            flynote = judgment_flynote.flynote
+            linked.append(
+                {
+                    "flynote": flynote,
+                    "nodes": [*flynote.get_ancestors(), flynote],
+                }
+            )
+        return linked
+
     def get_notices(self):
         notices = super().get_notices()
         document = self.get_object()
@@ -247,6 +262,7 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["linked_flynotes"] = self.linked_flynotes(self.object)
         context["judges"] = [
             bench.judge
             for bench in self.get_object().bench.select_related("judge").all()

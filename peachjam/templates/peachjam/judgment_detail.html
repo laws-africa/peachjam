@@ -95,17 +95,23 @@
 {% endblock %}
 {% block extra-metadata %}
   {{ block.super }}
+  {% if document.flynote %}
+    <dl class="document-metadata-list d-md-flex">
+      <dt>
+        {% trans 'Flynote' %}
+      </dt>
+      <dd>
+        {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
+        {% include "peachjam/_linked_flynotes.html" with linked_flynotes=linked_flynotes flynote_text=document.flynote %}
+      </dd>
+    </dl>
+  {% endif %}
   {% if document.case_summary %}
     <dl class="document-metadata-list d-md-flex">
       <dt>
         {% trans 'Summary' %}
       </dt>
       <dd>
-        {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
-        {% if document.flynote %}
-          <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
-          <div class="mb-2 fst-italic">{{ document.flynote|linebreaksbr }}</div>
-        {% endif %}
         <details>
           <summary class="mb-1" data-track-event="Document | Toggle summary">
             {% trans 'Read full summary' %}

@@ -59,6 +59,7 @@ class PeachjamViewsTest(TestCase):
     def test_homepage(self):
         response = self.client.get(reverse("home_page"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("flynote_list"))
 
         recent_judgments = [
             r_j.title for r_j in response.context.get("recent_judgments")
@@ -79,6 +80,7 @@ class PeachjamViewsTest(TestCase):
     def test_judgment_listing(self):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("flynote_list"))
 
         documents = [doc.title for doc in response.context.get("documents")]
         court_classes = [
@@ -213,6 +215,30 @@ class PeachjamViewsTest(TestCase):
             "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29",
         )
         self.assertTrue(hasattr(response.context["document"], "court"))
+
+    def test_judgment_detail_without_court_still_renders(self):
+        judgment = Judgment.objects.create(
+            title="Courtless judgment",
+            citation="Courtless judgment",
+            case_name="Courtless judgment",
+            jurisdiction=Country.objects.first(),
+            language=Language.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            court=None,
+            mnc="[2025] TEST 1",
+            serial_number=1,
+            auto_assign_details=False,
+            frbr_uri_doctype="judgment",
+            frbr_uri_actor="tzhc",
+            frbr_uri_date="2025",
+            frbr_uri_number="courtless-judgment",
+        )
+
+        response = self.client.get(judgment.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Courtless judgment")
+        self.assertContains(response, reverse("judgment_list"))
 
     def test_legislation_listing(self):
         response = self.client.get(reverse("legislation_list"))

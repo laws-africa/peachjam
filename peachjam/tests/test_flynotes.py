@@ -1582,6 +1582,58 @@ class JudgmentListFlynoteTopicsTest(TestCase):
     def test_judgment_list_loads(self):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("flynote_list"))
+
+
+class JudgmentDetailFlynoteNavigationTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+        self.judgment = Judgment.objects.create(
+            case_name="Navigation Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+            flynote="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(self.judgment)
+
+    def test_judgment_detail_links_to_flynote_topic_pages(self):
+        response = self.client.get(self.judgment.get_absolute_url())
+        leaf = Flynote.objects.get(name="judicial review")
+
+        self.assertEqual(response.status_code, 200)
+        for node in [*leaf.get_ancestors(), leaf]:
+            self.assertContains(
+                response,
+                reverse("flynote_detail", kwargs={"slug": node.slug}),
+            )
+            self.assertContains(response, node.name)
+
+    def test_judgment_detail_shows_flynotes_without_case_summary(self):
+        judgment = Judgment.objects.create(
+            case_name="Flynote without summary",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 2),
+            language=Language.objects.first(),
+            flynote="Constitutional law — fair hearing",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        response = self.client.get(judgment.get_absolute_url())
+        leaf = judgment.flynotes.select_related("flynote").get().flynote
+
+        self.assertEqual(response.status_code, 200)
+        for node in [*leaf.get_ancestors(), leaf]:
+            self.assertContains(
+                response,
+                reverse("flynote_detail", kwargs={"slug": node.slug}),
+            )
+            self.assertContains(response, node.name)
 
 
 class UpdateFlynoteTaxonomiesCommandTest(TestCase):
