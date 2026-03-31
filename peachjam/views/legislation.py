@@ -128,6 +128,8 @@ class LegislationSubsidiaryView(LegislationListView):
         context["legislation"] = self.legislation
         context["doc_table_show_date"] = False
         context["doc_table_disable_push_url"] = True
+        context["doc_table_show_jurisdiction"] = False
+        context["doc_table_show_doc_type"] = False
         return context
 
 
