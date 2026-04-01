@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import base64
 import logging
 import os
+import socket
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -38,13 +39,37 @@ DEBUG = os.environ.get("DJANGO_DEBUG", "true") == "true"
 LOCALHOST_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
 
 
+def get_local_ip_allowed_hosts():
+    allowed_hosts = set()
+
+    try:
+        allowed_hosts.update(socket.gethostbyname_ex(socket.gethostname())[2])
+    except OSError:
+        pass
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("10.255.255.255", 1))
+            allowed_hosts.add(sock.getsockname()[0])
+    except OSError:
+        pass
+
+    return allowed_hosts
+
+
 def build_allowed_hosts(*default_hosts):
     allowed_hosts = list(default_hosts)
+    allowed_hosts.extend(
+        host.strip()
+        for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    )
     allowed_hosts.extend(
         host.strip()
         for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
         if host.strip()
     )
+    allowed_hosts.extend(get_local_ip_allowed_hosts())
 
     if DEBUG:
         allowed_hosts.extend(LOCALHOST_ALLOWED_HOSTS)
