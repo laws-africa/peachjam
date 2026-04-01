@@ -4,7 +4,14 @@ INSTALLED_APPS = ["obl_microsites"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "obl_microsites.urls"
 ALLOWED_HOSTS = build_allowed_hosts(  # noqa
-    "openbylaws.org.za", "www.openbylaws.org.za"
+    "bergrivier.openbylaws.org.za",
+    "www.bergrivier.openbylaws.org.za",
+    "capeagulhas.openbylaws.org.za" "www.capeagulhas.openbylaws.org.za",
+    "cederberg.openbylaws.org.za",
+    "www.cederberg.openbylaws.org.za" "matzikama.openbylaws.org.za",
+    "www.matzikama.openbylaws.org.za",
+    "mbizana.openbylaws.org.za",
+    "www.mbizana.openbylaws.org.za",
 )
 
 MIDDLEWARE = ["obl_microsites.middleware.LocalityMiddleware"] + MIDDLEWARE  # noqa
