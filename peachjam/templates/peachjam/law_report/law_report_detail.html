@@ -1,8 +1,8 @@
-{% extends "peachjam/layouts/main.html" %}
-{% load i18n %}
+{% extends "peachjam/layouts/detail.html" %}
+{% load i18n peachjam %}
 {% block title %}{{ law_report.title }}{% endblock %}
-{% block page-content %}
-  <div class="container pb-5">
+{% block breadcrumbs %}
+  <div class="container">
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -14,22 +14,30 @@
         <li class="breadcrumb-item active" aria-current="page">{{ law_report.title }}</li>
       </ol>
     </nav>
-    {% if entity_profile %}
-      {% include 'peachjam/_entity_profile.html' with profile=entity_profile %}
-    {% else %}
-      <h1 class="my-4">{{ law_report.title }}</h1>
-    {% endif %}
-    <h2>{% trans 'Volumes' %}</h2>
-    {% if law_report_volumes %}
-      <ul class="list-unstyled">
-        {% for volume in law_report_volumes %}
-          <li class="mb-2">
-            <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>{% trans 'No volumes found.' %}</p>
-    {% endif %}
   </div>
+{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}
+    <div class="my-4">
+      <h1 class="mb-0">{{ law_report.title }}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
+             hx-trigger="load"></div>
+      {% endblock %}
+    </div>
+  {% endif %}
+{% endblock %}
+{% block detail-content %}
+  <h2>{% trans 'Volumes' %}</h2>
+  {% if law_report_volumes %}
+    <ul class="list-unstyled">
+      {% for volume in law_report_volumes %}
+        <li class="mb-2">
+          <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>{% trans 'No volumes found.' %}</p>
+  {% endif %}
 {% endblock %}

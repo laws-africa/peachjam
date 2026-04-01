@@ -1,10 +1,12 @@
 from collections import defaultdict
 from functools import cached_property
 
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from django.shortcuts import get_object_or_404
-from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
+from peachjam.helpers import get_language
 from peachjam.models import (
     ExtractedCitation,
     Judgment,
@@ -83,23 +85,30 @@ class LawReportVolumeCitationIndexBaseView(
     form_defaults = {"sort": "title"}
     doc_table_toggle = True
     doc_table_show_jurisdiction = False
-    page_title_text = None
-    doc_count_noun = None
-    doc_count_noun_plural = None
-    doc_table_title_label = None
-    doc_table_date_label = _("Date")
-    nature = None
 
-    def get_base_queryset(self, exclude=None):
-        volume_lookup = (
-            "work__incoming_citations__citing_work__documents"
-            "__judgment__law_report_entries__law_report_volume"
-        )
+    @cached_property
+    def volume_judgment_work_ids(self):
         return (
-            self.get_model_queryset()
-            .filter(**{volume_lookup: self.law_report_volume})
+            Judgment.objects.filter(
+                law_report_entries__law_report_volume=self.law_report_volume,
+                published=True,
+            )
+            .values_list("work_id", flat=True)
             .distinct()
         )
+
+    @cached_property
+    def cited_work_ids(self):
+        return (
+            ExtractedCitation.objects.filter(
+                citing_work_id__in=self.volume_judgment_work_ids
+            )
+            .values_list("target_work_id", flat=True)
+            .distinct()
+        )
+
+    def get_base_queryset(self, exclude=None):
+        return self.get_model_queryset().filter(work_id__in=self.cited_work_ids)
 
     def add_facets(self, context):
         context["facet_data"] = {}
@@ -107,17 +116,9 @@ class LawReportVolumeCitationIndexBaseView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["page_title"] = self.page_title_text
-        context["doc_count_noun"] = self.doc_count_noun
-        context["doc_count_noun_plural"] = self.doc_count_noun_plural
-        context["doc_table_date_label"] = self.doc_table_date_label
         context["doc_table_toggle"] = self.doc_table_toggle
         context["doc_table_show_jurisdiction"] = self.doc_table_show_jurisdiction
         context["documents"] = self.group_documents(context["documents"])
-        if self.doc_table_title_label:
-            context["doc_table_title_label"] = self.doc_table_title_label
-        if self.nature:
-            context["nature"] = self.nature
         self.attach_citing_judgments(context["documents"])
         return context
 
@@ -129,7 +130,7 @@ class LawReportVolumeCitationIndexBaseView(
 
         citations = (
             ExtractedCitation.objects.filter(
-                citing_work__documents__judgment__law_report_entries__law_report_volume=self.law_report_volume,
+                citing_work_id__in=self.volume_judgment_work_ids,
                 target_work_id__in=work_ids,
             )
             .values_list("target_work_id", "citing_work_id")
@@ -166,25 +167,27 @@ class LawReportVolumeCitationIndexBaseView(
 
 
 class LawReportVolumeCasesIndexView(LawReportVolumeCitationIndexBaseView):
-    template_name = "peachjam/law_report/law_report_volume_detail.html"
+    template_name = "peachjam/law_report/law_report_volume_cases_index.html"
     active_tab = "cases"
     model = Judgment
     queryset = Judgment.objects.prefetch_related(
         "judges", "labels", "attorneys", "outcomes"
     ).select_related("work")
-    page_title_text = _("Cited cases")
-    doc_count_noun = _("case")
-    doc_count_noun_plural = _("cases")
-    doc_table_title_label = _("Citation")
-    doc_table_date_label = _("Judgment date")
-    nature = "Judgment"
 
 
 class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
-    template_name = "peachjam/law_report/law_report_volume_detail.html"
+    template_name = "peachjam/law_report/law_report_volume_legislation_index.html"
     active_tab = "legislation"
     model = Legislation
-    page_title_text = _("Cited legislation")
-    doc_count_noun = _("document")
-    doc_count_noun_plural = _("documents")
-    nature = "Legislation"
+
+    def get_queryset(self):
+        qs = self.get_base_queryset().preferred_language(get_language(self.request))
+        filtered_qs = self.filter_queryset(qs, filter_q=True)
+        latest_ids = filtered_qs.annotate(
+            row_number=Window(
+                expression=RowNumber(),
+                partition_by=[F("work_id")],
+                order_by=[F("date").desc(), F("pk").desc()],
+            )
+        ).filter(row_number=1)
+        return self.form.order_queryset(qs.filter(pk__in=latest_ids.values("pk")))

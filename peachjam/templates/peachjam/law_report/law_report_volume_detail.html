@@ -1,6 +1,6 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load i18n %}
-{% block title %}{{ page_title }}{% endblock %}
+{% load i18n peachjam %}
+{% block title %}{{ law_report.title }} - {{ law_report_volume.title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
@@ -22,12 +22,19 @@
 {% block entity-profile %}{% endblock %}
 {% block page-title %}
   <div class="my-4">
-    <h1>{{ page_title }}</h1>
+    <h1 class="mb-0">{{ law_report.title }}</h1>
+    {% block follow-button %}
+      <div class="my-2"
+           hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
+           hx-trigger="load">
+      </div>
+    {% endblock %}
+    <h2 class="h4 mb-0">{{ law_report_volume.title }}</h2>
   </div>
 {% endblock %}
 {% block count-and-search %}{% endblock %}
 {% block nav-tabs %}
-  <nav class="nav nav-tabs mb-3">
+  <ul class="nav nav-tabs border-bottom mb-3">
     <li class="nav-item">
       <a class="nav-link {% if active_tab == 'judgments' %}active{% endif %}"
          href="{{ law_report_volume.get_absolute_url }}">{% trans 'Judgments' %}</a>
@@ -40,5 +47,5 @@
       <a class="nav-link {% if active_tab == 'legislation' %}active{% endif %}"
          href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">{% trans 'Cited legislation' %}</a>
     </li>
-  </nav>
+  </ul>
 {% endblock %}

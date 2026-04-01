@@ -108,6 +108,33 @@ class LawReportViewsTestCase(TestCase):
         )
         self.cited_legislation = legislations[0]
         self.other_legislation = legislations[1]
+        self.original_cited_legislation_date = self.cited_legislation.date
+        duplicated_legislation_fields = {
+            field.attname: getattr(self.cited_legislation, field.attname)
+            for field in Legislation._meta.concrete_fields
+            if not field.primary_key
+            and field.attname
+            not in {
+                "polymorphic_ctype_id",
+                "created_by_id",
+                "created_at",
+                "updated_at",
+                "work_frbr_uri",
+                "expression_frbr_uri",
+            }
+        }
+        duplicated_legislation_fields["work_id"] = self.cited_legislation.work_id
+        duplicated_legislation_fields["date"] = (
+            self.cited_legislation.date + datetime.timedelta(days=365)
+        )
+        self.latest_cited_legislation = Legislation.objects.create(
+            **duplicated_legislation_fields
+        )
+        Legislation.objects.filter(pk=self.latest_cited_legislation.pk).update(
+            work_id=self.cited_legislation.work_id,
+            work_frbr_uri=self.cited_legislation.work_frbr_uri,
+        )
+        self.latest_cited_legislation.refresh_from_db()
 
         LawReportEntry.objects.create(
             judgment=self.first_judgment,
@@ -148,12 +175,17 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(self.law_report.get_absolute_url())
 
         self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "peachjam/law_report/law_report_detail.html")
         self.assertContains(response, "Volumes")
         self.assertContains(response, self.volume_1.title)
         self.assertContains(response, self.volume_2.title)
         self.assertNotContains(response, self.empty_volume.title)
         self.assertNotContains(response, self.first_judgment.title)
         self.assertNotContains(response, 'placeholder="Filter documents"', html=False)
+        self.assertContains(
+            response,
+            reverse("user_following_button") + f"?law_report={self.law_report.pk}",
+        )
         self.assertEqual(self.law_report, response.context["law_report"])
         self.assertIn(self.volume_1, response.context["law_report_volumes"])
         self.assertIn(self.volume_2, response.context["law_report_volumes"])
@@ -173,6 +205,15 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotContains(response, self.second_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertNotContains(response, "Back to law report")
+        self.assertContains(
+            response,
+            reverse("user_following_button") + f"?law_report={self.law_report.pk}",
+        )
+        self.assertContains(
+            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+        )
+        self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
+        self.assertContains(response, "nav nav-tabs border-bottom", html=False)
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
         self.assertEqual("judgments", response.context["active_tab"])
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
@@ -186,11 +227,22 @@ class LawReportViewsTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(
-            response, "peachjam/law_report/law_report_volume_detail.html"
+            response, "peachjam/law_report/law_report_volume_cases_index.html"
         )
         self.assertEqual("cases", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
-        self.assertEqual("case", str(response.context["doc_count_noun"]))
+        self.assertContains(
+            response,
+            reverse("user_following_button") + f"?law_report={self.law_report.pk}",
+        )
+        self.assertContains(
+            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+        )
+        self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
+        self.assertNotContains(response, "<h1>Cited cases</h1>", html=False)
+        self.assertNotContains(response, "Advanced search")
+        self.assertContains(response, "Citation")
+        self.assertContains(response, "Judgment date")
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
@@ -205,14 +257,31 @@ class LawReportViewsTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(
-            response, "peachjam/law_report/law_report_volume_detail.html"
+            response, "peachjam/law_report/law_report_volume_legislation_index.html"
         )
         self.assertEqual("legislation", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
-        self.assertEqual("documents", str(response.context["doc_count_noun_plural"]))
-        self.assertContains(response, self.cited_legislation.title)
+        self.assertContains(
+            response,
+            reverse("user_following_button") + f"?law_report={self.law_report.pk}",
+        )
+        self.assertContains(
+            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+        )
+        self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
+        self.assertNotContains(response, "<h1>Cited legislation</h1>", html=False)
+        self.assertNotContains(response, "Advanced search")
+        self.assertContains(response, self.cited_legislation.title, count=1)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
+        legislation_row = next(
+            doc
+            for doc in response.context["documents"]
+            if getattr(doc, "work_id", None) == self.cited_legislation.work_id
+        )
+        self.assertEqual(self.latest_cited_legislation.pk, legislation_row.pk)
+        self.assertEqual(self.latest_cited_legislation.date, legislation_row.date)
+        self.assertNotEqual(self.original_cited_legislation_date, legislation_row.date)
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_ignores_tab_query_param(self):
