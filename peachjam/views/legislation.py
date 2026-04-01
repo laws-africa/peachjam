@@ -104,10 +104,8 @@ class LegislationSubsidiaryView(LegislationListView):
     paginate_by = None
 
     def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/_document_table.html"]
-            return ["peachjam/document/_legislation_subsidiary.html"]
+        if self.request.htmx and self.request.htmx.target == "children-tab":
+            return self.template_name
         return super().get_template_names()
 
     @cached_property
@@ -128,7 +126,7 @@ class LegislationSubsidiaryView(LegislationListView):
         context["legislation"] = self.legislation
         context["doc_table_show_date"] = False
         context["doc_table_disable_push_url"] = True
-        context["doc_table_htmx_target"] = "#subsidiary-container"
+        context["doc_table_citations"] = True
         context["doc_table_show_jurisdiction"] = False
         context["doc_table_show_doc_type"] = False
         return context
