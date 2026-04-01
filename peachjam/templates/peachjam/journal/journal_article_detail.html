@@ -34,7 +34,7 @@
       </dt>
       <dd class="text-muted">
         {% for author in authors %}
-          <a href="{% url 'journal_article_list' %}?authors={{ author.name }}">{{ author.name }}</a>
+          <a href="{% url 'journal_article_list' %}?authors={{ author.name|urlencode }}">{{ author.name }}</a>
           {% if not forloop.last %},{% endif %}
         {% endfor %}
       </dd>
