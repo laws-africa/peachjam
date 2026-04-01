@@ -492,6 +492,20 @@ class Judgment(CoreDocument):
             return self.date.year - self.filing_year
         return None
 
+    def linked_flynotes(self):
+        linked = []
+        for judgment_flynote in self.flynotes.select_related("flynote").order_by(
+            "flynote__path"
+        ):
+            flynote = judgment_flynote.flynote
+            linked.append(
+                {
+                    "flynote": flynote,
+                    "nodes": [*flynote.get_ancestors(), flynote],
+                }
+            )
+        return linked
+
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court:
