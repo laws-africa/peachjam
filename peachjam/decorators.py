@@ -63,22 +63,19 @@ class JudgmentDecorator(DocumentDecorator):
     def get_breadcrumbs(self, document):
         crumbs = super().get_breadcrumbs(document)
         crumbs.append(BreadCrumb(name=_("Judgments"), url=reverse("judgment_list")))
-        court = document.court
-        court_class = court.court_class if court else None
-
-        if court_class:
-            if court_class.show_listing_page:
+        if document.court.court_class:
+            if document.court.court_class.show_listing_page:
                 crumbs.append(
                     BreadCrumb(
-                        name=court_class.name,
-                        url=court_class.get_absolute_url(),
+                        name=document.court.court_class.name,
+                        url=document.court.court_class.get_absolute_url(),
                     )
                 )
-        if court:
+        if document.court:
             crumbs.append(
                 BreadCrumb(
-                    name=court.name,
-                    url=court.get_absolute_url(),
+                    name=document.court.name,
+                    url=document.court.get_absolute_url(),
                 )
             )
         if document.registry:
@@ -88,13 +85,14 @@ class JudgmentDecorator(DocumentDecorator):
                     url=document.registry.get_absolute_url(),
                 )
             )
-        if court and document.date:
-            crumbs.append(
-                BreadCrumb(
-                    name=str(document.date.year),
-                    url=reverse("court_year", args=[court.code, document.date.year]),
-                )
+        crumbs.append(
+            BreadCrumb(
+                name=str(document.date.year),
+                url=reverse(
+                    "court_year", args=[document.court.code, document.date.year]
+                ),
             )
+        )
         return crumbs
 
 

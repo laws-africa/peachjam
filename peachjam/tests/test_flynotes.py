@@ -1613,28 +1613,6 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             )
             self.assertContains(response, node.name)
 
-    def test_judgment_detail_shows_flynotes_without_case_summary(self):
-        judgment = Judgment.objects.create(
-            case_name="Flynote without summary",
-            jurisdiction=Country.objects.first(),
-            court=Court.objects.first(),
-            date=datetime.date(2025, 1, 2),
-            language=Language.objects.first(),
-            flynote="Constitutional law — fair hearing",
-        )
-        self.updater.update_for_judgment(judgment)
-
-        response = self.client.get(judgment.get_absolute_url())
-        leaf = judgment.flynotes.select_related("flynote").get().flynote
-
-        self.assertEqual(response.status_code, 200)
-        for node in [*leaf.get_ancestors(), leaf]:
-            self.assertContains(
-                response,
-                reverse("flynote_detail", kwargs={"slug": node.slug}),
-            )
-            self.assertContains(response, node.name)
-
 
 class UpdateFlynoteTaxonomiesCommandTest(TestCase):
     """Tests for the update_flynote_taxonomies management command flags."""

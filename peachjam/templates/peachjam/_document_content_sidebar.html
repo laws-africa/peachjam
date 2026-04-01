@@ -90,7 +90,7 @@ and #navigation-column for desktop screensize.
             {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
             {% if document.flynote %}
               <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
-              {% include "peachjam/_linked_flynotes.html" with linked_flynotes=linked_flynotes flynote_text=document.flynote %}
+              {% include "peachjam/document/_linked_flynotes.html" with linked_flynotes=linked_flynotes flynote_text=document.flynote %}
             {% endif %}
             <div class="judgment-full-summary"></div>
           </div>

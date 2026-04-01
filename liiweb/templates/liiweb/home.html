@@ -34,15 +34,12 @@
   {% endblock %}
   {% block frequently-used %}
     <div class="container pt-2">
-      <div class="mt-3 d-lg-none row row-cols-3">
+      <div class="mt-3 d-lg-none row row-cols-2">
         <div class="col mb-2">
           <a href="{% url 'judgment_list' %}" class="btn btn-primary d-block">{% trans 'Judgments' %}</a>
         </div>
         <div class="col mb-2">
           <a href="{% url 'legislation_list' %}" class="btn btn-primary d-block">{% trans 'Legislation' %}</a>
-        </div>
-        <div class="col mb-2">
-          <a href="{% url 'flynote_list' %}" class="btn btn-secondary d-block">{% trans 'Explore by topic' %}</a>
         </div>
       </div>
     </div>
@@ -81,19 +78,6 @@
   {% block my-lii %}
     {% include 'peachjam/my/_frontpage_loader.html' %}
   {% endblock %}
-  {% if not PEACHJAM_SETTINGS.allow_signups %}
-    <section class="mt-5">
-      <div class="container">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="mb-3">{% trans "Explore case law by topic" %}</h5>
-            <p class="mb-3">{% trans "Browse judgments organised by legal subject." %}</p>
-            <a href="{% url 'flynote_list' %}">{% trans "Explore topics" %} →</a>
-          </div>
-        </div>
-      </div>
-    </section>
-  {% endif %}
   {% block recent-documents %}
     <section class="my-5">
       <div class="container">
