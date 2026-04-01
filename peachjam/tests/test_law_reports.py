@@ -1,4 +1,5 @@
 import datetime
+from copy import deepcopy
 
 from countries_plus.models import Country
 from django.test import TestCase
@@ -103,38 +104,46 @@ class LawReportViewsTestCase(TestCase):
         self.first_judgment = judgments[0]
         self.second_judgment = judgments[1]
         self.unrelated_judgment = judgments[2]
-        legislations = list(
-            Legislation.objects.filter(published=True).order_by("title")[:2]
+        self.cited_legislation = Legislation.objects.get(
+            expression_frbr_uri=(
+                "/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17"
+            )
         )
-        self.cited_legislation = legislations[0]
-        self.other_legislation = legislations[1]
+        self.other_legislation = Legislation.objects.get(
+            expression_frbr_uri=(
+                "/akn/aa-au/act/pact/2005/non-aggression-and-common-defence/eng@2005-01-31"
+            )
+        )
         self.original_cited_legislation_date = self.cited_legislation.date
-        duplicated_legislation_fields = {
-            field.attname: getattr(self.cited_legislation, field.attname)
-            for field in Legislation._meta.concrete_fields
-            if not field.primary_key
-            and field.attname
-            not in {
-                "polymorphic_ctype_id",
-                "created_by_id",
-                "created_at",
-                "updated_at",
-                "work_frbr_uri",
-                "expression_frbr_uri",
-            }
-        }
-        duplicated_legislation_fields["work_id"] = self.cited_legislation.work_id
-        duplicated_legislation_fields["date"] = (
-            self.cited_legislation.date + datetime.timedelta(days=365)
-        )
         self.latest_cited_legislation = Legislation.objects.create(
-            **duplicated_legislation_fields
+            jurisdiction=self.cited_legislation.jurisdiction,
+            locality=self.cited_legislation.locality,
+            title=self.cited_legislation.title,
+            date=self.cited_legislation.date + datetime.timedelta(days=365),
+            source_url=self.cited_legislation.source_url,
+            citation=self.cited_legislation.citation,
+            metadata_json=deepcopy(self.cited_legislation.metadata_json),
+            language=self.cited_legislation.language,
+            frbr_uri_doctype=self.cited_legislation.frbr_uri_doctype,
+            frbr_uri_subtype=self.cited_legislation.frbr_uri_subtype,
+            frbr_uri_actor=self.cited_legislation.frbr_uri_actor,
+            frbr_uri_date=self.cited_legislation.frbr_uri_date,
+            frbr_uri_number=self.cited_legislation.frbr_uri_number,
+            allow_robots=self.cited_legislation.allow_robots,
+            published=self.cited_legislation.published,
+            timeline_json=deepcopy(self.cited_legislation.timeline_json),
+            commencements_json=deepcopy(self.cited_legislation.commencements_json),
+            repealed=self.cited_legislation.repealed,
+            parent_work=self.cited_legislation.parent_work,
+            principal=self.cited_legislation.principal,
         )
-        Legislation.objects.filter(pk=self.latest_cited_legislation.pk).update(
-            work_id=self.cited_legislation.work_id,
-            work_frbr_uri=self.cited_legislation.work_frbr_uri,
+        self.assertEqual(
+            self.cited_legislation.work_id, self.latest_cited_legislation.work_id
         )
-        self.latest_cited_legislation.refresh_from_db()
+        self.assertEqual(
+            self.cited_legislation.work_frbr_uri,
+            self.latest_cited_legislation.work_frbr_uri,
+        )
 
         LawReportEntry.objects.create(
             judgment=self.first_judgment,

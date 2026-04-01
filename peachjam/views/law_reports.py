@@ -1,12 +1,9 @@
 from collections import defaultdict
 from functools import cached_property
 
-from django.db.models import F, Window
-from django.db.models.functions import RowNumber
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
-from peachjam.helpers import get_language
 from peachjam.models import (
     ExtractedCitation,
     Judgment,
@@ -179,15 +176,4 @@ class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
     template_name = "peachjam/law_report/law_report_volume_legislation_index.html"
     active_tab = "legislation"
     model = Legislation
-
-    def get_queryset(self):
-        qs = self.get_base_queryset().preferred_language(get_language(self.request))
-        filtered_qs = self.filter_queryset(qs, filter_q=True)
-        latest_ids = filtered_qs.annotate(
-            row_number=Window(
-                expression=RowNumber(),
-                partition_by=[F("work_id")],
-                order_by=[F("date").desc(), F("pk").desc()],
-            )
-        ).filter(row_number=1)
-        return self.form.order_queryset(qs.filter(pk__in=latest_ids.values("pk")))
+    latest_expression_only = True
