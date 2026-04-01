@@ -98,9 +98,9 @@ class JournalArticleListView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["doc_count_noun"] = _("Article")
-        context["doc_count_noun_plural"] = _("Articles")
-        context["nature"] = "Article"
+        context["doc_count_noun"] = _("Journal article")
+        context["doc_count_noun_plural"] = _("Journal articles")
+        context["nature"] = "Journal article"
         return context
 
 
