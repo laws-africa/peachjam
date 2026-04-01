@@ -137,8 +137,6 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "mnc": doc["mnc"],
             "date": doc["date"],
             "metadata_json": doc,
-            "content_html": self.get_content_html(doc),
-            "content_html_is_akn": doc["content_html_is_akn"],
             "allow_robots": doc["allow_robots"],
             "published": doc["published"],
             "registry": registry,
@@ -149,6 +147,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "flynote": doc["flynote"],
             "case_summary": doc["case_summary"],
         }
+        content_html = self.get_content_html(doc)
 
         document = Judgment(**data)
         document.work_frbr_uri = document.generate_work_frbr_uri()
@@ -162,12 +161,15 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         created_doc, new = Judgment.objects.update_or_create(
             expression_frbr_uri=expression_frbr_uri, defaults=data
         )
+        doc_content = created_doc.get_or_create_document_content(True)
+        doc_content.content_html_is_akn = doc.get("content_html_is_akn", False)
+        doc_content.set_source_html(content_html)
+        doc_content.save()
 
         self.get_case_numbers(doc["case_numbers"], created_doc)
         self.get_judges(doc["judges"], created_doc)
         self.get_taxonomies(doc["topics"], created_doc)
         self.attach_source_file(doc, created_doc)
-        created_doc.update_text_content()
 
         log.info(f"Updated judgment {created_doc}")
         log.info(f"New {new}")
@@ -245,13 +247,14 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             ext = guess_extension(mimetype) or ""
             filename = f"{slugify(doc['title'])[:200]}{ext}"
 
-            sf, _ = SourceFile.objects.update_or_create(
-                document=created_doc,
-                defaults={
-                    "file": File(f, filename),
-                    "mimetype": mimetype,
-                },
+            source_file = getattr(created_doc, "source_file", None) or SourceFile(
+                document=created_doc
             )
+            source_file.track_changes()
+            source_file.file = File(f, filename)
+            source_file.mimetype = mimetype
+            source_file.save()
+            sf = source_file
             sf.ensure_file_as_pdf()
 
     def get_content_html(self, doc):

@@ -12,6 +12,7 @@ class LawReportListView(ListView):
     template_name = "peachjam/law_report/law_report_list.html"
     model = LawReport
     context_object_name = "law_reports"
+    navbar_link = "law_report"
 
 
 class LawReportDetailView(FilteredJudgmentView):
@@ -43,7 +44,6 @@ class LawReportDetailView(FilteredJudgmentView):
         context["law_report_volume_groups"] = chunks(context["law_report_volumes"], 3)
         context["entity_profile"] = self.law_report.entity_profile.first()
         context["entity_profile_title"] = self.law_report.title
-        context["hide_follow_button"] = True
         return context
 
 

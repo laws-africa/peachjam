@@ -1,0 +1,33 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load humanize i18n %}
+{% block title %}
+  {% trans "Explore case law by topic" %}
+{% endblock %}
+{% block page-content %}
+  <section class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans "Judgments" %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Explore by topic" %}</li>
+      </ol>
+    </nav>
+    <h1>{% trans "Explore case law by topic" %}</h1>
+    <p class="lead">
+      {% trans "Browse judgments organised by legal subject. Popular topics highlight where most decisions have been delivered, or explore all available topics below." %}
+    </p>
+    <h2 class="mt-4">{% trans "Popular topics" %}</h2>
+    {% include 'peachjam/flynote/_popular.html' %}
+    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
+      <h2 class="mb-0">
+        {% trans "All topics" %}
+        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ paginator.count|intcomma }}</span>
+      </h2>
+    </div>
+    {% include 'peachjam/flynote/_filter_form.html' %}
+  </section>
+{% endblock %}

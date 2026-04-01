@@ -1,5 +1,8 @@
 import datetime
+import os
 
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.auth.models import Permission, User
@@ -10,19 +13,26 @@ from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.models import (
+    Annotation,
     CaseHistory,
     CoreDocument,
     Court,
+    Folder,
+    GenericDocument,
     Judgment,
     Outcome,
     PeachJamSettings,
+    SavedDocument,
     SourceFile,
+    UserFollowing,
 )
 from peachjam.views.robots import (
     _language_prefixes,
     _place_codes,
     _prefixed_place_rules,
 )
+from peachjam_search.models import SavedSearch
+from peachjam_subs.models import Subscription
 
 
 class PeachjamViewsTest(TestCase):
@@ -31,7 +41,16 @@ class PeachjamViewsTest(TestCase):
         "documents/sample_documents",
         "tests/users",
         "tests/journal_article",
+        "tests/products",
     ]
+
+    @staticmethod
+    def pdf_fixture_content():
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            return fixture.read()
 
     def test_login_page(self):
         response = self.client.get(reverse("account_login"))
@@ -341,6 +360,68 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get(reverse("my_account"))
         self.assertEqual(response.status_code, 200)
 
+    def test_delete_account_page(self):
+        self.client._login(
+            User.objects.first(), "django.contrib.auth.backends.ModelBackend"
+        )
+        response = self.client.get(reverse("delete_account"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Delete account")
+
+    def test_delete_account_anonymises_user(self):
+        user = User.objects.first()
+        sub = Subscription.get_or_create_active_for_user(user)
+        doc = CoreDocument.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+
+        EmailAddress.objects.create(
+            user=user, email=user.email, verified=True, primary=True
+        )
+        SocialAccount.objects.create(
+            user=user, provider="test", uid=f"social-{user.pk}"
+        )
+        Annotation.objects.create(user=user, document=doc, text="note")
+        folder = Folder.objects.create(user=user, name="My folder")
+        saved_document = SavedDocument.objects.create(user=user, work=doc.work)
+        saved_document.folders.add(folder)
+        SavedSearch.objects.create(user=user, q="test")
+        UserFollowing.objects.create(user=user, court=Court.objects.first())
+        self.assertEqual(sub.status, Subscription.Status.ACTIVE)
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "deleted_reason": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("account_logged_out"))
+
+        user.refresh_from_db()
+        profile = user.userprofile
+        self.assertTrue(user.username.startswith("deleted-"))
+        self.assertEqual(user.email, "")
+        self.assertEqual(user.first_name, "")
+        self.assertEqual(user.last_name, "")
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.has_usable_password())
+
+        self.assertIsNotNone(profile.deleted_at)
+        self.assertEqual(profile.deleted_reason, "No longer needed")
+        self.assertEqual(len(profile.email_hash), 64)
+
+        self.assertEqual(Annotation.objects.filter(user=user).count(), 0)
+        self.assertEqual(Folder.objects.filter(user=user).count(), 0)
+        self.assertEqual(SavedDocument.objects.filter(user=user).count(), 0)
+        self.assertEqual(SavedSearch.objects.filter(user=user).count(), 0)
+        self.assertEqual(UserFollowing.objects.filter(user=user).count(), 0)
+        self.assertEqual(EmailAddress.objects.filter(user=user).count(), 0)
+        self.assertEqual(SocialAccount.objects.filter(user=user).count(), 0)
+
+        sub.refresh_from_db()
+        self.assertEqual(sub.status, Subscription.Status.CLOSED)
+
     def test_case_history(self):
         self.user = User.objects.first()
         self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
@@ -417,9 +498,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
         )
         self.assertEqual(
@@ -427,7 +509,7 @@ class PeachjamViewsTest(TestCase):
         )
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.content, b"test")
+        self.assertEqual(resp.content, pdf_content)
 
     def test_document_source_unpublished(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
@@ -450,9 +532,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -484,9 +567,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -515,9 +599,10 @@ class PeachjamViewsTest(TestCase):
         )
 
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -557,9 +642,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file is anonymised
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             file_is_anonymised=True,
         )
@@ -634,3 +720,36 @@ class PeachjamViewsTest(TestCase):
         # Contact button should be plain mailto (no beacon trigger attr)
         self.assertContains(response, 'href="mailto:support@example.com"')
         self.assertNotContains(response, "data-contact-us-beacon")
+
+
+class DocumentPopupViewTestCase(TestCase):
+    fixtures = ["tests/countries", "tests/languages"]
+
+    def test_popup_portion_qualifies_local_internal_refs(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Popup test document",
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html(
+            (
+                '<section id="sec_1" data-eid="sec_1">'
+                '<a class="akn-ref" href="#sec_2" data-href="#sec_2">section 2</a>'
+                "</section>"
+                '<section id="sec_2" data-eid="sec_2"><p>Target</p></section>'
+            )
+        )
+        doc_content.save()
+
+        response = self.client.get(
+            f"/en/p/localhost/e/popup{doc.expression_frbr_uri}/~sec_1"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected = f"{doc.expression_frbr_uri}#sec_2"
+        self.assertContains(response, f'href="{expected}"')
+        self.assertContains(response, f'data-href="{expected}"')

@@ -5,15 +5,17 @@ from django.views.generic import RedirectView
 from peachjam.views import (
     AcceptTermsView,
     AccountView,
+    DeleteAccountView,
     DocumentAccessGroupDetailView,
     EditAccountView,
     LoggedOutView,
 )
-from peachjam.views.accounts import OnboardView, UserAuthView
+from peachjam.views.accounts import OnboardView, SignupView, UserAuthView
 
 urlpatterns = []
 
 urlpatterns += [
+    path("signup/", SignupView.as_view(), name="account_signup"),
     path("", include("allauth.urls")),
     path("accept-terms/", AcceptTermsView.as_view(), name="account_accept_terms"),
     path(
@@ -23,6 +25,7 @@ urlpatterns += [
     ),
     path("profile/", AccountView.as_view(), name="my_account"),
     path("profile/edit", EditAccountView.as_view(), name="edit_account"),
+    path("offboarding", DeleteAccountView.as_view(), name="delete_account"),
     path("logged-out", LoggedOutView.as_view(), name="account_logged_out"),
     path(
         "document-access-groups/",

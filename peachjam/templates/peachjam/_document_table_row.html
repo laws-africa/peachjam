@@ -22,7 +22,7 @@
   {% else %}
     <td class="cell-title">
       <div class="d-flex">
-        <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        <a href="{{ document.get_absolute_url }}" data-key-link="document">{{ document.title }}</a>
         {% if document.work.languages|length > 1 %}
           <span class="d-inline-block ms-2"
                 data-bs-toggle="tooltip"
@@ -38,7 +38,7 @@
       {% endif %}
       {% if document.doc_type == "judgment" %}
         {% if document.blurb %}<div class="my-2">{{ document.blurb }}</div>{% endif %}
-        {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|safe }}</div>{% endif %}
+        {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>{% endif %}
       {% elif document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}

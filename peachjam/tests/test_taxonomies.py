@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.urls.base import reverse
@@ -57,3 +59,51 @@ class TaxonomyTestCase(WebTest):
         response = self.app.get(environment.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("public", response.headers.get("Cache-Control", ""))
+
+    def test_first_level_taxonomy_page_does_not_need_get_root_for_child_links(self):
+        with patch.object(
+            Taxonomy,
+            "get_root",
+            side_effect=AssertionError("get_root should not be called for child links"),
+        ):
+            response = self.app.get(
+                reverse("first_level_taxonomy_list", kwargs={"topic": self.root.slug})
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("/taxonomy/collections/collections-land-rights", response.text)
+
+    def test_taxonomy_detail_page_does_not_need_get_root_for_breadcrumb_links(self):
+        environment = Taxonomy.objects.get(name="Environment")
+        with patch.object(
+            Taxonomy,
+            "get_root",
+            side_effect=AssertionError(
+                "get_root should not be called for taxonomy detail breadcrumbs"
+            ),
+        ):
+            response = self.app.get(
+                reverse(
+                    "taxonomy_detail",
+                    kwargs={"topic": self.root.slug, "child": environment.slug},
+                ),
+                user=User.objects.get(username="officer@example.com"),
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("/taxonomy/collections", response.text)
+        self.assertIn("/taxonomy/collections/collections-land-rights", response.text)
+
+    def test_taxonomy_detail_404s_for_mismatched_root_and_child(self):
+        other_root = Taxonomy.add_root(name="Other collections")
+        environment = Taxonomy.objects.get(name="Environment")
+
+        response = self.app.get(
+            reverse(
+                "taxonomy_detail",
+                kwargs={"topic": other_root.slug, "child": environment.slug},
+            ),
+            expect_errors=True,
+        )
+
+        self.assertEqual(response.status_code, 404)

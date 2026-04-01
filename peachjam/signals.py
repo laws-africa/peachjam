@@ -1,32 +1,37 @@
+import logging
+
 import allauth.account.signals as allauth_signals
 from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.db import transaction
 from django.db.models import signals
 from django.dispatch import receiver
 from django.dispatch.dispatcher import Signal
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
+from django_lifecycle import AFTER_SAVE
 
 from peachjam.customerio import get_customerio
 from peachjam.models import (
     Annotation,
     CoreDocument,
     DocumentChatThread,
-    DocumentContent,
     ExtractedCitation,
     Folder,
     Judgment,
     Relationship,
     SavedDocument,
-    SourceFile,
     UserFollowing,
     UserProfile,
     Work,
+    pj_settings,
 )
-from peachjam.models.lifecycle import after_attribute_changed
+from peachjam.models.core_document import DocumentContent
+from peachjam.models.lifecycle import on_attribute_changed
 from peachjam.tasks import (
+    extract_criminal_data,
     generate_judgment_summary,
     update_extracted_citations_for_a_work,
     update_flynote_taxonomy,
@@ -35,9 +40,18 @@ from peachjam_search.models import SavedSearch
 
 User = get_user_model()
 
+log = logging.getLogger(__name__)
+
 
 # a user has requested a password reset
 password_reset_started = Signal()
+
+
+@receiver(signals.post_save, sender=get_user_model())
+def user_saved(sender, instance, created, **kwargs):
+    if created:
+        # ensure a user profile exists
+        UserProfile.objects.get_or_create(user=instance)
 
 
 @receiver(signals.post_save)
@@ -69,13 +83,6 @@ def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
     """Update language list on related work after a subclass of CoreDocument is deleted."""
     if isinstance(instance, CoreDocument):
         update_extracted_citations_for_a_work(instance.work_id)
-
-
-@receiver(signals.post_save, sender=SourceFile)
-def convert_to_pdf(sender, instance, created, **kwargs):
-    """Convert a source file to PDF when it's saved"""
-    if created:
-        instance.ensure_file_as_pdf()
 
 
 @receiver(signals.post_save, sender=ExtractedCitation)
@@ -205,7 +212,10 @@ def password_reset_customerio(sender, request, user, **kwargs):
 
 
 @receiver(signals.post_save, sender=DocumentContent)
-def judgment_content_changed_generate_summary(sender, instance, **kwargs):
+def judgment_content_changed_generate_summary(sender, instance, raw, **kwargs):
+    if raw:
+        return
+
     if not instance.document.doc_type == "judgment":
         return
     judgment = instance.document
@@ -217,6 +227,30 @@ def judgment_content_changed_generate_summary(sender, instance, **kwargs):
     )
     if should_generate:
         generate_judgment_summary(judgment.pk)
+
+
+@receiver(signals.pre_save, sender=DocumentContent)
+def judgment_content_changed_extract_criminal_data(sender, instance, **kwargs):
+    if not pj_settings().allow_criminal_data_extraction:
+        log.info("Criminal data extraction is disabled.")
+        return
+
+    if instance.document.doc_type != "judgment":
+        return
+
+    content_has_changed = bool(instance.content_text)
+    if instance.pk:
+        previous = (
+            DocumentContent.objects.filter(pk=instance.pk)
+            .values_list("content_text", flat=True)
+            .first()
+        )
+        content_has_changed = previous != instance.content_text
+
+    if not content_has_changed:
+        return
+
+    transaction.on_commit(lambda: extract_criminal_data(instance.document_id))
 
 
 @receiver(signals.post_save, sender=SavedDocument)
@@ -263,6 +297,6 @@ def chat_thread_deleted(sender, instance, **kwargs):
     async_to_sync(session.clear_session)()
 
 
-@after_attribute_changed(Judgment, "flynote")
+@on_attribute_changed(Judgment, AFTER_SAVE, ["flynote"], ["flynote_taxonomy"])
 def when_flynote_changed(judgment):
     update_flynote_taxonomy(judgment.pk, schedule=5)

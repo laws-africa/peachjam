@@ -18,6 +18,7 @@ import htmx from 'htmx.org';
 import { csrfToken } from './api';
 import analytics, { Analytics } from './analytics';
 import { User } from './user';
+import * as Sentry from '@sentry/browser';
 
 export interface PeachJamConfig {
   appName: string;
@@ -77,11 +78,11 @@ class PeachJam {
   setup () {
     window.dispatchEvent(new Event('peachjam.before-setup'));
     this.setupConfig();
+    this.setupSentry();
     // add the current user agent to the root HTML element for use with pocketlaw
     document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
     this.setupAnalytics();
     this.setupHtmx();
-    this.setupSentry();
     this.createComponents(document.body);
     this.createVueComponents(document.body);
     this.setupTooltips();
@@ -96,6 +97,10 @@ class PeachJam {
     this.setupHelpScoutBeacon();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
+  }
+
+  triggerSentryTest () {
+    throw new Error('[Peachjam] Sentry sanity check — first-party error trigger');
   }
 
   setupConfig () {
@@ -193,44 +198,48 @@ class PeachJam {
   }
 
   setupSentry () {
-    // @ts-ignore
-    if (this.config.sentry && window.Sentry) {
-      // @ts-ignore
-      window.Sentry.init({
-        dsn: this.config.sentry.dsn,
-        environment: this.config.sentry.environment,
-        allowUrls: [
-          new RegExp(window.location.host.replace('.', '\\.') + '/static/')
-        ],
-        denyUrls: [
-          new RegExp(window.location.host.replace('.', '\\.') + '/static/lib/pdfjs/')
-        ],
-        beforeSend (event: any) {
-          try {
-            // if there is no stacktrace, ignore it
-            if (!event.exception || !event.exception.values || !event.exception.values[0] || !event.exception.values[0].stacktrace) {
-              return null;
-            }
-
-            const frames = event.exception.values[0].stacktrace.frames;
-
-            // if first frame is anonymous, don't send this event
-            // see https://github.com/getsentry/sentry-javascript/issues/3147
-            if (frames && frames.length > 0) {
-              const firstFrame = frames[0];
-              if (!firstFrame.filename || firstFrame.filename === '<anonymous>') {
-                return null;
-              }
-            }
-          } catch (e) {
-            // ignore error, send event
-            console.log(e);
+    if (!this.config.sentry?.dsn) return;
+    Sentry.init({
+      dsn: this.config.sentry.dsn,
+      environment: this.config.sentry.environment ?? undefined,
+      integrations: [
+        Sentry.thirdPartyErrorFilterIntegration({
+          filterKeys: ['peachjam-frontend'],
+          behaviour: 'drop-error-if-exclusively-contains-third-party-frames'
+        })
+      ],
+      allowUrls: [
+        new RegExp(window.location.host.replace(/\./g, '\\.') + '/static/')
+      ],
+      denyUrls: [
+        new RegExp(window.location.host.replace(/\./g, '\\.') + '/static/lib/pdfjs/')
+      ],
+      beforeSend (event) {
+        try {
+          // if there is no stacktrace, ignore it
+          const values = event.exception?.values;
+          if (!values?.[0]?.stacktrace) {
+            return null;
           }
 
-          return event;
+          const frames = values[0].stacktrace.frames;
+
+          // if first frame is anonymous, don't send this event
+          // see https://github.com/getsentry/sentry-javascript/issues/3147
+          if (frames && frames.length > 0) {
+            const firstFrame = frames[0];
+            if (!firstFrame.filename || firstFrame.filename === '<anonymous>') {
+              return null;
+            }
+          }
+        } catch (err) {
+          // ignore error, send event
+          console.log(err);
         }
-      });
-    }
+
+        return event;
+      }
+    });
   }
 
   setupTooltips () {

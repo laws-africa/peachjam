@@ -1,4 +1,5 @@
 import json
+import logging
 
 from agents import Runner
 from agents.stream_events import RawResponsesStreamEvent
@@ -11,12 +12,15 @@ from django.template.loader import render_to_string
 from django.views.generic import DetailView
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
-from peachjam.chat.agent import DocumentChat, extract_assistant_response, langfuse
+from peachjam.chat.agent import DocumentChat, extract_assistant_response
+from peachjam.langfuse import langfuse
 from peachjam.models import DocumentChatThread
 from peachjam.views.documents import DocumentDetailView
 from peachjam.views.mixins import AsyncDispatchMixin
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import Product, Subscription
+
+log = logging.getLogger(__name__)
 
 
 class StartDocumentChatView(
@@ -189,6 +193,7 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
                 "question": message["content"],
             },
         ) as generation:
+            log.info(f"Streaming chat for {thread}")
             result = Runner.run_streamed(
                 chat.agent,
                 input=message["content"],
@@ -205,6 +210,7 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
                             {"id": event.data.item_id, "c": event.data.delta},
                         )
 
+            log.info(f"Finished stream for {thread}")
             reply = extract_assistant_response(result)
             reply["content"] = await sync_to_async(chat.markup_refs)(reply["content"])
             reply["trace_id"] = generation.trace_id

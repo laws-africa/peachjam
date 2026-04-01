@@ -1,10 +1,14 @@
 import datetime
+import os
+from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from languages_plus.models import Language
 
+from peachjam.analysis.summariser import JudgmentSummary
 from peachjam.models import CaseNumber, Court, CourtClass, Judgment, Locality
 
 
@@ -223,3 +227,161 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(za, judgment.jurisdiction)
         self.assertIsNone(judgment.locality)
+
+    @patch.dict(
+        os.environ,
+        {
+            "OPENAI_API_KEY": "test-openai-key",
+            "LANGFUSE_PUBLIC_KEY": "test-langfuse-public-key",
+            "LANGFUSE_SECRET_KEY": "test-langfuse-secret-key",
+        },
+        clear=False,
+    )
+    @patch("peachjam.analysis.summariser.langfuse.get_prompt")
+    @patch("peachjam.analysis.summariser.OpenAI")
+    def test_generate_summary_updates_judgment_fields(
+        self,
+        openai_cls,
+        get_prompt,
+    ):
+        raw_flynote = (
+            "  * Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. "
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+            "Agreement is silent on mode of delivery - Delivery in one lot presumed. "
+        )
+        expected_flynote = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell\n"
+            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
+            "Agreement is silent on mode of delivery - Delivery in one lot presumed"
+        )
+        fake_summary = JudgmentSummary(
+            issues=["Whether the appeal should succeed"],
+            held=["The appeal was dismissed"],
+            order="Appeal dismissed with costs.",
+            summary="The court found no basis to interfere with the lower court's decision.",
+            flynote=raw_flynote,
+            blurb="Appeal dismissed.",
+        )
+        fake_response = SimpleNamespace(output_parsed=fake_summary)
+
+        fake_openai = MagicMock()
+        fake_openai.responses.parse.return_value = fake_response
+        openai_cls.return_value = fake_openai
+
+        fake_prompt = MagicMock()
+        fake_prompt.compile.return_value = "Summarise this judgment."
+        fake_prompt.config = {"model": "gpt-5-mini"}
+        get_prompt.return_value = fake_prompt
+
+        judgment = Judgment(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        judgment.save()
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        judgment.generate_summary()
+        judgment.refresh_from_db()
+
+        self.assertEqual(fake_summary.blurb, judgment.blurb)
+        self.assertEqual(fake_summary.summary, judgment.case_summary)
+        self.assertEqual(expected_flynote, judgment.flynote)
+        self.assertEqual(fake_summary.held, judgment.held)
+        self.assertEqual(fake_summary.issues, judgment.issues)
+        self.assertEqual(fake_summary.order, judgment.order)
+        self.assertTrue(judgment.summary_ai_generated)
+        get_prompt.assert_called_once_with(
+            "summarise/judgment",
+            cache_ttl_seconds=30,
+        )
+        fake_openai.responses.parse.assert_called_once()
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_content_text_change_triggers_summary_generation(
+        self, generate_summary_task
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        self.assertTrue(
+            any(
+                call.args == (judgment.pk,)
+                for call in generate_summary_task.call_args_list
+            )
+        )
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_content_text_change_does_not_trigger_summary_until_anonymised(
+        self, generate_summary_task
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        initial_calls = len(generate_summary_task.call_args_list)
+
+        judgment.track_changes()
+        judgment.must_be_anonymised = True
+        judgment.save()
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+        judgment.refresh_from_db()
+        judgment.track_changes()
+        judgment.anonymised = True
+        judgment.save()
+
+        self.assertTrue(
+            any(
+                call.args == (judgment.pk,)
+                for call in generate_summary_task.call_args_list
+            )
+        )
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_existing_human_summary_blocks_auto_generation(self, generate_summary_task):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+            case_summary="Editor-written summary",
+            summary_ai_generated=False,
+        )
+        initial_calls = len(generate_summary_task.call_args_list)
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+        judgment.anonymised = True
+        judgment.save()
+
+        self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))

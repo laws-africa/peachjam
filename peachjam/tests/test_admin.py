@@ -1,11 +1,20 @@
 import os
+from datetime import date
 
 from django.contrib.auth.models import User
 from django.urls import reverse
 from django_webtest import WebTest
 from webtest import Upload
 
-from peachjam.models import Judgment
+from peachjam.models import (
+    Country,
+    GenericDocument,
+    Journal,
+    JournalArticle,
+    Judgment,
+    Language,
+    VolumeIssue,
+)
 
 
 class TestJudgmentAdmin(WebTest):
@@ -55,7 +64,7 @@ class TestJudgmentAdmin(WebTest):
         # check if content_html has been extracted
         self.assertIn(
             "The second count is robbery, in that on or about near the place mentioned in count",
-            judgment.content_html,
+            judgment.document_content.content_html,
         )
         self.assertEqual(
             "file.docx",
@@ -146,6 +155,82 @@ class TestJudgmentAdmin(WebTest):
         judgment.refresh_from_db()
         self.assertIn(
             "The second count is robbery, in that on or about near the place mentioned in count",
-            judgment.content_html,
+            judgment.document_content.content_html,
         )
         self.assertEqual("file.docx", judgment.source_file.filename)
+
+
+class TestDocumentAdminHtmlEdit(WebTest):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.app.set_user(User.objects.get(username="admin@example.com"))
+        self.document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=date(2022, 9, 14),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Admin source_html integration",
+        )
+        doc_content = self.document.get_or_create_document_content()
+        doc_content.set_source_html("<h1>Initial</h1><p>Initial</p>")
+        self.document.save()
+
+    def test_admin_edit_source_html_updates_content_text_and_toc(self):
+        change_url = reverse(
+            "admin:peachjam_genericdocument_change",
+            kwargs={"object_id": self.document.pk},
+        )
+        form = self.app.get(change_url).forms["genericdocument_form"]
+        form["source_html"] = "<h1>Edited Heading</h1><p>Edited body</p>"
+
+        response = form.submit()
+        self.assertEqual(302, response.status_code)
+
+        self.document.refresh_from_db()
+        self.assertEqual(
+            "<h1>Edited Heading</h1><p>Edited body</p>",
+            self.document.document_content.source_html,
+        )
+        self.assertIn("Edited body", self.document.document_content.content_html)
+        self.assertIn("Edited Heading", self.document.document_content.content_text)
+        self.assertTrue(self.document.document_content.toc_json)
+
+
+class TestJournalArticleAdmin(WebTest):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.app.set_user(User.objects.get(username="admin@example.com"))
+        self.journal = Journal.objects.create(
+            title="Contemporary Labour Law",
+            slug="contemporary-labour-law",
+        )
+        self.volume = VolumeIssue.objects.create(
+            title="Volume 1",
+            journal=self.journal,
+        )
+
+    def test_add_journal_article_with_journal_and_volume(self):
+        journal_article_add_url = reverse("admin:peachjam_journalarticle_add")
+        journal_article_list_url = reverse("admin:peachjam_journalarticle_changelist")
+
+        form = self.app.get(journal_article_add_url).forms["journalarticle_form"]
+        form["title"] = "New journal article"
+        form["jurisdiction"] = "ZA"
+        form["language"] = "en"
+        form["journal"].force_value(str(self.journal.pk))
+        form["volume"].force_value(str(self.volume.pk))
+        form["date_0"] = "19"
+        form["date_1"] = "3"
+        form["date_2"] = "2026"
+        form["frbr_uri_doctype"] = "doc"
+        form["frbr_uri_number"] = "new-journal-article"
+
+        response = form.submit()
+        self.assertRedirects(response, journal_article_list_url)
+
+        article = JournalArticle.objects.get(title="New journal article")
+        self.assertEqual(self.journal.pk, article.journal_id)
+        self.assertEqual(self.volume.pk, article.volume_id)
+        self.assertTrue(hasattr(article, "document_content"))

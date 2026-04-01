@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import date as format_date
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
@@ -15,7 +16,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
-from peachjam.helpers import add_slash_to_frbr_uri
+from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.models import (
     CoreDocument,
     Glossary,
@@ -97,6 +98,40 @@ class LegislationListView(FilteredDocumentListView):
         return context
 
 
+class LegislationSubsidiaryView(LegislationListView):
+    template_name = "peachjam/document/_legislation_subsidiary.html"
+    latest_expression_only = True
+    paginate_by = None
+
+    def get_template_names(self):
+        if self.request.htmx and self.request.htmx.target == "children-tab":
+            return self.template_name
+        return super().get_template_names()
+
+    @cached_property
+    def legislation(self):
+        return get_object_or_404(
+            Legislation,
+            expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri")),
+        )
+
+    def get_base_queryset(self):
+        return Legislation.objects.filter(
+            parent_work=self.legislation.work,
+            published=True,
+        ).for_document_table()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["legislation"] = self.legislation
+        context["doc_table_show_date"] = False
+        context["doc_table_disable_push_url"] = True
+        context["doc_table_citations"] = True
+        context["doc_table_show_jurisdiction"] = False
+        context["doc_table_show_doc_type"] = False
+        return context
+
+
 @registry.register_doc_type("legislation")
 class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     model = Legislation
@@ -144,7 +179,9 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         context["timeline"] = self.get_timeline()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
-        context["child_documents"] = self.get_child_documents()
+        context["child_documents_count"] = self.model.objects.filter(
+            parent_work=self.object.work
+        ).count()
         return context
 
     def get_notices(self):

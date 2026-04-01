@@ -176,10 +176,6 @@ class SavedSearch(models.Model):
         # sort params alphabetically so that the lookup is consistent
         self.filters = self.get_sorted_filters_string()
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
     def get_absolute_url(self):
         filters = self.get_filters_dict()
         if self.a:

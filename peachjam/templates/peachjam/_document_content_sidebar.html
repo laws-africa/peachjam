@@ -58,6 +58,16 @@ and #navigation-column for desktop screensize.
         </button>
       </div>
     </nav>
+    {% if display_type == 'pdf' %}
+      <div class="pdf-sidebar-progress" data-sidebar-pdf-progress hidden>
+        <div class="progress">
+          <div class="progress-bar bg-primary progress-bar-striped progress-bar-animated"
+               role="progressbar"
+               data-sidebar-pdf-progress-bar>
+          </div>
+        </div>
+      </div>
+    {% endif %}
     <div class="tab-content" id="navigation-tab-content">
       <div class="tab-pane"
            id="navigation-search"
@@ -80,7 +90,7 @@ and #navigation-column for desktop screensize.
             {% if document.blurb %}<div class="mb-3">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
             {% if document.flynote %}
               <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
-              <div class="mb-2 fst-italic">{{ document.flynote|safe }}</div>
+              <div class="mb-2 fst-italic">{{ document.flynote|linebreaksbr }}</div>
             {% endif %}
             <div class="judgment-full-summary"></div>
           </div>
@@ -110,4 +120,4 @@ and #navigation-column for desktop screensize.
   </div>
   <div class="navigation" data-offcanvas-body></div>
 </div>
-{{ document.toc_json|json_script:"akn_toc_json" }}
+{{ document.document_content.toc_json|json_script:"akn_toc_json" }}

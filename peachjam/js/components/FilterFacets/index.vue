@@ -34,9 +34,11 @@
     >
       <SingleFacet
         :facet="facet"
+        :search-term="facetSearchTerms[facet.name] || ''"
         :loading="loading"
         @on-change="handleChange"
         @clear-facet="clearFacet"
+        @facet-search-change="setFacetSearchTerm"
       />
     </template>
   </ul>
@@ -62,6 +64,11 @@ export default {
     }
   },
   emits: ['update:modelValue', 'ordered'],
+  data () {
+    return {
+      facetSearchTerms: {}
+    };
+  },
   computed: {
     showClearAllFilter () {
       return this.modelValue.some((item) => {
@@ -74,6 +81,13 @@ export default {
     }
   },
   methods: {
+    setFacetSearchTerm ({ name, term }) {
+      this.facetSearchTerms = {
+        ...this.facetSearchTerms,
+        [name]: term
+      };
+    },
+
     clearSingleFacet (data, fieldName) {
       const targetIndex = data.findIndex((facet) => facet.name === fieldName);
       if (data[targetIndex].type === 'checkboxes') {
@@ -88,6 +102,7 @@ export default {
 
     clearFacet (fieldName) {
       const data = this.clearSingleFacet(this.modelValue, fieldName);
+      this.setFacetSearchTerm({ name: fieldName, term: '' });
       this.$emit('update:modelValue', [...data]);
     },
 
@@ -95,6 +110,7 @@ export default {
       let data = this.modelValue;
       this.modelValue.forEach((facet) => {
         data = this.clearSingleFacet(data, facet.name);
+        this.setFacetSearchTerm({ name: facet.name, term: '' });
       });
       this.$emit('update:modelValue', [...data]);
     },

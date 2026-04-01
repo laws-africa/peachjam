@@ -44,31 +44,18 @@ The following must be configured as ENV variables:
 import os
 
 import lxml
-import nest_asyncio
 from agents import Agent
 from agents.extensions.memory import SQLAlchemySession
 from agents.items import MessageOutputItem
 from asgiref.sync import sync_to_async
 from django.conf import settings
 from html_to_markdown import convert as html_to_markdown
-from langfuse import Langfuse
 from martor.utils import markdownify
-from openinference.instrumentation.openai_agents import OpenAIAgentsInstrumentor
 
 from ..analysis.citations import citation_analyser
+from ..langfuse import PROMPT_CACHE_TTL_SECS, langfuse
 from ..xmlutils import parse_html_str
 from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
-
-# required for langfuse to work properly in Django views which may already have an event loop running
-# see https://langfuse.com/integrations/frameworks/openai-agents
-nest_asyncio.apply()
-
-# setup OpenAI Agents instrumentation for observability in Langfuse
-OpenAIAgentsInstrumentor().instrument()
-
-# Langfuse uses environment variables to configure itself
-# we block elasticsearch-api instrumentation which comes through from the opentelemetry data
-langfuse = Langfuse(blocked_instrumentation_scopes=["elasticsearch-api"])
 
 
 def get_db_url() -> str:
@@ -95,7 +82,6 @@ def get_session(thread) -> SQLAlchemySession:
 
 class DocumentChat:
     INITIAL_PROMPT_NAME = "chat/document/initial"
-    PROMPT_CACHE_TTL_SECS = 30 if settings.DEBUG else 60
     CHAT_MODEL_NAME = "gpt-5-mini"
 
     def __init__(self, thread):
@@ -133,7 +119,7 @@ class DocumentChat:
     def compile_initial_prompt(self) -> str:
         app = settings.PEACHJAM["APP_NAME"]
         prompt = langfuse.get_prompt(
-            self.INITIAL_PROMPT_NAME, cache_ttl_seconds=self.PROMPT_CACHE_TTL_SECS
+            self.INITIAL_PROMPT_NAME, cache_ttl_seconds=PROMPT_CACHE_TTL_SECS
         )
         return prompt.compile(app=app, user_name=self.user.get_full_name())
 

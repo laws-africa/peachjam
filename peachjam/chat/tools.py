@@ -28,13 +28,14 @@ async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
     @sync_to_async
     def get_text():
         doc = CoreDocument.objects.get(pk=ctx.context.document_id)
-        return doc.get_content_as_text()
+        doc_content = doc.get_or_create_document_content()
+        return doc_content.get_content_as_text()
 
     text = await get_text()
     if not text.strip():
         return "The document has no text content. Suggest that the user downloads the document to view its content."
 
-    if len(text) > 1_250_000:
+    if len(text) > 750_000:
         return "The document text is too large to include here. Suggest that the user downloads the document instead."
 
     return text

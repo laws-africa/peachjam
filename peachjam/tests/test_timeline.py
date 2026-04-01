@@ -10,7 +10,12 @@ from languages_plus.models import Language
 from peachjam.models import (
     Court,
     ExtractedCitation,
+    Journal,
+    JournalArticle,
     Judgment,
+    LawReport,
+    LawReportEntry,
+    LawReportVolume,
     Legislation,
     Locality,
     Predicate,
@@ -156,6 +161,84 @@ class TimelineViewTest(TestCase):
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
         self.assertEqual(f"New documents for {topic}", str(request.subject))
+
+    def test_journal_follow_creates_new_documents_timeline_event(self):
+        journal = Journal.objects.create(
+            title="Regional Law Journal",
+            slug="regional-law-journal",
+        )
+        follow = UserFollowing.objects.create(user=self.user, journal=journal)
+        follow.last_alerted_at = self.last_alerted_at
+        follow.save(update_fields=["last_alerted_at"])
+        article = JournalArticle.objects.create(
+            title="Fresh journal article",
+            journal=journal,
+            publisher="Publisher",
+            date=datetime(2025, 10, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+
+        UserFollowing.update_follows_for_user(self.user)
+
+        event = TimelineEvent.objects.get(user_following=follow)
+        self.assertEqual(TimelineEvent.EventTypes.NEW_DOCUMENTS, event.event_type)
+        self.assertIn(article.work, event.subject_works.all())
+
+    def test_law_report_follow_creates_new_documents_timeline_event(self):
+        law_report = LawReport.objects.create(
+            title="Regional Law Reports",
+            slug="regional-law-reports",
+        )
+        volume = LawReportVolume.objects.create(
+            title="Volume 1",
+            slug="volume-1",
+            law_report=law_report,
+            year=2025,
+        )
+        follow = UserFollowing.objects.create(user=self.user, law_report=law_report)
+        follow.last_alerted_at = self.last_alerted_at
+        follow.save(update_fields=["last_alerted_at"])
+        judgment = Judgment.objects.create(
+            case_name="Reported case",
+            court=self.court,
+            date=datetime(2025, 10, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        LawReportEntry.objects.create(judgment=judgment, law_report_volume=volume)
+
+        UserFollowing.update_follows_for_user(self.user)
+
+        event = TimelineEvent.objects.get(user_following=follow)
+        self.assertEqual(TimelineEvent.EventTypes.NEW_DOCUMENTS, event.event_type)
+        self.assertIn(judgment.work, event.subject_works.all())
+
+    def test_send_new_documents_email_includes_journal_in_subject(self):
+        journal = Journal.objects.create(
+            title="Regional Law Journal",
+            slug="regional-law-journal",
+        )
+        follow = UserFollowing.objects.create(user=self.user, journal=journal)
+        doc = Judgment.objects.first()
+        TimelineEvent.add_new_documents_event(follow, [doc])
+
+        with (
+            override_settings(
+                PEACHJAM={
+                    **settings.PEACHJAM,
+                    "EMAIL_ALERTS_ENABLED": True,
+                    "CUSTOMERIO_EMAIL_API_KEY": "test",
+                },
+                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
+            ),
+            patch("peachjam.emails.APIClient.send_email") as mailer,
+        ):
+            TimelineEmailService.send_new_documents_email(self.user)
+
+        self.assertEqual(1, mailer.call_count)
+        request = mailer.call_args[0][0]
+        self.assertEqual(f"New documents for {journal}", str(request.subject))
 
 
 class TimelineRelationshipTests(TestCase):

@@ -20,9 +20,9 @@ from django.urls import reverse
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 from docpipe.pipeline import PipelineContext
 from docpipe.soffice import soffice_convert
-from docpipe.xmlutils import unwrap_element
 from languages_plus.models import Language
 from lxml import etree, html
 from lxml.etree import ParserError
@@ -42,7 +42,7 @@ from peachjam.helpers import pdfjs_to_text
 from peachjam.models.attachments import Image
 from peachjam.models.citations import CitationLink, ExtractedCitation
 from peachjam.models.enrichments import ProvisionCitation, ProvisionCitationCount
-from peachjam.models.lifecycle import AttributeHooksMixin
+from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
 from peachjam.models.settings import pj_settings
 from peachjam.pipelines import DOC_MIMETYPES, word_pipeline
 from peachjam.xmlutils import parse_html_str
@@ -303,7 +303,7 @@ class Work(models.Model):
 class CoreDocumentManager(PolymorphicManager):
     def get_queryset(self):
         # defer expensive fields
-        return super().get_queryset().defer("content_html", "toc_json", "metadata_json")
+        return super().get_queryset().defer("metadata_json")
 
     def get_qs_no_defer(self):
         return super().get_queryset()
@@ -414,9 +414,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         _("source URL"), max_length=2048, null=True, blank=True
     )
     citation = models.CharField(_("citation"), max_length=4096, null=True, blank=True)
-    content_html = models.TextField(_("content HTML"), null=True, blank=True)
-    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
-    toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
     language = models.ForeignKey(
         Language,
         on_delete=models.PROTECT,
@@ -536,9 +533,6 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         help_text=_("Restrict access to this document to selected groups."),
     )
 
-    # for caching parsed html
-    _content_html_tree = None
-
     class Meta:
         ordering = ["doc_type", "title"]
         permissions = [
@@ -574,53 +568,23 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         self.pre_save()
         super().full_clean(*args, **kwargs)
 
-    def set_content_html(self, content_html):
-        """Update the content HTML for this document. This cleans the HTML and generates a TOC if necessary. This is
-        the preferred way of setting the content_html field."""
-        if not self.content_html_is_akn:
-            self.content_html = self.clean_content_html(content_html)
-            self.update_toc_json_from_html()
-            self._content_html_tree = None
-
-    @property
-    def content_html_tree(self) -> html.HtmlElement:
-        """A parsed version of the content HTML. This is cached for performance."""
-        if self._content_html_tree is None:
-            self._content_html_tree = parse_html_str(self.content_html)
-        return self._content_html_tree
-
-    def update_toc_json_from_html(self):
-        if self.content_html:
-            root = self.content_html_tree
-            self.toc_json = generate_toc_json_from_html(root)
-            wrap_toc_entries_in_divs(root, self.toc_json)
-            self.content_html = html.tostring(root, encoding="unicode")
-        else:
-            self.toc_json = []
-
-    def clean_html_field(self, html):
-        if not html:
-            return None
-
-        # return None if the HTML doesn't have any content
+    def get_or_create_document_content(self, track_changes=False):
+        """Get a DocumentContent instance for this document. If you are going to make changes to the content,
+        set track_changes to True to ensure change tracking is enabled on the returned object.
+        """
         try:
-            root = parse_html_str(html)
-            iframes = root.xpath("//iframe")
-            if iframes:
-                return html
+            doc_content = self.document_content
+        except DocumentContent.DoesNotExist:
+            if self.pk:
+                doc_content, _ = DocumentContent.objects.get_or_create(document=self)
+            else:
+                doc_content = DocumentContent(document=self)
+            self.document_content = doc_content
 
-            text = "".join(root.itertext()).strip()
-            text = re.sub(r"\s", "", text)
-            if not text:
-                return None
-        except (ValueError, ParserError):
-            return None
+        if track_changes:
+            doc_content.track_changes()
 
-        return html
-
-    def clean_content_html(self, content_html):
-        """Ensure that content_html is not just whitespace HTML. Returns the cleaned value."""
-        return self.clean_html_field(content_html)
+        return doc_content
 
     def clean(self):
         super().clean()
@@ -776,56 +740,15 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
         CitationLink.objects.filter(document=self).delete()
 
-        if self.content_html and not self.content_html_is_akn:
-            # delete existing citations in html
-            root = self.content_html_tree
-            deleted = False
-            for a in root.xpath('//a[starts-with(@href, "/akn/")]'):
-                unwrap_element(a)
-                deleted = True
-            if deleted:
-                self.content_html = html.tostring(root, encoding="unicode")
-
-    def extract_content_from_source_file(self):
-        """Re-extract content from DOCX source files, overwriting anything in content_html and associated images.
-
-        This requires that the document has already been saved, in order to associate image attachments.
-        """
-        result = False
-        if (
-            not self.content_html_is_akn
-            and hasattr(self, "source_file")
-            and self.source_file.mimetype in DOC_MIMETYPES
-        ):
-            context = PipelineContext(word_pipeline)
-            context.source_file = self.source_file.file
-            word_pipeline(context)
-            self.set_content_html(context.html_text)
-
-            for img in self.images.all():
-                img.delete()
-
-            for attachment in context.attachments:
-                if attachment.content_type.startswith("image/"):
-                    img = Image.from_docpipe_attachment(attachment)
-                    img.document = self
-                    img.save()
-                    self.images.add(img)
-
-            result = True
-
-        # always update document text
-        self.update_text_content()
-
-        return result
-
     def prepare_content_html_for_pdf(self):
         """Prepare the content HTML for PDF generation by inlining images as base64."""
-        if not self.content_html:
+        doc_content = self.get_or_create_document_content()
+
+        if not doc_content.content_html:
             return None
 
         # Parse the HTML content
-        root = parse_html_str(self.content_html)
+        root = parse_html_str(doc_content.content_html)
         images = {i.filename: i for i in self.images.all()}
 
         # inline images
@@ -879,12 +802,14 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         )
 
     def get_provision_by_eid(self, eid):
-        if not self.content_html or not self.content_html_is_akn:
+        doc_content = self.get_or_create_document_content()
+
+        if not doc_content.content_html or not doc_content.content_html_is_akn:
             return None
 
         # Find element with data-eId
         xpath = f"//*[@data-eid='{eid}']"
-        elements = self.content_html_tree.xpath(xpath)
+        elements = doc_content.content_html_tree.xpath(xpath)
 
         if elements:
             return etree.tostring(elements[0], encoding="unicode", method="html")
@@ -892,52 +817,11 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
 
     def get_content_as_text(self):
         """Get the document content as plain text."""
-        if not hasattr(self, "document_content"):
-            self.update_text_content()
-        return self.document_content.content_text
-
-    def update_text_content(self):
-        """Update the extracted text content."""
-        self.document_content = DocumentContent.update_or_create_for_document(self)
+        return self.get_or_create_document_content().get_content_as_text()
 
     def get_cited_work_frbr_uris(self):
         """Get a list of parsed FRBR URIs of works cited by this document."""
-        work_frbr_uris = {}
-
-        if self.content_html:
-            root = html.fromstring(self.content_html)
-            if self.content_html_is_akn:
-                # get AKN links in the document content, except those in remarks or in the generated
-                # coverpage (which is outside the akn-akomaNtoso root)
-                xpath = (
-                    '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
-                    'not(ancestor::*[contains(@class, "akn-remark")])]'
-                )
-                attr = "data-href"
-            else:
-                xpath = '//a[starts-with(@href, "/akn")]'
-                attr = "href"
-
-            for a in root.xpath(xpath):
-                try:
-                    work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
-                    # here we can add a list of citation treatments as values
-                    work_frbr_uris[work_frbr_uri] = []
-                except ValueError:
-                    # ignore malformed FRBR URIs
-                    pass
-        else:
-            for citation_link in CitationLink.objects.filter(document_id=self.pk):
-                try:
-                    uri = FrbrUri.parse(citation_link.url)
-                    uri.portion = None
-                    work_frbr_uri = uri.work_uri()
-                    work_frbr_uris[work_frbr_uri] = []
-                except ValueError:
-                    # ignore malformed FRBR URIs
-                    pass
-
-        return work_frbr_uris
+        return self.get_or_create_document_content().get_cited_work_frbr_uris()
 
     def search_penalty(self):
         """Optionally provide a penalty for this document in search results. This cannot be zero or None."""
@@ -962,7 +846,215 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         """Generate a friendly title for the provision with the given eid. This assumes the document is AKN HTML
         and has a TOC JSON.
         """
-        if self.toc_json:
+        return self.get_or_create_document_content().friendly_provision_title(
+            provision_eid
+        )
+
+    def get_breadcrumbs(self):
+        """Get a list of breadcrumbs for this document, suitable for rendering in a template."""
+        crumbs = []
+        if self.decorator:
+            crumbs = self.decorator.get_breadcrumbs(self)
+        return crumbs
+
+
+class AlternativeName(models.Model):
+    document = models.ForeignKey(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="alternative_names",
+        verbose_name=_("document"),
+    )
+    title = models.CharField(
+        _("Law report citation/Alternative known name"),
+        max_length=1024,
+        null=False,
+        blank=False,
+    )
+
+    class Meta:
+        verbose_name = _("alternative name")
+        verbose_name_plural = _("alternative names")
+
+    def __str__(self):
+        return self.title
+
+
+class DocumentContent(AttributeHooksMixin, models.Model):
+    """Support model for storing the actual content of the document. This means it is never loaded in listing views
+    which makes queries faster.
+    """
+
+    document = models.OneToOneField(
+        CoreDocument,
+        on_delete=models.CASCADE,
+        related_name="document_content",
+        verbose_name=_("document"),
+    )
+    content_html_is_akn = models.BooleanField(_("content HTML is AKN"), default=False)
+    source_html = models.TextField(_("Source HTML"), null=True, blank=True)
+    content_html = models.TextField(_("Content HTML"), null=True, blank=True)
+    toc_json = models.JSONField(_("TOC JSON"), null=True, blank=True)
+    # the raw text of the document, extracted either from the source file or the HTML
+    # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
+    content_text = models.TextField(
+        blank=True, null=True, verbose_name=_("document text")
+    )
+    # option XML content of the document
+    content_xml = models.TextField(
+        blank=True, null=True, verbose_name=_("document XML")
+    )
+
+    class Meta:
+        verbose_name = _("document content")
+        verbose_name_plural = _("document contents")
+
+    _content_html_tree = None
+
+    def akn_doc(self):
+        """Get a cobalt StructureDocument instance for this document's XML, assuming it is AKN XML."""
+        if self.content_xml:
+            return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
+                self.content_xml
+            )
+
+    @property
+    def content_html_tree(self) -> html.HtmlElement:
+        """A parsed version of content HTML cached for this instance."""
+        if self._content_html_tree is None:
+            self._content_html_tree = parse_html_str(self.content_html)
+        return self._content_html_tree
+
+    @staticmethod
+    def clean_html_field(html_content):
+        """Return None if html_content is empty or contains only whitespace, otherwise return it unchanged."""
+        if not html_content:
+            return None
+        try:
+            root = parse_html_str(html_content)
+            iframes = root.xpath("//iframe")
+            if iframes:
+                return html_content
+            text = "".join(root.itertext()).strip()
+            text = re.sub(r"\s", "", text)
+            if not text:
+                return None
+        except (ValueError, ParserError):
+            return None
+        return html_content
+
+    def clean_content_html(self, content_html):
+        return self.clean_html_field(content_html)
+
+    def set_source_html(self, source_html):
+        """Set and clean the source HTML. This is the primary source of HTML content, which can then be processed
+        by other methods to set the content HTML, which is shown to the user."""
+        # clean to prevent saving empty or whitespace-only HTML
+        self.source_html = self.clean_html_field(source_html)
+
+    def set_content_html(self, content_html):
+        """Used to set the content HTML after processing the source HTML."""
+        # clean to prevent saving empty or whitespace-only HTML
+        self.content_html = self.clean_content_html(content_html)
+        self._content_html_tree = None
+
+    def extract_content_from_source_file(self):
+        """Refresh content from the attached source file.
+
+        Word-like source files are converted into ``source_html`` and related images. Other source
+        files are treated as PDF-rendered sources and are used only to refresh ``content_text``.
+        """
+        document = self.document
+        if self.content_html_is_akn or not hasattr(document, "source_file"):
+            return False
+
+        if document.source_file.mimetype not in DOC_MIMETYPES:
+            self.update_text_content_from_source_file_pdf()
+            return True
+
+        return self.extract_content_from_source_file_doc()
+
+    def extract_content_from_source_file_doc(self):
+        """Extract HTML and images from a Word-like source file and save the result."""
+        log.debug(
+            f"Extracting content HTML from source file for document {self.document}"
+        )
+
+        context = PipelineContext(word_pipeline)
+        context.source_file = self.document.source_file.file
+        word_pipeline(context)
+
+        for img in self.document.images.all():
+            img.delete()
+
+        for attachment in context.attachments:
+            if attachment.content_type.startswith("image/"):
+                img = Image.from_docpipe_attachment(attachment)
+                img.document = self.document
+                img.save()
+                self.document.images.add(img)
+
+        self.set_source_html(context.html_text)
+
+        return True
+
+    def update_toc_json_from_content_html(self):
+        if self.content_html_is_akn:
+            return
+        if self.content_html:
+            root = self.content_html_tree
+            toc_json = generate_toc_json_from_html(root)
+            wrap_toc_entries_in_divs(root, toc_json)
+            self.content_html = html.tostring(root, encoding="unicode")
+            self._content_html_tree = None
+        else:
+            toc_json = []
+        self.toc_json = toc_json
+
+    def get_cited_work_frbr_uris(self):
+        """Get a list of parsed FRBR URIs of works cited by this document content."""
+        work_frbr_uris = {}
+
+        if self.content_html:
+            root = html.fromstring(self.content_html)
+            if self.content_html_is_akn:
+                # get AKN links in the document content, except those in remarks or in the generated
+                # coverpage (which is outside the akn-akomaNtoso root)
+                xpath = (
+                    '//*[contains(@class, "akn-akomaNtoso")]//a[starts-with(@data-href, "/akn") and '
+                    'not(ancestor::*[contains(@class, "akn-remark")])]'
+                )
+                attr = "data-href"
+            else:
+                xpath = '//a[starts-with(@href, "/akn")]'
+                attr = "href"
+
+            for a in root.xpath(xpath):
+                try:
+                    work_frbr_uri = FrbrUri.parse(a.attrib[attr]).work_uri()
+                    work_frbr_uris[work_frbr_uri] = []
+                except ValueError:
+                    # ignore malformed FRBR URIs
+                    pass
+        else:
+            for citation_link in CitationLink.objects.filter(
+                document_id=self.document_id
+            ):
+                try:
+                    uri = FrbrUri.parse(citation_link.url)
+                    uri.portion = None
+                    work_frbr_uri = uri.work_uri()
+                    work_frbr_uris[work_frbr_uri] = []
+                except ValueError:
+                    # ignore malformed FRBR URIs
+                    pass
+
+        return work_frbr_uris
+
+    def friendly_provision_title(self, provision_eid):
+        """Generate a friendly title for the provision with the given eid."""
+        toc_json = self.toc_json
+        if toc_json:
 
             def find_toc_item(toc, eid):
                 for item in toc:
@@ -980,7 +1072,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
                         return item
 
             # walk down the TOC and try to find the item, or the closest entry to it
-            item = find_toc_item(self.toc_json, provision_eid)
+            item = find_toc_item(toc_json, provision_eid)
             if item:
                 if item["id"] == provision_eid:
                     return item["title"]
@@ -1015,103 +1107,118 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         # fallback to the eid
         return provision_eid
 
-    def get_breadcrumbs(self):
-        """Get a list of breadcrumbs for this document, suitable for rendering in a template."""
-        crumbs = []
-        if self.decorator:
-            crumbs = self.decorator.get_breadcrumbs(self)
-        return crumbs
+    def get_content_as_text(self):
+        """Get the document content as plain text."""
+        if self.content_text is None:
+            self.update_text_content()
+        return self.content_text
 
+    def update_text_content(self):
+        """Update ``content_text`` from ``content_html`` or, if absent, from the source file PDF."""
+        if self.content_html:
+            self.update_text_content_from_html()
+        else:
+            self.update_text_content_from_source_file_pdf()
 
-class AlternativeName(models.Model):
-    document = models.ForeignKey(
-        CoreDocument,
-        on_delete=models.CASCADE,
-        related_name="alternative_names",
-        verbose_name=_("document"),
-    )
-    title = models.CharField(
-        _("Law report citation/Alternative known name"),
-        max_length=1024,
-        null=False,
-        blank=False,
-    )
+    def update_text_content_from_source_file_pdf(self):
+        """Update ``content_text`` from the PDF version of the source file."""
+        log.debug(
+            f"Extracting text content from source file PDF for document {self.document}"
+        )
 
-    class Meta:
-        verbose_name = _("alternative name")
-        verbose_name_plural = _("alternative names")
-
-    def __str__(self):
-        return self.title
-
-
-class DocumentContent(models.Model):
-    """Support model for storing the actual content of the document. This means it is never loaded in listing views
-    which makes queries faster.
-    """
-
-    document = models.OneToOneField(
-        CoreDocument,
-        on_delete=models.CASCADE,
-        related_name="document_content",
-        verbose_name=_("document"),
-    )
-    # the raw text of the document, extracted either from the source file or the HTML
-    # this makes re-indexing for faster, because we don't need to re-extract the text from the source document
-    content_text = models.TextField(
-        blank=True, null=True, verbose_name=_("document text")
-    )
-    # option XML content of the document
-    content_xml = models.TextField(
-        blank=True, null=True, verbose_name=_("document XML")
-    )
-
-    class Meta:
-        verbose_name = _("document content")
-        verbose_name_plural = _("document contents")
-
-    def akn_doc(self):
-        """Get a cobalt StructureDocument instance for this document's XML, assuming it is AKN XML."""
-        if self.content_xml:
-            return StructuredDocument.for_document_type(self.document.frbr_uri_doctype)(
-                self.content_xml
-            )
-
-    @classmethod
-    def update_or_create_for_document(cls, document):
-        """Extract the content from a document, whatever its format is."""
         text = ""
-        if document.content_html:
-            # it's html, grab the text from the html tree
-            root = document.content_html_tree
-            text = " ".join(root.itertext())
+        if hasattr(self.document, "source_file") and self.document.source_file.pk:
+            # get the text from the source file, via PDF if necessary
+            with tempfile.NamedTemporaryFile() as tmp:
+                pdf = self.document.source_file.as_pdf()
+                if pdf:
+                    pdf.seek(0)
+                    shutil.copyfileobj(pdf, tmp)
+                    pdf.seek(0)
+                    tmp.flush()
 
-        elif hasattr(document, "source_file"):
-            if document.source_file.pk:
-                # get the text from the source file, via PDF if necessary
-                with tempfile.NamedTemporaryFile() as tmp:
-                    # convert document to pdf and then extract the text
-                    pdf = document.source_file.as_pdf()
-                    if pdf:
-                        pdf.seek(0)
-                        shutil.copyfileobj(pdf, tmp)
-                        pdf.seek(0)
-                        tmp.flush()
+                    # ensure the file isn't empty, so that pdfjs_to_text doesn't fail
+                    size = os.fstat(tmp.fileno()).st_size
+                    assert size > 0, "Temporary PDF file is empty"
 
-                        # ensure the file isn't empty, so that pdfjs_to_text doesn't fail
-                        size = os.fstat(tmp.fileno()).st_size
-                        assert size > 0, "Temporary PDF file is empty"
+                    text = pdfjs_to_text(tmp.name)
+                    # some PDFs have nulls, which breaks SQL insertion
+                    # replace rather than deleting to keep string length the same
+                    text = text.replace("\0", " ")
+                else:
+                    log.debug("Document has no PDF source file, text will be empty")
+        else:
+            log.debug("Document has no source file, text will be empty")
 
-                        text = pdfjs_to_text(tmp.name)
-                        # some PDFs have nulls, which breaks SQL insertion
-                        # replace rather than deleting to keep string length the same
-                        text = text.replace("\0", " ")
+        self.content_text = text
 
-        doc_content = DocumentContent.objects.update_or_create(
-            document=document, defaults={"content_text": text}
-        )[0]
-        document.document_content = doc_content
-        return doc_content
+    def update_text_content_from_html(self):
+        """Update ``content_text`` by extracting plain text from ``content_html``."""
+        log.debug(f"Extracting text content from HTML for document {self.document}")
+
+        text = ""
+        if self.content_html:
+            text = " ".join(self.content_html_tree.itertext())
+        else:
+            log.debug("Document has no HTML, text will be empty")
+
+        self.content_text = text
+
+    @on_attribute_changed(BEFORE_SAVE, ["source_html"], ["content_html"])
+    def sync_content_html_from_source_html(self):
+        self.set_content_html(self.source_html)
+        # TODO: hooks don't currently cascade, so fake it
+        self.sync_html_derived_fields()
+
+    @on_attribute_changed(BEFORE_SAVE, ["content_html"], ["toc_json", "content_text"])
+    def sync_html_derived_fields(self):
+        self.update_toc_json_from_content_html()
+        self.update_text_content()
+
+    @on_attribute_changed(
+        AFTER_SAVE, ["source_html"], ["CoreDocument.citations", "content_html"]
+    )
+    def trigger_extract_citations_from_source_html(self):
+        from peachjam.tasks import extract_citations
+
+        if self.document_id:
+            extract_citations(self.document_id)
+
+    @on_attribute_changed(AFTER_SAVE, ["content_text"], ["CoreDocument.citations"])
+    def trigger_extract_citations_from_content_text(self):
+        """If citation extraction will be done on content_text instead of content_html, trigger it when content_text
+        changes.
+
+        This cannot be merged with trigger_extract_citations because that declares that it will update content_html,
+        which this path will not, otherwise it will create a circular dependency between the content_html and
+        content_text.
+        """
+        from peachjam.tasks import extract_citations
+
+        if self.document_id and not self.content_html_is_akn and not self.source_html:
+            extract_citations(self.document_id)
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["content_text"],
+        [
+            "Judgment.blurb",
+            "Judgment.case_summary",
+            "Judgment.flynote",
+            "Judgment.held",
+            "Judgment.issues",
+            "Judgment.order",
+        ],
+    )
+    def potentially_generate_judgment_summary(self):
+        """Trigger summary generation when the content text changes, and clear existing summary fields."""
+        from peachjam.models import CoreDocument, Judgment
+
+        if self.document_id:
+            if self.document.doc_type == "judgment":
+                document = CoreDocument.objects.get(pk=self.document_id)
+                if isinstance(document, Judgment):
+                    document.potentially_generate_summary()
 
 
 def get_country_and_locality(code):

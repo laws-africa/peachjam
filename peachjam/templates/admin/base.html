@@ -1,0 +1,9 @@
+{% extends 'admin/base.html' %}
+{% block messages %}
+  {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+      {{ message|capfirst }}
+    </div>
+  {% endfor %}
+{% endblock messages %}

@@ -1,6 +1,6 @@
 from datetime import datetime, time
 
-import peachjam.customerio
+from peachjam.customerio import CustomerIO as PeachjamCustomerIO
 from peachjam.customerio import analytics
 from peachjam_subs.models import Subscription
 
@@ -9,17 +9,17 @@ def date_to_timestamp(date):
     return int(datetime.combine(date, time(0)).timestamp())
 
 
-class SubscriptionDetailsMixin:
+class CustomerIO(PeachjamCustomerIO):
     def get_user_details(self, user):
         details = super().get_user_details(user)
 
-        # Add subscription details
         sub = Subscription.objects.active_for_user(user).first()
         if sub:
             details.update(
                 {
                     "is_paid": sub.product_offering.pricing_plan.price > 0,
                     "subscription_product": sub.product_offering.product.name,
+                    "subscription_billing_period": sub.product_offering.pricing_plan.period,
                     "subscription_is_trial": sub.is_trial,
                     "subscription_ends_on": (
                         date_to_timestamp(sub.ends_on) if sub.ends_on else None
@@ -37,6 +37,7 @@ class SubscriptionDetailsMixin:
                 {
                     "is_paid": False,
                     "subscription_product": None,
+                    "subscription_billing_period": None,
                     "subscription_is_trial": False,
                     "subscription_ends_on": None,
                     "subscription_pricing_plan": None,
@@ -51,6 +52,7 @@ class SubscriptionDetailsMixin:
         details.update(
             {
                 "product": subscription.product_offering.product.name,
+                "billing_period": subscription.product_offering.pricing_plan.period,
                 "pricing_plan": str(subscription.product_offering.pricing_plan),
                 "is_trial": subscription.is_trial,
                 "ends_on": (
@@ -84,12 +86,3 @@ class SubscriptionDetailsMixin:
                 "Subscription closed",
                 self.get_subscription_details(subscription),
             )
-
-
-def with_mixin(base, mixin):
-    return type(f"{mixin.__name__}{base.__name__}", (mixin, base), {})
-
-
-peachjam.customerio.CustomerIO = with_mixin(
-    peachjam.customerio.CustomerIO, SubscriptionDetailsMixin
-)

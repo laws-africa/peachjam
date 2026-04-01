@@ -12,6 +12,7 @@ from django.utils.safestring import mark_safe
 
 from peachjam.auth import user_display
 from peachjam.models import DocumentChatThread
+from peachjam.xmlutils import qualify_local_refs as qualify_local_refs_html
 
 register = template.Library()
 
@@ -95,9 +96,17 @@ def user_name(user):
 @register.simple_tag
 def build_taxonomy_url(item, prefix="taxonomy"):
     items = []
-    root = item.root if hasattr(item, "root") else item.get_root()
-    if root != item:
-        items.append(root.slug)
+    root_slug = getattr(item, "root_slug", None)
+    if root_slug is None:
+        root = getattr(item, "root", None)
+        if root is not None:
+            root_slug = root.slug
+        elif hasattr(item, "is_root") and item.is_root():
+            root_slug = item.slug
+        else:
+            root_slug = item.get_root().slug
+    if root_slug != item.slug:
+        items.append(root_slug)
     items.append(item.slug)
     return f"/{prefix}/" + "/".join(items)
 
@@ -119,9 +128,20 @@ def split(value, sep=None):
 
 
 @register.filter
+def qualify_local_refs(value, frbr_uri):
+    return qualify_local_refs_html(value, frbr_uri)
+
+
+@register.filter
 def get_follow_params(obj):
     # this would be better as a model method
-    return f"{obj._meta.model_name}={obj.pk}"
+    field_map = {
+        "courtclass": "court_class",
+        "courtregistry": "court_registry",
+        "lawreport": "law_report",
+    }
+    field_name = field_map.get(obj._meta.model_name, obj._meta.model_name)
+    return f"{field_name}={obj.pk}"
 
 
 @register.simple_tag

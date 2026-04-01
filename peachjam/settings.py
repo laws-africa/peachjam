@@ -28,7 +28,6 @@ from sentry_sdk.integrations.logging import LoggingIntegration
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
@@ -144,6 +143,7 @@ PEACHJAM = {
     "EXTRACTOR_API": os.environ.get(
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
+    "SUMMARISE_JUDGMENTS": True,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
@@ -162,6 +162,7 @@ PEACHJAM = {
     "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
     "CUSTOMERIO_EMAIL_API_KEY": os.environ.get("CUSTOMERIO_EMAIL_API_KEY"),
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
+    "CUSTOMERIO_CLASS": "peachjam_subs.customerio.CustomerIO",
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
     # Chat settings
@@ -176,6 +177,8 @@ PEACHJAM = {
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
 PEACHJAM["MY_LII"] = f"My {PEACHJAM['APP_NAME']}"
+# tie document embeddings to semantic search, although embeddings can be enabled separately
+PEACHJAM["DOCUMENT_EMBEDDINGS"] = PEACHJAM["SEARCH_SEMANTIC"]
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
@@ -423,6 +426,10 @@ if not DEBUG:
         send_default_pii=True,
         # sample x% of requests for performance metrics
         traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.1")),
+        profile_session_sample_rate=float(
+            os.environ.get("SENTRY_PROFILE_SESSION_SAMPLE_RATE", "0.0")
+        ),
+        profile_lifecycle="trace",
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}

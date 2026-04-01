@@ -1,0 +1,26 @@
+[
+{
+  "model": "peachjam.work",
+  "pk": 306647,
+  "fields": {
+    "frbr_uri": "/akn/tz/act/ord/1930/11",
+    "frbr_uri_country": "tz",
+    "frbr_uri_locality": null,
+    "frbr_uri_place": "tz",
+    "frbr_uri_doctype": "act",
+    "frbr_uri_subtype": "ord",
+    "frbr_uri_actor": null,
+    "frbr_uri_date": "1930",
+    "frbr_uri_number": "11",
+    "title": "Penal Code",
+    "languages": ["eng"],
+    "partner": null,
+    "pagerank": 0.0,
+    "pagerank_normalized": 0.0,
+    "n_cited_works": 0,
+    "n_citing_works": 0,
+    "n_citing_works_normalized": 0.0,
+    "authority_score": 0.0
+  }
+}
+]

@@ -5,8 +5,12 @@ import tablib
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from peachjam.models import GenericDocument, Judgment, Taxonomy
-from peachjam.resources import GenericDocumentResource, JudgmentResource
+from peachjam.models import GenericDocument, Judgment, Offence, Taxonomy, Work
+from peachjam.resources import (
+    GenericDocumentResource,
+    JudgmentResource,
+    OffenceResource,
+)
 
 judgment_import_headers = [
     "skip",
@@ -182,3 +186,146 @@ class JudgmentBulkImportTestCase(TestCase):
         self.assertEqual(0, result.totals["update"])
         self.assertEqual(1, result.totals["skip"])
         self.assertIsNone(GenericDocument.objects.first())
+
+    def test_source_html_import_export_round_trip(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+            "source_html",
+        ]
+        row = [
+            "",
+            "ZA",
+            "2022-09-14",
+            "eng",
+            "thing",
+            "source html round trip",
+            "doc",
+            "<h1>Heading</h1><p>Body</p>",
+        ]
+
+        resource = GenericDocumentResource()
+        result = resource.import_data(
+            dataset=tablib.Dataset(row, headers=headers), dry_run=False
+        )
+        self.assertFalse(result.has_errors())
+
+        doc = GenericDocument.objects.get(title="source html round trip")
+        self.assertEqual(
+            "<h1>Heading</h1><p>Body</p>", doc.document_content.source_html
+        )
+        self.assertIn("Body", doc.document_content.content_html)
+
+        exported = resource.export(GenericDocument.objects.filter(pk=doc.pk))
+        self.assertIn("source_html", exported.headers)
+        self.assertNotIn("content_html", exported.headers)
+        self.assertEqual("<h1>Heading</h1><p>Body</p>", exported.dict[0]["source_html"])
+
+    def test_content_html_import_is_legacy_fallback_with_warning(self):
+        headers = [
+            "skip",
+            "jurisdiction",
+            "date",
+            "language",
+            "nature",
+            "title",
+            "frbr_uri_doctype",
+            "content_html",
+        ]
+        row = [
+            "",
+            "ZA",
+            "2022-09-15",
+            "eng",
+            "thing",
+            "legacy html fallback",
+            "doc",
+            "<p>Legacy content_html value</p>",
+        ]
+
+        with self.assertLogs("peachjam.resources", level="WARNING") as captured:
+            result = GenericDocumentResource().import_data(
+                dataset=tablib.Dataset(row, headers=headers), dry_run=False
+            )
+
+        self.assertFalse(result.has_errors())
+        self.assertTrue(
+            any(
+                "Deprecated import header 'content_html'" in line
+                for line in captured.output
+            )
+        )
+        self.assertTrue(
+            any(
+                "Deprecated import column 'content_html'" in line
+                for line in captured.output
+            )
+        )
+        doc = GenericDocument.objects.get(title="legacy html fallback")
+        self.assertEqual(
+            "<p>Legacy content_html value</p>", doc.document_content.source_html
+        )
+
+
+class OffenceBulkImportTestCase(TestCase):
+    def setUp(self):
+        self.work = Work.objects.create(
+            title="Penal Code",
+            frbr_uri="/akn/tz/act/2002/16",
+        )
+
+    def test_offence_import(self):
+        headers = [
+            "work",
+            "provision_eid",
+            "code",
+            "title",
+            "description",
+            "elements",
+            "penalty",
+        ]
+        row = [
+            self.work.frbr_uri,
+            "sec_296",
+            "ROB-296",
+            "Robbery with violence",
+            "The accused steals while armed with a dangerous weapon.",
+            "stealing property|armed with a dangerous weapon",
+            "Imprisonment for life",
+        ]
+
+        dataset = tablib.Dataset(row, headers=headers)
+        result = OffenceResource().import_data(dataset=dataset, dry_run=False)
+
+        self.assertEqual([], result.invalid_rows)
+        self.assertFalse(result.has_errors())
+
+        offence = Offence.objects.get(code="ROB-296")
+        self.assertEqual(self.work, offence.work)
+        self.assertEqual(
+            ["stealing property", "armed with a dangerous weapon"], offence.elements
+        )
+
+    def test_offence_export(self):
+        offence = Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_296",
+            code="ROB-296",
+            title="Robbery with violence",
+            description="The accused steals while armed with a dangerous weapon.",
+            elements=["stealing property", "armed with a dangerous weapon"],
+            penalty="Imprisonment for life",
+        )
+
+        dataset = OffenceResource().export(Offence.objects.filter(pk=offence.pk))
+
+        self.assertEqual(self.work.frbr_uri, dataset.dict[0]["work"])
+        self.assertEqual(
+            "stealing property|armed with a dangerous weapon",
+            dataset.dict[0]["elements"],
+        )

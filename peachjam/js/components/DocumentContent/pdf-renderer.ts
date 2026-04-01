@@ -26,6 +26,8 @@ class PdfRenderer {
   protected scrollListenerActive: boolean = true;
   protected pdfContentMarks: any[] = [];
   protected progressBarElement: HTMLElement | null;
+  protected sidebarProgressElement: HTMLElement | null;
+  protected sidebarProgressBarElement: HTMLElement | null;
   protected previewPanelsContainer: Element | null;
   protected manager: DocumentContent;
   public onPreviewPanelClick: () => void = () => {};
@@ -41,7 +43,9 @@ class PdfRenderer {
     this.pdfjsLib.GlobalWorkerOptions.workerSrc = peachJam.config.pdfWorker;
     this.pdfUrl = root.dataset.pdf;
     this.pdfContentWrapper = root.querySelector('.pdf-content');
-    this.progressBarElement = root.querySelector('.progress-bar');
+    this.progressBarElement = root.querySelector('[data-pdf-download-progress-bar]');
+    this.sidebarProgressElement = root.querySelector('[data-sidebar-pdf-progress]');
+    this.sidebarProgressBarElement = root.querySelector('[data-sidebar-pdf-progress-bar]');
     this.previewPanelsContainer = root.querySelector('.pdf-previews');
     this.root.querySelector('button[data-load-doc-button]')?.addEventListener('click', () => {
       this.loadPdf();
@@ -67,6 +71,31 @@ class PdfRenderer {
     }).catch((e:ErrorEvent) => {
       throw e;
     });
+  }
+
+  updateDownloadProgress (loaded: number, total: number) {
+    if (!total) return;
+    const progress = loaded / total * 100;
+
+    if (this.progressBarElement) {
+      this.progressBarElement.style.width = `${progress}%`;
+      this.progressBarElement.innerText = `${Math.ceil(progress)}%`;
+    }
+  }
+
+  updateSidebarPageProgress (loaded: number, total: number) {
+    if (!total) return;
+
+    if (this.sidebarProgressElement) {
+      this.sidebarProgressElement.hidden = false;
+    }
+
+    if (this.sidebarProgressBarElement) {
+      const progress = loaded / total * 100;
+      this.sidebarProgressBarElement.style.width = `${progress}%`;
+      this.sidebarProgressBarElement.innerText = '';
+      this.sidebarProgressBarElement.setAttribute('aria-valuenow', String(Math.ceil(progress)));
+    }
   }
 
   setupPreviewSyncing () {
@@ -138,6 +167,14 @@ class PdfRenderer {
 
     this.root.removeAttribute('data-pdf-standby');
     this.root.setAttribute('data-pdf-loading', '');
+    if (this.sidebarProgressElement) {
+      this.sidebarProgressElement.hidden = false;
+    }
+    if (this.sidebarProgressBarElement) {
+      this.sidebarProgressBarElement.style.width = '0%';
+      this.sidebarProgressBarElement.innerText = '';
+      this.sidebarProgressBarElement.setAttribute('aria-valuenow', '0');
+    }
 
     // load the PDF
     let response = null;
@@ -159,22 +196,20 @@ class PdfRenderer {
     const pdfData = new Uint8Array(await response.arrayBuffer());
     const loadingTask = this.pdfjsLib.getDocument(pdfData);
     loadingTask.onProgress = (data: { loaded: number, total: number }) => {
-      if (data.total && this.progressBarElement) {
-        const progress = data.loaded / data.total * 100;
-        this.progressBarElement.style.width = `${progress}%`;
-        this.progressBarElement.innerText = `${Math.ceil(progress)}%`;
-      }
+      this.updateDownloadProgress(data.loaded, data.total);
     };
 
     try {
       const pdf = await loadingTask.promise;
       this.root.removeAttribute('data-pdf-loading');
+      this.updateSidebarPageProgress(0, pdf.numPages);
 
       const canvas = document.createElement('canvas');
 
       for (let i = 0; i < pdf.numPages; i++) {
         const page = await pdf.getPage(i + 1);
         await this.renderSinglePage(page, i, scale, containerWidth, canvas);
+        this.updateSidebarPageProgress(i + 1, pdf.numPages);
         if (initialPage && initialPage === i + 1) {
           this.scrollToPage(i + 1);
         }
@@ -186,8 +221,12 @@ class PdfRenderer {
       canvas.height = 1;
       const ctx = canvas.getContext('2d');
       if (ctx) ctx.clearRect(0, 0, 1, 1);
+      if (this.sidebarProgressElement) {
+        this.sidebarProgressElement.hidden = true;
+      }
     } catch (e) {
       console.log(e);
+      this.showError(null, e);
     }
   }
 
@@ -307,6 +346,9 @@ class PdfRenderer {
 
     this.root.removeAttribute('data-pdf-loading');
     this.root.setAttribute('data-pdf-error', '');
+    if (this.sidebarProgressElement) {
+      this.sidebarProgressElement.hidden = true;
+    }
     const err = this.root.querySelector('.pdf-error-message') as HTMLSpanElement;
     if (err) {
       err.innerText = message;

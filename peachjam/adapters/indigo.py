@@ -33,6 +33,7 @@ from peachjam.models import (
     Predicate,
     ProvisionEnrichment,
     Relationship,
+    SourceFile,
     Taxonomy,
     UncommencedProvision,
     UnconstitutionalProvision,
@@ -286,18 +287,16 @@ class IndigoAdapter(RequestsAdapter):
             "title": title,
             "created_at": document["created_at"],
             "updated_at": document["updated_at"],
-            "content_html_is_akn": True,
             "source_url": (
                 document["publication_document"]["url"]
                 if document["publication_document"]
                 else None
             ),
             "language": language,
-            "toc_json": toc_json,
-            "content_html": self.get_content_html(document),
             "citation": document["numbered_title"],
             "ingestor": self.ingestor,
         }
+        content_html = self.get_content_html(document)
 
         frbr_uri_data = {
             "jurisdiction": jurisdiction,
@@ -375,6 +374,11 @@ class IndigoAdapter(RequestsAdapter):
             expression_frbr_uri=expression_frbr_uri,
             defaults={**field_data, **frbr_uri_data},
         )
+        doc_content = created_doc.get_or_create_document_content(True)
+        doc_content.set_source_html(content_html)
+        doc_content.content_html_is_akn = True
+        doc_content.toc_json = toc_json
+        doc_content.save()
 
         logger.info(f"New document: {new}")
 
@@ -392,7 +396,6 @@ class IndigoAdapter(RequestsAdapter):
         self.download_and_save_document_images(document, created_doc)
         if model is Legislation:
             self.get_provision_enrichments(url, created_doc.work)
-        created_doc.update_text_content()
 
     def get_provision_enrichments(self, url, work):
         logger.info(
@@ -589,8 +592,6 @@ class IndigoAdapter(RequestsAdapter):
         return toc_json
 
     def download_source_file(self, url, doc, title):
-        from peachjam.models import SourceFile
-
         logger.info(f"Downloading source file from {url}")
 
         with NamedTemporaryFile() as f:
@@ -603,32 +604,40 @@ class IndigoAdapter(RequestsAdapter):
                 filename = f"{slugify(title)}.pdf"
             f.write(r.content)
 
-            SourceFile.objects.update_or_create(
-                document=doc,
-                defaults={
-                    "file": File(f, name=filename),
-                    "mimetype": magic.from_file(f.name, mime=True),
-                    "size": len(r.content),
-                },
-            )
+            # there is a small race condition here if SourceFile is created in the db while we do this. In that case
+            # the task will fail and be re-tried.
+            source_file = getattr(doc, "source_file", None) or SourceFile(document=doc)
+            source_file.track_changes()
+            source_file.file = File(f, name=filename)
+            source_file.mimetype = magic.from_file(f.name, mime=True)
+            source_file.size = len(r.content)
+            source_file.save()
 
     def get_size_from_url(self, url):
         logger.info("  Getting the file size ...")
         r = self.client_get(url)
         return len(r.content)
 
+    def clear_publication_file(self, doc):
+        if not hasattr(doc, "publication_file"):
+            return
+
+        publication_file = doc.publication_file
+        if publication_file.file:
+            logger.info(
+                f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
+            )
+            publication_file.file.delete(save=False)
+
+        logger.info(
+            f"  Deleting existing publication file record on {doc.work_frbr_uri}"
+        )
+        publication_file.delete()
+
     def create_publication_file(self, publication_document, doc, title, stub=False):
         from peachjam.models import PublicationFile
 
         logger.info(f"Creating / updating a publication file for {title}")
-
-        # first delete any existing PublicationFile file: a new one will be saved if needed
-        if hasattr(doc, "publication_file"):
-            if doc.publication_file.file:
-                logger.info(
-                    f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
-                )
-                doc.publication_file.file.delete(save=False)
 
         if stub:
             if hasattr(doc, "source_file"):
@@ -645,13 +654,7 @@ class IndigoAdapter(RequestsAdapter):
                     },
                 )
             else:
-                if hasattr(doc, "publication_file"):
-                    logger.info(
-                        "  Stub: No source file, deleting existing publication file"
-                    )
-                    doc.publication_file.delete()
-                else:
-                    logger.info("  Stub: No source file, skipping")
+                logger.info("  Stub: No source file, skipping")
         else:
             url = publication_document["url"]
             filename = (
@@ -735,6 +738,7 @@ class IndigoAdapter(RequestsAdapter):
             self.download_source_file(f"{url}.pdf", created_document, document["title"])
 
         # the publication file is always the publication file -- it will use the source file where relevant
+        self.clear_publication_file(created_document)
         if pubdoc:
             self.create_publication_file(
                 pubdoc, created_document, document["title"], stub=document["stub"]

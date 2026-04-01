@@ -119,15 +119,67 @@ npx webpack -w --mode development
 from the project root to watch and rebuild assets whenever you save. Do not commit the generated files in
 `peachjam/static/js/`, that will be built automatically on `main` as described below.
 
-Any time a change lands on `main`, [the build workflow](.github/workflows/build.yml) runs webpack and compares the
+Any time a change lands on `main`, [the build workflow](../.github/workflows/build.yml) runs webpack and compares the
 compiled output with the previous commit. If real differences are detected, the workflow commits the updated bundles
 back to `main`. That follow-up commit is what ultimately lands the production-ready JavaScript in the repository, so
 developers do not need to worry about checking in built assets themselves. This commit includes `[nobuild]` in the
 commit message to prevent a circular build loop.
 
-The same push to `main` also triggers [the deployment workflow](.github/workflows/deploy.yml) which pushes the code to
+The same push to `main` also triggers [the deployment workflow](../.github/workflows/deploy.yml) which pushes the code to
 each Dokku target in turn. If you are merging a pull request and want to avoid that deploy, include `nodeploy` anywhere
 in your merge commit message so that the workflow skips its jobs.
+
+## Key link analytics
+
+Peachjam can emit a Customer.io event when a user clicks a marked "key link" on an important page. This is intended for feature-usage analysis, for example understanding whether users click documents from the homepage courts block, the document metadata section, or the My LII timeline.
+
+### How it works
+
+Tracking only runs when the page `<body>` has `data-key-link-page`. The shared base layout adds this automatically when the template context includes `KEY_LINK_PAGE`.
+
+Marked links use:
+
+```html
+<a href="..." data-key-link="document">...</a>
+```
+
+The frontend sends a `Key link clicked` event with:
+
+- `link`: the value from `data-key-link`
+- `href`: the resolved link URL
+- `page`: the value from `body[data-key-link-page]`
+- `feature`: the nearest `data-key-link-feature` on the link or one of its ancestors, or `none`
+
+### When to add `KEY_LINK_PAGE`
+
+Set `KEY_LINK_PAGE` for pages where key-link usage is important enough to analyse at a page level. Current examples include:
+
+- `homepage`
+- `document_detail`
+- `my_lii`
+
+As a rule, add it when the page contains important discovery or conversion features and you want to distinguish its clicks from the same link types elsewhere in the product.
+
+### When to add `data-key-link-feature`
+
+Wrap the smallest meaningful feature/container around a group of key links, for example:
+
+- homepage courts, collections, recent-document blocks
+- document-detail metadata, citations, related-documents, suggested-documents, sublegislation tabs
+- My LII timeline blocks
+
+Use a stable machine-friendly name such as `courts`, `document_metadata`, `incoming_citations`, or `my_lii_timeline`.
+
+### When to add `data-key-link`
+
+Add `data-key-link` to the actual links you care about, using a short human-friendly label such as:
+
+- `document`
+- `court`
+- `topic`
+- `judge`
+
+Prefer annotating shared partials like document tables and relationship lists so all reused instances stay consistent.
 
 ## Caching
 

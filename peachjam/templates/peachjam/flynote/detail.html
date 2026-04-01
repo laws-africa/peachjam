@@ -1,0 +1,43 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load humanize i18n %}
+{% block title %}{{ flynote.name }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'flynote_list' %}">{% trans 'Explore by topic' %}</a>
+        </li>
+        {% for ancestor in ancestors %}
+          <li class="breadcrumb-item">
+            <a href="{% url 'flynote_detail' ancestor.slug %}">{{ ancestor.name }}</a>
+          </li>
+        {% endfor %}
+        <li class="breadcrumb-item active" aria-current="page">{{ flynote.name }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-header %}
+  <div class="mb-4">
+    <h1 class="mb-4">
+      {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
+      {{ flynote.name }}
+    </h1>
+    {% if popular_flynotes %}
+      <h2 class="h4">
+        {% trans "Subtopics" %}
+        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
+      </h2>
+      {% include 'peachjam/flynote/_popular.html' %}
+    {% endif %}
+    <h2 class="h4 mt-4">{% trans "Judgments" %}</h2>
+    {% include 'peachjam/_count_and_search.html' with hide_search=True %}
+  </div>
+{% endblock %}

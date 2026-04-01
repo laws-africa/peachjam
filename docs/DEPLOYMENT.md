@@ -65,12 +65,12 @@ IAM policy:
 A `SENTRY_DSN_KEY` environment variable is required for Sentry to start monitoring events in the application you've just created. To get a dsn value:
 - Access your Laws.Africa Sentry account, click on **Projects** then **Create Project**:
 
-  ![Sentry Create Project](assets/img/sentry.png "Sentry Create Project")
+  ![Sentry Create Project](../assets/img/sentry.png "Sentry Create Project")
 
 
 - Upon creating a new Sentry project, a dsn value will be generated automatically. Copy the value and set it as the `SENTRY_DSN_KEY` environment variable for your dokku application.
 
-  ![Sentry DSN Key](assets/img/sentry_dsn.png "Sentry DSN Key")
+  ![Sentry DSN Key](../assets/img/sentry_dsn.png "Sentry DSN Key")
 
       dokku config:set <app_name> SENTRY_DSN_KEY=<dsn_value>
 

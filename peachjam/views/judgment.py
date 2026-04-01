@@ -1,7 +1,14 @@
+import operator
+from collections import defaultdict
+from functools import reduce
+
 from django.contrib import messages
-from django.shortcuts import redirect
+from django.db.models import F, IntegerField, Q, Value, Window
+from django.db.models.functions import Coalesce, Length, RowNumber, Substr
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.utils.timezone import now
@@ -10,10 +17,12 @@ from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CourtClass, Judgment
-from peachjam.models.settings import pj_settings
-from peachjam.models.taxonomies import Taxonomy, TaxonomyDocumentCount
+from peachjam.models.flynote import Flynote
 from peachjam.registry import registry
-from peachjam.views.generic_views import BaseDocumentDetailView
+from peachjam.views.generic_views import (
+    BaseDocumentDetailView,
+    FilteredDocumentListView,
+)
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -45,60 +54,173 @@ class JudgmentListView(TemplateView):
         pass
 
 
-class FlynoteTopicListView(ListView):
-    model = Taxonomy
-    template_name = "peachjam/flynote_topic_list.html"
-    context_object_name = "all_topics"
-    paginate_by = 50
-
-    def get(self, request, *args, **kwargs):
-        root = pj_settings().flynote_taxonomy_root
-        if not root:
-            return redirect(reverse("judgment_list"))
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
-        root = pj_settings().flynote_taxonomy_root
-        qs = root.get_children().order_by("name")
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            qs = qs.filter(name__icontains=q)
-        return qs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        root = pj_settings().flynote_taxonomy_root
-        children = root.get_children()
-
-        count_map = dict(
-            TaxonomyDocumentCount.objects.filter(taxonomy__in=children).values_list(
-                "taxonomy_id", "count"
+class FlynoteViewMixin:
+    @staticmethod
+    def annotate_with_counts(qs):
+        return qs.annotate(
+            doc_count=Coalesce(
+                F("document_count_cache__count"),
+                Value(0),
+                output_field=IntegerField(),
             )
         )
 
-        all_enriched = []
-        for child in children:
-            child_names = list(child.get_children().values_list("name", flat=True)[:3])
-            all_enriched.append(
-                {
-                    "topic": child,
-                    "count": count_map.get(child.pk, 0),
-                    "child_names": child_names,
-                }
+    @staticmethod
+    def get_top_children_by_count(parent_flynotes):
+        if not parent_flynotes:
+            return {}
+
+        depth = parent_flynotes[0].depth
+        direct_child_filter = reduce(
+            operator.or_,
+            (Q(path__startswith=flynote.path) for flynote in parent_flynotes),
+        )
+
+        children_qs = (
+            Flynote.objects.filter(depth=depth + 1)
+            .filter(direct_child_filter)
+            .annotate(
+                parent_path=Substr("path", 1, Length("path") - Flynote.steplen),
+                doc_count=Coalesce(
+                    F("document_count_cache__count"),
+                    Value(0),
+                    output_field=IntegerField(),
+                ),
             )
+            .annotate(
+                rank=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("parent_path")],
+                    order_by=[F("doc_count").desc(), F("name").asc()],
+                ),
+            )
+            .filter(rank__lte=3)
+            .order_by("parent_path", "rank")
+        )
 
-        sorted_by_count = sorted(all_enriched, key=lambda x: x["count"], reverse=True)
-        context["popular_topics"] = sorted_by_count[:16]
+        children_by_parent = defaultdict(list)
+        for child in children_qs:
+            children_by_parent[child.parent_path].append(child.name)
 
-        enriched_lookup = {item["topic"].pk: item for item in all_enriched}
-        context["all_topics"] = [
-            enriched_lookup[topic.pk]
-            for topic in context["all_topics"]
-            if topic.pk in enriched_lookup
+        path_to_pk = {f.path: f.pk for f in parent_flynotes}
+        return {path_to_pk[path]: names for path, names in children_by_parent.items()}
+
+    def make_flynote_list(self, flynotes):
+        child_names = self.get_top_children_by_count(flynotes)
+        return [
+            {
+                "flynote": f,
+                "count": f.doc_count,
+                "child_names": child_names.get(f.pk, []),
+            }
+            for f in flynotes
         ]
-        context["total_judgment_count"] = sum(t["count"] for t in all_enriched)
-        context["root"] = root
+
+
+class FlynoteListView(FlynoteViewMixin, ListView):
+    """Lists flynotes. By default, it lists popular top-level flynotes. With htmx, it lists paginated top-level
+    flynotes, or subtopics if a root flynote is given.
+    """
+
+    model = Flynote
+    template_name = "peachjam/flynote/list.html"
+    context_object_name = "flynotes"
+    paginate_by = 30
+
+    def get(self, request, *args, **kwargs):
+        if not Flynote.get_root_nodes().exists():
+            return redirect(reverse("judgment_list"))
+        return super().get(request, *args, **kwargs)
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam/flynote/_list.html"]
+        return super().get_template_names()
+
+    @cached_property
+    def flynote(self):
+        """In htmx mode, the ?flynote=slug parameter anchors the list of subtopics."""
+        if self.request.GET.get("flynote"):
+            return get_object_or_404(Flynote, slug=self.request.GET.get("flynote"))
+
+    def get_queryset(self):
+        if self.flynote:
+            # children of the provided root
+            qs = self.flynote.get_children()
+        else:
+            # all roots
+            qs = Flynote.get_root_nodes()
+
+        q = self.request.GET.get("q", "").strip()
+        if q:
+            qs = qs.filter(name__icontains=q)
+
+        return self.annotate_with_counts(qs).order_by("name")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["flynotes"] = self.make_flynote_list(list(context["flynotes"]))
+        # ensure that the template appends, rather than replaces, when "load more" is clicked
+        context["more"] = "more" in self.request.GET
+
+        if not self.request.htmx:
+            # for non-htmx, load popular flynotes
+            self.popular_flynotes(context)
+
         return context
+
+    def popular_flynotes(self, context):
+        qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
+            "-doc_count", "name"
+        )[:16]
+        context["popular_flynotes"] = self.make_flynote_list(list(qs))
+
+
+class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
+    """List of documents and children under a flynote. In HTMX mode, updates the document list."""
+
+    template_name = "peachjam/flynote/detail.html"
+    navbar_link = "judgments"
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam/_document_table.html"]
+        return super().get_template_names()
+
+    def dispatch(self, request, *args, **kwargs):
+        self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_base_queryset(self):
+        return (
+            super()
+            .get_base_queryset()
+            .filter(
+                judgment__flynotes__flynote__path__startswith=self.flynote.path,
+            )
+            .distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        if not self.request.htmx:
+            self.popular_subtopics(context)
+            context["flynote"] = self.flynote
+            context["ancestors"] = self.flynote.get_ancestors()
+
+        return context
+
+    def popular_subtopics(self, context):
+        # Top 16 subtopcis by count
+        children_qs = self.annotate_with_counts(self.flynote.get_children())
+        total_children = children_qs.count()
+        popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])
+
+        context["popular_flynotes"] = self.make_flynote_list(popular_flynotes)
+        context["has_more_topics"] = total_children > len(popular_flynotes)
+        context["total_subtopic_count"] = total_children
 
 
 @registry.register_doc_type("judgment")
@@ -130,16 +252,6 @@ class JudgmentDetailView(BaseDocumentDetailView):
             for bench in self.get_object().bench.select_related("judge").all()
         ]
         return context
-
-    def get_taxonomy_queryset(self):
-        qs = super().get_taxonomy_queryset()
-        settings = pj_settings()
-        root = settings.flynote_taxonomy_root
-        if root:
-            flynote_pks = set(root.get_descendants().values_list("pk", flat=True))
-            flynote_pks.add(root.pk)
-            qs = qs.exclude(pk__in=flynote_pks)
-        return qs
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")

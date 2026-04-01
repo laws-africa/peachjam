@@ -23,6 +23,7 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 from languages_plus.models import Language
 
+from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.models import (
     Annotation,
     AttachedFiles,
@@ -86,26 +87,18 @@ class NewDocumentFormMixin:
         super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
-            self.run_analysis()
 
     def process_upload_file(self, upload_file):
         # store the uploaded file
         upload_file.seek(0)
-        SourceFile(
+        source_file = SourceFile(
             document=self.instance,
-            file=File(upload_file, name=upload_file.name),
             filename=upload_file.name,
             mimetype=upload_file.content_type,
-        ).save()
-
-        # extract content, if we can
-        if self.instance.extract_content_from_source_file():
-            self.instance.save()
-
-    def run_analysis(self):
-        """Apply analysis pipelines for this newly created document."""
-        if self.instance.extract_citations():
-            self.instance.save()
+        )
+        source_file.track_changes()
+        source_file.file = File(upload_file, name=upload_file.name)
+        source_file.save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
@@ -462,15 +455,9 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
         fields = "__all__"
         exclude = ("file_as_pdf",)
 
-    def _save_m2m(self):
-        super()._save_m2m()
-        if "file" in self.changed_data:
-            if self.instance.document.extract_content_from_source_file():
-                self.instance.document.save()
-
-                # if the file is changed, we need delete the existing pdf and re-generate
-                self.instance.file_as_pdf.delete()
-                self.instance.ensure_file_as_pdf()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.track_changes()
 
 
 class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):
@@ -483,6 +470,57 @@ class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
         model = AttachedFiles
         fields = "__all__"
+
+
+class DocumentSummaryForm(forms.Form):
+    summary_prompt_str = forms.CharField(
+        label=_("Summary prompt"),
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": 12,
+            }
+        ),
+        help_text=_("Optional. Overrides the default summary prompt."),
+    )
+    llm_model = forms.CharField(
+        label=_("Model"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+        help_text=_("Optional. Overrides the configured model."),
+    )
+    language = forms.CharField(
+        label=_("Translation language"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+        help_text=_(
+            "Optional. Translates the summary when set to a non-English language."
+        ),
+    )
+
+    @classmethod
+    def build(cls, data=None):
+        summariser = JudgmentSummariser()
+        try:
+            summary_prompt_str = summariser.get_summary_prompt_str()
+        except Exception:
+            summary_prompt_str = ""
+
+        initial = {
+            "summary_prompt_str": summary_prompt_str,
+            "llm_model": summariser.llm_model or summariser.default_llm_model,
+            "language": summariser.summary_language,
+        }
+        return cls(data=data, initial=initial)
 
 
 class DocumentProblemForm(forms.Form):
@@ -687,6 +725,19 @@ class UserProfileForm(forms.Form):
         self.user.save()
         self.user.refresh_from_db()
         return self.user
+
+
+class DeleteAccountForm(forms.Form):
+    confirm_delete = forms.BooleanField(
+        label=_("I understand this action cannot be undone"),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        error_messages={"required": _("Please confirm account deletion.")},
+    )
+    deleted_reason = forms.CharField(
+        label=_("Please tell us briefly why you are deleting your account."),
+        widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
+        max_length=2000,
+    )
 
 
 class TermsAcceptanceForm(forms.Form):

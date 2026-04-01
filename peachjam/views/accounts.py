@@ -1,6 +1,8 @@
 from allauth.account.forms import ReauthenticateForm
 from allauth.account.mixins import NextRedirectMixin
 from allauth.account.views import ConfirmLoginCodeView as AllauthConfirmLoginCodeView
+from allauth.account.views import SignupView as AllauthSignupView
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -13,11 +15,24 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView, UpdateView
 from django.views.generic.base import TemplateView
 
-from peachjam.forms import PasswordSignupForm, TermsAcceptanceForm, UserProfileForm
+from peachjam.forms import (
+    DeleteAccountForm,
+    PasswordSignupForm,
+    TermsAcceptanceForm,
+    UserProfileForm,
+)
 from peachjam.models import DocumentAccessGroup, UserProfile
 from peachjam.views.mixins import AtomicPostMixin
+from peachjam_subs.models import Subscription
 
 User = get_user_model()
+
+
+class SignupView(AllauthSignupView):
+    def dispatch(self, request, *args, **kwargs):
+        if settings.PEACHJAM["AUTH_OTP"]:
+            return redirect("account_login")
+        return super().dispatch(request, *args, **kwargs)
 
 
 class UserAuthView(AllauthConfirmLoginCodeView):
@@ -171,6 +186,29 @@ class EditAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
             ),
         )
         return context
+
+
+class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
+    template_name = "user_account/delete_account.html"
+    form_class = DeleteAccountForm
+
+    def get_success_url(self):
+        return reverse("account_logged_out")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        subscription = Subscription.get_or_create_active_for_user(self.request.user)
+        context["has_paid_subscription"] = (
+            subscription.product_offering.pricing_plan.price > 0
+        )
+        return context
+
+    def form_valid(self, form):
+        self.request.user.userprofile.delete_account(
+            deleted_reason=form.cleaned_data["deleted_reason"]
+        )
+        messages.success(self.request, _("Your account has been deleted."))
+        return redirect(self.get_success_url())
 
 
 class LoggedOutView(TemplateView):

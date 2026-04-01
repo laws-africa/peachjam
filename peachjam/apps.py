@@ -9,9 +9,11 @@ class PeachJamConfig(AppConfig):
     def ready(self):
         import jazzmin.settings
         from countries_plus.models import Country
+        from docpipe import soffice
         from docpipe.matchers import CitationMatcher
 
         import peachjam.adapters  # noqa
+        import peachjam.checks  # noqa
         import peachjam.signals  # noqa
         from peachjam.helpers import get_country_absolute_url
 
@@ -21,29 +23,27 @@ class PeachJamConfig(AppConfig):
         # bump up the context for citation extraction
         CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 100
 
-        # enforce timeouts and memory limits on soffice
-        from docpipe import soffice
-
-        soffice.TIMEOUT = 60 * 10  # 10 minutes
-        soffice.SOFFICE_CMD = "timeout"
-        soffice.SOFFICE_ARGS = [
-            # send SIGKLL when the grace period is up
-            "--signal=KILL",
-            # send again 1s later
-            "--kill-after=1s",
-            # timeout in seconds, a bit longer than python's timeout
-            f"{soffice.TIMEOUT + 30}s",
-            # set resource limits
-            "prlimit",
-            # max memory (2 GB)
-            f"--as={2 * 1024 * 1024 * 1024}",
-            "--",
-            # usual soffice command
-            "soffice",
-            "--headless",
-        ]
-
         if not settings.DEBUG:
+            # enforce timeouts and memory limits on soffice
+            soffice.TIMEOUT = 60 * 10  # 10 minutes
+            soffice.SOFFICE_CMD = "timeout"
+            soffice.SOFFICE_ARGS = [
+                # send SIGKLL when the grace period is up
+                "--signal=KILL",
+                # send again 1s later
+                "--kill-after=1s",
+                # timeout in seconds, a bit longer than python's timeout
+                f"{soffice.TIMEOUT + 30}s",
+                # set resource limits
+                "prlimit",
+                # max memory (2 GB)
+                f"--as={2 * 1024 * 1024 * 1024}",
+                "--",
+                # usual soffice command
+                "soffice",
+                "--headless",
+            ]
+
             from background_task.models import Task
 
             from peachjam.models import Ingestor

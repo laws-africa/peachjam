@@ -175,20 +175,16 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("ID of a Google custom search engine."),
     )
-    flynote_taxonomy_root = models.ForeignKey(
-        "peachjam.Taxonomy",
-        null=True,
-        blank=True,
-        on_delete=models.PROTECT,
-        related_name="+",
-        verbose_name=_("flynote taxonomy root"),
-        help_text=_("Root taxonomy node for automatically managed flynote topics."),
-    )
     helpscout_beacon_id = models.CharField(
         max_length=100,
         null=True,
         blank=True,
         help_text=_("ID of a helpscout contact us beacon."),
+    )
+    allow_criminal_data_extraction = models.BooleanField(
+        verbose_name=_("allow criminal data extraction"),
+        default=False,
+        help_text=_("Allow AI-based criminal data extraction for judgments."),
     )
 
     class Meta:

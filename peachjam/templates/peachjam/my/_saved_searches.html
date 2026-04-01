@@ -7,7 +7,8 @@
         <li class="d-flex">
           <i class="bi bi-search me-2"></i>
           <div class="flex-grow-1">
-            <a href="{{ saved_search.get_absolute_url }}">{{ saved_search }}</a>
+            <a href="{{ saved_search.get_absolute_url }}"
+               data-key-link="saved_search">{{ saved_search }}</a>
             {% if saved_search.note %}<div class="text-muted">{{ saved_search.note }}</div>{% endif %}
           </div>
         </li>

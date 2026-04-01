@@ -3,8 +3,10 @@ from urllib.parse import quote
 
 from countries_plus.models import Country
 from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
@@ -12,10 +14,19 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
+from django_lifecycle import AFTER_SAVE
 
+from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
-from peachjam.models import CoreDocument, Locality, SourceFile
-from peachjam.tasks import create_anonymised_source_file_pdf
+from peachjam.helpers import current_year
+from peachjam.models import (
+    CoreDocument,
+    DocumentContent,
+    Locality,
+    SourceFile,
+    on_attribute_changed,
+)
+from peachjam.tasks import create_anonymised_source_file_pdf, generate_judgment_summary
 
 log = logging.getLogger(__name__)
 
@@ -297,6 +308,10 @@ class LowerBench(models.Model):
 class Judgment(CoreDocument):
     decorator = JudgmentDecorator()
 
+    class CaseType(models.TextChoices):
+        CRIMINAL = "criminal", _("Criminal")
+        CIVIL = "civil", _("Civil")
+
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
     )
@@ -314,6 +329,23 @@ class Judgment(CoreDocument):
         blank=True,
         related_name="judgments",
         verbose_name=_("court division"),
+    )
+    case_type = models.CharField(
+        _("case type"),
+        max_length=512,
+        choices=CaseType.choices,
+        null=True,
+        blank=True,
+    )
+    filing_year = models.PositiveIntegerField(
+        _("filing year"),
+        null=True,
+        blank=True,
+        help_text=_("Year the matter was filed (YYYY only)."),
+        validators=[
+            MinValueValidator(1800),
+            MaxValueValidator(limit_value=current_year),
+        ],
     )
     case_action = models.ForeignKey(
         CaseAction,
@@ -453,6 +485,13 @@ class Judgment(CoreDocument):
     def __str__(self):
         return self.title
 
+    @property
+    def case_duration(self):
+        # judgment_date__year minus filing_year
+        if self.date and self.filing_year:
+            return self.date.year - self.filing_year
+        return None
+
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court:
@@ -497,9 +536,9 @@ class Judgment(CoreDocument):
     def clean(self):
         if self.auto_assign_details:
             self.assign_mnc()
-        self.flynote = self.clean_html_field(self.flynote)
-        self.case_summary = self.clean_html_field(self.case_summary)
-        self.order = self.clean_html_field(self.order)
+        self.flynote = DocumentContent.clean_html_field(self.flynote)
+        self.case_summary = DocumentContent.clean_html_field(self.case_summary)
+        self.order = DocumentContent.clean_html_field(self.order)
         super().clean()
 
     def assign_title(self):
@@ -562,8 +601,13 @@ class Judgment(CoreDocument):
     def ensure_anonymised_source_file(self):
         """If this judgment is anonymised but its source file isn't, then queue up a task to generate a PDF
         from the anonymised file."""
+        doc_content = self.get_or_create_document_content()
         if self.anonymised:
-            if self.content_html and not self.content_html_is_akn:
+            if (
+                doc_content
+                and doc_content.content_html
+                and not doc_content.content_html_is_akn
+            ):
                 if (
                     not hasattr(self, "source_file")
                     or not self.source_file.file_is_anonymised
@@ -589,7 +633,13 @@ class Judgment(CoreDocument):
         """Create an anonymised source file from the HTML of this judgment. If there is already a source file,
         store this new one as the anonymised pdf. Otherwise, create a new source file using this PDF and set
         the anonymised flag."""
-        if self.anonymised and self.content_html and not self.content_html_is_akn:
+        doc_content = self.get_or_create_document_content()
+        if (
+            self.anonymised
+            and doc_content
+            and doc_content.content_html
+            and not doc_content.content_html_is_akn
+        ):
             pdf = self.convert_html_to_pdf()
             f = File(pdf, name=f"{slugify(self.case_name)}.pdf")
 
@@ -606,11 +656,32 @@ class Judgment(CoreDocument):
                     file_is_anonymised=True,
                 )
 
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["must_be_anonymised", "anonymised"],
+        ["blurb", "case_summary", "flynote", "held", "issues", "order"],
+    )
+    def potentially_generate_summary(self):
+        if self.should_have_summary():
+            generate_judgment_summary(self.pk)
+
+    def should_have_summary(self):
+        return (
+            not self.case_summary  # No summary at all
+            or self.summary_ai_generated  # Summary exists but is AI-generated
+        ) and (
+            not self.must_be_anonymised or self.anonymised  # Anonymization OK
+        )
+
     def generate_summary(self):
         """Generate an AI summary for this judgment."""
-        from peachjam.analysis.summariser import SummariserService
+        if not self.should_have_summary():
+            log.warning(
+                f"Judgment {self} does not meet criteria for summary generation, skipping."
+            )
+            return
 
-        summariser = SummariserService()
+        summariser = JudgmentSummariser()
         if not summariser.enabled():
             log.warning(
                 "Summariser service is not enabled, skipping AI summary generation."
@@ -618,17 +689,16 @@ class Judgment(CoreDocument):
             return
 
         try:
-            response = summariser.summarise_judgment(self)
-            summary = response.get("summary", {})
-            if not summary:
+            summary = summariser.summarise_judgment(self)
+            if not summary.summary:
                 log.warning(f"No summary found in response {self.pk}, skipping.")
                 return
-            self.blurb = summary.get("blurb", "")
-            self.case_summary = summary.get("summary", "")
-            self.flynote = summary.get("flynote", "")
-            self.held = summary.get("held", [])
-            self.issues = summary.get("issues", [])
-            self.order = summary.get("order", "")
+            self.blurb = summary.blurb
+            self.case_summary = summary.summary
+            self.flynote = summary.flynote
+            self.held = summary.held
+            self.issues = summary.issues
+            self.order = summary.order
             self.summary_ai_generated = True
             self.save()
         except Exception as e:
@@ -783,3 +853,125 @@ class Replacement(models.Model):
 
     def __str__(self):
         return f"{self.old_text} -> {self.new_text}"
+
+
+class Offence(models.Model):
+    work = models.ForeignKey(
+        "peachjam.Work",
+        on_delete=models.PROTECT,
+        related_name="offences",
+        verbose_name=_("work"),
+        help_text=_(
+            "The Work for the code (e.g., Penal Code) that defines this offence."
+        ),
+    )
+    provision_eid = models.CharField(
+        _("provision EID"),
+        max_length=2048,
+        help_text=_(
+            "AKN element id / EID for the provision within the code (e.g., 'sec_296')."
+        ),
+    )
+    code = models.CharField(
+        _("offence code"),
+        max_length=2048,
+        help_text=_(
+            "Internal offence code / short identifier (often from the code or a local convention)."
+        ),
+    )
+    title = models.CharField(_("title"), max_length=4096)
+    description = models.TextField(_("description"), blank=True)
+    elements = ArrayField(
+        base_field=models.CharField(max_length=4096),
+        default=list,
+        blank=True,
+        help_text=_("List of offence elements (actus reus, mens rea, etc.)."),
+    )
+    penalty = models.TextField(
+        _("recommended penalty"),
+        blank=True,
+        help_text=_("Human-readable recommended/typical penalty guidance."),
+    )
+
+    class Meta:
+        ordering = ("title",)
+
+    def __str__(self):
+        return self.title
+
+
+class JudgmentOffence(models.Model):
+    judgment = models.ForeignKey(
+        "Judgment",
+        on_delete=models.CASCADE,
+        related_name="judgment_offence",
+        verbose_name=_("judgment"),
+    )
+    offence = models.ForeignKey(
+        Offence,
+        on_delete=models.PROTECT,
+        related_name="judgment_offence",
+        verbose_name=_("judgments"),
+    )
+
+    def __str__(self):
+        return f"JudgmentOffence {self.offence} - {self.judgment}"
+
+
+class Sentence(models.Model):
+    class SentenceType(models.TextChoices):
+        IMPRISONMENT = "imprisonment", _("Imprisonment")
+        FINE = "fine", _("Fine")
+        PROBATION = "probation", _("Probation")
+
+    judgment = models.ForeignKey(
+        Judgment,
+        on_delete=models.CASCADE,
+        related_name="sentences",
+        verbose_name=_("offences"),
+    )
+
+    offence = models.ForeignKey(
+        JudgmentOffence,
+        on_delete=models.CASCADE,
+        related_name="sentences",
+        verbose_name=_("offences"),
+        null=True,
+        blank=True,
+    )
+    sentence_type = models.CharField(
+        _("sentence type"),
+        max_length=32,
+        choices=SentenceType.choices,
+    )
+
+    mandatory_minimum = models.BooleanField(
+        _("mandatory minimum"),
+        null=True,
+        blank=True,
+        help_text=_("True if the sentence reflects a mandatory minimum."),
+    )
+
+    duration_months = models.PositiveIntegerField(
+        _("duration (months)"),
+        null=True,
+        blank=True,
+        help_text=_("Imprisonment/probation duration in months, if applicable."),
+    )
+    suspended = models.BooleanField(
+        _("suspended"),
+        default=False,
+        help_text=_("True if the sentence is suspended (fully or partially)."),
+    )
+    fine_amount = models.PositiveIntegerField(
+        _("fine amount"),
+        null=True,
+        blank=True,
+        help_text=_("Fine amount"),
+    )
+
+    class Meta:
+        ordering = ("pk",)
+
+    def __str__(self):
+        return f"{self.get_sentence_type_display()} for {self.offence}"

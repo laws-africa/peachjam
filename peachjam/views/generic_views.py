@@ -226,12 +226,39 @@ class FilteredDocumentListView(DocumentListView):
         context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
+        self.order_facet_options(context)
         self.show_facet_clear_all(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
         context["doc_table_show_counts"] = True
 
         return context
+
+    def order_facet_options(self, context):
+        for facet_name, facet in context.get("facet_data", {}).items():
+            options = facet.get("options")
+            if not options or facet_name == "alphabet":
+                continue
+
+            selected_values = self.facet_selected_values(facet)
+            if not selected_values:
+                continue
+
+            def option_key(option):
+                option_value = (
+                    option[0] if isinstance(option, (list, tuple)) else option
+                )
+                return 0 if str(option_value) in selected_values else 1
+
+            facet["options"] = sorted(list(options), key=option_key)
+
+    def facet_selected_values(self, facet):
+        values = facet.get("values")
+        if isinstance(values, (list, tuple, set)):
+            return {str(v) for v in values}
+        if values in [None, "", False]:
+            return set()
+        return {str(values)}
 
     def add_taxonomies_facet(self, context):
         if "taxonomies" not in self.exclude_facets:
@@ -433,9 +460,10 @@ class BaseDocumentDetailView(DetailView):
         self.add_provision_relationships(context)
         self.add_provision_enrichments(context)
 
-        if context["document"].content_html:
+        doc_content = context["document"].get_or_create_document_content()
+        if doc_content and doc_content.content_html:
             context["display_type"] = (
-                "akn" if context["document"].content_html_is_akn else "html"
+                "akn" if doc_content.content_html_is_akn else "html"
             )
             self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
@@ -463,6 +491,7 @@ class BaseDocumentDetailView(DetailView):
         ]
 
         context["download_options"] = self.get_download_options()
+        context["KEY_LINK_PAGE"] = "document_detail"
 
         # provide extra context for analytics
         self.get_subscription_permissions_context(context)
@@ -587,7 +616,12 @@ class BaseDocumentDetailView(DetailView):
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""
-        root = document.content_html_tree
+        doc_content = document.get_or_create_document_content()
+
+        if not doc_content.content_html:
+            return
+
+        root = doc_content.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
             # images should load lazily, otherwise they block page load
@@ -600,7 +634,7 @@ class BaseDocumentDetailView(DetailView):
                     src = "media/" + src
                 img.attrib["src"] = document.expression_frbr_uri + "/" + src
 
-        document.content_html = html.tostring(root, encoding="unicode")
+        doc_content.content_html = html.tostring(root, encoding="unicode")
 
     def add_track_page_properties(self, context):
         context["track_page_properties"] = (
