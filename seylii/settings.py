@@ -4,6 +4,7 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["seylii.apps.SeyLIIConfig"] + INSTALLED_APPS  # noqa
 
+ALLOWED_HOSTS = build_allowed_hosts("seylii.org", "www.seylii.org")  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "SeyLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "SeyLII"  # noqa

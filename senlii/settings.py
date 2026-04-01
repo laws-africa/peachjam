@@ -5,6 +5,7 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["senlii.apps.SenLIIConfig", "peachjam_ml"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "senlii.urls"
+ALLOWED_HOSTS = build_allowed_hosts("senlii.org", "www.senlii.org")  # noqa
 
 LANGUAGE_CODE = "fr"
 

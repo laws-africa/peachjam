@@ -11,6 +11,7 @@ PEACHJAM["CHAT_PUBLIC"] = True  # noqa
 PEACHJAM["DOCUMENT_EMBEDDINGS"] = True  # noqa
 
 ROOT_URLCONF = "ghalii.urls"
+ALLOWED_HOSTS = build_allowed_hosts("ghalii.org", "www.ghalii.org")  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "GhaLII"  # noqa

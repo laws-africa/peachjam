@@ -5,6 +5,7 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["zanzibarlii.apps.ZanzibarLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("zanzibarlii.org", "www.zanzibarlii.org")  # noqa
 
 
 # Custom middleware to force the I18N machinery to always choose settings.LANGUAGE_CODE

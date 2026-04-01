@@ -34,6 +34,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "true") == "true"
 
+
+LOCALHOST_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+
+
+def build_allowed_hosts(*default_hosts):
+    allowed_hosts = list(default_hosts)
+    allowed_hosts.extend(
+        host.strip()
+        for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    )
+
+    if DEBUG:
+        allowed_hosts.extend(LOCALHOST_ALLOWED_HOSTS)
+
+    return list(dict.fromkeys(allowed_hosts))
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 if DEBUG:
     SECRET_KEY = "django-insecure-1q!zjpjmde2=yf0$doia!@74h-(f85(&&8)l05a+tt(b8g^rrt"
@@ -41,7 +59,7 @@ else:
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = build_allowed_hosts()
 
 
 INSTALLED_APPS = [

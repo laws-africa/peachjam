@@ -7,6 +7,7 @@ INSTALLED_APPS = ["zambialii.apps.ZambiaLIIConfig"] + INSTALLED_APPS  # noqa
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
 
 ROOT_URLCONF = "zambialii.urls"
+ALLOWED_HOSTS = build_allowed_hosts("zambialii.org", "www.zambialii.org")  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "ZambiaLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "ZambiaLII"  # noqa

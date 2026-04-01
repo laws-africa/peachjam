@@ -3,6 +3,9 @@ from open_by_laws.settings import *  # noqa
 INSTALLED_APPS = ["obl_microsites"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "obl_microsites.urls"
+ALLOWED_HOSTS = build_allowed_hosts(  # noqa
+    "openbylaws.org.za", "www.openbylaws.org.za"
+)
 
 MIDDLEWARE = ["obl_microsites.middleware.LocalityMiddleware"] + MIDDLEWARE  # noqa
 
