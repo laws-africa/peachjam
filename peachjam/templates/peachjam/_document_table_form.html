@@ -126,7 +126,7 @@
         {% block content %}
           {% block filter-documents %}
             <div class="mb-2 d-flex pocketlaw-hidden"
-                 hx-target="#doc-table"
+                 hx-target="next .table-responsive"
                  {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
               <div class="flex-grow-1 me-2">
                 <input id="filter-input"
