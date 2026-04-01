@@ -49,7 +49,7 @@ def build_allowed_hosts(*default_hosts):
     if DEBUG:
         allowed_hosts.extend(LOCALHOST_ALLOWED_HOSTS)
 
-    return list(dict.fromkeys(allowed_hosts))
+    return list(set(allowed_hosts))
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
