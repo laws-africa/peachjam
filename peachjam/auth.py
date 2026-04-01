@@ -23,7 +23,7 @@ _original_send_by_email = LoginCodeVerificationProcess.send_by_email
 _original_finish = LoginCodeVerificationProcess.finish
 
 
-def _patched_send_by_email(self, email):
+def _patched_send_by_email(self, email, *args, **kwargs):
     adapter = get_adapter()
     code = adapter.generate_login_code()
     context = {
