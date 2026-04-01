@@ -5,9 +5,11 @@ from cobalt import FrbrUri
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Count
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.http.response import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
+from django.template.loader import render_to_string
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
@@ -27,6 +29,7 @@ from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -477,4 +480,90 @@ class DocumentTextContentView(DocumentDebugViewBase):
         filename = clean_filename(self.object.title) + ".txt"
         response = FileResponse(text, as_attachment=True, content_type="text/plain")
         response["Content-Disposition"] = f"attachment; filename={filename}"
+        return response
+
+
+class DocumentCapabilitiesView(SubscriptionRequiredMixin, DetailView):
+    """Returns JSON capabilities for document-level client actions."""
+
+    model = CoreDocument
+    queryset = CoreDocument.objects.filter(published=True)
+    slug_field = "pk"
+    slug_url_kwarg = "pk"
+    http_method_names = ["get"]
+    permission_required = ""
+    action_permissions = {
+        "add_annotation": "peachjam.add_annotation",
+        "view_provision_diffs": "peachjam.can_view_provision_changes",
+    }
+
+    def has_permission(self):
+        # Capability permissions are checked per action in get_capability().
+        return True
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.restricted:
+            perm = f"{obj._meta.app_label}.view_{obj._meta.model_name}"
+            if not self.request.user.has_perm(perm, obj):
+                raise Http404()
+        return obj
+
+    def get_requested_actions(self):
+        actions_param = (self.request.GET.get("actions") or "").strip()
+        if not actions_param:
+            return list(self.action_permissions.keys()), []
+
+        actions = [
+            action.strip() for action in actions_param.split(",") if action.strip()
+        ]
+        actions = list(dict.fromkeys(actions))
+        invalid_actions = [
+            action for action in actions if action not in self.action_permissions
+        ]
+        return actions, invalid_actions
+
+    def render_subscription_required_html(self, permission):
+        old_permission_required = self.permission_required
+        self.permission_required = permission
+        try:
+            context = self.build_subscription_required_context()
+            return render_to_string(
+                self.get_subscription_required_template(),
+                context,
+                request=self.request,
+            )
+        finally:
+            self.permission_required = old_permission_required
+
+    def get_capability(self, permission):
+        if self.request.user.has_perm(permission):
+            return {"allowed": True}
+
+        return {
+            "allowed": False,
+            "message_html": self.render_subscription_required_html(permission),
+        }
+
+    def get(self, request, *args, **kwargs):
+        self.get_object()
+        actions, invalid_actions = self.get_requested_actions()
+        if invalid_actions:
+            response = JsonResponse(
+                {
+                    "error": "Unknown capability action(s).",
+                    "invalid_actions": invalid_actions,
+                },
+                status=400,
+            )
+            add_never_cache_headers(response)
+            return response
+
+        data = {
+            action: self.get_capability(self.action_permissions[action])
+            for action in actions
+        }
+
+        response = JsonResponse(data, status=200)
+        add_never_cache_headers(response)
         return response
