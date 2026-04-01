@@ -167,9 +167,9 @@ class LawReportVolumeCasesIndexView(LawReportVolumeCitationIndexBaseView):
     template_name = "peachjam/law_report/law_report_volume_cases_index.html"
     active_tab = "cases"
     model = Judgment
-    queryset = Judgment.objects.prefetch_related(
-        "judges", "labels", "attorneys", "outcomes"
-    ).select_related("work")
+
+    def get_model_queryset(self):
+        return Judgment.objects.filter(published=True).for_document_table()
 
 
 class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
@@ -177,3 +177,6 @@ class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
     active_tab = "legislation"
     model = Legislation
     latest_expression_only = True
+
+    def get_model_queryset(self):
+        return Legislation.objects.filter(published=True).for_document_table()
