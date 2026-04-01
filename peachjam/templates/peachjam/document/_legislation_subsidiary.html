@@ -1,3 +1,5 @@
 {% load i18n %}
-<h4>{{ PEACHJAM_SETTINGS.subleg_label }}</h4>
-{% include "peachjam/_document_table_form.html" with doc_table_citations=True %}
+<div class="container">
+  <h4>{{ PEACHJAM_SETTINGS.subleg_label }}</h4>
+  {% include "peachjam/_document_table_form.html" %}
+</div>

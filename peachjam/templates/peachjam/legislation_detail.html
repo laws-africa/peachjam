@@ -11,7 +11,7 @@
               type="button"
               role="tab"
               aria-controls="children-tab"
-              hx-get="{% url 'legislation_subsidiary' document.expression_frbr_uri|strip_first_character %}"
+              hx-get="{% url 'legislation_subsidiary' document.expression_frbr_uri|strip_first_character %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}"
               hx-target="#children-tab"
               hx-swap="innerHTML"
               hx-trigger="click once">
@@ -24,7 +24,7 @@
 {% block document-tab-panes %}
   {{ block.super }}
   {% if child_documents_count %}
-    <div class="tab-pane"
+    <div class="tab-pane spinner-when-empty"
          id="children-tab"
          role="tabpanel"
          data-key-link-feature="subleg"
