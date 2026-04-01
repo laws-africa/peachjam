@@ -11,6 +11,7 @@ from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
@@ -492,19 +493,37 @@ class Judgment(CoreDocument):
             return self.date.year - self.filing_year
         return None
 
+    @cached_property
     def linked_flynotes(self):
-        linked = []
-        for judgment_flynote in self.flynotes.select_related("flynote").order_by(
-            "flynote__path"
-        ):
+        if not self.flynote:
+            return []
+
+        # Import lazily so the model does not take a hard import dependency on the
+        # analysis module at import time.
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        parser = FlynoteParser()
+        linked_nodes_by_path = {}
+        for judgment_flynote in self.flynotes.select_related("flynote"):
             flynote = judgment_flynote.flynote
-            linked.append(
-                {
-                    "flynote": flynote,
-                    "nodes": [*flynote.get_ancestors(), flynote],
-                }
-            )
-        return linked
+            nodes = [*flynote.get_ancestors(), flynote]
+            linked_nodes_by_path[tuple(node.name for node in nodes)] = nodes
+
+        linked_lines = []
+        text = parser.clean(self.flynote)
+        if not text:
+            return linked_lines
+
+        for line in parser.normalise_multiline_text(text).splitlines():
+            items = []
+            for path in parser.parse(line):
+                nodes = linked_nodes_by_path.get(tuple(path))
+                if nodes:
+                    items.append({"flynote": nodes[-1], "nodes": nodes})
+            if items:
+                linked_lines.append(items)
+
+        return linked_lines
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""

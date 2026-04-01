@@ -43,6 +43,7 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun"] = _("judgment")
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
+        context["show_flynote_topics"] = Flynote.get_root_nodes().exists()
         self.add_entity_profile(context)
         self.get_court_classes(context)
         return context
@@ -247,7 +248,6 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["linked_flynotes"] = self.object.linked_flynotes()
         context["judges"] = [
             bench.judge
             for bench in self.get_object().bench.select_related("judge").all()
