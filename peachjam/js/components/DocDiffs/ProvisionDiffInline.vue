@@ -53,21 +53,7 @@
       <div class="card-body reader-provision-changes-inline-body">
         <!-- NO PERMISSION -->
         <div v-if="!canViewDiffs">
-          <p v-if="user?.id">
-            {{ $t('You need to upgrade your subscription to view these changes.') }}
-          </p>
-          <p v-else>
-            {{ $t('Log in or sign up and subscribe to view these changes.') }}
-          </p>
-          <a
-            v-if="!user?.id"
-            class="btn btn-primary"
-            href="/subscribe"
-            target="_blank"
-            rel="noopeneroptional"
-          >
-            {{ $t('Subscribe') }}
-          </a>
+          <div v-if="permissionDeniedHtml" v-html="permissionDeniedHtml" />
         </div>
 
         <!-- HAS PERMISSION -->
@@ -87,11 +73,8 @@
     </div>
   </div>
 </template>
->
 <script>
 import DiffContent from './DiffContent.vue';
-import debounce from 'lodash/debounce';
-import peachjam from '../../peachjam';
 
 export default {
   name: 'ProvisionDiffContentInline',
@@ -105,6 +88,7 @@ export default {
   data: () => ({
     user: null,
     canViewDiffs: false,
+    permissionDeniedHtml: null,
     diffsets: [],
     diffset: null,
     sideBySide: window.matchMedia('(min-width: 992px)').matches,
@@ -113,15 +97,6 @@ export default {
   }),
 
   async mounted () {
-    // Wait for user info before doing anything that requires permissions
-    try {
-      const user = await peachjam.whenUserLoaded();
-      this.user = user;
-      this.canViewDiffs = user?.perms?.includes('peachjam.can_view_provision_changes') || false;
-    } catch (err) {
-      console.error('Error loading user info:', err);
-    }
-
     // Setup wrapping logic only if original element exists
     this.originalElement = document.getElementById(this.provision.id);
     if (this.originalElement) {
@@ -138,12 +113,39 @@ export default {
       this.wrapperElement.append(this.originalElement, this.$el);
     }
 
-    if (this.canViewDiffs) {
-      await this.loadDiffContentsets();
-    }
+    await this.loadPermission();
   },
 
   methods: {
+    async loadPermission () {
+      if (!this.documentId) return;
+
+      try {
+        const resp = await fetch(`/api/documents/${this.documentId}/capabilities?actions=view_provision_diffs`, {
+          headers: { 'HX-Current-URL': window.location.href }
+        });
+
+        if (!resp.ok) {
+          this.canViewDiffs = false;
+          return;
+        }
+
+        const data = await resp.json().catch(() => null);
+        const capability = data?.view_provision_diffs;
+        if (capability?.allowed) {
+          this.canViewDiffs = true;
+          this.permissionDeniedHtml = null;
+          await this.loadDiffContentsets();
+          return;
+        }
+
+        this.canViewDiffs = false;
+        this.permissionDeniedHtml = capability?.message_html || null;
+      } catch {
+        // ignore network errors
+      }
+    },
+
     async loadDiffContentsets () {
       const url = `${this.serviceUrl}/e/diffsets${this.frbrExpressionUri}/?id=${this.provision.id}`;
       try {
