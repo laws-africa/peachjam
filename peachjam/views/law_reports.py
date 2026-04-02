@@ -2,6 +2,7 @@ from collections import defaultdict
 from functools import cached_property
 
 from django.shortcuts import get_object_or_404
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, ListView
 
 from peachjam.helpers import get_language
@@ -10,10 +11,10 @@ from peachjam.models import (
     Judgment,
     LawReport,
     LawReportVolume,
-    Legislation,
 )
 from peachjam.views.courts import FilteredJudgmentView
 from peachjam.views.generic_views import FilteredDocumentListView
+from peachjam.views.legislation import LegislationListView
 
 
 class LawReportListView(ListView):
@@ -77,9 +78,7 @@ class LawReportVolumeDetailView(LawReportVolumeViewMixin, FilteredJudgmentView):
         return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
 
 
-class LawReportVolumeCitationIndexBaseView(
-    LawReportVolumeViewMixin, FilteredDocumentListView
-):
+class LawReportVolumeCitationIndexMixin:
     form_defaults = {"sort": "title"}
     doc_table_toggle = True
     doc_table_children_expanded = True
@@ -113,18 +112,23 @@ class LawReportVolumeCitationIndexBaseView(
             .filter(work_id__in=self.cited_work_ids)
         )
 
-    def add_facets(self, context):
-        context["facet_data"] = {}
-        self.add_alphabet_facet(context)
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_toggle"] = self.doc_table_toggle
+        context["doc_table_toggle_title"] = _("Cited by")
         context["doc_table_children_expanded"] = self.doc_table_children_expanded
+        context["doc_table_children_group_row"] = {
+            "is_group": True,
+            "title": _("Cited by"),
+        }
         context["doc_table_show_jurisdiction"] = self.doc_table_show_jurisdiction
-        self.attach_citing_judgments(context["documents"])
-        context["documents"] = self.group_documents(context["documents"])
+        if hasattr(context["documents"], "query"):
+            context["documents"] = self.group_documents(context["documents"])
         return context
+
+    def group_documents(self, documents, group_by=None):
+        self.attach_citing_judgments(documents)
+        return super().group_documents(documents, group_by=group_by)
 
     def attach_citing_judgments(self, cited_docs):
         """Attach citing judgments from this volume as .children for toggle."""
@@ -170,17 +174,19 @@ class LawReportVolumeCitationIndexBaseView(
             )
 
 
-class LawReportVolumeCasesIndexView(LawReportVolumeCitationIndexBaseView):
+class LawReportVolumeCasesIndexView(
+    LawReportVolumeCitationIndexMixin, LawReportVolumeViewMixin, FilteredJudgmentView
+):
     template_name = "peachjam/law_report/law_report_volume_cases_index.html"
     active_tab = "cases"
-    model = Judgment
 
-    def get_model_queryset(self):
-        return Judgment.objects.filter(published=True).for_document_table()
+    def get_form(self):
+        return FilteredDocumentListView.get_form(self)
 
 
-class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
+class LawReportVolumeLegislationIndexView(
+    LawReportVolumeCitationIndexMixin, LawReportVolumeViewMixin, LegislationListView
+):
     template_name = "peachjam/law_report/law_report_volume_legislation_index.html"
     active_tab = "legislation"
-    model = Legislation
     latest_expression_only = True

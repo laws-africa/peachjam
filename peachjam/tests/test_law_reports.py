@@ -10,6 +10,7 @@ from peachjam.models import (
     Court,
     ExtractedCitation,
     Judgment,
+    Label,
     LawReport,
     LawReportEntry,
     LawReportVolume,
@@ -104,6 +105,7 @@ class LawReportViewsTestCase(TestCase):
         self.first_judgment = judgments[0]
         self.second_judgment = judgments[1]
         self.unrelated_judgment = judgments[2]
+        self.second_judgment.labels.add(Label.objects.create(name="Featured case"))
         self.cited_legislation = Legislation.objects.get(
             expression_frbr_uri=(
                 "/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17"
@@ -255,7 +257,11 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
+        self.assertIn("labels", response.context["facet_data"])
+        self.assertIn("alphabet", response.context["facet_data"])
         self.assertContains(response, 'class="doc-table-children collapse show"')
+        self.assertContains(response, 'title="Cited by"', html=False)
+        self.assertContains(response, "Cited by")
         parent_row = next(
             doc
             for doc in response.context["documents"]
@@ -294,6 +300,8 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.cited_legislation.title, count=1)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
+        self.assertIn("years", response.context["facet_data"])
+        self.assertIn("alphabet", response.context["facet_data"])
         legislation_row = next(
             doc
             for doc in response.context["documents"]
@@ -303,6 +311,8 @@ class LawReportViewsTestCase(TestCase):
         self.assertEqual(self.latest_cited_legislation.date, legislation_row.date)
         self.assertNotEqual(self.original_cited_legislation_date, legislation_row.date)
         self.assertContains(response, 'class="doc-table-children collapse show"')
+        self.assertContains(response, 'title="Cited by"', html=False)
+        self.assertContains(response, "Cited by")
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_ignores_tab_query_param(self):
