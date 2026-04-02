@@ -8,6 +8,7 @@ variables like "hide_xxx" default to being "on".
 * doc_table_classes: Additional classes for the table
 * doc_table_collapse: include the doc-table--collapse modifier so the table behaves like it's on a small screen
 * doc_table_toggle: Show a toggle for child documents (default: false)
+* doc_table_children_expanded: Show child rows expanded by default (default: false)
 * doc_table_citations: Show document citations column
 * doc_table_many_cols: There are multiple columns
 * doc_table_hide_thead: Hide the table header
@@ -77,7 +78,7 @@ variables like "hide_xxx" default to being "on".
       {% include 'peachjam/_document_table_row.html' %}
       {% if document.children %}
         <tbody id="doc-table-children-{{ forloop.counter0 }}"
-               class="doc-table-children collapse">
+               class="doc-table-children collapse{% if doc_table_children_expanded %} show{% endif %}">
           {% include 'peachjam/_document_table_row.html' with document=subleg_group_row %}
           {% for d in document.children %}
             {% include 'peachjam/_document_table_row.html' with document=d %}

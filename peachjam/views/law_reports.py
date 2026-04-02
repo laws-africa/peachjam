@@ -4,6 +4,7 @@ from functools import cached_property
 from django.shortcuts import get_object_or_404
 from django.views.generic import DetailView, ListView
 
+from peachjam.helpers import get_language
 from peachjam.models import (
     ExtractedCitation,
     Judgment,
@@ -81,6 +82,7 @@ class LawReportVolumeCitationIndexBaseView(
 ):
     form_defaults = {"sort": "title"}
     doc_table_toggle = True
+    doc_table_children_expanded = True
     doc_table_show_jurisdiction = False
 
     @cached_property
@@ -105,7 +107,11 @@ class LawReportVolumeCitationIndexBaseView(
         )
 
     def get_base_queryset(self, exclude=None):
-        return self.get_model_queryset().filter(work_id__in=self.cited_work_ids)
+        return (
+            super()
+            .get_base_queryset(exclude=exclude)
+            .filter(work_id__in=self.cited_work_ids)
+        )
 
     def add_facets(self, context):
         context["facet_data"] = {}
@@ -114,14 +120,15 @@ class LawReportVolumeCitationIndexBaseView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_toggle"] = self.doc_table_toggle
+        context["doc_table_children_expanded"] = self.doc_table_children_expanded
         context["doc_table_show_jurisdiction"] = self.doc_table_show_jurisdiction
-        context["documents"] = self.group_documents(context["documents"])
         self.attach_citing_judgments(context["documents"])
+        context["documents"] = self.group_documents(context["documents"])
         return context
 
     def attach_citing_judgments(self, cited_docs):
         """Attach citing judgments from this volume as .children for toggle."""
-        work_ids = [d.work_id for d in cited_docs if hasattr(d, "work_id")]
+        work_ids = [d.work_id for d in cited_docs]
         if not work_ids:
             return
 
@@ -147,20 +154,20 @@ class LawReportVolumeCitationIndexBaseView(
             for j in Judgment.objects.filter(
                 work_id__in=all_citing_wids, published=True
             )
-            .distinct("work_frbr_uri")
-            .order_by("work_frbr_uri", "-date")
+            .preferred_language(get_language(self.request))
+            .latest_expression()
+            .for_document_table()
         }
 
         for doc in cited_docs:
-            if hasattr(doc, "work_id"):
-                doc.children = sorted(
-                    [
-                        citing_docs[wid]
-                        for wid in citing_map.get(doc.work_id, [])
-                        if wid in citing_docs
-                    ],
-                    key=lambda d: d.title,
-                )
+            doc.children = sorted(
+                [
+                    citing_docs[wid]
+                    for wid in citing_map.get(doc.work_id, [])
+                    if wid in citing_docs
+                ],
+                key=lambda d: d.title,
+            )
 
 
 class LawReportVolumeCasesIndexView(LawReportVolumeCitationIndexBaseView):
@@ -177,6 +184,3 @@ class LawReportVolumeLegislationIndexView(LawReportVolumeCitationIndexBaseView):
     active_tab = "legislation"
     model = Legislation
     latest_expression_only = True
-
-    def get_model_queryset(self):
-        return Legislation.objects.filter(published=True).for_document_table()

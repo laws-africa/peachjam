@@ -255,6 +255,17 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
+        self.assertContains(response, 'class="doc-table-children collapse show"')
+        parent_row = next(
+            doc
+            for doc in response.context["documents"]
+            if getattr(doc, "work_id", None) == self.second_judgment.work_id
+        )
+        child_row = parent_row.children[0]
+        self.assertEqual(self.first_judgment.work_id, child_row.work_id)
+        self.assertIn("work", child_row._state.fields_cache)
+        self.assertIn("labels", child_row._prefetched_objects_cache)
+        self.assertIn("taxonomies", child_row._prefetched_objects_cache)
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_legislation_tab(self):
@@ -291,6 +302,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertEqual(self.latest_cited_legislation.pk, legislation_row.pk)
         self.assertEqual(self.latest_cited_legislation.date, legislation_row.date)
         self.assertNotEqual(self.original_cited_legislation_date, legislation_row.date)
+        self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_ignores_tab_query_param(self):
