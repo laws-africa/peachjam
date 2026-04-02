@@ -5,6 +5,7 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["malawilii.apps.MalawiLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("malawilii.org", "www.malawilii.org")  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "MalawiLII"  # noqa

@@ -8,6 +8,7 @@ INSTALLED_APPS = [
 ] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "tanzlii.urls"
+ALLOWED_HOSTS = build_allowed_hosts("tanzlii.org", "www.tanzlii.org")  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "TanzLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "TanzLII"  # noqa

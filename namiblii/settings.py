@@ -6,6 +6,7 @@ INSTALLED_APPS = ["namiblii.apps.NamibLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
 PEACHJAM["CHAT_PUBLIC"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("namiblii.org", "www.namiblii.org")  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "NamibLII"  # noqa

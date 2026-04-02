@@ -5,6 +5,7 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["zimlii.apps.ZimLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("zimlii.org", "www.zimlii.org")  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "ZimLII"  # noqa
