@@ -61,6 +61,7 @@ from peachjam.models import (
     Locality,
     MatterType,
     Offence,
+    OffenceCategory,
     Outcome,
     Ratification,
     RatificationCountry,
@@ -797,6 +798,16 @@ class OffenceResource(resources.ModelResource):
         attribute="work",
         widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
     )
+    categories = fields.Field(
+        column_name="categories",
+        attribute="categories",
+        widget=ManyToManyRequiredWidget(OffenceCategory, separator="|", field="slug"),
+    )
+    offence_tags = fields.Field(
+        column_name="offence_tags",
+        attribute="offence_tags",
+        widget=SimpleArrayWidget(separator="|"),
+    )
     elements = fields.Field(
         column_name="elements",
         attribute="elements",
@@ -812,6 +823,8 @@ class OffenceResource(resources.ModelResource):
             "code",
             "title",
             "description",
+            "categories",
+            "offence_tags",
             "elements",
             "penalty",
         )
