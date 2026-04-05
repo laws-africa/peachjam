@@ -101,6 +101,7 @@ from peachjam.models import (
     LowerBench,
     MatterType,
     Offence,
+    OffenceCategory,
     Outcome,
     Partner,
     PartnerLogo,
@@ -1393,6 +1394,7 @@ class LawReportEntryInline(admin.TabularInline):
 class JudgmentOffenceInline(admin.TabularInline):
     model = JudgmentOffence
     extra = 1
+    fields = ("offence", "case_tags")
 
 
 class SentenceInline(admin.StackedInline):
@@ -1668,9 +1670,19 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         obj.ensure_anonymised_source_file()
 
 
+@admin.register(OffenceCategory)
+class OffenceCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug", "order", "is_active")
+    list_editable = ("order", "is_active")
+    search_fields = ("name", "description")
+    prepopulated_fields = {"slug": ("name",)}
+
+
 @admin.register(Offence)
 class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_classes = [OffenceResource]
+    filter_horizontal = ("categories",)
+    search_fields = ("title", "description", "code", "provision_eid")
 
     def get_form(self, request, obj=None, **kwargs):
         return super().get_form(
@@ -1679,6 +1691,13 @@ class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
             widgets={"work": autocomplete.ModelSelect2(url="autocomplete-works")},
             **kwargs,
         )
+
+
+@admin.register(JudgmentOffence)
+class JudgmentOffenceAdmin(admin.ModelAdmin):
+    fields = ("judgment", "offence", "case_tags")
+    list_display = ("judgment", "offence")
+    search_fields = ("judgment__title", "judgment__case_name", "offence__title")
 
 
 @admin.register(CauseList)

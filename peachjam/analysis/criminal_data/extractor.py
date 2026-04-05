@@ -10,6 +10,7 @@ from .agent import (
     extract_offences_and_sentences,
     extract_outcomes,
 )
+from .vocabulary import JUDGMENT_OFFENCE_CASE_TAGS, normalize_tag_array
 
 log = logging.getLogger(__name__)
 
@@ -71,12 +72,30 @@ class CriminalDataExtractor:
                 continue
 
             offence = Offence.objects.get(id=match.offence_id)
+            normalized_case_tags = normalize_tag_array(match.case_tags)
+            case_tags = normalize_tag_array(
+                match.case_tags, allowed_tags=JUDGMENT_OFFENCE_CASE_TAGS
+            )
+            invalid_case_tags = [
+                tag
+                for tag in normalized_case_tags
+                if tag not in JUDGMENT_OFFENCE_CASE_TAGS
+            ]
+
+            if invalid_case_tags:
+                log.warning(
+                    "dropping invalid case tags for offence %s on judgment %s: %s",
+                    offence.id,
+                    judgment.id,
+                    invalid_case_tags,
+                )
 
             jo = JudgmentOffence.objects.create(
                 judgment=judgment,
                 offence=offence,
+                case_tags=case_tags,
             )
-            log.info(f"Created {jo}")
+            log.info("Created %s with case tags %s", jo, case_tags)
 
             for s in match.sentences:
                 sentence = Sentence.objects.create(
