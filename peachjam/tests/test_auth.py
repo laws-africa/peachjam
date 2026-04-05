@@ -135,6 +135,25 @@ class PatchedSendByEmailTests(TestCase):
         context = mock_adapter.send_mail.call_args[0][2]
         self.assertIs(context["request"], proc.request)
 
+    def test_accepts_new_allauth_keyword_arguments(self):
+        proc = MagicMock(spec=LoginCodeVerificationProcess)
+        proc.state = {}
+        proc.request = RequestFactory().get("/login/")
+
+        with patch("peachjam.auth.get_adapter") as mock_get_adapter:
+            mock_adapter = MagicMock()
+            mock_adapter.generate_login_code.return_value = "333444"
+            mock_get_adapter.return_value = mock_adapter
+
+            _patched_send_by_email(
+                proc,
+                "kwarg@example.com",
+                skip_enumeration_mails=True,
+            )
+
+        self.assertEqual(proc.state["code"], "333444")
+        mock_adapter.send_mail.assert_called_once()
+
 
 class CompleteProfileViewTests(TestCase):
 
