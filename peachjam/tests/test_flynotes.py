@@ -1579,9 +1579,94 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         "documents/sample_documents",
     ]
 
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+
     def test_judgment_list_loads(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("flynote_list"))
+
+    def test_judgment_list_hides_topic_link_without_flynotes(self):
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+
+class JudgmentDetailFlynoteNavigationTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+        self.judgment = Judgment.objects.create(
+            case_name="Navigation Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+            flynote="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(self.judgment)
+
+    def test_judgment_detail_links_to_flynote_topic_pages(self):
+        response = self.client.get(self.judgment.get_absolute_url())
+        leaf = Flynote.objects.get(name="judicial review")
+
+        self.assertEqual(response.status_code, 200)
+        for node in [*leaf.get_ancestors(), leaf]:
+            self.assertContains(
+                response,
+                reverse("flynote_detail", kwargs={"slug": node.slug}),
+            )
+            self.assertContains(response, node.name)
+
+    def test_linked_flynotes_preserve_multiline_grouping(self):
+        judgment = Judgment.objects.create(
+            case_name="Multiline flynote test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 2),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+            flynote=(
+                "Criminal law — admissibility — trial within a trial; right to representation\n"
+                "Administrative law — judicial review"
+            ),
+        )
+        self.updater.update_for_judgment(judgment)
+
+        self.assertEqual(
+            [
+                [tuple(node.name for node in item["nodes"]) for item in line]
+                for line in judgment.linked_flynotes
+            ],
+            [
+                [
+                    (
+                        "Criminal law",
+                        "admissibility",
+                        "trial within a trial",
+                    ),
+                    (
+                        "Criminal law",
+                        "admissibility",
+                        "right to representation",
+                    ),
+                ],
+                [("Administrative law", "judicial review")],
+            ],
+        )
 
 
 class UpdateFlynoteTaxonomiesCommandTest(TestCase):
