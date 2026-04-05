@@ -855,6 +855,27 @@ class Replacement(models.Model):
         return f"{self.old_text} -> {self.new_text}"
 
 
+class OffenceCategory(models.Model):
+    slug = models.SlugField(_("slug"), unique=True, blank=True)
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    description = models.TextField(_("description"), blank=True)
+    order = models.IntegerField(_("order"), null=True, blank=True)
+    is_active = models.BooleanField(_("is active"), default=True)
+
+    class Meta:
+        ordering = ("order", "name")
+        verbose_name = _("offence category")
+        verbose_name_plural = _("offence categories")
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+
 class Offence(models.Model):
     work = models.ForeignKey(
         "peachjam.Work",
@@ -881,6 +902,20 @@ class Offence(models.Model):
     )
     title = models.CharField(_("title"), max_length=4096)
     description = models.TextField(_("description"), blank=True)
+    categories = models.ManyToManyField(
+        "OffenceCategory",
+        blank=True,
+        related_name="offences",
+        verbose_name=_("categories"),
+    )
+    offence_tags = ArrayField(
+        base_field=models.CharField(max_length=100),
+        default=list,
+        blank=True,
+        help_text=_(
+            "Flexible semantic tags that are inherent to the offence definition."
+        ),
+    )
     elements = ArrayField(
         base_field=models.CharField(max_length=4096),
         default=list,
@@ -895,6 +930,12 @@ class Offence(models.Model):
 
     class Meta:
         ordering = ("title",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("work", "provision_eid"),
+                name="unique_offence_work_provision_eid",
+            )
+        ]
 
     def __str__(self):
         return self.title
@@ -913,6 +954,22 @@ class JudgmentOffence(models.Model):
         related_name="judgment_offence",
         verbose_name=_("judgments"),
     )
+    case_tags = ArrayField(
+        base_field=models.CharField(max_length=100),
+        default=list,
+        blank=True,
+        help_text=_(
+            "Case-specific semantic tags extracted from the judgment for this offence."
+        ),
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("judgment", "offence"),
+                name="unique_judgment_offence_judgment_offence",
+            )
+        ]
 
     def __str__(self):
         return f"JudgmentOffence {self.offence} - {self.judgment}"

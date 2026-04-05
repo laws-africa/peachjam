@@ -5,11 +5,12 @@ import unittest
 from unittest.mock import patch
 
 from countries_plus.models import Country
-from django.db import connections
+from django.db import IntegrityError, connections
 from django.test import TransactionTestCase as TestCase
 from languages_plus.models import Language
 
 from peachjam.analysis.criminal_data.agent import (
+    JUDGMENT_EXTRACTION_PROMPT,
     CaseMetaExtraction,
     JudgmentOffenceExtraction,
     JudgmentOutcomeExtraction,
@@ -24,7 +25,19 @@ from peachjam.analysis.criminal_data.agent import (
     search_offences_tool as search_offences,
 )
 from peachjam.analysis.criminal_data.extractor import CriminalDataExtractor
-from peachjam.models import Court, Judgment, Offence, Outcome, Work
+from peachjam.analysis.criminal_data.vocabulary import (
+    JUDGMENT_OFFENCE_CASE_TAGS,
+    normalize_tag_array,
+)
+from peachjam.models import (
+    Court,
+    Judgment,
+    JudgmentOffence,
+    Offence,
+    OffenceCategory,
+    Outcome,
+    Work,
+)
 
 log = logging.getLogger(__name__)
 
@@ -322,6 +335,8 @@ class SearchOffencesTests(TestCase):
 
         self.abduction = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_1",
+            code="ABD-1",
             title="Abduction",
             description=(
                 "Taking away or detaining a woman against her will with intent to marry "
@@ -331,6 +346,8 @@ class SearchOffencesTests(TestCase):
 
         self.abduction_of_girls = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_2",
+            code="ABD-2",
             title="Abduction of girls under sixteen",
             description=(
                 "A person who unlawfully takes an unmarried girl under the age of sixteen "
@@ -340,6 +357,8 @@ class SearchOffencesTests(TestCase):
 
         self.assaults_causing_abh = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_3",
+            code="ASS-3",
             title="Assaults causing actual bodily harm",
             description=(
                 "A person who commits an assault that occasions actual bodily harm "
@@ -349,6 +368,8 @@ class SearchOffencesTests(TestCase):
 
         self.attempt_armed_robbery = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_4",
+            code="ROB-4",
             title="Attempt armed robbery",
             description=(
                 "A person who, with intent to steal, is armed and threatens or attempts "
@@ -358,6 +379,8 @@ class SearchOffencesTests(TestCase):
 
         self.armed_robbery = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_5",
+            code="ROB-5",
             title="Armed robbery",
             description=(
                 "A person who steals and is armed with a dangerous or offensive weapon "
@@ -367,6 +390,8 @@ class SearchOffencesTests(TestCase):
 
         self.obtaining_goods_false_pretences = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_6",
+            code="FRAUD-6",
             title="Obtaining goods by false pretences",
             description=(
                 "A person who by false pretence and with intent to defraud obtains from "
@@ -376,6 +401,8 @@ class SearchOffencesTests(TestCase):
 
         self.obtaining_credit_false_pretences = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_7",
+            code="FRAUD-7",
             title="Obtaining credit, etc., by false pretences",
             description=(
                 "A person who by false pretence or other fraud obtains credit commits an offence."
@@ -515,6 +542,7 @@ class CriminalDataExtractorTests(TestCase):
                 OffenceExtraction(
                     offence_id=self.robbery.id,
                     extracted_offence="robbery with violence",
+                    case_tags=[],
                     sentences=[
                         SentenceExtraction(
                             sentence_type="imprisonment",
@@ -578,3 +606,154 @@ class CriminalDataExtractorTests(TestCase):
         self.assertEqual(self.judgment.outcomes.count(), 0)
         self.assertFalse(mock_extract_offences_and_sentences.called)
         self.assertFalse(mock_extract_outcomes.called)
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_persists_normalized_case_tags_and_drops_invalid(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        mock_get_content_as_text.return_value = "Criminal appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="criminal",
+            filing_year=2019,
+        )
+        mock_extract_offences_and_sentences.return_value = JudgmentOffenceExtraction(
+            offences=[
+                OffenceExtraction(
+                    offence_id=self.robbery.id,
+                    extracted_offence="robbery with violence",
+                    case_tags=[
+                        " Weapon-Used ",
+                        "group-offending",
+                        "weapon-used",
+                        "",
+                        "unknown-tag",
+                    ],
+                    sentences=[],
+                )
+            ]
+        )
+        mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(outcomes=[])
+
+        with self.assertLogs(
+            "peachjam.analysis.criminal_data.extractor", level="INFO"
+        ) as logs:
+            CriminalDataExtractor().extract(self.judgment)
+
+        jo = self.judgment.judgment_offence.get()
+        self.assertEqual(jo.case_tags, ["weapon-used", "group-offending"])
+        self.assertTrue(
+            any("dropping invalid case tags" in message for message in logs.output)
+        )
+        self.assertTrue(any("with case tags" in message for message in logs.output))
+
+
+class CriminalDataVocabularyTests(TestCase):
+    def test_normalize_tag_array_lowercases_trims_deduplicates_and_drops_blanks(self):
+        self.assertEqual(
+            normalize_tag_array(
+                [" Weapon-Used ", "", "weapon-used", " group-offending ", None]
+            ),
+            ["weapon-used", "group-offending"],
+        )
+
+    def test_normalize_tag_array_rejects_unknown_tags_when_validation_requested(self):
+        with self.assertRaises(ValueError):
+            normalize_tag_array(
+                ["weapon-used", "not-a-real-tag"],
+                allowed_tags=JUDGMENT_OFFENCE_CASE_TAGS,
+                validate=True,
+            )
+
+    def test_normalize_tag_array_preserves_input_order_after_cleaning(self):
+        self.assertEqual(
+            normalize_tag_array(
+                [
+                    " threats-used ",
+                    "weapon-used",
+                    "threats-used",
+                    "group-offending",
+                ],
+                allowed_tags=JUDGMENT_OFFENCE_CASE_TAGS,
+            ),
+            ["threats-used", "weapon-used", "group-offending"],
+        )
+
+
+class CriminalDataModelTests(TestCase):
+    fixtures = [
+        "tests/countries",
+        "tests/courts",
+        "tests/languages",
+    ]
+
+    def setUp(self):
+        self.work = Work.objects.create(
+            title="Test Work", frbr_uri="/akn/za/act/2001/1"
+        )
+        self.judgment = Judgment.objects.create(
+            case_name="Test criminal appeal",
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+
+    def test_offence_category_slug_auto_populates(self):
+        category = OffenceCategory.objects.create(name="Public Safety")
+        self.assertEqual(category.slug, "public-safety")
+
+    def test_offence_is_unique_by_work_and_provision_eid(self):
+        Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_1",
+            code="A-1",
+            title="First offence",
+        )
+
+        with self.assertRaises(IntegrityError):
+            Offence.objects.create(
+                work=self.work,
+                provision_eid="sec_1",
+                code="A-2",
+                title="Second offence",
+            )
+
+    def test_judgment_offence_is_unique_by_judgment_and_offence(self):
+        offence = Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_2",
+            code="B-1",
+            title="Robbery",
+        )
+        JudgmentOffence.objects.create(judgment=self.judgment, offence=offence)
+
+        with self.assertRaises(IntegrityError):
+            JudgmentOffence.objects.create(judgment=self.judgment, offence=offence)
+
+
+class CriminalDataPromptTests(TestCase):
+    def test_offence_extraction_supports_case_tags(self):
+        extraction = OffenceExtraction(
+            offence_id=1,
+            extracted_offence="robbery with violence",
+            case_tags=["weapon-used", "group-offending"],
+            sentences=[],
+        )
+
+        self.assertEqual(extraction.case_tags, ["weapon-used", "group-offending"])
+
+    def test_prompt_includes_case_tag_guidance_and_examples(self):
+        self.assertIn("Allowed case tags only:", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("consent-disputed", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("group-offending", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("weapon-used", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("Do not infer `consent-disputed`", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("do not add `weapon-used`", JUDGMENT_EXTRACTION_PROMPT)
