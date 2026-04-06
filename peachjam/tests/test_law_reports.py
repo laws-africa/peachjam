@@ -105,6 +105,12 @@ class LawReportViewsTestCase(TestCase):
         self.first_judgment = judgments[0]
         self.second_judgment = judgments[1]
         self.unrelated_judgment = judgments[2]
+        reported_label, _ = Label.objects.get_or_create(
+            code="reported",
+            defaults={"name": "Reported", "level": "success"},
+        )
+        self.first_judgment.labels.add(reported_label)
+        self.second_judgment.labels.add(reported_label)
         self.second_judgment.labels.add(Label.objects.create(name="Featured case"))
         self.cited_legislation = Legislation.objects.get(
             expression_frbr_uri=(
@@ -213,7 +219,7 @@ class LawReportViewsTestCase(TestCase):
             response, "peachjam/law_report/law_report_volume_detail.html"
         )
         self.assertContains(response, self.first_judgment.title)
-        self.assertNotContains(response, self.second_judgment.title)
+        self.assertContains(response, self.second_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertNotContains(response, "Back to law report")
         self.assertContains(
@@ -225,8 +231,26 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertContains(response, "nav nav-tabs border-bottom", html=False)
+        self.assertContains(response, "Reported judgments")
+        self.assertTrue(response.context.get("doc_table_toggle"))
+        self.assertContains(response, 'class="doc-table-children collapse"', html=False)
+        self.assertContains(response, 'title="Cited cases"', html=False)
+        self.assertContains(response, "1 cited case")
+        self.assertNotContains(
+            response, '<span class="badge rounded-pill bg-success">Reported</span>'
+        )
+        self.assertNotIn("labels", response.context["facet_data"])
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
         self.assertEqual("judgments", response.context["active_tab"])
+        parent_row = next(
+            doc
+            for doc in response.context["documents"]
+            if getattr(doc, "work_id", None) == self.first_judgment.work_id
+        )
+        child_row = parent_row.children[0]
+        self.assertEqual(self.second_judgment.work_id, child_row.work_id)
+        self.assertTrue(child_row.is_table_child)
+        self.assertEqual("1 cited case", parent_row.children_count_label)
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_cases_tab(self):
@@ -257,11 +281,20 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
+        self.assertContains(response, "Reported judgments")
+        self.assertContains(response, "1 reported judgment")
         self.assertIn("labels", response.context["facet_data"])
         self.assertIn("alphabet", response.context["facet_data"])
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
         self.assertContains(response, "Cited by")
+        self.assertNotContains(
+            response, '<span class="badge rounded-pill bg-success">Reported</span>'
+        )
+        self.assertNotIn(
+            ("Reported", "Reported"),
+            response.context["facet_data"]["labels"]["options"],
+        )
         parent_row = next(
             doc
             for doc in response.context["documents"]
@@ -269,6 +302,8 @@ class LawReportViewsTestCase(TestCase):
         )
         child_row = parent_row.children[0]
         self.assertEqual(self.first_judgment.work_id, child_row.work_id)
+        self.assertTrue(child_row.is_table_child)
+        self.assertEqual("1 reported judgment", parent_row.children_count_label)
         self.assertIn("work", child_row._state.fields_cache)
         self.assertIn("labels", child_row._prefetched_objects_cache)
         self.assertIn("taxonomies", child_row._prefetched_objects_cache)
@@ -300,8 +335,13 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.cited_legislation.title, count=1)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
+        self.assertContains(response, "Reported judgments")
+        self.assertContains(response, "1 reported judgment")
         self.assertIn("years", response.context["facet_data"])
         self.assertIn("alphabet", response.context["facet_data"])
+        self.assertNotContains(
+            response, '<span class="badge rounded-pill bg-success">Reported</span>'
+        )
         legislation_row = next(
             doc
             for doc in response.context["documents"]
@@ -310,6 +350,9 @@ class LawReportViewsTestCase(TestCase):
         self.assertEqual(self.latest_cited_legislation.pk, legislation_row.pk)
         self.assertEqual(self.latest_cited_legislation.date, legislation_row.date)
         self.assertNotEqual(self.original_cited_legislation_date, legislation_row.date)
+        child_row = legislation_row.children[0]
+        self.assertTrue(child_row.is_table_child)
+        self.assertEqual("1 reported judgment", legislation_row.children_count_label)
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
         self.assertContains(response, "Cited by")

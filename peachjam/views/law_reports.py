@@ -3,12 +3,14 @@ from functools import cached_property
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
+from django.utils.translation import ngettext
 from django.views.generic import DetailView, ListView
 
 from peachjam.helpers import get_language
 from peachjam.models import (
     ExtractedCitation,
     Judgment,
+    Label,
     LawReport,
     LawReportVolume,
 )
@@ -69,16 +71,136 @@ class LawReportVolumeViewMixin:
         return context
 
 
-class LawReportVolumeDetailView(LawReportVolumeViewMixin, FilteredJudgmentView):
+class LawReportJudgmentChildrenMixin:
+    doc_table_hide_label_codes = ["reported"]
+
+    @cached_property
+    def doc_table_hidden_label_names(self):
+        return set(
+            Label.objects.filter(code__in=self.doc_table_hide_label_codes).values_list(
+                "name", flat=True
+            )
+        )
+
+    def update_doc_table_context(self, context, toggle_title):
+        context["doc_table_toggle"] = self.doc_table_toggle
+        context["doc_table_toggle_title"] = toggle_title
+        context["doc_table_children_expanded"] = self.doc_table_children_expanded
+        context["doc_table_hide_label_codes"] = self.doc_table_hide_label_codes
+
+    def add_labels_facet(self, context):
+        super().add_labels_facet(context)
+        labels_facet = context.get("facet_data", {}).get("labels")
+        if not labels_facet or not self.doc_table_hidden_label_names:
+            return
+
+        labels_facet["options"] = [
+            option
+            for option in labels_facet["options"]
+            if option[0] not in self.doc_table_hidden_label_names
+        ]
+        labels_facet["values"] = [
+            value
+            for value in labels_facet["values"]
+            if value not in self.doc_table_hidden_label_names
+        ]
+
+        if not labels_facet["options"]:
+            context["facet_data"].pop("labels", None)
+
+    def get_document_table_judgments(self, work_ids):
+        return {
+            judgment.work_id: judgment
+            for judgment in Judgment.objects.filter(
+                work_id__in=work_ids,
+                published=True,
+            )
+            .preferred_language(get_language(self.request))
+            .latest_expression()
+            .for_document_table()
+        }
+
+    def attach_related_judgments(
+        self, parent_docs, relation_pairs, singular_label, plural_label, sort_key
+    ):
+        parent_docs = [doc for doc in parent_docs if getattr(doc, "work_id", None)]
+        if not parent_docs:
+            return
+
+        related_work_ids_by_parent = defaultdict(set)
+        for parent_work_id, child_work_id in relation_pairs:
+            related_work_ids_by_parent[parent_work_id].add(child_work_id)
+
+        if not related_work_ids_by_parent:
+            return
+
+        related_judgments = self.get_document_table_judgments(
+            set().union(*related_work_ids_by_parent.values())
+        )
+
+        for parent_doc in parent_docs:
+            children = sorted(
+                [
+                    related_judgments[work_id]
+                    for work_id in related_work_ids_by_parent.get(
+                        parent_doc.work_id, []
+                    )
+                    if work_id in related_judgments
+                ],
+                key=sort_key,
+            )
+            for child in children:
+                child.is_table_child = True
+            parent_doc.children = children
+            if children:
+                parent_doc.children_count_label = ngettext(
+                    singular_label,
+                    plural_label,
+                    len(children),
+                ) % {"count": len(children)}
+
+
+class LawReportVolumeDetailView(
+    LawReportJudgmentChildrenMixin, LawReportVolumeViewMixin, FilteredJudgmentView
+):
     template_name = "peachjam/law_report/law_report_volume_detail.html"
     active_tab = "judgments"
+    doc_table_toggle = True
+    doc_table_children_expanded = False
 
     def get_base_queryset(self, exclude=None):
         qs = super().get_base_queryset(exclude=exclude)
         return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.update_doc_table_context(context, _("Cited cases"))
+        self.attach_cited_judgments(context["documents"])
+        return context
 
-class LawReportVolumeCitationIndexMixin:
+    def attach_cited_judgments(self, reported_judgments):
+        judgment_work_ids = [
+            judgment.work_id
+            for judgment in reported_judgments
+            if getattr(judgment, "work_id", None)
+        ]
+        if not judgment_work_ids:
+            return
+
+        citations = ExtractedCitation.objects.filter(
+            citing_work_id__in=judgment_work_ids
+        ).values_list("citing_work_id", "target_work_id")
+
+        self.attach_related_judgments(
+            reported_judgments,
+            citations.distinct(),
+            "%(count)s cited case",
+            "%(count)s cited cases",
+            lambda doc: (-doc.work.authority_score, doc.title),
+        )
+
+
+class LawReportVolumeCitationIndexMixin(LawReportJudgmentChildrenMixin):
     form_defaults = {"sort": "title"}
     doc_table_toggle = True
     doc_table_children_expanded = True
@@ -114,9 +236,7 @@ class LawReportVolumeCitationIndexMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["doc_table_toggle"] = self.doc_table_toggle
-        context["doc_table_toggle_title"] = _("Cited by")
-        context["doc_table_children_expanded"] = self.doc_table_children_expanded
+        self.update_doc_table_context(context, _("Cited by"))
         context["doc_table_children_group_row"] = {
             "is_group": True,
             "title": _("Cited by"),
@@ -136,42 +256,18 @@ class LawReportVolumeCitationIndexMixin:
         if not work_ids:
             return
 
-        citations = (
-            ExtractedCitation.objects.filter(
-                citing_work_id__in=self.volume_judgment_work_ids,
-                target_work_id__in=work_ids,
-            )
-            .values_list("target_work_id", "citing_work_id")
-            .distinct()
+        citations = ExtractedCitation.objects.filter(
+            citing_work_id__in=self.volume_judgment_work_ids,
+            target_work_id__in=work_ids,
+        ).values_list("target_work_id", "citing_work_id")
+
+        self.attach_related_judgments(
+            cited_docs,
+            citations.distinct(),
+            "%(count)s reported judgment",
+            "%(count)s reported judgments",
+            lambda doc: doc.title,
         )
-
-        citing_map = defaultdict(set)
-        for target_wid, citing_wid in citations:
-            citing_map[target_wid].add(citing_wid)
-
-        if not citing_map:
-            return
-
-        all_citing_wids = set().union(*citing_map.values())
-        citing_docs = {
-            j.work_id: j
-            for j in Judgment.objects.filter(
-                work_id__in=all_citing_wids, published=True
-            )
-            .preferred_language(get_language(self.request))
-            .latest_expression()
-            .for_document_table()
-        }
-
-        for doc in cited_docs:
-            doc.children = sorted(
-                [
-                    citing_docs[wid]
-                    for wid in citing_map.get(doc.work_id, [])
-                    if wid in citing_docs
-                ],
-                key=lambda d: d.title,
-            )
 
 
 class LawReportVolumeCasesIndexView(

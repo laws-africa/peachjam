@@ -21,30 +21,36 @@
         class="cell-group">{{ document.title }}</td>
   {% else %}
     <td class="cell-title">
-      <div class="d-flex">
-        <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
-        {% if document.work.languages|length > 1 %}
-          <span class="d-inline-block ms-2"
-                data-bs-toggle="tooltip"
-                title="{% trans 'Multiple languages available' %}">
-            <i class="bi bi-translate"></i>
-          </span>
-        {% endif %}
-        <span id="saved-document-star--{{ document.pk }}"></span>
-      </div>
-      {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
-      {% if doc_table_show_treatments %}
-        {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
-      {% endif %}
-      {% if document.doc_type == "judgment" %}
-        {% if document.blurb %}<div class="my-2">{{ document.blurb }}</div>{% endif %}
-        {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>{% endif %}
-      {% elif document.listing_taxonomies %}
-        <div class="d-none d-md-block ms-3">
-          {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+      <div class="{% if document.is_table_child %}ms-3 ps-3 border-start border-2 border-light{% endif %}">
+        <div class="d-flex align-items-start flex-wrap gap-2">
+          <a href="{{ document.get_absolute_url }}"
+             class="{% if document.children %}fw-semibold{% endif %}">{{ document.title }}</a>
+          {% if document.children_count_label %}
+            <span class="badge rounded-pill text-bg-light border">{{ document.children_count_label }}</span>
+          {% endif %}
+          {% if document.work.languages|length > 1 %}
+            <span class="d-inline-block"
+                  data-bs-toggle="tooltip"
+                  title="{% trans 'Multiple languages available' %}">
+              <i class="bi bi-translate"></i>
+            </span>
+          {% endif %}
+          <span class="saved-document-star--{{ document.pk }}"></span>
         </div>
-      {% endif %}
-      <div id="saved-document-table-detail--{{ document.pk }}"></div>
+        {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
+        {% if doc_table_show_treatments %}
+          {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
+        {% endif %}
+        {% if document.doc_type == "judgment" %}
+          {% if document.blurb %}<div class="my-2">{{ document.blurb }}</div>{% endif %}
+          {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>{% endif %}
+        {% elif document.listing_taxonomies %}
+          <div class="d-none d-md-block ms-3">
+            {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+          </div>
+        {% endif %}
+        <div class="saved-document-table-detail--{{ document.pk }}"></div>
+      </div>
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
