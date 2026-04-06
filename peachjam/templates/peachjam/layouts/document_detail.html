@@ -215,7 +215,7 @@
           <div class="container">
             {% include 'peachjam/document/_info_notices.html' with messages=notices %}
             {% block document-metadata %}
-              <div class="row">
+              <div class="row" data-key-link-feature="document_metadata">
                 <div class="col-md mb-3">
                   {% block document-metadata-content %}
                     <dl class="document-metadata-list d-flex">
@@ -293,7 +293,7 @@
                           <dd class="text-muted">
                             {% for judge in judges %}
                               {# djlint:off #}
-                          <a href="{{ judge.get_absolute_url }}">{{ judge }}</a>{% if not forloop.last %},{% endif %}
+                          <a href="{{ judge.get_absolute_url }}" data-key-link="judge">{{ judge }}</a>{% if not forloop.last %},{% endif %}
                               {# djlint:on #}
                             {% endfor %}
                           </dd>
@@ -443,7 +443,8 @@
                                   <li>
                                     {% translate rel.predicate.verb as verb %}
                                     {{ verb|capfirst }}
-                                    <a href="{{ rel.object_work.get_absolute_url }}">{{ rel.object_work.title }}</a>
+                                    <a href="{{ rel.object_work.get_absolute_url }}"
+                                       data-key-link="document">{{ rel.object_work.title }}</a>
                                   </li>
                                 {% endif %}
                               {% endfor %}
@@ -454,7 +455,8 @@
                                   <li>
                                     {% translate rel.predicate.reverse_verb as verb %}
                                     {{ verb|capfirst }}
-                                    <a href="{{ rel.subject_work.get_absolute_url }}">{{ rel.subject_work.title }}</a>
+                                    <a href="{{ rel.subject_work.get_absolute_url }}"
+                                       data-key-link="document">{{ rel.subject_work.title }}</a>
                                   </li>
                                 {% endif %}
                               {% endfor %}

@@ -1,4 +1,7 @@
+import re
+
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -111,11 +114,31 @@ class JournalArticle(CoreDocument):
         return list(self.authors.all())
 
 
+VOLUME_ISSUE_TITLE_RE = re.compile(
+    r"Vol[.\s]*(\d+)[,\s]*No[.\s]*(\d+).*?(\d{4})", re.IGNORECASE
+)
+
+MONTH_NAMES = {
+    "january",
+    "february",
+    "march",
+    "april",
+    "may",
+    "june",
+    "july",
+    "august",
+    "september",
+    "october",
+    "november",
+    "december",
+}
+
+
 class VolumeIssue(models.Model):
 
     title = models.CharField(
         max_length=2048,
-        help_text="The volume and issue number (e.g., 'Vol 58, Issue 1' or 'Volume 58')",
+        help_text="The volume and issue number, e.g. 'Vol. 3 No.1 1993' or 'Vol. 3 No.1 - 1993'.",
     )
     journal = models.ForeignKey(
         "peachjam.Journal",
@@ -129,6 +152,27 @@ class VolumeIssue(models.Model):
         verbose_name = "Volume/Issue"
         verbose_name_plural = "Volumes/Issues"
         unique_together = [["journal", "title"], ["journal", "slug"]]
+
+    def clean(self):
+        if self.title:
+            if not VOLUME_ISSUE_TITLE_RE.search(self.title):
+                raise ValidationError(
+                    {
+                        "title": _(
+                            "Title must include a volume number, issue number, month, and year, "
+                            "e.g. 'Vol. 3 No.1 - January 1993'."
+                        )
+                    }
+                )
+            if not any(w.lower() in MONTH_NAMES for w in self.title.split()):
+                raise ValidationError(
+                    {
+                        "title": _(
+                            "Title must include a month name, "
+                            "e.g. 'Vol. 3 No.1 - January 1993'."
+                        )
+                    }
+                )
 
     def save(self, *args, **kwargs):
         self.slug = slugify(self.title, "-")

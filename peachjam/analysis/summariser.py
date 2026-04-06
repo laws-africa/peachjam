@@ -78,6 +78,19 @@ class JudgmentSummariser:
             or self.default_llm_model
         )
 
+    @staticmethod
+    def normalise_flynote_text(flynote):
+        if not flynote:
+            return ""
+
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        return FlynoteParser().normalise_multiline_text(flynote)
+
+    def normalise_summary(self, summary):
+        summary.flynote = self.normalise_flynote_text(summary.flynote)
+        return summary
+
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
         log.info("Generating judgment summary locally")
 
@@ -124,6 +137,7 @@ class JudgmentSummariser:
                 )
                 summary = completion.output_parsed
 
+            summary = self.normalise_summary(summary)
             generation.update(output=summary.model_dump())
             log.info("Done")
             return summary

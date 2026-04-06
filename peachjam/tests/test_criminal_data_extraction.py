@@ -1,18 +1,43 @@
+import datetime
 import logging
 import os
 import unittest
+from unittest.mock import patch
 
-from django.db import connections
+from countries_plus.models import Country
+from django.db import IntegrityError, connections
 from django.test import TransactionTestCase as TestCase
+from languages_plus.models import Language
 
 from peachjam.analysis.criminal_data.agent import (
+    JUDGMENT_EXTRACTION_PROMPT,
+    CaseMetaExtraction,
+    JudgmentOffenceExtraction,
+    JudgmentOutcomeExtraction,
+    OffenceExtraction,
+    OutcomeExtraction,
+    SentenceExtraction,
     extract_case_type_filing_year,
     extract_offences_and_sentences,
+    extract_outcomes,
 )
 from peachjam.analysis.criminal_data.agent import (
     search_offences_tool as search_offences,
 )
-from peachjam.models import Offence, Work
+from peachjam.analysis.criminal_data.extractor import CriminalDataExtractor
+from peachjam.analysis.criminal_data.vocabulary import (
+    JUDGMENT_OFFENCE_CASE_TAGS,
+    normalize_tag_array,
+)
+from peachjam.models import (
+    Court,
+    Judgment,
+    JudgmentOffence,
+    Offence,
+    OffenceCategory,
+    Outcome,
+    Work,
+)
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +61,8 @@ class CriminalDataExtractionTests(TestCase):
     def setUp(self):
         self.robbery = Offence.objects.get(title="Robbery with violence")
         self.trespass = Offence.objects.get(title="Criminal trespass")
+        Outcome.objects.get_or_create(name="Dismissed")
+        Outcome.objects.get_or_create(name="Sentence reduced")
 
     def test_extract_robbery_with_violence(self):
         judgment_text = """
@@ -288,6 +315,17 @@ class CriminalDataExtractionTests(TestCase):
         self.assertEqual(result.case_type, expected_case_type)
         self.assertEqual(result.filing_year, expected_filing_year)
 
+    def test_extract_outcomes_for_split_result(self):
+        judgment_text = """
+        The appeal against conviction is dismissed.
+        However, the sentence of ten years imprisonment is reduced to five years.
+        """.strip()
+
+        result = extract_outcomes(judgment_text)
+        log.info("test_extract_outcomes_for_split_result: %s", result)
+
+        self.assertTrue(result.outcomes)
+
 
 class SearchOffencesTests(TestCase):
     def setUp(self):
@@ -297,6 +335,8 @@ class SearchOffencesTests(TestCase):
 
         self.abduction = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_1",
+            code="ABD-1",
             title="Abduction",
             description=(
                 "Taking away or detaining a woman against her will with intent to marry "
@@ -306,6 +346,8 @@ class SearchOffencesTests(TestCase):
 
         self.abduction_of_girls = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_2",
+            code="ABD-2",
             title="Abduction of girls under sixteen",
             description=(
                 "A person who unlawfully takes an unmarried girl under the age of sixteen "
@@ -315,6 +357,8 @@ class SearchOffencesTests(TestCase):
 
         self.assaults_causing_abh = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_3",
+            code="ASS-3",
             title="Assaults causing actual bodily harm",
             description=(
                 "A person who commits an assault that occasions actual bodily harm "
@@ -324,6 +368,8 @@ class SearchOffencesTests(TestCase):
 
         self.attempt_armed_robbery = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_4",
+            code="ROB-4",
             title="Attempt armed robbery",
             description=(
                 "A person who, with intent to steal, is armed and threatens or attempts "
@@ -333,6 +379,8 @@ class SearchOffencesTests(TestCase):
 
         self.armed_robbery = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_5",
+            code="ROB-5",
             title="Armed robbery",
             description=(
                 "A person who steals and is armed with a dangerous or offensive weapon "
@@ -342,6 +390,8 @@ class SearchOffencesTests(TestCase):
 
         self.obtaining_goods_false_pretences = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_6",
+            code="FRAUD-6",
             title="Obtaining goods by false pretences",
             description=(
                 "A person who by false pretence and with intent to defraud obtains from "
@@ -351,6 +401,8 @@ class SearchOffencesTests(TestCase):
 
         self.obtaining_credit_false_pretences = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_7",
+            code="FRAUD-7",
             title="Obtaining credit, etc., by false pretences",
             description=(
                 "A person who by false pretence or other fraud obtains credit commits an offence."
@@ -439,3 +491,269 @@ class SearchOffencesTests(TestCase):
 
         self.assertTrue(results)
         self.assertEqual(results[0]["title"], "Abduction")
+
+
+class CriminalDataExtractorTests(TestCase):
+    fixtures = [
+        "tests/countries",
+        "tests/courts",
+        "tests/languages",
+        "offences/offences",
+        "offences/penal_code_work",
+    ]
+
+    def setUp(self):
+        self.judgment = Judgment.objects.create(
+            case_name="Test criminal appeal",
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        self.robbery = Offence.objects.get(title="Robbery with violence")
+        self.conviction_upheld = Outcome.objects.create(
+            name="Conviction upheld",
+            description="The conviction is affirmed on appeal.",
+        )
+        self.sentence_reduced = Outcome.objects.create(
+            name="Sentence reduced",
+            description="The sentence is reduced or varied downward.",
+        )
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_sets_canonical_outcomes(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        mock_get_content_as_text.return_value = "Criminal appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="criminal",
+            filing_year=2019,
+        )
+        mock_extract_offences_and_sentences.return_value = JudgmentOffenceExtraction(
+            offences=[
+                OffenceExtraction(
+                    offence_id=self.robbery.id,
+                    extracted_offence="robbery with violence",
+                    case_tags=[],
+                    sentences=[
+                        SentenceExtraction(
+                            sentence_type="imprisonment",
+                            duration_months=120,
+                            fine_amount=None,
+                            suspended=False,
+                            mandatory_minimum=None,
+                        )
+                    ],
+                )
+            ]
+        )
+        mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(
+            outcomes=[
+                OutcomeExtraction(
+                    extracted_outcome="Conviction upheld",
+                ),
+                OutcomeExtraction(
+                    extracted_outcome="Sentence reduced",
+                ),
+            ]
+        )
+
+        CriminalDataExtractor().extract(self.judgment)
+        self.judgment.refresh_from_db()
+
+        self.assertEqual(self.judgment.case_type, Judgment.CaseType.CRIMINAL)
+        self.assertEqual(self.judgment.filing_year, 2019)
+        self.assertCountEqual(
+            self.judgment.outcomes.values_list("id", flat=True),
+            [self.conviction_upheld.id, self.sentence_reduced.id],
+        )
+        self.assertEqual(self.judgment.judgment_offence.count(), 1)
+        self.assertEqual(self.judgment.sentences.count(), 1)
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_clears_outcomes_for_non_criminal_case(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        self.judgment.outcomes.add(self.conviction_upheld, self.sentence_reduced)
+
+        mock_get_content_as_text.return_value = "Civil appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="civil",
+            filing_year=2020,
+        )
+
+        CriminalDataExtractor().extract(self.judgment)
+        self.judgment.refresh_from_db()
+
+        self.assertEqual(self.judgment.case_type, Judgment.CaseType.CIVIL)
+        self.assertEqual(self.judgment.filing_year, 2020)
+        self.assertEqual(self.judgment.outcomes.count(), 0)
+        self.assertFalse(mock_extract_offences_and_sentences.called)
+        self.assertFalse(mock_extract_outcomes.called)
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_persists_normalized_case_tags_and_drops_invalid(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        mock_get_content_as_text.return_value = "Criminal appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="criminal",
+            filing_year=2019,
+        )
+        mock_extract_offences_and_sentences.return_value = JudgmentOffenceExtraction(
+            offences=[
+                OffenceExtraction(
+                    offence_id=self.robbery.id,
+                    extracted_offence="robbery with violence",
+                    case_tags=[
+                        " Weapon-Used ",
+                        "group-offending",
+                        "weapon-used",
+                        "",
+                        "unknown-tag",
+                    ],
+                    sentences=[],
+                )
+            ]
+        )
+        mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(outcomes=[])
+
+        with self.assertLogs(
+            "peachjam.analysis.criminal_data.extractor", level="INFO"
+        ) as logs:
+            CriminalDataExtractor().extract(self.judgment)
+
+        jo = self.judgment.judgment_offence.get()
+        self.assertEqual(jo.case_tags, ["weapon-used", "group-offending"])
+        self.assertTrue(
+            any("dropping invalid case tags" in message for message in logs.output)
+        )
+        self.assertTrue(any("with case tags" in message for message in logs.output))
+
+
+class CriminalDataVocabularyTests(TestCase):
+    def test_normalize_tag_array_lowercases_trims_deduplicates_and_drops_blanks(self):
+        self.assertEqual(
+            normalize_tag_array(
+                [" Weapon-Used ", "", "weapon-used", " group-offending ", None]
+            ),
+            ["weapon-used", "group-offending"],
+        )
+
+    def test_normalize_tag_array_rejects_unknown_tags_when_validation_requested(self):
+        with self.assertRaises(ValueError):
+            normalize_tag_array(
+                ["weapon-used", "not-a-real-tag"],
+                allowed_tags=JUDGMENT_OFFENCE_CASE_TAGS,
+                validate=True,
+            )
+
+    def test_normalize_tag_array_preserves_input_order_after_cleaning(self):
+        self.assertEqual(
+            normalize_tag_array(
+                [
+                    " threats-used ",
+                    "weapon-used",
+                    "threats-used",
+                    "group-offending",
+                ],
+                allowed_tags=JUDGMENT_OFFENCE_CASE_TAGS,
+            ),
+            ["threats-used", "weapon-used", "group-offending"],
+        )
+
+
+class CriminalDataModelTests(TestCase):
+    fixtures = [
+        "tests/countries",
+        "tests/courts",
+        "tests/languages",
+    ]
+
+    def setUp(self):
+        self.work = Work.objects.create(
+            title="Test Work", frbr_uri="/akn/za/act/2001/1"
+        )
+        self.judgment = Judgment.objects.create(
+            case_name="Test criminal appeal",
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+
+    def test_offence_category_slug_auto_populates(self):
+        category = OffenceCategory.objects.create(name="Public Safety")
+        self.assertEqual(category.slug, "public-safety")
+
+    def test_offence_is_unique_by_work_and_provision_eid(self):
+        Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_1",
+            code="A-1",
+            title="First offence",
+        )
+
+        with self.assertRaises(IntegrityError):
+            Offence.objects.create(
+                work=self.work,
+                provision_eid="sec_1",
+                code="A-2",
+                title="Second offence",
+            )
+
+    def test_judgment_offence_is_unique_by_judgment_and_offence(self):
+        offence = Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_2",
+            code="B-1",
+            title="Robbery",
+        )
+        JudgmentOffence.objects.create(judgment=self.judgment, offence=offence)
+
+        with self.assertRaises(IntegrityError):
+            JudgmentOffence.objects.create(judgment=self.judgment, offence=offence)
+
+
+class CriminalDataPromptTests(TestCase):
+    def test_offence_extraction_supports_case_tags(self):
+        extraction = OffenceExtraction(
+            offence_id=1,
+            extracted_offence="robbery with violence",
+            case_tags=["weapon-used", "group-offending"],
+            sentences=[],
+        )
+
+        self.assertEqual(extraction.case_tags, ["weapon-used", "group-offending"])
+
+    def test_prompt_includes_case_tag_guidance_and_examples(self):
+        self.assertIn("Allowed case tags only:", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("consent-disputed", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("group-offending", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("weapon-used", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("Do not infer `consent-disputed`", JUDGMENT_EXTRACTION_PROMPT)
+        self.assertIn("do not add `weapon-used`", JUDGMENT_EXTRACTION_PROMPT)

@@ -32,6 +32,11 @@ class MyHomeView(LoginRequiredMixin, CommonContextMixin, TemplateView):
     tab = "my"
     timeline_truncated = False
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["KEY_LINK_PAGE"] = "my_lii"
+        return context
+
 
 class MyFrontpageView(CommonContextMixin, TemplateView):
     """The My LII part of the site homepage that is loaded dynamically."""

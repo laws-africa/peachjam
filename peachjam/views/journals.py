@@ -6,12 +6,47 @@ from django.views.generic import ListView
 
 from peachjam.forms import JournalArticleFilterForm
 from peachjam.helpers import chunks
-from peachjam.models import Journal, JournalArticle, VolumeIssue
+from peachjam.models import (
+    MONTH_NAMES,
+    VOLUME_ISSUE_TITLE_RE,
+    Journal,
+    JournalArticle,
+    VolumeIssue,
+)
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
+
+_MONTH_ORDER = {
+    "january": 1,
+    "february": 2,
+    "march": 3,
+    "april": 4,
+    "may": 5,
+    "june": 6,
+    "july": 7,
+    "august": 8,
+    "september": 9,
+    "october": 10,
+    "november": 11,
+    "december": 12,
+}
+
+
+def _volume_sort_key(volume):
+    m = VOLUME_ISSUE_TITLE_RE.search(volume.title)
+    if m:
+        year = int(m.group(3))
+        vol = int(m.group(1))
+        issue = int(m.group(2))
+        month_word = next(
+            (w for w in volume.title.split() if w.lower() in MONTH_NAMES), None
+        )
+        month = _MONTH_ORDER[month_word.lower()] if month_word else 0
+        return -year, -month, vol, issue
+    return 0, 0, 0, 0
 
 
 class JournalListView(ListView):
@@ -63,9 +98,9 @@ class JournalArticleListView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["doc_count_noun"] = _("Article")
-        context["doc_count_noun_plural"] = _("Articles")
-        context["nature"] = "Article"
+        context["doc_count_noun"] = _("Journal article")
+        context["doc_count_noun_plural"] = _("Journal articles")
+        context["nature"] = "Journal article"
         return context
 
 
@@ -94,7 +129,12 @@ class JournalDetailView(JournalArticleListView):
         context = super().get_context_data(**kwargs)
         context["entity_profile"] = self.journal.entity_profile.first()
         context["journal"] = self.journal
-        volumes = list(self.journal.volumes.all())
+        volumes = list(
+            self.journal.volumes.annotate(article_count=Count("articles")).filter(
+                article_count__gt=0
+            )
+        )
+        volumes.sort(key=_volume_sort_key)
         context["volume_groups"] = chunks(volumes, 3)
         return context
 

@@ -1,9 +1,9 @@
-{% load i18n %}
+{% load i18n peachjam %}
 <div class="document-popup-content">
   {% if portion_html %}
     {% block portion %}
       <la-akoma-ntoso frbr-expression-uri="{{ document.expression_frbr_uri }}">
-      {{ portion_html|safe }}
+      {{ portion_html|qualify_local_refs:document.expression_frbr_uri|safe }}
       </la-akoma-ntoso>
     {% endblock %}
   {% else %}

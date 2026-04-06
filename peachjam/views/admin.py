@@ -1,15 +1,14 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http.response import HttpResponseForbidden
 from django.views.generic.base import TemplateView
 
 from peachjam.models import CoreDocument
 
 
-class CheckDuplicateFilesView(LoginRequiredMixin, TemplateView):
+class CheckDuplicateFilesView(TemplateView):
     template_name = "admin/_check_duplicate_files.html"
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_staff:
+        if not request.user.is_authenticated or request.user.is_staff:
             return HttpResponseForbidden("Forbidden")
         return super().get(request, *args, **kwargs)
 

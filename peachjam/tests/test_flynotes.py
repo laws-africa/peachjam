@@ -1246,6 +1246,13 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
 
+    def test_caches_nodes_by_slug(self):
+        found = self.updater.get_or_create_node(None, "Criminal law")
+        self.assertEqual(self.updater.node_cache["criminal-law"].pk, found.pk)
+
+        again = self.updater.get_or_create_node(None, "Criminal law")
+        self.assertEqual(again.pk, found.pk)
+
     def test_creates_nested_nodes(self):
         parent = self.updater.get_or_create_node(None, "Criminal law")
         child = self.updater.get_or_create_node(parent, "admissibility")
@@ -1509,7 +1516,7 @@ class FlynoteDocumentCountTest(TestCase):
             FlynoteDocumentCount.refresh_for_flynote(None)
 
 
-class FlynoteTopicListViewTest(TestCase):
+class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",
         "tests/courts",
@@ -1531,10 +1538,10 @@ class FlynoteTopicListViewTest(TestCase):
         )
         self.updater.update_for_judgment(judgment)
 
-        response = self.client.get(reverse("flynote_topic_list"))
+        response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "peachjam/flynote/list.html")
-        self.assertIn("all_topics", response.context)
+        self.assertIn("flynotes", response.context)
 
     def test_uses_precalculated_counts(self):
         judgment = Judgment.objects.create(
@@ -1549,17 +1556,17 @@ class FlynoteTopicListViewTest(TestCase):
         admin_flynote = Flynote.objects.get(name="Administrative law")
         FlynoteDocumentCount.refresh_for_flynote(admin_flynote)
 
-        response = self.client.get(reverse("flynote_topic_list"))
+        response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 200)
-        popular = response.context["popular_topics"]
+        popular = response.context["flynotes"]
         admin_item = next(
-            (p for p in popular if p["topic"].name == "Administrative law"), None
+            (p for p in popular if p["flynote"].name == "Administrative law"), None
         )
         self.assertIsNotNone(admin_item)
         self.assertEqual(admin_item["count"], 1)
 
     def test_redirects_to_judgment_list_when_no_flynotes(self):
-        response = self.client.get(reverse("flynote_topic_list"))
+        response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("judgment_list"))
 

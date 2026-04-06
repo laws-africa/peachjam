@@ -3,8 +3,9 @@ from unittest.mock import MagicMock, patch
 from allauth.account.internal.flows.login_by_code import LoginCodeVerificationProcess
 from allauth.account.models import Login
 from allauth.account.stages import LoginByCodeStage
+from django.conf import settings
 from django.contrib.auth.models import User
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
 from peachjam.auth import _patched_finish, _patched_send_by_email
@@ -133,6 +134,25 @@ class PatchedSendByEmailTests(TestCase):
 
         context = mock_adapter.send_mail.call_args[0][2]
         self.assertIs(context["request"], proc.request)
+
+    def test_accepts_new_allauth_keyword_arguments(self):
+        proc = MagicMock(spec=LoginCodeVerificationProcess)
+        proc.state = {}
+        proc.request = RequestFactory().get("/login/")
+
+        with patch("peachjam.auth.get_adapter") as mock_get_adapter:
+            mock_adapter = MagicMock()
+            mock_adapter.generate_login_code.return_value = "333444"
+            mock_get_adapter.return_value = mock_adapter
+
+            _patched_send_by_email(
+                proc,
+                "kwarg@example.com",
+                skip_enumeration_mails=True,
+            )
+
+        self.assertEqual(proc.state["code"], "333444")
+        mock_adapter.send_mail.assert_called_once()
 
 
 class CompleteProfileViewTests(TestCase):
@@ -312,3 +332,15 @@ class UserAuthViewTests(TestCase):
         view = self._setup_view(request, "taken@example.com", user=user)
         response = view.post(request)
         self.assertEqual(response.status_code, 302)
+
+
+class SignupViewTests(TestCase):
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True})
+    def test_signup_view_redirects_to_login_when_otp_enabled(self):
+        from peachjam.views.accounts import SignupView
+
+        request = RequestFactory().get(reverse("account_signup"))
+        response = SignupView.as_view()(request)
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], reverse("account_login"))

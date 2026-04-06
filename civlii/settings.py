@@ -5,6 +5,9 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["civlii.apps.CIVLIIConfig", "peachjam_ml"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "civlii.urls"
+ALLOWED_HOSTS = build_allowed_hosts(  # noqa
+    "civlii.laws.africa", "www.civlii.laws.africa"
+)
 
 
 JAZZMIN_SETTINGS["site_title"] = "CIVLII"  # noqa

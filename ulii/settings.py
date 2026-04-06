@@ -6,6 +6,7 @@ INSTALLED_APPS = ["ulii.apps.ULIIConfig", "peachjam_ml"] + INSTALLED_APPS  # noq
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
 PEACHJAM["CHAT_PUBLIC"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("ulii.org", "www.ulii.org")  # noqa
 
 # turn on document embeddings for document similarity without semantic search
 PEACHJAM["DOCUMENT_EMBEDDINGS"] = True  # noqa

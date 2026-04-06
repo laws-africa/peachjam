@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n peachjam %}
 <ol id="glossary-{{ letter }}" class="list-unstyled glossary-list">
   {% for term in terms %}
     <li class="term" data-term="{{ term.term }}">
@@ -8,7 +8,7 @@
       <div class="ms-4">
         <la-akoma-ntoso frbr-expression-uri="{{ term.expression_frbr_uri }}"
         class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;">
-        {{ term.defn|safe }}
+        {{ term.defn|qualify_local_refs:term.expression_frbr_uri|safe }}
         </la-akoma-ntoso>
         <div>
           <ul class="list-unstyled">
@@ -56,7 +56,7 @@
                 {% for defn in group.defns %}
                   <la-akoma-ntoso frbr-expression-uri="{{ term.expression_frbr_uri }}"
                   class="bg-light p-3 border my-2" style="max-height: 50vh; overflow-y: auto;">
-                  {{ defn.defn|safe }}
+                  {{ defn.defn|qualify_local_refs:term.expression_frbr_uri|safe }}
                   </la-akoma-ntoso>
                   <ul class="list-unstyled text-muted">
                     {% for expression in defn.expressions %}

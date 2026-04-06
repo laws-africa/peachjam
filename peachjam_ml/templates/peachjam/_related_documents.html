@@ -2,7 +2,7 @@
 {% load peachjam i18n %}
 {% block extra-related-documents %}
   <div class="row">
-    <div class="col-lg">
+    <div class="col-lg" data-key-link-feature="suggested_documents">
       <h4>{% trans 'More documents like this one' %}</h4>
       {# djLint:off #}
       <div class="spinner-when-empty" hx-get="{% url 'document_similar_docs' document.expression_frbr_uri|strip_first_character %}" hx-trigger="load"></div>

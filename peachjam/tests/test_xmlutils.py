@@ -1,6 +1,11 @@
 from unittest import TestCase
 
-from peachjam.xmlutils import get_following_text, get_preceding_text, parse_html_str
+from peachjam.xmlutils import (
+    get_following_text,
+    get_preceding_text,
+    parse_html_str,
+    qualify_local_refs,
+)
 
 
 class WrapTextTestCase(TestCase):
@@ -75,3 +80,25 @@ class WrapTextTestCase(TestCase):
         self.check_fol(
             "<div><section><p><a>baz</a>foo bar</p>xxx</section></div>", "foo", 3
         )
+
+
+class QualifyLocalRefsTestCase(TestCase):
+    def test_rewrites_fragment_local_links(self):
+        html = (
+            '<span><a class="akn-ref" href="#sec_2" data-href="#sec_2">'
+            "Section 2"
+            "</a></span>"
+        )
+        result = qualify_local_refs(html, "/akn/za/act/2000/1/eng@2024-01-01")
+
+        self.assertIn('href="/akn/za/act/2000/1/eng@2024-01-01#sec_2"', result)
+        self.assertIn('data-href="/akn/za/act/2000/1/eng@2024-01-01#sec_2"', result)
+
+    def test_leaves_non_local_links_unchanged(self):
+        html = (
+            '<p><a href="#">Top</a></p>' '<p><a href="/akn/za/act/2000/1">Act</a></p>'
+        )
+        result = qualify_local_refs(html, "/akn/za/act/2000/1/eng@2024-01-01")
+
+        self.assertIn('href="#"', result)
+        self.assertIn('href="/akn/za/act/2000/1"', result)

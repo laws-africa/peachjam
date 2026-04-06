@@ -36,7 +36,7 @@ class Flynote(MP_Node):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("flynote_topic_detail", kwargs={"slug": self.slug})
+        return reverse("flynote_detail", kwargs={"slug": self.slug})
 
     def update_slug(self):
         """Build a unique slug from the ancestor chain, just like Taxonomy."""
@@ -110,6 +110,11 @@ class FlynoteDocumentCount(models.Model):
 
         with transaction.atomic():
             with connection.cursor() as cursor:
+                log.info(
+                    "Deleting cached flynote counts under root '%s' (pk=%s).",
+                    root.slug,
+                    root.pk,
+                )
                 cursor.execute(
                     """
                     DELETE FROM peachjam_flynotedocumentcount
@@ -121,6 +126,11 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%"],
                 )
 
+                log.info(
+                    "Rebuilding cached flynote counts under root '%s' (pk=%s).",
+                    root.slug,
+                    root.pk,
+                )
                 cursor.execute(
                     """
                     INSERT INTO peachjam_flynotedocumentcount (flynote_id, count)
@@ -135,9 +145,23 @@ class FlynoteDocumentCount(models.Model):
                         ON jf.flynote_id = descendant.id
                     WHERE ancestor.path LIKE %s
                     GROUP BY ancestor.id
+                    ON CONFLICT (flynote_id)
+                    DO UPDATE SET count = EXCLUDED.count
                     """,
                     [root_path + "%", root_path + "%"],
                 )
+
+            # After rebuilding cumulative counts, any node in this subtree
+            # without a count row has no linked documents in its subtree and
+            # can be pruned safely using Treebeard's delete handling.
+            log.info(
+                "Pruning empty flynotes under root '%s' (pk=%s).",
+                root.slug,
+                root.pk,
+            )
+            Flynote.objects.filter(path__startswith=root_path).filter(
+                document_count_cache__isnull=True
+            ).delete()
 
         log.info(
             "Refreshed document counts for flynote tree rooted at '%s' (pk=%s)",
@@ -149,7 +173,7 @@ class FlynoteDocumentCount(models.Model):
     def refresh_for_all_flynotes(cls):
         """Recompute document counts for each flynote tree independently."""
         refreshed = 0
-        for root in Flynote.get_root_nodes():
+        for root in list(Flynote.get_root_nodes()):
             cls.refresh_for_flynote(root)
             refreshed += 1
 

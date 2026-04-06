@@ -4,6 +4,9 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["sierralii.apps.SierraLIIConfig"] + INSTALLED_APPS  # noqa
 
+ALLOWED_HOSTS = build_allowed_hosts(  # noqa
+    "sierralii.org", "www.sierralii.org", "sierralii.gov.sl", "www.sierralii.gov.sl"
+)
 
 JAZZMIN_SETTINGS["site_title"] = "SierraLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "SierraLII"  # noqa

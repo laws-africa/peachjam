@@ -2,21 +2,15 @@ import logging
 import re
 from typing import Any, Dict, List, Literal, Optional
 
-from agents import (
-    Agent,
-    ModelSettings,
-    ReasoningItem,
-    Runner,
-    RunResult,
-    function_tool,
-)
+from agents import Agent, ModelSettings, ReasoningItem, Runner, RunResult, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
 from django.db.models import Case, FloatField, Q, Value, When
 from openai.types import Reasoning
 from pydantic import BaseModel, Field, conint
 
-from peachjam.models import Offence, Sentence
+from peachjam.analysis.criminal_data.vocabulary import JUDGMENT_OFFENCE_CASE_TAGS
+from peachjam.models import Offence, Outcome, Sentence
 
 log = logging.getLogger(__name__)
 
@@ -175,11 +169,31 @@ def search_offences(search_terms: str):
     return matches
 
 
+CASE_TAG_PROMPT_DESCRIPTIONS = {
+    "child-victim": "the victim or complainant for this offence is clearly a child or minor",
+    "domestic-context": "the offence occurred in a domestic or family setting",
+    "intimate-partner-context": "the victim and accused are intimate partners, spouses, or lovers",
+    "public-official-victim": "the victim is a judge, magistrate, police officer, public servant, or public official",
+    "multiple-victims": "more than one victim or complainant is clearly involved",
+    "weapon-used": "a weapon was used, brandished, or carried in the commission of the offence",
+    "group-offending": "the offence was committed with others, jointly, or in company",
+    "serious-injury": "serious bodily harm or grievous injury is clearly described",
+    "fatality": "a death resulted from the offence conduct",
+    "threats-used": "threats are clearly part of the commission of the offence",
+    "trust-relationship": "the accused abused a relationship of trust, authority, or care",
+    "deception-used": "deception or false pretence was clearly used in the commission of the offence",
+    "identification-issue": "identification or recognition is a live issue in the judgment for that offence",
+    "confession-issue": "a confession or admission is a live issue in the judgment for that offence",
+    "circumstantial-evidence": "circumstantial evidence is materially discussed for that offence",
+    "consent-disputed": "consent is a live factual or legal issue for that offence",
+}
+
+
 JUDGMENT_EXTRACTION_PROMPT = """
 # Role
 
-You are a legal information extraction system. Your task is to extract structured information about offences and
-sentencing from the text of a court judgment.
+You are a legal information extraction system. Your task is to extract structured information about offences
+and sentencing from the text of a court judgment.
 
 # Task
 
@@ -191,6 +205,31 @@ You must also extract any sentences imposed on the accused or appellant and ensu
 associated with the relevant offence.
 
 Only return offences and sentences that relate directly to the accused or appellant in the case.
+
+# Case-Specific Tags
+
+For each extracted offence, you may also return `case_tags`.
+
+`offence_id` is for canonical offence matching to the database.
+`case_tags` are case-specific semantic facts grounded in this judgment about that specific extracted offence.
+
+Allowed case tags only:
+
+__ALLOWED_CASE_TAGS__
+
+Rules for case tags:
+- Only use tags from the allowed list.
+- Return tags only when clearly grounded in the judgment text.
+- Tags are optional; an empty list is valid.
+- Tags attach to the relevant extracted offence.
+- Do not infer tags merely because an offence type often involves them.
+- Rape does not automatically imply `consent-disputed`; only tag it if consent is actually a live issue in the judgment.
+- Robbery does not automatically imply `weapon-used`; only tag it if weapon use is stated.
+- Defilement does not automatically imply `child-victim`; only tag it if the victim's minority is clearly stated or
+is inherent from the described charge text.
+- No guessing.
+- No synonyms.
+- No free-form tags.
 
 # Identifying Case Offences
 
@@ -235,8 +274,6 @@ You must NOT assign an offence_id when:
 - the returned offences are related but not the same
 - the result is merely the “closest” available offence
 - the wording in the judgment and the wording in the result refer to different offences
-
-
 
 Example tool call:
 
@@ -299,6 +336,9 @@ Because this clearly matches the offence “robbery with violence,” the offenc
 
 The sentence “ten years imprisonment” is extracted and converted to 120 months.
 
+Because the judgment text only states conviction and sentence, and does not clearly state any allowed case-tag facts,
+`case_tags` should be an empty list here.
+
 # Example 2: Charge but Acquittal
 
 <text>
@@ -331,7 +371,39 @@ The accused pleaded guilty to the offence of careless driving and was fined KSh 
 
 Extract the offence **careless driving** and the sentence **fine of 20000**.
 
-# Example 5: Negative Example – Legal Discussion
+# Example 5: Robbery With Case Tags
+
+<text>
+The appellant, acting jointly with two others, robbed the complainant of cash and a phone while armed with a panga
+and threatening to cut him if he resisted. The trial court convicted the appellant of robbery with violence and
+sentenced him to twenty years imprisonment.
+</text>
+
+Return the offence **robbery with violence** with case tags:
+- `weapon-used`
+- `group-offending`
+- `threats-used`
+
+# Example 6: Defilement With Child Victim
+
+<text>
+The appellant was convicted of defilement of a 13-year-old girl and sentenced to fifteen years imprisonment.
+</text>
+
+Return the offence **defilement** with case tag:
+- `child-victim`
+
+# Example 7: Rape Appeal With Consent Disputed
+
+<text>
+The appellant was convicted of rape. On appeal he argued that the complainant consented and that the trial court
+failed to evaluate that defence. The High Court reviewed the evidence and upheld the conviction.
+</text>
+
+Return the offence **rape** with case tag:
+- `consent-disputed`
+
+# Example 8: Negative Example – Legal Discussion
 
 <text>
 In the case of R v Smith, the court explained that the offence of theft requires proof of dishonest appropriation.
@@ -340,7 +412,7 @@ In the case of R v Smith, the court explained that the offence of theft requires
 The offence **theft** appears in this sentence but is part of a general legal explanation. It does not relate to the
 accused in the present case and must therefore be ignored.
 
-# Example 6: Negative Example – Hypothetical
+# Example 9: Negative Example – Hypothetical
 
 <text>
 If a person commits robbery but does not use violence, the offence may be simple robbery rather than robbery with
@@ -350,7 +422,25 @@ violence.
 The offences **robbery** and **robbery with violence** appear only in a hypothetical explanation of the law and must
 not be extracted.
 
-# Example 7: Negative Example – Offence by Another Person
+# Example 10: Negative Example – Do Not Infer Common Tags
+
+<text>
+The appellant was convicted of rape and sentenced to ten years imprisonment. The judgment discusses only credibility,
+without any live dispute about consent.
+</text>
+
+Extract the offence and sentence, but `case_tags` must be empty. Do not infer `consent-disputed`.
+
+# Example 11: Negative Example – Weapon Not Stated
+
+<text>
+The appellant was convicted of robbery with violence after snatching a handbag and sentenced to fifteen years
+imprisonment. The judgment does not say that any weapon was used.
+</text>
+
+Extract the offence and sentence, but do not add `weapon-used`.
+
+# Example 12: Negative Example – Offence by Another Person
 
 <text>
 The prosecution witness testified that another suspect had earlier committed the offence of burglary in a
@@ -360,7 +450,7 @@ different incident.
 The offence **burglary** mentioned here relates to another person and not to the accused in this case. It must be
 ignored.
 
-# Example 8: Appeal Context
+# Example 13: Appeal Context
 
 <text>
 The appellant appealed against his conviction for defilement and the sentence of fifteen years imprisonment imposed by
@@ -370,7 +460,7 @@ the trial court.
 The offence **defilement** must be extracted because it is the conviction being appealed. The sentence of fifteen years
 imprisonment must also be extracted and converted to 180 months.
 
-# Example 9: Extracted Offence With No Database Match
+# Example 14: Extracted Offence With No Database Match
 
 <text>
 The appellant was charged with assault causing actual bodily harm and sentenced to twelve months imprisonment.
@@ -398,6 +488,7 @@ Extraction:
     "offence_id": null,
     "offence_title": null,
     "extracted_offence": "assault causing actual bodily harm",
+    "case_tags": [],
     "sentences": [
       {
         "sentence_type": "imprisonment",
@@ -409,7 +500,13 @@ Extraction:
     ]
   }
 ]
-"""
+""".replace(
+    "__ALLOWED_CASE_TAGS__",
+    "\n".join(
+        f"- {tag}: {CASE_TAG_PROMPT_DESCRIPTIONS[tag]}"
+        for tag in JUDGMENT_OFFENCE_CASE_TAGS
+    ),
+)
 
 
 class SentenceExtraction(BaseModel):
@@ -437,11 +534,24 @@ class OffenceExtraction(BaseModel):
     extracted_offence: str = Field(
         description="Clean offence label as written/normalized (no statute numbers)."
     )
+    case_tags: List[str] = []
     sentences: List[SentenceExtraction] = []
+
+
+class OutcomeExtraction(BaseModel):
+    extracted_outcome: str = Field(
+        description="""Canonical outcome label. Must exactly match one of the canonical outcome names provided in the
+                        prompt.
+                    """
+    )
 
 
 class JudgmentOffenceExtraction(BaseModel):
     offences: List[OffenceExtraction] = []
+
+
+class JudgmentOutcomeExtraction(BaseModel):
+    outcomes: List[OutcomeExtraction] = []
 
 
 offence_extraction_agent = Agent(
@@ -461,6 +571,75 @@ def extract_offences_and_sentences(judgment_text: str) -> JudgmentOffenceExtract
     )
     log_agent_reasoning(result)
     log.info("Extraction result: %s", result.final_output)
+    return result.final_output
+
+
+OUTCOME_EXTRACTION_PROMPT = """
+# Role
+
+You are a legal information extraction system. Your task is to extract structured information about case outcomes
+from the text of a court judgment.
+
+# Task
+
+From the judgment text, identify the dispositive outcomes for the present case.
+
+Only extract outcomes that describe the actual result of the present judgment or the result being affirmed, varied,
+or overturned on appeal.
+
+The outcome labels you return must come from this canonical list only:
+
+{allowed_case_outcomes}
+
+# Identifying Case Outcomes
+
+Typical examples include outcomes such as an appeal being dismissed or allowed, a conviction being upheld or quashed,
+a sentence being affirmed, reduced, enhanced, or set aside, or an acquittal being entered.
+
+Outcomes may be multiple. For example, a judgment may dismiss an appeal against conviction but allow an appeal against
+sentence, or it may quash a conviction and set aside the sentence. Return each distinct canonical outcome that is
+clearly supported by the judgment text.
+
+Do not extract generic narrative statements that are not dispositive outcomes.
+
+Focus on the final operative result, not every intermediate discussion.
+
+When you return `extracted_outcome`, it must be exactly one of the canonical outcome labels above.
+
+Do not invent new labels, paraphrase the labels, or return near-matches. If none of the canonical labels fit, return
+no outcome for that point.
+"""
+
+
+def extract_outcomes(judgment_text: str) -> JudgmentOutcomeExtraction:
+    canonical_outcome_names = list(
+        Outcome.objects.order_by("name").values_list("name", flat=True)
+    )
+    if not canonical_outcome_names:
+        log.info("No canonical outcomes configured; skipping outcome extraction.")
+        return JudgmentOutcomeExtraction()
+
+    outcome_extraction_agent = Agent(
+        name="Outcome Extractor",
+        instructions=OUTCOME_EXTRACTION_PROMPT.format(
+            allowed_case_outcomes="\n".join(
+                f"- {outcome}" for outcome in canonical_outcome_names
+            )
+        ),
+        tools=[],
+        output_type=JudgmentOutcomeExtraction,
+        model_settings=ModelSettings(
+            reasoning=Reasoning(effort="medium", summary="auto")
+        ),
+        model="gpt-5-mini",
+    )
+
+    result = Runner.run_sync(
+        outcome_extraction_agent,
+        judgment_text,
+    )
+    log_agent_reasoning(result)
+    log.info("Outcome extraction result: %s", result.final_output)
     return result.final_output
 
 

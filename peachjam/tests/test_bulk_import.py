@@ -5,7 +5,14 @@ import tablib
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from peachjam.models import GenericDocument, Judgment, Offence, Taxonomy, Work
+from peachjam.models import (
+    GenericDocument,
+    Judgment,
+    Offence,
+    OffenceCategory,
+    Taxonomy,
+    Work,
+)
 from peachjam.resources import (
     GenericDocumentResource,
     JudgmentResource,
@@ -278,6 +285,12 @@ class OffenceBulkImportTestCase(TestCase):
             title="Penal Code",
             frbr_uri="/akn/tz/act/2002/16",
         )
+        self.violence = OffenceCategory.objects.get_or_create(
+            name="Violence", defaults={"slug": "violence"}
+        )[0]
+        self.public_safety = OffenceCategory.objects.get_or_create(
+            name="Public Safety", defaults={"slug": "public-safety"}
+        )[0]
 
     def test_offence_import(self):
         headers = [
@@ -286,6 +299,8 @@ class OffenceBulkImportTestCase(TestCase):
             "code",
             "title",
             "description",
+            "categories",
+            "offence_tags",
             "elements",
             "penalty",
         ]
@@ -295,6 +310,8 @@ class OffenceBulkImportTestCase(TestCase):
             "ROB-296",
             "Robbery with violence",
             "The accused steals while armed with a dangerous weapon.",
+            "violence|public-safety",
+            "weapon-capable|inchoate",
             "stealing property|armed with a dangerous weapon",
             "Imprisonment for life",
         ]
@@ -307,6 +324,11 @@ class OffenceBulkImportTestCase(TestCase):
 
         offence = Offence.objects.get(code="ROB-296")
         self.assertEqual(self.work, offence.work)
+        self.assertCountEqual(
+            offence.categories.values_list("slug", flat=True),
+            ["violence", "public-safety"],
+        )
+        self.assertEqual(offence.offence_tags, ["weapon-capable", "inchoate"])
         self.assertEqual(
             ["stealing property", "armed with a dangerous weapon"], offence.elements
         )
@@ -318,13 +340,17 @@ class OffenceBulkImportTestCase(TestCase):
             code="ROB-296",
             title="Robbery with violence",
             description="The accused steals while armed with a dangerous weapon.",
+            offence_tags=["weapon-capable", "inchoate"],
             elements=["stealing property", "armed with a dangerous weapon"],
             penalty="Imprisonment for life",
         )
+        offence.categories.set([self.violence, self.public_safety])
 
         dataset = OffenceResource().export(Offence.objects.filter(pk=offence.pk))
 
         self.assertEqual(self.work.frbr_uri, dataset.dict[0]["work"])
+        self.assertEqual("violence|public-safety", dataset.dict[0]["categories"])
+        self.assertEqual("weapon-capable|inchoate", dataset.dict[0]["offence_tags"])
         self.assertEqual(
             "stealing property|armed with a dangerous weapon",
             dataset.dict[0]["elements"],

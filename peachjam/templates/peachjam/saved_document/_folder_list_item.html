@@ -1,10 +1,14 @@
 {% load i18n %}
 <div id="saved-doc-{{ saved_document.pk }}" class="border-bottom">
   <div class="py-2">
-    <div class="d-flex">
+    <div class="d-flex align-items-start">
       <div class="me-2">
         <a href="{{ saved_document.document.get_absolute_url }}">{{ saved_document.document.title }}</a>
         {% include 'peachjam/_document_labels.html' with labels=saved_document.document.labels.all %}
+        {% if saved_document.document.blurb %}<div class="my-2">{{ saved_document.document.blurb }}</div>{% endif %}
+        {% if saved_document.document.flynote %}
+          <div class="fst-italic my-2">{{ saved_document.document.flynote|linebreaksbr }}</div>
+        {% endif %}
       </div>
       <button class="btn btn-link ms-auto p-0"
               type="button"
@@ -17,10 +21,10 @@
       </button>
       <button class="btn btn-link text-danger p-0 ms-2"
               type="button"
-              title="{% trans "Delete" %}"
-              hx-post="{% url 'saved_document_delete' saved_document.id %}?next={% url 'folder_list' %}"
+              title="{% trans "Remove from folder" %}"
+              hx-post="{% url 'saved_document_remove_from_folder' saved_document.id folder.id %}?next={% url 'folder_list' %}"
               hx-target="#folders-list"
-              hx-confirm="{% trans "Are you sure you want to remove this document?" %}">
+              hx-confirm="{% trans "Are you sure you want to remove this document from this folder?" %}">
         <i class="bi bi-trash"></i>
       </button>
     </div>

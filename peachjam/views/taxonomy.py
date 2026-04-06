@@ -55,7 +55,10 @@ class TaxonomyFirstLevelView(AllowedTaxonomyMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["children"] = self.object.get_allowed_children(self.request.user)
+        children = list(self.object.get_allowed_children(self.request.user))
+        for child in children:
+            child.root_slug = self.object.slug
+        context["children"] = children
         context["taxonomy_link_prefix"] = "taxonomy"
         return context
 
@@ -76,7 +79,7 @@ class TaxonomyDetailView(AllowedTaxonomyMixin, FilteredDocumentListView):
         root = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])
         taxonomy = get_object_or_404(Taxonomy, slug=self.kwargs["child"])
         # first check the root
-        if taxonomy.get_root() != root:
+        if taxonomy.path[: taxonomy.steplen] != root.path:
             raise Http404()
         return taxonomy
 
@@ -93,11 +96,14 @@ class TaxonomyDetailView(AllowedTaxonomyMixin, FilteredDocumentListView):
         context["taxonomy"] = self.taxonomy
         context["entity_profile"] = self.taxonomy.get_entity_profile()
         context["root"] = self.taxonomy
-        ancestors = self.taxonomy.get_ancestors()
+        ancestors = list(self.taxonomy.get_ancestors())
         if len(ancestors) > 1:
             context["root"] = ancestors[1]
+        root_slug = ancestors[0].slug if ancestors else self.taxonomy.slug
+        for ancestor in ancestors:
+            ancestor.root_slug = root_slug
         context["ancestors"] = ancestors
-        context["root_taxonomy"] = context["root"].get_root().slug
+        context["root_taxonomy"] = root_slug
         context["taxonomy_tree"] = self.allowed_taxonomies["tree"]
         context["first_level_taxonomy"] = context["taxonomy_tree"][0]["data"]["name"]
         context["is_leaf_node"] = not (context["taxonomy_tree"][0].get("children"))

@@ -4,6 +4,7 @@ from liiweb.settings import *  # noqa
 
 INSTALLED_APPS = ["eswatinilii.apps.EswatiniLIIConfig"] + INSTALLED_APPS  # noqa
 
+ALLOWED_HOSTS = build_allowed_hosts("eswatinilii.org", "www.eswatinilii.org")  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "EswatiniLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "EswatiniLII"  # noqa

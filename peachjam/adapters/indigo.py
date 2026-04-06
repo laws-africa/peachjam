@@ -618,18 +618,26 @@ class IndigoAdapter(RequestsAdapter):
         r = self.client_get(url)
         return len(r.content)
 
+    def clear_publication_file(self, doc):
+        if not hasattr(doc, "publication_file"):
+            return
+
+        publication_file = doc.publication_file
+        if publication_file.file:
+            logger.info(
+                f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
+            )
+            publication_file.file.delete(save=False)
+
+        logger.info(
+            f"  Deleting existing publication file record on {doc.work_frbr_uri}"
+        )
+        publication_file.delete()
+
     def create_publication_file(self, publication_document, doc, title, stub=False):
         from peachjam.models import PublicationFile
 
         logger.info(f"Creating / updating a publication file for {title}")
-
-        # first delete any existing PublicationFile file: a new one will be saved if needed
-        if hasattr(doc, "publication_file"):
-            if doc.publication_file.file:
-                logger.info(
-                    f"  Deleting existing PublicationFile file on {doc.work_frbr_uri}"
-                )
-                doc.publication_file.file.delete(save=False)
 
         if stub:
             if hasattr(doc, "source_file"):
@@ -646,13 +654,7 @@ class IndigoAdapter(RequestsAdapter):
                     },
                 )
             else:
-                if hasattr(doc, "publication_file"):
-                    logger.info(
-                        "  Stub: No source file, deleting existing publication file"
-                    )
-                    doc.publication_file.delete()
-                else:
-                    logger.info("  Stub: No source file, skipping")
+                logger.info("  Stub: No source file, skipping")
         else:
             url = publication_document["url"]
             filename = (
@@ -736,6 +738,7 @@ class IndigoAdapter(RequestsAdapter):
             self.download_source_file(f"{url}.pdf", created_document, document["title"])
 
         # the publication file is always the publication file -- it will use the source file where relevant
+        self.clear_publication_file(created_document)
         if pubdoc:
             self.create_publication_file(
                 pubdoc, created_document, document["title"], stub=document["stub"]
