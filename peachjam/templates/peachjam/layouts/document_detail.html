@@ -38,7 +38,7 @@
             <div>
               <h1 class="doc-title d-flex">
                 <span>{{ document.title }}</span>
-                <span class="saved-document-star--{{ document.pk }}"></span>
+                <span id="saved-document-star--{{ document.pk }}"></span>
               </h1>
               {% block sub-title %}{% endblock %}
               {% include 'peachjam/_document_labels.html' %}

@@ -36,7 +36,7 @@
               <i class="bi bi-translate"></i>
             </span>
           {% endif %}
-          <span class="saved-document-star--{{ document.pk }}"></span>
+          {% if not document.is_table_child %}<span id="saved-document-star--{{ document.pk }}"></span>{% endif %}
         </div>
         {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
         {% if doc_table_show_treatments %}
@@ -50,7 +50,7 @@
             {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
           </div>
         {% endif %}
-        <div class="saved-document-table-detail--{{ document.pk }}"></div>
+        {% if not document.is_table_child %}<div id="saved-document-table-detail--{{ document.pk }}"></div>{% endif %}
       </div>
     </td>
   {% endif %}

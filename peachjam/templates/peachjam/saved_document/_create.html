@@ -10,8 +10,7 @@
   <i class="bi bi-star"></i>
   {% trans 'Save' %}
 </button>
-<span class="saved-document-star--{{ document.id }}"
-      hx-swap-oob="outerHTML:.saved-document-star--{{ document.id }}"></span>
-<span class="saved-document-table-detail--{{ document.id }}"
-      hx-swap-oob="outerHTML:.saved-document-table-detail--{{ document.id }}"></span>
+<span hx-swap-oob="true" id="saved-document-star--{{ document.id }}"></span>
+<span hx-swap-oob="true"
+      id="saved-document-table-detail--{{ document.id }}"></span>
 <div id="saved-document-detail--{{ document.id }}" hx-swap-oob="true"></div>
