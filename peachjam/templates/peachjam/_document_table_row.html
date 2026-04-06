@@ -24,6 +24,7 @@
       <div class="{% if document.is_table_child %}ms-3 ps-3 border-start border-2 border-light{% endif %}">
         <div class="d-flex align-items-start flex-wrap gap-2">
           <a href="{{ document.get_absolute_url }}"
+             data-key-link="document"
              class="{% if document.children %}fw-semibold{% endif %}">{{ document.title }}</a>
           {% if document.children_count_label %}
             <span class="badge rounded-pill text-bg-light border">{{ document.children_count_label }}</span>
