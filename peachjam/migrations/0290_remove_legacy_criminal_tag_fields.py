@@ -8,14 +8,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterModelOptions(
-            name="offencecategory",
-            options={
-                "ordering": ("name",),
-                "verbose_name": "offence category",
-                "verbose_name_plural": "offence categories",
-            },
-        ),
         migrations.RemoveField(
             model_name="judgmentoffence",
             name="case_tags",

@@ -286,9 +286,11 @@ class OffenceBulkImportTestCase(TestCase):
             title="Penal Code",
             frbr_uri="/akn/tz/act/2002/16",
         )
-        self.violence = OffenceCategory.objects.get_or_create(name="Violence")[0]
+        self.violence = OffenceCategory.objects.get_or_create(
+            name="Violence", defaults={"slug": "violence"}
+        )[0]
         self.public_safety = OffenceCategory.objects.get_or_create(
-            name="Public Safety"
+            name="Public Safety", defaults={"slug": "public-safety"}
         )[0]
         self.weapon_capable = OffenceTag.objects.get_or_create(name="weapon-capable")[0]
         self.inchoate = OffenceTag.objects.get_or_create(name="inchoate")[0]
@@ -311,7 +313,7 @@ class OffenceBulkImportTestCase(TestCase):
             "ROB-296",
             "Robbery with violence",
             "The accused steals while armed with a dangerous weapon.",
-            "Violence|Public Safety",
+            "violence|public-safety",
             "weapon-capable|inchoate",
             "stealing property|armed with a dangerous weapon",
             "Imprisonment for life",
@@ -326,8 +328,8 @@ class OffenceBulkImportTestCase(TestCase):
         offence = Offence.objects.get(code="ROB-296")
         self.assertEqual(self.work, offence.work)
         self.assertCountEqual(
-            offence.categories.values_list("name", flat=True),
-            ["Violence", "Public Safety"],
+            offence.categories.values_list("slug", flat=True),
+            ["violence", "public-safety"],
         )
         self.assertCountEqual(
             offence.tags.values_list("name", flat=True),
@@ -353,7 +355,7 @@ class OffenceBulkImportTestCase(TestCase):
         dataset = OffenceResource().export(Offence.objects.filter(pk=offence.pk))
 
         self.assertEqual(self.work.frbr_uri, dataset.dict[0]["work"])
-        self.assertEqual("Public Safety|Violence", dataset.dict[0]["categories"])
+        self.assertEqual("public-safety|violence", dataset.dict[0]["categories"])
         self.assertEqual("inchoate|weapon-capable", dataset.dict[0]["offence_tags"])
         self.assertEqual(
             "stealing property|armed with a dangerous weapon",
