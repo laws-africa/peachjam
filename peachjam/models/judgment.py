@@ -859,21 +859,40 @@ class OffenceCategory(models.Model):
     slug = models.SlugField(_("slug"), unique=True, blank=True)
     name = models.CharField(_("name"), max_length=255, unique=True)
     description = models.TextField(_("description"), blank=True)
-    order = models.IntegerField(_("order"), null=True, blank=True)
-    is_active = models.BooleanField(_("is active"), default=True)
 
     class Meta:
-        ordering = ("order", "name")
+        ordering = ("name",)
         verbose_name = _("offence category")
         verbose_name_plural = _("offence categories")
 
     def __str__(self):
         return self.name
 
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        return super().save(*args, **kwargs)
+
+class OffenceTag(models.Model):
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("offence tag")
+        verbose_name_plural = _("offence tags")
+
+    def __str__(self):
+        return self.name
+
+
+class CaseTag(models.Model):
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("case tag")
+        verbose_name_plural = _("case tags")
+
+    def __str__(self):
+        return self.name
 
 
 class Offence(models.Model):
@@ -908,13 +927,11 @@ class Offence(models.Model):
         related_name="offences",
         verbose_name=_("categories"),
     )
-    offence_tags = ArrayField(
-        base_field=models.CharField(max_length=100),
-        default=list,
+    tags = models.ManyToManyField(
+        "OffenceTag",
         blank=True,
-        help_text=_(
-            "Flexible semantic tags that are inherent to the offence definition."
-        ),
+        related_name="offences",
+        verbose_name=_("tags"),
     )
     elements = ArrayField(
         base_field=models.CharField(max_length=4096),
@@ -954,13 +971,11 @@ class JudgmentOffence(models.Model):
         related_name="judgment_offence",
         verbose_name=_("judgments"),
     )
-    case_tags = ArrayField(
-        base_field=models.CharField(max_length=100),
-        default=list,
+    tags = models.ManyToManyField(
+        "CaseTag",
         blank=True,
-        help_text=_(
-            "Case-specific semantic tags extracted from the judgment for this offence."
-        ),
+        related_name="judgment_offences",
+        verbose_name=_("case tags"),
     )
 
     class Meta:

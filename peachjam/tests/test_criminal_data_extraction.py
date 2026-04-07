@@ -30,11 +30,13 @@ from peachjam.analysis.criminal_data.vocabulary import (
     normalize_tag_array,
 )
 from peachjam.models import (
+    CaseTag,
     Court,
     Judgment,
     JudgmentOffence,
     Offence,
     OffenceCategory,
+    OffenceTag,
     Outcome,
     Work,
 )
@@ -511,6 +513,8 @@ class CriminalDataExtractorTests(TestCase):
             jurisdiction=Country.objects.get(pk="ZA"),
         )
         self.robbery = Offence.objects.get(title="Robbery with violence")
+        for case_tag_name in JUDGMENT_OFFENCE_CASE_TAGS:
+            CaseTag.objects.get_or_create(name=case_tag_name)
         self.conviction_upheld = Outcome.objects.create(
             name="Conviction upheld",
             description="The conviction is affirmed on appeal.",
@@ -648,7 +652,10 @@ class CriminalDataExtractorTests(TestCase):
             CriminalDataExtractor().extract(self.judgment)
 
         jo = self.judgment.judgment_offence.get()
-        self.assertEqual(jo.case_tags, ["weapon-used", "group-offending"])
+        self.assertEqual(
+            list(jo.tags.values_list("name", flat=True)),
+            ["group-offending", "weapon-used"],
+        )
         self.assertTrue(
             any("dropping invalid case tags" in message for message in logs.output)
         )
@@ -706,9 +713,21 @@ class CriminalDataModelTests(TestCase):
             jurisdiction=Country.objects.get(pk="ZA"),
         )
 
-    def test_offence_category_slug_auto_populates(self):
+    def test_offence_category_is_stringified_by_name(self):
         category = OffenceCategory.objects.create(name="Public Safety")
-        self.assertEqual(category.slug, "public-safety")
+        self.assertEqual(str(category), "Public Safety")
+
+    def test_offence_tag_name_is_unique(self):
+        OffenceTag.objects.create(name="weapon-capable")
+
+        with self.assertRaises(IntegrityError):
+            OffenceTag.objects.create(name="weapon-capable")
+
+    def test_case_tag_name_is_unique(self):
+        CaseTag.objects.create(name="weapon-used")
+
+        with self.assertRaises(IntegrityError):
+            CaseTag.objects.create(name="weapon-used")
 
     def test_offence_is_unique_by_work_and_provision_eid(self):
         Offence.objects.create(
@@ -737,6 +756,48 @@ class CriminalDataModelTests(TestCase):
 
         with self.assertRaises(IntegrityError):
             JudgmentOffence.objects.create(judgment=self.judgment, offence=offence)
+
+    def test_offence_tags_many_to_many(self):
+        offence = Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_3",
+            code="C-1",
+            title="Attempted robbery",
+        )
+        offence.tags.set(
+            [
+                OffenceTag.objects.create(name="weapon-capable"),
+                OffenceTag.objects.create(name="inchoate"),
+            ]
+        )
+
+        self.assertEqual(
+            list(offence.tags.values_list("name", flat=True)),
+            ["inchoate", "weapon-capable"],
+        )
+
+    def test_judgment_offence_tags_many_to_many(self):
+        offence = Offence.objects.create(
+            work=self.work,
+            provision_eid="sec_4",
+            code="D-1",
+            title="Robbery",
+        )
+        judgment_offence = JudgmentOffence.objects.create(
+            judgment=self.judgment,
+            offence=offence,
+        )
+        judgment_offence.tags.set(
+            [
+                CaseTag.objects.create(name="weapon-used"),
+                CaseTag.objects.create(name="group-offending"),
+            ]
+        )
+
+        self.assertEqual(
+            list(judgment_offence.tags.values_list("name", flat=True)),
+            ["group-offending", "weapon-used"],
+        )
 
 
 class CriminalDataPromptTests(TestCase):

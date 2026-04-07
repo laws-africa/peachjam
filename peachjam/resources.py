@@ -62,6 +62,7 @@ from peachjam.models import (
     MatterType,
     Offence,
     OffenceCategory,
+    OffenceTag,
     Outcome,
     Ratification,
     RatificationCountry,
@@ -801,12 +802,12 @@ class OffenceResource(resources.ModelResource):
     categories = fields.Field(
         column_name="categories",
         attribute="categories",
-        widget=ManyToManyRequiredWidget(OffenceCategory, separator="|", field="slug"),
+        widget=ManyToManyRequiredWidget(OffenceCategory, separator="|", field="name"),
     )
     offence_tags = fields.Field(
         column_name="offence_tags",
-        attribute="offence_tags",
-        widget=SimpleArrayWidget(separator="|"),
+        attribute="tags",
+        widget=ManyToManyRequiredWidget(OffenceTag, separator="|", field="name"),
     )
     elements = fields.Field(
         column_name="elements",

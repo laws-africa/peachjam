@@ -3,7 +3,14 @@ import os
 
 from django.db import transaction
 
-from peachjam.models import Judgment, JudgmentOffence, Offence, Outcome, Sentence
+from peachjam.models import (
+    CaseTag,
+    Judgment,
+    JudgmentOffence,
+    Offence,
+    Outcome,
+    Sentence,
+)
 
 from .agent import (
     extract_case_type_filing_year,
@@ -90,12 +97,27 @@ class CriminalDataExtractor:
                     invalid_case_tags,
                 )
 
+            case_tag_map = CaseTag.objects.in_bulk(case_tags, field_name="name")
+            matched_case_tags = [
+                case_tag_map[name] for name in case_tags if name in case_tag_map
+            ]
+            missing_case_tags = [name for name in case_tags if name not in case_tag_map]
+
+            if missing_case_tags:
+                log.warning(
+                    "canonical case tags missing from DB for offence %s on judgment %s: %s",
+                    offence.id,
+                    judgment.id,
+                    missing_case_tags,
+                )
+
             jo = JudgmentOffence.objects.create(
                 judgment=judgment,
                 offence=offence,
-                case_tags=case_tags,
             )
-            log.info("Created %s with case tags %s", jo, case_tags)
+            jo.tags.set(matched_case_tags)
+            persisted_case_tags = [tag.name for tag in matched_case_tags]
+            log.info("Created %s with case tags %s", jo, persisted_case_tags)
 
             for s in match.sentences:
                 sentence = Sentence.objects.create(
