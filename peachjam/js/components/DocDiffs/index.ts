@@ -8,9 +8,11 @@ class DocDiffsManager {
   private inlineDiff: any;
   private serviceUrl: string;
   private readonly frbrExpressionUri: string;
+  private readonly documentId: string;
 
-  constructor (frbrExpressionUri: string, gutter: HTMLElement, serviceBaseUrl: string) {
+  constructor (frbrExpressionUri: string, documentId: string, gutter: HTMLElement, serviceBaseUrl: string) {
     this.frbrExpressionUri = frbrExpressionUri;
+    this.documentId = documentId;
     this.gutter = gutter;
     this.serviceUrl = this.getServiceUrl(serviceBaseUrl);
     this.loadProvisions();
@@ -67,7 +69,7 @@ class DocDiffsManager {
     this.inlineDiff = createAndMountApp({
       component: ProvisionDiffInline,
       props: {
-        documentId: provision.id,
+        documentId: this.documentId,
         provision: provision,
         frbrExpressionUri: this.frbrExpressionUri,
         serviceUrl: this.serviceUrl

@@ -11,6 +11,7 @@ from peachjam.views import (
     CaseSummaryView,
     ComparePortionsView,
     DocumentAttachmentView,
+    DocumentCapabilitiesView,
     DocumentCitationsTabView,
     DocumentCitationsView,
     DocumentDebugView,
@@ -105,6 +106,11 @@ urlpatterns = [
         "document-problem/",
         DocumentProblemView.as_view(),
         name="document_problem",
+    ),
+    path(
+        "api/documents/<int:pk>/capabilities",
+        DocumentCapabilitiesView.as_view(),
+        name="document_capabilities",
     ),
     # Annotations
     path(
