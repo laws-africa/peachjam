@@ -802,7 +802,7 @@ class OffenceResource(resources.ModelResource):
     categories = fields.Field(
         column_name="categories",
         attribute="categories",
-        widget=ManyToManyRequiredWidget(OffenceCategory, separator="|", field="name"),
+        widget=ManyToManyRequiredWidget(OffenceCategory, separator="|", field="slug"),
     )
     offence_tags = fields.Field(
         column_name="offence_tags",

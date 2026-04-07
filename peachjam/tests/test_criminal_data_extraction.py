@@ -713,9 +713,9 @@ class CriminalDataModelTests(TestCase):
             jurisdiction=Country.objects.get(pk="ZA"),
         )
 
-    def test_offence_category_is_stringified_by_name(self):
+    def test_offence_category_slug_auto_populates(self):
         category = OffenceCategory.objects.create(name="Public Safety")
-        self.assertEqual(str(category), "Public Safety")
+        self.assertEqual(category.slug, "public-safety")
 
     def test_offence_tag_name_is_unique(self):
         OffenceTag.objects.create(name="weapon-capable")

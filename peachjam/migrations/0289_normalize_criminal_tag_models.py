@@ -1,17 +1,5 @@
 from django.db import migrations, models
 
-OFFENCE_CATEGORY_DESCRIPTIONS = {
-    "Violence": "Offences involving physical force, injury, or threats of violence.",
-    "Sexual and Gender-Based Violence": "Offences involving sexual harm, coercion, or gender-based abuse.",
-    "Property": "Offences involving theft, damage, trespass, or unlawful interference with property.",
-    "Financial and Economic": "Offences involving fraud, corruption, or unlawful financial gain.",
-    "Public Order": "Offences involving disorder, disturbance, or disruption of public peace.",
-    "State and Political": "Offences against the state, public authority, or political order.",
-    "Justice System": "Offences affecting courts, investigations, evidence, or the administration of justice.",
-    "Public Safety": "Offences creating danger to the public, transport, health, or general safety.",
-    "Morality": "Offences historically framed around morality, decency, or prohibited conduct.",
-}
-
 OFFENCE_TAG_DESCRIPTIONS = {
     "child-targeted": "The offence definition specifically targets children as victims or protected persons.",
     "deception-based": "The offence definition depends on deceit, fraud, or false pretences.",
@@ -67,15 +55,8 @@ def get_matched_legacy_tags(tags, tag_map):
 
 
 def seed_criminal_vocab_models(apps, schema_editor):
-    OffenceCategory = apps.get_model("peachjam", "OffenceCategory")
     OffenceTag = apps.get_model("peachjam", "OffenceTag")
     CaseTag = apps.get_model("peachjam", "CaseTag")
-
-    for name, description in OFFENCE_CATEGORY_DESCRIPTIONS.items():
-        OffenceCategory.objects.update_or_create(
-            name=name,
-            defaults={"description": description},
-        )
 
     for name, description in OFFENCE_TAG_DESCRIPTIONS.items():
         OffenceTag.objects.update_or_create(
