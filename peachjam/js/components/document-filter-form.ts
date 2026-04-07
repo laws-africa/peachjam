@@ -52,7 +52,7 @@ export default class DocumentFilterForm {
   }
 
   cleanupOffcanvas () {
-    const offcanvasElement = this.root.querySelector('#document-list-filters-offcanvas') as HTMLElement | null;
+    const offcanvasElement = this.root.querySelector('[data-document-table-offcanvas]') as HTMLElement | null;
     if (!offcanvasElement) {
       return;
     }
