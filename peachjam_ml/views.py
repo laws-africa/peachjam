@@ -18,6 +18,9 @@ class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
     slug_field = "expression_frbr_uri"
     model = CoreDocument
 
+    def get_document_table_id(self, scope):
+        return f"doc-table-{scope}-{self.object.pk}"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # get the similar documents, best first
@@ -33,6 +36,7 @@ class SimilarDocumentsDocumentDetailView(SubscriptionRequiredMixin, DetailView):
         context["similar_documents"] = [
             docs.get(sd["document_id"]) for sd in similar_documents
         ]
+        context["similar_documents_table_id"] = self.get_document_table_id("similar")
         return context
 
 
@@ -41,6 +45,9 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
     template_name = "peachjam/_similar_documents_folder.html"
     subscription_required_template = template_name
     model = Folder
+
+    def get_document_table_id(self, scope):
+        return f"doc-table-{scope}-{self.object.pk}"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -62,4 +69,5 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
         context["similar_documents"] = [
             docs.get(sd["document_id"]) for sd in similar_documents
         ]
+        context["similar_documents_table_id"] = self.get_document_table_id("similar")
         return context
