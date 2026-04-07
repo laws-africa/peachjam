@@ -8,9 +8,9 @@
                 type="button"
                 title="{{ PEACHJAM_SETTINGS.subleg_label }}"
                 data-bs-toggle="collapse"
-                data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
+                data-bs-target="#{{ doc_table_dom_id|default:'doc-table' }}-children-{{ forloop.counter0 }}"
                 aria-expanded="false"
-                aria-controls="doc-table-children-{{ forloop.counter0 }}">
+                aria-controls="{{ doc_table_dom_id|default:'doc-table' }}-children-{{ forloop.counter0 }}">
           <i class="bi"></i>
         </button>
       {% endif %}

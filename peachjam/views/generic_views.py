@@ -431,6 +431,9 @@ class BaseDocumentDetailView(DetailView):
         # override in subclass to add subscription-related context
         return context
 
+    def get_document_table_id(self, scope):
+        return f"doc-table-{scope}-{self.object.pk}"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
@@ -492,6 +495,8 @@ class BaseDocumentDetailView(DetailView):
 
         context["download_options"] = self.get_download_options()
         context["KEY_LINK_PAGE"] = "document_detail"
+        context["related_documents_table_id"] = self.get_document_table_id("related")
+        context["similar_documents_table_id"] = self.get_document_table_id("similar")
 
         # provide extra context for analytics
         self.get_subscription_permissions_context(context)
