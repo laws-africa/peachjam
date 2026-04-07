@@ -1,36 +1,34 @@
 <template>
   <la-gutter-item :anchor.prop="anchorElement">
     <i
-      class="`bi bi-link mobile-gutter-item-icon"
+      class="bi bi-link mobile-gutter-item-icon"
       role="button"
       @click="activate"
     />
     <div class="card gutter-item-card">
       <div class="card-body">
-        <p>
+        <p class="mb-0">
           <button class="btn btn-sm btn-outline-secondary float-end ms-1" @click="edit">
             {{ $t('Edit') }}
           </button>
           {{ link.text }}
-          <br>
-          <a
-            :href="link.url"
-          >
+        </p>
+        <div>
+          <a :href="link.url">
             {{ link.url }}
-            <span
-              v-if="link.is_external"
-              class="ms-1 text-muted"
-            >
-              ({{ $t('External') }})
-            </span>
+          </a>
+          <span
+            v-if="link.is_external"
+            class="badge bg-secondary ms-2"
+          >
+            {{ $t('External') }}
             <i
-              v-if="link.is_external"
               class="bi bi-box-arrow-up-right ms-1"
               :title="$t('External document')"
               aria-hidden="true"
             />
-          </a>
-        </p>
+          </span>
+        </div>
       </div>
     </div>
   </la-gutter-item>
