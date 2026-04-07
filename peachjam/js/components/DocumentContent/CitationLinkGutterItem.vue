@@ -13,7 +13,23 @@
           </button>
           {{ link.text }}
           <br>
-          <a :href="link.url" target="_blank">{{ link.url }}</a>
+          <a
+            :href="link.url"
+          >
+            {{ link.url }}
+            <span
+              v-if="link.is_external"
+              class="ms-1 text-muted"
+            >
+              ({{ $t('External') }})
+            </span>
+            <i
+              v-if="link.is_external"
+              class="bi bi-box-arrow-up-right ms-1"
+              :title="$t('External document')"
+              aria-hidden="true"
+            />
+          </a>
         </p>
       </div>
     </div>

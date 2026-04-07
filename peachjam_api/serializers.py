@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from rest_framework import serializers
 
 from peachjam.auth import user_display
@@ -140,10 +142,23 @@ class TargetSelectorField(serializers.JSONField):
 
 class CitationLinkSerializer(serializers.ModelSerializer):
     target_selectors = TargetSelectorField()
+    is_external = serializers.SerializerMethodField("get_is_external")
 
     class Meta:
         model = CitationLink
-        fields = ("id", "document", "text", "url", "target_id", "target_selectors")
+        fields = (
+            "id",
+            "document",
+            "text",
+            "url",
+            "target_id",
+            "target_selectors",
+            "is_external",
+        )
+
+    def get_is_external(self, instance):
+        parsed = urlparse(instance.url)
+        return bool(parsed.scheme or parsed.netloc)
 
 
 class LabelSerializer(serializers.ModelSerializer):

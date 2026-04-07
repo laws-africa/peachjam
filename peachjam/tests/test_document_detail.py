@@ -4,7 +4,7 @@ from django.test import TestCase
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
-from peachjam.models import Judgment, Legislation
+from peachjam.models import CitationLink, Judgment, Legislation
 
 User = get_user_model()
 
@@ -41,6 +41,20 @@ class DocumentViewTestCase(WebTest):
             '<script id="incoming-citations-json" type="application/json">[]</script>',
             html=True,
         )
+
+    def test_external_document_citation_links_include_external_flag(self):
+        doc = Judgment.objects.first()
+        CitationLink.objects.create(
+            document=doc,
+            text="External citation",
+            url="https://example.com/doc",
+            target_id="page-1",
+            target_selectors=[],
+        )
+
+        response = self.app.get(doc.get_absolute_url())
+
+        self.assertContains(response, '"is_external": true')
 
 
 class RestrictedDocumentsTestCase(WebTest):
