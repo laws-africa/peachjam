@@ -1,23 +1,24 @@
 {% load i18n %}
 <form method="get"
-      id="filter-form"
+      id="{{ doc_table_form_id }}"
       data-component="DocumentFilterForm"
-      hx-include="#filter-form"
+      hx-include="#{{ doc_table_form_id }}"
       hx-indicator=".htmx-progress"
-      hx-target="#filter-form"
+      hx-target="#{{ doc_table_form_id }}"
       hx-swap="outerHTML">
   <div class="d-block d-md-none my-2">
     <a class="btn btn-primary"
-       href="#document-list-filters-offcanvas"
+       href="#{{ doc_table_offcanvas_id }}"
        data-bs-toggle="offcanvas"
-       aria-controls="document-list-filters-offcanvas">
+       aria-controls="{{ doc_table_offcanvas_id }}">
       {% trans 'Filters' %}
     </a>
   </div>
   <div class="offcanvas offcanvas-start"
        tabindex="-1"
-       id="document-list-filters-offcanvas"
-       aria-labelledby="document-list-filters-offcanvas-title">
+       id="{{ doc_table_offcanvas_id }}"
+       data-document-table-offcanvas
+       aria-labelledby="{{ doc_table_offcanvas_title_id }}">
     <div class="offcanvas-header">
       <button type="button"
               class="btn-close ms-auto"
@@ -34,7 +35,7 @@
         {% endif %}
         <ul class="list-group {% if taxonomy_tree|length > 0 and not is_leaf_node %}pocketlaw-hidden{% endif %}">
           <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
-            <strong id="document-list-filters-offcanvas-title">{% trans 'Filters' %}</strong>
+            <strong id="{{ doc_table_offcanvas_title_id }}">{% trans 'Filters' %}</strong>
             {% if show_clear_all %}
               <div class="d-flex align-items-center">
                 <a href="{{ request.path }}"
@@ -64,18 +65,21 @@
                   <div>
                     <div class="letter-radiobox-container">
                       {% for value, label in facet.options %}
-                        <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
-                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                                 name="{{ facet_name }}"
-                                 type="{{ facet.type }}"
-                                 hx-get="{{ request.path }}"
-                                 {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
-                                 {% if value == facet.values %}checked{% endif %}
-                                 hx-include="#filter-form"
-                                 value="{{ value }}"/>
-                          <span class="letter-radiobox__text"
-                                data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
-                        </label>
+                        {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
+                          <label class="letter-radiobox"
+                                 for="{{ facet_option_id }}-{{ forloop.counter0 }}">
+                            <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
+                                   name="{{ facet_name }}"
+                                   type="{{ facet.type }}"
+                                   hx-get="{{ request.path }}"
+                                   {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
+                                   {% if value == facet.values %}checked{% endif %}
+                                   hx-include="#{{ doc_table_form_id }}"
+                                   value="{{ value }}"/>
+                            <span class="letter-radiobox__text"
+                                  data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
+                          </label>
+                        {% endwith %}
                       {% endfor %}
                     </div>
                   </div>
@@ -94,23 +98,25 @@
                     {% for value, label in facet.options %}
                       <div class="d-flex justify-content-between align-items-center"
                            data-facet-option>
-                        <div class="form-check flex-grow-1"
-                             data-track-event="Listing | Filter | {{ facet_name }}">
-                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                                 class="form-check-input"
-                                 name="{{ facet_name }}"
-                                 type="{{ facet.type }}"
-                                 hx-get="{{ request.path }}"
-                                 {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
-                                 {% if value in facet.values %}checked{% endif %}
-                                 hx-include="#filter-form"
-                                 value="{{ value }}"/>
-                          <label class="form-check-label"
-                                 data-facet-option-label
-                                 for="{{ facet_name }}_{{ forloop.counter0 }}">
-                            {{ label }}
-                          </label>
-                        </div>
+                        {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
+                          <div class="form-check flex-grow-1"
+                               data-track-event="Listing | Filter | {{ facet_name }}">
+                            <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
+                                   class="form-check-input"
+                                   name="{{ facet_name }}"
+                                   type="{{ facet.type }}"
+                                   hx-get="{{ request.path }}"
+                                   {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
+                                   {% if value in facet.values %}checked{% endif %}
+                                   hx-include="#{{ doc_table_form_id }}"
+                                   value="{{ value }}"/>
+                            <label class="form-check-label"
+                                   data-facet-option-label
+                                   for="{{ facet_option_id }}-{{ forloop.counter0 }}">
+                              {{ label }}
+                            </label>
+                          </div>
+                        {% endwith %}
                       </div>
                     {% endfor %}
                   </div>
@@ -126,10 +132,10 @@
         {% block content %}
           {% block filter-documents %}
             <div class="mb-2 d-flex pocketlaw-hidden"
-                 hx-target="#doc-table"
+                 hx-target="#{{ doc_table_id }}"
                  {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
               <div class="flex-grow-1 me-2">
-                <input id="filter-input"
+                <input id="{{ doc_table_filter_input_id }}"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
                        hx-sync="this:replace"
@@ -149,7 +155,7 @@
               <div class="d-none d-md-block ms-2">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
-                        hx-sync="#filter-input:replace"
+                        hx-sync="#{{ doc_table_filter_input_id }}:replace"
                         type="submit">
                   {% trans "Filter" %}
                 </button>
