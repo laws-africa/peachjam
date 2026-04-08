@@ -24,11 +24,12 @@
 {% block document-tab-panes %}
   {{ block.super }}
   {% if child_documents_count %}
-    <div class="tab-pane spinner-when-empty"
+    <div class="tab-pane"
          id="children-tab"
          role="tabpanel"
          data-key-link-feature="subleg"
          aria-labelledby="children-tab">
+      <div class="spinner-when-empty"></div>
     </div>
   {% endif %}
 {% endblock %}
