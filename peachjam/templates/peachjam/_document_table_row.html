@@ -4,12 +4,12 @@
   {% if doc_table_toggle %}
     <td class="cell-toggle">
       {% if document.children %}
-        <button class="btn btn-sm bg-none{% if not doc_table_children_expanded %} collapsed{% endif %}"
+        <button class="btn btn-sm bg-none"
                 type="button"
                 title="{{ doc_table_toggle_title }}"
                 data-bs-toggle="collapse"
                 data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
-                aria-expanded="{% if doc_table_children_expanded %}true{% else %}false{% endif %}"
+                aria-expanded="true"
                 aria-controls="doc-table-children-{{ forloop.counter0 }}">
           <i class="bi"></i>
         </button>

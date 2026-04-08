@@ -99,7 +99,6 @@ class LawReportVolumeTableMixin:
             )
         context["doc_table_toggle"] = self.doc_table_toggle
         context["doc_table_toggle_title"] = self.doc_table_toggle_title
-        context["doc_table_children_expanded"] = self.doc_table_children_expanded
         context["doc_table_hide_label_codes"] = self.doc_table_hide_label_codes
 
     def add_labels_facet(self, context):
@@ -129,7 +128,6 @@ class LawReportVolumeDetailView(
     template_name = "peachjam/law_report/law_report_volume_detail.html"
     active_tab = "judgments"
     doc_table_toggle = False
-    doc_table_children_expanded = False
 
     def get_base_queryset(self, exclude=None):
         qs = super().get_base_queryset(exclude=exclude)
@@ -145,7 +143,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
     form_defaults = {"sort": "title"}
     doc_table_toggle = True
     doc_table_toggle_title = _("Cited by")
-    doc_table_children_expanded = True
     doc_table_show_jurisdiction = False
 
     @staticmethod
