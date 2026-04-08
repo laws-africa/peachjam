@@ -111,7 +111,6 @@ class LawReportViewsTestCase(TestCase):
         )
         self.first_judgment.labels.add(reported_label)
         self.second_judgment.labels.add(reported_label)
-        self.second_judgment.labels.add(Label.objects.create(name="Featured case"))
         self.cited_legislation = Legislation.objects.get(
             expression_frbr_uri=(
                 "/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17"
