@@ -126,13 +126,23 @@ class SavedDocumentViewsTest(TestCase):
 
         self.assertContains(response, "Saved")
 
-        self.assertContains(response, "saved-document-star--5389", 1)
+        self.assertContains(
+            response, 'class="saved-document-star saved-document-star--5389"', 1
+        )
+        self.assertContains(
+            response, 'hx-swap-oob="outerHTML:.saved-document-star--5389"', 1
+        )
         self.assertContains(
             response, "save-document-button save-document-button--5389", 1
         )
         self.assertContains(response, "saved-document-table-detail--5389", 1)
 
-        self.assertContains(response, "saved-document-star--3407", 1)
+        self.assertContains(
+            response, 'class="saved-document-star saved-document-star--3407"', 1
+        )
+        self.assertContains(
+            response, 'hx-swap-oob="outerHTML:.saved-document-star--3407"', 1
+        )
         self.assertContains(
             response, "save-document-button save-document-button--3407", 1
         )
