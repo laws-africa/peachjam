@@ -12,7 +12,6 @@ from peachjam.helpers import get_language
 from peachjam.models import (
     ExtractedCitation,
     Judgment,
-    Label,
     LawReport,
     LawReportVolume,
 )
@@ -135,14 +134,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
             .for_document_table()
         }
 
-    @cached_property
-    def reported_display_label(self):
-        return Label.objects.filter(code="reported").first() or {
-            "code": "reported",
-            "name": _("Reported"),
-            "level": "success",
-        }
-
     def attach_related_judgments(
         self,
         parent_docs,
@@ -178,9 +169,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
             )
             for child in children:
                 child.is_table_child = True
-                child.table_labels = list(child.labels.all())
-                if "reported" not in {label.code for label in child.table_labels}:
-                    child.table_labels.insert(0, self.reported_display_label)
             parent_doc.children = children
             if children:
                 if group_title:
