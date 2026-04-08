@@ -66,6 +66,7 @@ from peachjam.models import (
     CaseAction,
     CaseHistory,
     CaseNumber,
+    CaseTag,
     CauseList,
     CitationLink,
     CitationProcessing,
@@ -102,6 +103,7 @@ from peachjam.models import (
     MatterType,
     Offence,
     OffenceCategory,
+    OffenceTag,
     Outcome,
     Partner,
     PartnerLogo,
@@ -1394,7 +1396,7 @@ class LawReportEntryInline(admin.TabularInline):
 class JudgmentOffenceInline(admin.TabularInline):
     model = JudgmentOffence
     extra = 1
-    fields = ("offence", "case_tags")
+    fields = ("offence", "tags")
 
 
 class SentenceInline(admin.StackedInline):
@@ -1672,16 +1674,27 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
 @admin.register(OffenceCategory)
 class OffenceCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug", "order", "is_active")
-    list_editable = ("order", "is_active")
+    list_display = ("name", "slug")
     search_fields = ("name", "description")
     prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(OffenceTag)
+class OffenceTagAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name", "description")
+
+
+@admin.register(CaseTag)
+class CaseTagAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name", "description")
 
 
 @admin.register(Offence)
 class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_classes = [OffenceResource]
-    filter_horizontal = ("categories",)
+    filter_horizontal = ("categories", "tags")
     search_fields = ("title", "description", "code", "provision_eid")
 
     def get_form(self, request, obj=None, **kwargs):
@@ -1695,9 +1708,10 @@ class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
 
 @admin.register(JudgmentOffence)
 class JudgmentOffenceAdmin(admin.ModelAdmin):
-    fields = ("judgment", "offence", "case_tags")
+    fields = ("judgment", "offence", "tags")
     list_display = ("judgment", "offence")
     search_fields = ("judgment__title", "judgment__case_name", "offence__title")
+    filter_horizontal = ("tags",)
 
 
 @admin.register(CauseList)

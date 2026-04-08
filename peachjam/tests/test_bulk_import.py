@@ -10,6 +10,7 @@ from peachjam.models import (
     Judgment,
     Offence,
     OffenceCategory,
+    OffenceTag,
     Taxonomy,
     Work,
 )
@@ -291,6 +292,8 @@ class OffenceBulkImportTestCase(TestCase):
         self.public_safety = OffenceCategory.objects.get_or_create(
             name="Public Safety", defaults={"slug": "public-safety"}
         )[0]
+        self.weapon_capable = OffenceTag.objects.get_or_create(name="weapon-capable")[0]
+        self.inchoate = OffenceTag.objects.get_or_create(name="inchoate")[0]
 
     def test_offence_import(self):
         headers = [
@@ -328,7 +331,10 @@ class OffenceBulkImportTestCase(TestCase):
             offence.categories.values_list("slug", flat=True),
             ["violence", "public-safety"],
         )
-        self.assertEqual(offence.offence_tags, ["weapon-capable", "inchoate"])
+        self.assertCountEqual(
+            offence.tags.values_list("name", flat=True),
+            ["weapon-capable", "inchoate"],
+        )
         self.assertEqual(
             ["stealing property", "armed with a dangerous weapon"], offence.elements
         )
@@ -340,17 +346,17 @@ class OffenceBulkImportTestCase(TestCase):
             code="ROB-296",
             title="Robbery with violence",
             description="The accused steals while armed with a dangerous weapon.",
-            offence_tags=["weapon-capable", "inchoate"],
             elements=["stealing property", "armed with a dangerous weapon"],
             penalty="Imprisonment for life",
         )
         offence.categories.set([self.violence, self.public_safety])
+        offence.tags.set([self.weapon_capable, self.inchoate])
 
         dataset = OffenceResource().export(Offence.objects.filter(pk=offence.pk))
 
         self.assertEqual(self.work.frbr_uri, dataset.dict[0]["work"])
-        self.assertEqual("violence|public-safety", dataset.dict[0]["categories"])
-        self.assertEqual("weapon-capable|inchoate", dataset.dict[0]["offence_tags"])
+        self.assertEqual("public-safety|violence", dataset.dict[0]["categories"])
+        self.assertEqual("inchoate|weapon-capable", dataset.dict[0]["offence_tags"])
         self.assertEqual(
             "stealing property|armed with a dangerous weapon",
             dataset.dict[0]["elements"],
