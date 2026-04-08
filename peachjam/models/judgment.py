@@ -584,8 +584,6 @@ class Judgment(CoreDocument):
             court = self.court
             if court.country:
                 self.jurisdiction = court.country
-
-            if court.country:
                 self.locality = court.locality
 
         self.doc_type = "judgment"
