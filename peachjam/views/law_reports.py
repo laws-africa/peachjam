@@ -77,17 +77,8 @@ class LawReportVolumeViewMixin:
 
 
 class LawReportVolumeTableMixin:
-    doc_table_hide_label_codes = []
     doc_table_children_expanded = False
     doc_table_toggle_title = None
-
-    @cached_property
-    def doc_table_hidden_label_names(self):
-        return set(
-            Label.objects.filter(code__in=self.doc_table_hide_label_codes).values_list(
-                "name", flat=True
-            )
-        )
 
     def update_doc_table_context(self, context):
         if self.doc_table_toggle and not self.doc_table_toggle_title:
@@ -98,27 +89,6 @@ class LawReportVolumeTableMixin:
         context["doc_table_toggle"] = self.doc_table_toggle
         context["doc_table_children_expanded"] = self.doc_table_children_expanded
         context["doc_table_toggle_title"] = self.doc_table_toggle_title
-        context["doc_table_hide_label_codes"] = self.doc_table_hide_label_codes
-
-    def add_labels_facet(self, context):
-        super().add_labels_facet(context)
-        labels_facet = context.get("facet_data", {}).get("labels")
-        if not labels_facet or not self.doc_table_hidden_label_names:
-            return
-
-        labels_facet["options"] = [
-            option
-            for option in labels_facet["options"]
-            if option[0] not in self.doc_table_hidden_label_names
-        ]
-        labels_facet["values"] = [
-            value
-            for value in labels_facet["values"]
-            if value not in self.doc_table_hidden_label_names
-        ]
-
-        if not labels_facet["options"]:
-            context["facet_data"].pop("labels", None)
 
 
 class LawReportVolumeDetailView(

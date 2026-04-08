@@ -33,9 +33,9 @@
         <span class="saved-document-star--{{ document.pk }}"></span>
       </div>
       {% if document.table_labels %}
-        {% include 'peachjam/_document_labels.html' with labels=document.table_labels hide_label_codes=doc_table_hide_label_codes %}
+        {% include 'peachjam/_document_labels.html' with labels=document.table_labels %}
       {% else %}
-        {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
+        {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
       {% endif %}
       {% if doc_table_show_treatments %}
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
