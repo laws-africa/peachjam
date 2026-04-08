@@ -194,6 +194,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "peachjam/law_report/law_report_detail.html")
         self.assertContains(response, "Volumes")
+        self.assertContains(response, 'class="row row-cols-1 row-cols-md-auto g-4"')
         self.assertContains(response, self.volume_1.title)
         self.assertContains(response, self.volume_2.title)
         self.assertNotContains(response, self.empty_volume.title)
@@ -208,6 +209,10 @@ class LawReportViewsTestCase(TestCase):
         self.assertIn(self.volume_2, response.context["law_report_volumes"])
         self.assertNotIn(self.empty_volume, response.context["law_report_volumes"])
         self.assertEqual(
+            [[self.volume_2, self.volume_1]],
+            response.context["law_report_volume_columns"],
+        )
+        self.assertEqual(
             [self.volume_2, self.volume_1], list(response.context["law_report_volumes"])
         )
 
@@ -219,7 +224,7 @@ class LawReportViewsTestCase(TestCase):
             response, "peachjam/law_report/law_report_volume_detail.html"
         )
         self.assertContains(response, self.first_judgment.title)
-        self.assertContains(response, self.second_judgment.title)
+        self.assertNotContains(response, self.second_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertNotContains(response, "Back to law report")
         self.assertContains(
@@ -232,10 +237,12 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertContains(response, "nav nav-tabs border-bottom", html=False)
         self.assertContains(response, "Reported judgments")
-        self.assertTrue(response.context.get("doc_table_toggle"))
-        self.assertContains(response, 'class="doc-table-children collapse"', html=False)
-        self.assertContains(response, 'title="Cited cases"', html=False)
-        self.assertContains(response, "1 cited case")
+        self.assertFalse(response.context.get("doc_table_toggle"))
+        self.assertNotContains(
+            response, 'class="doc-table-children collapse"', html=False
+        )
+        self.assertNotContains(response, 'title="Cited by"', html=False)
+        self.assertNotContains(response, "1 cited case")
         self.assertNotContains(
             response, '<span class="badge rounded-pill bg-success">Reported</span>'
         )
@@ -247,10 +254,7 @@ class LawReportViewsTestCase(TestCase):
             for doc in response.context["documents"]
             if getattr(doc, "work_id", None) == self.first_judgment.work_id
         )
-        child_row = parent_row.children[0]
-        self.assertEqual(self.second_judgment.work_id, child_row.work_id)
-        self.assertTrue(child_row.is_table_child)
-        self.assertEqual("1 cited case", parent_row.children_count_label)
+        self.assertFalse(hasattr(parent_row, "children"))
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_cases_tab(self):
@@ -282,12 +286,13 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
         self.assertContains(response, "Reported judgments")
-        self.assertContains(response, "1 reported judgment")
+        self.assertNotContains(response, "1 reported judgment")
+        self.assertContains(response, "Cited by 1 judgment")
         self.assertIn("labels", response.context["facet_data"])
         self.assertIn("alphabet", response.context["facet_data"])
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
-        self.assertContains(response, "Cited by")
+        self.assertContains(response, "Cited by 1 judgment")
         self.assertNotContains(
             response, '<span class="badge rounded-pill bg-success">Reported</span>'
         )
@@ -304,6 +309,10 @@ class LawReportViewsTestCase(TestCase):
         self.assertEqual(self.first_judgment.work_id, child_row.work_id)
         self.assertTrue(child_row.is_table_child)
         self.assertEqual("1 reported judgment", parent_row.children_count_label)
+        self.assertEqual("Cited by 1 judgment", parent_row.children_group_row["title"])
+        self.assertContains(
+            response, f"saved-document-star--{self.first_judgment.pk}", count=1
+        )
         self.assertIn("work", child_row._state.fields_cache)
         self.assertIn("labels", child_row._prefetched_objects_cache)
         self.assertIn("taxonomies", child_row._prefetched_objects_cache)
@@ -336,9 +345,12 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
         self.assertContains(response, "Reported judgments")
-        self.assertContains(response, "1 reported judgment")
+        self.assertNotContains(response, "1 reported judgment")
+        self.assertContains(response, "Cited by 1 judgment")
         self.assertIn("years", response.context["facet_data"])
         self.assertIn("alphabet", response.context["facet_data"])
+        self.assertFalse(response.context.get("doc_table_show_doc_type"))
+        self.assertTrue(response.context.get("doc_table_full_title_width"))
         self.assertNotContains(
             response, '<span class="badge rounded-pill bg-success">Reported</span>'
         )
@@ -353,9 +365,15 @@ class LawReportViewsTestCase(TestCase):
         child_row = legislation_row.children[0]
         self.assertTrue(child_row.is_table_child)
         self.assertEqual("1 reported judgment", legislation_row.children_count_label)
+        self.assertEqual(
+            "Cited by 1 judgment", legislation_row.children_group_row["title"]
+        )
+        self.assertContains(
+            response, f"saved-document-star--{self.first_judgment.pk}", count=1
+        )
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
-        self.assertContains(response, "Cited by")
+        self.assertContains(response, "Cited by 1 judgment")
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_ignores_tab_query_param(self):

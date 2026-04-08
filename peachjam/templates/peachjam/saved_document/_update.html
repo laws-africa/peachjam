@@ -1,7 +1,6 @@
 {% load i18n %}
-<span id="saved-document-star--{{ saved_document.document.id }}"
-      hx-swap-oob="true"
-      class="saved-document-star"
+<span class="saved-document-star saved-document-star--{{ saved_document.document.id }}"
+      hx-swap-oob="outerHTML:.saved-document-star--{{ saved_document.document.id }}"
       data-bs-toggle="modal"
       data-bs-target="#saved-document-modal"
       hx-get="{% url 'saved_document_modal' saved_document.pk %}?doc_id={{ saved_document.document.id }}"

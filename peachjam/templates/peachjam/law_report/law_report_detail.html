@@ -30,13 +30,19 @@
 {% block detail-content %}
   <h2>{% trans 'Volumes' %}</h2>
   {% if law_report_volumes %}
-    <ul class="list-unstyled">
-      {% for volume in law_report_volumes %}
-        <li class="mb-2">
-          <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
-        </li>
+    <div class="row row-cols-1 row-cols-md-auto g-4">
+      {% for volume_column in law_report_volume_columns %}
+        <div class="col">
+          <ul class="list-unstyled mb-0">
+            {% for volume in volume_column %}
+              <li class="mb-2">
+                <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
       {% endfor %}
-    </ul>
+    </div>
   {% else %}
     <p>{% trans 'No volumes found.' %}</p>
   {% endif %}

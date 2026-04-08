@@ -1,5 +1,6 @@
 from collections import defaultdict
 from functools import cached_property
+from itertools import batched
 
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -34,9 +35,15 @@ class LawReportDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["law_report_volumes"] = self.object.volumes.exclude(
-            law_report_entries__isnull=True
-        ).order_by("-title")
+        volumes = list(
+            self.object.volumes.exclude(law_report_entries__isnull=True).order_by(
+                "-title"
+            )
+        )
+        context["law_report_volumes"] = volumes
+        context["law_report_volume_columns"] = [
+            list(volume_column) for volume_column in batched(volumes, 4)
+        ]
         context["entity_profile"] = self.object.entity_profile.first()
         context["entity_profile_title"] = self.object.title
         return context
@@ -71,7 +78,7 @@ class LawReportVolumeViewMixin:
         return context
 
 
-class LawReportJudgmentChildrenMixin:
+class LawReportVolumeTableMixin:
     doc_table_hide_label_codes = ["reported"]
 
     @cached_property
@@ -108,6 +115,39 @@ class LawReportJudgmentChildrenMixin:
         if not labels_facet["options"]:
             context["facet_data"].pop("labels", None)
 
+
+class LawReportVolumeDetailView(
+    LawReportVolumeTableMixin, LawReportVolumeViewMixin, FilteredJudgmentView
+):
+    template_name = "peachjam/law_report/law_report_volume_detail.html"
+    active_tab = "judgments"
+    doc_table_toggle = False
+    doc_table_children_expanded = False
+
+    def get_base_queryset(self, exclude=None):
+        qs = super().get_base_queryset(exclude=exclude)
+        return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        self.update_doc_table_context(context, _("Cited by"))
+        return context
+
+
+class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
+    form_defaults = {"sort": "title"}
+    doc_table_toggle = True
+    doc_table_children_expanded = True
+    doc_table_show_jurisdiction = False
+
+    @staticmethod
+    def cited_by_group_title(count):
+        return ngettext(
+            "Cited by %(count)s judgment",
+            "Cited by %(count)s judgments",
+            count,
+        ) % {"count": count}
+
     def get_document_table_judgments(self, work_ids):
         return {
             judgment.work_id: judgment
@@ -121,7 +161,13 @@ class LawReportJudgmentChildrenMixin:
         }
 
     def attach_related_judgments(
-        self, parent_docs, relation_pairs, singular_label, plural_label, sort_key
+        self,
+        parent_docs,
+        relation_pairs,
+        singular_label,
+        plural_label,
+        sort_key,
+        group_title=None,
     ):
         parent_docs = [doc for doc in parent_docs if getattr(doc, "work_id", None)]
         if not parent_docs:
@@ -158,53 +204,12 @@ class LawReportJudgmentChildrenMixin:
                     plural_label,
                     len(children),
                 ) % {"count": len(children)}
-
-
-class LawReportVolumeDetailView(
-    LawReportJudgmentChildrenMixin, LawReportVolumeViewMixin, FilteredJudgmentView
-):
-    template_name = "peachjam/law_report/law_report_volume_detail.html"
-    active_tab = "judgments"
-    doc_table_toggle = True
-    doc_table_children_expanded = False
-
-    def get_base_queryset(self, exclude=None):
-        qs = super().get_base_queryset(exclude=exclude)
-        return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        self.update_doc_table_context(context, _("Cited cases"))
-        self.attach_cited_judgments(context["documents"])
-        return context
-
-    def attach_cited_judgments(self, reported_judgments):
-        judgment_work_ids = [
-            judgment.work_id
-            for judgment in reported_judgments
-            if getattr(judgment, "work_id", None)
-        ]
-        if not judgment_work_ids:
-            return
-
-        citations = ExtractedCitation.objects.filter(
-            citing_work_id__in=judgment_work_ids
-        ).values_list("citing_work_id", "target_work_id")
-
-        self.attach_related_judgments(
-            reported_judgments,
-            citations.distinct(),
-            "%(count)s cited case",
-            "%(count)s cited cases",
-            lambda doc: (-doc.work.authority_score, doc.title),
-        )
-
-
-class LawReportVolumeCitationIndexMixin(LawReportJudgmentChildrenMixin):
-    form_defaults = {"sort": "title"}
-    doc_table_toggle = True
-    doc_table_children_expanded = True
-    doc_table_show_jurisdiction = False
+                if group_title:
+                    parent_doc.children_group_row = {
+                        "is_group": True,
+                        "is_table_child": True,
+                        "title": group_title(len(children)),
+                    }
 
     @cached_property
     def volume_judgment_work_ids(self):
@@ -237,10 +242,6 @@ class LawReportVolumeCitationIndexMixin(LawReportJudgmentChildrenMixin):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         self.update_doc_table_context(context, _("Cited by"))
-        context["doc_table_children_group_row"] = {
-            "is_group": True,
-            "title": _("Cited by"),
-        }
         context["doc_table_show_jurisdiction"] = self.doc_table_show_jurisdiction
         if hasattr(context["documents"], "query"):
             context["documents"] = self.group_documents(context["documents"])
@@ -267,6 +268,7 @@ class LawReportVolumeCitationIndexMixin(LawReportJudgmentChildrenMixin):
             "%(count)s reported judgment",
             "%(count)s reported judgments",
             lambda doc: doc.title,
+            group_title=self.cited_by_group_title,
         )
 
 
@@ -286,3 +288,9 @@ class LawReportVolumeLegislationIndexView(
     template_name = "peachjam/law_report/law_report_volume_legislation_index.html"
     active_tab = "legislation"
     latest_expression_only = True
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["doc_table_show_doc_type"] = False
+        context["doc_table_full_title_width"] = True
+        return context

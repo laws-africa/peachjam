@@ -6,7 +6,7 @@
       {% if document.children %}
         <button class="btn btn-sm bg-none{% if not doc_table_children_expanded %} collapsed{% endif %}"
                 type="button"
-                title="{{ doc_table_toggle_title|default:PEACHJAM_SETTINGS.subleg_label }}"
+                title="{{ doc_table_toggle_title }}"
                 data-bs-toggle="collapse"
                 data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
                 aria-expanded="{% if doc_table_children_expanded %}true{% else %}false{% endif %}"
@@ -18,17 +18,14 @@
   {% endif %}
   {% if document.is_group %}
     <td id="{% if document.group_id %}{{ document.group_id }}{% endif %}"
-        class="cell-group">{{ document.title }}</td>
+        class="cell-group">
+      <div class="{% if document.is_table_child %}ps-lg-3 ms-lg-1{% endif %}">{{ document.title }}</div>
+    </td>
   {% else %}
-    <td class="cell-title">
-      <div class="{% if document.is_table_child %}ms-3 ps-3 border-start border-2 border-light{% endif %}">
+    <td class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
+      <div>
         <div class="d-flex align-items-start flex-wrap gap-2">
-          <a href="{{ document.get_absolute_url }}"
-             data-key-link="document"
-             class="{% if document.children %}fw-semibold{% endif %}">{{ document.title }}</a>
-          {% if document.children_count_label %}
-            <span class="badge rounded-pill text-bg-light border">{{ document.children_count_label }}</span>
-          {% endif %}
+          <a href="{{ document.get_absolute_url }}" data-key-link="document">{{ document.title }}</a>
           {% if document.work.languages|length > 1 %}
             <span class="d-inline-block"
                   data-bs-toggle="tooltip"
@@ -36,7 +33,7 @@
               <i class="bi bi-translate"></i>
             </span>
           {% endif %}
-          {% if not document.is_table_child %}<span id="saved-document-star--{{ document.pk }}"></span>{% endif %}
+          <span class="saved-document-star--{{ document.pk }}"></span>
         </div>
         {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
         {% if doc_table_show_treatments %}
@@ -69,6 +66,6 @@
   {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_sub_publication %}<td>{{ document.sub_publication|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_frbr_uri_number %}<td>{{ document.frbr_uri_number }}</td>{% endif %}
-  {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
+  {% if doc_table_show_doc_type %}<td class="text-nowrap">{{ document.get_doc_type_display }}</td>{% endif %}
   {% if doc_table_show_date %}<td class="cell-date text-nowrap">{{ document.date|default_if_none:'' }}</td>{% endif %}
 </tr>
