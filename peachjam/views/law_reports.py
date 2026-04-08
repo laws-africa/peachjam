@@ -54,9 +54,6 @@ class LawReportVolumeViewMixin:
     navbar_link = "law_report"
     active_tab = None
 
-    def base_view_name(self):
-        return self.law_report_volume.title
-
     @cached_property
     def law_report(self):
         return get_object_or_404(
@@ -169,8 +166,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
         self,
         parent_docs,
         relation_pairs,
-        singular_label,
-        plural_label,
         sort_key,
         group_title=None,
     ):
@@ -204,11 +199,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
                 child.is_table_child = True
             parent_doc.children = children
             if children:
-                parent_doc.children_count_label = ngettext(
-                    singular_label,
-                    plural_label,
-                    len(children),
-                ) % {"count": len(children)}
                 if group_title:
                     parent_doc.children_group_row = {
                         "is_group": True,
@@ -270,8 +260,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
         self.attach_related_judgments(
             cited_docs,
             citations.distinct(),
-            "%(count)s reported judgment",
-            "%(count)s reported judgments",
             lambda doc: doc.title,
             group_title=self.cited_by_group_title,
         )

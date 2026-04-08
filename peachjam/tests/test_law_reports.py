@@ -309,7 +309,6 @@ class LawReportViewsTestCase(TestCase):
         child_row = parent_row.children[0]
         self.assertEqual(self.first_judgment.work_id, child_row.work_id)
         self.assertTrue(child_row.is_table_child)
-        self.assertEqual("1 reported judgment", parent_row.children_count_label)
         self.assertEqual("Cited by 1 judgment", parent_row.children_group_row["title"])
         self.assertContains(
             response, f"saved-document-star--{self.first_judgment.pk}", count=1
@@ -366,7 +365,6 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotEqual(self.original_cited_legislation_date, legislation_row.date)
         child_row = legislation_row.children[0]
         self.assertTrue(child_row.is_table_child)
-        self.assertEqual("1 reported judgment", legislation_row.children_count_label)
         self.assertEqual(
             "Cited by 1 judgment", legislation_row.children_group_row["title"]
         )
