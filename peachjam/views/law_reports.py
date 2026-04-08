@@ -143,12 +143,6 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
             "level": "success",
         }
 
-    def get_child_table_labels(self, judgment):
-        labels = list(judgment.labels.all())
-        if "reported" not in {label.code for label in labels}:
-            labels.insert(0, self.reported_display_label)
-        return labels
-
     def attach_related_judgments(
         self,
         parent_docs,
@@ -184,7 +178,9 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
             )
             for child in children:
                 child.is_table_child = True
-                child.table_labels = self.get_child_table_labels(child)
+                child.table_labels = list(child.labels.all())
+                if "reported" not in {label.code for label in child.table_labels}:
+                    child.table_labels.insert(0, self.reported_display_label)
             parent_doc.children = children
             if children:
                 if group_title:
