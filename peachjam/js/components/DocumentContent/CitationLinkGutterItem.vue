@@ -7,7 +7,7 @@
     />
     <div class="card gutter-item-card">
       <div class="card-body">
-        <div class="mb-0">
+        <div>
           <button class="btn btn-sm btn-outline-secondary float-end ms-1" @click="edit">
             {{ $t('Edit') }}
           </button>
