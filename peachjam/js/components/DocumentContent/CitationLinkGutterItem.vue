@@ -7,14 +7,14 @@
     />
     <div class="card gutter-item-card">
       <div class="card-body">
-        <p class="mb-0">
+        <div class="mb-0">
           <button class="btn btn-sm btn-outline-secondary float-end ms-1" @click="edit">
             {{ $t('Edit') }}
           </button>
           {{ link.text }}
-        </p>
+        </div>
         <div>
-          <a :href="link.url">
+          <a :href="link.url" target="_blank">
             {{ link.url }}
           </a>
           <span
