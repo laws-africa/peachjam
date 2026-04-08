@@ -5,11 +5,19 @@ from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 from languages_plus.models import Language
 
 from peachjam.analysis.summariser import JudgmentSummary
-from peachjam.models import CaseNumber, Court, CourtClass, Judgment, Locality
+from peachjam.models import (
+    CaseNumber,
+    Court,
+    CourtClass,
+    CourtRegistry,
+    Judgment,
+    Locality,
+)
 
 
 class JudgmentTestCase(TestCase):
@@ -227,6 +235,46 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(za, judgment.jurisdiction)
         self.assertIsNone(judgment.locality)
+
+    def test_judgment_cannot_save_without_court(self):
+        judgment = Judgment(
+            auto_assign_details=False,
+            language=Language.objects.get(pk="en"),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+            title="Foo v Bar [2019] TEST 1 (1 January 2019)",
+            citation="Foo v Bar [2019] TEST 1 (1 January 2019)",
+            serial_number=1,
+            mnc="[2019] TEST 1",
+            frbr_uri_doctype="judgment",
+            frbr_uri_actor="testcourt",
+            frbr_uri_date="2019",
+            frbr_uri_number="1",
+        )
+
+        with self.assertRaises(IntegrityError):
+            judgment.save()
+
+    def test_judgment_registry_sets_court_on_save(self):
+        court = Court.objects.first()
+        registry = CourtRegistry.objects.create(
+            court=court,
+            name="Main registry",
+            code="main-registry",
+        )
+        judgment = Judgment(
+            language=Language.objects.get(pk="en"),
+            registry=registry,
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+
+        judgment.save()
+        judgment.refresh_from_db()
+
+        self.assertEqual(court, judgment.court)
 
     @patch.dict(
         os.environ,
