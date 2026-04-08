@@ -26,9 +26,8 @@
     {% trans 'Saved' %}
   {% endif %}
 </button>
-<div id="saved-document-table-detail--{{ saved_document.document.id }}"
-     class="saved-document-table-detail"
-     hx-swap-oob="true">
+<div class="saved-document-table-detail saved-document-table-detail--{{ saved_document.document.id }}"
+     hx-swap-oob="outerHTML:.saved-document-table-detail--{{ saved_document.document.id }}">
   <i class="bi bi-folder"></i>
   {% for folder in saved_document.folders.all %}
     {# djLint:off #}

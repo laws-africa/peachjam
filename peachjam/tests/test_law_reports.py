@@ -243,10 +243,14 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertNotContains(response, 'title="Cited by"', html=False)
         self.assertNotContains(response, "1 cited case")
-        self.assertNotContains(
-            response, '<span class="badge rounded-pill bg-success">Reported</span>'
+        self.assertContains(
+            response, '<span class="badge rounded-pill bg-success">Reported</span>', 1
         )
-        self.assertNotIn("labels", response.context["facet_data"])
+        self.assertIn("labels", response.context["facet_data"])
+        self.assertIn(
+            ("Reported", "Reported"),
+            response.context["facet_data"]["labels"]["options"],
+        )
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
         self.assertEqual("judgments", response.context["active_tab"])
         parent_row = next(
@@ -258,6 +262,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_cases_tab(self):
+        self.first_judgment.labels.remove(Label.objects.get(code="reported"))
         url = reverse(
             "law_report_volume_cases_index",
             args=[self.law_report.slug, self.volume_1.slug],
@@ -294,10 +299,10 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
         self.assertContains(response, "Cited by 1 judgment")
-        self.assertNotContains(
-            response, '<span class="badge rounded-pill bg-success">Reported</span>'
+        self.assertContains(
+            response, '<span class="badge rounded-pill bg-success">Reported</span>', 2
         )
-        self.assertNotIn(
+        self.assertIn(
             ("Reported", "Reported"),
             response.context["facet_data"]["labels"]["options"],
         )
@@ -309,6 +314,14 @@ class LawReportViewsTestCase(TestCase):
         child_row = parent_row.children[0]
         self.assertEqual(self.first_judgment.work_id, child_row.work_id)
         self.assertTrue(child_row.is_table_child)
+        self.assertEqual(
+            ["reported"],
+            [
+                label.code
+                for label in child_row.table_labels
+                if label.code == "reported"
+            ],
+        )
         self.assertEqual("Cited by 1 judgment", parent_row.children_group_row["title"])
         self.assertContains(
             response, f"saved-document-star--{self.first_judgment.pk}", count=1
@@ -319,6 +332,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
 
     def test_law_report_volume_detail_view_legislation_tab(self):
+        self.first_judgment.labels.remove(Label.objects.get(code="reported"))
         url = reverse(
             "law_report_volume_legislation_index",
             args=[self.law_report.slug, self.volume_1.slug],
@@ -352,8 +366,8 @@ class LawReportViewsTestCase(TestCase):
         self.assertIn("alphabet", response.context["facet_data"])
         self.assertFalse(response.context.get("doc_table_show_doc_type"))
         self.assertTrue(response.context.get("doc_table_full_title_width"))
-        self.assertNotContains(
-            response, '<span class="badge rounded-pill bg-success">Reported</span>'
+        self.assertContains(
+            response, '<span class="badge rounded-pill bg-success">Reported</span>', 1
         )
         legislation_row = next(
             doc
@@ -365,6 +379,14 @@ class LawReportViewsTestCase(TestCase):
         self.assertNotEqual(self.original_cited_legislation_date, legislation_row.date)
         child_row = legislation_row.children[0]
         self.assertTrue(child_row.is_table_child)
+        self.assertEqual(
+            ["reported"],
+            [
+                label.code
+                for label in child_row.table_labels
+                if label.code == "reported"
+            ],
+        )
         self.assertEqual(
             "Cited by 1 judgment", legislation_row.children_group_row["title"]
         )

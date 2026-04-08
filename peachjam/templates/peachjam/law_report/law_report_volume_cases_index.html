@@ -1,5 +1,8 @@
 {% extends 'peachjam/law_report/law_report_volume_detail.html' %}
 {% load i18n %}
+{% block alerts %}
+  <h3 class="h5 mb-3">{% trans "Index of cited cases" %}</h3>
+{% endblock %}
 {% block document-table %}
   {% trans "case" as doc_count_noun %}
   {% trans "cases" as doc_count_noun_plural %}

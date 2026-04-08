@@ -77,7 +77,8 @@ class LawReportVolumeViewMixin:
 
 
 class LawReportVolumeTableMixin:
-    doc_table_hide_label_codes = ["reported"]
+    doc_table_hide_label_codes = []
+    doc_table_children_expanded = False
     doc_table_toggle_title = None
 
     @cached_property
@@ -95,6 +96,7 @@ class LawReportVolumeTableMixin:
                 "doc_table_toggle is enabled."
             )
         context["doc_table_toggle"] = self.doc_table_toggle
+        context["doc_table_children_expanded"] = self.doc_table_children_expanded
         context["doc_table_toggle_title"] = self.doc_table_toggle_title
         context["doc_table_hide_label_codes"] = self.doc_table_hide_label_codes
 
@@ -138,6 +140,7 @@ class LawReportVolumeDetailView(
 
 class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
     form_defaults = {"sort": "title"}
+    doc_table_children_expanded = True
     doc_table_toggle = True
     doc_table_toggle_title = _("Cited by")
     doc_table_show_jurisdiction = False
@@ -161,6 +164,20 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
             .latest_expression()
             .for_document_table()
         }
+
+    @cached_property
+    def reported_display_label(self):
+        return Label.objects.filter(code="reported").first() or {
+            "code": "reported",
+            "name": _("Reported"),
+            "level": "success",
+        }
+
+    def get_child_table_labels(self, judgment):
+        labels = list(judgment.labels.all())
+        if "reported" not in {label.code for label in labels}:
+            labels.insert(0, self.reported_display_label)
+        return labels
 
     def attach_related_judgments(
         self,
@@ -197,6 +214,7 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
             )
             for child in children:
                 child.is_table_child = True
+                child.table_labels = self.get_child_table_labels(child)
             parent_doc.children = children
             if children:
                 if group_title:

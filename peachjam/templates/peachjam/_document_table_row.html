@@ -4,12 +4,12 @@
   {% if doc_table_toggle %}
     <td class="cell-toggle">
       {% if document.children %}
-        <button class="btn btn-sm bg-none"
+        <button class="btn btn-sm bg-none{% if not doc_table_children_expanded %} collapsed{% endif %}"
                 type="button"
                 title="{{ doc_table_toggle_title }}"
                 data-bs-toggle="collapse"
                 data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
-                aria-expanded="true"
+                aria-expanded="{% if doc_table_children_expanded %}true{% else %}false{% endif %}"
                 aria-controls="doc-table-children-{{ forloop.counter0 }}">
           <i class="bi"></i>
         </button>
@@ -18,9 +18,7 @@
   {% endif %}
   {% if document.is_group %}
     <td id="{% if document.group_id %}{{ document.group_id }}{% endif %}"
-        class="cell-group">
-      <div class="{% if document.is_table_child %}ps-lg-3 ms-lg-1{% endif %}">{{ document.title }}</div>
-    </td>
+        class="cell-group">{{ document.title }}</td>
   {% else %}
     <td class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
       <div class="d-flex">
@@ -34,7 +32,11 @@
         {% endif %}
         <span class="saved-document-star--{{ document.pk }}"></span>
       </div>
-      {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
+      {% if document.table_labels %}
+        {% include 'peachjam/_document_labels.html' with labels=document.table_labels hide_label_codes=doc_table_hide_label_codes %}
+      {% else %}
+        {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
+      {% endif %}
       {% if doc_table_show_treatments %}
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
@@ -46,7 +48,7 @@
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
         </div>
       {% endif %}
-      {% if not document.is_table_child %}<div id="saved-document-table-detail--{{ document.pk }}"></div>{% endif %}
+      <div class="saved-document-table-detail saved-document-table-detail--{{ document.pk }}"></div>
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
