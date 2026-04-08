@@ -270,6 +270,7 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertEqual("cases", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
+        self.assertEqual("Cited by", response.context.get("doc_table_toggle_title"))
         self.assertContains(
             response,
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
@@ -331,6 +332,7 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertEqual("legislation", response.context["active_tab"])
         self.assertTrue(response.context.get("doc_table_toggle"))
+        self.assertEqual("Cited by", response.context.get("doc_table_toggle_title"))
         self.assertContains(
             response,
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",

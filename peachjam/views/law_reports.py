@@ -2,6 +2,7 @@ from collections import defaultdict
 from functools import cached_property
 from itertools import batched
 
+from django.core.exceptions import ImproperlyConfigured
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import ngettext
@@ -80,6 +81,7 @@ class LawReportVolumeViewMixin:
 
 class LawReportVolumeTableMixin:
     doc_table_hide_label_codes = ["reported"]
+    doc_table_toggle_title = None
 
     @cached_property
     def doc_table_hidden_label_names(self):
@@ -89,9 +91,14 @@ class LawReportVolumeTableMixin:
             )
         )
 
-    def update_doc_table_context(self, context, toggle_title):
+    def update_doc_table_context(self, context):
+        if self.doc_table_toggle and not self.doc_table_toggle_title:
+            raise ImproperlyConfigured(
+                f"{self.__class__.__name__} must define doc_table_toggle_title when "
+                "doc_table_toggle is enabled."
+            )
         context["doc_table_toggle"] = self.doc_table_toggle
-        context["doc_table_toggle_title"] = toggle_title
+        context["doc_table_toggle_title"] = self.doc_table_toggle_title
         context["doc_table_children_expanded"] = self.doc_table_children_expanded
         context["doc_table_hide_label_codes"] = self.doc_table_hide_label_codes
 
@@ -130,13 +137,14 @@ class LawReportVolumeDetailView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.update_doc_table_context(context, _("Cited by"))
+        self.update_doc_table_context(context)
         return context
 
 
 class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
     form_defaults = {"sort": "title"}
     doc_table_toggle = True
+    doc_table_toggle_title = _("Cited by")
     doc_table_children_expanded = True
     doc_table_show_jurisdiction = False
 
@@ -241,7 +249,7 @@ class LawReportVolumeCitationIndexMixin(LawReportVolumeTableMixin):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.update_doc_table_context(context, _("Cited by"))
+        self.update_doc_table_context(context)
         context["doc_table_show_jurisdiction"] = self.doc_table_show_jurisdiction
         if hasattr(context["documents"], "query"):
             context["documents"] = self.group_documents(context["documents"])
