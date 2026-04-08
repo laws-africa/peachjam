@@ -23,32 +23,30 @@
     </td>
   {% else %}
     <td class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
-      <div>
-        <div class="d-flex align-items-start flex-wrap gap-2">
-          <a href="{{ document.get_absolute_url }}" data-key-link="document">{{ document.title }}</a>
-          {% if document.work.languages|length > 1 %}
-            <span class="d-inline-block"
-                  data-bs-toggle="tooltip"
-                  title="{% trans 'Multiple languages available' %}">
-              <i class="bi bi-translate"></i>
-            </span>
-          {% endif %}
-          <span class="saved-document-star--{{ document.pk }}"></span>
-        </div>
-        {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
-        {% if doc_table_show_treatments %}
-          {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
+      <div class="d-flex">
+        <a href="{{ document.get_absolute_url }}" data-key-link="document">{{ document.title }}</a>
+        {% if document.work.languages|length > 1 %}
+          <span class="d-inline-block ms-2"
+                data-bs-toggle="tooltip"
+                title="{% trans 'Multiple languages available' %}">
+            <i class="bi bi-translate"></i>
+          </span>
         {% endif %}
-        {% if document.doc_type == "judgment" %}
-          {% if document.blurb %}<div class="my-2">{{ document.blurb }}</div>{% endif %}
-          {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>{% endif %}
-        {% elif document.listing_taxonomies %}
-          <div class="d-none d-md-block ms-3">
-            {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
-          </div>
-        {% endif %}
-        {% if not document.is_table_child %}<div id="saved-document-table-detail--{{ document.pk }}"></div>{% endif %}
+        <span class="saved-document-star--{{ document.pk }}"></span>
       </div>
+      {% include 'peachjam/_document_labels.html' with labels=document.labels.all hide_label_codes=doc_table_hide_label_codes %}
+      {% if doc_table_show_treatments %}
+        {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
+      {% endif %}
+      {% if document.doc_type == "judgment" %}
+        {% if document.blurb %}<div class="my-2">{{ document.blurb }}</div>{% endif %}
+        {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>{% endif %}
+      {% elif document.listing_taxonomies %}
+        <div class="d-none d-md-block ms-3">
+          {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
+        </div>
+      {% endif %}
+      {% if not document.is_table_child %}<div id="saved-document-table-detail--{{ document.pk }}"></div>{% endif %}
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
@@ -66,6 +64,6 @@
   {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_sub_publication %}<td>{{ document.sub_publication|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_frbr_uri_number %}<td>{{ document.frbr_uri_number }}</td>{% endif %}
-  {% if doc_table_show_doc_type %}<td class="text-nowrap">{{ document.get_doc_type_display }}</td>{% endif %}
+  {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
   {% if doc_table_show_date %}<td class="cell-date text-nowrap">{{ document.date|default_if_none:'' }}</td>{% endif %}
 </tr>
