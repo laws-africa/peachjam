@@ -64,10 +64,10 @@
 
 ## Running Specific Sites
 
-To run a specific country site (e.g. TanzLII), set the `DJANGO_SETTINGS_MODULE` environment variable:
+To run a specific site shell in this repository (for example `liiweb`), set the `DJANGO_SETTINGS_MODULE` environment variable:
 
 ```bash
-export DJANGO_SETTINGS_MODULE=tanzlii.settings
+export DJANGO_SETTINGS_MODULE=liiweb.settings
 python manage.py runserver
 ```
 
