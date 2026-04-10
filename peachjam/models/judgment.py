@@ -313,7 +313,7 @@ class Judgment(CoreDocument):
         CIVIL = "civil", _("Civil")
 
     court = models.ForeignKey(
-        Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
+        Court, on_delete=models.PROTECT, null=False, verbose_name=_("court")
     )
     registry = models.ForeignKey(
         CourtRegistry,
@@ -494,7 +494,7 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
-        if self.date and self.court:
+        if self.date and self.court_id:
             if (
                 self.mnc != self.generate_citation()
                 or self.serial_number_override
@@ -511,7 +511,7 @@ class Judgment(CoreDocument):
 
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
-            date__year=self.date.year, court=self.court
+            date__year=self.date.year, court_id=self.court_id
         )
         if self.pk:
             query = query.exclude(pk=self.pk)
@@ -528,7 +528,7 @@ class Judgment(CoreDocument):
         # enforce certain defaults for judgment FRBR URIs
         if self.auto_assign_details:
             self.frbr_uri_doctype = "judgment"
-            self.frbr_uri_actor = self.court.code.lower() if self.court else None
+            self.frbr_uri_actor = self.court.code.lower() if self.court_id else None
             self.frbr_uri_date = str(self.date.year) if self.date else ""
             self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
@@ -580,12 +580,11 @@ class Judgment(CoreDocument):
         if self.registry:
             self.court = self.registry.court
 
-        if self.court is not None:
-            if self.court.country:
-                self.jurisdiction = self.court.country
-
-            if self.court.country:
-                self.locality = self.court.locality
+        if self.court_id:
+            court = self.court
+            if court.country:
+                self.jurisdiction = court.country
+                self.locality = court.locality
 
         self.doc_type = "judgment"
         if self.auto_assign_details:
