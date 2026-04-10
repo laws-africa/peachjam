@@ -66,6 +66,7 @@ class LegislationListView(BaseLegislationListView):
         self.add_children(context["documents"])
 
         context["doc_table_toggle"] = True
+        context["doc_table_toggle_title"] = pj_settings().subleg_label
         context["doc_table_citations"] = True
         context["doc_table_show_doc_type"] = False
         context["doc_table_show_court"] = False
