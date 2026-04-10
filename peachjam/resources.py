@@ -62,6 +62,7 @@ from peachjam.models import (
     MatterType,
     Offence,
     OffenceCategory,
+    OffenceGrouping,
     OffenceTag,
     Outcome,
     Ratification,
@@ -91,6 +92,34 @@ class ForeignKeyRequiredWidget(ForeignKeyWidget):
         if not value:
             raise ValueError("this field is required")
         return super().clean(value, row, **kwargs)
+
+
+class WorkScopedProvisionEidWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, **kwargs):
+        value = (value or "").strip()
+        if not value:
+            return None
+
+        work_frbr_uri = (row or {}).get("work")
+        if not work_frbr_uri:
+            raise ValueError("work frbr_uri is required")
+
+        work = Work.objects.filter(frbr_uri=work_frbr_uri).first()
+        if not work:
+            raise ValueError(f'work with frbr_uri "{work_frbr_uri}" not found')
+
+        instance = self.model.objects.filter(work=work, provision_eid=value).first()
+        if not instance:
+            raise ValueError(
+                f'{self.model._meta.verbose_name} with provision_eid "{value}" not found for work "{work_frbr_uri}"'
+            )
+
+        return instance
+
+    def render(self, value, obj=None, **kwargs):
+        if not value:
+            return ""
+        return value.provision_eid
 
 
 class SourceFileWidget(CharWidget):
@@ -793,11 +822,43 @@ class AttorneyResource(resources.ModelResource):
         model = Attorney
 
 
+class OffenceGroupingResource(resources.ModelResource):
+    work = fields.Field(
+        column_name="work",
+        attribute="work",
+        widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
+    )
+    parent = fields.Field(
+        column_name="parent",
+        attribute="parent",
+        widget=WorkScopedProvisionEidWidget(OffenceGrouping, field="provision_eid"),
+    )
+
+    class Meta:
+        model = OffenceGrouping
+        import_id_fields = ("work", "provision_eid")
+        fields = (
+            "work",
+            "parent",
+            "kind",
+            "label",
+            "number",
+            "title",
+            "provision_eid",
+            "order",
+        )
+
+
 class OffenceResource(resources.ModelResource):
     work = fields.Field(
         column_name="work",
         attribute="work",
         widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
+    )
+    grouping = fields.Field(
+        column_name="grouping",
+        attribute="grouping",
+        widget=WorkScopedProvisionEidWidget(OffenceGrouping, field="provision_eid"),
     )
     categories = fields.Field(
         column_name="categories",
@@ -820,6 +881,7 @@ class OffenceResource(resources.ModelResource):
         import_id_fields = ("work", "provision_eid", "code")
         fields = (
             "work",
+            "grouping",
             "provision_eid",
             "code",
             "title",

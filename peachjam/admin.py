@@ -103,6 +103,7 @@ from peachjam.models import (
     MatterType,
     Offence,
     OffenceCategory,
+    OffenceGrouping,
     OffenceTag,
     Outcome,
     Partner,
@@ -136,6 +137,7 @@ from peachjam.resources import (
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
+    OffenceGroupingResource,
     OffenceResource,
     RatificationResource,
     UserResource,
@@ -1683,6 +1685,21 @@ class OffenceCategoryAdmin(admin.ModelAdmin):
 class OffenceTagAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name", "description")
+
+
+@admin.register(OffenceGrouping)
+class OffenceGroupingAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_classes = [OffenceGroupingResource]
+    list_display = ("label", "kind", "work", "parent", "order")
+    list_filter = ("kind",)
+    search_fields = (
+        "label",
+        "title",
+        "number",
+        "provision_eid",
+        "work__title",
+        "work__frbr_uri",
+    )
 
 
 @admin.register(CaseTag)

@@ -899,6 +899,66 @@ class CaseTag(models.Model):
         return self.name
 
 
+class OffenceGrouping(models.Model):
+    work = models.ForeignKey(
+        "peachjam.Work",
+        on_delete=models.PROTECT,
+        related_name="offence_groupings",
+        verbose_name=_("work"),
+        help_text=_("The Work that defines this offence grouping."),
+    )
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="children",
+        verbose_name=_("parent"),
+    )
+    kind = models.CharField(_("kind"), max_length=50)
+    label = models.CharField(_("label"), max_length=255)
+    number = models.CharField(_("number"), max_length=100, blank=True, default="")
+    title = models.CharField(_("title"), max_length=1024, blank=True, default="")
+    provision_eid = models.CharField(
+        _("provision EID"),
+        max_length=255,
+        blank=True,
+        default="",
+        help_text=_("AKN element id / EID for the grouping within the work."),
+    )
+    order = models.IntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ("work_id", "parent_id", "order", "id")
+        verbose_name = _("offence grouping")
+        verbose_name_plural = _("offence groupings")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("work", "provision_eid"),
+                condition=~models.Q(provision_eid=""),
+                name="unique_offencegrouping_work_provision_eid",
+            )
+        ]
+        indexes = [
+            models.Index(fields=("kind",), name="offence_grouping_kind_idx"),
+            models.Index(
+                fields=("work", "kind"), name="offence_grouping_work_kind_idx"
+            ),
+        ]
+
+    def __str__(self):
+        if self.title:
+            return f"{self.label}: {self.title}"
+        return self.label
+
+    def clean(self):
+        super().clean()
+        if self.parent and self.parent.work_id != self.work_id:
+            raise ValidationError(
+                {"parent": _("Parent grouping must belong to the same work.")}
+            )
+
+
 class Offence(models.Model):
     work = models.ForeignKey(
         "peachjam.Work",
@@ -922,6 +982,14 @@ class Offence(models.Model):
         help_text=_(
             "Internal offence code / short identifier (often from the code or a local convention)."
         ),
+    )
+    grouping = models.ForeignKey(
+        "OffenceGrouping",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="offences",
+        verbose_name=_("grouping"),
     )
     title = models.CharField(_("title"), max_length=4096)
     description = models.TextField(_("description"), blank=True)
@@ -960,6 +1028,13 @@ class Offence(models.Model):
 
     def __str__(self):
         return self.title
+
+    def clean(self):
+        super().clean()
+        if self.grouping and self.grouping.work_id != self.work_id:
+            raise ValidationError(
+                {"grouping": _("Grouping must belong to the same work.")}
+            )
 
 
 class JudgmentOffence(models.Model):
