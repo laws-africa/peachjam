@@ -1691,7 +1691,9 @@ class OffenceTagAdmin(admin.ModelAdmin):
 class OffenceGroupingAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_classes = [OffenceGroupingResource]
     list_display = ("label", "kind", "work", "parent", "order")
+    list_select_related = ("work", "parent")
     list_filter = ("kind",)
+    autocomplete_fields = ("work", "parent")
     search_fields = (
         "label",
         "title",
@@ -1712,15 +1714,8 @@ class CaseTagAdmin(admin.ModelAdmin):
 class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_classes = [OffenceResource]
     filter_horizontal = ("categories", "tags")
+    autocomplete_fields = ("work", "grouping")
     search_fields = ("title", "description", "code", "provision_eid")
-
-    def get_form(self, request, obj=None, **kwargs):
-        return super().get_form(
-            request,
-            obj,
-            widgets={"work": autocomplete.ModelSelect2(url="autocomplete-works")},
-            **kwargs,
-        )
 
 
 @admin.register(JudgmentOffence)
