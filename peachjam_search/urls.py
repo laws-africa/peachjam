@@ -55,6 +55,7 @@ urlpatterns = [
         name="search_feedback_create",
     ),
     path("", views.SearchView.as_view(), name="search"),
+    path("box", views.TemplateView.as_view(template_name="peachjam_search/box.html")),
     path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
     path(
         "traces/<uuid:pk>", views.SearchTraceDetailView.as_view(), name="search_trace"
