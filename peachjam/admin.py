@@ -103,6 +103,7 @@ from peachjam.models import (
     MatterType,
     Offence,
     OffenceCategory,
+    OffenceGrouping,
     OffenceTag,
     Outcome,
     Partner,
@@ -136,6 +137,7 @@ from peachjam.resources import (
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
+    OffenceGroupingResource,
     OffenceResource,
     RatificationResource,
     UserResource,
@@ -1685,6 +1687,23 @@ class OffenceTagAdmin(admin.ModelAdmin):
     search_fields = ("name", "description")
 
 
+@admin.register(OffenceGrouping)
+class OffenceGroupingAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_classes = [OffenceGroupingResource]
+    list_display = ("label", "kind", "work", "parent", "order")
+    list_select_related = ("work", "parent")
+    list_filter = ("kind",)
+    autocomplete_fields = ("work", "parent")
+    search_fields = (
+        "label",
+        "title",
+        "number",
+        "provision_eid",
+        "work__title",
+        "work__frbr_uri",
+    )
+
+
 @admin.register(CaseTag)
 class CaseTagAdmin(admin.ModelAdmin):
     list_display = ("name",)
@@ -1695,15 +1714,8 @@ class CaseTagAdmin(admin.ModelAdmin):
 class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_classes = [OffenceResource]
     filter_horizontal = ("categories", "tags")
+    autocomplete_fields = ("work", "grouping")
     search_fields = ("title", "description", "code", "provision_eid")
-
-    def get_form(self, request, obj=None, **kwargs):
-        return super().get_form(
-            request,
-            obj,
-            widgets={"work": autocomplete.ModelSelect2(url="autocomplete-works")},
-            **kwargs,
-        )
 
 
 @admin.register(JudgmentOffence)

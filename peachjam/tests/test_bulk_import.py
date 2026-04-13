@@ -10,6 +10,7 @@ from peachjam.models import (
     Judgment,
     Offence,
     OffenceCategory,
+    OffenceGrouping,
     OffenceTag,
     Taxonomy,
     Work,
@@ -17,6 +18,7 @@ from peachjam.models import (
 from peachjam.resources import (
     GenericDocumentResource,
     JudgmentResource,
+    OffenceGroupingResource,
     OffenceResource,
 )
 
@@ -295,9 +297,52 @@ class OffenceBulkImportTestCase(TestCase):
         self.weapon_capable = OffenceTag.objects.get_or_create(name="weapon-capable")[0]
         self.inchoate = OffenceTag.objects.get_or_create(name="inchoate")[0]
 
+    def test_offence_grouping_import(self):
+        headers = [
+            "work",
+            "parent",
+            "kind",
+            "label",
+            "number",
+            "title",
+            "provision_eid",
+            "order",
+        ]
+        parent_row = [
+            self.work.frbr_uri,
+            "",
+            "part",
+            "Part II",
+            "II",
+            "Offences against the person",
+            "part_ii",
+            1,
+        ]
+        child_row = [
+            self.work.frbr_uri,
+            "part_ii",
+            "division",
+            "Division IV",
+            "IV",
+            "Violence offences",
+            "div_iv",
+            2,
+        ]
+
+        dataset = tablib.Dataset(parent_row, child_row, headers=headers)
+        result = OffenceGroupingResource().import_data(dataset=dataset, dry_run=False)
+
+        self.assertEqual([], result.invalid_rows)
+        self.assertFalse(result.has_errors())
+
+        parent = OffenceGrouping.objects.get(work=self.work, provision_eid="part_ii")
+        child = OffenceGrouping.objects.get(work=self.work, provision_eid="div_iv")
+        self.assertEqual(parent, child.parent)
+
     def test_offence_import(self):
         headers = [
             "work",
+            "grouping",
             "provision_eid",
             "code",
             "title",
@@ -309,6 +354,7 @@ class OffenceBulkImportTestCase(TestCase):
         ]
         row = [
             self.work.frbr_uri,
+            "",
             "sec_296",
             "ROB-296",
             "Robbery with violence",
@@ -339,9 +385,70 @@ class OffenceBulkImportTestCase(TestCase):
             ["stealing property", "armed with a dangerous weapon"], offence.elements
         )
 
-    def test_offence_export(self):
+    def test_offence_import_updates_grouping_by_provision_eid(self):
+        grouping = OffenceGrouping.objects.create(
+            work=self.work,
+            kind="part",
+            label="Part II",
+            number="II",
+            title="Offences against the person",
+            provision_eid="part_ii",
+            order=1,
+        )
         offence = Offence.objects.create(
             work=self.work,
+            provision_eid="sec_296",
+            code="ROB-296",
+            title="Robbery with violence",
+        )
+
+        headers = [
+            "work",
+            "grouping",
+            "provision_eid",
+            "code",
+            "title",
+            "description",
+            "categories",
+            "offence_tags",
+            "elements",
+            "penalty",
+        ]
+        row = [
+            self.work.frbr_uri,
+            grouping.provision_eid,
+            offence.provision_eid,
+            offence.code,
+            offence.title,
+            "",
+            "violence",
+            "weapon-capable",
+            "",
+            "",
+        ]
+
+        dataset = tablib.Dataset(row, headers=headers)
+        result = OffenceResource().import_data(dataset=dataset, dry_run=False)
+
+        self.assertEqual([], result.invalid_rows)
+        self.assertFalse(result.has_errors())
+
+        offence.refresh_from_db()
+        self.assertEqual(grouping, offence.grouping)
+
+    def test_offence_export(self):
+        grouping = OffenceGrouping.objects.create(
+            work=self.work,
+            kind="part",
+            label="Part II",
+            number="II",
+            title="Offences against the person",
+            provision_eid="part_ii",
+            order=1,
+        )
+        offence = Offence.objects.create(
+            work=self.work,
+            grouping=grouping,
             provision_eid="sec_296",
             code="ROB-296",
             title="Robbery with violence",
@@ -355,6 +462,7 @@ class OffenceBulkImportTestCase(TestCase):
         dataset = OffenceResource().export(Offence.objects.filter(pk=offence.pk))
 
         self.assertEqual(self.work.frbr_uri, dataset.dict[0]["work"])
+        self.assertEqual("part_ii", dataset.dict[0]["grouping"])
         self.assertEqual("public-safety|violence", dataset.dict[0]["categories"])
         self.assertEqual("inchoate|weapon-capable", dataset.dict[0]["offence_tags"])
         self.assertEqual(
