@@ -2,6 +2,8 @@
 
 ![Liiweb icon](https://laws.africa/img/icons/liiweb.png)
 
+[![Coverage Status](https://coveralls.io/repos/github/laws-africa/peachjam/badge.svg?branch=coveralls)](https://coveralls.io/github/laws-africa/peachjam?branch=coveralls)
+
 ## Development
 See [DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
