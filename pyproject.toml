@@ -100,6 +100,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "coverage>=7.6",
     "django-debug-toolbar>=4.4",
     "django-webtest>=1.9.11",
     "pre-commit>=2.17.0",
