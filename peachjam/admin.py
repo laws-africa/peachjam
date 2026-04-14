@@ -91,7 +91,6 @@ from peachjam.models import (
     JournalArticle,
     Judge,
     Judgment,
-    JudgmentOffence,
     JurisdictionProfile,
     Label,
     LawReport,
@@ -115,7 +114,6 @@ from peachjam.models import (
     Ratification,
     RatificationCountry,
     Relationship,
-    Sentence,
     SourceFile,
     Taxonomy,
     Treatment,
@@ -1395,17 +1393,6 @@ class LawReportEntryInline(admin.TabularInline):
     extra = 1
 
 
-class JudgmentOffenceInline(admin.TabularInline):
-    model = JudgmentOffence
-    extra = 1
-    fields = ("offence", "tags")
-
-
-class SentenceInline(admin.StackedInline):
-    model = Sentence
-    extra = 1
-
-
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
@@ -1418,8 +1405,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
         LawReportEntryInline,
-        JudgmentOffenceInline,
-        SentenceInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1716,14 +1701,6 @@ class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
     filter_horizontal = ("categories", "tags")
     autocomplete_fields = ("work", "grouping")
     search_fields = ("title", "description", "code", "provision_eid")
-
-
-@admin.register(JudgmentOffence)
-class JudgmentOffenceAdmin(admin.ModelAdmin):
-    fields = ("judgment", "offence", "tags")
-    list_display = ("judgment", "offence")
-    search_fields = ("judgment__title", "judgment__case_name", "offence__title")
-    filter_horizontal = ("tags",)
 
 
 @admin.register(CauseList)
