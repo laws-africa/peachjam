@@ -65,7 +65,7 @@ jobs:
           python -m pip install --upgrade "setuptools<82" wheel
           pip install .[dev]
           pip install psycopg[binary]==3.2.12 unittest-xml-reporting
-          npm ci
+          npm ci --no-audit --ignore-scripts --only=prod
           npm i -g sass
       - name: Run tests
         env:
