@@ -63,7 +63,7 @@ dependencies = [
     "django-treebeard>=4.5.1",
     "djangorestframework>=3.13.1",
     "drf-spectacular>=0.26.0",
-    "docpipe @ git+https://github.com/laws-africa/docpipe.git@433c34ef93b29871298b91862d14fb0d59ee1ea4",
+    "docpipe @ git+https://github.com/laws-africa/docpipe.git@a32eb0f478a945e1189ec998e1d312eddf9ac08d",
     "elasticsearch>=8.0.0,<9.0.0",
     "elasticsearch-dsl>=8.0.0,<9.0.0",
     "google-api-python-client>=2.46.0",
