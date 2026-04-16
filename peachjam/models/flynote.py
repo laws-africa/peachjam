@@ -159,9 +159,13 @@ class FlynoteDocumentCount(models.Model):
                 root.slug,
                 root.pk,
             )
-            Flynote.objects.filter(path__startswith=root_path).filter(
-                document_count_cache__isnull=True
-            ).delete()
+            empty_flynotes = list(
+                Flynote.objects.filter(path__startswith=root_path)
+                .filter(document_count_cache__isnull=True)
+                .order_by("-depth", "-path")
+            )
+            for flynote in empty_flynotes:
+                flynote.delete()
 
         log.info(
             "Refreshed document counts for flynote tree rooted at '%s' (pk=%s)",
