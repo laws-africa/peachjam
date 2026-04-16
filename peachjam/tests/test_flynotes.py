@@ -1515,6 +1515,27 @@ class FlynoteDocumentCountTest(TestCase):
         with self.assertRaises(ValueError):
             FlynoteDocumentCount.refresh_for_flynote(None)
 
+    def test_refresh_prunes_empty_subtree_leaf_first(self):
+        judgment = Judgment.objects.create(
+            case_name="Prune Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Criminal law — admissibility — trial within a trial",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        criminal = Flynote.objects.get(name="Criminal law")
+        self.assertTrue(Flynote.objects.filter(path__startswith=criminal.path).exists())
+
+        judgment.delete()
+        FlynoteDocumentCount.refresh_for_flynote(criminal)
+
+        self.assertFalse(
+            Flynote.objects.filter(path__startswith=criminal.path).exists()
+        )
+
 
 class FlynoteListViewTest(TestCase):
     fixtures = [
