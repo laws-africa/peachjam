@@ -28,9 +28,27 @@ variables like "hide_xxx" default to being "on".
 * hide_pagination: Hide pagination
 {% endcomment %}
 {% with doc_table_dom_id=doc_table_id|default:"doc-table" %}
-  <div class="table-responsive"
-       id="{{ doc_table_dom_id }}"
-       data-component="DocumentTable">
+  <section class="table-responsive"
+           id="{{ doc_table_dom_id }}"
+           data-component="DocumentTable"
+           aria-labelledby="{{ doc_table_dom_id }}-results-heading">
+    <h2 id="{{ doc_table_dom_id }}-results-heading"
+        class="visually-hidden-focusable mb-2"
+        tabindex="-1"
+        data-document-table-results-target>
+      {% trans 'Results' %}
+    </h2>
+    <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+      {% if documents %}
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }} {% trans 'found.' %}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }} {% trans 'found.' %}
+        {% endif %}
+      {% else %}
+        {% trans 'No documents found.' %}
+      {% endif %}
+    </p>
     {% if doc_table_show_counts %}
       <div class="mb-3 text-muted">
         {% if doc_count == 1 %}
@@ -101,5 +119,5 @@ variables like "hide_xxx" default to being "on".
     {% if documents and not hide_pagination and paginator %}
       {% include 'peachjam/_pagination.html' %}
     {% endif %}
-  </div>
+  </section>
 {% endwith %}
