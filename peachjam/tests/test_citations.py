@@ -1,9 +1,11 @@
 import os
 from datetime import datetime
+from unittest.mock import patch
 
 from countries_plus.models import Country
 from django.core.files.base import File
 from django.test import TestCase
+from docpipe.citations import ActNoOfYearMatcher
 from languages_plus.models import Language
 
 from peachjam.analysis.citations import citation_analyser
@@ -20,6 +22,32 @@ from peachjam.models import (
 class CitationAnalyserTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
     maxDiff = None
+
+    def test_html_extraction_persists_content_html_after_reload(self):
+        doc = CoreDocument.objects.create(
+            title="test",
+            frbr_uri_doctype="doc",
+            frbr_uri_number="test",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            language=Language.objects.get(pk="en"),
+            date=datetime(2023, 1, 1),
+        )
+
+        doc_content = doc.get_or_create_document_content()
+        doc_content.source_html = "<p>consider Act 5 of 2009</p>"
+        doc_content.save()
+
+        with patch.object(citation_analyser, "matchers", [ActNoOfYearMatcher]):
+            doc.extract_citations()
+
+        doc.refresh_from_db()
+        doc_content = doc.get_or_create_document_content()
+        doc_content.refresh_from_db()
+
+        self.assertEqual(
+            '<p>consider <a href="/akn/za/act/2009/5">Act 5 of 2009</a></p>',
+            doc_content.content_html,
+        )
 
     def test_pdf_extractions(self):
         # only some installations have matchers set up
