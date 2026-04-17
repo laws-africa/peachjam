@@ -1,16 +1,20 @@
 import datetime
 from io import StringIO
+from threading import Event, Thread, current_thread
 from unittest.mock import call, patch
 
 from countries_plus.models import Country
 from django.core.management import call_command
-from django.test import TestCase
+from django.db import connections
+from django.test import TestCase, TransactionTestCase
 from django.urls import reverse
 from languages_plus.models import Language
+from treebeard.mp_tree import MP_Node
 
 from peachjam.analysis.flynotes import FlynoteParser, FlynoteUpdater
 from peachjam.models import Court, Judgment
 from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
+from peachjam.tasks import refresh_flynote_document_count
 
 
 class ParseFlynoteTextTest(TestCase):
@@ -1535,6 +1539,86 @@ class FlynoteDocumentCountTest(TestCase):
         self.assertFalse(
             Flynote.objects.filter(path__startswith=criminal.path).exists()
         )
+
+
+class RefreshFlynoteDocumentCountRaceReproTest(TransactionTestCase):
+    def tearDown(self):
+        connections.close_all()
+        super().tearDown()
+
+    def test_same_root_refresh_can_raise_does_not_exist_without_task_lock(self):
+        root = Flynote.add_root(
+            name="Codex experimental law", slug="codex-experimental-law"
+        )
+        branch = root.add_child(name="branch", slug="branch")
+        leaf = branch.add_child(name="leaf", slug="leaf")
+
+        worker_a_blocked = Event()
+        allow_worker_a = Event()
+        worker_b_finished = Event()
+        errors = []
+
+        original_get_parent = MP_Node.get_parent
+
+        def patched_get_parent(node, update=False):
+            if (
+                current_thread().name == "worker-a"
+                and update
+                and node.pk == leaf.pk
+                and not worker_a_blocked.is_set()
+            ):
+                worker_a_blocked.set()
+                if not allow_worker_a.wait(timeout=5):
+                    raise AssertionError("timed out waiting to resume worker-a")
+
+            return original_get_parent(node, update=update)
+
+        def run_refresh(worker_name):
+            try:
+                refresh_flynote_document_count.now(root.pk)
+            except Exception as exc:
+                errors.append((worker_name, exc))
+            finally:
+                if worker_name == "worker-b":
+                    worker_b_finished.set()
+                connections.close_all()
+
+        with patch.object(MP_Node, "get_parent", new=patched_get_parent):
+            worker_a = Thread(
+                target=run_refresh,
+                args=("worker-a",),
+                name="worker-a",
+                daemon=True,
+            )
+            worker_a.start()
+            self.assertTrue(worker_a_blocked.wait(timeout=5))
+
+            worker_b = Thread(
+                target=run_refresh,
+                args=("worker-b",),
+                name="worker-b",
+                daemon=True,
+            )
+            worker_b.start()
+
+            root_deleted_while_worker_a_blocked = False
+            for _ in range(40):
+                if not Flynote.objects.filter(pk=root.pk).exists():
+                    root_deleted_while_worker_a_blocked = True
+                    break
+                worker_b_finished.wait(timeout=0.05)
+
+            allow_worker_a.set()
+            worker_a.join(timeout=5)
+            worker_b.join(timeout=5)
+
+        self.assertFalse(worker_a.is_alive())
+        self.assertFalse(worker_b.is_alive())
+        self.assertFalse(
+            root_deleted_while_worker_a_blocked,
+            "worker-b should not be able to delete the root while worker-a is mid-refresh",
+        )
+        self.assertFalse(errors)
 
 
 class FlynoteListViewTest(TestCase):
