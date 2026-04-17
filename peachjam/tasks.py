@@ -394,11 +394,10 @@ def update_flynote_taxonomy(judgment_id):
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
-@transaction.atomic
 def refresh_flynote_document_count(root_id):
     from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 
-    root = Flynote.objects.select_for_update().filter(pk=root_id).first()
+    root = Flynote.objects.filter(pk=root_id).first()
     if not root:
         log.info(f"No flynote root with id {root_id} exists, ignoring.")
         return
