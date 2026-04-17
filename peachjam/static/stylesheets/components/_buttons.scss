@@ -1,0 +1,22 @@
+@mixin solid-button-focus-ring {
+  outline: 3px solid $gray-900;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 0.2rem $white;
+}
+
+.btn.btn-primary:focus-visible,
+.btn.btn-secondary:focus-visible,
+.btn-check:focus-visible + .btn.btn-primary,
+.btn-check:focus-visible + .btn.btn-secondary {
+  @include solid-button-focus-ring;
+}
+
+@media (forced-colors: active) {
+  .btn.btn-primary:focus-visible,
+  .btn.btn-secondary:focus-visible,
+  .btn-check:focus-visible + .btn.btn-primary,
+  .btn-check:focus-visible + .btn.btn-secondary {
+    outline: 2px solid Highlight;
+    box-shadow: none;
+  }
+}
