@@ -106,9 +106,18 @@ class FlynoteDocumentCount(models.Model):
         if root is None:
             raise ValueError("refresh_for_flynote requires a root flynote node")
 
-        root_path = root.path
+        root_id = root.pk
 
         with transaction.atomic():
+            root = Flynote.objects.select_for_update().filter(pk=root_id).first()
+            if not root:
+                log.info(
+                    "No flynote root with id %s exists while refreshing counts, ignoring.",
+                    root_id,
+                )
+                return
+
+            root_path = root.path
             with connection.cursor() as cursor:
                 log.info(
                     "Deleting cached flynote counts under root '%s' (pk=%s).",
