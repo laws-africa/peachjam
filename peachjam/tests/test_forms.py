@@ -98,6 +98,10 @@ class BaseDocumentFilterFormTestCase(TestCase):
             {
                 "request": request,
                 "registries": registries,
+                "years": years,
+                "months": [],
+                "year": None,
+                "doc_table_id": "doc-table-test",
                 "registry_groups": [registries[:5], registries[5:]],
                 "registry": SimpleNamespace(code=""),
                 "registry_label_plural": "Registries",
@@ -111,15 +115,14 @@ class BaseDocumentFilterFormTestCase(TestCase):
                 "years": years,
                 "year": None,
                 "all_years_url": "/years/",
+                "years_skip_target_id": "article-list-heading",
             },
             request=request,
         )
 
         self.assertIn("Skip past Registries", registries_html)
-        self.assertIn(
-            'aria-labelledby="registries-heading-judgmentsecowascj"', registries_html
-        )
-        self.assertIn('id="registries-end-judgmentsecowascj"', registries_html)
+        self.assertIn('aria-labelledby="registries-heading"', registries_html)
+        self.assertIn('href="#years-heading"', registries_html)
         self.assertIn("Skip past years", years_html)
-        self.assertIn('aria-labelledby="years-heading-judgmentsecowascj"', years_html)
-        self.assertIn('id="years-end-judgmentsecowascj"', years_html)
+        self.assertIn('aria-labelledby="years-heading"', years_html)
+        self.assertIn('href="#article-list-heading"', years_html)
