@@ -14,6 +14,7 @@ export default class DocumentFilterForm {
     observer.observe(this.root);
     this.moveFilters();
     this.setupFacetSearch();
+    this.setupSkipLinks();
   }
 
   moveFilters () {
@@ -86,6 +87,37 @@ export default class DocumentFilterForm {
       const isVisible = !searchTerm || labelText.includes(searchTerm);
 
       optionEl.classList.toggle('d-none', !isVisible);
+      optionEl.hidden = !isVisible;
+      optionEl.setAttribute('aria-hidden', String(!isVisible));
     });
+  }
+
+  setupSkipLinks () {
+    this.root.querySelectorAll('[data-skip-link]').forEach((link) => {
+      link.addEventListener('click', (event: Event) => {
+        const currentTarget = event.currentTarget as HTMLAnchorElement | null;
+        const href = currentTarget?.getAttribute('href') || '';
+        if (!href.startsWith('#')) {
+          return;
+        }
+
+        const target = document.querySelector(href) as HTMLElement | null;
+        if (!target) {
+          return;
+        }
+
+        event.preventDefault();
+        if (currentTarget?.hasAttribute('data-close-offcanvas')) {
+          this.cleanupOffcanvas();
+        }
+        window.history.replaceState(null, '', href);
+        requestAnimationFrame(() => this.focusTarget(target));
+      });
+    });
+  }
+
+  focusTarget (target: HTMLElement) {
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: 'start' });
   }
 }
