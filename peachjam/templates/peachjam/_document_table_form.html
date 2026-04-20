@@ -60,11 +60,11 @@
                             class="mb-0"
                             data-filter-group
                             tabindex="-1">
-                    <legend id="{{ doc_table_form_id }}-group-heading-{{ forloop.counter0 }}"
-                            class="h6 mb-2">
-                      {{ facet.label }}
-                    </legend>
                     <div class="d-flex justify-content-between mb-2 align-items-start">
+                      <legend id="{{ doc_table_form_id }}-group-heading-{{ forloop.counter0 }}"
+                              class="h6 mb-0">
+                        {{ facet.label }}
+                      </legend>
                       {% if facet.values %}
                         <div class="d-flex align-items-center ms-2">
                           <a href="{{ request.path }}"
