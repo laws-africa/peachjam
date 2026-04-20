@@ -320,7 +320,6 @@ class LawReportViewsTestCase(TestCase):
         self.assertIn("labels", child_row._prefetched_objects_cache)
         self.assertIn("taxonomies", child_row._prefetched_objects_cache)
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
-        self.assertContains(response, "Sort documents by")
         self.assertContains(response, "Alphabetical (A - Z)")
         self.assertContains(response, "Date (Newest first)")
         self.assertContains(response, 'aria-sort="ascending"', html=False)

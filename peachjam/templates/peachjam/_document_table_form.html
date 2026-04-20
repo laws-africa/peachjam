@@ -146,21 +146,12 @@
                        value="{{ form.q.value|default_if_none:'' }}"
                        name="q"/>
               </div>
-              {% with doc_table_sort_select_id=doc_table_form_id|add:"-sort" %}
-                <div class="d-flex align-items-center">
-                  <label class="d-none d-md-block ms-3 me-2 text-nowrap"
-                         for="{{ doc_table_sort_select_id }}">
-                    {% trans "Sort documents by" %}
-                  </label>
-                  <select id="{{ doc_table_sort_select_id }}"
-                          class="form-control"
-                          hx-get="{{ request.path }}"
-                          name="sort"
-                          aria-label="{% trans "Sort documents by" %}">
-                    {% for opt in form.sort %}{{ opt }}{% endfor %}
-                  </select>
-                </div>
-              {% endwith %}
+              <div class="d-flex align-items-center">
+                <div class="d-none d-md-block ms-3 me-2 text-nowrap">{% trans "Sort by" %}:</div>
+                <select class="form-control" hx-get="{{ request.path }}" name="sort">
+                  {% for opt in form.sort %}{{ opt }}{% endfor %}
+                </select>
+              </div>
               <div class="d-none d-md-block ms-2">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
