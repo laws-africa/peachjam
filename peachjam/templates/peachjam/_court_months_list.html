@@ -21,7 +21,12 @@
       {% endfor %}
     </ul>
   </div>
-  <select class="form-select mb-3 d-block d-lg-none"
+  <label class="form-label d-block d-lg-none mb-1"
+         for="court-month-navigation-select">
+    {% trans 'Browse by month' %}
+  </label>
+  <select id="court-month-navigation-select"
+          class="form-select mb-3 d-block d-lg-none"
           data-component="NavigationSelect">
     <option value="{{ all_months_url }}">
       {% trans 'All months' %}

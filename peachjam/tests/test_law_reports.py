@@ -297,6 +297,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
         self.assertContains(response, "Cited by 1 judgment")
+        self.assertContains(response, "Sort documents by")
         self.assertContains(
             response, '<span class="badge rounded-pill bg-success">Reported</span>', 2
         )
