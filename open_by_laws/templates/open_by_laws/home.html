@@ -50,7 +50,8 @@
                        class="btn btn-primary ms-2 btn-lg"
                        value="{% trans 'Search' %}"/>
               </form>
-              <a href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
+              <a class="hero-search__aux-link"
+                 href="{% url 'search:search' %}?show-advanced-tab=1">{% trans 'Advanced search' %}</a>
             </div>
           </div>
         {% endblock %}
