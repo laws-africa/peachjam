@@ -23,8 +23,7 @@
   background-color: transparentize($primary, 0.90);
 }
 
-.hero-search__aux-link,
-.hero-search__aux-links a {
+.hero-search a:not(.btn) {
   color: mix($visited-link, $link-color, 45%);
 
   &:visited {
