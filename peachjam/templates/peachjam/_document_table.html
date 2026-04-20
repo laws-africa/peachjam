@@ -49,7 +49,7 @@ variables like "hide_xxx" default to being "on".
                 class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}"
                 {% if form.sort.value == "title" %}aria-sort="ascending"{% elif form.sort.value == "-title" %}aria-sort="descending"{% endif %}>
               <button type="button"
-                      class="btn btn-link link-dark p-0 d-inline-flex align-items-center text-start{% if form.sort.value == "title" or form.sort.value == "-title" %} fw-semibold{% endif %}"
+                      class="btn btn-link"
                       data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
                 {{ doc_table_title_label|default_if_none:"Title" }}
                 <span class="visually-hidden">{% trans "Sort alphabetically" %}</span>
@@ -73,7 +73,7 @@ variables like "hide_xxx" default to being "on".
                   class="cell-date"
                   {% if form.sort.value == "-date" %}aria-sort="descending"{% elif form.sort.value == "date" %}aria-sort="ascending"{% endif %}>
                 <button type="button"
-                        class="btn btn-link link-dark p-0 d-inline-flex align-items-center text-start{% if form.sort.value == "date" or form.sort.value == "-date" %} fw-semibold{% endif %}"
+                        class="btn btn-link"
                         data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
                   {{ doc_table_date_label|default_if_none:"Date" }}
                   <span class="visually-hidden">{% trans "Sort by date" %}</span>
