@@ -32,10 +32,6 @@ from peachjam.tasks import refresh_flynote_document_count
 log = logging.getLogger(__name__)
 
 
-class FlynoteUpdateDeferred(Exception):
-    """Raised when flynote relinking should be retried later."""
-
-
 class FlynoteParser:
     """Parses raw flynote text into structured paths.
 
@@ -2640,11 +2636,13 @@ class FlynoteUpdater:
 
         *parent* is the parent Flynote node, or None for top-level.
 
-        Returns ``None`` if the name produces an empty slug.
+        Returns ``(node, defer_reason)`` where ``defer_reason`` is set when the
+        whole relink should be retried later. ``node`` is ``None`` when the
+        name produces an empty slug and the current path should be skipped.
         """
         normalised = FlynoteParser.normalise_name(name)
         if not normalised:
-            return None
+            return None, None
 
         if parent:
             expected_slug = f"{parent.slug}-{normalised}"
@@ -2653,23 +2651,23 @@ class FlynoteUpdater:
 
         cached = self.node_cache.get(expected_slug)
         if cached is not None:
-            return cached
+            return cached, None
 
         existing = Flynote.objects.filter(slug=expected_slug).first()
         if existing:
             self.node_cache[expected_slug] = existing
-            return existing
+            return existing, None
 
         if not parent:
             try:
                 node = Flynote.add_root(name=name, slug=expected_slug)
                 self.node_cache[expected_slug] = node
-                return node
+                return node, None
             except IntegrityError:
                 existing = Flynote.objects.filter(slug=expected_slug).first()
                 if existing:
                     self.node_cache[expected_slug] = existing
-                return existing
+                return existing, None
 
         for attempt in range(1, 4):
             locked_parent = (
@@ -2679,20 +2677,21 @@ class FlynoteUpdater:
                 .first()
             )
             if not locked_parent:
-                raise FlynoteUpdateDeferred(
+                return (
+                    None,
                     "parent %s no longer exists while creating '%s'"
-                    % (parent.pk, expected_slug)
+                    % (parent.pk, expected_slug),
                 )
 
             try:
                 node = locked_parent.add_child(name=name, slug=expected_slug)
                 self.node_cache[expected_slug] = node
-                return node
+                return node, None
             except IntegrityError:
                 existing = Flynote.objects.filter(slug=expected_slug).first()
                 if existing:
                     self.node_cache[expected_slug] = existing
-                return existing
+                return existing, None
             except AttributeError as exc:
                 if "add_sibling" not in str(exc):
                     raise
@@ -2700,13 +2699,14 @@ class FlynoteUpdater:
                 existing = Flynote.objects.filter(slug=expected_slug).first()
                 if existing:
                     self.node_cache[expected_slug] = existing
-                    return existing
+                    return existing, None
 
                 if attempt == 3:
-                    raise FlynoteUpdateDeferred(
+                    return (
+                        None,
                         "Treebeard could not safely create '%s' after %s retries"
-                        % (expected_slug, attempt)
-                    ) from exc
+                        % (expected_slug, attempt),
+                    )
 
     @transaction.atomic
     def update_for_judgment(self, judgment, refresh_counts=False):
@@ -2747,30 +2747,29 @@ class FlynoteUpdater:
         node_start = perf_counter()
         leaf_flynotes = set()
         roots_to_refresh = set()
-        try:
-            for path in paths:
-                parent = None
-                root_id = None
-                for index, name in enumerate(path):
-                    node = self.get_or_create_node(parent, name)
-                    if node is None:
-                        break
-                    if index == 0:
-                        root_id = node.pk
-                    parent = node
-                else:
-                    leaf_flynotes.add(node)
-                    if root_id is not None:
-                        roots_to_refresh.add(root_id)
-        except FlynoteUpdateDeferred as exc:
-            log.warning(
-                "Skipping flynote update for judgment %s because tree rebuilding could not be completed safely: %s",
-                judgment.pk,
-                exc,
-                exc_info=True,
-            )
-            transaction.set_rollback(True)
-            return
+        for path in paths:
+            parent = None
+            root_id = None
+            for index, name in enumerate(path):
+                node, defer_reason = self.get_or_create_node(parent, name)
+                if defer_reason:
+                    log.warning(
+                        "Skipping flynote update for judgment %s because "
+                        "tree rebuilding could not be completed safely: %s",
+                        judgment.pk,
+                        defer_reason,
+                    )
+                    transaction.set_rollback(True)
+                    return
+                if node is None:
+                    break
+                if index == 0:
+                    root_id = node.pk
+                parent = node
+            else:
+                leaf_flynotes.add(node)
+                if root_id is not None:
+                    roots_to_refresh.add(root_id)
         node_ms = (perf_counter() - node_start) * 1000
 
         JudgmentFlynote.objects.filter(document=judgment).delete()
