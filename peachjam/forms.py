@@ -161,8 +161,8 @@ class BaseDocumentFilterForm(forms.Form):
     sort = forms.ChoiceField(
         required=False,
         choices=[
-            ("title", _("Title") + " (A - Z)"),
-            ("-title", _("Title") + " (Z - A)"),
+            ("title", _("Alphabetical") + " (A - Z)"),
+            ("-title", _("Alphabetical") + " (Z - A)"),
             ("-date", _("Date") + " " + _("(Newest first)")),
             ("date", _("Date") + " " + _("(Oldest first)")),
         ],

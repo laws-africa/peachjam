@@ -46,13 +46,16 @@ variables like "hide_xxx" default to being "on".
           <tr>
             {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
             <th scope="col"
-                class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
-              <div class="align-items-center"
-                   role="button"
-                   data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
+                class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}"
+                {% if form.sort.value == "title" %}aria-sort="ascending"{% elif form.sort.value == "-title" %}aria-sort="descending"{% endif %}>
+              <button type="button"
+                      class="btn btn-link link-dark p-0 d-inline-flex align-items-center text-start{% if form.sort.value == "title" or form.sort.value == "-title" %} fw-semibold{% endif %}"
+                      data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
                 {{ doc_table_title_label|default_if_none:"Title" }}
-                <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"></i>
-              </div>
+                <span class="visually-hidden">{% trans "Sort alphabetically" %}</span>
+                <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"
+                   aria-hidden="true"></i>
+              </button>
             </th>
             {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
             {% if doc_table_show_jurisdiction %}
@@ -66,13 +69,17 @@ variables like "hide_xxx" default to being "on".
             {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
             {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
             {% if doc_table_show_date %}
-              <th scope="col" class="cell-date">
-                <div class="align-items-center"
-                     role="button"
-                     data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
+              <th scope="col"
+                  class="cell-date"
+                  {% if form.sort.value == "-date" %}aria-sort="descending"{% elif form.sort.value == "date" %}aria-sort="ascending"{% endif %}>
+                <button type="button"
+                        class="btn btn-link link-dark p-0 d-inline-flex align-items-center text-start{% if form.sort.value == "date" or form.sort.value == "-date" %} fw-semibold{% endif %}"
+                        data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
                   {{ doc_table_date_label|default_if_none:"Date" }}
-                  <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
-                </div>
+                  <span class="visually-hidden">{% trans "Sort by date" %}</span>
+                  <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"
+                     aria-hidden="true"></i>
+                </button>
               </th>
             {% endif %}
           </tr>
