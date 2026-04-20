@@ -32,6 +32,10 @@ from peachjam.tasks import refresh_flynote_document_count
 log = logging.getLogger(__name__)
 
 
+class FlynoteUpdateDeferred(Exception):
+    """Raised when flynote relinking should be retried later."""
+
+
 class FlynoteParser:
     """Parses raw flynote text into structured paths.
 
@@ -2675,12 +2679,10 @@ class FlynoteUpdater:
                 .first()
             )
             if not locked_parent:
-                log.warning(
-                    "Skipping flynote node creation for slug '%s' because parent %s no longer exists.",
-                    expected_slug,
-                    parent.pk,
+                raise FlynoteUpdateDeferred(
+                    "parent %s no longer exists while creating '%s'"
+                    % (parent.pk, expected_slug)
                 )
-                return None
 
             try:
                 node = locked_parent.add_child(name=name, slug=expected_slug)
@@ -2701,21 +2703,18 @@ class FlynoteUpdater:
                     return existing
 
                 if attempt == 3:
-                    log.warning(
-                        "Skipping flynote node creation for slug '%s' after %s Treebeard retries.",
-                        expected_slug,
-                        attempt,
-                        exc_info=True,
-                    )
-                    return None
+                    raise FlynoteUpdateDeferred(
+                        "Treebeard could not safely create '%s' after %s retries"
+                        % (expected_slug, attempt)
+                    ) from exc
 
     @transaction.atomic
     def update_for_judgment(self, judgment, refresh_counts=False):
         """Parse a judgment's flynote and sync its Flynote links.
 
-        1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
-        2. Parses ``judgment.flynote`` into hierarchical paths.
-        3. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
+        1. Parses ``judgment.flynote`` into hierarchical paths.
+        2. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
+        3. Replaces existing ``JudgmentFlynote`` links with the rebuilt leaf set.
         4. Links the judgment to the leaf node of every path.
 
         Does nothing if the flynote text cannot be parsed (plain prose, empty, etc.).
@@ -2735,9 +2734,8 @@ class FlynoteUpdater:
             return
         parse_ms = (perf_counter() - parse_start) * 1000
 
-        JudgmentFlynote.objects.filter(document=judgment).delete()
-
         if not paths:
+            JudgmentFlynote.objects.filter(document=judgment).delete()
             log.info(
                 "Linked judgment %s to 0 flynote topics (parse=%.2fms, nodes=0.00ms, links=0.00ms, total=%.2fms).",
                 judgment.pk,
@@ -2749,21 +2747,33 @@ class FlynoteUpdater:
         node_start = perf_counter()
         leaf_flynotes = set()
         roots_to_refresh = set()
-        for path in paths:
-            parent = None
-            root_id = None
-            for index, name in enumerate(path):
-                node = self.get_or_create_node(parent, name)
-                if node is None:
-                    break
-                if index == 0:
-                    root_id = node.pk
-                parent = node
-            else:
-                leaf_flynotes.add(node)
-                if root_id is not None:
-                    roots_to_refresh.add(root_id)
+        try:
+            for path in paths:
+                parent = None
+                root_id = None
+                for index, name in enumerate(path):
+                    node = self.get_or_create_node(parent, name)
+                    if node is None:
+                        break
+                    if index == 0:
+                        root_id = node.pk
+                    parent = node
+                else:
+                    leaf_flynotes.add(node)
+                    if root_id is not None:
+                        roots_to_refresh.add(root_id)
+        except FlynoteUpdateDeferred as exc:
+            log.warning(
+                "Skipping flynote update for judgment %s because tree rebuilding could not be completed safely: %s",
+                judgment.pk,
+                exc,
+                exc_info=True,
+            )
+            transaction.set_rollback(True)
+            return
         node_ms = (perf_counter() - node_start) * 1000
+
+        JudgmentFlynote.objects.filter(document=judgment).delete()
 
         link_start = perf_counter()
         JudgmentFlynote.objects.bulk_create(
