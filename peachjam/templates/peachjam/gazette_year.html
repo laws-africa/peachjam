@@ -36,7 +36,7 @@
 {% endblock %}
 {% block count-and-search %}
   {{ block.super }}
-  {% include "peachjam/_years_list.html" with years_skip_target_id=doc_table_id|add:'-results-heading' %}
+  {% include "peachjam/_years_list.html" with years_skip_target_id=doc_table_form_id|add:'-filters-heading' %}
 {% endblock %}
 {% block nav-tabs %}
   <div class="row mb-3">

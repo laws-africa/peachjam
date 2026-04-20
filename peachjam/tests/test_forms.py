@@ -58,6 +58,28 @@ class BaseDocumentFilterFormTestCase(TestCase):
                         "type": "checkbox",
                     },
                 },
+                "rendered_facets": [
+                    {
+                        "name": "judges",
+                        "facet": {
+                            "label": "Judges",
+                            "options": [(f"judge-{i}", f"Judge {i}") for i in range(9)],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-form-test-group-years",
+                    },
+                    {
+                        "name": "years",
+                        "facet": {
+                            "label": "Years",
+                            "options": [("2024", "2024")],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-test-results-heading",
+                    },
+                ],
                 "form": form,
                 "documents": [],
                 "doc_count": 0,
@@ -72,12 +94,87 @@ class BaseDocumentFilterFormTestCase(TestCase):
 
         self.assertIn('href="#doc-table-test-results-heading"', html)
         self.assertIn('id="doc-table-form-test-group-judges"', html)
-        self.assertIn('aria-labelledby="doc-table-form-test-group-heading-0"', html)
-        self.assertEqual(html.count("data-close-offcanvas"), 3)
-        self.assertIn('href="#doc-table-form-test-group-heading-1"', html)
+        self.assertIn('<fieldset id="doc-table-form-test-group-judges"', html)
+        self.assertIn('<legend id="doc-table-form-test-group-heading-0"', html)
+        self.assertEqual(html.count("data-close-offcanvas"), 1)
+        self.assertIn('href="#doc-table-form-test-group-years"', html)
         self.assertIn("data-document-table-results-target", html)
         self.assertIn('aria-live="polite"', html)
         self.assertIn("No documents found.", html)
+        self.assertIn('id="doc-table-form-test-filters-section"', html)
+        self.assertIn('aria-labelledby="doc-table-form-test-filters-heading"', html)
+
+    def test_document_table_form_skips_hidden_facets_when_building_next_links(self):
+        request = RequestFactory().get("/documents/")
+        form = BaseDocumentFilterForm({}, {})
+        html = render_to_string(
+            "peachjam/_document_table_form.html",
+            {
+                "request": request,
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+                "doc_table_offcanvas_id": "doc-table-filters-offcanvas-test",
+                "doc_table_offcanvas_title_id": "doc-table-filters-offcanvas-test-title",
+                "doc_table_filter_input_id": "doc-table-form-test-filter-input",
+                "taxonomy_tree": [],
+                "is_leaf_node": False,
+                "show_clear_all": False,
+                "facet_data": {
+                    "judges": {
+                        "label": "Judges",
+                        "options": [("judge-1", "Judge 1")],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                    "years": {
+                        "label": "Years",
+                        "options": [],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                    "alphabet": {
+                        "label": "Alphabet",
+                        "options": [("a", "A")],
+                        "values": "",
+                        "type": "radio",
+                    },
+                },
+                "rendered_facets": [
+                    {
+                        "name": "judges",
+                        "facet": {
+                            "label": "Judges",
+                            "options": [("judge-1", "Judge 1")],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-form-test-group-alphabet",
+                    },
+                    {
+                        "name": "alphabet",
+                        "facet": {
+                            "label": "Alphabet",
+                            "options": [("a", "A")],
+                            "values": "",
+                            "type": "radio",
+                        },
+                        "next_target_id": "doc-table-test-results-heading",
+                    },
+                ],
+                "form": form,
+                "documents": [],
+                "doc_count": 0,
+                "doc_count_noun": "document",
+                "doc_count_noun_plural": "documents",
+                "doc_table_show_counts": True,
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('href="#doc-table-form-test-group-alphabet"', html)
+        self.assertNotIn('href="#doc-table-form-test-group-years"', html)
 
     def test_long_sidebar_lists_render_bypass_navigation(self):
         request = RequestFactory().get("/judgments/ecowascj/")
