@@ -2,12 +2,10 @@
 {% if registries %}
   <section>
     <h2 id="registries-heading" class="h4">{{ registry_label_plural }}</h2>
-    {% if registries|length > 8 %}
-      <a class="visually-hidden-focusable d-inline-block mb-2"
-         href="#{% if years %}years-heading{% elif months and year %}months-heading{% else %}{{ doc_table_id }}-results-heading{% endif %}">
-        {% blocktrans with label=registry_label_plural %}Skip past {{ label }}{% endblocktrans %}
-      </a>
-    {% endif %}
+    <a class="visually-hidden-focusable d-inline-block mb-2"
+       href="#{% if years %}years-heading{% elif months and year %}months-heading{% else %}{{ doc_table_id }}-results-heading{% endif %}">
+      {% blocktrans with label=registry_label_plural %}Skip past {{ label }}{% endblocktrans %}
+    </a>
     <nav id="registries-nav" class="mb-4" aria-labelledby="registries-heading">
       <div class="flow-columns">
         {% for group in registry_groups %}
