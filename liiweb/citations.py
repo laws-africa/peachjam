@@ -6,7 +6,11 @@ from docpipe.matchers import CitationMatcher, ExtractedMatch
 class MncMatcher(CitationMatcher):
     """Finds references to commonly-formatted MNCS of the form [YYYY] COURT NUM
 
-    example: [2022] ZASCA 126
+    examples:
+
+    - [2022] ZASCA 126
+    - [2022]ZASCA 126
+    - [2022] ZASCA126
     """
 
     country_codes = "|".join(
@@ -17,9 +21,9 @@ class MncMatcher(CitationMatcher):
     )
 
     pattern_re = re.compile(
-        r"\[(?P<year>\d{4})\]\s+(?P<court>("
+        r"\[(?P<year>\d{4})\]\s*(?P<court>("
         + country_codes
-        + r")[A-Z]{1,8})\s+(?P<num>\d+)\b"
+        + r")[A-Z]{1,8})\s*(?P<num>\d+)\b"
     )
     href_pattern = "/akn/{place}/judgment/{court}/{year}/{num}"
     html_candidate_xpath = ".//text()[contains(., '[') and not(ancestor::a)]"
