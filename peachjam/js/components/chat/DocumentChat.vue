@@ -301,7 +301,7 @@ export default {
       return message;
     },
     setMessageContent (message, content) {
-      message.content = content || '';
+      message.content = typeof content === 'string' ? content : (content != null ? String(content) : '');
       if (message.role === 'ai' && message.content.trim().length > 0) {
         message.content_html = marked.parse(message.content);
       } else {
