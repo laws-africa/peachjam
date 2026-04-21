@@ -3,6 +3,7 @@
 {% block title %}
   {% trans "Explore case law by topic" %}
 {% endblock %}
+{% block main-aria-labelledby %}aria-labelledby="main-page-heading"{% endblock %}
 {% block page-content %}
   <section class="container">
     <nav aria-label="breadcrumb">
@@ -16,7 +17,7 @@
         <li class="breadcrumb-item active" aria-current="page">{% trans "Explore by topic" %}</li>
       </ol>
     </nav>
-    <h1>{% trans "Explore case law by topic" %}</h1>
+    <h1 id="main-page-heading">{% trans "Explore case law by topic" %}</h1>
     <p class="lead">
       {% trans "Browse judgments organised by legal subject. Popular topics highlight where most decisions have been delivered, or explore all available topics below." %}
     </p>

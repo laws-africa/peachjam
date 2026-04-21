@@ -2,9 +2,9 @@
 {% load i18n peachjam %}
 {% block article-header %}
   {% if year %}
-    <h1 class="my-4">{% trans "Articles" %} - {{ year }}</h1>
+    <h1 id="main-page-heading" class="my-4">{% trans "Articles" %} - {{ year }}</h1>
   {% else %}
-    <h1 class="my-4">{% trans "Latest Articles" %}</h1>
+    <h1 id="main-page-heading" class="my-4">{% trans "Latest Articles" %}</h1>
   {% endif %}
 {% endblock %}
 {% block article-content %}

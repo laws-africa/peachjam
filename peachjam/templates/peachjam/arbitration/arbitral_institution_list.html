@@ -3,6 +3,7 @@
 {% block title %}
   {% trans 'Arbitral Institutions' %}
 {% endblock %}
+{% block main-aria-labelledby %}aria-labelledby="main-page-heading"{% endblock %}
 {% block page-content %}
   <section class="container pt-4 pb-5">
     <nav aria-label="breadcrumb">
@@ -16,7 +17,7 @@
         <li class="breadcrumb-item active" aria-current="page">{% trans 'Arbitral Institutions' %}</li>
       </ol>
     </nav>
-    <h1 class="my-4">{% trans 'Arbitral Institutions' %}</h1>
+    <h1 id="main-page-heading" class="my-4">{% trans 'Arbitral Institutions' %}</h1>
     <div class="mb-3">
       <a href="{% url 'arbitration_award_list' %}">{% trans 'Browse arbitration awards' %}</a>
     </div>

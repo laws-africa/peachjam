@@ -3,6 +3,7 @@
 {% block title %}
   {% trans 'Law reports' %}
 {% endblock %}
+{% block main-aria-labelledby %}aria-labelledby="main-page-heading"{% endblock %}
 {% block page-content %}
   <section class="container">
     {% block breadcrumbs %}
@@ -18,7 +19,7 @@
       </nav>
     {% endblock %}
     <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
-      <h1 class="mb-0">{% trans 'Law reports' %}</h1>
+      <h1 id="main-page-heading" class="mb-0">{% trans 'Law reports' %}</h1>
     </div>
     {% if law_reports %}
       <div class="text-muted mb-3">
