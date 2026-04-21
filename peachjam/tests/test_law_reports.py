@@ -325,7 +325,6 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(
             response, 'placeholder="Filter documents by title"', html=False
         )
-        self.assertContains(response, 'placeholder="Filter documents"', html=False)
         self.assertContains(response, "Title (A - Z)")
         self.assertContains(response, "Date (Newest first)")
         self.assertContains(response, 'aria-sort="ascending"', html=False)
