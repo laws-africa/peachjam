@@ -2,10 +2,12 @@
 <header>
   {% block skip-links %}
     <div class="skip-links">
-      <a class="bg-white"
-         href="{% if 'akn/' in request.path %}#document-content{% else %}#top{% endif %}">{% trans 'Skip to document content' %}</a>
-      <a class="bg-white" href="#main-nav">{% trans 'Skip to main menu' %}</a>
-      <a class="bg-white" href="#header-search">{% trans 'Skip to search' %}</a>
+      {% if 'akn/' in request.path %}
+        <a class="visually-hidden-focusable bg-white p-2"
+           href="#document-content">{% trans 'Skip to document content' %}</a>
+      {% endif %}
+      <a class="visually-hidden-focusable bg-white p-2" href="#main-nav">{% trans 'Skip to main menu' %}</a>
+      <a class="visually-hidden-focusable bg-white p-2" href="#header-search">{% trans 'Skip to search' %}</a>
     </div>
   {% endblock %}
   {% block top-bar %}<div>Top bar content</div>{% endblock %}

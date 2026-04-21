@@ -59,6 +59,9 @@ class PeachjamViewsTest(TestCase):
     def test_homepage(self):
         response = self.client.get(reverse("home_page"))
         self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "Skip to document content")
+        self.assertContains(response, "Skip to main menu")
+        self.assertContains(response, "Skip to search")
 
         recent_judgments = [
             r_j.title for r_j in response.context.get("recent_judgments")

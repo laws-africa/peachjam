@@ -201,7 +201,9 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
   left: -501px;
 }
 .skip-links a:focus {
-  left: -1px;
+  top: 0;
+  left: 0;
+  z-index: 1080;
 }
 
 .breadcrumb {

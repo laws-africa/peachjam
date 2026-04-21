@@ -21,6 +21,8 @@ class DocumentViewTestCase(WebTest):
         doc = Judgment.objects.first()
         response = self.app.get(doc.get_absolute_url())
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'href="#document-content"', html=False)
+        self.assertContains(response, "Skip to document content")
         self.assertContains(
             response,
             '<script id="citation-links" type="application/json">[]</script>',
