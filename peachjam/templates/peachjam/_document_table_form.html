@@ -135,12 +135,12 @@
                  hx-target="#{{ doc_table_id }}"
                  {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
               <div class="flex-grow-1 me-md-2 mb-2 mb-md-0">
-                <label class="form-label" for="{{ doc_table_filter_input_id }}">{% trans "Filter documents" %}</label>
+                <label class="form-label" for="{{ doc_table_filter_input_id }}">{% trans "Filter documents by title" %}</label>
                 <input id="{{ doc_table_filter_input_id }}"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
                        hx-sync="this:replace"
-                       placeholder="{% trans "Filter documents" %}"
+                       placeholder="{% trans "Filter documents by title" %}"
                        class="form-control"
                        type="text"
                        value="{{ form.q.value|default_if_none:'' }}"

@@ -258,7 +258,9 @@ class LawReportViewsTestCase(TestCase):
             if getattr(doc, "work_id", None) == self.first_judgment.work_id
         )
         self.assertFalse(hasattr(parent_row, "children"))
-        self.assertContains(response, 'placeholder="Filter documents"', html=False)
+        self.assertContains(
+            response, 'placeholder="Filter documents by title"', html=False
+        )
 
     def test_law_report_volume_detail_view_cases_tab(self):
         url = reverse(
@@ -320,7 +322,9 @@ class LawReportViewsTestCase(TestCase):
         self.assertIn("work", child_row._state.fields_cache)
         self.assertIn("labels", child_row._prefetched_objects_cache)
         self.assertIn("taxonomies", child_row._prefetched_objects_cache)
-        self.assertContains(response, 'placeholder="Filter documents"', html=False)
+        self.assertContains(
+            response, 'placeholder="Filter documents by title"', html=False
+        )
 
     def test_law_report_volume_detail_view_legislation_tab(self):
         url = reverse(
@@ -378,7 +382,9 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(response, 'class="doc-table-children collapse show"')
         self.assertContains(response, 'title="Cited by"', html=False)
         self.assertContains(response, "Cited by 1 judgment")
-        self.assertContains(response, 'placeholder="Filter documents"', html=False)
+        self.assertContains(
+            response, 'placeholder="Filter documents by title"', html=False
+        )
 
     def test_law_report_volume_detail_view_ignores_tab_query_param(self):
         url = self.volume_1.get_absolute_url() + "?tab=invalid"
