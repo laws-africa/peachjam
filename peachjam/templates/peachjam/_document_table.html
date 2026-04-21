@@ -52,7 +52,13 @@ variables like "hide_xxx" default to being "on".
                       class="p-0 border-0 bg-transparent text-reset fw-bold"
                       data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
                 {{ doc_table_title_label|default_if_none:"Title" }}
-                <span class="visually-hidden">{% trans "Sort alphabetically" %}</span>
+                <span class="visually-hidden">
+                  {% if form.sort.value == "title" %}
+                    {% blocktrans with sort_field=doc_table_title_label|default_if_none:"Title" %}Sort by {{ sort_field }} descending{% endblocktrans %}
+                  {% else %}
+                    {% blocktrans with sort_field=doc_table_title_label|default_if_none:"Title" %}Sort by {{ sort_field }} ascending{% endblocktrans %}
+                  {% endif %}
+                </span>
                 <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"
                    aria-hidden="true"></i>
               </button>
@@ -76,7 +82,13 @@ variables like "hide_xxx" default to being "on".
                         class="p-0 border-0 bg-transparent text-reset fw-bold"
                         data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
                   {{ doc_table_date_label|default_if_none:"Date" }}
-                  <span class="visually-hidden">{% trans "Sort by date" %}</span>
+                  <span class="visually-hidden">
+                    {% if form.sort.value == "date" %}
+                      {% blocktrans with sort_field=doc_table_date_label|default_if_none:"Date" %}Sort by {{ sort_field }} descending{% endblocktrans %}
+                    {% else %}
+                      {% blocktrans with sort_field=doc_table_date_label|default_if_none:"Date" %}Sort by {{ sort_field }} ascending{% endblocktrans %}
+                    {% endif %}
+                  </span>
                   <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"
                      aria-hidden="true"></i>
                 </button>

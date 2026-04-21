@@ -320,10 +320,11 @@ class LawReportViewsTestCase(TestCase):
         self.assertIn("labels", child_row._prefetched_objects_cache)
         self.assertIn("taxonomies", child_row._prefetched_objects_cache)
         self.assertContains(response, 'placeholder="Filter documents"', html=False)
-        self.assertContains(response, "Alphabetical (A - Z)")
+        self.assertContains(response, "Title (A - Z)")
         self.assertContains(response, "Date (Newest first)")
         self.assertContains(response, 'aria-sort="ascending"', html=False)
-        self.assertContains(response, "Sort alphabetically")
+        self.assertContains(response, "Sort by Citation descending")
+        self.assertContains(response, "Sort by Judgment date ascending")
 
     def test_law_report_volume_detail_view_cases_tab_date_sort_state(self):
         url = reverse(
@@ -334,7 +335,7 @@ class LawReportViewsTestCase(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'aria-sort="descending"', html=False)
-        self.assertContains(response, "Sort by date")
+        self.assertContains(response, "Sort by Judgment date ascending")
 
     def test_law_report_volume_detail_view_legislation_tab(self):
         url = reverse(
