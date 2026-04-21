@@ -1,7 +1,7 @@
 {% load i18n %}
 {% if years %}
   <section>
-    <h2 id="years-heading" class="h6 visually-hidden">{% trans 'Years' %}</h2>
+    <h2 id="years-heading" class="h6 visually-hidden skip-link-target">{% trans 'Years' %}</h2>
     {% if years|length > 8 %}
       <a class="visually-hidden-focusable d-inline-block mb-2"
          href="#{% if doc_table_form_id %}{{ doc_table_form_id }}-filters-heading{% else %}{{ doc_table_id }}-results-heading{% endif %}">{% trans 'Skip past years' %}</a>

@@ -10,7 +10,7 @@
 {% block article-content %}
   {% include 'peachjam/_years_list.html' with showallyears=True years_skip_target_id='article-list-heading' %}
   {% block article-list %}
-    <h2 id="article-list-heading" class="h6 visually-hidden">{% trans "Articles" %}</h2>
+    <h2 id="article-list-heading" class="h6 visually-hidden skip-link-target">{% trans "Articles" %}</h2>
     {% include "peachjam/article/_list.html" %}
   {% endblock %}
   {% include 'peachjam/_pagination.html' %}

@@ -41,7 +41,8 @@
         {% endif %}
         <ul class="list-group {% if taxonomy_tree|length > 0 and not is_leaf_node %}pocketlaw-hidden{% endif %}">
           <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
-            <h2 id="{{ doc_table_form_id }}-filters-heading" class="h6 mb-0">{% trans 'Filters' %}</h2>
+            <h2 id="{{ doc_table_form_id }}-filters-heading"
+                class="h6 mb-0 skip-link-target">{% trans 'Filters' %}</h2>
             {% if show_clear_all %}
               <div class="d-flex align-items-center">
                 <a href="{{ request.path }}"
@@ -57,7 +58,7 @@
               <li class="list-group-item">
                 {% with facet_group_id=doc_table_form_id|add:"-group-"|add:facet_name %}
                   <fieldset id="{{ facet_group_id }}"
-                            class="mb-0"
+                            class="mb-0 skip-link-target"
                             data-filter-group
                             tabindex="-1">
                     <div class="d-flex justify-content-between mb-2 align-items-start">

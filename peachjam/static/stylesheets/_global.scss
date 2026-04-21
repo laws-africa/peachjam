@@ -189,6 +189,10 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden,
   padding-bottom: 0.25rem;
 }
 
+.skip-link-target {
+  scroll-margin-top: $floating-header-height + 1rem;
+}
+
 a:visited:not(.btn, .nav-link, .dropdown-item) {
   color: $visited-link;
 }

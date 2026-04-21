@@ -1,7 +1,7 @@
 {% load i18n %}
 {% if registries %}
   <section>
-    <h2 id="registries-heading" class="h4">{{ registry_label_plural }}</h2>
+    <h2 id="registries-heading" class="h4 skip-link-target">{{ registry_label_plural }}</h2>
     <a class="visually-hidden-focusable d-inline-block mb-2"
        href="#{% if years %}years-heading{% elif months and year %}months-heading{% else %}{{ doc_table_id }}-results-heading{% endif %}">
       {% blocktrans with label=registry_label_plural %}Skip past {{ label }}{% endblocktrans %}
