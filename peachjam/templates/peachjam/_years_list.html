@@ -1,6 +1,6 @@
 {% load i18n %}
 {% if years %}
-  <section>
+  <section id="years-section" aria-labelledby="years-heading" tabindex="-1">
     <h2 id="years-heading" class="h6 visually-hidden skip-link-target">{% trans 'Years' %}</h2>
     {% if years|length > 8 and years_skip_target_id %}
       <a class="visually-hidden-focusable d-inline-block mb-2"

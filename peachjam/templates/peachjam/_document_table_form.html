@@ -30,7 +30,8 @@
   <div class="row">
     <section id="{{ doc_table_form_id }}-filters-section"
              class="col-lg-3 d-none d-lg-block document-list-facets-wrapper {% if not taxonomy_tree or is_leaf_node %}pocketlaw-hidden{% endif %}"
-             aria-labelledby="{{ doc_table_form_id }}-filters-heading">
+             aria-labelledby="{{ doc_table_form_id }}-filters-heading"
+             tabindex="-1">
       <div class="document-list-facets">
         <a class="visually-hidden-focusable d-inline-block mb-2"
            href="#{{ doc_table_id }}-results-heading"

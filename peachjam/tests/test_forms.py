@@ -1,3 +1,4 @@
+import datetime
 from types import SimpleNamespace
 
 from django.template.loader import render_to_string
@@ -216,6 +217,21 @@ class BaseDocumentFilterFormTestCase(TestCase):
             },
             request=request,
         )
+        months_html = render_to_string(
+            "peachjam/_court_months_list.html",
+            {
+                "request": request,
+                "months": [datetime.date(2024, month, 1) for month in range(1, 13)],
+                "years": years,
+                "year": 2024,
+                "month": None,
+                "all_months_url": "/months/",
+                "court": SimpleNamespace(code="ECOWASCJ"),
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+            },
+            request=request,
+        )
 
         self.assertIn("Skip past Registries", registries_html)
         self.assertIn('aria-labelledby="registries-heading"', registries_html)
@@ -223,3 +239,6 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn("Skip past years", years_html)
         self.assertIn('aria-labelledby="years-heading"', years_html)
         self.assertIn('href="#article-list-heading"', years_html)
+        self.assertIn("Skip past months", months_html)
+        self.assertIn('id="months-section"', months_html)
+        self.assertIn('href="#doc-table-form-test-filters-section"', months_html)
