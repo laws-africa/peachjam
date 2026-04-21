@@ -89,7 +89,7 @@
                                        name="{{ facet_name }}"
                                        type="{{ facet.type }}"
                                        hx-get="{{ request.path }}"
-                                       hx-trigger="delay:300ms"
+                                       hx-trigger="change delay:1000ms"
                                        {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
                                        {% if value == facet.values %}checked{% endif %}
                                        hx-include="#{{ doc_table_form_id }}"
