@@ -3,10 +3,10 @@
   {% block skip-links %}
     <div class="skip-links">
       {% if 'akn/' in request.path %}
-        <a href="#document-content">{% trans 'Skip to document content' %}</a>
+        <a class="bg-white" href="#document-content">{% trans 'Skip to document content' %}</a>
       {% endif %}
-      <a href="#main-nav">{% trans 'Skip to main menu' %}</a>
-      <a href="#header-search">{% trans 'Skip to search' %}</a>
+      <a class="bg-white" href="#main-nav">{% trans 'Skip to main menu' %}</a>
+      <a class="bg-white" href="#header-search">{% trans 'Skip to search' %}</a>
     </div>
   {% endblock %}
   {% block top-bar %}<div>Top bar content</div>{% endblock %}

@@ -200,9 +200,6 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
   position: absolute;
   left: -501px;
 }
-.skip-links a:visited {
-  color: var(--bs-link-color);
-}
 .skip-links a:focus,
 .skip-links a:focus-visible {
   position: absolute;
