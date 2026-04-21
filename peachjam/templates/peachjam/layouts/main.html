@@ -90,9 +90,13 @@
 {% endblock %}
 {% block body-content %}
   {% block before-content %}{% endblock %}
-  <main id="top" tabindex="-1" {% block main-aria-labelledby %}{% endblock %}>
-    <div id="messages"></div>
+  <main id="top"
+        tabindex="-1"
+        {% block main-aria-labelledby %}
+        aria-labelledby="main-page-heading"
+        {% endblock %}>
     {% block page-content %}{% endblock %}
+    <div id="messages" aria-hidden="true"></div>
     {% include 'peachjam/saved_document/_modal_placeholder.html' %}
   </main>
 {% endblock %}
