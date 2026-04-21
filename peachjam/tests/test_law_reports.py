@@ -325,6 +325,23 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(
             response, 'placeholder="Filter documents by title"', html=False
         )
+        self.assertContains(response, 'placeholder="Filter documents"', html=False)
+        self.assertContains(response, "Title (A - Z)")
+        self.assertContains(response, "Date (Newest first)")
+        self.assertContains(response, 'aria-sort="ascending"', html=False)
+        self.assertContains(response, "Sort by Citation descending")
+        self.assertContains(response, "Sort by Judgment date ascending")
+
+    def test_law_report_volume_detail_view_cases_tab_date_sort_state(self):
+        url = reverse(
+            "law_report_volume_cases_index",
+            args=[self.law_report.slug, self.volume_1.slug],
+        )
+        response = self.client.get(url, {"sort": "-date"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'aria-sort="descending"', html=False)
+        self.assertContains(response, "Sort by Judgment date ascending")
 
     def test_law_report_volume_detail_view_legislation_tab(self):
         url = reverse(
