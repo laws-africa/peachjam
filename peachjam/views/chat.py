@@ -230,7 +230,7 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
             )
 
         # send the full final response
-        yield self.format_sse("message", serialise_message(reply))
+        yield self.format_sse("message", reply)
         yield self.format_sse("done", {})
 
         messages = thread.get_thread_messages()
@@ -275,14 +275,3 @@ class VoteChatMessageView(ChatThreadDetailMixin):
                 )
 
         return HttpResponse(status=200)
-
-
-def serialise_message(message):
-    if isinstance(message, dict):
-        return message
-
-    return {
-        "id": message.id,
-        "role": message.type,
-        "content": message.content,
-    }
