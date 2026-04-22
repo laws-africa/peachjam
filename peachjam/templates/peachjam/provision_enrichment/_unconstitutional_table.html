@@ -1,21 +1,30 @@
-{% load i18n peachjam %}
-<section class="table-responsive"
-         id="{{ doc_table_id|default:"doc-table" }}"
-         data-component="DocumentTable"
-         aria-labelledby="{{ doc_table_id|default:"doc-table" }}-results-heading">
-  <h2 id="{{ doc_table_id|default:"doc-table" }}-results-heading"
-      class="visually-hidden-focusable mb-2 skip-link-target"
-      tabindex="-1"
-      data-document-table-results-target>
-    {% trans 'Results' %}
-  </h2>
-  {% for document in documents %}
-    {% include "peachjam/provision_enrichment/_unconstitutional_document_detail.html" with unconstitutional_provisions=document.provision_enrichments %}
-  {% endfor %}
-  {% if not documents %}
-    <p>{% trans 'No documents found.' %}</p>
-  {% endif %}
-  {% if documents and not hide_pagination and paginator %}
-    {% include 'peachjam/_pagination.html' %}
-  {% endif %}
-</section>
+{% load i18n peachjam humanize %}
+{% with doc_table_dom_id=doc_table_id|default:"doc-table" %}
+  <section class="table-responsive"
+           id="{{ doc_table_dom_id }}"
+           data-component="DocumentTable"
+           aria-label="{% trans 'Results' %}"
+           tabindex="-1">
+    <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+      {% trans 'Results.' %}
+      {% if documents %}
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }} {% trans 'found.' %}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }} {% trans 'found.' %}
+        {% endif %}
+      {% else %}
+        {% trans 'No documents found.' %}
+      {% endif %}
+    </p>
+    {% for document in documents %}
+      {% include "peachjam/provision_enrichment/_unconstitutional_document_detail.html" with unconstitutional_provisions=document.provision_enrichments %}
+    {% endfor %}
+    {% if not documents %}
+      <p>{% trans 'No documents found.' %}</p>
+    {% endif %}
+    {% if documents and not hide_pagination and paginator %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  </section>
+{% endwith %}

@@ -282,7 +282,7 @@ class FilteredDocumentListView(DocumentListView):
             item["next_target_id"] = (
                 f'{context["doc_table_form_id"]}-group-{next_item["name"]}'
                 if next_item
-                else f'{context["doc_table_id"]}-results-heading'
+                else context["doc_table_id"]
             )
         context["rendered_facets"] = rendered_facets
 

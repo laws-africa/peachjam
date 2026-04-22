@@ -2,10 +2,8 @@
 {% if years %}
   <section id="years-section" aria-labelledby="years-heading" tabindex="-1">
     <h2 id="years-heading" class="h6 visually-hidden skip-link-target">{% trans 'Years' %}</h2>
-    {% if years|length > 8 %}
-      <a class="visually-hidden-focusable d-inline-block mb-2"
-         href="#{% if months and years %}months-section{% elif doc_table_form_id %}{{ doc_table_form_id }}-filters-section{% else %}{{ doc_table_id }}-results-heading{% endif %}">{% trans 'Skip past years' %}</a>
-    {% endif %}
+    <a class="visually-hidden-focusable d-inline-block mb-2"
+       href="#{% if months and years %}months-section{% elif doc_table_form_id %}{{ doc_table_form_id }}-filters-section{% else %}{{ doc_table_id }}{% endif %}">{% trans 'Skip past years' %}</a>
     <nav id="years-nav"
          class="pl-0 mt-2 mb-3 d-none d-lg-block"
          aria-labelledby="years-heading">

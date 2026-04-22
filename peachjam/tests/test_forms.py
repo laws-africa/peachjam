@@ -80,7 +80,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
                             "values": [],
                             "type": "checkbox",
                         },
-                        "next_target_id": "doc-table-test-results-heading",
+                        "next_target_id": "doc-table-test",
                     },
                 ],
                 "form": form,
@@ -95,13 +95,12 @@ class BaseDocumentFilterFormTestCase(TestCase):
             request=request,
         )
 
-        self.assertIn('href="#doc-table-test-results-heading"', html)
+        self.assertIn('href="#doc-table-test"', html)
         self.assertIn('id="doc-table-form-test-group-judges"', html)
         self.assertIn('<fieldset id="doc-table-form-test-group-judges"', html)
         self.assertIn('<legend id="doc-table-form-test-group-heading-0"', html)
         self.assertEqual(html.count("data-close-offcanvas"), 1)
         self.assertIn('href="#doc-table-form-test-group-years"', html)
-        self.assertIn("data-document-table-results-target", html)
         self.assertIn('aria-live="polite"', html)
         self.assertIn("No documents found.", html)
         self.assertIn('id="doc-table-form-test-filters-section"', html)
@@ -161,7 +160,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
                             "values": "",
                             "type": "radio",
                         },
-                        "next_target_id": "doc-table-test-results-heading",
+                        "next_target_id": "doc-table-test",
                     },
                 ],
                 "form": form,
@@ -193,10 +192,9 @@ class BaseDocumentFilterFormTestCase(TestCase):
             request=request,
         )
 
-        self.assertIn(
-            'id="doc-table-unconstitutional-provisions-results-heading"', html
-        )
-        self.assertIn("data-document-table-results-target", html)
+        self.assertIn('id="doc-table-unconstitutional-provisions"', html)
+        self.assertIn('aria-label="Results"', html)
+        self.assertIn('aria-live="polite"', html)
 
     def test_long_sidebar_lists_render_bypass_navigation(self):
         request = RequestFactory().get("/judgments/ecowascj/")
@@ -303,3 +301,64 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn('aria-hidden="true"', empty_html)
         self.assertIn('id="messages"', populated_html)
         self.assertNotIn('aria-hidden="true"', populated_html)
+
+    def test_provision_enrichment_toggles_have_accessible_names(self):
+        request = RequestFactory().get("/documents/")
+
+        uncommenced_table_html = render_to_string(
+            "peachjam/provision_enrichment/_uncommenced_table.html",
+            {
+                "request": request,
+                "documents": [
+                    SimpleNamespace(
+                        pk=1,
+                        title="Example Act",
+                        get_absolute_url="/documents/example-act/",
+                    )
+                ],
+                "doc_table_id": "doc-table-test",
+                "hide_pagination": True,
+                "paginator": None,
+                "doc_table_show_counts": False,
+            },
+            request=request,
+        )
+        unconstitutional_detail_html = render_to_string(
+            "peachjam/provision_enrichment/_unconstitutional_provision_detail.html",
+            {
+                "request": request,
+                "expanded": False,
+                "enrichment": SimpleNamespace(
+                    pk=1,
+                    whole_work=False,
+                    provision_title="Section 1",
+                    resolved=False,
+                ),
+            },
+            request=request,
+        )
+        uncommenced_detail_html = render_to_string(
+            "peachjam/provision_enrichment/_uncommenced_provision_detail.html",
+            {
+                "request": request,
+                "expanded": False,
+                "document": SimpleNamespace(get_absolute_url="/documents/example-act/"),
+                "enrichment": SimpleNamespace(
+                    pk=2,
+                    provision_title="Section 2",
+                    provision_eid="sec_2",
+                    and_all_descendants=True,
+                ),
+            },
+            request=request,
+        )
+
+        self.assertIn(
+            'aria-label="Show uncommenced provisions for Example Act"',
+            uncommenced_table_html,
+        )
+        self.assertIn(
+            'aria-label="Show provision details"', unconstitutional_detail_html
+        )
+        self.assertIn('aria-label="Show provision details"', uncommenced_detail_html)
+        self.assertIn('aria-hidden="true"', uncommenced_table_html)

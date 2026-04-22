@@ -46,6 +46,12 @@ mark {
   content: "\f231";
 }
 
+.provision-toggle button:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
 .result-snippet * {
   font-size: $font-size-base;
 }
