@@ -245,5 +245,5 @@ def extract_assistant_response(result) -> dict:
             return {
                 "id": item.raw_item.id,
                 "role": "ai",
-                "content": result.final_output,
+                "content": str(result.final_output or ""),
             }
