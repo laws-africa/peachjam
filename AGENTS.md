@@ -72,3 +72,19 @@ Examples in this repo:
 * Use "Sentence case" not "Title Case" for headings, labels and buttons.
 * Prefer default styling for buttons. Don't adjust padding, font weight or custom colours. Use btn-primary for primary buttons or btn-secondary.
 * The default heading margins are usually fine, only adjust them if really necessary for spacing.
+
+## Accessibility requirements
+
+Build and modify UI with accessibility in mind by default. Meet WCAG 2.2 AA at minimum, and prefer higher conformance where practical. Do not introduce accessibility regressions in existing flows, semantics, keyboard support, focus behavior, color contrast, accessible names, or announcements.
+
+When changing existing UI, preserve or improve its accessibility characteristics. In particular:
+
+* Prefer semantic HTML and native controls over ARIA workarounds.
+* Preserve keyboard access and native control behavior. Do not replace native checkbox, radio, select, or button behavior with custom interaction unless explicitly required.
+* Ensure focus order and focus targets remain meaningful. Skip links and programmatic focus should land on real, named targets.
+* Add or preserve accessible names for landmarks, form controls, icon-only buttons/links, and dynamic regions.
+* Prefer `aria-labelledby` when there is a real visible or visually-hidden heading/label in the DOM; use `aria-label` only when necessary.
+* Do not add ARIA that duplicates or conflicts with native semantics.
+* Preserve or improve announcements for dynamic updates such as HTMX/AJAX content changes.
+* Ensure hidden content is not incorrectly focusable or exposed to assistive technology.
+* Avoid dead skip links, broken fragment targets, and inaccessible bypass mechanisms.
