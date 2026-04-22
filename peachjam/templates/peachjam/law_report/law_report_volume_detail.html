@@ -22,7 +22,7 @@
 {% block entity-profile %}{% endblock %}
 {% block page-title %}
   <div class="my-4">
-    <h1 class="mb-0">{{ law_report.title }}</h1>
+    <h1 id="main-page-heading" class="mb-0">{{ law_report.title }}</h1>
     {% block follow-button %}
       <div class="my-2"
            hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"

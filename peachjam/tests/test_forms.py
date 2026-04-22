@@ -177,6 +177,25 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn('href="#doc-table-form-test-group-alphabet"', html)
         self.assertNotIn('href="#doc-table-form-test-group-years"', html)
 
+    def test_custom_filtered_tables_render_results_target(self):
+        request = RequestFactory().get("/documents/")
+        html = render_to_string(
+            "peachjam/provision_enrichment/_unconstitutional_table.html",
+            {
+                "request": request,
+                "doc_table_id": "doc-table-unconstitutional-provisions",
+                "documents": [],
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn(
+            'id="doc-table-unconstitutional-provisions-results-heading"', html
+        )
+        self.assertIn("data-document-table-results-target", html)
+
     def test_long_sidebar_lists_render_bypass_navigation(self):
         request = RequestFactory().get("/judgments/ecowascj/")
         registries = [
