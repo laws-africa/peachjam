@@ -131,28 +131,33 @@
       <div class="position-relative">
         {% block content %}
           {% block filter-documents %}
-            <div class="mb-2 d-flex pocketlaw-hidden"
+            <div class="mb-2 d-flex flex-column flex-md-row pocketlaw-hidden"
                  hx-target="#{{ doc_table_id }}"
                  {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
-              <div class="flex-grow-1 me-2">
+              <div class="flex-grow-1 me-md-2 mb-2 mb-md-0">
+                <label class="form-label" for="{{ doc_table_filter_input_id }}">{% trans "Filter documents by title" %}</label>
                 <input id="{{ doc_table_filter_input_id }}"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
                        hx-sync="this:replace"
-                       aria-label="{% trans "Filter documents" %}"
-                       placeholder="{% trans "Filter documents" %}"
+                       placeholder="{% trans "Filter documents by title" %}"
                        class="form-control"
                        type="text"
                        value="{{ form.q.value|default_if_none:'' }}"
                        name="q"/>
               </div>
-              <div class="d-flex align-items-center">
-                <div class="d-none d-md-block ms-3 me-2 text-nowrap">{% trans "Sort by" %}:</div>
-                <select class="form-control" hx-get="{{ request.path }}" name="sort">
-                  {% for opt in form.sort %}{{ opt }}{% endfor %}
-                </select>
-              </div>
-              <div class="d-none d-md-block ms-2">
+              {% with doc_table_sort_select_id=doc_table_form_id|add:"-sort" %}
+                <div class="me-md-2 mb-2 mb-md-0">
+                  <label class="form-label" for="{{ doc_table_sort_select_id }}">{% trans "Sort documents by" %}</label>
+                  <select id="{{ doc_table_sort_select_id }}"
+                          class="form-control"
+                          hx-get="{{ request.path }}"
+                          name="sort">
+                    {% for opt in form.sort %}{{ opt }}{% endfor %}
+                  </select>
+                </div>
+              {% endwith %}
+              <div class="d-none d-md-block align-self-md-end">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
                         hx-sync="#{{ doc_table_filter_input_id }}:replace"
