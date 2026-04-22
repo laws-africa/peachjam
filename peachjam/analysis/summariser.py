@@ -39,6 +39,7 @@ class JudgmentSummariser:
             self.summary_prompt = langfuse.get_prompt(
                 self.summary_prompt_name,
                 cache_ttl_seconds=self.prompt_cache_ttl_seconds,
+                fallback=self.summary_prompt_str,
             )
 
     def enabled(self):
@@ -61,6 +62,7 @@ class JudgmentSummariser:
             result = self.summarise(
                 expression_frbr_uri=document.expression_frbr_uri,
                 text=text,
+                jurisdiction=document.jurisdiction.name,
                 language=self.summary_language,
             )
         except Exception as exc:
@@ -91,7 +93,9 @@ class JudgmentSummariser:
         summary.flynote = self.normalise_flynote_text(summary.flynote)
         return summary
 
-    def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
+    def summarise(
+        self, expression_frbr_uri, text, language=None, jurisdiction=None
+    ) -> JudgmentSummary:
         log.info("Generating judgment summary locally")
 
         with langfuse.start_as_current_observation(
@@ -103,7 +107,7 @@ class JudgmentSummariser:
             input = [{"role": "user", "content": text}]
             response = self.openai.responses.parse(
                 model=self.get_model(),
-                instructions=self.get_summary_prompt_str(),
+                instructions=self.get_summary_prompt_str(jurisdiction=jurisdiction),
                 input=input,
                 text_format=JudgmentSummary,
                 store=False,

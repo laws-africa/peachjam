@@ -689,6 +689,14 @@ class Judgment(CoreDocument):
 
         try:
             summary = summariser.summarise_judgment(self)
+            flynote_length = len((summary.flynote or "").strip())
+            if 0 < flynote_length <= 20:
+                log.warning(
+                    "Flynote for judgment %s is suspiciously short (%s chars); retrying summary generation.",
+                    self.pk,
+                    flynote_length,
+                )
+                summary = summariser.summarise_judgment(self)
             if not summary.summary:
                 log.warning(f"No summary found in response {self.pk}, skipping.")
                 return
