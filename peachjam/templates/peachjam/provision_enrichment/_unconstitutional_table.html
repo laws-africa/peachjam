@@ -1,5 +1,14 @@
 {% load i18n peachjam %}
-<div id="doc-table">
+<section class="table-responsive"
+         id="{{ doc_table_id|default:"doc-table" }}"
+         data-component="DocumentTable"
+         aria-labelledby="{{ doc_table_id|default:"doc-table" }}-results-heading">
+  <h2 id="{{ doc_table_id|default:"doc-table" }}-results-heading"
+      class="visually-hidden-focusable mb-2 skip-link-target"
+      tabindex="-1"
+      data-document-table-results-target>
+    {% trans 'Results' %}
+  </h2>
   {% for document in documents %}
     {% include "peachjam/provision_enrichment/_unconstitutional_document_detail.html" with unconstitutional_provisions=document.provision_enrichments %}
   {% endfor %}
@@ -9,4 +18,4 @@
   {% if documents and not hide_pagination and paginator %}
     {% include 'peachjam/_pagination.html' %}
   {% endif %}
-</div>
+</section>
