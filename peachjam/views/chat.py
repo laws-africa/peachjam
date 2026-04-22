@@ -212,7 +212,14 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
 
             log.info(f"Finished stream for {thread}")
             reply = extract_assistant_response(result)
-            reply["content"] = await sync_to_async(chat.markup_refs)(reply["content"])
+            # TODO: try working around a weird issue where sometimes the result of this await is not a string
+            text = await sync_to_async(chat.markup_refs)(reply["content"])
+            if isinstance(text, str):
+                reply["content"] = text
+            else:
+                log.warning(
+                    f"markup_refs for thread {thread.id} returned non-string {text} of type {type(text)}"
+                )
             reply["trace_id"] = generation.trace_id
 
             generation.update_trace(
