@@ -1,6 +1,8 @@
 import datetime
 from types import SimpleNamespace
 
+from django.contrib.messages.storage.base import Message
+from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -261,3 +263,43 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn("Skip past months", months_html)
         self.assertIn('id="months-section"', months_html)
         self.assertIn('href="#doc-table-form-test-filters-section"', months_html)
+
+    def test_pagination_renders_navigation_labels(self):
+        request = RequestFactory().get("/documents/?sort=-date")
+        paginator = Paginator(list(range(120)), 10)
+        page_obj = paginator.page(2)
+
+        html = render_to_string(
+            "peachjam/_pagination.html",
+            {
+                "request": request,
+                "paginator": paginator,
+                "page_obj": page_obj,
+            },
+            request=request,
+        )
+
+        self.assertIn('aria-label="Pagination"', html)
+        self.assertIn('aria-label="Go to page 1"', html)
+        self.assertIn('aria-label="Go to page 3"', html)
+        self.assertIn('aria-current="page"', html)
+        self.assertIn("Current page, page 2", html)
+
+    def test_messages_partial_hides_empty_container_only(self):
+        request = RequestFactory().get("/documents/")
+
+        empty_html = render_to_string(
+            "peachjam/_messages.html",
+            {"messages": []},
+            request=request,
+        )
+        populated_html = render_to_string(
+            "peachjam/_messages.html",
+            {"messages": [Message(level=20, message="Saved", extra_tags="primary")]},
+            request=request,
+        )
+
+        self.assertIn('id="messages"', empty_html)
+        self.assertIn('aria-hidden="true"', empty_html)
+        self.assertIn('id="messages"', populated_html)
+        self.assertNotIn('aria-hidden="true"', populated_html)
