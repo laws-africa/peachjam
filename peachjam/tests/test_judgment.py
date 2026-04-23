@@ -334,12 +334,14 @@ class JudgmentTestCase(TestCase):
         doc_content.set_content_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
+        judgment.track_changes()
         judgment.generate_summary()
         judgment.refresh_from_db()
 
         self.assertEqual(fake_summary.blurb, judgment.blurb)
         self.assertEqual(fake_summary.summary, judgment.case_summary)
         self.assertEqual(expected_flynote, judgment.flynote)
+        self.assertEqual(expected_flynote, judgment.flynote_raw)
         self.assertEqual(fake_summary.held, judgment.held)
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
