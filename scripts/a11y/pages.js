@@ -1,4 +1,4 @@
-module.exports = {
+const pageProfiles = {
   africanlii: [
     { id: "home", path: "/en/" },
     { id: "search", path: "/en/search/" },
@@ -45,4 +45,36 @@ module.exports = {
       path: "/akn/za/act/1979/70/eng@2020-10-22",
     },
   ],
+};
+
+const siteProfiles = {
+  africanlii: "africanlii",
+  zambialii: "zambialii",
+};
+
+function getProfileNameForSite(siteName) {
+  if (siteProfiles[siteName]) {
+    return siteProfiles[siteName];
+  }
+
+  if (pageProfiles[siteName]) {
+    return siteName;
+  }
+
+  return "liiweb";
+}
+
+function getPagesForSite(siteName) {
+  const profileName = getProfileNameForSite(siteName);
+  return {
+    profileName,
+    pages: pageProfiles[profileName],
+  };
+}
+
+module.exports = {
+  getPagesForSite,
+  getProfileNameForSite,
+  pageProfiles,
+  siteProfiles,
 };
