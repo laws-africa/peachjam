@@ -298,6 +298,16 @@ class TopicForm(forms.ModelForm):
         fields = "__all__"
 
 
+class FlynoteForm(forms.ModelForm):
+    class Meta:
+        model = Flynote
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.track_changes()
+
+
 class DocumentTopicInline(admin.TabularInline):
     form = TopicForm
     model = DocumentTopic
@@ -1194,15 +1204,71 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
 
 @admin.register(Flynote)
 class FlynoteAdmin(admin.ModelAdmin):
-    list_display = ("slug", "name", "depth")
-    list_filter = ("depth",)
+    form = FlynoteForm
+    list_display = ("slug", "name", "depth", "deprecated")
+    list_filter = ("depth", "deprecated")
     search_fields = ("name", "slug")
     ordering = ("slug",)
     readonly_fields = ("numchild", "ancestors_links", "children_links", "slug", "depth")
-    fields = ("ancestors_links", "name", "slug", "depth", "numchild", "children_links")
+    fields = (
+        "ancestors_links",
+        "name",
+        "slug",
+        "deprecated",
+        "depth",
+        "numchild",
+        "children_links",
+    )
+    actions = ("mark_deprecated", "mark_active")
 
     def has_add_permission(self, request):
         return False
+
+    def get_action_queryset_roots(self, queryset):
+        selected_paths = set(queryset.values_list("path", flat=True))
+        roots = []
+        for flynote in queryset.order_by("path"):
+            if any(
+                flynote.path[:end] in selected_paths
+                for end in range(flynote.steplen, len(flynote.path), flynote.steplen)
+            ):
+                continue
+            roots.append(flynote)
+        return roots
+
+    @admin.action(description=_("Mark selected flynotes as deprecated"))
+    def mark_deprecated(self, request, queryset):
+        updated = 0
+        for flynote in self.get_action_queryset_roots(queryset):
+            if flynote.deprecated:
+                continue
+            flynote.track_changes()
+            flynote.deprecated = True
+            flynote.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            _("Deprecated %(count)s flynote branches.") % {"count": updated},
+            messages.SUCCESS,
+        )
+
+    @admin.action(description=_("Mark selected flynotes as active"))
+    def mark_active(self, request, queryset):
+        updated = 0
+        for flynote in self.get_action_queryset_roots(queryset):
+            if not flynote.deprecated:
+                continue
+            flynote.track_changes()
+            flynote.deprecated = False
+            flynote.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            _("Reactivated %(count)s flynote branches.") % {"count": updated},
+            messages.SUCCESS,
+        )
 
     @admin.display(description=_("Ancestors"))
     def ancestors_links(self, obj):

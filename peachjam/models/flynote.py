@@ -1,17 +1,21 @@
 import logging
 
+from django.conf import settings
 from django.db import connection, models, transaction
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import AFTER_SAVE
 from treebeard.mp_tree import MP_Node
+
+from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
 
 log = logging.getLogger(__name__)
 
 __all__ = ["Flynote", "JudgmentFlynote", "FlynoteDocumentCount"]
 
 
-class Flynote(MP_Node):
+class Flynote(AttributeHooksMixin, MP_Node):
     """Hierarchical flynote tree node using treebeard's materialised path. This is used to represent textual flynotes
     in a tree form, for browsing and for search.
 
@@ -46,6 +50,7 @@ class Flynote(MP_Node):
 
     name = models.CharField(_("name"), max_length=255)
     slug = models.SlugField(_("slug"), max_length=1024, unique=True)
+    deprecated = models.BooleanField(_("deprecated"), default=False, db_index=True)
     node_order_by = ["name"]
 
     class Meta:
@@ -68,6 +73,39 @@ class Flynote(MP_Node):
     def save(self, *args, **kwargs):
         self.update_slug()
         super().save(*args, **kwargs)
+
+    @on_attribute_changed(AFTER_SAVE, ["deprecated"], [])
+    def handle_deprecated_changed(self):
+        self.cascade_deprecated()
+
+        if (
+            not self.deprecated
+            or self.initial_value("deprecated")
+            or not settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"]
+        ):
+            return
+
+        from peachjam.tasks import generate_judgment_summary
+
+        # this flynote is deprecated, any documents linked to it must have new summaries generated
+        judgment_ids = self.judgments.values_list("document_id", flat=True).distinct()
+        for judgment_id in judgment_ids:
+            generate_judgment_summary(judgment_id)
+
+    def cascade_deprecated(self):
+        """Propagate this node's current deprecated state to its descendants.
+
+        The current node is assumed to have already been saved with the desired
+        state. The cascade mirrors that state across the subtree so editors can
+        toggle an entire branch on or off with a single change.
+        """
+        for child in self.get_children():
+            child.track_changes()
+            if child.deprecated != self.deprecated:
+                child.deprecated = self.deprecated
+                child.save()
+            else:
+                child.cascade_deprecated()
 
     @classmethod
     def flynotes_to_string(cls, judgment_flynotes):

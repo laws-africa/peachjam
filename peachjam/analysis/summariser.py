@@ -147,8 +147,12 @@ def search_flynotes_tool(keywords: list[str], parent_id: int) -> str:
     # Flynote names are short canonical labels. Trigram similarity naturally favours
     # exact and near-exact matches, while still handling punctuation and hyphenation
     # differences such as "post judgment" vs "post-judgment".
-    qs = parent.get_children().annotate(
-        similarity=TrigramSimilarity("name", primary_term),
+    qs = (
+        parent.get_children()
+        .filter(deprecated=False)
+        .annotate(
+            similarity=TrigramSimilarity("name", primary_term),
+        )
     )
     # Require a minimum similarity so that loosely related long titles do not
     # dominate the results.
@@ -352,7 +356,7 @@ class JudgmentSummariser:
 
     def top_level_flynotes_prompt(self):
         flynotes = (
-            FlynoteModel.objects.filter(depth=1)
+            FlynoteModel.objects.filter(depth=1, deprecated=False)
             .select_related("document_count_cache")
             .order_by("-document_count_cache__count", "name")[
                 : self.max_top_level_flynotes

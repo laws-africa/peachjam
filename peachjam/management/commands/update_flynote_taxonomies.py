@@ -56,8 +56,8 @@ class Command(BaseCommand):
             return
 
         qs = (
-            Judgment.objects.exclude(flynote__isnull=True)
-            .exclude(flynote="")
+            Judgment.objects.exclude(flynote_raw__isnull=True)
+            .exclude(flynote_raw="")
             .order_by("-pk")
         )
 
