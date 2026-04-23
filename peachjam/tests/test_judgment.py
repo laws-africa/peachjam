@@ -483,3 +483,22 @@ class JudgmentTestCase(TestCase):
         judgment.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+    def test_serialise_flynote_tree(self):
+        from peachjam.analysis.flynotes import FlynoteUpdater
+
+        judgment = self.make_judgment()
+        judgment.flynote_raw = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        judgment.save()
+        FlynoteUpdater().update_for_judgment(judgment)
+
+        judgment.serialise_flynote_tree()
+        self.assertEqual(
+            judgment.flynote,
+            "Administrative law \u2014 judicial review\n"
+            "Criminal law \u2014 admissibility \u2014 trial within a trial",
+        )
+        self.assertEqual(judgment.flynote, judgment.flynote_raw)

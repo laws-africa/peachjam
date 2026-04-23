@@ -391,9 +391,6 @@ class DocumentForm(forms.ModelForm):
         ),
         required=False,
     )
-    flynote = forms.CharField(widget=forms.Textarea(), required=False)
-    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
-    order = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -1326,9 +1323,10 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
         )
 
 
-class JudgmentAdminForm(DocumentForm):
+class JudgmentForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
-    flynote = forms.CharField(
+    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
+    flynote_raw = forms.CharField(
         widget=forms.Textarea(attrs={"style": "width: 100%;"}),
         required=False,
         help_text=_("Enter one flynote per line."),
@@ -1341,6 +1339,7 @@ class JudgmentAdminForm(DocumentForm):
         widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
         required=False,
     )
+    order = forms.CharField(widget=CKEditorWidget(), required=False)
 
     class Meta:
         model = Judgment
@@ -1358,10 +1357,12 @@ class JudgmentAdminForm(DocumentForm):
     def clean_held(self):
         return self.cleaned_data["held"].splitlines()
 
-    def clean_flynote(self):
+    def clean_flynote_raw(self):
         from peachjam.analysis.flynotes import FlynoteParser
 
-        return FlynoteParser().normalise_multiline_text(self.cleaned_data["flynote"])
+        return FlynoteParser().normalise_multiline_text(
+            self.cleaned_data["flynote_raw"]
+        )
 
     def clean_issues(self):
         return self.cleaned_data["issues"].splitlines()
@@ -1396,7 +1397,7 @@ class LawReportEntryInline(admin.TabularInline):
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
-    form = JudgmentAdminForm
+    form = JudgmentForm
     resource_classes = [JudgmentResource]
     inlines = [
         BenchInline,
@@ -1434,7 +1435,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                 "fields": [
                     "case_summary_public",
                     "blurb",
-                    "flynote",
+                    "flynote_raw",
                     "case_summary",
                     "issues",
                     "held",

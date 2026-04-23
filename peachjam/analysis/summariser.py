@@ -208,7 +208,7 @@ class JudgmentSummariser:
     # them with the matched flynotes from the database? This can help improve consistency and categorization of
     # flynotes, but it requires that there is an initial set of top-level flynotes in the database to match against,
     # so it's behind a feature flag.
-    match_flynotes_to_db = settings.PEACHJAM["SUMMARISER_MATCH_FLYNOTES_TO_DB"]
+    match_flynotes_to_db = settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"]
     agent: Optional[Agent] = None
     run_result: Optional[RunResult] = None
     max_top_level_flynotes = 50

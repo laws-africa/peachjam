@@ -2678,7 +2678,7 @@ class FlynoteUpdater:
         """Parse a judgment's flynote and sync its Flynote links.
 
         1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
-        2. Parses ``judgment.flynote`` into hierarchical paths.
+        2. Parses ``judgment.flynote_raw`` into hierarchical paths.
         3. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
         4. Links the judgment to the leaf node of every path.
 
@@ -2688,7 +2688,7 @@ class FlynoteUpdater:
         JudgmentFlynote.objects.filter(document=judgment).delete()
 
         parse_start = perf_counter()
-        paths = self.parser.parse(judgment.flynote)
+        paths = self.parser.parse(judgment.flynote_raw)
         parse_ms = (perf_counter() - parse_start) * 1000
         if not paths:
             log.info(
