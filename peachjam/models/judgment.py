@@ -714,12 +714,13 @@ class Judgment(CoreDocument):
 
     @on_attribute_changed(BEFORE_SAVE, ["flynote_raw"], ["flynote", "flynote_tree"])
     def sync_flynote(self):
-        """The flynote_raw field has changed, copy it to flynote or populate the flynote tree (if configured)."""
+        """The flynote_raw field has changed, copy it to flynote and populate the flynote tree (if configured)."""
+        self.flynote = self.flynote_raw
+
         if settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"]:
-            # this will eventually update flynote_raw to match the flynote tree
+            # This will eventually update both flynote and flynote_raw to match the flynote tree.
+            # We set flynote above since this background task may take a while to run.
             update_flynote_taxonomy(self.pk)
-        else:
-            self.flynote = self.flynote_raw
 
     def serialise_flynote_tree(self):
         """Serialise the flynote tree to a string for storage in flynote and flynote_raw."""
@@ -729,6 +730,8 @@ class Judgment(CoreDocument):
             self.flynotes.select_related("flynote").order_by("flynote__path")
         )
 
+        # we update flynote_raw as well (without triggering attribute change events) so that a human can edit
+        # the flynote and we won't lose the changes made through the Flynote tree
         self.flynote_raw = self.flynote = Flynote.flynotes_to_string(judgment_flynotes)
 
 
