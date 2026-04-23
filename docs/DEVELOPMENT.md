@@ -83,8 +83,9 @@ npm run a11y:local -- --app liiweb --base-url http://127.0.0.1:8000
 
 Replace `liiweb` with a supported app such as `africanlii`, `namiblii`, or
 `zambialii`. The runner uses explicit profiles for `africanlii`, `liiweb`, and
-`zambialii`, and automatically maps other `*lii` site shells onto the `liiweb`
-profile. Local runs print the violations directly in the terminal.
+`zambialii`, and automatically maps other site shells that inherit from
+`liiweb` onto the `liiweb` profile. Local runs print the violations directly in
+the terminal.
 
 The automated GitHub Actions accessibility workflow lives in `.github/workflows/a11y.yml`.
 It uses that same discovery logic, scans the mapped pages for each supported app,
