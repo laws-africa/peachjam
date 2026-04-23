@@ -6,7 +6,7 @@ from django.test import TransactionTestCase as TestCase
 from django.utils.text import slugify
 
 from peachjam.analysis.summariser import JudgmentSummariser, JudgmentSummary
-from peachjam.models import Flynote
+from peachjam.models import Flynote, FlynoteDocumentCount
 
 MATCH_FLYNOTES_TEST_INPUT = [
     {
@@ -48,6 +48,8 @@ Criminal procedure
 
 @unittest.skipIf(not os.environ.get("OPENAI_API_KEY"), "OPENAI_API_KEY not set")
 class JudgmentSummariserMatchFlynotesE2ETest(TestCase):
+    maxDiff = None
+
     def setUp(self):
         for root in ROOTS.strip().splitlines():
             root = root.strip()
@@ -88,15 +90,24 @@ class JudgmentSummariserMatchFlynotesE2ETest(TestCase):
         )
 
         self.civil_procedure = Flynote.objects.get(name="Civil procedure")
+        FlynoteDocumentCount.objects.create(flynote=self.civil_procedure, count=640)
         # The AI should select this root for component 1 from the top-level prompt.
         self.post_judgment_interest = self.civil_procedure.add_child(
             name="Post-judgment interest",
             slug="civil-procedure-post-judgment-interest",
         )
+        FlynoteDocumentCount.objects.create(
+            flynote=self.post_judgment_interest,
+            count=320,
+        )
         # The AI should normalize "Post judgment interest" to this database entry for component 2.
-        self.post_judgment_interest.add_child(
+        self.unrelated_child = self.post_judgment_interest.add_child(
             name="Taxation of costs",
             slug="civil-procedure-post-judgment-interest-taxation-of-costs",
+        )
+        FlynoteDocumentCount.objects.create(
+            flynote=self.unrelated_child,
+            count=180,
         )
         # There is no relevant child under the chosen component 2, so the AI should keep its
         # original component 3 and component 4 wording.

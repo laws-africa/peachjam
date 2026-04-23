@@ -4,8 +4,8 @@ from typing import Optional
 
 from agents import Agent, ModelSettings, Runner, RunResult, function_tool
 from django.conf import settings
-from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
-from django.db import close_old_connections, connection
+from django.contrib.postgres.search import TrigramSimilarity
+from django.db import connection
 from openai.types import Reasoning
 from pydantic import BaseModel
 
@@ -44,7 +44,9 @@ most closely matches your flynote component 1.
 For flynote components 2, 3 and 4 you must use the search_flynotes tool to find the closest matching flynote in the
 database. Consider the text and semantics of the flynote when making your choice and ensure that the chosen flynotes
 (either from the list, or your original suggestion if there is no good match) still accurately reflect the content
-of the judgment.
+of the judgment. The search results include the number of documents tagged with each flynote. Use this as a guide for
+which flynote to choose if there are multiple good matches, since it's better to use flynotes that are already commonly
+used, but you should prioritise the semantic match over the number of documents.
 
 The flynote database is stored in a tree structure, where each flynote has a parent (except for component 1, which are
 top-level flynotes). When using the search_flynotes tool for components 2, 3 and 4, you must specify the id of the
@@ -99,10 +101,11 @@ For component 1, you look at the list of top-level flynotes provided and choose 
 For component 2, use the search_flynotes tool with keywords like ["Writs and quantification", "Writs", "Quantification"]
 and parent_id=10 (assuming 10 is the id of the chosen flynote for component 1). The database returns two close matches:
 
-- (id 1202): Writs
-- (id 1494): Writs/quantification
+- (id: 1202, documents: 12): Writs
+- (id: 1494, documenst: 392): Writs/quantification
 
-The best match is "Writs/quantification" and it's a very close match, so you use "Writs/quantification" for component 2.
+The best match is "Writs/quantification" since it's a very close match and many documents use it, so you use
+"Writs/quantification" for component 2.
 
 For component 3, you use the search_flynotes tool again with keywords like
 ["Whether writs for statutory post-judgment interest require supporting affidavits", "post-judgment interest", "writs",
@@ -124,22 +127,14 @@ def search_flynotes_tool(keywords: list[str], parent_id: int) -> str:
 
     terms = [(term or "").strip() for term in keywords]
     terms = [term for term in terms if term]
-    terms = set(terms)
+    terms = list(dict.fromkeys(terms))
 
     if not terms:
         return "You must provide at least one keyword to search for. Please try again with relevant keywords."
 
-    config = "english"
-    limit = 20
-    min_rank = 0.05
-    vector = SearchVector("name", weight="A", config=config)
-
-    ts_query = None
-    for term in terms:
-        q = SearchQuery(term, search_type="plain", config=config)
-        ts_query = q if ts_query is None else (ts_query | q)
-
-    rank = SearchRank(vector, ts_query)
+    primary_term = terms[0]
+    limit = 30
+    min_similarity = 0.1
 
     parent = FlynoteModel.objects.filter(pk=parent_id).first()
     if not parent:
@@ -148,11 +143,31 @@ def search_flynotes_tool(keywords: list[str], parent_id: int) -> str:
             "Please check the parent_id and try again."
         )
 
-    qs = parent.get_children()
-    qs = qs.annotate(rank=rank)
-    qs = qs.filter(rank__gte=min_rank).order_by("-rank", "name", "id")
+    # Flynote names are short canonical labels. Trigram similarity naturally favours
+    # exact and near-exact matches, while still handling punctuation and hyphenation
+    # differences such as "post judgment" vs "post-judgment".
+    qs = parent.get_children().annotate(
+        similarity=TrigramSimilarity("name", primary_term),
+    )
+    # Require a minimum similarity so that loosely related long titles do not
+    # dominate the results.
+    qs = qs.filter(similarity__gte=min_similarity)
+    qs = qs.select_related("document_count_cache")
+    # NOTE: if this fails with a psql type error, ensure that the pg_trgm extension is installed:
+    #   CREATE EXTENSION IF NOT EXISTS pg_trgm;
+    qs = qs.order_by("-similarity", "name", "id")[:limit]
 
-    matches = [f"(id {flynote.pk}): {flynote.name}" for flynote in qs[:limit]]
+    # sort by document count descending
+    matches = sorted(
+        list(qs),
+        key=lambda flynote: getattr(flynote.document_count_cache, "count", 0),
+        reverse=True,
+    )
+
+    matches = [
+        f"(id: {flynote.pk}, documents: {getattr(flynote.document_count_cache, 'count', 0)}): {flynote.name}"
+        for flynote in matches
+    ]
     log.debug("flynote search results: %s", matches)
 
     if not matches:
@@ -170,13 +185,12 @@ def search_flynotes(keywords: list[str], parent_id: int) -> str:
     Search the flynote database for flynotes matching the provided keywords, looking at children of parent_id, if given.
     Use this tool to find search the flynote tree for flynotes similar to the flynote components you have generated.
 
-    - For keywords, provide your original flynote component text as one of the keywords, along with any other
-    relevant keywords that might help the search. For example, if your flynote component is "Writs and quantification",
+    - For keywords, provide your original flynote component text as the first item, then any other relevant keywords
+    that might help the search. For example, if your flynote component is "Writs and quantification",
     you might provide keywords like ["Writs and quantification", "Writs", "Quantification"].
     - keywords are case insensitive
     - for the parent_id, provide the id of the parent flynote to search its children.
     """
-    close_old_connections()
     try:
         return search_flynotes_tool(keywords, parent_id)
     finally:
@@ -189,6 +203,10 @@ class JudgmentSummariser:
     summary_prompt_name = "summarise/judgment"
     summary_prompt_str = None
     prompt_cache_ttl_seconds = PROMPT_CACHE_TTL_SECS
+    # Should the summariser attempt to match flynotes in the generated summary to flynotes in the database, and replace
+    # them with the matched flynotes from the database? This can help improve consistency and categorization of
+    # flynotes, but it requires that there is an initial set of top-level flynotes in the database to match against,
+    # so it's behind a feature flag.
     match_flynotes_to_db = settings.PEACHJAM["SUMMARISER_MATCH_FLYNOTES_TO_DB"]
     agent: Optional[Agent] = None
     run_result: Optional[RunResult] = None
