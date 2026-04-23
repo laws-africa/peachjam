@@ -291,7 +291,7 @@ class JudgmentSummariser:
         return summary
 
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
-        log.info("Generating judgment summary")
+        log.info("Generating judgment summary for %s", expression_frbr_uri)
 
         with langfuse.start_as_current_observation(
             name="summarise_judgment",
@@ -310,9 +310,26 @@ class JudgmentSummariser:
         return summary
 
     def generate_summary(self, text):
-        self.run_result = Runner.run_sync(self.agent, input=text)
-        log_agent_reasoning(self.run_result)
-        return self.run_result.final_output
+        # sometimes we get back blank flynotes, so try a few times
+        attempts = 1
+        while attempts <= 3:
+            self.run_result = Runner.run_sync(self.agent, input=text)
+            log_agent_reasoning(self.run_result)
+            summary = self.run_result.final_output
+
+            flynote_length = len(summary.flynote or "")
+            if flynote_length == 0 or flynote_length > 20:
+                return summary
+
+            log.warning(
+                "Flynote is suspiciously short (%s chars); retrying attempt %s/3",
+                flynote_length,
+                attempts,
+            )
+            attempts += 1
+
+        # TODO: we could also return summary here
+        raise Exception("Could not generate summary after 3 attempts")
 
     def match_flynotes(self, summary):
         """If enabled, attempt to match flynotes in the generated summary to flynotes in the database, and replace the
