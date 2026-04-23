@@ -1,0 +1,82 @@
+name: Accessibility
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 1,15 * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  a11y:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      matrix:
+        app: [africanlii, liiweb]
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: npm
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade "setuptools<82" wheel
+          pip install .[dev]
+          pip install psycopg[binary]==3.2.12
+          npm ci --no-audit --ignore-scripts
+      - name: Install browser
+        run: npx puppeteer browsers install chrome
+      - name: Prepare fixture-backed site data
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/peach-jam
+        run: |
+          python manage.py migrate --noinput --settings=${{ matrix.app }}.settings
+          python manage.py setup_countries_languages --settings=${{ matrix.app }}.settings
+          python manage.py loaddata peachjam/fixtures/documents/sample_documents.json --settings=${{ matrix.app }}.settings
+      - name: Run accessibility checks
+        env:
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/peach-jam
+        run: |
+          python manage.py runserver 127.0.0.1:8000 --settings=${{ matrix.app }}.settings > /tmp/${{ matrix.app }}-a11y.log 2>&1 &
+          server_pid=$!
+          cleanup() {
+            kill "$server_pid" || true
+          }
+          trap cleanup EXIT
+
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:8000/en/ > /dev/null; then
+              break
+            fi
+            sleep 2
+          done
+
+          curl -fsS http://127.0.0.1:8000/en/ > /dev/null
+
+          npm run a11y:local -- --app ${{ matrix.app }} --base-url http://127.0.0.1:8000
+      - name: Show server log on failure
+        if: failure()
+        run: cat /tmp/${{ matrix.app }}-a11y.log

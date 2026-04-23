@@ -71,6 +71,20 @@ export DJANGO_SETTINGS_MODULE=liiweb.settings
 python manage.py runserver
 ```
 
+## Running accessibility scans
+
+The accessibility CI job uses a small fixture-backed page list defined in `scripts/a11y/pages.js`.
+
+After starting a local site shell, run:
+
+```bash
+npm run a11y:local -- --app liiweb --base-url http://127.0.0.1:8000
+```
+
+Replace `liiweb` with `africanlii` or `zambialii` when scanning those shells. Local runs print the violations directly in the terminal.
+
+The automated GitHub Actions accessibility workflow lives in `.github/workflows/a11y.yml`. It runs on manual dispatch and on a twice-monthly schedule.
+
 ## Compiling SCSS
 
 Ensure you have sass installed globally:
