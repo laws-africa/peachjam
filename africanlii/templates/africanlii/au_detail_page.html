@@ -28,7 +28,7 @@
       </p>
       <p>
         {%blocktrans trimmed %}
-        For more information, visit the <a href="https://au.int/" target="_blank" rel="noreferrer noopener">official African Union website</a> and the <a href="https://au.int/agenda2063/overview">Agenda 2063 portal.</a>
+        For more information, visit the <a href="https://au.int/" target="_blank" rel="noreferrer noopener">official African Union website<span class="visually-hidden">opens in new tab</span></a> and the <a href="https://au.int/agenda2063/overview">Agenda 2063 portal.</a>
         {% endblocktrans %}
       </p>
     </div>
@@ -99,8 +99,7 @@
                    alt="{{ member_state.name }}"
                    class="mb-3"/>
               <h5 class="card-title">
-                <a href="{% url 'member_state_detail_view' member_state.country.iso %}"
-                   target="_blank">{{ member_state.country }}</a>
+                <a href="{% url 'member_state_detail_view' member_state.country.iso %}">{{ member_state.country }}</a>
               </h5>
               {% include 'africanlii/_lii_info.html' %}
             </div>

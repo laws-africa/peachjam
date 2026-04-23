@@ -4,7 +4,7 @@
       :href="`${userHelpLink}${page}`"
       class="me-3"
       target="_blank"
-    ><i class="bi bi-question-circle me-1" />{{ $t('Help') }}</a>
+    ><i class="bi bi-question-circle me-1" />{{ $t('Help') }}<span class="visually-hidden"> {{ $t('opens in new tab') }}</span></a>
   </span>
 </template>
 

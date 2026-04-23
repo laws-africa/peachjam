@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from elasticsearch_dsl import Search
@@ -143,6 +144,48 @@ class SearchViewsTest(TestCase):
         response = self.client.get(reverse("search:search_documents") + "?search=test")
         self.assertEqual(response.status_code, 200)
         self.assertIn("max-age=900", response.headers["Cache-Control"])
+
+    def test_search_hit_links_open_in_same_tab(self):
+        request = RequestFactory().get("/search/?search=test")
+        doc = CoreDocument.objects.first()
+        hit = {
+            "document": doc,
+            "position": 1,
+            "best_match": False,
+            "highlight": {},
+            "pages": [
+                {
+                    "page_num": 3,
+                    "highlight": {"pages_body": ["example"]},
+                }
+            ],
+            "provisions": [
+                {
+                    "id": "sec_1",
+                    "title": "Section 1",
+                    "highlight": {"provisions_body": ["example"]},
+                    "parents": [],
+                }
+            ],
+        }
+
+        html = render_to_string(
+            "peachjam_search/_search_hit.html",
+            {
+                "request": request,
+                "hit": hit,
+                "show_jurisdiction": False,
+                "can_debug": False,
+            },
+            request=request,
+        )
+
+        self.assertNotIn(
+            f'target="_blank"\n           href="{doc.get_absolute_url}"',
+            html,
+        )
+        self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#page-3', html)
+        self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#sec_1', html)
 
 
 class PortionSearchViewTest(TestCase):

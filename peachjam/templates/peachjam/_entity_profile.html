@@ -39,7 +39,9 @@
             <div>
               <strong>{% trans 'Visit website' %}</strong>
             </div>
-            <a href="{{ entity_profile.website_url }}" target="_blank">{{ entity_profile.website_url }}</a>
+            <a href="{{ entity_profile.website_url }}" target="_blank">{{ entity_profile.website_url }}
+              {% include 'peachjam/_opens_in_new_tab.html' %}
+            </a>
           </div>
         {% endif %}
       </div>

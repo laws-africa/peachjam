@@ -1,5 +1,7 @@
 {% load i18n %}
-<div id="messages" hx-swap-oob="true">
+<div id="messages"
+     hx-swap-oob="true"
+     {% if not messages %}aria-hidden="true"{% endif %}>
   {% for message in messages %}
     <div class="container mt-3 alert alert-{{ message.tags }} alert-dismissible fade show"
          role="alert">
