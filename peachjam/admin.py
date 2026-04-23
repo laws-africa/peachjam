@@ -83,6 +83,7 @@ from peachjam.models import (
     DocumentTopic,
     EntityProfile,
     ExternalDocument,
+    Flynote,
     Gazette,
     GenericDocument,
     Ingestor,
@@ -1189,6 +1190,55 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
         resp.context_data["tree_json"] = json.dumps(tree)
 
         return resp
+
+
+@admin.register(Flynote)
+class FlynoteAdmin(admin.ModelAdmin):
+    list_display = ("slug", "name", "depth")
+    list_filter = ("depth",)
+    search_fields = ("name", "slug")
+    ordering = ("slug",)
+    readonly_fields = ("numchild", "ancestors_links", "children_links", "slug", "depth")
+    fields = ("ancestors_links", "name", "slug", "depth", "numchild", "children_links")
+
+    def has_add_permission(self, request):
+        return False
+
+    @admin.display(description=_("Ancestors"))
+    def ancestors_links(self, obj):
+        if not obj or obj.is_root():
+            return "-"
+
+        ancestors = obj.get_ancestors()
+        return format_html_join(
+            format_html(" — "),
+            '<a href="{}">{}</a>',
+            (
+                (
+                    reverse("admin:peachjam_flynote_change", args=[ancestor.pk]),
+                    ancestor.name,
+                )
+                for ancestor in ancestors
+            ),
+        )
+
+    @admin.display(description=_("Children"))
+    def children_links(self, obj):
+        if not obj:
+            return "-"
+
+        children = obj.get_children()
+        if not children:
+            return "-"
+
+        return format_html_join(
+            format_html("<br>"),
+            '<a href="{}">{}</a>',
+            (
+                (reverse("admin:peachjam_flynote_change", args=[child.pk]), child.name)
+                for child in children
+            ),
+        )
 
 
 @admin.register(CoreDocument)
