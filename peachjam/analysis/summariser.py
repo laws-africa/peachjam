@@ -2,13 +2,16 @@ import logging
 import os
 from typing import Optional
 
-from agents import Agent, ModelSettings, Runner, RunResult
+from agents import Agent, ModelSettings, Runner, RunResult, function_tool
 from django.conf import settings
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.db import close_old_connections, connection
 from openai.types import Reasoning
 from pydantic import BaseModel
 
 from peachjam.analysis.agents import log_agent_reasoning
 from peachjam.langfuse import PROMPT_CACHE_TTL_SECS, langfuse
+from peachjam.models import Flynote as FlynoteModel
 
 log = logging.getLogger(__name__)
 
@@ -30,6 +33,156 @@ class Flynote(BaseModel):
     flynote: str
 
 
+FLYNOTE_MATCH_PROMPT = """
+You must now align the flynotes you have suggested with the flynote components that are in the database. This helps
+ensure that flynotes are consistent and well-categorised, and avoids issues like typos or spelling differences.
+The first two components are more structured than the second two, so it's more important to match those to the database.
+
+For flynote component 1, you MUST choose an appropriate entry from the list of top-level flynotes provided below that
+most closely matches your flynote component 1.
+
+For flynote components 2, 3 and 4 you must use the search_flynotes tool to find the closest matching flynote in the
+database. Consider the text and semantics of the flynote when making your choice and ensure that the chosen flynotes
+(either from the list, or your original suggestion if there is no good match) still accurately reflect the content
+of the judgment.
+
+The flynote database is stored in a tree structure, where each flynote has a parent (except for component 1, which are
+top-level flynotes). When using the search_flynotes tool for components 2, 3 and 4, you must specify the id of the
+previous component as the parent_id. This ensures the tool searches the children of that flynote.
+
+Adhere to the following rules when matching flynotes to the database:
+
+1. Flynote component 1: you MUST choose an appropriate entry from the list provided below that most closely matches
+your flynote component 1. You MUST NOT use a flynote component 1 that doesn't exist in the database. There is no need
+to use the search_flynotes tool because the full list is provided below.
+
+2. Flynote component 2: you SHOULD choose an appropriate entry from the database that most closely matches your
+flynote component 2. If there is not a good match, use your original suggestion, but only if there is not a good match.
+About 75% of the time there should be a good match for flynote component 2.
+
+3. Flynote components 3 and 4: you MAY choose an appropriate entry from the database that most closely matches your
+flynote components 3 and 4, but only if there is a good match. If there is not a good match, use your original
+suggestions for flynote components 3 and 4.
+
+4. For components 2 or 3, if you choose not to use a flynote from the database, then you will not have an appropriate
+parent_id for the next component. In that case, simply use your original flynotes for the subsequent components, and do
+not use the search_flynotes tool for those components.
+
+You must follow this process for each newline-separated flynote that you generated.
+
+When you're done, return your new flynotes, one per line.
+
+# Using the search_flynotes tool
+
+When using the search_flynotes tool, you can provide a list of keywords (or phrases) to search for. Always provide the
+the actual flynote as one of the keywords, and then include 2-5 other keywords that are relevant to the flynote and
+might help the search. Keywords are case insensitive. The more relevant keywords you provide, the broader the results.
+
+# Example
+
+Your suggested flynote:
+
+<flynote>
+Execution — Writs and quantification — Whether writs for statutory post-judgment interest require supporting affidavits — Uniform Rules of Court
+</flynote>
+
+Components:
+
+1. Execution
+2. Writs and quantification
+3. Whether writs for statutory post-judgment interest require supporting affidavits
+4. Uniform Rules of Court
+
+For component 1, you look at the list of top-level flynotes provided and choose the one that most closely matches
+"Execution".
+
+For component 2, use the search_flynotes tool with keywords like ["Writs and quantification", "Writs", "Quantification"]
+and parent_id=10 (assuming 10 is the id of the chosen flynote for component 1). The database returns two close matches:
+
+- (id 1202): Writs
+- (id 1494): Writs/quantification
+
+The best match is "Writs/quantification" and it's a very close match, so you use "Writs/quantification" for component 2.
+
+For component 3, you use the search_flynotes tool again with keywords like
+["Whether writs for statutory post-judgment interest require supporting affidavits", "post-judgment interest", "writs",
+"quantification"] and parent_id=1494.
+
+The database returns no good matches, so you choose to keep your original suggestion. You also don't have an
+appropriate parent_id for component 4, so you keep your original suggestion for component 4 as well.
+
+Your final flynote is now:
+
+<flynote>
+Execution — Writs/quantification — Whether writs for statutory post-judgment interest require supporting affidavits — Uniform Rules of Court
+</flynote>
+"""  # noqa: E501
+
+
+def search_flynotes_tool(keywords: list[str], parent_id: int) -> str:
+    log.debug("search for flynotes: parent_id=%s, keywords=%s", parent_id, keywords)
+
+    terms = [(term or "").strip() for term in keywords]
+    terms = [term for term in terms if term]
+    terms = set(terms)
+
+    if not terms:
+        return "You must provide at least one keyword to search for. Please try again with relevant keywords."
+
+    config = "english"
+    limit = 20
+    min_rank = 0.05
+    vector = SearchVector("name", weight="A", config=config)
+
+    ts_query = None
+    for term in terms:
+        q = SearchQuery(term, search_type="plain", config=config)
+        ts_query = q if ts_query is None else (ts_query | q)
+
+    rank = SearchRank(vector, ts_query)
+
+    parent = FlynoteModel.objects.filter(pk=parent_id).first()
+    if not parent:
+        return (
+            "You provided an invalid parent_id that doesn't exist in the database, so no search was performed. "
+            "Please check the parent_id and try again."
+        )
+
+    qs = parent.get_children()
+    qs = qs.annotate(rank=rank)
+    qs = qs.filter(rank__gte=min_rank).order_by("-rank", "name", "id")
+
+    matches = [f"(id {flynote.pk}): {flynote.name}" for flynote in qs[:limit]]
+    log.debug("flynote search results: %s", matches)
+
+    if not matches:
+        return (
+            "There are no flynotes that match those search terms. You can try again with different search terms. "
+            "You must only try 2-3 times before concluding that there is no match."
+        )
+
+    return "\n".join(matches)
+
+
+@function_tool
+def search_flynotes(keywords: list[str], parent_id: int) -> str:
+    """
+    Search the flynote database for flynotes matching the provided keywords, looking at children of parent_id, if given.
+    Use this tool to find search the flynote tree for flynotes similar to the flynote components you have generated.
+
+    - For keywords, provide your original flynote component text as one of the keywords, along with any other
+    relevant keywords that might help the search. For example, if your flynote component is "Writs and quantification",
+    you might provide keywords like ["Writs and quantification", "Writs", "Quantification"].
+    - keywords are case insensitive
+    - for the parent_id, provide the id of the parent flynote to search its children.
+    """
+    close_old_connections()
+    try:
+        return search_flynotes_tool(keywords, parent_id)
+    finally:
+        connection.close()
+
+
 class JudgmentSummariser:
     default_llm_model = "gpt-5-mini"
     llm_model = None
@@ -39,6 +192,7 @@ class JudgmentSummariser:
     match_flynotes_to_db = settings.PEACHJAM["SUMMARISER_MATCH_FLYNOTES_TO_DB"]
     agent: Optional[Agent] = None
     run_result: Optional[RunResult] = None
+    max_top_level_flynotes = 50
 
     def __init__(self):
         self.summary_language = settings.PEACHJAM["SUMMARISER_LANGUAGE"]
@@ -149,25 +303,39 @@ class JudgmentSummariser:
 
         log.debug(f"Matching flynotes to db:\n---\n{summary.flynote}\n---")
 
-        # TODO: update input
         input = self.run_result.to_input_list()
         input.append(
             {
                 "role": "developer",
-                "content": "xxx",
+                "content": FLYNOTE_MATCH_PROMPT + self.top_level_flynotes_prompt(),
             }
         )
 
         # give the agent tools and change its output type
-        # TODO tools
-        agent = self.agent.clone(tools=[], output_type=Flynote)
+        agent = self.agent.clone(tools=[search_flynotes], output_type=Flynote)
         run_result = Runner.run_sync(agent, input)
         log_agent_reasoning(self.run_result)
-        summary.flynote = run_result.final_output.flynote
 
+        summary.flynote = run_result.final_output.flynote
         log.debug(f"Matched flynotes:\n---\n{summary.flynote}\n---")
 
         return summary
+
+    def top_level_flynotes_prompt(self):
+        flynotes = (
+            FlynoteModel.objects.filter(depth=1)
+            .select_related("document_count_cache")
+            .order_by("-document_count_cache__count", "name")[
+                : self.max_top_level_flynotes
+            ]
+        )
+        flynote_list = "\n".join(
+            f"- (id {flynote.pk}): {flynote.name}" for flynote in flynotes
+        )
+        return (
+            "\n\n# Top-level flynotes\n\nHere is the list of top-level flynotes you can choose from for flynote "
+            f"component 1:\n{flynote_list}\n"
+        )
 
     def translate_summary(self, summary, language):
         if not language or language == "English":
