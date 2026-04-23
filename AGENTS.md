@@ -84,6 +84,7 @@ When changing existing UI, preserve or improve its accessibility characteristics
 * Ensure focus order and focus targets remain meaningful. Skip links and programmatic focus should land on real, named targets.
 * Add or preserve accessible names for landmarks, form controls, icon-only buttons/links, and dynamic regions.
 * Prefer `aria-labelledby` when there is a real visible or visually-hidden heading/label in the DOM; use `aria-label` only when necessary.
+* When adding a top-level page, set `id="main-page-heading"` on that page's main `h1` so the main content region has a stable accessible label source.
 * Do not add ARIA that duplicates or conflicts with native semantics.
 * Preserve or improve announcements for dynamic updates such as HTMX/AJAX content changes.
 * Ensure hidden content is not incorrectly focusable or exposed to assistive technology.
