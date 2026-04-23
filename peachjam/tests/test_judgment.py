@@ -375,6 +375,7 @@ class JudgmentTestCase(TestCase):
         get_prompt.assert_called_once_with(
             "summarise/judgment",
             cache_ttl_seconds=30,
+            fallback=None,
         )
         fake_openai.responses.parse.assert_called_once()
 

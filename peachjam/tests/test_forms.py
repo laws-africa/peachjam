@@ -379,22 +379,25 @@ class BaseDocumentFilterFormTestCase(TestCase):
             },
             request=request,
         )
-        lii_info_html = render_to_string(
-            "africanlii/_lii_info.html",
+        entity_profile_html = render_to_string(
+            "peachjam/_entity_profile.html",
             {
                 "request": request,
-                "liis": [
-                    SimpleNamespace(
-                        country="Kenya",
-                        name="KenyaLII",
-                        url="https://kenyalii.example.com/",
-                        domain="kenyalii.example.com",
-                    )
-                ],
-                "member_state": SimpleNamespace(country=SimpleNamespace(name="Kenya")),
+                "entity_profile": SimpleNamespace(
+                    background_photo=None,
+                    profile_photo=None,
+                    title="Example profile",
+                    about_html="",
+                    address="",
+                    website_url="https://example.com",
+                    content_object=SimpleNamespace(),
+                ),
+                "entity_profile_title": "Example profile",
+                "hide_follow_button": True,
             },
             request=request,
         )
 
         self.assertIn("opens in new tab", help_html)
-        self.assertNotIn('target="_blank"', lii_info_html)
+        self.assertIn('target="_blank"', entity_profile_html)
+        self.assertIn("opens in new tab", entity_profile_html)
