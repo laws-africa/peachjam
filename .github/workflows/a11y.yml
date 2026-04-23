@@ -134,7 +134,8 @@ jobs:
 
           if npm run a11y:local -- \
             --app "${{ matrix.site }}" \
-            --base-url http://127.0.0.1:8000 2>&1 | tee "$output_file"; then
+            --base-url http://127.0.0.1:8000 \
+            --verbose 2>&1 | tee "$output_file"; then
             echo "passed" > "$status_file"
           else
             echo "failed" > "$status_file"
