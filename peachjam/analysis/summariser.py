@@ -277,17 +277,10 @@ class JudgmentSummariser:
             or self.default_llm_model
         )
 
-    @staticmethod
-    def normalise_flynote_text(flynote):
-        if not flynote:
-            return ""
-
+    def normalise_summary(self, summary):
         from peachjam.analysis.flynotes import FlynoteParser
 
-        return FlynoteParser().normalise_multiline_text(flynote)
-
-    def normalise_summary(self, summary):
-        summary.flynote = self.normalise_flynote_text(summary.flynote)
+        summary.flynote = FlynoteParser().normalise_multiline_text(summary.flynote)
         return summary
 
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
