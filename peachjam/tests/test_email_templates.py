@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import SimpleTestCase
+from templated_email import get_templated_mail
 
 
 class EmailTemplateUrlTestCase(SimpleTestCase):
@@ -64,10 +65,13 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             }
         )
 
-        html = render_to_string(
-            "peachjam/emails/new_citation_alert.email",
+        message = get_templated_mail(
+            template_name="new_citation_alert",
+            from_email="test@example.org",
+            to=["user@example.org"],
             context=context,
         )
+        html = message.alternatives[0][0] if message.alternatives else message.body
 
         self.assertIn(
             'href="https://example.org/en/my/following/?utm_campaign=following&utm_source=alert&utm_medium=email"',

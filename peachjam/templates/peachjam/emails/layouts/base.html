@@ -1,5 +1,4 @@
 {% load static i18n peachjam %}
-{% static 'images/logo.png' as static_logo_url %}
 {% block html %}
   {# djlint:off #}
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
@@ -133,7 +132,7 @@
                                     {% block header %}
                                       <center>
                                         {% block header-logo %}
-                                          <img src="{% absolute_url site static_logo_url %}" alt="{% trans "logo" %}" style="height: 60px" align="center" class="float-center"/>
+                                          <img src="{% absolute_static_url site 'images/logo.png' %}" alt="{% trans "logo" %}" style="height: 60px" align="center" class="float-center"/>
                                         {% endblock %}
                                       </center>
                                     {% endblock %}
