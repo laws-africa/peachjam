@@ -299,9 +299,14 @@ def chat_thread_deleted(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=Flynote)
 def flynote_saved_serialise_linked_judgments(sender, instance, raw, **kwargs):
     if not raw:
-        judgment_ids = instance.judgments.values_list(
-            "document_id", flat=True
-        ).distinct()
+        subtree_flynote_ids = Flynote.objects.filter(
+            path__startswith=instance.path
+        ).values_list("pk", flat=True)
+        judgment_ids = (
+            JudgmentFlynote.objects.filter(flynote_id__in=subtree_flynote_ids)
+            .values_list("document_id", flat=True)
+            .distinct()
+        )
         for judgment_id in judgment_ids:
             serialise_judgment_flynote_tree(judgment_id)
 
