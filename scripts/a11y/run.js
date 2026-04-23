@@ -18,11 +18,9 @@ const IMPACT_ORDER = {
 const ANSI = {
   reset: "\u001b[0m",
   bold: "\u001b[1m",
-  dim: "\u001b[2m",
   red: "\u001b[31m",
   green: "\u001b[32m",
   yellow: "\u001b[33m",
-  cyan: "\u001b[36m",
   gray: "\u001b[90m",
 };
 
@@ -50,6 +48,12 @@ function parseArgs(argv) {
 
     const key = part.slice(2);
     const value = argv[i + 1];
+
+    if (!value || value.startsWith("--")) {
+      args[key] = true;
+      continue;
+    }
+
     args[key] = value;
     i += 1;
   }
@@ -72,6 +76,10 @@ function normalizeBaseUrl(rawUrl) {
 
 function collapseWhitespace(value) {
   return String(value || "").replace(/\s+/g, " ").trim();
+}
+
+function pluralize(count, singular, plural = `${singular}s`) {
+  return count === 1 ? singular : plural;
 }
 
 function severityLabel(impact) {
@@ -131,6 +139,13 @@ function countBlockingViolations(violations) {
   );
 }
 
+function countAffectedNodes(violations) {
+  return violations.reduce(
+    (total, violation) => total + (violation.nodes ? violation.nodes.length : 0),
+    0,
+  );
+}
+
 function getFailureDetails(node) {
   const details = [];
 
@@ -144,6 +159,49 @@ function getFailureDetails(node) {
   }
 
   return details;
+}
+
+function normalizeFailureDetail(detail) {
+  return collapseWhitespace(detail).replace(/^Fix (?:any|all) of the following:\s*/i, "");
+}
+
+function unique(values) {
+  return [...new Set(values.filter(Boolean))];
+}
+
+function formatPreview(values, limit, separator = ", ") {
+  const items = unique(values);
+  const preview = items.slice(0, limit);
+  const remaining = Math.max(items.length - preview.length, 0);
+
+  if (!preview.length) {
+    return "";
+  }
+
+  const suffix = remaining > 0 ? ` (+${remaining} more)` : "";
+  return `${preview.join(separator)}${suffix}`;
+}
+
+function collectTargetPreview(nodes) {
+  return unique(
+    nodes.map((node) => {
+      if (!node.target || !node.target.length) {
+        return "";
+      }
+
+      return collapseWhitespace(node.target.join(" -> "));
+    }),
+  );
+}
+
+function collectFailureExamples(nodes) {
+  return unique(
+    nodes.flatMap((node) =>
+      getFailureDetails(node)
+        .map((detail) => normalizeFailureDetail(detail))
+        .filter(Boolean),
+    ),
+  );
 }
 
 function buildPageUrl(baseUrl, path) {
@@ -225,65 +283,119 @@ async function configurePage(page, allowedOrigin) {
   });
 }
 
-function printPageError(pageId, error) {
-  console.log(
-    paint(`${pageId} scan failed`, ANSI.bold, ANSI.red),
-  );
-  console.log(paint(error.stack || String(error), ANSI.red));
-}
-
-function printViolation(pageId, pageUrl, violation) {
+function renderViolation(violation, options = {}) {
   const label = severityLabel(violation.impact);
   const color = severityColor(violation.impact);
+  const affectedNodes = violation.nodes ? violation.nodes.length : 0;
+  const headline =
+    `${paint(`[${label}]`, ANSI.bold, color)} ${paint(violation.id, color)}: ` +
+    `${violation.help}`;
+  const lines = [`  ${headline}`];
 
-  console.log(
-    `  ${paint(label, ANSI.bold, color)} ${paint(violation.id, color)} ${violation.help}`,
-  );
-  console.log(`    page: ${pageId}`);
-  console.log(`    url: ${pageUrl}`);
+  lines.push(`    affected nodes: ${affectedNodes}`);
 
   if (violation.helpUrl) {
-    console.log(`    help: ${violation.helpUrl}`);
+    lines.push(`    help: ${violation.helpUrl}`);
   }
 
-  violation.nodes.forEach((node, index) => {
-    console.log(`    node ${index + 1}:`);
+  const targets = formatPreview(collectTargetPreview(violation.nodes || []), 3);
+  if (targets) {
+    lines.push(`    targets: ${targets}`);
+  }
 
-    if (node.target && node.target.length) {
-      console.log(`      target: ${node.target.join(", ")}`);
-    }
+  const [example] = collectFailureExamples(violation.nodes || []);
+  if (example) {
+    lines.push(`    example: ${example}`);
+  }
 
-    if (node.html) {
-      console.log(`      html: ${collapseWhitespace(node.html)}`);
-    }
+  if (options.verbose) {
+    violation.nodes.forEach((node, index) => {
+      lines.push(`    node ${index + 1}:`);
 
-    getFailureDetails(node).forEach((detail) => {
-      console.log(`      detail: ${detail}`);
+      if (node.target && node.target.length) {
+        lines.push(`      target: ${node.target.join(", ")}`);
+      }
+
+      if (node.html) {
+        lines.push(`      html: ${collapseWhitespace(node.html)}`);
+      }
+
+      getFailureDetails(node).forEach((detail) => {
+        lines.push(`      detail: ${detail}`);
+      });
     });
-  });
+  }
+
+  return lines;
 }
 
-function printPageResult(result) {
-  const counts = countBlockingViolations(result.violations);
-  const header = `${result.pageId} ${counts.total} blocking violation(s) (${counts.critical} critical, ${counts.serious} serious, ${counts.total} total)`;
+function renderPageError(result, options = {}) {
+  const errorMessage = collapseWhitespace(result.error && result.error.message ? result.error.message : result.error);
+  const lines = [
+    paint(`ERROR ${result.pageId} - scan failed`, ANSI.bold, ANSI.red),
+    `  url: ${result.url}`,
+    `  error: ${errorMessage}`,
+  ];
 
-  console.log(
-    paint(header, ANSI.bold, statusColor(counts.total > 0, false)),
-  );
-  console.log(`  ${result.url}`);
+  if (options.verbose && result.error && result.error.stack) {
+    result.error.stack
+      .split("\n")
+      .slice(1)
+      .map((line) => collapseWhitespace(line))
+      .filter(Boolean)
+      .forEach((line) => {
+        lines.push(`  stack: ${line}`);
+      });
+  }
+
+  return lines.join("\n");
+}
+
+function renderPageResult(result, options = {}) {
+  const counts = countBlockingViolations(result.violations);
+  const affectedNodes = countAffectedNodes(result.violations);
+
+  if (counts.total === 0) {
+    return paint(`PASS ${result.pageId}`, ANSI.bold, ANSI.green);
+  }
+
+  const lines = [
+    paint(
+      `FAIL ${result.pageId} - ` +
+        `${counts.total} blocking ${pluralize(counts.total, "violation")}, ` +
+        `${affectedNodes} affected ${pluralize(affectedNodes, "node")}`,
+      ANSI.bold,
+      statusColor(true, false),
+    ),
+    `  url: ${result.url}`,
+  ];
 
   sortViolations(result.violations).forEach((violation) => {
-    printViolation(result.pageId, result.url, violation);
+    lines.push(...renderViolation(violation, options));
   });
+
+  return lines.join("\n");
 }
 
-function printSummary(totalBlockingViolations, pageErrors, scannedPages) {
-  const hasErrors = totalBlockingViolations > 0 || pageErrors > 0;
-  const color = statusColor(totalBlockingViolations > 0, pageErrors > 0);
-  const summary = `Summary: ${totalBlockingViolations} blocking violation(s), ${pageErrors} page error(s), ${scannedPages} page(s) scanned`;
+function printSummary(totalPages, pageResults, pageErrors) {
+  const pagesWithViolations = pageResults.filter((result) => result.violations.length > 0);
+  const allViolations = pagesWithViolations.flatMap((result) => result.violations);
+  const counts = countBlockingViolations(allViolations);
+  const affectedNodes = countAffectedNodes(allViolations);
+  const hasErrors = counts.total > 0 || pageErrors.length > 0;
+  const color = statusColor(counts.total > 0, pageErrors.length > 0);
+  const lines = [
+    paint(`Build ${hasErrors ? "FAILED" : "PASSED"}`, ANSI.bold, color),
+    "",
+    `Pages scanned: ${totalPages}`,
+    `Pages with blocking violations: ${pagesWithViolations.length}`,
+    "Blocking violations: " +
+      `${counts.total} (${counts.critical} critical, ${counts.serious} serious)`,
+    `Affected nodes: ${affectedNodes}`,
+    `Page errors: ${pageErrors.length}`,
+  ];
 
-  console.log("");
-  console.log(paint(summary, ANSI.bold, color));
+  console.log(lines.join("\n"));
 
   if (hasErrors) {
     process.exitCode = 1;
@@ -316,6 +428,7 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   const siteName = requireArg(args, "app");
   const baseUrl = normalizeBaseUrl(requireArg(args, "base-url"));
+  const verbose = Boolean(args.verbose);
   const { pages } = getPagesForSite(siteName);
 
   const browser = await puppeteer.launch({
@@ -323,30 +436,47 @@ async function main() {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 
-  let totalBlockingViolations = 0;
-  let pageErrors = 0;
-  let scannedPages = 0;
+  const pageResults = [];
+  const pageErrors = [];
+  const renderedResults = [];
 
   try {
     for (const pageDefinition of pages) {
       try {
         const result = await scanPage(browser, baseUrl, pageDefinition);
-        totalBlockingViolations += result.violations.length;
-        scannedPages += 1;
-        printPageResult(result);
+        pageResults.push(result);
+        renderedResults.push(renderPageResult(result, { verbose }));
       } catch (error) {
-        pageErrors += 1;
-        printPageError(pageDefinition.id, error);
+        const pageError = {
+          pageId: pageDefinition.id,
+          url: buildPageUrl(baseUrl, pageDefinition.path),
+          error,
+        };
+
+        pageErrors.push(pageError);
+        renderedResults.push(renderPageError(pageError, { verbose }));
       }
     }
   } finally {
     await browser.close();
   }
 
-  printSummary(totalBlockingViolations, pageErrors, scannedPages);
+  printSummary(pages.length, pageResults, pageErrors);
+
+  if (renderedResults.length) {
+    console.log("");
+  }
+
+  renderedResults.forEach((output, index) => {
+    if (index > 0) {
+      console.log("");
+    }
+
+    console.log(output);
+  });
 }
 
 main().catch((error) => {
-  console.error(paint(error.stack || String(error), ANSI.red));
+  console.error(error.stack || String(error));
   process.exit(1);
 });
