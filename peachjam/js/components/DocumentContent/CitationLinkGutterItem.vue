@@ -16,6 +16,12 @@
         <div>
           <a :href="link.url" target="_blank">
             {{ link.url }}
+            <span
+              v-if="link.is_external"
+              class="visually-hidden"
+            >
+              {{ $t('opens in new tab') }}
+            </span>
           </a>
           <span
             v-if="link.is_external"

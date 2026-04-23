@@ -231,7 +231,9 @@ class LawReportViewsTestCase(TestCase):
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
         )
         self.assertContains(
-            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+            response,
+            '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
+            html=False,
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertContains(response, "nav nav-tabs border-bottom", html=False)
@@ -281,7 +283,9 @@ class LawReportViewsTestCase(TestCase):
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
         )
         self.assertContains(
-            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+            response,
+            '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
+            html=False,
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertNotContains(response, "<h1>Cited cases</h1>", html=False)
@@ -361,7 +365,9 @@ class LawReportViewsTestCase(TestCase):
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
         )
         self.assertContains(
-            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+            response,
+            '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
+            html=False,
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertNotContains(response, "<h1>Cited legislation</h1>", html=False)

@@ -8,7 +8,9 @@
     <div class="container">
       <div class="row align-items-center mb-5">
         <div class="col-lg-7">
-          <p class="display-5 text-left mb-3 fw-bold">{% trans "Legal research across African borders" %}</p>
+          <h1 id="main-page-heading" class="display-5 text-left mb-3 fw-bold">
+            {% trans "Legal research across African borders" %}
+          </h1>
           <p class="display-6 text-left mb-5">{% trans "Research digitised African regional and national law." %}</p>
           <p class="display-7 text-left my-4">
             <a href="#au" class="text-decoration-none">→ {% trans "Policies and regional laws of the African Union" %}</a>
@@ -186,7 +188,7 @@
                 <div>
                   {{ lii.name }}
                 </div>
-                <a href="{{ lii.url }}" class="stretched-link" target="_blank">{{ lii.domain }}</a>
+                <a href="{{ lii.url }}" class="stretched-link">{{ lii.domain }}</a>
               </div>
             </div>
           </div>

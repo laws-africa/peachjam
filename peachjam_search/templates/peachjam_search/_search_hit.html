@@ -5,7 +5,6 @@
     <div class="card-body">
       <h5 class="card-title">
         <a class="h5 text-primary"
-           target="_blank"
            href="{{ hit.document.get_absolute_url }}"
            data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
            data-position="{{ hit.position }}">
@@ -111,8 +110,7 @@
           <a href="{{ hit.document.get_absolute_url }}#page-{{ page.page_num }}"
              data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
              data-position="{{ hit.position }}"
-             data-portion="page-{{ page.page_num }}"
-             target="_blank">{% trans "Page" %} {{ page.page_num }}</a>:
+             data-portion="page-{{ page.page_num }}">{% trans "Page" %} {{ page.page_num }}</a>:
           {% if page.highlight.pages_body %}
             <span>[...] {{ page.highlight.pages_body|safeseq|join:" ... " }} [...]</span>
           {% endif %}

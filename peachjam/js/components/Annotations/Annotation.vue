@@ -211,7 +211,7 @@ export default {
       const domainPattern = /([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?=\s|$)/g;
 
       text = text.replace(urlPattern, (url) => {
-        return `<a href="${url}" target="_blank">${url}</a>`;
+        return `<a href="${url}" target="_blank">${url}<span class="visually-hidden">opens in new tab</span></a>`;
       });
 
       text = text.replace(emailPattern, (email) => {
@@ -219,7 +219,7 @@ export default {
       });
 
       text = text.replace(domainPattern, (domain) => {
-        return `<a href="http://${domain}" target="_blank">${domain}</a>`;
+        return `<a href="http://${domain}" target="_blank">${domain}<span class="visually-hidden">opens in new tab</span></a>`;
       });
 
       return text;
