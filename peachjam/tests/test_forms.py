@@ -362,3 +362,39 @@ class BaseDocumentFilterFormTestCase(TestCase):
         )
         self.assertIn('aria-label="Show provision details"', uncommenced_detail_html)
         self.assertIn('aria-hidden="true"', uncommenced_table_html)
+
+    def test_external_links_announce_new_tab_and_search_result_links_do_not_force_it(
+        self,
+    ):
+        request = RequestFactory().get("/documents/")
+
+        help_html = render_to_string(
+            "peachjam/_help_button.html",
+            {
+                "request": request,
+                "PEACHJAM_SETTINGS": SimpleNamespace(
+                    user_help_link="https://docs.example.com/"
+                ),
+                "help_link": "guide",
+            },
+            request=request,
+        )
+        lii_info_html = render_to_string(
+            "africanlii/_lii_info.html",
+            {
+                "request": request,
+                "liis": [
+                    SimpleNamespace(
+                        country="Kenya",
+                        name="KenyaLII",
+                        url="https://kenyalii.example.com/",
+                        domain="kenyalii.example.com",
+                    )
+                ],
+                "member_state": SimpleNamespace(country=SimpleNamespace(name="Kenya")),
+            },
+            request=request,
+        )
+
+        self.assertIn("opens in new tab", help_html)
+        self.assertNotIn('target="_blank"', lii_info_html)
