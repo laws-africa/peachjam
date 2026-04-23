@@ -81,9 +81,14 @@ After starting a local site shell, run:
 npm run a11y:local -- --app liiweb --base-url http://127.0.0.1:8000
 ```
 
-Replace `liiweb` with the site shell you want to scan locally, for example `africanlii`, `zambialii`, or `namiblii`. Local runs scan the mapped pages for that one site and print the violations directly in the terminal.
+Replace `liiweb` with a supported app such as `africanlii`, `namiblii`, or
+`zambialii`. The runner uses explicit profiles for `africanlii`, `liiweb`, and
+`zambialii`, and automatically maps other `*lii` site shells onto the `liiweb`
+profile. Local runs print the violations directly in the terminal.
 
-The automated GitHub Actions accessibility workflow lives in `.github/workflows/a11y.yml`. It discovers all site shells in the repo automatically, scans the mapped pages for each one, and runs on manual dispatch and on a twice-monthly schedule.
+The automated GitHub Actions accessibility workflow lives in `.github/workflows/a11y.yml`.
+It uses that same discovery logic, scans the mapped pages for each supported app,
+and runs on manual dispatch and on a twice-monthly schedule.
 
 ## Compiling SCSS
 

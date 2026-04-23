@@ -18,27 +18,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Discover site shells
+      - name: Discover supported accessibility scan sites
         id: discover
         shell: bash
         run: |
-          python - <<'PY' >> "$GITHUB_OUTPUT"
-          import json
-          from pathlib import Path
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const { getSupportedSites } = require("./scripts/a11y/pages");
+          const supportedSites = getSupportedSites();
 
-          sites = sorted(
-              child.name
-              for child in Path(".").iterdir()
-              if child.is_dir()
-              and not child.name.startswith(".")
-              and (child / "settings.py").exists()
-          )
+          if (!supportedSites.length) {
+            throw new Error("No supported accessibility scan sites were configured");
+          }
 
-          if not sites:
-              raise SystemExit("No site shells with settings.py were found")
-
-          print(f"sites={json.dumps(sites)}")
-          PY
+          process.stdout.write(`sites=${JSON.stringify(supportedSites)}\n`);
+          JS
 
   a11y:
     needs: discover-sites
@@ -139,7 +132,9 @@ jobs:
           output_file="/tmp/${{ matrix.site }}-a11y-output.log"
           status_file="/tmp/${{ matrix.site }}-a11y-status.txt"
 
-          if npm run a11y:local -- --app "${{ matrix.site }}" --base-url http://127.0.0.1:8000 | tee "$output_file"; then
+          if npm run a11y:local -- \
+            --app "${{ matrix.site }}" \
+            --base-url http://127.0.0.1:8000 2>&1 | tee "$output_file"; then
             echo "passed" > "$status_file"
           else
             echo "failed" > "$status_file"

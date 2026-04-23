@@ -1,3 +1,6 @@
+const fs = require("fs");
+const path = require("path");
+
 const pageProfiles = {
   africanlii: [
     { id: "home", path: "/en/" },
@@ -47,34 +50,69 @@ const pageProfiles = {
   ],
 };
 
-const siteProfiles = {
-  africanlii: "africanlii",
-  zambialii: "zambialii",
-};
+const REPO_ROOT = path.resolve(__dirname, "..", "..");
 
-function getProfileNameForSite(siteName) {
-  if (siteProfiles[siteName]) {
-    return siteProfiles[siteName];
+function getSettingsPath(siteName) {
+  return path.join(REPO_ROOT, siteName, "settings.py");
+}
+
+function appExists(siteName) {
+  return fs.existsSync(getSettingsPath(siteName));
+}
+
+function isLiiShell(siteName) {
+  if (!siteName.endsWith("lii") || !appExists(siteName)) {
+    return false;
   }
 
+  const settings = fs.readFileSync(getSettingsPath(siteName), "utf8");
+  return settings.includes("from liiweb.settings import *");
+}
+
+function getProfileNameForSite(siteName) {
   if (pageProfiles[siteName]) {
     return siteName;
   }
 
-  return "liiweb";
+  if (isLiiShell(siteName)) {
+    return "liiweb";
+  }
+
+  return null;
 }
 
 function getPagesForSite(siteName) {
+  if (!appExists(siteName)) {
+    throw new Error(`App "${siteName}" does not exist in this repo`);
+  }
+
   const profileName = getProfileNameForSite(siteName);
+
+  if (!profileName) {
+    throw new Error(
+      `Unsupported app "${siteName}" for this WCAG scan`,
+    );
+  }
+
   return {
     profileName,
     pages: pageProfiles[profileName],
   };
 }
 
+function getSupportedSites() {
+  return fs
+    .readdirSync(REPO_ROOT, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+    .map((entry) => entry.name)
+    .filter((siteName) => appExists(siteName) && getProfileNameForSite(siteName));
+}
+
 module.exports = {
+  appExists,
   getPagesForSite,
   getProfileNameForSite,
+  getSupportedSites,
+  isLiiShell,
   pageProfiles,
-  siteProfiles,
 };
