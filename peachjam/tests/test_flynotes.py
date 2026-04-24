@@ -1556,7 +1556,7 @@ class FlynoteDeprecationTest(TestCase):
             "SUMMARISE_USE_FLYNOTE_TREE": True,
         }
     )
-    @patch("peachjam.signals.serialise_judgment_flynote_tree")
+    @patch("peachjam.tasks.serialise_judgment_flynote_tree")
     @patch("peachjam.tasks.generate_judgment_summary")
     def test_deprecating_parent_cascades_and_queues_directly_linked_judgments(
         self,
@@ -1595,7 +1595,7 @@ class FlynoteDeprecationTest(TestCase):
             [args.args[0] for args in mock_generate_summary.call_args_list],
             [root_judgment.pk, child_judgment.pk, grandchild_judgment.pk],
         )
-        self.assertGreaterEqual(mock_serialise_flynote_tree.call_count, 3)
+        mock_serialise_flynote_tree.assert_not_called()
 
     @override_settings(
         PEACHJAM={
@@ -1636,6 +1636,38 @@ class FlynoteDeprecationTest(TestCase):
         self.assertFalse(child.deprecated)
         self.assertFalse(grandchild.deprecated)
         mock_generate_summary.assert_not_called()
+
+    @patch("peachjam.tasks.serialise_judgment_flynote_tree")
+    def test_renaming_parent_queues_descendant_linked_judgments_for_reserialisation(
+        self,
+        mock_serialise_judgment_flynote_tree,
+    ):
+        root = Flynote.add_root(name="Civil procedure", slug="civil-procedure")
+        child = root.add_child(
+            name="Stay of execution",
+            slug="civil-procedure-stay-of-execution",
+        )
+        grandchild = child.add_child(
+            name="Urgent applications",
+            slug="civil-procedure-stay-of-execution-urgent-applications",
+        )
+
+        root_judgment = self.make_judgment("Root flynote judgment")
+        grandchild_judgment = self.make_judgment("Grandchild flynote judgment")
+        JudgmentFlynote.objects.create(document=root_judgment, flynote=root)
+        JudgmentFlynote.objects.create(document=grandchild_judgment, flynote=grandchild)
+
+        root.track_changes()
+        root.name = "Civil practice and procedure"
+        root.save()
+
+        self.assertCountEqual(
+            [
+                args.args[0]
+                for args in mock_serialise_judgment_flynote_tree.call_args_list
+            ],
+            [root_judgment.pk, grandchild_judgment.pk],
+        )
 
 
 class FlynoteListViewTest(TestCase):

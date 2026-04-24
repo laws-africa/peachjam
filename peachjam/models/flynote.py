@@ -74,6 +74,22 @@ class Flynote(AttributeHooksMixin, MP_Node):
         self.update_slug()
         super().save(*args, **kwargs)
 
+    @on_attribute_changed(AFTER_SAVE, ["name"], [])
+    def serialise_linked_judgments_after_rename(self):
+        subtree_flynote_ids = Flynote.objects.filter(
+            path__startswith=self.path
+        ).values_list("pk", flat=True)
+
+        from peachjam.tasks import serialise_judgment_flynote_tree
+
+        judgment_ids = (
+            JudgmentFlynote.objects.filter(flynote_id__in=subtree_flynote_ids)
+            .values_list("document_id", flat=True)
+            .distinct()
+        )
+        for judgment_id in judgment_ids:
+            serialise_judgment_flynote_tree(judgment_id)
+
     @on_attribute_changed(AFTER_SAVE, ["deprecated"], [])
     def handle_deprecated_changed(self):
         self.cascade_deprecated()

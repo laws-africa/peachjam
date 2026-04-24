@@ -18,7 +18,6 @@ from peachjam.models import (
     CoreDocument,
     DocumentChatThread,
     ExtractedCitation,
-    Flynote,
     Folder,
     JudgmentFlynote,
     Relationship,
@@ -294,21 +293,6 @@ def chat_thread_deleted(sender, instance, **kwargs):
 
     session = get_session(instance)
     async_to_sync(session.clear_session)()
-
-
-@receiver(signals.post_save, sender=Flynote)
-def flynote_saved_serialise_linked_judgments(sender, instance, raw, **kwargs):
-    if not raw:
-        subtree_flynote_ids = Flynote.objects.filter(
-            path__startswith=instance.path
-        ).values_list("pk", flat=True)
-        judgment_ids = (
-            JudgmentFlynote.objects.filter(flynote_id__in=subtree_flynote_ids)
-            .values_list("document_id", flat=True)
-            .distinct()
-        )
-        for judgment_id in judgment_ids:
-            serialise_judgment_flynote_tree(judgment_id)
 
 
 @receiver(signals.post_save, sender=JudgmentFlynote)
