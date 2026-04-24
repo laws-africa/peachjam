@@ -1704,6 +1704,64 @@ class FlynoteDeprecationTest(TestCase):
         )
 
 
+class FlynoteMergeTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def make_judgment(self, case_name):
+        return Judgment.objects.create(
+            case_name=case_name,
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
+    def test_merge_moves_direct_judgments_and_reparents_children(self):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+        source_child = source.add_child(name="Urgent applications")
+
+        direct_judgment = self.make_judgment("Direct source judgment")
+        descendant_judgment = self.make_judgment("Descendant source judgment")
+        JudgmentFlynote.objects.create(document=direct_judgment, flynote=source)
+        JudgmentFlynote.objects.create(
+            document=descendant_judgment, flynote=source_child
+        )
+
+        target.merge_sources_into([source])
+
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=direct_judgment,
+                flynote=target,
+            ).exists()
+        )
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+
+        source_child.refresh_from_db()
+        self.assertEqual(source_child.get_parent().pk, target.pk)
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=descendant_judgment,
+                flynote=source_child,
+            ).exists()
+        )
+
+    def test_merge_rejects_duplicate_child_names_under_target(self):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+        target.add_child(name="Urgent applications")
+        source.add_child(name="Urgent applications")
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "Cannot merge because the target already has children with these names: Urgent applications.",
+        ):
+            target.merge_sources_into([source])
+
+
 class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",

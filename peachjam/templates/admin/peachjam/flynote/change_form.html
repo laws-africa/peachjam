@@ -1,0 +1,10 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block object-tools-items %}
+  {{ block.super }}
+  {% if change and not is_popup %}
+    <li>
+      <a href="{{ merge_url }}">{% trans "Merge other flynotes into this one" %}</a>
+    </li>
+  {% endif %}
+{% endblock %}
