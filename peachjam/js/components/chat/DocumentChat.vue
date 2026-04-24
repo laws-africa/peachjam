@@ -92,7 +92,6 @@
 <script>
 import { csrfToken } from '../../api';
 import analytics from '../../analytics';
-import i18next from 'i18next';
 import peachJam from '../../peachjam';
 import { marked } from 'marked';
 
@@ -101,17 +100,6 @@ function generateId () {
     return window.crypto.randomUUID();
   }
   return `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function t (message, options = {}) {
-  return i18next.t(message, options);
-}
-
-function fallbackErrorMessage (err) {
-  if (typeof err?.message === 'string' && err.message.trim()) {
-    return err.message;
-  }
-  return t('Something went wrong. Please try again.');
 }
 
 export default {
@@ -148,6 +136,9 @@ export default {
   mounted () {
     this.loadThread();
   },
+  unmounted () {
+    this.closeStream(this.eventSource);
+  },
   methods: {
     /** Load an existing chat thread for this document, if one exists. Sets the threadId if it does, otherwise
      * sets threadId to '' to indicate no existing thread.
@@ -168,7 +159,7 @@ export default {
             this.usageLimitHtml = null;
           }
         } else if (!resp.ok) {
-          throw new Error(t('The assistant could not respond right now. Please try again.'));
+          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
         } else {
           const data = await resp.json();
           this.threadId = data.thread_id || '';
@@ -180,7 +171,7 @@ export default {
       } catch (err) {
         console.error(err);
         this.threadId = '';
-        this.error = fallbackErrorMessage(err);
+        this.error = this.fallbackErrorMessage(err);
       }
     },
     /**
@@ -198,7 +189,7 @@ export default {
         if (resp.status === 403) {
           await this.handle403(resp);
         } else if (!resp.ok) {
-          throw new Error(t('The assistant could not respond right now. Please try again.'));
+          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
         } else {
           const data = await resp.json();
           this.error = null;
@@ -211,7 +202,7 @@ export default {
         }
       } catch (err) {
         console.error(err);
-        this.error = fallbackErrorMessage(err);
+        this.error = this.fallbackErrorMessage(err);
       }
     },
     async submit () {
@@ -279,7 +270,7 @@ export default {
 
       es.addEventListener('error', err => {
         console.error(err);
-        this.error = fallbackErrorMessage(err);
+        this.error = this.fallbackErrorMessage(err);
         // remove the message so that the user can try again
         const lastMessage = this.messages[this.messages.length - 1];
         if (!lastMessage || lastMessage.role !== 'ai') {
@@ -355,6 +346,12 @@ export default {
     finishStreamingUI () {
       this.focusInputAndScroll();
     },
+    fallbackErrorMessage (err) {
+      if (typeof err?.message === 'string' && err.message.trim()) {
+        return err.message;
+      }
+      return this.$t('Something went wrong. Please try again.');
+    },
     closeStream (source) {
       if (source) {
         source.close();
@@ -405,7 +402,7 @@ export default {
       } catch (parseErr) {
         console.error(parseErr);
       }
-      throw new Error(t("You don't have permission to do that."));
+      throw new Error(this.$t("You don't have permission to do that."));
     },
     handlePermissionDenied (messageHtml) {
       this.permissionDeniedHtml = messageHtml;
