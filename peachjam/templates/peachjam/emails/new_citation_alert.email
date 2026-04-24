@@ -1,5 +1,5 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block subject %}
   {% if saved_documents|length > 1 %}
     {% blocktrans trimmed with title=saved_documents.0.saved_document.title %}New citations for {{ title }} and more{% endblocktrans %}
@@ -10,12 +10,12 @@
 {% block alert-body %}
   {% for item in saved_documents %}
     <p>
-      <a href="{{ site.domain }}{{ item.saved_document.get_absolute_url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>
+      <a href="{% absolute_url site item.saved_document.get_absolute_url %}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>
     </p>
     <ul>
       {% for citing in item.citing_documents %}
         <li style="margin-bottom: 1rem">
-          <a href="{{ site.domain }}{{ citing.document.get_absolute_url }}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
+          <a href="{% absolute_url site citing.document.get_absolute_url %}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
           {% if citing.document.blurb %}<div>{{ citing.blurb | safe }}</div>{% endif %}
           {% if citing.document.flynote %}
             <div>

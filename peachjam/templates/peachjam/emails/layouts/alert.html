@@ -1,5 +1,5 @@
 {% extends 'peachjam/emails/layouts/base.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block body %}
   <p>{% blocktrans with name=user.get_full_name %}Hello {{ name }}{% endblocktrans %}</p>
   {% block alert-body %}{% endblock %}
@@ -7,12 +7,13 @@
   <p>{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
   <p>
     <small>
-      <a href="https://{{ site.domain }}{{ manage_url_path }}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
+      <a href="{% absolute_url site manage_url_path %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
     </small>
   </p>
 {% endblock %}
 {% block footer %}
   <p>
-    <small><a href="https://{{ site.domain }}{% url 'my_account' %}">{% blocktrans %}Manage your {{ APP_NAME }} account{% endblocktrans %}</a></small>
+    {% url 'my_account' as my_account_url %}
+    <small><a href="{% absolute_url site my_account_url %}">{% blocktrans %}Manage your {{ APP_NAME }} account{% endblocktrans %}</a></small>
   </p>
 {% endblock %}
