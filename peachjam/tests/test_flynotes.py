@@ -17,7 +17,7 @@ from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlyno
 
 class ParseFlynoteTextTest(TestCase):
     def setUp(self):
-        self.parser = FlynoteParser()
+        self.parser = FlynoteParser(assume_clean=False)
 
     def test_empty_input(self):
         self.assertEqual(self.parser.parse(""), [])
@@ -1117,6 +1117,34 @@ class ParseFlynoteTextTest(TestCase):
                     "Civil Practice and Procedure",
                     "Proceedings against a corporate body",
                     "Whether proceedings may be instituted against that particular organ",
+                ],
+                [
+                    "Administrative Law",
+                    "Jurisdiction of an administrative body",
+                    "Requirement of quorum",
+                    "Whether the meeting had jurisdiction to make valid decisions",
+                ],
+            ],
+        )
+
+    def test_parse_multiline_clean_flynotes_do_not_use_restart_inference(self):
+        parser = FlynoteParser(assume_clean=True)
+        text = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. Contract\n"
+            "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+            "Whether the meeting had jurisdiction to make valid decisions"
+        )
+        self.assertEqual(
+            parser.parse(text),
+            [
+                [
+                    "Contract",
+                    "Contract of sale of goods",
+                    (
+                        "Whether and under what circumstances a mere purchase order may amount to an agreement to "
+                        "sell. Contract",
+                    ),
                 ],
                 [
                     "Administrative Law",
