@@ -173,7 +173,7 @@ class JudgmentFlynote(models.Model):
     )
     flynote = models.ForeignKey(
         Flynote,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="judgments",
         verbose_name=_("flynote"),
     )
