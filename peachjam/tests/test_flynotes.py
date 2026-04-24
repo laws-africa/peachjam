@@ -4,6 +4,7 @@ from unittest.mock import call, patch
 
 from countries_plus.models import Country
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -1632,20 +1633,31 @@ class FlynoteDeprecationTest(TestCase):
         self.assertFalse(grandchild.deprecated)
         mock_generate_summary.assert_not_called()
 
+    def test_clean_rejects_reactivating_child_under_deprecated_ancestor(self):
+        root = Flynote.add_root(
+            name="Civil procedure",
+            deprecated=True,
+        )
+        child = root.add_child(
+            name="Stay of execution",
+            deprecated=True,
+        )
+
+        child.deprecated = False
+        with self.assertRaisesMessage(
+            ValidationError,
+            "A flynote cannot be active when any ancestor is deprecated.",
+        ):
+            child.full_clean()
+
     @patch("peachjam.tasks.serialise_judgment_flynote_tree")
     def test_renaming_parent_queues_descendant_linked_judgments_for_reserialisation(
         self,
         mock_serialise_judgment_flynote_tree,
     ):
-        root = Flynote.add_root(name="Civil procedure", slug="civil-procedure")
-        child = root.add_child(
-            name="Stay of execution",
-            slug="civil-procedure-stay-of-execution",
-        )
-        grandchild = child.add_child(
-            name="Urgent applications",
-            slug="civil-procedure-stay-of-execution-urgent-applications",
-        )
+        root = Flynote.add_root(name="Civil procedure")
+        child = root.add_child(name="Stay of execution")
+        grandchild = child.add_child(name="Urgent applications")
 
         root_judgment = self.make_judgment("Root flynote judgment")
         grandchild_judgment = self.make_judgment("Grandchild flynote judgment")

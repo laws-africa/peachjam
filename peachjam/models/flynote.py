@@ -1,6 +1,7 @@
 import logging
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -60,6 +61,24 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
     def get_absolute_url(self):
         return reverse("flynote_detail", kwargs={"pk": self.pk})
+
+    def validate_deprecated_invariant(self):
+        """Ensure an active node cannot exist under a deprecated ancestor."""
+        if self.deprecated or self.is_root():
+            return
+
+        if self.get_ancestors().filter(deprecated=True).exists():
+            raise ValidationError(
+                {
+                    "deprecated": _(
+                        "A flynote cannot be active when any ancestor is deprecated."
+                    )
+                }
+            )
+
+    def clean(self):
+        super().clean()
+        self.validate_deprecated_invariant()
 
     @on_attribute_changed(AFTER_SAVE, ["name", "path"], [])
     def serialise_linked_judgments(self):
