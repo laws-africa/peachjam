@@ -1143,7 +1143,7 @@ class ParseFlynoteTextTest(TestCase):
                     "Contract of sale of goods",
                     (
                         "Whether and under what circumstances a mere purchase order may amount to an agreement to "
-                        "sell. Contract",
+                        "sell. Contract"
                     ),
                 ],
                 [
