@@ -51,7 +51,7 @@
 
           <div v-if="error" class="alert alert-warning">{{ error }}</div>
           <div v-if="error && !threadId" class="text-center">
-            <button class="btn btn-link" @click="load">{{ $t('Try again') }}</button>
+            <button class="btn btn-link" @click="loadThread">{{ $t('Try again') }}</button>
           </div>
         </template>
       </template>
@@ -92,6 +92,7 @@
 <script>
 import { csrfToken } from '../../api';
 import analytics from '../../analytics';
+import i18next from 'i18next';
 import peachJam from '../../peachjam';
 import { marked } from 'marked';
 
@@ -100,6 +101,17 @@ function generateId () {
     return window.crypto.randomUUID();
   }
   return `msg-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function t (message, options = {}) {
+  return i18next.t(message, options);
+}
+
+function fallbackErrorMessage (err) {
+  if (typeof err?.message === 'string' && err.message.trim()) {
+    return err.message;
+  }
+  return t('Something went wrong. Please try again.');
 }
 
 export default {
@@ -156,18 +168,19 @@ export default {
             this.usageLimitHtml = null;
           }
         } else if (!resp.ok) {
-          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
+          throw new Error(t('The assistant could not respond right now. Please try again.'));
         } else {
           const data = await resp.json();
           this.threadId = data.thread_id || '';
           this.mergeMessages(data.messages);
           this.usageLimitHtml = data.usage_limit_html || null;
         }
+        this.error = null;
         this.focusInputAndScroll();
       } catch (err) {
         console.error(err);
         this.threadId = '';
-        this.error = err.message || this.$t('Something went wrong. Please try again.');
+        this.error = fallbackErrorMessage(err);
       }
     },
     /**
@@ -185,7 +198,7 @@ export default {
         if (resp.status === 403) {
           await this.handle403(resp);
         } else if (!resp.ok) {
-          throw new Error(this.$t('The assistant could not respond right now. Please try again.'));
+          throw new Error(t('The assistant could not respond right now. Please try again.'));
         } else {
           const data = await resp.json();
           this.error = null;
@@ -198,7 +211,7 @@ export default {
         }
       } catch (err) {
         console.error(err);
-        this.error = err.message || this.$t('Something went wrong. Please try again.');
+        this.error = fallbackErrorMessage(err);
       }
     },
     async submit () {
@@ -266,7 +279,7 @@ export default {
 
       es.addEventListener('error', err => {
         console.error(err);
-        this.error = err.message || this.$t('Something went wrong. Please try again.');
+        this.error = fallbackErrorMessage(err);
         // remove the message so that the user can try again
         const lastMessage = this.messages[this.messages.length - 1];
         if (!lastMessage || lastMessage.role !== 'ai') {
@@ -392,7 +405,7 @@ export default {
       } catch (parseErr) {
         console.error(parseErr);
       }
-      throw new Error(this.$t("You don't have permission to do that."));
+      throw new Error(t("You don't have permission to do that."));
     },
     handlePermissionDenied (messageHtml) {
       this.permissionDeniedHtml = messageHtml;
