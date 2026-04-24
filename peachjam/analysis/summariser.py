@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 from typing import Optional
@@ -367,8 +368,11 @@ class JudgmentSummariser:
             {
                 "role": "developer",
                 "content": (
-                    f"Now translate all fields of your summary into {language}. Do not translate Latin"
-                    f" words, keep them in their original form."
+                    "Here is the latest summary:\n\n"
+                    + json.dumps(summary.model_dump(), indent=2)
+                    + "\n\n",
+                    f"Now translate all fields of the summary into {language}. Do not translate Latin"
+                    f" words, keep them in their original form.",
                 ),
             }
         )
