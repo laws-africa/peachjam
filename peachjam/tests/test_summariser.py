@@ -7,7 +7,6 @@ from countries_plus.models import Country
 from django.conf import settings
 from django.test import TransactionTestCase as TestCase
 from django.test import override_settings
-from django.utils.text import slugify
 from languages_plus.models import Language
 
 from peachjam.analysis.summariser import JudgmentSummariser, JudgmentSummary
@@ -66,7 +65,7 @@ class JudgmentSummariserE2ETest(TestCase):
 
         for root in ROOTS.strip().splitlines():
             root = root.strip()
-            Flynote.add_root(name=root, slug=slugify(root))
+            Flynote.add_root(name=root)
 
         self.summariser = JudgmentSummariser()
         self.summariser.match_flynotes_to_db = True
@@ -107,7 +106,6 @@ class JudgmentSummariserE2ETest(TestCase):
         # The AI should select this root for component 1 from the top-level prompt.
         self.post_judgment_interest = self.civil_procedure.add_child(
             name="Post-judgment interest",
-            slug="civil-procedure-post-judgment-interest",
         )
         FlynoteDocumentCount.objects.create(
             flynote=self.post_judgment_interest,
@@ -116,7 +114,6 @@ class JudgmentSummariserE2ETest(TestCase):
         # The AI should normalize "Post judgment interest" to this database entry for component 2.
         self.unrelated_child = self.post_judgment_interest.add_child(
             name="Taxation of costs",
-            slug="civil-procedure-post-judgment-interest-taxation-of-costs",
         )
         FlynoteDocumentCount.objects.create(
             flynote=self.unrelated_child,

@@ -3,7 +3,6 @@ import logging
 from django.conf import settings
 from django.db import connection, models, transaction
 from django.urls import reverse
-from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
@@ -49,7 +48,6 @@ class Flynote(LifecycleModelMixin, MP_Node):
     """
 
     name = models.CharField(_("name"), max_length=255)
-    slug = models.SlugField(_("slug"), max_length=1024, unique=True)
     deprecated = models.BooleanField(_("deprecated"), default=False, db_index=True)
     node_order_by = ["name"]
 
@@ -58,21 +56,10 @@ class Flynote(LifecycleModelMixin, MP_Node):
         verbose_name_plural = _("flynotes")
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.pk})"
 
     def get_absolute_url(self):
-        return reverse("flynote_detail", kwargs={"slug": self.slug})
-
-    def update_slug(self):
-        """Build a unique slug from the ancestor chain, just like Taxonomy."""
-        old_slug = self.slug
-        parent = self.get_parent()
-        self.slug = (f"{parent.slug}-" if parent else "") + slugify(self.name)
-        return old_slug != self.slug
-
-    def save(self, *args, **kwargs):
-        self.update_slug()
-        super().save(*args, **kwargs)
+        return reverse("flynote_detail", kwargs={"pk": self.pk})
 
     @on_attribute_changed(AFTER_SAVE, ["name", "path"], [])
     def serialise_linked_judgments(self):
@@ -231,11 +218,7 @@ class FlynoteDocumentCount(models.Model):
 
             root_path = root.path
             with connection.cursor() as cursor:
-                log.info(
-                    "Deleting cached flynote counts under root '%s' (pk=%s).",
-                    root.slug,
-                    root.pk,
-                )
+                log.info("Deleting cached flynote counts under root %s", root)
                 cursor.execute(
                     """
                     DELETE FROM peachjam_flynotedocumentcount
@@ -247,11 +230,7 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%"],
                 )
 
-                log.info(
-                    "Rebuilding cached flynote counts under root '%s' (pk=%s).",
-                    root.slug,
-                    root.pk,
-                )
+                log.info("Rebuilding cached flynote counts under root %s", root)
                 cursor.execute(
                     """
                     INSERT INTO peachjam_flynotedocumentcount (flynote_id, count)
@@ -275,11 +254,7 @@ class FlynoteDocumentCount(models.Model):
             # After rebuilding cumulative counts, any node in this subtree
             # without a count row has no linked documents in its subtree and
             # can be pruned safely using Treebeard's delete handling.
-            log.info(
-                "Pruning empty flynotes under root '%s' (pk=%s).",
-                root.slug,
-                root.pk,
-            )
+            log.info("Pruning empty flynotes under root %s", root)
             empty_flynotes = list(
                 Flynote.objects.filter(path__startswith=root_path)
                 .filter(document_count_cache__isnull=True)
@@ -288,11 +263,7 @@ class FlynoteDocumentCount(models.Model):
             for flynote in empty_flynotes:
                 flynote.delete()
 
-        log.info(
-            "Refreshed document counts for flynote tree rooted at '%s' (pk=%s)",
-            root.slug,
-            root.pk,
-        )
+        log.info("Refreshed document counts for flynote tree rooted at %s", root)
 
     @classmethod
     def refresh_for_all_flynotes(cls):

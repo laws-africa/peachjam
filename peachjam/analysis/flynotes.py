@@ -2632,28 +2632,41 @@ class FlynoteUpdater:
         self.node_cache = {}
 
     def get_or_create_node(self, parent, name):
-        """Find an existing Flynote whose slug matches, or create a new one.
+        """Find an existing Flynote whose normalised sibling name matches, or create a new one.
 
         *parent* is the parent Flynote node, or None for top-level.
 
-        Returns ``None`` if the name produces an empty slug.
+        Returns ``None`` if the name normalises to an empty value.
         """
         normalised = FlynoteParser.normalise_name(name)
         if not normalised:
             return None
 
-        if parent:
-            expected_slug = f"{parent.slug}-{normalised}"
-        else:
-            expected_slug = normalised
-
-        cached = self.node_cache.get(expected_slug)
+        cache_key = (parent.pk if parent else None, normalised)
+        cached = self.node_cache.get(cache_key)
         if cached is not None:
             return cached
 
-        existing = Flynote.objects.filter(slug=expected_slug).first()
+        if parent:
+            existing = next(
+                (
+                    child
+                    for child in parent.get_children()
+                    if FlynoteParser.normalise_name(child.name) == normalised
+                ),
+                None,
+            )
+        else:
+            existing = next(
+                (
+                    root
+                    for root in Flynote.get_root_nodes()
+                    if FlynoteParser.normalise_name(root.name) == normalised
+                ),
+                None,
+            )
         if existing:
-            self.node_cache[expected_slug] = existing
+            self.node_cache[cache_key] = existing
             return existing
 
         try:
@@ -2662,15 +2675,32 @@ class FlynoteUpdater:
                 # Cached parent instances can go stale across multiple judgments,
                 # so refresh before inserting under an existing node.
                 parent.refresh_from_db(fields=["path", "depth", "numchild"])
-                node = parent.add_child(name=name, slug=expected_slug)
+                node = parent.add_child(name=name)
             else:
-                node = Flynote.add_root(name=name, slug=expected_slug)
-            self.node_cache[expected_slug] = node
+                node = Flynote.add_root(name=name)
+            self.node_cache[cache_key] = node
             return node
         except IntegrityError:
-            existing = Flynote.objects.filter(slug=expected_slug).first()
+            if parent:
+                existing = next(
+                    (
+                        child
+                        for child in parent.get_children()
+                        if FlynoteParser.normalise_name(child.name) == normalised
+                    ),
+                    None,
+                )
+            else:
+                existing = next(
+                    (
+                        root
+                        for root in Flynote.get_root_nodes()
+                        if FlynoteParser.normalise_name(root.name) == normalised
+                    ),
+                    None,
+                )
             if existing:
-                self.node_cache[expected_slug] = existing
+                self.node_cache[cache_key] = existing
             return existing
 
     @transaction.atomic

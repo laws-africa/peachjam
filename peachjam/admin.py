@@ -1194,15 +1194,14 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
 
 @admin.register(Flynote)
 class FlynoteAdmin(admin.ModelAdmin):
-    list_display = ("slug", "name", "depth", "deprecated")
+    list_display = ("name", "depth", "deprecated")
     list_filter = ("depth", "deprecated")
-    search_fields = ("name", "slug")
-    ordering = ("slug",)
-    readonly_fields = ("numchild", "ancestors_links", "children_links", "slug", "depth")
+    search_fields = ("name",)
+    ordering = ("name",)
+    readonly_fields = ("numchild", "ancestors_links", "children_links", "depth")
     fields = (
         "ancestors_links",
         "name",
-        "slug",
         "deprecated",
         "depth",
         "numchild",

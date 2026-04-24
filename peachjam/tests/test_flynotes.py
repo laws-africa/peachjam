@@ -1233,23 +1233,22 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         node = self.updater.get_or_create_node(None, "Criminal law")
         self.assertIsNotNone(node)
         self.assertEqual(node.name, "Criminal law")
-        self.assertEqual(node.slug, "criminal-law")
         self.assertTrue(node.is_root())
 
-    def test_returns_existing_by_slug(self):
-        Flynote.add_root(name="Criminal law", slug="criminal-law")
+    def test_returns_existing_by_normalised_root_name(self):
+        Flynote.add_root(name="Criminal law")
         found = self.updater.get_or_create_node(None, "Criminal law")
-        self.assertEqual(Flynote.objects.filter(slug="criminal-law").count(), 1)
+        self.assertEqual(Flynote.objects.filter(name="Criminal law").count(), 1)
         self.assertEqual(found.name, "Criminal law")
 
     def test_returns_existing_by_normalised_name(self):
-        Flynote.add_root(name="Criminal Law", slug="criminal-law")
+        Flynote.add_root(name="Criminal Law")
         found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
 
-    def test_caches_nodes_by_slug(self):
+    def test_caches_nodes_by_parent_and_normalised_name(self):
         found = self.updater.get_or_create_node(None, "Criminal law")
-        self.assertEqual(self.updater.node_cache["criminal-law"].pk, found.pk)
+        self.assertEqual(self.updater.node_cache[(None, "criminal-law")].pk, found.pk)
 
         again = self.updater.get_or_create_node(None, "Criminal law")
         self.assertEqual(again.pk, found.pk)
@@ -1258,7 +1257,6 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         parent = self.updater.get_or_create_node(None, "Criminal law")
         child = self.updater.get_or_create_node(parent, "admissibility")
         self.assertIsNotNone(child)
-        self.assertEqual(child.slug, "criminal-law-admissibility")
         self.assertFalse(child.is_root())
         self.assertEqual(child.get_parent().pk, parent.pk)
 
@@ -1563,15 +1561,9 @@ class FlynoteDeprecationTest(TestCase):
         mock_generate_summary,
         mock_serialise_flynote_tree,
     ):
-        root = Flynote.add_root(name="Civil procedure", slug="civil-procedure")
-        child = root.add_child(
-            name="Stay of execution",
-            slug="civil-procedure-stay-of-execution",
-        )
-        grandchild = child.add_child(
-            name="Urgent applications",
-            slug="civil-procedure-stay-of-execution-urgent-applications",
-        )
+        root = Flynote.add_root(name="Civil procedure")
+        child = root.add_child(name="Stay of execution")
+        grandchild = child.add_child(name="Urgent applications")
 
         root_judgment = self.make_judgment("Root flynote judgment")
         child_judgment = self.make_judgment("Child flynote judgment")
@@ -1617,17 +1609,14 @@ class FlynoteDeprecationTest(TestCase):
     ):
         root = Flynote.add_root(
             name="Civil procedure",
-            slug="civil-procedure",
             deprecated=True,
         )
         child = root.add_child(
             name="Stay of execution",
-            slug="civil-procedure-stay-of-execution",
             deprecated=True,
         )
         grandchild = child.add_child(
             name="Urgent applications",
-            slug="civil-procedure-stay-of-execution-urgent-applications",
             deprecated=True,
         )
 
