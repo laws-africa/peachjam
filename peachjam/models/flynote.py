@@ -9,6 +9,7 @@ from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
 
 from peachjam.models.lifecycle import on_attribute_changed
+from peachjam.tasks import refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
 
@@ -128,6 +129,99 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 child.save()
             else:
                 child.cascade_deprecated()
+
+    def merge_sources_into(self, sources):
+        """Merge sibling flynotes into this flynote.
+
+        Direct judgment links on each source move to this flynote. Source
+        children are re-parented under this flynote. Source flynotes are then
+        deleted explicitly, and document counts are refreshed in background.
+        """
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        source_ids = []
+        for source in sources:
+            if source.pk and source.pk != self.pk and source.pk not in source_ids:
+                source_ids.append(source.pk)
+
+        if not source_ids:
+            return
+
+        with transaction.atomic():
+            target = Flynote.objects.select_for_update().get(pk=self.pk)
+            sources = list(
+                Flynote.objects.select_for_update()
+                .filter(pk__in=source_ids)
+                .order_by("path")
+            )
+
+            if len(sources) != len(source_ids):
+                raise ValidationError(
+                    _("One or more selected flynotes no longer exist.")
+                )
+
+            target_parent = target.get_parent()
+            target_parent_id = target_parent.pk if target_parent else None
+
+            for source in sources:
+                source_parent = source.get_parent()
+                source_parent_id = source_parent.pk if source_parent else None
+                if source.depth != target.depth or source_parent_id != target_parent_id:
+                    raise ValidationError(
+                        _(
+                            "Flynotes can only be merged into a sibling at the same level."
+                        )
+                    )
+
+            existing_child_names = {
+                FlynoteParser.normalise_name(child.name): child.name
+                for child in target.get_children()
+                if FlynoteParser.normalise_name(child.name)
+            }
+            duplicate_child_names = set()
+
+            for source in sources:
+                for child in source.get_children():
+                    normalised = FlynoteParser.normalise_name(child.name)
+                    if not normalised:
+                        continue
+                    if normalised in existing_child_names:
+                        duplicate_child_names.add(child.name)
+                    else:
+                        existing_child_names[normalised] = child.name
+
+            if duplicate_child_names:
+                duplicates = ", ".join(sorted(duplicate_child_names))
+                raise ValidationError(
+                    _(
+                        "Cannot merge because the target already has children with these names: %(duplicates)s."
+                    )
+                    % {"duplicates": duplicates}
+                )
+
+            log.info(f"Merging flynotes into {self}: {sources}")
+            for source in sources:
+                for judgment_flynote in list(source.judgments.select_for_update()):
+                    duplicate = JudgmentFlynote.objects.filter(
+                        document_id=judgment_flynote.document_id,
+                        flynote=target,
+                    ).exists()
+                    if duplicate:
+                        judgment_flynote.delete()
+                    else:
+                        judgment_flynote.flynote = target
+                        judgment_flynote.save(update_fields=["flynote"])
+
+                for child in list(source.get_children()):
+                    # moving nodes updates path attributes, so always work with latest info from db
+                    child.refresh_from_db()
+                    target.refresh_from_db()
+                    child.move(target, pos="sorted-child")
+
+                source.delete()
+
+            refresh_flynote_document_count(target.get_root().pk)
+            log.info("Finished merging flynotes")
 
     @classmethod
     def flynotes_to_string(cls, judgment_flynotes):
