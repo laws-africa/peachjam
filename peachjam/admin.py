@@ -19,6 +19,7 @@ from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabul
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
+from django.db.models import Q
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import filesizeformat
@@ -245,6 +246,50 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset.filter(document__doc_type="legal_instrument")
         else:
             return queryset
+
+
+class FlynoteDocumentCountFilter(admin.SimpleListFilter):
+    title = "document count"
+    parameter_name = "document_count_range"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("0", "0"),
+            ("1", "1"),
+            ("2_5", "2-5"),
+            ("6_10", "6-10"),
+            ("11_20", "11-20"),
+            ("21_50", "21-50"),
+            ("51_plus", "51+"),
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == "0":
+            return queryset.filter(
+                Q(document_count_cache__count=0) | Q(document_count_cache__isnull=True)
+            )
+        if value == "1":
+            return queryset.filter(document_count_cache__count=1)
+        if value == "2_5":
+            return queryset.filter(
+                document_count_cache__count__gte=2, document_count_cache__count__lte=5
+            )
+        if value == "6_10":
+            return queryset.filter(
+                document_count_cache__count__gte=6, document_count_cache__count__lte=10
+            )
+        if value == "11_20":
+            return queryset.filter(
+                document_count_cache__count__gte=11, document_count_cache__count__lte=20
+            )
+        if value == "21_50":
+            return queryset.filter(
+                document_count_cache__count__gte=21, document_count_cache__count__lte=50
+            )
+        if value == "51_plus":
+            return queryset.filter(document_count_cache__count__gte=51)
+        return queryset
 
 
 class BaseAttachmentFileInline(admin.StackedInline):
@@ -1194,8 +1239,8 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
 
 @admin.register(Flynote)
 class FlynoteAdmin(admin.ModelAdmin):
-    list_display = ("name", "depth", "deprecated")
-    list_filter = ("depth", "deprecated")
+    list_display = ("name", "document_count", "depth", "deprecated")
+    list_filter = ("depth", "deprecated", FlynoteDocumentCountFilter)
     search_fields = ("name",)
     ordering = ("name",)
     readonly_fields = ("numchild", "ancestors_links", "children_links", "depth")
@@ -1211,6 +1256,9 @@ class FlynoteAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("document_count_cache")
 
     def get_action_queryset_roots(self, queryset):
         selected_paths = set(queryset.values_list("path", flat=True))
@@ -1255,6 +1303,11 @@ class FlynoteAdmin(admin.ModelAdmin):
             _("Reactivated %(count)s flynote branches.") % {"count": updated},
             messages.SUCCESS,
         )
+
+    @admin.display(description=_("Documents"), ordering="document_count_cache__count")
+    def document_count(self, obj):
+        cache = getattr(obj, "document_count_cache", None)
+        return cache.count if cache else 0
 
     @admin.display(description=_("Ancestors"))
     def ancestors_links(self, obj):
