@@ -75,7 +75,7 @@ def serialise_judgment_flynote_tree(judgment_id):
     log.info("Serialising flynote tree for judgment %s", judgment_id)
     # NB: we deliberately do not track changes to prevent circular updates when flynote_raw changes
     judgment.serialise_flynote_tree()
-    judgment.save()
+    judgment.save(update_fields=["flynote", "flynote_raw"])
     log.info("Done serialising flynote tree for judgment %s", judgment_id)
 
 
