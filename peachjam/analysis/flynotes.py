@@ -30,6 +30,7 @@ from peachjam.models.flynote import Flynote, JudgmentFlynote
 from peachjam.tasks import refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
+DEFER_FLYNOTE_UPDATE = object()
 
 
 class FlynoteParser:
@@ -2656,41 +2657,86 @@ class FlynoteUpdater:
             self.node_cache[expected_slug] = existing
             return existing
 
-        try:
-            if parent:
-                # Treebeard uses parent state such as numchild when adding a child.
-                # Cached parent instances can go stale across multiple judgments,
-                # so refresh before inserting under an existing node.
-                parent.refresh_from_db(fields=["path", "depth", "numchild"])
-                node = parent.add_child(name=name, slug=expected_slug)
-            else:
+        if not parent:
+            try:
                 node = Flynote.add_root(name=name, slug=expected_slug)
-            self.node_cache[expected_slug] = node
-            return node
-        except IntegrityError:
-            existing = Flynote.objects.filter(slug=expected_slug).first()
-            if existing:
-                self.node_cache[expected_slug] = existing
-            return existing
+                self.node_cache[expected_slug] = node
+                return node
+            except IntegrityError:
+                existing = Flynote.objects.filter(slug=expected_slug).first()
+                if existing:
+                    self.node_cache[expected_slug] = existing
+                return existing
+
+        for attempt in range(1, 4):
+            locked_parent = (
+                Flynote.objects.select_for_update()
+                .filter(pk=parent.pk)
+                .only("id", "slug", "path", "depth", "numchild")
+                .first()
+            )
+            if not locked_parent:
+                log.warning(
+                    "Deferring flynote update because parent %s no longer exists while creating '%s'.",
+                    parent.pk,
+                    expected_slug,
+                )
+                return DEFER_FLYNOTE_UPDATE
+
+            try:
+                node = locked_parent.add_child(name=name, slug=expected_slug)
+                self.node_cache[expected_slug] = node
+                return node
+            except IntegrityError:
+                existing = Flynote.objects.filter(slug=expected_slug).first()
+                if existing:
+                    self.node_cache[expected_slug] = existing
+                return existing
+            except AttributeError as exc:
+                if "add_sibling" not in str(exc):
+                    raise
+
+                existing = Flynote.objects.filter(slug=expected_slug).first()
+                if existing:
+                    self.node_cache[expected_slug] = existing
+                    return existing
+
+                if attempt == 3:
+                    log.warning(
+                        "Deferring flynote update because Treebeard could not safely create '%s' after %s retries.",
+                        expected_slug,
+                        attempt,
+                    )
+                    return DEFER_FLYNOTE_UPDATE
 
     @transaction.atomic
     def update_for_judgment(self, judgment, refresh_counts=False):
         """Parse a judgment's flynote and sync its Flynote links.
 
-        1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
-        2. Parses ``judgment.flynote`` into hierarchical paths.
-        3. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
+        1. Parses ``judgment.flynote`` into hierarchical paths.
+        2. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
+        3. Replaces existing ``JudgmentFlynote`` links with the rebuilt leaf set.
         4. Links the judgment to the leaf node of every path.
 
         Does nothing if the flynote text cannot be parsed (plain prose, empty, etc.).
         """
         overall_start = perf_counter()
-        JudgmentFlynote.objects.filter(document=judgment).delete()
 
         parse_start = perf_counter()
-        paths = self.parser.parse(judgment.flynote)
+        try:
+            paths = self.parser.parse(judgment.flynote)
+        except IndexError:
+            log.warning(
+                "Skipping flynote update for judgment %s because parsing hit an indexing error. Flynote excerpt: %r",
+                judgment.pk,
+                (judgment.flynote or "")[:200],
+                exc_info=True,
+            )
+            return
         parse_ms = (perf_counter() - parse_start) * 1000
+
         if not paths:
+            JudgmentFlynote.objects.filter(document=judgment).delete()
             log.info(
                 "Linked judgment %s to 0 flynote topics (parse=%.2fms, nodes=0.00ms, links=0.00ms, total=%.2fms).",
                 judgment.pk,
@@ -2707,6 +2753,14 @@ class FlynoteUpdater:
             root_id = None
             for index, name in enumerate(path):
                 node = self.get_or_create_node(parent, name)
+                if node is DEFER_FLYNOTE_UPDATE:
+                    log.warning(
+                        "Skipping flynote update for judgment %s because "
+                        "tree rebuilding could not be completed safely.",
+                        judgment.pk,
+                    )
+                    transaction.set_rollback(True)
+                    return
                 if node is None:
                     break
                 if index == 0:
@@ -2717,6 +2771,8 @@ class FlynoteUpdater:
                 if root_id is not None:
                     roots_to_refresh.add(root_id)
         node_ms = (perf_counter() - node_start) * 1000
+
+        JudgmentFlynote.objects.filter(document=judgment).delete()
 
         link_start = perf_counter()
         JudgmentFlynote.objects.bulk_create(

@@ -1417,6 +1417,95 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         criminal = Flynote.objects.get(name="Criminal law")
         mock_refresh.assert_called_once_with(criminal.pk, schedule=30 * 60)
 
+    def test_retries_transient_treebeard_child_insert_error(self):
+        criminal = Flynote.add_root(name="Criminal law", slug="criminal-law")
+        original_add_child = Flynote.add_child
+        attempts = {"count": 0}
+
+        def flaky_add_child(node, *args, **kwargs):
+            if node.pk == criminal.pk and attempts["count"] == 0:
+                attempts["count"] += 1
+                raise AttributeError("'NoneType' object has no attribute 'add_sibling'")
+            return original_add_child(node, *args, **kwargs)
+
+        self.judgment.flynote = "Criminal law \u2014 admissibility"
+        self.judgment.save()
+
+        with patch.object(
+            Flynote, "add_child", autospec=True, side_effect=flaky_add_child
+        ):
+            self.updater.update_for_judgment(self.judgment)
+
+        self.assertEqual(attempts["count"], 1)
+        self.assertTrue(Flynote.objects.filter(name="admissibility").exists())
+        self.assertEqual(
+            list(
+                JudgmentFlynote.objects.filter(document=self.judgment).values_list(
+                    "flynote__name", flat=True
+                )
+            ),
+            ["admissibility"],
+        )
+
+    def test_parser_index_error_preserves_existing_judgment_links(self):
+        self.updater.update_for_judgment(self.judgment)
+        existing_links = list(
+            JudgmentFlynote.objects.filter(document=self.judgment).values_list(
+                "flynote__name", flat=True
+            )
+        )
+
+        with patch.object(
+            self.updater.parser,
+            "parse",
+            side_effect=IndexError("list index out of range"),
+        ):
+            self.updater.update_for_judgment(self.judgment)
+
+        self.assertEqual(
+            list(
+                JudgmentFlynote.objects.filter(document=self.judgment).values_list(
+                    "flynote__name", flat=True
+                )
+            ),
+            existing_links,
+        )
+
+    def test_exhausted_tree_retries_preserve_existing_judgment_links(self):
+        self.judgment.flynote = "Criminal law \u2014 admissibility"
+        self.judgment.save()
+        self.updater.update_for_judgment(self.judgment)
+        existing_links = list(
+            JudgmentFlynote.objects.filter(document=self.judgment).values_list(
+                "flynote__name", flat=True
+            )
+        )
+
+        original_add_child = Flynote.add_child
+
+        def broken_add_child(node, *args, **kwargs):
+            if node.slug == "criminal-law":
+                raise AttributeError("'NoneType' object has no attribute 'add_sibling'")
+            return original_add_child(node, *args, **kwargs)
+
+        self.judgment.flynote = "Criminal law \u2014 sentencing"
+        self.judgment.save()
+
+        with patch.object(
+            Flynote, "add_child", autospec=True, side_effect=broken_add_child
+        ):
+            self.updater.update_for_judgment(self.judgment)
+
+        self.assertEqual(
+            list(
+                JudgmentFlynote.objects.filter(document=self.judgment).values_list(
+                    "flynote__name", flat=True
+                )
+            ),
+            existing_links,
+        )
+        self.assertFalse(Flynote.objects.filter(name="sentencing").exists())
+
 
 class FlynoteDocumentCountTest(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
