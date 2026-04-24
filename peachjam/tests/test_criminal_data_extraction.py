@@ -5,7 +5,7 @@ import unittest
 from unittest.mock import patch
 
 from countries_plus.models import Country
-from django.db import IntegrityError, connections
+from django.db import IntegrityError, OperationalError, connections
 from django.test import TransactionTestCase as TestCase
 from languages_plus.models import Language
 
@@ -523,6 +523,33 @@ class CriminalDataExtractorTests(TestCase):
             name="Sentence reduced",
             description="The sentence is reduced or varied downward.",
         )
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch(
+        "peachjam.analysis.criminal_data.extractor.CriminalDataExtractor.lock_judgment_for_extraction"
+    )
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_skips_when_judgment_lock_is_busy(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+        mock_lock_judgment_for_extraction,
+    ):
+        mock_lock_judgment_for_extraction.side_effect = OperationalError(
+            "could not obtain lock on row"
+        )
+
+        CriminalDataExtractor().extract(self.judgment)
+
+        self.assertFalse(mock_get_content_as_text.called)
+        self.assertFalse(mock_extract_case_type_filing_year.called)
+        self.assertFalse(mock_extract_offences_and_sentences.called)
+        self.assertFalse(mock_extract_outcomes.called)
 
     @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
     @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")

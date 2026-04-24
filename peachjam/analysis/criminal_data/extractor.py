@@ -1,7 +1,7 @@
 import logging
 import os
 
-from django.db import transaction
+from django.db import OperationalError, transaction
 
 from peachjam.models import (
     CaseTag,
@@ -31,8 +31,21 @@ class CriminalDataExtractor:
         if not os.environ.get("OPENAI_API_KEY"):
             raise ValueError("OPENAI_API_KEY is not configured.")
 
+    def lock_judgment_for_extraction(self, judgment_id: int) -> Judgment:
+        return Judgment.objects.select_for_update(nowait=True).get(pk=judgment_id)
+
     @transaction.atomic
     def extract(self, judgment: Judgment):
+        judgment_id = judgment.pk
+        try:
+            judgment = self.lock_judgment_for_extraction(judgment_id)
+        except OperationalError:
+            log.info(
+                "Skipping criminal data extraction for judgment %s because another extraction is running.",
+                judgment_id,
+            )
+            return None
+
         judgment_text = judgment.get_content_as_text()
         meta_out = extract_case_type_filing_year(judgment_text)
 
