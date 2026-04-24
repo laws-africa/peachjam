@@ -5,17 +5,17 @@ from django.db import connection, models, transaction
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE
+from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
 
-from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
+from peachjam.models.lifecycle import on_attribute_changed
 
 log = logging.getLogger(__name__)
 
 __all__ = ["Flynote", "JudgmentFlynote", "FlynoteDocumentCount"]
 
 
-class Flynote(AttributeHooksMixin, MP_Node):
+class Flynote(LifecycleModelMixin, MP_Node):
     """Hierarchical flynote tree node using treebeard's materialised path. This is used to represent textual flynotes
     in a tree form, for browsing and for search.
 
@@ -74,8 +74,8 @@ class Flynote(AttributeHooksMixin, MP_Node):
         self.update_slug()
         super().save(*args, **kwargs)
 
-    @on_attribute_changed(AFTER_SAVE, ["name"], [])
-    def serialise_linked_judgments_after_rename(self):
+    @on_attribute_changed(AFTER_SAVE, ["name", "path"], [])
+    def serialise_linked_judgments(self):
         subtree_flynote_ids = Flynote.objects.filter(
             path__startswith=self.path
         ).values_list("pk", flat=True)
@@ -116,9 +116,9 @@ class Flynote(AttributeHooksMixin, MP_Node):
         toggle an entire branch on or off with a single change.
         """
         for child in self.get_children():
-            child.track_changes()
             if child.deprecated != self.deprecated:
                 child.deprecated = self.deprecated
+                # this will trigger a change, which will call cascade_deprecated on the child
                 child.save()
             else:
                 child.cascade_deprecated()

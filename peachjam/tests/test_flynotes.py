@@ -1580,7 +1580,14 @@ class FlynoteDeprecationTest(TestCase):
         JudgmentFlynote.objects.create(document=child_judgment, flynote=child)
         JudgmentFlynote.objects.create(document=grandchild_judgment, flynote=grandchild)
 
-        root.track_changes()
+        # Reload the branch before editing it. In production this toggle
+        # happens on persisted nodes loaded from the database, and the
+        # re-serialisation hook should only run for real name/path changes.
+        root = Flynote.objects.get(pk=root.pk)
+        child = Flynote.objects.get(pk=child.pk)
+        grandchild = Flynote.objects.get(pk=grandchild.pk)
+        mock_serialise_flynote_tree.reset_mock()
+
         root.deprecated = True
         root.save()
 
@@ -1624,7 +1631,6 @@ class FlynoteDeprecationTest(TestCase):
             deprecated=True,
         )
 
-        root.track_changes()
         root.deprecated = False
         root.save()
 
@@ -1657,7 +1663,6 @@ class FlynoteDeprecationTest(TestCase):
         JudgmentFlynote.objects.create(document=root_judgment, flynote=root)
         JudgmentFlynote.objects.create(document=grandchild_judgment, flynote=grandchild)
 
-        root.track_changes()
         root.name = "Civil practice and procedure"
         root.save()
 

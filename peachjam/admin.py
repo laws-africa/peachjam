@@ -298,16 +298,6 @@ class TopicForm(forms.ModelForm):
         fields = "__all__"
 
 
-class FlynoteForm(forms.ModelForm):
-    class Meta:
-        model = Flynote
-        fields = "__all__"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.instance.track_changes()
-
-
 class DocumentTopicInline(admin.TabularInline):
     form = TopicForm
     model = DocumentTopic
@@ -1204,7 +1194,6 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
 
 @admin.register(Flynote)
 class FlynoteAdmin(admin.ModelAdmin):
-    form = FlynoteForm
     list_display = ("slug", "name", "depth", "deprecated")
     list_filter = ("depth", "deprecated")
     search_fields = ("name", "slug")
@@ -1242,7 +1231,6 @@ class FlynoteAdmin(admin.ModelAdmin):
         for flynote in self.get_action_queryset_roots(queryset):
             if flynote.deprecated:
                 continue
-            flynote.track_changes()
             flynote.deprecated = True
             flynote.save()
             updated += 1
@@ -1259,7 +1247,6 @@ class FlynoteAdmin(admin.ModelAdmin):
         for flynote in self.get_action_queryset_roots(queryset):
             if not flynote.deprecated:
                 continue
-            flynote.track_changes()
             flynote.deprecated = False
             flynote.save()
             updated += 1
