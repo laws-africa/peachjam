@@ -171,7 +171,7 @@ export default {
       } catch (err) {
         console.error(err);
         this.threadId = '';
-        this.error = this.fallbackErrorMessage(err);
+        this.error = err?.message?.trim() || this.$t('Something went wrong. Please try again.');
       }
     },
     /**
@@ -202,7 +202,7 @@ export default {
         }
       } catch (err) {
         console.error(err);
-        this.error = this.fallbackErrorMessage(err);
+        this.error = err?.message?.trim() || this.$t('Something went wrong. Please try again.');
       }
     },
     async submit () {
@@ -270,7 +270,7 @@ export default {
 
       es.addEventListener('error', err => {
         console.error(err);
-        this.error = this.fallbackErrorMessage(err);
+        this.error = err?.message?.trim() || this.$t('Something went wrong. Please try again.');
         // remove the message so that the user can try again
         const lastMessage = this.messages[this.messages.length - 1];
         if (!lastMessage || lastMessage.role !== 'ai') {
@@ -345,12 +345,6 @@ export default {
     },
     finishStreamingUI () {
       this.focusInputAndScroll();
-    },
-    fallbackErrorMessage (err) {
-      if (typeof err?.message === 'string' && err.message.trim()) {
-        return err.message;
-      }
-      return this.$t('Something went wrong. Please try again.');
     },
     closeStream (source) {
       if (source) {
