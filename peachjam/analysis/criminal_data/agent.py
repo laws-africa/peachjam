@@ -2,24 +2,18 @@ import logging
 import re
 from typing import Any, Dict, List, Literal, Optional
 
-from agents import Agent, ModelSettings, ReasoningItem, Runner, RunResult, function_tool
+from agents import Agent, ModelSettings, Runner, function_tool
 from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.db import close_old_connections, connection
 from django.db.models import Case, FloatField, Q, Value, When
 from openai.types import Reasoning
 from pydantic import BaseModel, Field, conint
 
+from peachjam.analysis.agents import log_agent_reasoning
 from peachjam.analysis.criminal_data.vocabulary import JUDGMENT_OFFENCE_CASE_TAGS
 from peachjam.models import Offence, Outcome, Sentence
 
 log = logging.getLogger(__name__)
-
-
-def log_agent_reasoning(result: RunResult):
-    for item in result.new_items:
-        if isinstance(item, ReasoningItem):
-            for entry in item.raw_item.summary:
-                log.debug("LLM reasoning: %s", entry.text)
 
 
 def search_offences_tool(search_terms: str) -> List[Dict[str, Any]]:

@@ -1,6 +1,4 @@
 import datetime
-import os
-from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
@@ -303,28 +301,8 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(court, judgment.court)
 
-    @patch.dict(
-        os.environ,
-        {
-            "OPENAI_API_KEY": "test-openai-key",
-            "LANGFUSE_PUBLIC_KEY": "test-langfuse-public-key",
-            "LANGFUSE_SECRET_KEY": "test-langfuse-secret-key",
-        },
-        clear=False,
-    )
-    @patch("peachjam.analysis.summariser.langfuse.get_prompt")
-    @patch("peachjam.analysis.summariser.OpenAI")
-    def test_generate_summary_updates_judgment_fields(
-        self,
-        openai_cls,
-        get_prompt,
-    ):
-        raw_flynote = (
-            "  * Contract - Contract of sale of goods - Whether and under what circumstances "
-            "a mere purchase order may amount to an agreement to sell. "
-            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
-            "Agreement is silent on mode of delivery - Delivery in one lot presumed. "
-        )
+    @patch("peachjam.models.judgment.JudgmentSummariser")
+    def test_generate_summary_updates_judgment_fields(self, summariser_cls):
         expected_flynote = (
             "Contract - Contract of sale of goods - Whether and under what circumstances "
             "a mere purchase order may amount to an agreement to sell\n"
@@ -336,19 +314,13 @@ class JudgmentTestCase(TestCase):
             held=["The appeal was dismissed"],
             order="Appeal dismissed with costs.",
             summary="The court found no basis to interfere with the lower court's decision.",
-            flynote=raw_flynote,
+            flynote=expected_flynote,
             blurb="Appeal dismissed.",
         )
-        fake_response = SimpleNamespace(output_parsed=fake_summary)
-
-        fake_openai = MagicMock()
-        fake_openai.responses.parse.return_value = fake_response
-        openai_cls.return_value = fake_openai
-
-        fake_prompt = MagicMock()
-        fake_prompt.compile.return_value = "Summarise this judgment."
-        fake_prompt.config = {"model": "gpt-5-mini"}
-        get_prompt.return_value = fake_prompt
+        summariser = MagicMock()
+        summariser.enabled.return_value = True
+        summariser.summarise_judgment.return_value = fake_summary
+        summariser_cls.return_value = summariser
 
         judgment = Judgment(
             language=Language.objects.get(pk="en"),
@@ -372,12 +344,7 @@ class JudgmentTestCase(TestCase):
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
         self.assertTrue(judgment.summary_ai_generated)
-        get_prompt.assert_called_once_with(
-            "summarise/judgment",
-            cache_ttl_seconds=30,
-            fallback=None,
-        )
-        fake_openai.responses.parse.assert_called_once()
+        summariser.summarise_judgment.assert_called_once_with(judgment)
 
     @patch("peachjam.models.judgment.JudgmentSummariser")
     def test_generate_summary_retries_when_flynote_is_suspiciously_short(
