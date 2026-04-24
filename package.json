@@ -4,6 +4,7 @@
   "description": "Project Peach Jam",
   "main": "",
   "scripts": {
+    "a11y:local": "node scripts/a11y/run.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,6 +18,7 @@
   },
   "homepage": "https://github.com/laws-africa/peach-jam#readme",
   "devDependencies": {
+    "@axe-core/puppeteer": "^4.11.2",
     "@lawsafrica/indigo-akn": "^5.3.0",
     "@lawsafrica/law-widgets": "^2.2.2",
     "@sentry/webpack-plugin": "^2.21.1",
@@ -26,6 +28,7 @@
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
     "@vue/compiler-sfc": "^3.2.31",
+    "axe-core": "^4.11.3",
     "bootstrap5-autocomplete": "^1.1.33",
     "css-loader": "^6.7.1",
     "eslint": "^7.3.0",
