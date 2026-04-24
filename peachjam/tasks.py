@@ -58,6 +58,27 @@ def on_task_error(*args, **kwargs):
         hub.scope.transaction.timestamp = -1
 
 
+@background(
+    queue="peachjam",
+    remove_existing_tasks=True,
+    schedule={"priority": -1, "run_at": 30},
+)
+@transaction.atomic
+def serialise_judgment_flynote_tree(judgment_id):
+    from peachjam.models import Judgment
+
+    judgment = Judgment.objects.filter(pk=judgment_id).first()
+    if not judgment:
+        log.info("No judgment with id %s exists, ignoring.", judgment_id)
+        return
+
+    log.info("Serialising flynote tree for judgment %s", judgment_id)
+    # NB: we deliberately do not track changes to prevent circular updates when flynote_raw changes
+    judgment.serialise_flynote_tree()
+    judgment.save(update_fields=["flynote", "flynote_raw"])
+    log.info("Done serialising flynote tree for judgment %s", judgment_id)
+
+
 @background(queue="peachjam", remove_existing_tasks=True)
 @transaction.atomic
 def update_document(ingestor_id, document_id):
@@ -378,7 +399,11 @@ def update_users_new_citation(citation_id):
     UserFollowing.update_new_citation_follows(citation)
 
 
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@background(
+    queue="peachjam",
+    remove_existing_tasks=True,
+    schedule={"priority": -1, "run_at": 30},
+)
 @transaction.atomic
 def update_flynote_taxonomy(judgment_id):
     from peachjam.analysis.flynotes import FlynoteUpdater

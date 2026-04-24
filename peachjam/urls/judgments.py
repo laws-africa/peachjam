@@ -18,7 +18,7 @@ urlpatterns = [
     path("", JudgmentListView.as_view(), name="judgment_list"),
     path("topics/", FlynoteListView.as_view(), name="flynote_list"),
     path(
-        "topics/<slug:slug>/",
+        "topics/<int:pk>/",
         FlynoteDetailView.as_view(),
         name="flynote_detail",
     ),

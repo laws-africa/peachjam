@@ -11,7 +11,6 @@ from django.dispatch import receiver
 from django.dispatch.dispatcher import Signal
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
-from django_lifecycle import AFTER_SAVE
 
 from peachjam.customerio import get_customerio
 from peachjam.models import (
@@ -20,7 +19,7 @@ from peachjam.models import (
     DocumentChatThread,
     ExtractedCitation,
     Folder,
-    Judgment,
+    JudgmentFlynote,
     Relationship,
     SavedDocument,
     UserFollowing,
@@ -29,12 +28,11 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam.models.core_document import DocumentContent
-from peachjam.models.lifecycle import on_attribute_changed
 from peachjam.tasks import (
     extract_criminal_data,
     generate_judgment_summary,
+    serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
-    update_flynote_taxonomy,
 )
 from peachjam_search.models import SavedSearch
 
@@ -297,6 +295,12 @@ def chat_thread_deleted(sender, instance, **kwargs):
     async_to_sync(session.clear_session)()
 
 
-@on_attribute_changed(Judgment, AFTER_SAVE, ["flynote"], ["flynote_taxonomy"])
-def when_flynote_changed(judgment):
-    update_flynote_taxonomy(judgment.pk, schedule=5)
+@receiver(signals.post_save, sender=JudgmentFlynote)
+def judgment_flynote_saved_serialise_judgment(sender, instance, raw, **kwargs):
+    if not raw:
+        serialise_judgment_flynote_tree(instance.document_id)
+
+
+@receiver(signals.post_delete, sender=JudgmentFlynote)
+def judgment_flynote_deleted_serialise_judgment(sender, instance, **kwargs):
+    serialise_judgment_flynote_tree(instance.document_id)

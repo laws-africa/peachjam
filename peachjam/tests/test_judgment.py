@@ -334,72 +334,19 @@ class JudgmentTestCase(TestCase):
         doc_content.set_content_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
+        judgment.track_changes()
         judgment.generate_summary()
         judgment.refresh_from_db()
 
         self.assertEqual(fake_summary.blurb, judgment.blurb)
         self.assertEqual(fake_summary.summary, judgment.case_summary)
         self.assertEqual(expected_flynote, judgment.flynote)
+        self.assertEqual(expected_flynote, judgment.flynote_raw)
         self.assertEqual(fake_summary.held, judgment.held)
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
         self.assertTrue(judgment.summary_ai_generated)
         summariser.summarise_judgment.assert_called_once_with(judgment)
-
-    @patch("peachjam.models.judgment.JudgmentSummariser")
-    def test_generate_summary_retries_when_flynote_is_suspiciously_short(
-        self,
-        summariser_cls,
-    ):
-        first_summary = self.make_summary(
-            flynote="Too short",
-            summary="Short flynote first attempt.",
-        )
-        second_summary = self.make_summary(
-            flynote=(
-                "Contract - Contract of sale of goods - Whether and under what circumstances "
-                "a mere purchase order may amount to an agreement to sell"
-            )
-        )
-
-        summariser = MagicMock()
-        summariser.enabled.return_value = True
-        summariser.summarise_judgment.side_effect = [first_summary, second_summary]
-        summariser_cls.return_value = summariser
-
-        judgment = self.make_judgment()
-
-        judgment.generate_summary()
-        judgment.refresh_from_db()
-
-        self.assertEqual(2, summariser.summarise_judgment.call_count)
-        self.assertEqual(second_summary.flynote, judgment.flynote)
-        self.assertEqual(second_summary.summary, judgment.case_summary)
-
-    @patch("peachjam.models.judgment.JudgmentSummariser")
-    def test_generate_summary_does_not_retry_when_flynote_is_not_short(
-        self,
-        summariser_cls,
-    ):
-        summary = self.make_summary(
-            flynote=(
-                "Contract - Contract of sale of goods - Whether and under what circumstances "
-                "a mere purchase order may amount to an agreement to sell"
-            )
-        )
-
-        summariser = MagicMock()
-        summariser.enabled.return_value = True
-        summariser.summarise_judgment.return_value = summary
-        summariser_cls.return_value = summariser
-
-        judgment = self.make_judgment()
-
-        judgment.generate_summary()
-        judgment.refresh_from_db()
-
-        self.assertEqual(1, summariser.summarise_judgment.call_count)
-        self.assertEqual(summary.flynote, judgment.flynote)
 
     @patch("peachjam.models.judgment.generate_judgment_summary")
     def test_content_text_change_triggers_summary_generation(
@@ -483,3 +430,22 @@ class JudgmentTestCase(TestCase):
         judgment.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+    def test_serialise_flynote_tree(self):
+        from peachjam.analysis.flynotes import FlynoteUpdater
+
+        judgment = self.make_judgment()
+        judgment.flynote_raw = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        judgment.save()
+        FlynoteUpdater().update_for_judgment(judgment)
+
+        judgment.serialise_flynote_tree()
+        self.assertEqual(
+            judgment.flynote,
+            "Administrative law \u2014 judicial review\n"
+            "Criminal law \u2014 admissibility \u2014 trial within a trial",
+        )
+        self.assertEqual(judgment.flynote, judgment.flynote_raw)

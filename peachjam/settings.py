@@ -187,8 +187,8 @@ PEACHJAM = {
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
     "SUMMARISE_JUDGMENTS": True,
-    # should we match flynotes to our database of known flynotes?
-    "SUMMARISER_MATCH_FLYNOTES_TO_DB": False,
+    # should we use the flynote tree and match flynotes to our database of known flynotes?
+    "SUMMARISE_USE_FLYNOTE_TREE": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
