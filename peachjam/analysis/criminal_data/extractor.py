@@ -124,7 +124,7 @@ class CriminalDataExtractor:
                     missing_case_tags,
                 )
 
-            jo = JudgmentOffence.objects.create(
+            jo, _ = JudgmentOffence.objects.get_or_create(
                 judgment=judgment,
                 offence=offence,
             )

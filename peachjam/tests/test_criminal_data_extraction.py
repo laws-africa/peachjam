@@ -38,6 +38,7 @@ from peachjam.models import (
     OffenceCategory,
     OffenceTag,
     Outcome,
+    Sentence,
     Work,
 )
 
@@ -687,6 +688,67 @@ class CriminalDataExtractorTests(TestCase):
             any("dropping invalid case tags" in message for message in logs.output)
         )
         self.assertTrue(any("with case tags" in message for message in logs.output))
+
+    @patch.dict(os.environ, {"OPENAI_API_KEY": "test-key"}, clear=False)
+    @patch("peachjam.analysis.criminal_data.extractor.extract_outcomes")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_offences_and_sentences")
+    @patch("peachjam.analysis.criminal_data.extractor.extract_case_type_filing_year")
+    @patch("peachjam.models.core_document.CoreDocument.get_content_as_text")
+    def test_extractor_merges_duplicate_offence_ids_in_single_run(
+        self,
+        mock_get_content_as_text,
+        mock_extract_case_type_filing_year,
+        mock_extract_offences_and_sentences,
+        mock_extract_outcomes,
+    ):
+        mock_get_content_as_text.return_value = "Criminal appeal text"
+        mock_extract_case_type_filing_year.return_value = CaseMetaExtraction(
+            case_type="criminal",
+            filing_year=2019,
+        )
+        mock_extract_offences_and_sentences.return_value = JudgmentOffenceExtraction(
+            offences=[
+                OffenceExtraction(
+                    offence_id=self.robbery.id,
+                    extracted_offence="robbery with violence",
+                    case_tags=["weapon-used"],
+                    sentences=[
+                        SentenceExtraction(
+                            sentence_type=Sentence.SentenceType.IMPRISONMENT,
+                            duration_months=120,
+                            fine_amount=None,
+                            suspended=False,
+                            mandatory_minimum=None,
+                        )
+                    ],
+                ),
+                OffenceExtraction(
+                    offence_id=self.robbery.id,
+                    extracted_offence="robbery with violence",
+                    case_tags=["group-offending"],
+                    sentences=[
+                        SentenceExtraction(
+                            sentence_type=Sentence.SentenceType.FINE,
+                            duration_months=None,
+                            fine_amount=5000,
+                            suspended=False,
+                            mandatory_minimum=None,
+                        )
+                    ],
+                ),
+            ]
+        )
+        mock_extract_outcomes.return_value = JudgmentOutcomeExtraction(outcomes=[])
+
+        CriminalDataExtractor().extract(self.judgment)
+
+        self.assertEqual(self.judgment.judgment_offence.count(), 1)
+        self.assertEqual(self.judgment.sentences.count(), 2)
+        jo = self.judgment.judgment_offence.get()
+        self.assertCountEqual(
+            list(jo.tags.values_list("name", flat=True)),
+            ["group-offending"],
+        )
 
 
 class CriminalDataVocabularyTests(TestCase):
