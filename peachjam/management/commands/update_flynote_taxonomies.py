@@ -1,3 +1,5 @@
+from argparse import BooleanOptionalAction
+
 from django.core.management.base import BaseCommand
 
 from peachjam.analysis.flynotes import FlynoteUpdater
@@ -34,11 +36,17 @@ class Command(BaseCommand):
             help="Skip refreshing flynote document counts entirely. "
             "Useful in batch mode when counts will be updated separately.",
         )
+        parser.add_argument(
+            "--assume-clean",
+            action=BooleanOptionalAction,
+            default=True,
+            help="Treat no-semicolon flynotes as already well-structured dash chains.",
+        )
 
     def handle(self, *args, **options):
         self.stdout.write("Using Flynote model (no taxonomy root required)")
 
-        updater = FlynoteUpdater()
+        updater = FlynoteUpdater(assume_clean=options["assume_clean"])
         skip_counts = options["skip_counts"]
 
         if options["judgment_id"]:
@@ -56,8 +64,8 @@ class Command(BaseCommand):
             return
 
         qs = (
-            Judgment.objects.exclude(flynote__isnull=True)
-            .exclude(flynote="")
+            Judgment.objects.exclude(flynote_raw__isnull=True)
+            .exclude(flynote_raw="")
             .order_by("-pk")
         )
 

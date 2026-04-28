@@ -2,6 +2,7 @@ import logging
 from urllib.parse import quote
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -14,7 +15,7 @@ from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
-from django_lifecycle import AFTER_SAVE
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
@@ -26,7 +27,11 @@ from peachjam.models import (
     SourceFile,
     on_attribute_changed,
 )
-from peachjam.tasks import create_anonymised_source_file_pdf, generate_judgment_summary
+from peachjam.tasks import (
+    create_anonymised_source_file_pdf,
+    generate_judgment_summary,
+    update_flynote_taxonomy,
+)
 
 log = logging.getLogger(__name__)
 
@@ -375,6 +380,9 @@ class Judgment(CoreDocument):
     )
     # Summary fields
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
+    # flynote_raw is editable by the user and is used to update flynote (which is displayed on the site), possibly
+    # via the Flynote model. See the Flynote model for a description of how the flynote fields work.
+    flynote_raw = models.TextField(_("flynote (raw)"), null=True, blank=True)
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     order = models.TextField(_("order"), null=True, blank=True)
     case_summary_public = models.BooleanField(
@@ -658,7 +666,7 @@ class Judgment(CoreDocument):
     @on_attribute_changed(
         AFTER_SAVE,
         ["must_be_anonymised", "anonymised"],
-        ["blurb", "case_summary", "flynote", "held", "issues", "order"],
+        ["blurb", "case_summary", "flynote_raw", "held", "issues", "order"],
     )
     def potentially_generate_summary(self):
         if self.should_have_summary():
@@ -689,20 +697,13 @@ class Judgment(CoreDocument):
 
         try:
             summary = summariser.summarise_judgment(self)
-            flynote_length = len((summary.flynote or "").strip())
-            if 0 < flynote_length <= 20:
-                log.warning(
-                    "Flynote for judgment %s is suspiciously short (%s chars); retrying summary generation.",
-                    self.pk,
-                    flynote_length,
-                )
-                summary = summariser.summarise_judgment(self)
             if not summary.summary:
                 log.warning(f"No summary found in response {self.pk}, skipping.")
                 return
             self.blurb = summary.blurb
             self.case_summary = summary.summary
-            self.flynote = summary.flynote
+            # self.flynote will be updated based on self.flynote_raw
+            self.flynote_raw = summary.flynote
             self.held = summary.held
             self.issues = summary.issues
             self.order = summary.order
@@ -710,6 +711,28 @@ class Judgment(CoreDocument):
             self.save()
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
+
+    @on_attribute_changed(BEFORE_SAVE, ["flynote_raw"], ["flynote", "flynote_tree"])
+    def sync_flynote(self):
+        """The flynote_raw field has changed, copy it to flynote and populate the flynote tree (if configured)."""
+        self.flynote = self.flynote_raw
+
+        if settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"] and self.pk:
+            # This will eventually update both flynote and flynote_raw to match the flynote tree.
+            # We set flynote above since this background task may take a while to run.
+            update_flynote_taxonomy(self.pk)
+
+    def serialise_flynote_tree(self):
+        """Serialise the flynote tree to a string for storage in flynote and flynote_raw."""
+        from peachjam.models import Flynote
+
+        judgment_flynotes = list(
+            self.flynotes.select_related("flynote").order_by("flynote__path")
+        )
+
+        # we update flynote_raw as well (without triggering attribute change events) so that a human can edit
+        # the flynote and we won't lose the changes made through the Flynote tree
+        self.flynote_raw = self.flynote = Flynote.flynotes_to_string(judgment_flynotes)
 
 
 class CaseNumber(models.Model):
