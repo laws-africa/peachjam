@@ -1,20 +1,53 @@
 import datetime
-import os
-from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
+from django.db import IntegrityError
 from django.test import TestCase
 from languages_plus.models import Language
 
 from peachjam.analysis.summariser import JudgmentSummary
-from peachjam.models import CaseNumber, Court, CourtClass, Judgment, Locality
+from peachjam.models import (
+    CaseNumber,
+    Court,
+    CourtClass,
+    CourtRegistry,
+    Judgment,
+    Locality,
+)
 
 
 class JudgmentTestCase(TestCase):
     fixtures = ["tests/courts", "tests/countries", "tests/languages"]
     maxDiff = None
+
+    def make_judgment(self):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.save()
+        return judgment
+
+    def make_summary(
+        self,
+        flynote,
+        summary="The court found no basis to interfere with the lower court's decision.",
+    ):
+        return JudgmentSummary(
+            issues=["Whether the appeal should succeed"],
+            held=["The appeal was dismissed"],
+            order="Appeal dismissed with costs.",
+            summary=summary,
+            flynote=flynote,
+            blurb="Appeal dismissed.",
+        )
 
     def test_assign_mnc(self):
         j = Judgment(
@@ -228,28 +261,48 @@ class JudgmentTestCase(TestCase):
         self.assertEqual(za, judgment.jurisdiction)
         self.assertIsNone(judgment.locality)
 
-    @patch.dict(
-        os.environ,
-        {
-            "OPENAI_API_KEY": "test-openai-key",
-            "LANGFUSE_PUBLIC_KEY": "test-langfuse-public-key",
-            "LANGFUSE_SECRET_KEY": "test-langfuse-secret-key",
-        },
-        clear=False,
-    )
-    @patch("peachjam.analysis.summariser.langfuse.get_prompt")
-    @patch("peachjam.analysis.summariser.OpenAI")
-    def test_generate_summary_updates_judgment_fields(
-        self,
-        openai_cls,
-        get_prompt,
-    ):
-        raw_flynote = (
-            "  * Contract - Contract of sale of goods - Whether and under what circumstances "
-            "a mere purchase order may amount to an agreement to sell. "
-            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
-            "Agreement is silent on mode of delivery - Delivery in one lot presumed. "
+    def test_judgment_cannot_save_without_court(self):
+        judgment = Judgment(
+            auto_assign_details=False,
+            language=Language.objects.get(pk="en"),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+            title="Foo v Bar [2019] TEST 1 (1 January 2019)",
+            citation="Foo v Bar [2019] TEST 1 (1 January 2019)",
+            serial_number=1,
+            mnc="[2019] TEST 1",
+            frbr_uri_doctype="judgment",
+            frbr_uri_actor="testcourt",
+            frbr_uri_date="2019",
+            frbr_uri_number="1",
         )
+
+        with self.assertRaises(IntegrityError):
+            judgment.save()
+
+    def test_judgment_registry_sets_court_on_save(self):
+        court = Court.objects.first()
+        registry = CourtRegistry.objects.create(
+            court=court,
+            name="Main registry",
+            code="main-registry",
+        )
+        judgment = Judgment(
+            language=Language.objects.get(pk="en"),
+            registry=registry,
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+
+        judgment.save()
+        judgment.refresh_from_db()
+
+        self.assertEqual(court, judgment.court)
+
+    @patch("peachjam.models.judgment.JudgmentSummariser")
+    def test_generate_summary_updates_judgment_fields(self, summariser_cls):
         expected_flynote = (
             "Contract - Contract of sale of goods - Whether and under what circumstances "
             "a mere purchase order may amount to an agreement to sell\n"
@@ -261,19 +314,13 @@ class JudgmentTestCase(TestCase):
             held=["The appeal was dismissed"],
             order="Appeal dismissed with costs.",
             summary="The court found no basis to interfere with the lower court's decision.",
-            flynote=raw_flynote,
+            flynote=expected_flynote,
             blurb="Appeal dismissed.",
         )
-        fake_response = SimpleNamespace(output_parsed=fake_summary)
-
-        fake_openai = MagicMock()
-        fake_openai.responses.parse.return_value = fake_response
-        openai_cls.return_value = fake_openai
-
-        fake_prompt = MagicMock()
-        fake_prompt.compile.return_value = "Summarise this judgment."
-        fake_prompt.config = {"model": "gpt-5-mini"}
-        get_prompt.return_value = fake_prompt
+        summariser = MagicMock()
+        summariser.enabled.return_value = True
+        summariser.summarise_judgment.return_value = fake_summary
+        summariser_cls.return_value = summariser
 
         judgment = Judgment(
             language=Language.objects.get(pk="en"),
@@ -287,21 +334,19 @@ class JudgmentTestCase(TestCase):
         doc_content.set_content_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
+        judgment.track_changes()
         judgment.generate_summary()
         judgment.refresh_from_db()
 
         self.assertEqual(fake_summary.blurb, judgment.blurb)
         self.assertEqual(fake_summary.summary, judgment.case_summary)
         self.assertEqual(expected_flynote, judgment.flynote)
+        self.assertEqual(expected_flynote, judgment.flynote_raw)
         self.assertEqual(fake_summary.held, judgment.held)
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
         self.assertTrue(judgment.summary_ai_generated)
-        get_prompt.assert_called_once_with(
-            "summarise/judgment",
-            cache_ttl_seconds=30,
-        )
-        fake_openai.responses.parse.assert_called_once()
+        summariser.summarise_judgment.assert_called_once_with(judgment)
 
     @patch("peachjam.models.judgment.generate_judgment_summary")
     def test_content_text_change_triggers_summary_generation(
@@ -385,3 +430,22 @@ class JudgmentTestCase(TestCase):
         judgment.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+    def test_serialise_flynote_tree(self):
+        from peachjam.analysis.flynotes import FlynoteUpdater
+
+        judgment = self.make_judgment()
+        judgment.flynote_raw = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        judgment.save()
+        FlynoteUpdater().update_for_judgment(judgment)
+
+        judgment.serialise_flynote_tree()
+        self.assertEqual(
+            judgment.flynote,
+            "Administrative law \u2014 judicial review\n"
+            "Criminal law \u2014 admissibility \u2014 trial within a trial",
+        )
+        self.assertEqual(judgment.flynote, judgment.flynote_raw)

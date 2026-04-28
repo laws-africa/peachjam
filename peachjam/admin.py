@@ -17,8 +17,11 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
+from django.db.models import Q
+from django.db.models.functions import Coalesce
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import filesizeformat
@@ -66,6 +69,7 @@ from peachjam.models import (
     CaseAction,
     CaseHistory,
     CaseNumber,
+    CaseTag,
     CauseList,
     CitationLink,
     CitationProcessing,
@@ -82,6 +86,7 @@ from peachjam.models import (
     DocumentTopic,
     EntityProfile,
     ExternalDocument,
+    Flynote,
     Gazette,
     GenericDocument,
     Ingestor,
@@ -90,7 +95,6 @@ from peachjam.models import (
     JournalArticle,
     Judge,
     Judgment,
-    JudgmentOffence,
     JurisdictionProfile,
     Label,
     LawReport,
@@ -101,6 +105,9 @@ from peachjam.models import (
     LowerBench,
     MatterType,
     Offence,
+    OffenceCategory,
+    OffenceGrouping,
+    OffenceTag,
     Outcome,
     Partner,
     PartnerLogo,
@@ -111,7 +118,6 @@ from peachjam.models import (
     Ratification,
     RatificationCountry,
     Relationship,
-    Sentence,
     SourceFile,
     Taxonomy,
     Treatment,
@@ -133,6 +139,7 @@ from peachjam.resources import (
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
+    OffenceGroupingResource,
     OffenceResource,
     RatificationResource,
     UserResource,
@@ -241,6 +248,50 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset.filter(document__doc_type="legal_instrument")
         else:
             return queryset
+
+
+class FlynoteDocumentCountFilter(admin.SimpleListFilter):
+    title = "document count"
+    parameter_name = "document_count_range"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("0", "0"),
+            ("1", "1"),
+            ("2_5", "2-5"),
+            ("6_10", "6-10"),
+            ("11_20", "11-20"),
+            ("21_50", "21-50"),
+            ("51_plus", "51+"),
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == "0":
+            return queryset.filter(
+                Q(document_count_cache__count=0) | Q(document_count_cache__isnull=True)
+            )
+        if value == "1":
+            return queryset.filter(document_count_cache__count=1)
+        if value == "2_5":
+            return queryset.filter(
+                document_count_cache__count__gte=2, document_count_cache__count__lte=5
+            )
+        if value == "6_10":
+            return queryset.filter(
+                document_count_cache__count__gte=6, document_count_cache__count__lte=10
+            )
+        if value == "11_20":
+            return queryset.filter(
+                document_count_cache__count__gte=11, document_count_cache__count__lte=20
+            )
+        if value == "21_50":
+            return queryset.filter(
+                document_count_cache__count__gte=21, document_count_cache__count__lte=50
+            )
+        if value == "51_plus":
+            return queryset.filter(document_count_cache__count__gte=51)
+        return queryset
 
 
 class BaseAttachmentFileInline(admin.StackedInline):
@@ -388,9 +439,6 @@ class DocumentForm(forms.ModelForm):
         ),
         required=False,
     )
-    flynote = forms.CharField(widget=forms.Textarea(), required=False)
-    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
-    order = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -1191,6 +1239,268 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
         return resp
 
 
+@admin.register(Flynote)
+class FlynoteAdmin(admin.ModelAdmin):
+    change_form_template = "admin/peachjam/flynote/change_form.html"
+    list_display = ("name", "document_count", "depth", "deprecated")
+    list_filter = ("depth", "deprecated", FlynoteDocumentCountFilter)
+    search_fields = ("name",)
+    ordering = ("name",)
+    readonly_fields = ("numchild", "ancestors_links", "children_links", "depth")
+    fields = (
+        "ancestors_links",
+        "name",
+        "deprecated",
+        "depth",
+        "numchild",
+        "children_links",
+    )
+    actions = ("mark_deprecated", "mark_active")
+
+    def has_add_permission(self, request):
+        return False
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        extra_context["merge_url"] = reverse(
+            "admin:peachjam_flynote_merge", args=[object_id]
+        )
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("document_count_cache")
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:object_id>/merge/",
+                self.admin_site.admin_view(self.merge_view),
+                name="peachjam_flynote_merge",
+            ),
+            path(
+                "<int:object_id>/merge/picker/",
+                self.admin_site.admin_view(self.merge_picker_view),
+                name="peachjam_flynote_merge_picker",
+            ),
+        ]
+        return custom_urls + urls
+
+    def get_merge_selected_ids(self, params):
+        selected_ids = []
+        for value in params.getlist("selected"):
+            try:
+                value = int(value)
+            except (TypeError, ValueError):
+                continue
+            if value not in selected_ids:
+                selected_ids.append(value)
+        return selected_ids
+
+    def get_merge_candidates(self, target, query, selected_ids):
+        if target.is_root():
+            qs = Flynote.get_root_nodes()
+        else:
+            qs = target.get_parent().get_children()
+
+        qs = (
+            qs.exclude(pk=target.pk)
+            .exclude(pk__in=selected_ids)
+            .select_related("document_count_cache")
+            .annotate(document_total=Coalesce("document_count_cache__count", 0))
+        )
+
+        if query:
+            qs = (
+                qs.annotate(similarity=TrigramSimilarity("name", query))
+                .filter(Q(similarity__gt=0.05) | Q(name__icontains=query))
+                .order_by("-similarity", "-document_total", "name")
+            )
+        else:
+            qs = qs.order_by("-document_total", "name")
+
+        return qs[:50]
+
+    def get_merge_picker_context(self, request, target, query, selected_ids):
+        selected_flynotes = list(
+            Flynote.objects.filter(pk__in=selected_ids)
+            .select_related("document_count_cache")
+            .annotate(document_total=Coalesce("document_count_cache__count", 0))
+            .order_by("name")
+        )
+        selected_ids = [flynote.pk for flynote in selected_flynotes]
+
+        return {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "original": target,
+            "target_flynote": target,
+            "query": query,
+            "selected_ids": selected_ids,
+            "selected_flynotes": selected_flynotes,
+            "search_results": self.get_merge_candidates(target, query, selected_ids),
+            "picker_url": reverse(
+                "admin:peachjam_flynote_merge_picker", args=[target.pk]
+            ),
+            "merge_url": reverse("admin:peachjam_flynote_merge", args=[target.pk]),
+        }
+
+    def merge_view(self, request, object_id):
+        target = get_object_or_404(
+            Flynote.objects.select_related("document_count_cache"), pk=object_id
+        )
+        params = request.GET
+
+        if request.method == "POST":
+            selected_ids = self.get_merge_selected_ids(request.POST)
+            selected_flynotes = list(Flynote.objects.filter(pk__in=selected_ids))
+            try:
+                target.merge_sources_into(selected_flynotes)
+            except ValidationError as exc:
+                self.message_user(
+                    request,
+                    "; ".join(exc.messages),
+                    messages.ERROR,
+                )
+            else:
+                self.message_user(
+                    request,
+                    _("Merged %(count)s flynotes into %(target)s.")
+                    % {"count": len(selected_ids), "target": target.name},
+                    messages.SUCCESS,
+                )
+                return HttpResponseRedirect(
+                    reverse("admin:peachjam_flynote_merge", args=[target.pk])
+                )
+            params = request.POST
+
+        query = params.get("q", target.name).strip()
+        context = self.get_merge_picker_context(
+            request,
+            target,
+            query,
+            self.get_merge_selected_ids(params),
+        )
+        context["title"] = _("Merge flynotes into: %(target)s") % {
+            "target": target.name
+        }
+        return TemplateResponse(request, "admin/peachjam/flynote/merge.html", context)
+
+    def merge_picker_view(self, request, object_id):
+        target = get_object_or_404(Flynote, pk=object_id)
+        selected_ids = self.get_merge_selected_ids(request.GET)
+        query = request.GET.get("q", target.name).strip()
+
+        add_id = request.GET.get("add")
+        remove_id = request.GET.get("remove")
+        if add_id:
+            try:
+                add_id = int(add_id)
+            except (TypeError, ValueError):
+                add_id = None
+            if add_id and add_id not in selected_ids:
+                selected_ids.append(add_id)
+        if remove_id:
+            try:
+                remove_id = int(remove_id)
+            except (TypeError, ValueError):
+                remove_id = None
+            if remove_id in selected_ids:
+                selected_ids.remove(remove_id)
+
+        context = self.get_merge_picker_context(request, target, query, selected_ids)
+        return TemplateResponse(
+            request,
+            "admin/peachjam/flynote/_merge_picker.html",
+            context,
+        )
+
+    def get_action_queryset_roots(self, queryset):
+        selected_paths = set(queryset.values_list("path", flat=True))
+        roots = []
+        for flynote in queryset.order_by("path"):
+            if any(
+                flynote.path[:end] in selected_paths
+                for end in range(flynote.steplen, len(flynote.path), flynote.steplen)
+            ):
+                continue
+            roots.append(flynote)
+        return roots
+
+    @admin.action(description=_("Mark selected flynotes as deprecated"))
+    def mark_deprecated(self, request, queryset):
+        updated = 0
+        for flynote in self.get_action_queryset_roots(queryset):
+            if flynote.deprecated:
+                continue
+            flynote.deprecated = True
+            flynote.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            _("Deprecated %(count)s flynote branches.") % {"count": updated},
+            messages.SUCCESS,
+        )
+
+    @admin.action(description=_("Mark selected flynotes as active"))
+    def mark_active(self, request, queryset):
+        updated = 0
+        for flynote in self.get_action_queryset_roots(queryset):
+            if not flynote.deprecated:
+                continue
+            flynote.deprecated = False
+            flynote.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            _("Reactivated %(count)s flynote branches.") % {"count": updated},
+            messages.SUCCESS,
+        )
+
+    @admin.display(description=_("Documents"), ordering="document_count_cache__count")
+    def document_count(self, obj):
+        cache = getattr(obj, "document_count_cache", None)
+        return cache.count if cache else 0
+
+    @admin.display(description=_("Ancestors"))
+    def ancestors_links(self, obj):
+        if not obj or obj.is_root():
+            return "-"
+
+        ancestors = obj.get_ancestors()
+        return format_html_join(
+            format_html(" — "),
+            '<a href="{}">{}</a>',
+            (
+                (
+                    reverse("admin:peachjam_flynote_change", args=[ancestor.pk]),
+                    ancestor.name,
+                )
+                for ancestor in ancestors
+            ),
+        )
+
+    @admin.display(description=_("Children"))
+    def children_links(self, obj):
+        if not obj:
+            return "-"
+
+        children = obj.get_children()
+        if not children:
+            return "-"
+
+        return format_html_join(
+            format_html("<br>"),
+            '<a href="{}">{}</a>',
+            (
+                (reverse("admin:peachjam_flynote_change", args=[child.pk]), child.name)
+                for child in children
+            ),
+        )
+
+
 @admin.register(CoreDocument)
 class CoreDocumentAdmin(DocumentAdmin):
     def has_add_permission(self, request):
@@ -1323,9 +1633,10 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
         )
 
 
-class JudgmentAdminForm(DocumentForm):
+class JudgmentForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
-    flynote = forms.CharField(
+    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
+    flynote_raw = forms.CharField(
         widget=forms.Textarea(attrs={"style": "width: 100%;"}),
         required=False,
         help_text=_("Enter one flynote per line."),
@@ -1338,6 +1649,7 @@ class JudgmentAdminForm(DocumentForm):
         widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
         required=False,
     )
+    order = forms.CharField(widget=CKEditorWidget(), required=False)
 
     class Meta:
         model = Judgment
@@ -1355,10 +1667,12 @@ class JudgmentAdminForm(DocumentForm):
     def clean_held(self):
         return self.cleaned_data["held"].splitlines()
 
-    def clean_flynote(self):
+    def clean_flynote_raw(self):
         from peachjam.analysis.flynotes import FlynoteParser
 
-        return FlynoteParser().normalise_multiline_text(self.cleaned_data["flynote"])
+        return FlynoteParser().normalise_multiline_text(
+            self.cleaned_data["flynote_raw"]
+        )
 
     def clean_issues(self):
         return self.cleaned_data["issues"].splitlines()
@@ -1390,20 +1704,10 @@ class LawReportEntryInline(admin.TabularInline):
     extra = 1
 
 
-class JudgmentOffenceInline(admin.TabularInline):
-    model = JudgmentOffence
-    extra = 1
-
-
-class SentenceInline(admin.StackedInline):
-    model = Sentence
-    extra = 1
-
-
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
-    form = JudgmentAdminForm
+    form = JudgmentForm
     resource_classes = [JudgmentResource]
     inlines = [
         BenchInline,
@@ -1412,8 +1716,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
         LawReportEntryInline,
-        JudgmentOffenceInline,
-        SentenceInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1443,7 +1745,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                 "fields": [
                     "case_summary_public",
                     "blurb",
-                    "flynote",
+                    "flynote_raw",
                     "case_summary",
                     "issues",
                     "held",
@@ -1668,17 +1970,48 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         obj.ensure_anonymised_source_file()
 
 
+@admin.register(OffenceCategory)
+class OffenceCategoryAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    search_fields = ("name", "description")
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(OffenceTag)
+class OffenceTagAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name", "description")
+
+
+@admin.register(OffenceGrouping)
+class OffenceGroupingAdmin(ImportExportMixin, admin.ModelAdmin):
+    resource_classes = [OffenceGroupingResource]
+    list_display = ("label", "kind", "work", "parent", "order")
+    list_select_related = ("work", "parent")
+    list_filter = ("kind",)
+    autocomplete_fields = ("work", "parent")
+    search_fields = (
+        "label",
+        "title",
+        "number",
+        "provision_eid",
+        "work__title",
+        "work__frbr_uri",
+    )
+
+
+@admin.register(CaseTag)
+class CaseTagAdmin(admin.ModelAdmin):
+    list_display = ("name",)
+    search_fields = ("name", "description")
+
+
 @admin.register(Offence)
 class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
     resource_classes = [OffenceResource]
-
-    def get_form(self, request, obj=None, **kwargs):
-        return super().get_form(
-            request,
-            obj,
-            widgets={"work": autocomplete.ModelSelect2(url="autocomplete-works")},
-            **kwargs,
-        )
+    filter_horizontal = ("categories", "tags")
+    autocomplete_fields = ("work", "grouping")
+    search_fields = ("title", "description", "code", "provision_eid")
 
 
 @admin.register(CauseList)

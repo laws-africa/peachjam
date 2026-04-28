@@ -234,7 +234,7 @@ Responsibilities:
 
 ### Jurisdiction shells
 
-Examples: `zambialii`, `malawilii`, `namiblii`, `seylii`, `senlii`, `civlii`, `tanzlii`.
+Examples: `zambialii`, `malawilii`, `namiblii`, `seylii`, `senlii`, `civlii`.
 
 Typical responsibilities:
 

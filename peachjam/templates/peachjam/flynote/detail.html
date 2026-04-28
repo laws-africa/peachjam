@@ -16,7 +16,7 @@
         </li>
         {% for ancestor in ancestors %}
           <li class="breadcrumb-item">
-            <a href="{% url 'flynote_detail' ancestor.slug %}">{{ ancestor.name }}</a>
+            <a href="{% url 'flynote_detail' ancestor.pk %}">{{ ancestor.name }}</a>
           </li>
         {% endfor %}
         <li class="breadcrumb-item active" aria-current="page">{{ flynote.name }}</li>
@@ -26,7 +26,7 @@
 {% endblock %}
 {% block page-header %}
   <div class="mb-4">
-    <h1 class="mb-4">
+    <h1 id="main-page-heading" class="mb-4">
       {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
       {{ flynote.name }}
     </h1>

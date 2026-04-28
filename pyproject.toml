@@ -63,7 +63,7 @@ dependencies = [
     "django-treebeard>=4.5.1",
     "djangorestframework>=3.13.1",
     "drf-spectacular>=0.26.0",
-    "docpipe @ git+https://github.com/laws-africa/docpipe.git@7bf829914cb673069784b672b69bfb349c53e01e",
+    "docpipe @ git+https://github.com/laws-africa/docpipe.git@a32eb0f478a945e1189ec998e1d312eddf9ac08d",
     "elasticsearch>=8.0.0,<9.0.0",
     "elasticsearch-dsl>=8.0.0,<9.0.0",
     "google-api-python-client>=2.46.0",
@@ -100,6 +100,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "coverage>=7.6",
     "django-debug-toolbar>=4.4",
     "django-webtest>=1.9.11",
     "pre-commit>=2.17.0",

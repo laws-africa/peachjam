@@ -1,0 +1,28 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n %}
+{% block title %}
+  {% trans "Details" %}
+{% endblock %}
+{% block page-content %}
+  {% block breadcrumbs %}{% endblock %}
+  {% block entity-profile %}
+    {% if entity_profile %}
+      {% include 'peachjam/_entity_profile.html' %}
+    {% endif %}
+  {% endblock %}
+  <div class="container pb-5">
+    {% block page-header %}
+      {% block page-title %}
+        {% if not entity_profile %}
+          <div class="my-4">
+            <h1 id="main-page-heading">{% trans 'Details' %}</h1>
+            {% block follow-button %}{% endblock %}
+          </div>
+        {% endif %}
+      {% endblock %}
+    {% endblock %}
+    {% block nav-tabs %}{% endblock %}
+    {% block alerts %}{% endblock %}
+    {% block detail-content %}{% endblock %}
+  </div>
+{% endblock %}

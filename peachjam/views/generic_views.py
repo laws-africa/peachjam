@@ -14,6 +14,7 @@ from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
 from django.utils.text import gettext_lazy as _
+from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, TemplateView, View
 from lxml import html
 
@@ -99,6 +100,32 @@ class DocumentListView(ListView):
     def cache_key_prefix(self):
         return self.request.get_full_path()
 
+    def get_document_table_scope(self):
+        path = self.request.path.strip("/")
+        scope = slugify(path)
+        if scope:
+            return scope
+        view_name = getattr(self.request.resolver_match, "view_name", "")
+        scope = slugify(view_name)
+        if scope:
+            return scope
+        return slugify(self.__class__.__name__) or "documents"
+
+    def get_document_table_id(self):
+        return f"doc-table-{self.get_document_table_scope()}"
+
+    def get_document_table_form_id(self):
+        return f"doc-table-form-{self.get_document_table_scope()}"
+
+    def get_document_table_offcanvas_id(self):
+        return f"doc-table-filters-offcanvas-{self.get_document_table_scope()}"
+
+    def get_document_table_offcanvas_title_id(self):
+        return f"{self.get_document_table_offcanvas_id()}-title"
+
+    def get_document_table_filter_input_id(self):
+        return f"{self.get_document_table_form_id()}-filter-input"
+
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
         return qs.filter(published=True).for_document_table()
@@ -119,6 +146,13 @@ class DocumentListView(ListView):
             *args,
             **kwargs,
         )
+        context["doc_table_id"] = self.get_document_table_id()
+        context["doc_table_form_id"] = self.get_document_table_form_id()
+        context["doc_table_offcanvas_id"] = self.get_document_table_offcanvas_id()
+        context["doc_table_offcanvas_title_id"] = (
+            self.get_document_table_offcanvas_title_id()
+        )
+        context["doc_table_filter_input_id"] = self.get_document_table_filter_input_id()
         self.add_doc_count(context)
         self.add_entity_profile(context)
         return context
@@ -174,7 +208,7 @@ class DocumentListView(ListView):
 
     def get_template_names(self):
         if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
+            if self.request.htmx.target == self.get_document_table_id():
                 return ["peachjam/_document_table.html"]
             return ["peachjam/_document_table_form.html"]
         return super().get_template_names()
@@ -227,12 +261,30 @@ class FilteredDocumentListView(DocumentListView):
 
         self.add_facets(context)
         self.order_facet_options(context)
+        self.set_rendered_facets(context)
         self.show_facet_clear_all(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
         context["doc_table_show_counts"] = True
 
         return context
+
+    def set_rendered_facets(self, context):
+        rendered_facets = [
+            {"name": facet_name, "facet": facet}
+            for facet_name, facet in context.get("facet_data", {}).items()
+            if facet.get("options")
+        ]
+        for index, item in enumerate(rendered_facets):
+            next_item = (
+                rendered_facets[index + 1] if index + 1 < len(rendered_facets) else None
+            )
+            item["next_target_id"] = (
+                f'{context["doc_table_form_id"]}-group-{next_item["name"]}'
+                if next_item
+                else context["doc_table_id"]
+            )
+        context["rendered_facets"] = rendered_facets
 
     def order_facet_options(self, context):
         for facet_name, facet in context.get("facet_data", {}).items():
@@ -431,6 +483,9 @@ class BaseDocumentDetailView(DetailView):
         # override in subclass to add subscription-related context
         return context
 
+    def get_document_table_id(self, scope):
+        return f"doc-table-{scope}-{self.object.pk}"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
@@ -492,6 +547,8 @@ class BaseDocumentDetailView(DetailView):
 
         context["download_options"] = self.get_download_options()
         context["KEY_LINK_PAGE"] = "document_detail"
+        context["related_documents_table_id"] = self.get_document_table_id("related")
+        context["similar_documents_table_id"] = self.get_document_table_id("similar")
 
         # provide extra context for analytics
         self.get_subscription_permissions_context(context)

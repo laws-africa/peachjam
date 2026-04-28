@@ -1,5 +1,5 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
-{% load i18n %}
+{% load i18n peachjam %}
 {% block subject %}
   {% if followed_documents|length > 1 %}
     {% blocktrans trimmed with title=followed_documents.0.followed_object %}New documents for {{ title }} and more{% endblocktrans %}
@@ -14,7 +14,7 @@
     <ul>
       {% for doc in item.documents %}
         <li>
-          <a href="https://{{ site.domain }}{{ doc.expression_frbr_uri }}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
+          <a href="{% absolute_url site doc.expression_frbr_uri %}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
           {% if doc.blurb %}<div>{{ doc.blurb }}</div>{% endif %}
           {% if doc.flynote %}<div>{{ doc.flynote|linebreaksbr }}</div>{% endif %}
         </li>

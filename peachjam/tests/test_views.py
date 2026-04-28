@@ -123,6 +123,7 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.context["year"], 2016)
         self.assertContains(response, "/judgments/ECOWASCJ/2018/")
         self.assertContains(response, "/judgments/ECOWASCJ/2016/")
+        self.assertContains(response, "Browse by year")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_court_year_listing_bad_year(self):

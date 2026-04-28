@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import base64
 import logging
 import os
+import socket
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -34,6 +35,48 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "true") == "true"
 
+
+LOCALHOST_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+
+
+def get_local_ip_allowed_hosts():
+    allowed_hosts = set()
+
+    try:
+        allowed_hosts.update(socket.gethostbyname_ex(socket.gethostname())[2])
+    except OSError:
+        pass
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("10.255.255.255", 1))
+            allowed_hosts.add(sock.getsockname()[0])
+    except OSError:
+        pass
+
+    return allowed_hosts
+
+
+def build_allowed_hosts(*default_hosts):
+    allowed_hosts = list(default_hosts)
+    allowed_hosts.extend(
+        host.strip()
+        for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    )
+    allowed_hosts.extend(
+        host.strip()
+        for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    )
+    allowed_hosts.extend(get_local_ip_allowed_hosts())
+
+    if DEBUG:
+        allowed_hosts.extend(LOCALHOST_ALLOWED_HOSTS)
+
+    return list(set(allowed_hosts))
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 if DEBUG:
     SECRET_KEY = "django-insecure-1q!zjpjmde2=yf0$doia!@74h-(f85(&&8)l05a+tt(b8g^rrt"
@@ -41,7 +84,7 @@ else:
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = build_allowed_hosts()
 
 
 INSTALLED_APPS = [
@@ -144,6 +187,8 @@ PEACHJAM = {
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
     "SUMMARISE_JUDGMENTS": True,
+    # should we use the flynote tree and match flynotes to our database of known flynotes?
+    "SUMMARISE_USE_FLYNOTE_TREE": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],

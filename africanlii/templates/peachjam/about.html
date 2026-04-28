@@ -40,44 +40,44 @@
   </ul>
   <p>
     {% blocktrans trimmed %}
-      This platform is developed and maintained jointly by <a href="https://africanlii.org/" target="_blank">AfricanLII</a> and
-      <a href="https://laws.africa/" target="_blank">Laws.Africa</a> with funds from the European Union,
+      This platform is developed and maintained jointly by <a href="https://africanlii.org/" target="_blank">AfricanLII<span class="visually-hidden">opens in new tab</span></a> and
+      <a href="https://laws.africa/" target="_blank">Laws.Africa<span class="visually-hidden">opens in new tab</span></a> with funds from the European Union,
       the Indigo Trust and the Sigrid Rausing Trust. The initial phase of the project runs from 2021 to 2024.
     {% endblocktrans %}
   </p>
   <h2 class="mb-4">{% trans 'Platform developers' %}</h2>
   <p>
     {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank">AfricanLII</a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University
-      of Cape Town. <a href="https://africanlii.org/" target="_blank">AfricanLII</a> helps governments, academia and non-profit organisations publish the law of African
-      countries for sustainable open access. <a href="https://africanlii.org/" target="_blank">AfricanLII</a> hosts curated collections on various subjects of African law,
+      <a href="https://africanlii.org/" target="_blank">AfricanLII<span class="visually-hidden">opens in new tab</span></a> is a programme of the Democratic Governance and Rights Unit at the Department of Public Law, University
+      of Cape Town. <a href="https://africanlii.org/" target="_blank">AfricanLII<span class="visually-hidden">opens in new tab</span></a> helps governments, academia and non-profit organisations publish the law of African
+      countries for sustainable open access. <a href="https://africanlii.org/" target="_blank">AfricanLII<span class="visually-hidden">opens in new tab</span></a> hosts curated collections on various subjects of African law,
       such as human rights, the environment, commercial law and finance.
     {% endblocktrans %}
   </p>
   <p>
     {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank">AfricanLII</a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and
+      <a href="https://africanlii.org/" target="_blank">AfricanLII<span class="visually-hidden">opens in new tab</span></a> convenes a network of 16 African LIIs - a collaborative group of governments, organizations, and
       individuals in Africa, dedicated to free access to law on our continent.
     {% endblocktrans %}
   </p>
   <p>
     {% blocktrans trimmed %}
-      <a href="https://laws.africa/" target="_blank">Laws.Africa</a> helps African governments to sustainably digitise their legal information for public use, through open
-      law software, capacity-building, training, partnerships and support. <a href="https://laws.africa/" target="_blank">Laws.Africa’s</a> Open Law Technology solutions
+      <a href="https://laws.africa/" target="_blank">Laws.Africa<span class="visually-hidden">opens in new tab</span></a> helps African governments to sustainably digitise their legal information for public use, through open
+      law software, capacity-building, training, partnerships and support. <a href="https://laws.africa/" target="_blank">Laws.Africa’s<span class="visually-hidden">opens in new tab</span></a> Open Law Technology solutions
       lower the cost of digitisation, archival and publication of primary legal information, and create opportunities for
       rich interactivity, advanced research and justice sector innovation.
     {% endblocktrans %}
   </p>
   <p class="mb-4">
     {% blocktrans trimmed %}
-      <a href="https://africanlii.org/" target="_blank">AfricanLII</a> and <a href="https://laws.africa/" target="_blank">Laws.Africa</a> collaborate in unlocking the value of African digital legal information in support
+      <a href="https://africanlii.org/" target="_blank">AfricanLII<span class="visually-hidden">opens in new tab</span></a> and <a href="https://laws.africa/" target="_blank">Laws.Africa<span class="visually-hidden">opens in new tab</span></a> collaborate in unlocking the value of African digital legal information in support
       of the rule of law, access to justice, and innovation.
     {% endblocktrans %}
   </p>
   <h2 class="mb-4">{% trans 'Find out more' %}</h2>
   <p class="mb-4">
     {% blocktrans trimmed %}
-      Visit <a href="https://openlawafrica.org/" target="_blank">openlawafrica.org</a>
+      Visit <a href="https://openlawafrica.org/" target="_blank">openlawafrica.org<span class="visually-hidden">opens in new tab</span></a>
       or contact us on <a href="mailto:info@laws.africa">info@laws.africa</a> for more information.
     {% endblocktrans %}
   </p>
@@ -90,6 +90,7 @@
         <img src="{% static 'images/laws-africa-logo.png' %}"
              height="140px"
              alt="Laws.Africa logo"/>
+        {% include 'peachjam/_opens_in_new_tab.html' %}
       </a>
     </div>
     <div class="col-md-3 mt-3 text-center">
@@ -97,6 +98,7 @@
         <img src="{% static 'images/africanlii-logo.svg' %}"
              height="140px"
              alt="AfricanLII logo"/>
+        {% include 'peachjam/_opens_in_new_tab.html' %}
       </a>
     </div>
   </div>

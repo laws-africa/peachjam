@@ -71,3 +71,23 @@ class MncMatcherTest(TestCase):
 </div>""",  # noqa
             lxml.html.tostring(html, encoding="unicode", pretty_print=True).strip(),
         )
+
+    def test_text_matches(self):
+        self.marker.extract_text_matches(
+            self.frbr_uri,
+            """
+In other words, what is not pleaded ought not to beconsidered by the trial or appellate court. See Parvis Gulamali
+Fazal v. National Housing Corporation (Civil Appeal No. 166 of 2018) [2021]TZCA 738 (3 December 2021, TanzLII), Maria
+Amandus Kavishe v. Nora Waziri Mzeru and Another (Civil Appeal No. 365 of 2019) [2023] TZCA 31 (20 February 2023,
+TanzLII) and Charles Richard Kombe t/a Building v. Eva rani Mtungi (Civil Appeal No. 38 of 2012) [2017] TZCA153 (24
+March 2017, TanzLII) to mention a few
+        """,
+        )
+        self.assertEqual(
+            [
+                ("[2021]TZCA 738", "/akn/tz/judgment/tzca/2021/738"),
+                ("[2023] TZCA 31", "/akn/tz/judgment/tzca/2023/31"),
+                ("[2017] TZCA153", "/akn/tz/judgment/tzca/2017/153"),
+            ],
+            [(c.text, c.href) for c in self.marker.citations],
+        )

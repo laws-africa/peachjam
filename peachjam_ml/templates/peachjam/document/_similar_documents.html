@@ -5,7 +5,7 @@
 {% if subscription_required %}
   {% include "peachjam_subs/_subscription_required.html" %}
 {% elif similar_documents %}
-  {% include "peachjam/_document_table.html" with documents=similar_documents doc_table_hide_thead=True %}
+  {% include "peachjam/_document_table.html" with documents=similar_documents doc_table_hide_thead=True doc_table_id=similar_documents_table_id %}
 {% else %}
   <p>{% trans 'No documents found.' %}</p>
 {% endif %}

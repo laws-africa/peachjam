@@ -26,14 +26,12 @@
             />
           </div>
           <div class="modal-body">
-            <p v-if="!user?.id">{{ $t('To add comments, please login and subscribe.') }}</p>
-            <p v-else>{{ $t('To add comments, please upgrade your subscription.') }}</p>
+            <div v-if="permissionDeniedHtml" v-html="permissionDeniedHtml" />
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
               {{ $t('Close') }}
             </button>
-            <a v-if="!user?.id" :href="loginUrl" type="button" class="btn btn-primary">{{ $t('Log in') }}</a>
           </div>
         </div>
       </div>
@@ -43,7 +41,6 @@
 <script>
 import AnnotationItem from './Annotation.vue';
 import { Modal } from 'bootstrap';
-import peachJam from '../../peachjam';
 
 export default {
   name: 'AnnotationsList',
@@ -58,7 +55,8 @@ export default {
     items: [],
     counter: -1,
     user: null,
-    editable: false
+    editable: false,
+    permissionDeniedHtml: null
   }),
   computed: {
     loginUrl () {
@@ -66,15 +64,38 @@ export default {
     }
   },
   mounted () {
-    peachJam.whenUserLoaded().then((user) => {
-      this.user = user;
-      if (user.perms.includes('peachjam.add_annotation')) {
-        this.editable = true;
-        this.getAnnotations();
-      }
-    });
+    this.loadPermission();
   },
   methods: {
+    async loadPermission () {
+      const documentId = this.viewRoot.dataset.documentId;
+      if (!documentId) return;
+
+      try {
+        const resp = await fetch(`/api/documents/${documentId}/capabilities?actions=add_annotation`, {
+          headers: { 'HX-Current-URL': window.location.href }
+        });
+
+        if (!resp.ok) {
+          this.editable = false;
+          return;
+        }
+
+        const data = await resp.json().catch(() => null);
+        const capability = data?.add_annotation;
+        if (capability?.allowed) {
+          this.editable = true;
+          this.permissionDeniedHtml = null;
+          this.getAnnotations();
+          return;
+        }
+
+        this.editable = false;
+        this.permissionDeniedHtml = capability?.message_html || null;
+      } catch {
+        // ignore network errors
+      }
+    },
     async getAnnotations () {
       if (!this.editable) return;
       try {

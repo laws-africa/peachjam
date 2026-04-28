@@ -1,0 +1,30 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% block breadcrumbs %}
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:index' %}">{% trans "Home" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:peachjam_flynote_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:peachjam_flynote_change' original.pk %}">{{ original }}</a>
+    </li>
+    <li class="breadcrumb-item">{% trans "Merge flynotes" %}</li>
+  </ol>
+{% endblock %}
+{% block content %}
+  <div id="content-main">
+    <h1>{{ title }}</h1>
+    <p>
+      {% blocktrans trimmed with target=target_flynote.name %}
+        Choose sibling flynotes to merge into “{{ target }}”.
+      {% endblocktrans %}
+    </p>
+    {% include "admin/peachjam/flynote/_merge_picker.html" %}
+  </div>
+{% endblock %}

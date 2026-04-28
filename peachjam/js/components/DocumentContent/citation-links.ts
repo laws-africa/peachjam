@@ -11,6 +11,7 @@ import peachJam from '../../peachjam';
 export interface ICitationLink {
   document: number | string | null;
   id: number | null;
+  is_external?: boolean;
   text: string;
   url: string;
   // eslint-disable-next-line camelcase

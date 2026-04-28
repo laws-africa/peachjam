@@ -38,7 +38,7 @@ from django.db.models import Prefetch
 from django.forms.forms import Form
 from django.http import Http404
 from django.http.response import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -46,6 +46,7 @@ from django.views.generic import (
     ListView,
     TemplateView,
     UpdateView,
+    View,
 )
 from django.views.generic.detail import DetailView
 
@@ -337,3 +338,33 @@ class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
     # stub form that always validates
     form_class = Form
     http_method_names = ["post"]
+
+
+class SavedDocumentRemoveFromFolderView(
+    AtomicPostMixin,
+    AllowSavedDocumentMixin,
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
+    View,
+):
+    permission_required = "peachjam.change_saveddocument"
+    http_method_names = ["post"]
+
+    def get_saved_document(self):
+        return get_object_or_404(
+            self.request.user.saved_documents.all(),
+            pk=self.kwargs["pk"],
+        )
+
+    def post(self, request, *args, **kwargs):
+        saved_document = self.get_saved_document()
+        folder = get_object_or_404(
+            request.user.folders.all(),
+            pk=self.kwargs["folder_pk"],
+        )
+
+        saved_document.folders.remove(folder)
+        if not saved_document.folders.exists():
+            saved_document.delete()
+
+        return redirect(request.GET.get("next") or reverse("folder_list"))

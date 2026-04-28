@@ -19,7 +19,7 @@
 {% block page-title %}
   {% if not entity_profile %}
     <div class="my-4">
-      <h1 class="mb-0">{{ journal.title }}</h1>
+      <h1 id="main-page-heading" class="mb-0">{{ journal.title }}</h1>
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ journal|get_follow_params }}"
              hx-trigger="load"></div>
@@ -30,7 +30,7 @@
 {% block page-header %}
   {{ block.super }}
   {% if volume_groups %}
-    <div class="flow-columns">
+    <div class="flow-columns mb-4">
       {% for group in volume_groups %}
         <div class="flow-columns-group">
           <ul class="list-unstyled">

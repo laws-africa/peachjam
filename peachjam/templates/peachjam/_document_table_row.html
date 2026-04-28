@@ -4,13 +4,13 @@
   {% if doc_table_toggle %}
     <td class="cell-toggle">
       {% if document.children %}
-        <button class="btn btn-sm bg-none collapsed"
+        <button class="btn btn-sm bg-none{% if not doc_table_children_expanded %} collapsed{% endif %}"
                 type="button"
-                title="{{ PEACHJAM_SETTINGS.subleg_label }}"
+                title="{{ doc_table_toggle_title }}"
                 data-bs-toggle="collapse"
-                data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
-                aria-expanded="false"
-                aria-controls="doc-table-children-{{ forloop.counter0 }}">
+                data-bs-target="#{{ doc_table_dom_id|default:'doc-table' }}-children-{{ forloop.counter0 }}"
+                aria-expanded="{% if doc_table_children_expanded %}true{% else %}false{% endif %}"
+                aria-controls="{{ doc_table_dom_id|default:'doc-table' }}-children-{{ forloop.counter0 }}">
           <i class="bi"></i>
         </button>
       {% endif %}
@@ -20,7 +20,7 @@
     <td id="{% if document.group_id %}{{ document.group_id }}{% endif %}"
         class="cell-group">{{ document.title }}</td>
   {% else %}
-    <td class="cell-title">
+    <td class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
       <div class="d-flex">
         <a href="{{ document.get_absolute_url }}" data-key-link="document">{{ document.title }}</a>
         {% if document.work.languages|length > 1 %}
@@ -30,7 +30,7 @@
             <i class="bi bi-translate"></i>
           </span>
         {% endif %}
-        <span id="saved-document-star--{{ document.pk }}"></span>
+        <span class="saved-document-star--{{ document.pk }}"></span>
       </div>
       {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
       {% if doc_table_show_treatments %}
@@ -44,7 +44,7 @@
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
         </div>
       {% endif %}
-      <div id="saved-document-table-detail--{{ document.pk }}"></div>
+      <div class="saved-document-table-detail saved-document-table-detail--{{ document.pk }}"></div>
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}

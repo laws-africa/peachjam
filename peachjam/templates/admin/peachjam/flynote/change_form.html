@@ -1,0 +1,8 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block object-tools-items %}
+  {% if change and not is_popup %}
+    <a href="{{ merge_url }}" class="btn btn-block btn-secondary">{% trans "Merge other flynotes into this one" %}</a>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

@@ -16,7 +16,7 @@ from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
-from django_lifecycle import AFTER_SAVE
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
@@ -28,7 +28,11 @@ from peachjam.models import (
     SourceFile,
     on_attribute_changed,
 )
-from peachjam.tasks import create_anonymised_source_file_pdf, generate_judgment_summary
+from peachjam.tasks import (
+    create_anonymised_source_file_pdf,
+    generate_judgment_summary,
+    update_flynote_taxonomy,
+)
 
 log = logging.getLogger(__name__)
 
@@ -315,7 +319,7 @@ class Judgment(CoreDocument):
         CIVIL = "civil", _("Civil")
 
     court = models.ForeignKey(
-        Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
+        Court, on_delete=models.PROTECT, null=False, verbose_name=_("court")
     )
     registry = models.ForeignKey(
         CourtRegistry,
@@ -377,6 +381,9 @@ class Judgment(CoreDocument):
     )
     # Summary fields
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
+    # flynote_raw is editable by the user and is used to update flynote (which is displayed on the site), possibly
+    # via the Flynote model. See the Flynote model for a description of how the flynote fields work.
+    flynote_raw = models.TextField(_("flynote (raw)"), null=True, blank=True)
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     order = models.TextField(_("order"), null=True, blank=True)
     case_summary_public = models.BooleanField(
@@ -517,7 +524,7 @@ class Judgment(CoreDocument):
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
-        if self.date and self.court:
+        if self.date and self.court_id:
             if (
                 self.mnc != self.generate_citation()
                 or self.serial_number_override
@@ -534,7 +541,7 @@ class Judgment(CoreDocument):
 
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
-            date__year=self.date.year, court=self.court
+            date__year=self.date.year, court_id=self.court_id
         )
         if self.pk:
             query = query.exclude(pk=self.pk)
@@ -551,7 +558,7 @@ class Judgment(CoreDocument):
         # enforce certain defaults for judgment FRBR URIs
         if self.auto_assign_details:
             self.frbr_uri_doctype = "judgment"
-            self.frbr_uri_actor = self.court.code.lower() if self.court else None
+            self.frbr_uri_actor = self.court.code.lower() if self.court_id else None
             self.frbr_uri_date = str(self.date.year) if self.date else ""
             self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
@@ -603,12 +610,11 @@ class Judgment(CoreDocument):
         if self.registry:
             self.court = self.registry.court
 
-        if self.court is not None:
-            if self.court.country:
-                self.jurisdiction = self.court.country
-
-            if self.court.country:
-                self.locality = self.court.locality
+        if self.court_id:
+            court = self.court
+            if court.country:
+                self.jurisdiction = court.country
+                self.locality = court.locality
 
         self.doc_type = "judgment"
         if self.auto_assign_details:
@@ -682,7 +688,7 @@ class Judgment(CoreDocument):
     @on_attribute_changed(
         AFTER_SAVE,
         ["must_be_anonymised", "anonymised"],
-        ["blurb", "case_summary", "flynote", "held", "issues", "order"],
+        ["blurb", "case_summary", "flynote_raw", "held", "issues", "order"],
     )
     def potentially_generate_summary(self):
         if self.should_have_summary():
@@ -718,7 +724,8 @@ class Judgment(CoreDocument):
                 return
             self.blurb = summary.blurb
             self.case_summary = summary.summary
-            self.flynote = summary.flynote
+            # self.flynote will be updated based on self.flynote_raw
+            self.flynote_raw = summary.flynote
             self.held = summary.held
             self.issues = summary.issues
             self.order = summary.order
@@ -726,6 +733,28 @@ class Judgment(CoreDocument):
             self.save()
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
+
+    @on_attribute_changed(BEFORE_SAVE, ["flynote_raw"], ["flynote", "flynote_tree"])
+    def sync_flynote(self):
+        """The flynote_raw field has changed, copy it to flynote and populate the flynote tree (if configured)."""
+        self.flynote = self.flynote_raw
+
+        if settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"] and self.pk:
+            # This will eventually update both flynote and flynote_raw to match the flynote tree.
+            # We set flynote above since this background task may take a while to run.
+            update_flynote_taxonomy(self.pk)
+
+    def serialise_flynote_tree(self):
+        """Serialise the flynote tree to a string for storage in flynote and flynote_raw."""
+        from peachjam.models import Flynote
+
+        judgment_flynotes = list(
+            self.flynotes.select_related("flynote").order_by("flynote__path")
+        )
+
+        # we update flynote_raw as well (without triggering attribute change events) so that a human can edit
+        # the flynote and we won't lose the changes made through the Flynote tree
+        self.flynote_raw = self.flynote = Flynote.flynotes_to_string(judgment_flynotes)
 
 
 class CaseNumber(models.Model):
@@ -878,6 +907,111 @@ class Replacement(models.Model):
         return f"{self.old_text} -> {self.new_text}"
 
 
+class OffenceCategory(models.Model):
+    slug = models.SlugField(_("slug"), unique=True, blank=True)
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("offence category")
+        verbose_name_plural = _("offence categories")
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)
+
+
+class OffenceTag(models.Model):
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("offence tag")
+        verbose_name_plural = _("offence tags")
+
+    def __str__(self):
+        return self.name
+
+
+class CaseTag(models.Model):
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("name",)
+        verbose_name = _("case tag")
+        verbose_name_plural = _("case tags")
+
+    def __str__(self):
+        return self.name
+
+
+class OffenceGrouping(models.Model):
+    work = models.ForeignKey(
+        "peachjam.Work",
+        on_delete=models.PROTECT,
+        related_name="offence_groupings",
+        verbose_name=_("work"),
+        help_text=_("The Work that defines this offence grouping."),
+    )
+    parent = models.ForeignKey(
+        "self",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="children",
+        verbose_name=_("parent"),
+    )
+    kind = models.CharField(_("kind"), max_length=50)
+    label = models.CharField(_("label"), max_length=255)
+    number = models.CharField(_("number"), max_length=100, blank=True, default="")
+    title = models.CharField(_("title"), max_length=1024, blank=True, default="")
+    provision_eid = models.CharField(
+        _("provision EID"),
+        max_length=255,
+        blank=True,
+        default="",
+        help_text=_("AKN element id / EID for the grouping within the work."),
+    )
+    order = models.IntegerField(_("order"), default=0)
+
+    class Meta:
+        ordering = ("work_id", "parent_id", "order", "id")
+        verbose_name = _("offence grouping")
+        verbose_name_plural = _("offence groupings")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("work", "provision_eid"),
+                condition=~models.Q(provision_eid=""),
+                name="unique_offencegrouping_work_provision_eid",
+            )
+        ]
+        indexes = [
+            models.Index(fields=("kind",), name="offence_grouping_kind_idx"),
+            models.Index(
+                fields=("work", "kind"), name="offence_grouping_work_kind_idx"
+            ),
+        ]
+
+    def __str__(self):
+        if self.title:
+            return f"{self.label}: {self.title}"
+        return self.label
+
+    def clean(self):
+        super().clean()
+        if self.parent and self.parent.work_id != self.work_id:
+            raise ValidationError(
+                {"parent": _("Parent grouping must belong to the same work.")}
+            )
+
+
 class Offence(models.Model):
     work = models.ForeignKey(
         "peachjam.Work",
@@ -902,8 +1036,28 @@ class Offence(models.Model):
             "Internal offence code / short identifier (often from the code or a local convention)."
         ),
     )
+    grouping = models.ForeignKey(
+        "OffenceGrouping",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="offences",
+        verbose_name=_("grouping"),
+    )
     title = models.CharField(_("title"), max_length=4096)
     description = models.TextField(_("description"), blank=True)
+    categories = models.ManyToManyField(
+        "OffenceCategory",
+        blank=True,
+        related_name="offences",
+        verbose_name=_("categories"),
+    )
+    tags = models.ManyToManyField(
+        "OffenceTag",
+        blank=True,
+        related_name="offences",
+        verbose_name=_("tags"),
+    )
     elements = ArrayField(
         base_field=models.CharField(max_length=4096),
         default=list,
@@ -918,9 +1072,22 @@ class Offence(models.Model):
 
     class Meta:
         ordering = ("title",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("work", "provision_eid"),
+                name="unique_offence_work_provision_eid",
+            )
+        ]
 
     def __str__(self):
         return self.title
+
+    def clean(self):
+        super().clean()
+        if self.grouping and self.grouping.work_id != self.work_id:
+            raise ValidationError(
+                {"grouping": _("Grouping must belong to the same work.")}
+            )
 
 
 class JudgmentOffence(models.Model):
@@ -936,6 +1103,20 @@ class JudgmentOffence(models.Model):
         related_name="judgment_offence",
         verbose_name=_("judgments"),
     )
+    tags = models.ManyToManyField(
+        "CaseTag",
+        blank=True,
+        related_name="judgment_offences",
+        verbose_name=_("case tags"),
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("judgment", "offence"),
+                name="unique_judgment_offence_judgment_offence",
+            )
+        ]
 
     def __str__(self):
         return f"JudgmentOffence {self.offence} - {self.judgment}"

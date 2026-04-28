@@ -3,6 +3,12 @@ from peachjam.settings import *  # noqa
 INSTALLED_APPS = ["africanlii.apps.AfricanliiConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "africanlii.urls"
+ALLOWED_HOSTS = build_allowed_hosts(  # noqa
+    "africanlii.org",
+    "www.africanlii.org",
+    "agp.africanlii.org",
+    "www.agp.africanlii.org",
+)
 
 JAZZMIN_SETTINGS["site_title"] = "Africanlii"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "Africanlii"  # noqa

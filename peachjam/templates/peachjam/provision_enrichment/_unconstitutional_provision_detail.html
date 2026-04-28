@@ -8,9 +8,10 @@
           hx-trigger="click once"
           data-bs-toggle="collapse"
           data-bs-target="#provision-detail-{{ enrichment.pk }}"
+          aria-label="{% trans 'Show provision details' %}"
           aria-expanded="{% if expanded %}true{% else %}false{% endif %}"
           aria-controls="provision-detail-{{ enrichment.pk }}">
-    <i class="bi"></i>
+    <i class="bi" aria-hidden="true"></i>
   </button>
   {% if enrichment.whole_work %}
     {{ enrichment.document.title }}

@@ -1,6 +1,6 @@
-{% extends 'peachjam/layouts/document_list.html' %}
+{% extends "peachjam/layouts/detail.html" %}
 {% load i18n peachjam %}
-{% block title %}{{ page_title }}{% endblock %}
+{% block title %}{{ law_report.title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="breadcrumb">
@@ -16,36 +16,34 @@
     </nav>
   </div>
 {% endblock %}
-{% block page-header %}
-  {% block page-title %}
-    {% if not entity_profile %}
-      <div class="my-4">
-        <h1>{{ page_title }}</h1>
-        {% block follow-button %}
-          <div hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
-               hx-trigger="load"></div>
-        {% endblock %}
-      </div>
-    {% endif %}
-  {% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}
+    <div class="my-4">
+      <h1 id="main-page-heading" class="mb-0">{{ law_report.title }}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
+             hx-trigger="load"></div>
+      {% endblock %}
+    </div>
+  {% endif %}
+{% endblock %}
+{% block detail-content %}
+  <h2>{% trans 'Volumes' %}</h2>
   {% if law_report_volumes %}
-    <div class="flow-columns">
-      {% for group in law_report_volume_groups %}
-        <div class="flow-columns-group">
-          <ul class="list-unstyled">
-            {% for volume in group %}
-              {% if law_report_volume and law_report_volume.slug == volume.slug %}
-                <li>{{ volume.title }}</li>
-              {% else %}
-                <li>
-                  <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
-                </li>
-              {% endif %}
+    <div class="row row-cols-1 row-cols-md-auto g-4">
+      {% for volume_column in law_report_volume_columns %}
+        <div class="col">
+          <ul class="list-unstyled mb-0">
+            {% for volume in volume_column %}
+              <li class="mb-2">
+                <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
+              </li>
             {% endfor %}
           </ul>
         </div>
       {% endfor %}
     </div>
+  {% else %}
+    <p>{% trans 'No volumes found.' %}</p>
   {% endif %}
-  {% include 'peachjam/_count_and_search.html' %}
 {% endblock %}

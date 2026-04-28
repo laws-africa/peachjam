@@ -46,6 +46,12 @@ mark {
   content: "\f231";
 }
 
+.provision-toggle button:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
 .result-snippet * {
   font-size: $font-size-base;
 }
@@ -189,6 +195,10 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden,
   padding-bottom: 0.25rem;
 }
 
+.skip-link-target {
+  scroll-margin-top: $floating-header-height + 1rem;
+}
+
 a:visited:not(.btn, .nav-link, .dropdown-item) {
   color: $visited-link;
 }
@@ -201,7 +211,8 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
   left: -501px;
 }
 .skip-links a:focus {
-  left: -1px;
+  left: 0;
+  z-index: 1080;
 }
 
 .breadcrumb {

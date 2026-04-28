@@ -41,6 +41,7 @@ The following must be configured as ENV variables:
 * CHAT_ASSISTANT_NAME (optional)
 """
 
+import logging
 import os
 
 import lxml
@@ -51,11 +52,14 @@ from asgiref.sync import sync_to_async
 from django.conf import settings
 from html_to_markdown import convert as html_to_markdown
 from martor.utils import markdownify
+from requests import HTTPError
 
 from ..analysis.citations import citation_analyser
 from ..langfuse import PROMPT_CACHE_TTL_SECS, langfuse
 from ..xmlutils import parse_html_str
 from .tools import DocumentChatContext, get_citator_citations, get_tools_for_document
+
+logger = logging.getLogger(__name__)
 
 
 def get_db_url() -> str:
@@ -223,11 +227,15 @@ class DocumentChat:
         # back to a string
         html = lxml.html.tostring(html, encoding="unicode")
 
-        # run remote citation analyser
-        resp = get_citator_citations(self.document.expression_frbr_uri, html=html)
+        try:
+            # run remote citation analyser
+            resp = get_citator_citations(self.document.expression_frbr_uri, html=html)
+            html = resp["body"]
+        except HTTPError as e:
+            logger.warning(f"Ignoring error calling citator API: {e}", exc_info=e)
 
         # turn back into markdown
-        text = html_to_markdown(resp["body"])
+        text = html_to_markdown(html)
         return text
 
 
@@ -237,5 +245,5 @@ def extract_assistant_response(result) -> dict:
             return {
                 "id": item.raw_item.id,
                 "role": "ai",
-                "content": result.final_output,
+                "content": str(result.final_output or ""),
             }

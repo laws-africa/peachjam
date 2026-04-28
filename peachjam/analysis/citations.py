@@ -49,6 +49,7 @@ class CitationAnalyser:
 
         html = self.markup_html_matches(document.expression_uri(), html)
         doc_content.set_content_html(lxml.html.tostring(html, encoding="unicode"))
+        doc_content.save()
         return True
 
     def markup_html_matches(self, frbr_uri, html):

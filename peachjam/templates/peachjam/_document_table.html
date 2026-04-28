@@ -4,11 +4,14 @@ This template is used to render a table of documents. It supports a number of va
 All variables default to null or false. So positive variables like "show_xxx" default to being "off", but negative
 variables like "hide_xxx" default to being "on".
 
-* doc_table_id: The ID of the table (default: doc-table)
+* doc_table_id: The ID of the table root (default: doc-table). Child collapse IDs are scoped from this value.
 * doc_table_classes: Additional classes for the table
 * doc_table_collapse: include the doc-table--collapse modifier so the table behaves like it's on a small screen
 * doc_table_toggle: Show a toggle for child documents (default: false)
+* doc_table_toggle_title: Title to use for the child toggle button
+* doc_table_children_expanded: Expand child documents by default
 * doc_table_citations: Show document citations column
+* doc_table_full_title_width: Make the title column span the available width
 * doc_table_many_cols: There are multiple columns
 * doc_table_hide_thead: Hide the table header
 * doc_table_title_label: label to use for Title column (default: Title)
@@ -19,77 +22,117 @@ variables like "hide_xxx" default to being "on".
 * doc_table_show_date: show document date (and associated column)
 * doc_table_show_doc_type: show document type (and associated column)
 * doc_table_show_frbr_uri_number: show document FRBR URI number (and associated column)
-* doc_table_show_jurisdictions: show document jurisdiction (and jurisdiction column)
+* doc_table_show_jurisdiction: show document jurisdiction (and jurisdiction column)
 * doc_table_show_sub_publication: show document sub_publication (and sub_publication column)
 * doc_table_show_treatments: show treatments for documents as labels
 * hide_pagination: Hide pagination
 {% endcomment %}
-<div class="table-responsive"
-     id="{{ doc_table_id|default:"doc-table" }}"
-     data-component="DocumentTable">
-  {% if doc_table_show_counts %}
-    <div class="mb-3 text-muted">
-      {% if doc_count == 1 %}
-        {{ doc_count|intcomma }} {{ doc_count_noun }}
+{% with doc_table_dom_id=doc_table_id|default:"doc-table" %}
+  <section class="table-responsive"
+           id="{{ doc_table_dom_id }}"
+           data-component="DocumentTable"
+           aria-label="{% trans 'Results' %}"
+           tabindex="-1">
+    <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+      {% trans 'Results.' %}
+      {% if documents %}
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }} {% trans 'found.' %}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }} {% trans 'found.' %}
+        {% endif %}
       {% else %}
-        {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+        {% trans 'No documents found.' %}
       {% endif %}
-    </div>
-  {% endif %}
-  <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {% if doc_table_collapse %}doc-table--collapse{% endif %} {{ doc_table_classes }}">
-    {% if not doc_table_hide_thead %}
-      <thead>
-        <tr>
-          {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
-          <th scope="col" class="cell-title">
-            <div class="align-items-center"
-                 role="button"
-                 data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
-              {{ doc_table_title_label|default_if_none:"Title" }}
-              <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"></i>
-            </div>
-          </th>
-          {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
-          {% if doc_table_show_jurisdiction %}
-            {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
-              <th scope="col">{% trans 'Jurisdiction' %}</th>
-            {% endif %}
-          {% endif %}
-          {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
-          {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
-          {% if doc_table_show_sub_publication %}<th scope="col"></th>{% endif %}
-          {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
-          {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
-          {% if doc_table_show_date %}
-            <th scope="col" class="cell-date">
-              <div class="align-items-center"
-                   role="button"
-                   data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
-                {{ doc_table_date_label|default_if_none:"Date" }}
-                <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"></i>
-              </div>
-            </th>
-          {% endif %}
-        </tr>
-      </thead>
+    </p>
+    {% if doc_table_show_counts %}
+      <div class="mb-3 text-muted">
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+        {% endif %}
+      </div>
     {% endif %}
-    {% for document in documents %}
-      {% include 'peachjam/_document_table_row.html' %}
-      {% if document.children %}
-        <tbody id="doc-table-children-{{ forloop.counter0 }}"
-               class="doc-table-children collapse">
-          {% include 'peachjam/_document_table_row.html' with document=subleg_group_row %}
-          {% for d in document.children %}
-            {% include 'peachjam/_document_table_row.html' with document=d %}
-          {% endfor %}
-        </tbody>
+    <table class="doc-table {% if doc_table_toggle %}doc-table--toggle{% endif %} {% if doc_table_citations or doc_table_many_cols %}doc-table--citation{% endif %} {% if doc_table_show_date %}doc-table--date{% endif %} {% if doc_table_collapse %}doc-table--collapse{% endif %} {{ doc_table_classes }}">
+      {% if not doc_table_hide_thead %}
+        <thead>
+          <tr>
+            {% if doc_table_toggle %}<th class="cell-toggle"></th>{% endif %}
+            <th scope="col"
+                class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}"
+                {% if form.sort.value == "title" %}aria-sort="ascending"{% elif form.sort.value == "-title" %}aria-sort="descending"{% endif %}>
+              <button type="button"
+                      class="p-0 border-0 bg-transparent text-reset fw-bold"
+                      data-sort="{% if form.sort.value == "title" %}-title{% else %}title{% endif %}">
+                {{ doc_table_title_label|default_if_none:"Title" }}
+                <span class="visually-hidden">
+                  {% if form.sort.value == "title" %}
+                    {% blocktrans with sort_field=doc_table_title_label|default_if_none:"Title" %}Sort by {{ sort_field }} descending{% endblocktrans %}
+                  {% else %}
+                    {% blocktrans with sort_field=doc_table_title_label|default_if_none:"Title" %}Sort by {{ sort_field }} ascending{% endblocktrans %}
+                  {% endif %}
+                </span>
+                <i class="bi ms-2 {% if form.sort.value == "title" %}bi-sort-down{% endif %} {% if form.sort.value == "-title" %}bi-sort-up{% endif %}"
+                   aria-hidden="true"></i>
+              </button>
+            </th>
+            {% if doc_table_citations %}<th scope="col" class="cell-citation"></th>{% endif %}
+            {% if doc_table_show_jurisdiction %}
+              {% if MULTIPLE_JURISDICTIONS or MULTIPLE_LOCALITIES %}
+                <th scope="col">{% trans 'Jurisdiction' %}</th>
+              {% endif %}
+            {% endif %}
+            {% if doc_table_show_author %}<th scope="col"></th>{% endif %}
+            {% if doc_table_show_court %}<th scope="col"></th>{% endif %}
+            {% if doc_table_show_sub_publication %}<th scope="col"></th>{% endif %}
+            {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
+            {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
+            {% if doc_table_show_date %}
+              <th scope="col"
+                  class="cell-date"
+                  {% if form.sort.value == "-date" %}aria-sort="descending"{% elif form.sort.value == "date" %}aria-sort="ascending"{% endif %}>
+                <button type="button"
+                        class="p-0 border-0 bg-transparent text-reset fw-bold"
+                        data-sort="{% if form.sort.value == "date" %}-date{% else %}date{% endif %}">
+                  {{ doc_table_date_label|default_if_none:"Date" }}
+                  <span class="visually-hidden">
+                    {% if form.sort.value == "date" %}
+                      {% blocktrans with sort_field=doc_table_date_label|default_if_none:"Date" %}Sort by {{ sort_field }} descending{% endblocktrans %}
+                    {% else %}
+                      {% blocktrans with sort_field=doc_table_date_label|default_if_none:"Date" %}Sort by {{ sort_field }} ascending{% endblocktrans %}
+                    {% endif %}
+                  </span>
+                  <i class="bi ms-2 {% if form.sort.value == "-date" %}bi-sort-down{% endif %} {% if form.sort.value == "date" %}bi-sort-up{% endif %}"
+                     aria-hidden="true"></i>
+                </button>
+              </th>
+            {% endif %}
+          </tr>
+        </thead>
       {% endif %}
-    {% endfor %}
-  </table>
-  {% if not documents %}
-    <p>{% trans 'No documents found.' %}</p>
-  {% endif %}
-  {% if documents and not hide_pagination and paginator %}
-    {% include 'peachjam/_pagination.html' %}
-  {% endif %}
-</div>
+      {% for document in documents %}
+        {% include 'peachjam/_document_table_row.html' %}
+        {% if document.children %}
+          <tbody id="{{ doc_table_dom_id }}-children-{{ forloop.counter0 }}"
+                 class="doc-table-children collapse{% if doc_table_children_expanded %} show{% endif %}">
+            {% if document.children_group_row %}
+              {% include 'peachjam/_document_table_row.html' with document=document.children_group_row %}
+            {% elif subleg_group_row %}
+              {% include 'peachjam/_document_table_row.html' with document=subleg_group_row %}
+            {% endif %}
+            {% for d in document.children %}
+              {% include 'peachjam/_document_table_row.html' with document=d %}
+            {% endfor %}
+          </tbody>
+        {% endif %}
+      {% endfor %}
+    </table>
+    {% if not documents %}
+      <p>{% trans 'No documents found.' %}</p>
+    {% endif %}
+    {% if documents and not hide_pagination and paginator %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  </section>
+{% endwith %}

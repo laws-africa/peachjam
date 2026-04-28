@@ -45,6 +45,7 @@ table.doc-table {
   .doc-table-children {
     background-color: $gray-100;
 
+    .cell-group,
     .cell-title {
       padding-left: 20px;
     }

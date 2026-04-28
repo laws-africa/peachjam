@@ -1,5 +1,6 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
+{% block entity-profile %}{% endblock %}
 {% block title %}{{ volume_issue.title }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
@@ -19,7 +20,4 @@
     </nav>
   </div>
 {% endblock %}
-{% block page-title %}
-  <h1 class="my-4">{{ volume_issue.title }}</h1>
-  <div class="text-muted">{{ journal }}</div>
-{% endblock %}
+{% block page-title %}<h1 id="main-page-heading" class="my-4">{{ volume_issue.title }}</h1>{% endblock %}
