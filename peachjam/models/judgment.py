@@ -1122,7 +1122,7 @@ class Sentence(models.Model):
         default=False,
         help_text=_("True if the sentence is suspended (fully or partially)."),
     )
-    fine_amount = models.PositiveIntegerField(
+    fine_amount = models.PositiveBigIntegerField(
         _("fine amount"),
         null=True,
         blank=True,
