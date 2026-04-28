@@ -139,9 +139,9 @@ class FlynoteListView(FlynoteViewMixin, ListView):
 
     @cached_property
     def flynote(self):
-        """In htmx mode, the ?flynote=slug parameter anchors the list of subtopics."""
+        """In htmx mode, the ?flynote=<pk> parameter anchors the list of subtopics."""
         if self.request.GET.get("flynote"):
-            return get_object_or_404(Flynote, slug=self.request.GET.get("flynote"))
+            return get_object_or_404(Flynote, pk=self.request.GET.get("flynote"))
 
     def get_queryset(self):
         if self.flynote:
@@ -189,7 +189,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
-        self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
+        self.flynote = get_object_or_404(Flynote, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
     def get_base_queryset(self):

@@ -1,0 +1,85 @@
+{% load i18n %}
+<div id="merge-picker">
+  <form method="post" action="{{ merge_url }}">
+    {% csrf_token %}
+    <input type="hidden" name="q" value="{{ query }}" />
+    <div class="card">
+      <h4 class="card-header">{% trans "Selected flynotes to merge into this one" %}</h4>
+      <div class="card-body">
+        {% if selected_flynotes %}
+          <ul class="list-unstyled">
+            {% for flynote in selected_flynotes %}
+              <li class="d-flex mb-2">
+                <button type="button"
+                        class="btn btn-danger btn-sm mr-3"
+                        hx-get="{{ picker_url }}"
+                        hx-target="#merge-picker"
+                        hx-swap="outerHTML"
+                        hx-include="#merge-search-form"
+                        hx-vals='{"remove":"{{ flynote.pk }}"}'>
+                  {% trans "Remove" %}
+                </button>
+                <input type="hidden" name="selected" value="{{ flynote.pk }}" />
+                <div class="flex-grow-1">
+                  <a href="{% url 'admin:peachjam_flynote_change' flynote.pk %}"
+                     target="_blank">{{ flynote.name }}</a>
+                  <span class="badge badge-secondary ml-2">{{ flynote.document_total }} {% trans "documents" %}</span>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>{% trans "No flynotes selected yet." %}</p>
+        {% endif %}
+      </div>
+      <div class="card-footer">
+        <input type="submit"
+               class="btn btn-primary"
+               data-confirm="{% trans 'Are you sure? This cannot be undone.' %}"
+               value="{% trans 'Merge these flynotes' %}"
+               {% if not selected_flynotes %}disabled{% endif %}/>
+      </div>
+    </div>
+  </form>
+  <form id="merge-search-form"
+        method="get"
+        hx-get="{{ picker_url }}"
+        hx-target="#merge-picker"
+        hx-swap="outerHTML"
+        hx-trigger="input changed delay:300ms from:#id_q, search from:#id_q">
+    <h2>{% trans "Find sibling flynotes to merge" %}</h2>
+    {% for flynote in selected_flynotes %}<input type="hidden" name="selected" value="{{ flynote.pk }}" />{% endfor %}
+    <div>
+      <label for="id_q" class="form-label">{% trans "Search" %}</label>
+      <input id="id_q"
+             type="search"
+             name="q"
+             value="{{ query }}"
+             class="form-control"/>
+    </div>
+  </form>
+  {% if search_results %}
+    <ul class="list-unstyled mt-3">
+      {% for flynote in search_results %}
+        <li class="d-flex mb-2">
+          <button type="button"
+                  class="btn btn-primary btn-sm mr-3"
+                  hx-get="{{ picker_url }}"
+                  hx-target="#merge-picker"
+                  hx-swap="outerHTML"
+                  hx-include="#merge-search-form"
+                  hx-vals='{"add":"{{ flynote.pk }}"}'>
+            {% trans "Add" %}
+          </button>
+          <div class="flex-grow-1">
+            <a href="{% url 'admin:peachjam_flynote_change' flynote.pk %}"
+               target="_blank">{{ flynote.name }}</a>
+            <span class="badge badge-secondary ml-2">{{ flynote.document_total }} {% trans "documents" %}</span>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>{% trans "No matching sibling flynotes found." %}</p>
+  {% endif %}
+</div>

@@ -147,8 +147,12 @@ def search_flynotes_tool(keywords: list[str], parent_id: int) -> str:
     # Flynote names are short canonical labels. Trigram similarity naturally favours
     # exact and near-exact matches, while still handling punctuation and hyphenation
     # differences such as "post judgment" vs "post-judgment".
-    qs = parent.get_children().annotate(
-        similarity=TrigramSimilarity("name", primary_term),
+    qs = (
+        parent.get_children()
+        .filter(deprecated=False)
+        .annotate(
+            similarity=TrigramSimilarity("name", primary_term),
+        )
     )
     # Require a minimum similarity so that loosely related long titles do not
     # dominate the results.
@@ -208,7 +212,7 @@ class JudgmentSummariser:
     # them with the matched flynotes from the database? This can help improve consistency and categorization of
     # flynotes, but it requires that there is an initial set of top-level flynotes in the database to match against,
     # so it's behind a feature flag.
-    match_flynotes_to_db = settings.PEACHJAM["SUMMARISER_MATCH_FLYNOTES_TO_DB"]
+    match_flynotes_to_db = settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"]
     agent: Optional[Agent] = None
     run_result: Optional[RunResult] = None
     max_top_level_flynotes = 50
@@ -277,21 +281,14 @@ class JudgmentSummariser:
             or self.default_llm_model
         )
 
-    @staticmethod
-    def normalise_flynote_text(flynote):
-        if not flynote:
-            return ""
-
+    def normalise_summary(self, summary):
         from peachjam.analysis.flynotes import FlynoteParser
 
-        return FlynoteParser().normalise_multiline_text(flynote)
-
-    def normalise_summary(self, summary):
-        summary.flynote = self.normalise_flynote_text(summary.flynote)
+        summary.flynote = FlynoteParser().normalise_multiline_text(summary.flynote)
         return summary
 
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
-        log.info("Generating judgment summary")
+        log.info("Generating judgment summary for %s", expression_frbr_uri)
 
         with langfuse.start_as_current_observation(
             name="summarise_judgment",
@@ -310,9 +307,26 @@ class JudgmentSummariser:
         return summary
 
     def generate_summary(self, text):
-        self.run_result = Runner.run_sync(self.agent, input=text)
-        log_agent_reasoning(self.run_result)
-        return self.run_result.final_output
+        # sometimes we get back blank flynotes, so try a few times
+        attempts = 1
+        while attempts <= 3:
+            self.run_result = Runner.run_sync(self.agent, input=text)
+            log_agent_reasoning(self.run_result)
+            summary = self.run_result.final_output
+
+            flynote_length = len(summary.flynote or "")
+            if flynote_length == 0 or flynote_length > 20:
+                return summary
+
+            log.warning(
+                "Flynote is suspiciously short (%s chars); retrying attempt %s/3",
+                flynote_length,
+                attempts,
+            )
+            attempts += 1
+
+        # TODO: we could also return summary here
+        raise Exception("Could not generate summary after 3 attempts")
 
     def match_flynotes(self, summary):
         """If enabled, attempt to match flynotes in the generated summary to flynotes in the database, and replace the
@@ -342,7 +356,7 @@ class JudgmentSummariser:
 
     def top_level_flynotes_prompt(self):
         flynotes = (
-            FlynoteModel.objects.filter(depth=1)
+            FlynoteModel.objects.filter(depth=1, deprecated=False)
             .select_related("document_count_cache")
             .order_by("-document_count_cache__count", "name")[
                 : self.max_top_level_flynotes
