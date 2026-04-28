@@ -4,10 +4,9 @@ from unittest.mock import call, patch
 
 from countries_plus.models import Country
 from django.conf import settings
-
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.template.loader import render_to_string
-from django.core.exceptions import ValidationError
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
