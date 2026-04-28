@@ -200,7 +200,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
     def dispatch(self, request, *args, **kwargs):
         if not self.flynote_topics_enabled():
             return redirect(reverse("judgment_list"))
-        self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
+        self.flynote = get_object_or_404(Flynote, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
     def get_base_queryset(self):

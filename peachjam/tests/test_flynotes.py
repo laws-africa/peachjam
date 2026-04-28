@@ -1861,7 +1861,7 @@ class JudgmentListFlynoteTopicsTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Administrative law — judicial review",
+            flynote_raw="Administrative law — judicial review",
         )
         self.updater.update_for_judgment(judgment)
 
@@ -1884,7 +1884,7 @@ class JudgmentListFlynoteTopicsTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Administrative law — judicial review",
+            flynote_raw="Administrative law — judicial review",
         )
         self.updater.update_for_judgment(judgment)
 
@@ -1906,7 +1906,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
             case_summary="A short summary.",
-            flynote="Administrative law — judicial review",
+            flynote_raw="Administrative law — judicial review",
         )
         self.updater.update_for_judgment(self.judgment)
 
@@ -1918,7 +1918,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
         for node in [*leaf.get_ancestors(), leaf]:
             self.assertContains(
                 response,
-                reverse("flynote_detail", kwargs={"slug": node.slug}),
+                reverse("flynote_detail", kwargs={"pk": node.pk}),
             )
             self.assertContains(response, node.name)
 
@@ -1942,7 +1942,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             date=datetime.date(2025, 1, 2),
             language=Language.objects.first(),
             case_summary="A short summary.",
-            flynote=(
+            flynote_raw=(
                 "Criminal law — admissibility — trial within a trial; right to representation\n"
                 "Administrative law — judicial review"
             ),
@@ -1987,7 +1987,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             response,
             reverse(
                 "flynote_detail",
-                kwargs={"slug": Flynote.objects.get(name="judicial review").slug},
+                kwargs={"pk": Flynote.objects.get(name="judicial review").pk},
             ),
         )
 
