@@ -7,6 +7,7 @@ from countries_plus.models import Country
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.db import connection
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -1599,17 +1600,28 @@ class FlynoteDocumentCountTest(TestCase):
             Flynote.objects.filter(path__startswith=criminal.path).exists()
         )
 
-    @patch("peachjam.models.flynote.connection.cursor")
-    def test_refresh_skips_linked_stale_subtree_and_keeps_pruning(self, mock_cursor):
-        class NoopCursor:
+    def test_refresh_skips_linked_stale_subtree_and_keeps_pruning(self):
+        class StaleCountsCursor:
+            def __init__(self, cursor):
+                self.cursor = cursor
+
             def __enter__(self):
+                self.cursor.__enter__()
                 return self
 
             def __exit__(self, exc_type, exc, tb):
-                return False
+                return self.cursor.__exit__(exc_type, exc, tb)
 
-            def execute(self, *args, **kwargs):
-                return None
+            def execute(self, sql, params=None):
+                statement = " ".join(sql.split())
+                if statement.startswith("DELETE FROM peachjam_flynotedocumentcount"):
+                    return None
+                if statement.startswith("INSERT INTO peachjam_flynotedocumentcount"):
+                    return None
+                return self.cursor.execute(sql, params)
+
+            def __getattr__(self, name):
+                return getattr(self.cursor, name)
 
         judgment = Judgment.objects.create(
             case_name="Protected prune test",
@@ -1624,9 +1636,15 @@ class FlynoteDocumentCountTest(TestCase):
         criminal = Flynote.objects.get(name="Criminal law")
         criminal.add_child(name="Sentencing")
         FlynoteDocumentCount.objects.all().delete()
-        mock_cursor.return_value = NoopCursor()
 
-        FlynoteDocumentCount.refresh_for_flynote(criminal)
+        real_cursor = connection.cursor
+        with patch(
+            "peachjam.models.flynote.connection.cursor",
+            side_effect=lambda *args, **kwargs: StaleCountsCursor(
+                real_cursor(*args, **kwargs)
+            ),
+        ):
+            FlynoteDocumentCount.refresh_for_flynote(criminal)
 
         self.assertTrue(Flynote.objects.filter(pk=criminal.pk).exists())
         self.assertTrue(Flynote.objects.filter(name="trial within a trial").exists())
