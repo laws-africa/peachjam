@@ -502,32 +502,18 @@ class Judgment(CoreDocument):
         ):
             return []
 
-        # Import lazily so the model does not take a hard import dependency on the
-        # analysis module at import time.
-        from peachjam.analysis.flynotes import FlynoteParser
-
-        parser = FlynoteParser()
-        linked_nodes_by_path = {}
-        for judgment_flynote in self.flynotes.select_related("flynote"):
-            flynote = judgment_flynote.flynote
-            nodes = [*flynote.get_ancestors(), flynote]
-            linked_nodes_by_path[tuple(node.name for node in nodes)] = nodes
-
-        linked_lines = []
-        text = parser.clean(self.flynote)
-        if not text:
-            return linked_lines
-
-        for line in parser.normalise_multiline_text(text).splitlines():
-            items = []
-            for path in parser.parse(line):
-                nodes = linked_nodes_by_path.get(tuple(path))
-                if nodes:
-                    items.append({"flynote": nodes[-1], "nodes": nodes})
-            if items:
-                linked_lines.append(items)
-
-        return linked_lines
+        return [
+            {
+                "flynote": judgment_flynote.flynote,
+                "nodes": [
+                    *judgment_flynote.flynote.get_ancestors(),
+                    judgment_flynote.flynote,
+                ],
+            }
+            for judgment_flynote in self.flynotes.select_related("flynote").order_by(
+                "flynote__path"
+            )
+        ]
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""

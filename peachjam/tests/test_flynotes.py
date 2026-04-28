@@ -1671,7 +1671,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             )
             self.assertContains(response, node.name)
 
-    def test_linked_flynotes_preserve_multiline_grouping(self):
+    def test_linked_flynotes_use_judgment_flynotes_in_path_order(self):
         judgment = Judgment.objects.create(
             case_name="Multiline flynote test",
             jurisdiction=Country.objects.first(),
@@ -1688,23 +1688,24 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         self.assertEqual(
             [
-                [tuple(node.name for node in item["nodes"]) for item in line]
-                for line in judgment.linked_flynotes
+                tuple(node.name for node in item["nodes"])
+                for item in judgment.linked_flynotes
             ],
             [
-                [
-                    (
-                        "Criminal law",
-                        "admissibility",
-                        "trial within a trial",
-                    ),
-                    (
-                        "Criminal law",
-                        "admissibility",
-                        "right to representation",
-                    ),
-                ],
-                [("Administrative law", "judicial review")],
+                (
+                    "Administrative law",
+                    "judicial review",
+                ),
+                (
+                    "Criminal law",
+                    "admissibility",
+                    "right to representation",
+                ),
+                (
+                    "Criminal law",
+                    "admissibility",
+                    "trial within a trial",
+                ),
             ],
         )
 
