@@ -1716,7 +1716,10 @@ class FlynoteMergeTest(TestCase):
             language=Language.objects.first(),
         )
 
-    def test_merge_moves_direct_judgments_and_reparents_children(self):
+    @patch("peachjam.signals.serialise_judgment_flynote_tree")
+    def test_merge_moves_direct_judgments_and_reparents_children(
+        self, mock_serialise_judgment_flynote_tree
+    ):
         root = Flynote.add_root(name="Civil procedure")
         target = root.add_child(name="Stay of execution")
         source = root.add_child(name="Stays of execution")
@@ -1728,6 +1731,7 @@ class FlynoteMergeTest(TestCase):
         JudgmentFlynote.objects.create(
             document=descendant_judgment, flynote=source_child
         )
+        mock_serialise_judgment_flynote_tree.reset_mock()
 
         target.merge_sources_into([source])
 
@@ -1747,6 +1751,7 @@ class FlynoteMergeTest(TestCase):
                 flynote=source_child,
             ).exists()
         )
+        mock_serialise_judgment_flynote_tree.assert_called_once_with(direct_judgment.pk)
 
     def test_merge_rejects_duplicate_child_names_under_target(self):
         root = Flynote.add_root(name="Civil procedure")
