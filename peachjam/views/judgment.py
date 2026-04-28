@@ -2,6 +2,7 @@ import operator
 from collections import defaultdict
 from functools import reduce
 
+from django.conf import settings
 from django.contrib import messages
 from django.db.models import F, IntegerField, Q, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
@@ -43,7 +44,10 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun"] = _("judgment")
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
-        context["show_flynote_topics"] = Flynote.get_root_nodes().exists()
+        context["show_flynote_topics"] = (
+            settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+            and Flynote.get_root_nodes().exists()
+        )
         self.add_entity_profile(context)
         self.get_court_classes(context)
         return context
@@ -56,6 +60,10 @@ class JudgmentListView(TemplateView):
 
 
 class FlynoteViewMixin:
+    @staticmethod
+    def flynote_topics_enabled():
+        return settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+
     @staticmethod
     def annotate_with_counts(qs):
         return qs.annotate(
@@ -129,7 +137,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     paginate_by = 30
 
     def get(self, request, *args, **kwargs):
-        if not Flynote.get_root_nodes().exists():
+        if not self.flynote_topics_enabled() or not Flynote.get_root_nodes().exists():
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
@@ -190,6 +198,8 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
+        if not self.flynote_topics_enabled():
+            return redirect(reverse("judgment_list"))
         self.flynote = get_object_or_404(Flynote, slug=self.kwargs["slug"])
         return super().dispatch(request, *args, **kwargs)
 

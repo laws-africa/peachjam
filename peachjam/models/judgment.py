@@ -2,6 +2,7 @@ import logging
 from urllib.parse import quote
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -495,7 +496,10 @@ class Judgment(CoreDocument):
 
     @cached_property
     def linked_flynotes(self):
-        if not self.flynote:
+        if (
+            not settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+            or not self.flynote
+        ):
             return []
 
         # Import lazily so the model does not take a hard import dependency on the

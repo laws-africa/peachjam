@@ -3,8 +3,9 @@ from io import StringIO
 from unittest.mock import call, patch
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
 
@@ -1516,6 +1517,7 @@ class FlynoteDocumentCountTest(TestCase):
             FlynoteDocumentCount.refresh_for_flynote(None)
 
 
+@override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})
 class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -1570,7 +1572,26 @@ class FlynoteListViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("judgment_list"))
 
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_redirects_to_judgment_list_when_tree_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="View Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Administrative law \u2014 judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
 
+        response = self.client.get(reverse("flynote_list"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("judgment_list"))
+
+
+@override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})
 class JudgmentListFlynoteTopicsTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -1602,7 +1623,26 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse("flynote_list"))
 
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_judgment_list_hides_topic_link_when_tree_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
 
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+
+@override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})
 class JudgmentDetailFlynoteNavigationTest(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
@@ -1666,6 +1706,25 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
                 ],
                 [("Administrative law", "judicial review")],
             ],
+        )
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_judgment_detail_falls_back_to_plain_flynote_text_when_tree_setting_disabled(
+        self,
+    ):
+        response = self.client.get(self.judgment.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.judgment.linked_flynotes, [])
+        self.assertContains(response, "Administrative law — judicial review")
+        self.assertNotContains(
+            response,
+            reverse(
+                "flynote_detail",
+                kwargs={"slug": Flynote.objects.get(name="judicial review").slug},
+            ),
         )
 
 
