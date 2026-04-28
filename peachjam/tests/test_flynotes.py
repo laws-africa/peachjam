@@ -5,6 +5,7 @@ from unittest.mock import call, patch
 from countries_plus.models import Country
 from django.conf import settings
 from django.core.management import call_command
+from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
@@ -1670,6 +1671,18 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
                 reverse("flynote_detail", kwargs={"slug": node.slug}),
             )
             self.assertContains(response, node.name)
+
+    def test_linked_flynotes_template_uses_semantic_list_markup(self):
+        html = render_to_string(
+            "peachjam/document/_linked_flynotes.html",
+            {
+                "linked_flynotes": self.judgment.linked_flynotes,
+                "flynote_text": self.judgment.flynote,
+            },
+        )
+
+        self.assertIn('<ul class="list-unstyled mb-2 fst-italic">', html)
+        self.assertEqual(html.count("<li>"), len(self.judgment.linked_flynotes))
 
     def test_linked_flynotes_use_judgment_flynotes_in_path_order(self):
         judgment = Judgment.objects.create(
