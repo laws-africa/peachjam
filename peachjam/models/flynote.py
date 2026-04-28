@@ -3,13 +3,15 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
+from django.db.models import Exists, OuterRef
+from django.db.models.deletion import ProtectedError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
 
 from peachjam.models.lifecycle import on_attribute_changed
-from peachjam.tasks import refresh_flynote_document_count
+from peachjam.tasks import queue_refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
 
@@ -220,7 +222,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
                 source.delete()
 
-            refresh_flynote_document_count(target.get_root().pk)
+            queue_refresh_flynote_document_count(target.get_root().pk)
             log.info("Finished merging flynotes")
 
     @classmethod
@@ -364,17 +366,28 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%", root_path + "%"],
                 )
 
-            # After rebuilding cumulative counts, any node in this subtree
-            # without a count row has no linked documents in its subtree and
-            # can be pruned safely using Treebeard's delete handling.
+            # Stale count rows can briefly make a linked flynote look empty, so
+            # only consider nodes with no linked judgments anywhere in their
+            # subtree and still guard against races during delete.
             log.info("Pruning empty flynotes under root %s", root)
+            linked_judgments = JudgmentFlynote.objects.filter(
+                flynote__path__startswith=OuterRef("path")
+            )
             empty_flynotes = list(
                 Flynote.objects.filter(path__startswith=root_path)
                 .filter(document_count_cache__isnull=True)
+                .annotate(has_linked_judgments=Exists(linked_judgments))
+                .filter(has_linked_judgments=False)
                 .order_by("-depth", "-path")
             )
             for flynote in empty_flynotes:
-                flynote.delete()
+                try:
+                    flynote.delete()
+                except ProtectedError:
+                    log.warning(
+                        "Skipping prune of flynote %s because linked judgments still protect it.",
+                        flynote.pk,
+                    )
 
         log.info("Refreshed document counts for flynote tree rooted at %s", root)
 

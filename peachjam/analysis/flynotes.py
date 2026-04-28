@@ -27,7 +27,7 @@ from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 
 from peachjam.models.flynote import Flynote, JudgmentFlynote
-from peachjam.tasks import refresh_flynote_document_count
+from peachjam.tasks import queue_refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
 
@@ -2812,4 +2812,4 @@ class FlynoteUpdater:
 
         if refresh_counts and leaf_flynotes:
             for root_id in roots_to_refresh:
-                refresh_flynote_document_count(root_id, schedule=30 * 60)
+                queue_refresh_flynote_document_count(root_id)

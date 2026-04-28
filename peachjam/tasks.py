@@ -13,6 +13,8 @@ from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
 
+FLYNOTE_REFRESH_DELAY = 24 * 60 * 60
+
 
 class PatchedDBTaskRunner(DBTaskRunner):
     """Patch DBTaskRunner to be more efficient when pulling tasks from the database. This can be dropped once
@@ -429,6 +431,27 @@ def refresh_flynote_document_count(root_id):
 
     log.info(f"Refreshing flynote counts for root {root_id}")
     FlynoteDocumentCount.refresh_for_flynote(root)
+
+
+def queue_refresh_flynote_document_count(root_id, schedule=FLYNOTE_REFRESH_DELAY):
+    existing_task = (
+        Task.objects.get_task(
+            refresh_flynote_document_count.name,
+            args=(root_id,),
+            kwargs={},
+        )
+        .filter(locked_at__isnull=True)
+        .order_by("run_at")
+        .first()
+    )
+    if existing_task:
+        return existing_task
+
+    return refresh_flynote_document_count(
+        root_id,
+        schedule=schedule,
+        remove_existing_tasks=False,
+    )
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
