@@ -717,7 +717,7 @@ class Judgment(CoreDocument):
         """The flynote_raw field has changed, copy it to flynote and populate the flynote tree (if configured)."""
         self.flynote = self.flynote_raw
 
-        if settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"]:
+        if settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"] and self.pk:
             # This will eventually update both flynote and flynote_raw to match the flynote tree.
             # We set flynote above since this background task may take a while to run.
             update_flynote_taxonomy(self.pk)
