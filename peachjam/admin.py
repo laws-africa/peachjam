@@ -4,6 +4,7 @@ import logging
 from datetime import date
 
 from background_task.models import Task
+from background_task.tasks import TaskSchedule
 from ckeditor.widgets import CKEditorWidget
 from countries_plus.models import Country
 from dal import autocomplete
@@ -147,6 +148,7 @@ from peachjam.resources import (
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam.tasks import (
     generate_judgment_summary,
+    refresh_flynote_document_count,
     update_extracted_citations_for_a_work,
 )
 from peachjam_search.models import SavedSearch
@@ -1255,7 +1257,7 @@ class FlynoteAdmin(admin.ModelAdmin):
         "numchild",
         "children_links",
     )
-    actions = ("mark_deprecated", "mark_active")
+    actions = ("refresh_document_counts_now", "mark_deprecated", "mark_active")
 
     def has_add_permission(self, request):
         return False
@@ -1426,6 +1428,34 @@ class FlynoteAdmin(admin.ModelAdmin):
                 continue
             roots.append(flynote)
         return roots
+
+    def get_action_target_roots(self, queryset):
+        root_paths = {
+            path[: self.model.steplen]
+            for path in queryset.values_list("path", flat=True)
+        }
+        return self.model.get_root_nodes().filter(path__in=root_paths).order_by("path")
+
+    @admin.action(description=_("Refresh selected flynote roots now (background)"))
+    def refresh_document_counts_now(self, request, queryset):
+        roots = list(self.get_action_target_roots(queryset))
+        scheduled_at = timezone.now()
+        for root in roots:
+            refresh_flynote_document_count(
+                root.pk,
+                schedule={
+                    "priority": -1,
+                    "run_at": scheduled_at,
+                    "action": TaskSchedule.RESCHEDULE_EXISTING,
+                },
+            )
+
+        self.message_user(
+            request,
+            _("Queued immediate refresh for %(count)s flynote roots.")
+            % {"count": len(roots)},
+            messages.SUCCESS,
+        )
 
     @admin.action(description=_("Mark selected flynotes as deprecated"))
     def mark_deprecated(self, request, queryset):
