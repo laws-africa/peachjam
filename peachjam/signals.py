@@ -19,7 +19,6 @@ from peachjam.models import (
     DocumentChatThread,
     ExtractedCitation,
     Folder,
-    Judgment,
     JudgmentFlynote,
     Relationship,
     SavedDocument,
@@ -32,7 +31,7 @@ from peachjam.models.core_document import DocumentContent
 from peachjam.tasks import (
     extract_criminal_data,
     generate_judgment_summary,
-    queue_refresh_flynote_roots,
+    refresh_flynote_document_count,
     serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
 )
@@ -300,26 +299,17 @@ def chat_thread_deleted(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=JudgmentFlynote)
 def judgment_flynote_saved_serialise_judgment(sender, instance, raw, **kwargs):
     if not raw:
+        root_id = instance.flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
         serialise_judgment_flynote_tree(instance.document_id)
 
 
 @receiver(signals.post_delete, sender=JudgmentFlynote)
 def judgment_flynote_deleted_serialise_judgment(sender, instance, **kwargs):
-    serialise_judgment_flynote_tree(instance.document_id)
-
-
-@receiver(signals.pre_delete, sender=Judgment)
-def judgment_deleting_collect_flynote_roots(sender, instance, **kwargs):
-    instance._affected_flynote_root_ids = {
-        judgment_flynote.flynote.get_root().pk
-        for judgment_flynote in instance.flynotes.select_related("flynote")
-    }
-
-
-@receiver(signals.post_delete, sender=Judgment)
-def judgment_deleted_schedule_flynote_refresh(sender, instance, **kwargs):
+    root_id = instance.flynote.get_root().pk
     transaction.on_commit(
-        lambda: queue_refresh_flynote_roots(
-            getattr(instance, "_affected_flynote_root_ids", set())
-        )
+        lambda root_id=root_id: refresh_flynote_document_count(root_id)
     )
+    serialise_judgment_flynote_tree(instance.document_id)

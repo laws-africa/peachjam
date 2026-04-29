@@ -11,7 +11,7 @@ from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
 
 from peachjam.models.lifecycle import on_attribute_changed
-from peachjam.tasks import queue_refresh_flynote_roots
+from peachjam.tasks import refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
 
@@ -53,11 +53,6 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
     name = models.CharField(_("name"), max_length=255)
     deprecated = models.BooleanField(_("deprecated"), default=False, db_index=True)
-    document_count_refresh_pending = models.BooleanField(
-        _("document count refresh pending"),
-        default=False,
-        db_index=True,
-    )
     node_order_by = ["name"]
 
     class Meta:
@@ -227,7 +222,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
                 source.delete()
 
-            queue_refresh_flynote_roots({target.get_root().pk})
+            refresh_flynote_document_count(target.get_root().pk)
             log.info("Finished merging flynotes")
 
     @classmethod

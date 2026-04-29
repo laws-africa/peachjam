@@ -17,9 +17,7 @@ from peachjam.models import Court, Judgment
 from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 from peachjam.tasks import (
     FLYNOTE_REFRESH_DELAY,
-    queue_refresh_flynote_roots,
     refresh_flynote_document_count,
-    refresh_pending_flynote_document_counts,
 )
 
 
@@ -1432,34 +1430,25 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         self.assertEqual(affected_roots, {"Administrative law", "Criminal law"})
 
 
-class ScheduleRefreshFlynoteRootsTest(TestCase):
+class RefreshFlynoteDocumentCountTaskTest(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
     def setUp(self):
         Task.objects.all().delete()
 
-    def test_marks_dirty_roots_and_schedules_one_container_task(self):
-        admin = Flynote.add_root(name="Administrative law")
-        criminal = Flynote.add_root(name="Criminal law")
+    def test_schedules_for_12_hours(self):
+        before = datetime.datetime.now(datetime.timezone.utc)
 
-        queue_refresh_flynote_roots({admin.pk})
-        queue_refresh_flynote_roots({criminal.pk})
+        task = refresh_flynote_document_count(123)
 
-        admin.refresh_from_db()
-        criminal.refresh_from_db()
-        self.assertTrue(admin.document_count_refresh_pending)
-        self.assertTrue(criminal.document_count_refresh_pending)
-
-        self.assertEqual(
-            Task.objects.filter(
-                task_name=refresh_pending_flynote_document_counts.name,
-            ).count(),
-            1,
+        self.assertEqual(task.task_name, refresh_flynote_document_count.name)
+        self.assertGreaterEqual(
+            task.run_at,
+            before + datetime.timedelta(seconds=FLYNOTE_REFRESH_DELAY - 60),
         )
 
-    def test_keeps_existing_pending_container_task(self):
+    def test_keeps_existing_pending_task_for_same_root(self):
         admin = Flynote.add_root(name="Administrative law")
-        criminal = Flynote.add_root(name="Criminal law")
 
         with patch("background_task.tasks.timezone.now") as mock_now:
             first_now = datetime.datetime(
@@ -1469,18 +1458,16 @@ class ScheduleRefreshFlynoteRootsTest(TestCase):
                 2025, 1, 1, 10, 0, tzinfo=datetime.timezone.utc
             )
             mock_now.return_value = first_now
-            queue_refresh_flynote_roots({admin.pk})
-            first_task = Task.objects.get(
-                task_name=refresh_pending_flynote_document_counts.name
-            )
+            refresh_flynote_document_count(admin.pk)
+            first_task = Task.objects.get(task_name=refresh_flynote_document_count.name)
 
             mock_now.return_value = second_now
-            queue_refresh_flynote_roots({criminal.pk})
+            refresh_flynote_document_count(admin.pk)
 
-        task = Task.objects.get(task_name=refresh_pending_flynote_document_counts.name)
+        task = Task.objects.get(task_name=refresh_flynote_document_count.name)
         self.assertEqual(
             Task.objects.filter(
-                task_name=refresh_pending_flynote_document_counts.name,
+                task_name=refresh_flynote_document_count.name,
             ).count(),
             1,
         )
@@ -1490,32 +1477,19 @@ class ScheduleRefreshFlynoteRootsTest(TestCase):
             first_now + datetime.timedelta(seconds=FLYNOTE_REFRESH_DELAY),
         )
 
-        admin.refresh_from_db()
-        criminal.refresh_from_db()
-        self.assertTrue(admin.document_count_refresh_pending)
-        self.assertTrue(criminal.document_count_refresh_pending)
-
-    @patch("peachjam.models.flynote.FlynoteDocumentCount.refresh_for_flynote")
-    def test_container_refreshes_dirty_roots_and_clears_marks(self, mock_refresh):
+    def test_different_roots_get_different_tasks(self):
         admin = Flynote.add_root(name="Administrative law")
         criminal = Flynote.add_root(name="Criminal law")
-        Flynote.get_root_nodes().filter(pk__in=[admin.pk, criminal.pk]).update(
-            document_count_refresh_pending=True
+
+        refresh_flynote_document_count(admin.pk)
+        refresh_flynote_document_count(criminal.pk)
+
+        self.assertEqual(
+            Task.objects.filter(task_name=refresh_flynote_document_count.name).count(),
+            2,
         )
 
-        refresh_pending_flynote_document_counts.now()
-
-        refreshed_root_ids = {call.args[0].pk for call in mock_refresh.call_args_list}
-        self.assertEqual(refreshed_root_ids, {admin.pk, criminal.pk})
-
-        admin.refresh_from_db()
-        criminal.refresh_from_db()
-        self.assertFalse(admin.document_count_refresh_pending)
-        self.assertFalse(criminal.document_count_refresh_pending)
-
-    def test_judgment_delete_marks_root_and_queues_container_refresh(
-        self,
-    ):
+    def test_judgment_flynote_delete_queues_delayed_refresh_for_affected_root(self):
         judgment = Judgment.objects.create(
             case_name="Delete scheduling test",
             jurisdiction=Country.objects.first(),
@@ -1531,17 +1505,38 @@ class ScheduleRefreshFlynoteRootsTest(TestCase):
         with self.captureOnCommitCallbacks(execute=True):
             judgment.delete()
 
-        root = Flynote.objects.get(pk=root_id)
-        self.assertTrue(root.document_count_refresh_pending)
-        self.assertEqual(
-            Task.objects.filter(
-                task_name=refresh_pending_flynote_document_counts.name
-            ).count(),
-            1,
+        self.assertTrue(
+            Task.objects.get_task(
+                refresh_flynote_document_count.name,
+                args=(root_id,),
+                kwargs={},
+            ).exists()
+        )
+
+    def test_judgment_flynote_save_queues_delayed_refresh_for_affected_root(self):
+        root = Flynote.add_root(name="Criminal law")
+        leaf = root.add_child(name="Admissibility")
+        judgment = Judgment.objects.create(
+            case_name="Save scheduling test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            JudgmentFlynote.objects.create(document=judgment, flynote=leaf)
+
+        self.assertTrue(
+            Task.objects.get_task(
+                refresh_flynote_document_count.name,
+                args=(root.pk,),
+                kwargs={},
+            ).exists()
         )
 
     @patch("peachjam.models.flynote.FlynoteDocumentCount.refresh_for_flynote")
-    def test_legacy_per_root_refresh_task_uses_shared_refresh_logic(self, mock_refresh):
+    def test_refresh_task_uses_shared_refresh_logic(self, mock_refresh):
         root = Flynote.add_root(name="Criminal law")
 
         refresh_flynote_document_count.now(root.pk)
@@ -1942,15 +1937,15 @@ class FlynoteMergeTest(TestCase):
         )
         mock_serialise_judgment_flynote_tree.assert_called_once_with(direct_judgment.pk)
 
-    @patch("peachjam.models.flynote.queue_refresh_flynote_roots")
-    def test_merge_queues_container_refresh_for_affected_root(self, mock_refresh):
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_queues_refresh_for_affected_root(self, mock_refresh):
         root = Flynote.add_root(name="Civil procedure")
         target = root.add_child(name="Stay of execution")
         source = root.add_child(name="Stays of execution")
 
         target.merge_sources_into([source])
 
-        mock_refresh.assert_called_once_with({root.pk})
+        mock_refresh.assert_called_once_with(root.pk)
 
     def test_merge_rejects_duplicate_child_names_under_target(self):
         root = Flynote.add_root(name="Civil procedure")
