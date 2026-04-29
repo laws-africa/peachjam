@@ -4,7 +4,6 @@ import logging
 from datetime import date
 
 from background_task.models import Task
-from background_task.tasks import TaskSchedule
 from ckeditor.widgets import CKEditorWidget
 from countries_plus.models import Country
 from dal import autocomplete
@@ -148,7 +147,6 @@ from peachjam.resources import (
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam.tasks import (
     generate_judgment_summary,
-    refresh_flynote_document_count,
     update_extracted_citations_for_a_work,
 )
 from peachjam_search.models import SavedSearch
@@ -1436,24 +1434,17 @@ class FlynoteAdmin(admin.ModelAdmin):
         }
         return self.model.get_root_nodes().filter(path__in=root_paths).order_by("path")
 
-    @admin.action(description=_("Refresh selected flynote roots now (background)"))
+    @admin.action(description=_("Refresh selected flynote roots now"))
     def refresh_document_counts_now(self, request, queryset):
+        from peachjam.models.flynote import FlynoteDocumentCount
+
         roots = list(self.get_action_target_roots(queryset))
-        scheduled_at = timezone.now()
         for root in roots:
-            refresh_flynote_document_count(
-                root.pk,
-                schedule={
-                    "priority": -1,
-                    "run_at": scheduled_at,
-                    "action": TaskSchedule.RESCHEDULE_EXISTING,
-                },
-            )
+            FlynoteDocumentCount.refresh_for_flynote(root)
 
         self.message_user(
             request,
-            _("Queued immediate refresh for %(count)s flynote roots.")
-            % {"count": len(roots)},
+            _("Refreshed %(count)s flynote roots.") % {"count": len(roots)},
             messages.SUCCESS,
         )
 

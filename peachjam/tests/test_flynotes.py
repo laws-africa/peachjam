@@ -11,7 +11,6 @@ from django.core.management import call_command
 from django.db import connection
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
-from django.utils import timezone
 from languages_plus.models import Language
 
 from peachjam.admin import FlynoteAdmin
@@ -1572,34 +1571,21 @@ class RefreshFlynoteDocumentCountTaskTest(TestCase):
 
         mock_refresh.assert_called_once_with(root)
 
-    def test_admin_action_reschedules_selected_root_to_run_now(self):
+    @patch("peachjam.models.flynote.FlynoteDocumentCount.refresh_for_flynote")
+    def test_admin_action_refreshes_selected_root_immediately(self, mock_refresh):
         root = Flynote.add_root(name="Criminal law")
         leaf = root.add_child(name="Admissibility")
-        refresh_flynote_document_count(root.pk)
-        original_task = Task.objects.get(task_name=refresh_flynote_document_count.name)
-        original_run_at = original_task.run_at
 
         request = RequestFactory().post("/")
         model_admin = FlynoteAdmin(Flynote, AdminSite())
 
-        before = timezone.now()
         with patch.object(model_admin, "message_user") as mock_message:
             model_admin.refresh_document_counts_now(
                 request,
                 Flynote.objects.filter(pk=leaf.pk),
             )
 
-        task = Task.objects.get(task_name=refresh_flynote_document_count.name)
-        self.assertEqual(
-            Task.objects.filter(task_name=refresh_flynote_document_count.name).count(),
-            1,
-        )
-        self.assertEqual(task.pk, original_task.pk)
-        self.assertLess(task.run_at, original_run_at)
-        self.assertGreaterEqual(task.run_at, before - datetime.timedelta(seconds=1))
-        self.assertLessEqual(
-            task.run_at, timezone.now() + datetime.timedelta(seconds=1)
-        )
+        mock_refresh.assert_called_once_with(root)
         mock_message.assert_called_once()
 
 
