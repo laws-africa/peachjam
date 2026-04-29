@@ -1513,6 +1513,32 @@ class RefreshFlynoteDocumentCountTaskTest(TestCase):
             ).exists()
         )
 
+    def test_judgment_flynote_delete_without_cached_flynote_still_queues_refresh(self):
+        judgment = Judgment.objects.create(
+            case_name="Direct delete scheduling test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Criminal law \u2014 admissibility",
+        )
+        FlynoteUpdater().update_for_judgment(judgment)
+        judgment_flynote = JudgmentFlynote.objects.only(
+            "id", "document_id", "flynote_id"
+        ).get(document=judgment)
+        root_id = Flynote.objects.get(pk=judgment_flynote.flynote_id).get_root().pk
+
+        with self.captureOnCommitCallbacks(execute=True):
+            judgment_flynote.delete()
+
+        self.assertTrue(
+            Task.objects.get_task(
+                refresh_flynote_document_count.name,
+                args=(root_id,),
+                kwargs={},
+            ).exists()
+        )
+
     def test_judgment_flynote_save_queues_delayed_refresh_for_affected_root(self):
         root = Flynote.add_root(name="Criminal law")
         leaf = root.add_child(name="Admissibility")
@@ -1536,7 +1562,7 @@ class RefreshFlynoteDocumentCountTaskTest(TestCase):
         )
 
     @patch("peachjam.models.flynote.FlynoteDocumentCount.refresh_for_flynote")
-    def test_refresh_task_uses_shared_refresh_logic(self, mock_refresh):
+    def test_refresh_task_refreshes_root_directly(self, mock_refresh):
         root = Flynote.add_root(name="Criminal law")
 
         refresh_flynote_document_count.now(root.pk)

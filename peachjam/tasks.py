@@ -424,18 +424,6 @@ def update_flynote_taxonomy(judgment_id):
         )
 
 
-def refresh_flynote_roots_now(root_ids):
-    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
-
-    roots = list(Flynote.get_root_nodes().filter(pk__in=set(root_ids)).order_by("path"))
-    refreshed = 0
-    for root in roots:
-        log.info("Refreshing flynote counts for root %s", root.pk)
-        FlynoteDocumentCount.refresh_for_flynote(root)
-        refreshed += 1
-    return refreshed
-
-
 @background(
     queue="peachjam",
     schedule={
@@ -445,9 +433,15 @@ def refresh_flynote_roots_now(root_ids):
     },
 )
 def refresh_flynote_document_count(root_id):
-    refreshed = refresh_flynote_roots_now([root_id])
-    if not refreshed:
+    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+
+    root = Flynote.get_root_nodes().filter(pk=root_id).first()
+    if not root:
         log.info("No flynote root with id %s exists, ignoring.", root_id)
+        return
+
+    log.info("Refreshing flynote counts for root %s", root.pk)
+    FlynoteDocumentCount.refresh_for_flynote(root)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

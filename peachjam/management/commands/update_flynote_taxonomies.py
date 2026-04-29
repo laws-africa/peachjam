@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from peachjam.analysis.flynotes import FlynoteUpdater
 from peachjam.models import Judgment
-from peachjam.tasks import refresh_flynote_roots_now
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 
 
 class Command(BaseCommand):
@@ -61,7 +61,12 @@ class Command(BaseCommand):
             self.stdout.write(f"Processing: {judgment.case_name}")
             affected_root_ids = updater.update_for_judgment(judgment)
             if not skip_counts:
-                refresh_flynote_roots_now(affected_root_ids)
+                for root in (
+                    Flynote.get_root_nodes()
+                    .filter(pk__in=set(affected_root_ids))
+                    .order_by("path")
+                ):
+                    FlynoteDocumentCount.refresh_for_flynote(root)
             self.stdout.write(self.style.SUCCESS("Done."))
             return
 
@@ -115,7 +120,12 @@ class Command(BaseCommand):
             msg += f" Last pk processed: {last_pk}."
 
         if not skip_counts and affected_root_ids:
-            refresh_flynote_roots_now(affected_root_ids)
+            for root in (
+                Flynote.get_root_nodes()
+                .filter(pk__in=set(affected_root_ids))
+                .order_by("path")
+            ):
+                FlynoteDocumentCount.refresh_for_flynote(root)
             msg += " Flynote counts refreshed."
 
         self.stdout.write(self.style.SUCCESS(msg))

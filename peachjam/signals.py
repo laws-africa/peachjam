@@ -308,8 +308,12 @@ def judgment_flynote_saved_serialise_judgment(sender, instance, raw, **kwargs):
 
 @receiver(signals.post_delete, sender=JudgmentFlynote)
 def judgment_flynote_deleted_serialise_judgment(sender, instance, **kwargs):
-    root_id = instance.flynote.get_root().pk
-    transaction.on_commit(
-        lambda root_id=root_id: refresh_flynote_document_count(root_id)
-    )
+    from peachjam.models.flynote import Flynote
+
+    flynote = Flynote.objects.filter(pk=instance.flynote_id).first()
+    if flynote:
+        root_id = flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
     serialise_judgment_flynote_tree(instance.document_id)
