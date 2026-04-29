@@ -1922,6 +1922,14 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             )
             self.assertContains(response, node.name)
 
+    def test_flynote_detail_hides_document_type_column(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
     def test_linked_flynotes_template_uses_semantic_list_markup(self):
         html = render_to_string(
             "peachjam/document/_linked_flynotes.html",

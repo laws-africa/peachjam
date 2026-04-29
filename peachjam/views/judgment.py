@@ -215,6 +215,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["doc_table_show_doc_type"] = False
 
         if not self.request.htmx:
             self.popular_subtopics(context)
