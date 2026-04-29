@@ -237,13 +237,15 @@ It's NOT recommended to block:
 Go to Security, Security rules:
 
 - Create rule, custom rules
-- Give it a name (such as "gazettes")
+- Give it a name (such as "akn")
 - When incoming requests match…
   - Field: URI path
   - Operator: starts with
   - Value: your prefix such as `/akn/` for all documents
 - Action: mananged challenge
 - Click Deploy
+
+NOTE: for multi-lingual sites, you must add multiple rules for each language prefix, such as `/en/akn/`, `/fr/akn/`.
 
 ### Preventing bots using a wildcard path
 

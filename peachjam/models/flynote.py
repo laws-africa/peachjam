@@ -3,6 +3,8 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
+from django.db.models import Exists, OuterRef
+from django.db.models.deletion import ProtectedError
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
@@ -135,7 +137,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
         Direct judgment links on each source move to this flynote. Source
         children are re-parented under this flynote. Source flynotes are then
-        deleted explicitly, and document counts are refreshed in background.
+        deleted explicitly.
         """
         from peachjam.analysis.flynotes import FlynoteParser
 
@@ -364,17 +366,33 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%", root_path + "%"],
                 )
 
-            # After rebuilding cumulative counts, any node in this subtree
-            # without a count row has no linked documents in its subtree and
-            # can be pruned safely using Treebeard's delete handling.
+            # Stale count rows can briefly make a linked flynote look empty, so
+            # only consider nodes with no linked judgments anywhere in their
+            # subtree and still guard against races during delete.
             log.info("Pruning empty flynotes under root %s", root)
+            linked_judgments = JudgmentFlynote.objects.filter(
+                flynote__path__startswith=OuterRef("path")
+            )
             empty_flynotes = list(
                 Flynote.objects.filter(path__startswith=root_path)
                 .filter(document_count_cache__isnull=True)
+                .annotate(has_linked_judgments=Exists(linked_judgments))
+                .filter(has_linked_judgments=False)
                 .order_by("-depth", "-path")
             )
             for flynote in empty_flynotes:
-                flynote.delete()
+                try:
+                    flynote.delete()
+                except Flynote.DoesNotExist:
+                    log.warning(
+                        "Skipping prune of flynote %s because it was already deleted.",
+                        flynote.pk,
+                    )
+                except ProtectedError:
+                    log.warning(
+                        "Skipping prune of flynote %s because linked judgments still protect it.",
+                        flynote.pk,
+                    )
 
         log.info("Refreshed document counts for flynote tree rooted at %s", root)
 

@@ -3,7 +3,7 @@ import logging
 import sentry_sdk
 from background_task import background
 from background_task.signals import task_error
-from background_task.tasks import DBTaskRunner, Task, logger, tasks
+from background_task.tasks import DBTaskRunner, Task, TaskSchedule, logger, tasks
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
@@ -12,6 +12,8 @@ from sentry_sdk.tracing import TransactionSource
 from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
+
+FLYNOTE_REFRESH_DELAY = 12 * 60 * 60
 
 
 class PatchedDBTaskRunner(DBTaskRunner):
@@ -415,19 +417,30 @@ def update_flynote_taxonomy(judgment_id):
         return
 
     log.info(f"Updating flynotes for judgment {judgment_id}")
-    FlynoteUpdater().update_for_judgment(judgment, refresh_counts=True)
+    affected_root_ids = FlynoteUpdater().update_for_judgment(judgment)
+    for root_id in affected_root_ids:
+        refresh_flynote_document_count(
+            root_id,
+        )
 
 
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
+@background(
+    queue="peachjam",
+    schedule={
+        "priority": -1,
+        "run_at": FLYNOTE_REFRESH_DELAY,
+        "action": TaskSchedule.CHECK_EXISTING,
+    },
+)
 def refresh_flynote_document_count(root_id):
     from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 
-    root = Flynote.objects.filter(pk=root_id).first()
+    root = Flynote.get_root_nodes().filter(pk=root_id).first()
     if not root:
-        log.info(f"No flynote root with id {root_id} exists, ignoring.")
+        log.info("No flynote root with id %s exists, ignoring.", root_id)
         return
 
-    log.info(f"Refreshing flynote counts for root {root_id}")
+    log.info("Refreshing flynote counts for root %s", root.pk)
     FlynoteDocumentCount.refresh_for_flynote(root)
 
 

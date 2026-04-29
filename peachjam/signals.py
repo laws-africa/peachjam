@@ -31,6 +31,7 @@ from peachjam.models.core_document import DocumentContent
 from peachjam.tasks import (
     extract_criminal_data,
     generate_judgment_summary,
+    refresh_flynote_document_count,
     serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
 )
@@ -298,9 +299,21 @@ def chat_thread_deleted(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=JudgmentFlynote)
 def judgment_flynote_saved_serialise_judgment(sender, instance, raw, **kwargs):
     if not raw:
+        root_id = instance.flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
         serialise_judgment_flynote_tree(instance.document_id)
 
 
 @receiver(signals.post_delete, sender=JudgmentFlynote)
 def judgment_flynote_deleted_serialise_judgment(sender, instance, **kwargs):
+    from peachjam.models.flynote import Flynote
+
+    flynote = Flynote.objects.filter(pk=instance.flynote_id).first()
+    if flynote:
+        root_id = flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
     serialise_judgment_flynote_tree(instance.document_id)
