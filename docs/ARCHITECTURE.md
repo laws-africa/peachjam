@@ -312,6 +312,14 @@ Views and templates must avoid leaking user-specific state into cacheable respon
 
 Background work is handled through `django-background-tasks-updated`.
 
+Tasks are defined in `tasks.py` modules across the platform and supporting apps. They are queued on demand and sometimes
+also scheduled to run at intervals.
+
+Treat `tasks.py` as an entrypoint for background work. The task code short be short and focused on loading the state
+necessary to run the task by delegating to business logic code elsewhere in the codebase. In particular, when running
+a task related to a specific django object, the task should load the object by ID (handling the fact it may no longer
+exist), and then delegate to a method on the object or a related service function.
+
 Scheduled on app startup in non-debug mode:
 
 - ingestion tasks from `peachjam`
