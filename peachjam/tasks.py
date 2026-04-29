@@ -3,7 +3,7 @@ import logging
 import sentry_sdk
 from background_task import background
 from background_task.signals import task_error
-from background_task.tasks import DBTaskRunner, Task, logger, tasks
+from background_task.tasks import DBTaskRunner, Task, TaskSchedule, logger, tasks
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
@@ -417,41 +417,92 @@ def update_flynote_taxonomy(judgment_id):
         return
 
     log.info(f"Updating flynotes for judgment {judgment_id}")
-    FlynoteUpdater().update_for_judgment(judgment, refresh_counts=True)
+    affected_root_ids = FlynoteUpdater().update_for_judgment(judgment)
+    queue_refresh_flynote_roots(affected_root_ids)
+
+
+def queue_refresh_flynote_roots(root_ids):
+    from peachjam.models.flynote import Flynote
+
+    root_ids = set(root_ids)
+    if not root_ids:
+        return
+
+    updated = (
+        Flynote.get_root_nodes()
+        .filter(pk__in=root_ids)
+        .update(document_count_refresh_pending=True)
+    )
+    if not updated:
+        return
+
+    refresh_pending_flynote_document_counts(
+        schedule={
+            "run_at": FLYNOTE_REFRESH_DELAY,
+            "action": TaskSchedule.CHECK_EXISTING,
+        }
+    )
+
+
+def get_pending_flynote_root_ids():
+    from peachjam.models.flynote import Flynote
+
+    return list(
+        Flynote.get_root_nodes()
+        .filter(document_count_refresh_pending=True)
+        .order_by("path")
+        .values_list("pk", flat=True)
+    )
+
+
+def refresh_flynote_roots_now(root_ids):
+    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+
+    roots = list(Flynote.get_root_nodes().filter(pk__in=set(root_ids)).order_by("path"))
+    refreshed = 0
+    for root in roots:
+        cleared_pending = (
+            Flynote.get_root_nodes()
+            .filter(
+                pk=root.pk,
+                document_count_refresh_pending=True,
+            )
+            .update(document_count_refresh_pending=False)
+        )
+        try:
+            log.info("Refreshing flynote counts for root %s", root.pk)
+            FlynoteDocumentCount.refresh_for_flynote(root)
+        except Exception:
+            if cleared_pending:
+                Flynote.get_root_nodes().filter(pk=root.pk).update(
+                    document_count_refresh_pending=True
+                )
+            raise
+        refreshed += 1
+    return refreshed
 
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 def refresh_flynote_document_count(root_id):
-    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
-
-    root = Flynote.objects.filter(pk=root_id).first()
-    if not root:
-        log.info(f"No flynote root with id {root_id} exists, ignoring.")
-        return
-
-    log.info(f"Refreshing flynote counts for root {root_id}")
-    FlynoteDocumentCount.refresh_for_flynote(root)
+    # Compatibility shim for older queued tasks and the generic Tasks admin.
+    refreshed = refresh_flynote_roots_now([root_id])
+    if not refreshed:
+        log.info("No flynote root with id %s exists, ignoring.", root_id)
 
 
-def queue_refresh_flynote_document_count(root_id, schedule=FLYNOTE_REFRESH_DELAY):
-    existing_task = (
-        Task.objects.get_task(
-            refresh_flynote_document_count.name,
-            args=(root_id,),
-            kwargs={},
-        )
-        .filter(locked_at__isnull=True)
-        .order_by("run_at")
-        .first()
-    )
-    if existing_task:
-        return existing_task
+def run_pending_flynote_document_count_refresh():
+    dirty_root_ids = get_pending_flynote_root_ids()
+    if not dirty_root_ids:
+        log.info("No dirty flynote roots exist, ignoring.")
+        return 0
 
-    return refresh_flynote_document_count(
-        root_id,
-        schedule=schedule,
-        remove_existing_tasks=False,
-    )
+    log.info("Refreshing %s dirty flynote roots", len(dirty_root_ids))
+    return refresh_flynote_roots_now(dirty_root_ids)
+
+
+@background(queue="peachjam", schedule={"priority": -1})
+def refresh_pending_flynote_document_counts():
+    run_pending_flynote_document_count_refresh()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

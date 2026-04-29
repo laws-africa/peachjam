@@ -4,7 +4,7 @@ from django.core.management.base import BaseCommand
 
 from peachjam.analysis.flynotes import FlynoteUpdater
 from peachjam.models import Judgment
-from peachjam.models.flynote import FlynoteDocumentCount
+from peachjam.tasks import refresh_flynote_roots_now
 
 
 class Command(BaseCommand):
@@ -59,7 +59,9 @@ class Command(BaseCommand):
                 )
                 return
             self.stdout.write(f"Processing: {judgment.case_name}")
-            updater.update_for_judgment(judgment, refresh_counts=(not skip_counts))
+            affected_root_ids = updater.update_for_judgment(judgment)
+            if not skip_counts:
+                refresh_flynote_roots_now(affected_root_ids)
             self.stdout.write(self.style.SUCCESS("Done."))
             return
 
@@ -91,6 +93,7 @@ class Command(BaseCommand):
         processed = 0
         skipped = 0
         last_pk = None
+        affected_root_ids = set()
         for judgment in qs.iterator():
             processed += 1
             last_pk = judgment.pk
@@ -98,7 +101,7 @@ class Command(BaseCommand):
                 f"  [{processed}] (pk={judgment.pk}) {judgment.case_name}"
             )
             try:
-                updater.update_for_judgment(judgment, refresh_counts=False)
+                affected_root_ids.update(updater.update_for_judgment(judgment))
             except Exception as e:
                 skipped += 1
                 self.stderr.write(
@@ -111,8 +114,8 @@ class Command(BaseCommand):
         if last_pk:
             msg += f" Last pk processed: {last_pk}."
 
-        if not skip_counts and processed > 0:
-            FlynoteDocumentCount.refresh_for_all_flynotes()
+        if not skip_counts and affected_root_ids:
+            refresh_flynote_roots_now(affected_root_ids)
             msg += " Flynote counts refreshed."
 
         self.stdout.write(self.style.SUCCESS(msg))

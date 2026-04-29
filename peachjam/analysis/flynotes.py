@@ -27,7 +27,6 @@ from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 
 from peachjam.models.flynote import Flynote, JudgmentFlynote
-from peachjam.tasks import queue_refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
 
@@ -2746,7 +2745,7 @@ class FlynoteUpdater:
             return existing
 
     @transaction.atomic
-    def update_for_judgment(self, judgment, refresh_counts=False):
+    def update_for_judgment(self, judgment):
         """Parse a judgment's flynote and sync its Flynote links.
 
         1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
@@ -2754,9 +2753,22 @@ class FlynoteUpdater:
         3. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
         4. Links the judgment to the leaf node of every path.
 
-        Does nothing if the flynote text cannot be parsed (plain prose, empty, etc.).
+        Returns the set of root flynote ids affected by the update. This includes
+        roots that previously had linked leaves and roots that gained new linked
+        leaves, so callers can refresh or prune only the touched flynote trees.
         """
         overall_start = perf_counter()
+        existing_root_paths = {
+            judgment_flynote.flynote.path[: judgment_flynote.flynote.steplen]
+            for judgment_flynote in JudgmentFlynote.objects.filter(
+                document=judgment
+            ).select_related("flynote")
+        }
+        affected_root_ids = set(
+            Flynote.get_root_nodes()
+            .filter(path__in=existing_root_paths)
+            .values_list("pk", flat=True)
+        )
         JudgmentFlynote.objects.filter(document=judgment).delete()
 
         parse_start = perf_counter()
@@ -2769,11 +2781,11 @@ class FlynoteUpdater:
                 parse_ms,
                 (perf_counter() - overall_start) * 1000,
             )
-            return
+            return affected_root_ids
 
         node_start = perf_counter()
         leaf_flynotes = set()
-        roots_to_refresh = set()
+        new_root_ids = set()
         for path in paths:
             parent = None
             root_id = None
@@ -2787,8 +2799,9 @@ class FlynoteUpdater:
             else:
                 leaf_flynotes.add(node)
                 if root_id is not None:
-                    roots_to_refresh.add(root_id)
+                    new_root_ids.add(root_id)
         node_ms = (perf_counter() - node_start) * 1000
+        affected_root_ids.update(new_root_ids)
 
         link_start = perf_counter()
         JudgmentFlynote.objects.bulk_create(
@@ -2809,7 +2822,4 @@ class FlynoteUpdater:
             link_ms,
             (perf_counter() - overall_start) * 1000,
         )
-
-        if refresh_counts and leaf_flynotes:
-            for root_id in roots_to_refresh:
-                queue_refresh_flynote_document_count(root_id)
+        return affected_root_ids
