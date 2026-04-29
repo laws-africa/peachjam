@@ -1255,7 +1255,7 @@ class FlynoteAdmin(admin.ModelAdmin):
         "numchild",
         "children_links",
     )
-    actions = ("mark_deprecated", "mark_active")
+    actions = ("refresh_document_counts_now", "mark_deprecated", "mark_active")
 
     def has_add_permission(self, request):
         return False
@@ -1426,6 +1426,27 @@ class FlynoteAdmin(admin.ModelAdmin):
                 continue
             roots.append(flynote)
         return roots
+
+    def get_action_target_roots(self, queryset):
+        root_paths = {
+            path[: self.model.steplen]
+            for path in queryset.values_list("path", flat=True)
+        }
+        return self.model.get_root_nodes().filter(path__in=root_paths).order_by("path")
+
+    @admin.action(description=_("Refresh selected flynote roots now"))
+    def refresh_document_counts_now(self, request, queryset):
+        from peachjam.models.flynote import FlynoteDocumentCount
+
+        roots = list(self.get_action_target_roots(queryset))
+        for root in roots:
+            FlynoteDocumentCount.refresh_for_flynote(root)
+
+        self.message_user(
+            request,
+            _("Refreshed %(count)s flynote roots.") % {"count": len(roots)},
+            messages.SUCCESS,
+        )
 
     @admin.action(description=_("Mark selected flynotes as deprecated"))
     def mark_deprecated(self, request, queryset):
