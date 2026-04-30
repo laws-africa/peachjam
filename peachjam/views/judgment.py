@@ -125,7 +125,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     model = Flynote
     template_name = "peachjam/flynote/list.html"
     context_object_name = "flynotes"
-    paginate_by = 30
+    paginate_by = 100
 
     def get(self, request, *args, **kwargs):
         if not Flynote.get_root_nodes().exists():
