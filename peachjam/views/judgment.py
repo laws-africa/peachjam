@@ -214,7 +214,9 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
     def popular_subtopics(self, context):
         # Top 16 subtopcis by count
-        children_qs = self.annotate_with_counts(self.flynote.get_children())
+        children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
+            doc_count__gt=0
+        )
         total_children = children_qs.count()
         popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])
 
