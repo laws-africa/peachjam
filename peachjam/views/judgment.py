@@ -125,7 +125,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     model = Flynote
     template_name = "peachjam/flynote/list.html"
     context_object_name = "flynotes"
-    paginate_by = 100
+    paginate_by = 30
 
     def get(self, request, *args, **kwargs):
         if not Flynote.get_root_nodes().exists():
@@ -136,6 +136,12 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         if self.request.htmx:
             return ["peachjam/flynote/_list.html"]
         return super().get_template_names()
+
+    def get_paginate_by(self, queryset):
+        if self.flynote:
+            return self.paginate_by
+        # always return 100 top-level flynotes, because that is usually the full list
+        return 100
 
     @cached_property
     def flynote(self):
@@ -155,7 +161,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         if q:
             qs = qs.filter(name__icontains=q)
 
-        return self.annotate_with_counts(qs).order_by("name")
+        return self.annotate_with_counts(qs).filter(doc_count__gt=0).order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
