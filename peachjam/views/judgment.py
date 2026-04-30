@@ -137,6 +137,12 @@ class FlynoteListView(FlynoteViewMixin, ListView):
             return ["peachjam/flynote/_list.html"]
         return super().get_template_names()
 
+    def get_paginate_by(self, queryset):
+        if self.flynote:
+            return self.paginate_by
+        # always return 100 top-level flynotes, because that is usually the full list
+        return 100
+
     @cached_property
     def flynote(self):
         """In htmx mode, the ?flynote=<pk> parameter anchors the list of subtopics."""
@@ -155,7 +161,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         if q:
             qs = qs.filter(name__icontains=q)
 
-        return self.annotate_with_counts(qs).order_by("name")
+        return self.annotate_with_counts(qs).filter(doc_count__gt=0).order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -214,7 +220,9 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
     def popular_subtopics(self, context):
         # Top 16 subtopcis by count
-        children_qs = self.annotate_with_counts(self.flynote.get_children())
+        children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
+            doc_count__gt=0
+        )
         total_children = children_qs.count()
         popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])
 
