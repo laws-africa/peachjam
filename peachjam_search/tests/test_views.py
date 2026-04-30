@@ -1,4 +1,6 @@
+from types import SimpleNamespace
 from unittest.mock import patch
+from uuid import uuid4
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
@@ -11,6 +13,7 @@ from elasticsearch_dsl.response import Response
 from peachjam.models import CoreDocument
 from peachjam_search.models import SearchTrace
 from peachjam_search.views.api import PortionSearchView
+from peachjam_search.views.search import DocumentSearchView
 
 
 class SearchViewsTest(TestCase):
@@ -144,6 +147,44 @@ class SearchViewsTest(TestCase):
         response = self.client.get(reverse("search:search_documents") + "?search=test")
         self.assertEqual(response.status_code, 200)
         self.assertIn("max-age=900", response.headers["Cache-Control"])
+
+    def test_search_trace_strips_null_bytes_before_saving(self):
+        captured = {}
+
+        def create(**kwargs):
+            captured.update(kwargs)
+            return SimpleNamespace(id=uuid4())
+
+        request = RequestFactory().get(
+            reverse("search:search_documents"),
+            {
+                "search": "nul\x00search",
+                "suggestion": "prefix\x00selected",
+            },
+            HTTP_USER_AGENT="agent-browser",
+        )
+        request.user = self.user
+        request.id = "none"
+
+        view = DocumentSearchView()
+        view.request = request
+        engine = SimpleNamespace(field_queries={}, filters={}, mode="text", page=1)
+
+        with patch(
+            "peachjam_search.views.search.SearchTrace.objects.create",
+            side_effect=create,
+        ) as mock_create:
+            trace = view.save_search_trace(engine, 1)
+
+        self.assertIsNotNone(trace)
+        mock_create.assert_called_once()
+        self.assertEqual("nul search", captured["search"])
+        self.assertEqual({}, captured["field_searches"])
+        self.assertEqual({}, captured["filters"])
+        self.assertEqual("prefix selected", captured["suggestion"])
+        self.assertEqual("agent-browser", captured["user_agent"])
+        self.assertEqual("nul search", captured["query_clean"])
+        self.assertNotIn("\x00", captured["filters_string"])
 
     def test_search_hit_links_open_in_same_tab(self):
         request = RequestFactory().get("/search/?search=test")
