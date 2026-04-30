@@ -621,11 +621,6 @@ class Judgment(CoreDocument):
             self.assign_mnc()
             self.assign_title()
 
-        # flynote_raw is the editable/source field; keep flynote populated immediately
-        # even before any tree sync or background work runs.
-        if self.flynote_raw != self.flynote:
-            self.flynote = self.flynote_raw
-
         # enforce anonymisation
         if self.must_be_anonymised and not self.anonymised:
             self.published = False

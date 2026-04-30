@@ -1357,6 +1357,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         initial_count = JudgmentFlynote.objects.filter(document=self.judgment).count()
         self.assertEqual(initial_count, 2)
 
+        self.judgment.track_changes()
         self.judgment.flynote_raw = "Contract law \u2014 breach of contract"
         self.judgment.save()
         self.updater.update_for_judgment(self.judgment)
@@ -1386,6 +1387,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         self.assertEqual(Flynote.objects.get(name="Criminal law").pk, criminal_pk)
 
     def test_empty_flynote_skips(self):
+        self.judgment.track_changes()
         self.judgment.flynote_raw = ""
         self.judgment.save()
 
@@ -1395,6 +1397,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_prose_flynote_skips(self):
+        self.judgment.track_changes()
         self.judgment.flynote_raw = "This is a plain prose description of the case."
         self.judgment.save()
 
@@ -1404,6 +1407,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_multiline_flynotes_link_separate_leaf_nodes(self):
+        self.judgment.track_changes()
         self.judgment.flynote_raw = (
             "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
             "Administrative law \u2014 judicial review"
