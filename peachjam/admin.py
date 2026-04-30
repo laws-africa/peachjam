@@ -1970,7 +1970,9 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     def generate_summary_view(self, request, object_id):
         if request.user.has_perm("peachjam.can_generate_judgment_summary"):
             message = _("Generating summary for judgment with ID: {}").format(object_id)
-            generate_judgment_summary(object_id)
+            doc = self.model.objects.get(pk=object_id)
+            doc.track_changes()
+            doc.generate_summary()
             self.message_user(request, message)
         else:
             message = _("You do not have permission to generate judgment summaries.")
