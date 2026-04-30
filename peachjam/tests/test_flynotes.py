@@ -2149,8 +2149,10 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
             case_summary="A short summary.",
-            flynote_raw="Administrative law — judicial review",
         )
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = "Administrative law — judicial review"
+        self.judgment.save()
         self.updater.update_for_judgment(self.judgment)
 
     def test_judgment_detail_links_to_flynote_topic_pages(self):
@@ -2193,11 +2195,13 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             date=datetime.date(2025, 1, 2),
             language=Language.objects.first(),
             case_summary="A short summary.",
-            flynote_raw=(
-                "Criminal law — admissibility — trial within a trial; right to representation\n"
-                "Administrative law — judicial review"
-            ),
         )
+        judgment.track_changes()
+        judgment.flynote_raw = (
+            "Criminal law — admissibility — trial within a trial; right to representation\n"
+            "Administrative law — judicial review"
+        )
+        judgment.save()
         self.updater.update_for_judgment(judgment)
 
         self.assertEqual(
