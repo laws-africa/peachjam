@@ -4,10 +4,8 @@ from urllib.parse import quote
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
-from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
@@ -19,7 +17,6 @@ from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
-from peachjam.helpers import current_year
 from peachjam.models import (
     CoreDocument,
     DocumentContent,
@@ -313,10 +310,6 @@ class LowerBench(models.Model):
 class Judgment(CoreDocument):
     decorator = JudgmentDecorator()
 
-    class CaseType(models.TextChoices):
-        CRIMINAL = "criminal", _("Criminal")
-        CIVIL = "civil", _("Civil")
-
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=False, verbose_name=_("court")
     )
@@ -334,23 +327,6 @@ class Judgment(CoreDocument):
         blank=True,
         related_name="judgments",
         verbose_name=_("court division"),
-    )
-    case_type = models.CharField(
-        _("case type"),
-        max_length=512,
-        choices=CaseType.choices,
-        null=True,
-        blank=True,
-    )
-    filing_year = models.PositiveIntegerField(
-        _("filing year"),
-        null=True,
-        blank=True,
-        help_text=_("Year the matter was filed (YYYY only)."),
-        validators=[
-            MinValueValidator(1800),
-            MaxValueValidator(limit_value=current_year),
-        ],
     )
     case_action = models.ForeignKey(
         CaseAction,
@@ -492,13 +468,6 @@ class Judgment(CoreDocument):
 
     def __str__(self):
         return self.title
-
-    @property
-    def case_duration(self):
-        # judgment_date__year minus filing_year
-        if self.date and self.filing_year:
-            return self.date.year - self.filing_year
-        return None
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
@@ -883,277 +852,3 @@ class Replacement(models.Model):
 
     def __str__(self):
         return f"{self.old_text} -> {self.new_text}"
-
-
-class OffenceCategory(models.Model):
-    slug = models.SlugField(_("slug"), unique=True, blank=True)
-    name = models.CharField(_("name"), max_length=255, unique=True)
-    description = models.TextField(_("description"), blank=True)
-
-    class Meta:
-        ordering = ("name",)
-        verbose_name = _("offence category")
-        verbose_name_plural = _("offence categories")
-
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            self.slug = slugify(self.name)
-        return super().save(*args, **kwargs)
-
-
-class OffenceTag(models.Model):
-    name = models.CharField(_("name"), max_length=255, unique=True)
-    description = models.TextField(_("description"), blank=True)
-
-    class Meta:
-        ordering = ("name",)
-        verbose_name = _("offence tag")
-        verbose_name_plural = _("offence tags")
-
-    def __str__(self):
-        return self.name
-
-
-class CaseTag(models.Model):
-    name = models.CharField(_("name"), max_length=255, unique=True)
-    description = models.TextField(_("description"), blank=True)
-
-    class Meta:
-        ordering = ("name",)
-        verbose_name = _("case tag")
-        verbose_name_plural = _("case tags")
-
-    def __str__(self):
-        return self.name
-
-
-class OffenceGrouping(models.Model):
-    work = models.ForeignKey(
-        "peachjam.Work",
-        on_delete=models.PROTECT,
-        related_name="offence_groupings",
-        verbose_name=_("work"),
-        help_text=_("The Work that defines this offence grouping."),
-    )
-    parent = models.ForeignKey(
-        "self",
-        null=True,
-        blank=True,
-        on_delete=models.CASCADE,
-        related_name="children",
-        verbose_name=_("parent"),
-    )
-    kind = models.CharField(_("kind"), max_length=50)
-    label = models.CharField(_("label"), max_length=255)
-    number = models.CharField(_("number"), max_length=100, blank=True, default="")
-    title = models.CharField(_("title"), max_length=1024, blank=True, default="")
-    provision_eid = models.CharField(
-        _("provision EID"),
-        max_length=255,
-        blank=True,
-        default="",
-        help_text=_("AKN element id / EID for the grouping within the work."),
-    )
-    order = models.IntegerField(_("order"), default=0)
-
-    class Meta:
-        ordering = ("work_id", "parent_id", "order", "id")
-        verbose_name = _("offence grouping")
-        verbose_name_plural = _("offence groupings")
-        constraints = [
-            models.UniqueConstraint(
-                fields=("work", "provision_eid"),
-                condition=~models.Q(provision_eid=""),
-                name="unique_offencegrouping_work_provision_eid",
-            )
-        ]
-        indexes = [
-            models.Index(fields=("kind",), name="offence_grouping_kind_idx"),
-            models.Index(
-                fields=("work", "kind"), name="offence_grouping_work_kind_idx"
-            ),
-        ]
-
-    def __str__(self):
-        if self.title:
-            return f"{self.label}: {self.title}"
-        return self.label
-
-    def clean(self):
-        super().clean()
-        if self.parent and self.parent.work_id != self.work_id:
-            raise ValidationError(
-                {"parent": _("Parent grouping must belong to the same work.")}
-            )
-
-
-class Offence(models.Model):
-    work = models.ForeignKey(
-        "peachjam.Work",
-        on_delete=models.PROTECT,
-        related_name="offences",
-        verbose_name=_("work"),
-        help_text=_(
-            "The Work for the code (e.g., Penal Code) that defines this offence."
-        ),
-    )
-    provision_eid = models.CharField(
-        _("provision EID"),
-        max_length=2048,
-        help_text=_(
-            "AKN element id / EID for the provision within the code (e.g., 'sec_296')."
-        ),
-    )
-    code = models.CharField(
-        _("offence code"),
-        max_length=2048,
-        help_text=_(
-            "Internal offence code / short identifier (often from the code or a local convention)."
-        ),
-    )
-    grouping = models.ForeignKey(
-        "OffenceGrouping",
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="offences",
-        verbose_name=_("grouping"),
-    )
-    title = models.CharField(_("title"), max_length=4096)
-    description = models.TextField(_("description"), blank=True)
-    categories = models.ManyToManyField(
-        "OffenceCategory",
-        blank=True,
-        related_name="offences",
-        verbose_name=_("categories"),
-    )
-    tags = models.ManyToManyField(
-        "OffenceTag",
-        blank=True,
-        related_name="offences",
-        verbose_name=_("tags"),
-    )
-    elements = ArrayField(
-        base_field=models.CharField(max_length=4096),
-        default=list,
-        blank=True,
-        help_text=_("List of offence elements (actus reus, mens rea, etc.)."),
-    )
-    penalty = models.TextField(
-        _("recommended penalty"),
-        blank=True,
-        help_text=_("Human-readable recommended/typical penalty guidance."),
-    )
-
-    class Meta:
-        ordering = ("title",)
-        constraints = [
-            models.UniqueConstraint(
-                fields=("work", "provision_eid"),
-                name="unique_offence_work_provision_eid",
-            )
-        ]
-
-    def __str__(self):
-        return self.title
-
-    def clean(self):
-        super().clean()
-        if self.grouping and self.grouping.work_id != self.work_id:
-            raise ValidationError(
-                {"grouping": _("Grouping must belong to the same work.")}
-            )
-
-
-class JudgmentOffence(models.Model):
-    judgment = models.ForeignKey(
-        "Judgment",
-        on_delete=models.CASCADE,
-        related_name="judgment_offence",
-        verbose_name=_("judgment"),
-    )
-    offence = models.ForeignKey(
-        Offence,
-        on_delete=models.PROTECT,
-        related_name="judgment_offence",
-        verbose_name=_("judgments"),
-    )
-    tags = models.ManyToManyField(
-        "CaseTag",
-        blank=True,
-        related_name="judgment_offences",
-        verbose_name=_("case tags"),
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=("judgment", "offence"),
-                name="unique_judgment_offence_judgment_offence",
-            )
-        ]
-
-    def __str__(self):
-        return f"JudgmentOffence {self.offence} - {self.judgment}"
-
-
-class Sentence(models.Model):
-    class SentenceType(models.TextChoices):
-        IMPRISONMENT = "imprisonment", _("Imprisonment")
-        FINE = "fine", _("Fine")
-        PROBATION = "probation", _("Probation")
-
-    judgment = models.ForeignKey(
-        Judgment,
-        on_delete=models.CASCADE,
-        related_name="sentences",
-        verbose_name=_("offences"),
-    )
-
-    offence = models.ForeignKey(
-        JudgmentOffence,
-        on_delete=models.CASCADE,
-        related_name="sentences",
-        verbose_name=_("offences"),
-        null=True,
-        blank=True,
-    )
-    sentence_type = models.CharField(
-        _("sentence type"),
-        max_length=32,
-        choices=SentenceType.choices,
-    )
-
-    mandatory_minimum = models.BooleanField(
-        _("mandatory minimum"),
-        null=True,
-        blank=True,
-        help_text=_("True if the sentence reflects a mandatory minimum."),
-    )
-
-    duration_months = models.PositiveIntegerField(
-        _("duration (months)"),
-        null=True,
-        blank=True,
-        help_text=_("Imprisonment/probation duration in months, if applicable."),
-    )
-    suspended = models.BooleanField(
-        _("suspended"),
-        default=False,
-        help_text=_("True if the sentence is suspended (fully or partially)."),
-    )
-    fine_amount = models.PositiveIntegerField(
-        _("fine amount"),
-        null=True,
-        blank=True,
-        help_text=_("Fine amount"),
-    )
-
-    class Meta:
-        ordering = ("pk",)
-
-    def __str__(self):
-        return f"{self.get_sentence_type_display()} for {self.offence}"
