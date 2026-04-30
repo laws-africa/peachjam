@@ -1246,13 +1246,20 @@ class FlynoteAdmin(admin.ModelAdmin):
     list_filter = ("depth", "deprecated", FlynoteDocumentCountFilter)
     search_fields = ("name",)
     ordering = ("name",)
-    readonly_fields = ("numchild", "ancestors_links", "children_links", "depth")
+    readonly_fields = (
+        "numchild",
+        "ancestors_links",
+        "children_links",
+        "depth",
+        "document_count",
+    )
     fields = (
         "ancestors_links",
         "name",
         "deprecated",
         "depth",
         "numchild",
+        "document_count",
         "children_links",
     )
     actions = ("refresh_document_counts_now", "mark_deprecated", "mark_active")
