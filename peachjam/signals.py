@@ -5,7 +5,6 @@ from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
-from django.db import transaction
 from django.db.models import signals
 from django.dispatch import receiver
 from django.dispatch.dispatcher import Signal
@@ -25,11 +24,9 @@ from peachjam.models import (
     UserFollowing,
     UserProfile,
     Work,
-    pj_settings,
 )
 from peachjam.models.core_document import DocumentContent
 from peachjam.tasks import (
-    extract_criminal_data,
     generate_judgment_summary,
     serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
@@ -225,30 +222,6 @@ def judgment_content_changed_generate_summary(sender, instance, raw, **kwargs):
     )
     if should_generate:
         generate_judgment_summary(judgment.pk)
-
-
-@receiver(signals.pre_save, sender=DocumentContent)
-def judgment_content_changed_extract_criminal_data(sender, instance, **kwargs):
-    if not pj_settings().allow_criminal_data_extraction:
-        log.info("Criminal data extraction is disabled.")
-        return
-
-    if instance.document.doc_type != "judgment":
-        return
-
-    content_has_changed = bool(instance.content_text)
-    if instance.pk:
-        previous = (
-            DocumentContent.objects.filter(pk=instance.pk)
-            .values_list("content_text", flat=True)
-            .first()
-        )
-        content_has_changed = previous != instance.content_text
-
-    if not content_has_changed:
-        return
-
-    transaction.on_commit(lambda: extract_criminal_data(instance.document_id))
 
 
 @receiver(signals.post_save, sender=SavedDocument)

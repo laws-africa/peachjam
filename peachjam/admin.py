@@ -69,7 +69,6 @@ from peachjam.models import (
     CaseAction,
     CaseHistory,
     CaseNumber,
-    CaseTag,
     CauseList,
     CitationLink,
     CitationProcessing,
@@ -104,10 +103,6 @@ from peachjam.models import (
     Locality,
     LowerBench,
     MatterType,
-    Offence,
-    OffenceCategory,
-    OffenceGrouping,
-    OffenceTag,
     Outcome,
     Partner,
     PartnerLogo,
@@ -139,8 +134,6 @@ from peachjam.resources import (
     GazetteResource,
     GenericDocumentResource,
     JudgmentResource,
-    OffenceGroupingResource,
-    OffenceResource,
     RatificationResource,
     UserResource,
 )
@@ -1968,50 +1961,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
         obj.ensure_anonymised_source_file()
-
-
-@admin.register(OffenceCategory)
-class OffenceCategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
-    search_fields = ("name", "description")
-    prepopulated_fields = {"slug": ("name",)}
-
-
-@admin.register(OffenceTag)
-class OffenceTagAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name", "description")
-
-
-@admin.register(OffenceGrouping)
-class OffenceGroupingAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_classes = [OffenceGroupingResource]
-    list_display = ("label", "kind", "work", "parent", "order")
-    list_select_related = ("work", "parent")
-    list_filter = ("kind",)
-    autocomplete_fields = ("work", "parent")
-    search_fields = (
-        "label",
-        "title",
-        "number",
-        "provision_eid",
-        "work__title",
-        "work__frbr_uri",
-    )
-
-
-@admin.register(CaseTag)
-class CaseTagAdmin(admin.ModelAdmin):
-    list_display = ("name",)
-    search_fields = ("name", "description")
-
-
-@admin.register(Offence)
-class OffenceAdmin(ImportExportMixin, admin.ModelAdmin):
-    resource_classes = [OffenceResource]
-    filter_horizontal = ("categories", "tags")
-    autocomplete_fields = ("work", "grouping")
-    search_fields = ("title", "description", "code", "provision_eid")
 
 
 @admin.register(CauseList)

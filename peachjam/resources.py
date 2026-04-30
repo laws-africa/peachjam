@@ -30,7 +30,6 @@ from import_export.widgets import (
     CharWidget,
     ForeignKeyWidget,
     ManyToManyWidget,
-    SimpleArrayWidget,
 )
 from languages_plus.models import Language
 
@@ -60,10 +59,6 @@ from peachjam.models import (
     Legislation,
     Locality,
     MatterType,
-    Offence,
-    OffenceCategory,
-    OffenceGrouping,
-    OffenceTag,
     Outcome,
     Ratification,
     RatificationCountry,
@@ -820,77 +815,6 @@ class AttorneyResource(resources.ModelResource):
 
     class Meta:
         model = Attorney
-
-
-class OffenceGroupingResource(resources.ModelResource):
-    work = fields.Field(
-        column_name="work",
-        attribute="work",
-        widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
-    )
-    parent = fields.Field(
-        column_name="parent",
-        attribute="parent",
-        widget=WorkScopedProvisionEidWidget(OffenceGrouping, field="provision_eid"),
-    )
-
-    class Meta:
-        model = OffenceGrouping
-        import_id_fields = ("work", "provision_eid")
-        fields = (
-            "work",
-            "parent",
-            "kind",
-            "label",
-            "number",
-            "title",
-            "provision_eid",
-            "order",
-        )
-
-
-class OffenceResource(resources.ModelResource):
-    work = fields.Field(
-        column_name="work",
-        attribute="work",
-        widget=ForeignKeyRequiredWidget(Work, field="frbr_uri"),
-    )
-    grouping = fields.Field(
-        column_name="grouping",
-        attribute="grouping",
-        widget=WorkScopedProvisionEidWidget(OffenceGrouping, field="provision_eid"),
-    )
-    categories = fields.Field(
-        column_name="categories",
-        attribute="categories",
-        widget=ManyToManyRequiredWidget(OffenceCategory, separator="|", field="slug"),
-    )
-    offence_tags = fields.Field(
-        column_name="offence_tags",
-        attribute="tags",
-        widget=ManyToManyRequiredWidget(OffenceTag, separator="|", field="name"),
-    )
-    elements = fields.Field(
-        column_name="elements",
-        attribute="elements",
-        widget=SimpleArrayWidget(separator="|"),
-    )
-
-    class Meta:
-        model = Offence
-        import_id_fields = ("work", "provision_eid", "code")
-        fields = (
-            "work",
-            "grouping",
-            "provision_eid",
-            "code",
-            "title",
-            "description",
-            "categories",
-            "offence_tags",
-            "elements",
-            "penalty",
-        )
 
 
 class RatificationField(ForeignKeyWidget):
