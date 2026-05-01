@@ -1,0 +1,45 @@
+{% extends "peachjam/about.html" %}
+{% load i18n %}
+{% block about-top-content %}
+  <p class="lead mb-4">
+    {% blocktrans trimmed %}
+    SierraLII provides free, unrestricted access to the primary and secondary legal materials of Sierra Leone. Free Access to Law supports the rule of law, access to justice and transparency.
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+     The platform was developed for the Ordre des Avocats du Sénégal by Laws.Africa and AfricanLII, with financial support from the Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ).
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    Access to the law is a fundamental right. SenLII is grounded in the principle that every citizen, legal professional, public institution, and business should be able to access and understand the laws that govern Senegal.
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+    SenLII aims to (i) provide free, open, and permanent access to Senegalese legal materials, (ii) enhance transparency and legal certainty, (iii) support legal professionals, researchers, students, and the public, (iv) contribute to the digital transformation of Senegal’s legal ecosystem.
+  {% endblocktrans %}
+  </p>
+  <h4>{% trans 'Strengthening the rule of law' %}</h4>
+  <p>
+    {% blocktrans %}By improving access to reliable and structured legal information, SenLII helps to:{% endblocktrans %}
+  </p>
+  <ul>
+    <li>{% trans 'strengthen trust in public institutions' %}</li>
+    <li>{% trans 'improve the efficiency of the justice system' %}</li>
+    <li>{% trans 'support economic activity and investment' %}</li>
+    <li>{% trans 'empower citizens to understand and exercise their rights' %}</li>
+  </ul>
+  <h2>About the partners</h2>
+  <p>
+    {% blocktrans trimmed %}
+  <a href="https://laws.africa/" target="_blank" rel="noreferrer noopener">Laws.Africa</a> is a South Africa-based non-profit organisation that specialises in digitising, structuring, and publishing African legal information. It develops advanced tools to make legal data accessible and reusable at scale.
+  {% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}
+  <a href="https://africanlii.org/en/" target="_blank" rel="noreferrer noopener">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance.
+  {% endblocktrans %}
+  </p>
+{% endblock %}
