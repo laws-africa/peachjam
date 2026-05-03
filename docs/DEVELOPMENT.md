@@ -71,6 +71,29 @@ export DJANGO_SETTINGS_MODULE=liiweb.settings
 python manage.py runserver
 ```
 
+## Running accessibility scans
+
+The accessibility scan uses the mapped page profiles defined in `scripts/a11y/pages.js`.
+
+After starting a local site shell, run:
+
+```bash
+npm run a11y:local -- --app liiweb --base-url http://127.0.0.1:8000 --verbose
+```
+
+Replace `liiweb` with a supported app such as `africanlii`, `namiblii`, or
+`zambialii`. The runner uses explicit profiles for `africanlii`, `liiweb`, and
+`zambialii`, and automatically maps other site shells that inherit from
+`liiweb` onto the `liiweb` profile. Use `--verbose` for local runs so the
+terminal output includes the failing node HTML and detailed Axe failure notes,
+which makes it much easier to identify the offending control or element.
+
+The automated GitHub Actions accessibility workflow lives in `.github/workflows/a11y.yml`.
+It uses that same discovery logic, scans the mapped pages for each supported app,
+and runs on manual dispatch and on a twice-monthly schedule. The workflow also
+uses `--verbose`, so GitHub accessibility issues use the same detailed output as
+the recommended local command.
+
 ## Compiling SCSS
 
 Ensure you have sass installed globally:

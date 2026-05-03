@@ -1,0 +1,299 @@
+name: Accessibility
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 3 1,15 * *"
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  discover-sites:
+    runs-on: ubuntu-latest
+    outputs:
+      sites: ${{ steps.discover.outputs.sites }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Discover supported accessibility scan sites
+        id: discover
+        shell: bash
+        run: |
+          node - <<'JS' >> "$GITHUB_OUTPUT"
+          const { getSupportedSites } = require("./scripts/a11y/pages");
+          const supportedSites = getSupportedSites();
+
+          if (!supportedSites.length) {
+            throw new Error("No supported accessibility scan sites were configured");
+          }
+
+          process.stdout.write(`sites=${JSON.stringify(supportedSites)}\n`);
+          JS
+
+  a11y:
+    needs: discover-sites
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        site: ${{ fromJson(needs.discover-sites.outputs.sites) }}
+
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: peachjam
+          POSTGRES_USER: peachjam
+          POSTGRES_PASSWORD: peachjam
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U peachjam -d peachjam"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: postgres://peachjam:peachjam@127.0.0.1:5432/peachjam
+      DJANGO_SETTINGS_MODULE: ${{ matrix.site }}.settings
+      PUPPETEER_SKIP_DOWNLOAD: "true"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+          pip install psycopg[binary]==3.2.12
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Install browser for Puppeteer
+        run: npx puppeteer browsers install chrome
+
+      - name: Prepare database
+        run: |
+          python manage.py migrate
+          python manage.py setup_countries_languages
+          python manage.py loaddata peachjam/fixtures/documents/sample_documents.json
+
+      - name: Start Django server
+        run: |
+          python manage.py runserver 127.0.0.1:8000 > /tmp/${{ matrix.site }}-server.log 2>&1 &
+          echo $! > /tmp/${{ matrix.site }}-server.pid
+
+      - name: Wait for server
+        run: |
+          python - <<'PY'
+          import sys
+          import time
+          import urllib.error
+          import urllib.request
+
+          url = "http://127.0.0.1:8000/"
+          for _ in range(60):
+              try:
+                  with urllib.request.urlopen(url) as response:
+                      if response.status < 500:
+                          sys.exit(0)
+              except urllib.error.HTTPError as error:
+                  if error.code < 500:
+                      sys.exit(0)
+              except Exception:
+                  pass
+              time.sleep(1)
+
+          raise SystemExit("Server did not start in time")
+          PY
+
+      - name: Run accessibility scan
+        id: scan
+        shell: bash
+        run: |
+          set -o pipefail
+          output_file="/tmp/${{ matrix.site }}-a11y-output.log"
+          status_file="/tmp/${{ matrix.site }}-a11y-status.txt"
+
+          if npm run a11y:local -- \
+            --app "${{ matrix.site }}" \
+            --base-url http://127.0.0.1:8000 \
+            --verbose 2>&1 | tee "$output_file"; then
+            echo "passed" > "$status_file"
+          else
+            echo "failed" > "$status_file"
+          fi
+
+          echo "output_file=$output_file" >> "$GITHUB_OUTPUT"
+          echo "status_file=$status_file" >> "$GITHUB_OUTPUT"
+
+      - name: Upload scan output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: a11y-${{ matrix.site }}
+          path: |
+            ${{ steps.scan.outputs.output_file }}
+            ${{ steps.scan.outputs.status_file }}
+          if-no-files-found: error
+
+      - name: Show server log on failure
+        if: always()
+        run: cat /tmp/${{ matrix.site }}-server.log || true
+
+      - name: Stop Django server
+        if: always()
+        run: |
+          if [ -f /tmp/${{ matrix.site }}-server.pid ]; then
+            kill "$(cat /tmp/${{ matrix.site }}-server.pid)" || true
+          fi
+
+  publish-a11y-issue:
+    needs: [discover-sites, a11y]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download scan output
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/a11y-artifacts
+          pattern: a11y-*
+
+      - name: Build issue summary
+        id: summary
+        shell: bash
+        env:
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os
+          from pathlib import Path
+
+          base = Path("/tmp/a11y-artifacts")
+          body_path = Path("/tmp/a11y-issue-body.md")
+          failed_sites = []
+
+          for artifact_dir in sorted(base.glob("a11y-*")):
+              site_name = artifact_dir.name.replace("a11y-", "", 1)
+              status_files = sorted(artifact_dir.glob("*-a11y-status.txt"))
+              output_files = sorted(artifact_dir.glob("*-a11y-output.log"))
+
+              if not status_files or not output_files:
+                  continue
+
+              status = status_files[0].read_text().strip()
+              output = output_files[0].read_text().strip()
+
+              if status == "failed":
+                  failed_sites.append((site_name, output))
+
+          if not failed_sites:
+              print("has_failures=false")
+              raise SystemExit(0)
+
+          lines = [
+              "Automated accessibility scan failures.",
+              "",
+              f"Workflow run: {os.environ['RUN_URL']}",
+              "",
+          ]
+
+          remaining = 60000
+          for site_name, output in failed_sites:
+              section = [
+                  f"## {site_name}",
+                  "",
+                  "```text",
+                  output,
+                  "```",
+                  "",
+              ]
+              section_text = "\n".join(section)
+
+              if len(section_text) > remaining:
+                  truncated_output = output[: max(0, remaining - 200)]
+                  section = [
+                      f"## {site_name}",
+                      "",
+                      "```text",
+                      truncated_output,
+                      "",
+                      "[truncated]",
+                      "```",
+                      "",
+                  ]
+                  section_text = "\n".join(section)
+
+              lines.append(section_text)
+              remaining -= len(section_text)
+
+              if remaining <= 0:
+                  break
+
+          body_path.write_text("\n".join(lines))
+          print("has_failures=true")
+          print(f"body_file={body_path}")
+          PY
+
+      - name: Create or update accessibility issue
+        if: steps.summary.outputs.has_failures == 'true'
+        uses: actions/github-script@v7
+        env:
+          ISSUE_BODY_FILE: ${{ steps.summary.outputs.body_file }}
+        with:
+          script: |
+            const fs = require("fs");
+            const title = "[A11y] accessibility scan failures";
+            const body = fs.readFileSync(process.env.ISSUE_BODY_FILE, "utf8");
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: "all",
+              per_page: 100,
+            });
+
+            const existing = issues.find((issue) => issue.title === title);
+
+            if (!existing) {
+              const { data: issue } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+              });
+
+              core.info(`Created issue #${issue.number}`);
+              return;
+            }
+
+            await github.rest.issues.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: existing.number,
+              state: "open",
+              body,
+            });
+
+            core.info(`Updated issue #${existing.number}`);
+
+      - name: Fail workflow when scan finds blocking issues
+        if: steps.summary.outputs.has_failures == 'true'
+        run: exit 1
