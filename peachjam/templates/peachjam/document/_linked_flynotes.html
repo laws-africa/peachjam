@@ -1,0 +1,14 @@
+{% if linked_flynotes %}
+  <ul class="list-unstyled mb-2 fst-italic">
+    {% for item in linked_flynotes %}
+      <li>
+        {% for node in item.nodes %}
+          <a href="{{ node.get_absolute_url }}">{{ node.name }}</a>
+          {% if not forloop.last %}—{% endif %}
+        {% endfor %}
+      </li>
+    {% endfor %}
+  </ul>
+{% elif flynote_text %}
+  <div class="mb-2 fst-italic">{{ flynote_text|linebreaksbr }}</div>
+{% endif %}

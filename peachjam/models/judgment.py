@@ -12,6 +12,7 @@ from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
@@ -499,6 +500,27 @@ class Judgment(CoreDocument):
         if self.date and self.filing_year:
             return self.date.year - self.filing_year
         return None
+
+    @cached_property
+    def linked_flynotes(self):
+        if (
+            not settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+            or not self.flynote
+        ):
+            return []
+
+        return [
+            {
+                "flynote": judgment_flynote.flynote,
+                "nodes": [
+                    *judgment_flynote.flynote.get_ancestors(),
+                    judgment_flynote.flynote,
+                ],
+            }
+            for judgment_flynote in self.flynotes.select_related("flynote").order_by(
+                "flynote__path"
+            )
+        ]
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""

@@ -9,6 +9,7 @@ from django.contrib.admin.sites import AdminSite
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import connection
+from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
@@ -1356,6 +1357,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         initial_count = JudgmentFlynote.objects.filter(document=self.judgment).count()
         self.assertEqual(initial_count, 2)
 
+        self.judgment.track_changes()
         self.judgment.flynote_raw = "Contract law \u2014 breach of contract"
         self.judgment.save()
         self.updater.update_for_judgment(self.judgment)
@@ -1385,6 +1387,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         self.assertEqual(Flynote.objects.get(name="Criminal law").pk, criminal_pk)
 
     def test_empty_flynote_skips(self):
+        self.judgment.track_changes()
         self.judgment.flynote_raw = ""
         self.judgment.save()
 
@@ -1394,6 +1397,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_prose_flynote_skips(self):
+        self.judgment.track_changes()
         self.judgment.flynote_raw = "This is a plain prose description of the case."
         self.judgment.save()
 
@@ -1403,6 +1407,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_multiline_flynotes_link_separate_leaf_nodes(self):
+        self.judgment.track_changes()
         self.judgment.flynote_raw = (
             "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
             "Administrative law \u2014 judicial review"
@@ -2006,6 +2011,7 @@ class FlynoteMergeTest(TestCase):
             target.merge_sources_into([source])
 
 
+@override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})
 class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -2060,7 +2066,26 @@ class FlynoteListViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("judgment_list"))
 
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_redirects_to_judgment_list_when_tree_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="View Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote="Administrative law \u2014 judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
 
+        response = self.client.get(reverse("flynote_list"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("judgment_list"))
+
+
+@override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})
 class JudgmentListFlynoteTopicsTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -2069,9 +2094,157 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         "documents/sample_documents",
     ]
 
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+
     def test_judgment_list_loads(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("flynote_list"))
+
+    def test_judgment_list_hides_topic_link_without_flynotes(self):
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_judgment_list_hides_topic_link_when_tree_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+
+@override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})
+class JudgmentDetailFlynoteNavigationTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+        self.judgment = Judgment.objects.create(
+            case_name="Navigation Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+        )
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = "Administrative law — judicial review"
+        self.judgment.save()
+        self.updater.update_for_judgment(self.judgment)
+
+    def test_judgment_detail_links_to_flynote_topic_pages(self):
+        response = self.client.get(self.judgment.get_absolute_url())
+        leaf = Flynote.objects.get(name="judicial review")
+
+        self.assertEqual(response.status_code, 200)
+        for node in [*leaf.get_ancestors(), leaf]:
+            self.assertContains(
+                response,
+                reverse("flynote_detail", kwargs={"pk": node.pk}),
+            )
+            self.assertContains(response, node.name)
+
+    def test_flynote_detail_hides_document_type_column(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
+    def test_linked_flynotes_template_uses_semantic_list_markup(self):
+        html = render_to_string(
+            "peachjam/document/_linked_flynotes.html",
+            {
+                "linked_flynotes": self.judgment.linked_flynotes,
+                "flynote_text": self.judgment.flynote,
+            },
+        )
+
+        self.assertIn('<ul class="list-unstyled mb-2 fst-italic">', html)
+        self.assertEqual(html.count("<li>"), len(self.judgment.linked_flynotes))
+
+    def test_linked_flynotes_use_judgment_flynotes_in_path_order(self):
+        judgment = Judgment.objects.create(
+            case_name="Multiline flynote test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 2),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+        )
+        judgment.track_changes()
+        judgment.flynote_raw = (
+            "Criminal law — admissibility — trial within a trial; right to representation\n"
+            "Administrative law — judicial review"
+        )
+        judgment.save()
+        self.updater.update_for_judgment(judgment)
+
+        self.assertEqual(
+            [
+                tuple(node.name for node in item["nodes"])
+                for item in judgment.linked_flynotes
+            ],
+            [
+                (
+                    "Administrative law",
+                    "judicial review",
+                ),
+                (
+                    "Criminal law",
+                    "admissibility",
+                    "right to representation",
+                ),
+                (
+                    "Criminal law",
+                    "admissibility",
+                    "trial within a trial",
+                ),
+            ],
+        )
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_judgment_detail_falls_back_to_plain_flynote_text_when_tree_setting_disabled(
+        self,
+    ):
+        response = self.client.get(self.judgment.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.judgment.linked_flynotes, [])
+        self.assertContains(response, "Administrative law — judicial review")
+        self.assertNotContains(
+            response,
+            reverse(
+                "flynote_detail",
+                kwargs={"pk": Flynote.objects.get(name="judicial review").pk},
+            ),
+        )
 
 
 class UpdateFlynoteTaxonomiesCommandTest(TestCase):
