@@ -346,7 +346,7 @@ class JudgmentSummariser:
 
         # give the agent tools and change its output type
         agent = self.agent.clone(tools=[search_flynotes], output_type=Flynote)
-        run_result = Runner.run_sync(agent, input)
+        run_result = Runner.run_sync(agent, input, max_turns=20)
         log_agent_reasoning(run_result)
 
         summary.flynote = run_result.final_output.flynote
