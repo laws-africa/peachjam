@@ -243,6 +243,7 @@ class SearchViewsTest(TestCase):
             doc_type="judgment",
             blurb=None,
             flynote="Line one\nLine two",
+            flynote_lines=["Line one", "Line two"],
             get_absolute_url=lambda: "/akn/example",
             expression_frbr_uri="/akn/example",
         )
@@ -266,7 +267,9 @@ class SearchViewsTest(TestCase):
             request=request,
         )
 
-        self.assertIn("Line one<br>Line two", html)
+        self.assertIn('<ul class="list-unstyled flynotes my-2">', html)
+        self.assertIn("<li>Line one</li>", html)
+        self.assertIn("<li>Line two</li>", html)
 
 
 class PortionSearchViewTest(TestCase):

@@ -49,6 +49,10 @@ class JudgmentTestCase(TestCase):
             blurb="Appeal dismissed.",
         )
 
+    def test_flynote_lines_splits_and_trims_multiline_flynotes(self):
+        judgment = Judgment(flynote=" Line one \n\nLine two\n  Line three  ")
+        self.assertEqual(["Line one", "Line two", "Line three"], judgment.flynote_lines)
+
     def test_assign_mnc(self):
         j = Judgment(
             language=Language.objects.get(pk="en"),

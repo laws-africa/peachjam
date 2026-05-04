@@ -500,6 +500,12 @@ class Judgment(CoreDocument):
             return self.date.year - self.filing_year
         return None
 
+    @property
+    def flynote_lines(self):
+        if not self.flynote:
+            return []
+        return [line.strip() for line in self.flynote.splitlines() if line.strip()]
+
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court_id:

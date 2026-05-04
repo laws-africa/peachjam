@@ -69,8 +69,7 @@
         </div>
         {% if hit.document.matter_type %}<div>{{ hit.document.matter_type }}</div>{% endif %}
         {% if hit.document.doc_type == "judgment" %}
-          {% if hit.document.blurb %}<div class="my-2">{{ hit.document.blurb }}</div>{% endif %}
-          {% if hit.document.flynote %}<div class="fst-italic my-2">{{ hit.document.flynote|linebreaksbr }}</div>{% endif %}
+          {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=hit.document %}
         {% elif hit.document.listing_taxonomies %}
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=hit.document.listing_taxonomies %}
         {% endif %}
