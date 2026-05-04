@@ -693,12 +693,19 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         if self.decorator:
             self.decorator.post_save(self)
 
+    @on_attribute_changed(AFTER_SAVE, ["language"], ["Work.languages"])
+    def trigger_update_work_languages_from_language(self):
+        self.work.update_languages()
+
     def save(self, *args, **kwargs):
         # give ourselves and subclasses a chance to pre-populate derived fields before saving,
         # in case full_clean() has not yet been called
+        is_new = self._state.adding
         self.pre_save()
         super().save(*args, **kwargs)
         self.post_save()
+        if is_new:
+            self.work.update_languages()
 
     def extract_citations(self):
         """Run citation extraction on this document. If the document has content_html,

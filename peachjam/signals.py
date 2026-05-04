@@ -31,7 +31,6 @@ from peachjam.models import (
 from peachjam.models.core_document import DocumentContent
 from peachjam.tasks import (
     extract_criminal_data,
-    generate_judgment_summary,
     refresh_flynote_document_count,
     serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
@@ -52,13 +51,6 @@ def user_saved(sender, instance, created, **kwargs):
     if created:
         # ensure a user profile exists
         UserProfile.objects.get_or_create(user=instance)
-
-
-@receiver(signals.post_save)
-def doc_saved_update_language(sender, instance, **kwargs):
-    """Update language list on related work when a subclass of CoreDocument is saved."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        instance.work.update_languages()
 
 
 @receiver(signals.post_delete)
@@ -215,24 +207,6 @@ def password_reset_started_customerio(sender, request, user, **kwargs):
 @receiver(allauth_signals.password_reset, sender=User)
 def password_reset_customerio(sender, request, user, **kwargs):
     get_customerio().track_password_reset(user)
-
-
-@receiver(signals.post_save, sender=DocumentContent)
-def judgment_content_changed_generate_summary(sender, instance, raw, **kwargs):
-    if raw:
-        return
-
-    if not instance.document.doc_type == "judgment":
-        return
-    judgment = instance.document
-    should_generate = (
-        not judgment.case_summary  # No summary at all
-        or judgment.summary_ai_generated  # Summary exists but is AI-generated
-    ) and (
-        not judgment.must_be_anonymised or judgment.anonymised  # Anonymization OK
-    )
-    if should_generate:
-        generate_judgment_summary(judgment.pk)
 
 
 @receiver(signals.pre_save, sender=DocumentContent)

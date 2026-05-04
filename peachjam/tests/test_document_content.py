@@ -327,6 +327,20 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
 
         update.assert_not_called()
 
+    def test_language_change_updates_work_languages(self):
+        """The CoreDocument AFTER_SAVE hook updates work languages when language changes."""
+        doc = _make_doc("Hook work languages")
+        work = doc.work
+
+        self.assertEqual(["eng"], work.languages)
+
+        doc.track_changes()
+        doc.language = Language.objects.get(pk="fr")
+        doc.save()
+        work.refresh_from_db()
+
+        self.assertEqual(["fra"], work.languages)
+
     def test_citation_link_changes_update_extracted_citations(self):
         """CitationLink changes update extracted citations for the related work."""
         doc = _make_doc("Citation link extracted citation update")
