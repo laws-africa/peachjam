@@ -1,0 +1,12 @@
+{% load i18n %}
+{% if document.blurb %}<div class="my-2">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
+{% if document.flynote_lines %}
+  {% if show_flynote_heading %}
+    <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
+  {% endif %}
+  <ul class="list-unstyled flynotes my-2">
+    {% for flynote_line in document.flynote_lines %}<li>{{ flynote_line }}</li>{% endfor %}
+  </ul>
+{% elif document.flynote %}
+  <div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>
+{% endif %}
