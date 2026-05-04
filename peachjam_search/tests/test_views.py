@@ -228,6 +228,46 @@ class SearchViewsTest(TestCase):
         self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#page-3', html)
         self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#sec_1', html)
 
+    def test_search_hit_flynote_preserves_line_breaks(self):
+        request = RequestFactory().get("/search/?search=test")
+        doc = SimpleNamespace(
+            id=1,
+            title="Example judgment",
+            citation=None,
+            alternative_names=None,
+            locality=None,
+            date="2024-01-01",
+            court="High Court",
+            author_list=None,
+            matter_type=None,
+            doc_type="judgment",
+            blurb=None,
+            flynote="Line one\nLine two",
+            get_absolute_url=lambda: "/akn/example",
+            expression_frbr_uri="/akn/example",
+        )
+        hit = {
+            "document": doc,
+            "position": 1,
+            "best_match": False,
+            "highlight": {},
+            "pages": [],
+            "provisions": [],
+        }
+
+        html = render_to_string(
+            "peachjam_search/_search_hit.html",
+            {
+                "request": request,
+                "hit": hit,
+                "show_jurisdiction": False,
+                "can_debug": False,
+            },
+            request=request,
+        )
+
+        self.assertIn("Line one<br>Line two", html)
+
 
 class PortionSearchViewTest(TestCase):
     fixtures = ["tests/countries", "tests/users", "documents/sample_documents"]

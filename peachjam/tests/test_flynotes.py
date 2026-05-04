@@ -2177,3 +2177,82 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         output = out.getvalue()
 
         self.assertIn("Last pk processed:", output)
+
+
+class RegenerateJudgmentFlynotesCommandTest(TestCase):
+    fixtures = ["tests/courts", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        country = Country.objects.get(pk="ZA")
+        court = Court.objects.first()
+        lang = Language.objects.get(pk="en")
+        self.eligible = Judgment.objects.create(
+            case_name="Eligible case",
+            jurisdiction=country,
+            court=court,
+            date=datetime.date(2025, 1, 1),
+            language=lang,
+            flynote=":[",
+            flynote_raw=":[",
+            case_summary="AI summary",
+            summary_ai_generated=True,
+        )
+        self.human_summary = Judgment.objects.create(
+            case_name="Human summary case",
+            jurisdiction=country,
+            court=court,
+            date=datetime.date(2025, 2, 1),
+            language=lang,
+            flynote=":[",
+            flynote_raw=":[",
+            case_summary="Editor-written summary",
+            summary_ai_generated=False,
+        )
+        self.awaiting_anonymisation = Judgment.objects.create(
+            case_name="Awaiting anonymisation case",
+            jurisdiction=country,
+            court=court,
+            date=datetime.date(2025, 3, 1),
+            language=lang,
+            flynote=":[",
+            flynote_raw=":[",
+            case_summary="AI summary",
+            summary_ai_generated=True,
+            must_be_anonymised=True,
+            anonymised=False,
+        )
+
+    @patch(
+        "peachjam.management.commands.regenerate_judgment_flynotes.Judgment.generate_summary"
+    )
+    def test_dry_run_lists_matches_without_regenerating(self, mock_generate_summary):
+        out = StringIO()
+        call_command(
+            "regenerate_judgment_flynotes",
+            dry_run=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+        output = out.getvalue()
+
+        self.assertIn("Listing matches only", output)
+        self.assertIn("Eligible to regenerate: 1", output)
+        self.assertIn("skip (human summary)", output)
+        self.assertIn("skip (awaiting anonymisation)", output)
+        mock_generate_summary.assert_not_called()
+
+    @patch(
+        "peachjam.management.commands.regenerate_judgment_flynotes.Judgment.generate_summary"
+    )
+    def test_default_regenerates_eligible_matches(self, mock_generate_summary):
+        out = StringIO()
+        call_command(
+            "regenerate_judgment_flynotes",
+            stdout=out,
+            stderr=StringIO(),
+        )
+        output = out.getvalue()
+
+        self.assertIn("Regenerating summaries now", output)
+        self.assertIn("Regenerated 1 judgment summary(s)", output)
+        mock_generate_summary.assert_called_once()
