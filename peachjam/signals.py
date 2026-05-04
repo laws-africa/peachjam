@@ -15,6 +15,7 @@ from django_comments.signals import comment_will_be_posted
 from peachjam.customerio import get_customerio
 from peachjam.models import (
     Annotation,
+    CitationLink,
     CoreDocument,
     DocumentChatThread,
     ExtractedCitation,
@@ -70,18 +71,24 @@ def doc_deleted_update_language(sender, instance, **kwargs):
             work.update_languages()
 
 
-@receiver(signals.post_save)
-def doc_saved_update_extracted_citations(sender, instance, **kwargs):
-    """Update extracted citations when a subclass of CoreDocument is saved."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        update_extracted_citations_for_a_work(instance.work_id)
-
-
 @receiver(signals.post_delete)
 def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
-    """Update language list on related work after a subclass of CoreDocument is deleted."""
+    """Update extracted citations after a subclass of CoreDocument is deleted."""
     if isinstance(instance, CoreDocument):
         update_extracted_citations_for_a_work(instance.work_id)
+
+
+@receiver(signals.post_save, sender=CitationLink)
+def citation_link_saved_update_extracted_citations(sender, instance, raw, **kwargs):
+    """Update extracted citations when source citation links are changed."""
+    if not raw:
+        update_extracted_citations_for_a_work(instance.document.work_id)
+
+
+@receiver(signals.post_delete, sender=CitationLink)
+def citation_link_deleted_update_extracted_citations(sender, instance, **kwargs):
+    """Update extracted citations when source citation links are deleted."""
+    update_extracted_citations_for_a_work(instance.document.work_id)
 
 
 @receiver(signals.post_save, sender=ExtractedCitation)

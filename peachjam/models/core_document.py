@@ -1200,6 +1200,17 @@ class DocumentContent(AttributeHooksMixin, models.Model):
 
     @on_attribute_changed(
         AFTER_SAVE,
+        ["content_html"],
+        ["CoreDocument.extracted_citations"],
+    )
+    def trigger_update_extracted_citations_from_content_html(self):
+        from peachjam.tasks import update_extracted_citations_for_a_work
+
+        if self.document_id:
+            update_extracted_citations_for_a_work(self.document.work_id)
+
+    @on_attribute_changed(
+        AFTER_SAVE,
         ["content_text"],
         [
             "Judgment.blurb",
