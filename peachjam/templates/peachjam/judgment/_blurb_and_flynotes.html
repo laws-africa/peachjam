@@ -4,7 +4,7 @@
   {% if show_flynote_heading %}
     <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
   {% endif %}
-  {% if document.linked_flynotes %}
+  {% if show_linked_flynotes and document.linked_flynotes %}
     {% include "peachjam/document/_linked_flynotes.html" with linked_flynotes=document.linked_flynotes flynote_text=document.flynote %}
   {% elif document.flynote_lines %}
     <ul class="list-unstyled flynotes my-2">
