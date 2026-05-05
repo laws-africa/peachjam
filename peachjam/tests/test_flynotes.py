@@ -1351,6 +1351,34 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         trial = Flynote.objects.get(name="trial within a trial")
         self.assertEqual(trial.get_parent().pk, admissibility.pk)
 
+    @patch(
+        "peachjam.analysis.flynotes.FlynoteDocumentCount.quick_refresh_for_single_flynote"
+    )
+    def test_update_quick_refreshes_leaf_flynotes_and_ancestors(self, mock_refresh):
+        self.updater.update_for_judgment(self.judgment)
+
+        refreshed_names = {call.args[0].name for call in mock_refresh.call_args_list}
+        self.assertEqual(
+            refreshed_names,
+            {
+                "Criminal law",
+                "admissibility",
+                "trial within a trial",
+                "circumstantial evidence",
+                "Blom principles",
+            },
+        )
+
+    @patch(
+        "peachjam.analysis.flynotes.FlynoteDocumentCount.quick_refresh_for_single_flynote"
+    )
+    def test_update_can_skip_quick_count_refresh(self, mock_refresh):
+        updater = FlynoteUpdater(update_counts=False)
+
+        updater.update_for_judgment(self.judgment)
+
+        mock_refresh.assert_not_called()
+
     def test_clears_old_links_on_reprocess(self):
         self.updater.update_for_judgment(self.judgment)
         initial_count = JudgmentFlynote.objects.filter(document=self.judgment).count()
