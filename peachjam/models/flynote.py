@@ -6,6 +6,8 @@ from django.db import connection, models, transaction
 from django.db.models import Exists, OuterRef
 from django.db.models.deletion import ProtectedError
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
@@ -79,9 +81,41 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 }
             )
 
+    def validate_unique_sibling_name(self):
+        """Prevent admin edits from creating duplicate sibling/root names."""
+        if not self.pk:
+            return
+
+        name = self.name.strip()
+        if self.is_root():
+            siblings = Flynote.get_root_nodes()
+        else:
+            siblings = self.get_parent().get_children()
+
+        duplicate = siblings.exclude(pk=self.pk).filter(name__iexact=name).first()
+        if not duplicate:
+            return
+
+        merge_url = "{}?{}".format(
+            reverse("admin:peachjam_flynote_merge", args=[duplicate.pk]),
+            urlencode({"selected": self.pk, "q": name}),
+        )
+        raise ValidationError(
+            {
+                "name": format_html(
+                    _(
+                        "A sibling flynote already has this name. "
+                        '<a href="{}">Merge this flynote into that one</a> instead.'
+                    ),
+                    merge_url,
+                )
+            }
+        )
+
     def clean(self):
         super().clean()
         self.validate_deprecated_invariant()
+        self.validate_unique_sibling_name()
 
     @on_attribute_changed(AFTER_SAVE, ["name", "path"], [])
     def serialise_linked_judgments(self):

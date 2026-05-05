@@ -2088,6 +2088,42 @@ class FlynoteMergeTest(TestCase):
         )
 
 
+class FlynoteCleanTest(TestCase):
+    def test_rejects_duplicate_root_name(self):
+        Flynote.add_root(name="Civil procedure")
+        duplicate = Flynote.add_root(name="Civil proceedings")
+        duplicate.name = "Civil procedure"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_rejects_duplicate_sibling_name(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Costs")
+        duplicate = root.add_child(name="Cost orders")
+        duplicate.name = "Costs"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_allows_duplicate_name_under_different_parents(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Costs")
+        other_parent = root.add_child(name="Appeals")
+        flynote = other_parent.add_child(name="Cost orders")
+        flynote.name = "Costs"
+
+        flynote.clean()
+
+
 class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",
