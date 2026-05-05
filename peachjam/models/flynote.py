@@ -231,6 +231,66 @@ class Flynote(LifecycleModelMixin, MP_Node):
         source.delete()
         FlynoteDocumentCount.quick_refresh_for_single_flynote(self)
 
+    def prune_empty_descendants(self):
+        """Delete empty flynotes under this flynote.
+
+        Locks the tree root before pruning so concurrent tree/count updates for
+        the same tree are serialised, even when pruning only a subtree.
+        """
+        flynote_id = self.pk
+
+        with transaction.atomic():
+            flynote = Flynote.objects.filter(pk=flynote_id).first()
+            if not flynote:
+                log.info(
+                    "No flynote with id %s exists while pruning empty descendants, ignoring.",
+                    flynote_id,
+                )
+                return
+
+            tree_root = (
+                Flynote.objects.select_for_update()
+                .filter(pk=flynote.get_root().pk)
+                .first()
+            )
+            if not tree_root:
+                log.info(
+                    "No flynote root exists for %s while pruning empty descendants, ignoring.",
+                    flynote_id,
+                )
+                return
+
+            flynote.refresh_from_db()
+            root_path = flynote.path
+
+            # Stale count rows can briefly make a linked flynote look empty, so
+            # only consider nodes with no linked judgments anywhere in their
+            # subtree and still guard against races during delete.
+            log.info("Pruning empty flynotes under %s", flynote)
+            linked_judgments = JudgmentFlynote.objects.filter(
+                flynote__path__startswith=OuterRef("path")
+            )
+            empty_flynotes = list(
+                Flynote.objects.filter(path__startswith=root_path)
+                .filter(document_count_cache__isnull=True)
+                .annotate(has_linked_judgments=Exists(linked_judgments))
+                .filter(has_linked_judgments=False)
+                .order_by("-depth", "-path")
+            )
+            for empty_flynote in empty_flynotes:
+                try:
+                    empty_flynote.delete()
+                except Flynote.DoesNotExist:
+                    log.warning(
+                        "Skipping prune of flynote %s because it was already deleted.",
+                        empty_flynote.pk,
+                    )
+                except ProtectedError:
+                    log.warning(
+                        "Skipping prune of flynote %s because linked judgments still protect it.",
+                        empty_flynote.pk,
+                    )
+
     @classmethod
     def flynotes_to_string(cls, judgment_flynotes):
         """Convert a queryset of JudgmentFlynote to a string representation."""
@@ -414,34 +474,7 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%", root_path + "%"],
                 )
 
-            # Stale count rows can briefly make a linked flynote look empty, so
-            # only consider nodes with no linked judgments anywhere in their
-            # subtree and still guard against races during delete.
-            log.info("Pruning empty flynotes under %s", flynote)
-            linked_judgments = JudgmentFlynote.objects.filter(
-                flynote__path__startswith=OuterRef("path")
-            )
-            empty_flynotes = list(
-                Flynote.objects.filter(path__startswith=root_path)
-                .filter(document_count_cache__isnull=True)
-                .annotate(has_linked_judgments=Exists(linked_judgments))
-                .filter(has_linked_judgments=False)
-                .order_by("-depth", "-path")
-            )
-            for empty_flynote in empty_flynotes:
-                try:
-                    empty_flynote.delete()
-                except Flynote.DoesNotExist:
-                    log.warning(
-                        "Skipping prune of flynote %s because it was already deleted.",
-                        empty_flynote.pk,
-                    )
-                except ProtectedError:
-                    log.warning(
-                        "Skipping prune of flynote %s because linked judgments still protect it.",
-                        empty_flynote.pk,
-                    )
-
+        flynote.prune_empty_descendants()
         log.info("Refreshed document counts for flynote tree under %s", flynote)
 
     @classmethod
