@@ -521,6 +521,11 @@ class Judgment(CoreDocument):
                 "flynote__path"
             )
         ]
+    @property
+    def flynote_lines(self):
+        if not self.flynote:
+            return []
+        return [line.strip() for line in self.flynote.splitlines() if line.strip()]
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
@@ -1167,7 +1172,7 @@ class Sentence(models.Model):
         default=False,
         help_text=_("True if the sentence is suspended (fully or partially)."),
     )
-    fine_amount = models.PositiveIntegerField(
+    fine_amount = models.PositiveBigIntegerField(
         _("fine amount"),
         null=True,
         blank=True,

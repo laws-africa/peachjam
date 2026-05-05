@@ -359,7 +359,11 @@ def send_new_relationship_email_alert(user_id):
     log.info("New relationship email alerts sent")
 
 
-@background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
+@background(
+    queue="peachjam",
+    remove_existing_tasks=True,
+    schedule={"run_at": 5 * 60, "priority": -1},
+)
 @transaction.atomic
 def generate_judgment_summary(doc_id):
     from peachjam.models import Judgment
