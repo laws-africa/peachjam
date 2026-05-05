@@ -1990,7 +1990,50 @@ class FlynoteMergeTest(TestCase):
 
         target.merge_sources_into([source])
 
-        mock_refresh.assert_called_once_with(root.pk)
+        mock_refresh.assert_any_call(root.pk)
+
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_refreshes_small_target_count_inline(self, mock_refresh):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+
+        target_judgment = self.make_judgment("Target judgment")
+        source_judgment = self.make_judgment("Source judgment")
+        JudgmentFlynote.objects.create(document=target_judgment, flynote=target)
+        JudgmentFlynote.objects.create(document=source_judgment, flynote=source)
+        FlynoteDocumentCount.objects.create(flynote=target, count=1)
+        FlynoteDocumentCount.objects.create(flynote=source, count=1)
+
+        target.merge_sources_into([source])
+
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=target).count,
+            2,
+        )
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=root).count,
+            2,
+        )
+        mock_refresh.assert_any_call(root.pk)
+
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_skips_inline_target_count_when_estimate_is_large(self, mock_refresh):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        target_child = target.add_child(name="Urgent applications")
+        source = root.add_child(name="Stays of execution")
+
+        FlynoteDocumentCount.objects.create(flynote=target, count=5001)
+        FlynoteDocumentCount.objects.create(flynote=target_child, count=5001)
+
+        target.merge_sources_into([source])
+
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=target).count,
+            5001,
+        )
+        mock_refresh.assert_any_call(root.pk)
 
     def test_merge_recursively_merges_duplicate_child_names_under_target(self):
         root = Flynote.add_root(name="Civil procedure")
