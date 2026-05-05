@@ -521,6 +521,7 @@ class Judgment(CoreDocument):
                 "flynote__path"
             )
         ]
+
     @property
     def flynote_lines(self):
         if not self.flynote:
