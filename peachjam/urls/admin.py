@@ -6,6 +6,7 @@ from peachjam.views import (
     DocumentAnonymiseAPIView,
     DocumentAnonymiseSuggestionsAPIView,
     DocumentAnonymiseView,
+    FlynoteManagerView,
     JudgesAutocomplete,
     JudgmentWorksAutocomplete,
     PeachjamAdminLoginView,
@@ -47,5 +48,6 @@ urlpatterns = [
         DocumentAnonymiseSuggestionsAPIView.as_view(),
     ),
     path("check-duplicate-file", CheckDuplicateFilesView.as_view()),
+    path("flynote-manager/", FlynoteManagerView.as_view(), name="flynote-manager"),
     path("", admin.site.urls),
 ]

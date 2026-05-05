@@ -21,6 +21,7 @@ import { DocumentChatBanner, DocumentChatOpenButton } from './chat';
 
 import { OfflineDetails, OfflineTaxonomyStatus } from './Offline';
 import DocumentProblemModal from './DocumentProblemModal.vue';
+import FlynoteManager from './FlynoteManager/index.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 import TaxonomyTopics from './TaxonomyTopics.vue';
@@ -53,6 +54,7 @@ const components: Record<string, any> = {
   // Vue components
   AnonApp,
   DocumentProblemModal,
+  FlynoteManager,
   FindDocuments,
   OfflineDetails,
   OfflineTaxonomyStatus,
