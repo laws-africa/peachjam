@@ -1,0 +1,19 @@
+<section aria-labelledby="flynote-manager-detail-heading" class="p-3">
+  <nav aria-label="Flynote path" class="mb-3">
+    <ol class="breadcrumb mb-0">
+      {% for ancestor in ancestors %}<li class="breadcrumb-item">{{ ancestor.name }}</li>{% endfor %}
+      <li class="breadcrumb-item active" aria-current="page">{{ flynote.name }}</li>
+    </ol>
+  </nav>
+  <div class="d-flex justify-content-between align-items-start gap-3">
+    <div>
+      <h2 id="flynote-manager-detail-heading" class="h4 mb-2">{{ flynote.name }}</h2>
+      <p class="text-muted mb-0">
+        {{ document_count }} judgment{{ document_count|pluralize }} total
+        <span class="mx-2">·</span>
+        {{ flynote.numchild }} child topic{{ flynote.numchild|pluralize }}
+      </p>
+    </div>
+    {% if flynote.deprecated %}<span class="badge text-bg-secondary">Deprecated</span>{% endif %}
+  </div>
+</section>

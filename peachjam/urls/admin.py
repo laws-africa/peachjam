@@ -6,6 +6,10 @@ from peachjam.views import (
     DocumentAnonymiseAPIView,
     DocumentAnonymiseSuggestionsAPIView,
     DocumentAnonymiseView,
+    FlynoteManagerDetailView,
+    FlynoteManagerSearchView,
+    FlynoteManagerTreeChildrenView,
+    FlynoteManagerTreeView,
     FlynoteManagerView,
     JudgesAutocomplete,
     JudgmentWorksAutocomplete,
@@ -48,6 +52,26 @@ urlpatterns = [
         DocumentAnonymiseSuggestionsAPIView.as_view(),
     ),
     path("check-duplicate-file", CheckDuplicateFilesView.as_view()),
+    path(
+        "flynote-manager/tree/",
+        FlynoteManagerTreeView.as_view(),
+        name="flynote-manager-tree",
+    ),
+    path(
+        "flynote-manager/tree/<int:pk>/children/",
+        FlynoteManagerTreeChildrenView.as_view(),
+        name="flynote-manager-tree-children",
+    ),
+    path(
+        "flynote-manager/workspace/search/",
+        FlynoteManagerSearchView.as_view(),
+        name="flynote-manager-search",
+    ),
+    path(
+        "flynote-manager/workspace/<int:pk>/",
+        FlynoteManagerDetailView.as_view(),
+        name="flynote-manager-detail",
+    ),
     path("flynote-manager/", FlynoteManagerView.as_view(), name="flynote-manager"),
     path("", admin.site.urls),
 ]
