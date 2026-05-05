@@ -136,10 +136,12 @@ class Flynote(LifecycleModelMixin, MP_Node):
         """Merge sibling flynotes into this flynote.
 
         Direct judgment links on each source move to this flynote. Source
-        children are re-parented under this flynote. Source flynotes are then
-        deleted explicitly.
+        children are merged into matching children on this flynote, or
+        re-parented under this flynote. Source flynotes are then deleted
+        explicitly.
         """
-        from peachjam.analysis.flynotes import FlynoteParser
+        if not all(isinstance(source, Flynote) for source in sources):
+            raise TypeError("merge_sources_into expects a list of Flynote objects")
 
         source_ids = []
         for source in sources:
@@ -175,55 +177,50 @@ class Flynote(LifecycleModelMixin, MP_Node):
                         )
                     )
 
-            existing_child_names = {
-                FlynoteParser.normalise_name(child.name): child.name
-                for child in target.get_children()
-                if FlynoteParser.normalise_name(child.name)
-            }
-            duplicate_child_names = set()
-
-            for source in sources:
-                for child in source.get_children():
-                    normalised = FlynoteParser.normalise_name(child.name)
-                    if not normalised:
-                        continue
-                    if normalised in existing_child_names:
-                        duplicate_child_names.add(child.name)
-                    else:
-                        existing_child_names[normalised] = child.name
-
-            if duplicate_child_names:
-                duplicates = ", ".join(sorted(duplicate_child_names))
-                raise ValidationError(
-                    _(
-                        "Cannot merge because the target already has children with these names: %(duplicates)s."
-                    )
-                    % {"duplicates": duplicates}
-                )
-
             log.info(f"Merging flynotes into {self}: {sources}")
             for source in sources:
-                for judgment_flynote in list(source.judgments.select_for_update()):
-                    duplicate = JudgmentFlynote.objects.filter(
-                        document_id=judgment_flynote.document_id,
-                        flynote=target,
-                    ).exists()
-                    if duplicate:
-                        judgment_flynote.delete()
-                    else:
-                        judgment_flynote.flynote = target
-                        judgment_flynote.save(update_fields=["flynote"])
-
-                for child in list(source.get_children()):
-                    # moving nodes updates path attributes, so always work with latest info from db
-                    child.refresh_from_db()
-                    target.refresh_from_db()
-                    child.move(target, pos="sorted-child")
-
-                source.delete()
+                target._merge_other_into(source)
 
             refresh_flynote_document_count(target.get_root().pk)
             log.info("Finished merging flynotes")
+
+    def _merge_other_into(self, source):
+        """Merge one corresponding source flynote into this flynote."""
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        for judgment_flynote in list(source.judgments.select_for_update()):
+            duplicate = JudgmentFlynote.objects.filter(
+                document_id=judgment_flynote.document_id,
+                flynote=self,
+            ).exists()
+            if duplicate:
+                judgment_flynote.delete()
+            else:
+                judgment_flynote.flynote = self
+                judgment_flynote.save(update_fields=["flynote"])
+
+        for child in list(source.get_children()):
+            normalised = FlynoteParser.normalise_name(child.name)
+            target_child = None
+            if normalised:
+                target_child = next(
+                    (
+                        candidate
+                        for candidate in self.get_children().select_for_update()
+                        if FlynoteParser.normalise_name(candidate.name) == normalised
+                    ),
+                    None,
+                )
+
+            if target_child:
+                target_child._merge_other_into(child)
+            else:
+                # moving nodes updates path attributes, so always work with latest info from db
+                child.refresh_from_db()
+                self.refresh_from_db()
+                child.move(self, pos="sorted-child")
+
+        source.delete()
 
     @classmethod
     def flynotes_to_string(cls, judgment_flynotes):

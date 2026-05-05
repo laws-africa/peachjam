@@ -1992,18 +1992,29 @@ class FlynoteMergeTest(TestCase):
 
         mock_refresh.assert_called_once_with(root.pk)
 
-    def test_merge_rejects_duplicate_child_names_under_target(self):
+    def test_merge_recursively_merges_duplicate_child_names_under_target(self):
         root = Flynote.add_root(name="Civil procedure")
         target = root.add_child(name="Stay of execution")
         source = root.add_child(name="Stays of execution")
-        target.add_child(name="Urgent applications")
-        source.add_child(name="Urgent applications")
+        target_child = target.add_child(name="Urgent applications")
+        source_child = source.add_child(name="Urgent applications")
 
-        with self.assertRaisesMessage(
-            ValidationError,
-            "Cannot merge because the target already has children with these names: Urgent applications.",
-        ):
-            target.merge_sources_into([source])
+        source_child_judgment = self.make_judgment("Source child judgment")
+        JudgmentFlynote.objects.create(
+            document=source_child_judgment, flynote=source_child
+        )
+
+        target.merge_sources_into([source])
+
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=source_child.pk).exists())
+        self.assertTrue(Flynote.objects.filter(pk=target_child.pk).exists())
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=source_child_judgment,
+                flynote=target_child,
+            ).exists()
+        )
 
 
 class FlynoteListViewTest(TestCase):
