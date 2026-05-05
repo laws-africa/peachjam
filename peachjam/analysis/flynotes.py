@@ -26,7 +26,7 @@ from time import perf_counter
 from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 
-from peachjam.models.flynote import Flynote, JudgmentFlynote
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 
 log = logging.getLogger(__name__)
 
@@ -2668,9 +2668,10 @@ class FlynoteUpdater:
         updater.update_for_judgment(judgment)
     """
 
-    def __init__(self, assume_clean=True):
+    def __init__(self, assume_clean=True, update_counts=True):
         self.parser = FlynoteParser(assume_clean=assume_clean)
         self.node_cache = {}
+        self.update_counts = update_counts
 
     def get_or_create_node(self, parent, name):
         """Find an existing Flynote whose normalised sibling name matches, or create a new one.
@@ -2813,6 +2814,9 @@ class FlynoteUpdater:
         )
         link_ms = (perf_counter() - link_start) * 1000
 
+        if self.update_counts:
+            self.quick_refresh_counts(leaf_flynotes)
+
         log.info(
             "Linked judgment %s to %s flynote topics (parse=%.2fms, nodes=%.2fms, links=%.2fms, total=%.2fms).",
             judgment.pk,
@@ -2823,3 +2827,23 @@ class FlynoteUpdater:
             (perf_counter() - overall_start) * 1000,
         )
         return affected_root_ids
+
+    def quick_refresh_counts(self, leaf_flynotes):
+        """Optimistically refresh linked leaves and ancestors.
+
+        Leaves are refreshed first so that immediate parent estimates can use
+        fresh child counts. Ancestors then run deepest-to-root for the same
+        reason.
+        """
+        flynotes = {}
+        for leaf in leaf_flynotes:
+            flynotes[leaf.pk] = leaf
+            for ancestor in leaf.get_ancestors():
+                flynotes[ancestor.pk] = ancestor
+
+        for flynote in sorted(
+            flynotes.values(),
+            key=lambda item: item.depth,
+            reverse=True,
+        ):
+            FlynoteDocumentCount.quick_refresh_for_single_flynote(flynote)

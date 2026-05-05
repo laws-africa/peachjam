@@ -46,7 +46,10 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         self.stdout.write("Using Flynote model (no taxonomy root required)")
 
-        updater = FlynoteUpdater(assume_clean=options["assume_clean"])
+        updater = FlynoteUpdater(
+            assume_clean=options["assume_clean"],
+            update_counts=False,
+        )
         skip_counts = options["skip_counts"]
 
         if options["judgment_id"]:
