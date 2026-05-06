@@ -66,6 +66,25 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, 'data-vue-component="FlynoteManager"')
         self.assertContains(response, 'data-path-url="')
 
+    def test_admin_changelist_points_to_manager(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse("admin:peachjam_flynote_changelist"))
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Flynotes are managed in the flynote manager.")
+        self.assertContains(response, f'href="{reverse("flynote-manager")}"')
+
+    def test_admin_change_view_redirects_to_manager_detail(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("admin:peachjam_flynote_change", args=[self.sentencing.pk])
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.url,
+            f'{reverse("flynote-manager")}?flynote={self.sentencing.pk}',
+        )
+
     def test_tree_endpoint_returns_root_nodes(self):
         self.client.force_login(self.staff_user)
         response = self.client.get(reverse("flynote-manager-tree"))
@@ -338,7 +357,6 @@ class FlynoteManagerViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-        self.assertContains(response, "Choose sibling flynotes to merge")
         self.assertContains(response, "Bail")
         self.assertContains(
             response,

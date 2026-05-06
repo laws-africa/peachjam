@@ -1239,6 +1239,7 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
 
 @admin.register(Flynote)
 class FlynoteAdmin(admin.ModelAdmin):
+    change_list_template = "admin/peachjam/flynote/change_list.html"
     list_display = ("name", "document_count", "depth", "deprecated")
     list_filter = ("depth", "deprecated", FlynoteDocumentCountFilter)
     search_fields = ("name",)
@@ -1263,6 +1264,10 @@ class FlynoteAdmin(admin.ModelAdmin):
 
     def has_add_permission(self, request):
         return False
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        manager_url = f"{reverse('flynote-manager')}?flynote={object_id}"
+        return HttpResponseRedirect(manager_url)
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("document_count_cache")
