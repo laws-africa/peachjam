@@ -16,6 +16,7 @@
     </ol>
   </nav>
   {% if saved %}<div class="alert alert-success" role="status">Flynote saved.</div>{% endif %}
+  {% if delete_error %}<div class="alert alert-danger" role="alert">{{ delete_error }}</div>{% endif %}
   <div class="mb-4">
     <h2 id="flynote-manager-detail-heading" class="h4 mb-2">{{ flynote.name }}</h2>
     <p class="text-muted mb-0">
@@ -80,26 +81,40 @@
         Deprecation will prevent this flynote and all its descendants from being re-used, and re-generate summaries and
         flynotes for all associated judgments. This may take hours.
       </p>
-      <form hx-post="{% url 'flynote-manager-detail' flynote.pk %}"
-            hx-target="closest section"
-            hx-swap="outerHTML">
-        {% csrf_token %}
-        {% if flynote.deprecated %}
+      {% if flynote.deprecated %}
+        <form hx-post="{% url 'flynote-manager-detail' flynote.pk %}"
+              hx-target="closest section"
+              hx-swap="outerHTML"
+              hx-confirm="Are you sure you want to un-deprecate this flynote and all its descendants?">
+          {% csrf_token %}
           <input type="hidden" name="_action" value="undeprecate"/>
-          <button type="submit"
-                  class="btn btn-danger"
-                  hx-confirm="Are you sure you want to un-deprecate this flynote and all its descendants?">
-            Un-deprecate
-          </button>
-        {% else %}
+          <button type="submit" class="btn btn-danger">Un-deprecate</button>
+        </form>
+      {% else %}
+        <form hx-post="{% url 'flynote-manager-detail' flynote.pk %}"
+              hx-target="closest section"
+              hx-swap="outerHTML"
+              hx-confirm="Are you sure you want to deprecate this flynote and all its descendants?">
+          {% csrf_token %}
           <input type="hidden" name="_action" value="deprecate"/>
-          <button type="submit"
-                  class="btn btn-danger"
-                  hx-confirm="Are you sure you want to deprecate this flynote and all its descendants?">
-            Deprecate
-          </button>
-        {% endif %}
-      </form>
+          <button type="submit" class="btn btn-danger">Deprecate</button>
+        </form>
+      {% endif %}
+      {% if can_delete_flynote %}
+        <hr/>
+        <p>
+          Deleting this flynote will also delete all descendant topics. Only topics with no linked judgments can be
+          deleted.
+        </p>
+        <form hx-post="{% url 'flynote-manager-detail' flynote.pk %}"
+              hx-target="closest section"
+              hx-swap="outerHTML"
+              hx-confirm="Are you sure you want to delete this flynote and all descendant topics?">
+          {% csrf_token %}
+          <input type="hidden" name="_action" value="delete"/>
+          <button type="submit" class="btn btn-danger">Delete</button>
+        </form>
+      {% endif %}
     </details>
   {% endif %}
 </section>

@@ -2,7 +2,13 @@ import json
 
 from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
+from django.db.models.deletion import ProtectedError
+from django.http import (
+    HttpResponse,
+    HttpResponseForbidden,
+    HttpResponseRedirect,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -120,15 +126,40 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
         context["can_change_flynote"] = self.request.user.has_perm(
             "peachjam.change_flynote"
         )
+        context["can_delete_flynote"] = self.request.user.has_perm(
+            "peachjam.delete_flynote"
+        )
         context["manager_url"] = reverse("flynote-manager")
         return context
 
     def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        action = request.POST.get("_action", "save")
+
+        if action == "delete":
+            if not request.user.has_perm("peachjam.delete_flynote"):
+                return HttpResponseForbidden("Forbidden")
+            parent = self.object.get_parent()
+            redirect_url = reverse("flynote-manager")
+            if parent:
+                redirect_url = f"{redirect_url}?flynote={parent.pk}"
+            try:
+                self.object.delete()
+            except ProtectedError:
+                return self.detail_response(
+                    delete_error=(
+                        "This flynote cannot be deleted because it or one of its descendants "
+                        "has linked judgments."
+                    )
+                )
+
+            response = HttpResponse(status=204)
+            response["HX-Redirect"] = redirect_url
+            return response
+
         if not request.user.has_perm("peachjam.change_flynote"):
             return HttpResponseForbidden("Forbidden")
 
-        self.object = self.get_object()
-        action = request.POST.get("_action", "save")
         if action in ["deprecate", "undeprecate"]:
             self.object.deprecated = action == "deprecate"
             self.object.save()
@@ -145,9 +176,11 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
 
         return self.detail_response(form=form, saved=saved)
 
-    def detail_response(self, form=None, saved=False):
+    def detail_response(self, form=None, saved=False, delete_error=None):
+        if form is None:
+            form = FlynoteManagerForm(instance=self.object)
         response = self.render_to_response(
-            self.get_context_data(form=form, saved=saved)
+            self.get_context_data(form=form, saved=saved, delete_error=delete_error)
         )
         if saved:
             response["HX-Trigger"] = json.dumps(

@@ -1,12 +1,17 @@
+import datetime
+
+from countries_plus.models import Country
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
+from languages_plus.models import Language
 
-from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+from peachjam.models import Court, Judgment
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 
 
 class FlynoteManagerViewTest(TestCase):
-    fixtures = ["tests/languages"]
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
     def setUp(self):
         self.staff_user = User.objects.create_user(
@@ -21,7 +26,8 @@ class FlynoteManagerViewTest(TestCase):
             password="password",
         )
         change_flynote = Permission.objects.get(codename="change_flynote")
-        self.staff_user.user_permissions.add(change_flynote)
+        delete_flynote = Permission.objects.get(codename="delete_flynote")
+        self.staff_user.user_permissions.add(change_flynote, delete_flynote)
         self.criminal = Flynote.add_root(name="Criminal law")
         self.contract = Flynote.add_root(name="Contract law", deprecated=True)
         self.criminal.refresh_from_db()
@@ -33,6 +39,15 @@ class FlynoteManagerViewTest(TestCase):
         FlynoteDocumentCount.objects.create(flynote=self.criminal, count=3)
         FlynoteDocumentCount.objects.create(flynote=self.sentencing, count=2)
         FlynoteDocumentCount.objects.create(flynote=self.bail, count=1)
+
+    def make_judgment(self):
+        return Judgment.objects.create(
+            case_name="Linked judgment",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
 
     def test_manager_requires_staff(self):
         response = self.client.get(reverse("flynote-manager"))
@@ -120,7 +135,12 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "card-footer")
         self.assertContains(response, "Danger zone")
         self.assertContains(response, "Deprecation will prevent this flynote")
+        self.assertContains(
+            response, "Deleting this flynote will also delete all descendant topics"
+        )
+        self.assertContains(response, "Only topics with no linked judgments can be")
         self.assertContains(response, "Deprecate")
+        self.assertContains(response, "Delete")
         self.assertNotContains(response, "id_deprecated")
 
     def test_workspace_detail_shows_deprecated_alert(self):
@@ -171,6 +191,68 @@ class FlynoteManagerViewTest(TestCase):
             {"name": "Sentence review"},
         )
         self.assertEqual(post_response.status_code, 403)
+
+    def test_workspace_detail_requires_delete_permission_to_delete(self):
+        staff_without_permission = User.objects.create_user(
+            username="change-only-staff@example.com",
+            email="change-only-staff@example.com",
+            password="password",
+            is_staff=True,
+        )
+        staff_without_permission.user_permissions.add(
+            Permission.objects.get(codename="change_flynote")
+        )
+        self.client.force_login(staff_without_permission)
+
+        post_response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.appeals.pk]),
+            {"_action": "delete"},
+        )
+        self.assertEqual(post_response.status_code, 403)
+
+    def test_workspace_detail_delete_deletes_descendants_and_redirects_to_parent(self):
+        child_pk = self.appeals.pk
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"_action": "delete"},
+        )
+        self.assertEqual(response.status_code, 204)
+
+        self.assertFalse(Flynote.objects.filter(pk=self.sentencing.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=child_pk).exists())
+        self.assertEqual(
+            response.headers["HX-Redirect"],
+            f'{reverse("flynote-manager")}?flynote={self.criminal.pk}',
+        )
+
+    def test_workspace_detail_delete_root_redirects_to_manager(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.contract.pk]),
+            {"_action": "delete"},
+        )
+        self.assertEqual(response.status_code, 204)
+
+        self.assertFalse(Flynote.objects.filter(pk=self.contract.pk).exists())
+        self.assertEqual(response.headers["HX-Redirect"], reverse("flynote-manager"))
+
+    def test_workspace_detail_delete_renders_linked_judgment_error(self):
+        JudgmentFlynote.objects.create(
+            document=self.make_judgment(),
+            flynote=self.appeals,
+        )
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"_action": "delete"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertTrue(Flynote.objects.filter(pk=self.sentencing.pk).exists())
+        self.assertContains(response, "cannot be deleted")
+        self.assertContains(response, "has linked judgments")
+        self.assertNotContains(response, "This field is required")
 
     def test_workspace_detail_post_deprecates_flynote(self):
         self.client.force_login(self.staff_user)
