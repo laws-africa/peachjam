@@ -7,6 +7,7 @@ import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
 import FloatingHeader from './floating-header';
+import FlynoteDetailActions from './flynote-detail-actions';
 import GlossaryFilter from './glossary';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
@@ -37,6 +38,7 @@ const components: Record<string, any> = {
   DocumentFilterForm,
   DocumentTable,
   FloatingHeader,
+  FlynoteDetailActions,
   GlossaryFilter,
   DocumentUploader,
   NavigationSelect,

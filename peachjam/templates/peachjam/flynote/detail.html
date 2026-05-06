@@ -26,9 +26,15 @@
 {% endblock %}
 {% block page-header %}
   <div class="mb-4">
-    <h1 id="main-page-heading" class="mb-4">
-      {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
-      {{ flynote.name }}
+    <h1 id="main-page-heading"
+        class="mb-4 d-flex align-items-start justify-content-between gap-3">
+      <span>
+        {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
+        {{ flynote.name }}
+      </span>
+      <div data-component="FlynoteDetailActions"
+           data-manage-url="{% url 'flynote-manager' %}?flynote={{ flynote.pk }}">
+      </div>
     </h1>
     {% if popular_flynotes %}
       <h2 class="h4">
