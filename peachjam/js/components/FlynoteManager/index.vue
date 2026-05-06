@@ -1,7 +1,7 @@
 <template>
   <div class="flynote-manager">
     <section
-      class="flynote-manager__pane flynote-manager__pane--list"
+      class="flynote-manager__pane flynote-manager__pane--list bg-light"
       aria-labelledby="main-page-heading"
     >
       <h1 id="main-page-heading" class="h4 mb-3">
@@ -89,11 +89,15 @@ export default {
   async mounted () {
     window.addEventListener('popstate', this.handlePopState);
     document.body.addEventListener('flynote-updated', this.handleFlynoteUpdated);
+    document.body.addEventListener('flynote-merged', this.handleFlynoteMerged);
     await this.loadRoots();
 
     const selectedId = this.getSelectedIdFromUrl();
     if (selectedId) {
-      await this.selectFlynote(selectedId, { updateUrl: false });
+      await this.selectFlynote(selectedId, {
+        updateUrl: false,
+        workspaceParams: this.getWorkspaceParamsFromUrl()
+      });
     } else {
       this.loadWorkspace(this.searchUrl);
     }
@@ -101,6 +105,7 @@ export default {
   beforeUnmount () {
     window.removeEventListener('popstate', this.handlePopState);
     document.body.removeEventListener('flynote-updated', this.handleFlynoteUpdated);
+    document.body.removeEventListener('flynote-merged', this.handleFlynoteMerged);
   },
   methods: {
     nodeUrl (template, id) {
@@ -112,6 +117,16 @@ export default {
 
       const parsed = parseInt(id, 10);
       return Number.isNaN(parsed) ? null : parsed;
+    },
+    getWorkspaceParamsFromUrl () {
+      const pageParams = new URLSearchParams(window.location.search);
+      const workspaceParams = new URLSearchParams();
+      for (const key of ['tab', 'selected', 'q']) {
+        for (const value of pageParams.getAll(key)) {
+          workspaceParams.append(key, value);
+        }
+      }
+      return workspaceParams.toString();
     },
     findNode (id, nodes = this.nodes) {
       for (const node of nodes) {
@@ -160,15 +175,22 @@ export default {
     selectNode (node) {
       this.selectFlynote(node.id);
     },
-    async selectFlynote (id, options = { updateUrl: true }) {
+    async selectFlynote (id, options = {}) {
       if (!id) return;
 
       await this.revealFlynote(id);
       this.selectedId = id;
-      this.loadWorkspace(this.nodeUrl(this.detailUrl, id));
-      if (options.updateUrl) {
+      let detailUrl = this.nodeUrl(this.detailUrl, id);
+      if (options.workspaceParams) {
+        detailUrl = `${detailUrl}?${options.workspaceParams}`;
+      }
+      this.loadWorkspace(detailUrl);
+      if (options.updateUrl !== false) {
         const url = new URL(window.location.href);
         url.searchParams.set('flynote', id);
+        url.searchParams.delete('tab');
+        url.searchParams.delete('selected');
+        url.searchParams.delete('q');
         window.history.pushState({ flynoteId: id }, '', url);
       }
     },
@@ -203,7 +225,10 @@ export default {
     handlePopState () {
       const selectedId = this.getSelectedIdFromUrl();
       if (selectedId) {
-        this.selectFlynote(selectedId, { updateUrl: false });
+        this.selectFlynote(selectedId, {
+          updateUrl: false,
+          workspaceParams: this.getWorkspaceParamsFromUrl()
+        });
       } else {
         this.selectedId = null;
         this.loadWorkspace(this.searchUrl);
@@ -215,6 +240,23 @@ export default {
 
       node.name = event.detail.name;
       node.deprecated = event.detail.deprecated;
+    },
+    async handleFlynoteMerged (event) {
+      const parentId = event.detail.parentId;
+      this.selectedId = event.detail.targetId;
+
+      if (!parentId) {
+        await this.loadRoots();
+        return;
+      }
+
+      const parent = this.findNode(parentId);
+      if (!parent) return;
+
+      parent.childrenLoaded = false;
+      parent.children = [];
+      await this.loadNodeChildren(parent);
+      parent.expanded = true;
     }
   }
 };

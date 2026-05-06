@@ -27,7 +27,7 @@
         @click="$emit('select', node)"
       >
         <span>{{ node.name }}</span>
-        <span class="badge text-bg-light border ms-2">{{ node.document_count }}</span>
+        <span class="badge text-bg-light bg-white border ms-2">{{ node.document_count }}</span>
         <span v-if="node.deprecated" class="visually-hidden"> Deprecated </span>
       </button>
     </div>

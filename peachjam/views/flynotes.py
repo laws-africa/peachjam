@@ -2,7 +2,11 @@ import json
 
 from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.postgres.search import TrigramSimilarity
+from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.db.models.deletion import ProtectedError
+from django.db.models.functions import Coalesce
 from django.http import (
     HttpResponse,
     HttpResponseForbidden,
@@ -53,6 +57,61 @@ class FlynoteManagerMixin:
             "has_children": flynote.numchild > 0,
         }
 
+    def get_merge_selected_ids(self, params):
+        selected_ids = []
+        for value in params.getlist("selected"):
+            try:
+                value = int(value)
+            except (TypeError, ValueError):
+                continue
+            if value not in selected_ids:
+                selected_ids.append(value)
+        return selected_ids
+
+    def get_merge_candidates(self, target, query, selected_ids):
+        if target.is_root():
+            qs = Flynote.get_root_nodes()
+        else:
+            qs = target.get_parent().get_children()
+
+        qs = (
+            qs.exclude(pk=target.pk)
+            .exclude(pk__in=selected_ids)
+            .select_related("document_count_cache")
+            .annotate(document_total=Coalesce("document_count_cache__count", 0))
+        )
+
+        if query:
+            qs = (
+                qs.annotate(similarity=TrigramSimilarity("name", query))
+                .filter(Q(similarity__gt=0.05) | Q(name__icontains=query))
+                .order_by("-similarity", "-document_total", "name")
+            )
+        else:
+            qs = qs.order_by("-document_total", "name")
+
+        return qs[:50]
+
+    def get_merge_picker_context(self, request, target, query, selected_ids):
+        selected_flynotes = list(
+            Flynote.objects.filter(pk__in=selected_ids)
+            .select_related("document_count_cache")
+            .annotate(document_total=Coalesce("document_count_cache__count", 0))
+            .order_by("name")
+        )
+        selected_ids = [flynote.pk for flynote in selected_flynotes]
+
+        return {
+            "target_flynote": target,
+            "query": query,
+            "selected_ids": selected_ids,
+            "selected_flynotes": selected_flynotes,
+            "search_results": self.get_merge_candidates(target, query, selected_ids),
+            "picker_url": reverse("flynote-manager-merge-picker", args=[target.pk]),
+            "merge_url": reverse("flynote-manager-merge", args=[target.pk]),
+            "manager_url": reverse("flynote-manager"),
+        }
+
 
 @method_decorator(staff_member_required, name="dispatch")
 class FlynoteManagerTreeView(FlynoteManagerMixin, View):
@@ -100,6 +159,25 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
     template_name = "peachjam/flynote/manager/_detail.html"
     context_object_name = "flynote"
 
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        if request.GET.get("tab") == "merge" and request.user.has_perm(
+            "peachjam.change_flynote"
+        ):
+            query = request.GET.get("q", "").strip()
+            merge_context = self.get_merge_picker_context(
+                request,
+                self.object,
+                query,
+                self.get_merge_selected_ids(request.GET),
+            )
+            return self.detail_response(
+                active_tab="merge",
+                merge_context=merge_context,
+            )
+        context = self.get_context_data(object=self.object)
+        return self.render_to_response(context)
+
     def get_form(self):
         if self.request.method == "POST":
             return FlynoteManagerForm(self.request.POST, instance=self.object)
@@ -130,6 +208,9 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
             "peachjam.delete_flynote"
         )
         context["manager_url"] = reverse("flynote-manager")
+        context["active_tab"] = kwargs.get("active_tab", "detail")
+        if kwargs.get("merge_context"):
+            context.update(kwargs["merge_context"])
         return context
 
     def post(self, request, *args, **kwargs):
@@ -176,11 +257,24 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
 
         return self.detail_response(form=form, saved=saved)
 
-    def detail_response(self, form=None, saved=False, delete_error=None):
+    def detail_response(
+        self,
+        form=None,
+        saved=False,
+        delete_error=None,
+        active_tab="detail",
+        merge_context=None,
+    ):
         if form is None:
             form = FlynoteManagerForm(instance=self.object)
         response = self.render_to_response(
-            self.get_context_data(form=form, saved=saved, delete_error=delete_error)
+            self.get_context_data(
+                form=form,
+                saved=saved,
+                delete_error=delete_error,
+                active_tab=active_tab,
+                merge_context=merge_context,
+            )
         )
         if saved:
             response["HX-Trigger"] = json.dumps(
@@ -193,3 +287,105 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
                 }
             )
         return response
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class FlynoteManagerMergeView(FlynoteManagerDetailView):
+    template_name = "peachjam/flynote/manager/_merge.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.has_perm("peachjam.change_flynote"):
+            return HttpResponseForbidden("Forbidden")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        query = request.GET.get("q", "").strip()
+        context = self.get_merge_picker_context(
+            request,
+            self.object,
+            query,
+            self.get_merge_selected_ids(request.GET),
+        )
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        parent = self.object.get_parent()
+        parent_id = parent.pk if parent else None
+        selected_ids = self.get_merge_selected_ids(request.POST)
+        selected_flynotes = list(Flynote.objects.filter(pk__in=selected_ids))
+        merge_error = None
+        merge_success = None
+
+        try:
+            self.object.merge_sources_into(selected_flynotes)
+        except ValidationError as exc:
+            merge_error = "; ".join(exc.messages)
+        else:
+            self.object.refresh_from_db()
+            merge_success = (
+                f"Merged {len(selected_ids)} flynotes into {self.object.name}."
+            )
+            selected_ids = []
+
+        query = request.POST.get("q", self.object.name).strip()
+        merge_context = self.get_merge_picker_context(
+            request,
+            self.object,
+            query,
+            selected_ids,
+        )
+        merge_context["merge_error"] = merge_error
+        merge_context["merge_success"] = merge_success
+
+        self.template_name = "peachjam/flynote/manager/_detail.html"
+        response = self.detail_response(
+            active_tab="merge",
+            merge_context=merge_context,
+        )
+        if merge_success:
+            response["HX-Trigger"] = json.dumps(
+                {
+                    "flynote-merged": {
+                        "targetId": self.object.pk,
+                        "parentId": parent_id,
+                    }
+                }
+            )
+        return response
+
+
+@method_decorator(staff_member_required, name="dispatch")
+class FlynoteManagerMergePickerView(FlynoteManagerMixin, TemplateView):
+    template_name = "peachjam/flynote/manager/_merge_picker.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.has_perm("peachjam.change_flynote"):
+            return HttpResponseForbidden("Forbidden")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        target = get_object_or_404(Flynote, pk=kwargs["pk"])
+        selected_ids = self.get_merge_selected_ids(request.GET)
+        query = request.GET.get("q", "").strip()
+
+        add_id = request.GET.get("add")
+        remove_id = request.GET.get("remove")
+        if add_id:
+            try:
+                add_id = int(add_id)
+            except (TypeError, ValueError):
+                add_id = None
+            if add_id and add_id not in selected_ids:
+                selected_ids.append(add_id)
+        if remove_id:
+            try:
+                remove_id = int(remove_id)
+            except (TypeError, ValueError):
+                remove_id = None
+            if remove_id in selected_ids:
+                selected_ids.remove(remove_id)
+
+        context = self.get_merge_picker_context(request, target, query, selected_ids)
+        return self.render_to_response(context)
