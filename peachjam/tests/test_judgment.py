@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.test import TestCase
 from languages_plus.models import Language
 
+from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.analysis.summariser import JudgmentSummary
 from peachjam.models import (
     CaseNumber,
@@ -22,6 +23,12 @@ from peachjam.models import (
 class JudgmentTestCase(TestCase):
     fixtures = ["tests/courts", "tests/countries", "tests/languages"]
     maxDiff = None
+
+    def assertGroupedFlynotesEqual(self, expected, judgment):
+        self.assertEqual(
+            expected,
+            FlynoteDisplayGrouper(judgment.flynote_lines).group(),
+        )
 
     def make_judgment(self):
         judgment = Judgment.objects.create(
@@ -70,7 +77,7 @@ class JudgmentTestCase(TestCase):
             )
         )
 
-        self.assertEqual(
+        self.assertGroupedFlynotesEqual(
             [
                 {
                     "text": (
@@ -102,7 +109,7 @@ class JudgmentTestCase(TestCase):
                     ],
                 },
             ],
-            judgment.grouped_flynote_lines,
+            judgment,
         )
 
     def test_grouped_flynote_lines_keeps_original_order(self):
@@ -114,13 +121,13 @@ class JudgmentTestCase(TestCase):
             )
         )
 
-        self.assertEqual(
+        self.assertGroupedFlynotesEqual(
             [
                 {"text": "Zebra law — first point", "children": []},
                 {"text": "Alpha law — second point", "children": []},
                 {"text": "Beta law — third point", "children": []},
             ],
-            judgment.grouped_flynote_lines,
+            judgment,
         )
 
     def test_grouped_flynote_lines_groups_en_dash_paths(self):
@@ -136,7 +143,7 @@ class JudgmentTestCase(TestCase):
             )
         )
 
-        self.assertEqual(
+        self.assertGroupedFlynotesEqual(
             [
                 {
                     "text": "Civil procedure",
@@ -166,7 +173,7 @@ class JudgmentTestCase(TestCase):
                     "children": [],
                 },
             ],
-            judgment.grouped_flynote_lines,
+            judgment,
         )
 
     def test_grouped_flynote_lines_groups_spaced_ascii_dash_paths(self):
@@ -179,7 +186,7 @@ class JudgmentTestCase(TestCase):
             )
         )
 
-        self.assertEqual(
+        self.assertGroupedFlynotesEqual(
             [
                 {
                     "text": (
@@ -198,7 +205,7 @@ class JudgmentTestCase(TestCase):
                     ],
                 }
             ],
-            judgment.grouped_flynote_lines,
+            judgment,
         )
 
     def test_grouped_flynote_lines_groups_ancestor_with_descendants(self):
@@ -212,7 +219,7 @@ class JudgmentTestCase(TestCase):
             )
         )
 
-        self.assertEqual(
+        self.assertGroupedFlynotesEqual(
             [
                 {
                     "text": "Customs law — internal appeal jurisdiction",
@@ -228,7 +235,7 @@ class JudgmentTestCase(TestCase):
                     ],
                 }
             ],
-            judgment.grouped_flynote_lines,
+            judgment,
         )
 
     def test_blurb_and_flynotes_renders_nested_groups(self):
