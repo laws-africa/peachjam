@@ -347,7 +347,80 @@ class FlynoteManagerViewTest(TestCase):
         self.client.force_login(self.staff_user)
         response = self.client.get(reverse("flynote-manager-search"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Search tools will appear here.")
+        self.assertContains(response, "Search flynotes")
+        self.assertContains(
+            response, "Enter a flynote name or choose a depth to search."
+        )
+        self.assertContains(response, 'name="q"')
+        self.assertContains(response, 'name="depth"')
+        self.assertContains(response, "Any depth")
+
+    def test_workspace_search_returns_matching_flynotes(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(reverse("flynote-manager-search"), {"q": "sent"})
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Sentencing")
+        self.assertContains(response, "Criminal law — Sentencing")
+        self.assertContains(
+            response,
+            f'href="{reverse("flynote-manager")}?flynote={self.sentencing.pk}"',
+        )
+        self.assertContains(response, f'data-flynote-id="{self.sentencing.pk}"')
+        self.assertContains(response, "<td>2</td>", html=True)
+        self.assertContains(response, "<td>1</td>", html=True)
+        self.assertNotContains(response, "Bail")
+
+    def test_workspace_search_only_matches_flynote_name_and_marks_deprecated(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-search"),
+            {"q": "law"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Criminal law")
+        self.assertContains(response, "Contract law")
+        self.assertContains(response, "Deprecated")
+        self.assertNotContains(response, "Sentencing")
+
+    def test_workspace_search_filters_by_depth(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-search"),
+            {"q": "law", "depth": "1"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Criminal law")
+        self.assertContains(response, "Contract law")
+        self.assertNotContains(response, "Sentencing")
+        self.assertContains(
+            response, '<option value="1" selected>1</option>', html=True
+        )
+
+        response = self.client.get(
+            reverse("flynote-manager-search"),
+            {"q": "law", "depth": "2"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "No matching flynotes found.")
+        self.assertNotContains(response, "Criminal law")
+
+    def test_workspace_search_allows_depth_without_query(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-search"),
+            {"depth": "2"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "Bail")
+        self.assertContains(response, "Sentencing")
+        self.assertNotContains(
+            response,
+            f'href="{reverse("flynote-manager")}?flynote={self.criminal.pk}"',
+        )
 
     def test_workspace_merge_loads_sibling_candidates(self):
         self.client.force_login(self.staff_user)

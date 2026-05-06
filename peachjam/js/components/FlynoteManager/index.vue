@@ -30,11 +30,58 @@
       </ul>
     </section>
     <section
-      ref="workspace"
-      class="flynote-manager__pane flynote-manager__pane--detail"
-      aria-label="Flynote details"
+      class="flynote-manager__pane flynote-manager__pane--workspace"
+      aria-label="Flynote manager workspace"
       @click="handleWorkspaceClick"
-    />
+    >
+      <ul class="nav nav-tabs mb-3 border-bottom" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            :class="{ active: activeWorkspace === 'search' }"
+            type="button"
+            role="tab"
+            aria-controls="flynote-manager-search-pane"
+            :aria-selected="activeWorkspace === 'search' ? 'true' : 'false'"
+            @click="showSearch"
+          >
+            Search
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button
+            class="nav-link"
+            :class="{ active: activeWorkspace === 'flynote' }"
+            type="button"
+            role="tab"
+            aria-controls="flynote-manager-flynote-pane"
+            :aria-selected="activeWorkspace === 'flynote' ? 'true' : 'false'"
+            :disabled="!selectedId"
+            @click="showFlynote"
+          >
+            Flynote
+          </button>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <div
+          id="flynote-manager-search-pane"
+          ref="searchWorkspace"
+          class="tab-pane fade"
+          :class="{ 'show active': activeWorkspace === 'search' }"
+          role="tabpanel"
+          tabindex="0"
+        />
+        <div
+          id="flynote-manager-flynote-pane"
+          ref="flynoteWorkspace"
+          class="tab-pane fade"
+          :class="{ 'show active': activeWorkspace === 'flynote' }"
+          role="tabpanel"
+          tabindex="0"
+        />
+      </div>
+    </section>
   </div>
 </template>
 
@@ -82,6 +129,8 @@ export default {
     return {
       nodes: [],
       selectedId: null,
+      activeWorkspace: 'search',
+      searchLoaded: false,
       loading: true,
       error: null
     };
@@ -99,7 +148,7 @@ export default {
         workspaceParams: this.getWorkspaceParamsFromUrl()
       });
     } else {
-      this.loadWorkspace(this.searchUrl);
+      this.showSearch({ updateUrl: false });
     }
   },
   beforeUnmount () {
@@ -175,16 +224,36 @@ export default {
     selectNode (node) {
       this.selectFlynote(node.id);
     },
+    showSearch (options = {}) {
+      this.activeWorkspace = 'search';
+      if (!this.searchLoaded) {
+        this.loadSearchWorkspace(this.searchUrl);
+      }
+      if (options.updateUrl !== false) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('flynote');
+        url.searchParams.delete('tab');
+        url.searchParams.delete('selected');
+        url.searchParams.delete('q');
+        window.history.pushState({}, '', url);
+      }
+    },
+    showFlynote () {
+      if (this.selectedId) {
+        this.activeWorkspace = 'flynote';
+      }
+    },
     async selectFlynote (id, options = {}) {
       if (!id) return;
 
       await this.revealFlynote(id);
       this.selectedId = id;
+      this.activeWorkspace = 'flynote';
       let detailUrl = this.nodeUrl(this.detailUrl, id);
       if (options.workspaceParams) {
         detailUrl = `${detailUrl}?${options.workspaceParams}`;
       }
-      this.loadWorkspace(detailUrl);
+      this.loadFlynoteWorkspace(detailUrl);
       if (options.updateUrl !== false) {
         const url = new URL(window.location.href);
         url.searchParams.set('flynote', id);
@@ -205,9 +274,16 @@ export default {
         node.expanded = true;
       }
     },
-    loadWorkspace (url) {
+    loadSearchWorkspace (url) {
       htmx.ajax('GET', url, {
-        target: this.$refs.workspace,
+        target: this.$refs.searchWorkspace,
+        swap: 'innerHTML'
+      });
+      this.searchLoaded = true;
+    },
+    loadFlynoteWorkspace (url) {
+      htmx.ajax('GET', url, {
+        target: this.$refs.flynoteWorkspace,
         swap: 'innerHTML'
       });
     },
@@ -231,7 +307,7 @@ export default {
         });
       } else {
         this.selectedId = null;
-        this.loadWorkspace(this.searchUrl);
+        this.showSearch({ updateUrl: false });
       }
     },
     handleFlynoteUpdated (event) {
@@ -244,6 +320,7 @@ export default {
     async handleFlynoteMerged (event) {
       const parentId = event.detail.parentId;
       this.selectedId = event.detail.targetId;
+      this.activeWorkspace = 'flynote';
 
       if (!parentId) {
         await this.loadRoots();
@@ -281,7 +358,7 @@ export default {
   border-right: 1px solid var(--bs-border-color);
 }
 
-.flynote-manager__pane--detail {
+.flynote-manager__pane--workspace {
   flex: 1 1 auto;
 }
 

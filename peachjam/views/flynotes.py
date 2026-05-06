@@ -57,6 +57,36 @@ class FlynoteManagerMixin:
             "has_children": flynote.numchild > 0,
         }
 
+    def get_flynote_path_labels(self, flynotes):
+        paths = set()
+        for flynote in flynotes:
+            for end in range(
+                flynote.steplen,
+                len(flynote.path) + 1,
+                flynote.steplen,
+            ):
+                paths.add(flynote.path[:end])
+
+        path_names = {
+            flynote.path: flynote.name
+            for flynote in Flynote.objects.filter(path__in=paths).only("name", "path")
+        }
+        return {
+            flynote.pk: [
+                path_names[path]
+                for path in [
+                    flynote.path[:end]
+                    for end in range(
+                        flynote.steplen,
+                        len(flynote.path) + 1,
+                        flynote.steplen,
+                    )
+                ]
+                if path in path_names
+            ]
+            for flynote in flynotes
+        }
+
     def get_merge_selected_ids(self, params):
         selected_ids = []
         for value in params.getlist("selected"):
@@ -150,8 +180,44 @@ class FlynoteManagerTreePathView(View):
 
 
 @method_decorator(staff_member_required, name="dispatch")
-class FlynoteManagerSearchView(TemplateView):
+class FlynoteManagerSearchView(FlynoteManagerMixin, TemplateView):
     template_name = "peachjam/flynote/manager/_search.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query = self.request.GET.get("q", "").strip()
+        depth = self.request.GET.get("depth", "").strip()
+        results = []
+        path_labels = {}
+
+        if query or depth:
+            queryset = Flynote.objects.all()
+            if query:
+                queryset = queryset.filter(name__icontains=query)
+            if depth:
+                try:
+                    queryset = queryset.filter(depth=int(depth))
+                except ValueError:
+                    depth = ""
+
+            results = list(
+                queryset.select_related("document_count_cache")
+                .annotate(document_total=Coalesce("document_count_cache__count", 0))
+                .order_by("name")[:100]
+            )
+            path_labels = self.get_flynote_path_labels(results)
+
+        context["query"] = query
+        context["depth"] = depth
+        context["results"] = results
+        context["path_labels"] = path_labels
+        context["manager_url"] = reverse("flynote-manager")
+        context["search_url"] = reverse("flynote-manager-search")
+        max_depth = (
+            Flynote.objects.order_by("-depth").values_list("depth", flat=True).first()
+        )
+        context["depth_choices"] = range(1, (max_depth or 1) + 1)
+        return context
 
 
 @method_decorator(staff_member_required, name="dispatch")
