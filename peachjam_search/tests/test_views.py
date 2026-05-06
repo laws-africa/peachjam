@@ -268,8 +268,8 @@ class SearchViewsTest(TestCase):
         )
 
         self.assertIn('<ul class="list-unstyled flynotes my-2">', html)
-        self.assertIn("<li>Line one</li>", html)
-        self.assertIn("<li>Line two</li>", html)
+        self.assertRegex(html, r"<li>\s*Line one\s*</li>")
+        self.assertRegex(html, r"<li>\s*Line two\s*</li>")
 
 
 class PortionSearchViewTest(TestCase):
