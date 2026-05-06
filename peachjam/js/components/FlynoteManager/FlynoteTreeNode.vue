@@ -6,6 +6,7 @@
   >
     <div
       class="flynote-tree__row"
+      :data-flynote-tree-id="node.id"
       :class="{
         'flynote-tree__row--selected': selectedId === node.id,
         'flynote-tree__row--deprecated': node.deprecated

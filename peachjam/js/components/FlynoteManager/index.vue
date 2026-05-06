@@ -1,6 +1,7 @@
 <template>
   <div class="flynote-manager">
     <section
+      ref="treePane"
       class="flynote-manager__pane flynote-manager__pane--list bg-light"
       aria-labelledby="main-page-heading"
     >
@@ -249,6 +250,7 @@ export default {
       await this.revealFlynote(id);
       this.selectedId = id;
       this.activeWorkspace = 'flynote';
+      this.scrollSelectedNodeIntoView();
       let detailUrl = this.nodeUrl(this.detailUrl, id);
       if (options.workspaceParams) {
         detailUrl = `${detailUrl}?${options.workspaceParams}`;
@@ -273,6 +275,15 @@ export default {
         await this.loadNodeChildren(node);
         node.expanded = true;
       }
+    },
+    scrollSelectedNodeIntoView () {
+      this.$nextTick(() => {
+        const treePane = this.$refs.treePane;
+        if (!treePane || !this.selectedId) return;
+
+        const selected = treePane.querySelector(`[data-flynote-tree-id="${this.selectedId}"]`);
+        selected?.scrollIntoView({ block: 'nearest' });
+      });
     },
     loadSearchWorkspace (url) {
       htmx.ajax('GET', url, {
