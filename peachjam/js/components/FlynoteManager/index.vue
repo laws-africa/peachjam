@@ -35,7 +35,7 @@
       aria-label="Flynote manager workspace"
       @click="handleWorkspaceClick"
     >
-      <ul class="nav nav-tabs mb-3 border-bottom" role="tablist">
+      <ul class="nav nav-tabs border-bottom bg-light px-3 pt-1" role="tablist">
         <li class="nav-item" role="presentation">
           <button
             class="nav-link"
@@ -64,7 +64,7 @@
           </button>
         </li>
       </ul>
-      <div class="tab-content">
+      <div class="tab-content p-3">
         <div
           id="flynote-manager-search-pane"
           ref="searchWorkspace"
@@ -361,16 +361,29 @@ export default {
 .flynote-manager__pane {
   min-height: 0;
   overflow-y: auto;
-  padding: 1rem;
 }
 
 .flynote-manager__pane--list {
   flex: 0 0 22rem;
   border-right: 1px solid var(--bs-border-color);
+  padding: 1rem;
 }
 
 .flynote-manager__pane--workspace {
+  display: flex;
+  flex-direction: column;
   flex: 1 1 auto;
+  overflow: hidden;
+}
+
+.flynote-manager__pane--workspace > .nav {
+  flex: 0 0 auto;
+}
+
+.flynote-manager__pane--workspace > .tab-content {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .flynote-tree {
