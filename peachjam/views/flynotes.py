@@ -1,6 +1,7 @@
 from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, TemplateView
@@ -51,6 +52,27 @@ class FlynoteManagerTreeChildrenView(FlynoteManagerMixin, View):
 
 
 @method_decorator(staff_member_required, name="dispatch")
+class FlynoteManagerTreePathView(View):
+    def get(self, request, *args, **kwargs):
+        flynote = get_object_or_404(Flynote, pk=kwargs["pk"])
+        path_ids = list(
+            Flynote.objects.filter(
+                path__in=[
+                    flynote.path[:end]
+                    for end in range(
+                        flynote.steplen,
+                        len(flynote.path) + 1,
+                        flynote.steplen,
+                    )
+                ]
+            )
+            .order_by("path")
+            .values_list("pk", flat=True)
+        )
+        return JsonResponse({"path": path_ids})
+
+
+@method_decorator(staff_member_required, name="dispatch")
 class FlynoteManagerSearchView(TemplateView):
     template_name = "peachjam/flynote/manager/_search.html"
 
@@ -77,4 +99,5 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
             context["document_count"] = self.object.document_count_cache.count
         except Flynote.document_count_cache.RelatedObjectDoesNotExist:
             context["document_count"] = 0
+        context["manager_url"] = reverse("flynote-manager")
         return context

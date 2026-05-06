@@ -104,6 +104,7 @@ export default {
   min-width: 0;
   text-align: start;
   text-decoration: none;
+  padding: 0.15rem 0.15rem;
 }
 
 .flynote-tree__select span:first-child {

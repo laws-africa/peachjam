@@ -1,8 +1,18 @@
 <section aria-labelledby="flynote-manager-detail-heading" class="p-3">
   <nav aria-label="Flynote path" class="mb-3">
-    <ol class="breadcrumb mb-0">
-      {% for ancestor in ancestors %}<li class="breadcrumb-item">{{ ancestor.name }}</li>{% endfor %}
-      <li class="breadcrumb-item active" aria-current="page">{{ flynote.name }}</li>
+    <ol class="breadcrumb breadcrumb-flynote mb-0">
+      {% for ancestor in ancestors %}
+        <li class="breadcrumb-item">
+          <a href="{{ manager_url }}?flynote={{ ancestor.pk }}"
+             data-flynote-manager-link
+             data-flynote-id="{{ ancestor.pk }}">{{ ancestor.name }}</a>
+        </li>
+      {% endfor %}
+      <li class="breadcrumb-item active" aria-current="page">
+        <a href="{{ manager_url }}?flynote={{ flynote.pk }}"
+           data-flynote-manager-link
+           data-flynote-id="{{ flynote.pk }}">{{ flynote.name }}</a>
+      </li>
     </ol>
   </nav>
   <div class="d-flex justify-content-between align-items-start gap-3">

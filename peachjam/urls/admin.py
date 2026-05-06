@@ -9,6 +9,7 @@ from peachjam.views import (
     FlynoteManagerDetailView,
     FlynoteManagerSearchView,
     FlynoteManagerTreeChildrenView,
+    FlynoteManagerTreePathView,
     FlynoteManagerTreeView,
     FlynoteManagerView,
     JudgesAutocomplete,
@@ -61,6 +62,11 @@ urlpatterns = [
         "flynote-manager/tree/<int:pk>/children/",
         FlynoteManagerTreeChildrenView.as_view(),
         name="flynote-manager-tree-children",
+    ),
+    path(
+        "flynote-manager/tree/<int:pk>/path/",
+        FlynoteManagerTreePathView.as_view(),
+        name="flynote-manager-tree-path",
     ),
     path(
         "flynote-manager/workspace/search/",

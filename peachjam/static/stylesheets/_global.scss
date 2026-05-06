@@ -231,6 +231,10 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
   padding-top: 1rem;
 }
 
+.breadcrumb-flynote {
+  --bs-breadcrumb-divider: "—";
+}
+
 select.form-select.select-narrow {
   width: initial;
 }

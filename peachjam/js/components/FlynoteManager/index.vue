@@ -33,6 +33,7 @@
       ref="workspace"
       class="flynote-manager__pane flynote-manager__pane--detail"
       aria-label="Flynote details"
+      @click="handleWorkspaceClick"
     />
   </div>
 </template>
@@ -64,6 +65,10 @@ export default {
       type: String,
       required: true
     },
+    pathUrl: {
+      type: String,
+      required: true
+    },
     searchUrl: {
       type: String,
       required: true
@@ -81,13 +86,38 @@ export default {
       error: null
     };
   },
-  mounted () {
-    this.loadRoots();
-    this.loadWorkspace(this.searchUrl);
+  async mounted () {
+    window.addEventListener('popstate', this.handlePopState);
+    await this.loadRoots();
+
+    const selectedId = this.getSelectedIdFromUrl();
+    if (selectedId) {
+      await this.selectFlynote(selectedId, { updateUrl: false });
+    } else {
+      this.loadWorkspace(this.searchUrl);
+    }
+  },
+  beforeUnmount () {
+    window.removeEventListener('popstate', this.handlePopState);
   },
   methods: {
     nodeUrl (template, id) {
       return template.replace('/0/', `/${id}/`);
+    },
+    getSelectedIdFromUrl () {
+      const id = new URLSearchParams(window.location.search).get('flynote');
+      if (!id) return null;
+
+      const parsed = parseInt(id, 10);
+      return Number.isNaN(parsed) ? null : parsed;
+    },
+    findNode (id, nodes = this.nodes) {
+      for (const node of nodes) {
+        if (node.id === id) return node;
+        const child = this.findNode(id, node.children);
+        if (child) return child;
+      }
+      return null;
     },
     async loadRoots () {
       this.loading = true;
@@ -102,14 +132,8 @@ export default {
       }
       this.loading = false;
     },
-    async toggleNode (node) {
-      if (!node.has_children || node.loading) return;
-
-      if (node.childrenLoaded) {
-        node.expanded = !node.expanded;
-        return;
-      }
-
+    async loadNodeChildren (node) {
+      if (!node.has_children || node.loading || node.childrenLoaded) return;
       node.loading = true;
       node.error = null;
       try {
@@ -118,21 +142,70 @@ export default {
         const data = await response.json();
         node.children = data.results.map(decorateNode);
         node.childrenLoaded = true;
-        node.expanded = true;
       } catch {
         node.error = 'Unable to load child flynotes.';
       }
       node.loading = false;
     },
+    async toggleNode (node) {
+      if (!node.has_children || node.loading) return;
+
+      if (!node.childrenLoaded) {
+        await this.loadNodeChildren(node);
+      }
+      node.expanded = !node.expanded;
+    },
     selectNode (node) {
-      this.selectedId = node.id;
-      this.loadWorkspace(this.nodeUrl(this.detailUrl, node.id));
+      this.selectFlynote(node.id);
+    },
+    async selectFlynote (id, options = { updateUrl: true }) {
+      if (!id) return;
+
+      await this.revealFlynote(id);
+      this.selectedId = id;
+      this.loadWorkspace(this.nodeUrl(this.detailUrl, id));
+      if (options.updateUrl) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('flynote', id);
+        window.history.pushState({ flynoteId: id }, '', url);
+      }
+    },
+    async revealFlynote (id) {
+      const response = await fetch(this.nodeUrl(this.pathUrl, id));
+      if (!response.ok) return;
+      const data = await response.json();
+      for (const pathId of data.path.slice(0, -1)) {
+        const node = this.findNode(pathId);
+        if (!node) return;
+        await this.loadNodeChildren(node);
+        node.expanded = true;
+      }
     },
     loadWorkspace (url) {
       htmx.ajax('GET', url, {
         target: this.$refs.workspace,
         swap: 'innerHTML'
       });
+    },
+    handleWorkspaceClick (event) {
+      const link = event.target.closest('a[data-flynote-manager-link]');
+      if (!link) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return;
+
+      event.preventDefault();
+      const id = parseInt(link.dataset.flynoteId, 10);
+      if (!Number.isNaN(id)) {
+        this.selectFlynote(id);
+      }
+    },
+    handlePopState () {
+      const selectedId = this.getSelectedIdFromUrl();
+      if (selectedId) {
+        this.selectFlynote(selectedId, { updateUrl: false });
+      } else {
+        this.selectedId = null;
+        this.loadWorkspace(this.searchUrl);
+      }
     }
   }
 };
