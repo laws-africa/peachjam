@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
+from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.helpers import current_year
@@ -505,6 +506,10 @@ class Judgment(CoreDocument):
         if not self.flynote:
             return []
         return [line.strip() for line in self.flynote.splitlines() if line.strip()]
+
+    @property
+    def grouped_flynote_lines(self):
+        return FlynoteDisplayGrouper(self.flynote_lines).group()
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
