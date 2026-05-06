@@ -1,5 +1,8 @@
+import json
+
+from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
-from django.http import JsonResponse
+from django.http import HttpResponseForbidden, HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -7,6 +10,15 @@ from django.views import View
 from django.views.generic import DetailView, TemplateView
 
 from peachjam.models.flynote import Flynote
+
+
+class FlynoteManagerForm(forms.ModelForm):
+    class Meta:
+        model = Flynote
+        fields = ["name"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+        }
 
 
 @method_decorator(staff_member_required, name="dispatch")
@@ -82,6 +94,11 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
     template_name = "peachjam/flynote/manager/_detail.html"
     context_object_name = "flynote"
 
+    def get_form(self):
+        if self.request.method == "POST":
+            return FlynoteManagerForm(self.request.POST, instance=self.object)
+        return FlynoteManagerForm(instance=self.object)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ancestor_paths = [
@@ -99,5 +116,47 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
             context["document_count"] = self.object.document_count_cache.count
         except Flynote.document_count_cache.RelatedObjectDoesNotExist:
             context["document_count"] = 0
+        context["form"] = kwargs.get("form") or self.get_form()
+        context["can_change_flynote"] = self.request.user.has_perm(
+            "peachjam.change_flynote"
+        )
         context["manager_url"] = reverse("flynote-manager")
         return context
+
+    def post(self, request, *args, **kwargs):
+        if not request.user.has_perm("peachjam.change_flynote"):
+            return HttpResponseForbidden("Forbidden")
+
+        self.object = self.get_object()
+        action = request.POST.get("_action", "save")
+        if action in ["deprecate", "undeprecate"]:
+            self.object.deprecated = action == "deprecate"
+            self.object.save()
+            return HttpResponseRedirect(
+                reverse("flynote-manager-detail", args=[self.object.pk])
+            )
+
+        form = self.get_form()
+        saved = False
+        if form.is_valid():
+            form.save()
+            self.object.refresh_from_db()
+            saved = True
+
+        return self.detail_response(form=form, saved=saved)
+
+    def detail_response(self, form=None, saved=False):
+        response = self.render_to_response(
+            self.get_context_data(form=form, saved=saved)
+        )
+        if saved:
+            response["HX-Trigger"] = json.dumps(
+                {
+                    "flynote-updated": {
+                        "id": self.object.pk,
+                        "name": self.object.name,
+                        "deprecated": self.object.deprecated,
+                    }
+                }
+            )
+        return response

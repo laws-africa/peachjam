@@ -88,6 +88,7 @@ export default {
   },
   async mounted () {
     window.addEventListener('popstate', this.handlePopState);
+    document.body.addEventListener('flynote-updated', this.handleFlynoteUpdated);
     await this.loadRoots();
 
     const selectedId = this.getSelectedIdFromUrl();
@@ -99,6 +100,7 @@ export default {
   },
   beforeUnmount () {
     window.removeEventListener('popstate', this.handlePopState);
+    document.body.removeEventListener('flynote-updated', this.handleFlynoteUpdated);
   },
   methods: {
     nodeUrl (template, id) {
@@ -206,6 +208,13 @@ export default {
         this.selectedId = null;
         this.loadWorkspace(this.searchUrl);
       }
+    },
+    handleFlynoteUpdated (event) {
+      const node = this.findNode(event.detail.id);
+      if (!node) return;
+
+      node.name = event.detail.name;
+      node.deprecated = event.detail.deprecated;
     }
   }
 };

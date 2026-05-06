@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 
@@ -20,6 +20,8 @@ class FlynoteManagerViewTest(TestCase):
             email="user@example.com",
             password="password",
         )
+        change_flynote = Permission.objects.get(codename="change_flynote")
+        self.staff_user.user_permissions.add(change_flynote)
         self.criminal = Flynote.add_root(name="Criminal law")
         self.contract = Flynote.add_root(name="Contract law", deprecated=True)
         self.criminal.refresh_from_db()
@@ -99,6 +101,8 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "Criminal law")
         self.assertContains(response, "Sentencing")
         self.assertContains(response, "2 judgments total")
+        self.assertContains(response, f'href="{self.sentencing.get_absolute_url()}"')
+        self.assertContains(response, "View on site")
         self.assertContains(
             response,
             f'href="{reverse("flynote-manager")}?flynote={self.criminal.pk}"',
@@ -107,6 +111,111 @@ class FlynoteManagerViewTest(TestCase):
             response,
             f'data-flynote-id="{self.sentencing.pk}"',
         )
+        self.assertContains(
+            response,
+            f'hx-post="/en/admin/flynote-manager/workspace/{self.sentencing.pk}/"',
+        )
+        self.assertContains(response, "Depth")
+        self.assertNotContains(response, '<dt class="col-sm-3">Children</dt>')
+        self.assertContains(response, "card-footer")
+        self.assertContains(response, "Danger zone")
+        self.assertContains(response, "Deprecation will prevent this flynote")
+        self.assertContains(response, "Deprecate")
+        self.assertNotContains(response, "id_deprecated")
+
+    def test_workspace_detail_shows_deprecated_alert(self):
+        self.sentencing.deprecated = True
+        self.sentencing.save()
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "alert-warning")
+        self.assertContains(response, "This flynote is deprecated")
+        self.assertContains(response, "will not be re-used")
+
+    def test_workspace_detail_post_updates_flynote(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"name": "Sentence review"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.sentencing.refresh_from_db()
+        self.assertEqual(self.sentencing.name, "Sentence review")
+        self.assertFalse(self.sentencing.deprecated)
+        self.assertContains(response, "Flynote saved.")
+        self.assertIn("flynote-updated", response.headers["HX-Trigger"])
+
+    def test_workspace_detail_requires_change_permission_to_edit(self):
+        staff_without_permission = User.objects.create_user(
+            username="readonly-staff@example.com",
+            email="readonly-staff@example.com",
+            password="password",
+            is_staff=True,
+        )
+        self.client.force_login(staff_without_permission)
+
+        get_response = self.client.get(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk])
+        )
+        self.assertEqual(get_response.status_code, 200)
+        self.assertNotContains(get_response, "card-footer")
+        self.assertNotContains(get_response, "Danger zone")
+
+        post_response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"name": "Sentence review"},
+        )
+        self.assertEqual(post_response.status_code, 403)
+
+    def test_workspace_detail_post_deprecates_flynote(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"_action": "deprecate"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.sentencing.refresh_from_db()
+        self.assertTrue(self.sentencing.deprecated)
+        self.assertEqual(
+            response.url,
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+        )
+
+    def test_workspace_detail_post_undeprecates_flynote(self):
+        self.sentencing.deprecated = True
+        self.sentencing.save()
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"_action": "undeprecate"},
+        )
+        self.assertEqual(response.status_code, 302)
+
+        self.sentencing.refresh_from_db()
+        self.assertFalse(self.sentencing.deprecated)
+        self.assertEqual(
+            response.url,
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+        )
+
+    def test_workspace_detail_post_renders_form_errors(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk]),
+            {"name": "Bail"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.sentencing.refresh_from_db()
+        self.assertEqual(self.sentencing.name, "Sentencing")
+        self.assertContains(response, "A sibling flynote already has this name")
+        self.assertNotIn("HX-Trigger", response.headers)
 
     def test_workspace_search_renders_empty_shell(self):
         self.client.force_login(self.staff_user)

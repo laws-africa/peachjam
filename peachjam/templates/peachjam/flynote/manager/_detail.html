@@ -1,4 +1,4 @@
-<section aria-labelledby="flynote-manager-detail-heading" class="p-3">
+<section aria-labelledby="flynote-manager-detail-heading">
   <nav aria-label="Flynote path" class="mb-3">
     <ol class="breadcrumb breadcrumb-flynote mb-0">
       {% for ancestor in ancestors %}
@@ -15,15 +15,91 @@
       </li>
     </ol>
   </nav>
-  <div class="d-flex justify-content-between align-items-start gap-3">
-    <div>
-      <h2 id="flynote-manager-detail-heading" class="h4 mb-2">{{ flynote.name }}</h2>
-      <p class="text-muted mb-0">
-        {{ document_count }} judgment{{ document_count|pluralize }} total
-        <span class="mx-2">·</span>
-        {{ flynote.numchild }} child topic{{ flynote.numchild|pluralize }}
-      </p>
-    </div>
-    {% if flynote.deprecated %}<span class="badge text-bg-secondary">Deprecated</span>{% endif %}
+  {% if saved %}<div class="alert alert-success" role="status">Flynote saved.</div>{% endif %}
+  <div class="mb-4">
+    <h2 id="flynote-manager-detail-heading" class="h4 mb-2">{{ flynote.name }}</h2>
+    <p class="text-muted mb-0">
+      {{ document_count }} judgment{{ document_count|pluralize }} total
+      <span class="mx-2">·</span>
+      {{ flynote.numchild }} child topic{{ flynote.numchild|pluralize }}
+      <span class="mx-2">·</span>
+      <a href="{{ flynote.get_absolute_url }}" target="_blank" rel="noopener">View on site</a>
+    </p>
+    {% if flynote.deprecated %}
+      <div class="alert alert-warning mt-3 mb-0" role="status">
+        This flynote is deprecated. It and its descendants will not be re-used when generating new flynotes.
+      </div>
+    {% endif %}
   </div>
+  {% if can_change_flynote %}
+    <form hx-post="{% url 'flynote-manager-detail' flynote.pk %}"
+          hx-target="closest section"
+          hx-swap="outerHTML">
+      {% csrf_token %}
+      {% if form.non_field_errors %}<div class="alert alert-danger" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="mb-0">
+            <label for="{{ form.name.id_for_label }}" class="form-label">{{ form.name.label }}</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="invalid-feedback d-block">{{ form.name.errors }}</div>{% endif %}
+          </div>
+        </div>
+        <div class="card-footer">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </form>
+  {% endif %}
+  <dl class="row mb-3">
+    <dt class="col-sm-3">
+      Depth
+    </dt>
+    <dd class="col-sm-9">
+      {{ flynote.depth }}
+    </dd>
+    <dt class="col-sm-3">
+      Child topics
+    </dt>
+    <dd class="col-sm-9">
+      {{ flynote.numchild }}
+    </dd>
+    <dt class="col-sm-3">
+      Documents
+    </dt>
+    <dd class="col-sm-9">
+      {{ document_count }}
+    </dd>
+  </dl>
+  {% if can_change_flynote %}
+    <details class="border border-danger rounded p-3">
+      <summary class="text-danger">
+        Danger zone
+      </summary>
+      <p class="mt-3">
+        Deprecation will prevent this flynote and all its descendants from being re-used, and re-generate summaries and
+        flynotes for all associated judgments. This may take hours.
+      </p>
+      <form hx-post="{% url 'flynote-manager-detail' flynote.pk %}"
+            hx-target="closest section"
+            hx-swap="outerHTML">
+        {% csrf_token %}
+        {% if flynote.deprecated %}
+          <input type="hidden" name="_action" value="undeprecate"/>
+          <button type="submit"
+                  class="btn btn-danger"
+                  hx-confirm="Are you sure you want to un-deprecate this flynote and all its descendants?">
+            Un-deprecate
+          </button>
+        {% else %}
+          <input type="hidden" name="_action" value="deprecate"/>
+          <button type="submit"
+                  class="btn btn-danger"
+                  hx-confirm="Are you sure you want to deprecate this flynote and all its descendants?">
+            Deprecate
+          </button>
+        {% endif %}
+      </form>
+    </details>
+  {% endif %}
 </section>
