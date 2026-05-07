@@ -28,7 +28,10 @@
               Remove
             </button>
             <div class="flex-grow-1">
-              <input type="hidden" name="selected" value="{{ flynote.pk }}"/>
+              <input type="hidden"
+                     name="selected"
+                     value="{{ flynote.pk }}"
+                     form="merge-picker-form"/>
               <a href="{{ manager_url }}?flynote={{ flynote.pk }}"
                  target="_blank"
                  rel="noopener">{{ flynote.name }}</a>
