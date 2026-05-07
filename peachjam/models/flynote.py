@@ -97,8 +97,14 @@ class Flynote(LifecycleModelMixin, MP_Node):
             return
 
         merge_url = "{}?{}".format(
-            reverse("admin:peachjam_flynote_merge", args=[duplicate.pk]),
-            urlencode({"selected": self.pk, "q": name}),
+            reverse("flynote-manager"),
+            urlencode(
+                {
+                    "flynote": duplicate.pk,
+                    "tab": "merge",
+                    "selected": self.pk,
+                }
+            ),
         )
         raise ValidationError(
             {

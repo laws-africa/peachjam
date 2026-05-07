@@ -1,0 +1,99 @@
+{% load humanize %}
+<div id="merge-picker">
+  <!-- keep the form out of the card so that the remove buttons don't trigger hx-confirm -->
+  <form id="merge-picker-form"
+        method="post"
+        action="{{ merge_url }}"
+        hx-post="{{ merge_url }}"
+        hx-target="closest section"
+        hx-swap="outerHTML"
+        hx-confirm="Are you sure? This cannot be undone.">
+    {% csrf_token %}
+  </form>
+  <input type="hidden" name="q" value="{{ query }}" form="merge-picker-form"/>
+  <div class="card mb-4">
+    <h3 class="card-header h5">Selected flynotes to merge into this one</h3>
+    {% if selected_flynotes %}
+      <ul class="list-group list-group-flush mb-0">
+        {% for flynote in selected_flynotes %}
+          <li class="list-group-item d-flex align-items-center">
+            <button type="button"
+                    class="btn btn-danger btn-sm me-3"
+                    hx-get="{{ picker_url }}"
+                    hx-target="#merge-picker"
+                    hx-swap="outerHTML"
+                    hx-include="#merge-search-form"
+                    hx-confirm
+                    hx-vals='{"remove":"{{ flynote.pk }}"}'>
+              Remove
+            </button>
+            <div class="flex-grow-1">
+              <input type="hidden" name="selected" value="{{ flynote.pk }}"/>
+              <a href="{{ manager_url }}?flynote={{ flynote.pk }}"
+                 target="_blank"
+                 rel="noopener">{{ flynote.name }}</a>
+              {% for flynote_id, names in child_names.items %}
+                {% if flynote_id == flynote.pk %}<small class="text-muted d-block">{{ names|join:", " }}</small>{% endif %}
+              {% endfor %}
+            </div>
+            <span class="badge bg-secondary">{{ flynote.document_total|intcomma }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <div class="card-body">No flynotes selected yet.</div>
+    {% endif %}
+    <div class="card-footer">
+      <button type="submit"
+              class="btn btn-primary"
+              form="merge-picker-form"
+              {% if not selected_flynotes %}disabled{% endif %}>
+        Merge these flynotes
+      </button>
+    </div>
+  </div>
+  <form id="merge-search-form"
+        method="get"
+        hx-get="{{ picker_url }}"
+        hx-target="#merge-picker"
+        hx-swap="outerHTML"
+        hx-trigger="input changed delay:300ms from:#id_q, search from:#id_q">
+    {% for flynote in selected_flynotes %}<input type="hidden" name="selected" value="{{ flynote.pk }}"/>{% endfor %}
+    <div class="mb-3">
+      <label for="id_q" class="form-label">Find sibling flynotes to merge</label>
+      <input id="id_q"
+             type="search"
+             name="q"
+             value="{{ query }}"
+             class="form-control"/>
+    </div>
+  </form>
+  {% if search_results %}
+    <ul class="list-group list-group-flush">
+      {% for flynote in search_results %}
+        <li class="list-group-item d-flex align-items-center">
+          <button type="button"
+                  class="btn btn-primary btn-sm me-3"
+                  hx-get="{{ picker_url }}"
+                  hx-target="#merge-picker"
+                  hx-swap="outerHTML"
+                  hx-include="#merge-search-form"
+                  hx-vals='{"add":"{{ flynote.pk }}"}'>
+            Add
+          </button>
+          <div class="flex-grow-1">
+            <a href="{{ manager_url }}?flynote={{ flynote.pk }}"
+               target="_blank"
+               rel="noopener">{{ flynote.name }}</a>
+            {% for flynote_id, names in child_names.items %}
+              {% if flynote_id == flynote.pk %}<small class="text-muted d-block">{{ names|join:"; " }}</small>{% endif %}
+            {% endfor %}
+          </div>
+          <span class="badge bg-secondary">{{ flynote.document_total|intcomma }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No matching sibling flynotes found.</p>
+  {% endif %}
+</div>
