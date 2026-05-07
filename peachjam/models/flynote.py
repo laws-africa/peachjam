@@ -366,7 +366,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
         if not flynote_lines:
             return None
 
-        return "\n".join(flynote_lines)
+        return "\n".join(sorted(flynote_lines))
 
 
 class JudgmentFlynote(models.Model):
