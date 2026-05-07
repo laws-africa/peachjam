@@ -35,6 +35,50 @@ class TaxonomyTestCase(WebTest):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("public", response.headers.get("Cache-Control", ""))
 
+    def test_taxonomy_tree_is_not_ordered_by_treebeard(self):
+        self.assertEqual(Taxonomy.node_order_by, [])
+
+    def test_allowed_children_are_ordered_by_name(self):
+        self.root.add_child(name="Zoning")
+        self.root.add_child(name="Administrative law")
+
+        children = list(
+            self.root.get_allowed_children(
+                User.objects.get(username="user@example.com")
+            )
+        )
+
+        self.assertEqual(
+            [child.name for child in children],
+            ["Administrative law", "Land Rights", "Zoning"],
+        )
+
+    def test_allowed_taxonomies_are_ordered_by_name(self):
+        self.root.add_child(name="Zoning")
+        self.root.add_child(name="Administrative law")
+
+        tree = Taxonomy.get_allowed_taxonomies()["tree"]
+        collections = next(
+            node for node in tree if node["data"]["name"] == "Collections"
+        )
+
+        self.assertEqual(
+            [child["data"]["name"] for child in collections["children"]],
+            ["Administrative law", "Land Rights", "Zoning"],
+        )
+
+    def test_taxonomy_tree_for_items_is_ordered_by_name(self):
+        zoning = self.root.add_child(name="Zoning")
+        admin = self.root.add_child(name="Administrative law")
+
+        tree = Taxonomy.get_tree_for_items([zoning, admin])
+        root_children = tree[self.root]
+
+        self.assertEqual(
+            [topic.name for topic in root_children],
+            ["Administrative law", "Zoning"],
+        )
+
     def test_restricted_taxonomy_unauthorized(self):
         unauthorized_user = User.objects.get(username="user@example.com")
         land = Taxonomy.objects.get(name="Land Rights")

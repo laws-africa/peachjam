@@ -409,7 +409,7 @@ class TopicTreeWidget(forms.CheckboxSelectMultiple):
             for kid in item.get("children", []):
                 fixup(kid)
 
-        tree = Taxonomy.dump_bulk()
+        tree = Taxonomy.sort_bulk_tree(Taxonomy.dump_bulk())
         for x in tree:
             fixup(x)
         return tree
@@ -1229,7 +1229,7 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
                 fixup(kid)
 
         # grab the tree and turn it into something la-table-of-contents-controller understands
-        tree = self.model.dump_bulk()
+        tree = self.model.sort_bulk_tree(self.model.dump_bulk())
         for x in tree:
             fixup(x)
         resp.context_data["tree_json"] = json.dumps(tree)
