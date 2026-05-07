@@ -157,6 +157,13 @@ def split(value, sep=None):
 
 
 @register.filter
+def group_flynote_lines(lines):
+    from peachjam.analysis.flynotes import FlynoteDisplayGrouper
+
+    return FlynoteDisplayGrouper(lines).group()
+
+
+@register.filter
 def qualify_local_refs(value, frbr_uri):
     return qualify_local_refs_html(value, frbr_uri)
 
