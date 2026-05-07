@@ -423,6 +423,7 @@ class FlynoteManagerViewTest(TestCase):
         )
 
     def test_workspace_merge_loads_sibling_candidates(self):
+        self.bail.add_child(name="Release conditions")
         self.client.force_login(self.staff_user)
         response = self.client.get(
             reverse("flynote-manager-merge", args=[self.sentencing.pk]),
@@ -431,6 +432,7 @@ class FlynoteManagerViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, "Bail")
+        self.assertContains(response, "Release conditions")
         self.assertContains(
             response,
             f'href="{reverse("flynote-manager")}?flynote={self.bail.pk}"',

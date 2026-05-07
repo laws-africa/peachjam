@@ -21,6 +21,7 @@ from django.views import View
 from django.views.generic import DetailView, TemplateView
 
 from peachjam.models.flynote import Flynote
+from peachjam.views.judgment import FlynoteViewMixin
 
 
 class FlynoteManagerForm(forms.ModelForm):
@@ -37,7 +38,7 @@ class FlynoteManagerView(TemplateView):
     template_name = "peachjam/flynote/manager/manager.html"
 
 
-class FlynoteManagerMixin:
+class FlynoteManagerMixin(FlynoteViewMixin):
     model = Flynote
 
     def get_queryset(self):
@@ -135,12 +136,18 @@ class FlynoteManagerMixin:
         )
         selected_ids = [flynote.pk for flynote in selected_flynotes]
 
+        search_results = self.get_merge_candidates(target, query, selected_ids)
+        child_names = self.get_top_children_by_count(
+            [*selected_flynotes, *search_results]
+        )
+
         return {
             "target_flynote": target,
             "query": query,
             "selected_ids": selected_ids,
             "selected_flynotes": selected_flynotes,
-            "search_results": self.get_merge_candidates(target, query, selected_ids),
+            "search_results": search_results,
+            "child_names": child_names,
             "picker_url": reverse("flynote-manager-merge-picker", args=[target.pk]),
             "merge_url": reverse("flynote-manager-merge", args=[target.pk]),
             "manager_url": reverse("flynote-manager"),
