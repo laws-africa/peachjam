@@ -38,7 +38,9 @@ class DocIndexesListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         taxonomy = get_object_or_404(Taxonomy, slug="case-index")
-        context["taxonomies"] = Taxonomy.dump_bulk(parent=taxonomy)
+        context["taxonomies"] = Taxonomy.sort_bulk_tree(
+            Taxonomy.dump_bulk(parent=taxonomy)
+        )
         context["taxonomy_url"] = "doc_index_detail"
         context["taxonomy_link_prefix"] = "indexes"
         return context
