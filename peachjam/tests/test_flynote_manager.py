@@ -438,6 +438,19 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, 'target="_blank"')
         self.assertNotContains(response, "Appeals")
 
+    def test_workspace_merge_defaults_search_to_target_name(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-merge", args=[self.sentencing.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(
+            response,
+            '<input id="id_q" type="search" name="q" value="Sentencing" class="form-control"/>',
+            html=True,
+        )
+
     def test_workspace_detail_can_deep_link_to_merge_tab(self):
         self.client.force_login(self.staff_user)
         response = self.client.get(
@@ -448,6 +461,11 @@ class FlynoteManagerViewTest(TestCase):
 
         self.assertContains(response, 'id="flynote-manager-merge-tab"')
         self.assertContains(response, 'aria-selected="true"')
+        self.assertContains(
+            response,
+            '<input id="id_q" type="search" name="q" value="Bail" class="form-control"/>',
+            html=True,
+        )
         self.assertContains(
             response,
             f'<input type="hidden" name="selected" value="{self.sentencing.pk}"/>',

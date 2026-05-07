@@ -4,6 +4,7 @@ from django import forms
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
+from django.db import ProgrammingError, transaction
 from django.db.models import Q
 from django.db.models.deletion import ProtectedError
 from django.db.models.functions import Coalesce
@@ -112,15 +113,18 @@ class FlynoteManagerMixin:
         )
 
         if query:
-            qs = (
+            trigram_qs = (
                 qs.annotate(similarity=TrigramSimilarity("name", query))
                 .filter(Q(similarity__gt=0.05) | Q(name__icontains=query))
                 .order_by("-similarity", "-document_total", "name")
             )
-        else:
-            qs = qs.order_by("-document_total", "name")
+            try:
+                with transaction.atomic():
+                    return list(trigram_qs[:50])
+            except ProgrammingError:
+                qs = qs.filter(name__icontains=query)
 
-        return qs[:50]
+        return list(qs.order_by("-document_total", "name")[:50])
 
     def get_merge_picker_context(self, request, target, query, selected_ids):
         selected_flynotes = list(
@@ -230,7 +234,7 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
         if request.GET.get("tab") == "merge" and request.user.has_perm(
             "peachjam.change_flynote"
         ):
-            query = request.GET.get("q", "").strip()
+            query = request.GET.get("q", self.object.name).strip()
             merge_context = self.get_merge_picker_context(
                 request,
                 self.object,
@@ -366,7 +370,7 @@ class FlynoteManagerMergeView(FlynoteManagerDetailView):
 
     def get(self, request, *args, **kwargs):
         self.object = self.get_object()
-        query = request.GET.get("q", "").strip()
+        query = request.GET.get("q", self.object.name).strip()
         context = self.get_merge_picker_context(
             request,
             self.object,
@@ -434,7 +438,7 @@ class FlynoteManagerMergePickerView(FlynoteManagerMixin, TemplateView):
     def get(self, request, *args, **kwargs):
         target = get_object_or_404(Flynote, pk=kwargs["pk"])
         selected_ids = self.get_merge_selected_ids(request.GET)
-        query = request.GET.get("q", "").strip()
+        query = request.GET.get("q", target.name).strip()
 
         add_id = request.GET.get("add")
         remove_id = request.GET.get("remove")
