@@ -55,7 +55,6 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
     name = models.CharField(_("name"), max_length=255)
     deprecated = models.BooleanField(_("deprecated"), default=False, db_index=True)
-    node_order_by = ["name"]
 
     class Meta:
         verbose_name = _("flynote")
@@ -266,7 +265,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 # moving nodes updates path attributes, so always work with latest info from db
                 child.refresh_from_db()
                 self.refresh_from_db()
-                child.move(self, pos="sorted-child")
+                child.move(self, pos="last-child")
 
         source.delete()
         FlynoteDocumentCount.quick_refresh_for_single_flynote(self)
@@ -367,7 +366,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
         if not flynote_lines:
             return None
 
-        return "\n".join(flynote_lines)
+        return "\n".join(sorted(flynote_lines))
 
 
 class JudgmentFlynote(models.Model):
