@@ -104,6 +104,13 @@
             {{ document_count }}
           </dd>
         </dl>
+        <section aria-labelledby="flynote-manager-comments-heading" class="mb-4">
+          <h3 id="flynote-manager-comments-heading" class="h5">Comments</h3>
+          <div id="comments-list">{% include "admin/_comments_list.html" with object=flynote %}</div>
+          <div id="comments-form-wrapper">
+            {% include "admin/_comments_form.html" with object=flynote app_label=app_label model_name=model_name %}
+          </div>
+        </section>
         <details class="border border-danger rounded p-3">
           <summary class="text-danger">
             Danger zone

@@ -285,6 +285,8 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
             "peachjam.delete_flynote"
         )
         context["manager_url"] = reverse("flynote-manager")
+        context["app_label"] = self.object._meta.app_label
+        context["model_name"] = self.object._meta.model_name
         context["active_tab"] = kwargs.get("active_tab", "detail")
         if kwargs.get("merge_context"):
             context.update(kwargs["merge_context"])

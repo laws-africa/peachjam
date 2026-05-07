@@ -154,6 +154,17 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "Depth")
         self.assertNotContains(response, '<dt class="col-sm-3">Children</dt>')
         self.assertContains(response, "card-footer")
+        self.assertContains(response, "Comments")
+        self.assertContains(response, 'id="comments-list"')
+        self.assertContains(response, 'id="comments-form-wrapper"')
+        self.assertContains(response, 'name="comment"')
+        self.assertContains(
+            response,
+            reverse(
+                "comment_form",
+                args=["peachjam", "flynote", self.sentencing.pk],
+            ),
+        )
         self.assertContains(response, "Danger zone")
         self.assertContains(response, "Merge")
         self.assertContains(response, "Deprecation will prevent this flynote")
@@ -164,6 +175,19 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "Deprecate")
         self.assertContains(response, "Delete")
         self.assertNotContains(response, "id_deprecated")
+
+    def test_comment_form_refresh_is_not_cacheable(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse(
+                "comment_form",
+                args=["peachjam", "flynote", self.sentencing.pk],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, 'name="csrfmiddlewaretoken"')
+        self.assertIn("no-store", response.headers["Cache-Control"])
 
     def test_workspace_detail_shows_deprecated_alert(self):
         self.sentencing.deprecated = True
