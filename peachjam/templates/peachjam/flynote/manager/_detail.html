@@ -103,7 +103,52 @@
           <dd class="col-sm-9">
             {{ document_count }}
           </dd>
+          <dt class="col-sm-3">
+            Path
+          </dt>
+          <dd class="col-sm-9">
+            {{ flynote.path }}
+          </dd>
+          {% if flynote.depth > 1 %}
+            <dt class="col-sm-3">
+              Parent's path
+            </dt>
+            <dd class="col-sm-9">
+              {{ flynote.get_parent.path }}
+            </dd>
+          {% endif %}
         </dl>
+        <div class="row">
+          <div class="col">
+            <section aria-labelledby="flynote-manager-history-heading" class="mb-4">
+              <h3 id="flynote-manager-history-heading" class="h5">History</h3>
+              {% if log_entries %}
+                <ul class="list-group">
+                  {% for log_entry in log_entries %}
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between gap-3">
+                        <strong>{{ log_entry.user.get_username|default:"Unknown user" }}</strong>
+                        <span class="text-muted">{{ log_entry.action_time|date:"SHORT_DATETIME_FORMAT" }}</span>
+                      </div>
+                      <div>{{ log_entry.get_change_message }}</div>
+                    </li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <p class="text-muted mb-0">No history yet.</p>
+              {% endif %}
+            </section>
+          </div>
+          <div class="col">
+            <section aria-labelledby="flynote-manager-comments-heading" class="mb-4">
+              <h3 id="flynote-manager-comments-heading" class="h5">Comments</h3>
+              <div id="comments-list">{% include "admin/_comments_list.html" with object=flynote %}</div>
+              <div id="comments-form-wrapper">
+                {% include "admin/_comments_form.html" with object=flynote app_label=app_label model_name=model_name %}
+              </div>
+            </section>
+          </div>
+        </div>
         <details class="border border-danger rounded p-3">
           <summary class="text-danger">
             Danger zone

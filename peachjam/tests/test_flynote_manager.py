@@ -2,7 +2,9 @@ import datetime
 import json
 
 from countries_plus.models import Country
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.auth.models import Permission, User
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
@@ -154,6 +156,19 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "Depth")
         self.assertNotContains(response, '<dt class="col-sm-3">Children</dt>')
         self.assertContains(response, "card-footer")
+        self.assertContains(response, "History")
+        self.assertContains(response, "No history yet.")
+        self.assertContains(response, "Comments")
+        self.assertContains(response, 'id="comments-list"')
+        self.assertContains(response, 'id="comments-form-wrapper"')
+        self.assertContains(response, 'name="comment"')
+        self.assertContains(
+            response,
+            reverse(
+                "comment_form",
+                args=["peachjam", "flynote", self.sentencing.pk],
+            ),
+        )
         self.assertContains(response, "Danger zone")
         self.assertContains(response, "Merge")
         self.assertContains(response, "Deprecation will prevent this flynote")
@@ -164,6 +179,19 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "Deprecate")
         self.assertContains(response, "Delete")
         self.assertNotContains(response, "id_deprecated")
+
+    def test_comment_form_refresh_is_not_cacheable(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse(
+                "comment_form",
+                args=["peachjam", "flynote", self.sentencing.pk],
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, 'name="csrfmiddlewaretoken"')
+        self.assertIn("no-store", response.headers["Cache-Control"])
 
     def test_workspace_detail_shows_deprecated_alert(self):
         self.sentencing.deprecated = True
@@ -191,6 +219,32 @@ class FlynoteManagerViewTest(TestCase):
         self.assertFalse(self.sentencing.deprecated)
         self.assertContains(response, "Flynote saved.")
         self.assertIn("flynote-updated", response.headers["HX-Trigger"])
+        log_entry = LogEntry.objects.get(object_id=str(self.sentencing.pk))
+        self.assertEqual(log_entry.user, self.staff_user)
+        self.assertIn(
+            'Changed name from "Sentencing" to "Sentence review".',
+            log_entry.change_message,
+        )
+
+    def test_workspace_detail_shows_admin_history(self):
+        LogEntry.objects.log_action(
+            user_id=self.staff_user.pk,
+            content_type_id=ContentType.objects.get_for_model(self.sentencing).pk,
+            object_id=self.sentencing.pk,
+            object_repr=str(self.sentencing),
+            action_flag=CHANGE,
+            change_message="Changed flynote.",
+        )
+
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-detail", args=[self.sentencing.pk])
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertContains(response, "History")
+        self.assertContains(response, "Changed flynote.")
+        self.assertContains(response, self.staff_user.username)
 
     def test_workspace_detail_requires_change_permission_to_edit(self):
         staff_without_permission = User.objects.create_user(
@@ -296,6 +350,9 @@ class FlynoteManagerViewTest(TestCase):
             response.url,
             reverse("flynote-manager-detail", args=[self.sentencing.pk]),
         )
+        log_entry = LogEntry.objects.get(object_id=str(self.sentencing.pk))
+        self.assertEqual(log_entry.user, self.staff_user)
+        self.assertEqual(log_entry.change_message, "Deprecated flynote.")
 
     def test_workspace_detail_post_undeprecates_flynote(self):
         self.sentencing.deprecated = True
@@ -313,6 +370,9 @@ class FlynoteManagerViewTest(TestCase):
             response.url,
             reverse("flynote-manager-detail", args=[self.sentencing.pk]),
         )
+        log_entry = LogEntry.objects.get(object_id=str(self.sentencing.pk))
+        self.assertEqual(log_entry.user, self.staff_user)
+        self.assertEqual(log_entry.change_message, "Un-deprecated flynote.")
 
     def test_workspace_detail_post_renders_form_errors(self):
         self.client.force_login(self.staff_user)
@@ -509,6 +569,10 @@ class FlynoteManagerViewTest(TestCase):
 
         self.assertFalse(Flynote.objects.filter(pk=self.bail.pk).exists())
         self.assertContains(response, "Merged 1 flynotes into Sentencing.")
+        log_entry = LogEntry.objects.get(object_id=str(self.sentencing.pk))
+        self.assertEqual(log_entry.user, self.staff_user)
+        self.assertIn("Merged flynotes into this flynote", log_entry.change_message)
+        self.assertIn(f"Bail ({self.bail.pk})", log_entry.change_message)
         self.assertContains(response, 'id="flynote-manager-merge-tab"')
         self.assertContains(response, 'aria-selected="true"')
         trigger = json.loads(response.headers["HX-Trigger"])
