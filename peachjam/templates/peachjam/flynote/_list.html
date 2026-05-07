@@ -18,7 +18,7 @@
     <a href="#"
        hx-get="{% url 'flynote_list' %}?more&{% query_string request.GET page=page_obj.next_page_number %}"
        id="flynote-more"
-       class="btn btn-outline-primary mt-2"
+       class="btn btn-outline-primary m-3"
        {% if more %} hx-swap-oob="true"{% endif %}>{% trans "Load more ..." %}</a>
   {% endif %}
 {% elif not more %}
