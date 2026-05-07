@@ -172,7 +172,11 @@ class FlynoteManagerMixin(FlynoteViewMixin):
 @method_decorator(staff_member_required, name="dispatch")
 class FlynoteManagerTreeView(FlynoteManagerMixin, View):
     def get(self, request, *args, **kwargs):
-        flynotes = Flynote.get_root_nodes().select_related("document_count_cache")
+        flynotes = (
+            Flynote.get_root_nodes()
+            .select_related("document_count_cache")
+            .order_by("name")
+        )
         return JsonResponse({"results": [self.serialize_node(f) for f in flynotes]})
 
 
@@ -180,7 +184,11 @@ class FlynoteManagerTreeView(FlynoteManagerMixin, View):
 class FlynoteManagerTreeChildrenView(FlynoteManagerMixin, View):
     def get(self, request, *args, **kwargs):
         parent = get_object_or_404(Flynote, pk=kwargs["pk"])
-        flynotes = parent.get_children().select_related("document_count_cache")
+        flynotes = (
+            parent.get_children()
+            .select_related("document_count_cache")
+            .order_by("name")
+        )
         return JsonResponse({"results": [self.serialize_node(f) for f in flynotes]})
 
 

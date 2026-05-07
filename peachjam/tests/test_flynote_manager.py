@@ -95,6 +95,10 @@ class FlynoteManagerViewTest(TestCase):
 
         names = {node["name"] for node in payload["results"]}
         self.assertEqual(names, {"Criminal law", "Contract law"})
+        self.assertEqual(
+            [node["name"] for node in payload["results"]],
+            ["Contract law", "Criminal law"],
+        )
         criminal = next(
             node for node in payload["results"] if node["name"] == "Criminal law"
         )
@@ -116,6 +120,10 @@ class FlynoteManagerViewTest(TestCase):
 
         names = {node["name"] for node in payload["results"]}
         self.assertEqual(names, {"Bail", "Sentencing"})
+        self.assertEqual(
+            [node["name"] for node in payload["results"]],
+            ["Bail", "Sentencing"],
+        )
         self.assertNotIn("Appeals", names)
 
     def test_path_endpoint_returns_path_to_node(self):
