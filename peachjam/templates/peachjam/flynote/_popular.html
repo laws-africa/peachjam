@@ -31,12 +31,15 @@
 </div>
 {% if has_more_topics %}
   <div class="collapse my-4" id="allSubtopicsCollapse">
-    <div class="card card-body shadow-sm">
-      <h3 class="h5 mb-3">
-        {{ flynote.name }}
-        <span class="badge rounded-pill text-bg-secondary ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
-      </h3>
-      {% include 'peachjam/flynote/_filter_form.html' with onload=True %}
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h3 class="h5 mb-3">
+          {{ flynote.name }}
+          <span class="badge rounded-pill text-bg-secondary ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
+        </h3>
+        {% include 'peachjam/flynote/_filter_form.html' with onload=True omit_results=True %}
+      </div>
+      <div id="flynote-list-container">{% include 'peachjam/flynote/_list.html' %}</div>
     </div>
   </div>
 {% endif %}
