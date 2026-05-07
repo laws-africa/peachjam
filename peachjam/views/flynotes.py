@@ -1,7 +1,9 @@
 import json
 
 from django import forms
+from django.contrib.admin.models import CHANGE, LogEntry
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ValidationError
 from django.db import ProgrammingError, transaction
@@ -40,6 +42,19 @@ class FlynoteManagerView(TemplateView):
 
 class FlynoteManagerMixin(FlynoteViewMixin):
     model = Flynote
+
+    def get_flynote_content_type(self):
+        return ContentType.objects.get_for_model(Flynote)
+
+    def log_flynote_change(self, request, flynote, message):
+        LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=self.get_flynote_content_type().pk,
+            object_id=flynote.pk,
+            object_repr=str(flynote)[:200],
+            action_flag=CHANGE,
+            change_message=message,
+        )
 
     def get_queryset(self):
         return self.model.objects.select_related("document_count_cache")
@@ -287,6 +302,14 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
         context["manager_url"] = reverse("flynote-manager")
         context["app_label"] = self.object._meta.app_label
         context["model_name"] = self.object._meta.model_name
+        context["log_entries"] = (
+            LogEntry.objects.filter(
+                content_type=self.get_flynote_content_type(),
+                object_id=str(self.object.pk),
+            )
+            .select_related("user")
+            .order_by("-action_time")[:20]
+        )
         context["active_tab"] = kwargs.get("active_tab", "detail")
         if kwargs.get("merge_context"):
             context.update(kwargs["merge_context"])
@@ -321,17 +344,32 @@ class FlynoteManagerDetailView(FlynoteManagerMixin, DetailView):
             return HttpResponseForbidden("Forbidden")
 
         if action in ["deprecate", "undeprecate"]:
+            was_deprecated = self.object.deprecated
             self.object.deprecated = action == "deprecate"
             self.object.save()
+            if self.object.deprecated != was_deprecated:
+                message = (
+                    "Deprecated flynote."
+                    if self.object.deprecated
+                    else "Un-deprecated flynote."
+                )
+                self.log_flynote_change(request, self.object, message)
             return HttpResponseRedirect(
                 reverse("flynote-manager-detail", args=[self.object.pk])
             )
 
+        old_name = self.object.name
         form = self.get_form()
         saved = False
         if form.is_valid():
             form.save()
             self.object.refresh_from_db()
+            if self.object.name != old_name:
+                self.log_flynote_change(
+                    request,
+                    self.object,
+                    f'Changed name from "{old_name}" to "{self.object.name}".',
+                )
             saved = True
 
         return self.detail_response(form=form, saved=saved)
@@ -393,7 +431,12 @@ class FlynoteManagerMergeView(FlynoteManagerDetailView):
         parent = self.object.get_parent()
         parent_id = parent.pk if parent else None
         selected_ids = self.get_merge_selected_ids(request.POST)
-        selected_flynotes = list(Flynote.objects.filter(pk__in=selected_ids))
+        selected_flynotes = list(
+            Flynote.objects.filter(pk__in=selected_ids).order_by("name")
+        )
+        source_labels = [
+            f"{flynote.name} ({flynote.pk})" for flynote in selected_flynotes
+        ]
         merge_error = None
         merge_success = None
 
@@ -406,6 +449,14 @@ class FlynoteManagerMergeView(FlynoteManagerDetailView):
             merge_success = (
                 f"Merged {len(selected_ids)} flynotes into {self.object.name}."
             )
+            if source_labels:
+                self.log_flynote_change(
+                    request,
+                    self.object,
+                    "Merged flynotes into this flynote: "
+                    + ", ".join(source_labels)
+                    + ".",
+                )
             selected_ids = []
 
         query = request.POST.get("q", self.object.name).strip()
