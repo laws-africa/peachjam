@@ -5,6 +5,9 @@
   {% if original.must_be_anonymised and not original.anonymised %}
     <div class="alert alert-warning">{% trans "This judgment must be anonymised before it can be published." %}</div>
   {% endif %}
+  {% if original.needs_source_file_anonymisation %}
+    <div class="alert alert-warning">{% trans "Mark the source file as anonymised if it is safe to download." %}</div>
+  {% endif %}
 {% endblock %}
 {% block extra_actions %}
   {% if original %}

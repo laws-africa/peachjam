@@ -506,6 +506,16 @@ class Judgment(CoreDocument):
             return []
         return [line.strip() for line in self.flynote.splitlines() if line.strip()]
 
+    @property
+    def needs_source_file_anonymisation(self):
+        if not self.anonymised:
+            return False
+
+        try:
+            return not self.source_file.file_is_anonymised
+        except SourceFile.DoesNotExist:
+            return False
+
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court_id:
