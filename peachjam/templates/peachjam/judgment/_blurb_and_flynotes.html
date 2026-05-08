@@ -1,17 +1,13 @@
 {% load i18n peachjam %}
 {% if document.blurb %}<div class="my-2">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
-{% if document.flynote %}
+{% if document.linked_flynotes %}
   {% if show_flynote_heading %}
     <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
   {% endif %}
-  {% if show_linked_flynotes and document.linked_flynotes %}
-    {% include "peachjam/document/_linked_flynotes.html" with linked_flynotes=document.linked_flynotes flynote_text=document.flynote %}
-  {% elif document.flynote_lines %}
-    <ul class="list-unstyled flynotes my-2">
-      {% for flynote_line in document.flynote_lines %}<li>{{ flynote_line }}</li>{% endfor %}
-    </ul>
-  {% else %}
-    <div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>
+  {% include "peachjam/document/_linked_flynotes.html" with linked_flynotes=document.linked_flynotes flynote_text=document.flynote link_flynote_topics=link_flynote_topics %}
+{% elif document.flynote_lines %}
+  {% if show_flynote_heading %}
+    <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
   {% endif %}
   {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=document.flynote_lines|group_flynote_lines %}
 {% elif document.flynote %}

@@ -2302,8 +2302,9 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             },
         )
 
-        self.assertIn('<ul class="list-unstyled mb-2 fst-italic">', html)
-        self.assertEqual(html.count("<li>"), len(self.judgment.linked_flynotes))
+        self.assertIn('<ul class="list-unstyled flynotes my-2">', html)
+        self.assertIn('<ul class="list-unstyled flynotes">', html)
+        self.assertEqual(html.count("<li>"), 2)
 
     def test_linked_flynotes_use_judgment_flynotes_in_path_order(self):
         judgment = Judgment.objects.create(
@@ -2335,12 +2336,12 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
                 (
                     "Criminal law",
                     "admissibility",
-                    "right to representation",
+                    "trial within a trial",
                 ),
                 (
                     "Criminal law",
                     "admissibility",
-                    "trial within a trial",
+                    "right to representation",
                 ),
             ],
         )

@@ -101,7 +101,7 @@
         {% trans 'Summary' %}
       </dt>
       <dd>
-        {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document show_flynote_heading=True show_linked_flynotes=True %}
+        {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document show_flynote_heading=True link_flynote_topics=True %}
         <details>
           <summary class="mb-1" data-track-event="Document | Toggle summary">
             {% trans 'Read full summary' %}
