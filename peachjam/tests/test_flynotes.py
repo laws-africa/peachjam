@@ -1352,6 +1352,34 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         trial = Flynote.objects.get(name="trial within a trial")
         self.assertEqual(trial.get_parent().pk, admissibility.pk)
 
+    @patch(
+        "peachjam.analysis.flynotes.FlynoteDocumentCount.quick_refresh_for_single_flynote"
+    )
+    def test_update_quick_refreshes_leaf_flynotes_and_ancestors(self, mock_refresh):
+        self.updater.update_for_judgment(self.judgment)
+
+        refreshed_names = {call.args[0].name for call in mock_refresh.call_args_list}
+        self.assertEqual(
+            refreshed_names,
+            {
+                "Criminal law",
+                "admissibility",
+                "trial within a trial",
+                "circumstantial evidence",
+                "Blom principles",
+            },
+        )
+
+    @patch(
+        "peachjam.analysis.flynotes.FlynoteDocumentCount.quick_refresh_for_single_flynote"
+    )
+    def test_update_can_skip_quick_count_refresh(self, mock_refresh):
+        updater = FlynoteUpdater(update_counts=False)
+
+        updater.update_for_judgment(self.judgment)
+
+        mock_refresh.assert_not_called()
+
     def test_clears_old_links_on_reprocess(self):
         self.updater.update_for_judgment(self.judgment)
         initial_count = JudgmentFlynote.objects.filter(document=self.judgment).count()
@@ -1995,20 +2023,110 @@ class FlynoteMergeTest(TestCase):
 
         target.merge_sources_into([source])
 
-        mock_refresh.assert_called_once_with(root.pk)
+        mock_refresh.assert_any_call(root.pk)
 
-    def test_merge_rejects_duplicate_child_names_under_target(self):
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_refreshes_small_target_count_inline(self, mock_refresh):
         root = Flynote.add_root(name="Civil procedure")
         target = root.add_child(name="Stay of execution")
         source = root.add_child(name="Stays of execution")
-        target.add_child(name="Urgent applications")
-        source.add_child(name="Urgent applications")
 
-        with self.assertRaisesMessage(
-            ValidationError,
-            "Cannot merge because the target already has children with these names: Urgent applications.",
-        ):
-            target.merge_sources_into([source])
+        target_judgment = self.make_judgment("Target judgment")
+        source_judgment = self.make_judgment("Source judgment")
+        JudgmentFlynote.objects.create(document=target_judgment, flynote=target)
+        JudgmentFlynote.objects.create(document=source_judgment, flynote=source)
+        FlynoteDocumentCount.objects.create(flynote=target, count=1)
+        FlynoteDocumentCount.objects.create(flynote=source, count=1)
+
+        target.merge_sources_into([source])
+
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=target).count,
+            2,
+        )
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=root).count,
+            2,
+        )
+        mock_refresh.assert_any_call(root.pk)
+
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_skips_inline_target_count_when_estimate_is_large(self, mock_refresh):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        target_child = target.add_child(name="Urgent applications")
+        source = root.add_child(name="Stays of execution")
+
+        FlynoteDocumentCount.objects.create(flynote=target, count=5001)
+        FlynoteDocumentCount.objects.create(flynote=target_child, count=5001)
+
+        target.merge_sources_into([source])
+
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=target).count,
+            5001,
+        )
+        mock_refresh.assert_any_call(root.pk)
+
+    def test_merge_recursively_merges_duplicate_child_names_under_target(self):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+        target_child = target.add_child(name="Urgent applications")
+        source_child = source.add_child(name="Urgent applications")
+
+        source_child_judgment = self.make_judgment("Source child judgment")
+        JudgmentFlynote.objects.create(
+            document=source_child_judgment, flynote=source_child
+        )
+
+        target.merge_sources_into([source])
+
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=source_child.pk).exists())
+        self.assertTrue(Flynote.objects.filter(pk=target_child.pk).exists())
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=source_child_judgment,
+                flynote=target_child,
+            ).exists()
+        )
+
+
+class FlynoteCleanTest(TestCase):
+    def test_rejects_duplicate_root_name(self):
+        Flynote.add_root(name="Civil procedure")
+        duplicate = Flynote.add_root(name="Civil proceedings")
+        duplicate.name = "Civil procedure"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_rejects_duplicate_sibling_name(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Costs")
+        duplicate = root.add_child(name="Cost orders")
+        duplicate.name = "Costs"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_allows_duplicate_name_under_different_parents(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Costs")
+        other_parent = root.add_child(name="Appeals")
+        flynote = other_parent.add_child(name="Cost orders")
+        flynote.name = "Costs"
+
+        flynote.clean()
 
 
 @override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True})

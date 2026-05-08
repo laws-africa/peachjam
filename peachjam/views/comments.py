@@ -1,8 +1,10 @@
 from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.cache import never_cache
 
 
+@never_cache
 def comment_form_view(request, app_label, model_name, pk):
     """Renders a list of comments for the admin view, refreshed using htmx after posting a comment."""
     if not request.user.is_authenticated or not request.user.is_staff:

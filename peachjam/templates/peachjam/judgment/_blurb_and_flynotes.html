@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load i18n peachjam %}
 {% if document.blurb %}<div class="my-2">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
 {% if document.flynote %}
   {% if show_flynote_heading %}
@@ -13,4 +13,7 @@
   {% else %}
     <div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>
   {% endif %}
+  {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=document.flynote_lines|group_flynote_lines %}
+{% elif document.flynote %}
+  <div class="fst-italic my-2">{{ document.flynote|linebreaksbr }}</div>
 {% endif %}

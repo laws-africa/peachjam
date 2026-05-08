@@ -1,0 +1,77 @@
+<section aria-labelledby="flynote-manager-search-heading">
+  <h2 id="flynote-manager-search-heading" class="h4 mb-3">Search flynotes</h2>
+  <form class="mb-4"
+        method="get"
+        action="{{ search_url }}"
+        hx-get="{{ search_url }}"
+        hx-target="closest section"
+        hx-swap="outerHTML">
+    <div class="row g-3 align-items-end">
+      <div class="col-md">
+        <label for="flynote-manager-search-q" class="form-label">Flynote name</label>
+        <input id="flynote-manager-search-q"
+               type="search"
+               name="q"
+               value="{{ query }}"
+               class="form-control"
+               autocomplete="off"/>
+      </div>
+      <div class="col-md-3">
+        <label for="flynote-manager-search-depth" class="form-label">Depth</label>
+        <select id="flynote-manager-search-depth" name="depth" class="form-select">
+          <option value="">
+            Any depth
+          </option>
+          {% for choice in depth_choices %}
+            <option value="{{ choice }}"
+                    {% if depth == choice|stringformat:"s" %}selected{% endif %}>
+              {{ choice }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-auto">
+        <button type="submit" class="btn btn-primary">Search</button>
+      </div>
+    </div>
+  </form>
+  {% if query or depth %}
+    {% if results %}
+      <div class="table-responsive">
+        <table class="table table-sm align-middle">
+          <thead>
+            <tr>
+              <th scope="col">Flynote</th>
+              <th scope="col">Path</th>
+              <th scope="col">Judgments</th>
+              <th scope="col">Child topics</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for flynote in results %}
+              <tr>
+                <td>
+                  <a href="{{ manager_url }}?flynote={{ flynote.pk }}"
+                     data-flynote-manager-link
+                     data-flynote-id="{{ flynote.pk }}">{{ flynote.name }}</a>
+                  {% if flynote.deprecated %}<span class="badge text-bg-warning ms-2">Deprecated</span>{% endif %}
+                </td>
+                <td>
+                  {% for flynote_id, labels in path_labels.items %}
+                    {% if flynote_id == flynote.pk %}{{ labels|join:" — " }}{% endif %}
+                  {% endfor %}
+                </td>
+                <td>{{ flynote.document_total }}</td>
+                <td>{{ flynote.numchild }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">No matching flynotes found.</p>
+    {% endif %}
+  {% else %}
+    <p class="text-muted mb-0">Enter a flynote name or choose a depth to search.</p>
+  {% endif %}
+</section>

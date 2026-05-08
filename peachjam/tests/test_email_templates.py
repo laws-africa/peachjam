@@ -93,6 +93,10 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             'href="https://example.org/documents/citing/?utm_campaign=new_citation&utm_source=alert&utm_medium=email"',
             html,
         )
+        self.assertIn(
+            "We have found citations for documents that you have saved.",
+            html,
+        )
 
     def test_search_alert_email_does_not_duplicate_protocol(self):
         context = self.base_context("https://example.org")

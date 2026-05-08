@@ -4,9 +4,11 @@ from unittest.mock import MagicMock, patch
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.template.loader import render_to_string
 from django.test import TestCase
 from languages_plus.models import Language
 
+from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.analysis.summariser import JudgmentSummary
 from peachjam.models import (
     CaseNumber,
@@ -21,6 +23,12 @@ from peachjam.models import (
 class JudgmentTestCase(TestCase):
     fixtures = ["tests/courts", "tests/countries", "tests/languages"]
     maxDiff = None
+
+    def assertGroupedFlynotesEqual(self, expected, judgment):
+        self.assertEqual(
+            expected,
+            FlynoteDisplayGrouper(judgment.flynote_lines).group(),
+        )
 
     def make_judgment(self):
         judgment = Judgment.objects.create(
@@ -52,6 +60,204 @@ class JudgmentTestCase(TestCase):
     def test_flynote_lines_splits_and_trims_multiline_flynotes(self):
         judgment = Judgment(flynote=" Line one \n\nLine two\n  Line three  ")
         self.assertEqual(["Line one", "Line two", "Line three"], judgment.flynote_lines)
+
+    def test_grouped_flynote_lines_groups_maximal_common_ancestors(self):
+        judgment = Judgment(
+            flynote=(
+                "Customs law — Customs and excise act — Diesel refund scheme — "
+                "Interpretation of Note 6(f)(ii)(cc) — "
+                "joint venture as substantive authorised user\n"
+                "Customs law — Customs and excise act — Diesel refund scheme — "
+                "Interpretation of Note 6(f)(ii)(cc) — "
+                "Note 5 discretion to pay refunds to third parties on good cause shown\n"
+                "Customs law — internal appeal jurisdiction — "
+                "administrative-law duty to consider discretionary relief\n"
+                "Customs law — internal appeal jurisdiction — "
+                "NAC cannot introduce new grounds or increase original quantum"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": (
+                        "Customs law — Customs and excise act — Diesel refund scheme — "
+                        "Interpretation of Note 6(f)(ii)(cc)"
+                    ),
+                    "children": [
+                        {
+                            "text": "joint venture as substantive authorised user",
+                            "children": [],
+                        },
+                        {
+                            "text": "Note 5 discretion to pay refunds to third parties on good cause shown",
+                            "children": [],
+                        },
+                    ],
+                },
+                {
+                    "text": "Customs law — internal appeal jurisdiction",
+                    "children": [
+                        {
+                            "text": "administrative-law duty to consider discretionary relief",
+                            "children": [],
+                        },
+                        {
+                            "text": "NAC cannot introduce new grounds or increase original quantum",
+                            "children": [],
+                        },
+                    ],
+                },
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_keeps_original_order(self):
+        judgment = Judgment(
+            flynote=(
+                "Zebra law — first point\n"
+                "Alpha law — second point\n"
+                "Beta law — third point"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {"text": "Zebra law — first point", "children": []},
+                {"text": "Alpha law — second point", "children": []},
+                {"text": "Beta law — third point", "children": []},
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_groups_en_dash_paths(self):
+        judgment = Judgment(
+            flynote=(
+                "Civil procedure – Intervention (Rule 12) – requires direct and substantial interest; "
+                "non-joinder fatal\n"
+                "Civil procedure – Rule 45A – cannot be used to suspend non-executable orders or mount "
+                "collateral challenges; locus standi required\n"
+                "Insolvency law – Sequestration – Final order under s 12(1)(a)–(c) – statutory requirements "
+                "established (liquidated debt, insolvency, advantage to creditors) – court’s discretion "
+                "exercised where no special circumstances shown"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": "Civil procedure",
+                    "children": [
+                        {
+                            "text": (
+                                "Intervention (Rule 12) — requires direct and substantial interest; "
+                                "non-joinder fatal"
+                            ),
+                            "children": [],
+                        },
+                        {
+                            "text": (
+                                "Rule 45A — cannot be used to suspend non-executable orders or mount "
+                                "collateral challenges; locus standi required"
+                            ),
+                            "children": [],
+                        },
+                    ],
+                },
+                {
+                    "text": (
+                        "Insolvency law — Sequestration — Final order under s 12(1)(a)–(c) — statutory "
+                        "requirements established (liquidated debt, insolvency, advantage to creditors) — "
+                        "court’s discretion exercised where no special circumstances shown"
+                    ),
+                    "children": [],
+                },
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_groups_spaced_ascii_dash_paths(self):
+        judgment = Judgment(
+            flynote=(
+                "Administrative Law - Judicial Review - Legality Review - Unlawful Appointment - "
+                "Jurisdiction, Delay, Legality of Municipal Appointments\n"
+                "Administrative Law - Judicial Review - Legality Review - Unlawful Appointment - "
+                "Delay and prejudice"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": (
+                        "Administrative Law — Judicial Review — Legality Review — "
+                        "Unlawful Appointment"
+                    ),
+                    "children": [
+                        {
+                            "text": "Jurisdiction, Delay, Legality of Municipal Appointments",
+                            "children": [],
+                        },
+                        {
+                            "text": "Delay and prejudice",
+                            "children": [],
+                        },
+                    ],
+                }
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_groups_ancestor_with_descendants(self):
+        judgment = Judgment(
+            flynote=(
+                "Customs law — internal appeal jurisdiction\n"
+                "Customs law — internal appeal jurisdiction — "
+                "administrative-law duty to consider discretionary relief\n"
+                "Customs law — internal appeal jurisdiction — "
+                "NAC cannot introduce new grounds or increase original quantum"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": "Customs law — internal appeal jurisdiction",
+                    "children": [
+                        {
+                            "text": "administrative-law duty to consider discretionary relief",
+                            "children": [],
+                        },
+                        {
+                            "text": "NAC cannot introduce new grounds or increase original quantum",
+                            "children": [],
+                        },
+                    ],
+                }
+            ],
+            judgment,
+        )
+
+    def test_blurb_and_flynotes_renders_nested_groups(self):
+        judgment = Judgment(
+            blurb="Appeal dismissed.",
+            flynote=(
+                "Contract law — offer and acceptance\n" "Contract law — consideration"
+            ),
+        )
+
+        html = render_to_string(
+            "peachjam/judgment/_blurb_and_flynotes.html",
+            {"document": judgment, "show_flynote_heading": True},
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertIn("<h6", html)
+        self.assertIn("Contract law", html)
+        self.assertEqual(1, html.count("Contract law"))
+        self.assertIn("— offer and acceptance", normalized_html)
+        self.assertIn("— consideration", normalized_html)
+        self.assertGreaterEqual(html.count("<ul"), 2)
 
     def test_assign_mnc(self):
         j = Judgment(

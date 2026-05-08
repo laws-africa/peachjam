@@ -754,9 +754,7 @@ class Judgment(CoreDocument):
         """Serialise the flynote tree to a string for storage in flynote and flynote_raw."""
         from peachjam.models import Flynote
 
-        judgment_flynotes = list(
-            self.flynotes.select_related("flynote").order_by("flynote__path")
-        )
+        judgment_flynotes = list(self.flynotes.select_related("flynote"))
 
         # we update flynote_raw as well (without triggering attribute change events) so that a human can edit
         # the flynote and we won't lose the changes made through the Flynote tree

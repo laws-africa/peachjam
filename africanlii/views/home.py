@@ -53,7 +53,7 @@ class HomePageView(BaseHomePageView):
         )
         context["recs"] = RegionalEconomicCommunity.objects.prefetch_related("locality")
         context["member_states"] = MemberState.objects.prefetch_related("country")
-        context["taxonomies"] = Taxonomy.dump_bulk()
+        context["taxonomies"] = Taxonomy.sort_bulk_tree(Taxonomy.dump_bulk())
         context["taxonomy_url"] = "taxonomy_detail"
         context["court_classes"] = CourtClass.objects.prefetch_related("courts")
         context["documents_count"] = CoreDocument.objects.exclude(
