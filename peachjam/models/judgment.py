@@ -501,12 +501,15 @@ class Judgment(CoreDocument):
             return self.date.year - self.filing_year
         return None
 
+    @staticmethod
+    def flynote_topics_enabled():
+        return settings.PEACHJAM.get(
+            "SUMMARISE_USE_FLYNOTE_TREE", False
+        ) and settings.PEACHJAM.get("SHOW_FLYNOTE_TOPICS", False)
+
     @cached_property
     def linked_flynotes(self):
-        if (
-            not settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
-            or not self.flynote
-        ):
+        if not self.flynote_topics_enabled() or not self.flynote:
             return []
 
         return [

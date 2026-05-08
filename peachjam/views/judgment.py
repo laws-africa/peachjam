@@ -2,7 +2,6 @@ import operator
 from collections import defaultdict
 from functools import reduce
 
-from django.conf import settings
 from django.contrib import messages
 from django.db.models import F, IntegerField, Q, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
@@ -45,8 +44,7 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
         context["show_flynote_topics"] = (
-            settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
-            and Flynote.get_root_nodes().exists()
+            Judgment.flynote_topics_enabled() and Flynote.get_root_nodes().exists()
         )
         self.add_entity_profile(context)
         self.get_court_classes(context)
@@ -62,7 +60,7 @@ class JudgmentListView(TemplateView):
 class FlynoteViewMixin:
     @staticmethod
     def flynote_topics_enabled():
-        return settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+        return Judgment.flynote_topics_enabled()
 
     @staticmethod
     def annotate_with_counts(qs):
