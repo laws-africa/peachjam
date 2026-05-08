@@ -1,6 +1,11 @@
 {% load i18n peachjam %}
 {% if document.blurb %}<div class="my-2">{{ document.blurb|default_if_none:"" }}</div>{% endif %}
-{% if document.flynote_lines %}
+{% if document.linked_flynotes %}
+  {% if show_flynote_heading %}
+    <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
+  {% endif %}
+  {% include "peachjam/document/_linked_flynotes.html" with linked_flynotes=document.linked_flynotes flynote_text=document.flynote link_flynote_topics=link_flynote_topics %}
+{% elif document.flynote_lines %}
   {% if show_flynote_heading %}
     <h6 class="mb-1 fw-bold">{% trans 'Flynote' %}</h6>
   {% endif %}

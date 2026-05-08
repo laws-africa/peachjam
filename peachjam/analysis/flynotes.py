@@ -131,6 +131,54 @@ class FlynoteDisplayGrouper:
 
         return grouped_paths
 
+    @classmethod
+    def group_linked_flynotes(cls, linked_flynotes):
+        """Group linked flynote node paths into a nested node tree.
+
+        ``linked_flynotes`` is expected to be an iterable of dicts containing a
+        ``nodes`` list. The returned structure preserves first-seen order while
+        collapsing shared ancestors so linked topic rendering matches the
+        grouped plain-flynote display.
+        """
+
+        roots = []
+        root_index = {}
+        seen_paths = set()
+
+        for item in linked_flynotes or []:
+            nodes = tuple(item.get("nodes") or [])
+            if not nodes:
+                continue
+
+            path_key = tuple(
+                getattr(node, "pk", None) or getattr(node, "name", None)
+                for node in nodes
+            )
+            if path_key in seen_paths:
+                continue
+            seen_paths.add(path_key)
+
+            items = roots
+            index = root_index
+            for node in nodes:
+                node_key = getattr(node, "pk", None) or getattr(node, "name", None)
+                group = index.get(node_key)
+                if group is None:
+                    group = {"node": node, "children": [], "_index": {}}
+                    items.append(group)
+                    index[node_key] = group
+
+                items = group["children"]
+                index = group["_index"]
+
+        def cleanup(groups):
+            return [
+                {"node": group["node"], "children": cleanup(group["children"])}
+                for group in groups
+            ]
+
+        return cleanup(roots)
+
 
 class FlynoteParser:
     """Parses raw flynote text into structured paths.

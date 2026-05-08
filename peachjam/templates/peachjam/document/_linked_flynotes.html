@@ -1,0 +1,22 @@
+{% load peachjam %}
+{% if linked_flynote_groups %}
+  <ul class="{% if nested %}list-unstyled flynotes{% else %}list-unstyled flynotes my-2{% endif %}">
+    {% for item in linked_flynote_groups %}
+      <li>
+        {% if nested %}—{% endif %}
+        {% if link_flynote_topics %}
+          <a href="{{ item.node.get_absolute_url }}">{{ item.node.name }}</a>
+        {% else %}
+          {{ item.node.name }}
+        {% endif %}
+        {% if item.children %}
+          {% include "peachjam/document/_linked_flynotes.html" with linked_flynote_groups=item.children nested=True link_flynote_topics=link_flynote_topics %}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% elif linked_flynotes %}
+  {% include "peachjam/document/_linked_flynotes.html" with linked_flynote_groups=linked_flynotes|group_linked_flynotes nested=nested flynote_text=flynote_text link_flynote_topics=link_flynote_topics %}
+{% elif flynote_text %}
+  <div class="mb-2 fst-italic">{{ flynote_text|linebreaksbr }}</div>
+{% endif %}

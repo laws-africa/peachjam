@@ -1,4 +1,5 @@
 import datetime
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
@@ -8,7 +9,6 @@ from django.template.loader import render_to_string
 from django.test import TestCase
 from languages_plus.models import Language
 
-from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.analysis.summariser import JudgmentSummary
 from peachjam.models import (
     CaseNumber,
@@ -18,6 +18,7 @@ from peachjam.models import (
     Judgment,
     Locality,
 )
+from peachjam.templatetags.peachjam import group_flynote_lines, group_linked_flynotes
 
 
 class JudgmentTestCase(TestCase):
@@ -27,7 +28,7 @@ class JudgmentTestCase(TestCase):
     def assertGroupedFlynotesEqual(self, expected, judgment):
         self.assertEqual(
             expected,
-            FlynoteDisplayGrouper(judgment.flynote_lines).group(),
+            group_flynote_lines(judgment.flynote_lines),
         )
 
     def make_judgment(self):
@@ -207,6 +208,254 @@ class JudgmentTestCase(TestCase):
             ],
             judgment,
         )
+
+    def test_group_linked_flynotes_groups_single_line_semicolon_branches(self):
+        def node(name):
+            node_obj = SimpleNamespace(name=name)
+            slug = name.lower().replace(" ", "-")
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        linked = [
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("Matrimonial property act"),
+                    node(
+                        "Doctrine of notice inapplicable to contingent accrual claims"
+                    ),
+                ]
+            },
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("Matrimonial property act"),
+                    node(
+                        "accrual claim contingent until dissolution, not a proprietary right of occupation"
+                    ),
+                ]
+            },
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("PIE Act"),
+                    node(
+                        "eviction may be just and equitable where spouse has no vested right"
+                    ),
+                ]
+            },
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("Procedure"),
+                    node(
+                        "proper form of order when jurisdictional threshold not met "
+                        "(confirmation vs striking off roll)."
+                    ),
+                ]
+            },
+        ]
+
+        grouped = group_linked_flynotes(linked)
+
+        def simplify(groups):
+            return [
+                {
+                    "node": item["node"].name,
+                    "children": simplify(item["children"]),
+                }
+                for item in groups
+            ]
+
+        self.assertEqual(
+            [
+                {
+                    "node": "Family law",
+                    "children": [
+                        {
+                            "node": "Matrimonial property act",
+                            "children": [
+                                {
+                                    "node": "Doctrine of notice inapplicable to contingent accrual claims",
+                                    "children": [],
+                                },
+                                {
+                                    "node": (
+                                        "accrual claim contingent until dissolution, not a proprietary "
+                                        "right of occupation"
+                                    ),
+                                    "children": [],
+                                },
+                            ],
+                        },
+                        {
+                            "node": "PIE Act",
+                            "children": [
+                                {
+                                    "node": (
+                                        "eviction may be just and equitable where spouse has no vested right"
+                                    ),
+                                    "children": [],
+                                }
+                            ],
+                        },
+                        {
+                            "node": "Procedure",
+                            "children": [
+                                {
+                                    "node": (
+                                        "proper form of order when jurisdictional threshold not met "
+                                        "(confirmation vs striking off roll)."
+                                    ),
+                                    "children": [],
+                                }
+                            ],
+                        },
+                    ],
+                },
+            ],
+            simplify(grouped),
+        )
+
+    def test_blurb_and_flynotes_renders_grouped_linked_flynotes_without_repeating_ancestors(
+        self,
+    ):
+        def node(name):
+            slug = name.lower().replace(" ", "-")
+            node_obj = SimpleNamespace(name=name)
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        document = SimpleNamespace(
+            blurb="Appeal dismissed.",
+            flynote="",
+            flynote_lines=[],
+            linked_flynotes=[
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("Matrimonial property act"),
+                        node(
+                            "Doctrine of notice inapplicable to contingent accrual claims"
+                        ),
+                    ]
+                },
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("Matrimonial property act"),
+                        node(
+                            "accrual claim contingent until dissolution, not a proprietary right of occupation"
+                        ),
+                    ]
+                },
+            ],
+        )
+
+        html = render_to_string(
+            "peachjam/judgment/_blurb_and_flynotes.html",
+            {
+                "document": document,
+                "show_flynote_heading": True,
+                "link_flynote_topics": True,
+            },
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertEqual(1, html.count("Family law"))
+        self.assertEqual(1, html.count("Matrimonial property act"))
+        self.assertIn(
+            '<a href="/judgments/topics/family-law/">Family law</a>',
+            normalized_html,
+        )
+        self.assertIn(
+            '— <a href="/judgments/topics/matrimonial-property-act/">Matrimonial property act</a>',
+            normalized_html,
+        )
+        self.assertIn(
+            '— <a href="/judgments/topics/doctrine-of-notice-inapplicable-to-contingent-accrual-claims/">'
+            "Doctrine of notice inapplicable to contingent accrual claims</a>",
+            normalized_html,
+        )
+        self.assertIn(
+            '— <a href="/judgments/topics/'
+            "accrual-claim-contingent-until-dissolution,"
+            '-not-a-proprietary-right-of-occupation/">'
+            "accrual claim contingent until dissolution, not a proprietary right of occupation</a>",
+            normalized_html,
+        )
+        self.assertGreaterEqual(html.count("<ul"), 3)
+
+    def test_document_table_row_renders_grouped_flynotes_without_topic_links(self):
+        class EmptyRelatedManager:
+            def all(self):
+                return []
+
+        def node(name):
+            slug = name.lower().replace(" ", "-")
+            node_obj = SimpleNamespace(name=name)
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        document = SimpleNamespace(
+            children=[],
+            pk=1,
+            is_group=False,
+            title="Example judgment",
+            get_absolute_url="/judgments/example/",
+            work=SimpleNamespace(languages=[]),
+            labels=EmptyRelatedManager(),
+            treatments=EmptyRelatedManager(),
+            doc_type="judgment",
+            blurb="Appeal dismissed.",
+            flynote="",
+            flynote_lines=[],
+            linked_flynotes=[
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("Matrimonial property act"),
+                        node(
+                            "Doctrine of notice inapplicable to contingent accrual claims"
+                        ),
+                    ]
+                },
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("PIE Act"),
+                        node(
+                            "eviction may be just and equitable where spouse has no vested right"
+                        ),
+                    ]
+                },
+            ],
+        )
+
+        html = render_to_string(
+            "peachjam/_document_table_row.html",
+            {
+                "document": document,
+                "doc_table_toggle": False,
+                "doc_table_full_title_width": False,
+                "doc_table_show_treatments": False,
+                "doc_table_show_citations": False,
+                "doc_table_show_jurisdiction": False,
+                "doc_table_show_author": False,
+                "doc_table_show_court": False,
+                "doc_table_show_sub_publication": False,
+                "doc_table_show_frbr_uri_number": False,
+                "doc_table_show_doc_type": False,
+                "doc_table_show_date": False,
+            },
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertEqual(1, html.count("Family law"))
+        self.assertNotIn("/judgments/topics/", html)
+        self.assertIn("— Matrimonial property act", normalized_html)
+        self.assertIn("— PIE Act", normalized_html)
+        self.assertGreaterEqual(html.count("<ul"), 3)
 
     def test_grouped_flynote_lines_groups_ancestor_with_descendants(self):
         judgment = Judgment(

@@ -43,6 +43,9 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun"] = _("judgment")
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
+        context["show_flynote_topics"] = (
+            Judgment.flynote_topics_enabled() and Flynote.get_root_nodes().exists()
+        )
         self.add_entity_profile(context)
         self.get_court_classes(context)
         return context
@@ -55,6 +58,10 @@ class JudgmentListView(TemplateView):
 
 
 class FlynoteViewMixin:
+    @staticmethod
+    def flynote_topics_enabled():
+        return Judgment.flynote_topics_enabled()
+
     @staticmethod
     def annotate_with_counts(qs):
         return qs.annotate(
@@ -128,7 +135,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     paginate_by = 30
 
     def get(self, request, *args, **kwargs):
-        if not Flynote.get_root_nodes().exists():
+        if not self.flynote_topics_enabled() or not Flynote.get_root_nodes().exists():
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
@@ -195,6 +202,8 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
+        if not self.flynote_topics_enabled():
+            return redirect(reverse("judgment_list"))
         self.flynote = get_object_or_404(Flynote, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
@@ -210,6 +219,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["doc_table_show_doc_type"] = False
 
         if not self.request.htmx:
             self.popular_subtopics(context)
