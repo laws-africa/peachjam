@@ -14,7 +14,14 @@
         <li class="breadcrumb-item">
           <a href="{{ law_report.get_absolute_url }}">{{ law_report.title }}</a>
         </li>
-        <li class="breadcrumb-item active" aria-current="page">{{ law_report_volume.title }}</li>
+        {% if section == "judgments" %}
+          <li class="breadcrumb-item active" aria-current="page">{{ law_report_volume.title }}</li>
+        {% else %}
+          <li class="breadcrumb-item">
+            <a href="{{ law_report_volume.get_absolute_url }}">{{ law_report_volume.title }}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ section_title }}</li>
+        {% endif %}
       </ol>
     </nav>
   </div>
@@ -29,23 +36,42 @@
            hx-trigger="load">
       </div>
     {% endblock %}
-    <h2 class="h4 mb-0">{{ law_report_volume.title }}</h2>
+    <p class="h4 mb-0">{{ law_report_volume.title }}</p>
   </div>
 {% endblock %}
 {% block count-and-search %}{% endblock %}
 {% block nav-tabs %}
-  <ul class="nav nav-tabs border-bottom mb-3">
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'judgments' %}active{% endif %}"
-         href="{{ law_report_volume.get_absolute_url }}">{% trans 'Reported judgments' %}</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'cases' %}active{% endif %}"
-         href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">{% trans 'Cited cases' %}</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if active_tab == 'legislation' %}active{% endif %}"
-         href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">{% trans 'Cited legislation' %}</a>
-    </li>
-  </ul>
+  {% if section == "judgments" %}
+    <div class="mb-4">
+      <h2 class="h5 mb-3">{% trans 'Explore related indexes' %}</h2>
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        <div class="col">
+          <a class="card h-100 text-decoration-none text-reset"
+             href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">
+            <div class="card-body">
+              <h3 class="h5 card-title mb-2">{% trans 'Cited cases' %}</h3>
+              <p class="card-text text-muted mb-0">{% trans 'Browse judgments cited by the reported judgments in this volume.' %}</p>
+            </div>
+          </a>
+        </div>
+        <div class="col">
+          <a class="card h-100 text-decoration-none text-reset"
+             href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">
+            <div class="card-body">
+              <h3 class="h5 card-title mb-2">{% trans 'Cited legislation' %}</h3>
+              <p class="card-text text-muted mb-0">
+                {% trans 'Browse legislation cited by the reported judgments in this volume.' %}
+              </p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block alerts %}
+  <div class="mb-3">
+    <h2 class="h4 mb-1">{{ section_title }}</h2>
+    {% if section_description %}<p class="text-muted mb-0">{{ section_description }}</p>{% endif %}
+  </div>
 {% endblock %}

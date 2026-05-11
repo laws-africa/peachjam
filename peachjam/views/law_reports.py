@@ -51,7 +51,9 @@ class LawReportDetailView(DetailView):
 
 class LawReportVolumeViewMixin:
     navbar_link = "law_report"
-    active_tab = None
+    section = None
+    section_title = None
+    section_description = None
 
     @cached_property
     def law_report(self):
@@ -71,7 +73,9 @@ class LawReportVolumeViewMixin:
         context = super().get_context_data(**kwargs)
         context["law_report"] = self.law_report
         context["law_report_volume"] = self.law_report_volume
-        context["active_tab"] = self.active_tab
+        context["section"] = self.section
+        context["section_title"] = self.section_title
+        context["section_description"] = self.section_description
         return context
 
 
@@ -94,7 +98,9 @@ class LawReportVolumeDetailView(
     LawReportVolumeTableMixin, LawReportVolumeViewMixin, FilteredJudgmentView
 ):
     template_name = "peachjam/law_report/law_report_volume_detail.html"
-    active_tab = "judgments"
+    section = "judgments"
+    section_title = _("Reported judgments")
+    section_description = _("Browse the judgments reported in this law report volume.")
     doc_table_toggle = False
 
     def get_base_queryset(self, exclude=None):
@@ -241,7 +247,11 @@ class LawReportVolumeCasesIndexView(
     LawReportVolumeCitationIndexMixin, LawReportVolumeViewMixin, FilteredJudgmentView
 ):
     template_name = "peachjam/law_report/law_report_volume_cases_index.html"
-    active_tab = "cases"
+    section = "cases"
+    section_title = _("Cited cases")
+    section_description = _(
+        "Browse judgments cited by the reported judgments in this volume."
+    )
 
     def get_form(self):
         return FilteredDocumentListView.get_form(self)
@@ -251,7 +261,11 @@ class LawReportVolumeLegislationIndexView(
     LawReportVolumeCitationIndexMixin, LawReportVolumeViewMixin, LegislationListView
 ):
     template_name = "peachjam/law_report/law_report_volume_legislation_index.html"
-    active_tab = "legislation"
+    section = "legislation"
+    section_title = _("Cited legislation")
+    section_description = _(
+        "Browse legislation cited by the reported judgments in this volume."
+    )
     latest_expression_only = True
 
     def get_context_data(self, **kwargs):
