@@ -235,7 +235,7 @@ class LawReportViewsTestCase(TestCase):
             '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
             html=False,
         )
-        self.assertContains(response, '<p class="h4 mb-0">Volume 1</p>', html=False)
+        self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertContains(response, "Explore related indexes")
         self.assertContains(response, "Reported judgments")
         self.assertContains(
@@ -314,7 +314,7 @@ class LawReportViewsTestCase(TestCase):
             '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
             html=False,
         )
-        self.assertContains(response, '<p class="h4 mb-0">Volume 1</p>', html=False)
+        self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertNotContains(response, "Explore related indexes")
         self.assertNotContains(
             response, 'class="card h-100 text-decoration-none text-reset"'
@@ -409,7 +409,7 @@ class LawReportViewsTestCase(TestCase):
             '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
             html=False,
         )
-        self.assertContains(response, '<p class="h4 mb-0">Volume 1</p>', html=False)
+        self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertNotContains(response, "Explore related indexes")
         self.assertNotContains(
             response, 'class="card h-100 text-decoration-none text-reset"'
