@@ -1,0 +1,24 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'arbitration_hub' %}">{% trans 'Arbitration Hub' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ page_title }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  <div class="my-4">
+    <h1 id="main-page-heading">{{ page_title }}</h1>
+    <p class="text-muted mb-0">{% trans 'Browse court judgments tagged as arbitration-related.' %}</p>
+  </div>
+{% endblock %}

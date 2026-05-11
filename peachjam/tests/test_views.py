@@ -17,6 +17,7 @@ from peachjam.models import (
     CaseHistory,
     CoreDocument,
     Court,
+    DocumentTopic,
     Folder,
     GenericDocument,
     Judgment,
@@ -24,6 +25,7 @@ from peachjam.models import (
     PeachJamSettings,
     SavedDocument,
     SourceFile,
+    Taxonomy,
     UserFollowing,
 )
 from peachjam.views.robots import (
@@ -214,6 +216,55 @@ class PeachjamViewsTest(TestCase):
             "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29",
         )
         self.assertTrue(hasattr(response.context["document"], "court"))
+
+    def test_arbitration_judgment_listing(self):
+        judgment = Judgment.objects.get(
+            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+        )
+        root = Taxonomy.add_root(name="Arbitration judgment categories")
+        category = root.add_child(name="Enforcement of awards")
+        DocumentTopic.objects.create(document=judgment, topic=category)
+
+        response = self.client.get(reverse("arbitration_judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, judgment.title)
+        self.assertContains(
+            response,
+            reverse(
+                "arbitration_judgment_detail",
+                kwargs={"frbr_uri": judgment.expression_frbr_uri[1:]},
+            ),
+        )
+        self.assertEqual(response.context["page_title"], "Arbitration judgments")
+
+    def test_arbitration_judgment_detail(self):
+        judgment = Judgment.objects.get(
+            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+        )
+        root = Taxonomy.add_root(name="Arbitration judgment categories")
+        category = root.add_child(name="Setting aside awards")
+        DocumentTopic.objects.create(document=judgment, topic=category)
+
+        response = self.client.get(
+            reverse(
+                "arbitration_judgment_detail",
+                kwargs={"frbr_uri": judgment.expression_frbr_uri[1:]},
+            )
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(
+            response, "peachjam/arbitration/arbitration_judgment_detail.html"
+        )
+        self.assertContains(response, "Arbitration-related judgment")
+        self.assertContains(response, category.name)
+
+    def test_arbitration_hub_links_to_judgment_listing(self):
+        response = self.client.get(reverse("arbitration_hub"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("arbitration_judgment_list"))
 
     def test_legislation_listing(self):
         response = self.client.get(reverse("legislation_list"))

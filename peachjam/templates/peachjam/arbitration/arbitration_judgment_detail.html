@@ -1,0 +1,30 @@
+{% extends 'peachjam/judgment_detail.html' %}
+{% load i18n %}
+{% block breadcrumbs %}
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{% url 'arbitration_hub' %}">{% trans 'Arbitration Hub' %}</a>
+      </li>
+      <li class="breadcrumb-item">
+        <a href="{{ arbitration_judgment_list_url }}">{% trans 'Arbitration judgments' %}</a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page">{{ document.title }}</li>
+    </ol>
+  </nav>
+{% endblock %}
+{% block sub-title %}
+  <p class="text-muted mb-2">{% trans 'Arbitration-related judgment' %}</p>
+  {% if arbitration_categories %}
+    <div class="d-flex flex-wrap gap-2 mb-3"
+         aria-label="{% trans 'Arbitration categories' %}">
+      {% for category in arbitration_categories %}
+        <a href="{{ arbitration_judgment_list_url }}?taxonomies={{ category.slug }}"
+           class="badge text-bg-light text-decoration-none">{{ category.name }}</a>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}
