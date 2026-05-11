@@ -1,10 +1,15 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
 {% block hero-headings-title %}
-  {% trans "Welcome to the Senegal Legal Information Institute" %}
+  {% trans 'Welcome to the Senegal Legal Information Institute' %}
 {% endblock %}
 {% block hero-headings-welcome %}
-  {% blocktrans trimmed %}
-    Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement.
-  {% endblocktrans %}
+  <span class="d-inline-block mb-2">{% trans 'SenLII digitises and publishes the law of Senegal for free access to all, in collaboration with the Ordre des Avocats du Sénégal.' %}</span>
+  <span class="d-inline-block mb-2">{% trans 'SenLII is a non-profit platform that provides digital access to legislation, case law, and other legal materials from Senegal. It promotes access to legal information as a fundamental component of the rule of law.' %}</span>
+  {% trans 'The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ.' %}
+{% endblock %}
+{% block hero-logos %}
+  <img src="{% static 'images/senlii-bar.png' %}" alt="SenLII Bar"/>
+  <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII"/>
+  <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
 {% endblock %}
