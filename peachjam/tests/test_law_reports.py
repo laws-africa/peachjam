@@ -243,7 +243,13 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertContains(
             response,
-            'class="card h-100 text-decoration-none text-reset"',
+            'class="card h-100 position-relative"',
+            count=2,
+            html=False,
+        )
+        self.assertContains(
+            response,
+            'class="stretched-link"',
             count=2,
             html=False,
         )

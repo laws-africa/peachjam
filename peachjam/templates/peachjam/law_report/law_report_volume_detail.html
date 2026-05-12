@@ -46,24 +46,32 @@
       <h2 class="h5 mb-3">{% trans 'Explore related indexes' %}</h2>
       <div class="row row-cols-1 row-cols-md-2 g-3">
         <div class="col">
-          <a class="card h-100 text-decoration-none text-reset"
-             href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">
+          <div class="card h-100 position-relative">
             <div class="card-body">
-              <h3 class="h5 card-title mb-2">{% trans 'Cited cases' %}</h3>
+              <h3 class="h5 card-title mb-2">
+                <a class="stretched-link"
+                   href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">
+                  {% trans 'Cited cases' %}
+                </a>
+              </h3>
               <p class="card-text text-muted mb-0">{% trans 'Browse judgments cited by the reported judgments in this volume.' %}</p>
             </div>
-          </a>
+          </div>
         </div>
         <div class="col">
-          <a class="card h-100 text-decoration-none text-reset"
-             href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">
+          <div class="card h-100 position-relative">
             <div class="card-body">
-              <h3 class="h5 card-title mb-2">{% trans 'Cited legislation' %}</h3>
+              <h3 class="h5 card-title mb-2">
+                <a class="stretched-link"
+                   href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">
+                  {% trans 'Cited legislation' %}
+                </a>
+              </h3>
               <p class="card-text text-muted mb-0">
                 {% trans 'Browse legislation cited by the reported judgments in this volume.' %}
               </p>
             </div>
-          </a>
+          </div>
         </div>
       </div>
     </div>
