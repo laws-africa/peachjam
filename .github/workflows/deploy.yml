@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 concurrency:
-  group: liiweb2.africanlii.org
+  group: peachjam-deploy
 
 jobs:
   preconditions:
@@ -319,56 +319,9 @@ jobs:
   # web4.laws.africa
   # ------------------
 
-  deploy-africanlii:
-    needs: preconditions
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    name: Deploy to africanlii.org
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to africanlii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web4.laws.africa:22/africanlii'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/africanlii'
-          git_push_flags: '--force'
-
-  deploy-ulii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-africanlii
-      - preconditions
-    name: Deploy to ulii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to ulii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web4.laws.africa:22/ulii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/ulii-peachjam'
-          git_push_flags: '--force'
-
   deploy-senlii:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     needs:
-      - deploy-ulii
       - preconditions
     name: Deploy to senlii
     runs-on: ubuntu-latest

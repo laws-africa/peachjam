@@ -17,7 +17,7 @@ class DjangoUvicornWorker(UvicornWorker):
     CONFIG_KWARGS = {"loop": "auto", "http": "auto", "lifespan": "off"}
 
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "africanlii.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "liiweb.settings")
 
 django_application = get_asgi_application()
 
