@@ -2,6 +2,7 @@ import os
 from datetime import date
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from django_webtest import WebTest
 from webtest import Upload
@@ -13,6 +14,7 @@ from peachjam.models import (
     JournalArticle,
     Judgment,
     Language,
+    SourceFile,
     VolumeIssue,
 )
 
@@ -22,6 +24,32 @@ class TestJudgmentAdmin(WebTest):
 
     def setUp(self):
         self.app.set_user(User.objects.get(username="admin@example.com"))
+
+    def make_judgment(self, anonymised=False):
+        return Judgment.objects.create(
+            case_name="Warning test case",
+            court_id=1,
+            date=date(2026, 1, 8),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            anonymised=anonymised,
+        )
+
+    def attach_source_file(self, judgment, file_is_anonymised):
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"), "rb"
+        ) as pdf_file:
+            return SourceFile.objects.create(
+                document=judgment,
+                file=SimpleUploadedFile(
+                    "warning-source.pdf",
+                    pdf_file.read(),
+                    content_type="application/pdf",
+                ),
+                filename="warning-source.pdf",
+                mimetype="application/pdf",
+                file_is_anonymised=file_is_anonymised,
+            )
 
     def test_add_judgment_docx_swap_pdf(self):
         # add judgment
@@ -158,6 +186,36 @@ class TestJudgmentAdmin(WebTest):
             judgment.document_content.content_html,
         )
         self.assertEqual("file.docx", judgment.source_file.filename)
+
+    def test_change_form_warns_if_anonymised_judgment_source_file_is_not_marked_anonymised(
+        self,
+    ):
+        judgment = self.make_judgment(anonymised=True)
+        self.attach_source_file(judgment, file_is_anonymised=False)
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertIn(
+            "This judgment is marked as anonymised, but the attached source file is not marked as anonymised.",
+            response.text,
+        )
+
+    def test_change_form_does_not_warn_when_attached_source_file_is_marked_anonymised(
+        self,
+    ):
+        judgment = self.make_judgment(anonymised=True)
+        self.attach_source_file(judgment, file_is_anonymised=True)
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertNotIn(
+            "This judgment is marked as anonymised, but the attached source file is not marked as anonymised.",
+            response.text,
+        )
 
 
 class TestDocumentAdminHtmlEdit(WebTest):

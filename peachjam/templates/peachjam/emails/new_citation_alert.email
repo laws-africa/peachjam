@@ -8,6 +8,7 @@
   {% endif %}
 {% endblock %}
 {% block alert-body %}
+  <p>{% trans "We have found citations for documents that you have saved." %}</p>
   {% for item in saved_documents %}
     <p>
       <a href="{% absolute_url site item.saved_document.get_absolute_url %}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>

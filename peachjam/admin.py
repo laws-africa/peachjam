@@ -17,11 +17,9 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.postgres.search import TrigramSimilarity
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
 from django.db.models import Q
-from django.db.models.functions import Coalesce
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import filesizeformat
@@ -404,7 +402,7 @@ class TopicTreeWidget(forms.CheckboxSelectMultiple):
             for kid in item.get("children", []):
                 fixup(kid)
 
-        tree = Taxonomy.dump_bulk()
+        tree = Taxonomy.sort_bulk_tree(Taxonomy.dump_bulk())
         for x in tree:
             fixup(x)
         return tree
@@ -1224,7 +1222,7 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
                 fixup(kid)
 
         # grab the tree and turn it into something la-table-of-contents-controller understands
-        tree = self.model.dump_bulk()
+        tree = self.model.sort_bulk_tree(self.model.dump_bulk())
         for x in tree:
             fixup(x)
         resp.context_data["tree_json"] = json.dumps(tree)
@@ -1234,179 +1232,38 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
 
 @admin.register(Flynote)
 class FlynoteAdmin(admin.ModelAdmin):
-    change_form_template = "admin/peachjam/flynote/change_form.html"
+    change_list_template = "admin/peachjam/flynote/change_list.html"
     list_display = ("name", "document_count", "depth", "deprecated")
     list_filter = ("depth", "deprecated", FlynoteDocumentCountFilter)
     search_fields = ("name",)
     ordering = ("name",)
-    readonly_fields = ("numchild", "ancestors_links", "children_links", "depth")
+    readonly_fields = (
+        "numchild",
+        "ancestors_links",
+        "children_links",
+        "depth",
+        "document_count",
+    )
     fields = (
         "ancestors_links",
         "name",
         "deprecated",
         "depth",
         "numchild",
+        "document_count",
         "children_links",
     )
-    actions = ("mark_deprecated", "mark_active")
+    actions = ("refresh_document_counts_now", "mark_deprecated", "mark_active")
 
     def has_add_permission(self, request):
         return False
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
-        extra_context = extra_context or {}
-        extra_context["merge_url"] = reverse(
-            "admin:peachjam_flynote_merge", args=[object_id]
-        )
-        return super().change_view(request, object_id, form_url, extra_context)
+        manager_url = f"{reverse('flynote-manager')}?flynote={object_id}"
+        return HttpResponseRedirect(manager_url)
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related("document_count_cache")
-
-    def get_urls(self):
-        urls = super().get_urls()
-        custom_urls = [
-            path(
-                "<int:object_id>/merge/",
-                self.admin_site.admin_view(self.merge_view),
-                name="peachjam_flynote_merge",
-            ),
-            path(
-                "<int:object_id>/merge/picker/",
-                self.admin_site.admin_view(self.merge_picker_view),
-                name="peachjam_flynote_merge_picker",
-            ),
-        ]
-        return custom_urls + urls
-
-    def get_merge_selected_ids(self, params):
-        selected_ids = []
-        for value in params.getlist("selected"):
-            try:
-                value = int(value)
-            except (TypeError, ValueError):
-                continue
-            if value not in selected_ids:
-                selected_ids.append(value)
-        return selected_ids
-
-    def get_merge_candidates(self, target, query, selected_ids):
-        if target.is_root():
-            qs = Flynote.get_root_nodes()
-        else:
-            qs = target.get_parent().get_children()
-
-        qs = (
-            qs.exclude(pk=target.pk)
-            .exclude(pk__in=selected_ids)
-            .select_related("document_count_cache")
-            .annotate(document_total=Coalesce("document_count_cache__count", 0))
-        )
-
-        if query:
-            qs = (
-                qs.annotate(similarity=TrigramSimilarity("name", query))
-                .filter(Q(similarity__gt=0.05) | Q(name__icontains=query))
-                .order_by("-similarity", "-document_total", "name")
-            )
-        else:
-            qs = qs.order_by("-document_total", "name")
-
-        return qs[:50]
-
-    def get_merge_picker_context(self, request, target, query, selected_ids):
-        selected_flynotes = list(
-            Flynote.objects.filter(pk__in=selected_ids)
-            .select_related("document_count_cache")
-            .annotate(document_total=Coalesce("document_count_cache__count", 0))
-            .order_by("name")
-        )
-        selected_ids = [flynote.pk for flynote in selected_flynotes]
-
-        return {
-            **self.admin_site.each_context(request),
-            "opts": self.model._meta,
-            "original": target,
-            "target_flynote": target,
-            "query": query,
-            "selected_ids": selected_ids,
-            "selected_flynotes": selected_flynotes,
-            "search_results": self.get_merge_candidates(target, query, selected_ids),
-            "picker_url": reverse(
-                "admin:peachjam_flynote_merge_picker", args=[target.pk]
-            ),
-            "merge_url": reverse("admin:peachjam_flynote_merge", args=[target.pk]),
-        }
-
-    def merge_view(self, request, object_id):
-        target = get_object_or_404(
-            Flynote.objects.select_related("document_count_cache"), pk=object_id
-        )
-        params = request.GET
-
-        if request.method == "POST":
-            selected_ids = self.get_merge_selected_ids(request.POST)
-            selected_flynotes = list(Flynote.objects.filter(pk__in=selected_ids))
-            try:
-                target.merge_sources_into(selected_flynotes)
-            except ValidationError as exc:
-                self.message_user(
-                    request,
-                    "; ".join(exc.messages),
-                    messages.ERROR,
-                )
-            else:
-                self.message_user(
-                    request,
-                    _("Merged %(count)s flynotes into %(target)s.")
-                    % {"count": len(selected_ids), "target": target.name},
-                    messages.SUCCESS,
-                )
-                return HttpResponseRedirect(
-                    reverse("admin:peachjam_flynote_merge", args=[target.pk])
-                )
-            params = request.POST
-
-        query = params.get("q", target.name).strip()
-        context = self.get_merge_picker_context(
-            request,
-            target,
-            query,
-            self.get_merge_selected_ids(params),
-        )
-        context["title"] = _("Merge flynotes into: %(target)s") % {
-            "target": target.name
-        }
-        return TemplateResponse(request, "admin/peachjam/flynote/merge.html", context)
-
-    def merge_picker_view(self, request, object_id):
-        target = get_object_or_404(Flynote, pk=object_id)
-        selected_ids = self.get_merge_selected_ids(request.GET)
-        query = request.GET.get("q", target.name).strip()
-
-        add_id = request.GET.get("add")
-        remove_id = request.GET.get("remove")
-        if add_id:
-            try:
-                add_id = int(add_id)
-            except (TypeError, ValueError):
-                add_id = None
-            if add_id and add_id not in selected_ids:
-                selected_ids.append(add_id)
-        if remove_id:
-            try:
-                remove_id = int(remove_id)
-            except (TypeError, ValueError):
-                remove_id = None
-            if remove_id in selected_ids:
-                selected_ids.remove(remove_id)
-
-        context = self.get_merge_picker_context(request, target, query, selected_ids)
-        return TemplateResponse(
-            request,
-            "admin/peachjam/flynote/_merge_picker.html",
-            context,
-        )
 
     def get_action_queryset_roots(self, queryset):
         selected_paths = set(queryset.values_list("path", flat=True))
@@ -1419,6 +1276,27 @@ class FlynoteAdmin(admin.ModelAdmin):
                 continue
             roots.append(flynote)
         return roots
+
+    def get_action_target_roots(self, queryset):
+        root_paths = {
+            path[: self.model.steplen]
+            for path in queryset.values_list("path", flat=True)
+        }
+        return self.model.get_root_nodes().filter(path__in=root_paths).order_by("path")
+
+    @admin.action(description=_("Refresh selected flynote roots now"))
+    def refresh_document_counts_now(self, request, queryset):
+        from peachjam.models.flynote import FlynoteDocumentCount
+
+        roots = list(self.get_action_target_roots(queryset))
+        for root in roots:
+            FlynoteDocumentCount.refresh_for_flynote(root)
+
+        self.message_user(
+            request,
+            _("Refreshed %(count)s flynote roots.") % {"count": len(roots)},
+            messages.SUCCESS,
+        )
 
     @admin.action(description=_("Mark selected flynotes as deprecated"))
     def mark_deprecated(self, request, queryset):
@@ -1942,7 +1820,9 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     def generate_summary_view(self, request, object_id):
         if request.user.has_perm("peachjam.can_generate_judgment_summary"):
             message = _("Generating summary for judgment with ID: {}").format(object_id)
-            generate_judgment_summary(object_id)
+            doc = self.model.objects.get(pk=object_id)
+            doc.track_changes()
+            doc.generate_summary()
             self.message_user(request, message)
         else:
             message = _("You do not have permission to generate judgment summaries.")

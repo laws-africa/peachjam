@@ -10,6 +10,7 @@ from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
@@ -469,6 +470,46 @@ class Judgment(CoreDocument):
     def __str__(self):
         return self.title
 
+    @staticmethod
+    def flynote_topics_enabled():
+        return settings.PEACHJAM.get(
+            "SUMMARISE_USE_FLYNOTE_TREE", False
+        ) and settings.PEACHJAM.get("SHOW_FLYNOTE_TOPICS", False)
+
+    @cached_property
+    def linked_flynotes(self):
+        if not self.flynote_topics_enabled() or not self.flynote:
+            return []
+
+        return [
+            {
+                "flynote": judgment_flynote.flynote,
+                "nodes": [
+                    *judgment_flynote.flynote.get_ancestors(),
+                    judgment_flynote.flynote,
+                ],
+            }
+            for judgment_flynote in self.flynotes.select_related("flynote").order_by(
+                "flynote__path"
+            )
+        ]
+
+    @property
+    def flynote_lines(self):
+        if not self.flynote:
+            return []
+        return [line.strip() for line in self.flynote.splitlines() if line.strip()]
+
+    @property
+    def needs_source_file_anonymisation(self):
+        if not self.anonymised:
+            return False
+
+        try:
+            return not self.source_file.file_is_anonymised
+        except SourceFile.DoesNotExist:
+            return False
+
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court_id:
@@ -695,9 +736,7 @@ class Judgment(CoreDocument):
         """Serialise the flynote tree to a string for storage in flynote and flynote_raw."""
         from peachjam.models import Flynote
 
-        judgment_flynotes = list(
-            self.flynotes.select_related("flynote").order_by("flynote__path")
-        )
+        judgment_flynotes = list(self.flynotes.select_related("flynote"))
 
         # we update flynote_raw as well (without triggering attribute change events) so that a human can edit
         # the flynote and we won't lose the changes made through the Flynote tree

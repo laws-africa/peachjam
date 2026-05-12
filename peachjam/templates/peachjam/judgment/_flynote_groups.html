@@ -1,0 +1,14 @@
+<ul class="{% if nested %}list-unstyled flynotes{% else %}list-unstyled flynotes my-2{% endif %}">
+  {% for item in flynote_groups %}
+    <li>
+      {% if nested %}
+        — {{ item.text }}
+      {% else %}
+        {{ item.text }}
+      {% endif %}
+      {% if item.children %}
+        {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=item.children nested=True %}
+      {% endif %}
+    </li>
+  {% endfor %}
+</ul>

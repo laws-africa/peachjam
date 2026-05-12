@@ -11,9 +11,10 @@ This module converts that notation into paths and keeps the
 Django ``Flynote`` / ``JudgmentFlynote`` tables in sync with each judgment's
 flynote field.
 
-Two classes are exposed:
+Three classes are exposed:
 
 * **FlynoteParser** – stateless text-to-paths converter.
+* **FlynoteDisplayGrouper** – groups flat flynote lines for nested display.
 * **FlynoteUpdater** – creates/reuses ``Flynote`` nodes and links
   them to a ``Judgment`` via ``JudgmentFlynote``.
 """
@@ -26,10 +27,157 @@ from time import perf_counter
 from django.db import IntegrityError, transaction
 from django.utils.text import slugify
 
-from peachjam.models.flynote import Flynote, JudgmentFlynote
-from peachjam.tasks import refresh_flynote_document_count
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 
 log = logging.getLogger(__name__)
+
+
+class FlynoteDisplayGrouper:
+    """Group flat flynote lines into nested structures for template rendering.
+
+    This is intentionally narrower than ``FlynoteParser``. It treats only
+    spaced dash variants as hierarchy separators so citation ranges such as
+    ``12(1)(a)–(c)`` remain intact in display-only flynote text.
+    """
+
+    PATH_SEPARATOR_RE = re.compile(r"\s+[—–\-\u2010\u2011\u2012]\s+")
+
+    def __init__(self, lines):
+        self.lines = lines or []
+
+    def group(self):
+        paths = []
+        seen = set()
+
+        for line in self.lines:
+            path = self.split_path(line)
+            if path and path not in seen:
+                seen.add(path)
+                paths.append(path)
+
+        if not paths:
+            return []
+
+        return self.build_groups(paths)
+
+    @classmethod
+    def split_path(cls, line):
+        return tuple(
+            component.strip()
+            for component in cls.PATH_SEPARATOR_RE.split(line)
+            if component.strip()
+        )
+
+    @staticmethod
+    def common_path_prefix(paths):
+        if not paths:
+            return ()
+
+        prefix = []
+        for components in zip(*paths):
+            if len(set(components)) != 1:
+                break
+            prefix.append(components[0])
+
+        return tuple(prefix)
+
+    @staticmethod
+    def group_paths_by_head(paths):
+        groups = []
+        for path in paths:
+            head = path[0]
+            if not groups or groups[-1][0] != head:
+                groups.append((head, [path]))
+            else:
+                groups[-1][1].append(path)
+        return [group for _, group in groups]
+
+    @classmethod
+    def build_groups(cls, paths, inherited_prefix=()):
+        if not paths:
+            return []
+
+        if len(paths) == 1:
+            return [{"text": " — ".join(inherited_prefix + paths[0]), "children": []}]
+
+        prefix = cls.common_path_prefix(paths)
+        if not prefix:
+            grouped_paths = []
+            for group in cls.group_paths_by_head(paths):
+                grouped_paths.extend(cls.build_groups(group, inherited_prefix))
+            return grouped_paths
+
+        combined_prefix = inherited_prefix + prefix
+        remainders = [path[len(prefix) :] for path in paths]
+        descendant_paths = [remainder for remainder in remainders if remainder]
+
+        if not descendant_paths:
+            return [{"text": " — ".join(combined_prefix), "children": []}]
+
+        child_groups = cls.group_paths_by_head(descendant_paths)
+        if len(descendant_paths) != len(paths) or all(
+            len(group) == 1 for group in child_groups
+        ):
+            return [
+                {
+                    "text": " — ".join(combined_prefix),
+                    "children": cls.build_groups(descendant_paths),
+                }
+            ]
+
+        grouped_paths = []
+        for group in child_groups:
+            grouped_paths.extend(cls.build_groups(group, combined_prefix))
+
+        return grouped_paths
+
+    @classmethod
+    def group_linked_flynotes(cls, linked_flynotes):
+        """Group linked flynote node paths into a nested node tree.
+
+        ``linked_flynotes`` is expected to be an iterable of dicts containing a
+        ``nodes`` list. The returned structure preserves first-seen order while
+        collapsing shared ancestors so linked topic rendering matches the
+        grouped plain-flynote display.
+        """
+
+        roots = []
+        root_index = {}
+        seen_paths = set()
+
+        for item in linked_flynotes or []:
+            nodes = tuple(item.get("nodes") or [])
+            if not nodes:
+                continue
+
+            path_key = tuple(
+                getattr(node, "pk", None) or getattr(node, "name", None)
+                for node in nodes
+            )
+            if path_key in seen_paths:
+                continue
+            seen_paths.add(path_key)
+
+            items = roots
+            index = root_index
+            for node in nodes:
+                node_key = getattr(node, "pk", None) or getattr(node, "name", None)
+                group = index.get(node_key)
+                if group is None:
+                    group = {"node": node, "children": [], "_index": {}}
+                    items.append(group)
+                    index[node_key] = group
+
+                items = group["children"]
+                index = group["_index"]
+
+        def cleanup(groups):
+            return [
+                {"node": group["node"], "children": cleanup(group["children"])}
+                for group in groups
+            ]
+
+        return cleanup(roots)
 
 
 class FlynoteParser:
@@ -2669,9 +2817,10 @@ class FlynoteUpdater:
         updater.update_for_judgment(judgment)
     """
 
-    def __init__(self, assume_clean=True):
+    def __init__(self, assume_clean=True, update_counts=True):
         self.parser = FlynoteParser(assume_clean=assume_clean)
         self.node_cache = {}
+        self.update_counts = update_counts
 
     def get_or_create_node(self, parent, name):
         """Find an existing Flynote whose normalised sibling name matches, or create a new one.
@@ -2746,7 +2895,7 @@ class FlynoteUpdater:
             return existing
 
     @transaction.atomic
-    def update_for_judgment(self, judgment, refresh_counts=False):
+    def update_for_judgment(self, judgment):
         """Parse a judgment's flynote and sync its Flynote links.
 
         1. Deletes all existing ``JudgmentFlynote`` links for this judgment.
@@ -2754,9 +2903,22 @@ class FlynoteUpdater:
         3. For each path, walks (or creates) ``Flynote`` nodes from root to leaf.
         4. Links the judgment to the leaf node of every path.
 
-        Does nothing if the flynote text cannot be parsed (plain prose, empty, etc.).
+        Returns the set of root flynote ids affected by the update. This includes
+        roots that previously had linked leaves and roots that gained new linked
+        leaves, so callers can refresh or prune only the touched flynote trees.
         """
         overall_start = perf_counter()
+        existing_root_paths = {
+            judgment_flynote.flynote.path[: judgment_flynote.flynote.steplen]
+            for judgment_flynote in JudgmentFlynote.objects.filter(
+                document=judgment
+            ).select_related("flynote")
+        }
+        affected_root_ids = set(
+            Flynote.get_root_nodes()
+            .filter(path__in=existing_root_paths)
+            .values_list("pk", flat=True)
+        )
         JudgmentFlynote.objects.filter(document=judgment).delete()
 
         parse_start = perf_counter()
@@ -2769,11 +2931,11 @@ class FlynoteUpdater:
                 parse_ms,
                 (perf_counter() - overall_start) * 1000,
             )
-            return
+            return affected_root_ids
 
         node_start = perf_counter()
         leaf_flynotes = set()
-        roots_to_refresh = set()
+        new_root_ids = set()
         for path in paths:
             parent = None
             root_id = None
@@ -2787,8 +2949,9 @@ class FlynoteUpdater:
             else:
                 leaf_flynotes.add(node)
                 if root_id is not None:
-                    roots_to_refresh.add(root_id)
+                    new_root_ids.add(root_id)
         node_ms = (perf_counter() - node_start) * 1000
+        affected_root_ids.update(new_root_ids)
 
         link_start = perf_counter()
         JudgmentFlynote.objects.bulk_create(
@@ -2800,6 +2963,9 @@ class FlynoteUpdater:
         )
         link_ms = (perf_counter() - link_start) * 1000
 
+        if self.update_counts:
+            self.quick_refresh_counts(leaf_flynotes)
+
         log.info(
             "Linked judgment %s to %s flynote topics (parse=%.2fms, nodes=%.2fms, links=%.2fms, total=%.2fms).",
             judgment.pk,
@@ -2809,7 +2975,24 @@ class FlynoteUpdater:
             link_ms,
             (perf_counter() - overall_start) * 1000,
         )
+        return affected_root_ids
 
-        if refresh_counts and leaf_flynotes:
-            for root_id in roots_to_refresh:
-                refresh_flynote_document_count(root_id, schedule=30 * 60)
+    def quick_refresh_counts(self, leaf_flynotes):
+        """Optimistically refresh linked leaves and ancestors.
+
+        Leaves are refreshed first so that immediate parent estimates can use
+        fresh child counts. Ancestors then run deepest-to-root for the same
+        reason.
+        """
+        flynotes = {}
+        for leaf in leaf_flynotes:
+            flynotes[leaf.pk] = leaf
+            for ancestor in leaf.get_ancestors():
+                flynotes[ancestor.pk] = ancestor
+
+        for flynote in sorted(
+            flynotes.values(),
+            key=lambda item: item.depth,
+            reverse=True,
+        ):
+            FlynoteDocumentCount.quick_refresh_for_single_flynote(flynote)

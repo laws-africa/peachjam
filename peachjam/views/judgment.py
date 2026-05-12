@@ -43,6 +43,9 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun"] = _("judgment")
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
+        context["show_flynote_topics"] = (
+            Judgment.flynote_topics_enabled() and Flynote.get_root_nodes().exists()
+        )
         self.add_entity_profile(context)
         self.get_court_classes(context)
         return context
@@ -55,6 +58,10 @@ class JudgmentListView(TemplateView):
 
 
 class FlynoteViewMixin:
+    @staticmethod
+    def flynote_topics_enabled():
+        return Judgment.flynote_topics_enabled()
+
     @staticmethod
     def annotate_with_counts(qs):
         return qs.annotate(
@@ -128,7 +135,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     paginate_by = 30
 
     def get(self, request, *args, **kwargs):
-        if not Flynote.get_root_nodes().exists():
+        if not self.flynote_topics_enabled() or not Flynote.get_root_nodes().exists():
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
@@ -136,6 +143,12 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         if self.request.htmx:
             return ["peachjam/flynote/_list.html"]
         return super().get_template_names()
+
+    def get_paginate_by(self, queryset):
+        if self.flynote:
+            return self.paginate_by
+        # always return 100 top-level flynotes, because that is usually the full list
+        return 100
 
     @cached_property
     def flynote(self):
@@ -155,7 +168,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         if q:
             qs = qs.filter(name__icontains=q)
 
-        return self.annotate_with_counts(qs).order_by("name")
+        return self.annotate_with_counts(qs).filter(doc_count__gt=0).order_by("name")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -189,6 +202,8 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
+        if not self.flynote_topics_enabled():
+            return redirect(reverse("judgment_list"))
         self.flynote = get_object_or_404(Flynote, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)
 
@@ -204,6 +219,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["doc_table_show_doc_type"] = False
 
         if not self.request.htmx:
             self.popular_subtopics(context)
@@ -214,7 +230,9 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
 
     def popular_subtopics(self, context):
         # Top 16 subtopcis by count
-        children_qs = self.annotate_with_counts(self.flynote.get_children())
+        children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
+            doc_count__gt=0
+        )
         total_children = children_qs.count()
         popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])
 

@@ -16,6 +16,18 @@ main {
   flex-grow: 1;
 }
 
+body.full-page {
+  height: 100%;
+  overflow: hidden;
+
+  main#top {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
 // newspaper-like dynamic columns
 .flow-columns {
   columns: 1;
@@ -217,6 +229,10 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
 
 .breadcrumb {
   padding-top: 1rem;
+}
+
+.breadcrumb-flynote {
+  --bs-breadcrumb-divider: "—";
 }
 
 select.form-select.select-narrow {

@@ -5,6 +5,7 @@ from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.db import transaction
 from django.db.models import signals
 from django.dispatch import receiver
 from django.dispatch.dispatcher import Signal
@@ -14,6 +15,7 @@ from django_comments.signals import comment_will_be_posted
 from peachjam.customerio import get_customerio
 from peachjam.models import (
     Annotation,
+    CitationLink,
     CoreDocument,
     DocumentChatThread,
     ExtractedCitation,
@@ -28,6 +30,7 @@ from peachjam.models import (
 from peachjam.models.core_document import DocumentContent
 from peachjam.tasks import (
     generate_judgment_summary,
+    refresh_flynote_document_count,
     serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
 )
@@ -49,13 +52,6 @@ def user_saved(sender, instance, created, **kwargs):
         UserProfile.objects.get_or_create(user=instance)
 
 
-@receiver(signals.post_save)
-def doc_saved_update_language(sender, instance, **kwargs):
-    """Update language list on related work when a subclass of CoreDocument is saved."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        instance.work.update_languages()
-
-
 @receiver(signals.post_delete)
 def doc_deleted_update_language(sender, instance, **kwargs):
     """Update language list on related work after a subclass of CoreDocument is deleted."""
@@ -66,18 +62,24 @@ def doc_deleted_update_language(sender, instance, **kwargs):
             work.update_languages()
 
 
-@receiver(signals.post_save)
-def doc_saved_update_extracted_citations(sender, instance, **kwargs):
-    """Update extracted citations when a subclass of CoreDocument is saved."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        update_extracted_citations_for_a_work(instance.work_id)
-
-
 @receiver(signals.post_delete)
 def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
-    """Update language list on related work after a subclass of CoreDocument is deleted."""
+    """Update extracted citations after a subclass of CoreDocument is deleted."""
     if isinstance(instance, CoreDocument):
         update_extracted_citations_for_a_work(instance.work_id)
+
+
+@receiver(signals.post_save, sender=CitationLink)
+def citation_link_saved_update_extracted_citations(sender, instance, raw, **kwargs):
+    """Update extracted citations when source citation links are changed."""
+    if not raw:
+        update_extracted_citations_for_a_work(instance.document.work_id)
+
+
+@receiver(signals.post_delete, sender=CitationLink)
+def citation_link_deleted_update_extracted_citations(sender, instance, **kwargs):
+    """Update extracted citations when source citation links are deleted."""
+    update_extracted_citations_for_a_work(instance.document.work_id)
 
 
 @receiver(signals.post_save, sender=ExtractedCitation)
@@ -271,9 +273,21 @@ def chat_thread_deleted(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=JudgmentFlynote)
 def judgment_flynote_saved_serialise_judgment(sender, instance, raw, **kwargs):
     if not raw:
+        root_id = instance.flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
         serialise_judgment_flynote_tree(instance.document_id)
 
 
 @receiver(signals.post_delete, sender=JudgmentFlynote)
 def judgment_flynote_deleted_serialise_judgment(sender, instance, **kwargs):
+    from peachjam.models.flynote import Flynote
+
+    flynote = Flynote.objects.filter(pk=instance.flynote_id).first()
+    if flynote:
+        root_id = flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
     serialise_judgment_flynote_tree(instance.document_id)

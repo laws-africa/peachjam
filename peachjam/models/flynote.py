@@ -3,7 +3,11 @@ import logging
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
+from django.db.models import Exists, OuterRef
+from django.db.models.deletion import ProtectedError
 from django.urls import reverse
+from django.utils.html import format_html
+from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
 from treebeard.mp_tree import MP_Node
@@ -51,7 +55,6 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
     name = models.CharField(_("name"), max_length=255)
     deprecated = models.BooleanField(_("deprecated"), default=False, db_index=True)
-    node_order_by = ["name"]
 
     class Meta:
         verbose_name = _("flynote")
@@ -77,9 +80,47 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 }
             )
 
+    def validate_unique_sibling_name(self):
+        """Prevent admin edits from creating duplicate sibling/root names."""
+        if not self.pk:
+            return
+
+        name = self.name.strip()
+        if self.is_root():
+            siblings = Flynote.get_root_nodes()
+        else:
+            siblings = self.get_parent().get_children()
+
+        duplicate = siblings.exclude(pk=self.pk).filter(name__iexact=name).first()
+        if not duplicate:
+            return
+
+        merge_url = "{}?{}".format(
+            reverse("flynote-manager"),
+            urlencode(
+                {
+                    "flynote": duplicate.pk,
+                    "tab": "merge",
+                    "selected": self.pk,
+                }
+            ),
+        )
+        raise ValidationError(
+            {
+                "name": format_html(
+                    _(
+                        "A sibling flynote already has this name. "
+                        '<a href="{}">Merge this flynote into that one</a> instead.'
+                    ),
+                    merge_url,
+                )
+            }
+        )
+
     def clean(self):
         super().clean()
         self.validate_deprecated_invariant()
+        self.validate_unique_sibling_name()
 
     @on_attribute_changed(AFTER_SAVE, ["name", "path"], [])
     def serialise_linked_judgments(self):
@@ -134,10 +175,12 @@ class Flynote(LifecycleModelMixin, MP_Node):
         """Merge sibling flynotes into this flynote.
 
         Direct judgment links on each source move to this flynote. Source
-        children are re-parented under this flynote. Source flynotes are then
-        deleted explicitly, and document counts are refreshed in background.
+        children are merged into matching children on this flynote, or
+        re-parented under this flynote. Source flynotes are then deleted
+        explicitly.
         """
-        from peachjam.analysis.flynotes import FlynoteParser
+        if not all(isinstance(source, Flynote) for source in sources):
+            raise TypeError("merge_sources_into expects a list of Flynote objects")
 
         source_ids = []
         for source in sources:
@@ -162,6 +205,8 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
             target_parent = target.get_parent()
             target_parent_id = target_parent.pk if target_parent else None
+            source_parents = []
+            source_parent_ids = set()
 
             for source in sources:
                 source_parent = source.get_parent()
@@ -172,56 +217,118 @@ class Flynote(LifecycleModelMixin, MP_Node):
                             "Flynotes can only be merged into a sibling at the same level."
                         )
                     )
-
-            existing_child_names = {
-                FlynoteParser.normalise_name(child.name): child.name
-                for child in target.get_children()
-                if FlynoteParser.normalise_name(child.name)
-            }
-            duplicate_child_names = set()
-
-            for source in sources:
-                for child in source.get_children():
-                    normalised = FlynoteParser.normalise_name(child.name)
-                    if not normalised:
-                        continue
-                    if normalised in existing_child_names:
-                        duplicate_child_names.add(child.name)
-                    else:
-                        existing_child_names[normalised] = child.name
-
-            if duplicate_child_names:
-                duplicates = ", ".join(sorted(duplicate_child_names))
-                raise ValidationError(
-                    _(
-                        "Cannot merge because the target already has children with these names: %(duplicates)s."
-                    )
-                    % {"duplicates": duplicates}
-                )
+                if source_parent_id and source_parent_id not in source_parent_ids:
+                    source_parents.append(source_parent)
+                    source_parent_ids.add(source_parent_id)
 
             log.info(f"Merging flynotes into {self}: {sources}")
             for source in sources:
-                for judgment_flynote in list(source.judgments.select_for_update()):
-                    duplicate = JudgmentFlynote.objects.filter(
-                        document_id=judgment_flynote.document_id,
-                        flynote=target,
-                    ).exists()
-                    if duplicate:
-                        judgment_flynote.delete()
-                    else:
-                        judgment_flynote.flynote = target
-                        judgment_flynote.save(update_fields=["flynote"])
+                target._merge_other_into(source)
 
-                for child in list(source.get_children()):
-                    # moving nodes updates path attributes, so always work with latest info from db
-                    child.refresh_from_db()
-                    target.refresh_from_db()
-                    child.move(target, pos="sorted-child")
-
-                source.delete()
-
-            refresh_flynote_document_count(target.get_root().pk)
+            for source_parent in source_parents:
+                if Flynote.objects.filter(pk=source_parent.pk).exists():
+                    source_parent.refresh_from_db()
+                    FlynoteDocumentCount.quick_refresh_for_single_flynote(source_parent)
             log.info("Finished merging flynotes")
+
+    def _merge_other_into(self, source):
+        """Merge one corresponding source flynote into this flynote."""
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        for judgment_flynote in list(source.judgments.select_for_update()):
+            duplicate = JudgmentFlynote.objects.filter(
+                document_id=judgment_flynote.document_id,
+                flynote=self,
+            ).exists()
+            if duplicate:
+                judgment_flynote.delete()
+            else:
+                judgment_flynote.flynote = self
+                judgment_flynote.save(update_fields=["flynote"])
+
+        for child in list(source.get_children()):
+            normalised = FlynoteParser.normalise_name(child.name)
+            target_child = None
+            if normalised:
+                target_child = next(
+                    (
+                        candidate
+                        for candidate in self.get_children().select_for_update()
+                        if FlynoteParser.normalise_name(candidate.name) == normalised
+                    ),
+                    None,
+                )
+
+            if target_child:
+                target_child._merge_other_into(child)
+            else:
+                # moving nodes updates path attributes, so always work with latest info from db
+                child.refresh_from_db()
+                self.refresh_from_db()
+                child.move(self, pos="last-child")
+
+        source.delete()
+        FlynoteDocumentCount.quick_refresh_for_single_flynote(self)
+
+    def prune_empty_descendants(self):
+        """Delete empty flynotes under this flynote.
+
+        Locks the tree root before pruning so concurrent tree/count updates for
+        the same tree are serialised, even when pruning only a subtree.
+        """
+        flynote_id = self.pk
+
+        with transaction.atomic():
+            flynote = Flynote.objects.filter(pk=flynote_id).first()
+            if not flynote:
+                log.info(
+                    "No flynote with id %s exists while pruning empty descendants, ignoring.",
+                    flynote_id,
+                )
+                return
+
+            tree_root = (
+                Flynote.objects.select_for_update()
+                .filter(pk=flynote.get_root().pk)
+                .first()
+            )
+            if not tree_root:
+                log.info(
+                    "No flynote root exists for %s while pruning empty descendants, ignoring.",
+                    flynote_id,
+                )
+                return
+
+            flynote.refresh_from_db()
+            root_path = flynote.path
+
+            # Stale count rows can briefly make a linked flynote look empty, so
+            # only consider nodes with no linked judgments anywhere in their
+            # subtree and still guard against races during delete.
+            log.info("Pruning empty flynotes under %s", flynote)
+            linked_judgments = JudgmentFlynote.objects.filter(
+                flynote__path__startswith=OuterRef("path")
+            )
+            empty_flynotes = list(
+                Flynote.objects.filter(path__startswith=root_path)
+                .filter(document_count_cache__isnull=True)
+                .annotate(has_linked_judgments=Exists(linked_judgments))
+                .filter(has_linked_judgments=False)
+                .order_by("-depth", "-path")
+            )
+            for empty_flynote in empty_flynotes:
+                try:
+                    empty_flynote.delete()
+                except Flynote.DoesNotExist:
+                    log.warning(
+                        "Skipping prune of flynote %s because it was already deleted.",
+                        empty_flynote.pk,
+                    )
+                except ProtectedError:
+                    log.warning(
+                        "Skipping prune of flynote %s because linked judgments still protect it.",
+                        empty_flynote.pk,
+                    )
 
     @classmethod
     def flynotes_to_string(cls, judgment_flynotes):
@@ -259,7 +366,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
         if not flynote_lines:
             return None
 
-        return "\n".join(flynote_lines)
+        return "\n".join(sorted(flynote_lines))
 
 
 class JudgmentFlynote(models.Model):
@@ -307,31 +414,73 @@ class FlynoteDocumentCount(models.Model):
         return f"{self.flynote.name}: {self.count}"
 
     @classmethod
-    def refresh_for_flynote(cls, root):
-        """Recompute document counts for flynotes under *root*.
+    def quick_refresh_for_single_flynote(cls, flynote, limit=1000):
+        """Refresh counts for one flynote now if it is cheap. Always queues a background refresh of the root.
+
+        Child counts are assumed to already be correct. The estimate is used
+        only as a cheap threshold check; refresh_for_flynote() still computes
+        the exact count if the subtree is small enough.
+        """
+        flynote.refresh_from_db(fields=["path", "numchild"])
+        direct_count = (
+            JudgmentFlynote.objects.filter(flynote=flynote)
+            .values("document_id")
+            .distinct()
+            .count()
+        )
+        child_count = sum(
+            cls.objects.filter(flynote__in=flynote.get_children()).values_list(
+                "count", flat=True
+            )
+        )
+
+        estimated_count = direct_count + child_count
+        if estimated_count < limit:
+            cls.refresh_for_flynote(flynote)
+
+        # always queue up a refresh of the root (if this not a root)
+        if flynote.depth > 1:
+            refresh_flynote_document_count(flynote.get_root().pk)
+
+    @classmethod
+    def refresh_for_flynote(cls, flynote):
+        """Recompute document counts for flynotes under *flynote*, which could be a root or just a subtree.
 
         Each node's count includes documents linked directly to it plus
         documents linked to any of its descendants. Uses treebeard's
         materialised path to walk ancestors efficiently in a single SQL
         query, following the same pattern as TaxonomyDocumentCount.
         """
-        if root is None:
-            raise ValueError("refresh_for_flynote requires a root flynote node")
+        if flynote is None:
+            raise ValueError("refresh_for_flynote requires a flynote node")
 
-        root_id = root.pk
+        flynote_id = flynote.pk
 
         with transaction.atomic():
-            root = Flynote.objects.select_for_update().filter(pk=root_id).first()
-            if not root:
+            flynote = Flynote.objects.filter(pk=flynote_id).first()
+            if not flynote:
                 log.info(
-                    "No flynote root with id %s exists while refreshing counts, ignoring.",
-                    root_id,
+                    "No flynote with id %s exists while refreshing counts, ignoring.",
+                    flynote_id,
                 )
                 return
 
-            root_path = root.path
+            tree_root = (
+                Flynote.objects.select_for_update()
+                .filter(pk=flynote.get_root().pk)
+                .first()
+            )
+            if not tree_root:
+                log.info(
+                    "No flynote root exists for %s while refreshing counts, ignoring.",
+                    flynote_id,
+                )
+                return
+
+            flynote.refresh_from_db()
+            root_path = flynote.path
             with connection.cursor() as cursor:
-                log.info("Deleting cached flynote counts under root %s", root)
+                log.info("Deleting cached flynote counts under %s", flynote)
                 cursor.execute(
                     """
                     DELETE FROM peachjam_flynotedocumentcount
@@ -343,7 +492,7 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%"],
                 )
 
-                log.info("Rebuilding cached flynote counts under root %s", root)
+                log.info("Rebuilding cached flynote counts under %s", flynote)
                 cursor.execute(
                     """
                     INSERT INTO peachjam_flynotedocumentcount (flynote_id, count)
@@ -364,19 +513,8 @@ class FlynoteDocumentCount(models.Model):
                     [root_path + "%", root_path + "%"],
                 )
 
-            # After rebuilding cumulative counts, any node in this subtree
-            # without a count row has no linked documents in its subtree and
-            # can be pruned safely using Treebeard's delete handling.
-            log.info("Pruning empty flynotes under root %s", root)
-            empty_flynotes = list(
-                Flynote.objects.filter(path__startswith=root_path)
-                .filter(document_count_cache__isnull=True)
-                .order_by("-depth", "-path")
-            )
-            for flynote in empty_flynotes:
-                flynote.delete()
-
-        log.info("Refreshed document counts for flynote tree rooted at %s", root)
+        flynote.prune_empty_descendants()
+        log.info("Refreshed document counts for flynote tree under %s", flynote)
 
     @classmethod
     def refresh_for_all_flynotes(cls):

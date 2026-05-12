@@ -12,6 +12,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.auth import user_display
 from peachjam.models import DocumentChatThread
 from peachjam.xmlutils import qualify_local_refs as qualify_local_refs_html
@@ -154,6 +155,16 @@ def jurisdiction_icon(doc):
 @register.filter
 def split(value, sep=None):
     return [v.strip() for v in value.split(sep)]
+
+
+@register.filter
+def group_flynote_lines(lines):
+    return FlynoteDisplayGrouper(lines).group()
+
+
+@register.filter
+def group_linked_flynotes(linked_flynotes):
+    return FlynoteDisplayGrouper.group_linked_flynotes(linked_flynotes)
 
 
 @register.filter

@@ -215,7 +215,7 @@ class JudgmentSummariser:
     match_flynotes_to_db = settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"]
     agent: Optional[Agent] = None
     run_result: Optional[RunResult] = None
-    max_top_level_flynotes = 50
+    max_top_level_flynotes = 100
 
     def __init__(self):
         self.summary_language = settings.PEACHJAM["SUMMARISER_LANGUAGE"]
@@ -346,7 +346,7 @@ class JudgmentSummariser:
 
         # give the agent tools and change its output type
         agent = self.agent.clone(tools=[search_flynotes], output_type=Flynote)
-        run_result = Runner.run_sync(agent, input)
+        run_result = Runner.run_sync(agent, input, max_turns=20)
         log_agent_reasoning(run_result)
 
         summary.flynote = run_result.final_output.flynote
