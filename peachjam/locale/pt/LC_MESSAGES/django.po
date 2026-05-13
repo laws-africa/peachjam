@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-13 12:28\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -66,25 +66,21 @@ msgid "content HTML is AKN"
 msgstr "HTML do conteúdo é AKN"
 
 #: admin.py:803
-#, fuzzy
-#| msgid "background photo"
 msgid "Background tasks"
-msgstr "foto de fundo"
+msgstr "Tarefas de fundo"
 
 #: admin.py:837
-#, fuzzy
-#| msgid "images"
 msgid "Images"
 msgstr "Imagens"
 
 #: admin.py:895
 #, python-format
 msgid "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
-msgstr ""
+msgstr "Foram encontrados erros de validação em: %(fields)s. Verifique também as secções em linha e os erros que não estão nos campos."
 
 #: admin.py:952
 msgid "main form (non-field)"
-msgstr ""
+msgstr "formulário principal (não campo)"
 
 #: admin.py:1053
 msgid "Work"
@@ -158,30 +154,30 @@ msgstr "A taxonomia com slug \"%(value)s\" já existe."
 
 #: admin.py:1284
 msgid "Refresh selected flynote roots now"
-msgstr ""
+msgstr "Atualize as raízes de notas de voo selecionadas agora."
 
 #: admin.py:1294
 #, python-format
 msgid "Refreshed %(count)s flynote roots."
-msgstr ""
+msgstr "Raízes flynote atualizadas %(count)s."
 
 #: admin.py:1298
 msgid "Mark selected flynotes as deprecated"
-msgstr ""
+msgstr "Mark selecionou flynotes como obsoletos."
 
 #: admin.py:1310
 #, python-format
 msgid "Deprecated %(count)s flynote branches."
-msgstr ""
+msgstr "Ramificações flynote obsoletas %(count)s."
 
 #: admin.py:1314
 msgid "Mark selected flynotes as active"
-msgstr ""
+msgstr "Mark selecionou flynotes como ativo"
 
 #: admin.py:1326
 #, python-format
 msgid "Reactivated %(count)s flynote branches."
-msgstr ""
+msgstr "Reativaram-se os ramos %(count)s do Flynote."
 
 #: admin.py:1330 templates/peachjam/layouts/document_list.html:4
 #: templates/peachjam/layouts/document_list.html:17
@@ -189,14 +185,12 @@ msgid "Documents"
 msgstr "Documentos"
 
 #: admin.py:1335
-#, fuzzy
-#| msgid "ingestors"
 msgid "Ancestors"
-msgstr "ingestores"
+msgstr "Antepassados"
 
 #: admin.py:1353
 msgid "Children"
-msgstr ""
+msgstr "Crianças"
 
 #: admin.py:1417 models/judgment.py:774 models/judgment.py:810
 msgid "case number"
@@ -237,7 +231,7 @@ msgstr "histórico de caso"
 
 #: admin.py:1510
 msgid "Enter one flynote per line."
-msgstr ""
+msgstr "Introduza uma anotação por linha."
 
 #: admin.py:1611 templates/peachjam/_document_content_sidebar.html:22
 #: templates/peachjam/judgment_detail.html:101
@@ -425,32 +419,28 @@ msgid "(Oldest first)"
 msgstr "(Mais velhos primeiro)"
 
 #: forms.py:477
-#, fuzzy
-#| msgid "Summary"
 msgid "Summary prompt"
 msgstr "Resumo"
 
 #: forms.py:485
 msgid "Optional. Overrides the default summary prompt."
-msgstr ""
+msgstr "Opcional. Substitui o pedido de resumo padrão."
 
 #: forms.py:488
 msgid "Model"
-msgstr ""
+msgstr "Modelo"
 
 #: forms.py:495
 msgid "Optional. Overrides the configured model."
-msgstr ""
+msgstr "Opcional. Substitui o modelo configurado."
 
 #: forms.py:498
-#, fuzzy
-#| msgid "default document language"
 msgid "Translation language"
-msgstr "idioma padrão do documento"
+msgstr "Idioma de tradução"
 
 #: forms.py:506
 msgid "Optional. Translates the summary when set to a non-English language."
-msgstr ""
+msgstr "Opcional. Traduz o resumo quando definido para um idioma diferente do inglês."
 
 #: forms.py:554
 msgid "Document problem reported"
@@ -488,15 +478,15 @@ msgstr "Palavra-passe (novamente)"
 
 #: forms.py:732
 msgid "I understand this action cannot be undone"
-msgstr ""
+msgstr "Entendo que esta ação não pode ser anulada."
 
 #: forms.py:734
 msgid "Please confirm account deletion."
-msgstr ""
+msgstr "Por favor, confirme a eliminação da conta."
 
 #: forms.py:737
 msgid "Please tell us briefly why you are deleting your account."
-msgstr ""
+msgstr "Por favor, explique brevemente por que razão está a eliminar a sua conta."
 
 #: forms.py:745
 msgid "I agree to the Terms of Use"
@@ -1010,16 +1000,12 @@ msgid "alternative names"
 msgstr "nomes alternativos"
 
 #: models/core_document.py:901
-#, fuzzy
-#| msgid "Source"
 msgid "Source HTML"
-msgstr "fonte"
+msgstr "HTML de origem"
 
 #: models/core_document.py:902
-#, fuzzy
-#| msgid "content HTML"
 msgid "Content HTML"
-msgstr "conteúdo HTML"
+msgstr "Conteúdo HTML"
 
 #: models/core_document.py:907
 msgid "document text"
@@ -1221,10 +1207,8 @@ msgid "jurisdiction profiles"
 msgstr "perfis de jurisdição"
 
 #: models/flynote.py:57
-#, fuzzy
-#| msgid "predicate"
 msgid "deprecated"
-msgstr "predicate"
+msgstr "obsoleto"
 
 #: models/flynote.py:60 models/flynote.py:385 models/flynote.py:405
 #: models/judgment.py:363
@@ -1232,50 +1216,40 @@ msgid "flynote"
 msgstr "nota"
 
 #: models/flynote.py:61
-#, fuzzy
-#| msgid "flynote"
 msgid "flynotes"
-msgstr "nota"
+msgstr "notas de voo"
 
 #: models/flynote.py:78
 msgid "A flynote cannot be active when any ancestor is deprecated."
-msgstr ""
+msgstr "Uma nota de rodapé não pode estar ativa quando qualquer antepassado está obsoleto."
 
 #: models/flynote.py:112
 msgid "A sibling flynote already has this name. <a href=\"{}\">Merge this flynote into that one</a> instead."
-msgstr ""
+msgstr "Uma nota de rodapé irmã já possui este nome. <a href=\"{}\">Mescle esta nota de rodapé com aquela</a> em vez disso."
 
 #: models/flynote.py:203
 msgid "One or more selected flynotes no longer exist."
-msgstr ""
+msgstr "Uma ou mais notas selecionadas já não existem."
 
 #: models/flynote.py:217
 msgid "Flynotes can only be merged into a sibling at the same level."
-msgstr ""
+msgstr "Os Flynotes só podem ser fundidos com um Flynote do mesmo nível."
 
 #: models/flynote.py:390
-#, fuzzy
-#| msgid "judgment work"
 msgid "judgment flynote"
-msgstr "trabalho de julgamento"
+msgstr "nota de julgamento"
 
 #: models/flynote.py:391
-#, fuzzy
-#| msgid "judgments"
 msgid "judgment flynotes"
-msgstr "julgamentos"
+msgstr "notas de julgamento"
 
 #: models/flynote.py:410
-#, fuzzy
-#| msgid "document content"
 msgid "flynote document count"
-msgstr "conteúdo do documento"
+msgstr "contagem de documentos flynote"
 
 #: models/flynote.py:411
-#, fuzzy
-#| msgid "document contents"
 msgid "flynote document counts"
-msgstr "conteúdo documento"
+msgstr "Contagem de documentos Flynote"
 
 #: models/gazette.py:13
 msgid "publication"
@@ -1367,11 +1341,11 @@ msgstr "Intervalo de páginas, por exemplo, páginas 17-24"
 
 #: models/journals_books.py:162
 msgid "Title must include a volume number, issue number, month, and year, e.g. 'Vol. 3 No.1 - January 1993'."
-msgstr ""
+msgstr "O título deve incluir o número do volume, o número da edição, o mês e o ano, por exemplo, 'Vol. 3 N.º1 - Janeiro de 1993'."
 
 #: models/journals_books.py:171
 msgid "Title must include a month name, e.g. 'Vol. 3 No.1 - January 1993'."
-msgstr ""
+msgstr "O título deve incluir o nome do mês, por exemplo, 'Vol. 3 N.º1 - Janeiro de 1993'."
 
 #: models/judgment.py:45
 msgid "attorney"
@@ -1473,10 +1447,8 @@ msgid "case summary"
 msgstr "resumo do caso"
 
 #: models/judgment.py:362
-#, fuzzy
-#| msgid "flynote"
 msgid "flynote (raw)"
-msgstr "nota"
+msgstr "flynote (bruto)"
 
 #: models/judgment.py:366
 msgid "case summary public"
@@ -1969,11 +1941,11 @@ msgstr "Identificação de um sinalizador de contacto do HelpScout."
 
 #: models/settings.py:185
 msgid "allow criminal data extraction"
-msgstr ""
+msgstr "permitir extração de dados criminais"
 
 #: models/settings.py:187
 msgid "Allow AI-based criminal data extraction for judgments."
-msgstr ""
+msgstr "Permitir a extração de dados criminais com base em IA para efeitos de julgamento."
 
 #: models/settings.py:191
 msgid "site settings"
@@ -2005,13 +1977,11 @@ msgstr "Permitir que os utilizadores disponibilizem esta taxonomia e os seus des
 
 #: models/taxonomies.py:47
 msgid "hidden"
-msgstr ""
+msgstr "oculto"
 
 #: models/taxonomies.py:51
-#, fuzzy
-#| msgid "Allow users to make this taxonomy and its descendants available offline."
 msgid "Hide this taxonomy and its descendants from public taxonomy listings."
-msgstr "Permitir que os utilizadores disponibilizem esta taxonomia e os seus descendentes offline."
+msgstr "Oculte esta taxonomia e os seus descendentes das listas públicas de taxonomias."
 
 #: models/taxonomies.py:56 models/taxonomies.py:311 models/user_following.py:82
 msgid "taxonomy"
@@ -2034,16 +2004,12 @@ msgid "document topics"
 msgstr "tópicos do documento"
 
 #: models/taxonomies.py:316
-#, fuzzy
-#| msgid "Skip to document content"
 msgid "taxonomy document count"
-msgstr "Saltar para o conteúdo do documento"
+msgstr "contagem de documentos de taxonomia"
 
 #: models/taxonomies.py:317
-#, fuzzy
-#| msgid "document contents"
 msgid "taxonomy document counts"
-msgstr "conteúdo documento"
+msgstr "contagem de documentos de taxonomia"
 
 #: models/timeline.py:55
 msgid "New Documents"
@@ -2106,10 +2072,8 @@ msgid "New updates for"
 msgstr "Novas atualizações para"
 
 #: models/user_following.py:90
-#, fuzzy
-#| msgid "Journal"
 msgid "journal"
-msgstr "Jornal"
+msgstr "jornal"
 
 #: models/user_following.py:106
 msgid "saved search"
@@ -2148,20 +2112,16 @@ msgid "When the user accepted the terms of service."
 msgstr "Quando o utilizador aceitou os termos de serviço."
 
 #: models/user_profile.py:54
-#, fuzzy
-#| msgid "created at"
 msgid "deleted at"
-msgstr "criado em"
+msgstr "excluído em"
 
 #: models/user_profile.py:55
 msgid "deleted reason"
-msgstr ""
+msgstr "motivo excluído"
 
 #: models/user_profile.py:56
-#, fuzzy
-#| msgid "Emails"
 msgid "email hash"
-msgstr "E-mails"
+msgstr "hash de e-mail"
 
 #: models/user_profile.py:59
 msgid "user profile"
@@ -2609,11 +2569,11 @@ msgstr "Este documento é um duplicado de:"
 
 #: templates/admin/peachjam/flynote/change_list.html:5
 msgid "Flynotes are managed in the flynote manager."
-msgstr ""
+msgstr "As anotações de voo são geridas no gestor de anotações de voo."
 
 #: templates/admin/peachjam/flynote/change_list.html:6
 msgid "Open the flynote manager"
-msgstr ""
+msgstr "Abra o gestor de notas Flynote."
 
 #: templates/admin/peachjam/judgment/_extracted_form.html:7
 msgid "Extracted:"
@@ -2625,7 +2585,7 @@ msgstr "Este julgamento deve ser tornado anónimo antes de ser publicado."
 
 #: templates/admin/peachjam/judgment/change_form.html:10
 msgid "This judgment is marked as anonymised, but the attached source file is not marked as anonymised. Mark the source file as anonymised if it is safe to download."
-msgstr ""
+msgstr "Esta frase está marcada como anonimizada, mas o ficheiro fonte em anexo não está marcado como anonimizado. Marque o ficheiro fonte como anonimizado se for seguro descarregá-lo."
 
 #: templates/admin/peachjam/judgment/change_form.html:16
 msgid "Anonymise"
@@ -2745,14 +2705,12 @@ msgid "Explore %(court)s"
 msgstr "Explorar %(court)s"
 
 #: templates/peachjam/_court_months_list.html:4
-#, fuzzy
-#| msgid "All months"
 msgid "Months"
-msgstr "Todos os meses"
+msgstr "Meses"
 
 #: templates/peachjam/_court_months_list.html:6
 msgid "Skip past months"
-msgstr ""
+msgstr "Salte para os meses anteriores"
 
 #: templates/peachjam/_court_months_list.html:14
 #: templates/peachjam/_court_months_list.html:40
@@ -2764,7 +2722,7 @@ msgstr "Todos os meses"
 #: templates/peachjam/_court_months_list.html:34
 #: templates/peachjam/_months_list.html:22
 msgid "Browse by month"
-msgstr ""
+msgstr "Navegue por mês"
 
 #: templates/peachjam/_court_years_list.html:4
 #: templates/peachjam/_years_list.html:4 views/generic_views.py:416
@@ -2774,10 +2732,8 @@ msgstr "anos"
 
 #: templates/peachjam/_court_years_list.html:6
 #: templates/peachjam/_years_list.html:7
-#, fuzzy
-#| msgid "Skip to search"
 msgid "Skip past years"
-msgstr "Saltar para a pesquisa"
+msgstr "Saltar para anos anteriores"
 
 #: templates/peachjam/_court_years_list.html:14
 #: templates/peachjam/_court_years_list.html:40
@@ -2789,7 +2745,7 @@ msgstr "Todos os anos"
 #: templates/peachjam/_court_years_list.html:34
 #: templates/peachjam/_years_list.html:33
 msgid "Browse by year"
-msgstr ""
+msgstr "Navegue por ano"
 
 #: templates/peachjam/_document_content.html:46
 msgid "Loading PDF..."
@@ -2883,14 +2839,14 @@ msgstr "Copiar citação"
 #: templates/peachjam/provision_enrichment/_uncommenced_table.html:6
 #: templates/peachjam/provision_enrichment/_unconstitutional_table.html:6
 msgid "Results"
-msgstr ""
+msgstr "Resultados"
 
 #: templates/peachjam/_document_table.html:37
 #: templates/peachjam/provision_enrichment/_provision_citations_table.html:9
 #: templates/peachjam/provision_enrichment/_uncommenced_table.html:9
 #: templates/peachjam/provision_enrichment/_unconstitutional_table.html:9
 msgid "Results."
-msgstr ""
+msgstr "Resultados."
 
 #: templates/peachjam/_document_table.html:40
 #: templates/peachjam/_document_table.html:42
@@ -2901,7 +2857,7 @@ msgstr ""
 #: templates/peachjam/provision_enrichment/_unconstitutional_table.html:12
 #: templates/peachjam/provision_enrichment/_unconstitutional_table.html:14
 msgid "found."
-msgstr ""
+msgstr "encontrado."
 
 #: templates/peachjam/_document_table.html:45
 #: templates/peachjam/_document_table.html:132
@@ -2918,13 +2874,13 @@ msgstr "Nenhum documento encontrado."
 #: templates/peachjam/_document_table.html:101
 #, python-format
 msgid "Sort by %(sort_field)s descending"
-msgstr ""
+msgstr "Ordenar por %(sort_field)s por ordem decrescente"
 
 #: templates/peachjam/_document_table.html:73
 #: templates/peachjam/_document_table.html:103
 #, python-format
 msgid "Sort by %(sort_field)s ascending"
-msgstr ""
+msgstr "Ordenar por %(sort_field)s por ordem crescente"
 
 #: templates/peachjam/_document_table.html:83
 #: templates/peachjam/layouts/document_detail.html:235
@@ -2954,10 +2910,8 @@ msgid "Close"
 msgstr "FECHAR"
 
 #: templates/peachjam/_document_table_form.html:39
-#, fuzzy
-#| msgid "Skip to main menu"
 msgid "Skip to results"
-msgstr "Ir para o menu principal"
+msgstr "Ir para os resultados"
 
 #: templates/peachjam/_document_table_form.html:53
 msgid "Clear all"
@@ -2969,20 +2923,16 @@ msgstr "Limpar"
 
 #: templates/peachjam/_document_table_form.html:82
 msgid "Skip to next filter group"
-msgstr ""
+msgstr "Ir para o grupo de filtros seguinte"
 
 #: templates/peachjam/_document_table_form.html:160
 #: templates/peachjam/_document_table_form.html:165
-#, fuzzy
-#| msgid "Filter documents"
 msgid "Filter documents by title"
-msgstr "Filtrar documentos"
+msgstr "Filtrar documentos por título"
 
 #: templates/peachjam/_document_table_form.html:173
-#, fuzzy
-#| msgid "No recent documents."
 msgid "Sort documents by"
-msgstr "Nenhum documento recente."
+msgstr "Classificar os documentos por"
 
 #: templates/peachjam/_document_table_form.html:187
 msgid "Filter"
@@ -3036,19 +2986,17 @@ msgstr "Lei Aberta África"
 #: templates/peachjam/_social_media.html:37
 #: templates/peachjam/_social_media.html:47
 msgid "opens in new tab"
-msgstr ""
+msgstr "abre em novo separador"
 
 #: templates/peachjam/_pagination.html:2
-#, fuzzy
-#| msgid "annotation"
 msgid "Pagination"
-msgstr "anotação"
+msgstr "Paginação"
 
 #: templates/peachjam/_pagination.html:8 templates/peachjam/_pagination.html:30
 #: templates/peachjam/_pagination.html:38
 #, python-format
 msgid "Go to page %(page_number)s"
-msgstr ""
+msgstr "Aceda à página %(page_number)s"
 
 #: templates/peachjam/_pagination.html:8
 msgid "Previous"
@@ -3057,7 +3005,7 @@ msgstr "Anterior"
 #: templates/peachjam/_pagination.html:22
 #, python-format
 msgid "Current page, page %(page_number)s"
-msgstr ""
+msgstr "Página atual, página %(page_number)s"
 
 #: templates/peachjam/_pagination.html:38
 msgid "Next"
@@ -3105,7 +3053,7 @@ msgstr "Nenhum documento recente."
 #: templates/peachjam/_registries.html:7
 #, python-format
 msgid "Skip past %(label)s"
-msgstr ""
+msgstr "Ignorar %(label)s"
 
 #: templates/peachjam/_related_documents.html:4
 #: templates/peachjam/layouts/document_detail.html:174
@@ -3131,8 +3079,7 @@ msgstr "Visite o nosso canal no YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3140,8 +3087,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Participe da pesquisa %(APP_NAME)s</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Ajude-nos a tornar o %(APP_NAME)s melhor.\n"
@@ -3157,14 +3103,12 @@ msgstr "Participe da pesquisa"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Ajude-nos a tornar o %(APP_NAME)s melhor. Responda a esta breve pesquisa de 5 minutos e conte-nos sobre como você usa o %(APP_NAME)s e como podemos melhorá-lo. Todas as informações compartilhadas são confidenciais.\n"
 "            </p>\n"
@@ -3477,15 +3421,15 @@ msgstr "Sobre"
 
 #: templates/peachjam/article/detail.html:43
 msgid "Share this article on WhatsApp opens in new tab"
-msgstr ""
+msgstr "Partilhar este artigo no WhatsApp (abre em novo separador)"
 
 #: templates/peachjam/article/detail.html:49
 msgid "Share this article on X opens in new tab"
-msgstr ""
+msgstr "Partilhar este artigo no X (abre em novo separador)"
 
 #: templates/peachjam/article/detail.html:55
 msgid "Share this article on Facebook opens in new tab"
-msgstr ""
+msgstr "Partilhar este artigo no Facebook (abre em novo separador)"
 
 #: templates/peachjam/article/detail.html:58
 msgid "Take a look at this article from"
@@ -3623,64 +3567,48 @@ msgstr "Gira a sua conta %(APP_NAME)s"
 
 #: templates/peachjam/flynote/_filter_form.html:6
 #: templates/peachjam/flynote/_filter_form.html:7
-#, fuzzy
-#| msgid "Filters"
 msgid "Filter topics"
-msgstr "Filtros"
+msgstr "Filtrar tópicos"
 
 #: templates/peachjam/flynote/_list.html:22
-#, fuzzy
-#| msgid "Load more"
 msgid "Load more ..."
-msgstr "Carregar mais"
+msgstr "Carregar mais..."
 
 #: templates/peachjam/flynote/_list.html:25
-#, fuzzy
-#| msgid "No documents found."
 msgid "No matching topics found."
-msgstr "Nenhum documento encontrado."
+msgstr "Nenhum tópico correspondente encontrado."
 
 #: templates/peachjam/flynote/_popular.html:26
-#, fuzzy
-#| msgid "topics"
 msgid "All subtopics"
-msgstr "tópicos"
+msgstr "Todos os subtópicos"
 
 #: templates/peachjam/flynote/detail.html:15
 #: templates/peachjam/flynote/list.html:16
 #: templates/peachjam/judgment_list.html:26
-#, fuzzy
-#| msgid "Explore"
 msgid "Explore by topic"
-msgstr "Explorar"
+msgstr "Explore por tópico"
 
 #: templates/peachjam/flynote/detail.html:41
-#, fuzzy
-#| msgid "topics"
 msgid "Subtopics"
-msgstr "tópicos"
+msgstr "Subtópicos"
 
 #: templates/peachjam/flynote/list.html:4
 #: templates/peachjam/flynote/list.html:19
 #: templates/peachjam/judgment_list.html:28
 msgid "Explore case law by topic"
-msgstr ""
+msgstr "Explore a jurisprudência por tópico."
 
 #: templates/peachjam/flynote/list.html:21
 msgid "Browse judgments organised by legal subject. Popular topics highlight where most decisions have been delivered, or explore all available topics below."
-msgstr ""
+msgstr "Consulte as decisões judiciais organizadas por matéria jurídica. Os tópicos mais populares destacam as áreas onde a maioria das decisões foram proferidas, ou explore todos os tópicos disponíveis abaixo."
 
 #: templates/peachjam/flynote/list.html:23
-#, fuzzy
-#| msgid "document topics"
 msgid "Popular topics"
-msgstr "tópicos do documento"
+msgstr "Tópicos populares"
 
 #: templates/peachjam/flynote/list.html:27
-#, fuzzy
-#| msgid "topics"
 msgid "All topics"
-msgstr "tópicos"
+msgstr "Todos os tópicos"
 
 #: templates/peachjam/gazette_list.html:66
 #, python-format
@@ -3816,7 +3744,7 @@ msgstr "Explorar todos os tribunais"
 
 #: templates/peachjam/judgment_list.html:27
 msgid "Browse judgments organised by legal subject."
-msgstr ""
+msgstr "Consulte as decisões judiciais organizadas por matéria jurídica."
 
 #: templates/peachjam/judgment_list.html:40
 msgid "Recent judgments"
@@ -3835,10 +3763,8 @@ msgid "Volumes"
 msgstr "Volumes"
 
 #: templates/peachjam/law_report/law_report_detail.html:47
-#, fuzzy
-#| msgid "No documents found."
 msgid "No volumes found."
-msgstr "Nenhum documento encontrado."
+msgstr "Nenhum volume encontrado."
 
 #: templates/peachjam/law_report/law_report_list.html:25
 #, python-format
@@ -3852,14 +3778,12 @@ msgid "No Law reports found."
 msgstr "Nenhum relatório policial encontrado."
 
 #: templates/peachjam/law_report/law_report_volume_cases_index.html:4
-#, fuzzy
-#| msgid "case type"
 msgid "case"
-msgstr "tipo de caso"
+msgstr "caso"
 
 #: templates/peachjam/law_report/law_report_volume_cases_index.html:5
 msgid "cases"
-msgstr ""
+msgstr "casos"
 
 #: templates/peachjam/law_report/law_report_volume_cases_index.html:6
 #: templates/peachjam/layouts/document_detail.html:249 views/courts.py:52
@@ -3867,34 +3791,28 @@ msgid "Citation"
 msgstr "Citação"
 
 #: templates/peachjam/law_report/law_report_volume_detail.html:46
-#, fuzzy
-#| msgid "Explore older updates"
 msgid "Explore related indexes"
-msgstr "Explorar atualizações mais antigas"
+msgstr "Explore índices relacionados"
 
 #: templates/peachjam/law_report/law_report_volume_detail.html:54
 #: views/law_reports.py:251
-#, fuzzy
-#| msgid "Cited documents"
 msgid "Cited cases"
-msgstr "Documentos citados"
+msgstr "Casos citados"
 
 #: templates/peachjam/law_report/law_report_volume_detail.html:57
 #: views/law_reports.py:253
 msgid "Browse judgments cited by the reported judgments in this volume."
-msgstr ""
+msgstr "Consulte as decisões judiciais citadas nas decisões relatadas neste volume."
 
 #: templates/peachjam/law_report/law_report_volume_detail.html:67
 #: views/law_reports.py:265
-#, fuzzy
-#| msgid "legislation"
 msgid "Cited legislation"
-msgstr "legislação"
+msgstr "Legislação citada"
 
 #: templates/peachjam/law_report/law_report_volume_detail.html:71
 #: views/law_reports.py:267
 msgid "Browse legislation cited by the reported judgments in this volume."
-msgstr ""
+msgstr "Consulte a legislação citada nas decisões judiciais relatadas neste volume."
 
 #: templates/peachjam/layouts/articles.html:24
 msgid "Recent news"
@@ -3906,26 +3824,24 @@ msgstr "Categorias"
 
 #: templates/peachjam/layouts/detail.html:4
 #: templates/peachjam/layouts/detail.html:18
-#, fuzzy
-#| msgid "Key details"
 msgid "Details"
-msgstr "Detalhes da chave"
+msgstr "Detalhes"
 
 #: templates/peachjam/layouts/document_detail.html:51
 msgid "Share this document on WhatsApp opens in new tab"
-msgstr ""
+msgstr "Partilhe este documento no WhatsApp (abre numa nova aba)"
 
 #: templates/peachjam/layouts/document_detail.html:59
 msgid "Share this document on X opens in new tab"
-msgstr ""
+msgstr "Partilhar este documento no X (abre em novo separador)"
 
 #: templates/peachjam/layouts/document_detail.html:67
 msgid "Share this document on Facebook opens in new tab"
-msgstr ""
+msgstr "Partilhar este documento no Facebook (abre em novo separador)"
 
 #: templates/peachjam/layouts/document_detail.html:75
 msgid "Share this document on LinkedIn opens in new tab"
-msgstr ""
+msgstr "Partilhar este documento no LinkedIn (abre num novo separador)"
 
 #: templates/peachjam/layouts/document_detail.html:80
 #: templates/peachjam/layouts/document_detail.html:84
@@ -3934,7 +3850,7 @@ msgstr "Dê uma olhada neste documento de"
 
 #: templates/peachjam/layouts/document_detail.html:85
 msgid "Share this document by email"
-msgstr ""
+msgstr "Partilhe este documento por e-mail"
 
 #: templates/peachjam/layouts/document_detail.html:110
 msgid "Document detail"
@@ -4036,18 +3952,14 @@ msgstr "%(place)s Contas"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:11
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:11
-#, fuzzy
-#| msgid "provision eid"
 msgid "Show provision details"
-msgstr "provisão eid"
+msgstr "Mostrar detalhes da provisão"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid ""
-"\n"
+msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr ""
-"\n"
+msgstr "\n"
 "      Nota: esta disposição tem algumas subdisposições que já entraram em vigor.\n"
 "    "
 
@@ -4056,10 +3968,9 @@ msgid "Legislation provisions that have not yet come into force."
 msgstr "Disposições legislativas que ainda não entraram em vigor."
 
 #: templates/peachjam/provision_enrichment/_uncommenced_table.html:41
-#, fuzzy, python-format
-#| msgid "uncommenced provisions"
+#, python-format
 msgid "Show uncommenced provisions for %(title)s"
-msgstr "disposições não iniciadas"
+msgstr "Mostrar disposições não iniciadas para %(title)s"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:22
 #: views/legislation.py:580 views/legislation.py:584
@@ -4137,16 +4048,12 @@ msgid "To save a document you need to be logged in"
 msgstr "Para salvar um documento você precisa estar logado"
 
 #: templates/peachjam/saved_document/_folder_list_item.html:21
-#, fuzzy
-#| msgid "Rename folder"
 msgid "Remove from folder"
-msgstr "Renomear pasta"
+msgstr "Remover da pasta"
 
 #: templates/peachjam/saved_document/_folder_list_item.html:24
-#, fuzzy
-#| msgid "Are you sure you want to remove this document?"
 msgid "Are you sure you want to remove this document from this folder?"
-msgstr "Tem certeza de que deseja remover este documento?"
+msgstr "Tem a certeza que pretende remover este documento desta pasta?"
 
 #: templates/peachjam/saved_document/_folder_list_item.html:36
 #, python-format
@@ -4253,42 +4160,34 @@ msgid "Saved Documents"
 msgstr "Documentos salvos"
 
 #: templates/peachjam/taxonomy_restricted.html:7
-#, fuzzy
-#| msgid "restricted"
 msgid "Access restricted"
-msgstr "restrito"
+msgstr "Acesso restrito"
 
 #: templates/peachjam/taxonomy_restricted.html:8
-#, fuzzy
-#| msgid "This document is restricted and is only visible to some users."
 msgid "This collection is restricted and is not publicly available."
-msgstr "Este documento é restrito e apenas visível para alguns utilizadores."
+msgstr "Esta coleção é restrita e não está disponível ao público."
 
 #: templates/peachjam/taxonomy_restricted.html:11
-#, fuzzy
-#| msgid "You don't have permission to view this document."
 msgid "Your account does not currently have permission to view this collection."
-msgstr "Você não tem permissão para visualizar este documento."
+msgstr "A sua conta não tem permissão para visualizar esta coleção."
 
 #: templates/peachjam/taxonomy_restricted.html:13
 #, python-format
 msgid "To request institutional access, please contact us at <a href=\"mailto:%(email)s\">%(email)s</a>."
-msgstr ""
+msgstr "Para solicitar o acesso institucional, contacte-nos através do endereço <a href=\"mailto:%(email)s\">%(email)s</a>."
 
 #: templates/peachjam/taxonomy_restricted.html:19
 msgid "If your institution has access to this collection, sign in to your account to continue."
-msgstr ""
+msgstr "Se a sua instituição tiver acesso a esta coleção, inicie sessão na sua conta para continuar."
 
 #: templates/peachjam/taxonomy_restricted.html:21
-#, fuzzy
-#| msgid "Sign up"
 msgid "Sign in"
-msgstr "Inscrever-se"
+msgstr "Entrar"
 
 #: templates/peachjam/taxonomy_restricted.html:24
 #, python-format
 msgid "Don't have an account? To request institutional access, contact us at <a href=\"mailto:%(email)s\">%(email)s</a>."
-msgstr ""
+msgstr "Não tem conta? Para solicitar o acesso institucional, contacte-nos através do endereço <a href=\"mailto:%(email)s\">%(email)s</a>."
 
 #: templates/peachjam/terms_of_use.html:4
 #: templates/peachjam/terms_of_use.html:29
@@ -4401,30 +4300,24 @@ msgstr "Se não concordar, pode <a href=\"%(logout_url)s\">sair</a>."
 #: templates/user_account/delete_account.html:9
 #: templates/user_account/delete_account.html:45
 #: templates/user_account/home.html:84 templates/user_account/home.html:86
-#, fuzzy
-#| msgid "My account"
 msgid "Delete account"
-msgstr "Minha conta"
+msgstr "Apagar conta"
 
 #: templates/user_account/delete_account.html:13
 msgid "You have a paid subscription. Deleting your account will remove your billing information and active subscription access."
-msgstr ""
+msgstr "Possui uma assinatura paga. Ao eliminar a sua conta, as suas informações de faturação e o acesso à sua subscrição ativa serão removidos."
 
 #: templates/user_account/delete_account.html:16
-#, fuzzy
-#| msgid "Don't have an account?"
 msgid "You have a free account."
-msgstr "Não tem conta?"
+msgstr "Tem uma conta gratuita."
 
 #: templates/user_account/delete_account.html:20
 msgid "This action is permanent. Your annotations, follows, saved searches and saved documents will be deleted, and your personal information will be removed from your account."
-msgstr ""
+msgstr "Esta ação é permanente. As suas notas, seguidores, pesquisas guardadas e documentos guardados serão eliminados, e as suas informações pessoais serão removidas da sua conta."
 
 #: templates/user_account/delete_account.html:44
-#, fuzzy
-#| msgid "Are you sure you want to delete this annotation?"
 msgid "Are you sure you want to delete your account? This action cannot be undone."
-msgstr "Tem certeza de que deseja excluir esta anotação?"
+msgstr "Tem a certeza de que pretende eliminar a sua conta? Esta ação não pode ser anulada."
 
 #: templates/user_account/edit.html:4 templates/user_account/home.html:4
 msgid "My Account"
@@ -4472,7 +4365,7 @@ msgstr "Você não pertence a nenhum grupo."
 
 #: templates/user_account/home.html:85
 msgid "Permanently delete your account and remove your personal information."
-msgstr ""
+msgstr "Apague permanentemente a sua conta e remova as suas informações pessoais."
 
 #: views/about.py:28
 msgid "Your message has been sent. Thank you!"
@@ -4483,10 +4376,8 @@ msgid "Your details have been updated."
 msgstr "Os seus dados foram atualizados."
 
 #: views/accounts.py:210
-#, fuzzy
-#| msgid "Your password has been reset."
 msgid "Your account has been deleted."
-msgstr "Sua senha foi redefinida."
+msgstr "A sua conta foi excluída."
 
 #: views/anon.py:83
 msgid "Only judgments with HTML content can be anonymised."
@@ -4553,10 +4444,8 @@ msgid "Supplement"
 msgstr "Suplemento"
 
 #: views/journals.py:101
-#, fuzzy
-#| msgid "Journal articles"
 msgid "Journal article"
-msgstr "Artigos de periódicos"
+msgstr "Artigo de periódico"
 
 #: views/journals.py:162
 msgid "Article"
@@ -4567,28 +4456,23 @@ msgid "This judgment has been anonymised to protect personal information in comp
 msgstr "Este julgamento foi tornado anônimo para proteger informações pessoais em conformidade com a lei."
 
 #: views/law_reports.py:102
-#, fuzzy
-#| msgid "Related judgments"
 msgid "Reported judgments"
-msgstr "Julgamentos relacionados"
+msgstr "Julgamentos relatados"
 
 #: views/law_reports.py:103
 msgid "Browse the judgments reported in this law report volume."
-msgstr ""
+msgstr "Consulte as decisões judiciais relatadas neste volume de relatórios jurídicos."
 
 #: views/law_reports.py:120
-#, fuzzy
-#| msgid "created by"
 msgid "Cited by"
-msgstr "criado por"
+msgstr "Citado por"
 
 #: views/law_reports.py:126
-#, fuzzy, python-format
-#| msgid "Recent judgments"
+#, python-format
 msgid "Cited by %(count)s judgment"
 msgid_plural "Cited by %(count)s judgments"
-msgstr[0] "Julgamentos recentes"
-msgstr[1] "Julgamentos recentes"
+msgstr[0] "Citado por %(count)s acórdão"
+msgstr[1] "Citado por %(count)s acórdãos"
 
 #: views/legislation.py:210
 #, python-format
@@ -4653,185 +4537,3 @@ msgstr "Esta versão está numa data futura."
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
 
-#~ msgid "Arbitration Hub"
-#~ msgstr "Centro de Arbitragem"
-
-#~ msgid "Arbitration Awards"
-#~ msgstr "Decisões arbitrais"
-
-#~ msgid "acronym"
-#~ msgstr "acrónimo"
-
-#~ msgid "headquarters city"
-#~ msgstr "cidade sede"
-
-#~ msgid "internationally recognized"
-#~ msgstr "reconhecido internacionalmente"
-
-#~ msgid "arbitral institution"
-#~ msgstr "instituição arbitral"
-
-#~ msgid "arbitral institutions"
-#~ msgstr "instituições arbitrais"
-
-#~ msgid "city"
-#~ msgstr "cidade"
-
-#~ msgid "New York Convention signatory"
-#~ msgstr "signatário da Convenção de Nova Iorque"
-
-#~ msgid "Can awards be enforced in 170+ countries."
-#~ msgstr "As sentenças arbitrais podem ser executadas em mais de 170 países?"
-
-#~ msgid "arbitration seat"
-#~ msgstr "assento de arbitragem"
-
-#~ msgid "arbitration seats"
-#~ msgstr "assentos de arbitragem"
-
-#~ msgid "Investor State"
-#~ msgstr "Estado investidor"
-
-#~ msgid "Commercial Arbitration"
-#~ msgstr "Arbitragem Comercial"
-
-#~ msgid "International Investor Agreement"
-#~ msgstr "Acordo Internacional de Investidores"
-
-#~ msgid "Final Award"
-#~ msgstr "Prémio Final"
-
-#~ msgid "Interim Award"
-#~ msgstr "Prémio Interino"
-
-#~ msgid "Partial Award"
-#~ msgstr "Prémio Parcial"
-
-#~ msgid "Domestic"
-#~ msgstr "Doméstico"
-
-#~ msgid "International"
-#~ msgstr "Internacional"
-
-#~ msgid "In Favour of Claimant"
-#~ msgstr "A favor do requerente"
-
-#~ msgid "In Favour of Respondent"
-#~ msgstr "A favor do Recorrido"
-
-#~ msgid "institution"
-#~ msgstr "instituição"
-
-#~ msgid "seat"
-#~ msgstr "lugar"
-
-#~ msgid "applicable law"
-#~ msgstr "lei aplicável"
-
-#~ msgid "claimants country of origin"
-#~ msgstr "país de origem dos requerentes"
-
-#~ msgid "respondents country of origin"
-#~ msgstr "país de origem dos inquiridos"
-
-#~ msgid "rules of arbitration"
-#~ msgstr "regras de arbitragem"
-
-#~ msgid "award type"
-#~ msgstr "tipo de prémio"
-
-#~ msgid "nature of proceedings"
-#~ msgstr "natureza dos procedimentos"
-
-#~ msgid "arbitration award"
-#~ msgstr "laudo arbitral"
-
-#~ msgid "arbitration awards"
-#~ msgstr "laudos arbitrais"
-
-#~ msgid "Subsidiary legislation"
-#~ msgstr "Legislação subsidiária"
-
-#~ msgid "Sort by"
-#~ msgstr "Classificar por"
-
-#~ msgid "Arbitration"
-#~ msgstr "Arbitragem"
-
-#~ msgid "Arbitral Institutions"
-#~ msgstr "Instituições Arbitrais"
-
-#~ msgid "Browse arbitration awards"
-#~ msgstr "Consulte os laudos arbitrais."
-
-#, python-format
-#~ msgid "%(counter)s Institution"
-#~ msgid_plural "%(counter)s Institutions"
-#~ msgstr[0] "%(counter)s Instituição"
-#~ msgstr[1] "%(counter)s Instituições"
-
-#~ msgid "Internationally recognized"
-#~ msgstr "Reconhecido internacionalmente"
-
-#~ msgid "No arbitral institutions found."
-#~ msgstr "Nenhuma instituição arbitral encontrada."
-
-#~ msgid "Award date"
-#~ msgstr "Data de entrega do prémio"
-
-#~ msgid "Institution"
-#~ msgstr "Instituição"
-
-#~ msgid "Seat of arbitration"
-#~ msgstr "Sede da arbitragem"
-
-#~ msgid "Rules of arbitration"
-#~ msgstr "Regras de arbitragem"
-
-#~ msgid "Case type"
-#~ msgstr "Tipo de caso"
-
-#~ msgid "Award type"
-#~ msgstr "Tipo de prémio"
-
-#~ msgid "Nature of proceedings"
-#~ msgstr "Natureza do processo"
-
-#~ msgid "Claimants country of origin"
-#~ msgstr "País de origem do requerente"
-
-#~ msgid "Respondents country of origin"
-#~ msgstr "País de origem dos inquiridos"
-
-#~ msgid "Applicable law"
-#~ msgstr "Lei aplicável"
-
-#~ msgid "Browse arbitration awards and arbitral institutions."
-#~ msgstr "Consulte os relatórios arbitrais e as instituições de arbitragem."
-
-#~ msgid "Browse arbitration decisions, awards, and related documentation from various jurisdictions and institutions."
-#~ msgstr "Consulte decisões arbitrais, relatórios e documentos relacionados de diversas jurisdições e instituições."
-
-#~ msgid "Awards"
-#~ msgstr "Prémios"
-
-#~ msgid "Decisions"
-#~ msgstr "Decisões"
-
-#~ msgid "Arbitration Institutions"
-#~ msgstr "Instituições de Arbitragem"
-
-#~ msgid "Explore profiles, rules, and documentation from international and domestic arbitration institutions."
-#~ msgstr "Explore perfis, regras e documentação de instituições de arbitragem internacionais e nacionais."
-
-#~ msgid "Profiles"
-#~ msgstr "Perfis"
-
-#~ msgid "Rules"
-#~ msgstr "Regras"
-
-#~ msgid "New updates for documents you have saved"
-#~ msgstr "Novas atualizações para os documentos que guardou."
-
-#~ msgid "New overturn for judgments you have saved"
-#~ msgstr "Nova anulação de decisões judiciais que tinha salvo."
