@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 10:35+0300\n"
+"POT-Creation-Date: 2026-05-13 14:19+0200\n"
 "PO-Revision-Date: 2026-02-27 08:52\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,79 +17,112 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_subs/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 267\n"
 
+#: admin.py:42
+msgid "Save the product first, then configure selectable offerings."
+msgstr ""
+
+#: admin.py:50
+#, python-format
+msgid "Selectable offerings for '%(product)s' must belong to that product."
+msgstr ""
+
 #: admin.py:89
+#, python-format
+msgid "Key products must have at least one selectable offering configured: %(products)s"
+msgstr ""
+
+#: admin.py:164
 msgid "Subscription activated."
 msgstr "Usajili umewezeshwa."
 
-#: admin.py:91
+#: admin.py:166
 msgid "Subscription cannot be activated."
 msgstr "Usajili hauwezi kuwezeshwa."
 
-#: admin.py:101
+#: admin.py:176
 msgid "Subscription cancelled."
 msgstr "Usajili umeghairiwa."
 
-#: admin.py:103
+#: admin.py:178
 msgid "Subscription cannot be cancelled."
 msgstr "Usajili hauwezi kughairiwa."
 
-#: admin.py:180
+#: admin.py:257
 msgid "View"
 msgstr "Tazama"
 
-#: models.py:181
-msgid "Monthly"
-msgstr "Kila mwezi"
+#: models.py:30
+#, python-format
+msgid "Product '%(product)s' has more than one selectable %(period)s offering."
+msgstr ""
 
-#: models.py:182
+#: models.py:46
+#, python-format
+msgid "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly (%(monthly)s)."
+msgstr ""
+
+#: models.py:76
+#, python-format
+msgid "Selectable %(period)s pricing must increase with tier: '%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
+msgstr ""
+
+#: models.py:118
+msgid "Offerings explicitly available to users for this product (for example monthly and annual)."
+msgstr ""
+
+#: models.py:257
 msgid "Annually"
 msgstr "Kila mwaka"
 
-#: models.py:192
+#: models.py:258
+msgid "Monthly"
+msgstr "Kila mwezi"
+
+#: models.py:268
 msgid "month"
 msgstr "mwezi"
 
-#: models.py:193
+#: models.py:269
 msgid "year"
 msgstr "mwaka"
 
-#: models.py:213
+#: models.py:289 models.py:303
 msgid "FREE"
 msgstr "BILA MALIPO"
 
-#: models.py:286
+#: models.py:376
 msgid "Pending"
 msgstr "Inasubiri"
 
-#: models.py:287
+#: models.py:377
 msgid "Active"
 msgstr "Inayotumika"
 
-#: models.py:288
+#: models.py:378
 msgid "Closed"
 msgstr "Imefungwa"
 
-#: models.py:562
+#: models.py:655
 msgid "Default product offering"
 msgstr "Utoaji wa bidhaa chaguomsingi"
 
-#: models.py:567
+#: models.py:660
 msgid "These products are highlighted in the product listing."
 msgstr "Bidhaa hizi zimeangaziwa kwenye orodha ya bidhaa."
 
-#: models.py:575
+#: models.py:668
 msgid "Trial product offering"
 msgstr "Sadaka ya bidhaa ya majaribio"
 
-#: models.py:576
+#: models.py:669
 msgid "If set, this product offering is used for trials."
 msgstr "Ikiwa imewekwa, toleo la bidhaa hii linatumika kwa majaribio."
 
-#: models.py:580
+#: models.py:673
 msgid "Trial duration (days)"
 msgstr "Muda wa majaribio (siku)"
 
-#: models.py:581
+#: models.py:674
 msgid "Number of days for the trial period."
 msgstr "Idadi ya siku kwa kipindi cha majaribio."
 
@@ -133,17 +166,46 @@ msgstr "Ghairi mabadiliko"
 msgid "Active since"
 msgstr "Imetumika tangu"
 
-#: templates/peachjam_subs/_subscription_required.html:11
-#, python-format
-msgid "This feature is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
-msgstr "Kipengele hiki kinapatikana kwa waliojisajili pekee. <a href=\"%(login_url)s\">Ingia</a> au <a href=\"%(signup_url)s\">Jisajili</a> na ujiandikishe kwa <a href=\"%(upsell_url)s\">%(lowest_product)s</a> ili kufungua ufikiaji."
+#: templates/peachjam_subs/_subscription_required.html:12
+#: templates/peachjam_subs/_subscription_required.html:20
+#, fuzzy
+#| msgid "Create your free account"
+msgid "Create a free account"
+msgstr "Fungua akaunti yako ya bure"
 
-#: templates/peachjam_subs/_subscription_required.html:24
-#, python-format
-msgid "Your current subscription doesn’t include this feature. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
-msgstr "Usajili wako wa sasa haujumuishi kipengele hiki. Tafadhali boresha hadi <a href=\"%(upsell_url)s\">%(lowest_product)s</a> ili kufungua ufikiaji."
+#: templates/peachjam_subs/_subscription_required.html:14
+#: templates/peachjam_subs/_subscription_required.html:34
+msgid "Unlock this feature"
+msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:33
+#: templates/peachjam_subs/_subscription_required.html:17
+msgid "Sign up to save documents, read summaries and access more features."
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:22
+msgid "Start"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:27
+#, fuzzy
+#| msgid "Why create an acocunt?"
+msgid "Already have an account?"
+msgstr "Kwa nini kuunda akaunti?"
+
+#: templates/peachjam_subs/_subscription_required.html:28
+msgid "Log in"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:36
+#, python-format
+msgid "This feature is available with %(lowest_product)s."
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:40
+msgid "Upgrade to"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:48
 msgid "This feature is not currently available."
 msgstr "Kipengele hiki hakipatikani kwa sasa."
 
@@ -232,7 +294,14 @@ msgstr "Fungua akaunti yako ya bure"
 msgid "Subscription"
 msgstr "Usajili"
 
-#: views.py:29
+#: views.py:30
 msgid "Your pending subscription change has been cancelled."
 msgstr "Mabadiliko ya usajili unaosubiri kutekelezwa yameghairiwa."
 
+#, python-format
+#~ msgid "This feature is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
+#~ msgstr "Kipengele hiki kinapatikana kwa waliojisajili pekee. <a href=\"%(login_url)s\">Ingia</a> au <a href=\"%(signup_url)s\">Jisajili</a> na ujiandikishe kwa <a href=\"%(upsell_url)s\">%(lowest_product)s</a> ili kufungua ufikiaji."
+
+#, python-format
+#~ msgid "Your current subscription doesn’t include this feature. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
+#~ msgstr "Usajili wako wa sasa haujumuishi kipengele hiki. Tafadhali boresha hadi <a href=\"%(upsell_url)s\">%(lowest_product)s</a> ili kufungua ufikiaji."
