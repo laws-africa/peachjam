@@ -2556,3 +2556,121 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         output = out.getvalue()
 
         self.assertIn("Last pk processed:", output)
+
+
+class CleanFlynoteChildPrefixesCommandTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.country = Country.objects.first()
+        self.court = Court.objects.first()
+        self.language = Language.objects.first()
+
+    def make_judgment(self, case_name):
+        return Judgment.objects.create(
+            case_name=case_name,
+            jurisdiction=self.country,
+            court=self.court,
+            date=datetime.date(2025, 1, 1),
+            language=self.language,
+        )
+
+    def link_flynote(self, judgment, flynote):
+        JudgmentFlynote.objects.create(document=judgment, flynote=flynote)
+        judgment.serialise_flynote_tree()
+        judgment.save(update_fields=["flynote", "flynote_raw"])
+        judgment.refresh_from_db()
+
+    def test_dry_run_reports_changes_without_writing(self):
+        admin = Flynote.add_root(name="Administrative law")
+        child = admin.add_child(name="Administrative/constitutional duty")
+        judgment = self.make_judgment("Administrative case")
+        self.link_flynote(judgment, child)
+
+        out = StringIO()
+        call_command("clean_flynote_child_prefixes", stdout=out, stderr=StringIO())
+
+        child.refresh_from_db()
+        judgment.refresh_from_db()
+
+        self.assertEqual(child.name, "Administrative/constitutional duty")
+        self.assertEqual(
+            judgment.flynote,
+            "Administrative law — Administrative/constitutional duty",
+        )
+        self.assertIn("Running in dry-run mode", out.getvalue())
+        self.assertIn("RENAME", out.getvalue())
+        self.assertIn("dry_run=True", out.getvalue())
+
+    def test_apply_renames_direct_children_and_reserialises_judgments(self):
+        admin = Flynote.add_root(name="Administrative law")
+        child = admin.add_child(name="Administrative/constitutional duty")
+        grandchild = child.add_child(name="Administrative/keep me")
+        direct_judgment = self.make_judgment("Administrative child case")
+        deep_judgment = self.make_judgment("Administrative grandchild case")
+        self.link_flynote(direct_judgment, child)
+        self.link_flynote(deep_judgment, grandchild)
+
+        out = StringIO()
+        call_command(
+            "clean_flynote_child_prefixes",
+            apply=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        child.refresh_from_db()
+        grandchild.refresh_from_db()
+        direct_judgment.refresh_from_db()
+        deep_judgment.refresh_from_db()
+
+        self.assertEqual(child.name, "constitutional duty")
+        self.assertEqual(grandchild.name, "Administrative/keep me")
+        self.assertEqual(
+            direct_judgment.flynote,
+            "Administrative law — constitutional duty",
+        )
+        self.assertEqual(
+            deep_judgment.flynote,
+            "Administrative law — constitutional duty — Administrative/keep me",
+        )
+        self.assertIn("judgments_updated=2", out.getvalue())
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=admin).count,
+            2,
+        )
+
+    def test_apply_merges_duplicate_siblings_after_prefix_strip(self):
+        root = Flynote.add_root(name="Defamation")
+        target = root.add_child(name="communications")
+        source = root.add_child(name="Defamation/communications")
+        source_judgment = self.make_judgment("Source defamation case")
+        target_judgment = self.make_judgment("Target defamation case")
+        self.link_flynote(source_judgment, source)
+        self.link_flynote(target_judgment, target)
+
+        out = StringIO()
+        call_command(
+            "clean_flynote_child_prefixes",
+            apply=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        source_judgment.refresh_from_db()
+        target_judgment.refresh_from_db()
+
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=source_judgment).flynote_id,
+            target.pk,
+        )
+        self.assertEqual(
+            source_judgment.flynote,
+            "Defamation — communications",
+        )
+        self.assertEqual(
+            target_judgment.flynote,
+            "Defamation — communications",
+        )
+        self.assertIn("MERGE", out.getvalue())
