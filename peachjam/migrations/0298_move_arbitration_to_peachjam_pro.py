@@ -2,11 +2,11 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-    """Remove arbitration models from peachjam's migration state.
+    """Move arbitration models from peachjam to peachjam-pro (arbitration_hub).
 
-    Tables are kept in the database — ownership moves to peachjam-pro,
-    which must supply a matching SeparateDatabaseAndState migration that
-    adds the models to its own state without recreating the tables.
+    Drops the tables here; peachjam-pro's 0002 migration recreates them.
+    Both apps share the same DB so the net result is identical tables,
+    just tracked under arbitration_hub's migration state.
     """
 
     dependencies = [
@@ -41,6 +41,11 @@ class Migration(migrations.Migration):
                     ),
                 ),
             ],
-            database_operations=[],
+            database_operations=[
+                # Drop in FK-safe order: award first (references institution + seat)
+                migrations.DeleteModel("ArbitrationAward"),
+                migrations.DeleteModel("ArbitrationSeat"),
+                migrations.DeleteModel("ArbitralInstitution"),
+            ],
         ),
     ]
