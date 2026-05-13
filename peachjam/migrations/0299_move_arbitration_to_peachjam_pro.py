@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     """
 
     dependencies = [
-        ("peachjam", "0297_alter_offencecategory_options_remove_flynote_slug_and_more"),
+        ("peachjam", "0298_remove_judgmentoffence_judgment_and_more"),
     ]
 
     operations = [
