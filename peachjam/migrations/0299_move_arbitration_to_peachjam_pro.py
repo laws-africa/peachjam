@@ -42,10 +42,19 @@ class Migration(migrations.Migration):
                 ),
             ],
             database_operations=[
-                # Drop in FK-safe order: award first (references institution + seat)
-                migrations.DeleteModel("ArbitrationAward"),
-                migrations.DeleteModel("ArbitrationSeat"),
-                migrations.DeleteModel("ArbitralInstitution"),
+                # IF EXISTS: apps like gazettes never had these tables
+                migrations.RunSQL(
+                    "DROP TABLE IF EXISTS peachjam_arbitrationaward CASCADE;",
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
+                migrations.RunSQL(
+                    "DROP TABLE IF EXISTS peachjam_arbitrationseat CASCADE;",
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
+                migrations.RunSQL(
+                    "DROP TABLE IF EXISTS peachjam_arbitralinstitution CASCADE;",
+                    reverse_sql=migrations.RunSQL.noop,
+                ),
             ],
         ),
     ]
