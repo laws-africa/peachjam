@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-05-13 12:28\n"
+"PO-Revision-Date: 2026-05-13 13:01\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -2349,7 +2349,7 @@ msgstr "Annuler"
 
 #: templates/account/onboard.html:4 templates/account/onboard.html:8
 msgid "Welcome"
-msgstr "Accueillir"
+msgstr "Bienvenue"
 
 #: templates/account/onboard.html:9
 msgid "Please tell us a bit about yourself to get started."
