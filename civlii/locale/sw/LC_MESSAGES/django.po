@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-13 12:28\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -78,16 +78,12 @@ msgid "CNDJ is a member of the community of African LIIs and of the Free Access 
 msgstr "CNDJ ni mwanachama wa jumuiya ya LII za Kiafrika na Ufikiaji Huru wa Vuguvugu la Sheria."
 
 #: templates/peachjam/about.html:11
-#, fuzzy
-#| msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII<span class=\"visually-hidden\">opens in new tab</span></a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic<span class=\"visually-hidden\">opens in new tab</span> Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> ni sehemu ya Kitengo <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">cha</a> cha Utawala na Haki za Kidemokrasia katika Kitivo cha Sheria, Chuo Kikuu cha Cape Town (UCT), Afrika Kusini. AfricanLII husaidia watu binafsi, mashirika, na serikali kujenga na kudumisha upatikanaji endelevu wa bila malipo wa tovuti za sheria, na kufikia watu wa Afrika na kwingineko."
+msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII<span class=\"visually-hidden\">inafunguliwa kwenye kichupo kipya</span></a> ni sehemu ya <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Kidemokrasia<span class=\"visually-hidden\">inafunguliwa kwenye kichupo kipya</span> Kitengo cha Utawala na Haki</a> katika Kitivo cha Sheria, Chuo Kikuu cha Cape Town (UCT), Afrika Kusini. AfricanLII huwasaidia watu binafsi, mashirika, na serikali kujenga na kudumisha ufikiaji endelevu wa bure wa milango ya sheria, na kuwafikia watu wa Afrika na kwingineko."
 
 #: templates/peachjam/about.html:21
-#, fuzzy
-#| msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa<span class=\"visually-hidden\">opens in new tab</span></a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
-msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> ni shirika lisilo la faida la Afrika Kusini ambalo huweka kidigitali taarifa za kisheria za Kiafrika kwa matumizi ya umma. Ufikiaji wazi wa taarifa za kisheria za kidijitali za Kiafrika husaidia jamii kustawi, biashara kufanikiwa, na maafisa wa mahakama na watumishi wa umma kutoa huduma kwa ufanisi na kwa ufanisi."
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa<span class=\"visually-hidden\">inafunguliwa kwenye kichupo kipya</span></a> ni shirika lisilo la faida la Afrika Kusini ambalo hubadilisha taarifa za kisheria za Kiafrika kuwa za kidijitali kwa matumizi ya umma. Ufikiaji wazi wa taarifa za kisheria za Kiafrika husaidia jamii kustawi, biashara kufanikiwa, na maafisa wa mahakama na watumishi wa umma kutoa huduma kwa ufanisi na kwa ufanisi."
 
 #: templates/peachjam/about.html:28
 msgid "Contact us"
@@ -96,3 +92,4 @@ msgstr "Wasiliana nasi"
 #: templates/peachjam/about.html:30
 msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr ""
+

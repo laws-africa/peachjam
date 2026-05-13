@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-13 12:28\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -19,17 +19,17 @@ msgstr ""
 
 #: admin.py:42
 msgid "Save the product first, then configure selectable offerings."
-msgstr ""
+msgstr "Primeiro, guarde o produto e, em seguida, configure as ofertas selecionáveis."
 
 #: admin.py:50
 #, python-format
 msgid "Selectable offerings for '%(product)s' must belong to that product."
-msgstr ""
+msgstr "As ofertas selecionáveis para '%(product)s' devem pertencer a esse produto."
 
 #: admin.py:89
 #, python-format
 msgid "Key products must have at least one selectable offering configured: %(products)s"
-msgstr ""
+msgstr "Os produtos principais devem ter pelo menos uma oferta selecionável configurada: %(products)s"
 
 #: admin.py:164
 msgid "Subscription activated."
@@ -54,21 +54,21 @@ msgstr "Ver"
 #: models.py:30
 #, python-format
 msgid "Product '%(product)s' has more than one selectable %(period)s offering."
-msgstr ""
+msgstr "O produto '%(product)s' tem mais do que uma oferta selecionável %(period)s."
 
 #: models.py:46
 #, python-format
 msgid "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly (%(monthly)s)."
-msgstr ""
+msgstr "O preço anual seleccionável do produto '%(product)s' (%(annual)s) deve ser superior ao preço mensal (%(monthly)s)."
 
 #: models.py:76
 #, python-format
 msgid "Selectable %(period)s pricing must increase with tier: '%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
-msgstr ""
+msgstr "O preço seleccionável %(period)s deve aumentar com o nível: '%(product)s' (%(price)s) não é superior a '%(prev_product)s' (%(prev_price)s)."
 
 #: models.py:118
 msgid "Offerings explicitly available to users for this product (for example monthly and annual)."
-msgstr ""
+msgstr "Ofertas explicitamente disponíveis para os utilizadores deste produto (por exemplo, mensais e anuais)."
 
 #: models.py:257
 msgid "Annually"
@@ -168,42 +168,38 @@ msgstr "Ativo desde"
 
 #: templates/peachjam_subs/_subscription_required.html:12
 #: templates/peachjam_subs/_subscription_required.html:20
-#, fuzzy
-#| msgid "Create your free account"
 msgid "Create a free account"
-msgstr "Crie a sua conta gratuita"
+msgstr "Crie uma conta gratuita"
 
 #: templates/peachjam_subs/_subscription_required.html:14
 #: templates/peachjam_subs/_subscription_required.html:34
 msgid "Unlock this feature"
-msgstr ""
+msgstr "Desbloqueie esta funcionalidade"
 
 #: templates/peachjam_subs/_subscription_required.html:17
 msgid "Sign up to save documents, read summaries and access more features."
-msgstr ""
+msgstr "Registe-se para guardar documentos, ler resumos e aceder a mais recursos."
 
 #: templates/peachjam_subs/_subscription_required.html:22
 msgid "Start"
-msgstr ""
+msgstr "Iniciar"
 
 #: templates/peachjam_subs/_subscription_required.html:27
-#, fuzzy
-#| msgid "Why create an acocunt?"
 msgid "Already have an account?"
-msgstr "Porquê criar uma conta?"
+msgstr "Já tem uma conta?"
 
 #: templates/peachjam_subs/_subscription_required.html:28
 msgid "Log in"
-msgstr ""
+msgstr "Efetuar Login"
 
 #: templates/peachjam_subs/_subscription_required.html:36
 #, python-format
 msgid "This feature is available with %(lowest_product)s."
-msgstr ""
+msgstr "Esta funcionalidade está disponível com %(lowest_product)s."
 
 #: templates/peachjam_subs/_subscription_required.html:40
 msgid "Upgrade to"
-msgstr ""
+msgstr "Atualize para"
 
 #: templates/peachjam_subs/_subscription_required.html:48
 msgid "This feature is not currently available."
@@ -298,10 +294,3 @@ msgstr "Subscrição"
 msgid "Your pending subscription change has been cancelled."
 msgstr "A sua alteração de subscrição pendente foi cancelada."
 
-#, python-format
-#~ msgid "This feature is available only to subscribers. <a href=\"%(login_url)s\">Log in</a> or <a href=\"%(signup_url)s\">Sign up</a> and subscribe to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
-#~ msgstr "Esta funcionalidade está disponível apenas para assinantes. <a href=\"%(login_url)s\">Faça login</a> ou <a href=\"%(signup_url)s\">Registe-se</a> e subscreva <a href=\"%(upsell_url)s\">%(lowest_product)s</a> para desbloquear o acesso."
-
-#, python-format
-#~ msgid "Your current subscription doesn’t include this feature. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock access."
-#~ msgstr "A sua assinatura atual não inclui esta funcionalidade. Atualize para <a href=\"%(upsell_url)s\">%(lowest_product)s</a> para desbloquear o acesso."

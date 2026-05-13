@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-13 13:01\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -31,19 +31,19 @@ msgstr "Bem-vindo ao Instituto de Informação Jurídica do Senegal"
 
 #: templates/liiweb/home.html:7
 msgid "SenLII digitises and publishes the law of Senegal for free access to all, in collaboration with the Ordre des Avocats du Sénégal."
-msgstr ""
+msgstr "A SenLII digitaliza e publica a legislação do Senegal, disponibilizando-a gratuitamente a todos, em colaboração com a Ordem dos Advogados do Senegal."
 
 #: templates/liiweb/home.html:8
 msgid "SenLII is a non-profit platform that provides digital access to legislation, case law, and other legal materials from Senegal. It promotes access to legal information as a fundamental component of the rule of law."
-msgstr ""
+msgstr "A SenLII é uma plataforma sem fins lucrativos que oferece acesso digital à legislação, jurisprudência e outros materiais jurídicos do Senegal. Promove o acesso à informação jurídica como componente fundamental do Estado de Direito."
 
 #: templates/liiweb/home.html:9
 msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
-msgstr ""
+msgstr "A plataforma foi desenvolvida pela Laws.Africa e pela AfricanLII, com o apoio financeiro da GIZ."
 
 #: templates/peachjam/_footer.html:4
 msgid "Our partners"
-msgstr ""
+msgstr "Nossos parceiros"
 
 #: templates/peachjam/_header.html:12
 msgid "Judgments"
@@ -67,55 +67,53 @@ msgstr "Socorro"
 
 #: templates/peachjam/about.html:5
 msgid "SenLII (Senegal Legal Information Institute) is a free access to law platform dedicated to making Senegalese legislation and case law freely available to everyone."
-msgstr ""
+msgstr "O SenLII (Instituto de Informação Jurídica do Senegal) é uma plataforma de acesso gratuito à legislação dedicada a disponibilizar a legislação e a jurisprudência senegalesas a todos."
 
 #: templates/peachjam/about.html:10
 msgid "The platform was developed for the Ordre des Avocats du Sénégal by Laws.Africa and AfricanLII, with financial support from the Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ)."
-msgstr ""
+msgstr "A plataforma foi desenvolvida para a Ordre des Avocats du Sénégal pela Laws.Africa e pela AfricanLII, com o apoio financeiro da Deutsche Gesellschaft für Internationale Zusammenarbeit (GIZ)."
 
 #: templates/peachjam/about.html:15
 msgid "Access to the law is a fundamental right. SenLII is grounded in the principle that every citizen, legal professional, public institution, and business should be able to access and understand the laws that govern Senegal."
-msgstr ""
+msgstr "O acesso à justiça é um direito fundamental. A SenLII baseia-se no princípio de que cada cidadão, profissional do direito, instituição pública e empresa deve ter acesso e ser capaz de compreender as leis que regem o Senegal."
 
 #: templates/peachjam/about.html:20
 msgid "SenLII aims to (i) provide free, open, and permanent access to Senegalese legal materials, (ii) enhance transparency and legal certainty, (iii) support legal professionals, researchers, students, and the public, (iv) contribute to the digital transformation of Senegal’s legal ecosystem."
-msgstr ""
+msgstr "O SenLII tem como objetivo (i) proporcionar o acesso gratuito, aberto e permanente aos materiais jurídicos senegaleses, (ii) aumentar a transparência e a segurança jurídica, (iii) apoiar os profissionais do direito, investigadores, estudantes e o público, (iv) contribuir para a transformação digital do ecossistema jurídico do Senegal."
 
 #: templates/peachjam/about.html:24
 msgid "Strengthening the rule of law"
-msgstr ""
+msgstr "Fortalecimento do Estado de Direito"
 
 #: templates/peachjam/about.html:26
 msgid "By improving access to reliable and structured legal information, SenLII helps to:"
-msgstr ""
+msgstr "Ao melhorar o acesso a informação jurídica fiável e estruturada, o SenLII ajuda a:"
 
 #: templates/peachjam/about.html:29
 msgid "strengthen trust in public institutions"
-msgstr ""
+msgstr "reforçar a confiança nas instituições públicas"
 
 #: templates/peachjam/about.html:30
 msgid "improve the efficiency of the justice system"
-msgstr ""
+msgstr "melhorar a eficiência do sistema de justiça"
 
 #: templates/peachjam/about.html:31
 msgid "support economic activity and investment"
-msgstr ""
+msgstr "Apoiar a actividade económica e o investimento."
 
 #: templates/peachjam/about.html:32
 msgid "empower citizens to understand and exercise their rights"
-msgstr ""
+msgstr "capacitar os cidadãos para que compreendam e exerçam os seus direitos."
 
 #: templates/peachjam/about.html:34
 msgid "About the partners"
-msgstr ""
+msgstr "Sobre os parceiros"
 
 #: templates/peachjam/about.html:36
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa-based non-profit organisation that specialises in digitising, structuring, and publishing African legal information. It develops advanced tools to make legal data accessible and reusable at scale."
-msgstr ""
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> é uma organização sem fins lucrativos sediada na África do Sul, especializada na digitalização, estruturação e publicação de informação jurídica africana. Desenvolve ferramentas avançadas para tornar os dados jurídicos acessíveis e reutilizáveis em larga escala."
 
 #: templates/peachjam/about.html:41
 msgid "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance."
-msgstr ""
+msgstr "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> é uma iniciativa da Faculdade de Direito da Universidade da Cidade do Cabo que apoia as instituições africanas na construção e manutenção de plataformas de acesso livre ao direito. O seu trabalho promove o acesso à informação jurídica como pedra basilar da democracia e da boa governação."
 
-#~ msgid "Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-#~ msgstr "Acesso livre à legislação do Senegal. A SenegalLII é membro da comunidade das Instituições de Acesso Livre à Legislação Africanas e do Movimento de Acesso Livre à Legislação."

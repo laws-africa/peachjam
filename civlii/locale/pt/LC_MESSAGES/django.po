@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-13 12:28\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -78,16 +78,12 @@ msgid "CNDJ is a member of the community of African LIIs and of the Free Access 
 msgstr "A CNDJ é membro da comunidade das instituições de ensino jurídico africanas e do Movimento de Livre Acesso à Justiça."
 
 #: templates/peachjam/about.html:11
-#, fuzzy
-#| msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
 msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII<span class=\"visually-hidden\">opens in new tab</span></a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic<span class=\"visually-hidden\">opens in new tab</span> Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> faz parte da <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Unidade de Governança Democrática e Direitos</a> da Faculdade de Direito da Universidade da Cidade do Cabo (UCT), África do Sul. O AfricanLII ajuda indivíduos, organizações e governos a construir e manter acesso gratuito e sustentável a portais jurídicos e a alcançar o povo da África e além."
+msgstr ""
 
 #: templates/peachjam/about.html:21
-#, fuzzy
-#| msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
 msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa<span class=\"visually-hidden\">opens in new tab</span></a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
-msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> é uma organização sem fins lucrativos da África do Sul que digitaliza informações legais africanas para uso público. O acesso aberto à informação jurídica digital africana ajuda as comunidades a prosperar, as empresas a ter sucesso e os funcionários judiciais e funcionários públicos a prestar serviços de forma eficiente e eficaz."
+msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa<span class=\"visually-hidden\">abre num novo separador</span></a> é uma organização sem fins lucrativos da África do Sul que digitaliza informação jurídica africana para uso público. O acesso aberto à informação jurídica africana digital ajuda as comunidades a prosperar, as empresas a terem sucesso e os magistrados e funcionários públicos a prestarem serviços de forma eficiente e eficaz."
 
 #: templates/peachjam/about.html:28
 msgid "Contact us"
@@ -96,3 +92,4 @@ msgstr "Contate-nos"
 #: templates/peachjam/about.html:30
 msgid "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
 msgstr "<div> <a href=\"mailto:info@laws.africa\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-envelope mr-2\"></i></span>info@laws.africa</a> </div> <div> <a href=\"https://facebook.com/africanlii/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-facebook mr-2\"></i></span>facebook.com/africanlii</a> </div> <div> <a href=\"https://twitter.com/AfricanLII/\"><span style=\"margin-right: .2rem\"><i class=\"bi bi-twitter mr-2\"></i></span>twitter.com/AfricanLII</a> </div>"
+
