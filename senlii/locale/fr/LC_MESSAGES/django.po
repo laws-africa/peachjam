@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-13 12:28\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -43,7 +43,7 @@ msgstr ""
 
 #: templates/peachjam/_footer.html:4
 msgid "Our partners"
-msgstr ""
+msgstr "Nos partenaires"
 
 #: templates/peachjam/_header.html:12
 msgid "Judgments"
@@ -117,5 +117,3 @@ msgstr ""
 msgid "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance."
 msgstr ""
 
-#~ msgid "Free access to the law of Senegal. SenegalLII is a member of the community of African LIIs and of the Free Access to Law Movement."
-#~ msgstr "Accès libre au droit sénégalais. SenegalLII est membre de la communauté des LII africains et du Mouvement pour le libre accès au droit."
