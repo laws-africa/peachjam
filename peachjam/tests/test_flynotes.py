@@ -2674,3 +2674,53 @@ class CleanFlynoteChildPrefixesCommandTest(TestCase):
             "Defamation — communications",
         )
         self.assertIn("MERGE", out.getvalue())
+
+    def test_apply_moves_external_target_into_root_before_merging(self):
+        customary = Flynote.add_root(name="Customary law")
+        other = Flynote.add_root(name="Leadership")
+        target = other.add_child(name="traditional leadership")
+        source_one = customary.add_child(name="Customary law / traditional leadership")
+        source_two = customary.add_child(name="Customary law/traditional leadership")
+        target_judgment = self.make_judgment("Existing leadership case")
+        source_one_judgment = self.make_judgment("Customary source one")
+        source_two_judgment = self.make_judgment("Customary source two")
+        self.link_flynote(target_judgment, target)
+        self.link_flynote(source_one_judgment, source_one)
+        self.link_flynote(source_two_judgment, source_two)
+
+        out = StringIO()
+        call_command(
+            "clean_flynote_child_prefixes",
+            apply=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        target.refresh_from_db()
+        target_judgment.refresh_from_db()
+        source_one_judgment.refresh_from_db()
+        source_two_judgment.refresh_from_db()
+
+        self.assertEqual(target.get_parent().pk, customary.pk)
+        self.assertEqual(target.name, "traditional leadership")
+        self.assertFalse(Flynote.objects.filter(pk=source_one.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=source_two.pk).exists())
+        self.assertEqual(
+            target_judgment.flynote,
+            "Customary law — traditional leadership",
+        )
+        self.assertEqual(
+            source_one_judgment.flynote,
+            "Customary law — traditional leadership",
+        )
+        self.assertEqual(
+            source_two_judgment.flynote,
+            "Customary law — traditional leadership",
+        )
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=customary).count,
+            3,
+        )
+        self.assertFalse(FlynoteDocumentCount.objects.filter(flynote=other).exists())
+        self.assertIn("TARGET", out.getvalue())
+        self.assertIn("merge target in ROOT", out.getvalue())
