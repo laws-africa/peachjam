@@ -13,32 +13,10 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     {% block head-meta %}
-      <link rel="alternate"
-            type="application/atom+xml"
-            title="Atom RSS Feed"
-            href="{% url 'atom_feed' %}"/>
-      {% if request.path == '/judgments/' %}
-        <link rel="alternate"
-              type="application/atom+xml"
-              title="Judgments Atom RSS Feed"
-              href="{% url 'judgment_feed' %}"/>
-      {% endif %}
-      {% if request.path == '/doc/' %}
-        <link rel="alternate"
-              type="application/atom+xml"
-              title="AU Documents Atom RSS Feed"
-              href="{% url 'generic_document_feed' %}"/>
-      {% endif %}
-      {% if request.path == '/legislation/' %}
-        <link rel="alternate"
-              type="application/atom+xml"
-              title="Treaties & Protocols Atom RSS Feed"
-              href="{% url 'legislation_feed' %}"/>
-      {% endif %}
       {% if request.path == '/articles/' %}
         <link rel="alternate"
               type="application/atom+xml"
-              title="{{ APP_NAME }} Articles RSS Feed"
+              title="{{ APP_NAME }} Articles Atom Feed"
               href="{% url 'article_feed' %}"/>
       {% endif %}
       {% block favicon %}
