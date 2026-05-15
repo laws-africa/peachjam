@@ -1,12 +1,8 @@
 import re
-from collections import defaultdict
 
 from django.core.management.base import BaseCommand
-from django.db import transaction
 
-from peachjam.analysis.flynotes import FlynoteParser
-from peachjam.models import Judgment
-from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
+from peachjam.models.flynote import Flynote
 
 LAW_SUFFIX_RE = re.compile(r"\s+law$", re.I)
 
@@ -62,189 +58,64 @@ class Command(BaseCommand):
                 "Running in dry-run mode. Re-run with --apply to persist changes."
             )
 
-        total_roots_touched = 0
-        total_targets_moved = 0
-        total_renamed = 0
-        total_merged = 0
-        total_judgments_updated = 0
-
+        cleaned_any = False
         roots = list(Flynote.get_root_nodes().order_by("name"))
 
         for root in roots:
             children = list(root.get_children().order_by("name", "pk"))
-
-            candidate_by_pk = {}
-            groups = defaultdict(list)
-
-            for child in children:
-                new_name = strip_redundant_prefix(root.name, child.name)
-                if not new_name:
-                    continue
-
-                normalised = FlynoteParser.normalise_name(new_name)
-                if not normalised:
-                    continue
-
-                row = {
-                    "child": child,
-                    "new_name": new_name,
-                    "norm": normalised,
-                }
-                candidate_by_pk[child.pk] = row
-                groups[normalised].append(row)
-
-            if not groups:
+            pending = [
+                (child, strip_redundant_prefix(root.name, child.name))
+                for child in children
+            ]
+            pending = [(child, new_name) for child, new_name in pending if new_name]
+            if not pending:
                 continue
 
-            total_roots_touched += 1
-            root_targets_moved = 0
+            cleaned_any = True
             root_renamed = 0
             root_merged = 0
-            affected_judgment_ids = set()
-            roots_to_refresh = {root.pk: root}
-
             self.stdout.write(f"ROOT {root.pk}: {root.name}")
-
-            with transaction.atomic():
-                for norm, rows in sorted(groups.items(), key=lambda item: item[0]):
-                    target, move_target = self.find_target(
-                        root=root,
-                        children=children,
-                        candidate_by_pk=candidate_by_pk,
-                        norm=norm,
+            if dry_run:
+                for child, new_name in pending:
+                    duplicate = (
+                        child.get_siblings()
+                        .exclude(pk=child.pk)
+                        .filter(name__iexact=new_name)
+                        .first()
                     )
+                    if duplicate:
+                        self.stdout.write(
+                            f"MERGE   {child.pk}: {child.name!r} -> {duplicate.pk}"
+                        )
+                        root_merged += 1
+                        continue
 
-                    rename_row = None
-                    if target:
-                        merge_rows = rows
+                    self.stdout.write(
+                        f"RENAME  {child.pk}: {child.name!r} -> {new_name!r}"
+                    )
+                    root_renamed += 1
+            else:
+                for child, new_name in pending:
+                    source_pk = child.pk
+                    source_name = child.name
+                    target, action = child.rename_to_or_merge(new_name)
+                    if action == "merge":
+                        self.stdout.write(
+                            f"MERGE   {source_pk}: {source_name!r} -> {target.pk}"
+                        )
+                        root_merged += 1
                     else:
-                        rename_row = rows[0]
-                        target = rename_row["child"]
-                        merge_rows = rows[1:]
-
-                    if move_target:
-                        old_root = target.get_root()
                         self.stdout.write(
-                            "TARGET  {}: {!r} from ROOT {}: {} -> merge target in ROOT {}: {}".format(
-                                target.pk,
-                                target.name,
-                                old_root.pk,
-                                old_root.name,
-                                root.pk,
-                                root.name,
-                            )
+                            f"RENAME  {source_pk}: {source_name!r} -> {new_name!r}"
                         )
-                        if not dry_run:
-                            affected_judgment_ids.update(
-                                self.get_subtree_judgment_ids(target)
-                            )
-                            roots_to_refresh[old_root.pk] = old_root
-                            target.move(root, pos="last-child")
-                            target.refresh_from_db()
-                        root_targets_moved += 1
-
-                    if rename_row:
-                        node = target
-                        self.stdout.write(
-                            f"RENAME  {node.pk}: {node.name!r} -> {rename_row['new_name']!r}"
-                        )
-                        if not dry_run:
-                            affected_judgment_ids.update(
-                                JudgmentFlynote.objects.filter(
-                                    flynote__path__startswith=node.path
-                                )
-                                .values_list("document_id", flat=True)
-                                .distinct()
-                            )
-                            node.name = rename_row["new_name"]
-                            node.full_clean()
-                            node.save(update_fields=["name"])
                         root_renamed += 1
 
-                    for row in merge_rows:
-                        source = row["child"]
-                        self.stdout.write(
-                            f"MERGE   {source.pk}: {source.name!r} -> {target.pk}"
-                        )
-                        if not dry_run:
-                            affected_judgment_ids.update(
-                                JudgmentFlynote.objects.filter(
-                                    flynote__path__startswith=source.path
-                                )
-                                .values_list("document_id", flat=True)
-                                .distinct()
-                            )
-                            target.merge_sources_into([source])
-                        root_merged += 1
-
-                if not dry_run and (root_targets_moved or root_renamed or root_merged):
-                    for judgment in Judgment.objects.filter(
-                        pk__in=affected_judgment_ids
-                    ).only("pk"):
-                        judgment.serialise_flynote_tree()
-                        judgment.save(update_fields=["flynote", "flynote_raw"])
-
-                    for refresh_root in roots_to_refresh.values():
-                        FlynoteDocumentCount.refresh_for_flynote(refresh_root)
-
-            total_targets_moved += root_targets_moved
-            total_renamed += root_renamed
-            total_merged += root_merged
-            total_judgments_updated += len(affected_judgment_ids)
-
             self.stdout.write(
-                "ROOT DONE: targets_moved={}, renamed={}, merged={}, judgments_updated={}".format(
-                    root_targets_moved,
-                    root_renamed,
-                    root_merged,
-                    len(affected_judgment_ids),
-                )
+                "ROOT DONE: renamed={}, merged={}".format(root_renamed, root_merged)
             )
 
-        if not total_roots_touched:
+        if not cleaned_any:
             self.stdout.write("Nothing to clean.")
+            return
 
-        self.stdout.write(
-            "Done. roots_touched={}, targets_moved={}, renamed={}, merged={}, "
-            "judgments_updated={}, dry_run={}".format(
-                total_roots_touched,
-                total_targets_moved,
-                total_renamed,
-                total_merged,
-                total_judgments_updated,
-                dry_run,
-            )
-        )
-
-    def find_target(self, root, children, candidate_by_pk, norm):
-        existing_sibling = next(
-            (
-                sibling
-                for sibling in children
-                if sibling.pk not in candidate_by_pk
-                and FlynoteParser.normalise_name(sibling.name) == norm
-            ),
-            None,
-        )
-        if existing_sibling:
-            return existing_sibling, False
-
-        external_matches = [
-            node
-            for node in Flynote.objects.filter(depth=root.depth + 1)
-            .exclude(pk__in=candidate_by_pk)
-            .exclude(path__startswith=root.path)
-            .order_by("path", "pk")
-            if FlynoteParser.normalise_name(node.name) == norm
-        ]
-        if len(external_matches) == 1:
-            return external_matches[0], True
-
-        return None, False
-
-    def get_subtree_judgment_ids(self, flynote):
-        return set(
-            JudgmentFlynote.objects.filter(flynote__path__startswith=flynote.path)
-            .values_list("document_id", flat=True)
-            .distinct()
-        )
+        self.stdout.write("Done.")

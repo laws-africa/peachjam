@@ -2600,9 +2600,12 @@ class CleanFlynoteChildPrefixesCommandTest(TestCase):
         )
         self.assertIn("Running in dry-run mode", out.getvalue())
         self.assertIn("RENAME", out.getvalue())
-        self.assertIn("dry_run=True", out.getvalue())
+        self.assertIn("Done.", out.getvalue())
 
-    def test_apply_renames_direct_children_and_reserialises_judgments(self):
+    @patch("peachjam.tasks.serialise_judgment_flynote_tree")
+    def test_apply_renames_direct_children_and_reserialises_judgments(
+        self, mock_serialise_judgment_flynote_tree
+    ):
         admin = Flynote.add_root(name="Administrative law")
         child = admin.add_child(name="Administrative/constitutional duty")
         grandchild = child.add_child(name="Administrative/keep me")
@@ -2610,6 +2613,7 @@ class CleanFlynoteChildPrefixesCommandTest(TestCase):
         deep_judgment = self.make_judgment("Administrative grandchild case")
         self.link_flynote(direct_judgment, child)
         self.link_flynote(deep_judgment, grandchild)
+        mock_serialise_judgment_flynote_tree.reset_mock()
 
         out = StringIO()
         call_command(
@@ -2627,18 +2631,21 @@ class CleanFlynoteChildPrefixesCommandTest(TestCase):
         self.assertEqual(child.name, "constitutional duty")
         self.assertEqual(grandchild.name, "Administrative/keep me")
         self.assertEqual(
-            direct_judgment.flynote,
-            "Administrative law — constitutional duty",
+            JudgmentFlynote.objects.get(document=direct_judgment).flynote_id,
+            child.pk,
         )
         self.assertEqual(
-            deep_judgment.flynote,
-            "Administrative law — constitutional duty — Administrative/keep me",
+            JudgmentFlynote.objects.get(document=deep_judgment).flynote_id,
+            grandchild.pk,
         )
-        self.assertIn("judgments_updated=2", out.getvalue())
-        self.assertEqual(
-            FlynoteDocumentCount.objects.get(flynote=admin).count,
-            2,
+        self.assertCountEqual(
+            [
+                args.args[0]
+                for args in mock_serialise_judgment_flynote_tree.call_args_list
+            ],
+            [direct_judgment.pk, deep_judgment.pk],
         )
+        self.assertIn("ROOT DONE: renamed=1, merged=0", out.getvalue())
 
     def test_apply_merges_duplicate_siblings_after_prefix_strip(self):
         root = Flynote.add_root(name="Defamation")
@@ -2665,17 +2672,9 @@ class CleanFlynoteChildPrefixesCommandTest(TestCase):
             JudgmentFlynote.objects.get(document=source_judgment).flynote_id,
             target.pk,
         )
-        self.assertEqual(
-            source_judgment.flynote,
-            "Defamation — communications",
-        )
-        self.assertEqual(
-            target_judgment.flynote,
-            "Defamation — communications",
-        )
         self.assertIn("MERGE", out.getvalue())
 
-    def test_apply_moves_external_target_into_root_before_merging(self):
+    def test_apply_prefers_local_rename_and_merge_over_cross_root_target(self):
         customary = Flynote.add_root(name="Customary law")
         other = Flynote.add_root(name="Leadership")
         target = other.add_child(name="traditional leadership")
@@ -2701,26 +2700,23 @@ class CleanFlynoteChildPrefixesCommandTest(TestCase):
         source_one_judgment.refresh_from_db()
         source_two_judgment.refresh_from_db()
 
-        self.assertEqual(target.get_parent().pk, customary.pk)
+        renamed_target = Flynote.objects.get(pk=source_one.pk)
+        self.assertEqual(target.get_parent().pk, other.pk)
         self.assertEqual(target.name, "traditional leadership")
-        self.assertFalse(Flynote.objects.filter(pk=source_one.pk).exists())
+        self.assertEqual(renamed_target.get_parent().pk, customary.pk)
+        self.assertEqual(renamed_target.name, "traditional leadership")
         self.assertFalse(Flynote.objects.filter(pk=source_two.pk).exists())
         self.assertEqual(
-            target_judgment.flynote,
-            "Customary law — traditional leadership",
+            JudgmentFlynote.objects.get(document=target_judgment).flynote_id,
+            target.pk,
         )
         self.assertEqual(
-            source_one_judgment.flynote,
-            "Customary law — traditional leadership",
+            JudgmentFlynote.objects.get(document=source_one_judgment).flynote_id,
+            renamed_target.pk,
         )
         self.assertEqual(
-            source_two_judgment.flynote,
-            "Customary law — traditional leadership",
+            JudgmentFlynote.objects.get(document=source_two_judgment).flynote_id,
+            renamed_target.pk,
         )
-        self.assertEqual(
-            FlynoteDocumentCount.objects.get(flynote=customary).count,
-            3,
-        )
-        self.assertFalse(FlynoteDocumentCount.objects.filter(flynote=other).exists())
-        self.assertIn("TARGET", out.getvalue())
-        self.assertIn("merge target in ROOT", out.getvalue())
+        self.assertIn("RENAME", out.getvalue())
+        self.assertIn("MERGE", out.getvalue())
