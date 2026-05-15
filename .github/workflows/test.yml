@@ -58,10 +58,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "18"
+      - name: Cache apt packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: libreoffice poppler-utils pandoc
+          version: test-apt-v1
+          execute_install_scripts: true
       - name: Install deps
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libreoffice poppler-utils pandoc
           python -m pip install --upgrade "setuptools<82" wheel
           pip install .[dev]
           pip install psycopg[binary]==3.2.12 unittest-xml-reporting

@@ -20,11 +20,14 @@ jobs:
         with:
           python-version: "3.10"
           cache: 'pip'
+      - name: Cache apt packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: gettext
+          version: l10n-apt-v1
 
       - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y gettext
           python -m pip install --upgrade pip setuptools wheel
           pip install .[dev]
           pip install psycopg2-binary==2.9.3
