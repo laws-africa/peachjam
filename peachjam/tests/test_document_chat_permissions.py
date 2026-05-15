@@ -4,6 +4,7 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls.base import reverse
 
+from peachjam.chat.tools import DOCUMENT_TEXT_CHAT_MAX_LENGTH
 from peachjam.models import Country, DocumentChatThread, GenericDocument, Language
 from peachjam_subs.models import (
     Feature,
@@ -128,3 +129,24 @@ class TestStartDocumentChatPermissions(TestCase):
         self.assertEqual(404, response.status_code)
         payload = response.json()
         self.assertIsNone(payload.get("usage_limit_html"))
+
+    def test_oversized_document_gets_403(self):
+        document = self.documents[0]
+        doc_content = document.get_or_create_document_content()
+        doc_content.content_text = "x" * (DOCUMENT_TEXT_CHAT_MAX_LENGTH + 1)
+        doc_content.save()
+
+        self.activate_subscription(self.user)
+        self.client.force_login(self.user)
+
+        for method in [self.client.get, self.client.post]:
+            response = method(self.chat_url(document))
+            self.assertEqual(403, response.status_code)
+            payload = response.json()
+            self.assertIn("too large", payload["message_html"])
+
+        self.assertFalse(
+            DocumentChatThread.objects.filter(
+                user=self.user, core_document=document
+            ).exists()
+        )
