@@ -86,12 +86,9 @@ class Flynote(LifecycleModelMixin, MP_Node):
             return
 
         name = self.name.strip()
-        if self.is_root():
-            siblings = Flynote.get_root_nodes()
-        else:
-            siblings = self.get_parent().get_children()
-
-        duplicate = siblings.exclude(pk=self.pk).filter(name__iexact=name).first()
+        duplicate = (
+            self.get_siblings().exclude(pk=self.pk).filter(name__iexact=name).first()
+        )
         if not duplicate:
             return
 
@@ -170,6 +167,35 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 child.save()
             else:
                 child.cascade_deprecated()
+
+    def rename_to_or_merge(self, new_name):
+        """Rename this flynote, or merge it into an existing sibling of the same name.
+
+        This is the small convenience wrapper around ``merge_sources_into`` for
+        cleanup flows that only need to decide whether the cleaned name should
+        become a rename or a sibling merge.
+        """
+        if not self.pk:
+            raise ValidationError(_("Flynote must be saved before it can be renamed."))
+
+        new_name = (new_name or "").strip()
+        if not new_name:
+            raise ValidationError(_("Flynote name cannot be blank."))
+
+        duplicate = (
+            self.get_siblings()
+            .exclude(pk=self.pk)
+            .filter(name__iexact=new_name)
+            .first()
+        )
+        if duplicate:
+            duplicate.merge_sources_into([self])
+            return duplicate, "merge"
+
+        self.name = new_name
+        self.full_clean()
+        self.save(update_fields=["name"])
+        return self, "rename"
 
     def merge_sources_into(self, sources):
         """Merge sibling flynotes into this flynote.
