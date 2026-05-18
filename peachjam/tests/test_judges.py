@@ -34,6 +34,51 @@ class JudgeAliasModelTests(TestCase):
         self.assertEqual("abban ja", alias.normalized_name)
 
 
+class JudgeIdentityResolutionTests(TestCase):
+    def test_resolve_judge_person_reuses_existing_alias_owner(self):
+        judge_person = JudgePerson.objects.create(full_name="Abban", slug="abban")
+        alias = JudgeAlias.objects.create(
+            judge_person=judge_person,
+            name="ABBAN, J.A.",
+        )
+
+        resolved = judge_identity_service.resolve_judge_person(["Abban JA"])
+
+        self.assertEqual(judge_person.pk, resolved["judge_person"].pk)
+        self.assertEqual([alias.pk], [row.pk for row in resolved["aliases"]])
+        self.assertEqual("Abban", resolved["canonical_name"])
+        self.assertFalse(resolved["created"])
+
+    def test_resolve_judge_person_reuses_existing_person_without_alias(self):
+        judge_person = JudgePerson.objects.create(full_name="ABBAN", slug="abban")
+
+        resolved = judge_identity_service.resolve_judge_person(["Abban JA"])
+
+        self.assertEqual(judge_person.pk, resolved["judge_person"].pk)
+        self.assertEqual([], resolved["aliases"])
+        self.assertEqual("Abban", resolved["canonical_name"])
+        self.assertFalse(resolved["created"])
+
+    def test_resolve_judge_person_creates_new_person_when_needed(self):
+        resolved = judge_identity_service.resolve_judge_person(["Abban JA"])
+
+        self.assertTrue(resolved["created"])
+        self.assertIsNotNone(resolved["judge_person"].pk)
+        self.assertEqual("Abban", resolved["judge_person"].full_name)
+        self.assertEqual([], resolved["aliases"])
+
+    def test_resolve_judge_person_dry_run_returns_unsaved_person(self):
+        resolved = judge_identity_service.resolve_judge_person(
+            ["Abban JA"],
+            dry_run=True,
+        )
+
+        self.assertTrue(resolved["created"])
+        self.assertIsNone(resolved["judge_person"].pk)
+        self.assertEqual("Abban", resolved["judge_person"].full_name)
+        self.assertEqual([], resolved["aliases"])
+
+
 class BackfillJudgePeopleCommandTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 

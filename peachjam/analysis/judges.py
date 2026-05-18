@@ -107,6 +107,71 @@ class JudgeIdentityService:
 
         return (JudgePerson.objects.create(full_name=full_name), True)
 
+    def get_matching_judge_aliases(self, names):
+        from peachjam.models import JudgeAlias
+
+        normalized_names = {
+            self.normalize_judge_name(name) for name in names if (name or "").strip()
+        }
+        normalized_names.discard("")
+        if not normalized_names:
+            return []
+
+        return list(
+            JudgeAlias.objects.filter(normalized_name__in=normalized_names)
+            .select_related("judge_person")
+            .order_by("pk")
+        )
+
+    def resolve_judge_person(self, names, dry_run=False):
+        """Reuse an existing canonical judge person for source names, or create one."""
+        from peachjam.models import JudgePerson
+
+        source_names = [(name or "").strip() for name in names if (name or "").strip()]
+        canonical_name = self.canonical_name_from_aliases(source_names)
+        aliases = self.get_matching_judge_aliases(source_names)
+
+        for alias in aliases:
+            if (
+                alias.judge_person_id
+                and alias.judge_person.full_name.casefold() == canonical_name.casefold()
+            ):
+                return {
+                    "judge_person": alias.judge_person,
+                    "aliases": aliases,
+                    "canonical_name": canonical_name,
+                    "created": False,
+                }
+
+        existing_person = (
+            JudgePerson.objects.filter(full_name__iexact=canonical_name)
+            .order_by("pk")
+            .first()
+        )
+        if existing_person is not None:
+            return {
+                "judge_person": existing_person,
+                "aliases": aliases,
+                "canonical_name": canonical_name,
+                "created": False,
+            }
+
+        if dry_run:
+            return {
+                "judge_person": JudgePerson(full_name=canonical_name),
+                "aliases": aliases,
+                "canonical_name": canonical_name,
+                "created": True,
+            }
+
+        judge_person, created = self.get_or_create_judge_person(canonical_name)
+        return {
+            "judge_person": judge_person,
+            "aliases": aliases,
+            "canonical_name": canonical_name,
+            "created": created,
+        }
+
     def rename_judge_person(self, judge_person, full_name):
         full_name = (full_name or "").strip()
         if not full_name:

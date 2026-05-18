@@ -6,7 +6,7 @@ from django.db import transaction
 from peachjam.analysis.judges import (
     judge_identity_service,
 )
-from peachjam.models import Judge, JudgeAlias, JudgePerson
+from peachjam.models import Judge
 
 
 class Command(BaseCommand):
@@ -44,21 +44,13 @@ class Command(BaseCommand):
 
         for normalized_name, judges in judge_groups.items():
             names = [judge.name for judge in judges]
-            canonical_name = judge_identity_service.canonical_name_from_aliases(names)
-            alias_normalized_names = {
-                judge_identity_service.normalize_judge_name(judge.name)
-                for judge in judges
-            }
-            aliases = list(
-                JudgeAlias.objects.filter(normalized_name__in=alias_normalized_names)
-                .select_related("judge_person")
-                .order_by("pk")
-            )
-            primary = self.get_or_create_primary(
-                aliases=aliases,
-                canonical_name=canonical_name,
+            resolved = judge_identity_service.resolve_judge_person(
+                names,
                 dry_run=dry_run,
             )
+            canonical_name = resolved["canonical_name"]
+            aliases = resolved["aliases"]
+            primary = resolved["judge_person"]
             duplicates = {
                 alias.judge_person
                 for alias in aliases
@@ -119,27 +111,6 @@ class Command(BaseCommand):
                 f"Backfilled {group_count} judge groups and merged {merge_count} duplicates."
             )
         )
-
-    def get_or_create_primary(self, aliases, canonical_name, dry_run):
-        for alias in aliases:
-            if (
-                alias.judge_person_id
-                and alias.judge_person.full_name.casefold() == canonical_name.casefold()
-            ):
-                return alias.judge_person
-
-        existing_person = (
-            JudgePerson.objects.filter(full_name__iexact=canonical_name)
-            .order_by("pk")
-            .first()
-        )
-        if existing_person:
-            return existing_person
-
-        if dry_run:
-            return JudgePerson(full_name=canonical_name)
-
-        return judge_identity_service.get_or_create_judge_person(canonical_name)[0]
 
     def print_dry_run_group(self, canonical_name, judges):
         self.stdout.write(f"JudgePerson(full_name='{canonical_name}')")
