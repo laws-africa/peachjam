@@ -1,10 +1,5 @@
 {% extends "admin/change_list.html" %}
 {% load i18n %}
-{% block object-tools-items %}
-  <a class="btn btn-info"
-     href="{% url 'admin:peachjam_judgeperson_workflow' %}">{% trans "Judge identity workflow" %}</a>
-  {{ block.super }}
-{% endblock %}
 {% block content %}
   <div class="alert alert-info" role="status">
     {% blocktrans %}

@@ -597,16 +597,6 @@ JAZZMIN_SETTINGS = {
         "socialaccount.SocialToken": "fa fa-key",
         "socialaccount.SocialApp": "fa fa-puzzle-piece",
     },
-    "custom_links": {
-        "peachjam": [
-            {
-                "name": "Judge identity workflow",
-                "url": "admin:peachjam_judgeperson_workflow",
-                "icon": "fas fa-user-check",
-                "permissions": ["peachjam.change_judgeperson"],
-            },
-        ]
-    },
     "related_modal_active": True,
     "show_ui_builder": False,
     "topmenu_links": [
