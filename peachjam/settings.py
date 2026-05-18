@@ -568,8 +568,6 @@ JAZZMIN_SETTINGS = {
         "auth.User": "fas fa-user",
         "auth.Group": "fas fa-users",
         "peachjam.Judgment": "fa fa-balance-scale",
-        "peachjam.JudgeAlias": "fas fa-signature",
-        "peachjam.JudgePerson": "fas fa-user-check",
         "background_task.CompletedTask": "fa fa-calendar-check",
         "background_task.Task": "fa fa-tasks",
         "countries_plus.Country": "fa fa-globe",

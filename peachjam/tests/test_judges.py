@@ -141,7 +141,7 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
             is_superuser=True,
         )
         self.client.force_login(self.admin_user)
-        self.workflow_url = reverse("admin:peachjam_judgeperson_workflow")
+        self.workflow_url = reverse("peachjam_judgeperson_workflow")
         self.target = JudgePerson.objects.create(full_name="Abban", slug="abban")
         self.duplicate = JudgePerson.objects.create(
             full_name="Abban duplicate",

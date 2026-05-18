@@ -234,9 +234,12 @@ class JudgeIdentityWorkflowMixin:
         if form is None or not form.errors:
             return active_tab
 
-        if form.selected_aliases.errors:
+        if form["selected_aliases"].errors:
             return self.alias_tab
-        if form.selected_judge_people.errors or form.merge_target_judge_person.errors:
+        if (
+            form["selected_judge_people"].errors
+            or form["merge_target_judge_person"].errors
+        ):
             return self.judge_people_tab
         return active_tab
 
@@ -545,18 +548,19 @@ class JudgeIdentityWorkflowMixin:
                 "people."
             )
             if result["renamed"]:
-                summary = gettext_lazy(
-                    "Moved {} selected aliases to this judge person, refreshed their "
-                    "bench links automatically, deleted {} now-empty source judge "
-                    'people, and renamed the judge person from "{}".'
-                )
-                summary = summary.format(
+                return format_html(
+                    '{} <a href="{}">{}</a>. Moved {} selected aliases to this '
+                    "judge person, refreshed their bench links automatically, "
+                    "deleted {} now-empty source judge people, and renamed the "
+                    'judge person from "{}".',
+                    action_label,
+                    change_url,
+                    judge_person.full_name,
                     result["count"],
                     result["deleted_count"],
                     result["old_name"],
                 )
-            else:
-                summary = summary.format(result["count"], result["deleted_count"])
+            summary = summary.format(result["count"], result["deleted_count"])
             return format_html(
                 '{} <a href="{}">{}</a>. {}',
                 action_label,
@@ -637,7 +641,7 @@ class JudgeIdentityWorkflowView(JudgeIdentityWorkflowMixin, TemplateView):
                     request,
                     self.build_workflow_success_message(result),
                 )
-                redirect_url = reverse("admin:peachjam_judgeperson_workflow")
+                redirect_url = reverse("peachjam_judgeperson_workflow")
                 params = {}
                 if query:
                     params["q"] = query

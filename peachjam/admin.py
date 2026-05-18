@@ -1414,12 +1414,6 @@ class BenchInlineForm(forms.ModelForm):
             "judge": gettext_lazy(
                 "Legacy judge record used by the existing judgment-to-judge relationship."
             ),
-            "judge_person": gettext_lazy(
-                "Canonical judge identity, for example 'Mogoeng Mogoeng'."
-            ),
-            "matched_alias": gettext_lazy(
-                "Alias that matched the extracted name, for example 'Mogoeng CJ'."
-            ),
         }
 
 
@@ -2366,7 +2360,6 @@ class JurisdictionProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Judge)
 class JudgeAdmin(admin.ModelAdmin):
-    change_list_template = "admin/peachjam/judge_identity/change_list.html"
     list_display = ("name",)
     search_fields = ("name",)
 
@@ -2380,7 +2373,6 @@ class JudgeAliasInline(admin.TabularInline):
 
 @admin.register(JudgePerson)
 class JudgePersonAdmin(admin.ModelAdmin):
-    change_list_template = "admin/peachjam/judge_identity/change_list.html"
     list_display = ("full_name", "slug")
     search_fields = ("full_name", "aliases__name")
     inlines = [JudgeAliasInline]

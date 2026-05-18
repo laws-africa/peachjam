@@ -65,7 +65,7 @@
                 <div class="col-md-4">
                   <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
                   {% if query %}
-                    <a href="{% url 'admin:peachjam_judgeperson_workflow' %}{% if active_tab != alias_tab %}?tab={{ active_tab }}{% endif %}"
+                    <a href="{% url 'peachjam_judgeperson_workflow' %}{% if active_tab != alias_tab %}?tab={{ active_tab }}{% endif %}"
                        class="btn btn-secondary">{% trans "Clear" %}</a>
                   {% endif %}
                 </div>
