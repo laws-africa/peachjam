@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-05-13 13:01\n"
+"PO-Revision-Date: 2026-05-18 07:37\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -3740,7 +3740,7 @@ msgstr "Explorez les jugements de tous les tribunaux."
 
 #: templates/peachjam/judgment_list.html:17
 msgid "Explore all courts"
-msgstr "Explorez tous les terrains"
+msgstr "Explorer toutes les juridictions"
 
 #: templates/peachjam/judgment_list.html:27
 msgid "Browse judgments organised by legal subject."
