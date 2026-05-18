@@ -41,15 +41,7 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
-from peachjam.analysis.judges import (
-    canonical_name_from_aliases,
-    delete_judge_aliases,
-    delete_judge_people,
-    get_or_create_judge_person,
-    merge_judge_people,
-    move_judge_alias_to_person,
-    rename_judge_person,
-)
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
@@ -2478,8 +2470,10 @@ class JudgeIdentityWorkflowForm(forms.Form):
 
         if selected_aliases:
             if not judge_person and not full_name:
-                cleaned_data["target_full_name"] = canonical_name_from_aliases(
-                    [alias.name for alias in selected_aliases]
+                cleaned_data["target_full_name"] = (
+                    judge_identity_service.canonical_name_from_aliases(
+                        [alias.name for alias in selected_aliases]
+                    )
                 )
         else:
             if judge_person is None:
@@ -2811,7 +2805,9 @@ class JudgePersonAdmin(admin.ModelAdmin):
             renamed = False
             old_name = None
             if judge_person is None:
-                judge_person, created = get_or_create_judge_person(requested_name)
+                judge_person, created = (
+                    judge_identity_service.get_or_create_judge_person(requested_name)
+                )
 
             source_judge_people = set()
             moved_count = len(selected_aliases)
@@ -2823,11 +2819,13 @@ class JudgePersonAdmin(admin.ModelAdmin):
                     and judge_alias.judge_person_id != judge_person.pk
                 }
                 for judge_alias in selected_aliases:
-                    move_judge_alias_to_person(judge_alias, judge_person)
+                    judge_identity_service.move_judge_alias_to_person(
+                        judge_alias, judge_person
+                    )
 
             if requested_name and judge_person.full_name != requested_name:
                 old_name = judge_person.full_name
-                rename_judge_person(judge_person, requested_name)
+                judge_identity_service.rename_judge_person(judge_person, requested_name)
                 renamed = True
 
             deleted_count = 0
@@ -2858,7 +2856,7 @@ class JudgePersonAdmin(admin.ModelAdmin):
                 for candidate in cleaned_data["selected_judge_people"]
                 if candidate.pk != judge_person.pk
             ]
-            merge_judge_people(judge_person, duplicates)
+            judge_identity_service.merge_judge_people(judge_person, duplicates)
 
         return {
             "action": JudgeIdentityWorkflowForm.MERGE_JUDGE_PEOPLE,
@@ -2889,7 +2887,9 @@ class JudgePersonAdmin(admin.ModelAdmin):
                         for judge_alias in selected_aliases
                         if judge_alias.judge_person_id not in selected_judge_person_ids
                     ]
-                alias_result = delete_judge_aliases(selected_aliases)
+                alias_result = judge_identity_service.delete_judge_aliases(
+                    selected_aliases
+                )
                 selected_alias_count = alias_result["alias_count"]
             else:
                 alias_result = {
@@ -2898,7 +2898,9 @@ class JudgePersonAdmin(admin.ModelAdmin):
                 }
 
             if delete_mode in {"judge_people", "both"}:
-                judge_people_result = delete_judge_people(selected_judge_people)
+                judge_people_result = judge_identity_service.delete_judge_people(
+                    selected_judge_people
+                )
 
         return {
             "action": JudgeIdentityWorkflowForm.DELETE_RECORDS,

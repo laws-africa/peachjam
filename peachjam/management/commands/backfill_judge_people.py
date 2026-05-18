@@ -4,13 +4,7 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from peachjam.analysis.judges import (
-    assign_legacy_judge_to_person,
-    canonical_name_from_aliases,
-    get_or_create_judge_person,
-    merge_judge_people,
-    normalize_judge_name,
-    parse_judge_name,
-    unique_judge_slug,
+    judge_identity_service,
 )
 from peachjam.models import Judge, JudgeAlias, JudgePerson
 
@@ -38,17 +32,22 @@ class Command(BaseCommand):
             return
 
         for judge in legacy_judges:
-            canonical_name = canonical_name_from_aliases([judge.name])
-            judge_groups[normalize_judge_name(canonical_name)].append(judge)
+            canonical_name = judge_identity_service.canonical_name_from_aliases(
+                [judge.name]
+            )
+            judge_groups[
+                judge_identity_service.normalize_judge_name(canonical_name)
+            ].append(judge)
 
         merge_count = 0
         group_count = 0
 
         for normalized_name, judges in judge_groups.items():
             names = [judge.name for judge in judges]
-            canonical_name = canonical_name_from_aliases(names)
+            canonical_name = judge_identity_service.canonical_name_from_aliases(names)
             alias_normalized_names = {
-                normalize_judge_name(judge.name) for judge in judges
+                judge_identity_service.normalize_judge_name(judge.name)
+                for judge in judges
             }
             aliases = list(
                 JudgeAlias.objects.filter(normalized_name__in=alias_normalized_names)
@@ -76,14 +75,18 @@ class Command(BaseCommand):
                 for judge in judges:
                     alias = alias_by_name.get(judge.name)
                     if alias is None:
-                        alias, _ = assign_legacy_judge_to_person(judge, primary)
+                        alias, _ = judge_identity_service.assign_legacy_judge_to_person(
+                            judge, primary
+                        )
                         alias_by_name[judge.name] = alias
                     else:
                         updated_fields = []
                         if alias.judge_person_id != primary.pk:
                             alias.judge_person = primary
                             updated_fields.append("judge_person")
-                        judge_normalized_name = normalize_judge_name(judge.name)
+                        judge_normalized_name = (
+                            judge_identity_service.normalize_judge_name(judge.name)
+                        )
                         if alias.normalized_name != judge_normalized_name:
                             alias.normalized_name = judge_normalized_name
                             updated_fields.append("normalized_name")
@@ -94,9 +97,13 @@ class Command(BaseCommand):
                         primary.description = judge.description
                         primary.save(update_fields=["description"])
 
-                    assign_legacy_judge_to_person(judge, primary, alias_name=alias.name)
+                    judge_identity_service.assign_legacy_judge_to_person(
+                        judge,
+                        primary,
+                        alias_name=alias.name,
+                    )
 
-                merge_judge_people(primary, list(duplicates))
+                judge_identity_service.merge_judge_people(primary, list(duplicates))
 
             group_count += 1
 
@@ -131,13 +138,10 @@ class Command(BaseCommand):
             return existing_person
 
         if aliases and aliases[0].judge_person_id and not dry_run:
-            aliases[0].judge_person.full_name = canonical_name
-            aliases[0].judge_person.slug = unique_judge_slug(
-                JudgePerson,
+            judge_identity_service.rename_judge_person(
+                aliases[0].judge_person,
                 canonical_name,
-                pk=aliases[0].judge_person.pk,
             )
-            aliases[0].judge_person.save(update_fields=["full_name", "slug"])
             return aliases[0].judge_person
 
         if dry_run:
@@ -150,12 +154,12 @@ class Command(BaseCommand):
                 )
             )
 
-        return get_or_create_judge_person(canonical_name)[0]
+        return judge_identity_service.get_or_create_judge_person(canonical_name)[0]
 
     def print_dry_run_group(self, canonical_name, judges):
         self.stdout.write(f"JudgePerson(full_name='{canonical_name}')")
         for judge in judges:
-            parts = parse_judge_name(judge.name)
+            parts = judge_identity_service.parse_judge_name(judge.name)
             title = parts["title"] or "-"
             self.stdout.write(
                 "  JudgeAlias("

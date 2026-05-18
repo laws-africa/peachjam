@@ -8,13 +8,13 @@ from django.test import TestCase
 from django.urls import reverse
 from languages_plus.models import Language
 
-from peachjam.analysis.judges import parse_judge_name
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.models import Bench, Court, Judge, JudgeAlias, JudgePerson, Judgment
 
 
 class JudgeParsingTests(TestCase):
     def test_parse_judge_name_splits_source_name_and_title(self):
-        parts = parse_judge_name(" ABBAN, J.A. ")
+        parts = judge_identity_service.parse_judge_name(" ABBAN, J.A. ")
 
         self.assertEqual("ABBAN, J.A.", parts["raw_name"])
         self.assertEqual("abban ja", parts["normalized_name"])

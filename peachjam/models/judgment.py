@@ -17,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
-from peachjam.analysis.judges import normalize_judge_name, unique_judge_slug
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.models import (
@@ -99,7 +99,11 @@ class JudgePerson(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = unique_judge_slug(self.__class__, self.full_name, pk=self.pk)
+            self.slug = judge_identity_service.unique_judge_slug(
+                self.__class__,
+                self.full_name,
+                pk=self.pk,
+            )
         return super().save(*args, **kwargs)
 
 
@@ -127,7 +131,7 @@ class JudgeAlias(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.normalized_name = normalize_judge_name(self.name)
+        self.normalized_name = judge_identity_service.normalize_judge_name(self.name)
         return super().save(*args, **kwargs)
 
 
