@@ -84,11 +84,10 @@ class Command(BaseCommand):
                         if alias.judge_person_id != primary.pk:
                             alias.judge_person = primary
                             updated_fields.append("judge_person")
-                        judge_normalized_name = (
-                            judge_identity_service.normalize_judge_name(judge.name)
-                        )
-                        if alias.normalized_name != judge_normalized_name:
-                            alias.normalized_name = judge_normalized_name
+                        if (
+                            alias.normalized_name
+                            != judge_identity_service.normalize_judge_name(judge.name)
+                        ):
                             updated_fields.append("normalized_name")
                         if updated_fields:
                             alias.save(update_fields=updated_fields)
@@ -137,22 +136,8 @@ class Command(BaseCommand):
         if existing_person:
             return existing_person
 
-        if aliases and aliases[0].judge_person_id and not dry_run:
-            judge_identity_service.rename_judge_person(
-                aliases[0].judge_person,
-                canonical_name,
-            )
-            return aliases[0].judge_person
-
         if dry_run:
-            return (
-                aliases[0].judge_person
-                if aliases
-                else JudgePerson(
-                    full_name=canonical_name,
-                    slug=canonical_name,
-                )
-            )
+            return JudgePerson(full_name=canonical_name, slug=canonical_name)
 
         return judge_identity_service.get_or_create_judge_person(canonical_name)[0]
 

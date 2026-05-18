@@ -105,13 +105,7 @@ class JudgeIdentityService:
         if existing_person is not None:
             return existing_person, False
 
-        return (
-            JudgePerson.objects.create(
-                full_name=full_name,
-                slug=self.unique_judge_slug(JudgePerson, full_name),
-            ),
-            True,
-        )
+        return (JudgePerson.objects.create(full_name=full_name), True)
 
     def rename_judge_person(self, judge_person, full_name):
         full_name = (full_name or "").strip()
@@ -119,11 +113,7 @@ class JudgeIdentityService:
             return judge_person
 
         judge_person.full_name = full_name
-        judge_person.slug = self.unique_judge_slug(
-            judge_person.__class__,
-            full_name,
-            pk=judge_person.pk,
-        )
+        judge_person.slug = ""
         judge_person.save(update_fields=["full_name", "slug"])
         return judge_person
 
@@ -135,21 +125,12 @@ class JudgeIdentityService:
             .order_by("pk")
             .first()
         )
-        normalized_name = self.normalize_judge_name(name)
         if alias is not None:
-            if alias.normalized_name != normalized_name:
-                alias.normalized_name = normalized_name
+            if alias.normalized_name != self.normalize_judge_name(name):
                 alias.save(update_fields=["normalized_name"])
             return alias, False
 
-        return (
-            JudgeAlias.objects.create(
-                judge_person=judge_person,
-                name=name,
-                normalized_name=normalized_name,
-            ),
-            True,
-        )
+        return (JudgeAlias.objects.create(judge_person=judge_person, name=name), True)
 
     def update_bench_rows(self, queryset, judge_person, matched_alias, source_name):
         title = self.parse_judge_name(source_name)["title"]
