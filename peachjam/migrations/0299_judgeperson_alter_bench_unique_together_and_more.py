@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0297_alter_offencecategory_options_remove_flynote_slug_and_more"),
+        ("peachjam", "0298_move_arbitration_to_peachjam_pro"),
     ]
 
     operations = [
