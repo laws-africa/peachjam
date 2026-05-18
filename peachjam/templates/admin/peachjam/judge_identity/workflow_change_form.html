@@ -47,6 +47,11 @@
           </div>
           <div class="card-body">
             <form method="get" class="form">
+              <input type="hidden"
+                     name="tab"
+                     value="{{ active_tab }}"
+                     id="id_filter_tab"
+                     data-judge-workflow-tab-input="true"/>
               <div class="form-row align-items-end">
                 <div class="col-md-8">
                   <label for="id_q">{% trans "Search" %}</label>
@@ -60,7 +65,7 @@
                 <div class="col-md-4">
                   <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
                   {% if query %}
-                    <a href="{% url 'admin:peachjam_judgeperson_workflow' %}"
+                    <a href="{% url 'admin:peachjam_judgeperson_workflow' %}{% if active_tab != alias_tab %}?tab={{ active_tab }}{% endif %}"
                        class="btn btn-secondary">{% trans "Clear" %}</a>
                   {% endif %}
                 </div>
@@ -73,7 +78,11 @@
     <form method="post" novalidate>
       {% csrf_token %}
       <input type="hidden" name="q" value="{{ query }}" />
-      <input type="hidden" name="tab" value="{{ active_tab }}" id="id_active_tab" />
+      <input type="hidden"
+             name="tab"
+             value="{{ active_tab }}"
+             id="id_active_tab"
+             data-judge-workflow-tab-input="true"/>
       <div class="row">
         <div class="col-12 col-xl-8">
           <div class="card">
@@ -407,13 +416,17 @@
   <script>
     document.addEventListener("DOMContentLoaded", function() {
       const activeTabInput = document.getElementById("id_active_tab");
-      if (!activeTabInput) {
+      const tabInputs = document.querySelectorAll("[data-judge-workflow-tab-input]");
+      if (!activeTabInput || !tabInputs.length) {
         return;
       }
 
       document.querySelectorAll("[data-judge-workflow-tab]").forEach(function(tabButton) {
         tabButton.addEventListener("shown.bs.tab", function(event) {
-          activeTabInput.value = event.target.getAttribute("data-judge-workflow-tab");
+          const tabValue = event.target.getAttribute("data-judge-workflow-tab");
+          tabInputs.forEach(function(tabInput) {
+            tabInput.value = tabValue;
+          });
         });
       });
     });

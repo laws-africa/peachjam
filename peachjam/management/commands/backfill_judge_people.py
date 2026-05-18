@@ -137,7 +137,7 @@ class Command(BaseCommand):
             return existing_person
 
         if dry_run:
-            return JudgePerson(full_name=canonical_name, slug=canonical_name)
+            return JudgePerson(full_name=canonical_name)
 
         return judge_identity_service.get_or_create_judge_person(canonical_name)[0]
 
