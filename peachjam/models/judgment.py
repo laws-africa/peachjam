@@ -82,7 +82,7 @@ class JudgePerson(models.Model):
     model_label_plural = _("Judges")
 
     full_name = models.CharField(
-        _("full name"), max_length=1024, null=False, blank=False
+        _("full name"), max_length=1024, null=False, blank=False, unique=True
     )
     slug = models.SlugField(
         _("slug"), max_length=255, null=False, blank=True, unique=True
@@ -117,8 +117,6 @@ class JudgeAlias(models.Model):
     normalized_name = models.CharField(
         _("normalized name"), max_length=1024, null=False, blank=False, db_index=True
     )
-    description = models.TextField(_("description"), blank=True)
-    is_verified = models.BooleanField(_("verified"), default=True)
 
     class Meta:
         ordering = ("name", "pk")
@@ -332,13 +330,8 @@ class CourtRegistry(models.Model):
 
 
 class Bench(models.Model):
-    # This model is not strictly necessary, as it's almost identical to the default that Django creates
-    # for a many-to-many relationship. However, by creating it, we can indicate that the ordering should
-    # be on the PK of the model. This means that we can preserve the ordering of Judges as the are
-    # entered in the admin interface.
-    #
-    # To use this effectively, views that need the judges to be ordered, should call "judgement.bench.all()"
-    # and not "judgment.judges.all()".
+    # Bench is a real through model because it preserves judge order and stores
+    # canonical judge identity data for each source-level judge entry.
     judgment = models.ForeignKey(
         "Judgment",
         related_name="bench",
@@ -353,6 +346,7 @@ class Bench(models.Model):
         blank=True,
         related_name="bench_entries",
         verbose_name=_("judge"),
+        help_text=_("Canonical judge identity for this bench row."),
     )
     matched_alias = models.ForeignKey(
         JudgeAlias,
@@ -361,10 +355,33 @@ class Bench(models.Model):
         blank=True,
         related_name="bench_entries",
         verbose_name=_("matched alias"),
+        help_text=_(
+            "Alias that matched the extracted source name to the canonical judge."
+        ),
     )
-    title = models.CharField(_("title"), max_length=32, blank=True)
-    extracted_name = models.CharField(_("extracted name"), max_length=1024, blank=True)
-    is_manual_override = models.BooleanField(_("manual override"), default=False)
+    title = models.CharField(
+        _("title"),
+        max_length=32,
+        blank=True,
+        help_text=_(
+            "Judicial title parsed from the source name, for example 'JA' or 'DCJ'."
+        ),
+    )
+    extracted_name = models.CharField(
+        _("extracted name"),
+        max_length=1024,
+        blank=True,
+        help_text=_(
+            "Judge name exactly as it appeared in the source, for example 'ABBAN, J.A.'."
+        ),
+    )
+    is_manual_override = models.BooleanField(
+        _("manual override"),
+        default=False,
+        help_text=_(
+            "Tick when you have manually corrected the canonical judge mapping for this row."
+        ),
+    )
 
     class Meta:
         # this is to re-use the existing table rather than creating a new one

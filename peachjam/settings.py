@@ -568,6 +568,8 @@ JAZZMIN_SETTINGS = {
         "auth.User": "fas fa-user",
         "auth.Group": "fas fa-users",
         "peachjam.Judgment": "fa fa-balance-scale",
+        "peachjam.JudgeAlias": "fas fa-signature",
+        "peachjam.JudgePerson": "fas fa-user-check",
         "background_task.CompletedTask": "fa fa-calendar-check",
         "background_task.Task": "fa fa-tasks",
         "countries_plus.Country": "fa fa-globe",
@@ -594,6 +596,16 @@ JAZZMIN_SETTINGS = {
         "socialaccount.SocialAccount": "fa fa-users",
         "socialaccount.SocialToken": "fa fa-key",
         "socialaccount.SocialApp": "fa fa-puzzle-piece",
+    },
+    "custom_links": {
+        "peachjam": [
+            {
+                "name": "Judge identity workflow",
+                "url": "admin:peachjam_judgeperson_workflow",
+                "icon": "fas fa-user-check",
+                "permissions": ["peachjam.change_judgeperson"],
+            },
+        ]
     },
     "related_modal_active": True,
     "show_ui_builder": False,

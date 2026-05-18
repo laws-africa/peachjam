@@ -1,0 +1,358 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+{% block breadcrumbs %}
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:index' %}">{% trans "Home" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:peachjam_judgeperson_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ title }}</li>
+  </ol>
+{% endblock %}
+{% block content_title %}{{ title }}{% endblock %}
+{% block content %}
+  <div id="content-main" class="col-12">
+    {% if form.errors %}
+      <div class="alert alert-danger">
+        {% if form.errors|length == 1 %}
+          {% trans "Please correct the error below." %}
+        {% else %}
+          {% trans "Please correct the errors below." %}
+        {% endif %}
+      </div>
+      {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+    {% endif %}
+    <div class="row">
+      <div class="col-12">
+        <div class="alert alert-info">
+          {% blocktrans %}
+            Use aliases and judge people as the editing surface. The first panel can
+            rename a judge person, move selected aliases into a judge person, or do
+            both in one step. Moving aliases also deletes the source judge person
+            automatically if nothing is left there.
+          {% endblocktrans %}
+        </div>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-12">
+        <div class="card card-outline card-info">
+          <div class="card-header">
+            <h3 class="card-title">{% trans "Find judge identities" %}</h3>
+          </div>
+          <div class="card-body">
+            <form method="get" class="form">
+              <div class="form-row align-items-end">
+                <div class="col-md-8">
+                  <label for="id_q">{% trans "Search" %}</label>
+                  <input type="text"
+                         id="id_q"
+                         name="q"
+                         value="{{ query }}"
+                         class="form-control"
+                         placeholder="{% trans 'Search by alias or judge person' %}"/>
+                </div>
+                <div class="col-md-4">
+                  <button type="submit" class="btn btn-primary">{% trans "Filter" %}</button>
+                  {% if query %}
+                    <a href="{% url 'admin:peachjam_judgeperson_workflow' %}"
+                       class="btn btn-secondary">{% trans "Clear" %}</a>
+                  {% endif %}
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="q" value="{{ query }}" />
+      <div class="row">
+        <div class="col-12 col-xl-8">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">{% trans "Alias connections" %}</h3>
+            </div>
+            <div class="card-body p-0">
+              {% if alias_workflow_rows %}
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 44px;">{% trans "Use" %}</th>
+                        <th>{% trans "Alias" %}</th>
+                        <th>{% trans "Judge person" %}</th>
+                        <th>{% trans "Legacy judge" %}</th>
+                        <th>{% trans "Bench rows" %}</th>
+                        <th>{% trans "Judgments" %}</th>
+                        <th>{% trans "Status" %}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for row in alias_workflow_rows %}
+                        <tr>
+                          <td>
+                            <input type="checkbox"
+                                   name="selected_aliases"
+                                   value="{{ row.alias.pk }}"
+                                   {% if row.alias.pk|stringformat:"s" in selected_alias_ids %}checked{% endif %}/>
+                          </td>
+                          <td>
+                            <strong>{{ row.alias.name }}</strong>
+                            {% for note in row.notes %}<div class="text-muted small">{{ note }}</div>{% endfor %}
+                          </td>
+                          <td>
+                            <a href="{% url 'admin:peachjam_judgeperson_change' row.current_person.pk %}">{{ row.current_person.full_name }}</a>
+                          </td>
+                          <td>
+                            {% if row.legacy_judge %}
+                              {{ row.legacy_judge.name }}
+                            {% else %}
+                              <span class="text-muted">{% trans "Missing" %}</span>
+                            {% endif %}
+                          </td>
+                          <td>{{ row.bench_rows }}</td>
+                          <td>{{ row.judgments }}</td>
+                          <td>
+                            <span class="badge badge-{{ row.status_class }}">{{ row.status }}</span>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <div class="p-3">
+                  <p class="mb-0 text-muted">{% trans "No aliases matched this filter." %}</p>
+                </div>
+              {% endif %}
+            </div>
+            <div class="card-footer text-muted">
+              {% for error in form.selected_aliases.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+              {% blocktrans with workflow_limit=workflow_limit %}Showing at most {{ workflow_limit }} aliases at a time.{% endblocktrans %}
+            </div>
+          </div>
+          <div class="card mt-3">
+            <div class="card-header">
+              <h3 class="card-title">
+                {% trans "Judge people" %}
+              </h3>
+            </div>
+            <div class="card-body p-0">
+              {% if judge_person_workflow_rows %}
+                <div class="table-responsive">
+                  <table class="table table-striped table-hover mb-0">
+                    <thead>
+                      <tr>
+                        <th style="width: 44px;">
+                          {% trans "Use" %}
+                        </th>
+                        <th>
+                          {% trans "Judge person" %}
+                        </th>
+                        <th>
+                          {% trans "Aliases" %}
+                        </th>
+                        <th>
+                          {% trans "Bench rows" %}
+                        </th>
+                        <th>
+                          {% trans "Judgments" %}
+                        </th>
+                        <th>
+                          {% trans "Status" %}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {% for row in judge_person_workflow_rows %}
+                        <tr>
+                          <td>
+                            <input type="checkbox"
+                                   name="selected_judge_people"
+                                   value="{{ row.judge_person.pk }}"
+                                   {% if row.judge_person.pk|stringformat:"s" in selected_judge_person_ids %}checked{% endif %}/>
+                          </td>
+                          <td>
+                            <a href="{% url 'admin:peachjam_judgeperson_change' row.judge_person.pk %}">{{ row.judge_person.full_name }}</a>
+                            {% for note in row.notes %}
+                              <div class="text-muted small">
+                                {{ note }}
+                              </div>
+                            {% endfor %}
+                          </td>
+                          <td>
+                            {{ row.alias_count }}
+                          </td>
+                          <td>
+                            {{ row.bench_rows }}
+                          </td>
+                          <td>
+                            {{ row.judgments }}
+                          </td>
+                          <td>
+                            <span class="badge badge-{{ row.status_class }}">{{ row.status }}</span>
+                          </td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  </table>
+                </div>
+              {% else %}
+                <div class="p-3">
+                  <p class="mb-0 text-muted">
+                    {% trans "No judge people matched this filter." %}
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+            <div class="card-footer text-muted">
+              {% for error in form.selected_judge_people.errors %}
+                <div class="text-danger small mb-2">
+                  {{ error }}
+                </div>
+              {% endfor %}
+              {% blocktrans with workflow_limit=workflow_limit %}Showing at most {{ workflow_limit }} judge people at a time.{% endblocktrans %}
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-xl-4">
+          <div class="card card-info card-outline">
+            <div class="card-header">
+              <h3 class="card-title">
+                {% trans "Update selected judge identity" %}
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group{% if form.target_judge_person.errors %} errors{% endif %}">
+                <label for="{{ form.target_judge_person.id_for_label }}">
+                  {{ form.target_judge_person.label }}
+                </label>
+                {{ form.target_judge_person }}
+                {% for error in form.target_judge_person.errors %}
+                  <div class="text-danger small">
+                    {{ error }}
+                  </div>
+                {% endfor %}
+                <div class="text-muted small">
+                  {{ form.target_judge_person.help_text }}
+                </div>
+              </div>
+              <div class="form-group{% if form.target_full_name.errors %} errors{% endif %}">
+                <label for="{{ form.target_full_name.id_for_label }}">
+                  {{ form.target_full_name.label }}
+                </label>
+                {{ form.target_full_name }}
+                {% for error in form.target_full_name.errors %}
+                  <div class="text-danger small">
+                    {{ error }}
+                  </div>
+                {% endfor %}
+                <div class="text-muted small">
+                  {{ form.target_full_name.help_text }}
+                </div>
+              </div>
+              <div class="text-muted small">
+                {% blocktrans %}
+                  If aliases are selected, they will move into the chosen judge person.
+                  If no judge person is chosen, a new one will be created from the new
+                  name or derived from the selected aliases. If you also enter a new
+                  name, the destination judge person will be renamed after the move.
+                  If no aliases are selected, this panel will rename the chosen judge
+                  person.
+                {% endblocktrans %}
+              </div>
+            </div>
+            <div class="card-footer">
+              <button type="submit"
+                      class="btn btn-primary btn-block"
+                      name="action"
+                      value="apply_identity_changes">
+                {% trans "Apply changes" %}
+              </button>
+            </div>
+          </div>
+          <div class="card card-info card-outline mt-3">
+            <div class="card-header">
+              <h3 class="card-title">
+                {% trans "Merge selected judge people" %}
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group{% if form.merge_target_judge_person.errors %} errors{% endif %}">
+                <label for="{{ form.merge_target_judge_person.id_for_label }}">
+                  {{ form.merge_target_judge_person.label }}
+                </label>
+                {{ form.merge_target_judge_person }}
+                {% for error in form.merge_target_judge_person.errors %}
+                  <div class="text-danger small">
+                    {{ error }}
+                  </div>
+                {% endfor %}
+                <div class="text-muted small">
+                  {{ form.merge_target_judge_person.help_text }}
+                </div>
+              </div>
+              <div class="text-muted small">
+                {% trans "Select the duplicate judge people in the table. The merge target can also be one of the selected rows." %}
+              </div>
+            </div>
+            <div class="card-footer">
+              <button type="submit"
+                      class="btn btn-secondary btn-block"
+                      name="action"
+                      value="merge_judge_people">
+                {% trans "Merge judge people" %}
+              </button>
+            </div>
+          </div>
+          <div class="card card-outline card-danger mt-3">
+            <div class="card-header">
+              <h3 class="card-title">
+                {% trans "Delete selected records" %}
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group{% if form.delete_mode.errors %} errors{% endif %}">
+                <fieldset>
+                  <legend class="h6 mb-2">
+                    {{ form.delete_mode.label }}
+                  </legend>
+                  {{ form.delete_mode }}
+                </fieldset>
+                {% for error in form.delete_mode.errors %}
+                  <div class="text-danger small">
+                    {{ error }}
+                  </div>
+                {% endfor %}
+              </div>
+              <div class="text-muted small">
+                {% blocktrans %}
+                  Deleting aliases clears matched alias links on related bench rows.
+                  Deleting judge people clears their bench links first, then deletes
+                  the judge person together with all aliases connected to it.
+                {% endblocktrans %}
+              </div>
+            </div>
+            <div class="card-footer">
+              <button type="submit"
+                      class="btn btn-danger btn-block"
+                      name="action"
+                      value="delete_records">
+                {% trans "Delete selected records" %}
+              </button>
+              <a href="{% url 'admin:peachjam_judgeperson_changelist' %}"
+                 class="btn btn-secondary btn-block">{% trans "Back to judges" %}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

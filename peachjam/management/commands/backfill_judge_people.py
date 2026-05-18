@@ -4,13 +4,15 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 
 from peachjam.analysis.judges import (
+    assign_legacy_judge_to_person,
     canonical_name_from_aliases,
-    merge_judges,
+    get_or_create_judge_person,
+    merge_judge_people,
     normalize_judge_name,
     parse_judge_name,
     unique_judge_slug,
 )
-from peachjam.models import Bench, Judge, JudgeAlias, JudgePerson
+from peachjam.models import Judge, JudgeAlias, JudgePerson
 
 
 class Command(BaseCommand):
@@ -51,7 +53,7 @@ class Command(BaseCommand):
             aliases = list(
                 JudgeAlias.objects.filter(normalized_name__in=alias_normalized_names)
                 .select_related("judge_person")
-                .order_by("-is_verified", "pk")
+                .order_by("pk")
             )
             primary = self.get_or_create_primary(
                 aliases=aliases,
@@ -74,13 +76,7 @@ class Command(BaseCommand):
                 for judge in judges:
                     alias = alias_by_name.get(judge.name)
                     if alias is None:
-                        alias = JudgeAlias.objects.create(
-                            judge_person=primary,
-                            name=judge.name,
-                            normalized_name=normalize_judge_name(judge.name),
-                            description=judge.description,
-                            is_verified=True,
-                        )
+                        alias, _ = assign_legacy_judge_to_person(judge, primary)
                         alias_by_name[judge.name] = alias
                     else:
                         updated_fields = []
@@ -91,17 +87,16 @@ class Command(BaseCommand):
                         if alias.normalized_name != judge_normalized_name:
                             alias.normalized_name = judge_normalized_name
                             updated_fields.append("normalized_name")
-                        if not alias.description and judge.description:
-                            alias.description = judge.description
-                            updated_fields.append("description")
                         if updated_fields:
                             alias.save(update_fields=updated_fields)
 
-                    self.update_bench_rows(
-                        judge=judge, judge_person=primary, alias=alias
-                    )
+                    if judge.description and not primary.description:
+                        primary.description = judge.description
+                        primary.save(update_fields=["description"])
 
-                merge_judges(primary, list(duplicates))
+                    assign_legacy_judge_to_person(judge, primary, alias_name=alias.name)
+
+                merge_judge_people(primary, list(duplicates))
 
             group_count += 1
 
@@ -155,43 +150,7 @@ class Command(BaseCommand):
                 )
             )
 
-        return JudgePerson.objects.create(
-            full_name=canonical_name,
-            slug=unique_judge_slug(JudgePerson, canonical_name),
-        )
-
-    def update_bench_rows(self, judge, judge_person, alias):
-        parts = parse_judge_name(judge.name)
-
-        Bench.objects.filter(
-            judge=judge,
-            is_manual_override=False,
-        ).update(
-            judge_person=judge_person,
-            matched_alias=alias,
-            extracted_name=judge.name,
-            title=parts["title"],
-        )
-        Bench.objects.filter(
-            judge=judge,
-            is_manual_override=True,
-            judge_person__isnull=True,
-        ).update(judge_person=judge_person)
-        Bench.objects.filter(
-            judge=judge,
-            is_manual_override=True,
-            matched_alias__isnull=True,
-        ).update(matched_alias=alias)
-        Bench.objects.filter(
-            judge=judge,
-            is_manual_override=True,
-            extracted_name="",
-        ).update(extracted_name=judge.name)
-        Bench.objects.filter(
-            judge=judge,
-            is_manual_override=True,
-            title="",
-        ).update(title=parts["title"])
+        return get_or_create_judge_person(canonical_name)[0]
 
     def print_dry_run_group(self, canonical_name, judges):
         self.stdout.write(f"JudgePerson(full_name='{canonical_name}')")

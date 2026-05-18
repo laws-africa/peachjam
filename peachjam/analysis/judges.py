@@ -42,6 +42,11 @@ def normalize_judge_name(value):
 
 
 def parse_judge_name(value):
+    """This splits a source judge string into raw, normalized, canonical, and title parts.
+
+    Example: ``ABBAN, J.A.`` becomes raw_name ``ABBAN, J.A.``, normalized_name
+    ``abban ja``, base_name ``abban``, and title ``JA``.
+    """
     raw_name = (value or "").strip()
     normalized_name = normalize_judge_name(raw_name)
     tokens = normalized_name.split()

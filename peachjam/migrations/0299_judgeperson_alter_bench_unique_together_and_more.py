@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0298_move_arbitration_to_peachjam_pro"),
+        ("peachjam", "0297_alter_offencecategory_options_remove_flynote_slug_and_more"),
     ]
 
     operations = [
@@ -24,7 +24,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "full_name",
-                    models.CharField(max_length=1024, verbose_name="full name"),
+                    models.CharField(
+                        max_length=1024,
+                        unique=True,
+                        verbose_name="full name",
+                    ),
                 ),
                 (
                     "slug",
@@ -66,14 +70,6 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
-                    "description",
-                    models.TextField(blank=True, verbose_name="description"),
-                ),
-                (
-                    "is_verified",
-                    models.BooleanField(default=True, verbose_name="verified"),
-                ),
-                (
                     "judge_person",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
@@ -95,6 +91,10 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 default="",
+                help_text=(
+                    "Judge name exactly as it appeared in the source, "
+                    "for example 'ABBAN, J.A.'."
+                ),
                 max_length=1024,
                 verbose_name="extracted name",
             ),
@@ -103,13 +103,21 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="bench",
             name="is_manual_override",
-            field=models.BooleanField(default=False, verbose_name="manual override"),
+            field=models.BooleanField(
+                default=False,
+                help_text=(
+                    "Tick when you have manually corrected the canonical "
+                    "judge mapping for this row."
+                ),
+                verbose_name="manual override",
+            ),
         ),
         migrations.AddField(
             model_name="bench",
             name="judge_person",
             field=models.ForeignKey(
                 blank=True,
+                help_text="Canonical judge identity for this bench row.",
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="bench_entries",
@@ -122,6 +130,10 @@ class Migration(migrations.Migration):
             name="matched_alias",
             field=models.ForeignKey(
                 blank=True,
+                help_text=(
+                    "Alias that matched the extracted source name to the "
+                    "canonical judge."
+                ),
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="bench_entries",
@@ -135,6 +147,10 @@ class Migration(migrations.Migration):
             field=models.CharField(
                 blank=True,
                 default="",
+                help_text=(
+                    "Judicial title parsed from the source name, for "
+                    "example 'JA' or 'DCJ'."
+                ),
                 max_length=32,
                 verbose_name="title",
             ),

@@ -14,6 +14,8 @@ from peachjam.views import (
     FlynoteManagerTreePathView,
     FlynoteManagerTreeView,
     FlynoteManagerView,
+    JudgeAliasesAutocomplete,
+    JudgePeopleAutocomplete,
     JudgesAutocomplete,
     JudgmentWorksAutocomplete,
     PeachjamAdminLoginView,
@@ -37,6 +39,16 @@ urlpatterns = [
         "autocomplete/judges",
         JudgesAutocomplete.as_view(),
         name="autocomplete-judges",
+    ),
+    path(
+        "autocomplete/judge-people",
+        JudgePeopleAutocomplete.as_view(),
+        name="autocomplete-judge-people",
+    ),
+    path(
+        "autocomplete/judge-aliases",
+        JudgeAliasesAutocomplete.as_view(),
+        name="autocomplete-judge-aliases",
     ),
     path(
         "autocomplete/judgments",
