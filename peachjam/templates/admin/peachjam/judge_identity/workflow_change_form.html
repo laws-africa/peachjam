@@ -14,7 +14,7 @@
     <li class="breadcrumb-item active">{{ title }}</li>
   </ol>
 {% endblock %}
-{% block content_title %}{{ title }}{% endblock %}
+{% block content_title %}<span id="main-page-heading">{{ title }}</span>{% endblock %}
 {% block content %}
   <div id="content-main" class="col-12">
     {% if form.errors %}
@@ -83,30 +83,37 @@
               {% if alias_workflow_rows %}
                 <div class="table-responsive">
                   <table class="table table-striped table-hover mb-0">
+                    <caption class="visually-hidden">
+                      {% trans "Alias connections table with selection checkboxes, current judge person, legacy judge, bench rows, judgments, and status." %}
+                    </caption>
                     <thead>
                       <tr>
-                        <th style="width: 44px;">{% trans "Use" %}</th>
-                        <th>{% trans "Alias" %}</th>
-                        <th>{% trans "Judge person" %}</th>
-                        <th>{% trans "Legacy judge" %}</th>
-                        <th>{% trans "Bench rows" %}</th>
-                        <th>{% trans "Judgments" %}</th>
-                        <th>{% trans "Status" %}</th>
+                        <th scope="col" style="width: 44px;">{% trans "Use" %}</th>
+                        <th scope="col">{% trans "Alias" %}</th>
+                        <th scope="col">{% trans "Judge person" %}</th>
+                        <th scope="col">{% trans "Legacy judge" %}</th>
+                        <th scope="col">{% trans "Bench rows" %}</th>
+                        <th scope="col">{% trans "Judgments" %}</th>
+                        <th scope="col">{% trans "Status" %}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {% for row in alias_workflow_rows %}
                         <tr>
                           <td>
+                            <label class="visually-hidden" for="id_selected_alias_{{ row.alias.pk }}">
+                              {% blocktrans with alias_name=row.alias.name %}Select alias {{ alias_name }}{% endblocktrans %}
+                            </label>
                             <input type="checkbox"
+                                   id="id_selected_alias_{{ row.alias.pk }}"
                                    name="selected_aliases"
                                    value="{{ row.alias.pk }}"
                                    {% if row.alias.pk|stringformat:"s" in selected_alias_ids %}checked{% endif %}/>
                           </td>
-                          <td>
+                          <th scope="row">
                             <strong>{{ row.alias.name }}</strong>
                             {% for note in row.notes %}<div class="text-muted small">{{ note }}</div>{% endfor %}
-                          </td>
+                          </th>
                           <td>
                             <a href="{% url 'admin:peachjam_judgeperson_change' row.current_person.pk %}">{{ row.current_person.full_name }}</a>
                           </td>
@@ -129,12 +136,18 @@
                 </div>
               {% else %}
                 <div class="p-3">
-                  <p class="mb-0 text-muted">{% trans "No aliases matched this filter." %}</p>
+                  <p class="mb-0 text-muted">
+                    {% trans "No aliases matched this filter." %}
+                  </p>
                 </div>
               {% endif %}
             </div>
             <div class="card-footer text-muted">
-              {% for error in form.selected_aliases.errors %}<div class="text-danger small mb-2">{{ error }}</div>{% endfor %}
+              {% for error in form.selected_aliases.errors %}
+                <div class="text-danger small mb-2">
+                  {{ error }}
+                </div>
+              {% endfor %}
               {% blocktrans with workflow_limit=workflow_limit %}Showing at most {{ workflow_limit }} aliases at a time.{% endblocktrans %}
             </div>
           </div>
@@ -148,24 +161,27 @@
               {% if judge_person_workflow_rows %}
                 <div class="table-responsive">
                   <table class="table table-striped table-hover mb-0">
+                    <caption class="visually-hidden">
+                      {% trans "Judge people table with selection checkboxes, alias counts, bench rows, judgments, and status." %}
+                    </caption>
                     <thead>
                       <tr>
-                        <th style="width: 44px;">
+                        <th scope="col" style="width: 44px;">
                           {% trans "Use" %}
                         </th>
-                        <th>
+                        <th scope="col">
                           {% trans "Judge person" %}
                         </th>
-                        <th>
+                        <th scope="col">
                           {% trans "Aliases" %}
                         </th>
-                        <th>
+                        <th scope="col">
                           {% trans "Bench rows" %}
                         </th>
-                        <th>
+                        <th scope="col">
                           {% trans "Judgments" %}
                         </th>
-                        <th>
+                        <th scope="col">
                           {% trans "Status" %}
                         </th>
                       </tr>
@@ -174,19 +190,24 @@
                       {% for row in judge_person_workflow_rows %}
                         <tr>
                           <td>
+                            <label class="visually-hidden"
+                                   for="id_selected_judge_person_{{ row.judge_person.pk }}">
+                              {% blocktrans with judge_person_name=row.judge_person.full_name %}Select judge person {{ judge_person_name }}{% endblocktrans %}
+                            </label>
                             <input type="checkbox"
+                                   id="id_selected_judge_person_{{ row.judge_person.pk }}"
                                    name="selected_judge_people"
                                    value="{{ row.judge_person.pk }}"
                                    {% if row.judge_person.pk|stringformat:"s" in selected_judge_person_ids %}checked{% endif %}/>
                           </td>
-                          <td>
+                          <th scope="row">
                             <a href="{% url 'admin:peachjam_judgeperson_change' row.judge_person.pk %}">{{ row.judge_person.full_name }}</a>
                             {% for note in row.notes %}
                               <div class="text-muted small">
                                 {{ note }}
                               </div>
                             {% endfor %}
-                          </td>
+                          </th>
                           <td>
                             {{ row.alias_count }}
                           </td>
