@@ -2832,7 +2832,6 @@ class FlynoteUpdater:
         can proceed safely.
         """
         locked_parent = Flynote.objects.select_for_update().get(pk=parent.pk)
-        locked_parent.refresh_from_db(fields=["path", "depth", "numchild"])
 
         if locked_parent.numchild and locked_parent.get_last_child() is None:
             log.warning(
