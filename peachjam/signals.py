@@ -79,7 +79,11 @@ def citation_link_saved_update_extracted_citations(sender, instance, raw, **kwar
 @receiver(signals.post_delete, sender=CitationLink)
 def citation_link_deleted_update_extracted_citations(sender, instance, **kwargs):
     """Update extracted citations when source citation links are deleted."""
-    update_extracted_citations_for_a_work(instance.document.work_id)
+    try:
+        update_extracted_citations_for_a_work(instance.document.work_id)
+    except CoreDocument.DoesNotExist:
+        # the citation link was deleted when the document was deleted
+        pass
 
 
 @receiver(signals.post_save, sender=ExtractedCitation)
