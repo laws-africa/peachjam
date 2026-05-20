@@ -62,16 +62,12 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1.6.0
         with:
           packages: libreoffice poppler-utils pandoc
-          version: test-apt-v1
+          version: test-apt-v3
           execute_install_scripts: true
-      - name: Inspect cached system packages
+      - name: Install system packages
         run: |
-          which pandoc || true
-          pandoc --version || true
-          which pdftotext || true
-          pdftotext -v || true
-          which soffice || true
-          soffice --version || true
+          sudo apt-get update
+          sudo apt-get install -y libreoffice poppler-utils pandoc
       - name: Install deps
         run: |
           python -m pip install --upgrade "setuptools<82" wheel
