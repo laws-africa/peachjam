@@ -59,6 +59,10 @@ class JudgmentListView(TemplateView):
 
 class FlynoteViewMixin:
     @staticmethod
+    def flynote_tree_enabled():
+        return Judgment.flynote_tree_enabled()
+
+    @staticmethod
     def flynote_topics_enabled():
         return Judgment.flynote_topics_enabled()
 
@@ -135,7 +139,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     paginate_by = 30
 
     def get(self, request, *args, **kwargs):
-        if not self.flynote_topics_enabled() or not Flynote.get_root_nodes().exists():
+        if not self.flynote_tree_enabled() or not Flynote.get_root_nodes().exists():
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
@@ -202,7 +206,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
-        if not self.flynote_topics_enabled():
+        if not self.flynote_tree_enabled():
             return redirect(reverse("judgment_list"))
         self.flynote = get_object_or_404(Flynote, pk=self.kwargs["pk"])
         return super().dispatch(request, *args, **kwargs)

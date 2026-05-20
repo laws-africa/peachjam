@@ -2216,7 +2216,7 @@ class FlynoteListViewTest(TestCase):
             "SHOW_FLYNOTE_TOPICS": False,
         }
     )
-    def test_redirects_to_judgment_list_when_topic_setting_disabled(self):
+    def test_renders_topic_list_page_when_topic_ui_setting_disabled(self):
         judgment = Judgment.objects.create(
             case_name="View Test",
             jurisdiction=Country.objects.first(),
@@ -2229,8 +2229,8 @@ class FlynoteListViewTest(TestCase):
         self.assertTrue(Flynote.get_root_nodes().exists())
 
         response = self.client.get(reverse("flynote_list"))
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "peachjam/flynote/list.html")
 
 
 @override_settings(
@@ -2356,6 +2356,21 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": False,
+        }
+    )
+    def test_flynote_detail_remains_accessible_when_topic_setting_disabled(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, leaf.name)
 
     def test_linked_flynotes_template_uses_semantic_list_markup(self):
         html = render_to_string(
