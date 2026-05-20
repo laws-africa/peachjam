@@ -62,7 +62,7 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1.6.0
         with:
           packages: libreoffice poppler-utils pandoc
-          version: test-apt-v3
+          version: test-apt-v1
           execute_install_scripts: true
       - name: Install system packages
         run: |
