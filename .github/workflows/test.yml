@@ -64,6 +64,14 @@ jobs:
           packages: libreoffice poppler-utils pandoc
           version: test-apt-v1
           execute_install_scripts: true
+      - name: Inspect cached system packages
+        run: |
+          which pandoc || true
+          pandoc --version || true
+          which pdftotext || true
+          pdftotext -v || true
+          which soffice || true
+          soffice --version || true
       - name: Ensure system packages are installed
         run: |
           sudo apt-get update
