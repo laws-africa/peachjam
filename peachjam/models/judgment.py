@@ -471,10 +471,14 @@ class Judgment(CoreDocument):
         return self.title
 
     @staticmethod
+    def flynote_tree_enabled():
+        return settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+
+    @staticmethod
     def flynote_topics_enabled():
-        return settings.PEACHJAM.get(
-            "SUMMARISE_USE_FLYNOTE_TREE", False
-        ) and settings.PEACHJAM.get("SHOW_FLYNOTE_TOPICS", False)
+        return Judgment.flynote_tree_enabled() and settings.PEACHJAM.get(
+            "SHOW_FLYNOTE_TOPICS", False
+        )
 
     @cached_property
     def linked_flynotes(self):
