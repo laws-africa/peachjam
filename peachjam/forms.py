@@ -9,7 +9,7 @@ from django import forms
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMultiAlternatives
@@ -22,6 +22,7 @@ from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 from languages_plus.models import Language
+from turnstile.fields import TurnstileField
 
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.models import (
@@ -45,7 +46,7 @@ User = get_user_model()
 
 
 def get_recaptcha_field():
-    """Return a captcha field that is disabled when running in DEBUG mode."""
+    """Return a human-verification field that is disabled when running in DEBUG mode."""
 
     if settings.DEBUG:
         return forms.BooleanField(
@@ -54,7 +55,15 @@ def get_recaptcha_field():
             initial=True,
         )
 
-    return ReCaptchaField(widget=ReCaptchaV2Invisible)
+    if settings.RECAPTCHA_PUBLIC_KEY and settings.RECAPTCHA_PRIVATE_KEY:
+        return ReCaptchaField(widget=ReCaptchaV2Invisible)
+
+    if settings.TURNSTILE_SECRET and settings.TURNSTILE_SITEKEY:
+        return TurnstileField()
+
+    raise ImproperlyConfigured(
+        "In production, either RECAPTCHA or TURNSTILE settings must be configured."
+    )
 
 
 def work_choices():

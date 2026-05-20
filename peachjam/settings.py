@@ -126,6 +126,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_htmx",
     "django_recaptcha",
+    "turnstile",
     "django_comments",
     "guardian",
 ]
@@ -286,11 +287,17 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
 ACCOUNT_ADAPTER = "peachjam.auth.AccountAdapter"
 
-# Recaptcha
+# Only one of Recaptcha or Turnstile should be configured
+# Google Recaptcha
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY", "")
 if DEBUG:
     SILENCED_SYSTEM_CHECKS = ["django_recaptcha.recaptcha_test_key_error"]
+
+# Cloudflare Turnstile
+if not DEBUG:
+    TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY", "")
+    TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "")
 
 
 if DEBUG:
