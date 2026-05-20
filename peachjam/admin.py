@@ -1425,10 +1425,8 @@ class BenchInline(admin.TabularInline):
     fields = (
         "judge",
         "extracted_name",
-        "title",
         "matched_alias",
         "judge_person",
-        "is_manual_override",
     )
     verbose_name = gettext_lazy("judge")
     verbose_name_plural = gettext_lazy("judges")
@@ -2367,8 +2365,8 @@ class JudgeAdmin(admin.ModelAdmin):
 class JudgeAliasInline(admin.TabularInline):
     model = JudgeAlias
     extra = 1
-    fields = ("name", "normalized_name")
-    readonly_fields = ("normalized_name",)
+    fields = ("name", "title", "normalized_name")
+    readonly_fields = ("title", "normalized_name")
 
 
 @admin.register(JudgePerson)
@@ -2380,8 +2378,8 @@ class JudgePersonAdmin(admin.ModelAdmin):
 
 @admin.register(JudgeAlias)
 class JudgeAliasAdmin(admin.ModelAdmin):
-    list_display = ("name", "judge_person", "normalized_name")
-    search_fields = ("name", "normalized_name", "judge_person__full_name")
+    list_display = ("name", "title", "judge_person", "normalized_name")
+    search_fields = ("name", "title", "normalized_name", "judge_person__full_name")
     autocomplete_fields = ("judge_person",)
 
 

@@ -23,7 +23,7 @@ class JudgeParsingTests(TestCase):
 
 
 class JudgeAliasModelTests(TestCase):
-    def test_save_sets_normalized_name(self):
+    def test_save_sets_normalized_name_and_title(self):
         judge_person = JudgePerson.objects.create(full_name="Abban", slug="abban")
 
         alias = JudgeAlias.objects.create(
@@ -32,6 +32,7 @@ class JudgeAliasModelTests(TestCase):
         )
 
         self.assertEqual("abban ja", alias.normalized_name)
+        self.assertEqual("JA", alias.title)
 
 
 class JudgeIdentityResolutionTests(TestCase):
@@ -104,9 +105,7 @@ class BackfillJudgePeopleCommandTests(TestCase):
         self.bench_three = Bench.objects.create(
             judgment=self.judgment,
             judge=self.legacy_judge_three,
-            title="Manual title",
             extracted_name="Manual extracted",
-            is_manual_override=True,
         )
 
     def test_command_backfills_legacy_judges_into_new_tables(self):
@@ -121,6 +120,9 @@ class BackfillJudgePeopleCommandTests(TestCase):
         self.assertEqual(alias_one.judge_person_id, alias_two.judge_person_id)
         self.assertEqual(alias_one.judge_person_id, alias_three.judge_person_id)
         self.assertEqual("abban", alias_one.judge_person.full_name.casefold())
+        self.assertEqual("JA", alias_one.title)
+        self.assertEqual("JA", alias_two.title)
+        self.assertEqual("J", alias_three.title)
 
         self.bench_one.refresh_from_db()
         self.bench_two.refresh_from_db()
@@ -129,17 +131,14 @@ class BackfillJudgePeopleCommandTests(TestCase):
         self.assertEqual(alias_one.judge_person_id, self.bench_one.judge_person_id)
         self.assertEqual(alias_one.pk, self.bench_one.matched_alias_id)
         self.assertEqual("Abban JA", self.bench_one.extracted_name)
-        self.assertEqual("JA", self.bench_one.title)
 
         self.assertEqual(alias_one.judge_person_id, self.bench_two.judge_person_id)
         self.assertEqual(alias_two.pk, self.bench_two.matched_alias_id)
         self.assertEqual("ABBAN, J.A.", self.bench_two.extracted_name)
-        self.assertEqual("JA", self.bench_two.title)
 
         self.assertEqual(alias_three.judge_person_id, self.bench_three.judge_person_id)
         self.assertEqual(alias_three.pk, self.bench_three.matched_alias_id)
         self.assertEqual("Manual extracted", self.bench_three.extracted_name)
-        self.assertEqual("Manual title", self.bench_three.title)
 
     def test_command_is_safe_to_run_twice(self):
         call_command("backfill_judge_people")
@@ -167,11 +166,19 @@ class BackfillJudgePeopleCommandTests(TestCase):
         output = out.getvalue()
 
         self.assertIn("JudgePerson(full_name='Abban')", output)
-        self.assertIn("JudgeAlias(name='Abban JA', normalized_name='abban ja')", output)
         self.assertIn(
-            "JudgeAlias(name='ABBAN, J.A.', normalized_name='abban ja')", output
+            "JudgeAlias(name='Abban JA', normalized_name='abban ja', title='JA')",
+            output,
         )
-        self.assertIn("JudgeAlias(name='Abban, J', normalized_name='abban j')", output)
+        self.assertIn("matched_alias='Abban JA', extracted_name='Abban JA'", output)
+        self.assertIn(
+            "JudgeAlias(name='ABBAN, J.A.', normalized_name='abban ja', title='JA')",
+            output,
+        )
+        self.assertIn(
+            "JudgeAlias(name='Abban, J', normalized_name='abban j', title='J')",
+            output,
+        )
 
 
 class JudgeIdentityWorkflowAdminTests(TestCase):
@@ -219,16 +226,13 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
             judge_person=self.duplicate,
             matched_alias=self.alias_one,
             extracted_name="Abban JA",
-            title="JA",
         )
         self.bench_two = Bench.objects.create(
             judgment=self.judgment,
             judge=self.legacy_judge_two,
             judge_person=self.duplicate,
             matched_alias=self.alias_two,
-            title="Manual title",
             extracted_name="Manual extracted",
-            is_manual_override=True,
         )
 
     def test_workflow_page_loads(self):
@@ -279,12 +283,10 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
         self.assertEqual(self.bench_one.judge_person_id, self.target.pk)
         self.assertEqual(self.bench_one.matched_alias_id, alias_one.pk)
         self.assertEqual(self.bench_one.extracted_name, "Abban JA")
-        self.assertEqual(self.bench_one.title, "JA")
 
         self.assertEqual(self.bench_two.judge_person_id, self.target.pk)
         self.assertEqual(self.bench_two.matched_alias_id, alias_two.pk)
         self.assertEqual(self.bench_two.extracted_name, "Manual extracted")
-        self.assertEqual(self.bench_two.title, "Manual title")
 
     def test_workflow_can_create_canonical_judge_from_selected_legacy_judges(self):
         response = self.client.post(

@@ -72,15 +72,15 @@ class Command(BaseCommand):
                         )
                         alias_by_name[judge.name] = alias
                     else:
+                        parts = judge_identity_service.parse_judge_name(judge.name)
                         updated_fields = []
                         if alias.judge_person_id != primary.pk:
                             alias.judge_person = primary
                             updated_fields.append("judge_person")
-                        if (
-                            alias.normalized_name
-                            != judge_identity_service.normalize_judge_name(judge.name)
-                        ):
+                        if alias.normalized_name != parts["normalized_name"]:
                             updated_fields.append("normalized_name")
+                        if alias.title != parts["title"]:
+                            updated_fields.append("title")
                         if updated_fields:
                             alias.save(update_fields=updated_fields)
 
@@ -116,14 +116,14 @@ class Command(BaseCommand):
         self.stdout.write(f"JudgePerson(full_name='{canonical_name}')")
         for judge in judges:
             parts = judge_identity_service.parse_judge_name(judge.name)
-            title = parts["title"] or "-"
             self.stdout.write(
                 "  JudgeAlias("
                 f"name='{judge.name}', "
-                f"normalized_name='{parts['normalized_name']}') "
+                f"normalized_name='{parts['normalized_name']}', "
+                f"title='{parts['title'] or '-'}') "
                 "-> Bench("
                 f"judge='{judge.name}', "
                 f"judge_person='{canonical_name}', "
                 f"matched_alias='{judge.name}', "
-                f"title='{title}')"
+                f"extracted_name='{judge.name}')"
             )

@@ -60,7 +60,9 @@ class JudgeAliasesAutocomplete(autocomplete.Select2QuerySetView):
         qs = JudgeAlias.objects.select_related("judge_person")
         if self.q:
             qs = qs.filter(
-                Q(name__icontains=self.q) | Q(judge_person__full_name__icontains=self.q)
+                Q(name__icontains=self.q)
+                | Q(title__icontains=self.q)
+                | Q(judge_person__full_name__icontains=self.q)
             ).distinct()
         return qs
 

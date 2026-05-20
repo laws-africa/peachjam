@@ -251,6 +251,7 @@ class JudgeIdentityWorkflowMixin:
         if query:
             alias_qs = alias_qs.filter(
                 Q(name__icontains=query)
+                | Q(title__icontains=query)
                 | Q(normalized_name__icontains=query)
                 | Q(judge_person__full_name__icontains=query)
             ).distinct()
@@ -277,7 +278,6 @@ class JudgeIdentityWorkflowMixin:
             .annotate(
                 bench_rows=Count("pk"),
                 judgments=Count("judgment_id", distinct=True),
-                manual_overrides=Count("pk", filter=Q(is_manual_override=True)),
             )
         }
 
@@ -305,12 +305,6 @@ class JudgeIdentityWorkflowMixin:
                     gettext_lazy(
                         "{} alias records currently share this exact name."
                     ).format(alias_duplicates[alias.name])
-                )
-            if stats.get("manual_overrides"):
-                notes.append(
-                    gettext_lazy("{} manual bench overrides use this alias.").format(
-                        stats["manual_overrides"]
-                    )
                 )
             if legacy_judge is None:
                 notes.append(

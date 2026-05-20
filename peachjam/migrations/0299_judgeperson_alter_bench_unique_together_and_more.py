@@ -70,6 +70,18 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 (
+                    "title",
+                    models.CharField(
+                        blank=True,
+                        help_text=(
+                            "Judicial title parsed from the alias name, for "
+                            "example 'JA' or 'DCJ'."
+                        ),
+                        max_length=32,
+                        verbose_name="title",
+                    ),
+                ),
+                (
                     "judge_person",
                     models.ForeignKey(
                         on_delete=django.db.models.deletion.CASCADE,
@@ -84,6 +96,19 @@ class Migration(migrations.Migration):
                 "verbose_name_plural": "judge aliases",
                 "ordering": ("name", "pk"),
             },
+        ),
+        migrations.AddField(
+            model_name="bench",
+            name="judge_person",
+            field=models.ForeignKey(
+                blank=True,
+                help_text="Canonical judge identity for this bench row.",
+                null=True,
+                on_delete=django.db.models.deletion.PROTECT,
+                related_name="bench_entries",
+                to="peachjam.judgeperson",
+                verbose_name="judge",
+            ),
         ),
         migrations.AddField(
             model_name="bench",
@@ -102,36 +127,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="bench",
-            name="is_manual_override",
-            field=models.BooleanField(
-                default=False,
-                help_text=(
-                    "Tick when you have manually corrected the canonical "
-                    "judge mapping for this row."
-                ),
-                verbose_name="manual override",
-            ),
-        ),
-        migrations.AddField(
-            model_name="bench",
-            name="judge_person",
-            field=models.ForeignKey(
-                blank=True,
-                help_text="Canonical judge identity for this bench row.",
-                null=True,
-                on_delete=django.db.models.deletion.PROTECT,
-                related_name="bench_entries",
-                to="peachjam.judgeperson",
-                verbose_name="judge",
-            ),
-        ),
-        migrations.AddField(
-            model_name="bench",
             name="matched_alias",
             field=models.ForeignKey(
                 blank=True,
                 help_text=(
-                    "Alias that matched the extracted source name to the "
+                    "Alias that matched the legacy judge name to the "
                     "canonical judge."
                 ),
                 null=True,
@@ -140,20 +140,5 @@ class Migration(migrations.Migration):
                 to="peachjam.judgealias",
                 verbose_name="matched alias",
             ),
-        ),
-        migrations.AddField(
-            model_name="bench",
-            name="title",
-            field=models.CharField(
-                blank=True,
-                default="",
-                help_text=(
-                    "Judicial title parsed from the source name, for "
-                    "example 'JA' or 'DCJ'."
-                ),
-                max_length=32,
-                verbose_name="title",
-            ),
-            preserve_default=False,
         ),
     ]

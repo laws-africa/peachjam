@@ -121,6 +121,14 @@ class JudgeAlias(models.Model):
     normalized_name = models.CharField(
         _("normalized name"), max_length=1024, null=False, blank=False, db_index=True
     )
+    title = models.CharField(
+        _("title"),
+        max_length=32,
+        blank=True,
+        help_text=_(
+            "Judicial title parsed from the alias name, for example 'JA' or 'DCJ'."
+        ),
+    )
 
     class Meta:
         ordering = ("name", "pk")
@@ -131,7 +139,9 @@ class JudgeAlias(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.normalized_name = judge_identity_service.normalize_judge_name(self.name)
+        parts = judge_identity_service.parse_judge_name(self.name)
+        self.normalized_name = parts["normalized_name"]
+        self.title = parts["title"]
         return super().save(*args, **kwargs)
 
 
@@ -335,7 +345,7 @@ class CourtRegistry(models.Model):
 
 class Bench(models.Model):
     # Bench is a real through model because it preserves judge order and stores
-    # canonical judge identity data for each source-level judge entry.
+    # canonical judge identity links for each source-level judge entry.
     judgment = models.ForeignKey(
         "Judgment",
         related_name="bench",
@@ -359,17 +369,7 @@ class Bench(models.Model):
         blank=True,
         related_name="bench_entries",
         verbose_name=_("matched alias"),
-        help_text=_(
-            "Alias that matched the extracted source name to the canonical judge."
-        ),
-    )
-    title = models.CharField(
-        _("title"),
-        max_length=32,
-        blank=True,
-        help_text=_(
-            "Judicial title parsed from the source name, for example 'JA' or 'DCJ'."
-        ),
+        help_text=_("Alias that matched the legacy judge name to the canonical judge."),
     )
     extracted_name = models.CharField(
         _("extracted name"),
@@ -377,13 +377,6 @@ class Bench(models.Model):
         blank=True,
         help_text=_(
             "Judge name exactly as it appeared in the source, for example 'ABBAN, J.A.'."
-        ),
-    )
-    is_manual_override = models.BooleanField(
-        _("manual override"),
-        default=False,
-        help_text=_(
-            "Tick when you have manually corrected the canonical judge mapping for this row."
         ),
     )
 

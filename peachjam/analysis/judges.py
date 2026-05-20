@@ -185,20 +185,23 @@ class JudgeIdentityService:
     def ensure_judge_alias(self, judge_person, name):
         from peachjam.models import JudgeAlias
 
+        parts = self.parse_judge_name(name)
         alias = (
             JudgeAlias.objects.filter(judge_person=judge_person, name=name)
             .order_by("pk")
             .first()
         )
         if alias is not None:
-            if alias.normalized_name != self.normalize_judge_name(name):
-                alias.save(update_fields=["normalized_name"])
+            if (
+                alias.normalized_name != parts["normalized_name"]
+                or alias.title != parts["title"]
+            ):
+                alias.save(update_fields=["normalized_name", "title"])
             return alias, False
 
         return (JudgeAlias.objects.create(judge_person=judge_person, name=name), True)
 
     def update_bench_rows(self, queryset, judge_person, matched_alias, source_name):
-        title = self.parse_judge_name(source_name)["title"]
         updated_count = 0
 
         for bench in queryset:
@@ -212,15 +215,9 @@ class JudgeIdentityService:
                 bench.matched_alias = matched_alias
                 update_fields.append("matched_alias")
 
-            if not bench.is_manual_override or not bench.extracted_name:
-                if bench.extracted_name != source_name:
-                    bench.extracted_name = source_name
-                    update_fields.append("extracted_name")
-
-            if not bench.is_manual_override or not bench.title:
-                if bench.title != title:
-                    bench.title = title
-                    update_fields.append("title")
+            if source_name and not bench.extracted_name:
+                bench.extracted_name = source_name
+                update_fields.append("extracted_name")
 
             if update_fields:
                 bench.save(update_fields=update_fields)
