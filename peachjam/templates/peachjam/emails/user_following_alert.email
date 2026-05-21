@@ -13,15 +13,7 @@
     <b>{{ item.followed_object }}</b>
     <ul>
       {% for doc in item.documents %}
-        <li style="margin-bottom: 1rem">
-          <a href="{% absolute_url site doc.expression_frbr_uri %}?utm_campaign=following&utm_source=alert&utm_medium=email">{{ doc.title }}</a>
-          {% if doc.blurb %}<div>{{ doc.blurb }}</div>{% endif %}
-          {% if doc.flynote %}
-            <div style="margin-top: 0.5rem; font-style: italic">
-              {{ doc.flynote | linebreaksbr }}
-            </div>
-          {% endif %}
-        </li>
+        {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.expression_frbr_uri utm_campaign="following" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
       {% endfor %}
     </ul>
     <hr/>
