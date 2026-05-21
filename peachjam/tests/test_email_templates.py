@@ -135,11 +135,10 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         html = message.alternatives[0][0] if message.alternatives else message.body
 
         self.assert_alert_document_item_spacing(html)
-        self.assertIn("Short blurb", html)
-        self.assertNotIn("&lt;b&gt;blurb&lt;/b&gt;", html)
+        self.assertIn("Short &lt;b&gt;blurb&lt;/b&gt;", html)
         self.assertIn("First line<br>Second line", html)
 
-    def test_citation_alert_email_strips_blurb_markup(self):
+    def test_citation_alert_email_escapes_blurb_markup(self):
         context = self.base_context("example.org")
         context.update(
             {
@@ -175,11 +174,10 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         html = message.alternatives[0][0] if message.alternatives else message.body
 
         self.assert_alert_document_item_spacing(html)
-        self.assertIn("Short blurb", html)
-        self.assertNotIn("<b>blurb</b>", html)
+        self.assertIn("Short &lt;b&gt;blurb&lt;/b&gt;", html)
         self.assertIn("First line<br>Second line", html)
 
-    def test_relationship_alert_email_strips_blurb_markup(self):
+    def test_relationship_alert_email_escapes_blurb_markup(self):
         context = self.base_context("example.org")
         context.update(
             {
@@ -217,8 +215,7 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         html = message.alternatives[0][0] if message.alternatives else message.body
 
         self.assert_alert_document_item_spacing(html)
-        self.assertIn("Short blurb", html)
-        self.assertNotIn("<b>blurb</b>", html)
+        self.assertIn("Short &lt;b&gt;blurb&lt;/b&gt;", html)
         self.assertIn("First line<br>Second line", html)
 
     def test_search_alert_email_does_not_duplicate_protocol(self):
