@@ -16,9 +16,7 @@
             </a>
             {% if doc.blurb %}<div>{{ doc.blurb | safe }}</div>{% endif %}
             {% if doc.flynote %}
-              <div>
-                <em>{{ doc.flynote | linebreaksbr }}</em>
-              </div>
+              <div style="margin-top: 0.5rem; font-style: italic">{{ doc.flynote | linebreaksbr }}</div>
             {% endif %}
           </li>
         {% endfor %}

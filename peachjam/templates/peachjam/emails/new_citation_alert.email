@@ -19,8 +19,8 @@
           <a href="{% absolute_url site citing.document.get_absolute_url %}?utm_campaign=new_citation&utm_source=alert&utm_medium=email">{{ citing.document.title }}</a>
           {% if citing.document.blurb %}<div>{{ citing.blurb | safe }}</div>{% endif %}
           {% if citing.document.flynote %}
-            <div>
-              <em>{{ citing.document.flynote | linebreaksbr }}</em>
+            <div style="margin-top: 0.5rem; font-style: italic">
+              {{ citing.document.flynote | linebreaksbr }}
             </div>
           {% endif %}
         </li>

@@ -98,6 +98,42 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             html,
         )
 
+    def test_following_alert_email_adds_email_safe_flynote_spacing(self):
+        context = self.base_context("example.org")
+        context.update(
+            {
+                "manage_url_path": "/en/my/following/",
+                "followed_documents": [
+                    {
+                        "followed_object": "Civil procedure",
+                        "documents": [
+                            SimpleNamespace(
+                                title="Example document",
+                                expression_frbr_uri="/documents/example/",
+                                blurb="Short blurb",
+                                flynote="First line\nSecond line",
+                            )
+                        ],
+                    }
+                ],
+            }
+        )
+
+        message = get_templated_mail(
+            template_name="user_following_alert",
+            from_email="test@example.org",
+            to=["user@example.org"],
+            context=context,
+        )
+        html = message.alternatives[0][0] if message.alternatives else message.body
+
+        self.assertIn('<li style="margin-bottom: 1rem">', html)
+        self.assertIn(
+            '<div style="margin-top: 0.5rem; font-style: italic">',
+            html,
+        )
+        self.assertIn("First line<br>Second line", html)
+
     def test_search_alert_email_does_not_duplicate_protocol(self):
         context = self.base_context("https://example.org")
         context.update(
