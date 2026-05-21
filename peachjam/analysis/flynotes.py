@@ -2822,6 +2822,28 @@ class FlynoteUpdater:
         self.node_cache = {}
         self.update_counts = update_counts
 
+    def get_parent_for_child_insert(self, parent):
+        """Lock and refresh the parent row before inserting a child.
+
+        Treebeard decides whether a node is a leaf from ``numchild`` on the
+        in-memory parent. In production we have seen parent rows where
+        ``numchild`` says children exist but the last-child lookup returns
+        nothing. Repair that drift before calling ``add_child()`` so the insert
+        can proceed safely.
+        """
+        locked_parent = Flynote.objects.select_for_update().get(pk=parent.pk)
+
+        if locked_parent.numchild and locked_parent.get_last_child() is None:
+            log.warning(
+                "Repairing flynote %s before add_child(): numchild=%s but no last child exists.",
+                locked_parent.pk,
+                locked_parent.numchild,
+            )
+            Flynote.objects.filter(pk=locked_parent.pk).update(numchild=0)
+            locked_parent.numchild = 0
+
+        return locked_parent
+
     def get_or_create_node(self, parent, name):
         """Find an existing Flynote whose normalised sibling name matches, or create a new one.
 
@@ -2862,10 +2884,7 @@ class FlynoteUpdater:
 
         try:
             if parent:
-                # Treebeard uses parent state such as numchild when adding a child.
-                # Cached parent instances can go stale across multiple judgments,
-                # so refresh before inserting under an existing node.
-                parent.refresh_from_db(fields=["path", "depth", "numchild"])
+                parent = self.get_parent_for_child_insert(parent)
                 node = parent.add_child(name=name)
             else:
                 node = Flynote.add_root(name=name)

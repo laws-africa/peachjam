@@ -1298,6 +1298,18 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         self.assertFalse(child.is_root())
         self.assertEqual(child.get_parent().pk, parent.pk)
 
+    def test_repairs_parent_numchild_when_last_child_is_missing(self):
+        parent = Flynote.add_root(name="Criminal law")
+        Flynote.objects.filter(pk=parent.pk).update(numchild=1)
+        parent.refresh_from_db(fields=["path", "depth", "numchild"])
+
+        child = self.updater.get_or_create_node(parent, "admissibility")
+
+        self.assertIsNotNone(child)
+        self.assertEqual(child.get_parent().pk, parent.pk)
+        parent.refresh_from_db(fields=["numchild"])
+        self.assertEqual(parent.numchild, 1)
+
 
 class UpdateFlynoteForJudgmentTest(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
