@@ -220,6 +220,7 @@ PEACHJAM = {
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
     "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
+    "ALL_USERS_PERMISSION_GROUP": "All users",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -237,6 +238,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL = (
 # Django all-auth
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
+    "peachjam.auth.AllUsersPermissionBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
