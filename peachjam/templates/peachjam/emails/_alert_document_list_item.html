@@ -1,6 +1,6 @@
 {% load peachjam %}
 <li style="margin-bottom: 1rem">
   <a href="{% absolute_url site url_path %}?utm_campaign={{ utm_campaign }}&utm_source=alert&utm_medium=email">{{ title }}</a>
-  {% if blurb %}<div>{{ blurb|striptags }}</div>{% endif %}
+  {% if blurb %}<div>{{ blurb }}</div>{% endif %}
   {% if flynote %}<div style="margin-top: 0.5rem; font-style: italic">{{ flynote|linebreaksbr }}</div>{% endif %}
 </li>
