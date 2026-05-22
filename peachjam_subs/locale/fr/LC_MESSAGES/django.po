@@ -293,4 +293,3 @@ msgstr "Abonnement"
 #: views.py:30
 msgid "Your pending subscription change has been cancelled."
 msgstr "Votre modification d’abonnement en attente a été annulée."
-

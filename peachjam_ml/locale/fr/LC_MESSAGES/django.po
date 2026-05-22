@@ -54,4 +54,3 @@ msgstr "Documents enregistrés"
 #: templates/peachjam/saved_document/_folders_list.html:30
 msgid "Suggested for this folder"
 msgstr "Suggéré pour ce dossier"
-

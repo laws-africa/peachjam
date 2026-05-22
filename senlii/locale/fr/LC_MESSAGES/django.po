@@ -116,4 +116,3 @@ msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noop
 #: templates/peachjam/about.html:41
 msgid "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance."
 msgstr "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> est une initiative de la Faculté de droit de l’Université du Cap qui soutient les institutions africaines dans la construction et le maintien d’un accès libre aux plates-formes juridiques. Son travail promeut l’accès à l’information juridique en tant que pierre angulaire de la démocratie et de la bonne gouvernance."
-

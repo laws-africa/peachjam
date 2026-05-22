@@ -293,4 +293,3 @@ msgstr "Usajili"
 #: views.py:30
 msgid "Your pending subscription change has been cancelled."
 msgstr "Mabadiliko ya usajili unaosubiri kutekelezwa yameghairiwa."
-

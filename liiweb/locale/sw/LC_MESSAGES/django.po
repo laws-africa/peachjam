@@ -199,4 +199,3 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
-

@@ -10,4 +10,4 @@ for d in peachjam peachjam_search peachjam_subs peachjam_ml civlii liiweb senlii
 done
 
 echo "Extracting translatable strings from javascript"
-i18next './peachjam/js/**/*.{js,ts,vue}'
+npx --no-install i18next-cli extract
