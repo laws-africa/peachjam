@@ -9,8 +9,10 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.models import User
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import redirect_to_login
+from django.db import IntegrityError, OperationalError, ProgrammingError
 from django.utils import translation
 from templated_email import send_templated_mail
 
@@ -53,6 +55,56 @@ def _patched_finish(self, redirect_url):
 
 LoginCodeVerificationProcess.send_by_email = _patched_send_by_email
 LoginCodeVerificationProcess.finish = _patched_finish
+
+
+def get_all_users_permission_group_name():
+    return settings.PEACHJAM.get("ALL_USERS_PERMISSION_GROUP", "All users")
+
+
+def get_or_create_all_users_permission_group():
+    group_name = get_all_users_permission_group_name()
+    if not group_name:
+        return None
+
+    try:
+        return Group.objects.get_or_create(name=group_name)[0]
+    except IntegrityError:
+        return Group.objects.get(name=group_name)
+    except (OperationalError, ProgrammingError):
+        logger.debug("Could not create all-users permission group", exc_info=True)
+        return None
+
+
+class AllUsersPermissionBackend(BaseBackend):
+    """Grant a configured baseline group of permissions to every user."""
+
+    def get_group_permissions(self, user_obj, obj=None):
+        if obj is not None:
+            return set()
+
+        if not hasattr(user_obj, "_all_users_perm_cache"):
+            group = get_or_create_all_users_permission_group()
+            if group:
+                perms = group.permissions.select_related("content_type")
+                user_obj._all_users_perm_cache = {
+                    f"{perm.content_type.app_label}.{perm.codename}" for perm in perms
+                }
+            else:
+                user_obj._all_users_perm_cache = set()
+
+        return user_obj._all_users_perm_cache
+
+    def get_all_permissions(self, user_obj, obj=None):
+        return self.get_group_permissions(user_obj, obj=obj)
+
+    def has_perm(self, user_obj, perm, obj=None):
+        return perm in self.get_all_permissions(user_obj, obj=obj)
+
+    def has_module_perms(self, user_obj, app_label):
+        return any(
+            permission.startswith(f"{app_label}.")
+            for permission in self.get_all_permissions(user_obj)
+        )
 
 
 def user_display(user):
