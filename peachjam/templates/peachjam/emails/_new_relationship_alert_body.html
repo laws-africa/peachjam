@@ -10,17 +10,7 @@
       </p>
       <ul>
         {% for doc in rel.documents %}
-          <li style="margin-bottom: 1rem">
-            <a href="{% absolute_url site doc.get_absolute_url %}?utm_campaign=new_relationship&utm_source=alert&utm_medium=email">
-              {{ doc.title }}
-            </a>
-            {% if doc.blurb %}<div>{{ doc.blurb | safe }}</div>{% endif %}
-            {% if doc.flynote %}
-              <div>
-                <em>{{ doc.flynote | linebreaksbr }}</em>
-              </div>
-            {% endif %}
-          </li>
+          {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.get_absolute_url utm_campaign="new_relationship" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
         {% endfor %}
       </ul>
     </div>
