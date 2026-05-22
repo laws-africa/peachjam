@@ -10,7 +10,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
-"PO-Revision-Date: 2026-05-13 12:28\n"
+"PO-Revision-Date: 2026-05-22 09:41\n"
 
 #: models.py:174
 msgid "Search alert limit reached"
@@ -115,7 +115,7 @@ msgid "Try it"
 msgstr "Ijaribu"
 
 #: templates/peachjam_search/_searchtrace_card.html:22
-#: templates/peachjam_search/box.html:4 templates/peachjam_search/search.html:4
+#: templates/peachjam_search/search.html:4
 #: templates/peachjam_search/searchtrace_list.html:32
 msgid "Search"
 msgstr "Tafuta"
