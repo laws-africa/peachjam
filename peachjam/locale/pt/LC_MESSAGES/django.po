@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-05-22 08:06+0100\n"
 "PO-Revision-Date: 2026-05-13 12:28\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -1084,7 +1084,7 @@ msgstr "enriquecimento de prestação"
 msgid "provision enrichments"
 msgstr "enriquecimentos de prestação"
 
-#: models/enrichments.py:84 models/flynote.py:379 models/judgment.py:284
+#: models/enrichments.py:84 models/flynote.py:405 models/judgment.py:284
 #: models/judgment.py:300 models/judgment.py:466 views/courts.py:54
 #: views/judgment.py:43
 msgid "judgment"
@@ -1158,7 +1158,7 @@ msgstr "citação de provisão"
 msgid "provision citations"
 msgstr "citações de provisão"
 
-#: models/enrichments.py:153 models/flynote.py:407 models/taxonomies.py:313
+#: models/enrichments.py:153 models/flynote.py:433 models/taxonomies.py:313
 msgid "count"
 msgstr "contagem"
 
@@ -1210,7 +1210,7 @@ msgstr "perfis de jurisdição"
 msgid "deprecated"
 msgstr "obsoleto"
 
-#: models/flynote.py:60 models/flynote.py:385 models/flynote.py:405
+#: models/flynote.py:60 models/flynote.py:411 models/flynote.py:431
 #: models/judgment.py:363
 msgid "flynote"
 msgstr "nota"
@@ -1223,31 +1223,41 @@ msgstr "notas de voo"
 msgid "A flynote cannot be active when any ancestor is deprecated."
 msgstr "Uma nota de rodapé não pode estar ativa quando qualquer antepassado está obsoleto."
 
-#: models/flynote.py:112
+#: models/flynote.py:109
 msgid "A sibling flynote already has this name. <a href=\"{}\">Merge this flynote into that one</a> instead."
 msgstr "Uma nota de rodapé irmã já possui este nome. <a href=\"{}\">Mescle esta nota de rodapé com aquela</a> em vez disso."
 
-#: models/flynote.py:203
+#: models/flynote.py:179
+#, fuzzy
+#| msgid "This judgment must be anonymised before it can be published."
+msgid "Flynote must be saved before it can be renamed."
+msgstr "Este julgamento deve ser tornado anónimo antes de ser publicado."
+
+#: models/flynote.py:183
+msgid "Flynote name cannot be blank."
+msgstr ""
+
+#: models/flynote.py:229
 msgid "One or more selected flynotes no longer exist."
 msgstr "Uma ou mais notas selecionadas já não existem."
 
-#: models/flynote.py:217
+#: models/flynote.py:243
 msgid "Flynotes can only be merged into a sibling at the same level."
 msgstr "Os Flynotes só podem ser fundidos com um Flynote do mesmo nível."
 
-#: models/flynote.py:390
+#: models/flynote.py:416
 msgid "judgment flynote"
 msgstr "nota de julgamento"
 
-#: models/flynote.py:391
+#: models/flynote.py:417
 msgid "judgment flynotes"
 msgstr "notas de julgamento"
 
-#: models/flynote.py:410
+#: models/flynote.py:436
 msgid "flynote document count"
 msgstr "contagem de documentos flynote"
 
-#: models/flynote.py:411
+#: models/flynote.py:437
 msgid "flynote document counts"
 msgstr "Contagem de documentos Flynote"
 
@@ -3079,7 +3089,8 @@ msgstr "Visite o nosso canal no YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3087,7 +3098,8 @@ msgid "\n"
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr "\n"
+msgstr ""
+"\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Participe da pesquisa %(APP_NAME)s</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Ajude-nos a tornar o %(APP_NAME)s melhor.\n"
@@ -3103,12 +3115,14 @@ msgstr "Participe da pesquisa"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr "\n"
+msgstr ""
+"\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Ajude-nos a tornar o %(APP_NAME)s melhor. Responda a esta breve pesquisa de 5 minutos e conte-nos sobre como você usa o %(APP_NAME)s e como podemos melhorá-lo. Todas as informações compartilhadas são confidenciais.\n"
 "            </p>\n"
@@ -3471,6 +3485,10 @@ msgstr "Listas de Causas Recentes"
 #, python-format
 msgid "You've reached your limit of %(chat_limit)s chats per month. Please upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats, or wait until next month."
 msgstr "Atingiu o seu limite de %(chat_limit)s chats por mês. Por favor, atualize para <a href=\"%(upsell_url)s\">%(lowest_product)s</a> para desbloquear mais chats ou aguarde até ao próximo mês."
+
+#: templates/peachjam/chat/_chat_unavailable_too_large.html:3
+msgid "This document is too large for questions. Please download it instead."
+msgstr ""
 
 #: templates/peachjam/chat/_chat_usage_limit.html:5
 #, python-format
@@ -3956,10 +3974,12 @@ msgid "Show provision details"
 msgstr "Mostrar detalhes da provisão"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid "\n"
+msgid ""
+"\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr "\n"
+msgstr ""
+"\n"
 "      Nota: esta disposição tem algumas subdisposições que já entraram em vigor.\n"
 "    "
 
@@ -4536,4 +4556,3 @@ msgstr "Esta versão está numa data futura."
 #: views/legislation.py:422
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
-
