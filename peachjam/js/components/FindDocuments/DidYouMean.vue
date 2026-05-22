@@ -3,7 +3,7 @@
     v-if="suggestion.did_you_mean"
     class="mb-3"
   >
-    Did you mean
+    {{ $t('Did you mean') }}
     <a
       href="#"
       @click.prevent="suggest"

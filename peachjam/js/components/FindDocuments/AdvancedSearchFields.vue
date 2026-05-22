@@ -24,7 +24,7 @@
           v-model="criterion.text"
           type="text"
           class="form-control"
-          placeholder="Text to search for..."
+          :placeholder="$t('Text to search for...')"
           @input="changed"
         >
       </div>
