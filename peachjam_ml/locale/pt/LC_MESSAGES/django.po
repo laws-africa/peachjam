@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-05-13 12:28\n"
+"PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -54,3 +54,4 @@ msgstr "Documentos salvos"
 #: templates/peachjam/saved_document/_folders_list.html:30
 msgid "Suggested for this folder"
 msgstr "Sugerido para esta pasta"
+
