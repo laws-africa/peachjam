@@ -7,6 +7,7 @@ from django.db.models import F, IntegerField, Q, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
@@ -194,15 +195,36 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         context["popular_flynotes"] = self.make_flynote_list(list(qs))
 
 
-class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
+class FlynoteDetailView(
+    SubscriptionRequiredMixin, FlynoteViewMixin, FilteredDocumentListView
+):
     """List of documents and children under a flynote. In HTMX mode, updates the document list."""
 
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
+    permission_required = "peachjam.view_linked_judgments"
+
+    def get_flynote_document_listing_id(self):
+        return f"flynote-document-listing-{self.flynote.pk}"
+
+    def is_linked_judgments_htmx_request(self):
+        return self.request.htmx and self.request.htmx.target in {
+            self.get_flynote_document_listing_id(),
+            self.get_document_table_form_id(),
+            self.get_document_table_id(),
+        }
+
+    def has_permission(self):
+        if not self.is_linked_judgments_htmx_request():
+            return True
+        return super().has_permission()
 
     def get_template_names(self):
-        if self.request.htmx:
-            return ["peachjam/_document_table.html"]
+        if (
+            self.request.htmx
+            and self.request.htmx.target == self.get_flynote_document_listing_id()
+        ):
+            return ["peachjam/_document_table_form.html"]
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
@@ -224,6 +246,7 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_doc_type"] = False
+        context["flynote_document_listing_id"] = self.get_flynote_document_listing_id()
 
         if not self.request.htmx:
             self.popular_subtopics(context)
@@ -231,6 +254,12 @@ class FlynoteDetailView(FlynoteViewMixin, FilteredDocumentListView):
             context["ancestors"] = self.flynote.get_ancestors()
 
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        if self.request.htmx:
+            add_never_cache_headers(response)
+        return response
 
     def popular_subtopics(self, context):
         # Top 16 subtopcis by count

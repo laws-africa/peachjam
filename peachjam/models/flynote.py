@@ -59,6 +59,9 @@ class Flynote(LifecycleModelMixin, MP_Node):
     class Meta:
         verbose_name = _("flynote")
         verbose_name_plural = _("flynotes")
+        permissions = [
+            ("view_linked_judgments", _("Can view linked judgments")),
+        ]
 
     def __str__(self):
         return f"{self.name} ({self.pk})"
