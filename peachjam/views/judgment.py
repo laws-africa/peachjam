@@ -224,7 +224,7 @@ class FlynoteDetailView(
             self.request.htmx
             and self.request.htmx.target == self.get_flynote_document_listing_id()
         ):
-            return ["peachjam/flynote/_detail_document_listing.html"]
+            return ["peachjam/_document_table_form.html"]
         return super().get_template_names()
 
     def dispatch(self, request, *args, **kwargs):
