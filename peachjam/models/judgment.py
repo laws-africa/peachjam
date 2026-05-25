@@ -258,7 +258,7 @@ class CourtRegistry(models.Model):
         unique_together = ("court", "name")
 
     def __str__(self):
-        return f"{self.name} - {self.court}"
+        return self.name
 
     def get_absolute_url(self):
         return reverse("court_registry", args=[self.court.code, self.code])
