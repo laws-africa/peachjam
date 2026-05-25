@@ -1,18 +1,16 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 08:06+0100\n"
-"PO-Revision-Date: 2026-05-13 12:28\n"
-"Language-Team: French\n"
-"Language: fr_FR\n"
-"Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: fr\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language-Team: French\n"
+"Language: fr_FR\n"
+"PO-Revision-Date: 2026-05-25 09:32\n"
 
 #: models.py:174
 msgid "Search alert limit reached"
@@ -247,3 +245,4 @@ msgstr "Rechercher dans %(app_name)s"
 #: views/search.py:303
 msgid "Search trace not found"
 msgstr "Trace de recherche non trouvée"
+
