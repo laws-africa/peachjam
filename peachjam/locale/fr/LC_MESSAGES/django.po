@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-05-22 08:06+0100\n"
-"PO-Revision-Date: 2026-05-18 07:37\n"
+"PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -1228,14 +1228,12 @@ msgid "A sibling flynote already has this name. <a href=\"{}\">Merge this flynot
 msgstr "Une note Flynote sœur porte déjà ce nom. <a href=\"{}\">Fusionnez plutôt cette note Flynote avec celle-ci</a>."
 
 #: models/flynote.py:179
-#, fuzzy
-#| msgid "This judgment must be anonymised before it can be published."
 msgid "Flynote must be saved before it can be renamed."
-msgstr "Ce jugement doit être anonymisé avant de pouvoir être publié."
+msgstr "Flynote doit être enregistré avant de pouvoir être renommé."
 
 #: models/flynote.py:183
 msgid "Flynote name cannot be blank."
-msgstr ""
+msgstr "Le nom Flynote ne peut pas être vide."
 
 #: models/flynote.py:229
 msgid "One or more selected flynotes no longer exist."
@@ -2173,7 +2171,7 @@ msgstr "Aller à la page d'accueil."
 #: templates/403.html:20 templates/404.html:20 templates/429.html:20
 #: templates/500.html:20
 msgid "Try searching for what you're looking for."
-msgstr "Essayez de chercher ce que vous cherchez."
+msgstr "Essayez une autre recheche."
 
 #: templates/404.html:4 templates/404.html:9
 msgid "Not found (Error 404)"
@@ -3089,8 +3087,7 @@ msgstr "Visitez notre chaîne YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3098,8 +3095,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Répondez à l'enquête %(APP_NAME)s</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Aidez-nous à améliorer %(APP_NAME)s .\n"
@@ -3115,14 +3111,12 @@ msgstr "Participez à l'enquête"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Aidez-nous à améliorer %(APP_NAME)s . Répondez à ce court sondage de 5 minutes et dites-nous comment vous utilisez %(APP_NAME)s et comment nous pouvons l'améliorer. Toutes les informations partagées sont confidentielles.\n"
 "            </p>\n"
@@ -3443,7 +3437,7 @@ msgstr "Partagez cet article sur X (ouvre dans un nouvel onglet)"
 
 #: templates/peachjam/article/detail.html:55
 msgid "Share this article on Facebook opens in new tab"
-msgstr "Partager cet article sur Facebook ouvre dans un nouvel onglet"
+msgstr "Partager cet article sur Facebook (ouvre dans un nouvel onglet)"
 
 #: templates/peachjam/article/detail.html:58
 msgid "Take a look at this article from"
@@ -3488,7 +3482,7 @@ msgstr "Vous avez atteint votre limite de %(chat_limit)s discussions par mois. V
 
 #: templates/peachjam/chat/_chat_unavailable_too_large.html:3
 msgid "This document is too large for questions. Please download it instead."
-msgstr ""
+msgstr "Ce document est trop volumineux pour les questions. Veuillez le télécharger."
 
 #: templates/peachjam/chat/_chat_usage_limit.html:5
 #, python-format
@@ -3933,7 +3927,7 @@ msgstr "Conversations récentes avec %(name)s"
 #: templates/peachjam/my/_chats.html:14
 #, python-format
 msgid "%(time_ago)s ago"
-msgstr "%(time_ago)s il y a"
+msgstr "il y a %(time_ago)s"
 
 #: templates/peachjam/my/_frontpage.html:6
 msgid "Explore"
@@ -3974,12 +3968,10 @@ msgid "Show provision details"
 msgstr "Afficher les détails de la provision"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid ""
-"\n"
+msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr ""
-"\n"
+msgstr "\n"
 "      Remarque : cette disposition comporte certaines sous-dispositions qui sont déjà entrées en vigueur.\n"
 "    "
 
@@ -4556,3 +4548,4 @@ msgstr "Cette version est à une date ultérieure."
 #: views/legislation.py:422
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
+
