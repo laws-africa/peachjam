@@ -6,6 +6,8 @@ from background_task.models import Task
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.db import connection
@@ -16,6 +18,7 @@ from languages_plus.models import Language
 
 from peachjam.admin import FlynoteAdmin
 from peachjam.analysis.flynotes import FlynoteParser, FlynoteUpdater
+from peachjam.auth import get_or_create_all_users_permission_group
 from peachjam.models import Court, Judgment
 from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 from peachjam.tasks import (
@@ -2368,6 +2371,54 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
+    def test_flynote_detail_shell_loads_judgment_listing_via_htmx(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'id="flynote-document-listing-{leaf.pk}"',
+        )
+        self.assertContains(response, 'hx-trigger="load"')
+        self.assertNotContains(response, "doc-table-form-")
+        self.assertNotContains(response, self.judgment.case_name)
+
+    def test_flynote_detail_htmx_listing_requires_permission(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": leaf.pk}),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET=f"flynote-document-listing-{leaf.pk}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This feature is not currently available.")
+        self.assertIn("no-cache", response["Cache-Control"])
+
+    def test_flynote_detail_htmx_listing_allows_anonymous_access_with_permission(self):
+        leaf = Flynote.objects.get(name="judicial review")
+        permission = Permission.objects.get(
+            content_type=ContentType.objects.get_for_model(Flynote),
+            codename="view_linked_judgments",
+        )
+        group = get_or_create_all_users_permission_group()
+        group.permissions.add(permission)
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": leaf.pk}),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET=f"flynote-document-listing-{leaf.pk}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.judgment.case_name)
+        self.assertContains(response, "doc-table-form-")
+        self.assertNotContains(response, "This feature is not currently available.")
+        self.assertIn("no-cache", response["Cache-Control"])
 
     @override_settings(
         PEACHJAM={

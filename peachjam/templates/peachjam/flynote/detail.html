@@ -44,6 +44,16 @@
       {% include 'peachjam/flynote/_popular.html' %}
     {% endif %}
     <h2 class="h4 mt-4">{% trans "Judgments" %}</h2>
-    {% include 'peachjam/_count_and_search.html' with hide_search=True %}
+  </div>
+{% endblock %}
+{% block document-table %}
+  <div id="{{ flynote_document_listing_id }}"
+       hx-get="{{ request.get_full_path }}"
+       hx-trigger="load"
+       hx-target="this"
+       hx-swap="innerHTML">
+    <div class="htmx-progress progress mb-2">
+      <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+    </div>
   </div>
 {% endblock %}
