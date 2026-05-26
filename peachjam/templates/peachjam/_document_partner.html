@@ -10,8 +10,11 @@
         <img src="{{ document.work.partner.logo.get_absolute_url }}"
              alt="{{ document.work.partner.name }}"
              class="img-fluid"/>
-        {% if document.work.partner.url %}</a>{% endif %}
-      </div>
-    {% endif %}
-  </div>
+        {% if document.work.partner.url %}
+          {% include 'peachjam/_opens_in_new_tab.html' %}
+        </a>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
 </div>

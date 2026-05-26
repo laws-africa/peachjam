@@ -187,6 +187,10 @@ PEACHJAM = {
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
     "SUMMARISE_JUDGMENTS": True,
+    # should we use the flynote tree and match flynotes to our database of known flynotes?
+    "SUMMARISE_USE_FLYNOTE_TREE": False,
+    # should flynote topic navigation and linked flynote UI be shown when the flynote tree is enabled?
+    "SHOW_FLYNOTE_TOPICS": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
@@ -216,6 +220,7 @@ PEACHJAM = {
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
     "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
+    "ALL_USERS_PERMISSION_GROUP": "AllUsers",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
@@ -233,6 +238,7 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL = (
 # Django all-auth
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
+    "peachjam.auth.AllUsersPermissionBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]

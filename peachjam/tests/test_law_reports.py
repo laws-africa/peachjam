@@ -231,11 +231,46 @@ class LawReportViewsTestCase(TestCase):
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
         )
         self.assertContains(
-            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+            response,
+            '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
+            html=False,
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
-        self.assertContains(response, "nav nav-tabs border-bottom", html=False)
+        self.assertContains(response, "Explore related indexes")
         self.assertContains(response, "Reported judgments")
+        self.assertContains(
+            response, "Browse the judgments reported in this law report volume."
+        )
+        self.assertContains(
+            response,
+            'class="card h-100 position-relative"',
+            count=2,
+            html=False,
+        )
+        self.assertContains(
+            response,
+            'class="stretched-link"',
+            count=2,
+            html=False,
+        )
+        self.assertNotContains(
+            response,
+            "Browse the judgments reported in this volume.",
+        )
+        self.assertContains(
+            response,
+            reverse(
+                "law_report_volume_cases_index",
+                args=[self.law_report.slug, self.volume_1.slug],
+            ),
+        )
+        self.assertContains(
+            response,
+            reverse(
+                "law_report_volume_legislation_index",
+                args=[self.law_report.slug, self.volume_1.slug],
+            ),
+        )
         self.assertFalse(response.context.get("doc_table_toggle"))
         self.assertNotContains(
             response, 'class="doc-table-children collapse"', html=False
@@ -251,7 +286,7 @@ class LawReportViewsTestCase(TestCase):
             response.context["facet_data"]["labels"]["options"],
         )
         self.assertEqual(self.volume_1, response.context["law_report_volume"])
-        self.assertEqual("judgments", response.context["active_tab"])
+        self.assertEqual("judgments", response.context["section"])
         parent_row = next(
             doc
             for doc in response.context["documents"]
@@ -273,7 +308,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertTemplateUsed(
             response, "peachjam/law_report/law_report_volume_cases_index.html"
         )
-        self.assertEqual("cases", response.context["active_tab"])
+        self.assertEqual("cases", response.context["section"])
         self.assertTrue(response.context.get("doc_table_toggle"))
         self.assertEqual("Cited by", response.context.get("doc_table_toggle_title"))
         self.assertContains(
@@ -281,17 +316,32 @@ class LawReportViewsTestCase(TestCase):
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
         )
         self.assertContains(
-            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+            response,
+            '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
+            html=False,
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
-        self.assertNotContains(response, "<h1>Cited cases</h1>", html=False)
+        self.assertNotContains(response, "Explore related indexes")
+        self.assertNotContains(
+            response, 'class="card h-100 text-decoration-none text-reset"'
+        )
         self.assertNotContains(response, "Advanced search")
+        self.assertContains(
+            response, '<h2 class="h4 mb-1">Cited cases</h2>', html=False
+        )
+        self.assertContains(
+            response, "Browse judgments cited by the reported judgments in this volume."
+        )
         self.assertContains(response, "Citation")
         self.assertContains(response, "Judgment date")
         self.assertContains(response, self.second_judgment.title)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.unrelated_judgment.title)
-        self.assertContains(response, "Reported judgments")
+        self.assertContains(
+            response,
+            f'<a href="{self.volume_1.get_absolute_url()}">Volume 1</a>',
+            html=False,
+        )
         self.assertNotContains(response, "1 reported judgment")
         self.assertContains(response, "Cited by 1 judgment")
         self.assertIn("labels", response.context["facet_data"])
@@ -353,7 +403,7 @@ class LawReportViewsTestCase(TestCase):
         self.assertTemplateUsed(
             response, "peachjam/law_report/law_report_volume_legislation_index.html"
         )
-        self.assertEqual("legislation", response.context["active_tab"])
+        self.assertEqual("legislation", response.context["section"])
         self.assertTrue(response.context.get("doc_table_toggle"))
         self.assertEqual("Cited by", response.context.get("doc_table_toggle_title"))
         self.assertContains(
@@ -361,15 +411,31 @@ class LawReportViewsTestCase(TestCase):
             reverse("user_following_button") + f"?law_report={self.law_report.pk}",
         )
         self.assertContains(
-            response, '<h1 class="mb-0">East Africa Law Reports</h1>', html=False
+            response,
+            '<h1 id="main-page-heading" class="mb-0">East Africa Law Reports</h1>',
+            html=False,
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
-        self.assertNotContains(response, "<h1>Cited legislation</h1>", html=False)
+        self.assertNotContains(response, "Explore related indexes")
+        self.assertNotContains(
+            response, 'class="card h-100 text-decoration-none text-reset"'
+        )
         self.assertNotContains(response, "Advanced search")
+        self.assertContains(
+            response, '<h2 class="h4 mb-1">Cited legislation</h2>', html=False
+        )
+        self.assertContains(
+            response,
+            "Browse legislation cited by the reported judgments in this volume.",
+        )
         self.assertContains(response, self.cited_legislation.title, count=1)
         self.assertContains(response, self.first_judgment.title)
         self.assertNotContains(response, self.other_legislation.title)
-        self.assertContains(response, "Reported judgments")
+        self.assertContains(
+            response,
+            f'<a href="{self.volume_1.get_absolute_url()}">Volume 1</a>',
+            html=False,
+        )
         self.assertNotContains(response, "1 reported judgment")
         self.assertContains(response, "Cited by 1 judgment")
         self.assertIn("years", response.context["facet_data"])
@@ -407,4 +473,4 @@ class LawReportViewsTestCase(TestCase):
         response = self.client.get(url)
 
         self.assertEqual(response.status_code, 200)
-        self.assertEqual("judgments", response.context["active_tab"])
+        self.assertEqual("judgments", response.context["section"])

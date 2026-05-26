@@ -3,11 +3,11 @@
 set -e
 
 echo "Extracting translatable strings from django"
-for d in peachjam peachjam_search peachjam_subs peachjam_ml africanlii civlii liiweb senlii zanzibarlii; do
+for d in peachjam peachjam_search peachjam_subs peachjam_ml civlii liiweb senlii zanzibarlii; do
   pushd $d
   django-admin makemessages -a --no-wrap
   popd
 done
 
 echo "Extracting translatable strings from javascript"
-i18next './peachjam/js/**/*.{js,ts,vue}'
+npx --no-install i18next-cli extract

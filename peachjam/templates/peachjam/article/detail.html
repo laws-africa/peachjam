@@ -16,7 +16,7 @@
                src="{{ article.image.url }}"/>
         </figure>
       {% endif %}
-      <h1>{{ article.title }}</h1>
+      <h1 id="main-page-heading">{{ article.title }}</h1>
       <div class="text-muted mb-2 d-flex">
         <div class="flex-grow-1">
           {{ article.date }}
@@ -40,16 +40,19 @@
           <a href="https://api.whatsapp.com/send?text={{ request.build_absolute_uri }}"
              class="btn btn-link share-link"
              target="_blank">
+            <span class="visually-hidden">{% trans 'Share this article on WhatsApp opens in new tab' %}</span>
             <i class="bi bi-whatsapp whatsapp-forecolor share-icon"></i>
           </a>
           <a href="https://twitter.com/intent/tweet?text={{ request.build_absolute_uri }}"
              class="btn btn-link share-link"
              target="_blank">
+            <span class="visually-hidden">{% trans 'Share this article on X opens in new tab' %}</span>
             <i class="bi bi-twitter-x twitter-x-forecolor share-icon"></i>
           </a>
           <a href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri }}"
              class="btn btn-link share-link"
              target="_blank">
+            <span class="visually-hidden">{% trans 'Share this article on Facebook opens in new tab' %}</span>
             <i class="bi bi-facebook facebook-forecolor share-icon"></i>
           </a>
           <a href="mailto:?subject={% trans 'Take a look at this article from' %} {{ APP_NAME }}: {{ article.title|truncatewords:7|escape }}&body={{ request.build_absolute_uri }}"

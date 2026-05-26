@@ -3,6 +3,8 @@
   <div class="mb-3">
     <a href="{{ PEACHJAM_SETTINGS.user_help_link }}{{ help_link }}"
        target="_blank"
-       rel="noopener noreferrer"><i class="bi bi-question-circle me-1"></i>{% trans 'Help' %}</a>
+       rel="noopener noreferrer"><i class="bi bi-question-circle me-1"></i>{% trans 'Help' %}
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
 {% endif %}

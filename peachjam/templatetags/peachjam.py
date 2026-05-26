@@ -1,20 +1,34 @@
 import datetime
 import hashlib
 import json
+from urllib.parse import urljoin
 
 from django import template
 from django.db.models import F, Window
 from django.db.models.functions import RowNumber
 from django.http import QueryDict
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 
+from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.auth import user_display
 from peachjam.models import DocumentChatThread
 from peachjam.xmlutils import qualify_local_refs as qualify_local_refs_html
 
 register = template.Library()
+
+
+def normalize_base_url(value, protocol="https"):
+    value = str(value or "").strip()
+    if not value:
+        return ""
+
+    if "://" not in value:
+        value = f"{protocol}://{value.lstrip('/')}"
+
+    return value.rstrip("/") + "/"
 
 
 @register.filter
@@ -112,6 +126,22 @@ def build_taxonomy_url(item, prefix="taxonomy"):
 
 
 @register.simple_tag
+def absolute_url(site_or_domain, path="", protocol="https"):
+    domain = getattr(site_or_domain, "domain", site_or_domain)
+    base_url = normalize_base_url(domain, protocol)
+    if not base_url:
+        return ""
+
+    path = "" if path is None else str(path)
+    return urljoin(base_url, path.lstrip("/"))
+
+
+@register.simple_tag
+def absolute_static_url(site_or_domain, path, protocol="https"):
+    return absolute_url(site_or_domain, static(path), protocol)
+
+
+@register.simple_tag
 def jurisdiction_icon(doc):
     code = doc.expression_frbr_uri.split("/")[2].split("-")[0]
     if code == "aa":
@@ -125,6 +155,16 @@ def jurisdiction_icon(doc):
 @register.filter
 def split(value, sep=None):
     return [v.strip() for v in value.split(sep)]
+
+
+@register.filter
+def group_flynote_lines(lines):
+    return FlynoteDisplayGrouper(lines).group()
+
+
+@register.filter
+def group_linked_flynotes(linked_flynotes):
+    return FlynoteDisplayGrouper.group_linked_flynotes(linked_flynotes)
 
 
 @register.filter

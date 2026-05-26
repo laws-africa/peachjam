@@ -16,6 +16,18 @@ main {
   flex-grow: 1;
 }
 
+body.full-page {
+  height: 100%;
+  overflow: hidden;
+
+  main#top {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
 // newspaper-like dynamic columns
 .flow-columns {
   columns: 1;
@@ -44,6 +56,12 @@ mark {
 
 .provision-toggle .collapsed i::before {
   content: "\f231";
+}
+
+.provision-toggle button:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
 }
 
 .result-snippet * {
@@ -189,6 +207,10 @@ html[data-user-agent*='pocketlaw'] .pocketlaw-hidden,
   padding-bottom: 0.25rem;
 }
 
+.skip-link-target {
+  scroll-margin-top: $floating-header-height + 1rem;
+}
+
 a:visited:not(.btn, .nav-link, .dropdown-item) {
   color: $visited-link;
 }
@@ -201,11 +223,16 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
   left: -501px;
 }
 .skip-links a:focus {
-  left: -1px;
+  left: 0;
+  z-index: 1080;
 }
 
 .breadcrumb {
   padding-top: 1rem;
+}
+
+.breadcrumb-flynote {
+  --bs-breadcrumb-divider: "—";
 }
 
 select.form-select.select-narrow {

@@ -1,5 +1,6 @@
-import { createI18n } from 'vue-i18n';
+import type { App, Plugin } from 'vue';
 import i18n from 'i18next';
+import I18NextVue from 'i18next-vue';
 
 // Load language data from html, we can't use peachJam.config because it's loaded after this file
 const data = document.getElementById('peachjam-config')?.innerText;
@@ -34,29 +35,17 @@ export function setUpI8n () {
   i18n.init({
     fallbackLng: 'en',
     lng: config.language,
-    resources
+    resources,
+    returnEmptyString: false
   });
-};
-
-// Setup Vue i18next for vue files
-const setupVueI8n = () => {
-  const messages: {
-  [key: string] : any
-} = {};
-
-  config.languages.forEach(key => {
-    messages[key] = loadJSONFile(`${key}/translation.json`);
-  });
-
-  const vueOptions = {
-    fallbackLocale: 'en',
-    locale: config.language,
-    messages
-  };
-  return createI18n(vueOptions);
-};
+}
 
 // Setup i8next for js files
 setUpI8n();
-// Setup Vue i18next for vue files
-export const vueI18n = setupVueI8n();
+
+// Provide a Vue plugin that wires i18next-vue to the shared i18next instance.
+export const vueI18n: Plugin = {
+  install (app: App) {
+    app.use(I18NextVue, { i18next: i18n });
+  }
+};

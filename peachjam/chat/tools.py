@@ -11,12 +11,24 @@ from django.urls.base import reverse
 from peachjam.models import CoreDocument, Legislation
 from peachjam.xmlutils import parse_html_str
 
+DOCUMENT_TEXT_CHAT_MAX_LENGTH = 750_000
+
 
 @dataclass(frozen=True)
 class DocumentChatContext:
     document_id: int
     user_id: int
     thread_id: str
+
+
+def get_document_chat_text(document: CoreDocument) -> str:
+    doc_content = document.get_or_create_document_content()
+    return doc_content.get_content_as_text()
+
+
+def document_exceeds_chat_text_limit(document: CoreDocument) -> bool:
+    text = get_document_chat_text(document)
+    return bool(text.strip()) and len(text) > DOCUMENT_TEXT_CHAT_MAX_LENGTH
 
 
 @function_tool
@@ -28,14 +40,13 @@ async def get_document_text(ctx: RunContextWrapper[DocumentChatContext]) -> str:
     @sync_to_async
     def get_text():
         doc = CoreDocument.objects.get(pk=ctx.context.document_id)
-        doc_content = doc.get_or_create_document_content()
-        return doc_content.get_content_as_text()
+        return get_document_chat_text(doc)
 
     text = await get_text()
     if not text.strip():
         return "The document has no text content. Suggest that the user downloads the document to view its content."
 
-    if len(text) > 750_000:
+    if len(text) > DOCUMENT_TEXT_CHAT_MAX_LENGTH:
         return "The document text is too large to include here. Suggest that the user downloads the document instead."
 
     return text

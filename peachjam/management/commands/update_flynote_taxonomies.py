@@ -1,8 +1,10 @@
+from argparse import BooleanOptionalAction
+
 from django.core.management.base import BaseCommand
 
 from peachjam.analysis.flynotes import FlynoteUpdater
 from peachjam.models import Judgment
-from peachjam.models.flynote import FlynoteDocumentCount
+from peachjam.models.flynote import Flynote, FlynoteDocumentCount
 
 
 class Command(BaseCommand):
@@ -34,11 +36,20 @@ class Command(BaseCommand):
             help="Skip refreshing flynote document counts entirely. "
             "Useful in batch mode when counts will be updated separately.",
         )
+        parser.add_argument(
+            "--assume-clean",
+            action=BooleanOptionalAction,
+            default=True,
+            help="Treat no-semicolon flynotes as already well-structured dash chains.",
+        )
 
     def handle(self, *args, **options):
         self.stdout.write("Using Flynote model (no taxonomy root required)")
 
-        updater = FlynoteUpdater()
+        updater = FlynoteUpdater(
+            assume_clean=options["assume_clean"],
+            update_counts=False,
+        )
         skip_counts = options["skip_counts"]
 
         if options["judgment_id"]:
@@ -51,13 +62,20 @@ class Command(BaseCommand):
                 )
                 return
             self.stdout.write(f"Processing: {judgment.case_name}")
-            updater.update_for_judgment(judgment, refresh_counts=(not skip_counts))
+            affected_root_ids = updater.update_for_judgment(judgment)
+            if not skip_counts:
+                for root in (
+                    Flynote.get_root_nodes()
+                    .filter(pk__in=set(affected_root_ids))
+                    .order_by("path")
+                ):
+                    FlynoteDocumentCount.refresh_for_flynote(root)
             self.stdout.write(self.style.SUCCESS("Done."))
             return
 
         qs = (
-            Judgment.objects.exclude(flynote__isnull=True)
-            .exclude(flynote="")
+            Judgment.objects.exclude(flynote_raw__isnull=True)
+            .exclude(flynote_raw="")
             .order_by("-pk")
         )
 
@@ -83,6 +101,7 @@ class Command(BaseCommand):
         processed = 0
         skipped = 0
         last_pk = None
+        affected_root_ids = set()
         for judgment in qs.iterator():
             processed += 1
             last_pk = judgment.pk
@@ -90,7 +109,7 @@ class Command(BaseCommand):
                 f"  [{processed}] (pk={judgment.pk}) {judgment.case_name}"
             )
             try:
-                updater.update_for_judgment(judgment, refresh_counts=False)
+                affected_root_ids.update(updater.update_for_judgment(judgment))
             except Exception as e:
                 skipped += 1
                 self.stderr.write(
@@ -103,8 +122,13 @@ class Command(BaseCommand):
         if last_pk:
             msg += f" Last pk processed: {last_pk}."
 
-        if not skip_counts and processed > 0:
-            FlynoteDocumentCount.refresh_for_all_flynotes()
+        if not skip_counts and affected_root_ids:
+            for root in (
+                Flynote.get_root_nodes()
+                .filter(pk__in=set(affected_root_ids))
+                .order_by("path")
+            ):
+                FlynoteDocumentCount.refresh_for_flynote(root)
             msg += " Flynote counts refreshed."
 
         self.stdout.write(self.style.SUCCESS(msg))

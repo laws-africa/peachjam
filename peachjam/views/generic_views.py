@@ -261,12 +261,30 @@ class FilteredDocumentListView(DocumentListView):
 
         self.add_facets(context)
         self.order_facet_options(context)
+        self.set_rendered_facets(context)
         self.show_facet_clear_all(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
         context["doc_table_show_counts"] = True
 
         return context
+
+    def set_rendered_facets(self, context):
+        rendered_facets = [
+            {"name": facet_name, "facet": facet}
+            for facet_name, facet in context.get("facet_data", {}).items()
+            if facet.get("options")
+        ]
+        for index, item in enumerate(rendered_facets):
+            next_item = (
+                rendered_facets[index + 1] if index + 1 < len(rendered_facets) else None
+            )
+            item["next_target_id"] = (
+                f'{context["doc_table_form_id"]}-group-{next_item["name"]}'
+                if next_item
+                else context["doc_table_id"]
+            )
+        context["rendered_facets"] = rendered_facets
 
     def order_facet_options(self, context):
         for facet_name, facet in context.get("facet_data", {}).items():

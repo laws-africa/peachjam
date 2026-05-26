@@ -19,7 +19,6 @@ class Taxonomy(MP_Node):
     name = models.CharField(_("name"), max_length=255)
     path_name = models.CharField(_("path name"), max_length=4096, blank=True)
     slug = models.SlugField(_("slug"), max_length=10 * 1024, unique=True)
-    node_order_by = ["name"]
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
@@ -159,7 +158,7 @@ class Taxonomy(MP_Node):
             if is_restricted and not is_allowed:
                 exclude.append(child["id"])
 
-        children = self.get_children().exclude(id__in=exclude)
+        children = self.get_children().exclude(id__in=exclude).order_by("name")
         return children
 
     def get_offline_ancestor(self):
@@ -167,6 +166,31 @@ class Taxonomy(MP_Node):
         if self.allow_offline:
             return self
         return self.get_ancestors().filter(allow_offline=True).first()
+
+    @classmethod
+    def sort_bulk_tree(cls, tree):
+        """Sort a treebeard dump_bulk tree by taxonomy name at every level."""
+        tree.sort(
+            key=lambda node: (
+                str(node.get("data", {}).get("name") or "").casefold(),
+                str(node.get("data", {}).get("slug") or "").casefold(),
+            )
+        )
+        for node in tree:
+            if "children" in node:
+                cls.sort_bulk_tree(node["children"])
+        return tree
+
+    @classmethod
+    def sort_item_tree(cls, tree):
+        """Sort a nested taxonomy-object tree by taxonomy name at every level."""
+        return {
+            topic: cls.sort_item_tree(children)
+            for topic, children in sorted(
+                tree.items(),
+                key=lambda item: (item[0].name.casefold(), item[0].slug.casefold()),
+            )
+        }
 
     @classmethod
     def get_tree_for_items(cls, items):
@@ -187,7 +211,7 @@ class Taxonomy(MP_Node):
                     current_level[node] = {}
                 current_level = current_level[node]
 
-        return tree
+        return cls.sort_item_tree(tree)
 
     @classmethod
     def get_allowed_taxonomies(cls, user=None, root=None):
@@ -237,7 +261,7 @@ class Taxonomy(MP_Node):
             if filtered_node is not None
         ]
         return {
-            "tree": filtered_taxonomies,
+            "tree": cls.sort_bulk_tree(filtered_taxonomies),
             "pk_list": node_ids,
         }
 

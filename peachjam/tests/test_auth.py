@@ -4,11 +4,17 @@ from allauth.account.internal.flows.login_by_code import LoginCodeVerificationPr
 from allauth.account.models import Login
 from allauth.account.stages import LoginByCodeStage
 from django.conf import settings
-from django.contrib.auth.models import User
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.models import AnonymousUser, Group, Permission, User
+from django.contrib.contenttypes.models import ContentType
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 
-from peachjam.auth import _patched_finish, _patched_send_by_email
+from peachjam.auth import (
+    _patched_finish,
+    _patched_send_by_email,
+    get_or_create_all_users_permission_group,
+)
 
 
 class PatchedFinishTests(TestCase):
@@ -81,6 +87,71 @@ class PatchedFinishTests(TestCase):
 
         self.assertEqual(User.objects.filter(email="withuser@example.com").count(), 1)
         mock_finish.assert_called_once_with(proc, "/done")
+
+
+@override_settings(
+    AUTHENTICATION_BACKENDS=["peachjam.auth.AllUsersPermissionBackend"],
+    PEACHJAM={**settings.PEACHJAM, "ALL_USERS_PERMISSION_GROUP": "All users"},
+)
+class AllUsersPermissionBackendTests(TestCase):
+    fixtures = ["tests/languages"]
+
+    def setUp(self):
+        content_type = ContentType.objects.get_for_model(User)
+        self.permission = Permission.objects.create(
+            content_type=content_type,
+            codename="can_use_baseline_feature",
+            name="Can use baseline feature",
+        )
+        self.group = get_or_create_all_users_permission_group()
+        self.group.permissions.add(self.permission)
+
+    def test_group_is_created_if_missing(self):
+        Group.objects.filter(name="All users").delete()
+
+        group = get_or_create_all_users_permission_group()
+
+        self.assertIsNotNone(group)
+        self.assertEqual("All users", group.name)
+
+    def test_anonymous_user_gets_all_users_permissions(self):
+        user = AnonymousUser()
+
+        self.assertTrue(user.has_perm("auth.can_use_baseline_feature"))
+
+    def test_authenticated_user_gets_all_users_permissions(self):
+        user = User.objects.create_user(username="test-user")
+
+        self.assertTrue(user.has_perm("auth.can_use_baseline_feature"))
+
+    def test_inactive_user_gets_all_users_permissions(self):
+        user = User.objects.create_user(username="inactive-user", is_active=False)
+
+        self.assertTrue(user.has_perm("auth.can_use_baseline_feature"))
+
+    def test_permission_required_mixin_allows_anonymous_user(self):
+        class TestPermissionRequiredMixin(PermissionRequiredMixin):
+            permission_required = "auth.can_use_baseline_feature"
+
+        view = TestPermissionRequiredMixin()
+        view.request = RequestFactory().get("/")
+        view.request.user = AnonymousUser()
+
+        self.assertTrue(view.has_permission())
+
+    def test_all_users_permissions_are_not_object_permissions(self):
+        user = AnonymousUser()
+        obj = User(username="target")
+
+        self.assertFalse(user.has_perm("auth.can_use_baseline_feature", obj))
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "ALL_USERS_PERMISSION_GROUP": None}
+    )
+    def test_setting_can_disable_all_users_permissions(self):
+        user = AnonymousUser()
+
+        self.assertFalse(user.has_perm("auth.can_use_baseline_feature"))
 
 
 class PatchedSendByEmailTests(TestCase):

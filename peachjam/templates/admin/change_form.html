@@ -37,12 +37,6 @@
   {% endblock %}
 {% endblock %}
 {% block content %}
-  <script>
-  // app-prod.js uses Bootstrap 5, but jazzmin uses Bootstrap 4. So tell Bootstrap 5 not to integrate with jquery,
-  // so that it doesn't conflict with Bootstrap 4.
-  document.body.setAttribute('data-bs-no-jquery', 'true');
-  </script>
-  <script defer src="{% static 'js/app-prod.js' %}"></script>
   {{ block.super }}
   {% if original %}
     <!-- actual comment form, outside of main form; this will be updated with hx-oob-swap when a comment is posted -->

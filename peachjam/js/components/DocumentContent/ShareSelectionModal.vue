@@ -31,7 +31,7 @@
               target="_blank"
               data-track-event="Document | Social share | WhatsApp"
               @click="modal.hide()"
-            ><i class="bi bi-whatsapp whatsapp-forecolor share-icon" />
+            ><span class="visually-hidden">{{ $t('Share this selection on WhatsApp opens in new tab') }}</span><i class="bi bi-whatsapp whatsapp-forecolor share-icon" />
             </a>
             <a
               :href="`https://twitter.com/intent/tweet?text=${ combined }`"
@@ -39,7 +39,7 @@
               target="_blank"
               data-track-event="Document | Social share | X"
               @click="modal.hide()"
-            ><i class="bi bi-twitter-x twitter-x-forecolor share-icon" />
+            ><span class="visually-hidden">{{ $t('Share this selection on X opens in new tab') }}</span><i class="bi bi-twitter-x twitter-x-forecolor share-icon" />
             </a>
             <a
               :href="`https://www.facebook.com/sharer/sharer.php?u=${ encodeURIComponent(url) }`"
@@ -47,7 +47,7 @@
               target="_blank"
               data-track-event="Document | Social share | Facebook"
               @click="modal.hide()"
-            ><i class="bi bi-facebook facebook-forecolor share-icon" />
+            ><span class="visually-hidden">{{ $t('Share this selection on Facebook opens in new tab') }}</span><i class="bi bi-facebook facebook-forecolor share-icon" />
             </a>
             <a
               :href="`https://www.linkedin.com/sharing/share-offsite/?url=${ encodeURIComponent(url) }`"
@@ -55,7 +55,7 @@
               target="_blank"
               data-track-event="Document | Social share | LinkedIn"
               @click="modal.hide()"
-            ><i class="bi bi-linkedin linkedin-forecolor share-icon" />
+            ><span class="visually-hidden">{{ $t('Share this selection on LinkedIn opens in new tab') }}</span><i class="bi bi-linkedin linkedin-forecolor share-icon" />
             </a>
             <a
               :href="`mailto:?subject=${emailSubject}&body=${combined}`"

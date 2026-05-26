@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        app: [peachjam, africanlii, liiweb]
+        app: [peachjam, liiweb]
     services:
       postgres:
         image: pgvector/pgvector:pg17
@@ -57,11 +57,19 @@ jobs:
           cache: pip
       - uses: actions/setup-node@v4
         with:
-          node-version: "18"
-      - name: Install deps
+          node-version: "22"
+      - name: Cache apt packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: libreoffice poppler-utils pandoc
+          version: test-apt-v1
+          execute_install_scripts: true
+      - name: Install libreoffice
         run: |
           sudo apt-get update
-          sudo apt-get install -y libreoffice poppler-utils pandoc
+          sudo apt-get install -y libreoffice
+      - name: Install deps
+        run: |
           python -m pip install --upgrade "setuptools<82" wheel
           pip install .[dev]
           pip install psycopg[binary]==3.2.12 unittest-xml-reporting

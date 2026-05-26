@@ -29,7 +29,7 @@
 {% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
-    <h1 class="my-4">
+    <h1 id="main-page-heading" class="my-4">
       {% if place %}{{ place }}{% endif %}
       {% trans 'Gazettes' %}
     </h1>

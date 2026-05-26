@@ -10,21 +10,21 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"PO-Revision-Date: 2026-05-25 09:32\n"
 
 #: models.py:174
 msgid "Search alert limit reached"
 msgstr "Limite d'alerte de recherche atteinte"
 
-#: models.py:262
+#: models.py:258
 msgid "feedback"
 msgstr "retour"
 
-#: models.py:264
+#: models.py:260
 msgid "name"
 msgstr "nom"
 
-#: models.py:269
+#: models.py:265
 msgid "email address"
 msgstr "adresse e-mail"
 
@@ -92,21 +92,21 @@ msgstr "Se connecter"
 msgid "Best match"
 msgstr "Meilleure correspondance"
 
-#: templates/peachjam_search/_search_hit.html:88
+#: templates/peachjam_search/_search_hit.html:86
 msgid "Explanation"
 msgstr "Explication"
 
-#: templates/peachjam_search/_search_hit.html:93
+#: templates/peachjam_search/_search_hit.html:91
 msgid "Raw"
 msgstr "Brut"
 
-#: templates/peachjam_search/_search_hit.html:115
+#: templates/peachjam_search/_search_hit.html:112
 #: templates/peachjam_search/_searchtrace_card.html:44
 #: templates/peachjam_search/searchtrace_list.html:34
 msgid "Page"
 msgstr "Page"
 
-#: templates/peachjam_search/_search_hit.html:133
+#: templates/peachjam_search/_search_hit.html:130
 msgid "Download"
 msgstr "Télécharger"
 

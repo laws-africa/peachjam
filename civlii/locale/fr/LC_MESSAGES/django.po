@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 10:35+0300\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Crowdin-File: /main/civlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 277\n"
 
-#: settings.py:15
+#: settings.py:18
 msgid "French"
 msgstr "Français"
 
-#: settings.py:16
+#: settings.py:19
 msgid "English"
 msgstr "Anglais"
 
@@ -29,61 +29,61 @@ msgstr "Anglais"
 msgid "La mémoire du droit en Côte d'Ivoire."
 msgstr "La mémoire du droit en Côte d'Ivoire."
 
-#: templates/peachjam/_header.html:7
-msgid "Help"
-msgstr "Aide"
-
-#: templates/peachjam/_header.html:14
+#: templates/peachjam/_header.html:11
 msgid "Home"
 msgstr "Accueil"
 
-#: templates/peachjam/_header.html:19
+#: templates/peachjam/_header.html:16
 msgid "Judgments"
 msgstr "Jugements"
 
-#: templates/peachjam/_header.html:25
+#: templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/peachjam/_header.html:34
+#: templates/peachjam/_header.html:31
 msgid "African Union and ECOWAS"
 msgstr "Union africaine et CEDEAO"
 
-#: templates/peachjam/_header.html:40
+#: templates/peachjam/_header.html:37
 msgid "African Court of Human and People's Rights"
 msgstr "Cour africaine des droits de l'homme et des peuples"
 
-#: templates/peachjam/_header.html:46
+#: templates/peachjam/_header.html:43
 msgid "African Commission on Human and People's Rights"
 msgstr "Commission africaine des droits de l'homme et des peuples"
 
-#: templates/peachjam/_header.html:52
+#: templates/peachjam/_header.html:49
 msgid "Economic Community of West African States (ECOWAS)"
 msgstr "Communauté économique des États de l'Afrique de l'Ouest (CEDEAO)"
 
-#: templates/peachjam/_header.html:58
+#: templates/peachjam/_header.html:55
 msgid "ECOWAS Community Court of Justice"
 msgstr "Cour de justice de la CEDEAO"
 
-#: templates/peachjam/_header.html:64
+#: templates/peachjam/_header.html:61
 msgid "AU Charters and Treaties"
 msgstr "Chartes et traités de l'UA"
 
-#: templates/peachjam/_header.html:72
+#: templates/peachjam/_header.html:69
 msgid "About"
 msgstr "À propos"
+
+#: templates/peachjam/_header.html:73
+msgid "Help"
+msgstr "Aide"
 
 #: templates/peachjam/about.html:5
 msgid "CNDJ is a member of the community of African LIIs and of the Free Access to Law Movement."
 msgstr "CNDJ est membre de la communauté des institutions juridiques africaines et du Mouvement pour le libre accès au droit."
 
 #: templates/peachjam/about.html:11
-msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
-msgstr "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> fait partie de l'unité <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Gouvernance démocratique et droits</a> de la Faculté de droit de l'Université de Cape Town (UCT), Afrique du Sud. AfricanLII aide les individus, les organisations et les gouvernements à créer et à maintenir un accès libre et durable aux portails juridiques et à atteindre les peuples d'Afrique et d'ailleurs."
+msgid "<a href=\"https://africanlii.org/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII<span class=\"visually-hidden\">opens in new tab</span></a> is a part of the <a href=\"http://www.dgru.uct.ac.za/\" target=\"_blank\" rel=\"noreferrer noopener\">Democratic<span class=\"visually-hidden\">opens in new tab</span> Governance and Rights Unit</a> at the Faculty of Law, University of Cape Town (UCT), South Africa. AfricanLII helps individuals, organizations, and governments build and maintain sustainable free access to law portals, and reach the people of Africa and beyond."
+msgstr ""
 
 #: templates/peachjam/about.html:21
-msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
-msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa</a> est une organisation sud-africaine à but non lucratif qui numérise les informations juridiques africaines à usage public. Le libre accès aux informations juridiques numériques africaines aide les communautés à prospérer, les entreprises à réussir, et les officiers de justice et les fonctionnaires à fournir des services de manière efficace et efficiente."
+msgid "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noopener\">Laws.Africa<span class=\"visually-hidden\">opens in new tab</span></a> is a South Africa non-profit organisation that digitises African legal information for public use. Open access to digital African legal information helps communities to thrive, businesses to succeed, and judicial officers and civil servants to deliver services efficiently and effectively."
+msgstr ""
 
 #: templates/peachjam/about.html:28
 msgid "Contact us"

@@ -51,7 +51,7 @@
 
           <div v-if="error" class="alert alert-warning">{{ error }}</div>
           <div v-if="error && !threadId" class="text-center">
-            <button class="btn btn-link" @click="load">{{ $t('Try again') }}</button>
+            <button class="btn btn-link" @click="loadThread">{{ $t('Try again') }}</button>
           </div>
         </template>
       </template>
@@ -136,6 +136,9 @@ export default {
   mounted () {
     this.loadThread();
   },
+  unmounted () {
+    this.closeStream(this.eventSource);
+  },
   methods: {
     /** Load an existing chat thread for this document, if one exists. Sets the threadId if it does, otherwise
      * sets threadId to '' to indicate no existing thread.
@@ -163,6 +166,7 @@ export default {
           this.mergeMessages(data.messages);
           this.usageLimitHtml = data.usage_limit_html || null;
         }
+        this.error = null;
         this.focusInputAndScroll();
       } catch (err) {
         console.error(err);

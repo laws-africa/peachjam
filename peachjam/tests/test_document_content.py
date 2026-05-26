@@ -1,11 +1,13 @@
 import os
 from datetime import date
+from unittest.mock import patch
 
 from django.core.files.base import File
 from django.test import TestCase
 from docpipe.soffice import SOfficeError
 
 from peachjam.models import (
+    CitationLink,
     Country,
     DocumentContent,
     GenericDocument,
@@ -301,6 +303,63 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         doc_content.save()
         self.assertIsNotNone(doc_content.content_text)
         self.assertIn("Extracted text", doc_content.content_text)
+
+    def test_content_html_change_updates_extracted_citations(self):
+        """The AFTER_SAVE hook updates work extracted citations when content_html changes."""
+        doc = _make_doc("Hook extracted citations")
+        doc_content = doc.get_or_create_document_content(True)
+
+        with patch("peachjam.tasks.update_extracted_citations_for_a_work") as update:
+            doc_content.content_html = (
+                '<p><a href="/akn/za/act/2009/5">Act 5 of 2009</a></p>'
+            )
+            doc_content.save()
+
+        update.assert_called_once_with(doc.work_id)
+
+    def test_document_save_does_not_update_extracted_citations(self):
+        """A metadata-only CoreDocument save doesn't update extracted citations."""
+        doc = _make_doc("No extracted citation update")
+
+        with patch("peachjam.signals.update_extracted_citations_for_a_work") as update:
+            doc.title = "Updated"
+            doc.save()
+
+        update.assert_not_called()
+
+    def test_language_change_updates_work_languages(self):
+        """The CoreDocument AFTER_SAVE hook updates work languages when language changes."""
+        doc = _make_doc("Hook work languages")
+        work = doc.work
+
+        self.assertEqual(["eng"], work.languages)
+
+        doc.track_changes()
+        doc.language = Language.objects.get(pk="fr")
+        doc.save()
+        work.refresh_from_db()
+
+        self.assertEqual(["fra"], work.languages)
+
+    def test_citation_link_changes_update_extracted_citations(self):
+        """CitationLink changes update extracted citations for the related work."""
+        doc = _make_doc("Citation link extracted citation update")
+
+        with patch("peachjam.signals.update_extracted_citations_for_a_work") as update:
+            citation_link = CitationLink.objects.create(
+                document=doc,
+                text="Act 5 of 2009",
+                url="/akn/za/act/2009/5",
+                target_id="page-1",
+                target_selectors=[],
+            )
+
+        update.assert_called_once_with(doc.work_id)
+
+        with patch("peachjam.signals.update_extracted_citations_for_a_work") as update:
+            citation_link.delete()
+
+        update.assert_called_once_with(doc.work_id)
 
     def test_toc_not_generated_for_akn(self):
         """update_toc_json_from_content_html() is a no-op for AKN documents."""

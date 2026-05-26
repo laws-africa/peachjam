@@ -5,10 +5,21 @@
     // this enables stricter inference for data properties on `this`
     "strict": true,
     // if using webpack 2+ or rollup, to leverage tree shaking:
-    "module": "es2015",
-    "moduleResolution": "node",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "allowJs": true
-  }
+    "allowJs": true,
+    "skipLibCheck": true
+  },
+  "include": [
+    "peachjam/js/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "venv",
+    ".venv",
+    "build",
+    "staticfiles"
+  ]
 }

@@ -10,24 +10,34 @@
 {% block second-content-column %}
   <h5>{% trans 'Our partners' %}</h5>
   <div>
-    <a href="https://africanlii.org/" target="_blank" rel="noreferrer">AfricanLII</a>
+    <a href="https://africanlii.org/" target="_blank" rel="noreferrer">AfricanLII
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
   <div>
     <a href="https://namati.org/network/organization/the-gender-and-justice-unit/"
        target="_blank"
-       rel="noreferrer">Gender and Justice Unit</a>
+       rel="noreferrer">Gender and Justice Unit
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
   <div>
-    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa</a>
+    <a href="https://laws.africa/" target="_blank" rel="noreferrer">Laws.Africa
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
   <h6 class="mt-4">{% trans 'With support from' %}</h6>
   <div>
-    <a href="https://www.ned.org/" target="_blank" rel="noreferrer">{% trans 'National Endowment for Democracy' %}</a>
+    <a href="https://www.ned.org/" target="_blank" rel="noreferrer">{% trans 'National Endowment for Democracy' %}
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
   <div>
     <a href="https://www.indigotrust.org.uk/"
        target="_blank"
-       rel="noreferrer">{% trans 'The Indigo Trust' %}</a>
+       rel="noreferrer">{% trans 'The Indigo Trust' %}
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
 {% endblock %}
 {% block footer-logos %}
@@ -37,24 +47,28 @@
        rel="noreferrer"
        class="footer-logos__item">
       <img src="{% static 'images/ned-logo.png' %}" alt="NED logo" />
+      {% include 'peachjam/_opens_in_new_tab.html' %}
     </a>
     <a href="https://laws.africa/"
        target="_blank"
        rel="noreferrer"
        class="footer-logos__item">
       <img src="{% static 'images/laws-africa-logo.png' %}" alt="Laws.Africa"/>
+      {% include 'peachjam/_opens_in_new_tab.html' %}
     </a>
     <a class="footer-logos__item"
        href="https://africanlii.org/"
        target="_blank"
        rel="noreferrer">
       <img src="{% static 'images/africanlii-logo.svg' %}" alt="AfricanLII" />
+      {% include 'peachjam/_opens_in_new_tab.html' %}
     </a>
     <a href="https://namati.org/network/organization/the-gender-and-justice-unit/"
        target="_blank"
        rel="noreferrer"
        class="footer-logos__item">
       <img src="{% static 'images/gju.jpg' %}" alt="Gender and Justice Unit" />
+      {% include 'peachjam/_opens_in_new_tab.html' %}
     </a>
     <a href="https://macdonaldanddon.com/"
        target="_blank"
@@ -62,6 +76,7 @@
        class="footer-logos__item">
       <img src="{% static 'images/macdonald.png' %}"
            alt="Gender and Justice Unit"/>
+      {% include 'peachjam/_opens_in_new_tab.html' %}
     </a>
     <a href="https://www.indigotrust.org.uk/"
        target="_blank"
@@ -69,6 +84,7 @@
        class="footer-logos__item">
       <img src="{% static 'images/indigo-trust-logo.jpg' %}"
            alt="The Indigo Trust"/>
+      {% include 'peachjam/_opens_in_new_tab.html' %}
     </a>
   </div>
 {% endblock %}

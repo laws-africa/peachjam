@@ -13,4 +13,4 @@ class PeachjamMLConfig(AppConfig):
         from .handler import modify_document_detail_context
 
         BaseDocumentDetailView.modify_context.connect(modify_document_detail_context)
-        PortionSearchEngine.mode = "hybrid"
+        PortionSearchEngine.mode = "text"

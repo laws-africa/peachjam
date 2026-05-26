@@ -4,7 +4,7 @@
 
 This repository is a reusable Django-based legal publishing platform. The shared platform is `peachjam`, and each deployed site layers a site-specific app and settings module on top of it.
 
-At runtime, the project usually does **not** boot directly from `peachjam.settings`. Instead, entry points such as `manage.py`, `peachjam/asgi.py`, and `peachjam/wsgi.py` set `DJANGO_SETTINGS_MODULE` to a site shell like `africanlii.settings`.
+At runtime, the project usually does **not** boot directly from `peachjam.settings`. Instead, entry points such as `manage.py`, `peachjam/asgi.py`, and `peachjam/wsgi.py` set `DJANGO_SETTINGS_MODULE` to a site shell like `liiweb.settings`.
 
 ## System shape
 
@@ -12,7 +12,7 @@ The system has four layers:
 
 1. **Shared platform**: `peachjam`
 2. **Supporting shared apps**: `peachjam_search`, `peachjam_api`, `peachjam_subs`, `peachjam_ml`
-3. **Site shells**: `africanlii`, `liiweb`, `gazettes`, `open_by_laws`, and jurisdiction-specific apps such as `zambialii`, `malawilii`, `senlii`
+3. **Site shells**: `liiweb`, `gazettes`, `open_by_laws`, and jurisdiction-specific apps such as `zambialii`, `malawilii`, `senlii`
 4. **Frontend assets**: TypeScript/Vue/HTMX code under `peachjam/js`, bundled by webpack into `peachjam/static/js`
 
 ## Boot and request flow
@@ -22,7 +22,7 @@ The system has four layers:
 - `manage.py` starts Django admin/management commands.
 - `peachjam/wsgi.py` exposes the WSGI app.
 - `peachjam/asgi.py` exposes the ASGI app and defines a custom `DjangoUvicornWorker`.
-- These entry points default to `africanlii.settings` in this checkout.
+- These entry points default to `liiweb.settings` in this checkout.
 
 ### Settings layering
 
@@ -37,7 +37,6 @@ The system has four layers:
 
 Examples:
 
-- `africanlii.settings`: multi-jurisdiction search portal
 - `liiweb.settings`: base shell used by some LII sites
 - `gazettes.settings`: Gazettes.Africa-specific DB/middleware/CORS
 - `open_by_laws.settings`: municipal by-laws deployment with microsite metadata
@@ -52,7 +51,6 @@ Examples:
 
 Examples:
 
-- `africanlii.urls` adds African Union, taxonomy, and redirect routes before including `peachjam.urls`.
 - `liiweb.urls.i18n` adds a legislation-focused home/navigation layer before including `peachjam.urls.i18n`.
 
 ## Main shared modules
@@ -210,17 +208,6 @@ Important modules:
 
 These apps customize the shared platform for specific deployments. They usually provide settings, templates, static files, translations, and sometimes views/routes/models.
 
-### `africanlii`
-
-Multi-jurisdiction portal shell.
-
-Responsibilities:
-
-- top-level site branding
-- African Union and taxonomy browsing pages
-- multi-jurisdiction search configuration
-- redirect middleware and legacy URL handling
-
 ### `liiweb`
 
 Reusable LII shell sitting between `peachjam` and specific country sites.
@@ -311,6 +298,14 @@ Views and templates must avoid leaking user-specific state into cacheable respon
 ### Background jobs
 
 Background work is handled through `django-background-tasks-updated`.
+
+Tasks are defined in `tasks.py` modules across the platform and supporting apps. They are queued on demand and sometimes
+also scheduled to run at intervals.
+
+Treat `tasks.py` as an entrypoint for background work. The task code short be short and focused on loading the state
+necessary to run the task by delegating to business logic code elsewhere in the codebase. In particular, when running
+a task related to a specific django object, the task should load the object by ID (handling the fact it may no longer
+exist), and then delegate to a method on the object or a related service function.
 
 Scheduled on app startup in non-debug mode:
 

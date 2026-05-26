@@ -19,7 +19,7 @@
 {% block page-title %}
   {% if not entity_profile %}
     <div class="my-4">
-      <h1 class="mb-0">{{ law_report.title }}</h1>
+      <h1 id="main-page-heading" class="mb-0">{{ law_report.title }}</h1>
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
              hx-trigger="load"></div>

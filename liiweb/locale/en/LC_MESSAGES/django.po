@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 10:35+0300\n"
+"POT-Creation-Date: 2026-05-13 14:19+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,11 +192,11 @@ msgstr ""
 msgid "Our partners"
 msgstr ""
 
-#: templates/peachjam/_footer.html:49
+#: templates/peachjam/_footer.html:53
 msgid "Other African Legal Information Institutions"
 msgstr ""
 
-#: views/legislation.py:179
+#: views/legislation.py:180
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr ""

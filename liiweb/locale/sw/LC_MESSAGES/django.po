@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-27 10:35+0300\n"
-"PO-Revision-Date: 2026-02-27 08:52\n"
+"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -191,11 +191,11 @@ msgstr "Masharti ya matumizi"
 msgid "Our partners"
 msgstr "Washirika wetu"
 
-#: templates/peachjam/_footer.html:49
+#: templates/peachjam/_footer.html:53
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
-#: views/legislation.py:179
+#: views/legislation.py:180
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"

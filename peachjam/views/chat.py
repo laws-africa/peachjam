@@ -13,6 +13,7 @@ from django.views.generic import DetailView
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
 from peachjam.chat.agent import DocumentChat, extract_assistant_response
+from peachjam.chat.tools import document_exceeds_chat_text_limit
 from peachjam.langfuse import langfuse
 from peachjam.models import DocumentChatThread
 from peachjam.views.documents import DocumentDetailView
@@ -45,6 +46,9 @@ class StartDocumentChatView(
     def get(self, request, *args, **kwargs):
         document = self.get_object()
 
+        if document_exceeds_chat_text_limit(document):
+            return self.render_chat_unavailable_too_large()
+
         thread = (
             DocumentChatThread.objects.filter(
                 user=self.request.user, core_document=document
@@ -67,6 +71,9 @@ class StartDocumentChatView(
 
     def post(self, request, *args, **kwargs):
         document = self.get_object()
+
+        if document_exceeds_chat_text_limit(document):
+            return self.render_chat_unavailable_too_large()
 
         if limit_response := self.check_limits(document):
             return limit_response
@@ -113,6 +120,13 @@ class StartDocumentChatView(
             context,
             request=self.request,
         )
+
+    def render_chat_unavailable_too_large(self):
+        html = render_to_string(
+            "peachjam/chat/_chat_unavailable_too_large.html",
+            request=self.request,
+        )
+        return JsonResponse({"message_html": html}, status=403)
 
     def check_limits(self, document):
         n_active = DocumentChatThread.count_active_for_user(self.request.user)
@@ -212,7 +226,14 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
 
             log.info(f"Finished stream for {thread}")
             reply = extract_assistant_response(result)
-            reply["content"] = await sync_to_async(chat.markup_refs)(reply["content"])
+            # TODO: try working around a weird issue where sometimes the result of this await is not a string
+            text = await sync_to_async(chat.markup_refs)(reply["content"])
+            if isinstance(text, str):
+                reply["content"] = text
+            else:
+                log.warning(
+                    f"markup_refs for thread {thread.id} returned non-string {text} of type {type(text)}"
+                )
             reply["trace_id"] = generation.trace_id
 
             generation.update_trace(
@@ -223,7 +244,7 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
             )
 
         # send the full final response
-        yield self.format_sse("message", serialise_message(reply))
+        yield self.format_sse("message", reply)
         yield self.format_sse("done", {})
 
         messages = thread.get_thread_messages()
@@ -268,14 +289,3 @@ class VoteChatMessageView(ChatThreadDetailMixin):
                 )
 
         return HttpResponse(status=200)
-
-
-def serialise_message(message):
-    if isinstance(message, dict):
-        return message
-
-    return {
-        "id": message.id,
-        "role": message.type,
-        "content": message.content,
-    }

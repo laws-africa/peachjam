@@ -16,7 +16,7 @@
         </li>
         {% for ancestor in ancestors %}
           <li class="breadcrumb-item">
-            <a href="{% url 'flynote_detail' ancestor.slug %}">{{ ancestor.name }}</a>
+            <a href="{% url 'flynote_detail' ancestor.pk %}">{{ ancestor.name }}</a>
           </li>
         {% endfor %}
         <li class="breadcrumb-item active" aria-current="page">{{ flynote.name }}</li>
@@ -26,9 +26,15 @@
 {% endblock %}
 {% block page-header %}
   <div class="mb-4">
-    <h1 class="mb-4">
-      {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
-      {{ flynote.name }}
+    <h1 id="main-page-heading"
+        class="mb-4 d-flex align-items-start justify-content-between gap-3">
+      <span>
+        {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
+        {{ flynote.name }}
+      </span>
+      <div data-component="FlynoteDetailActions"
+           data-manage-url="{% url 'flynote-manager' %}?flynote={{ flynote.pk }}">
+      </div>
     </h1>
     {% if popular_flynotes %}
       <h2 class="h4">
@@ -39,5 +45,14 @@
     {% endif %}
     <h2 class="h4 mt-4">{% trans "Judgments" %}</h2>
     {% include 'peachjam/_count_and_search.html' with hide_search=True %}
+  </div>
+{% endblock %}
+{% block document-table %}
+  <div id="{{ flynote_document_listing_id }}"
+       hx-get="{{ request.get_full_path }}"
+       hx-trigger="load"
+       hx-target="this"
+       hx-swap="innerHTML">
+    <div class="spinner-when-empty"></div>
   </div>
 {% endblock %}

@@ -246,12 +246,12 @@ class DocumentSearchView(TemplateView):
         filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
 
         search = self.request.GET.get("search", "")[:2048]
-        # ignore nulls
         search = search.replace("\00", " ")
+        suggestion = self.request.GET.get("suggestion", "")[:1024]
+        suggestion = suggestion.replace("\00", " ")
 
         qclass = self.classify_query(search)
 
-        # save the search trace
         with transaction.atomic():
             return SearchTrace.objects.create(
                 user=self.request.user if self.request.user.is_authenticated else None,
@@ -265,7 +265,7 @@ class DocumentSearchView(TemplateView):
                 filters=engine.filters,
                 filters_string=filters_string,
                 ordering=self.request.GET.get("ordering"),
-                suggestion=self.request.GET.get("suggestion", "")[:1024],
+                suggestion=suggestion,
                 ip_address=self.request.headers.get("x-forwarded-for"),
                 user_agent=self.request.headers.get("user-agent"),
                 query_clean=qclass.query_clean,

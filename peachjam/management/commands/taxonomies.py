@@ -62,7 +62,7 @@ class Command(BaseCommand):
             root_node = Taxonomy.objects.filter(slug=root).first()
             if not root_node:
                 raise ValueError("Root node not found: " + root)
-        data = Taxonomy.dump_bulk(root_node, keep_ids=False)
+        data = Taxonomy.sort_bulk_tree(Taxonomy.dump_bulk(root_node, keep_ids=False))
 
         # keep only the name and slug of the data
         def fixup(node):

@@ -1,21 +1,35 @@
 import datetime
 from io import StringIO
-from unittest.mock import call, patch
+from unittest.mock import patch
 
+from background_task.models import Task
 from countries_plus.models import Country
+from django.conf import settings
+from django.contrib.admin.sites import AdminSite
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.core.management import call_command
-from django.test import TestCase
+from django.db import connection
+from django.template.loader import render_to_string
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
 
+from peachjam.admin import FlynoteAdmin
 from peachjam.analysis.flynotes import FlynoteParser, FlynoteUpdater
+from peachjam.auth import get_or_create_all_users_permission_group
 from peachjam.models import Court, Judgment
 from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
+from peachjam.tasks import (
+    FLYNOTE_REFRESH_DELAY,
+    refresh_flynote_document_count,
+)
 
 
 class ParseFlynoteTextTest(TestCase):
     def setUp(self):
-        self.parser = FlynoteParser()
+        self.parser = FlynoteParser(assume_clean=False)
 
     def test_empty_input(self):
         self.assertEqual(self.parser.parse(""), [])
@@ -1125,6 +1139,34 @@ class ParseFlynoteTextTest(TestCase):
             ],
         )
 
+    def test_parse_multiline_clean_flynotes_do_not_use_restart_inference(self):
+        parser = FlynoteParser(assume_clean=True)
+        text = (
+            "Contract - Contract of sale of goods - Whether and under what circumstances "
+            "a mere purchase order may amount to an agreement to sell. Contract\n"
+            "Administrative Law - Jurisdiction of an administrative body - Requirement of quorum - "
+            "Whether the meeting had jurisdiction to make valid decisions"
+        )
+        self.assertEqual(
+            parser.parse(text),
+            [
+                [
+                    "Contract",
+                    "Contract of sale of goods",
+                    (
+                        "Whether and under what circumstances a mere purchase order may amount to an agreement to "
+                        "sell. Contract"
+                    ),
+                ],
+                [
+                    "Administrative Law",
+                    "Jurisdiction of an administrative body",
+                    "Requirement of quorum",
+                    "Whether the meeting had jurisdiction to make valid decisions",
+                ],
+            ],
+        )
+
     def test_parse_stops_before_statute_reference_tail(self):
         text = (
             "Jurisdiction - Buganda courts - Suit for damages - Car collision - "
@@ -1232,23 +1274,22 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         node = self.updater.get_or_create_node(None, "Criminal law")
         self.assertIsNotNone(node)
         self.assertEqual(node.name, "Criminal law")
-        self.assertEqual(node.slug, "criminal-law")
         self.assertTrue(node.is_root())
 
-    def test_returns_existing_by_slug(self):
-        Flynote.add_root(name="Criminal law", slug="criminal-law")
+    def test_returns_existing_by_normalised_root_name(self):
+        Flynote.add_root(name="Criminal law")
         found = self.updater.get_or_create_node(None, "Criminal law")
-        self.assertEqual(Flynote.objects.filter(slug="criminal-law").count(), 1)
+        self.assertEqual(Flynote.objects.filter(name="Criminal law").count(), 1)
         self.assertEqual(found.name, "Criminal law")
 
     def test_returns_existing_by_normalised_name(self):
-        Flynote.add_root(name="Criminal Law", slug="criminal-law")
+        Flynote.add_root(name="Criminal Law")
         found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
 
-    def test_caches_nodes_by_slug(self):
+    def test_caches_nodes_by_parent_and_normalised_name(self):
         found = self.updater.get_or_create_node(None, "Criminal law")
-        self.assertEqual(self.updater.node_cache["criminal-law"].pk, found.pk)
+        self.assertEqual(self.updater.node_cache[(None, "criminal-law")].pk, found.pk)
 
         again = self.updater.get_or_create_node(None, "Criminal law")
         self.assertEqual(again.pk, found.pk)
@@ -1257,9 +1298,20 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         parent = self.updater.get_or_create_node(None, "Criminal law")
         child = self.updater.get_or_create_node(parent, "admissibility")
         self.assertIsNotNone(child)
-        self.assertEqual(child.slug, "criminal-law-admissibility")
         self.assertFalse(child.is_root())
         self.assertEqual(child.get_parent().pk, parent.pk)
+
+    def test_repairs_parent_numchild_when_last_child_is_missing(self):
+        parent = Flynote.add_root(name="Criminal law")
+        Flynote.objects.filter(pk=parent.pk).update(numchild=1)
+        parent.refresh_from_db(fields=["path", "depth", "numchild"])
+
+        child = self.updater.get_or_create_node(parent, "admissibility")
+
+        self.assertIsNotNone(child)
+        self.assertEqual(child.get_parent().pk, parent.pk)
+        parent.refresh_from_db(fields=["numchild"])
+        self.assertEqual(parent.numchild, 1)
 
 
 class UpdateFlynoteForJudgmentTest(TestCase):
@@ -1274,7 +1326,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote=(
+            flynote_raw=(
                 "Criminal law \u2014 admissibility \u2014 trial within a trial"
                 "; circumstantial evidence \u2014 Blom principles"
             ),
@@ -1315,12 +1367,41 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         trial = Flynote.objects.get(name="trial within a trial")
         self.assertEqual(trial.get_parent().pk, admissibility.pk)
 
+    @patch(
+        "peachjam.analysis.flynotes.FlynoteDocumentCount.quick_refresh_for_single_flynote"
+    )
+    def test_update_quick_refreshes_leaf_flynotes_and_ancestors(self, mock_refresh):
+        self.updater.update_for_judgment(self.judgment)
+
+        refreshed_names = {call.args[0].name for call in mock_refresh.call_args_list}
+        self.assertEqual(
+            refreshed_names,
+            {
+                "Criminal law",
+                "admissibility",
+                "trial within a trial",
+                "circumstantial evidence",
+                "Blom principles",
+            },
+        )
+
+    @patch(
+        "peachjam.analysis.flynotes.FlynoteDocumentCount.quick_refresh_for_single_flynote"
+    )
+    def test_update_can_skip_quick_count_refresh(self, mock_refresh):
+        updater = FlynoteUpdater(update_counts=False)
+
+        updater.update_for_judgment(self.judgment)
+
+        mock_refresh.assert_not_called()
+
     def test_clears_old_links_on_reprocess(self):
         self.updater.update_for_judgment(self.judgment)
         initial_count = JudgmentFlynote.objects.filter(document=self.judgment).count()
         self.assertEqual(initial_count, 2)
 
-        self.judgment.flynote = "Contract law \u2014 breach of contract"
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = "Contract law \u2014 breach of contract"
         self.judgment.save()
         self.updater.update_for_judgment(self.judgment)
 
@@ -1341,7 +1422,7 @@ class UpdateFlynoteForJudgmentTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 2, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 sentencing",
+            flynote_raw="Criminal law \u2014 sentencing",
         )
         self.updater.update_for_judgment(judgment2)
 
@@ -1349,7 +1430,8 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         self.assertEqual(Flynote.objects.get(name="Criminal law").pk, criminal_pk)
 
     def test_empty_flynote_skips(self):
-        self.judgment.flynote = ""
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = ""
         self.judgment.save()
 
         self.updater.update_for_judgment(self.judgment)
@@ -1358,7 +1440,8 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_prose_flynote_skips(self):
-        self.judgment.flynote = "This is a plain prose description of the case."
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = "This is a plain prose description of the case."
         self.judgment.save()
 
         self.updater.update_for_judgment(self.judgment)
@@ -1367,7 +1450,8 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
 
     def test_multiline_flynotes_link_separate_leaf_nodes(self):
-        self.judgment.flynote = (
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = (
             "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
             "Administrative law \u2014 judicial review"
         )
@@ -1382,40 +1466,175 @@ class UpdateFlynoteForJudgmentTest(TestCase):
         )
         self.assertEqual(linked_flynotes, {"trial within a trial", "judicial review"})
 
-    def test_refresh_counts_queues_delayed_refresh_per_root(self):
-        with (
-            patch.object(
-                self.updater.parser,
-                "parse",
-                return_value=[
-                    ["Criminal law", "admissibility", "trial within a trial"],
-                    ["Administrative law", "judicial review"],
-                ],
-            ),
-            patch(
-                "peachjam.analysis.flynotes.refresh_flynote_document_count"
-            ) as mock_refresh,
-        ):
-            self.updater.update_for_judgment(self.judgment, refresh_counts=True)
+    def test_update_returns_affected_old_and_new_roots(self):
+        self.updater.update_for_judgment(self.judgment)
 
-        admin = Flynote.objects.get(name="Administrative law")
-        criminal = Flynote.objects.get(name="Criminal law")
-        self.assertCountEqual(
-            mock_refresh.call_args_list,
-            [
-                call(admin.pk, schedule=30 * 60),
-                call(criminal.pk, schedule=30 * 60),
-            ],
+        self.judgment.flynote_raw = "Administrative law \u2014 judicial review"
+        affected_root_ids = self.updater.update_for_judgment(self.judgment)
+
+        affected_roots = set(
+            Flynote.objects.filter(pk__in=affected_root_ids).values_list(
+                "name", flat=True
+            )
+        )
+        self.assertEqual(affected_roots, {"Administrative law", "Criminal law"})
+
+
+class RefreshFlynoteDocumentCountTaskTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        Task.objects.all().delete()
+
+    def test_schedules_for_12_hours(self):
+        before = datetime.datetime.now(datetime.timezone.utc)
+
+        task = refresh_flynote_document_count(123)
+
+        self.assertEqual(task.task_name, refresh_flynote_document_count.name)
+        self.assertGreaterEqual(
+            task.run_at,
+            before + datetime.timedelta(seconds=FLYNOTE_REFRESH_DELAY - 60),
         )
 
-    def test_refresh_counts_queues_once_for_shared_root(self):
-        with patch(
-            "peachjam.analysis.flynotes.refresh_flynote_document_count"
-        ) as mock_refresh:
-            self.updater.update_for_judgment(self.judgment, refresh_counts=True)
+    def test_keeps_existing_pending_task_for_same_root(self):
+        admin = Flynote.add_root(name="Administrative law")
 
-        criminal = Flynote.objects.get(name="Criminal law")
-        mock_refresh.assert_called_once_with(criminal.pk, schedule=30 * 60)
+        with patch("background_task.tasks.timezone.now") as mock_now:
+            first_now = datetime.datetime(
+                2025, 1, 1, 9, 0, tzinfo=datetime.timezone.utc
+            )
+            second_now = datetime.datetime(
+                2025, 1, 1, 10, 0, tzinfo=datetime.timezone.utc
+            )
+            mock_now.return_value = first_now
+            refresh_flynote_document_count(admin.pk)
+            first_task = Task.objects.get(task_name=refresh_flynote_document_count.name)
+
+            mock_now.return_value = second_now
+            refresh_flynote_document_count(admin.pk)
+
+        task = Task.objects.get(task_name=refresh_flynote_document_count.name)
+        self.assertEqual(
+            Task.objects.filter(
+                task_name=refresh_flynote_document_count.name,
+            ).count(),
+            1,
+        )
+        self.assertEqual(task.pk, first_task.pk)
+        self.assertEqual(
+            task.run_at,
+            first_now + datetime.timedelta(seconds=FLYNOTE_REFRESH_DELAY),
+        )
+
+    def test_different_roots_get_different_tasks(self):
+        admin = Flynote.add_root(name="Administrative law")
+        criminal = Flynote.add_root(name="Criminal law")
+
+        refresh_flynote_document_count(admin.pk)
+        refresh_flynote_document_count(criminal.pk)
+
+        self.assertEqual(
+            Task.objects.filter(task_name=refresh_flynote_document_count.name).count(),
+            2,
+        )
+
+    def test_judgment_flynote_delete_queues_delayed_refresh_for_affected_root(self):
+        judgment = Judgment.objects.create(
+            case_name="Delete scheduling test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Criminal law \u2014 admissibility",
+        )
+        FlynoteUpdater().update_for_judgment(judgment)
+        judgment_flynote = JudgmentFlynote.objects.get(document=judgment)
+        root_id = judgment_flynote.flynote.get_root().pk
+
+        with self.captureOnCommitCallbacks(execute=True):
+            judgment.delete()
+
+        self.assertTrue(
+            Task.objects.get_task(
+                refresh_flynote_document_count.name,
+                args=(root_id,),
+                kwargs={},
+            ).exists()
+        )
+
+    def test_judgment_flynote_delete_without_cached_flynote_still_queues_refresh(self):
+        judgment = Judgment.objects.create(
+            case_name="Direct delete scheduling test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Criminal law \u2014 admissibility",
+        )
+        FlynoteUpdater().update_for_judgment(judgment)
+        judgment_flynote = JudgmentFlynote.objects.only(
+            "id", "document_id", "flynote_id"
+        ).get(document=judgment)
+        root_id = Flynote.objects.get(pk=judgment_flynote.flynote_id).get_root().pk
+
+        with self.captureOnCommitCallbacks(execute=True):
+            judgment_flynote.delete()
+
+        self.assertTrue(
+            Task.objects.get_task(
+                refresh_flynote_document_count.name,
+                args=(root_id,),
+                kwargs={},
+            ).exists()
+        )
+
+    def test_judgment_flynote_save_queues_delayed_refresh_for_affected_root(self):
+        root = Flynote.add_root(name="Criminal law")
+        leaf = root.add_child(name="Admissibility")
+        judgment = Judgment.objects.create(
+            case_name="Save scheduling test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            JudgmentFlynote.objects.create(document=judgment, flynote=leaf)
+
+        self.assertTrue(
+            Task.objects.get_task(
+                refresh_flynote_document_count.name,
+                args=(root.pk,),
+                kwargs={},
+            ).exists()
+        )
+
+    @patch("peachjam.models.flynote.FlynoteDocumentCount.refresh_for_flynote")
+    def test_refresh_task_refreshes_root_directly(self, mock_refresh):
+        root = Flynote.add_root(name="Criminal law")
+
+        refresh_flynote_document_count.now(root.pk)
+
+        mock_refresh.assert_called_once_with(root)
+
+    @patch("peachjam.models.flynote.FlynoteDocumentCount.refresh_for_flynote")
+    def test_admin_action_refreshes_selected_root_immediately(self, mock_refresh):
+        root = Flynote.add_root(name="Criminal law")
+        leaf = root.add_child(name="Admissibility")
+
+        request = RequestFactory().post("/")
+        model_admin = FlynoteAdmin(Flynote, AdminSite())
+
+        with patch.object(model_admin, "message_user") as mock_message:
+            model_admin.refresh_document_counts_now(
+                request,
+                Flynote.objects.filter(pk=leaf.pk),
+            )
+
+        mock_refresh.assert_called_once_with(root)
+        mock_message.assert_called_once()
 
 
 class FlynoteDocumentCountTest(TestCase):
@@ -1431,7 +1650,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 admissibility",
+            flynote_raw="Criminal law \u2014 admissibility",
         )
         self.updater.update_for_judgment(judgment)
         criminal = Flynote.objects.get(name="Criminal law")
@@ -1447,7 +1666,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 admissibility \u2014 trial within a trial",
+            flynote_raw="Criminal law \u2014 admissibility \u2014 trial within a trial",
         )
         judgment2 = Judgment.objects.create(
             case_name="Case 2",
@@ -1455,7 +1674,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 2, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 sentencing",
+            flynote_raw="Criminal law \u2014 sentencing",
         )
         self.updater.update_for_judgment(judgment1)
         self.updater.update_for_judgment(judgment2)
@@ -1476,7 +1695,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 admissibility",
+            flynote_raw="Criminal law \u2014 admissibility",
         )
         self.updater.update_for_judgment(judgment)
         FlynoteDocumentCount.refresh_for_all_flynotes()
@@ -1492,7 +1711,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 sentencing; Administrative law \u2014 judicial review",
+            flynote_raw="Criminal law \u2014 sentencing; Administrative law \u2014 judicial review",
         )
         judgment2 = Judgment.objects.create(
             case_name="Case 2",
@@ -1500,7 +1719,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 2, 1),
             language=Language.objects.first(),
-            flynote="Criminal law \u2014 admissibility",
+            flynote_raw="Criminal law \u2014 admissibility",
         )
         self.updater.update_for_judgment(judgment1)
         self.updater.update_for_judgment(judgment2)
@@ -1522,7 +1741,7 @@ class FlynoteDocumentCountTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Criminal law — admissibility — trial within a trial",
+            flynote_raw="Criminal law — admissibility — trial within a trial",
         )
         self.updater.update_for_judgment(judgment)
 
@@ -1536,7 +1755,402 @@ class FlynoteDocumentCountTest(TestCase):
             Flynote.objects.filter(path__startswith=criminal.path).exists()
         )
 
+    def test_refresh_skips_linked_stale_subtree_and_keeps_pruning(self):
+        class StaleCountsCursor:
+            def __init__(self, cursor):
+                self.cursor = cursor
 
+            def __enter__(self):
+                self.cursor.__enter__()
+                return self
+
+            def __exit__(self, exc_type, exc, tb):
+                return self.cursor.__exit__(exc_type, exc, tb)
+
+            def execute(self, sql, params=None):
+                statement = " ".join(sql.split())
+                if statement.startswith("DELETE FROM peachjam_flynotedocumentcount"):
+                    return None
+                if statement.startswith("INSERT INTO peachjam_flynotedocumentcount"):
+                    return None
+                return self.cursor.execute(sql, params)
+
+            def __getattr__(self, name):
+                return getattr(self.cursor, name)
+
+        judgment = Judgment.objects.create(
+            case_name="Protected prune test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Criminal law — admissibility — trial within a trial",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        criminal = Flynote.objects.get(name="Criminal law")
+        criminal.add_child(name="Sentencing")
+        FlynoteDocumentCount.objects.all().delete()
+
+        real_cursor = connection.cursor
+        with patch(
+            "peachjam.models.flynote.connection.cursor",
+            side_effect=lambda *args, **kwargs: StaleCountsCursor(
+                real_cursor(*args, **kwargs)
+            ),
+        ):
+            FlynoteDocumentCount.refresh_for_flynote(criminal)
+
+        self.assertTrue(Flynote.objects.filter(pk=criminal.pk).exists())
+        self.assertTrue(Flynote.objects.filter(name="trial within a trial").exists())
+        self.assertFalse(Flynote.objects.filter(name="Sentencing").exists())
+
+    def test_refresh_ignores_deleted_empty_flynote_and_keeps_pruning(self):
+        judgment = Judgment.objects.create(
+            case_name="Concurrent prune test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Criminal law — admissibility — trial within a trial",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        criminal = Flynote.objects.get(name="Criminal law")
+        sentencing = criminal.add_child(name="Sentencing")
+        procedure = criminal.add_child(name="Procedure")
+
+        original_delete = Flynote.delete
+        deleted_once = {"done": False}
+
+        def racing_delete(instance, *args, **kwargs):
+            if instance.pk == sentencing.pk and not deleted_once["done"]:
+                deleted_once["done"] = True
+                Flynote.objects.filter(pk=instance.pk).delete()
+                raise Flynote.DoesNotExist()
+            return original_delete(instance, *args, **kwargs)
+
+        with patch(
+            "peachjam.models.flynote.Flynote.delete", autospec=True
+        ) as mock_delete:
+            mock_delete.side_effect = racing_delete
+            FlynoteDocumentCount.refresh_for_flynote(criminal)
+
+        self.assertFalse(Flynote.objects.filter(pk=sentencing.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=procedure.pk).exists())
+        self.assertTrue(Flynote.objects.filter(pk=criminal.pk).exists())
+        self.assertTrue(Flynote.objects.filter(name="trial within a trial").exists())
+
+
+class FlynoteDeprecationTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def make_judgment(self, case_name):
+        return Judgment.objects.create(
+            case_name=case_name,
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+        }
+    )
+    @patch("peachjam.tasks.serialise_judgment_flynote_tree")
+    @patch("peachjam.tasks.generate_judgment_summary")
+    def test_deprecating_parent_cascades_and_queues_directly_linked_judgments(
+        self,
+        mock_generate_summary,
+        mock_serialise_flynote_tree,
+    ):
+        root = Flynote.add_root(name="Civil procedure")
+        child = root.add_child(name="Stay of execution")
+        grandchild = child.add_child(name="Urgent applications")
+
+        root_judgment = self.make_judgment("Root flynote judgment")
+        child_judgment = self.make_judgment("Child flynote judgment")
+        grandchild_judgment = self.make_judgment("Grandchild flynote judgment")
+        JudgmentFlynote.objects.create(document=root_judgment, flynote=root)
+        JudgmentFlynote.objects.create(document=child_judgment, flynote=child)
+        JudgmentFlynote.objects.create(document=grandchild_judgment, flynote=grandchild)
+
+        # Reload the branch before editing it. In production this toggle
+        # happens on persisted nodes loaded from the database, and the
+        # re-serialisation hook should only run for real name/path changes.
+        root = Flynote.objects.get(pk=root.pk)
+        child = Flynote.objects.get(pk=child.pk)
+        grandchild = Flynote.objects.get(pk=grandchild.pk)
+        mock_serialise_flynote_tree.reset_mock()
+
+        root.deprecated = True
+        root.save()
+
+        root.refresh_from_db()
+        child.refresh_from_db()
+        grandchild.refresh_from_db()
+
+        self.assertTrue(root.deprecated)
+        self.assertTrue(child.deprecated)
+        self.assertTrue(grandchild.deprecated)
+        self.assertCountEqual(
+            [args.args[0] for args in mock_generate_summary.call_args_list],
+            [root_judgment.pk, child_judgment.pk, grandchild_judgment.pk],
+        )
+        mock_serialise_flynote_tree.assert_not_called()
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+        }
+    )
+    @patch("peachjam.tasks.generate_judgment_summary")
+    def test_reactivating_parent_cascades_without_queueing_resummaries(
+        self,
+        mock_generate_summary,
+    ):
+        root = Flynote.add_root(
+            name="Civil procedure",
+            deprecated=True,
+        )
+        child = root.add_child(
+            name="Stay of execution",
+            deprecated=True,
+        )
+        grandchild = child.add_child(
+            name="Urgent applications",
+            deprecated=True,
+        )
+
+        root.deprecated = False
+        root.save()
+
+        root.refresh_from_db()
+        child.refresh_from_db()
+        grandchild.refresh_from_db()
+
+        self.assertFalse(root.deprecated)
+        self.assertFalse(child.deprecated)
+        self.assertFalse(grandchild.deprecated)
+        mock_generate_summary.assert_not_called()
+
+    def test_clean_rejects_reactivating_child_under_deprecated_ancestor(self):
+        root = Flynote.add_root(
+            name="Civil procedure",
+            deprecated=True,
+        )
+        child = root.add_child(
+            name="Stay of execution",
+            deprecated=True,
+        )
+
+        child.deprecated = False
+        with self.assertRaisesMessage(
+            ValidationError,
+            "A flynote cannot be active when any ancestor is deprecated.",
+        ):
+            child.full_clean()
+
+    @patch("peachjam.tasks.serialise_judgment_flynote_tree")
+    def test_renaming_parent_queues_descendant_linked_judgments_for_reserialisation(
+        self,
+        mock_serialise_judgment_flynote_tree,
+    ):
+        root = Flynote.add_root(name="Civil procedure")
+        child = root.add_child(name="Stay of execution")
+        grandchild = child.add_child(name="Urgent applications")
+
+        root_judgment = self.make_judgment("Root flynote judgment")
+        grandchild_judgment = self.make_judgment("Grandchild flynote judgment")
+        JudgmentFlynote.objects.create(document=root_judgment, flynote=root)
+        JudgmentFlynote.objects.create(document=grandchild_judgment, flynote=grandchild)
+
+        root.name = "Civil practice and procedure"
+        root.save()
+
+        self.assertCountEqual(
+            [
+                args.args[0]
+                for args in mock_serialise_judgment_flynote_tree.call_args_list
+            ],
+            [root_judgment.pk, grandchild_judgment.pk],
+        )
+
+
+class FlynoteMergeTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def make_judgment(self, case_name):
+        return Judgment.objects.create(
+            case_name=case_name,
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+
+    @patch("peachjam.signals.serialise_judgment_flynote_tree")
+    def test_merge_moves_direct_judgments_and_reparents_children(
+        self, mock_serialise_judgment_flynote_tree
+    ):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+        source_child = source.add_child(name="Urgent applications")
+
+        direct_judgment = self.make_judgment("Direct source judgment")
+        descendant_judgment = self.make_judgment("Descendant source judgment")
+        JudgmentFlynote.objects.create(document=direct_judgment, flynote=source)
+        JudgmentFlynote.objects.create(
+            document=descendant_judgment, flynote=source_child
+        )
+        mock_serialise_judgment_flynote_tree.reset_mock()
+
+        target.merge_sources_into([source])
+
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=direct_judgment,
+                flynote=target,
+            ).exists()
+        )
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+
+        source_child.refresh_from_db()
+        self.assertEqual(source_child.get_parent().pk, target.pk)
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=descendant_judgment,
+                flynote=source_child,
+            ).exists()
+        )
+        mock_serialise_judgment_flynote_tree.assert_called_once_with(direct_judgment.pk)
+
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_queues_refresh_for_affected_root(self, mock_refresh):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+
+        target.merge_sources_into([source])
+
+        mock_refresh.assert_any_call(root.pk)
+
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_refreshes_small_target_count_inline(self, mock_refresh):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+
+        target_judgment = self.make_judgment("Target judgment")
+        source_judgment = self.make_judgment("Source judgment")
+        JudgmentFlynote.objects.create(document=target_judgment, flynote=target)
+        JudgmentFlynote.objects.create(document=source_judgment, flynote=source)
+        FlynoteDocumentCount.objects.create(flynote=target, count=1)
+        FlynoteDocumentCount.objects.create(flynote=source, count=1)
+
+        target.merge_sources_into([source])
+
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=target).count,
+            2,
+        )
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=root).count,
+            2,
+        )
+        mock_refresh.assert_any_call(root.pk)
+
+    @patch("peachjam.models.flynote.refresh_flynote_document_count")
+    def test_merge_skips_inline_target_count_when_estimate_is_large(self, mock_refresh):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        target_child = target.add_child(name="Urgent applications")
+        source = root.add_child(name="Stays of execution")
+
+        FlynoteDocumentCount.objects.create(flynote=target, count=5001)
+        FlynoteDocumentCount.objects.create(flynote=target_child, count=5001)
+
+        target.merge_sources_into([source])
+
+        self.assertEqual(
+            FlynoteDocumentCount.objects.get(flynote=target).count,
+            5001,
+        )
+        mock_refresh.assert_any_call(root.pk)
+
+    def test_merge_recursively_merges_duplicate_child_names_under_target(self):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+        target_child = target.add_child(name="Urgent applications")
+        source_child = source.add_child(name="Urgent applications")
+
+        source_child_judgment = self.make_judgment("Source child judgment")
+        JudgmentFlynote.objects.create(
+            document=source_child_judgment, flynote=source_child
+        )
+
+        target.merge_sources_into([source])
+
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=source_child.pk).exists())
+        self.assertTrue(Flynote.objects.filter(pk=target_child.pk).exists())
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=source_child_judgment,
+                flynote=target_child,
+            ).exists()
+        )
+
+
+class FlynoteCleanTest(TestCase):
+    def test_rejects_duplicate_root_name(self):
+        Flynote.add_root(name="Civil procedure")
+        duplicate = Flynote.add_root(name="Civil proceedings")
+        duplicate.name = "Civil procedure"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_rejects_duplicate_sibling_name(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Costs")
+        duplicate = root.add_child(name="Cost orders")
+        duplicate.name = "Costs"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_allows_duplicate_name_under_different_parents(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Costs")
+        other_parent = root.add_child(name="Appeals")
+        flynote = other_parent.add_child(name="Cost orders")
+        flynote.name = "Costs"
+
+        flynote.clean()
+
+
+@override_settings(
+    PEACHJAM={
+        **settings.PEACHJAM,
+        "SUMMARISE_USE_FLYNOTE_TREE": True,
+        "SHOW_FLYNOTE_TOPICS": True,
+    }
+)
 class FlynoteListViewTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -1555,7 +2169,7 @@ class FlynoteListViewTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Administrative law \u2014 judicial review",
+            flynote_raw="Administrative law \u2014 judicial review",
         )
         self.updater.update_for_judgment(judgment)
 
@@ -1571,7 +2185,7 @@ class FlynoteListViewTest(TestCase):
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
             language=Language.objects.first(),
-            flynote="Administrative law \u2014 judicial review",
+            flynote_raw="Administrative law \u2014 judicial review",
         )
         self.updater.update_for_judgment(judgment)
         admin_flynote = Flynote.objects.get(name="Administrative law")
@@ -1591,7 +2205,56 @@ class FlynoteListViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("judgment_list"))
 
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_redirects_to_judgment_list_when_tree_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="View Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law \u2014 judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+        self.assertTrue(Flynote.get_root_nodes().exists())
 
+        response = self.client.get(reverse("flynote_list"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("judgment_list"))
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": False,
+        }
+    )
+    def test_renders_topic_list_page_when_topic_ui_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="View Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law \u2014 judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+        self.assertTrue(Flynote.get_root_nodes().exists())
+
+        response = self.client.get(reverse("flynote_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "peachjam/flynote/list.html")
+
+
+@override_settings(
+    PEACHJAM={
+        **settings.PEACHJAM,
+        "SUMMARISE_USE_FLYNOTE_TREE": True,
+        "SHOW_FLYNOTE_TOPICS": True,
+    }
+)
 class JudgmentListFlynoteTopicsTest(TestCase):
     fixtures = [
         "tests/countries",
@@ -1600,9 +2263,272 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         "documents/sample_documents",
     ]
 
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+
     def test_judgment_list_loads(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, reverse("flynote_list"))
+
+    def test_judgment_list_hides_topic_link_without_flynotes(self):
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_judgment_list_hides_topic_link_when_tree_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": False,
+        }
+    )
+    def test_judgment_list_hides_topic_link_when_topic_setting_disabled(self):
+        judgment = Judgment.objects.create(
+            case_name="Topic link test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+
+        response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+
+@override_settings(
+    PEACHJAM={
+        **settings.PEACHJAM,
+        "SUMMARISE_USE_FLYNOTE_TREE": True,
+        "SHOW_FLYNOTE_TOPICS": True,
+    }
+)
+class JudgmentDetailFlynoteNavigationTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.updater = FlynoteUpdater()
+        self.judgment = Judgment.objects.create(
+            case_name="Navigation Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+        )
+        self.judgment.track_changes()
+        self.judgment.flynote_raw = "Administrative law — judicial review"
+        self.judgment.save()
+        self.updater.update_for_judgment(self.judgment)
+
+    def test_judgment_detail_links_to_flynote_topic_pages(self):
+        response = self.client.get(self.judgment.get_absolute_url())
+        leaf = Flynote.objects.get(name="judicial review")
+
+        self.assertEqual(response.status_code, 200)
+        for node in [*leaf.get_ancestors(), leaf]:
+            self.assertContains(
+                response,
+                reverse("flynote_detail", kwargs={"pk": node.pk}),
+            )
+            self.assertContains(response, node.name)
+
+    def test_flynote_detail_hides_document_type_column(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
+    def test_flynote_detail_shell_loads_judgment_listing_via_htmx(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'id="flynote-document-listing-{leaf.pk}"',
+        )
+        self.assertContains(response, 'hx-trigger="load"')
+        self.assertNotContains(response, "doc-table-form-")
+        self.assertNotContains(response, self.judgment.case_name)
+
+    def test_flynote_detail_htmx_listing_requires_permission(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": leaf.pk}),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET=f"flynote-document-listing-{leaf.pk}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "This feature is not currently available.")
+        self.assertIn("no-cache", response["Cache-Control"])
+
+    def test_flynote_detail_htmx_listing_allows_anonymous_access_with_permission(self):
+        leaf = Flynote.objects.get(name="judicial review")
+        permission = Permission.objects.get(
+            content_type=ContentType.objects.get_for_model(Flynote),
+            codename="view_linked_judgments",
+        )
+        group = get_or_create_all_users_permission_group()
+        group.permissions.add(permission)
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": leaf.pk}),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET=f"flynote-document-listing-{leaf.pk}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.judgment.case_name)
+        self.assertContains(response, "doc-table-form-")
+        self.assertNotContains(response, "This feature is not currently available.")
+        self.assertIn("no-cache", response["Cache-Control"])
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": False,
+        }
+    )
+    def test_flynote_detail_remains_accessible_when_topic_setting_disabled(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, leaf.name)
+
+    def test_linked_flynotes_template_uses_semantic_list_markup(self):
+        html = render_to_string(
+            "peachjam/document/_linked_flynotes.html",
+            {
+                "linked_flynotes": self.judgment.linked_flynotes,
+                "flynote_text": self.judgment.flynote,
+            },
+        )
+
+        self.assertIn('<ul class="list-unstyled flynotes my-2">', html)
+        self.assertIn('<ul class="list-unstyled flynotes">', html)
+        self.assertEqual(html.count("<li>"), 2)
+
+    def test_linked_flynotes_use_judgment_flynotes_in_path_order(self):
+        judgment = Judgment.objects.create(
+            case_name="Multiline flynote test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 2),
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+        )
+        judgment.track_changes()
+        judgment.flynote_raw = (
+            "Criminal law — admissibility — trial within a trial; right to representation\n"
+            "Administrative law — judicial review"
+        )
+        judgment.save()
+        self.updater.update_for_judgment(judgment)
+
+        self.assertEqual(
+            [
+                tuple(node.name for node in item["nodes"])
+                for item in judgment.linked_flynotes
+            ],
+            [
+                (
+                    "Administrative law",
+                    "judicial review",
+                ),
+                (
+                    "Criminal law",
+                    "admissibility",
+                    "trial within a trial",
+                ),
+                (
+                    "Criminal law",
+                    "admissibility",
+                    "right to representation",
+                ),
+            ],
+        )
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
+    )
+    def test_judgment_detail_falls_back_to_plain_flynote_text_when_tree_setting_disabled(
+        self,
+    ):
+        response = self.client.get(self.judgment.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.judgment.linked_flynotes, [])
+        self.assertContains(response, "Administrative law — judicial review")
+        self.assertNotContains(
+            response,
+            reverse(
+                "flynote_detail",
+                kwargs={"pk": Flynote.objects.get(name="judicial review").pk},
+            ),
+        )
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": False,
+        }
+    )
+    def test_judgment_detail_falls_back_to_plain_flynote_text_when_topic_setting_disabled(
+        self,
+    ):
+        response = self.client.get(self.judgment.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.judgment.linked_flynotes, [])
+        self.assertContains(response, "Administrative law — judicial review")
+        self.assertNotContains(
+            response,
+            reverse(
+                "flynote_detail",
+                kwargs={"pk": Flynote.objects.get(name="judicial review").pk},
+            ),
+        )
 
 
 class UpdateFlynoteTaxonomiesCommandTest(TestCase):
@@ -1621,7 +2547,7 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
             court=court,
             date=datetime.date(2025, 1, 1),
             language=lang,
-            flynote="Criminal law \u2014 admissibility",
+            flynote_raw="Criminal law \u2014 admissibility",
         )
         self.j2 = Judgment.objects.create(
             case_name="Case B",
@@ -1629,7 +2555,7 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
             court=court,
             date=datetime.date(2025, 2, 1),
             language=lang,
-            flynote="Contract law \u2014 breach of contract",
+            flynote_raw="Contract law \u2014 breach of contract",
         )
         self.j3 = Judgment.objects.create(
             case_name="Case C",
@@ -1637,7 +2563,7 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
             court=court,
             date=datetime.date(2025, 3, 1),
             language=lang,
-            flynote="Employment law \u2014 unfair dismissal",
+            flynote_raw="Employment law \u2014 unfair dismissal",
         )
 
     def test_skip_counts_flag(self):
@@ -1708,3 +2634,167 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
         output = out.getvalue()
 
         self.assertIn("Last pk processed:", output)
+
+
+class CleanFlynoteChildPrefixesCommandTest(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.country = Country.objects.first()
+        self.court = Court.objects.first()
+        self.language = Language.objects.first()
+
+    def make_judgment(self, case_name):
+        return Judgment.objects.create(
+            case_name=case_name,
+            jurisdiction=self.country,
+            court=self.court,
+            date=datetime.date(2025, 1, 1),
+            language=self.language,
+        )
+
+    def link_flynote(self, judgment, flynote):
+        JudgmentFlynote.objects.create(document=judgment, flynote=flynote)
+        judgment.serialise_flynote_tree()
+        judgment.save(update_fields=["flynote", "flynote_raw"])
+        judgment.refresh_from_db()
+
+    def test_dry_run_reports_changes_without_writing(self):
+        admin = Flynote.add_root(name="Administrative law")
+        child = admin.add_child(name="Administrative/constitutional duty")
+        judgment = self.make_judgment("Administrative case")
+        self.link_flynote(judgment, child)
+
+        out = StringIO()
+        call_command("clean_flynote_child_prefixes", stdout=out, stderr=StringIO())
+
+        child.refresh_from_db()
+        judgment.refresh_from_db()
+
+        self.assertEqual(child.name, "Administrative/constitutional duty")
+        self.assertEqual(
+            judgment.flynote,
+            "Administrative law — Administrative/constitutional duty",
+        )
+        self.assertIn("Running in dry-run mode", out.getvalue())
+        self.assertIn("RENAME", out.getvalue())
+        self.assertIn("Done.", out.getvalue())
+
+    @patch("peachjam.tasks.serialise_judgment_flynote_tree")
+    def test_apply_renames_direct_children_and_reserialises_judgments(
+        self, mock_serialise_judgment_flynote_tree
+    ):
+        admin = Flynote.add_root(name="Administrative law")
+        child = admin.add_child(name="Administrative/constitutional duty")
+        grandchild = child.add_child(name="Administrative/keep me")
+        direct_judgment = self.make_judgment("Administrative child case")
+        deep_judgment = self.make_judgment("Administrative grandchild case")
+        self.link_flynote(direct_judgment, child)
+        self.link_flynote(deep_judgment, grandchild)
+        mock_serialise_judgment_flynote_tree.reset_mock()
+
+        out = StringIO()
+        call_command(
+            "clean_flynote_child_prefixes",
+            apply=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        child.refresh_from_db()
+        grandchild.refresh_from_db()
+        direct_judgment.refresh_from_db()
+        deep_judgment.refresh_from_db()
+
+        self.assertEqual(child.name, "constitutional duty")
+        self.assertEqual(grandchild.name, "Administrative/keep me")
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=direct_judgment).flynote_id,
+            child.pk,
+        )
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=deep_judgment).flynote_id,
+            grandchild.pk,
+        )
+        self.assertCountEqual(
+            [
+                args.args[0]
+                for args in mock_serialise_judgment_flynote_tree.call_args_list
+            ],
+            [direct_judgment.pk, deep_judgment.pk],
+        )
+        self.assertIn("ROOT DONE: renamed=1, merged=0", out.getvalue())
+
+    def test_apply_merges_duplicate_siblings_after_prefix_strip(self):
+        root = Flynote.add_root(name="Defamation")
+        target = root.add_child(name="communications")
+        source = root.add_child(name="Defamation/communications")
+        source_judgment = self.make_judgment("Source defamation case")
+        target_judgment = self.make_judgment("Target defamation case")
+        self.link_flynote(source_judgment, source)
+        self.link_flynote(target_judgment, target)
+
+        out = StringIO()
+        call_command(
+            "clean_flynote_child_prefixes",
+            apply=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        source_judgment.refresh_from_db()
+        target_judgment.refresh_from_db()
+
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=source_judgment).flynote_id,
+            target.pk,
+        )
+        self.assertIn("MERGE", out.getvalue())
+
+    def test_apply_prefers_local_rename_and_merge_over_cross_root_target(self):
+        customary = Flynote.add_root(name="Customary law")
+        other = Flynote.add_root(name="Leadership")
+        target = other.add_child(name="traditional leadership")
+        source_one = customary.add_child(name="Customary law / traditional leadership")
+        source_two = customary.add_child(name="Customary law/traditional leadership")
+        target_judgment = self.make_judgment("Existing leadership case")
+        source_one_judgment = self.make_judgment("Customary source one")
+        source_two_judgment = self.make_judgment("Customary source two")
+        self.link_flynote(target_judgment, target)
+        self.link_flynote(source_one_judgment, source_one)
+        self.link_flynote(source_two_judgment, source_two)
+
+        out = StringIO()
+        call_command(
+            "clean_flynote_child_prefixes",
+            apply=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        target.refresh_from_db()
+        target_judgment.refresh_from_db()
+        source_one_judgment.refresh_from_db()
+        source_two_judgment.refresh_from_db()
+
+        renamed_target = Flynote.objects.get(pk=source_one.pk)
+        self.assertEqual(target.get_parent().pk, other.pk)
+        self.assertEqual(target.name, "traditional leadership")
+        self.assertEqual(renamed_target.get_parent().pk, customary.pk)
+        self.assertEqual(renamed_target.name, "traditional leadership")
+        self.assertFalse(Flynote.objects.filter(pk=source_two.pk).exists())
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=target_judgment).flynote_id,
+            target.pk,
+        )
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=source_one_judgment).flynote_id,
+            renamed_target.pk,
+        )
+        self.assertEqual(
+            JudgmentFlynote.objects.get(document=source_two_judgment).flynote_id,
+            renamed_target.pk,
+        )
+        self.assertIn("RENAME", out.getvalue())
+        self.assertIn("MERGE", out.getvalue())

@@ -1,11 +1,11 @@
 import datetime
-import os
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
+from django.template.loader import render_to_string
 from django.test import TestCase
 from languages_plus.models import Language
 
@@ -18,11 +18,18 @@ from peachjam.models import (
     Judgment,
     Locality,
 )
+from peachjam.templatetags.peachjam import group_flynote_lines, group_linked_flynotes
 
 
 class JudgmentTestCase(TestCase):
     fixtures = ["tests/courts", "tests/countries", "tests/languages"]
     maxDiff = None
+
+    def assertGroupedFlynotesEqual(self, expected, judgment):
+        self.assertEqual(
+            expected,
+            group_flynote_lines(judgment.flynote_lines),
+        )
 
     def make_judgment(self):
         judgment = Judgment.objects.create(
@@ -50,6 +57,456 @@ class JudgmentTestCase(TestCase):
             flynote=flynote,
             blurb="Appeal dismissed.",
         )
+
+    def test_flynote_lines_splits_and_trims_multiline_flynotes(self):
+        judgment = Judgment(flynote=" Line one \n\nLine two\n  Line three  ")
+        self.assertEqual(["Line one", "Line two", "Line three"], judgment.flynote_lines)
+
+    def test_grouped_flynote_lines_groups_maximal_common_ancestors(self):
+        judgment = Judgment(
+            flynote=(
+                "Customs law — Customs and excise act — Diesel refund scheme — "
+                "Interpretation of Note 6(f)(ii)(cc) — "
+                "joint venture as substantive authorised user\n"
+                "Customs law — Customs and excise act — Diesel refund scheme — "
+                "Interpretation of Note 6(f)(ii)(cc) — "
+                "Note 5 discretion to pay refunds to third parties on good cause shown\n"
+                "Customs law — internal appeal jurisdiction — "
+                "administrative-law duty to consider discretionary relief\n"
+                "Customs law — internal appeal jurisdiction — "
+                "NAC cannot introduce new grounds or increase original quantum"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": (
+                        "Customs law — Customs and excise act — Diesel refund scheme — "
+                        "Interpretation of Note 6(f)(ii)(cc)"
+                    ),
+                    "children": [
+                        {
+                            "text": "joint venture as substantive authorised user",
+                            "children": [],
+                        },
+                        {
+                            "text": "Note 5 discretion to pay refunds to third parties on good cause shown",
+                            "children": [],
+                        },
+                    ],
+                },
+                {
+                    "text": "Customs law — internal appeal jurisdiction",
+                    "children": [
+                        {
+                            "text": "administrative-law duty to consider discretionary relief",
+                            "children": [],
+                        },
+                        {
+                            "text": "NAC cannot introduce new grounds or increase original quantum",
+                            "children": [],
+                        },
+                    ],
+                },
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_keeps_original_order(self):
+        judgment = Judgment(
+            flynote=(
+                "Zebra law — first point\n"
+                "Alpha law — second point\n"
+                "Beta law — third point"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {"text": "Zebra law — first point", "children": []},
+                {"text": "Alpha law — second point", "children": []},
+                {"text": "Beta law — third point", "children": []},
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_groups_en_dash_paths(self):
+        judgment = Judgment(
+            flynote=(
+                "Civil procedure – Intervention (Rule 12) – requires direct and substantial interest; "
+                "non-joinder fatal\n"
+                "Civil procedure – Rule 45A – cannot be used to suspend non-executable orders or mount "
+                "collateral challenges; locus standi required\n"
+                "Insolvency law – Sequestration – Final order under s 12(1)(a)–(c) – statutory requirements "
+                "established (liquidated debt, insolvency, advantage to creditors) – court’s discretion "
+                "exercised where no special circumstances shown"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": "Civil procedure",
+                    "children": [
+                        {
+                            "text": (
+                                "Intervention (Rule 12) — requires direct and substantial interest; "
+                                "non-joinder fatal"
+                            ),
+                            "children": [],
+                        },
+                        {
+                            "text": (
+                                "Rule 45A — cannot be used to suspend non-executable orders or mount "
+                                "collateral challenges; locus standi required"
+                            ),
+                            "children": [],
+                        },
+                    ],
+                },
+                {
+                    "text": (
+                        "Insolvency law — Sequestration — Final order under s 12(1)(a)–(c) — statutory "
+                        "requirements established (liquidated debt, insolvency, advantage to creditors) — "
+                        "court’s discretion exercised where no special circumstances shown"
+                    ),
+                    "children": [],
+                },
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_groups_spaced_ascii_dash_paths(self):
+        judgment = Judgment(
+            flynote=(
+                "Administrative Law - Judicial Review - Legality Review - Unlawful Appointment - "
+                "Jurisdiction, Delay, Legality of Municipal Appointments\n"
+                "Administrative Law - Judicial Review - Legality Review - Unlawful Appointment - "
+                "Delay and prejudice"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": (
+                        "Administrative Law — Judicial Review — Legality Review — "
+                        "Unlawful Appointment"
+                    ),
+                    "children": [
+                        {
+                            "text": "Jurisdiction, Delay, Legality of Municipal Appointments",
+                            "children": [],
+                        },
+                        {
+                            "text": "Delay and prejudice",
+                            "children": [],
+                        },
+                    ],
+                }
+            ],
+            judgment,
+        )
+
+    def test_group_linked_flynotes_groups_single_line_semicolon_branches(self):
+        def node(name):
+            node_obj = SimpleNamespace(name=name)
+            slug = name.lower().replace(" ", "-")
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        linked = [
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("Matrimonial property act"),
+                    node(
+                        "Doctrine of notice inapplicable to contingent accrual claims"
+                    ),
+                ]
+            },
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("Matrimonial property act"),
+                    node(
+                        "accrual claim contingent until dissolution, not a proprietary right of occupation"
+                    ),
+                ]
+            },
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("PIE Act"),
+                    node(
+                        "eviction may be just and equitable where spouse has no vested right"
+                    ),
+                ]
+            },
+            {
+                "nodes": [
+                    node("Family law"),
+                    node("Procedure"),
+                    node(
+                        "proper form of order when jurisdictional threshold not met "
+                        "(confirmation vs striking off roll)."
+                    ),
+                ]
+            },
+        ]
+
+        grouped = group_linked_flynotes(linked)
+
+        def simplify(groups):
+            return [
+                {
+                    "node": item["node"].name,
+                    "children": simplify(item["children"]),
+                }
+                for item in groups
+            ]
+
+        self.assertEqual(
+            [
+                {
+                    "node": "Family law",
+                    "children": [
+                        {
+                            "node": "Matrimonial property act",
+                            "children": [
+                                {
+                                    "node": "Doctrine of notice inapplicable to contingent accrual claims",
+                                    "children": [],
+                                },
+                                {
+                                    "node": (
+                                        "accrual claim contingent until dissolution, not a proprietary "
+                                        "right of occupation"
+                                    ),
+                                    "children": [],
+                                },
+                            ],
+                        },
+                        {
+                            "node": "PIE Act",
+                            "children": [
+                                {
+                                    "node": (
+                                        "eviction may be just and equitable where spouse has no vested right"
+                                    ),
+                                    "children": [],
+                                }
+                            ],
+                        },
+                        {
+                            "node": "Procedure",
+                            "children": [
+                                {
+                                    "node": (
+                                        "proper form of order when jurisdictional threshold not met "
+                                        "(confirmation vs striking off roll)."
+                                    ),
+                                    "children": [],
+                                }
+                            ],
+                        },
+                    ],
+                },
+            ],
+            simplify(grouped),
+        )
+
+    def test_blurb_and_flynotes_renders_grouped_linked_flynotes_without_repeating_ancestors(
+        self,
+    ):
+        def node(name):
+            slug = name.lower().replace(" ", "-")
+            node_obj = SimpleNamespace(name=name)
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        document = SimpleNamespace(
+            blurb="Appeal dismissed.",
+            flynote="",
+            flynote_lines=[],
+            linked_flynotes=[
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("Matrimonial property act"),
+                        node(
+                            "Doctrine of notice inapplicable to contingent accrual claims"
+                        ),
+                    ]
+                },
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("Matrimonial property act"),
+                        node(
+                            "accrual claim contingent until dissolution, not a proprietary right of occupation"
+                        ),
+                    ]
+                },
+            ],
+        )
+
+        html = render_to_string(
+            "peachjam/judgment/_blurb_and_flynotes.html",
+            {
+                "document": document,
+                "show_flynote_heading": True,
+                "link_flynote_topics": True,
+            },
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertEqual(1, html.count("Family law"))
+        self.assertEqual(1, html.count("Matrimonial property act"))
+        self.assertIn(
+            '<a href="/judgments/topics/family-law/">Family law</a>',
+            normalized_html,
+        )
+        self.assertIn(
+            '— <a href="/judgments/topics/matrimonial-property-act/">Matrimonial property act</a>',
+            normalized_html,
+        )
+        self.assertIn(
+            '— <a href="/judgments/topics/doctrine-of-notice-inapplicable-to-contingent-accrual-claims/">'
+            "Doctrine of notice inapplicable to contingent accrual claims</a>",
+            normalized_html,
+        )
+        self.assertIn(
+            '— <a href="/judgments/topics/'
+            "accrual-claim-contingent-until-dissolution,"
+            '-not-a-proprietary-right-of-occupation/">'
+            "accrual claim contingent until dissolution, not a proprietary right of occupation</a>",
+            normalized_html,
+        )
+        self.assertGreaterEqual(html.count("<ul"), 3)
+
+    def test_document_table_row_renders_grouped_flynotes_without_topic_links(self):
+        class EmptyRelatedManager:
+            def all(self):
+                return []
+
+        def node(name):
+            slug = name.lower().replace(" ", "-")
+            node_obj = SimpleNamespace(name=name)
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        document = SimpleNamespace(
+            children=[],
+            pk=1,
+            is_group=False,
+            title="Example judgment",
+            get_absolute_url="/judgments/example/",
+            work=SimpleNamespace(languages=[]),
+            labels=EmptyRelatedManager(),
+            treatments=EmptyRelatedManager(),
+            doc_type="judgment",
+            blurb="Appeal dismissed.",
+            flynote="",
+            flynote_lines=[],
+            linked_flynotes=[
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("Matrimonial property act"),
+                        node(
+                            "Doctrine of notice inapplicable to contingent accrual claims"
+                        ),
+                    ]
+                },
+                {
+                    "nodes": [
+                        node("Family law"),
+                        node("PIE Act"),
+                        node(
+                            "eviction may be just and equitable where spouse has no vested right"
+                        ),
+                    ]
+                },
+            ],
+        )
+
+        html = render_to_string(
+            "peachjam/_document_table_row.html",
+            {
+                "document": document,
+                "doc_table_toggle": False,
+                "doc_table_full_title_width": False,
+                "doc_table_show_treatments": False,
+                "doc_table_show_citations": False,
+                "doc_table_show_jurisdiction": False,
+                "doc_table_show_author": False,
+                "doc_table_show_court": False,
+                "doc_table_show_sub_publication": False,
+                "doc_table_show_frbr_uri_number": False,
+                "doc_table_show_doc_type": False,
+                "doc_table_show_date": False,
+            },
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertEqual(1, html.count("Family law"))
+        self.assertNotIn("/judgments/topics/", html)
+        self.assertIn("— Matrimonial property act", normalized_html)
+        self.assertIn("— PIE Act", normalized_html)
+        self.assertGreaterEqual(html.count("<ul"), 3)
+
+    def test_grouped_flynote_lines_groups_ancestor_with_descendants(self):
+        judgment = Judgment(
+            flynote=(
+                "Customs law — internal appeal jurisdiction\n"
+                "Customs law — internal appeal jurisdiction — "
+                "administrative-law duty to consider discretionary relief\n"
+                "Customs law — internal appeal jurisdiction — "
+                "NAC cannot introduce new grounds or increase original quantum"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": "Customs law — internal appeal jurisdiction",
+                    "children": [
+                        {
+                            "text": "administrative-law duty to consider discretionary relief",
+                            "children": [],
+                        },
+                        {
+                            "text": "NAC cannot introduce new grounds or increase original quantum",
+                            "children": [],
+                        },
+                    ],
+                }
+            ],
+            judgment,
+        )
+
+    def test_blurb_and_flynotes_renders_nested_groups(self):
+        judgment = Judgment(
+            blurb="Appeal dismissed.",
+            flynote=(
+                "Contract law — offer and acceptance\n" "Contract law — consideration"
+            ),
+        )
+
+        html = render_to_string(
+            "peachjam/judgment/_blurb_and_flynotes.html",
+            {"document": judgment, "show_flynote_heading": True},
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertIn("<h6", html)
+        self.assertIn("Contract law", html)
+        self.assertEqual(1, html.count("Contract law"))
+        self.assertIn("— offer and acceptance", normalized_html)
+        self.assertIn("— consideration", normalized_html)
+        self.assertGreaterEqual(html.count("<ul"), 2)
 
     def test_assign_mnc(self):
         j = Judgment(
@@ -303,28 +760,8 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(court, judgment.court)
 
-    @patch.dict(
-        os.environ,
-        {
-            "OPENAI_API_KEY": "test-openai-key",
-            "LANGFUSE_PUBLIC_KEY": "test-langfuse-public-key",
-            "LANGFUSE_SECRET_KEY": "test-langfuse-secret-key",
-        },
-        clear=False,
-    )
-    @patch("peachjam.analysis.summariser.langfuse.get_prompt")
-    @patch("peachjam.analysis.summariser.OpenAI")
-    def test_generate_summary_updates_judgment_fields(
-        self,
-        openai_cls,
-        get_prompt,
-    ):
-        raw_flynote = (
-            "  * Contract - Contract of sale of goods - Whether and under what circumstances "
-            "a mere purchase order may amount to an agreement to sell. "
-            "Contract - Contract of sale of goods - Delivery - Mode of delivery - "
-            "Agreement is silent on mode of delivery - Delivery in one lot presumed. "
-        )
+    @patch("peachjam.models.judgment.JudgmentSummariser")
+    def test_generate_summary_updates_judgment_fields(self, summariser_cls):
         expected_flynote = (
             "Contract - Contract of sale of goods - Whether and under what circumstances "
             "a mere purchase order may amount to an agreement to sell\n"
@@ -336,19 +773,13 @@ class JudgmentTestCase(TestCase):
             held=["The appeal was dismissed"],
             order="Appeal dismissed with costs.",
             summary="The court found no basis to interfere with the lower court's decision.",
-            flynote=raw_flynote,
+            flynote=expected_flynote,
             blurb="Appeal dismissed.",
         )
-        fake_response = SimpleNamespace(output_parsed=fake_summary)
-
-        fake_openai = MagicMock()
-        fake_openai.responses.parse.return_value = fake_response
-        openai_cls.return_value = fake_openai
-
-        fake_prompt = MagicMock()
-        fake_prompt.compile.return_value = "Summarise this judgment."
-        fake_prompt.config = {"model": "gpt-5-mini"}
-        get_prompt.return_value = fake_prompt
+        summariser = MagicMock()
+        summariser.enabled.return_value = True
+        summariser.summarise_judgment.return_value = fake_summary
+        summariser_cls.return_value = summariser
 
         judgment = Judgment(
             language=Language.objects.get(pk="en"),
@@ -362,76 +793,19 @@ class JudgmentTestCase(TestCase):
         doc_content.set_content_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
+        judgment.track_changes()
         judgment.generate_summary()
         judgment.refresh_from_db()
 
         self.assertEqual(fake_summary.blurb, judgment.blurb)
         self.assertEqual(fake_summary.summary, judgment.case_summary)
         self.assertEqual(expected_flynote, judgment.flynote)
+        self.assertEqual(expected_flynote, judgment.flynote_raw)
         self.assertEqual(fake_summary.held, judgment.held)
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
         self.assertTrue(judgment.summary_ai_generated)
-        get_prompt.assert_called_once_with(
-            "summarise/judgment",
-            cache_ttl_seconds=30,
-        )
-        fake_openai.responses.parse.assert_called_once()
-
-    @patch("peachjam.models.judgment.JudgmentSummariser")
-    def test_generate_summary_retries_when_flynote_is_suspiciously_short(
-        self,
-        summariser_cls,
-    ):
-        first_summary = self.make_summary(
-            flynote="Too short",
-            summary="Short flynote first attempt.",
-        )
-        second_summary = self.make_summary(
-            flynote=(
-                "Contract - Contract of sale of goods - Whether and under what circumstances "
-                "a mere purchase order may amount to an agreement to sell"
-            )
-        )
-
-        summariser = MagicMock()
-        summariser.enabled.return_value = True
-        summariser.summarise_judgment.side_effect = [first_summary, second_summary]
-        summariser_cls.return_value = summariser
-
-        judgment = self.make_judgment()
-
-        judgment.generate_summary()
-        judgment.refresh_from_db()
-
-        self.assertEqual(2, summariser.summarise_judgment.call_count)
-        self.assertEqual(second_summary.flynote, judgment.flynote)
-        self.assertEqual(second_summary.summary, judgment.case_summary)
-
-    @patch("peachjam.models.judgment.JudgmentSummariser")
-    def test_generate_summary_does_not_retry_when_flynote_is_not_short(
-        self,
-        summariser_cls,
-    ):
-        summary = self.make_summary(
-            flynote=(
-                "Contract - Contract of sale of goods - Whether and under what circumstances "
-                "a mere purchase order may amount to an agreement to sell"
-            )
-        )
-
-        summariser = MagicMock()
-        summariser.enabled.return_value = True
-        summariser.summarise_judgment.return_value = summary
-        summariser_cls.return_value = summariser
-
-        judgment = self.make_judgment()
-
-        judgment.generate_summary()
-        judgment.refresh_from_db()
-
-        self.assertEqual(1, summariser.summarise_judgment.call_count)
-        self.assertEqual(summary.flynote, judgment.flynote)
+        summariser.summarise_judgment.assert_called_once_with(judgment)
 
     @patch("peachjam.models.judgment.generate_judgment_summary")
     def test_content_text_change_triggers_summary_generation(
@@ -515,3 +889,22 @@ class JudgmentTestCase(TestCase):
         judgment.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+    def test_serialise_flynote_tree(self):
+        from peachjam.analysis.flynotes import FlynoteUpdater
+
+        judgment = self.make_judgment()
+        judgment.flynote_raw = (
+            "Criminal law \u2014 admissibility \u2014 trial within a trial\n"
+            "Administrative law \u2014 judicial review"
+        )
+        judgment.save()
+        FlynoteUpdater().update_for_judgment(judgment)
+
+        judgment.serialise_flynote_tree()
+        self.assertEqual(
+            judgment.flynote,
+            "Administrative law \u2014 judicial review\n"
+            "Criminal law \u2014 admissibility \u2014 trial within a trial",
+        )
+        self.assertEqual(judgment.flynote, judgment.flynote_raw)

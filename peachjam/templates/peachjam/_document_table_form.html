@@ -18,7 +18,7 @@
        tabindex="-1"
        id="{{ doc_table_offcanvas_id }}"
        data-document-table-offcanvas
-       aria-labelledby="{{ doc_table_offcanvas_title_id }}">
+       aria-labelledby="{{ doc_table_form_id }}-filters-heading">
     <div class="offcanvas-header">
       <button type="button"
               class="btn-close ms-auto"
@@ -28,14 +28,22 @@
     <div class="offcanvas-body"></div>
   </div>
   <div class="row">
-    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper {% if not taxonomy_tree or is_leaf_node %}pocketlaw-hidden{% endif %}">
+    <section id="{{ doc_table_form_id }}-filters-section"
+             class="col-lg-3 d-none d-lg-block document-list-facets-wrapper {% if not taxonomy_tree or is_leaf_node %}pocketlaw-hidden{% endif %}"
+             aria-labelledby="{{ doc_table_form_id }}-filters-heading"
+             tabindex="-1">
       <div class="document-list-facets">
+        <a class="visually-hidden-focusable d-inline-block mb-2"
+           href="#{{ doc_table_id }}"
+           data-skip-link
+           data-close-offcanvas>{% trans 'Skip to results' %}</a>
         {% if taxonomy_tree|length > 0 and not is_leaf_node %}
           {% include "peachjam/_taxonomy_tree_facet.html" %}
         {% endif %}
         <ul class="list-group {% if taxonomy_tree|length > 0 and not is_leaf_node %}pocketlaw-hidden{% endif %}">
           <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
-            <strong id="{{ doc_table_offcanvas_title_id }}">{% trans 'Filters' %}</strong>
+            <h2 id="{{ doc_table_form_id }}-filters-heading"
+                class="h6 mb-0 skip-link-target">{% trans 'Filters' %}</h2>
             {% if show_clear_all %}
               <div class="d-flex align-items-center">
                 <a href="{{ request.path }}"
@@ -46,87 +54,101 @@
               </div>
             {% endif %}
           </li>
-          {% for facet_name, facet in facet_data.items %}
-            {% if facet.options %}
+          {% for rendered_facet in rendered_facets %}
+            {% with facet_name=rendered_facet.name facet=rendered_facet.facet %}
               <li class="list-group-item">
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ facet.label }}</strong>
-                  {% if facet.values %}
-                    <div class="d-flex align-items-center">
-                      <a href="{{ request.path }}"
-                         data-track-event="Listing | Clear filter | {{ facet_name }}"
-                         hx-get="{{ request.path }}"
-                         hx-params="not {{ facet_name }}"
-                         {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>{% trans 'Clear' %}</a>
+                {% with facet_group_id=doc_table_form_id|add:"-group-"|add:facet_name %}
+                  <fieldset id="{{ facet_group_id }}"
+                            class="mb-0 skip-link-target"
+                            data-filter-group
+                            tabindex="-1">
+                    <div class="d-flex justify-content-between mb-2 align-items-start">
+                      <legend id="{{ doc_table_form_id }}-group-heading-{{ forloop.counter0 }}"
+                              class="h6 mb-0">
+                        {{ facet.label }}
+                      </legend>
+                      {% if facet.values %}
+                        <div class="d-flex align-items-center ms-2">
+                          <a href="{{ request.path }}"
+                             data-track-event="Listing | Clear filter | {{ facet_name }}"
+                             hx-get="{{ request.path }}"
+                             hx-params="not {{ facet_name }}"
+                             {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>{% trans 'Clear' %}</a>
+                        </div>
+                      {% endif %}
                     </div>
-                  {% endif %}
-                </div>
-                {% if facet_name == "alphabet" %}
-                  <div>
-                    <div class="letter-radiobox-container">
-                      {% for value, label in facet.options %}
-                        {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
-                          <label class="letter-radiobox"
-                                 for="{{ facet_option_id }}-{{ forloop.counter0 }}">
-                            <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
-                                   name="{{ facet_name }}"
-                                   type="{{ facet.type }}"
-                                   hx-get="{{ request.path }}"
-                                   {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
-                                   {% if value == facet.values %}checked{% endif %}
-                                   hx-include="#{{ doc_table_form_id }}"
-                                   value="{{ value }}"/>
-                            <span class="letter-radiobox__text"
-                                  data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
-                          </label>
-                        {% endwith %}
-                      {% endfor %}
-                    </div>
-                  </div>
-                {% else %}
-                  <div class="facets-scrollable"
-                       {% if facet.options|length > 8 %}data-facet-search{% endif %}>
-                    {% if facet.options|length > 8 %}
-                      <div class="facet-search-sticky mb-2">
-                        <input type="search"
-                               class="form-control form-control-sm"
-                               placeholder="{% trans 'Search' %} {{ facet.label }}"
-                               aria-label="{% trans 'Search' %} {{ facet.label }}"
-                               data-facet-search-input/>
+                    <a class="visually-hidden-focusable d-inline-block mb-2"
+                       href="#{{ rendered_facet.next_target_id }}"
+                       data-skip-link>{% trans 'Skip to next filter group' %}</a>
+                    {% if facet_name == "alphabet" %}
+                      <div>
+                        <div class="letter-radiobox-container">
+                          {% for value, label in facet.options %}
+                            {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
+                              <label class="letter-radiobox"
+                                     for="{{ facet_option_id }}-{{ forloop.counter0 }}">
+                                <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
+                                       name="{{ facet_name }}"
+                                       type="{{ facet.type }}"
+                                       hx-get="{{ request.path }}"
+                                       hx-trigger="change delay:1000ms"
+                                       {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
+                                       {% if value == facet.values %}checked{% endif %}
+                                       hx-include="#{{ doc_table_form_id }}"
+                                       value="{{ value }}"/>
+                                <span class="letter-radiobox__text"
+                                      data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
+                              </label>
+                            {% endwith %}
+                          {% endfor %}
+                        </div>
+                      </div>
+                    {% else %}
+                      <div class="facets-scrollable"
+                           {% if facet.options|length > 8 %}data-facet-search{% endif %}>
+                        {% if facet.options|length > 8 %}
+                          <div class="facet-search-sticky mb-2">
+                            <input type="search"
+                                   class="form-control form-control-sm"
+                                   placeholder="{% trans 'Search' %} {{ facet.label }}"
+                                   aria-label="{% trans 'Search' %} {{ facet.label }}"
+                                   data-facet-search-input/>
+                          </div>
+                        {% endif %}
+                        {% for value, label in facet.options %}
+                          <div class="d-flex justify-content-between align-items-center"
+                               data-facet-option>
+                            {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
+                              <div class="form-check flex-grow-1"
+                                   data-track-event="Listing | Filter | {{ facet_name }}">
+                                <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
+                                       class="form-check-input"
+                                       name="{{ facet_name }}"
+                                       type="{{ facet.type }}"
+                                       hx-get="{{ request.path }}"
+                                       {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
+                                       {% if value in facet.values %}checked{% endif %}
+                                       hx-include="#{{ doc_table_form_id }}"
+                                       value="{{ value }}"/>
+                                <label class="form-check-label"
+                                       data-facet-option-label
+                                       for="{{ facet_option_id }}-{{ forloop.counter0 }}">
+                                  {{ label }}
+                                </label>
+                              </div>
+                            {% endwith %}
+                          </div>
+                        {% endfor %}
                       </div>
                     {% endif %}
-                    {% for value, label in facet.options %}
-                      <div class="d-flex justify-content-between align-items-center"
-                           data-facet-option>
-                        {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
-                          <div class="form-check flex-grow-1"
-                               data-track-event="Listing | Filter | {{ facet_name }}">
-                            <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
-                                   class="form-check-input"
-                                   name="{{ facet_name }}"
-                                   type="{{ facet.type }}"
-                                   hx-get="{{ request.path }}"
-                                   {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
-                                   {% if value in facet.values %}checked{% endif %}
-                                   hx-include="#{{ doc_table_form_id }}"
-                                   value="{{ value }}"/>
-                            <label class="form-check-label"
-                                   data-facet-option-label
-                                   for="{{ facet_option_id }}-{{ forloop.counter0 }}">
-                              {{ label }}
-                            </label>
-                          </div>
-                        {% endwith %}
-                      </div>
-                    {% endfor %}
-                  </div>
-                {% endif %}
+                  </fieldset>
+                {% endwith %}
               </li>
-            {% endif %}
+            {% endwith %}
           {% endfor %}
         </ul>
       </div>
-    </div>
+    </section>
     <div class="col">
       <div class="position-relative">
         {% block content %}

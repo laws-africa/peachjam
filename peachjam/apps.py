@@ -15,11 +15,13 @@ class PeachJamConfig(AppConfig):
         import peachjam.adapters  # noqa
         import peachjam.checks  # noqa
         import peachjam.signals  # noqa
+        from peachjam.auth import get_or_create_all_users_permission_group
         from peachjam.helpers import get_country_absolute_url
 
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
         Country.get_absolute_url = get_country_absolute_url
+        get_or_create_all_users_permission_group()
         # bump up the context for citation extraction
         CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 100
 
