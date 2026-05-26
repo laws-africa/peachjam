@@ -177,7 +177,7 @@ class TestJudgmentAdmin(WebTest):
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         )
 
-        response2 = self.submit_or_skip_soffice(form2)
+        response2 = form2.submit()
         self.assertRedirects(response2, judgment_list_url)
 
         judgment.refresh_from_db()
