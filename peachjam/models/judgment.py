@@ -66,8 +66,8 @@ class Judge(models.Model):
 
     class Meta:
         ordering = ("name",)
-        verbose_name = _("judge")
-        verbose_name_plural = _("judges")
+        verbose_name = _("legacy judge")
+        verbose_name_plural = _("legacy judges")
 
     def __str__(self):
         return self.name

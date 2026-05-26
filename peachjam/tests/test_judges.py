@@ -1,14 +1,19 @@
 import datetime
 from io import StringIO
+from unittest.mock import patch
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
 
+from peachjam.admin import BenchInlineForm, JudgmentForm
 from peachjam.analysis.judges import judge_identity_service
+from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.models import Bench, Court, Judge, JudgeAlias, JudgePerson, Judgment
 
 
@@ -33,6 +38,165 @@ class JudgeAliasModelTests(TestCase):
 
         self.assertEqual("abban ja", alias.normalized_name)
         self.assertEqual("JA", alias.title)
+
+
+class BenchInlineFormTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 3),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Abban v Republic",
+        )
+        self.judge_person = JudgePerson.objects.create(
+            full_name="Abban",
+            slug="abban",
+        )
+        self.alias = JudgeAlias.objects.create(
+            judge_person=self.judge_person,
+            name="Abban, J.A.",
+        )
+
+    def test_form_uses_greg_labels_for_bench_fields(self):
+        form = BenchInlineForm(instance=Bench(judgment=self.judgment))
+
+        self.assertEqual("Extracted name", form.fields["extracted_name"].label)
+        self.assertEqual("Judge title", form.fields["matched_alias"].label)
+        self.assertEqual("Judge", form.fields["judge_person"].label)
+
+    def test_extracted_name_is_readonly_when_prefilled(self):
+        form = BenchInlineForm(
+            initial={"extracted_name": "ABBAN, J.A."},
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertTrue(form.fields["extracted_name"].widget.attrs["readonly"])
+
+    def test_extracted_name_stays_editable_for_blank_manual_rows(self):
+        form = BenchInlineForm(instance=Bench(judgment=self.judgment))
+
+        self.assertNotIn("readonly", form.fields["extracted_name"].widget.attrs)
+
+    def test_form_prefills_preview_options_for_unmatched_rows(self):
+        form = BenchInlineForm(
+            initial={
+                "extracted_name": "Anukam J",
+                "judge_person_suggestion": "Anukam",
+            },
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertEqual(
+            BenchInlineForm.alias_preview_value,
+            form.initial["matched_alias"],
+        )
+        self.assertEqual(
+            BenchInlineForm.judge_preview_value,
+            form.initial["judge_person"],
+        )
+        self.assertIn(
+            'option value="__alias_preview__" selected>Anukam J</option>',
+            str(form["matched_alias"]),
+        )
+        self.assertIn(
+            'option value="__judge_preview__" selected>Anukam</option>',
+            str(form["judge_person"]),
+        )
+
+    def test_form_uses_alias_to_fill_hidden_legacy_judge(self):
+        form = BenchInlineForm(
+            data={
+                "judgment": self.judgment.pk,
+                "extracted_name": "ABBAN, J.A.",
+                "matched_alias": self.alias.pk,
+            },
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        bench = form.save()
+
+        self.assertEqual("Abban, J.A.", bench.judge.name)
+        self.assertEqual(self.judge_person, bench.judge_person)
+
+    def test_form_uses_extracted_name_when_no_alias_exists(self):
+        form = BenchInlineForm(
+            data={
+                "judgment": self.judgment.pk,
+                "extracted_name": "New Judge, JA",
+                "matched_alias": BenchInlineForm.alias_preview_value,
+                "judge_person": BenchInlineForm.judge_preview_value,
+            },
+            initial={
+                "judge_person_suggestion": "New Judge",
+            },
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        bench = form.save()
+
+        self.assertEqual("New Judge, JA", bench.judge.name)
+        self.assertEqual("New Judge", bench.judge_person.full_name)
+        self.assertEqual("New Judge, JA", bench.matched_alias.name)
+        self.assertTrue(Judge.objects.filter(name="New Judge, JA").exists())
+
+    def test_form_creates_alias_from_source_name_for_selected_canonical_judge(self):
+        form = BenchInlineForm(
+            data={
+                "judgment": self.judgment.pk,
+                "extracted_name": "Abban JA",
+                "judge_person": self.judge_person.pk,
+            },
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        bench = form.save()
+
+        self.assertIsNotNone(bench.matched_alias_id)
+        self.assertEqual("Abban JA", bench.matched_alias.name)
+        self.assertEqual(self.judge_person, bench.matched_alias.judge_person)
+        self.assertEqual(self.judge_person, bench.judge_person)
+
+    def test_form_reuses_existing_canonical_judge_when_alias_is_missing(self):
+        form = BenchInlineForm(
+            data={
+                "judgment": self.judgment.pk,
+                "extracted_name": "Abban JA",
+            },
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        bench = form.save()
+
+        self.assertEqual(self.judge_person.pk, bench.judge_person_id)
+        self.assertEqual("Abban JA", bench.matched_alias.name)
+        self.assertEqual(self.judge_person.pk, bench.matched_alias.judge_person_id)
+
+    def test_form_uses_selected_canonical_judge_when_editor_overrides_suggestion(self):
+        other_person = JudgePerson.objects.create(
+            full_name="Anukum",
+            slug="anukum",
+        )
+        form = BenchInlineForm(
+            data={
+                "judgment": self.judgment.pk,
+                "extracted_name": "Anukam J",
+                "judge_person": other_person.pk,
+            },
+            instance=Bench(judgment=self.judgment),
+        )
+
+        self.assertTrue(form.is_valid(), form.errors)
+        bench = form.save()
+
+        self.assertEqual("Anukam J", bench.matched_alias.name)
+        self.assertEqual(other_person.pk, bench.judge_person_id)
 
 
 class JudgeIdentityResolutionTests(TestCase):
@@ -78,6 +242,166 @@ class JudgeIdentityResolutionTests(TestCase):
         self.assertIsNone(resolved["judge_person"].pk)
         self.assertEqual("Abban", resolved["judge_person"].full_name)
         self.assertEqual([], resolved["aliases"])
+
+
+class JudgmentFormExtractorUrlTests(TestCase):
+    @override_settings(DEBUG=False)
+    def test_extractor_url_is_hidden_when_extractor_is_disabled(self):
+        form = JudgmentForm(instance=Judgment())
+
+        with patch("peachjam.admin.ExtractorService.enabled", return_value=False):
+            self.assertIsNone(form.extractor_url)
+
+    @override_settings(DEBUG=True)
+    def test_extractor_url_is_available_in_debug_when_extractor_is_disabled(self):
+        form = JudgmentForm(instance=Judgment())
+
+        with patch("peachjam.admin.ExtractorService.enabled", return_value=False):
+            self.assertEqual(
+                reverse("admin:peachjam_extract_judgment"),
+                form.extractor_url,
+            )
+
+    def test_extractor_url_is_available_when_extractor_is_enabled(self):
+        form = JudgmentForm(instance=Judgment())
+
+        with patch("peachjam.admin.ExtractorService.enabled", return_value=True):
+            self.assertEqual(
+                reverse("admin:peachjam_extract_judgment"),
+                form.extractor_url,
+            )
+
+
+class ExtractorJudgeIdentityTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.extractor = ExtractorService()
+        self.judge_person = JudgePerson.objects.create(full_name="Abban", slug="abban")
+        self.alias = JudgeAlias.objects.create(
+            judge_person=self.judge_person,
+            name="Abban JA",
+        )
+        self.legacy_exact = Judge.objects.create(name="ABBAN, J.A.")
+        self.legacy_alias = Judge.objects.create(name="Abban JA")
+
+    def test_process_judgment_details_builds_bench_rows_with_suggestions(self):
+        details = {
+            "court": Court.objects.first().name,
+            "date": "2024-01-03",
+            "judges": ["ABBAN, J.A.", "Abban JA", "Unknown J"],
+            "language": "eng",
+        }
+
+        self.extractor.process_judgment_details(details)
+
+        self.assertEqual(
+            ["ABBAN, J.A.", "Abban JA", "Unknown J"],
+            details["extracted_judges"],
+        )
+        self.assertEqual(2, len(details["judges"]))
+        self.assertEqual(3, len(details["bench_rows"]))
+
+        first_row, second_row, third_row = details["bench_rows"]
+
+        self.assertEqual(self.legacy_exact.pk, first_row["judge"].pk)
+        self.assertEqual("ABBAN, J.A.", first_row["extracted_name"])
+        self.assertEqual(self.alias.pk, first_row["matched_alias"].pk)
+        self.assertEqual(self.judge_person.pk, first_row["judge_person"].pk)
+
+        self.assertEqual(self.legacy_alias.pk, second_row["judge"].pk)
+        self.assertEqual("Abban JA", second_row["extracted_name"])
+        self.assertEqual(self.alias.pk, second_row["matched_alias"].pk)
+        self.assertEqual(self.judge_person.pk, second_row["judge_person"].pk)
+
+        self.assertIsNone(third_row["judge"])
+        self.assertEqual("Unknown J", third_row["extracted_name"])
+        self.assertIsNone(third_row["matched_alias"])
+        self.assertIsNone(third_row["judge_person"])
+
+    def test_process_judgment_details_leaves_ambiguous_aliases_unmatched_but_prefills_judge(
+        self,
+    ):
+        other_person = JudgePerson.objects.create(
+            full_name="Another Abban",
+            slug="another-abban",
+        )
+        JudgeAlias.objects.create(
+            judge_person=other_person,
+            name="ABBAN, J.A.",
+        )
+        details = {
+            "judges": ["ABBAN, J.A."],
+        }
+
+        self.extractor.process_judgment_details(details)
+
+        bench_row = details["bench_rows"][0]
+        self.assertIsNone(bench_row["matched_alias"])
+        self.assertEqual(self.judge_person.pk, bench_row["judge_person"].pk)
+
+    def test_process_judgment_details_prefills_existing_canonical_judge_without_alias(
+        self,
+    ):
+        existing_person = JudgePerson.objects.create(
+            full_name="Unknown",
+            slug="unknown",
+        )
+        details = {
+            "judges": ["Unknown J"],
+        }
+
+        self.extractor.process_judgment_details(details)
+
+        bench_row = details["bench_rows"][0]
+        self.assertIsNone(bench_row["matched_alias"])
+        self.assertEqual(existing_person.pk, bench_row["judge_person"].pk)
+
+
+class JudgmentExtractViewRenderingTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.create_superuser(
+            username="admin",
+            email="admin@example.com",
+            password="password",
+        )
+        self.client.force_login(self.user)
+
+    @override_settings(
+        DEBUG=True,
+        INSTALLED_APPS=[
+            app for app in settings.INSTALLED_APPS if app != "debug_toolbar"
+        ],
+        MIDDLEWARE=[
+            middleware
+            for middleware in settings.MIDDLEWARE
+            if middleware != "debug_toolbar.middleware.DebugToolbarMiddleware"
+        ],
+    )
+    def test_extract_view_renders_preview_options_for_unmatched_judges(self):
+        file = SimpleUploadedFile(
+            "judgment.pdf",
+            b"%PDF-1.4 fake",
+            content_type="application/pdf",
+        )
+
+        with patch(
+            "peachjam.admin.ExtractorService.extract_judgment_details",
+            side_effect=ExtractorError("boom"),
+        ):
+            response = self.client.post(
+                reverse("admin:peachjam_extract_judgment"),
+                {"file": file},
+            )
+
+        self.assertEqual(200, response.status_code)
+        content = response.content.decode()
+        self.assertIn("Anukam J", content)
+        self.assertIn('value="__alias_preview__"', content)
+        self.assertIn(">Anukam<", content)
+        self.assertIn('value="__judge_preview__"', content)
 
 
 class BackfillJudgePeopleCommandTests(TestCase):
