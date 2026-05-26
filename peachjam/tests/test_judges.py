@@ -26,6 +26,89 @@ class JudgeParsingTests(TestCase):
         self.assertEqual("abban", parts["base_name"])
         self.assertEqual("JA", parts["title"])
 
+    def test_parse_judge_name_recognizes_jsc_as_title(self):
+        parts = judge_identity_service.parse_judge_name("Acquah, JSC")
+
+        self.assertEqual("acquah jsc", parts["normalized_name"])
+        self.assertEqual("acquah", parts["base_name"])
+        self.assertEqual("JSC", parts["title"])
+
+    def test_parse_judge_name_recognizes_additional_trailing_titles(self):
+        self.assertEqual(
+            "VP",
+            judge_identity_service.parse_judge_name("Thompson VP")["title"],
+        )
+        self.assertEqual(
+            "PJ",
+            judge_identity_service.parse_judge_name("Atoki PJ")["title"],
+        )
+        self.assertEqual(
+            "DR",
+            judge_identity_service.parse_judge_name("Kakai, DR")["title"],
+        )
+        self.assertEqual(
+            "JCS",
+            judge_identity_service.parse_judge_name("Sapong, JCS")["title"],
+        )
+        self.assertEqual(
+            "CJ",
+            judge_identity_service.parse_judge_name("Van Lare, AG, C J")["title"],
+        )
+
+    def test_canonical_name_from_aliases_strips_attached_title_suffix(self):
+        self.assertEqual(
+            "Acquaye",
+            judge_identity_service.canonical_name_from_aliases(["Acquaye,JA"]),
+        )
+
+    def test_canonical_name_from_aliases_strips_jsc_suffix(self):
+        self.assertEqual(
+            "Adinyira",
+            judge_identity_service.canonical_name_from_aliases(["Adinyira, JSC"]),
+        )
+        self.assertEqual(
+            "Adjabeng",
+            judge_identity_service.canonical_name_from_aliases(["Adjabeng JSC"]),
+        )
+
+    def test_canonical_name_from_aliases_strips_other_trailing_titles(self):
+        self.assertEqual(
+            "Thompson",
+            judge_identity_service.canonical_name_from_aliases(["Thompson VP"]),
+        )
+        self.assertEqual(
+            "Atoki",
+            judge_identity_service.canonical_name_from_aliases(["Atoki PJ"]),
+        )
+        self.assertEqual(
+            "Kakai",
+            judge_identity_service.canonical_name_from_aliases(["Kakai, DR"]),
+        )
+        self.assertEqual(
+            "Sapong",
+            judge_identity_service.canonical_name_from_aliases(["Sapong, JCS"]),
+        )
+        self.assertEqual(
+            "Edward Wiredu",
+            judge_identity_service.canonical_name_from_aliases(
+                ["Edward Wiredu, AG CJ"]
+            ),
+        )
+        self.assertEqual(
+            "Van Lare",
+            judge_identity_service.canonical_name_from_aliases(["Van Lare, AG, C J"]),
+        )
+        self.assertEqual(
+            "Mensah A.G",
+            judge_identity_service.canonical_name_from_aliases(["Mensah A.G, JA"]),
+        )
+
+    def test_normalize_judge_name_folds_accents_without_dropping_letters(self):
+        self.assertEqual("ore", judge_identity_service.normalize_judge_name("Orè"))
+        self.assertEqual(
+            "guisse", judge_identity_service.normalize_judge_name("Guissè")
+        )
+
 
 class JudgeAliasModelTests(TestCase):
     def test_save_sets_normalized_name_and_title(self):
@@ -503,6 +586,20 @@ class BackfillJudgePeopleCommandTests(TestCase):
             "JudgeAlias(name='Abban, J', normalized_name='abban j', title='J')",
             output,
         )
+
+    def test_command_groups_jsc_and_other_titles_under_one_canonical_judge(self):
+        Judge.objects.create(name="Acquah, CJ")
+        Judge.objects.create(name="Acquah, JSC")
+
+        call_command("backfill_judge_people")
+
+        acquah_cj = JudgeAlias.objects.get(name="Acquah, CJ")
+        acquah_jsc = JudgeAlias.objects.get(name="Acquah, JSC")
+
+        self.assertEqual(acquah_cj.judge_person_id, acquah_jsc.judge_person_id)
+        self.assertEqual("Acquah", acquah_cj.judge_person.full_name)
+        self.assertEqual("CJ", acquah_cj.title)
+        self.assertEqual("JSC", acquah_jsc.title)
 
 
 class JudgeIdentityWorkflowAdminTests(TestCase):

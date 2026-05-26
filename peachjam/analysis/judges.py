@@ -18,12 +18,21 @@ TITLE_TOKENS = {
     "J",
     "JA",
     "JCC",
+    "JCS",
     "JP",
+    "PJ",
     "PM",
     "P",
     "R",
+    "DR",
+    "JSC",
     "SCJ",
     "SCM",
+    "VP",
+}
+
+TITLE_PREFIX_TOKENS = {
+    "AG",
 }
 
 PUNCTUATION_PATTERN = re.compile(r"[.,;:()]+")
@@ -32,8 +41,49 @@ NON_ALNUM_PATTERN = re.compile(r"[^0-9A-Za-z]+")
 
 
 class JudgeIdentityService:
+    def title_token_pattern(self, token):
+        if token in TITLE_PREFIX_TOKENS:
+            return re.escape(token)
+        return r"[.\s-]*".join(re.escape(char) for char in token)
+
+    def strip_trailing_titles(self, raw_name):
+        value = (raw_name or "").strip()
+        if not value:
+            return value
+
+        stripped_real_title = False
+        while True:
+            removed = False
+
+            for token in sorted(TITLE_TOKENS, key=len, reverse=True):
+                token_pattern = self.title_token_pattern(token)
+                pattern = rf"[\s,.;:-]*{token_pattern}[.\s,.;:-]*$"
+                updated = re.sub(pattern, "", value, flags=re.IGNORECASE)
+                if updated != value:
+                    value = updated.strip(" ,.;:-")
+                    stripped_real_title = True
+                    removed = True
+                    break
+
+            if removed:
+                continue
+
+            if stripped_real_title:
+                for token in TITLE_PREFIX_TOKENS:
+                    token_pattern = self.title_token_pattern(token)
+                    pattern = rf"[\s,.;:-]*{token_pattern}[\s,.;:-]*$"
+                    updated = re.sub(pattern, "", value, flags=re.IGNORECASE)
+                    if updated != value:
+                        value = updated.strip(" ,.;:-")
+                        removed = True
+                        break
+
+            if not removed:
+                return value
+
     def normalize_judge_name(self, value):
-        value = unicodedata.normalize("NFKC", value or "")
+        value = unicodedata.normalize("NFKD", value or "")
+        value = "".join(char for char in value if not unicodedata.combining(char))
         value = value.strip()
         value = value.replace(".", "")
         value = PUNCTUATION_PATTERN.sub(" ", value)
@@ -42,6 +92,14 @@ class JudgeIdentityService:
         value = WHITESPACE_PATTERN.sub(" ", value)
         return value.casefold().strip()
 
+    def extract_title(self, tokens):
+        max_size = min(3, len(tokens))
+        for size in range(max_size, 0, -1):
+            candidate = "".join(tokens[-size:]).upper()
+            if candidate in TITLE_TOKENS:
+                return candidate, tokens[:-size]
+        return "", tokens
+
     def parse_judge_name(self, value):
         """Split a source judge string into raw, normalized, canonical, and title parts."""
         raw_name = (value or "").strip()
@@ -49,10 +107,7 @@ class JudgeIdentityService:
         tokens = normalized_name.split()
         title = ""
         if tokens:
-            candidate_title = tokens[-1].upper()
-            if candidate_title in TITLE_TOKENS:
-                title = candidate_title
-                tokens = tokens[:-1]
+            title, tokens = self.extract_title(tokens)
 
         return {
             "raw_name": raw_name,
@@ -69,10 +124,10 @@ class JudgeIdentityService:
             if not base_name:
                 continue
 
-            words = re.split(r"\s+", (name or "").strip())
-            if parts["title"] and words:
-                words = words[:-1]
-            display_name = " ".join(words).strip(" ,.;:-")
+            if parts["title"]:
+                display_name = self.strip_trailing_titles(parts["raw_name"])
+            else:
+                display_name = parts["raw_name"].strip(" ,.;:-")
             candidates.append(display_name or (name or "").strip())
 
         if not candidates:
