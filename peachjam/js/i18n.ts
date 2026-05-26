@@ -36,6 +36,10 @@ export function setUpI8n () {
     fallbackLng: 'en',
     lng: config.language,
     resources,
+    interpolation: {
+      prefix: '{',
+      suffix: '}'
+    },
     returnEmptyString: false
   });
 }
