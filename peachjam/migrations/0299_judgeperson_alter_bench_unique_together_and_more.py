@@ -10,6 +10,14 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.AlterModelOptions(
+            name="judge",
+            options={
+                "ordering": ("name",),
+                "verbose_name": "legacy judge",
+                "verbose_name_plural": "legacy judges",
+            },
+        ),
         migrations.CreateModel(
             name="JudgePerson",
             fields=[
