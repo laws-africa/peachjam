@@ -1226,6 +1226,12 @@ class NormaliseFlynoteNameTest(TestCase):
             FlynoteParser.normalise_name("right to fair hearing"),
         )
 
+    def test_normalises_unicode_dash_variants(self):
+        self.assertEqual(
+            FlynoteParser.normalise_name("Decision-making"),
+            FlynoteParser.normalise_name("Decision\u2011making"),
+        )
+
     def test_canonicalises_root_name(self):
         self.assertEqual(
             FlynoteParser.canonicalise_root_name('* "Civil Procedure"'),
@@ -1286,6 +1292,21 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         Flynote.add_root(name="Criminal Law")
         found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
+
+    def test_returns_existing_by_normalised_name_with_dash_variants(self):
+        root = Flynote.add_root(name="Administrative law")
+        existing = root.add_child(name="Decision-making")
+
+        found = self.updater.get_or_create_node(root, "Decision\u2011making")
+
+        self.assertEqual(found.pk, existing.pk)
+
+    def test_stores_new_nodes_with_normalised_dashes(self):
+        root = self.updater.get_or_create_node(None, "Administrative law")
+
+        child = self.updater.get_or_create_node(root, "Decision\u2011making")
+
+        self.assertEqual(child.name, "Decision-making")
 
     def test_caches_nodes_by_parent_and_normalised_name(self):
         found = self.updater.get_or_create_node(None, "Criminal law")
@@ -2107,6 +2128,22 @@ class FlynoteMergeTest(TestCase):
             ).exists()
         )
 
+    def test_rename_to_or_merge_merges_unicode_dash_variant_sibling(self):
+        root = Flynote.add_root(name="Administrative law")
+        target = root.add_child(name="Decision-making")
+        source = root.add_child(name="Decision\u2011making")
+        judgment = self.make_judgment("Dash variant judgment")
+        JudgmentFlynote.objects.create(document=judgment, flynote=source)
+
+        merged, action = source.rename_to_or_merge("Decision-making")
+
+        self.assertEqual(action, "merge")
+        self.assertEqual(merged.pk, target.pk)
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(document=judgment, flynote=target).exists()
+        )
+
 
 class FlynoteCleanTest(TestCase):
     def test_rejects_duplicate_root_name(self):
@@ -2126,6 +2163,19 @@ class FlynoteCleanTest(TestCase):
         root.add_child(name="Costs")
         duplicate = root.add_child(name="Cost orders")
         duplicate.name = "Costs"
+
+        with self.assertRaises(ValidationError) as cm:
+            duplicate.clean()
+        self.assertIn(
+            "Merge this flynote into that one",
+            cm.exception.message_dict["name"][0],
+        )
+
+    def test_rejects_duplicate_sibling_name_with_dash_variants(self):
+        root = Flynote.add_root(name="Administrative law")
+        root.add_child(name="Decision-making")
+        duplicate = root.add_child(name="Review")
+        duplicate.name = "Decision\u2011making"
 
         with self.assertRaises(ValidationError) as cm:
             duplicate.clean()
@@ -2371,6 +2421,17 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
+    def test_flynote_detail_includes_follow_button(self):
+        leaf = Flynote.objects.get(name="judicial review")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            reverse("user_following_button") + f"?flynote={leaf.pk}",
+        )
 
     def test_flynote_detail_shell_loads_judgment_listing_via_htmx(self):
         leaf = Flynote.objects.get(name="judicial review")

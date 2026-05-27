@@ -116,12 +116,16 @@ class TimelineEmailService:
 
             follows_map = {}
             for ev in events:
-                key = ev.user_following.followed_object
-                follows_map.setdefault(key, set()).update(ev.subject_documents)
+                follows_map.setdefault(ev.user_following, set()).update(
+                    ev.subject_documents
+                )
 
             follows = [
-                {"followed_object": key, "documents": list(docs)[:10]}
-                for key, docs in follows_map.items()
+                {
+                    "followed_object": follow.followed_object_name,
+                    "documents": list(docs)[:10],
+                }
+                for follow, docs in follows_map.items()
             ]
 
             context = {

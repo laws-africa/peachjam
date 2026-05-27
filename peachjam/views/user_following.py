@@ -21,6 +21,7 @@ class UserFollowingForm(forms.ModelForm):
             "country",
             "locality",
             "taxonomy",
+            "flynote",
             "journal",
             "law_report",
         )
@@ -49,6 +50,7 @@ class UserFollowingButtonForm(forms.Form):
     country = forms.IntegerField(required=False)
     locality = forms.IntegerField(required=False)
     taxonomy = forms.IntegerField(required=False)
+    flynote = forms.IntegerField(required=False)
     journal = forms.IntegerField(required=False)
     law_report = forms.IntegerField(required=False)
 
