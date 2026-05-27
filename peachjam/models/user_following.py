@@ -81,6 +81,14 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
+    flynote = models.ForeignKey(
+        "peachjam.Flynote",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("flynote"),
+    )
     journal = models.ForeignKey(
         "peachjam.Journal",
         null=True,
@@ -127,6 +135,7 @@ class UserFollowing(models.Model):
         "country",
         "locality",
         "taxonomy",
+        "flynote",
         "journal",
         "law_report",
         "saved_search",
@@ -171,6 +180,11 @@ class UserFollowing(models.Model):
                 name="unique_user_taxonomy",
             ),
             models.UniqueConstraint(
+                fields=["user", "flynote"],
+                condition=models.Q(flynote__isnull=False),
+                name="unique_user_flynote",
+            ),
+            models.UniqueConstraint(
                 fields=["user", "journal"],
                 condition=models.Q(journal__isnull=False),
                 name="unique_user_journal",
@@ -193,7 +207,7 @@ class UserFollowing(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user} follows {self.followed_field} {self.followed_object}"
+        return f"{self.user} follows {self.followed_field} {self.followed_object_name}"
 
     # --- simple helpers ---
 
@@ -209,6 +223,14 @@ class UserFollowing(models.Model):
         return getattr(self, field) if field else None
 
     @property
+    def followed_object_name(self):
+        if self.flynote:
+            return self.flynote.name
+        if self.followed_object:
+            return str(self.followed_object)
+        return ""
+
+    @property
     def is_new_docs(self):
         return self.followed_field in [
             "court",
@@ -218,6 +240,7 @@ class UserFollowing(models.Model):
             "country",
             "locality",
             "taxonomy",
+            "flynote",
             "journal",
             "law_report",
         ]
@@ -285,6 +308,11 @@ class UserFollowing(models.Model):
         if self.taxonomy:
             topics = [self.taxonomy] + list(self.taxonomy.get_descendants())
             return qs.filter(taxonomies__topic__in=topics)
+
+        if self.flynote:
+            return qs.filter(
+                judgment__flynotes__flynote__path__startswith=self.flynote.path
+            ).distinct()
 
         if self.journal:
             return qs.filter(journalarticle__journal=self.journal)

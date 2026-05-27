@@ -51,7 +51,7 @@ class CustomerIO:
     def get_user_following_details(self, user_following):
         details = self.get_common_details()
         details["followed_type"] = user_following.followed_field
-        details["followed_name"] = str(user_following.followed_object)
+        details["followed_name"] = user_following.followed_object_name
         return details
 
     def get_annotation_details(self, annotation):

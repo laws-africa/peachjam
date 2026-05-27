@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/document_list.html' %}
-{% load humanize i18n %}
+{% load humanize i18n peachjam %}
 {% block title %}{{ flynote.name }}{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
@@ -26,16 +26,16 @@
 {% endblock %}
 {% block page-header %}
   <div class="mb-4">
-    <h1 id="main-page-heading"
-        class="mb-4 d-flex align-items-start justify-content-between gap-3">
-      <span>
-        {% for ancestor in ancestors %}{{ ancestor.name }} —&nbsp;{% endfor %}
-        {{ flynote.name }}
-      </span>
+    <div class="mb-4 d-flex align-items-start justify-content-between gap-3">
+      <div>
+        <h1 id="main-page-heading" class="mb-0">{{ flynote.name }}</h1>
+        <div hx-get="{% url 'user_following_button' %}?{{ flynote|get_follow_params }}"
+             hx-trigger="load"></div>
+      </div>
       <div data-component="FlynoteDetailActions"
            data-manage-url="{% url 'flynote-manager' %}?flynote={{ flynote.pk }}">
       </div>
-    </h1>
+    </div>
     {% if popular_flynotes %}
       <h2 class="h4">
         {% trans "Subtopics" %}

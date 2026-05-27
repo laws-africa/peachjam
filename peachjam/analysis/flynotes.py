@@ -195,6 +195,17 @@ class FlynoteParser:
         # paths == [['Criminal law', 'admissibility', 'trial within a trial']]
     """
 
+    DASH_TRANSLATION = str.maketrans(
+        {
+            "\u2010": "-",  # hyphen
+            "\u2011": "-",  # non-breaking hyphen
+            "\u2012": "-",  # figure dash
+            "\u2013": "-",  # en dash
+            "\u2014": "-",  # em dash
+            "\u2212": "-",  # minus sign
+        }
+    )
+
     def __init__(self, assume_clean=True):
         self.assume_clean = assume_clean
 
@@ -1786,15 +1797,20 @@ class FlynoteParser:
 
     @staticmethod
     def _canonicalise_candidate(text):
+        text = text.translate(FlynoteParser.DASH_TRANSLATION)
         text = text.casefold()
         text = re.sub(r"\s+", " ", text)
         text = re.sub(r"\s*[\u2014\u2013-]\s*", " - ", text)
         return text.strip(" .;,")
 
-    @staticmethod
-    def normalise_name(name):
+    @classmethod
+    def normalise_dash_variants(cls, text):
+        return (text or "").translate(cls.DASH_TRANSLATION)
+
+    @classmethod
+    def normalise_name(cls, name):
         """Convert a topic name to a slug for deduplication matching."""
-        return slugify(name)
+        return slugify(cls.normalise_dash_variants(unescape(name or "")))
 
     @classmethod
     def _basic_normalise_topic_name(cls, text):
@@ -2851,6 +2867,8 @@ class FlynoteUpdater:
 
         Returns ``None`` if the name normalises to an empty value.
         """
+        name = FlynoteParser.clean_path_part(name, preserve_literal=True)
+        name = FlynoteParser.normalise_dash_variants(name)
         normalised = FlynoteParser.normalise_name(name)
         if not normalised:
             return None

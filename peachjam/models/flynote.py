@@ -83,15 +83,25 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 }
             )
 
+    def find_duplicate_sibling(self, name):
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        normalised_name = FlynoteParser.normalise_name(name)
+        if not normalised_name:
+            return None
+
+        for sibling in self.get_siblings().exclude(pk=self.pk):
+            if FlynoteParser.normalise_name(sibling.name) == normalised_name:
+                return sibling
+
+        return None
+
     def validate_unique_sibling_name(self):
         """Prevent admin edits from creating duplicate sibling/root names."""
         if not self.pk:
             return
 
-        name = self.name.strip()
-        duplicate = (
-            self.get_siblings().exclude(pk=self.pk).filter(name__iexact=name).first()
-        )
+        duplicate = self.find_duplicate_sibling(self.name.strip())
         if not duplicate:
             return
 
@@ -185,12 +195,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
         if not new_name:
             raise ValidationError(_("Flynote name cannot be blank."))
 
-        duplicate = (
-            self.get_siblings()
-            .exclude(pk=self.pk)
-            .filter(name__iexact=new_name)
-            .first()
-        )
+        duplicate = self.find_duplicate_sibling(new_name)
         if duplicate:
             duplicate.merge_sources_into([self])
             return duplicate, "merge"

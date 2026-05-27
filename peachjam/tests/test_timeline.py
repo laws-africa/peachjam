@@ -10,9 +10,11 @@ from languages_plus.models import Language
 from peachjam.models import (
     Court,
     ExtractedCitation,
+    Flynote,
     Journal,
     JournalArticle,
     Judgment,
+    JudgmentFlynote,
     LawReport,
     LawReportEntry,
     LawReportVolume,
@@ -214,6 +216,27 @@ class TimelineViewTest(TestCase):
         self.assertEqual(TimelineEvent.EventTypes.NEW_DOCUMENTS, event.event_type)
         self.assertIn(judgment.work, event.subject_works.all())
 
+    def test_flynote_follow_creates_new_documents_timeline_event(self):
+        root = Flynote.add_root(name="Administrative law")
+        child = root.add_child(name="Decision-making")
+        follow = UserFollowing.objects.create(user=self.user, flynote=root)
+        follow.last_alerted_at = self.last_alerted_at
+        follow.save(update_fields=["last_alerted_at"])
+        judgment = Judgment.objects.create(
+            case_name="Administrative decision case",
+            court=self.court,
+            date=datetime(2025, 10, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+        JudgmentFlynote.objects.create(document=judgment, flynote=child)
+
+        UserFollowing.update_follows_for_user(self.user)
+
+        event = TimelineEvent.objects.get(user_following=follow)
+        self.assertEqual(TimelineEvent.EventTypes.NEW_DOCUMENTS, event.event_type)
+        self.assertIn(judgment.work, event.subject_works.all())
+
     def test_send_new_documents_email_includes_journal_in_subject(self):
         journal = Journal.objects.create(
             title="Regional Law Journal",
@@ -239,6 +262,29 @@ class TimelineViewTest(TestCase):
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
         self.assertEqual(f"New documents for {journal}", str(request.subject))
+
+    def test_send_new_documents_email_includes_flynote_in_subject(self):
+        flynote = Flynote.add_root(name="Administrative law")
+        follow = UserFollowing.objects.create(user=self.user, flynote=flynote)
+        doc = Judgment.objects.first()
+        TimelineEvent.add_new_documents_event(follow, [doc])
+
+        with (
+            override_settings(
+                PEACHJAM={
+                    **settings.PEACHJAM,
+                    "EMAIL_ALERTS_ENABLED": True,
+                    "CUSTOMERIO_EMAIL_API_KEY": "test",
+                },
+                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
+            ),
+            patch("peachjam.emails.APIClient.send_email") as mailer,
+        ):
+            TimelineEmailService.send_new_documents_email(self.user)
+
+        self.assertEqual(1, mailer.call_count)
+        request = mailer.call_args[0][0]
+        self.assertEqual(f"New documents for {flynote.name}", str(request.subject))
 
 
 class TimelineRelationshipTests(TestCase):
