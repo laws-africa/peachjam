@@ -53,11 +53,14 @@ The flynote database is stored in a tree structure, where each flynote has a par
 top-level flynotes). When using the search_flynotes tool for components 2, 3 and 4, you must specify the id of the
 previous component as the parent_id. This ensures the tool searches the children of that flynote.
 
-Adhere to the following rules when matching flynotes to the database:
+# Flynote matching rules
+
+You must adhere to the following rules when matching flynotes to the database:
 
 1. Flynote component 1: you MUST choose an appropriate entry from the list provided below that most closely matches
 your flynote component 1. You MUST NOT use a flynote component 1 that doesn't exist in the database. There is no need
-to use the search_flynotes tool because the full list is provided below.
+to use the search_flynotes tool because the full list is provided below. You MUST obey jurisdiction-specific
+restrictions when choosing flynote component 1 by ignoring any candidate that contradicts the restrictions.
 
 2. Flynote component 2: you SHOULD choose an appropriate entry from the database that most closely matches your
 flynote component 2. If there is not a good match, use your original suggestion, but only if there is not a good match.
@@ -75,7 +78,7 @@ You must follow this process for each newline-separated flynote that you generat
 
 When you're done, return your new flynotes, one per line.
 
-# Using the search_flynotes tool
+# How to use the search_flynotes tool
 
 When using the search_flynotes tool, you can provide a list of keywords (or phrases) to search for. Always provide the
 the actual flynote as one of the keywords, and then include 2-5 other keywords that are relevant to the flynote and
@@ -366,7 +369,7 @@ class JudgmentSummariser:
             f"- (id {flynote.pk}): {flynote.name}" for flynote in flynotes
         )
         return (
-            "\n\n# Top-level flynotes\n\nHere is the list of top-level flynotes you can choose from for flynote "
+            "\n\n# Top-level flynotes\n\nHere is the list of top-level flynotes you must choose from for flynote "
             f"component 1:\n{flynote_list}\n"
         )
 
