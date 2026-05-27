@@ -104,6 +104,12 @@
             {{ document_count }}
           </dd>
           <dt class="col-sm-3">
+            Created
+          </dt>
+          <dd class="col-sm-9">
+            {{ flynote.created_at|date:"Y-m-d H:i" }}
+          </dd>
+          <dt class="col-sm-3">
             Path
           </dt>
           <dd class="col-sm-9">

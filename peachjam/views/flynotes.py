@@ -18,6 +18,8 @@ from django.http import (
 )
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.generic import DetailView, TemplateView
@@ -42,6 +44,7 @@ class FlynoteManagerView(TemplateView):
 
 class FlynoteManagerMixin(FlynoteViewMixin):
     model = Flynote
+    new_flynote_window = timezone.timedelta(days=2)
 
     def get_flynote_content_type(self):
         return ContentType.objects.get_for_model(Flynote)
@@ -64,11 +67,16 @@ class FlynoteManagerMixin(FlynoteViewMixin):
             document_count = flynote.document_count_cache.count
         except Flynote.document_count_cache.RelatedObjectDoesNotExist:
             document_count = 0
+        is_new_root = (
+            flynote.depth == 1
+            and flynote.created_at >= timezone.now() - self.new_flynote_window
+        )
 
         return {
             "id": flynote.pk,
             "name": flynote.name,
             "deprecated": flynote.deprecated,
+            "is_new": is_new_root,
             "numchild": flynote.numchild,
             "document_count": document_count,
             "has_children": flynote.numchild > 0,
@@ -221,10 +229,12 @@ class FlynoteManagerSearchView(FlynoteManagerMixin, TemplateView):
         context = super().get_context_data(**kwargs)
         query = self.request.GET.get("q", "").strip()
         depth = self.request.GET.get("depth", "").strip()
+        created_after = self.request.GET.get("created_after", "").strip()
+        created_before = self.request.GET.get("created_before", "").strip()
         results = []
         path_labels = {}
 
-        if query or depth:
+        if query or depth or created_after or created_before:
             queryset = Flynote.objects.all()
             if query:
                 queryset = queryset.filter(name__icontains=query)
@@ -233,16 +243,30 @@ class FlynoteManagerSearchView(FlynoteManagerMixin, TemplateView):
                     queryset = queryset.filter(depth=int(depth))
                 except ValueError:
                     depth = ""
+            if created_after:
+                date = parse_date(created_after)
+                if date:
+                    queryset = queryset.filter(created_at__date__gte=date)
+                else:
+                    created_after = ""
+            if created_before:
+                date = parse_date(created_before)
+                if date:
+                    queryset = queryset.filter(created_at__date__lte=date)
+                else:
+                    created_before = ""
 
             results = list(
                 queryset.select_related("document_count_cache")
                 .annotate(document_total=Coalesce("document_count_cache__count", 0))
-                .order_by("name")[:100]
+                .order_by("-created_at", "name")[:100]
             )
             path_labels = self.get_flynote_path_labels(results)
 
         context["query"] = query
         context["depth"] = depth
+        context["created_after"] = created_after
+        context["created_before"] = created_before
         context["results"] = results
         context["path_labels"] = path_labels
         context["manager_url"] = reverse("flynote-manager")

@@ -6,6 +6,7 @@ from django.db import connection, models, transaction
 from django.db.models import Exists, OuterRef
 from django.db.models.deletion import ProtectedError
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
@@ -55,6 +56,9 @@ class Flynote(LifecycleModelMixin, MP_Node):
 
     name = models.CharField(_("name"), max_length=255)
     deprecated = models.BooleanField(_("deprecated"), default=False, db_index=True)
+    created_at = models.DateTimeField(
+        _("created at"), default=timezone.now, db_index=True
+    )
 
     class Meta:
         verbose_name = _("flynote")
