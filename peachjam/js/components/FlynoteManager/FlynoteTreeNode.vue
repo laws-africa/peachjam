@@ -27,7 +27,10 @@
         :class="selectedId === node.id ? 'btn-primary' : 'btn-link'"
         @click="$emit('select', node)"
       >
-        <span>{{ node.name }}</span>
+        <span class="flynote-tree__name">
+          <span>{{ node.name }}</span>
+          <span v-if="node.is_new" class="badge text-bg-success ms-2">New</span>
+        </span>
         <span class="badge text-bg-light bg-white border ms-2">{{ node.document_count }}</span>
         <span v-if="node.deprecated" class="visually-hidden"> Deprecated </span>
       </button>
@@ -108,7 +111,8 @@ export default {
   padding: 0.15rem 0.15rem;
 }
 
-.flynote-tree__select span:first-child {
+.flynote-tree__name {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

@@ -8,6 +8,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 from languages_plus.models import Language
 
 from peachjam.models import Court, Judgment
@@ -40,6 +41,15 @@ class FlynoteManagerViewTest(TestCase):
         self.bail = self.criminal.add_child(name="Bail")
         self.sentencing.refresh_from_db()
         self.appeals = self.sentencing.add_child(name="Appeals")
+        Flynote.objects.filter(
+            pk__in=[
+                self.criminal.pk,
+                self.contract.pk,
+                self.sentencing.pk,
+                self.bail.pk,
+                self.appeals.pk,
+            ]
+        ).update(created_at=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC))
         FlynoteDocumentCount.objects.create(flynote=self.criminal, count=3)
         FlynoteDocumentCount.objects.create(flynote=self.sentencing, count=2)
         FlynoteDocumentCount.objects.create(flynote=self.bail, count=1)
@@ -108,7 +118,35 @@ class FlynoteManagerViewTest(TestCase):
         self.assertEqual(criminal["document_count"], 3)
         self.assertEqual(criminal["numchild"], 2)
         self.assertTrue(criminal["has_children"])
+        self.assertFalse(criminal["is_new"])
         self.assertTrue(contract["deprecated"])
+
+    def test_tree_endpoint_marks_recent_root_nodes_as_new(self):
+        Flynote.objects.filter(pk=self.criminal.pk).update(created_at=timezone.now())
+        Flynote.objects.filter(pk=self.sentencing.pk).update(created_at=timezone.now())
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(reverse("flynote-manager-tree"))
+
+        self.assertEqual(response.status_code, 200)
+        criminal = next(
+            node
+            for node in response.json()["results"]
+            if node["id"] == self.criminal.pk
+        )
+        self.assertTrue(criminal["is_new"])
+
+        response = self.client.get(
+            reverse("flynote-manager-tree-children", args=[self.criminal.pk])
+        )
+
+        self.assertEqual(response.status_code, 200)
+        sentencing = next(
+            node
+            for node in response.json()["results"]
+            if node["id"] == self.sentencing.pk
+        )
+        self.assertFalse(sentencing["is_new"])
 
     def test_children_endpoint_returns_direct_children_only(self):
         self.client.force_login(self.staff_user)
@@ -162,6 +200,7 @@ class FlynoteManagerViewTest(TestCase):
             f'hx-post="/en/admin/flynote-manager/workspace/{self.sentencing.pk}/"',
         )
         self.assertContains(response, "Depth")
+        self.assertContains(response, "Created")
         self.assertNotContains(response, '<dt class="col-sm-3">Children</dt>')
         self.assertContains(response, "card-footer")
         self.assertContains(response, "History")
@@ -416,11 +455,11 @@ class FlynoteManagerViewTest(TestCase):
         response = self.client.get(reverse("flynote-manager-search"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Search flynotes")
-        self.assertContains(
-            response, "Enter a flynote name or choose a depth to search."
-        )
+        self.assertContains(response, "filter by created date")
         self.assertContains(response, 'name="q"')
         self.assertContains(response, 'name="depth"')
+        self.assertContains(response, 'name="created_after"')
+        self.assertContains(response, 'name="created_before"')
         self.assertContains(response, "Any depth")
 
     def test_workspace_search_returns_matching_flynotes(self):
@@ -489,6 +528,50 @@ class FlynoteManagerViewTest(TestCase):
             response,
             f'href="{reverse("flynote-manager")}?flynote={self.criminal.pk}"',
         )
+
+    def test_workspace_search_filters_by_created_date(self):
+        Flynote.objects.filter(pk=self.criminal.pk).update(
+            created_at=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC)
+        )
+        Flynote.objects.filter(pk=self.contract.pk).update(
+            created_at=datetime.datetime(2026, 1, 1, tzinfo=datetime.UTC)
+        )
+        Flynote.objects.filter(pk=self.bail.pk).update(
+            created_at=datetime.datetime(2026, 2, 1, tzinfo=datetime.UTC)
+        )
+        Flynote.objects.filter(pk=self.sentencing.pk).update(
+            created_at=datetime.datetime(2026, 3, 1, tzinfo=datetime.UTC)
+        )
+        Flynote.objects.filter(pk=self.appeals.pk).update(
+            created_at=datetime.datetime(2026, 4, 1, tzinfo=datetime.UTC)
+        )
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(
+            reverse("flynote-manager-search"),
+            {"created_after": "2026-03-01"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Sentencing")
+        self.assertContains(response, "Appeals")
+        self.assertContains(response, "2026-03-01")
+        self.assertNotContains(
+            response,
+            f'href="{reverse("flynote-manager")}?flynote={self.bail.pk}"',
+        )
+        self.assertNotContains(
+            response,
+            f'href="{reverse("flynote-manager")}?flynote={self.criminal.pk}"',
+        )
+
+    def test_new_flynotes_get_current_created_at(self):
+        before = timezone.now()
+        flynote = Flynote.add_root(name="Recently added")
+        after = timezone.now()
+
+        self.assertGreaterEqual(flynote.created_at, before)
+        self.assertLessEqual(flynote.created_at, after)
 
     def test_workspace_merge_loads_sibling_candidates(self):
         self.bail.add_child(name="Release conditions")

@@ -30,12 +30,28 @@
           {% endfor %}
         </select>
       </div>
+      <div class="col-md-2">
+        <label for="flynote-manager-search-created-after" class="form-label">Created after</label>
+        <input id="flynote-manager-search-created-after"
+               type="date"
+               name="created_after"
+               value="{{ created_after }}"
+               class="form-control"/>
+      </div>
+      <div class="col-md-2">
+        <label for="flynote-manager-search-created-before" class="form-label">Created before</label>
+        <input id="flynote-manager-search-created-before"
+               type="date"
+               name="created_before"
+               value="{{ created_before }}"
+               class="form-control"/>
+      </div>
       <div class="col-md-auto">
         <button type="submit" class="btn btn-primary">Search</button>
       </div>
     </div>
   </form>
-  {% if query or depth %}
+  {% if query or depth or created_after or created_before %}
     {% if results %}
       <div class="table-responsive">
         <table class="table table-sm align-middle">
@@ -45,6 +61,7 @@
               <th scope="col">Path</th>
               <th scope="col">Judgments</th>
               <th scope="col">Child topics</th>
+              <th scope="col">Created</th>
             </tr>
           </thead>
           <tbody>
@@ -63,6 +80,7 @@
                 </td>
                 <td>{{ flynote.document_total }}</td>
                 <td>{{ flynote.numchild }}</td>
+                <td>{{ flynote.created_at|date:"Y-m-d" }}</td>
               </tr>
             {% endfor %}
           </tbody>
@@ -72,6 +90,6 @@
       <p class="text-muted mb-0">No matching flynotes found.</p>
     {% endif %}
   {% else %}
-    <p class="text-muted mb-0">Enter a flynote name or choose a depth to search.</p>
+    <p class="text-muted mb-0">Enter a flynote name, choose a depth, or filter by created date.</p>
   {% endif %}
 </section>
