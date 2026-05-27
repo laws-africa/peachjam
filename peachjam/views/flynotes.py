@@ -496,7 +496,7 @@ class FlynoteManagerMergeView(FlynoteManagerDetailView):
 
 @method_decorator(staff_member_required, name="dispatch")
 class FlynoteManagerMergePickerView(FlynoteManagerMixin, TemplateView):
-    template_name = "peachjam/flynote/manager/_merge_picker.html"
+    template_name = "peachjam/flynote/manager/_merge_picker_content.html"
 
     def dispatch(self, request, *args, **kwargs):
         if not request.user.has_perm("peachjam.change_flynote"):

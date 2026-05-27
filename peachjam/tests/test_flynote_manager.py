@@ -538,9 +538,12 @@ class FlynoteManagerViewTest(TestCase):
         )
         self.assertContains(
             response,
-            f'<input type="hidden" name="selected" value="{self.sentencing.pk}"/>',
-            html=True,
+            'id="merge-picker-state"',
         )
+        self.assertContains(response, 'name="selected"')
+        self.assertContains(response, f'value="{self.sentencing.pk}"')
+        self.assertContains(response, 'hx-target="#merge-picker-content"')
+        self.assertContains(response, 'hx-include="#merge-picker-state"')
 
     def test_workspace_merge_picker_adds_and_removes_selected_flynotes(self):
         self.client.force_login(self.staff_user)
@@ -551,9 +554,13 @@ class FlynoteManagerViewTest(TestCase):
         self.assertEqual(add_response.status_code, 200)
         self.assertContains(
             add_response,
-            f'<input type="hidden" name="selected" value="{self.bail.pk}"/>',
-            html=True,
+            'hx-swap="innerHTML focus-scroll:false"',
         )
+        self.assertNotContains(add_response, 'id="merge-search-form"')
+        self.assertNotContains(add_response, 'id="id_q"')
+        self.assertContains(add_response, 'id="merge-picker-state"')
+        self.assertContains(add_response, 'name="selected"')
+        self.assertContains(add_response, f'value="{self.bail.pk}"')
         self.assertContains(add_response, "Remove")
 
         remove_response = self.client.get(
