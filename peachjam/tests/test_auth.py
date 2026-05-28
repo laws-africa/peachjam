@@ -406,6 +406,28 @@ class UserAuthViewTests(TestCase):
 
 
 class SignupViewTests(TestCase):
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False})
+    def test_signup_view_login_link_includes_next_when_otp_disabled(self):
+        response = self.client.get(reverse("account_signup"), {"next": "foo"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'href="{reverse("account_login")}?next=foo"',
+            html=False,
+        )
+
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False})
+    def test_login_view_signup_link_includes_next_when_otp_disabled(self):
+        response = self.client.get(reverse("account_login"), {"next": "foo"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'href="{reverse("account_signup")}?next=foo"',
+            html=False,
+        )
+
     @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True})
     def test_signup_view_redirects_to_login_when_otp_enabled(self):
         from peachjam.views.accounts import SignupView
@@ -415,3 +437,10 @@ class SignupViewTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], reverse("account_login"))
+
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True})
+    def test_signup_view_redirects_to_login_with_next_when_otp_enabled(self):
+        response = self.client.get(reverse("account_signup"), {"next": "foo"})
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response["Location"], f"{reverse('account_login')}?next=foo")

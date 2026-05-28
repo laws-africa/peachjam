@@ -31,7 +31,7 @@ User = get_user_model()
 class SignupView(AllauthSignupView):
     def dispatch(self, request, *args, **kwargs):
         if settings.PEACHJAM["AUTH_OTP"]:
-            return redirect("account_login")
+            return redirect(self.passthrough_next_url(reverse("account_login")))
         return super().dispatch(request, *args, **kwargs)
 
 
