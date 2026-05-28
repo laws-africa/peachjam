@@ -2128,6 +2128,73 @@ class FlynoteMergeTest(TestCase):
             ).exists()
         )
 
+    def test_promote_children_to_parent_moves_children_and_deletes_empty_flynote(self):
+        root = Flynote.add_root(name="Civil procedure")
+        parent = root.add_child(name="Applications")
+        flynote = parent.add_child(name="Urgent applications")
+        child = flynote.add_child(name="Service")
+        judgment = self.make_judgment("Child flynote judgment")
+        JudgmentFlynote.objects.create(document=judgment, flynote=child)
+
+        promoted_parent = flynote.promote_children_to_parent()
+
+        self.assertEqual(promoted_parent.pk, parent.pk)
+        self.assertFalse(Flynote.objects.filter(pk=flynote.pk).exists())
+        child.refresh_from_db()
+        self.assertEqual(child.get_parent().pk, parent.pk)
+
+    def test_promote_children_to_parent_keeps_flynote_with_direct_judgments(self):
+        root = Flynote.add_root(name="Civil procedure")
+        parent = root.add_child(name="Applications")
+        flynote = parent.add_child(name="Urgent applications")
+        child = flynote.add_child(name="Service")
+        judgment = self.make_judgment("Direct flynote judgment")
+        child_judgment = self.make_judgment("Child flynote judgment")
+        JudgmentFlynote.objects.create(document=judgment, flynote=flynote)
+        JudgmentFlynote.objects.create(document=child_judgment, flynote=child)
+
+        flynote.promote_children_to_parent()
+
+        flynote.refresh_from_db()
+        child.refresh_from_db()
+        self.assertEqual(flynote.get_parent().pk, parent.pk)
+        self.assertFalse(flynote.get_children().exists())
+        self.assertEqual(child.get_parent().pk, parent.pk)
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(document=judgment, flynote=flynote).exists()
+        )
+
+    def test_promote_children_to_parent_merges_duplicate_sibling_child(self):
+        root = Flynote.add_root(name="Civil procedure")
+        parent = root.add_child(name="Applications")
+        flynote = parent.add_child(name="Urgent applications")
+        existing_child = parent.add_child(name="Service")
+        promoted_child = flynote.add_child(name="Service")
+        judgment = self.make_judgment("Promoted child judgment")
+        JudgmentFlynote.objects.create(document=judgment, flynote=promoted_child)
+
+        flynote.promote_children_to_parent()
+
+        self.assertFalse(Flynote.objects.filter(pk=flynote.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=promoted_child.pk).exists())
+        self.assertTrue(Flynote.objects.filter(pk=existing_child.pk).exists())
+        self.assertTrue(
+            JudgmentFlynote.objects.filter(
+                document=judgment,
+                flynote=existing_child,
+            ).exists()
+        )
+
+    def test_promote_children_to_parent_rejects_root_flynote(self):
+        root = Flynote.add_root(name="Civil procedure")
+        root.add_child(name="Applications")
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "Cannot promote children of a root flynote.",
+        ):
+            root.promote_children_to_parent()
+
     def test_rename_to_or_merge_merges_unicode_dash_variant_sibling(self):
         root = Flynote.add_root(name="Administrative law")
         target = root.add_child(name="Decision-making")

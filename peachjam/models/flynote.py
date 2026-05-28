@@ -269,6 +269,62 @@ class Flynote(LifecycleModelMixin, MP_Node):
                     FlynoteDocumentCount.quick_refresh_for_single_flynote(source_parent)
             log.info("Finished merging flynotes")
 
+    def promote_children_to_parent(self):
+        """Move this flynote's children up one level to its parent.
+
+        Matching children are merged into existing siblings under the parent.
+        The current flynote is deleted only when it has no linked judgments
+        and no children after promotion.
+        """
+        if not self.pk:
+            raise ValidationError(_("Flynote must be saved before it can be moved."))
+        if self.is_root():
+            raise ValidationError(_("Cannot promote children of a root flynote."))
+
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        with transaction.atomic():
+            flynote = Flynote.objects.select_for_update().get(pk=self.pk)
+            parent = flynote.get_parent()
+
+            for child in list(
+                flynote.get_children().select_for_update().order_by("path")
+            ):
+                child.refresh_from_db()
+                flynote.refresh_from_db()
+                parent.refresh_from_db()
+
+                normalised = FlynoteParser.normalise_name(child.name)
+                target_child = None
+                if normalised:
+                    target_child = next(
+                        (
+                            candidate
+                            for candidate in parent.get_children()
+                            .exclude(pk=flynote.pk)
+                            .select_for_update()
+                            if FlynoteParser.normalise_name(candidate.name)
+                            == normalised
+                        ),
+                        None,
+                    )
+
+                if target_child:
+                    target_child._merge_other_into(child)
+                else:
+                    child.move(parent, pos="last-child")
+
+            flynote.refresh_from_db()
+            has_linked_judgments = flynote.judgments.exists()
+            if not has_linked_judgments and not flynote.get_children().exists():
+                flynote.delete()
+            else:
+                FlynoteDocumentCount.quick_refresh_for_single_flynote(flynote)
+
+            parent.refresh_from_db()
+            FlynoteDocumentCount.quick_refresh_for_single_flynote(parent)
+            return parent
+
     def _merge_other_into(self, source):
         """Merge one corresponding source flynote into this flynote."""
         from peachjam.analysis.flynotes import FlynoteParser
