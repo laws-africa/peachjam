@@ -115,7 +115,7 @@
       </div>
       <div class="text-center">
         {% trans "Don't have an account?" %}
-        <a href="{% url 'account_signup' %}">{% trans 'Sign up' %}</a>
+        <a href="{{ signup_url }}">{% trans 'Sign up' %}</a>
       </div>
     </form>
   {% endif %}
