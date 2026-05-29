@@ -1,0 +1,73 @@
+name: Extract translations PR
+
+on:
+  push:
+    branches:
+      - sandrava-3217
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  extract-translations:
+    runs-on: ubuntu-latest
+    name: Extract translations and open PR
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Cache apt packages
+        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
+        with:
+          packages: gettext
+          version: extract-translations-apt-v1
+          execute_install_scripts: true
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade "setuptools<82" wheel
+          pip install .[dev]
+          npm ci --no-audit --prefer-offline --ignore-scripts
+
+      - name: Extract translatable strings
+        run: bash scripts/extract-translations.sh
+
+      - name: Check for updated PO files
+        id: po_changes
+        run: |
+          if git diff --name-only | grep -qE '.+/locale/.+/LC_MESSAGES/.+\.po$'; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create pull request
+        if: steps.po_changes.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.LA_ACTIONS_TOKEN || github.token }}
+          commit-message: Extract new translation strings
+          branch: automated-extract-translations
+          branch-suffix: timestamp
+          base: main
+          title: Extract new translation strings
+          body: |
+            Automated extraction of translation strings from `main`.
+
+            This PR includes updated Django translation catalogs:
+            - `**/locale/*/LC_MESSAGES/*.po`
+          add-paths: |
+            **/locale/*/LC_MESSAGES/*.po
