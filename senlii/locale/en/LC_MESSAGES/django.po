@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-05-29 12:07+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,7 +39,7 @@ msgid "SenLII is a non-profit platform that provides digital access to legislati
 msgstr ""
 
 #: templates/liiweb/home.html:9
-msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
+msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from the Federal Ministry for Economic Cooperation and Development (BMZ), and implemented by GIZ."
 msgstr ""
 
 #: templates/peachjam/_footer.html:4
