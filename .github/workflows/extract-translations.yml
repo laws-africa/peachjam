@@ -3,7 +3,7 @@ name: Extract translations PR
 on:
   push:
     branches:
-      - sandrava-3217
+      - main
 
 permissions:
   contents: write

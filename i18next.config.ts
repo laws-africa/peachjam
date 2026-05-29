@@ -48,7 +48,8 @@ const vueTemplateExtractionPlugin = (): Plugin => ({
 
           keys.set(pluralKey, {
             key: `${key}${suffix}`,
-             ns: 'translation'
+            ns: 'translation',
+            defaultValue: key
           });
         }
       }

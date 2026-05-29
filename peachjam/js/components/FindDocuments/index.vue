@@ -210,7 +210,7 @@
                 <div class="my-3 d-flex">
                   <div class="me-2">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                    <span v-else>{{ $t('{count} documents found', { count: searchInfo.count }) }}</span>
+                    <span v-else>{{ $t('{count} document found', { count: searchInfo.count }) }}</span>
                       &nbsp;
                     <a
                       href="#"
