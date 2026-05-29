@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 08:06+0100\n"
+"POT-Creation-Date: 2026-05-29 12:12+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -192,11 +192,11 @@ msgstr "Mababu"
 msgid "Children"
 msgstr "Watoto"
 
-#: admin.py:1417 models/judgment.py:774 models/judgment.py:810
+#: admin.py:1417 models/judgment.py:778 models/judgment.py:814
 msgid "case number"
 msgstr "namba ya kesi"
 
-#: admin.py:1418 models/judgment.py:775
+#: admin.py:1418 models/judgment.py:779
 msgid "case numbers"
 msgstr "namba za kesi"
 
@@ -205,7 +205,7 @@ msgid "judge"
 msgstr "jaji"
 
 #: admin.py:1428 models/judgment.py:64 models/judgment.py:341
-#: models/judgment.py:827 models/judgment.py:873
+#: models/judgment.py:831 models/judgment.py:877
 msgid "judges"
 msgstr "majaji"
 
@@ -225,7 +225,7 @@ msgstr "Hukumu inayohusiana"
 msgid "Related judgments"
 msgstr "Hukumu zinazohusiana"
 
-#: admin.py:1480 models/judgment.py:835
+#: admin.py:1480 models/judgment.py:839
 msgid "case history"
 msgstr "historia ya kesi"
 
@@ -499,7 +499,7 @@ msgstr "Lazima ukubali sheria na masharti ili kuendelea."
 #: models/annotation.py:11 models/attachments.py:76 models/attachments.py:110
 #: models/attachments.py:264 models/attachments.py:307
 #: models/attachments.py:356 models/citations.py:21 models/core_document.py:872
-#: models/core_document.py:898 models/judgment.py:769 models/taxonomies.py:287
+#: models/core_document.py:898 models/judgment.py:773 models/taxonomies.py:287
 #: templates/peachjam/_document_count.html:8
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:4
 #: views/generic_views.py:144
@@ -524,9 +524,9 @@ msgstr "wateuzi lengwa"
 msgid "user"
 msgstr "mtumiaji"
 
-#: models/annotation.py:24 models/core_document.py:497
+#: models/annotation.py:24 models/core_document.py:497 models/flynote.py:60
 #: models/save_document.py:24 models/save_document.py:100
-#: models/user_following.py:120
+#: models/user_following.py:128
 msgid "created at"
 msgstr "imeundwa saa"
 
@@ -542,7 +542,7 @@ msgstr "maelezo"
 msgid "Page"
 msgstr "Ukurasa"
 
-#: models/article.py:19 models/core_document.py:411 models/judgment.py:831
+#: models/article.py:19 models/core_document.py:411 models/judgment.py:835
 msgid "date"
 msgstr "tarehe"
 
@@ -669,7 +669,7 @@ msgstr "faili za uchapishaji"
 
 #: models/attachments.py:291 models/author.py:11 models/citations.py:167
 #: models/core_document.py:63 models/core_document.py:91
-#: models/core_document.py:106 models/flynote.py:56 models/ingestors.py:15
+#: models/core_document.py:106 models/flynote.py:57 models/ingestors.py:15
 #: models/ingestors.py:45 models/judgment.py:39 models/judgment.py:57
 #: models/judgment.py:76 models/judgment.py:91 models/judgment.py:106
 #: models/judgment.py:120 models/judgment.py:162 models/judgment.py:181
@@ -1084,9 +1084,9 @@ msgstr "uboreshaji wa utoaji"
 msgid "provision enrichments"
 msgstr "uboreshaji wa utoaji"
 
-#: models/enrichments.py:84 models/flynote.py:405 models/judgment.py:284
+#: models/enrichments.py:84 models/flynote.py:417 models/judgment.py:284
 #: models/judgment.py:300 models/judgment.py:466 views/courts.py:54
-#: views/judgment.py:43
+#: views/judgment.py:44
 msgid "judgment"
 msgstr "hukumu"
 
@@ -1158,7 +1158,7 @@ msgstr "dondoo la utoaji"
 msgid "provision citations"
 msgstr "dondoo za utoaji"
 
-#: models/enrichments.py:153 models/flynote.py:433 models/taxonomies.py:313
+#: models/enrichments.py:153 models/flynote.py:445 models/taxonomies.py:313
 msgid "count"
 msgstr "hesabu"
 
@@ -1206,56 +1206,62 @@ msgstr "maelezo ya mamlaka"
 msgid "jurisdiction profiles"
 msgstr "maelezo ya mamlaka"
 
-#: models/flynote.py:57
+#: models/flynote.py:58
 msgid "deprecated"
 msgstr "imeondolewa"
 
-#: models/flynote.py:60 models/flynote.py:411 models/flynote.py:431
-#: models/judgment.py:363
+#: models/flynote.py:64 models/flynote.py:423 models/flynote.py:443
+#: models/judgment.py:363 models/user_following.py:90
 msgid "flynote"
 msgstr "mada"
 
-#: models/flynote.py:61
+#: models/flynote.py:65
 msgid "flynotes"
 msgstr "maelezo ya ndege"
 
-#: models/flynote.py:78
+#: models/flynote.py:67
+#, fuzzy
+#| msgid "Related judgments"
+msgid "Can view linked judgments"
+msgstr "Hukumu zinazohusiana"
+
+#: models/flynote.py:85
 msgid "A flynote cannot be active when any ancestor is deprecated."
 msgstr "Noti ya kuruka haiwezi kuwa hai wakati babu yeyote ameondolewa kwenye huduma."
 
-#: models/flynote.py:109
+#: models/flynote.py:126
 msgid "A sibling flynote already has this name. <a href=\"{}\">Merge this flynote into that one</a> instead."
 msgstr "Flynote ndugu tayari ina jina hili. <a href=\"{}\">Unganisha flynote hii na hiyo</a> badala yake."
 
-#: models/flynote.py:179
+#: models/flynote.py:196
 msgid "Flynote must be saved before it can be renamed."
 msgstr "Flynote lazima ihifadhiwe kabla haijabadilishwa jina."
 
-#: models/flynote.py:183
+#: models/flynote.py:200
 msgid "Flynote name cannot be blank."
 msgstr "Jina la Flynote haliwezi kuwa tupu."
 
-#: models/flynote.py:229
+#: models/flynote.py:241
 msgid "One or more selected flynotes no longer exist."
 msgstr "Noti moja au zaidi zilizochaguliwa hazipo tena."
 
-#: models/flynote.py:243
+#: models/flynote.py:255
 msgid "Flynotes can only be merged into a sibling at the same level."
 msgstr "Maelezo ya Kuruka yanaweza kuunganishwa tu na kuwa ndugu katika kiwango sawa."
 
-#: models/flynote.py:416
+#: models/flynote.py:428
 msgid "judgment flynote"
 msgstr "ujumbe mfupi wa hukumu"
 
-#: models/flynote.py:417
+#: models/flynote.py:429
 msgid "judgment flynotes"
 msgstr "maelezo ya hukumu"
 
-#: models/flynote.py:436
+#: models/flynote.py:448
 msgid "flynote document count"
 msgstr "Idadi ya hati za noti ya kuruka"
 
-#: models/flynote.py:437
+#: models/flynote.py:449
 msgid "flynote document counts"
 msgstr "Hesabu za hati za flynote"
 
@@ -1372,7 +1378,7 @@ msgstr "Jaji"
 msgid "Judges"
 msgstr "Majaji"
 
-#: models/judgment.py:82 models/judgment.py:825
+#: models/judgment.py:82 models/judgment.py:829
 msgid "outcome"
 msgstr "matokeo"
 
@@ -1388,7 +1394,7 @@ msgstr "kesi hatua"
 msgid "case actions"
 msgstr "vitendo vya kesi"
 
-#: models/judgment.py:112 models/judgment.py:762
+#: models/judgment.py:112 models/judgment.py:766
 msgid "matter type"
 msgstr "aina ya jambo"
 
@@ -1414,7 +1420,7 @@ msgid "country"
 msgstr "nchi"
 
 #: models/judgment.py:214 models/judgment.py:249 models/judgment.py:315
-#: models/judgment.py:829 models/judgment.py:856 models/user_following.py:34
+#: models/judgment.py:833 models/judgment.py:860 models/user_following.py:34
 msgid "court"
 msgstr "mahakama"
 
@@ -1570,51 +1576,51 @@ msgstr "Bila jina"
 msgid "Has the judgment been anonymised?"
 msgstr "Je, hukumu haijatajwa?"
 
-#: models/judgment.py:467 views/courts.py:55 views/judgment.py:44
+#: models/judgment.py:467 views/courts.py:55 views/judgment.py:45
 msgid "judgments"
 msgstr "hukumu"
 
-#: models/judgment.py:748
+#: models/judgment.py:752
 msgid "Full case number as printed on judgment"
 msgstr "Namba kamili ya kesi kama ilivyochapishwa kwenye hukumu"
 
-#: models/judgment.py:752
+#: models/judgment.py:756
 msgid "Override for full case number string"
 msgstr "Batilisha kwa mfuatano wa nukuu ya kesi kamili"
 
-#: models/judgment.py:754
+#: models/judgment.py:758
 msgid "string"
 msgstr "nukuu nyingi"
 
-#: models/judgment.py:755
+#: models/judgment.py:759
 msgid "number"
 msgstr "namba"
 
-#: models/judgment.py:756
+#: models/judgment.py:760
 msgid "year"
 msgstr "mwaka"
 
-#: models/judgment.py:807
+#: models/judgment.py:811
 msgid "judgment work"
 msgstr "kazi ya hukumu"
 
-#: models/judgment.py:818
+#: models/judgment.py:822
 msgid "historical judgment work"
 msgstr "kazi ya hukumu ya kihistoria"
 
-#: models/judgment.py:836
+#: models/judgment.py:840
 msgid "case histories"
 msgstr "historia za kesi"
 
-#: models/judgment.py:843 templates/peachjam/_case_histories.html:22
+#: models/judgment.py:847 templates/peachjam/_case_histories.html:22
 msgid "Case history"
 msgstr "Historia ya kesi"
 
-#: models/judgment.py:874
+#: models/judgment.py:878
 msgid "end date"
 msgstr "tarehe ya mwisho"
 
-#: models/law_reports.py:14 models/user_following.py:98
+#: models/law_reports.py:14 models/user_following.py:106
 msgid "law report"
 msgstr "ripoti ya sheria"
 
@@ -1763,7 +1769,7 @@ msgstr "Kikomo cha folda kimefikiwa"
 msgid "note"
 msgstr "kumbuka"
 
-#: models/save_document.py:131 models/user_following.py:114
+#: models/save_document.py:131 models/user_following.py:122
 msgid "saved document"
 msgstr "hati iliyohifadhiwa"
 
@@ -2079,19 +2085,19 @@ msgstr "Nukuu mpya za"
 msgid "New updates for"
 msgstr "Masasisho mapya ya"
 
-#: models/user_following.py:90
+#: models/user_following.py:98
 msgid "journal"
 msgstr "jarida"
 
-#: models/user_following.py:106
+#: models/user_following.py:114
 msgid "saved search"
 msgstr "utafutaji uliohifadhiwa"
 
-#: models/user_following.py:118
+#: models/user_following.py:126
 msgid "last alerted at"
 msgstr "alitahadharishwa mara ya mwisho saa"
 
-#: models/user_following.py:249
+#: models/user_following.py:272
 msgid "Following limit reached"
 msgstr "Kikomo cha kufuata kimefikiwa"
 
@@ -2139,19 +2145,19 @@ msgstr "wasifu wa mtumiaji"
 msgid "user profiles"
 msgstr "wasifu wa mtumiaji"
 
-#: settings.py:371
+#: settings.py:373
 msgid "English"
 msgstr "Kiingereza"
 
-#: settings.py:372
+#: settings.py:374
 msgid "French"
 msgstr "Kifaransa"
 
-#: settings.py:373
+#: settings.py:375
 msgid "Portuguese"
 msgstr "Kireno"
 
-#: settings.py:374
+#: settings.py:376
 msgid "Swahili"
 msgstr "Kiswahili"
 
@@ -3087,7 +3093,8 @@ msgstr "Tembelea chaneli yetu ya YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3095,7 +3102,8 @@ msgid "\n"
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr "\n"
+msgstr ""
+"\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Chukua %(APP_NAME)s Utafiti</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Tusaidie kufanya %(APP_NAME)s bora zaidi.\n"
@@ -3111,12 +3119,14 @@ msgstr "Chukua uchunguzi"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid "\n"
+msgid ""
+"\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr "\n"
+msgstr ""
+"\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Tusaidie kufanya %(APP_NAME)s bora zaidi. Chukua utafiti huu mfupi wa dakika 5 na utuambie jinsi unavyotumia %(APP_NAME)s na jinsi tunavyoweza kuuboresha. Taarifa zote zinazoshirikiwa ni siri.\n"
 "            </p>\n"
@@ -3968,10 +3978,12 @@ msgid "Show provision details"
 msgstr "Onyesha maelezo ya utoaji"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid "\n"
+msgid ""
+"\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr "\n"
+msgstr ""
+"\n"
 "      Kumbuka: kifungu hiki kina baadhi ya vifungu vidogo ambavyo tayari vimeanza kutumika.\n"
 "    "
 
@@ -4463,7 +4475,7 @@ msgstr "Makala ya jarida"
 msgid "Article"
 msgstr "Makala"
 
-#: views/judgment.py:258
+#: views/judgment.py:291
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr "Hukumu hii haijatambulishwa ili kulinda taarifa za kibinafsi kwa kufuata sheria."
 
@@ -4548,4 +4560,3 @@ msgstr "Toleo hili liko katika tarehe ya baadaye."
 #: views/legislation.py:422
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
-

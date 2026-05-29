@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-22 08:06+0100\n"
+"POT-Creation-Date: 2026-05-29 12:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -193,11 +193,11 @@ msgstr ""
 msgid "Children"
 msgstr ""
 
-#: admin.py:1417 models/judgment.py:774 models/judgment.py:810
+#: admin.py:1417 models/judgment.py:778 models/judgment.py:814
 msgid "case number"
 msgstr ""
 
-#: admin.py:1418 models/judgment.py:775
+#: admin.py:1418 models/judgment.py:779
 msgid "case numbers"
 msgstr ""
 
@@ -206,7 +206,7 @@ msgid "judge"
 msgstr ""
 
 #: admin.py:1428 models/judgment.py:64 models/judgment.py:341
-#: models/judgment.py:827 models/judgment.py:873
+#: models/judgment.py:831 models/judgment.py:877
 msgid "judges"
 msgstr ""
 
@@ -226,7 +226,7 @@ msgstr ""
 msgid "Related judgments"
 msgstr ""
 
-#: admin.py:1480 models/judgment.py:835
+#: admin.py:1480 models/judgment.py:839
 msgid "case history"
 msgstr ""
 
@@ -500,7 +500,7 @@ msgstr ""
 #: models/annotation.py:11 models/attachments.py:76 models/attachments.py:110
 #: models/attachments.py:264 models/attachments.py:307
 #: models/attachments.py:356 models/citations.py:21 models/core_document.py:872
-#: models/core_document.py:898 models/judgment.py:769 models/taxonomies.py:287
+#: models/core_document.py:898 models/judgment.py:773 models/taxonomies.py:287
 #: templates/peachjam/_document_count.html:8
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:4
 #: views/generic_views.py:144
@@ -525,9 +525,9 @@ msgstr ""
 msgid "user"
 msgstr ""
 
-#: models/annotation.py:24 models/core_document.py:497
+#: models/annotation.py:24 models/core_document.py:497 models/flynote.py:60
 #: models/save_document.py:24 models/save_document.py:100
-#: models/user_following.py:120
+#: models/user_following.py:128
 msgid "created at"
 msgstr ""
 
@@ -543,7 +543,7 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
-#: models/article.py:19 models/core_document.py:411 models/judgment.py:831
+#: models/article.py:19 models/core_document.py:411 models/judgment.py:835
 msgid "date"
 msgstr ""
 
@@ -670,7 +670,7 @@ msgstr ""
 
 #: models/attachments.py:291 models/author.py:11 models/citations.py:167
 #: models/core_document.py:63 models/core_document.py:91
-#: models/core_document.py:106 models/flynote.py:56 models/ingestors.py:15
+#: models/core_document.py:106 models/flynote.py:57 models/ingestors.py:15
 #: models/ingestors.py:45 models/judgment.py:39 models/judgment.py:57
 #: models/judgment.py:76 models/judgment.py:91 models/judgment.py:106
 #: models/judgment.py:120 models/judgment.py:162 models/judgment.py:181
@@ -1085,9 +1085,9 @@ msgstr ""
 msgid "provision enrichments"
 msgstr ""
 
-#: models/enrichments.py:84 models/flynote.py:405 models/judgment.py:284
+#: models/enrichments.py:84 models/flynote.py:417 models/judgment.py:284
 #: models/judgment.py:300 models/judgment.py:466 views/courts.py:54
-#: views/judgment.py:43
+#: views/judgment.py:44
 msgid "judgment"
 msgstr ""
 
@@ -1159,7 +1159,7 @@ msgstr ""
 msgid "provision citations"
 msgstr ""
 
-#: models/enrichments.py:153 models/flynote.py:433 models/taxonomies.py:313
+#: models/enrichments.py:153 models/flynote.py:445 models/taxonomies.py:313
 msgid "count"
 msgstr ""
 
@@ -1207,56 +1207,60 @@ msgstr ""
 msgid "jurisdiction profiles"
 msgstr ""
 
-#: models/flynote.py:57
+#: models/flynote.py:58
 msgid "deprecated"
 msgstr ""
 
-#: models/flynote.py:60 models/flynote.py:411 models/flynote.py:431
-#: models/judgment.py:363
+#: models/flynote.py:64 models/flynote.py:423 models/flynote.py:443
+#: models/judgment.py:363 models/user_following.py:90
 msgid "flynote"
 msgstr ""
 
-#: models/flynote.py:61
+#: models/flynote.py:65
 msgid "flynotes"
 msgstr ""
 
-#: models/flynote.py:78
+#: models/flynote.py:67
+msgid "Can view linked judgments"
+msgstr ""
+
+#: models/flynote.py:85
 msgid "A flynote cannot be active when any ancestor is deprecated."
 msgstr ""
 
-#: models/flynote.py:109
+#: models/flynote.py:126
 msgid "A sibling flynote already has this name. <a href=\"{}\">Merge this flynote into that one</a> instead."
 msgstr ""
 
-#: models/flynote.py:179
+#: models/flynote.py:196
 msgid "Flynote must be saved before it can be renamed."
 msgstr ""
 
-#: models/flynote.py:183
+#: models/flynote.py:200
 msgid "Flynote name cannot be blank."
 msgstr ""
 
-#: models/flynote.py:229
+#: models/flynote.py:241
 msgid "One or more selected flynotes no longer exist."
 msgstr ""
 
-#: models/flynote.py:243
+#: models/flynote.py:255
 msgid "Flynotes can only be merged into a sibling at the same level."
 msgstr ""
 
-#: models/flynote.py:416
+#: models/flynote.py:428
 msgid "judgment flynote"
 msgstr ""
 
-#: models/flynote.py:417
+#: models/flynote.py:429
 msgid "judgment flynotes"
 msgstr ""
 
-#: models/flynote.py:436
+#: models/flynote.py:448
 msgid "flynote document count"
 msgstr ""
 
-#: models/flynote.py:437
+#: models/flynote.py:449
 msgid "flynote document counts"
 msgstr ""
 
@@ -1373,7 +1377,7 @@ msgstr ""
 msgid "Judges"
 msgstr ""
 
-#: models/judgment.py:82 models/judgment.py:825
+#: models/judgment.py:82 models/judgment.py:829
 msgid "outcome"
 msgstr ""
 
@@ -1389,7 +1393,7 @@ msgstr ""
 msgid "case actions"
 msgstr ""
 
-#: models/judgment.py:112 models/judgment.py:762
+#: models/judgment.py:112 models/judgment.py:766
 msgid "matter type"
 msgstr ""
 
@@ -1415,7 +1419,7 @@ msgid "country"
 msgstr ""
 
 #: models/judgment.py:214 models/judgment.py:249 models/judgment.py:315
-#: models/judgment.py:829 models/judgment.py:856 models/user_following.py:34
+#: models/judgment.py:833 models/judgment.py:860 models/user_following.py:34
 msgid "court"
 msgstr ""
 
@@ -1571,51 +1575,51 @@ msgstr ""
 msgid "Has the judgment been anonymised?"
 msgstr ""
 
-#: models/judgment.py:467 views/courts.py:55 views/judgment.py:44
+#: models/judgment.py:467 views/courts.py:55 views/judgment.py:45
 msgid "judgments"
 msgstr ""
 
-#: models/judgment.py:748
+#: models/judgment.py:752
 msgid "Full case number as printed on judgment"
 msgstr ""
 
-#: models/judgment.py:752
+#: models/judgment.py:756
 msgid "Override for full case number string"
 msgstr ""
 
-#: models/judgment.py:754
+#: models/judgment.py:758
 msgid "string"
 msgstr ""
 
-#: models/judgment.py:755
+#: models/judgment.py:759
 msgid "number"
 msgstr ""
 
-#: models/judgment.py:756
+#: models/judgment.py:760
 msgid "year"
 msgstr ""
 
-#: models/judgment.py:807
+#: models/judgment.py:811
 msgid "judgment work"
 msgstr ""
 
-#: models/judgment.py:818
+#: models/judgment.py:822
 msgid "historical judgment work"
 msgstr ""
 
-#: models/judgment.py:836
+#: models/judgment.py:840
 msgid "case histories"
 msgstr ""
 
-#: models/judgment.py:843 templates/peachjam/_case_histories.html:22
+#: models/judgment.py:847 templates/peachjam/_case_histories.html:22
 msgid "Case history"
 msgstr ""
 
-#: models/judgment.py:874
+#: models/judgment.py:878
 msgid "end date"
 msgstr ""
 
-#: models/law_reports.py:14 models/user_following.py:98
+#: models/law_reports.py:14 models/user_following.py:106
 msgid "law report"
 msgstr ""
 
@@ -1764,7 +1768,7 @@ msgstr ""
 msgid "note"
 msgstr ""
 
-#: models/save_document.py:131 models/user_following.py:114
+#: models/save_document.py:131 models/user_following.py:122
 msgid "saved document"
 msgstr ""
 
@@ -2080,19 +2084,19 @@ msgstr ""
 msgid "New updates for"
 msgstr ""
 
-#: models/user_following.py:90
+#: models/user_following.py:98
 msgid "journal"
 msgstr ""
 
-#: models/user_following.py:106
+#: models/user_following.py:114
 msgid "saved search"
 msgstr ""
 
-#: models/user_following.py:118
+#: models/user_following.py:126
 msgid "last alerted at"
 msgstr ""
 
-#: models/user_following.py:249
+#: models/user_following.py:272
 msgid "Following limit reached"
 msgstr ""
 
@@ -2140,19 +2144,19 @@ msgstr ""
 msgid "user profiles"
 msgstr ""
 
-#: settings.py:371
+#: settings.py:373
 msgid "English"
 msgstr ""
 
-#: settings.py:372
+#: settings.py:374
 msgid "French"
 msgstr ""
 
-#: settings.py:373
+#: settings.py:375
 msgid "Portuguese"
 msgstr ""
 
-#: settings.py:374
+#: settings.py:376
 msgid "Swahili"
 msgstr ""
 
@@ -4454,7 +4458,7 @@ msgstr ""
 msgid "Article"
 msgstr ""
 
-#: views/judgment.py:258
+#: views/judgment.py:291
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr ""
 

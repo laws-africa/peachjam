@@ -199,4 +199,3 @@ msgstr "Autres Institutions Africaines d'information Juridique"
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
-
