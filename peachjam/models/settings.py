@@ -181,6 +181,12 @@ class PeachJamSettings(SingletonModel):
         blank=True,
         help_text=_("ID of a helpscout contact us beacon."),
     )
+    helpscout_beacon_secret_key = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("Secret key for helpscout signature."),
+    )
     allow_criminal_data_extraction = models.BooleanField(
         verbose_name=_("allow criminal data extraction"),
         default=False,

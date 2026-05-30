@@ -1,3 +1,5 @@
+import hashlib
+import hmac
 import itertools
 import json
 
@@ -41,7 +43,7 @@ from peachjam_api.serializers import (
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
 )
-from peachjam_subs.models import Product
+from peachjam_subs.models import Product, Subscription
 
 
 class ClampedPaginator(Paginator):
@@ -766,6 +768,8 @@ class PageLoadedView(TemplateView):
         context = super().get_context_data(**kwargs)
 
         if self.request.user.is_authenticated:
+            beacon_secret = pj_settings().helpscout_beacon_secret_key
+            sub = Subscription.objects.active_for_user(self.request.user).first()
             context["user_json"] = json.dumps(
                 {
                     "id": self.request.user.id,
@@ -778,6 +782,20 @@ class PageLoadedView(TemplateView):
                         for perm in self.request.user.get_all_permissions()
                         if perm.startswith("peachjam")
                     ],
+                    "subscription_product": (
+                        sub.product_offering.product.name if sub else None
+                    ),
+                    # helpscout signature for beacon('identify')
+                    # ref: https://developer.helpscout.com/beacon-2/web/secure-mode/
+                    "helpscout_beacon_sig": (
+                        hmac.new(
+                            bytes(beacon_secret, "utf-8"),
+                            bytes(self.request.user.email or "", "utf-8"),
+                            digestmod=hashlib.sha256,
+                        ).hexdigest()
+                        if beacon_secret
+                        else None
+                    ),
                 }
             )
         else:

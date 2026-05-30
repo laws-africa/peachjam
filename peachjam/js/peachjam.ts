@@ -67,7 +67,9 @@ class PeachJam {
     email: '',
     is_staff: false,
     perms: [],
-    tracking_id: null
+    tracking_id: null,
+    subscription_product: null,
+    helpscout_beacon_sig: null
   };
 
   constructor () {
@@ -415,6 +417,19 @@ class PeachJam {
         if (Array.isArray(beacon.readyQueue)) return;
 
         e.preventDefault();
+        if (this.user.id > -1) {
+          const info = {
+            name: this.user.name,
+            email: this.user.email,
+            subscription_product: this.user.subscription_product,
+            admin_url: `https://${location.hostname}/admin/auth/user/${this.user.id}/change`
+          };
+          if (this.user.helpscout_beacon_sig) {
+            // @ts-ignore
+            info.signature = this.user.helpscout_beacon_sig;
+          }
+          beacon('identify', info);
+        }
         // @ts-ignore
         beacon('open');
       });
