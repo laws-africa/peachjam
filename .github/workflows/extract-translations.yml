@@ -3,7 +3,7 @@ name: Extract translations PR
 on:
   push:
     branches:
-      - main
+      - sandrava-3217
 
 permissions:
   contents: write
@@ -48,7 +48,9 @@ jobs:
       - name: Check for updated translation files
         id: translation_changes
         run: |
-          if git diff --name-only | grep -qE '.+/locale/.+/LC_MESSAGES/.+\.po$|.*/js/locale/.+/translation\.json$'; then
+          if ! git diff --ignore-all-space --ignore-blank-lines --quiet -- \
+            ':(glob)**/locale/*/LC_MESSAGES/*.po' \
+            ':(glob)**/js/locale/*/translation.json'; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -62,7 +64,7 @@ jobs:
           commit-message: Extract new translation strings
           branch: automated-extract-translations
           branch-suffix: timestamp
-          base: main
+          base: sandrava-3217
           title: Extract new translation strings
           body: |
             Automated extraction of translation strings from `main`.
