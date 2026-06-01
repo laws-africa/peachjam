@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-06-01 08:53+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -38,7 +38,9 @@ msgid "SenLII is a non-profit platform that provides digital access to legislati
 msgstr "SenLII est une plateforme à but non lucratif qui offre un accès numérique à la législation, à la jurisprudence et à d'autres documents juridiques du Sénégal. Elle promeut l'accès à l'information juridique comme composante fondamentale de l'État de droit."
 
 #: templates/liiweb/home.html:9
-msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
+#, fuzzy
+#| msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
+msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from the Federal Ministry for Economic Cooperation and Development (BMZ), and implemented by GIZ."
 msgstr "La plateforme a été développée par Laws.Africa et AfricanLII, avec le soutien financier de la GIZ."
 
 #: templates/peachjam/_footer.html:4
@@ -116,4 +118,3 @@ msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noop
 #: templates/peachjam/about.html:41
 msgid "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance."
 msgstr "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> est une initiative de la Faculté de droit de l’Université du Cap qui soutient les institutions africaines dans la construction et le maintien d’un accès libre aux plates-formes juridiques. Son travail promeut l’accès à l’information juridique en tant que pierre angulaire de la démocratie et de la bonne gouvernance."
-
