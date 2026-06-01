@@ -69,7 +69,7 @@ jobs:
           git clean -fdq -- "$PATTERN_JSON" "$PATTERN_PO" || true
 
           if [ -s "$patch_file" ]; then
-            git apply --unidiff-zero "$patch_file"
+            git apply --unidiff-zero --whitespace=fix "$patch_file"
             git add -A -- "$PATTERN_JSON" "$PATTERN_PO"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
