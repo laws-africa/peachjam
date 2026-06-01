@@ -3,7 +3,7 @@ name: Extract translations PR
 on:
   push:
     branches:
-      - sandrava-3217
+      - main
 
 permissions:
   contents: write
@@ -84,7 +84,7 @@ jobs:
           commit-message: Extract new translation strings
           branch: automated-extract-translations
           force: true
-          base: sandrava-3217
+          base: main
           title: Extract new translation strings
           body: |
             Automated extraction of translation strings from `main`.
