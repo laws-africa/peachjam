@@ -26,11 +26,33 @@ const vueTemplateExtractionPlugin = (): Plugin => ({
   async onEnd (keys: ExtractedKeysMap) {
     const vueFiles = await findVueFiles('peachjam/js');
     const keyPattern = /(?:this\.)?(?:\bi18next\.t|\$t|\bt)\(\s*(['"`])(.*?)\1/g;
+    const countPattern = /(?:this\.)?(?:\bi18next\.t|\$t|\bt)\(\s*(['"`])(.*?)\1\s*,\s*\{[^}]*\bcount\s*:/g;
+    const countPluralSuffixes = ['_one', '_many', '_other'];
     const pluralSuffixes = ['_zero', '_one', '_two', '_few', '_many', '_other'];
 
     for (const file of vueFiles) {
       const content = await readFile(file, 'utf8');
       let match;
+
+      while ((match = countPattern.exec(content)) !== null) {
+        const key = match[2] || '';
+        if (!key.trim()) {
+          continue;
+        }
+
+        for (const suffix of countPluralSuffixes) {
+          const pluralKey = `translation:${key}${suffix}`;
+          if (keys.has(pluralKey)) {
+            continue;
+          }
+
+          keys.set(pluralKey, {
+            key: `${key}${suffix}`,
+            ns: 'translation',
+            defaultValue: key
+          });
+        }
+      }
 
       while ((match = keyPattern.exec(content)) !== null) {
         const key = match[2] || '';
