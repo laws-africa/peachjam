@@ -47,10 +47,30 @@ jobs:
 
       - name: Check for updated translation files
         id: translation_changes
+        shell: bash
         run: |
-          if ! git diff --ignore-all-space --ignore-blank-lines --quiet -- \
-            ':(glob)**/locale/*/LC_MESSAGES/*.po' \
-            ':(glob)**/js/locale/*/translation.json'; then
+          set -euo pipefail
+
+          PATTERN_JSON=':(glob)**/js/locale/*/translation.json'
+          PATTERN_PO=':(glob)**/locale/*/LC_MESSAGES/*.po'
+          patch_file="$(mktemp)"
+          trap 'rm -f "$patch_file"' EXIT
+
+          # Stage tracked + untracked translation changes
+          git add -A -- "$PATTERN_JSON" "$PATTERN_PO"
+
+          # Build a patch with only substantive changes
+          git diff --cached -U0 -w --ignore-blank-lines --ignore-cr-at-eol --binary -- \
+            "$PATTERN_JSON" "$PATTERN_PO" > "$patch_file"
+
+          # Clear translation paths, then reapply only substantive patch
+          git reset -q -- "$PATTERN_JSON" "$PATTERN_PO" || true
+          git restore --worktree --source=HEAD -- "$PATTERN_JSON" "$PATTERN_PO" || true
+          git clean -fdq -- "$PATTERN_JSON" "$PATTERN_PO" || true
+
+          if [ -s "$patch_file" ]; then
+            git apply --unidiff-zero "$patch_file"
+            git add -A -- "$PATTERN_JSON" "$PATTERN_PO"
             echo "changed=true" >> "$GITHUB_OUTPUT"
           else
             echo "changed=false" >> "$GITHUB_OUTPUT"
@@ -63,7 +83,7 @@ jobs:
           token: ${{ secrets.LA_ACTIONS_TOKEN || github.token }}
           commit-message: Extract new translation strings
           branch: automated-extract-translations
-          branch-suffix: timestamp
+          force: true
           base: sandrava-3217
           title: Extract new translation strings
           body: |
