@@ -1,6 +1,6 @@
 {
   "{count} document found_one": "{count} document found",
-  "{count} document found_many": "{count} document found",
+  "{count} document found_many": "{count} documents found",
   "{count} document found_other": "{count} document found",
   "{reverse_verb} this provision": "{reverse_verb} this provision",
   "Advanced search": "Advanced search",
