@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-06-02 08:20+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -38,7 +38,9 @@ msgid "SenLII is a non-profit platform that provides digital access to legislati
 msgstr "SenLII est une plateforme à but non lucratif qui offre un accès numérique à la législation, à la jurisprudence et à d'autres documents juridiques du Sénégal. Elle promeut l'accès à l'information juridique comme composante fondamentale de l'État de droit."
 
 #: templates/liiweb/home.html:9
-msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
+#, fuzzy
+#| msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
+msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from the Federal Ministry for Economic Cooperation and Development (BMZ), and implemented by GIZ."
 msgstr "La plateforme a été développée par Laws.Africa et AfricanLII, avec le soutien financier de la GIZ."
 
 #: templates/peachjam/_footer.html:4
