@@ -6,8 +6,23 @@ INSTALLED_APPS = ["open_by_laws.apps.OpenByLawsConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "open_by_laws.urls"
 ALLOWED_HOSTS = build_allowed_hosts(  # noqa
-    "openbylaws.org.za", "www.openbylaws.org.za"
+    "openbylaws.org.za",
+    "www.openbylaws.org.za",
+    "bergrivier.openbylaws.org.za",
+    "www.bergrivier.openbylaws.org.za",
+    "capeagulhas.openbylaws.org.za",
+    "www.capeagulhas.openbylaws.org.za",
+    "cederberg.openbylaws.org.za",
+    "www.cederberg.openbylaws.org.za",
+    "matzikama.openbylaws.org.za",
+    "www.matzikama.openbylaws.org.za",
+    "mbizana.openbylaws.org.za",
+    "www.mbizana.openbylaws.org.za",
 )
+
+MIDDLEWARE = [
+    "open_by_laws.middleware.LegacyMicrositeRedirectMiddleware"
+] + MIDDLEWARE  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "Open By-laws"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "Open By-laws"  # noqa
@@ -22,11 +37,10 @@ LANGUAGES = [
     ("en", _("English")),
 ]
 
-MICROSITES = {
-    "cederberg": {
-        "name": "Cederberg",
-        "code": "wc012",
-        "website": "http://www.cederbergmun.gov.za/",
-        "url": "https://cederberg.openbylaws.org.za",
-    },
+MICROSITE_REDIRECTS = {
+    "bergrivier": "wc013",
+    "capeagulhas": "wc033",
+    "cederberg": "wc012",
+    "matzikama": "wc011",
+    "mbizana": "ec443",
 }
