@@ -312,6 +312,7 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 if target_child:
                     target_child._merge_other_into(child)
                 else:
+                    parent.repair_stale_numchild_if_leaf("move")
                     child.move(parent, pos="last-child")
 
             flynote.refresh_from_db()
@@ -359,10 +360,23 @@ class Flynote(LifecycleModelMixin, MP_Node):
                 # moving nodes updates path attributes, so always work with latest info from db
                 child.refresh_from_db()
                 self.refresh_from_db()
+                self.repair_stale_numchild_if_leaf("move")
                 child.move(self, pos="last-child")
 
         source.delete()
         FlynoteDocumentCount.quick_refresh_for_single_flynote(self)
+
+    def repair_stale_numchild_if_leaf(self, action):
+        """Repair stale treebeard child metadata before child insert/move operations."""
+        if self.numchild and self.get_last_child() is None:
+            log.warning(
+                "Repairing flynote %s before %s: numchild=%s but no last child exists.",
+                self.pk,
+                action,
+                self.numchild,
+            )
+            Flynote.objects.filter(pk=self.pk).update(numchild=0)
+            self.numchild = 0
 
     def prune_empty_descendants(self):
         """Delete empty flynotes under this flynote.

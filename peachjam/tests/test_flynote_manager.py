@@ -679,6 +679,28 @@ class FlynoteManagerViewTest(TestCase):
             {"targetId": self.sentencing.pk, "parentId": self.criminal.pk},
         )
 
+    def test_workspace_merge_repairs_stale_child_count_before_moving_grandchild(self):
+        target_child = self.sentencing.add_child(name="Procedure")
+        source_child = self.bail.add_child(name="Procedure")
+        grandchild = source_child.add_child(name="Urgency")
+        judgment = self.make_judgment()
+        JudgmentFlynote.objects.create(document=judgment, flynote=grandchild)
+        Flynote.objects.filter(pk=target_child.pk).update(numchild=1)
+
+        self.client.force_login(self.staff_user)
+        response = self.client.post(
+            reverse("flynote-manager-merge", args=[self.sentencing.pk]),
+            {"q": "", "selected": self.bail.pk},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertFalse(Flynote.objects.filter(pk=self.bail.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=source_child.pk).exists())
+        grandchild.refresh_from_db()
+        target_child.refresh_from_db()
+        self.assertEqual(grandchild.get_parent().pk, target_child.pk)
+        self.assertEqual(target_child.numchild, 1)
+
     def test_workspace_merge_merges_root_sibling_and_reloads_roots(self):
         JudgmentFlynote.objects.create(
             document=self.make_judgment(),
