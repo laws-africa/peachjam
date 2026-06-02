@@ -15,7 +15,9 @@ class LocalityMiddleware(object):
         host = request.get_host()
 
         if host.startswith("127.0.0.1") or host.startswith("localhost"):
-            host = "bergrivier"
+            host = "cederberg"
+        elif host.startswith("www."):
+            host = host.split(".", 2)[1]
         elif "." in host:
             host = host.split(".", 1)[0]
 

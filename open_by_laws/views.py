@@ -10,7 +10,7 @@ class HomePageView(LiiWebPageView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        codes = "cpt eth jhb wc015 wc041 wc023".split()
+        codes = "cpt ec443 eth jhb wc011 wc013 wc015 wc023 wc033 wc041".split()
         context["municipalities"] = Locality.objects.filter(code__in=codes)
         context["microsites"] = settings.MICROSITES.values()
 
