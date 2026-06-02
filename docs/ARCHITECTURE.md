@@ -39,7 +39,7 @@ Examples:
 
 - `liiweb.settings`: base shell used by some LII sites
 - `gazettes.settings`: Gazettes.Africa-specific DB/middleware/CORS
-- `open_by_laws.settings`: municipal by-laws deployment with microsite metadata
+- `open_by_laws.settings`: municipal by-laws deployment with legacy microsite redirects
 - `civlii.settings`, `senlii.settings`: add `peachjam_ml`
 
 ### URL composition
@@ -247,17 +247,8 @@ Municipal by-laws deployment layered on `liiweb`.
 
 Responsibilities:
 
-- branding and microsite metadata
+- branding and legacy microsite redirects
 - single-language configuration
-- extra context processor for by-law microsites
-
-### `obl_microsites`
-
-Supporting microsite app for Open By-laws deployments.
-
-Responsibilities:
-
-- microsite-specific templates/assets/routing customizations
 
 ## Frontend architecture
 

@@ -297,24 +297,6 @@ jobs:
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/open-by-laws'
           git_push_flags: '--force'
 
-  deploy-obl-microsites:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-open-by-laws
-      - preconditions
-    name: Deploy to open by-laws microsites
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to openbylaws.org.za
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/obl-microsites'
-          git_push_flags: '--force'
-
   # ------------------
   # web4.laws.africa
   # ------------------
