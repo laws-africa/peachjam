@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
+"POT-Creation-Date: 2026-06-02 08:20+0000\n"
+"PO-Revision-Date: 2026-06-02 09:31\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -38,8 +38,8 @@ msgid "SenLII is a non-profit platform that provides digital access to legislati
 msgstr "SenLII ni jukwaa lisilo la faida linalotoa ufikiaji wa kidijitali wa sheria, sheria za kesi, na nyenzo zingine za kisheria kutoka Senegal. Inakuza ufikiaji wa taarifa za kisheria kama sehemu ya msingi ya utawala wa sheria."
 
 #: templates/liiweb/home.html:9
-msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from GIZ."
-msgstr "Jukwaa hilo lilitengenezwa na Laws.Africa na AfricanLII, kwa usaidizi wa kifedha kutoka GIZ."
+msgid "The platform was developed by Laws.Africa and AfricanLII, with financial support from the Federal Ministry for Economic Cooperation and Development (BMZ), and implemented by GIZ."
+msgstr "Jukwaa hilo lilitengenezwa na Laws.Africa na AfricanLII, kwa usaidizi wa kifedha kutoka Wizara ya Ushirikiano wa Kiuchumi na Maendeleo ya Shirikisho (BMZ), na kutekelezwa na GIZ."
 
 #: templates/peachjam/_footer.html:4
 msgid "Our partners"
