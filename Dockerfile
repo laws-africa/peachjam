@@ -7,12 +7,25 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
     libreoffice poppler-utils pandoc
 
+# NodeJS 24.x
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs
+
+RUN apt-get install -y --no-install-recommends \
+    python3.12 python3.12-venv python3.12-dev \
+    git ca-certificates build-essential file \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # python 3.12
 #   "file" is for python-magic
 RUN apt-get install -y --no-install-recommends \
     python3.12 python3.12-venv python3.12-dev \
     git ca-certificates build-essential file \
-    nodejs npm \
     && rm -rf /var/lib/apt/lists/*
 
 # Create and activate venv

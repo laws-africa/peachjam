@@ -57,7 +57,7 @@ jobs:
           cache: pip
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: "24"
       - name: Cache apt packages
         uses: awalsh128/cache-apt-pkgs-action@v1.6.0
         with:
