@@ -194,10 +194,19 @@ class ComparePortionsView(TemplateView):
             return []
         return [
             self.document_choice(doc, side)
-            for doc in self.get_eligible_documents()
+            for doc in self.get_candidate_documents(side)
             .filter(title__icontains=q)
             .select_related("work", "jurisdiction", "locality")[:10]
         ]
+
+    def get_candidate_documents(self, side):
+        qs = self.get_eligible_documents()
+        selected_side = self.get_selected_portion(side)
+        other_side = self.get_selected_portion("b" if side == "a" else "a")
+        comparison_side = selected_side or other_side
+        if comparison_side:
+            qs = qs.filter(frbr_uri_doctype=comparison_side.document.frbr_uri_doctype)
+        return qs
 
     def get_suggested_documents(self, other_side, side):
         if not other_side or not apps.is_installed("peachjam_ml"):
@@ -216,7 +225,7 @@ class ComparePortionsView(TemplateView):
         doc_ids = [item["document_id"] for item in similar_documents]
         docs = {
             doc.pk: doc
-            for doc in self.get_eligible_documents()
+            for doc in self.get_candidate_documents(side)
             .filter(pk__in=doc_ids)
             .select_related("work", "jurisdiction", "locality")
         }

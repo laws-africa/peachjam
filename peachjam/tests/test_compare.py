@@ -10,12 +10,12 @@ from peachjam.models import Country, GenericDocument, Language
 class ComparePortionsViewTest(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
-    def make_akn_document(self, title, number):
+    def make_akn_document(self, title, number, doctype="act"):
         document = GenericDocument.objects.create(
             jurisdiction=Country.objects.get(pk="ZA"),
             date=date(2020, 1, 2),
             language=Language.objects.get(pk="en"),
-            frbr_uri_doctype="act",
+            frbr_uri_doctype=doctype,
             frbr_uri_number=number,
             title=title,
             published=True,
@@ -151,6 +151,44 @@ class ComparePortionsViewTest(TestCase):
         self.assertNotContains(response, 'id="compare-document-search-a"')
         self.assertContains(response, 'hx-swap="outerHTML"')
         self.assertNotContains(response, "Second ineligible Act")
+
+    def test_chooser_search_filters_to_selected_side_doctype(self):
+        selected = self.make_akn_document("First Act", "1")
+        self.make_akn_document("Second Act", "2")
+        self.make_akn_document("Second Generic Document", "second-doc", doctype="doc")
+
+        response = self.client.get(
+            reverse("compare_chooser"),
+            {
+                "side": "a",
+                "search": "1",
+                "q": "Second",
+                "uri-a": self.provision_uri(selected),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Second Act")
+        self.assertNotContains(response, "Second Generic Document")
+
+    def test_blank_side_search_filters_to_opposite_side_doctype(self):
+        selected = self.make_akn_document("First Act", "1")
+        self.make_akn_document("Second Act", "2")
+        self.make_akn_document("Second Generic Document", "second-doc", doctype="doc")
+
+        response = self.client.get(
+            reverse("compare_chooser"),
+            {
+                "side": "b",
+                "search": "1",
+                "q": "Second",
+                "uri-a": self.provision_uri(selected),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Second Act")
+        self.assertNotContains(response, "Second Generic Document")
 
     def test_chooser_document_uri_renders_toc_links(self):
         doc = self.make_akn_document("First Act", "1")

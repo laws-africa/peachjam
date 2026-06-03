@@ -1,10 +1,10 @@
 {% load i18n %}
 <div id="compare-chooser-{{ side }}"
-     class="border rounded bg-white p-3"
+     class="border rounded bg-white p-3 pt-0"
      data-compare-chooser>
   {% if selected_document %}
     <div class="mb-3">
-      <h3 class="h6">{% trans "Choose a provision" %}</h3>
+      <h3 class="h6 mt-3">{% trans "Choose a provision" %}</h3>
     </div>
     {% if toc_items %}
       <nav aria-label="{% trans 'Table of contents' %}">
@@ -32,7 +32,7 @@
       <input type="hidden" name="search" value="1"/>
       <input type="hidden" name="uri-a" value="{{ uri_a }}"/>
       <input type="hidden" name="uri-b" value="{{ uri_b }}"/>
-      <label for="compare-document-search-{{ side }}" class="form-label">{% trans "Search document titles" %}</label>
+      <label for="compare-document-search-{{ side }}" class="form-label mt-3">{% trans "Search document titles" %}</label>
       <input id="compare-document-search-{{ side }}"
              class="form-control"
              type="search"
