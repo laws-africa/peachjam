@@ -15,14 +15,14 @@
               hx-get="{% url 'compare_chooser' %}?side={{ side }}&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
               hx-target="#compare-column-{{ side }}"
               hx-swap="innerHTML">
-        {% trans "Choose different document" %}
+        {% trans "Change document" %}
       </button>
       <button type="button"
               class="btn btn-secondary btn-sm"
               hx-get="{% url 'compare_chooser' %}?side={{ side }}&document-uri={{ selected.document.expression_frbr_uri|urlencode }}&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
               hx-target="#compare-column-{{ side }}"
               hx-swap="innerHTML">
-        {% trans "Choose different provision" %}
+        {% trans "Change provision" %}
       </button>
     </div>
   </div>
