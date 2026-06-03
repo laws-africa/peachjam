@@ -9,6 +9,7 @@ from peachjam.views import (
     AnnotationListView,
     CaseHistoryView,
     CaseSummaryView,
+    CompareChooserView,
     ComparePortionsView,
     DocumentAttachmentView,
     DocumentCapabilitiesView,
@@ -159,6 +160,11 @@ urlpatterns = [
         "partners/<int:pk>/logo/<int:logo_pk>",
         PartnerLogoView.as_view(),
         name="partner_logo",
+    ),
+    path(
+        "compare/chooser",
+        CompareChooserView.as_view(),
+        name="compare_chooser",
     ),
     path(
         "compare",

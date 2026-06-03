@@ -1,0 +1,55 @@
+{% load i18n %}
+<section id="compare-column-{{ side }}"
+         class="col-lg-6"
+         aria-labelledby="compare-side-{{ side }}-heading">
+  <div class="pb-3">
+    <div class="d-flex justify-content-between align-items-start gap-2">
+      <div>
+        {% if selected %}
+          <h2 id="compare-side-{{ side }}-heading" class="h5 mb-1">
+            <a href="{{ selected.document_url }}">{{ selected.document.title }}</a>
+          </h2>
+          <div>
+            <a href="{{ selected.provision_url }}">{{ selected.portion_title }}</a>
+          </div>
+        {% else %}
+          <h2 id="compare-side-{{ side }}-heading" class="h5 mb-1">{% trans "Choose a document and provision to compare" %}</h2>
+          <p class="mb-0 text-muted">{% trans "Search for a document, then choose a provision." %}</p>
+        {% endif %}
+      </div>
+      {% if selected %}
+        <div class="d-flex flex-column gap-2">
+          {% if mode == "selected" %}
+            <button type="button"
+                    class="btn btn-secondary btn-sm"
+                    hx-get="{{ compare_chooser_url }}?side={{ side }}&mode=choose_document&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
+                    hx-target="#compare-column-{{ side }}"
+                    hx-swap="outerHTML">
+              {% trans "Choose different document" %}
+            </button>
+            <button type="button"
+                    class="btn btn-secondary btn-sm"
+                    hx-get="{{ compare_chooser_url }}?side={{ side }}&mode=choose_provision&document-uri={{ selected.document.expression_frbr_uri|urlencode }}&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
+                    hx-target="#compare-column-{{ side }}"
+                    hx-swap="outerHTML">
+              {% trans "Choose different provision" %}
+            </button>
+          {% else %}
+            <button type="button"
+                    class="btn btn-secondary btn-sm"
+                    hx-get="{{ compare_chooser_url }}?side={{ side }}&cancel=1&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
+                    hx-target="#compare-column-{{ side }}"
+                    hx-swap="outerHTML">
+              {% trans "Cancel" %}
+            </button>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+  {% if mode == "selected" %}
+    {% include "peachjam/compare/_selected_content.html" %}
+  {% else %}
+    {% include "peachjam/compare/_chooser.html" %}
+  {% endif %}
+</section>
