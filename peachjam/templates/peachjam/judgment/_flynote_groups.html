@@ -1,13 +1,30 @@
 <ul class="{% if nested %}list-unstyled flynotes{% else %}list-unstyled flynotes my-2{% endif %}">
   {% for item in flynote_groups %}
     <li>
-      {% if nested %}
-        — {{ item.text }}
+      {% if item.children and item.parts|length > 1 %}
+        <div class="flynote-chain"
+             style="--flynote-child-indent: {{ item.child_indent }}ch">
+          <span class="flynote-chain-prefix">
+            {% if nested %}—{% endif %}
+            {% for part in item.parts %}
+              {% if not forloop.last %}{{ part }}<span class="flynote-chain-separator">&nbsp;—&nbsp;</span>{% endif %}
+            {% endfor %}
+          </span>
+          <span class="flynote-chain-tail">
+            {% for part in item.parts %}
+              {% if forloop.last %}{{ part }}{% endif %}
+            {% endfor %}
+          </span>
+          <div class="flynote-chain-children">
+            {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=item.children nested=True %}
+          </div>
+        </div>
       {% else %}
+        {% if nested %}—{% endif %}
         {{ item.text }}
-      {% endif %}
-      {% if item.children %}
-        {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=item.children nested=True %}
+        {% if item.children %}
+          {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=item.children nested=True %}
+        {% endif %}
       {% endif %}
     </li>
   {% endfor %}
