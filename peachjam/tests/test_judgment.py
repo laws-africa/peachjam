@@ -636,6 +636,7 @@ class JudgmentTestCase(TestCase):
                 {
                     "text": "Customs law — internal appeal jurisdiction",
                     "parts": ["Customs law", "internal appeal jurisdiction"],
+                    "child_indent": 14,
                     "children": [
                         {
                             "text": "administrative-law duty to consider discretionary relief",
