@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-04 08:12+0000\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
+"PO-Revision-Date: 2026-06-04 09:12\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -1220,10 +1220,8 @@ msgid "flynotes"
 msgstr "notes de vol"
 
 #: models/flynote.py:67
-#, fuzzy
-#| msgid "Related judgments"
 msgid "Can view linked judgments"
-msgstr "Jugements connexes"
+msgstr "Peut consulter les jugements liés"
 
 #: models/flynote.py:85
 msgid "A flynote cannot be active when any ancestor is deprecated."
@@ -1250,14 +1248,12 @@ msgid "Flynotes can only be merged into a sibling at the same level."
 msgstr "Les notes Flynotes ne peuvent être fusionnées qu'avec des notes sœurs de même niveau."
 
 #: models/flynote.py:280
-#, fuzzy
-#| msgid "Flynote must be saved before it can be renamed."
 msgid "Flynote must be saved before it can be moved."
-msgstr "Flynote doit être enregistré avant de pouvoir être renommé."
+msgstr "Flynote doit être enregistré avant de pouvoir être déplacé."
 
 #: models/flynote.py:282
 msgid "Cannot promote children of a root flynote."
-msgstr ""
+msgstr "Impossible de promouvoir les enfants d'une racine mouchenote."
 
 #: models/flynote.py:498
 msgid "judgment flynote"
@@ -1965,7 +1961,7 @@ msgstr "Identifiant d'une balise Helpscout nous contacter."
 
 #: models/settings.py:188
 msgid "Secret key for helpscout signature."
-msgstr ""
+msgstr "Clé secrète pour la signature helpscout."
 
 #: models/settings.py:191
 msgid "allow criminal data extraction"
@@ -3110,8 +3106,7 @@ msgstr "Visitez notre chaîne YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3119,8 +3114,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Répondez à l'enquête %(APP_NAME)s</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Aidez-nous à améliorer %(APP_NAME)s .\n"
@@ -3136,14 +3130,12 @@ msgstr "Participez à l'enquête"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Aidez-nous à améliorer %(APP_NAME)s . Répondez à ce court sondage de 5 minutes et dites-nous comment vous utilisez %(APP_NAME)s et comment nous pouvons l'améliorer. Toutes les informations partagées sont confidentielles.\n"
 "            </p>\n"
@@ -3517,76 +3509,58 @@ msgid "You've used %(chats_used)s of your %(chat_limit)s document chats this mon
 msgstr "Vous avez utilisé %(chats_used)s de vos discussions de documents %(chat_limit)s ce mois-ci.<br> Passez à <a href=\"%(upsell_url)s\">%(lowest_product)s</a> pour débloquer plus de discussions."
 
 #: templates/peachjam/compare/_chooser.html:7
-#, fuzzy
-#| msgid "Uncommenced provision"
 msgid "Choose a provision"
-msgstr "Disposition non encore mises en vigueur"
+msgstr "Choisissez une provision"
 
 #: templates/peachjam/compare/_chooser.html:13
-#, fuzzy
-#| msgid "Table of contents"
 msgid "Search table of contents"
-msgstr "Table des matières"
+msgstr "Rechercher la table des matières"
 
 #: templates/peachjam/compare/_chooser.html:23
-#, fuzzy
-#| msgid "This document is not published and is not visible to the public."
 msgid "This document does not have a table of contents."
-msgstr "Ce document n'est pas publié et n'est pas visible au public."
+msgstr "Ce document ne comporte pas de table des matières."
 
 #: templates/peachjam/compare/_chooser.html:27
-#, fuzzy
-#| msgid "Related documents"
 msgid "Suggested documents"
-msgstr "Documents connexes"
+msgstr "Documents suggérés"
 
 #: templates/peachjam/compare/_chooser.html:35
-#, fuzzy
-#| msgid "Filter documents by title"
 msgid "Search document titles"
-msgstr "Filtrer les documents par titre"
+msgstr "Titres de documents de recherche"
 
 #: templates/peachjam/compare/_column.html:16
 msgid "Choose a document and provision to compare"
-msgstr ""
+msgstr "Choisissez un document et une disposition à comparer"
 
 #: templates/peachjam/compare/_column.html:17
 msgid "Search for a document, then choose a provision."
-msgstr ""
+msgstr "Recherchez un document, puis choisissez une disposition."
 
 #: templates/peachjam/compare/_column.html:28
 #: templates/peachjam/compare/_selected_portion.html:18
-#, fuzzy
-#| msgid "Save document"
 msgid "Change document"
-msgstr "Enregistrer le document"
+msgstr "Document de modification"
 
 #: templates/peachjam/compare/_column.html:35
 #: templates/peachjam/compare/_selected_portion.html:25
-#, fuzzy
-#| msgid "Uncommenced provision"
 msgid "Change provision"
-msgstr "Disposition non encore mises en vigueur"
+msgstr "Dispositions relatives aux modifications"
 
 #: templates/peachjam/compare/_document_search_results.html:6
-#, fuzzy
-#| msgid "No recent documents."
 msgid "No matching documents."
-msgstr "Aucun document récent."
+msgstr "Aucun document correspondant."
 
 #: templates/peachjam/compare/compare.html:4
 msgid "Compare provisions side-by-side"
-msgstr ""
+msgstr "Comparez les dispositions côte à côte"
 
 #: templates/peachjam/compare/compare.html:9
-#, fuzzy
-#| msgid "Sort documents by"
 msgid "Compare two documents side-by-side"
-msgstr "Trier les documents par"
+msgstr "Comparer deux documents côte à côte"
 
 #: templates/peachjam/compare/compare.html:11
 msgid "Choose provisions of two documents to explore similarities and differences."
-msgstr ""
+msgstr "Choisissez des dispositions de deux documents pour explorer leurs similitudes et leurs différences."
 
 #: templates/peachjam/document/_ask_ai_banner.html:11
 #: templates/peachjam/document/_ask_ai_banner.html:18
@@ -4067,12 +4041,10 @@ msgid "Show provision details"
 msgstr "Afficher les détails de la provision"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid ""
-"\n"
+msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr ""
-"\n"
+msgstr "\n"
 "      Remarque : cette disposition comporte certaines sous-dispositions qui sont déjà entrées en vigueur.\n"
 "    "
 
