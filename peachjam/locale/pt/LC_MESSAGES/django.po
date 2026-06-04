@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 08:20+0000\n"
+"POT-Creation-Date: 2026-06-04 08:12+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -2371,7 +2371,7 @@ msgstr "Tem certeza de que deseja sair?"
 msgid "Log out"
 msgstr "Sair"
 
-#: templates/account/logout.html:19
+#: templates/account/logout.html:19 templates/peachjam/compare/_column.html:43
 msgid "Cancel"
 msgstr "Cancelar"
 
@@ -2633,10 +2633,12 @@ msgid "Search"
 msgstr "Pesquisa"
 
 #: templates/admin/tree_change_list.html:8
+#: templates/peachjam/compare/_chooser.html:14
 msgid "Collapse all"
 msgstr "Recolher tudo"
 
 #: templates/admin/tree_change_list.html:9
+#: templates/peachjam/compare/_chooser.html:15
 msgid "Expand all"
 msgstr "Expandir tudo"
 
@@ -2814,6 +2816,7 @@ msgid "Skip to document content"
 msgstr "Saltar para o conteúdo do documento"
 
 #: templates/peachjam/_document_content_sidebar.html:34
+#: templates/peachjam/compare/_chooser.html:10
 msgid "Table of contents"
 msgstr "Tabela de conteúdos"
 
@@ -3512,6 +3515,78 @@ msgstr "Este documento é demasiado grande para perguntas. Por favor, faça o do
 #, python-format
 msgid "You've used %(chats_used)s of your %(chat_limit)s document chats this month.<br> Upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats."
 msgstr "Utilizou %(chats_used)s dos seus %(chat_limit)s chats de documentos este mês.<br> Atualize para <a href=\"%(upsell_url)s\">%(lowest_product)s</a> para desbloquear mais chats."
+
+#: templates/peachjam/compare/_chooser.html:7
+#, fuzzy
+#| msgid "Uncommenced provision"
+msgid "Choose a provision"
+msgstr "Provisão não iniciada"
+
+#: templates/peachjam/compare/_chooser.html:13
+#, fuzzy
+#| msgid "Table of contents"
+msgid "Search table of contents"
+msgstr "Tabela de conteúdos"
+
+#: templates/peachjam/compare/_chooser.html:23
+#, fuzzy
+#| msgid "This document is not published and is not visible to the public."
+msgid "This document does not have a table of contents."
+msgstr "Este documento não é publicado e não é visível ao público."
+
+#: templates/peachjam/compare/_chooser.html:27
+#, fuzzy
+#| msgid "Related documents"
+msgid "Suggested documents"
+msgstr "Documentos relacionados"
+
+#: templates/peachjam/compare/_chooser.html:35
+#, fuzzy
+#| msgid "Filter documents by title"
+msgid "Search document titles"
+msgstr "Filtrar documentos por título"
+
+#: templates/peachjam/compare/_column.html:16
+msgid "Choose a document and provision to compare"
+msgstr ""
+
+#: templates/peachjam/compare/_column.html:17
+msgid "Search for a document, then choose a provision."
+msgstr ""
+
+#: templates/peachjam/compare/_column.html:28
+#: templates/peachjam/compare/_selected_portion.html:18
+#, fuzzy
+#| msgid "Save document"
+msgid "Change document"
+msgstr "Salvar documento"
+
+#: templates/peachjam/compare/_column.html:35
+#: templates/peachjam/compare/_selected_portion.html:25
+#, fuzzy
+#| msgid "Uncommenced provision"
+msgid "Change provision"
+msgstr "Provisão não iniciada"
+
+#: templates/peachjam/compare/_document_search_results.html:6
+#, fuzzy
+#| msgid "No recent documents."
+msgid "No matching documents."
+msgstr "Nenhum documento recente."
+
+#: templates/peachjam/compare/compare.html:4
+msgid "Compare provisions side-by-side"
+msgstr ""
+
+#: templates/peachjam/compare/compare.html:9
+#, fuzzy
+#| msgid "Sort documents by"
+msgid "Compare two documents side-by-side"
+msgstr "Classificar os documentos por"
+
+#: templates/peachjam/compare/compare.html:11
+msgid "Choose provisions of two documents to explore similarities and differences."
+msgstr ""
 
 #: templates/peachjam/document/_ask_ai_banner.html:11
 #: templates/peachjam/document/_ask_ai_banner.html:18
