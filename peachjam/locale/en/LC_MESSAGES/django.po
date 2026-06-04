@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 08:20+0000\n"
+"POT-Creation-Date: 2026-06-04 08:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2368,7 +2368,7 @@ msgstr ""
 msgid "Log out"
 msgstr ""
 
-#: templates/account/logout.html:19
+#: templates/account/logout.html:19 templates/peachjam/compare/_column.html:43
 msgid "Cancel"
 msgstr ""
 
@@ -2630,10 +2630,12 @@ msgid "Search"
 msgstr ""
 
 #: templates/admin/tree_change_list.html:8
+#: templates/peachjam/compare/_chooser.html:14
 msgid "Collapse all"
 msgstr ""
 
 #: templates/admin/tree_change_list.html:9
+#: templates/peachjam/compare/_chooser.html:15
 msgid "Expand all"
 msgstr ""
 
@@ -2811,6 +2813,7 @@ msgid "Skip to document content"
 msgstr ""
 
 #: templates/peachjam/_document_content_sidebar.html:34
+#: templates/peachjam/compare/_chooser.html:10
 msgid "Table of contents"
 msgstr ""
 
@@ -3495,6 +3498,60 @@ msgstr ""
 #: templates/peachjam/chat/_chat_usage_limit.html:5
 #, python-format
 msgid "You've used %(chats_used)s of your %(chat_limit)s document chats this month.<br> Upgrade to <a href=\"%(upsell_url)s\">%(lowest_product)s</a> to unlock more chats."
+msgstr ""
+
+#: templates/peachjam/compare/_chooser.html:7
+msgid "Choose a provision"
+msgstr ""
+
+#: templates/peachjam/compare/_chooser.html:13
+msgid "Search table of contents"
+msgstr ""
+
+#: templates/peachjam/compare/_chooser.html:23
+msgid "This document does not have a table of contents."
+msgstr ""
+
+#: templates/peachjam/compare/_chooser.html:27
+msgid "Suggested documents"
+msgstr ""
+
+#: templates/peachjam/compare/_chooser.html:35
+msgid "Search document titles"
+msgstr ""
+
+#: templates/peachjam/compare/_column.html:16
+msgid "Choose a document and provision to compare"
+msgstr ""
+
+#: templates/peachjam/compare/_column.html:17
+msgid "Search for a document, then choose a provision."
+msgstr ""
+
+#: templates/peachjam/compare/_column.html:28
+#: templates/peachjam/compare/_selected_portion.html:18
+msgid "Change document"
+msgstr ""
+
+#: templates/peachjam/compare/_column.html:35
+#: templates/peachjam/compare/_selected_portion.html:25
+msgid "Change provision"
+msgstr ""
+
+#: templates/peachjam/compare/_document_search_results.html:6
+msgid "No matching documents."
+msgstr ""
+
+#: templates/peachjam/compare/compare.html:4
+msgid "Compare provisions side-by-side"
+msgstr ""
+
+#: templates/peachjam/compare/compare.html:9
+msgid "Compare two documents side-by-side"
+msgstr ""
+
+#: templates/peachjam/compare/compare.html:11
+msgid "Choose provisions of two documents to explore similarities and differences."
 msgstr ""
 
 #: templates/peachjam/document/_ask_ai_banner.html:11
