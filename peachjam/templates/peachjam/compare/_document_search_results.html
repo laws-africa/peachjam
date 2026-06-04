@@ -1,0 +1,8 @@
+{% load i18n %}
+{% if q %}
+  {% if search_results %}
+    {% include "peachjam/compare/_document_choices.html" with document_choices=search_results %}
+  {% else %}
+    <p class="mb-0 text-muted">{% trans "No matching documents." %}</p>
+  {% endif %}
+{% endif %}

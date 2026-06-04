@@ -1,0 +1,10 @@
+<ul class="list-group">
+  {% for choice in document_choices %}
+    <li class="list-group-item">
+      <a href="{{ choice.chooser_url }}"
+         hx-get="{{ choice.chooser_url }}"
+         hx-target="#compare-column-{{ side }}"
+         hx-swap="outerHTML">{{ choice.document.title }}</a>
+    </li>
+  {% endfor %}
+</ul>
