@@ -50,6 +50,47 @@ class ComparePortionsViewTest(TestCase):
         content.save()
         return document
 
+    def make_html_document(self, title, number, doctype="act", subtype=None):
+        document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=date(2020, 1, 2),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype=doctype,
+            frbr_uri_subtype=subtype,
+            frbr_uri_number=number,
+            title=title,
+            published=True,
+        )
+        content = document.get_or_create_document_content(True)
+        content.content_html_is_akn = False
+        content.content_html = f"""
+          <div>
+            <section id="chp_1">
+              <h2>Chapter 1</h2>
+              <p>{title} HTML chapter content</p>
+              <section id="chp_1__sec_1">
+                <h3>1.</h3>
+                <p>{title} HTML section content</p>
+              </section>
+            </section>
+          </div>
+        """
+        content.toc_json = [
+            {
+                "id": "chp_1",
+                "title": "Chapter 1",
+                "children": [
+                    {
+                        "id": "chp_1__sec_1",
+                        "title": "Section 1",
+                        "children": [],
+                    }
+                ],
+            }
+        ]
+        content.save()
+        return document
+
     def provision_uri(self, document, portion_id="chp_1"):
         return f"{document.expression_frbr_uri}/~{portion_id}"
 
@@ -87,6 +128,38 @@ class ComparePortionsViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "First Act section content")
         self.assertContains(response, "Second Act chapter content")
+
+    def test_can_compare_akn_and_html_documents_with_tocs(self):
+        doc_a = self.make_akn_document("First Act", "1")
+        doc_b = self.make_html_document("Second Act", "2")
+
+        response = self.client.get(
+            reverse("compare_portions"),
+            {
+                "uri-a": self.provision_uri(doc_a),
+                "uri-b": self.provision_uri(doc_b, "chp_1__sec_1"),
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "First Act chapter content")
+        self.assertContains(response, "Second Act HTML section content")
+
+    def test_html_document_portion_renders_without_akn_component(self):
+        doc = self.make_html_document("First Act", "1", subtype="book")
+
+        response = self.client.get(
+            reverse("compare_portions"), {"uri-a": self.provision_uri(doc)}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "First Act HTML chapter content")
+        self.assertContains(
+            response, 'class="document-content border rounded bg-white"'
+        )
+        self.assertContains(response, 'class="p-3 content content__html')
+        self.assertContains(response, "frbr-subtype-book")
+        self.assertNotContains(response, "la-akoma-ntoso")
 
     def test_only_uri_b_redirects_to_uri_a(self):
         doc = self.make_akn_document("First Act", "1")
@@ -130,12 +203,13 @@ class ComparePortionsViewTest(TestCase):
     def test_chooser_search_returns_only_eligible_documents(self):
         self.make_akn_document("First Act", "1")
         self.make_akn_document("Second Act", "2")
+        self.make_html_document("Second HTML Act", "3")
         GenericDocument.objects.create(
             jurisdiction=Country.objects.get(pk="ZA"),
             date=date(2020, 1, 2),
             language=Language.objects.get(pk="en"),
             frbr_uri_doctype="act",
-            frbr_uri_number="3",
+            frbr_uri_number="4",
             title="Second ineligible Act",
             published=True,
         )
@@ -147,6 +221,7 @@ class ComparePortionsViewTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Second Act")
+        self.assertContains(response, "Second HTML Act")
         self.assertNotContains(response, 'id="compare-column-a"')
         self.assertNotContains(response, 'id="compare-document-search-a"')
         self.assertContains(response, 'hx-swap="outerHTML"')
