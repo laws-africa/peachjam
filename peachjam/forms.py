@@ -208,7 +208,8 @@ class BaseDocumentFilterForm(forms.Form):
         if filter_q and exclude != "q":
             queryset = self.apply_filter_q(queryset)
 
-        return queryset
+        # filters may join against tables that produce duplicate rows, so ensure distinct documents
+        return queryset.distinct()
 
     def order_queryset(self, queryset, exclude=None):
         sort = self.cleaned_data.get("sort") or "-date"

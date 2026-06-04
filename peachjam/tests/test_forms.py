@@ -1,14 +1,17 @@
 import datetime
 from types import SimpleNamespace
 
+from countries_plus.models import Country
 from django.contrib.messages.storage.base import Message
 from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.urls import reverse
+from languages_plus.models import Language
 
 from peachjam.forms import BaseDocumentFilterForm
+from peachjam.models import AlternativeName, GenericDocument
 
 
 class BaseDocumentFilterFormTestCase(TestCase):
@@ -31,6 +34,26 @@ class BaseDocumentFilterFormTestCase(TestCase):
         documents = response.context.get("documents")
         for title in [doc.title for doc in documents]:
             self.assertTrue(title.startswith("A"))
+
+    def test_q_filter_deduplicates_documents_with_multiple_matching_alternative_names(
+        self,
+    ):
+        document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Document with alternative names",
+        )
+        AlternativeName.objects.create(document=document, title="Unique marker one")
+        AlternativeName.objects.create(document=document, title="Unique marker two")
+
+        form = BaseDocumentFilterForm({}, {"q": "marker"})
+        self.assertTrue(form.is_valid())
+
+        documents = form.filter_queryset(GenericDocument.objects.all(), filter_q=True)
+
+        self.assertEqual([document.pk], list(documents.values_list("pk", flat=True)))
 
     def test_document_table_form_renders_accessibility_hooks_for_long_facets(self):
         request = RequestFactory().get("/documents/")
