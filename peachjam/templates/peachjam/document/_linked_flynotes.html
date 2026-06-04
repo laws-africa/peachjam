@@ -3,10 +3,11 @@
   <ul class="{% if nested %}list-unstyled flynotes{% else %}list-unstyled flynotes my-2{% endif %}">
     {% for item in linked_flynote_groups %}
       <li>
-        {% if nested %}—{% endif %}
         {% if item.children and item.nodes|length > 1 %}
-          <div class="flynote-chain">
-            <div class="flynote-chain-prefix">
+          <div class="flynote-chain"
+               style="--flynote-child-indent: {{ item.child_indent }}ch">
+            <span class="flynote-chain-prefix">
+              {% if nested %}—{% endif %}
               {% for node in item.nodes %}
                 {% if not forloop.last %}
                   {% if link_flynote_topics %}
@@ -14,11 +15,11 @@
                   {% else %}
                     {{ node.name }}
                   {% endif %}
-                  <span class="flynote-chain-separator">—</span>
+                  <span class="flynote-chain-separator">&nbsp;—&nbsp;</span>
                 {% endif %}
               {% endfor %}
-            </div>
-            <div class="flynote-chain-tail">
+            </span>
+            <span class="flynote-chain-tail">
               {% for node in item.nodes %}
                 {% if forloop.last %}
                   {% if link_flynote_topics %}
@@ -28,10 +29,13 @@
                   {% endif %}
                 {% endif %}
               {% endfor %}
+            </span>
+            <div class="flynote-chain-children">
               {% include "peachjam/document/_linked_flynotes.html" with linked_flynote_groups=item.children nested=True link_flynote_topics=link_flynote_topics %}
             </div>
           </div>
         {% else %}
+          {% if nested %}—{% endif %}
           {% for node in item.nodes %}
             {% if not forloop.first %}—{% endif %}
             {% if link_flynote_topics %}

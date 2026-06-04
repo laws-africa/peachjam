@@ -126,9 +126,18 @@ class FlynoteDisplayGrouper:
             }
             if value_key == "text" and children and len(chain) > 1:
                 group["parts"] = chain
+                group["child_indent"] = cls.chain_prefix_length(chain)
+            if value_key == "nodes" and children and len(chain) > 1:
+                group["child_indent"] = cls.chain_prefix_length(chain)
             groups.append(group)
 
         return groups
+
+    @staticmethod
+    def chain_prefix_length(chain):
+        return sum(len(getattr(item, "name", item)) for item in chain[:-1]) + (
+            max(len(chain) - 1, 0) * 3
+        )
 
     @classmethod
     def group_linked_flynotes(cls, linked_flynotes):

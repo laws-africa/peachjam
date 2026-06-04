@@ -93,6 +93,7 @@ class JudgmentTestCase(TestCase):
                                 "Diesel refund scheme",
                                 "Interpretation of Note 6(f)(ii)(cc)",
                             ],
+                            "child_indent": 48,
                             "children": [
                                 {
                                     "text": "joint venture as substantive authorised user",
@@ -212,6 +213,7 @@ class JudgmentTestCase(TestCase):
                         "Legality Review",
                         "Unlawful Appointment",
                     ],
+                    "child_indent": 57,
                     "children": [
                         {
                             "text": "Jurisdiction, Delay, Legality of Municipal Appointments",
@@ -482,7 +484,7 @@ class JudgmentTestCase(TestCase):
             normalized_html,
         )
         self.assertIn(
-            '<div class="flynote-chain-tail"> '
+            '<span class="flynote-chain-tail"> '
             '<a href="/judgments/topics/matrimonial-property-act/">Matrimonial property act</a>',
             normalized_html,
         )
@@ -607,11 +609,12 @@ class JudgmentTestCase(TestCase):
         normalized_html = " ".join(html.split())
 
         self.assertIn(
-            '<div class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">—</span>',
+            '<span class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">&nbsp;—&nbsp;</span>',
             normalized_html,
         )
         self.assertIn(
-            '<div class="flynote-chain-tail"> Delict <ul class="list-unstyled flynotes">',
+            '<span class="flynote-chain-tail"> Delict </span> '
+            '<div class="flynote-chain-children"> <ul class="list-unstyled flynotes">',
             normalized_html,
         )
         self.assertIn("— assessment of credibility and probabilities", normalized_html)
