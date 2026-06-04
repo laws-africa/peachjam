@@ -362,45 +362,18 @@ class CompareChooserView(ComparePortionsView):
         if not other_side or not apps.is_installed("peachjam_ml"):
             return []
 
-        from django.db.models import Avg
-        from pgvector.django import MaxInnerProduct
+        from peachjam_ml.models import ContentChunk
 
-        from peachjam_ml.models import ContentChunk, normalize_vector
-
-        avg = (
-            ContentChunk.objects.filter(
-                document=other_side.document,
-                type="provision",
-                portion=other_side.portion_id,
-            )
-            .aggregate(avg=Avg("text_embedding"))
-            .get("avg")
+        provisions = ContentChunk.get_similar_provisions(
+            other_side.document,
+            other_side.portion_id,
+            selected_document,
+            n_similar=limit,
         )
-        if avg is None:
-            return []
-
-        avg = normalize_vector(avg)
-        if not avg:
-            return []
-
-        portions = (
-            ContentChunk.objects.filter(document=selected_document, type="provision")
-            .exclude(portion__isnull=True)
-            .annotate(similarity=MaxInnerProduct("text_embedding", avg) * -1)
-            .filter(similarity__gt=0.8)
-            .order_by("-similarity")
-            .values_list("portion", flat=True)[: limit * 3]
-        )
-        choices = []
-        seen = set()
-        for portion_id in portions:
-            if portion_id in seen:
-                continue
-            seen.add(portion_id)
-            choices.append(self.provision_choice(selected_document, side, portion_id))
-            if len(choices) == limit:
-                break
-        return choices
+        return [
+            self.provision_choice(selected_document, side, provision["portion"])
+            for provision in provisions
+        ]
 
     def dispatch(self, request, *args, **kwargs):
         return TemplateView.dispatch(self, request, *args, **kwargs)
