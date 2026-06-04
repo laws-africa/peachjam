@@ -1,0 +1,28 @@
+{% load i18n peachjam %}
+<div class="my-4">
+  <h1 class="h4 mb-3">
+    <a href="{{ document.get_absolute_url }}" class="h5">{{ document.title }}</a>
+  </h1>
+  <h2 id="main-page-heading" class="h1 doc-title">
+    <a href="{{ document.get_absolute_url }}#{{ provision_eid }}">{{ provision_title }}</a>
+  </h2>
+  <la-akoma-ntoso frbr-expression-uri="{{ document.expression_frbr_uri }}" class="bg-light p-3 border mt-3 mb-4" style="max-height: 30vh; overflow-y: auto;" lang="{{ document.language.iso }}">
+  {{ provision_html|qualify_local_refs:document.expression_frbr_uri|safe }}
+  </la-akoma-ntoso>
+</div>
+<ul class="nav nav-tabs border-bottom">
+  <li class="nav-item" role="presentation">
+    <a class="nav-link {% if portion_tab == 'citations' %}active{% endif %}"
+       href="{% url 'document_provision_citations' document.expression_frbr_uri|slice:"1:" provision_eid %}">
+      {% trans "Citations" %}
+    </a>
+  </li>
+  {% if DOCUMENT_EMBEDDINGS %}
+    <li class="nav-item" role="presentation">
+      <a class="nav-link {% if portion_tab == 'similar' %}active{% endif %}"
+         href="{% url 'document_provision_similar' document.expression_frbr_uri|slice:"1:" provision_eid %}">
+        {% trans "Similar provisions" %}
+      </a>
+    </li>
+  {% endif %}
+</ul>

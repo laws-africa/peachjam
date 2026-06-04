@@ -672,37 +672,7 @@ class PlaceGlossaryLetterView(PlaceGlossaryView):
         return context
 
 
-@method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
-class DocumentProvisionCitationView(
-    SubscriptionRequiredMixin, FilteredDocumentListView
-):
-    permission_required = "peachjam.view_provisioncitation"
-    template_name = "peachjam/provision_enrichment/provision_citations.html"
-    latest_expression_only = True
-
-    def get_subscription_required_template(self):
-        return self.template_name
-
-    def get_subscription_required_context(self):
-        return {
-            "document": self.document,
-            "provision_title": self.document.friendly_provision_title(
-                self.provision_eid
-            ),
-            "provision_html": self.document.get_provision_by_eid(self.provision_eid),
-            "provision_eid": self.provision_eid,
-        }
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_provision_citations_table.html"]
-            return [
-                "peachjam/provision_enrichment/_provision_citations_table_form.html"
-            ]
-        return super().get_template_names()
-
+class DocumentProvisionMixin:
     @cached_property
     def document(self):
         obj = CoreDocument.objects.filter(
@@ -722,13 +692,46 @@ class DocumentProvisionCitationView(
     def provision_eid(self):
         return self.kwargs.get("provision_eid", "")
 
+    def get_provision_context(self):
+        return {
+            "document": self.document,
+            "provision_title": self.document.friendly_provision_title(
+                self.provision_eid
+            ),
+            "provision_html": self.document.get_provision_by_eid(self.provision_eid),
+            "provision_eid": self.provision_eid,
+        }
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
+class DocumentProvisionCitationView(
+    DocumentProvisionMixin, SubscriptionRequiredMixin, FilteredDocumentListView
+):
+    permission_required = "peachjam.view_provisioncitation"
+    template_name = "peachjam/provision_enrichment/provision_citations.html"
+    latest_expression_only = True
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return self.get_provision_context()
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return ["peachjam/provision_enrichment/_provision_citations_table.html"]
+            return [
+                "peachjam/provision_enrichment/_provision_citations_table_form.html"
+            ]
+        return super().get_template_names()
+
     @cached_property
     def provision_citations(self):
         contexts = ProvisionCitation.objects.filter(
             work=self.document.work, provision_eid=self.provision_eid
         ).prefetch_related("work")
-        if not contexts.exists():
-            raise Http404("No citations found for this provision.")
         return contexts
 
     def get_base_queryset(self, *args, **kwargs):
@@ -760,4 +763,19 @@ class DocumentProvisionCitationView(
             .first()
         )
         context["citing_documents_count"] = citing_documents_count or 0
+        return context
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+@method_decorator(never_cache, name="dispatch")
+class DocumentProvisionSimilarView(DocumentProvisionMixin, FilteredDocumentListView):
+    template_name = "peachjam/document/similar_provisions.html"
+    latest_expression_only = True
+    queryset = CoreDocument.objects.none()
+    paginate_by = 1
+    # TODO
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_provision_context())
         return context

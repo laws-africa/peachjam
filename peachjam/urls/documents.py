@@ -21,6 +21,7 @@ from peachjam.views import (
     DocumentPopupView,
     DocumentProblemView,
     DocumentProvisionCitationView,
+    DocumentProvisionSimilarView,
     DocumentPublicationView,
     DocumentSocialImageView,
     DocumentSourcePDFView,
@@ -59,9 +60,14 @@ urlpatterns = [
         name="document_attachment",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.+?)/provision(?:/(?P<provision_eid>.+))?$",
+        r"^(?P<frbr_uri>akn/.+?)/provision/(?P<provision_eid>.+)/similar$",
+        cache_page(CACHE_DURATION)(DocumentProvisionSimilarView.as_view()),
+        name="document_provision_similar",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.+?)/provision/(?P<provision_eid>.+)$",
         cache_page(CACHE_DURATION)(DocumentProvisionCitationView.as_view()),
-        name="document_citation_context",
+        name="document_provision_citations",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations/tab$",
