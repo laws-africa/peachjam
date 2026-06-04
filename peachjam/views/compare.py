@@ -6,6 +6,7 @@ from django.apps import apps
 from django.http import Http404, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import TemplateView
+from lxml import etree
 from rest_framework.generics import get_object_or_404
 
 from peachjam.models import CoreDocument
@@ -18,6 +19,7 @@ class ComparePortion:
         self.portion_id = portion_id
         self.portion_title = portion_title
         self.portion_html = portion_html
+        self.content_html_is_akn = document.document_content.content_html_is_akn
         self.document_url = document.get_absolute_url()
         self.provision_url = f"{self.document_url}#{portion_id}"
 
@@ -96,11 +98,11 @@ class ComparePortionsView(TemplateView):
             return None
 
         doc, portion_id = self.get_document_and_portion(uri)
+        doc_content = doc.get_or_create_document_content()
         portion_html = self.get_portion_html(doc, portion_id)
         if not portion_html:
             raise Http404()
 
-        doc_content = doc.get_or_create_document_content()
         return ComparePortion(
             uri=uri,
             document=doc,
@@ -128,13 +130,21 @@ class ComparePortionsView(TemplateView):
     def get_eligible_documents(self):
         return CoreDocument.objects.filter(
             published=True,
-            document_content__content_html_is_akn=True,
             document_content__content_html__isnull=False,
             document_content__toc_json__isnull=False,
         ).exclude(document_content__toc_json=[])
 
     def get_portion_html(self, doc, portion):
-        return doc.get_provision_by_eid(portion)
+        doc_content = doc.get_or_create_document_content()
+        if doc_content.content_html_is_akn:
+            return doc.get_provision_by_eid(portion)
+
+        elements = doc_content.content_html_tree.xpath(
+            "//*[@id=$portion]", portion=portion
+        )
+        if elements:
+            return etree.tostring(elements[0], encoding="unicode", method="html")
+        return None
 
     def get_column_context(self, side, mode=None):
         selected_side = self.get_selected_portion(side)

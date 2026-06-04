@@ -1,10 +1,19 @@
 {% load peachjam %}
-<div class="border rounded bg-white">
-  <la-akoma-ntoso frbr-expression-uri="{{ selected.document.expression_frbr_uri }}"
-  class="d-block p-3 content content__html"
-  style="max-height: 70vh;
-  overflow-y: auto"
-  lang="{{ selected.document.language.iso }}">
-  {{ selected.portion_html|qualify_local_refs:selected.document.expression_frbr_uri|safe }}
-  </la-akoma-ntoso>
+<div class="document-content border rounded bg-white">
+  {% if selected.content_html_is_akn %}
+    <la-akoma-ntoso frbr-expression-uri="{{ selected.document.expression_frbr_uri }}"
+    class="d-block p-3 content content__akn"
+    style="max-height: 70vh;
+    overflow-y: auto"
+    lang="{{ selected.document.language.iso }}">
+    {{ selected.portion_html|qualify_local_refs:selected.document.expression_frbr_uri|safe }}
+    </la-akoma-ntoso>
+  {% else %}
+    <div class="p-3 content content__html frbr-doctype-{{ selected.document.frbr_uri_doctype }} frbr-subtype-{{ selected.document.frbr_uri_subtype }}"
+         style="max-height: 70vh;
+                overflow-y: auto"
+         lang="{{ selected.document.language.iso }}">
+      {{ selected.portion_html|safe }}
+    </div>
+  {% endif %}
 </div>
