@@ -270,6 +270,26 @@ class JudgmentTestCase(TestCase):
             judgment,
         )
 
+    def test_grouped_flynote_lines_keeps_explicit_ancestor_topic(self):
+        judgment = Judgment(
+            flynote=("Administrative law\n" "Administrative law — PAJA")
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": "Administrative law",
+                    "children": [
+                        {
+                            "text": "PAJA",
+                            "children": [],
+                        },
+                    ],
+                },
+            ],
+            judgment,
+        )
+
     def test_group_linked_flynotes_groups_single_line_semicolon_branches(self):
         def node(name):
             node_obj = SimpleNamespace(name=name)
@@ -366,6 +386,44 @@ class JudgmentTestCase(TestCase):
                             ],
                             "children": [],
                         },
+                    ],
+                },
+            ],
+            simplify(grouped),
+        )
+
+    def test_group_linked_flynotes_keeps_explicit_ancestor_topic(self):
+        def node(name):
+            node_obj = SimpleNamespace(name=name)
+            slug = name.lower().replace(" ", "-")
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        grouped = group_linked_flynotes(
+            [
+                {"nodes": [node("Administrative law")]},
+                {"nodes": [node("Administrative law"), node("PAJA")]},
+            ]
+        )
+
+        def simplify(groups):
+            return [
+                {
+                    "nodes": [node.name for node in item["nodes"]],
+                    "children": simplify(item["children"]),
+                }
+                for item in groups
+            ]
+
+        self.assertEqual(
+            [
+                {
+                    "nodes": ["Administrative law"],
+                    "children": [
+                        {
+                            "nodes": ["PAJA"],
+                            "children": [],
+                        }
                     ],
                 },
             ],
@@ -549,7 +607,7 @@ class JudgmentTestCase(TestCase):
         normalized_html = " ".join(html.split())
 
         self.assertIn(
-            '<span class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">—</span>',
+            '<div class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">—</span>',
             normalized_html,
         )
         self.assertIn(

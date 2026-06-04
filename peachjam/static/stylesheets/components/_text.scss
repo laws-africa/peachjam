@@ -13,10 +13,20 @@ ul.flynotes > li {
   padding: 0 0.25rem;
 }
 
-.flynote-chain-tail {
-  display: inline-block;
+.flynote-chain {
+  display: inline-grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  max-width: 100%;
   text-indent: 0;
   vertical-align: top;
+}
+
+.flynote-chain-tail {
+  text-indent: 0;
+}
+
+.flynote-chain-tail > ul.flynotes > li {
+  overflow-wrap: anywhere;
 }
 
 .fs-sm {

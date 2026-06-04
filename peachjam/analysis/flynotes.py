@@ -91,12 +91,19 @@ class FlynoteDisplayGrouper:
                 node_key = key_func(component)
                 node = index.get(node_key)
                 if node is None:
-                    node = {"value": component, "children": [], "_index": {}}
+                    node = {
+                        "value": component,
+                        "children": [],
+                        "_index": {},
+                        "is_terminal": False,
+                    }
                     items.append(node)
                     index[node_key] = node
 
                 items = node["children"]
                 index = node["_index"]
+            if path:
+                node["is_terminal"] = True
 
         return roots
 
@@ -108,7 +115,7 @@ class FlynoteDisplayGrouper:
             chain = [node["value"]]
             last = node
 
-            while len(last["children"]) == 1:
+            while len(last["children"]) == 1 and not last["is_terminal"]:
                 last = last["children"][0]
                 chain.append(last["value"])
 

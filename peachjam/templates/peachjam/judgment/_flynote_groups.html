@@ -3,16 +3,18 @@
     <li>
       {% if nested %}—{% endif %}
       {% if item.children and item.parts|length > 1 %}
-        <span class="flynote-chain-prefix">
-          {% for part in item.parts %}
-            {% if not forloop.last %}{{ part }}<span class="flynote-chain-separator">—</span>{% endif %}
-          {% endfor %}
-        </span>
-        <div class="flynote-chain-tail">
-          {% for part in item.parts %}
-            {% if forloop.last %}{{ part }}{% endif %}
-          {% endfor %}
-          {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=item.children nested=True %}
+        <div class="flynote-chain">
+          <div class="flynote-chain-prefix">
+            {% for part in item.parts %}
+              {% if not forloop.last %}{{ part }}<span class="flynote-chain-separator">—</span>{% endif %}
+            {% endfor %}
+          </div>
+          <div class="flynote-chain-tail">
+            {% for part in item.parts %}
+              {% if forloop.last %}{{ part }}{% endif %}
+            {% endfor %}
+            {% include "peachjam/judgment/_flynote_groups.html" with flynote_groups=item.children nested=True %}
+          </div>
         </div>
       {% else %}
         {{ item.text }}
