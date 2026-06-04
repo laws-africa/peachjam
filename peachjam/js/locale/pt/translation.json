@@ -1,7 +1,7 @@
 {
   "{count} document found_one": "{count} documento encontrado",
   "{count} document found_many": "{count} documentos encontrados",
-  "{count} document found_other": "{count} documentos encontrados",
+  "{count} document found_other": "{count} documento encontrado",
   "{reverse_verb} this provision": "{reverse_verb} esta disposição",
   "Advanced search": "Pesquisa avançada",
   "AND": "E",
@@ -23,7 +23,7 @@
   "Case parties": "Partes envolvidas no caso",
   "Case summary": "Resumo do caso",
   "Citation": "Citação",
-  "Cited {count} time_one": "Citado {count} vez",
+  "Cited {count} time_one": "Citado {count} vezes",
   "Cited {count} time_many": "Citado {count} vezes",
   "Cited {count} time_other": "Citado {count} vezes",
   "Clear": "Limpar",
