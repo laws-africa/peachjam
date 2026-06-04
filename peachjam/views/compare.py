@@ -205,8 +205,9 @@ class ComparePortionsView(TemplateView):
         return [
             self.document_choice(doc, side)
             for doc in self.get_candidate_documents(side)
+            .latest_expression()
             .filter(title__icontains=q)
-            .select_related("work", "jurisdiction", "locality")[:10]
+            .for_document_table()[:10]
         ]
 
     def get_candidate_documents(self, side):

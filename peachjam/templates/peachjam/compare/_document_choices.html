@@ -1,10 +1,7 @@
-<ul class="list-group">
+<table class="doc-table"
+       hx-target="#compare-column-{{ side }}"
+       hx-swap="outerHTML">
   {% for choice in document_choices %}
-    <li class="list-group-item">
-      <a href="{{ choice.chooser_url }}"
-         hx-get="{{ choice.chooser_url }}"
-         hx-target="#compare-column-{{ side }}"
-         hx-swap="outerHTML">{{ choice.document.title }}</a>
-    </li>
+    {% include 'peachjam/_document_table_row.html' with document=choice.document document_url=choice.chooser_url document_hx_get=choice.chooser_url doc_table_show_jurisdiction=True %}
   {% endfor %}
-</ul>
+</table>
