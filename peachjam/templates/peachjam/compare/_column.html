@@ -50,6 +50,13 @@
   {% if mode == "selected" %}
     {% include "peachjam/compare/_selected_content.html" %}
   {% else %}
-    {% include "peachjam/compare/_chooser.html" %}
+    <div id="compare-chooser-{{ side }}"
+         class="border rounded bg-white p-3"
+         hx-get="{{ chooser_body_url }}"
+         hx-trigger="load"
+         hx-target="this"
+         hx-swap="outerHTML">
+      <div class="spinner-when-empty"></div>
+    </div>
   {% endif %}
 </section>

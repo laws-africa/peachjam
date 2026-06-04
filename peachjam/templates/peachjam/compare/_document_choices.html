@@ -1,7 +1,16 @@
+{% load i18n %}
 <table class="doc-table"
        hx-target="#compare-column-{{ side }}"
        hx-swap="outerHTML">
   {% for choice in document_choices %}
     {% include 'peachjam/_document_table_row.html' with document=choice.document document_url=choice.chooser_url document_hx_get=choice.chooser_url doc_table_show_jurisdiction=True %}
+    {% for provision in choice.suggested_provisions %}
+      <tr>
+        <td colspan="2" class="cell-title ps-4">
+          <span class="badge bg-light text-dark me-2">{% trans "Suggested provision" %}</span>
+          <a href="{{ provision.url }}">{{ provision.title }}</a>
+        </td>
+      </tr>
+    {% endfor %}
   {% endfor %}
 </table>

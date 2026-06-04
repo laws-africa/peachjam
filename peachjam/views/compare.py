@@ -149,7 +149,7 @@ class ComparePortionsView(TemplateView):
     def get_column_context(self, side, mode=None):
         selected_side = self.get_selected_portion(side)
         mode = mode or ("selected" if selected_side else "blank")
-        chooser_context = self.get_chooser_context(side) if mode != "selected" else {}
+        chooser_params = self.get_chooser_params(side, mode, selected_side)
         return {
             "side": side,
             "mode": mode,
@@ -157,8 +157,46 @@ class ComparePortionsView(TemplateView):
             "uri_a": self.request.GET.get("uri-a", ""),
             "uri_b": self.request.GET.get("uri-b", ""),
             "compare_chooser_url": reverse("compare_chooser"),
-            **chooser_context,
+            "chooser_params": chooser_params,
+            "chooser_body_url": f"{reverse('compare_chooser')}?{urlencode(chooser_params)}",
         }
+
+    def get_chooser_params(self, side, mode, selected_side):
+        params = self.base_state_params()
+        params.update(
+            {
+                "side": side,
+                "fragment": "chooser",
+            }
+        )
+        if mode in {"choose_document", "choose_provision"}:
+            params["mode"] = mode
+        if mode == "choose_provision":
+            document_uri = self.request.GET.get("document-uri")
+            if not document_uri and selected_side:
+                document_uri = selected_side.document.expression_frbr_uri
+            if document_uri:
+                params["document-uri"] = document_uri
+        return params
+
+    def get_compare_url_for_portion(self, side, expression_frbr_uri, portion_id):
+        frbr_uri = FrbrUri.parse(expression_frbr_uri)
+        frbr_uri.portion = portion_id
+        params = self.base_state_params()
+        params[f"uri-{side}"] = str(frbr_uri)
+        return f"{reverse('compare_portions')}?{urlencode(params)}"
+
+    def base_state_params(self):
+        params = {}
+        for side in ("a", "b"):
+            uri = self.request.GET.get(f"uri-{side}")
+            if uri:
+                params[f"uri-{side}"] = uri
+        return params
+
+
+class CompareChooserView(ComparePortionsView):
+    template_name = "peachjam/compare/_column.html"
 
     def get_chooser_context(self, side):
         other_side = self.get_selected_portion("b" if side == "a" else "a")
@@ -167,6 +205,7 @@ class ComparePortionsView(TemplateView):
         selected_document = None
         toc_items = None
         toc_items_json = None
+        suggested_provisions = []
 
         if document_uri:
             selected_document = get_object_or_404(
@@ -174,6 +213,9 @@ class ComparePortionsView(TemplateView):
             )
             similar_provision_ids = self.get_similar_provision_ids(
                 other_side, selected_document
+            )
+            suggested_provisions = self.get_similar_provision_choices(
+                other_side, selected_document, side, limit=5
             )
             toc_items = self.decorate_toc_items(
                 selected_document.get_or_create_document_content().toc_json or [],
@@ -184,6 +226,10 @@ class ComparePortionsView(TemplateView):
             toc_items_json = json.dumps(toc_items)
 
         return {
+            "side": side,
+            "uri_a": self.request.GET.get("uri-a", ""),
+            "uri_b": self.request.GET.get("uri-b", ""),
+            "compare_chooser_url": reverse("compare_chooser"),
             "other_side": other_side,
             "q": q,
             "selected_document": selected_document,
@@ -195,6 +241,7 @@ class ComparePortionsView(TemplateView):
             "search_results": (
                 [] if selected_document else self.get_document_search_results(q, side)
             ),
+            "suggested_provisions": (suggested_provisions if selected_document else []),
             "toc_items": toc_items,
             "toc_items_json": toc_items_json,
         }
@@ -242,12 +289,18 @@ class ComparePortionsView(TemplateView):
         }
 
         return [
-            self.document_choice(docs[doc_id], side)
+            self.document_choice(
+                docs[doc_id],
+                side,
+                suggested_provisions=self.get_similar_provision_choices(
+                    other_side, docs[doc_id], side, limit=5
+                ),
+            )
             for doc_id in doc_ids
             if doc_id in docs
         ]
 
-    def document_choice(self, document, side):
+    def document_choice(self, document, side, suggested_provisions=None):
         params = self.base_state_params()
         params.update(
             {
@@ -258,6 +311,19 @@ class ComparePortionsView(TemplateView):
         return {
             "document": document,
             "chooser_url": f"{reverse('compare_chooser')}?{urlencode(params)}",
+            "suggested_provisions": suggested_provisions or [],
+        }
+
+    def provision_choice(self, document, side, portion_id):
+        return {
+            "document": document,
+            "portion_id": portion_id,
+            "title": document.get_or_create_document_content().friendly_provision_title(
+                portion_id
+            ),
+            "url": self.get_compare_url_for_portion(
+                side, document.expression_frbr_uri, portion_id
+            ),
         }
 
     def decorate_toc_items(self, toc_items, side, document, similar_provision_ids):
@@ -282,24 +348,19 @@ class ComparePortionsView(TemplateView):
         )
         return item
 
-    def get_compare_url_for_portion(self, side, expression_frbr_uri, portion_id):
-        frbr_uri = FrbrUri.parse(expression_frbr_uri)
-        frbr_uri.portion = portion_id
-        params = self.base_state_params()
-        params[f"uri-{side}"] = str(frbr_uri)
-        return f"{reverse('compare_portions')}?{urlencode(params)}"
-
-    def base_state_params(self):
-        params = {}
-        for side in ("a", "b"):
-            uri = self.request.GET.get(f"uri-{side}")
-            if uri:
-                params[f"uri-{side}"] = uri
-        return params
-
     def get_similar_provision_ids(self, other_side, selected_document):
+        return {
+            choice["portion_id"]
+            for choice in self.get_similar_provision_choices(
+                other_side, selected_document, "a", limit=10
+            )
+        }
+
+    def get_similar_provision_choices(
+        self, other_side, selected_document, side, limit=5
+    ):
         if not other_side or not apps.is_installed("peachjam_ml"):
-            return set()
+            return []
 
         from django.db.models import Avg
         from pgvector.django import MaxInnerProduct
@@ -316,25 +377,30 @@ class ComparePortionsView(TemplateView):
             .get("avg")
         )
         if avg is None:
-            return set()
+            return []
 
         avg = normalize_vector(avg)
         if not avg:
-            return set()
+            return []
 
-        chunks = (
+        portions = (
             ContentChunk.objects.filter(document=selected_document, type="provision")
             .exclude(portion__isnull=True)
             .annotate(similarity=MaxInnerProduct("text_embedding", avg) * -1)
             .filter(similarity__gt=0.8)
             .order_by("-similarity")
-            .values_list("portion", flat=True)[:10]
+            .values_list("portion", flat=True)[: limit * 3]
         )
-        return set(chunks)
-
-
-class CompareChooserView(ComparePortionsView):
-    template_name = "peachjam/compare/_column.html"
+        choices = []
+        seen = set()
+        for portion_id in portions:
+            if portion_id in seen:
+                continue
+            seen.add(portion_id)
+            choices.append(self.provision_choice(selected_document, side, portion_id))
+            if len(choices) == limit:
+                break
+        return choices
 
     def dispatch(self, request, *args, **kwargs):
         return TemplateView.dispatch(self, request, *args, **kwargs)
@@ -342,6 +408,8 @@ class CompareChooserView(ComparePortionsView):
     def get_template_names(self):
         if self.request.GET.get("search"):
             return ["peachjam/compare/_document_search_results.html"]
+        if self.request.GET.get("fragment") == "chooser":
+            return ["peachjam/compare/_chooser.html"]
         return super().get_template_names()
 
     def get_context_data(self, **kwargs):
@@ -356,6 +424,9 @@ class CompareChooserView(ComparePortionsView):
                 "q": q,
                 "search_results": self.get_document_search_results(q, side),
             }
+
+        if self.request.GET.get("fragment") == "chooser":
+            return self.get_chooser_context(side)
 
         if self.request.GET.get("cancel"):
             if not self.get_selected_portion(side):

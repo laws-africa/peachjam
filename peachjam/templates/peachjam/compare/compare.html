@@ -12,8 +12,8 @@
   </div>
   <div class="container-fluid py-4">
     <div class="row g-3 bg-light pb-3">
-      {% include "peachjam/compare/_column.html" with side=column_a.side mode=column_a.mode selected=column_a.selected uri_a=column_a.uri_a uri_b=column_a.uri_b compare_chooser_url=column_a.compare_chooser_url other_side=column_a.other_side q=column_a.q selected_document=column_a.selected_document suggested_documents=column_a.suggested_documents search_results=column_a.search_results toc_items=column_a.toc_items toc_items_json=column_a.toc_items_json %}
-      {% include "peachjam/compare/_column.html" with side=column_b.side mode=column_b.mode selected=column_b.selected uri_a=column_b.uri_a uri_b=column_b.uri_b compare_chooser_url=column_b.compare_chooser_url other_side=column_b.other_side q=column_b.q selected_document=column_b.selected_document suggested_documents=column_b.suggested_documents search_results=column_b.search_results toc_items=column_b.toc_items toc_items_json=column_b.toc_items_json %}
+      {% include "peachjam/compare/_column.html" with side=column_a.side mode=column_a.mode selected=column_a.selected uri_a=column_a.uri_a uri_b=column_a.uri_b compare_chooser_url=column_a.compare_chooser_url chooser_body_url=column_a.chooser_body_url %}
+      {% include "peachjam/compare/_column.html" with side=column_b.side mode=column_b.mode selected=column_b.selected uri_a=column_b.uri_a uri_b=column_b.uri_b compare_chooser_url=column_b.compare_chooser_url chooser_body_url=column_b.chooser_body_url %}
     </div>
   </div>
 {% endblock %}
