@@ -549,10 +549,13 @@ class JudgmentTestCase(TestCase):
         normalized_html = " ".join(html.split())
 
         self.assertIn(
-            '<div class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">—</span>',
+            '<span class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">—</span>',
             normalized_html,
         )
-        self.assertIn('<div class="flynote-chain-tail"> Delict </div>', normalized_html)
+        self.assertIn(
+            '<div class="flynote-chain-tail"> Delict <ul class="list-unstyled flynotes">',
+            normalized_html,
+        )
         self.assertIn("— assessment of credibility and probabilities", normalized_html)
         self.assertIn("— causation (but-for and legal causation)", normalized_html)
 

@@ -9,19 +9,14 @@ ul.flynotes > li {
   margin-bottom: 0;
 }
 
-.flynote-chain {
-  display: inline-grid;
-  grid-template-columns: max-content minmax(0, 1fr);
-  text-indent: 0;
-  vertical-align: top;
-}
-
 .flynote-chain-separator {
   padding: 0 0.25rem;
 }
 
-.flynote-chain-children {
-  grid-column: 2;
+.flynote-chain-tail {
+  display: inline-block;
+  text-indent: 0;
+  vertical-align: top;
 }
 
 .fs-sm {
