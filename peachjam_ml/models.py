@@ -361,6 +361,56 @@ class ContentChunk(models.Model):
         return f'ContentChunk<#{self.pk} {self.document}: "{self.text}">'
 
     @classmethod
+    def get_average_embedding(cls, document, chunk_type, portion=None):
+        """Get the average embedding for chunks on a document."""
+        qs = cls.objects.filter(document=document, type=chunk_type)
+        if portion is not None:
+            qs = qs.filter(portion=portion)
+
+        avg = qs.aggregate(avg=Avg("text_embedding")).get("avg")
+        if avg is not None and len(avg):
+            avg = normalize_vector(avg)
+
+        return avg
+
+    @classmethod
+    def get_similar_provisions(
+        cls,
+        source_document,
+        source_portion,
+        target_document,
+        threshold=0.8,
+        n_similar=10,
+    ):
+        """Get provisions in target_document similar to source_portion."""
+        avg_embedding = cls.get_average_embedding(
+            source_document, "provision", portion=source_portion
+        )
+        if not avg_embedding:
+            return []
+
+        similar_provisions = (
+            cls.objects.filter(document=target_document, type="provision")
+            .exclude(portion__isnull=True)
+            .annotate(similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1)
+            .filter(similarity__gt=threshold)
+            .values("document_id", "portion", "title", "similarity")
+            .order_by("-similarity")
+        )[: n_similar * 3]
+
+        provisions = []
+        seen = set()
+        for provision in similar_provisions:
+            if provision["portion"] in seen:
+                continue
+            seen.add(provision["portion"])
+            provisions.append(provision)
+            if len(provisions) == n_similar:
+                break
+
+        return provisions
+
+    @classmethod
     def make_content_chunks(cls, document):
         from peachjam_search.documents import SearchableDocument
 

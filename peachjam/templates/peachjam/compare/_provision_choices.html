@@ -1,0 +1,9 @@
+{% load i18n %}
+<ul class="list-group mb-3">
+  {% for provision in provision_choices %}
+    <li class="list-group-item">
+      <a href="{{ provision.url }}">{{ provision.title }}</a>
+      {% if show_document_title %}<div class="small text-muted">{{ provision.document.title }}</div>{% endif %}
+    </li>
+  {% endfor %}
+</ul>

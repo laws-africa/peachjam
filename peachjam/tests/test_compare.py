@@ -1,10 +1,12 @@
 from datetime import date
+from unittest.mock import patch
 from urllib.parse import parse_qs, quote, urlparse
 
 from django.test import TestCase
 from django.urls import reverse
 
 from peachjam.models import Country, GenericDocument, Language
+from peachjam.views.compare import CompareChooserView
 
 
 class ComparePortionsViewTest(TestCase):
@@ -101,6 +103,8 @@ class ComparePortionsViewTest(TestCase):
         self.assertContains(response, "Compare provisions side-by-side")
         self.assertContains(response, 'id="compare-chooser-a"')
         self.assertContains(response, 'id="compare-chooser-b"')
+        self.assertContains(response, 'hx-trigger="load"')
+        self.assertContains(response, "fragment=chooser")
 
     def test_one_selected_side_renders_provision_and_other_chooser(self):
         doc = self.make_akn_document("First Act", "1")
@@ -270,11 +274,15 @@ class ComparePortionsViewTest(TestCase):
 
         response = self.client.get(
             reverse("compare_chooser"),
-            {"side": "b", "document-uri": doc.expression_frbr_uri},
+            {
+                "side": "b",
+                "fragment": "chooser",
+                "document-uri": doc.expression_frbr_uri,
+            },
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id="compare-column-b"')
+        self.assertContains(response, 'id="compare-chooser-b"')
         self.assertContains(response, "la-table-of-contents-controller")
         self.assertContains(response, "Search table of contents")
         self.assertContains(response, "&quot;href&quot;")
@@ -283,6 +291,92 @@ class ComparePortionsViewTest(TestCase):
         self.assertContains(
             response, quote(self.provision_uri(doc, "chp_1__sec_1"), safe="")
         )
+
+    def test_chooser_document_uri_shell_lazy_loads_selected_document(self):
+        doc = self.make_akn_document("First Act", "1")
+
+        response = self.client.get(
+            reverse("compare_chooser"),
+            {"side": "b", "document-uri": doc.expression_frbr_uri},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="compare-column-b"')
+        self.assertContains(response, 'hx-trigger="load"')
+        self.assertContains(response, "fragment=chooser")
+        self.assertContains(response, quote(doc.expression_frbr_uri, safe=""))
+        self.assertNotContains(response, "la-table-of-contents-controller")
+
+    def test_provision_chooser_shows_suggested_provisions_above_toc(self):
+        selected = self.make_akn_document("First Act", "1")
+        doc = self.make_akn_document("Second Act", "2")
+        suggested_url = self.provision_uri(doc, "chp_1__sec_1")
+
+        with patch.object(
+            CompareChooserView,
+            "get_similar_provision_choices",
+            return_value=[
+                {
+                    "document": doc,
+                    "portion_id": "chp_1__sec_1",
+                    "title": "Section 1",
+                    "url": suggested_url,
+                }
+            ],
+        ):
+            response = self.client.get(
+                reverse("compare_chooser"),
+                {
+                    "side": "b",
+                    "fragment": "chooser",
+                    "uri-a": self.provision_uri(selected),
+                    "document-uri": doc.expression_frbr_uri,
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Suggestions")
+        self.assertContains(response, "Section 1")
+        self.assertContains(response, f'href="{suggested_url}"')
+        self.assertContains(response, "la-table-of-contents-controller")
+
+    def test_suggested_documents_include_suggested_provision_rows(self):
+        selected = self.make_akn_document("First Act", "1")
+        doc = self.make_akn_document("Second Act", "2")
+        suggested_url = self.provision_uri(doc, "chp_1__sec_1")
+
+        with patch.object(
+            CompareChooserView,
+            "get_suggested_documents",
+            return_value=[
+                {
+                    "document": doc,
+                    "chooser_url": "#choose-document",
+                    "suggested_provisions": [
+                        {
+                            "document": doc,
+                            "portion_id": "chp_1__sec_1",
+                            "title": "Section 1",
+                            "url": suggested_url,
+                        }
+                    ],
+                }
+            ],
+        ):
+            response = self.client.get(
+                reverse("compare_chooser"),
+                {
+                    "side": "b",
+                    "fragment": "chooser",
+                    "uri-a": self.provision_uri(selected),
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Suggestions")
+        self.assertContains(response, "Second Act")
+        self.assertContains(response, "Suggested provision")
+        self.assertContains(response, f'href="{suggested_url}"')
 
     def test_chooser_for_selected_side_includes_cancel(self):
         doc = self.make_akn_document("First Act", "1")

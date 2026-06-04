@@ -6,6 +6,10 @@
     <div class="mb-3">
       <h3 class="h6 mt-3">{% trans "Choose a provision" %}</h3>
     </div>
+    {% if suggested_provisions %}
+      <h4 class="h6">{% trans "Suggestions" %}</h4>
+      {% include "peachjam/compare/_provision_choices.html" with provision_choices=suggested_provisions %}
+    {% endif %}
     {% if toc_items %}
       <nav aria-label="{% trans 'Table of contents' %}">
         <la-table-of-contents-controller
@@ -24,7 +28,7 @@
     {% endif %}
   {% else %}
     {% if suggested_documents %}
-      <h3 class="h6 mt-3">{% trans "Suggested documents" %}</h3>
+      <h3 class="h6 mt-3">{% trans "Suggestions" %}</h3>
       {% include "peachjam/compare/_document_choices.html" with document_choices=suggested_documents %}
     {% endif %}
     <form method="get" action="{{ compare_chooser_url }}" class="mb-3">

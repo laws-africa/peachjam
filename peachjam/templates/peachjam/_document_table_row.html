@@ -22,7 +22,9 @@
   {% else %}
     <td class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
       <div class="d-flex">
-        <a href="{{ document.get_absolute_url }}" data-key-link="document">{{ document.title }}</a>
+        <a href="{% if document_url %}{{ document_url }}{% else %}{{ document.get_absolute_url }}{% endif %}"
+           {% if document_hx_get %}hx-get="{{ document_hx_get }}"{% endif %}
+           data-key-link="document">{{ document.title }}</a>
         {% if document.work.languages|length > 1 %}
           <span class="d-inline-block ms-2"
                 data-bs-toggle="tooltip"
