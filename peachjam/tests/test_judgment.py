@@ -81,34 +81,46 @@ class JudgmentTestCase(TestCase):
         self.assertGroupedFlynotesEqual(
             [
                 {
-                    "text": (
-                        "Customs law — Customs and excise act — Diesel refund scheme — "
-                        "Interpretation of Note 6(f)(ii)(cc)"
-                    ),
+                    "text": "Customs law",
                     "children": [
                         {
-                            "text": "joint venture as substantive authorised user",
-                            "children": [],
+                            "text": (
+                                "Customs and excise act — Diesel refund scheme — "
+                                "Interpretation of Note 6(f)(ii)(cc)"
+                            ),
+                            "parts": [
+                                "Customs and excise act",
+                                "Diesel refund scheme",
+                                "Interpretation of Note 6(f)(ii)(cc)",
+                            ],
+                            "children": [
+                                {
+                                    "text": "joint venture as substantive authorised user",
+                                    "children": [],
+                                },
+                                {
+                                    "text": (
+                                        "Note 5 discretion to pay refunds to third parties on good cause shown"
+                                    ),
+                                    "children": [],
+                                },
+                            ],
                         },
                         {
-                            "text": "Note 5 discretion to pay refunds to third parties on good cause shown",
-                            "children": [],
+                            "text": "internal appeal jurisdiction",
+                            "children": [
+                                {
+                                    "text": "administrative-law duty to consider discretionary relief",
+                                    "children": [],
+                                },
+                                {
+                                    "text": "NAC cannot introduce new grounds or increase original quantum",
+                                    "children": [],
+                                },
+                            ],
                         },
                     ],
-                },
-                {
-                    "text": "Customs law — internal appeal jurisdiction",
-                    "children": [
-                        {
-                            "text": "administrative-law duty to consider discretionary relief",
-                            "children": [],
-                        },
-                        {
-                            "text": "NAC cannot introduce new grounds or increase original quantum",
-                            "children": [],
-                        },
-                    ],
-                },
+                }
             ],
             judgment,
         )
@@ -194,6 +206,12 @@ class JudgmentTestCase(TestCase):
                         "Administrative Law — Judicial Review — Legality Review — "
                         "Unlawful Appointment"
                     ),
+                    "parts": [
+                        "Administrative Law",
+                        "Judicial Review",
+                        "Legality Review",
+                        "Unlawful Appointment",
+                    ],
                     "children": [
                         {
                             "text": "Jurisdiction, Delay, Legality of Municipal Appointments",
@@ -205,6 +223,49 @@ class JudgmentTestCase(TestCase):
                         },
                     ],
                 }
+            ],
+            judgment,
+        )
+
+    def test_grouped_flynote_lines_compresses_single_child_paths_recursively(self):
+        judgment = Judgment(
+            flynote=(
+                "Criminal law — concurrency of sentences — condonation of late appeal\n"
+                "Criminal law — concurrency of sentences — link between offences\n"
+                "Criminal law — sentencing — Prescribed minimum sentences — "
+                "substantial and compelling circumstances — appellate interference only where sentencing "
+                "discretion misdirected, disproportionate or vitiated"
+            )
+        )
+
+        self.assertGroupedFlynotesEqual(
+            [
+                {
+                    "text": "Criminal law",
+                    "children": [
+                        {
+                            "text": "concurrency of sentences",
+                            "children": [
+                                {
+                                    "text": "condonation of late appeal",
+                                    "children": [],
+                                },
+                                {
+                                    "text": "link between offences",
+                                    "children": [],
+                                },
+                            ],
+                        },
+                        {
+                            "text": (
+                                "sentencing — Prescribed minimum sentences — "
+                                "substantial and compelling circumstances — appellate interference only where "
+                                "sentencing discretion misdirected, disproportionate or vitiated"
+                            ),
+                            "children": [],
+                        },
+                    ],
+                },
             ],
             judgment,
         )
@@ -261,7 +322,7 @@ class JudgmentTestCase(TestCase):
         def simplify(groups):
             return [
                 {
-                    "node": item["node"].name,
+                    "nodes": [node.name for node in item["nodes"]],
                     "children": simplify(item["children"]),
                 }
                 for item in groups
@@ -270,46 +331,40 @@ class JudgmentTestCase(TestCase):
         self.assertEqual(
             [
                 {
-                    "node": "Family law",
+                    "nodes": ["Family law"],
                     "children": [
                         {
-                            "node": "Matrimonial property act",
+                            "nodes": ["Matrimonial property act"],
                             "children": [
                                 {
-                                    "node": "Doctrine of notice inapplicable to contingent accrual claims",
+                                    "nodes": [
+                                        "Doctrine of notice inapplicable to contingent accrual claims"
+                                    ],
                                     "children": [],
                                 },
                                 {
-                                    "node": (
+                                    "nodes": [
                                         "accrual claim contingent until dissolution, not a proprietary "
                                         "right of occupation"
-                                    ),
+                                    ],
                                     "children": [],
                                 },
                             ],
                         },
                         {
-                            "node": "PIE Act",
-                            "children": [
-                                {
-                                    "node": (
-                                        "eviction may be just and equitable where spouse has no vested right"
-                                    ),
-                                    "children": [],
-                                }
+                            "nodes": [
+                                "PIE Act",
+                                "eviction may be just and equitable where spouse has no vested right",
                             ],
+                            "children": [],
                         },
                         {
-                            "node": "Procedure",
-                            "children": [
-                                {
-                                    "node": (
-                                        "proper form of order when jurisdictional threshold not met "
-                                        "(confirmation vs striking off roll)."
-                                    ),
-                                    "children": [],
-                                }
+                            "nodes": [
+                                "Procedure",
+                                "proper form of order when jurisdictional threshold not met "
+                                "(confirmation vs striking off roll).",
                             ],
+                            "children": [],
                         },
                     ],
                 },
@@ -369,7 +424,8 @@ class JudgmentTestCase(TestCase):
             normalized_html,
         )
         self.assertIn(
-            '— <a href="/judgments/topics/matrimonial-property-act/">Matrimonial property act</a>',
+            '<div class="flynote-chain-tail"> '
+            '<a href="/judgments/topics/matrimonial-property-act/">Matrimonial property act</a>',
             normalized_html,
         )
         self.assertIn(
@@ -384,7 +440,7 @@ class JudgmentTestCase(TestCase):
             "accrual claim contingent until dissolution, not a proprietary right of occupation</a>",
             normalized_html,
         )
-        self.assertGreaterEqual(html.count("<ul"), 3)
+        self.assertEqual(2, html.count("<ul"))
 
     def test_document_table_row_renders_grouped_flynotes_without_topic_links(self):
         class EmptyRelatedManager:
@@ -455,7 +511,50 @@ class JudgmentTestCase(TestCase):
         self.assertNotIn("/judgments/topics/", html)
         self.assertIn("— Matrimonial property act", normalized_html)
         self.assertIn("— PIE Act", normalized_html)
-        self.assertGreaterEqual(html.count("<ul"), 3)
+        self.assertEqual(2, html.count("<ul"))
+
+    def test_grouped_linked_flynotes_indents_children_under_compressed_topic(self):
+        def node(name):
+            slug = name.lower().replace(" ", "-")
+            node_obj = SimpleNamespace(name=name)
+            node_obj.get_absolute_url = lambda: f"/judgments/topics/{slug}/"
+            return node_obj
+
+        document = SimpleNamespace(
+            blurb="Respondents liable.",
+            flynote="",
+            flynote_lines=[],
+            linked_flynotes=[
+                {
+                    "nodes": [
+                        node("Tort"),
+                        node("Delict"),
+                        node("assessment of credibility and probabilities"),
+                    ]
+                },
+                {
+                    "nodes": [
+                        node("Tort"),
+                        node("Delict"),
+                        node("causation (but-for and legal causation)"),
+                    ]
+                },
+            ],
+        )
+
+        html = render_to_string(
+            "peachjam/judgment/_blurb_and_flynotes.html",
+            {"document": document},
+        )
+        normalized_html = " ".join(html.split())
+
+        self.assertIn(
+            '<div class="flynote-chain-prefix"> Tort <span class="flynote-chain-separator">—</span>',
+            normalized_html,
+        )
+        self.assertIn('<div class="flynote-chain-tail"> Delict </div>', normalized_html)
+        self.assertIn("— assessment of credibility and probabilities", normalized_html)
+        self.assertIn("— causation (but-for and legal causation)", normalized_html)
 
     def test_grouped_flynote_lines_groups_ancestor_with_descendants(self):
         judgment = Judgment(
@@ -472,6 +571,7 @@ class JudgmentTestCase(TestCase):
             [
                 {
                     "text": "Customs law — internal appeal jurisdiction",
+                    "parts": ["Customs law", "internal appeal jurisdiction"],
                     "children": [
                         {
                             "text": "administrative-law duty to consider discretionary relief",
