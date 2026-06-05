@@ -1,0 +1,25 @@
+{% load i18n %}
+<form role="search"
+      class="mb-3"
+      aria-label="{% trans 'Filter arbitration legislation topics' %}">
+  <input type="search"
+         name="q"
+         class="form-control"
+         placeholder="{% trans 'Filter topics' %}"
+         aria-label="{% trans 'Filter topics' %}"
+         value="{{ request.GET.q|default:'' }}"
+         hx-get="{% url topic_list_url_name %}"
+         hx-trigger="input changed delay:400ms, search"
+         hx-target="#arbitration-topic-list-container"
+         hx-indicator=".arbitration-topic-htmx-progress"/>
+  <div class="htmx-progress arbitration-topic-htmx-progress progress mt-1"
+       role="status"
+       aria-live="polite">
+    <span class="visually-hidden">{% trans 'Filtering topics...' %}</span>
+    <div class="progress-bar progress-bar-striped progress-bar-animated w-100"
+         aria-hidden="true"></div>
+  </div>
+</form>
+<div id="arbitration-topic-list-container" class="mt-1" aria-live="polite">
+  {% include "peachjam/provision_enrichment/_arbitration_topic_list.html" %}
+</div>

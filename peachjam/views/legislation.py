@@ -1,7 +1,10 @@
+import re
 import string
 from datetime import datetime, timedelta
 from functools import cached_property
+from urllib.parse import quote
 
+from countries_plus.models import Country
 from django.contrib import messages
 from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
@@ -11,11 +14,16 @@ from django.template.defaultfilters import date as format_date
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
+from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
-from django.views.generic import DetailView
+from django.views.generic import DetailView, TemplateView
 
-from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
+from peachjam.forms import (
+    LegislationFilterForm,
+    ProvisionTopicEnrichmentFilterForm,
+    UnconstitutionalProvisionFilterForm,
+)
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.models import (
     CoreDocument,
@@ -23,6 +31,8 @@ from peachjam.models import (
     Legislation,
     ProvisionCitation,
     ProvisionCitationCount,
+    ProvisionTopicEnrichment,
+    Taxonomy,
     UncommencedProvision,
     UnconstitutionalProvision,
     get_country_and_locality,
@@ -130,6 +140,214 @@ class LegislationSubsidiaryView(LegislationListView):
         context["doc_table_show_jurisdiction"] = False
         context["doc_table_show_doc_type"] = False
         return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class ArbitrationLegislationTopicListView(TemplateView):
+    template_name = None
+    topic_list_partial_template_name = (
+        "peachjam/provision_enrichment/_arbitration_topic_list.html"
+    )
+    navbar_link = "legislation"
+    root_taxonomy_slug = "enrichments-arbitration-law"
+    topic_list_url_name = "arbitration_legislation_topic_list"
+    topic_detail_url_name = "arbitration_legislation_topic_detail"
+    breadcrumb_parent_url_name = None
+    breadcrumb_parent_label = None
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return [self.topic_list_partial_template_name]
+        return super().get_template_names()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        root = get_object_or_404(
+            Taxonomy.objects.filter(hidden=False), slug=self.root_taxonomy_slug
+        )
+        allowed_taxonomies = Taxonomy.get_allowed_taxonomies(
+            self.request.user, root=root
+        )
+        taxonomies = self.sort_topic_tree(allowed_taxonomies["tree"])
+        browse_taxonomies = taxonomies
+        if len(taxonomies) == 1 and taxonomies[0]["data"]["slug"] == root.slug:
+            browse_taxonomies = taxonomies[0].get("children", [])
+
+        query = self.request.GET.get("q", "").strip()
+        if query:
+            browse_taxonomies = [
+                taxonomy
+                for taxonomy in browse_taxonomies
+                if self.topic_matches_query(taxonomy, query)
+            ]
+
+        context["taxonomy"] = root
+        context["browse_taxonomies"] = browse_taxonomies
+        context["topic_list_url_name"] = self.topic_list_url_name
+        context["topic_detail_url_name"] = self.topic_detail_url_name
+        context["breadcrumb_parent_url_name"] = self.breadcrumb_parent_url_name
+        context["breadcrumb_parent_label"] = self.breadcrumb_parent_label
+        return context
+
+    def sort_topic_tree(self, taxonomies):
+        """Sort the taxonomy tree using natural legal topic numbering."""
+        taxonomies.sort(key=self.topic_sort_key)
+        for taxonomy in taxonomies:
+            self.sort_topic_tree(taxonomy.get("children", []))
+        return taxonomies
+
+    def get_topic_name(self, taxonomy):
+        """Return a topic name from either a tree dict or taxonomy object."""
+        data = taxonomy.get("data", {})
+        if isinstance(data, dict):
+            return str(data.get("name") or "")
+        return str(getattr(data, "name", "") or "")
+
+    def topic_sort_key(self, taxonomy):
+        """Return a natural sort key so topic 2 sorts before topic 10."""
+        name = self.get_topic_name(taxonomy)
+        match = re.match(r"^\s*(\d+(?:\.\d+)*)", name)
+        if match:
+            return (0, tuple(int(part) for part in match.group(1).split(".")), name)
+        return (1, (), name.casefold())
+
+    def topic_matches_query(self, taxonomy, query):
+        """Return whether a topic or one of its descendants matches a query."""
+        query = query.casefold()
+        name = self.get_topic_name(taxonomy).casefold()
+        if query in name:
+            return True
+        return any(
+            self.topic_matches_query(child, query)
+            for child in taxonomy.get("children", [])
+        )
+
+
+@method_decorator(never_cache, name="dispatch")
+class ArbitrationLegislationTopicExplorerView(LegislationListView):
+    template_name = None
+    provision_table_template_name = (
+        "peachjam/provision_enrichment/_provision_topic_enrichment_table.html"
+    )
+    provision_table_form_template_name = (
+        "peachjam/provision_enrichment/_provision_topic_enrichment_table_form.html"
+    )
+    root_taxonomy_slug = "enrichments-arbitration-law"
+    exclude_facets = ["alphabet", "taxonomies"]
+    latest_expression_only = True
+    form_class = ProvisionTopicEnrichmentFilterForm
+    topic_list_url_name = "arbitration_legislation_topic_list"
+    topic_detail_url_name = "arbitration_legislation_topic_detail"
+    breadcrumb_parent_url_name = None
+    breadcrumb_parent_label = None
+
+    def get_template_names(self):
+        if self.request.htmx:
+            if self.request.htmx.target == "doc-table":
+                return [self.provision_table_template_name]
+            return [self.provision_table_form_template_name]
+        return super().get_template_names()
+
+    def get_topic(self):
+        """Return the selected topic if it belongs to the arbitration tree."""
+        root = get_object_or_404(Taxonomy, slug=self.root_taxonomy_slug)
+        topic = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])
+        if topic.path[: topic.steplen] != root.path:
+            raise Http404()
+        return topic
+
+    @cached_property
+    def topic(self):
+        return self.get_topic()
+
+    @cached_property
+    def topic_ids(self):
+        return list(
+            Taxonomy.objects.filter(path__startswith=self.topic.path).values_list(
+                "id", flat=True
+            )
+        )
+
+    def get_base_queryset(self, *args, **kwargs):
+        qs = super().get_base_queryset(*args, **kwargs)
+        provision_topic_works = ProvisionTopicEnrichment.objects.filter(
+            topic_id__in=self.topic_ids
+        ).values_list("work_id", flat=True)
+        return qs.filter(work__in=provision_topic_works)
+
+    def add_countries_facet(self, context):
+        """Add a country facet based on the matching tagged legislation."""
+        if "countries" not in self.exclude_facets:
+            countries = Country.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="countries"
+                )
+                .order_by()
+                .values_list("jurisdiction_id", flat=True)
+                .distinct()
+            )
+            if countries:
+                context["facet_data"]["countries"] = {
+                    "label": _("Countries"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(country.pk, country.name) for country in countries],
+                        key=lambda item: item[1],
+                    ),
+                    "values": self.request.GET.getlist("countries"),
+                }
+
+    def add_facets(self, context):
+        super().add_facets(context)
+        self.add_countries_facet(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["taxonomy"] = self.topic
+        context["doc_table_show_counts"] = True
+        context["doc_count_noun"] = _("legislation document with matching provisions")
+        context["doc_count_noun_plural"] = _(
+            "legislation documents with matching provisions"
+        )
+        context["topic_list_url_name"] = self.topic_list_url_name
+        context["topic_detail_url_name"] = self.topic_detail_url_name
+        context["breadcrumb_parent_url_name"] = self.breadcrumb_parent_url_name
+        context["breadcrumb_parent_label"] = self.breadcrumb_parent_label
+        context["selected_topic"] = self.topic
+
+        work_ids = [doc.work_id for doc in context["documents"]]
+        enrichments_by_work_id = {work_id: [] for work_id in work_ids}
+        for enrichment in (
+            ProvisionTopicEnrichment.objects.filter(
+                work_id__in=work_ids, topic_id__in=self.topic_ids
+            )
+            .select_related("topic")
+            .order_by("provision_eid", "topic__name")
+        ):
+            enrichments_by_work_id[enrichment.work_id].append(enrichment)
+
+        for doc in context["documents"]:
+            doc.provision_enrichments = enrichments_by_work_id.get(doc.work_id, [])
+            for enrichment in doc.provision_enrichments:
+                enrichment.document = doc
+                enrichment.provision_popup_url = self.get_provision_popup_url(
+                    doc, enrichment
+                )
+
+        return context
+
+    def get_provision_popup_url(self, document, enrichment):
+        """Build the existing provision popup URL used for HTMX content loading."""
+        expression_frbr_uri = document.expression_frbr_uri
+        if not expression_frbr_uri:
+            return None
+
+        language = getattr(self.request, "LANGUAGE_CODE", None) or get_language()
+        partner = self.request.get_host().split(":")[0]
+        url = f"/{language}/p/{partner}/e/popup{expression_frbr_uri}"
+        if not enrichment.whole_work and enrichment.provision_eid:
+            url = f"{url}/~{quote(enrichment.provision_eid, safe='')}"
+        return url
 
 
 @registry.register_doc_type("legislation")

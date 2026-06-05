@@ -32,6 +32,7 @@ from peachjam.models import (
     Locality,
     Predicate,
     ProvisionEnrichment,
+    ProvisionTopicEnrichment,
     Relationship,
     SourceFile,
     Taxonomy,
@@ -968,6 +969,232 @@ class IndigoTopicAdapter(IndigoAdapter):
         return qs.exclude(expression_frbr_uri__in=list(uris)).values_list(
             "expression_frbr_uri", flat=True
         )
+
+
+@plugins.register("ingestor-adapter")
+class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
+    """Imports provision-level taxonomy enrichments from an Indigo enrichment dataset.
+
+    Settings:
+
+    * token: API token
+    * api_url: URL to API base (no ending slash)
+    * dataset_id: Indigo enrichment dataset ID
+    * taxonomy_topic_root: src-root:target-root mapping for taxonomy import
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        auth_scheme = self.settings.get("auth_scheme", "Bearer")
+        self.client.headers.update(
+            {
+                "Authorization": f"{auth_scheme} {self.settings['token']}",
+            }
+        )
+        if not self.settings.get("dataset_id"):
+            raise ValueError("dataset_id setting is required")
+        if not self.settings.get("taxonomy_topic_root"):
+            raise ValueError("taxonomy_topic_root setting is required")
+
+        self.dataset_id = self.settings["dataset_id"]
+        self.taxonomy_topic_root = self.settings["taxonomy_topic_root"]
+
+    def check_for_updates(self, last_refreshed):
+        """Refresh the dataset whenever the ingestor runs."""
+        self.import_dataset()
+        return [], []
+
+    def update_document(self, document_id):
+        """Refresh the dataset for manual ingestor updates."""
+        self.import_dataset()
+
+    @cached_property
+    def taxonomy_tree(self):
+        """Fetch and normalize the configured taxonomy roots from Indigo."""
+        taxonomy_tree = self.client_get(f"{self.api_url}/taxonomy-topics").json()
+        topics = taxonomy_tree.get("results", taxonomy_tree)
+        roots = []
+        for root_slug in self.get_taxonomy_topic_root_mapping().keys():
+            root = self.find_taxonomy_topic(topics, root_slug)
+            if root is None:
+                raise ValueError(f"Taxonomy root {root_slug} not in tree from server")
+            roots.append(self.normalize_taxonomy_topic_slugs(root, root_slug))
+        return roots
+
+    def get_taxonomy_tree(self):
+        """Return the cached taxonomy tree for the base taxonomy importer."""
+        return self.taxonomy_tree
+
+    def find_taxonomy_topic(self, topics, slug):
+        """Find a topic by slug in a nested Indigo taxonomy tree."""
+        for topic in topics:
+            if topic["slug"] == slug:
+                return topic
+            found = self.find_taxonomy_topic(topic.get("children", []), slug)
+            if found is not None:
+                return found
+        return None
+
+    def normalize_taxonomy_topic_slugs(self, topic, root_slug):
+        """Add the enrichments namespace to child slugs when Indigo omits it."""
+        topic = topic.copy()
+        remote_slug = topic["slug"]
+        slug_without_root_namespace = root_slug.removeprefix("enrichments-")
+        if (
+            remote_slug != root_slug
+            and not remote_slug.startswith(root_slug)
+            and remote_slug.startswith(slug_without_root_namespace)
+        ):
+            topic["slug"] = f"enrichments-{remote_slug}"
+        topic["children"] = [
+            self.normalize_taxonomy_topic_slugs(child, root_slug)
+            for child in topic.get("children", [])
+        ]
+        return topic
+
+    def get_dataset(self):
+        """Fetch the configured Indigo enrichment dataset."""
+        return self.client_get(
+            f"{self.api_url}/enrichment-datasets/{self.dataset_id}"
+        ).json()
+
+    def import_dataset(self):
+        """Import provision-topic enrichments for works that exist locally."""
+        self.ensure_taxonomy_roots()
+        root_mapping, tree_mapping = self.import_taxonomy_tree()
+        dataset = self.get_dataset()
+        remote_topics = {}
+        for root in self.get_taxonomy_tree():
+            self.index_remote_topics(root, remote_topics)
+
+        expected_ids = []
+        duplicate_count = 0
+        missing_topic_slugs = set()
+        missing_work_frbr_uris = set()
+        for enrichment in dataset.get("enrichments", []):
+            topic_slug = self.normalize_taxonomy_topic_slug(
+                enrichment.get("taxonomy_topic")
+            )
+            topic = tree_mapping.get(topic_slug)
+            if topic is None and topic_slug in root_mapping:
+                topic = Taxonomy.objects.filter(slug=root_mapping[topic_slug]).first()
+            if topic is None:
+                missing_topic_slugs.add(topic_slug)
+                continue
+
+            work = Work.objects.filter(frbr_uri=enrichment.get("work")).first()
+            if work is None:
+                missing_work_frbr_uris.add(enrichment.get("work"))
+                continue
+
+            attrs = {
+                "work": work,
+                "provision_eid": enrichment.get("provision_id") or None,
+                "topic": topic,
+            }
+            text = remote_topics.get(topic_slug, {}).get("name", topic.name)
+            existing = ProvisionTopicEnrichment.objects.filter(**attrs).order_by("pk")
+            obj = existing.first()
+            if obj is None:
+                obj = ProvisionTopicEnrichment.objects.create(**attrs, text=text)
+            elif obj.text != text:
+                obj.text = text
+                obj.save(update_fields=["text"])
+
+            duplicates = existing.exclude(pk=obj.pk)
+            duplicate_count += duplicates.count()
+            duplicates.delete()
+
+            expected_ids.append(obj.pk)
+
+        self.log_skipped_enrichments(missing_topic_slugs, missing_work_frbr_uris)
+        if duplicate_count:
+            logger.info(
+                f"Removed {duplicate_count} duplicate provision topic enrichments"
+            )
+
+        local_roots = Taxonomy.objects.filter(slug__in=root_mapping.values())
+        delete_q = Q()
+        for root in local_roots:
+            delete_q |= Q(topic__path__startswith=root.path)
+        if delete_q:
+            ProvisionTopicEnrichment.objects.filter(delete_q).exclude(
+                pk__in=expected_ids
+            ).delete()
+        logger.info(f"Imported {len(expected_ids)} provision topic enrichments")
+
+    def log_skipped_enrichments(self, missing_topic_slugs, missing_work_frbr_uris):
+        """Log missing topics and works without interrupting the import."""
+        if missing_topic_slugs:
+            logger.warning(
+                "Ignoring enrichments for %s unknown taxonomy topics: %s",
+                len(missing_topic_slugs),
+                ", ".join(sorted(filter(None, missing_topic_slugs))[:20]),
+            )
+        if missing_work_frbr_uris:
+            logger.warning(
+                "Ignoring enrichments for %s unknown works: %s",
+                len(missing_work_frbr_uris),
+                ", ".join(sorted(filter(None, missing_work_frbr_uris))[:20]),
+            )
+
+    def normalize_taxonomy_topic_slug(self, slug):
+        """Normalize one Indigo topic slug to the local enrichments namespace."""
+        if slug is None:
+            return None
+        for root_slug in self.get_taxonomy_topic_root_mapping().keys():
+            slug_without_root_namespace = root_slug.removeprefix("enrichments-")
+            if (
+                slug != root_slug
+                and not slug.startswith(root_slug)
+                and slug.startswith(slug_without_root_namespace)
+            ):
+                return f"enrichments-{slug}"
+        return slug
+
+    def ensure_taxonomy_roots(self):
+        """Create local taxonomy roots before importing their descendants."""
+        root_mapping = self.get_taxonomy_topic_root_mapping()
+
+        remote_roots = {root["slug"]: root for root in self.get_taxonomy_tree()}
+        existing_roots = set(
+            Taxonomy.objects.filter(slug__in=root_mapping.values()).values_list(
+                "slug", flat=True
+            )
+        )
+        for src, target in root_mapping.items():
+            if target in existing_roots:
+                continue
+            remote_root = remote_roots[src]
+            self.create_taxonomy_root(remote_root, target)
+
+    def get_taxonomy_topic_root_mapping(self):
+        """Parse source-to-target taxonomy root mappings from settings."""
+        root_mapping = {}
+        for item in self.taxonomy_topic_root.split():
+            if ":" in item:
+                src, target = item.split(":", 1)
+            else:
+                src = target = item
+            root_mapping[src] = target
+        return root_mapping
+
+    def create_taxonomy_root(self, remote_root, slug):
+        """Create a local taxonomy root with the remote display name."""
+        root = Taxonomy.add_root(name=slug.replace("-", " "))
+        # Taxonomy.save() derives the slug from the name. The remote enrichment
+        # root needs a stable API slug and a human-readable display name.
+        Taxonomy.objects.filter(pk=root.pk).update(
+            name=remote_root["name"],
+            slug=slug,
+            path_name=remote_root["name"],
+        )
+
+    def index_remote_topics(self, topic, topics):
+        """Build a flat lookup of remote topics by slug."""
+        topics[topic["slug"]] = topic
+        for child in topic.get("children", []):
+            self.index_remote_topics(child, topics)
 
 
 @plugins.register("ingestor-adapter")

@@ -1,0 +1,28 @@
+{% load i18n %}
+{% if browse_taxonomies %}
+  <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3 mt-3"
+       role="list">
+    {% for taxonomy in browse_taxonomies %}
+      <div class="col" role="listitem">
+        <div class="card h-100 border shadow-sm"
+             aria-labelledby="arbitration-topic-heading-{{ taxonomy.data.id }}">
+          <div class="card-body">
+            <h2 class="h5 mb-2" id="arbitration-topic-heading-{{ taxonomy.data.id }}">{{ taxonomy.data.name }}</h2>
+            {% if taxonomy.children %}
+              <ul class="list-unstyled mb-0"
+                  aria-label="{% blocktrans with topic=taxonomy.data.name %}Provision-level tags for {{ topic }}{% endblocktrans %}">
+                {% for child in taxonomy.children %}
+                  <li>
+                    <a href="{% url topic_detail_url_name child.data.slug %}">{{ child.data.name }}</a>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p class="text-muted">{% trans 'No matching topics found.' %}</p>
+{% endif %}

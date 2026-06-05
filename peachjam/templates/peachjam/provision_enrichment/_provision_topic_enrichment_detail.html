@@ -1,0 +1,14 @@
+{% load i18n %}
+{% if enrichment.provision_popup_url %}
+  <div class="bg-light p-3 border my-2"
+       hx-get="{{ enrichment.provision_popup_url }}"
+       hx-trigger="load"
+       hx-target="this"
+       hx-swap="innerHTML"
+       hx-push-url="false"
+       aria-live="polite">
+    <span class="text-muted">{% trans "Loading provision content..." %}</span>
+  </div>
+{% else %}
+  <em>{% trans "No content found" %}</em>
+{% endif %}
