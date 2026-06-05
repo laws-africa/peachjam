@@ -5,6 +5,7 @@ from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
 from countries_plus.models import Country
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib.auth.models import Permission, User
 from django.core.cache import caches
 from django.core.files.base import ContentFile
@@ -47,7 +48,11 @@ def home_page_view(request):
     return HttpResponse("Home")
 
 
+# mirror production: i18n routes (incl. document_popup) live under i18n_patterns and
+# so carry a language prefix, while non_i18n routes do not.
 urlpatterns = [
+    path("", include("peachjam.urls.non_i18n")),
+] + i18n_patterns(
     path("", home_page_view, name="home_page"),
     path(
         "arbitration-topics/",
@@ -60,8 +65,7 @@ urlpatterns = [
         name="arbitration_legislation_topic_detail",
     ),
     path("", include("peachjam.urls.i18n")),
-    path("", include("peachjam.urls.non_i18n")),
-]
+)
 
 
 class PeachjamViewsTest(TestCase):

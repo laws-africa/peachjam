@@ -1036,16 +1036,9 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         return None
 
     def normalize_taxonomy_topic_slugs(self, topic, root_slug):
-        """Add the enrichments namespace to child slugs when Indigo omits it."""
+        """Recursively add the enrichments namespace to a topic tree's slugs."""
         topic = topic.copy()
-        remote_slug = topic["slug"]
-        slug_without_root_namespace = root_slug.removeprefix("enrichments-")
-        if (
-            remote_slug != root_slug
-            and not remote_slug.startswith(root_slug)
-            and remote_slug.startswith(slug_without_root_namespace)
-        ):
-            topic["slug"] = f"enrichments-{remote_slug}"
+        topic["slug"] = self.normalize_taxonomy_topic_slug(topic["slug"])
         topic["children"] = [
             self.normalize_taxonomy_topic_slugs(child, root_slug)
             for child in topic.get("children", [])

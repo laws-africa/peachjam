@@ -2,7 +2,6 @@ import re
 import string
 from datetime import datetime, timedelta
 from functools import cached_property
-from urllib.parse import quote
 
 from countries_plus.models import Country
 from django.contrib import messages
@@ -11,10 +10,10 @@ from django.db.models.functions.text import Substr
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import date as format_date
+from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
-from django.utils.translation import get_language
 from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, TemplateView
@@ -252,7 +251,7 @@ class ArbitrationLegislationTopicExplorerView(LegislationListView):
         """Return the selected topic if it belongs to the arbitration tree."""
         root = get_object_or_404(Taxonomy, slug=self.root_taxonomy_slug)
         topic = get_object_or_404(Taxonomy, slug=self.kwargs["topic"])
-        if topic.path[: topic.steplen] != root.path:
+        if not topic.path.startswith(root.path):
             raise Http404()
         return topic
 
@@ -337,17 +336,18 @@ class ArbitrationLegislationTopicExplorerView(LegislationListView):
         return context
 
     def get_provision_popup_url(self, document, enrichment):
-        """Build the existing provision popup URL used for HTMX content loading."""
+        """Build the DocumentPopupView URL used by the law-widget for HTMX content loading."""
         expression_frbr_uri = document.expression_frbr_uri
         if not expression_frbr_uri:
             return None
 
-        language = getattr(self.request, "LANGUAGE_CODE", None) or get_language()
-        partner = self.request.get_host().split(":")[0]
-        url = f"/{language}/p/{partner}/e/popup{expression_frbr_uri}"
+        frbr_uri = expression_frbr_uri.lstrip("/")
         if not enrichment.whole_work and enrichment.provision_eid:
-            url = f"{url}/~{quote(enrichment.provision_eid, safe='')}"
-        return url
+            frbr_uri = f"{frbr_uri}/~{enrichment.provision_eid}"
+        partner = self.request.get_host().split(":")[0]
+        return reverse(
+            "document_popup", kwargs={"partner": partner, "frbr_uri": frbr_uri}
+        )
 
 
 @registry.register_doc_type("legislation")
