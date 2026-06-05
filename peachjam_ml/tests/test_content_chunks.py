@@ -94,7 +94,7 @@ class TestContentChunks(TestCase):
                     "title": provision["title"],
                 }
                 for provision in ContentChunk.get_similar_provisions(
-                    self.document, "sec_1", target
+                    self.document, "sec_1", [target]
                 )
             ],
         )

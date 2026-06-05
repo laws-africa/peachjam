@@ -1,6 +1,7 @@
 import hashlib
 import logging
 import math
+from typing import List
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
@@ -378,21 +379,25 @@ class ContentChunk(models.Model):
         cls,
         source_document,
         source_portion,
-        target_document,
+        target_documents,
         threshold=0.8,
         n_similar=10,
-    ):
-        """Get provisions in target_document similar to source_portion."""
+    ) -> List["ContentChunk"]:
+        """Get provisions in target_documents similar to source_portion."""
         avg_embedding = cls.get_average_embedding(
             source_document, "provision", portion=source_portion
         )
         if not avg_embedding:
             return []
 
+        qs = cls.objects.filter(
+            type="provision", document__in=target_documents
+        ).exclude(portion__isnull=True)
+
         similar_provisions = (
-            cls.objects.filter(document=target_document, type="provision")
-            .exclude(portion__isnull=True)
-            .annotate(similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1)
+            qs.annotate(
+                similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1
+            )
             .filter(similarity__gt=threshold)
             .values("document_id", "portion", "title", "similarity")
             .order_by("-similarity")

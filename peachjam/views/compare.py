@@ -367,7 +367,7 @@ class CompareChooserView(ComparePortionsView):
         provisions = ContentChunk.get_similar_provisions(
             other_side.document,
             other_side.portion_id,
-            selected_document,
+            [selected_document],
             n_similar=limit,
         )
         return [

@@ -1,7 +1,9 @@
 import string
 from datetime import datetime, timedelta
 from functools import cached_property
+from types import SimpleNamespace
 
+from django.apps import apps
 from django.contrib import messages
 from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
@@ -771,11 +773,97 @@ class DocumentProvisionCitationView(
 class DocumentProvisionSimilarView(DocumentProvisionMixin, FilteredDocumentListView):
     template_name = "peachjam/document/similar_provisions.html"
     latest_expression_only = True
-    queryset = CoreDocument.objects.none()
-    paginate_by = 1
-    # TODO
+    similarity_threshold = 0.8
+    n_similar = 100
+
+    def get_base_queryset(self, *args, **kwargs):
+        if not apps.is_installed("peachjam_ml"):
+            return CoreDocument.objects.none()
+
+        from peachjam_ml.models import ContentChunk
+
+        document_ids = (
+            ContentChunk.objects.filter(type="provision")
+            .exclude(document=self.document)
+            .values_list("document_id", flat=True)
+        )
+        return (
+            CoreDocument.objects.filter(pk__in=document_ids)
+            .exclude(work=self.document.work)
+            .latest_expression()
+            .for_document_table()
+        )
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        return self.get_documents_with_similar_provisions(qs)
+
+    def get_documents_with_similar_provisions(self, documents_qs):
+        similar_provisions = self.get_similar_provisions(documents_qs)
+        if not similar_provisions:
+            return []
+
+        document_ids = []
+        for provision in similar_provisions:
+            if provision["document_id"] not in document_ids:
+                document_ids.append(provision["document_id"])
+
+        documents = {
+            document.pk: document
+            for document in documents_qs.filter(
+                pk__in=document_ids
+            ).for_document_table()
+        }
+
+        results = []
+        for provision in similar_provisions:
+            document = documents.get(provision["document_id"])
+            if not document:
+                continue
+
+            if not hasattr(document, "similar_provisions"):
+                document.similar_provisions = []
+                results.append(document)
+            document.similar_provisions.append(
+                self.build_similar_provision(document, provision)
+            )
+
+        return results
+
+    def get_similar_provisions(self, documents_qs):
+        if not apps.is_installed("peachjam_ml"):
+            return []
+
+        from peachjam_ml.models import ContentChunk
+
+        return ContentChunk.get_similar_provisions(
+            self.document,
+            self.provision_eid,
+            documents_qs,
+            threshold=self.similarity_threshold,
+            n_similar=self.n_similar,
+        )
+
+    def build_similar_provision(self, document, provision):
+        portion_id = provision["portion"]
+        return SimpleNamespace(
+            document=document,
+            provision_eid=portion_id,
+            portion_id=portion_id,
+            title=provision["title"] or document.friendly_provision_title(portion_id),
+            similarity=provision["similarity"],
+            url=f"{document.get_absolute_url()}#{portion_id}",
+            provision_html=document.get_provision_by_eid(portion_id),
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(self.get_provision_context())
+        context["similar_provisions"] = [
+            provision
+            for document in context["documents"]
+            for provision in getattr(document, "similar_provisions", [])
+        ]
+        context["doc_count_noun"] = _("document with similar provisions")
+        context["doc_count_noun_plural"] = _("documents with similar provisions")
         return context
