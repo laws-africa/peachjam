@@ -24,13 +24,14 @@
   </li>
   <li class="nav-item dropdown main-nav">
     <a class="nav-link dropdown-toggle"
+       id="regional-material-dropdown"
        href="#"
        role="button"
        data-bs-toggle="dropdown"
        aria-expanded="false">
-      {% trans 'African Union and ECOWAS' %}
+      {% trans 'Regional material' %}
     </a>
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu" aria-labelledby="regional-material-dropdown">
       <li class="dropdown-item">
         <a class=" nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
            href="{% url 'court' 'AfCHPR' %}">
@@ -59,6 +60,12 @@
         <a class=" nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
            href="{% url 'locality_legislation_list' 'aa-au' %}">
           {% trans 'AU Charters and Treaties' %}
+        </a>
+      </li>
+      <li class="dropdown-item">
+        <a class="nav-link px-0 {% if 'aa-ohada' in request.path %}active{% endif %}"
+           href="{% url 'place' 'aa-ohada' %}">
+          {% trans 'OHADA' %}
         </a>
       </li>
     </ul>
