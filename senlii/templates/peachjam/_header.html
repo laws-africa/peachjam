@@ -29,7 +29,7 @@
     </a>
     <ul class="dropdown-menu" aria-labelledby="regional-material-dropdown">
       <li class="dropdown-item">
-        <a class=" nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
+        <a class="nav-link px-0 {% if 'afchpr' in request.path %}active{% endif %}"
            href="{% url 'court' 'AfCHPR' %}">
           {% trans "African Court of Human and People's Rights" %}
         </a>
@@ -53,7 +53,7 @@
         </a>
       </li>
       <li class="dropdown-item">
-        <a class=" nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
+        <a class="nav-link px-0 {% if 'aa-au' in request.path %}active{% endif %}"
            href="{% url 'locality_legislation_list' 'aa-au' %}">
           {% trans 'AU Charters and Treaties' %}
         </a>
