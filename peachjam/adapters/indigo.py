@@ -985,12 +985,6 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        auth_scheme = self.settings.get("auth_scheme", "Bearer")
-        self.client.headers.update(
-            {
-                "Authorization": f"{auth_scheme} {self.settings['token']}",
-            }
-        )
         if not self.settings.get("dataset_id"):
             raise ValueError("dataset_id setting is required")
         if not self.settings.get("taxonomy_topic_root"):
@@ -1000,12 +994,19 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         self.taxonomy_topic_root = self.settings["taxonomy_topic_root"]
 
     def check_for_updates(self, last_refreshed):
-        """Refresh the dataset whenever the ingestor runs."""
-        self.import_dataset()
-        return [], []
+        """Signal a re-import only when the dataset changed since the last refresh.
+
+        Returning a non-empty list makes the ingestor call update_document(),
+        which re-imports the whole dataset. This avoids re-importing every run.
+        """
+        dataset = self.get_dataset()
+        updated_at = dataset.get("updated_at")
+        if last_refreshed and updated_at and parser.parse(updated_at) <= last_refreshed:
+            return [], []
+        return [str(self.dataset_id)], []
 
     def update_document(self, document_id):
-        """Refresh the dataset for manual ingestor updates."""
+        """Re-import the whole enrichment dataset."""
         self.import_dataset()
 
     @cached_property
@@ -1056,13 +1057,9 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         self.ensure_taxonomy_roots()
         root_mapping, tree_mapping = self.import_taxonomy_tree()
         dataset = self.get_dataset()
-        remote_topics = {}
-        for root in self.get_taxonomy_tree():
-            self.index_remote_topics(root, remote_topics)
 
         expected_ids = []
         duplicate_count = 0
-        missing_topic_slugs = set()
         missing_work_frbr_uris = set()
         for enrichment in dataset.get("enrichments", []):
             topic_slug = self.normalize_taxonomy_topic_slug(
@@ -1072,8 +1069,12 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             if topic is None and topic_slug in root_mapping:
                 topic = Taxonomy.objects.filter(slug=root_mapping[topic_slug]).first()
             if topic is None:
-                missing_topic_slugs.add(topic_slug)
-                continue
+                # The taxonomy tree is fully imported above, so a missing topic
+                # means we would silently drop tagged data. Fail loudly instead.
+                raise ValueError(
+                    f"Taxonomy topic '{topic_slug}' not found locally after "
+                    "importing the taxonomy tree; refusing to lose enrichment data."
+                )
 
             work = Work.objects.filter(frbr_uri=enrichment.get("work")).first()
             if work is None:
@@ -1085,14 +1086,10 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
                 "provision_eid": enrichment.get("provision_id") or None,
                 "topic": topic,
             }
-            text = remote_topics.get(topic_slug, {}).get("name", topic.name)
             existing = ProvisionTopicEnrichment.objects.filter(**attrs).order_by("pk")
             obj = existing.first()
             if obj is None:
-                obj = ProvisionTopicEnrichment.objects.create(**attrs, text=text)
-            elif obj.text != text:
-                obj.text = text
-                obj.save(update_fields=["text"])
+                obj = ProvisionTopicEnrichment.objects.create(**attrs)
 
             duplicates = existing.exclude(pk=obj.pk)
             duplicate_count += duplicates.count()
@@ -1100,7 +1097,7 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
 
             expected_ids.append(obj.pk)
 
-        self.log_skipped_enrichments(missing_topic_slugs, missing_work_frbr_uris)
+        self.log_skipped_enrichments(missing_work_frbr_uris)
         if duplicate_count:
             logger.info(
                 f"Removed {duplicate_count} duplicate provision topic enrichments"
@@ -1116,14 +1113,8 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             ).delete()
         logger.info(f"Imported {len(expected_ids)} provision topic enrichments")
 
-    def log_skipped_enrichments(self, missing_topic_slugs, missing_work_frbr_uris):
-        """Log missing topics and works without interrupting the import."""
-        if missing_topic_slugs:
-            logger.warning(
-                "Ignoring enrichments for %s unknown taxonomy topics: %s",
-                len(missing_topic_slugs),
-                ", ".join(sorted(filter(None, missing_topic_slugs))[:20]),
-            )
+    def log_skipped_enrichments(self, missing_work_frbr_uris):
+        """Log works that aren't available locally without interrupting the import."""
         if missing_work_frbr_uris:
             logger.warning(
                 "Ignoring enrichments for %s unknown works: %s",
@@ -1182,12 +1173,6 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             slug=slug,
             path_name=remote_root["name"],
         )
-
-    def index_remote_topics(self, topic, topics):
-        """Build a flat lookup of remote topics by slug."""
-        topics[topic["slug"]] = topic
-        for child in topic.get("children", []):
-            self.index_remote_topics(child, topics)
 
 
 @plugins.register("ingestor-adapter")

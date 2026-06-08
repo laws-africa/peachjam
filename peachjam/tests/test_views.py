@@ -22,18 +22,11 @@ from peachjam.models import (
     Folder,
     GenericDocument,
     Judgment,
-    Legislation,
     Outcome,
     PeachJamSettings,
-    ProvisionTopicEnrichment,
     SavedDocument,
     SourceFile,
-    Taxonomy,
     UserFollowing,
-)
-from peachjam.views.legislation import (
-    ArbitrationLegislationTopicExplorerView,
-    ArbitrationLegislationTopicListView,
 )
 from peachjam.views.robots import (
     _language_prefixes,
@@ -54,16 +47,6 @@ urlpatterns = [
     path("", include("peachjam.urls.non_i18n")),
 ] + i18n_patterns(
     path("", home_page_view, name="home_page"),
-    path(
-        "arbitration-topics/",
-        ArbitrationLegislationTopicListView.as_view(),
-        name="arbitration_legislation_topic_list",
-    ),
-    path(
-        "arbitration-topics/<slug:topic>/",
-        ArbitrationLegislationTopicExplorerView.as_view(),
-        name="arbitration_legislation_topic_detail",
-    ),
     path("", include("peachjam.urls.i18n")),
 )
 
@@ -787,147 +770,3 @@ class DocumentPopupViewTestCase(TestCase):
         expected = f"{doc.expression_frbr_uri}#sec_2"
         self.assertContains(response, f'href="{expected}"')
         self.assertContains(response, f'data-href="{expected}"')
-
-
-@override_settings(ROOT_URLCONF=__name__)
-class ArbitrationLegislationTopicViewsTest(TestCase):
-    fixtures = ["tests/countries", "tests/languages"]
-
-    def setUp(self):
-        root = Taxonomy.add_root(name="enrichments arbitration law")
-        Taxonomy.objects.filter(pk=root.pk).update(
-            name="Arbitration law",
-            slug="enrichments-arbitration-law",
-            path_name="Arbitration law",
-        )
-        root.refresh_from_db()
-        self.topic = root.add_child(name="Validity")
-        self.document = Legislation.objects.create(
-            jurisdiction=Country.objects.get(pk="ZA"),
-            date=datetime.date(2024, 1, 1),
-            language=Language.objects.get(pk="en"),
-            frbr_uri_doctype="act",
-            frbr_uri_number="1",
-            title="Arbitration Act",
-            metadata_json={"commenced": True},
-        )
-        doc_content = self.document.get_or_create_document_content()
-        doc_content.content_html_is_akn = True
-        doc_content.set_content_html(
-            '<section id="sec_1" data-eid="sec_1"><h2>Section 1</h2></section>'
-        )
-        doc_content.toc_json = [{"id": "sec_1", "title": "Section 1", "children": []}]
-        doc_content.save()
-        ProvisionTopicEnrichment.objects.create(
-            work=self.document.work,
-            provision_eid="sec_1",
-            topic=self.topic,
-        )
-        self.ghana_document = Legislation.objects.create(
-            jurisdiction=Country.objects.get(pk="GH"),
-            date=datetime.date(2023, 1, 1),
-            language=Language.objects.get(pk="en"),
-            frbr_uri_doctype="act",
-            frbr_uri_number="2",
-            title="Ghana Arbitration Act",
-            metadata_json={"commenced": True},
-        )
-        ghana_doc_content = self.ghana_document.get_or_create_document_content()
-        ghana_doc_content.content_html_is_akn = True
-        ghana_doc_content.set_content_html(
-            '<section id="sec_1" data-eid="sec_1"><h2>Section 1</h2></section>'
-        )
-        ghana_doc_content.toc_json = [
-            {"id": "sec_1", "title": "Section 1", "children": []}
-        ]
-        ghana_doc_content.save()
-        ProvisionTopicEnrichment.objects.create(
-            work=self.ghana_document.work,
-            provision_eid="sec_1",
-            topic=self.topic,
-        )
-
-    def test_arbitration_topic_list(self):
-        child_topic = self.topic.add_child(name="Written agreement")
-        topic_10 = self.topic.get_parent().add_child(
-            name="10. Recognition and enforcement"
-        )
-        topic_2 = self.topic.get_parent().add_child(name="2. Arbitration agreement")
-
-        response = self.client.get(
-            reverse("arbitration_legislation_topic_list"),
-            headers={"HX-Request": "true"},
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Validity")
-        topic_url = reverse(
-            "arbitration_legislation_topic_detail", args=[self.topic.slug]
-        )
-        child_topic_url = reverse(
-            "arbitration_legislation_topic_detail", args=[child_topic.slug]
-        )
-        self.assertNotContains(response, topic_url)
-        self.assertContains(response, child_topic_url)
-        self.assertLess(
-            response.content.index(topic_2.name.encode()),
-            response.content.index(topic_10.name.encode()),
-        )
-
-        response = self.client.get(
-            reverse("arbitration_legislation_topic_list"),
-            {"q": "validity"},
-            headers={"HX-Request": "true"},
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Validity")
-        self.assertNotContains(response, "Arbitration legislation topics")
-
-    def test_arbitration_topic_explorer_lists_matching_provisions(self):
-        response = self.client.get(
-            reverse("arbitration_legislation_topic_detail", args=[self.topic.slug]),
-            headers={"HX-Request": "true"},
-        )
-
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Arbitration Act")
-        self.assertContains(response, "Ghana Arbitration Act")
-        self.assertContains(response, "Section 1")
-        self.assertContains(response, "Countries")
-        self.assertContains(response, "South Africa")
-        self.assertContains(response, 'hx-trigger="load"')
-        self.assertContains(response, 'hx-target="this"')
-        self.assertContains(response, 'hx-push-url="false"')
-        self.assertContains(
-            response,
-            f"/en/p/testserver/e/popup{self.document.expression_frbr_uri}/~sec_1",
-        )
-
-        response = self.client.get(
-            reverse("arbitration_legislation_topic_detail", args=[self.topic.slug]),
-            {"countries": "ZA"},
-            headers={"HX-Request": "true"},
-        )
-
-        self.assertContains(response, "Arbitration Act")
-        self.assertNotContains(response, "Ghana Arbitration Act")
-
-    def test_arbitration_topic_explorer_links_child_topic_tags(self):
-        child_topic = self.topic.add_child(name="Domestic awards")
-        ProvisionTopicEnrichment.objects.filter(work=self.document.work).update(
-            topic=child_topic
-        )
-
-        response = self.client.get(
-            reverse("arbitration_legislation_topic_detail", args=[self.topic.slug]),
-            headers={"HX-Request": "true"},
-        )
-
-        child_topic_url = reverse(
-            "arbitration_legislation_topic_detail", args=[child_topic.slug]
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, child_topic_url)
-        self.assertContains(response, "Domestic awards")
-        self.assertContains(response, "South Africa")
