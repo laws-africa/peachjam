@@ -789,6 +789,22 @@ class IndigoAdapter(RequestsAdapter):
                 f"Added {len(taxonomies)} local taxonomies to {created_document}"
             )
 
+    @cached_property
+    def taxonomy_topic_root_mapping(self):
+        """Parse the taxonomy_topic_root setting into a {src_slug: target_slug} map.
+
+        Each whitespace-separated item is `src:target`, defaulting to `src:src`
+        when there is no colon.
+        """
+        mapping = {}
+        for item in (self.taxonomy_topic_root or "").split():
+            if ":" in item:
+                src, target = item.split(":", 1)
+            else:
+                src = target = item
+            mapping[src] = target
+        return mapping
+
     def import_taxonomy_tree(self):
         """Import the taxonomy trees rooted at self.taxonomy_topic_root from Indigo.
 
@@ -797,14 +813,7 @@ class IndigoAdapter(RequestsAdapter):
         - root_mapping: map from src slug to target slug for the tree roots
         - tree_mapping: full source taxonomy topic slugs to target taxonomy topic objects
         """
-        root_mapping = {}
-        for item in self.taxonomy_topic_root.split():
-            # parse src:target, defaulting to src:src if there is no :
-            if ":" in item:
-                src, target = item.split(":", 1)
-            else:
-                src = target = item
-            root_mapping[src] = target
+        root_mapping = self.taxonomy_topic_root_mapping
 
         # mapping from source topic slug prefix to target topic object
         tree_mapping = {}
@@ -1015,7 +1024,7 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         taxonomy_tree = self.client_get(f"{self.api_url}/taxonomy-topics").json()
         topics = taxonomy_tree.get("results", taxonomy_tree)
         roots = []
-        for root_slug in self.get_taxonomy_topic_root_mapping().keys():
+        for root_slug in self.taxonomy_topic_root_mapping:
             root = self.find_taxonomy_topic(topics, root_slug)
             if root is None:
                 raise ValueError(f"Taxonomy root {root_slug} not in tree from server")
@@ -1123,10 +1132,15 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             )
 
     def normalize_taxonomy_topic_slug(self, slug):
-        """Normalize one Indigo topic slug to the local enrichments namespace."""
+        """Map an Indigo topic slug into the local "enrichments-" namespace.
+
+        The enrichment dataset reports topic slugs without the namespace prefix
+        used by the imported taxonomy tree, so they must be normalized before
+        they can be matched against tree_mapping.
+        """
         if slug is None:
             return None
-        for root_slug in self.get_taxonomy_topic_root_mapping().keys():
+        for root_slug in self.taxonomy_topic_root_mapping:
             slug_without_root_namespace = root_slug.removeprefix("enrichments-")
             if (
                 slug != root_slug
@@ -1137,8 +1151,12 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         return slug
 
     def ensure_taxonomy_roots(self):
-        """Create local taxonomy roots before importing their descendants."""
-        root_mapping = self.get_taxonomy_topic_root_mapping()
+        """Create local taxonomy roots before importing their descendants.
+
+        The base import_taxonomy_tree() requires each target root to already
+        exist locally (it raises otherwise), so the roots are created here first.
+        """
+        root_mapping = self.taxonomy_topic_root_mapping
 
         remote_roots = {root["slug"]: root for root in self.get_taxonomy_tree()}
         existing_roots = set(
@@ -1151,17 +1169,6 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
                 continue
             remote_root = remote_roots[src]
             self.create_taxonomy_root(remote_root, target)
-
-    def get_taxonomy_topic_root_mapping(self):
-        """Parse source-to-target taxonomy root mappings from settings."""
-        root_mapping = {}
-        for item in self.taxonomy_topic_root.split():
-            if ":" in item:
-                src, target = item.split(":", 1)
-            else:
-                src = target = item
-            root_mapping[src] = target
-        return root_mapping
 
     def create_taxonomy_root(self, remote_root, slug):
         """Create a local taxonomy root with the remote display name."""
