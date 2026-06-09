@@ -311,6 +311,17 @@ class IndigoAdapterTest(TestCase):
             ]
         }
 
+        Taxonomy.load_bulk(
+            [
+                {
+                    "data": {
+                        "name": "Enrichments arbitration law",
+                    },
+                    "children": [],
+                }
+            ]
+        )
+
         adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
             json=lambda: taxonomy_tree if url.endswith("/taxonomy-topics") else dataset
         )
@@ -323,6 +334,37 @@ class IndigoAdapterTest(TestCase):
         self.assertEqual(document.work, enrichment.work)
         self.assertEqual("sec_1", enrichment.provision_eid)
         self.assertEqual(topic, enrichment.topic)
+
+    def test_enrichment_dataset_ingestor_requires_local_taxonomy_root(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        taxonomy_tree = {
+            "results": [
+                {
+                    "name": "Arbitration law",
+                    "slug": "enrichments-arbitration-law",
+                    "children": [],
+                }
+            ]
+        }
+        dataset = {"enrichments": []}
+
+        adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            json=lambda: taxonomy_tree if url.endswith("/taxonomy-topics") else dataset
+        )
+
+        with self.assertRaisesMessage(
+            ValueError,
+            "Taxonomy root enrichments-arbitration-law not found locally",
+        ):
+            adapter.import_dataset()
 
     @patch("peachjam.adapters.indigo.SourceFile.track_changes", autospec=True)
     def test_download_source_file_creates_tracked_source_file(self, track_changes):

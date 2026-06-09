@@ -1063,7 +1063,6 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
 
     def import_dataset(self):
         """Import provision-topic enrichments for works that exist locally."""
-        self.ensure_taxonomy_roots()
         root_mapping, tree_mapping = self.import_taxonomy_tree()
         dataset = self.get_dataset()
 
@@ -1149,37 +1148,6 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             ):
                 return f"enrichments-{slug}"
         return slug
-
-    def ensure_taxonomy_roots(self):
-        """Create local taxonomy roots before importing their descendants.
-
-        The base import_taxonomy_tree() requires each target root to already
-        exist locally (it raises otherwise), so the roots are created here first.
-        """
-        root_mapping = self.taxonomy_topic_root_mapping
-
-        remote_roots = {root["slug"]: root for root in self.get_taxonomy_tree()}
-        existing_roots = set(
-            Taxonomy.objects.filter(slug__in=root_mapping.values()).values_list(
-                "slug", flat=True
-            )
-        )
-        for src, target in root_mapping.items():
-            if target in existing_roots:
-                continue
-            remote_root = remote_roots[src]
-            self.create_taxonomy_root(remote_root, target)
-
-    def create_taxonomy_root(self, remote_root, slug):
-        """Create a local taxonomy root with the remote display name."""
-        root = Taxonomy.add_root(name=slug.replace("-", " "))
-        # Taxonomy.save() derives the slug from the name. The remote enrichment
-        # root needs a stable API slug and a human-readable display name.
-        Taxonomy.objects.filter(pk=root.pk).update(
-            name=remote_root["name"],
-            slug=slug,
-            path_name=remote_root["name"],
-        )
 
 
 @plugins.register("ingestor-adapter")
