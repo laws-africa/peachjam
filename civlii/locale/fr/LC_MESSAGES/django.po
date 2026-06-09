@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
+"POT-Creation-Date: 2026-06-08 07:01+0000\n"
+"PO-Revision-Date: 2026-06-09 09:13\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -41,35 +41,39 @@ msgstr "Jugements"
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/peachjam/_header.html:31
-msgid "African Union and ECOWAS"
-msgstr "Union africaine et CEDEAO"
+#: templates/peachjam/_header.html:32
+msgid "Regional material"
+msgstr "Matériel régional"
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:38
 msgid "African Court of Human and People's Rights"
 msgstr "Cour africaine des droits de l'homme et des peuples"
 
-#: templates/peachjam/_header.html:43
+#: templates/peachjam/_header.html:44
 msgid "African Commission on Human and People's Rights"
 msgstr "Commission africaine des droits de l'homme et des peuples"
 
-#: templates/peachjam/_header.html:49
+#: templates/peachjam/_header.html:50
 msgid "Economic Community of West African States (ECOWAS)"
 msgstr "Communauté économique des États de l'Afrique de l'Ouest (CEDEAO)"
 
-#: templates/peachjam/_header.html:55
+#: templates/peachjam/_header.html:56
 msgid "ECOWAS Community Court of Justice"
 msgstr "Cour de justice de la CEDEAO"
 
-#: templates/peachjam/_header.html:61
+#: templates/peachjam/_header.html:62
 msgid "AU Charters and Treaties"
 msgstr "Chartes et traités de l'UA"
 
-#: templates/peachjam/_header.html:69
+#: templates/peachjam/_header.html:68
+msgid "OHADA"
+msgstr "OHADA"
+
+#: templates/peachjam/_header.html:76
 msgid "About"
 msgstr "À propos"
 
-#: templates/peachjam/_header.html:73
+#: templates/peachjam/_header.html:80
 msgid "Help"
 msgstr "Aide"
 
