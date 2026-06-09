@@ -372,6 +372,15 @@ class LegislationFilterForm(BaseDocumentFilterForm):
         return queryset.order_by(*ordering)
 
 
+class ProvisionTopicEnrichmentFilterForm(LegislationFilterForm):
+    countries = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    filter_fields = LegislationFilterForm.filter_fields + ["countries"]
+
+    def apply_filter_countries(self, queryset):
+        countries = self.cleaned_data.get("countries", [])
+        return queryset.filter(jurisdiction_id__in=countries) if countries else queryset
+
+
 class GazetteFilterForm(BaseDocumentFilterForm):
     sub_publications = PermissiveTypedListField(coerce=remove_nulls, required=False)
     special = PermissiveTypedListField(coerce=remove_nulls, required=False)

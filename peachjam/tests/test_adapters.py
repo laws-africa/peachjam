@@ -8,8 +8,20 @@ from django.test import TestCase
 from django.utils.text import slugify
 from languages_plus.models import Language
 
-from peachjam.adapters import IndigoAdapter, JudgmentAdapter
-from peachjam.models import Court, GenericDocument, Judgment, SourceFile, Taxonomy
+from peachjam.adapters import (
+    IndigoAdapter,
+    IndigoEnrichmentDatasetIngestor,
+    JudgmentAdapter,
+)
+from peachjam.models import (
+    Court,
+    GenericDocument,
+    Judgment,
+    Legislation,
+    ProvisionTopicEnrichment,
+    SourceFile,
+    Taxonomy,
+)
 
 
 class IndigoAdapterTest(TestCase):
@@ -243,6 +255,116 @@ class IndigoAdapterTest(TestCase):
             ],
             local_tree,
         )
+
+    def test_enrichment_dataset_ingestor_imports_provision_topics(self):
+        document = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="act",
+            frbr_uri_number="1",
+            title="Arbitration Act",
+            metadata_json={"commenced": True},
+        )
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        taxonomy_tree = {
+            "results": [
+                {
+                    "name": "Enrichments",
+                    "slug": "enrichments",
+                    "children": [
+                        {
+                            "name": "Arbitration law",
+                            "slug": "enrichments-arbitration-law",
+                            "children": [
+                                {
+                                    "name": "Validity",
+                                    "slug": "enrichments-arbitration-law-validity",
+                                    "children": [],
+                                },
+                                {
+                                    "name": "Recognition",
+                                    "slug": "arbitration-law-recognition",
+                                    "children": [],
+                                },
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+        dataset = {
+            "enrichments": [
+                {
+                    "work": document.work.frbr_uri,
+                    "provision_id": "sec_1",
+                    "taxonomy_topic": "arbitration-law-validity",
+                }
+            ]
+        }
+
+        Taxonomy.load_bulk(
+            [
+                {
+                    "data": {
+                        "name": "Enrichments arbitration law",
+                    },
+                    "children": [],
+                }
+            ]
+        )
+
+        adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            json=lambda: taxonomy_tree if url.endswith("/taxonomy-topics") else dataset
+        )
+
+        adapter.import_dataset()
+
+        topic = Taxonomy.objects.get(slug="enrichments-arbitration-law-validity")
+        Taxonomy.objects.get(slug="enrichments-arbitration-law-recognition")
+        enrichment = ProvisionTopicEnrichment.objects.get()
+        self.assertEqual(document.work, enrichment.work)
+        self.assertEqual("sec_1", enrichment.provision_eid)
+        self.assertEqual(topic, enrichment.topic)
+
+    def test_enrichment_dataset_ingestor_requires_local_taxonomy_root(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        taxonomy_tree = {
+            "results": [
+                {
+                    "name": "Arbitration law",
+                    "slug": "enrichments-arbitration-law",
+                    "children": [],
+                }
+            ]
+        }
+        dataset = {"enrichments": []}
+
+        adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            json=lambda: taxonomy_tree if url.endswith("/taxonomy-topics") else dataset
+        )
+
+        with self.assertRaisesMessage(
+            ValueError,
+            "Taxonomy root enrichments-arbitration-law not found locally",
+        ):
+            adapter.import_dataset()
 
     @patch("peachjam.adapters.indigo.SourceFile.track_changes", autospec=True)
     def test_download_source_file_creates_tracked_source_file(self, track_changes):

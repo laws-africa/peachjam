@@ -15,7 +15,10 @@ from django.utils.translation import gettext as _
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
-from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
+from peachjam.forms import (
+    LegislationFilterForm,
+    UnconstitutionalProvisionFilterForm,
+)
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.models import (
     CoreDocument,
