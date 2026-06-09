@@ -1028,7 +1028,7 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             root = self.find_taxonomy_topic(topics, root_slug)
             if root is None:
                 raise ValueError(f"Taxonomy root {root_slug} not in tree from server")
-            roots.append(self.normalize_taxonomy_topic_slugs(root, root_slug))
+            roots.append(self.normalize_taxonomy_topic_slugs(root))
         return roots
 
     def get_taxonomy_tree(self):
@@ -1045,12 +1045,12 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
                 return found
         return None
 
-    def normalize_taxonomy_topic_slugs(self, topic, root_slug):
+    def normalize_taxonomy_topic_slugs(self, topic):
         """Recursively add the enrichments namespace to a topic tree's slugs."""
         topic = topic.copy()
         topic["slug"] = self.normalize_taxonomy_topic_slug(topic["slug"])
         topic["children"] = [
-            self.normalize_taxonomy_topic_slugs(child, root_slug)
+            self.normalize_taxonomy_topic_slugs(child)
             for child in topic.get("children", [])
         ]
         return topic
