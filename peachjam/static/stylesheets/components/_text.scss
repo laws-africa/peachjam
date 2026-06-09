@@ -29,7 +29,7 @@ ul.flynotes > li {
 }
 
 .flynote-chain-children {
-  margin-left: min(var(--flynote-child-indent), 40ch);
+  margin-left: 1rem;
 }
 
 .flynote-chain-children ul.flynotes > li {
