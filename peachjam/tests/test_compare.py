@@ -375,7 +375,7 @@ class ComparePortionsViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Suggestions")
         self.assertContains(response, "Second Act")
-        self.assertContains(response, "Suggested provision")
+        self.assertContains(response, "Suggestion")
         self.assertContains(response, f'href="{suggested_url}"')
 
     def test_chooser_for_selected_side_includes_cancel(self):
