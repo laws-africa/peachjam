@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-08 07:01+0000\n"
-"PO-Revision-Date: 2026-06-09 09:13\n"
+"PO-Revision-Date: 2026-06-09 10:11\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -55,7 +55,7 @@ msgstr "Sheria"
 
 #: templates/peachjam/_header.html:28
 msgid "Regional material"
-msgstr ""
+msgstr "Nyenzo za kikanda"
 
 #: templates/peachjam/_header.html:34
 msgid "African Court of Human and People's Rights"
@@ -79,7 +79,7 @@ msgstr "Mikataba na Mikataba ya AU"
 
 #: templates/peachjam/_header.html:64
 msgid "OHADA"
-msgstr ""
+msgstr "OHADA"
 
 #: templates/peachjam/_header.html:72
 msgid "Articles"
