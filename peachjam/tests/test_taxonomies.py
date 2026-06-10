@@ -79,18 +79,16 @@ class TaxonomyTestCase(WebTest):
             ["Administrative law", "Zoning"],
         )
 
-    def test_restricted_taxonomy_unauthorized(self):
+    def test_restricted_taxonomy_is_public(self):
         unauthorized_user = User.objects.get(username="user@example.com")
         land = Taxonomy.objects.get(name="Land Rights")
         response = self.app.get(land.get_absolute_url(), user=unauthorized_user)
         self.assertEqual(response.status_code, 200)
-        self.assertNotIn("Climate Change", response.text)
+        self.assertIn("Climate Change", response.text)
 
         environment = Taxonomy.objects.get(name="Environment")
-        response = self.app.get(
-            environment.get_absolute_url(), user=unauthorized_user, expect_errors=True
-        )
-        self.assertEqual(response.status_code, 403)
+        response = self.app.get(environment.get_absolute_url(), user=unauthorized_user)
+        self.assertEqual(response.status_code, 200)
 
     def test_restricted_taxonomy_authorized(self):
         authorized_user = User.objects.get(username="officer@example.com")
@@ -103,6 +101,24 @@ class TaxonomyTestCase(WebTest):
         response = self.app.get(environment.get_absolute_url(), user=authorized_user)
         self.assertEqual(response.status_code, 200)
         self.assertNotIn("public", response.headers.get("Cache-Control", ""))
+
+    def test_hidden_taxonomy_is_hidden_from_listing_but_public_directly(self):
+        hidden = Taxonomy.add_root(name="Enrichments", hidden=True)
+        child = hidden.add_child(name="Arbitration law")
+
+        response = self.app.get(reverse("top_level_taxonomy_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("Enrichments", response.text)
+
+        response = self.app.get(
+            reverse("first_level_taxonomy_list", kwargs={"topic": hidden.slug})
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Arbitration law", response.text)
+
+        response = self.app.get(child.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Arbitration law")
 
     def test_first_level_taxonomy_page_does_not_need_get_root_for_child_links(self):
         with patch.object(

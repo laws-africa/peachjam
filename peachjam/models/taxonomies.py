@@ -7,7 +7,6 @@ from django.db import connection, models, transaction
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
-from guardian.shortcuts import get_objects_for_user
 from treebeard.mp_tree import MP_Node
 
 from peachjam.models import CoreDocument, EntityProfile
@@ -139,27 +138,12 @@ class Taxonomy(MP_Node):
             for child in self.get_children():
                 child.save()
 
-    def get_allowed_children(self, user):
-        if user.is_authenticated:
-            allowed_taxonomies = set(
-                get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
-                    "id", flat=True
-                )
-            )
-        else:
-            allowed_taxonomies = []
-
-        children = self.get_children().values("id", "restricted")
-        exclude = []
-
-        for child in children:
-            is_restricted = child["restricted"]
-            is_allowed = child["id"] in allowed_taxonomies
-            if is_restricted and not is_allowed:
-                exclude.append(child["id"])
-
-        children = self.get_children().exclude(id__in=exclude).order_by("name")
-        return children
+    def get_allowed_children(self, user=None, include_hidden=False):
+        # taxonomy pages are public; we only hide "hidden" topics from listings
+        children = self.get_children()
+        if not include_hidden:
+            children = children.filter(hidden=False)
+        return children.order_by("name")
 
     def get_offline_ancestor(self):
         """Return the first ancestor which is available offline, including this node, if any."""
@@ -214,26 +198,14 @@ class Taxonomy(MP_Node):
         return cls.sort_item_tree(tree)
 
     @classmethod
-    def get_allowed_taxonomies(cls, user=None, root=None):
-        if user and user.is_authenticated:
-            allowed_taxonomies = set(
-                get_objects_for_user(user, "peachjam.view_taxonomy").values_list(
-                    "id", flat=True
-                )
-            )
-        else:
-            allowed_taxonomies = []
-
+    def get_allowed_taxonomies(cls, user=None, root=None, include_hidden=False):
+        # taxonomy pages are public; we only hide "hidden" topics from listings
         node_ids = []
 
         def filter_nodes(node):
             data = node.get("data", {})
             is_hidden = data.get("hidden", False)
-            if is_hidden:
-                return None
-            is_restricted = data.get("restricted", False)
-            is_allowed = node.get("id") in allowed_taxonomies
-            if is_restricted and not is_allowed:
+            if is_hidden and not include_hidden:
                 return None
 
             node_ids.append(node["id"])

@@ -1,5 +1,4 @@
 from django.shortcuts import Http404, get_object_or_404
-from django.template.response import TemplateResponse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import never_cache
@@ -16,7 +15,7 @@ class TaxonomyListView(TemplateView):
 
     def get(self, request, *args, **kwargs):
         context = self.get_context_data(**kwargs)
-        context["taxonomies"] = Taxonomy.get_allowed_taxonomies(request.user)["tree"]
+        context["taxonomies"] = Taxonomy.get_allowed_taxonomies()["tree"]
         context["taxonomy_url"] = "taxonomy_detail"
         return self.render_to_response(context)
 
@@ -25,19 +24,9 @@ class TaxonomyListView(TemplateView):
 class AllowedTaxonomyMixin:
     def dispatch(self, request, *args, **kwargs):
         self.taxonomy = self.get_taxonomy()
-        is_ancestor_restricted = self.taxonomy.get_ancestors().values_list(
-            "restricted", flat=True
-        )
-        if self.taxonomy.restricted or any(is_ancestor_restricted):
-            if not request.user.has_perm("peachjam.view_taxonomy", self.taxonomy):
-                return TemplateResponse(
-                    request,
-                    "peachjam/taxonomy_restricted.html",
-                    {"taxonomy": self.taxonomy},
-                    status=403,
-                )
         self.allowed_taxonomies = Taxonomy.get_allowed_taxonomies(
-            request.user, root=self.taxonomy
+            root=self.taxonomy,
+            include_hidden=True,
         )
         return super().dispatch(request, *args, **kwargs)
 
@@ -45,7 +34,6 @@ class AllowedTaxonomyMixin:
 class TaxonomyFirstLevelView(AllowedTaxonomyMixin, DetailView):
     template_name = "peachjam/taxonomy_first_level_detail.html"
     model = Taxonomy
-    queryset = Taxonomy.objects.filter(hidden=False)
     slug_url_kwarg = "topic"
     context_object_name = "taxonomy"
     navbar_link = "taxonomy"
@@ -55,7 +43,7 @@ class TaxonomyFirstLevelView(AllowedTaxonomyMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        children = list(self.object.get_allowed_children(self.request.user))
+        children = list(self.object.get_allowed_children(include_hidden=True))
         for child in children:
             child.root_slug = self.object.slug
         context["children"] = children
