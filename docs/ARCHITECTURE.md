@@ -94,6 +94,8 @@ Important subareas:
 - `peachjam/adapters`
   - External import/integration adapters, registered on app startup.
   - Includes Indigo, judgments, gazettes, GitBook, ratifications.
+  - See `docs/INGESTORS.md` for the scheduled ingestor lifecycle and adapter
+    update contracts.
 - `peachjam/middleware.py`
   - Cross-cutting request behavior.
   - Includes cache sanity checks, cache variation for HTMX, redirect handling, preferred language, terms acceptance, and request/user ID headers.

@@ -3,6 +3,7 @@ import os
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import requests
 from countries_plus.models import Country
 from django.test import TestCase
 from django.utils.text import slugify
@@ -334,6 +335,221 @@ class IndigoAdapterTest(TestCase):
         self.assertEqual(document.work, enrichment.work)
         self.assertEqual("sec_1", enrichment.provision_eid)
         self.assertEqual(topic, enrichment.topic)
+
+    def test_enrichment_dataset_ingestor_check_for_updates_returns_dataset_sentinel(
+        self,
+    ):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-02T00:00:00Z",
+            "enrichments": [],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual([adapter.DATASET_DOCUMENT_ID], updated)
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_check_for_updates_checks_works_when_dataset_fresh(
+        self,
+    ):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [
+                {
+                    "work": "/akn/za/act/2024/1",
+                    "provision_id": "sec_1",
+                    "taxonomy_topic": "arbitration-law-validity",
+                }
+            ],
+        }
+        adapter.get_work = lambda work_frbr_uri: {  # noqa: E731
+            "url": "http://example.com/akn/za/act/2024/1/eng@2024-01-01",
+            "updated_at": "2024-01-03T00:00:00Z",
+            "points_in_time": [
+                {
+                    "expressions": [
+                        {
+                            "url": "http://example.com/akn/za/act/2024/1/eng@2024-01-01",
+                            "updated_at": "2024-01-03T00:00:00Z",
+                        },
+                        {
+                            "url": "http://example.com/akn/za/act/2024/1/fra@2024-01-01",
+                            "updated_at": "2024-01-03T00:00:00Z",
+                        },
+                    ]
+                }
+            ],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual(
+            [
+                "http://example.com/akn/za/act/2024/1/eng@2024-01-01",
+                "http://example.com/akn/za/act/2024/1/fra@2024-01-01",
+            ],
+            sorted(updated),
+        )
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_queues_missing_local_work(self):
+        document = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="act",
+            frbr_uri_number="1",
+            title="Existing Act",
+            metadata_json={"commenced": True},
+        )
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [
+                {"work": document.work_frbr_uri},
+                {"work": "/akn/za/act/2024/2"},
+            ],
+        }
+        adapter.get_work = lambda work_frbr_uri: {  # noqa: E731
+            "url": f"http://example.com{work_frbr_uri}/eng@2024-01-01",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "points_in_time": [],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual(
+            ["http://example.com/akn/za/act/2024/2/eng@2024-01-01"],
+            updated,
+        )
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_skips_unchanged_existing_work(self):
+        document = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="act",
+            frbr_uri_number="1",
+            title="Existing Act",
+            metadata_json={"commenced": True},
+        )
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [{"work": document.work_frbr_uri}],
+        }
+        adapter.get_work = lambda work_frbr_uri: {  # noqa: E731
+            "url": f"http://example.com{work_frbr_uri}/eng@2024-01-01",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "points_in_time": [],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual([], updated)
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_skips_missing_remote_work(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        response = SimpleNamespace(status_code=404)
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [{"work": "/akn/za/act/2024/1"}],
+        }
+
+        def get_work(work_frbr_uri):
+            raise requests.exceptions.HTTPError(response=response)
+
+        adapter.get_work = get_work
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual([], updated)
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_update_document_imports_dataset(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+
+        with patch.object(adapter, "import_dataset") as import_dataset:
+            adapter.update_document(adapter.DATASET_DOCUMENT_ID)
+
+        import_dataset.assert_called_once_with()
+
+    def test_enrichment_dataset_ingestor_update_document_delegates_document_urls(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+
+        with patch.object(IndigoAdapter, "update_document") as update_document:
+            adapter.update_document(
+                "http://example.com/akn/za/act/2024/1/eng@2024-01-01"
+            )
+
+        update_document.assert_called_once_with(
+            "http://example.com/akn/za/act/2024/1/eng@2024-01-01"
+        )
 
     def test_enrichment_dataset_ingestor_requires_local_taxonomy_root(self):
         adapter = IndigoEnrichmentDatasetIngestor(
