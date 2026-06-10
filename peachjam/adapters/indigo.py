@@ -982,7 +982,10 @@ class IndigoTopicAdapter(IndigoAdapter):
 
 @plugins.register("ingestor-adapter")
 class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
-    """Imports provision-level taxonomy enrichments from an Indigo enrichment dataset.
+    """Imports provision-level taxonomy enrichments from an Indigo enrichment dataset. At the same time,
+    this also ensures that associated works and documents are up-to-date.
+
+    It does NOT delete works/documents that are removed.
 
     Settings:
 
@@ -991,6 +994,8 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
     * dataset_id: Indigo enrichment dataset ID
     * taxonomy_topic_root: src-root:target-root mapping for taxonomy import
     """
+
+    DATASET_DOCUMENT_ID = "dataset"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -1003,20 +1008,62 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         self.taxonomy_topic_root = self.settings["taxonomy_topic_root"]
 
     def check_for_updates(self, last_refreshed):
-        """Signal a re-import only when the dataset changed since the last refresh.
+        """Check whether the dataset or works referenced by the dataset changed.
 
-        Returning a non-empty list makes the ingestor call update_document(),
-        which re-imports the whole dataset. This avoids re-importing every run.
+        The dataset itself is represented by a sentinel document ID. Referenced
+        works are represented by Indigo expression URLs, which are delegated to
+        the base Indigo document importer.
         """
         dataset = self.get_dataset()
+        updated = []
+
         updated_at = dataset.get("updated_at")
-        if last_refreshed and updated_at and parser.parse(updated_at) <= last_refreshed:
-            return [], []
-        return [str(self.dataset_id)], []
+        if (
+            last_refreshed is None
+            or not updated_at
+            or parser.parse(updated_at) > last_refreshed
+        ):
+            updated.append(self.DATASET_DOCUMENT_ID)
+
+        for work_frbr_uri in self.get_dataset_work_frbr_uris(dataset):
+            try:
+                work = self.get_work(work_frbr_uri)
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 404:
+                    logger.warning(
+                        "Ignoring enrichment dataset work not found in Indigo: %s",
+                        work_frbr_uri,
+                    )
+                    continue
+                raise e
+
+            if not CoreDocument.objects.filter(work_frbr_uri=work_frbr_uri).exists():
+                updated.extend(self.check_for_updated([work], None))
+            else:
+                updated.extend(self.check_for_updated([work], last_refreshed))
+
+        return list(dict.fromkeys(updated)), []
 
     def update_document(self, document_id):
-        """Re-import the whole enrichment dataset."""
-        self.import_dataset()
+        """Update either the enrichment dataset or an Indigo document."""
+        if document_id == self.DATASET_DOCUMENT_ID:
+            self.import_dataset()
+        else:
+            super().update_document(document_id)
+
+    def get_dataset_work_frbr_uris(self, dataset):
+        """Get the unique work FRBR URIs referenced by the enrichment dataset."""
+        return sorted(
+            {
+                enrichment.get("work")
+                for enrichment in dataset.get("enrichments", [])
+                if enrichment.get("work")
+            }
+        )
+
+    def get_work(self, work_frbr_uri):
+        """Fetch an Indigo work by work FRBR URI."""
+        return self.client_get(f"{self.api_url}{work_frbr_uri}.json").json()
 
     @cached_property
     def taxonomy_tree(self):
