@@ -2246,7 +2246,8 @@ class ExternalDocumentAdmin(DocumentAdmin):
 class CourtRegistryAdmin(BaseAdmin):
     help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
-    list_display = ("name", "code")
+    list_display = ("court", "name", "code")
+    list_select_related = ("court",)
 
 
 @admin.register(Outcome)
