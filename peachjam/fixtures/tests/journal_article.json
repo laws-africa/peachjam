@@ -61,7 +61,7 @@
       "created_by": 2,
       "allow_robots": true,
       "published": true,
-      "metadata_json": null,
+      "metadata_json": {},
       "ingestor": null,
       "restricted": false,
       "labels": []
