@@ -94,8 +94,14 @@ class Ingestor(models.Model):
         return klass(self, settings)
 
     def queue_task(self):
+        if not self.pk:
+            log.warning(f"ingestor {self.name} has no primary key, not queueing task")
+            return
+
         if self.enabled:
-            run_ingestor(self.id, repeat=self.repeat, schedule=self.schedule)
+            run_ingestor(
+                self.pk, creator=self, repeat=self.repeat, schedule=self.schedule
+            )
         else:
             log.info(f"ingestor {self.name} disabled, ignoring")
 

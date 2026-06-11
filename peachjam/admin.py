@@ -1877,7 +1877,8 @@ class IngestorForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         instance = super().save(*args, **kwargs)
-        instance.queue_task()
+        if kwargs.get("commit", True):
+            instance.queue_task()
         return instance
 
 
@@ -1887,6 +1888,10 @@ class IngestorAdmin(admin.ModelAdmin):
     actions = ["refresh_all_content", "update_latest_content"]
     list_display = ("name", "adapter", "last_refreshed_at", "enabled")
     form = IngestorForm
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.queue_task()
 
     def refresh_all_content(self, request, queryset):
         queryset.update(last_refreshed_at=None)
