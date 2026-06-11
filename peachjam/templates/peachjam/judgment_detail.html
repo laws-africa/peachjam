@@ -114,6 +114,9 @@
       </dd>
     </dl>
   {% endif %}
+{% endblock %}
+{% block post-metadata-cols %}
+  {{ block.super }}
   {% with arbitration_judgment=document.arbitration_classification %}
     {% if arbitration_judgment %}
       <div>

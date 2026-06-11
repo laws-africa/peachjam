@@ -480,9 +480,13 @@
               </div>
             {% endblock %}
             {% block extra-metadata %}{% endblock %}
-            {% block metadata-ask-ai %}
-              {% include "peachjam/document/_ask_ai_banner.html" %}
-            {% endblock %}
+            <div class="row">
+              {% block post-metadata-cols %}
+                {% block metadata-ask-ai %}
+                  {% include "peachjam/document/_ask_ai_banner.html" %}
+                {% endblock %}
+              {% endblock %}
+            </div>
             <hr class="mb-5" />
           </div>
           {% block content %}
