@@ -4,8 +4,7 @@
     {% for item in linked_flynote_groups %}
       <li>
         {% if item.children and item.nodes|length > 1 %}
-          <div class="flynote-chain"
-               style="--flynote-child-indent: {{ item.child_indent }}ch">
+          <div class="flynote-chain">
             <span class="flynote-chain-prefix">
               {% if nested %}—{% endif %}
               {% for node in item.nodes %}

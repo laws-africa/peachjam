@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 08:20+0000\n"
+"POT-Creation-Date: 2026-06-08 07:01+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -53,15 +53,43 @@ msgstr "Jugements"
 msgid "Legislation"
 msgstr "Législation"
 
-#: templates/peachjam/_header.html:24
+#: templates/peachjam/_header.html:28
+msgid "Regional material"
+msgstr "Contenu régional"
+
+#: templates/peachjam/_header.html:34
+msgid "African Court of Human and People's Rights"
+msgstr "Cour africaine des droits de l'homme et des peuples"
+
+#: templates/peachjam/_header.html:40
+msgid "African Commission on Human and People's Rights"
+msgstr "Commission africaine des droits de l'homme et des peuples"
+
+#: templates/peachjam/_header.html:46
+msgid "Economic Community of West African States (ECOWAS)"
+msgstr "Communauté économique des États de l'Afrique de l'Ouest (CEDEAO)"
+
+#: templates/peachjam/_header.html:52
+msgid "ECOWAS Community Court of Justice"
+msgstr "Cour de justice de la CEDEAO"
+
+#: templates/peachjam/_header.html:58
+msgid "AU Charters and Treaties"
+msgstr "Chartes et traités de l'UA"
+
+#: templates/peachjam/_header.html:64
+msgid "OHADA"
+msgstr "OHADA"
+
+#: templates/peachjam/_header.html:72
 msgid "Articles"
 msgstr "Articles"
 
-#: templates/peachjam/_header.html:30
+#: templates/peachjam/_header.html:78
 msgid "About"
 msgstr "À propos"
 
-#: templates/peachjam/_header.html:34
+#: templates/peachjam/_header.html:82
 msgid "Help"
 msgstr "Aide"
 
@@ -116,4 +144,3 @@ msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noop
 #: templates/peachjam/about.html:41
 msgid "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance."
 msgstr "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> est une initiative de la Faculté de droit de l’Université du Cap qui soutient les institutions africaines dans la construction et le maintien d’un accès libre aux plates-formes juridiques. Son travail promeut l’accès à l’information juridique en tant que pierre angulaire de la démocratie et de la bonne gouvernance."
-

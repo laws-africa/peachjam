@@ -925,6 +925,16 @@ class JudgmentTestCase(TestCase):
 
         self.assertEqual(court, judgment.court)
 
+    def test_court_registry_str_includes_court_code(self):
+        court = Court.objects.first()
+        registry = CourtRegistry.objects.create(
+            court=court,
+            name="Main registry",
+            code="main-registry",
+        )
+
+        self.assertEqual(f"{court.code} - Main registry", str(registry))
+
     @patch("peachjam.models.judgment.JudgmentSummariser")
     def test_generate_summary_updates_judgment_fields(self, summariser_cls):
         expected_flynote = (
