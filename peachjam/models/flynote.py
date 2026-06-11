@@ -10,10 +10,13 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
-from django_lifecycle import AFTER_SAVE, LifecycleModelMixin
+from django_lifecycle import AFTER_SAVE
 from treebeard.mp_tree import MP_Node
 
-from peachjam.models.lifecycle import on_attribute_changed
+from peachjam.models.lifecycle import (
+    SuppressableHooksLifecycleMixin,
+    on_attribute_changed,
+)
 from peachjam.tasks import refresh_flynote_document_count
 
 log = logging.getLogger(__name__)
@@ -21,7 +24,7 @@ log = logging.getLogger(__name__)
 __all__ = ["Flynote", "JudgmentFlynote", "FlynoteDocumentCount"]
 
 
-class Flynote(LifecycleModelMixin, MP_Node):
+class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
     """Hierarchical flynote tree node using treebeard's materialised path. This is used to represent textual flynotes
     in a tree form, for browsing and for search.
 

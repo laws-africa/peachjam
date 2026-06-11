@@ -953,6 +953,7 @@ class JudgmentTestCase(TestCase):
         )
         summariser = MagicMock()
         summariser.enabled.return_value = True
+        summariser.summary_language = "English"
         summariser.summarise_judgment.return_value = fake_summary
         summariser_cls.return_value = summariser
 
@@ -980,6 +981,8 @@ class JudgmentTestCase(TestCase):
         self.assertEqual(fake_summary.issues, judgment.issues)
         self.assertEqual(fake_summary.order, judgment.order)
         self.assertTrue(judgment.summary_ai_generated)
+        self.assertEqual("English", judgment.summary_language)
+        self.assertIsNotNone(judgment.summary_generated_at)
         summariser.summarise_judgment.assert_called_once_with(judgment)
 
     @patch("peachjam.models.judgment.generate_judgment_summary")
@@ -1064,6 +1067,33 @@ class JudgmentTestCase(TestCase):
         judgment.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_content_text_change_regenerates_existing_ai_summary(
+        self, generate_summary_task
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+            case_summary="Existing AI summary",
+            summary_ai_generated=True,
+        )
+        initial_calls = len(generate_summary_task.call_args_list)
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>This is updated judgment text.</p>")
+        doc_content.save()
+
+        self.assertGreater(len(generate_summary_task.call_args_list), initial_calls)
+        self.assertTrue(
+            any(
+                call.args == (judgment.pk,)
+                for call in generate_summary_task.call_args_list
+            )
+        )
 
     def test_serialise_flynote_tree(self):
         from peachjam.analysis.flynotes import FlynoteUpdater

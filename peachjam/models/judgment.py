@@ -10,6 +10,7 @@ from django.db import models
 from django.db.models import Max, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -32,6 +33,10 @@ from peachjam.tasks import (
 )
 
 log = logging.getLogger(__name__)
+
+
+def default_summary_language():
+    return settings.PEACHJAM["SUMMARISER_LANGUAGE"]
 
 
 class Attorney(models.Model):
@@ -399,6 +404,13 @@ class Judgment(CoreDocument):
         blank=True,
         help_text=_("When the AI summary was generated"),
     )
+    summary_language = models.CharField(
+        _("summary language"),
+        max_length=128,
+        blank=True,
+        default=default_summary_language,
+        help_text=_("The language used for the AI-generated summary"),
+    )
     summary_trace_id = models.CharField(
         _("summary trace ID"),
         max_length=1024,
@@ -722,6 +734,8 @@ class Judgment(CoreDocument):
             self.issues = summary.issues
             self.order = summary.order
             self.summary_ai_generated = True
+            self.summary_generated_at = timezone.now()
+            self.summary_language = summariser.summary_language
             self.save()
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
