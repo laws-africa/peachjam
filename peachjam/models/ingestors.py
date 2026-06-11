@@ -66,10 +66,10 @@ class Ingestor(models.Model):
         updated, deleted = adapter.check_for_updates(self.last_refreshed_at)
         log.info(f"{len(updated)} documents to update")
         for doc in updated:
-            update_document(self.id, doc)
+            update_document(self.id, doc, creator=self)
         log.info(f"{len(deleted)} documents to delete")
         for doc in deleted:
-            delete_document(self.id, doc)
+            delete_document(self.id, doc, creator=self)
 
         self.last_refreshed_at = now
         self.save()
@@ -100,7 +100,10 @@ class Ingestor(models.Model):
 
         if self.enabled:
             run_ingestor(
-                self.pk, creator=self, repeat=self.repeat, schedule=self.schedule
+                self.pk,
+                creator=self,
+                repeat=self.repeat,
+                schedule=0,
             )
         else:
             log.info(f"ingestor {self.name} disabled, ignoring")
