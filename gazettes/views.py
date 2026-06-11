@@ -65,9 +65,16 @@ class JurisdictionView(GazetteListView):
 
 
 class YearView(GazetteYearView):
+    def get(self, request, code, *args, **kwargs):
+        try:
+            self.jurisdiction = JURISDICTION_MAP[code]
+        except KeyError:
+            raise Http404()
+        return super().get(request, code, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["jurisdiction"] = juri = JURISDICTION_MAP[self.kwargs["code"]]
+        context["jurisdiction"] = juri = self.jurisdiction
         context["contributors"] = CONTRIBUTORS.get(juri.code)
         return context
 
