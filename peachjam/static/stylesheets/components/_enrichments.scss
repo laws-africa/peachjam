@@ -52,4 +52,8 @@
       background-color: transparentize(tint-color($secondary, 80%), 0.6);
     }
   }
+
+  .active-portion {
+    background-color: transparentize(tint-color($secondary, 80%), 0.6);
+  }
 }
