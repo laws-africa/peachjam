@@ -1,0 +1,7 @@
+{% load peachjam %}
+{% if MULTIPLE_JURISDICTIONS or document.jurisdiction != PEACHJAM_SETTINGS.default_document_jurisdiction %}
+  {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
+  {% if document.locality %}· {{ document.locality }}{% endif %}
+{% elif MULTIPLE_LOCALITIES %}
+  {{ document.locality|default_if_none:'' }}
+{% endif %}

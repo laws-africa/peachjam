@@ -35,9 +35,7 @@
           <h2 class="h5 mb-1" id="provisions-document-{{ document.pk }}">
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </h2>
-          {% if document.jurisdiction %}
-            <div class="text-muted small">{% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction }}</div>
-          {% endif %}
+          <div>{% include 'peachjam/document/_jurisdiction.html' %}</div>
         </div>
         <div class="card-body bg-light">
           {% for provision in document.provisions %}
