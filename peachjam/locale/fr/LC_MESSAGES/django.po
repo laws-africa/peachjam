@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 08:12+0000\n"
-"PO-Revision-Date: 2026-06-04 09:12\n"
+"POT-Creation-Date: 2026-06-12 05:50+0000\n"
+"PO-Revision-Date: 2026-06-12 06:45\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
 "Language: fr_FR\n"
@@ -309,20 +309,20 @@ msgstr "Mettre à jour les langues"
 msgid "Gazette number"
 msgstr "Numéro de la Gazette"
 
-#: admin.py:2297
+#: admin.py:2298
 #, python-format
 msgid "Set 'accepted terms of use' to False for %(count)d users."
 msgstr "Définir « conditions d'utilisation acceptées » sur False pour les utilisateurs %(count)d ."
 
-#: admin.py:2302
+#: admin.py:2303
 msgid "Require selected users to accept terms of use"
 msgstr "Exiger que les utilisateurs sélectionnés acceptent les conditions d'utilisation"
 
-#: admin.py:2436 admin.py:2471
+#: admin.py:2437 admin.py:2472
 msgid "Document"
 msgstr "Document"
 
-#: admin.py:2444
+#: admin.py:2445
 msgid "Messages JSON"
 msgstr "Messages JSON"
 
@@ -418,81 +418,81 @@ msgstr "(Le plus récent d'abord)"
 msgid "(Oldest first)"
 msgstr "(le plus ancien en premier)"
 
-#: forms.py:477
+#: forms.py:487
 msgid "Summary prompt"
 msgstr "Résumé"
 
-#: forms.py:485
+#: forms.py:495
 msgid "Optional. Overrides the default summary prompt."
 msgstr "Facultatif. Remplace le message de résumé par défaut."
 
-#: forms.py:488
+#: forms.py:498
 msgid "Model"
 msgstr "Modèle"
 
-#: forms.py:495
+#: forms.py:505
 msgid "Optional. Overrides the configured model."
 msgstr "Facultatif. Remplace le modèle configuré."
 
-#: forms.py:498
+#: forms.py:508
 msgid "Translation language"
 msgstr "Langue de traduction"
 
-#: forms.py:506
+#: forms.py:516
 msgid "Optional. Translates the summary when set to a non-English language."
 msgstr "Optionnel. Traduit le résumé lorsqu'il est défini sur une langue autre que l'anglais."
 
-#: forms.py:554
+#: forms.py:564
 msgid "Document problem reported"
 msgstr "Problème de document signalé"
 
-#: forms.py:602
+#: forms.py:612
 msgid "Contact us message"
 msgstr "Contactez-nous message"
 
-#: forms.py:620
+#: forms.py:630
 msgid "Folders"
 msgstr "Dossiers"
 
-#: forms.py:669
+#: forms.py:679
 msgid "Please provide a valid name"
 msgstr "Veuillez fournir un nom valide"
 
-#: forms.py:675
+#: forms.py:685
 msgid "First name"
 msgstr "Prénom"
 
-#: forms.py:678
+#: forms.py:688
 msgid "Last name"
 msgstr "Nom de famille"
 
-#: forms.py:687 templates/account/login.html:89
+#: forms.py:697 templates/account/login.html:89
 #: templates/account/signup.html:47 templates/account/user_auth.html:103
 #: templates/account/user_auth.html:145 templates/user_account/home.html:26
 msgid "Password"
 msgstr "Mot de passe"
 
-#: forms.py:688 templates/account/signup.html:61
+#: forms.py:698 templates/account/signup.html:61
 msgid "Password (again)"
 msgstr "Mot de passe (encore)"
 
-#: forms.py:732
+#: forms.py:742
 msgid "I understand this action cannot be undone"
 msgstr "Je comprends que cette action est irréversible."
 
-#: forms.py:734
+#: forms.py:744
 msgid "Please confirm account deletion."
 msgstr "Veuillez confirmer la suppression du compte."
 
-#: forms.py:737
+#: forms.py:747
 msgid "Please tell us briefly why you are deleting your account."
 msgstr "Veuillez nous indiquer brièvement la raison pour laquelle vous supprimez votre compte."
 
-#: forms.py:745
+#: forms.py:755
 msgid "I agree to the Terms of Use"
 msgstr "J'accepte les conditions d'utilisation"
 
-#: forms.py:748
+#: forms.py:758
 msgid "You must accept the terms to continue."
 msgstr "Vous devez accepter les conditions pour continuer."
 
@@ -506,7 +506,7 @@ msgstr "Vous devez accepter les conditions pour continuer."
 msgid "document"
 msgstr "document"
 
-#: models/annotation.py:13 models/citations.py:23 models/enrichments.py:37
+#: models/annotation.py:13 models/citations.py:23 models/enrichments.py:38
 msgid "text"
 msgstr "texte"
 
@@ -909,7 +909,7 @@ msgid "authority score"
 msgstr "score d'autorité"
 
 #: models/core_document.py:219 models/core_document.py:400
-#: models/enrichments.py:23 models/enrichments.py:150 models/ratification.py:16
+#: models/enrichments.py:24 models/enrichments.py:168 models/ratification.py:16
 #: models/save_document.py:89
 msgid "work"
 msgstr "travail"
@@ -1064,117 +1064,133 @@ msgstr "Disposition non encore mises en vigueur"
 msgid "Provision citation"
 msgstr "Citation de disposition"
 
-#: models/enrichments.py:26 models/enrichments.py:152
+#: models/enrichments.py:15
+msgid "Provision topic"
+msgstr "Sujet de provisionnement"
+
+#: models/enrichments.py:27 models/enrichments.py:170
 msgid "provision eid"
 msgstr "disposition eid"
 
-#: models/enrichments.py:28
+#: models/enrichments.py:29
 msgid "whole work"
 msgstr "travail entier"
 
-#: models/enrichments.py:30
+#: models/enrichments.py:31
 msgid "enrichment type"
 msgstr "type d'enrichissement"
 
-#: models/enrichments.py:43
+#: models/enrichments.py:44
 msgid "provision enrichment"
 msgstr "enrichissement des provisions"
 
-#: models/enrichments.py:44
+#: models/enrichments.py:45
 msgid "provision enrichments"
 msgstr "enrichissements de disposition"
 
-#: models/enrichments.py:84 models/flynote.py:487 models/judgment.py:284
+#: models/enrichments.py:85 models/flynote.py:487 models/judgment.py:284
 #: models/judgment.py:300 models/judgment.py:466 views/courts.py:54
 #: views/judgment.py:44
 msgid "judgment"
 msgstr "jugement"
 
-#: models/enrichments.py:87
+#: models/enrichments.py:88
 msgid "date deemed unconstitutional"
 msgstr "date jugée inconstitutionnelle"
 
-#: models/enrichments.py:90
+#: models/enrichments.py:91
 msgid "end of suspension period"
 msgstr "fin de la période de suspension"
 
-#: models/enrichments.py:92
+#: models/enrichments.py:93
 msgid "resolved"
 msgstr "résolu"
 
-#: models/enrichments.py:93
+#: models/enrichments.py:94
 msgid "date resolved"
 msgstr "date de résolution"
 
-#: models/enrichments.py:100
+#: models/enrichments.py:101
 msgid "resolving amendment work"
 msgstr "résolution des travaux d'amendement"
 
-#: models/enrichments.py:102
+#: models/enrichments.py:103
 msgid "read-in text HTML"
 msgstr "texte HTML lu"
 
-#: models/enrichments.py:105
+#: models/enrichments.py:106
 msgid "unconstitutional provision"
 msgstr "disposition inconstitutionnelle"
 
-#: models/enrichments.py:106
+#: models/enrichments.py:107
 msgid "unconstitutional provisions"
 msgstr "dispositions inconstitutionnelles"
 
-#: models/enrichments.py:114
+#: models/enrichments.py:115
 msgid "and all descendants"
 msgstr "et tous les descendants"
 
-#: models/enrichments.py:117
+#: models/enrichments.py:118
 msgid "uncommenced provision"
 msgstr "dispositions non encore mises en vigueur"
 
-#: models/enrichments.py:118
+#: models/enrichments.py:119
 msgid "uncommenced provisions"
 msgstr "dispositions non encore mises en vigueur"
 
-#: models/enrichments.py:126
+#: models/enrichments.py:131 models/taxonomies.py:290
+msgid "topic"
+msgstr "sujet"
+
+#: models/enrichments.py:135
+msgid "provision topic enrichment"
+msgstr "enrichissement thématique des dispositions"
+
+#: models/enrichments.py:136
+msgid "provision topic enrichments"
+msgstr "enrichissements thématiques de l'offre"
+
+#: models/enrichments.py:144
 msgid "prefix"
 msgstr "préfixe"
 
-#: models/enrichments.py:127
+#: models/enrichments.py:145
 msgid "suffix"
 msgstr "suffixe"
 
-#: models/enrichments.py:128
+#: models/enrichments.py:146
 msgid "exact"
 msgstr "exact"
 
-#: models/enrichments.py:133
+#: models/enrichments.py:151
 msgid "citing document"
 msgstr "document citant"
 
-#: models/enrichments.py:137
+#: models/enrichments.py:155
 msgid "provision citation"
 msgstr "citation de disposition"
 
-#: models/enrichments.py:138
+#: models/enrichments.py:156
 msgid "provision citations"
 msgstr "citations de dispositions"
 
-#: models/enrichments.py:153 models/flynote.py:515 models/taxonomies.py:313
+#: models/enrichments.py:171 models/flynote.py:515 models/taxonomies.py:313
 msgid "count"
 msgstr "compter"
 
-#: models/enrichments.py:156
+#: models/enrichments.py:174
 msgid "provision citation count"
 msgstr "nombre de citations de la provision"
 
-#: models/enrichments.py:157
+#: models/enrichments.py:175
 msgid "provision citation counts"
 msgstr "nombre de citations de la disposition"
 
-#: models/enrichments.py:210
+#: models/enrichments.py:228
 msgid "place code"
 msgstr "code de lieu"
 
-#: models/enrichments.py:216
+#: models/enrichments.py:234
 msgid "data"
 msgstr "données"
 
@@ -2015,10 +2031,6 @@ msgstr "taxonomie"
 msgid "taxonomies"
 msgstr "taxonomies"
 
-#: models/taxonomies.py:290
-msgid "topic"
-msgstr "sujet"
-
 #: models/taxonomies.py:295
 msgid "document topic"
 msgstr "sujet du document"
@@ -2629,12 +2641,12 @@ msgid "Search"
 msgstr "Recherche"
 
 #: templates/admin/tree_change_list.html:8
-#: templates/peachjam/compare/_chooser.html:14
+#: templates/peachjam/compare/_chooser.html:18
 msgid "Collapse all"
 msgstr "Réduire tout"
 
 #: templates/admin/tree_change_list.html:9
-#: templates/peachjam/compare/_chooser.html:15
+#: templates/peachjam/compare/_chooser.html:19
 msgid "Expand all"
 msgstr "Développer tout"
 
@@ -2752,7 +2764,7 @@ msgstr "Parcourir par mois"
 
 #: templates/peachjam/_court_years_list.html:4
 #: templates/peachjam/_years_list.html:4 views/generic_views.py:418
-#: views/legislation.py:71
+#: views/legislation.py:74
 msgid "Years"
 msgstr "Années"
 
@@ -2812,7 +2824,7 @@ msgid "Skip to document content"
 msgstr "Accéder au contenu du document"
 
 #: templates/peachjam/_document_content_sidebar.html:34
-#: templates/peachjam/compare/_chooser.html:10
+#: templates/peachjam/compare/_chooser.html:14
 msgid "Table of contents"
 msgstr "Table des matières"
 
@@ -2965,7 +2977,7 @@ msgstr "Trier les documents par"
 msgid "Filter"
 msgstr "Filtre"
 
-#: templates/peachjam/_document_table_row.html:29
+#: templates/peachjam/_document_table_row.html:31
 #: templates/peachjam/layouts/document_detail.html:351
 msgid "Multiple languages available"
 msgstr "Plusieurs langues disponibles"
@@ -3512,19 +3524,20 @@ msgstr "Vous avez utilisé %(chats_used)s de vos discussions de documents %(chat
 msgid "Choose a provision"
 msgstr "Choisissez une provision"
 
-#: templates/peachjam/compare/_chooser.html:13
+#: templates/peachjam/compare/_chooser.html:10
+#: templates/peachjam/compare/_chooser.html:31
+msgid "Suggestions"
+msgstr "Suggestions"
+
+#: templates/peachjam/compare/_chooser.html:17
 msgid "Search table of contents"
 msgstr "Rechercher la table des matières"
 
-#: templates/peachjam/compare/_chooser.html:23
+#: templates/peachjam/compare/_chooser.html:27
 msgid "This document does not have a table of contents."
 msgstr "Ce document ne comporte pas de table des matières."
 
-#: templates/peachjam/compare/_chooser.html:27
-msgid "Suggested documents"
-msgstr "Documents suggérés"
-
-#: templates/peachjam/compare/_chooser.html:35
+#: templates/peachjam/compare/_chooser.html:39
 msgid "Search document titles"
 msgstr "Titres de documents de recherche"
 
@@ -3562,13 +3575,13 @@ msgstr "Comparer deux documents côte à côte"
 msgid "Choose provisions of two documents to explore similarities and differences."
 msgstr "Choisissez des dispositions de deux documents pour explorer leurs similitudes et leurs différences."
 
-#: templates/peachjam/document/_ask_ai_banner.html:11
-#: templates/peachjam/document/_ask_ai_banner.html:18
+#: templates/peachjam/document/_ask_ai_banner.html:12
+#: templates/peachjam/document/_ask_ai_banner.html:19
 #, python-format
 msgid "Ask %(name)s"
 msgstr "Demandez %(name)s"
 
-#: templates/peachjam/document/_ask_ai_banner.html:13
+#: templates/peachjam/document/_ask_ai_banner.html:14
 msgid "Ask questions and understand this document faster using AI."
 msgstr "Posez des questions et comprenez ce document plus rapidement grâce à l'IA."
 
@@ -3815,6 +3828,18 @@ msgstr "Avocats"
 msgid "Read full summary"
 msgstr "Lire le résumé complet"
 
+#: templates/peachjam/judgment_detail.html:129
+msgid "AfricanLII Arbitration Collection"
+msgstr "Collection d'arbitrage AfricanLII"
+
+#: templates/peachjam/judgment_detail.html:130
+msgid "This judgment is part of the AfricanLII Arbitration Collection."
+msgstr "Ce jugement fait partie de la collection d'arbitrage d'AfricanLII."
+
+#: templates/peachjam/judgment_detail.html:133
+msgid "Explore arbitration analysis on AfricanLII"
+msgstr "Explorez l'analyse de l'arbitrage sur AfricanLII"
+
 #: templates/peachjam/judgment_list.html:15 views/courts.py:206
 msgid "All courts"
 msgstr "Tous les tribunaux"
@@ -3976,7 +4001,7 @@ msgstr "Publication"
 msgid "%(n_relationships)s related documents"
 msgstr "%(n_relationships)s documents connexes"
 
-#: templates/peachjam/layouts/document_detail.html:566
+#: templates/peachjam/layouts/document_detail.html:570
 msgid "To the top"
 msgstr "En haut"
 
@@ -4058,12 +4083,12 @@ msgid "Show uncommenced provisions for %(title)s"
 msgstr "Afficher les dispositions non commencées pour %(title)s"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:22
-#: views/legislation.py:580 views/legislation.py:584
+#: views/legislation.py:583 views/legislation.py:587
 msgid "Resolved"
 msgstr "Résolu"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:24
-#: views/legislation.py:585
+#: views/legislation.py:588
 msgid "Unresolved"
 msgstr "Non résolu"
 
@@ -4559,66 +4584,66 @@ msgid_plural "Cited by %(count)s judgments"
 msgstr[0] "Cité par le jugement %(count)s"
 msgstr[1] "Cité par les jugements %(count)s"
 
-#: views/legislation.py:210
+#: views/legislation.py:213
 #, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr "Ce %(friendly_type)s était %(verb)s le %(date)s par <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
-#: views/legislation.py:222
+#: views/legislation.py:225
 #, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
 msgstr "Ce %(friendly_type)s %(verb)s sur %(date)s."
 
-#: views/legislation.py:235
+#: views/legislation.py:238
 #, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr "Ce %(friendly_type)s entrera en vigueur le %(date)s."
 
-#: views/legislation.py:250
+#: views/legislation.py:253
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
 msgstr "Cette %(friendly_type)s n'est pas encore pleinement entrée en vigueur. Consultez l'onglet « Dispositions non encore entrées en vigueur » pour plus d'informations."
 
-#: views/legislation.py:261
+#: views/legislation.py:264
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force."
 msgstr "Ce %(friendly_type)s n’est pas encore entré en vigueur."
 
-#: views/legislation.py:298
+#: views/legislation.py:301
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
 msgstr "Il s'agit de la version de ce %(friendly_type)s telle qu'elle était lorsqu'elle était %(verb)s."
 
-#: views/legislation.py:311
+#: views/legislation.py:314
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
 msgstr "Il s'agit de la version de ce %(friendly_type)s telle qu'elle était lorsqu'il était %(verb)s."
 
-#: views/legislation.py:329
+#: views/legislation.py:332
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Il s'agit de la dernière version de ce %(friendly_type)s."
 
-#: views/legislation.py:345
+#: views/legislation.py:348
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
 msgstr "Ceci est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lisez la version telle qu'elle était lorsqu'elle était %(verb)s</a>."
 
-#: views/legislation.py:350
+#: views/legislation.py:353
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
 msgstr "Ceci est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lisez la version telle qu'elle était lorsqu'elle %(verb)s</a>."
 
-#: views/legislation.py:355
+#: views/legislation.py:358
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lisez la dernière version disponible</a>."
 
-#: views/legislation.py:379
+#: views/legislation.py:382
 msgid "This version is at a future date."
 msgstr "Cette version est à une date ultérieure."
 
-#: views/legislation.py:422
+#: views/legislation.py:425
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
 
