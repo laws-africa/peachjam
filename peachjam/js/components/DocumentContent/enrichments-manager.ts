@@ -1,14 +1,13 @@
 import { RelationshipEnrichments } from '../RelationshipEnrichment';
 import DocDiffsManager from '../DocDiffs';
 import PDFCitationLinks from './citation-links';
-import { GutterEnrichmentManager } from '@lawsafrica/indigo-akn/dist/enrichments';
+import { GutterEnrichmentManager, SelectionToolbarManager } from '@lawsafrica/indigo-akn/dist/enrichments';
 import SelectionSearch from './selection-search';
 import SelectionShare from './selection-share';
 import { PortionDetails } from './portions';
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
 import { ProvisionCitations } from '../ProvisionCitations';
-import { SelectionToolbarManager } from './selection-toolbar';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -45,8 +44,6 @@ class EnrichmentsManager {
     // @ts-ignore
     // GutterEnrichmentManager by default looks for la-akoma-ntoso, and we might not be working with that
     this.gutterManager.akn = this.akn;
-    // @ts-ignore
-    this.gutterManager.floatingContainer.querySelector('.gutter-enrichment-new-buttons')?.classList.remove('btn-group-sm');
 
     // the order here matters for the order of buttons in the gutter
     if (this.displayType !== 'pdf') {
@@ -91,7 +88,9 @@ class EnrichmentsManager {
   setupSelectionToolbar () {
     if (this.akn) {
       // @ts-ignore
-      this.selectionToolbarManager = new SelectionToolbarManager(this.akn);
+      this.selectionToolbarManager = new SelectionToolbarManager(this.akn, {
+        shouldShow: () => window.matchMedia('(max-width: 991px)').matches
+      });
       if (this.annotationsManager) {
         this.selectionToolbarManager.addProvider(this.annotationsManager);
       }
