@@ -515,17 +515,16 @@ class DocumentUncommencedProvisionListView(DetailView):
 class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_uncommencedprovision"
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
+    document_table_template_name = (
+        "peachjam/provision_enrichment/_uncommenced_table.html"
+    )
+    document_table_form_template_name = (
+        "peachjam/provision_enrichment/_uncommenced_table_form.html"
+    )
     latest_expression_only = True
 
     def get_subscription_required_template(self):
         return self.template_name
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_uncommenced_table.html"]
-            return ["peachjam/provision_enrichment/_uncommenced_table_form.html"]
-        return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
@@ -553,21 +552,18 @@ class UnconstitutionalProvisionDetailView(DetailView):
 class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_unconstitutionalprovision"
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
+    document_table_template_name = (
+        "peachjam/provision_enrichment/_unconstitutional_table.html"
+    )
+    document_table_form_template_name = (
+        "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html"
+    )
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
     exclude_facets = ["alphabet", "years"]
 
     def get_subscription_required_template(self):
         return self.template_name
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_unconstitutional_table.html"]
-            return [
-                "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html"
-            ]
-        return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
@@ -715,6 +711,12 @@ class DocumentProvisionCitationView(
 ):
     permission_required = "peachjam.view_provisioncitation"
     template_name = "peachjam/provision_enrichment/provision_citations.html"
+    document_table_template_name = (
+        "peachjam/provision_enrichment/_provision_citations_table.html"
+    )
+    document_table_form_template_name = (
+        "peachjam/provision_enrichment/_provision_citations_table_form.html"
+    )
     latest_expression_only = True
 
     def get_subscription_required_template(self):
@@ -722,15 +724,6 @@ class DocumentProvisionCitationView(
 
     def get_subscription_required_context(self):
         return self.get_provision_context()
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_provision_citations_table.html"]
-            return [
-                "peachjam/provision_enrichment/_provision_citations_table_form.html"
-            ]
-        return super().get_template_names()
 
     @cached_property
     def provision_citations(self):
