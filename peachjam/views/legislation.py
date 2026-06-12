@@ -766,33 +766,35 @@ class DocumentProvisionCitationView(
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 @method_decorator(never_cache, name="dispatch")
-class DocumentProvisionSimilarView(DocumentProvisionMixin, FilteredDocumentListView):
+class DocumentProvisionSimilarView(DocumentProvisionMixin, LegislationListView):
     template_name = "peachjam/document/similar_provisions.html"
+    document_table_template_name = "peachjam/document/_similar_provisions_table.html"
+    document_table_form_template_name = (
+        "peachjam/document/_similar_provisions_table_form.html"
+    )
     latest_expression_only = True
     similarity_threshold = 0.8
-    n_similar = 100
+    n_similar = 10
+    exclude_facets = ["alphabet"]
+    paginate_by = 0
 
     def get_base_queryset(self, *args, **kwargs):
         if not apps.is_installed("peachjam_ml"):
-            return CoreDocument.objects.none()
+            return self.model.objects.none()
 
-        from peachjam_ml.models import ContentChunk
-
-        document_ids = (
-            ContentChunk.objects.filter(type="provision")
-            .exclude(document=self.document)
-            .values_list("document_id", flat=True)
-        )
-        return (
-            CoreDocument.objects.filter(pk__in=document_ids)
-            .exclude(work=self.document.work)
-            .latest_expression()
-            .for_document_table()
-        )
+        qs = super().get_base_queryset(*args, **kwargs)
+        qs = qs.exclude(work=self.document.work)
+        return qs.filter(pk__in=self.get_similar_document_ids(qs))
 
     def get_queryset(self):
         qs = super().get_queryset()
         return self.get_documents_with_similar_provisions(qs)
+
+    def get_similar_document_ids(self, documents_qs):
+        return {
+            provision["document_id"]
+            for provision in self.get_similar_provisions(documents_qs)
+        }
 
     def get_documents_with_similar_provisions(self, documents_qs):
         similar_provisions = self.get_similar_provisions(documents_qs)
@@ -806,9 +808,7 @@ class DocumentProvisionSimilarView(DocumentProvisionMixin, FilteredDocumentListV
 
         documents = {
             document.pk: document
-            for document in documents_qs.filter(
-                pk__in=document_ids
-            ).for_document_table()
+            for document in documents_qs.filter(pk__in=document_ids)
         }
 
         results = []
@@ -860,6 +860,9 @@ class DocumentProvisionSimilarView(DocumentProvisionMixin, FilteredDocumentListV
             for document in context["documents"]
             for provision in getattr(document, "similar_provisions", [])
         ]
+        context["source_provision_uri"] = (
+            f"{self.document.expression_frbr_uri}/~{self.provision_eid}"
+        )
         context["doc_count_noun"] = _("document with similar provisions")
         context["doc_count_noun_plural"] = _("documents with similar provisions")
         return context

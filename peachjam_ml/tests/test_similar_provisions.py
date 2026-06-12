@@ -2,7 +2,7 @@ from datetime import date
 
 from django.test import RequestFactory, TestCase
 
-from peachjam.models import Country, GenericDocument, Language
+from peachjam.models import Country, Language, Legislation
 from peachjam.views import DocumentProvisionSimilarView
 from peachjam_ml.models import ContentChunk
 
@@ -11,12 +11,13 @@ class DocumentProvisionSimilarViewTest(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
     def make_document(self, title, number):
-        document = GenericDocument.objects.create(
+        document = Legislation.objects.create(
             jurisdiction=Country.objects.first(),
             date=date(2020, 1, 2),
             language=Language.objects.first(),
-            frbr_uri_doctype="doc",
+            frbr_uri_doctype="act",
             frbr_uri_number=number,
+            frbr_uri_date="2020",
             title=title,
             published=True,
         )
@@ -73,6 +74,11 @@ class DocumentProvisionSimilarViewTest(TestCase):
         )
         view.form = view.get_form()
         view.form.is_valid()
+
+        self.assertEqual(
+            [target.pk],
+            list(view.get_base_queryset().values_list("pk", flat=True)),
+        )
 
         documents = view.get_queryset()
 

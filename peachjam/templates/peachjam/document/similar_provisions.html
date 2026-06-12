@@ -1,7 +1,7 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n peachjam %}
 {% block title %}
-  {{ document.title }} - {% trans 'Citations' %}
+  {{ document.title }} - {% trans 'Similar provisions' %}
   {% if provision %}- {{ provision }}{% endif %}
 {% endblock %}
 {% block page-title %}
@@ -14,6 +14,6 @@
   {% if subscription_required %}
     {% include "peachjam_subs/_subscription_required.html" %}
   {% else %}
-    {% include "peachjam/provision_enrichment/_provision_citations_table_form.html" %}
+    {% include "peachjam/document/_similar_provisions_table_form.html" %}
   {% endif %}
 {% endblock %}

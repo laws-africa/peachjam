@@ -1,0 +1,83 @@
+{% load i18n peachjam humanize %}
+{% with doc_table_dom_id=doc_table_id|default:"doc-table" %}
+  <section class="table-responsive"
+           id="{{ doc_table_dom_id }}"
+           data-component="DocumentTable"
+           aria-label="{% trans 'Results' %}"
+           tabindex="-1">
+    <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+      {% trans 'Results.' %}
+      {% if documents %}
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }} {% trans 'found.' %}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }} {% trans 'found.' %}
+        {% endif %}
+      {% else %}
+        {% trans 'No similar provisions found.' %}
+      {% endif %}
+    </p>
+    {% if doc_table_show_counts %}
+      <div class="mb-3 text-muted">
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+        {% endif %}
+      </div>
+    {% endif %}
+    {% for document in documents %}
+      <div class="card mb-4"
+           aria-labelledby="similar-provisions-document-{{ document.pk }}">
+        <div class="card-header">
+          <h2 class="h5 mb-1" id="similar-provisions-document-{{ document.pk }}">
+            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+          </h2>
+          {% if document.jurisdiction %}
+            <div class="text-muted small">{% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction }}</div>
+          {% endif %}
+        </div>
+        <div class="card-body bg-light">
+          {% for provision in document.similar_provisions %}
+            <section class="mb-3 {% if forloop.last %}mb-0{% endif %}"
+                     aria-labelledby="similar-provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
+              <div class="mb-2 d-flex">
+                <h3 class="h6 mb-0 provision-toggle"
+                    id="similar-provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
+                  <button type="button"
+                          class="btn btn-sm bg-none"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#similar-provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
+                          aria-label="{% blocktrans with provision=provision.title %}Toggle details for {{ provision }}{% endblocktrans %}"
+                          aria-expanded="true"
+                          aria-controls="similar-provision-detail-{{ document.pk }}-{{ forloop.counter0 }}">
+                    <i class="bi" aria-hidden="true"></i>
+                  </button>
+                  <a href="{{ provision.url }}" class="provision-link me-2">{{ provision.title }}</a>
+                </h3>
+                <a href="{% url 'compare_portions' %}?uri-a={{ source_provision_uri|urlencode }}&uri-b={{ document.expression_frbr_uri|add:"/~"|add:provision.provision_eid|urlencode }}"
+                   class="btn btn-outline-primary ms-auto">{% trans "Compare..." %}</a>
+              </div>
+              <div id="similar-provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
+                   class="collapse show">
+                {% if provision.provision_html %}
+                  <div class="bg-white p-3 border my-2">
+                    {{ provision.provision_html|qualify_local_refs:document.expression_frbr_uri|safe }}
+                  </div>
+                {% else %}
+                  <em>{% trans "No content found" %}</em>
+                {% endif %}
+              </div>
+            </section>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+    {% if not documents %}
+      <p>{% trans 'No similar provisions found.' %}</p>
+    {% endif %}
+    {% if documents and not hide_pagination and paginator %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  </section>
+{% endwith %}
