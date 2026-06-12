@@ -65,7 +65,7 @@ urlpatterns = [
         name="document_provision_similar",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.+?)/provision/(?P<provision_eid>.+)$",
+        r"^(?P<frbr_uri>akn/.+?)/provision/(?P<provision_eid>.+)/citations$",
         cache_page(CACHE_DURATION)(DocumentProvisionCitationView.as_view()),
         name="document_provision_citations",
     ),
