@@ -108,6 +108,7 @@ urlpatterns = [
     path(
         "p/<str:partner>/e/popup/<path:frbr_uri>",
         cache_page(CACHE_DURATION)(DocumentPopupView.as_view()),
+        name="document_popup",
     ),
     path(
         "document-problem/",

@@ -68,68 +68,76 @@ class FlynoteDisplayGrouper:
             if component.strip()
         )
 
-    @staticmethod
-    def common_path_prefix(paths):
-        if not paths:
-            return ()
-
-        prefix = []
-        for components in zip(*paths):
-            if len(set(components)) != 1:
-                break
-            prefix.append(components[0])
-
-        return tuple(prefix)
-
-    @staticmethod
-    def group_paths_by_head(paths):
-        groups = []
-        for path in paths:
-            head = path[0]
-            if not groups or groups[-1][0] != head:
-                groups.append((head, [path]))
-            else:
-                groups[-1][1].append(path)
-        return [group for _, group in groups]
-
     @classmethod
-    def build_groups(cls, paths, inherited_prefix=()):
+    def build_groups(cls, paths):
         if not paths:
             return []
 
-        if len(paths) == 1:
-            return [{"text": " — ".join(inherited_prefix + paths[0]), "children": []}]
+        return cls.compress_tree(cls.build_tree(paths), "text")
 
-        prefix = cls.common_path_prefix(paths)
-        if not prefix:
-            grouped_paths = []
-            for group in cls.group_paths_by_head(paths):
-                grouped_paths.extend(cls.build_groups(group, inherited_prefix))
-            return grouped_paths
+    @staticmethod
+    def build_tree(paths, key_func=None):
+        roots = []
+        root_index = {}
+        if key_func is None:
 
-        combined_prefix = inherited_prefix + prefix
-        remainders = [path[len(prefix) :] for path in paths]
-        descendant_paths = [remainder for remainder in remainders if remainder]
+            def key_func(value):
+                return value
 
-        if not descendant_paths:
-            return [{"text": " — ".join(combined_prefix), "children": []}]
+        for path in paths:
+            items = roots
+            index = root_index
+            for component in path:
+                node_key = key_func(component)
+                node = index.get(node_key)
+                if node is None:
+                    node = {
+                        "value": component,
+                        "children": [],
+                        "_index": {},
+                        "is_terminal": False,
+                    }
+                    items.append(node)
+                    index[node_key] = node
 
-        child_groups = cls.group_paths_by_head(descendant_paths)
-        if len(descendant_paths) != len(paths) or all(
-            len(group) == 1 for group in child_groups
-        ):
-            return [
-                {
-                    "text": " — ".join(combined_prefix),
-                    "children": cls.build_groups(descendant_paths),
-                }
-            ]
+                items = node["children"]
+                index = node["_index"]
+            if path:
+                node["is_terminal"] = True
 
-        grouped_paths = []
-        for group in child_groups:
-            grouped_paths.extend(cls.build_groups(group, combined_prefix))
+        return roots
 
-        return grouped_paths
+    @classmethod
+    def compress_tree(cls, nodes, value_key):
+        groups = []
+
+        for node in nodes:
+            chain = [node["value"]]
+            last = node
+
+            while len(last["children"]) == 1 and not last["is_terminal"]:
+                last = last["children"][0]
+                chain.append(last["value"])
+
+            children = cls.compress_tree(last["children"], value_key)
+            group = {
+                value_key: " — ".join(chain) if value_key == "text" else chain,
+                "children": children,
+            }
+            if value_key == "text" and children and len(chain) > 1:
+                group["parts"] = chain
+                group["child_indent"] = cls.chain_prefix_length(chain)
+            if value_key == "nodes" and children and len(chain) > 1:
+                group["child_indent"] = cls.chain_prefix_length(chain)
+            groups.append(group)
+
+        return groups
+
+    @staticmethod
+    def chain_prefix_length(chain):
+        return sum(len(getattr(item, "name", item)) for item in chain[:-1]) + (
+            max(len(chain) - 1, 0) * 3
+        )
 
     @classmethod
     def group_linked_flynotes(cls, linked_flynotes):
@@ -141,8 +149,7 @@ class FlynoteDisplayGrouper:
         grouped plain-flynote display.
         """
 
-        roots = []
-        root_index = {}
+        paths = []
         seen_paths = set()
 
         for item in linked_flynotes or []:
@@ -157,27 +164,17 @@ class FlynoteDisplayGrouper:
             if path_key in seen_paths:
                 continue
             seen_paths.add(path_key)
+            paths.append(nodes)
 
-            items = roots
-            index = root_index
-            for node in nodes:
-                node_key = getattr(node, "pk", None) or getattr(node, "name", None)
-                group = index.get(node_key)
-                if group is None:
-                    group = {"node": node, "children": [], "_index": {}}
-                    items.append(group)
-                    index[node_key] = group
-
-                items = group["children"]
-                index = group["_index"]
-
-        def cleanup(groups):
-            return [
-                {"node": group["node"], "children": cleanup(group["children"])}
-                for group in groups
-            ]
-
-        return cleanup(roots)
+        return cls.compress_tree(
+            cls.build_tree(
+                paths,
+                lambda node: getattr(node, "pk", None)
+                or getattr(node, "name", None)
+                or id(node),
+            ),
+            "nodes",
+        )
 
 
 class FlynoteParser:

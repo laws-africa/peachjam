@@ -1,12 +1,40 @@
 import json
 from collections import defaultdict
+from contextlib import contextmanager
 from dataclasses import dataclass
+from functools import wraps
 
 import igraph
 from django_lifecycle import LifecycleModelMixin, hook
 
 
-class AttributeHooksMixin(LifecycleModelMixin):
+class SuppressableHooksLifecycleMixin(LifecycleModelMixin):
+    @contextmanager
+    def suppress_attribute_hooks(self, *hook_names):
+        """Temporarily suppress specific attribute hooks for this model instance.
+
+        Hook names must be fully qualified as ``ClassName.hook_name`` so that
+        suppression is explicit and does not depend on hook names being globally
+        unique.
+        """
+        unqualified = [name for name in hook_names if "." not in name]
+        if unqualified:
+            raise ValueError(
+                "Attribute hook suppression requires fully qualified hook names"
+            )
+
+        existing = getattr(self, "_suppressed_attribute_hooks", set())
+        self._suppressed_attribute_hooks = {*existing, *hook_names}
+        try:
+            yield
+        finally:
+            self._suppressed_attribute_hooks = existing
+
+    def is_attribute_hook_suppressed(self, hook_name):
+        return hook_name in getattr(self, "_suppressed_attribute_hooks", set())
+
+
+class AttributeHooksMixin(SuppressableHooksLifecycleMixin):
     """Makes LifecycleChangesMixin work only when track_changes() is called. This means that we don't duplicate
     state in memory when it's not necessary (99% of the time).
 
@@ -226,8 +254,15 @@ def _register_attribute_hook(
         for attr in _normalise_attributes(target_attributes)
     ]
     when_any = [attr.split(".", 1)[1] for attr in trigger_attributes]
+    hook_name = f"{owner_class.__name__}.{func.__name__}"
 
-    wrapped = hook(timing, when_any=when_any, has_changed=True)(func)
+    @wraps(func)
+    def hook_wrapper(instance, *args, **kwargs):
+        if instance.is_attribute_hook_suppressed(hook_name):
+            return None
+        return func(instance, *args, **kwargs)
+
+    wrapped = hook(timing, when_any=when_any, has_changed=True)(hook_wrapper)
     attribute_dag.add_rule(
         owner_class=owner_class,
         function_name=func.__name__,

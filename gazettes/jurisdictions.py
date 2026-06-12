@@ -83,6 +83,7 @@ JURISDICTIONS = [
     Jurisdiction("rw", "Rwanda"),
     Jurisdiction("sc", "Seychelles", stitched_supplements=True),
     Jurisdiction("sl", "Sierra Leone"),
+    Jurisdiction("sn", "Senegal"),
     Jurisdiction("sz", "Eswatini"),
     Jurisdiction("tz", "Tanzania"),
     Jurisdiction("tz-znz", "Zanzibar", "tz"),

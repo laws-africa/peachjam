@@ -129,6 +129,11 @@ The same push to `main` also triggers [the deployment workflow](../.github/workf
 each Dokku target in turn. If you are merging a pull request and want to avoid that deploy, include `nodeploy` anywhere
 in your merge commit message so that the workflow skips its jobs.
 
+## Ingestors
+
+See [INGESTORS.md](INGESTORS.md) for the scheduled ingestor lifecycle, adapter
+contracts, and Indigo-specific import behavior.
+
 ## Key link analytics
 
 Peachjam can emit a Customer.io event when a user clicks a marked "key link" on an important page. This is intended for feature-usage analysis, for example understanding whether users click documents from the homepage courts block, the document metadata section, or the My LII timeline.

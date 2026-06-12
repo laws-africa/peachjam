@@ -1073,7 +1073,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         count = 0
         with transaction.atomic():
             for doc in queryset.only("pk"):
-                doc_content = doc.get_or_create_document_content()
+                doc_content = doc.get_or_create_document_content(True)
                 if doc_content.extract_content_from_source_file():
                     count += 1
                     doc_content.save()
@@ -2246,7 +2246,8 @@ class ExternalDocumentAdmin(DocumentAdmin):
 class CourtRegistryAdmin(BaseAdmin):
     help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
-    list_display = ("name", "code")
+    list_display = ("court", "name", "code")
+    list_select_related = ("court",)
 
 
 @admin.register(Outcome)

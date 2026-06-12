@@ -9,6 +9,33 @@ ul.flynotes > li {
   margin-bottom: 0;
 }
 
+.flynote-chain-separator {
+  white-space: nowrap;
+}
+
+.flynote-chain {
+  max-width: 100%;
+  overflow-wrap: normal;
+  text-indent: 0;
+}
+
+.flynote-chain-prefix,
+.flynote-chain-tail {
+  text-indent: 0;
+}
+
+.flynote-chain-tail {
+  overflow-wrap: anywhere;
+}
+
+.flynote-chain-children {
+  margin-left: 1rem;
+}
+
+.flynote-chain-children ul.flynotes > li {
+  overflow-wrap: anywhere;
+}
+
 .fs-sm {
   font-size: small;
 }

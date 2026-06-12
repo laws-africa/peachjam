@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 08:20+0000\n"
+"POT-Creation-Date: 2026-06-08 07:01+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -53,15 +53,43 @@ msgstr "Hukumu"
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/peachjam/_header.html:24
+#: templates/peachjam/_header.html:28
+msgid "Regional material"
+msgstr ""
+
+#: templates/peachjam/_header.html:34
+msgid "African Court of Human and People's Rights"
+msgstr ""
+
+#: templates/peachjam/_header.html:40
+msgid "African Commission on Human and People's Rights"
+msgstr ""
+
+#: templates/peachjam/_header.html:46
+msgid "Economic Community of West African States (ECOWAS)"
+msgstr ""
+
+#: templates/peachjam/_header.html:52
+msgid "ECOWAS Community Court of Justice"
+msgstr ""
+
+#: templates/peachjam/_header.html:58
+msgid "AU Charters and Treaties"
+msgstr ""
+
+#: templates/peachjam/_header.html:64
+msgid "OHADA"
+msgstr ""
+
+#: templates/peachjam/_header.html:72
 msgid "Articles"
 msgstr "Makala"
 
-#: templates/peachjam/_header.html:30
+#: templates/peachjam/_header.html:78
 msgid "About"
 msgstr "Kuhusu"
 
-#: templates/peachjam/_header.html:34
+#: templates/peachjam/_header.html:82
 msgid "Help"
 msgstr "Msaada"
 
@@ -116,4 +144,3 @@ msgstr "<a href=\"https://laws.africa/\" target=\"_blank\" rel=\"noreferrer noop
 #: templates/peachjam/about.html:41
 msgid "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> is an initiative of the University of Cape Town’s Faculty of Law that supports African institutions in building and sustaining free access to law platforms. Its work promotes access to legal information as a cornerstone of democracy and good governance."
 msgstr "<a href=\"https://africanlii.org/en/\" target=\"_blank\" rel=\"noreferrer noopener\">AfricanLII</a> ni mpango wa Kitivo cha Sheria cha Chuo Kikuu cha Cape Town unaounga mkono taasisi za Kiafrika katika kujenga na kudumisha upatikanaji huru wa majukwaa ya sheria. Kazi yake inakuza upatikanaji wa taarifa za kisheria kama msingi wa demokrasia na utawala bora."
-

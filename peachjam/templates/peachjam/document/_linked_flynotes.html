@@ -3,14 +3,49 @@
   <ul class="{% if nested %}list-unstyled flynotes{% else %}list-unstyled flynotes my-2{% endif %}">
     {% for item in linked_flynote_groups %}
       <li>
-        {% if nested %}—{% endif %}
-        {% if link_flynote_topics %}
-          <a href="{{ item.node.get_absolute_url }}">{{ item.node.name }}</a>
+        {% if item.children and item.nodes|length > 1 %}
+          <div class="flynote-chain">
+            <span class="flynote-chain-prefix">
+              {% if nested %}—{% endif %}
+              {% for node in item.nodes %}
+                {% if not forloop.last %}
+                  {% if link_flynote_topics %}
+                    <a href="{{ node.get_absolute_url }}">{{ node.name }}</a>
+                  {% else %}
+                    {{ node.name }}
+                  {% endif %}
+                  <span class="flynote-chain-separator">&nbsp;—&nbsp;</span>
+                {% endif %}
+              {% endfor %}
+            </span>
+            <span class="flynote-chain-tail">
+              {% for node in item.nodes %}
+                {% if forloop.last %}
+                  {% if link_flynote_topics %}
+                    <a href="{{ node.get_absolute_url }}">{{ node.name }}</a>
+                  {% else %}
+                    {{ node.name }}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            </span>
+            <div class="flynote-chain-children">
+              {% include "peachjam/document/_linked_flynotes.html" with linked_flynote_groups=item.children nested=True link_flynote_topics=link_flynote_topics %}
+            </div>
+          </div>
         {% else %}
-          {{ item.node.name }}
-        {% endif %}
-        {% if item.children %}
-          {% include "peachjam/document/_linked_flynotes.html" with linked_flynote_groups=item.children nested=True link_flynote_topics=link_flynote_topics %}
+          {% if nested %}—{% endif %}
+          {% for node in item.nodes %}
+            {% if not forloop.first %}—{% endif %}
+            {% if link_flynote_topics %}
+              <a href="{{ node.get_absolute_url }}">{{ node.name }}</a>
+            {% else %}
+              {{ node.name }}
+            {% endif %}
+          {% endfor %}
+          {% if item.children %}
+            {% include "peachjam/document/_linked_flynotes.html" with linked_flynote_groups=item.children nested=True link_flynote_topics=link_flynote_topics %}
+          {% endif %}
         {% endif %}
       </li>
     {% endfor %}

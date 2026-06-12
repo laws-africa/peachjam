@@ -20,3 +20,8 @@
     box-shadow: none;
   }
 }
+
+.btn.btn-badge {
+  --bs-btn-padding-y: 0.25rem;
+  --bs-btn-padding-x: 0.5rem;
+}

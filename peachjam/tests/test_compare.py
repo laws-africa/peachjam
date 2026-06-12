@@ -375,6 +375,7 @@ class ComparePortionsViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Suggestions")
         self.assertContains(response, "Second Act")
+        self.assertContains(response, "Suggestion")
         self.assertContains(response, "Section 1")
         self.assertContains(response, f'href="{suggested_url}"')
 
