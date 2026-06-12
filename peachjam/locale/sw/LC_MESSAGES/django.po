@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-04 08:12+0000\n"
-"PO-Revision-Date: 2026-06-04 09:12\n"
+"POT-Creation-Date: 2026-06-12 05:50+0000\n"
+"PO-Revision-Date: 2026-06-12 06:45\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -309,20 +309,20 @@ msgstr "Sasisha lugha"
 msgid "Gazette number"
 msgstr "Nambari ya Gazeti"
 
-#: admin.py:2297
+#: admin.py:2298
 #, python-format
 msgid "Set 'accepted terms of use' to False for %(count)d users."
 msgstr "Weka 'sheria na masharti yanayokubalika' kuwa Sivyo kwa watumiaji wa %(count)d ."
 
-#: admin.py:2302
+#: admin.py:2303
 msgid "Require selected users to accept terms of use"
 msgstr "Inahitaji watumiaji waliochaguliwa kukubali sheria na masharti"
 
-#: admin.py:2436 admin.py:2471
+#: admin.py:2437 admin.py:2472
 msgid "Document"
 msgstr "Hati"
 
-#: admin.py:2444
+#: admin.py:2445
 msgid "Messages JSON"
 msgstr "Ujumbe kwa JSON"
 
@@ -418,81 +418,81 @@ msgstr "(Mpya zaidi kwanza)"
 msgid "(Oldest first)"
 msgstr "(Ya zamani zaidi kwanza)"
 
-#: forms.py:477
+#: forms.py:487
 msgid "Summary prompt"
 msgstr "Kidokezo cha muhtasari"
 
-#: forms.py:485
+#: forms.py:495
 msgid "Optional. Overrides the default summary prompt."
 msgstr "Hiari. Hubatilisha kidokezo chaguo-msingi cha muhtasari."
 
-#: forms.py:488
+#: forms.py:498
 msgid "Model"
 msgstr "Mfano"
 
-#: forms.py:495
+#: forms.py:505
 msgid "Optional. Overrides the configured model."
 msgstr "Hiari. Hubatilisha modeli iliyosanidiwa."
 
-#: forms.py:498
+#: forms.py:508
 msgid "Translation language"
 msgstr "Lugha ya tafsiri"
 
-#: forms.py:506
+#: forms.py:516
 msgid "Optional. Translates the summary when set to a non-English language."
 msgstr "Hiari. Hutafsiri muhtasari unapowekwa kuwa lugha isiyo ya Kiingereza."
 
-#: forms.py:554
+#: forms.py:564
 msgid "Document problem reported"
 msgstr "Tatizo kuhusu nyaraka limeripotiwa"
 
-#: forms.py:602
+#: forms.py:612
 msgid "Contact us message"
 msgstr "Wasiliana nasi ujumbe"
 
-#: forms.py:620
+#: forms.py:630
 msgid "Folders"
 msgstr "Folda"
 
-#: forms.py:669
+#: forms.py:679
 msgid "Please provide a valid name"
 msgstr "Tafadhali toa jina halali"
 
-#: forms.py:675
+#: forms.py:685
 msgid "First name"
 msgstr "Jina la kwanza"
 
-#: forms.py:678
+#: forms.py:688
 msgid "Last name"
 msgstr "Jina la mwisho"
 
-#: forms.py:687 templates/account/login.html:89
+#: forms.py:697 templates/account/login.html:89
 #: templates/account/signup.html:47 templates/account/user_auth.html:103
 #: templates/account/user_auth.html:145 templates/user_account/home.html:26
 msgid "Password"
 msgstr "Nenosiri"
 
-#: forms.py:688 templates/account/signup.html:61
+#: forms.py:698 templates/account/signup.html:61
 msgid "Password (again)"
 msgstr "Nenosiri (tena)"
 
-#: forms.py:732
+#: forms.py:742
 msgid "I understand this action cannot be undone"
 msgstr "Ninaelewa kitendo hiki hakiwezi kutenduliwa"
 
-#: forms.py:734
+#: forms.py:744
 msgid "Please confirm account deletion."
 msgstr "Tafadhali thibitisha kufutwa kwa akaunti."
 
-#: forms.py:737
+#: forms.py:747
 msgid "Please tell us briefly why you are deleting your account."
 msgstr "Tafadhali tuambie kwa ufupi kwa nini unafuta akaunti yako."
 
-#: forms.py:745
+#: forms.py:755
 msgid "I agree to the Terms of Use"
 msgstr "Ninakubali Sheria na Masharti"
 
-#: forms.py:748
+#: forms.py:758
 msgid "You must accept the terms to continue."
 msgstr "Lazima ukubali sheria na masharti ili kuendelea."
 
@@ -506,7 +506,7 @@ msgstr "Lazima ukubali sheria na masharti ili kuendelea."
 msgid "document"
 msgstr "hati"
 
-#: models/annotation.py:13 models/citations.py:23 models/enrichments.py:37
+#: models/annotation.py:13 models/citations.py:23 models/enrichments.py:38
 msgid "text"
 msgstr "maandishi"
 
@@ -909,7 +909,7 @@ msgid "authority score"
 msgstr "alama ya mamlaka"
 
 #: models/core_document.py:219 models/core_document.py:400
-#: models/enrichments.py:23 models/enrichments.py:150 models/ratification.py:16
+#: models/enrichments.py:24 models/enrichments.py:168 models/ratification.py:16
 #: models/save_document.py:89
 msgid "work"
 msgstr "kazi"
@@ -1064,117 +1064,133 @@ msgstr "Utoaji ambao haujaanza"
 msgid "Provision citation"
 msgstr "Nukuu ya utoaji"
 
-#: models/enrichments.py:26 models/enrichments.py:152
+#: models/enrichments.py:15
+msgid "Provision topic"
+msgstr "Mada ya utoaji"
+
+#: models/enrichments.py:27 models/enrichments.py:170
 msgid "provision eid"
 msgstr "utoaji eid"
 
-#: models/enrichments.py:28
+#: models/enrichments.py:29
 msgid "whole work"
 msgstr "kazi nzima"
 
-#: models/enrichments.py:30
+#: models/enrichments.py:31
 msgid "enrichment type"
 msgstr "aina ya uboreshaji"
 
-#: models/enrichments.py:43
+#: models/enrichments.py:44
 msgid "provision enrichment"
 msgstr "uboreshaji wa utoaji"
 
-#: models/enrichments.py:44
+#: models/enrichments.py:45
 msgid "provision enrichments"
 msgstr "uboreshaji wa utoaji"
 
-#: models/enrichments.py:84 models/flynote.py:487 models/judgment.py:284
+#: models/enrichments.py:85 models/flynote.py:487 models/judgment.py:284
 #: models/judgment.py:300 models/judgment.py:466 views/courts.py:54
 #: views/judgment.py:44
 msgid "judgment"
 msgstr "hukumu"
 
-#: models/enrichments.py:87
+#: models/enrichments.py:88
 msgid "date deemed unconstitutional"
 msgstr "tarehe inayochukuliwa kuwa kinyume na katiba"
 
-#: models/enrichments.py:90
+#: models/enrichments.py:91
 msgid "end of suspension period"
 msgstr "mwisho wa kipindi cha kusimamishwa"
 
-#: models/enrichments.py:92
+#: models/enrichments.py:93
 msgid "resolved"
 msgstr "kutatuliwa"
 
-#: models/enrichments.py:93
+#: models/enrichments.py:94
 msgid "date resolved"
 msgstr "tarehe kutatuliwa"
 
-#: models/enrichments.py:100
+#: models/enrichments.py:101
 msgid "resolving amendment work"
 msgstr "kutatua kazi ya marekebisho"
 
-#: models/enrichments.py:102
+#: models/enrichments.py:103
 msgid "read-in text HTML"
 msgstr "maandishi ya kusoma ndani ya HTML"
 
-#: models/enrichments.py:105
+#: models/enrichments.py:106
 msgid "unconstitutional provision"
 msgstr "utoaji kinyume na katiba"
 
-#: models/enrichments.py:106
+#: models/enrichments.py:107
 msgid "unconstitutional provisions"
 msgstr "masharti kinyume na katiba"
 
-#: models/enrichments.py:114
+#: models/enrichments.py:115
 msgid "and all descendants"
 msgstr "na vizazi vyote"
 
-#: models/enrichments.py:117
+#: models/enrichments.py:118
 msgid "uncommenced provision"
 msgstr "utoaji ambao haujaanza"
 
-#: models/enrichments.py:118
+#: models/enrichments.py:119
 msgid "uncommenced provisions"
 msgstr "masharti ambayo hayajaanza"
 
-#: models/enrichments.py:126
+#: models/enrichments.py:131 models/taxonomies.py:290
+msgid "topic"
+msgstr "mada"
+
+#: models/enrichments.py:135
+msgid "provision topic enrichment"
+msgstr "uboreshaji wa mada ya utoaji"
+
+#: models/enrichments.py:136
+msgid "provision topic enrichments"
+msgstr "uboreshaji wa mada ya utoaji"
+
+#: models/enrichments.py:144
 msgid "prefix"
 msgstr "kiambishi awali"
 
-#: models/enrichments.py:127
+#: models/enrichments.py:145
 msgid "suffix"
 msgstr "kiambishi tamati"
 
-#: models/enrichments.py:128
+#: models/enrichments.py:146
 msgid "exact"
 msgstr "halisi"
 
-#: models/enrichments.py:133
+#: models/enrichments.py:151
 msgid "citing document"
 msgstr "akitoa hati"
 
-#: models/enrichments.py:137
+#: models/enrichments.py:155
 msgid "provision citation"
 msgstr "dondoo la utoaji"
 
-#: models/enrichments.py:138
+#: models/enrichments.py:156
 msgid "provision citations"
 msgstr "dondoo za utoaji"
 
-#: models/enrichments.py:153 models/flynote.py:515 models/taxonomies.py:313
+#: models/enrichments.py:171 models/flynote.py:515 models/taxonomies.py:313
 msgid "count"
 msgstr "hesabu"
 
-#: models/enrichments.py:156
+#: models/enrichments.py:174
 msgid "provision citation count"
 msgstr "hesabu ya nukuu ya utoaji"
 
-#: models/enrichments.py:157
+#: models/enrichments.py:175
 msgid "provision citation counts"
 msgstr "hesabu za nukuu za utoaji"
 
-#: models/enrichments.py:210
+#: models/enrichments.py:228
 msgid "place code"
 msgstr "nambari ya mahali"
 
-#: models/enrichments.py:216
+#: models/enrichments.py:234
 msgid "data"
 msgstr "data"
 
@@ -2015,10 +2031,6 @@ msgstr "taksonomia"
 msgid "taxonomies"
 msgstr "taksonomia"
 
-#: models/taxonomies.py:290
-msgid "topic"
-msgstr "mada"
-
 #: models/taxonomies.py:295
 msgid "document topic"
 msgstr "mada ya hati"
@@ -2629,12 +2641,12 @@ msgid "Search"
 msgstr "Tafuta"
 
 #: templates/admin/tree_change_list.html:8
-#: templates/peachjam/compare/_chooser.html:14
+#: templates/peachjam/compare/_chooser.html:18
 msgid "Collapse all"
 msgstr "Kunja zote"
 
 #: templates/admin/tree_change_list.html:9
-#: templates/peachjam/compare/_chooser.html:15
+#: templates/peachjam/compare/_chooser.html:19
 msgid "Expand all"
 msgstr "Panua zote"
 
@@ -2752,7 +2764,7 @@ msgstr "Vinjari kwa mwezi"
 
 #: templates/peachjam/_court_years_list.html:4
 #: templates/peachjam/_years_list.html:4 views/generic_views.py:418
-#: views/legislation.py:71
+#: views/legislation.py:74
 msgid "Years"
 msgstr "Miaka"
 
@@ -2812,7 +2824,7 @@ msgid "Skip to document content"
 msgstr "Ruka hadi kwa yaliyomo kwenye hati"
 
 #: templates/peachjam/_document_content_sidebar.html:34
-#: templates/peachjam/compare/_chooser.html:10
+#: templates/peachjam/compare/_chooser.html:14
 msgid "Table of contents"
 msgstr "Yaliyomo"
 
@@ -2965,7 +2977,7 @@ msgstr "Panga hati kulingana na"
 msgid "Filter"
 msgstr "Pembua"
 
-#: templates/peachjam/_document_table_row.html:29
+#: templates/peachjam/_document_table_row.html:31
 #: templates/peachjam/layouts/document_detail.html:351
 msgid "Multiple languages available"
 msgstr "Lugha nyingi zinapatikana"
@@ -3512,19 +3524,20 @@ msgstr "Umetumia %(chats_used)s kati ya gumzo zako za hati %(chat_limit)s mwezi 
 msgid "Choose a provision"
 msgstr "Chagua kifungu"
 
-#: templates/peachjam/compare/_chooser.html:13
+#: templates/peachjam/compare/_chooser.html:10
+#: templates/peachjam/compare/_chooser.html:31
+msgid "Suggestions"
+msgstr "Mapendekezo"
+
+#: templates/peachjam/compare/_chooser.html:17
 msgid "Search table of contents"
 msgstr "Tafuta yaliyomo"
 
-#: templates/peachjam/compare/_chooser.html:23
+#: templates/peachjam/compare/_chooser.html:27
 msgid "This document does not have a table of contents."
 msgstr "Hati hii haina jedwali la yaliyomo."
 
-#: templates/peachjam/compare/_chooser.html:27
-msgid "Suggested documents"
-msgstr "Nyaraka zilizopendekezwa"
-
-#: templates/peachjam/compare/_chooser.html:35
+#: templates/peachjam/compare/_chooser.html:39
 msgid "Search document titles"
 msgstr "Tafuta majina ya hati"
 
@@ -3562,13 +3575,13 @@ msgstr "Linganisha hati mbili kando kwa kando"
 msgid "Choose provisions of two documents to explore similarities and differences."
 msgstr "Chagua vifungu vya hati mbili ili kuchunguza kufanana na tofauti."
 
-#: templates/peachjam/document/_ask_ai_banner.html:11
-#: templates/peachjam/document/_ask_ai_banner.html:18
+#: templates/peachjam/document/_ask_ai_banner.html:12
+#: templates/peachjam/document/_ask_ai_banner.html:19
 #, python-format
 msgid "Ask %(name)s"
 msgstr "Uliza %(name)s"
 
-#: templates/peachjam/document/_ask_ai_banner.html:13
+#: templates/peachjam/document/_ask_ai_banner.html:14
 msgid "Ask questions and understand this document faster using AI."
 msgstr "Uliza maswali na uelewe hati hii haraka zaidi kwa kutumia akili bandia."
 
@@ -3815,6 +3828,18 @@ msgstr "Wanasheria"
 msgid "Read full summary"
 msgstr "Soma muhtasari kamili"
 
+#: templates/peachjam/judgment_detail.html:129
+msgid "AfricanLII Arbitration Collection"
+msgstr "Mkusanyiko wa Usuluhishi wa AfricanLII"
+
+#: templates/peachjam/judgment_detail.html:130
+msgid "This judgment is part of the AfricanLII Arbitration Collection."
+msgstr "Hukumu hii ni sehemu ya Mkusanyiko wa Usuluhishi wa AfricanLII."
+
+#: templates/peachjam/judgment_detail.html:133
+msgid "Explore arbitration analysis on AfricanLII"
+msgstr "Chunguza uchanganuzi wa usuluhishi kuhusu AfricanLII"
+
 #: templates/peachjam/judgment_list.html:15 views/courts.py:206
 msgid "All courts"
 msgstr "Mahakama zote"
@@ -3976,7 +4001,7 @@ msgstr "Uchapishaji"
 msgid "%(n_relationships)s related documents"
 msgstr "%(n_relationships)s nyaraka zinazohusiana"
 
-#: templates/peachjam/layouts/document_detail.html:566
+#: templates/peachjam/layouts/document_detail.html:570
 msgid "To the top"
 msgstr "Hadi juu"
 
@@ -4058,12 +4083,12 @@ msgid "Show uncommenced provisions for %(title)s"
 msgstr "Onyesha masharti ambayo hayajaanza kutumika kwa %(title)s"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:22
-#: views/legislation.py:580 views/legislation.py:584
+#: views/legislation.py:583 views/legislation.py:587
 msgid "Resolved"
 msgstr "Imetatuliwa"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:24
-#: views/legislation.py:585
+#: views/legislation.py:588
 msgid "Unresolved"
 msgstr "Haijatatuliwa"
 
@@ -4559,66 +4584,66 @@ msgid_plural "Cited by %(count)s judgments"
 msgstr[0] "Imenukuliwa na %(count)s hukumu"
 msgstr[1] "Imenukuliwa na hukumu %(count)s"
 
-#: views/legislation.py:210
+#: views/legislation.py:213
 #, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr "Hii %(friendly_type)s ilikuwa %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
-#: views/legislation.py:222
+#: views/legislation.py:225
 #, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
 msgstr "Hii %(friendly_type)s %(verb)s on %(date)s."
 
-#: views/legislation.py:235
+#: views/legislation.py:238
 #, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr "Hii %(friendly_type)s itaanza kutumika tarehe %(date)s."
 
-#: views/legislation.py:250
+#: views/legislation.py:253
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
 msgstr "Hii %(friendly_type)s bado haijaanza kutumika kikamilifu. Tazama kichupo cha masharti ambayo Hajaanza kwa maelezo zaidi."
 
-#: views/legislation.py:261
+#: views/legislation.py:264
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force."
 msgstr "Hii %(friendly_type)s bado haijaanza kutumika."
 
-#: views/legislation.py:298
+#: views/legislation.py:301
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa wakati ilikuwa %(verb)s."
 
-#: views/legislation.py:311
+#: views/legislation.py:314
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa wakati %(verb)s."
 
-#: views/legislation.py:329
+#: views/legislation.py:332
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Hili ni toleo la hivi karibuni la %(friendly_type)s hii."
 
-#: views/legislation.py:345
+#: views/legislation.py:348
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Soma toleo kama lilivyokuwa %(verb)s</a>."
 
-#: views/legislation.py:350
+#: views/legislation.py:353
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Soma toleo kama lilivyokuwa wakati %(verb)s</a>."
 
-#: views/legislation.py:355
+#: views/legislation.py:358
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr "Hili ni toleo la %(friendly_type)s kama ilivyokuwa kutoka %(date_from)s hadi %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Soma toleo jipya zaidi la</a>linalopatikana."
 
-#: views/legislation.py:379
+#: views/legislation.py:382
 msgid "This version is at a future date."
 msgstr "Toleo hili liko katika tarehe ya baadaye."
 
-#: views/legislation.py:422
+#: views/legislation.py:425
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
 
