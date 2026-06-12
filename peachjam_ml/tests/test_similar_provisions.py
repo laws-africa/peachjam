@@ -83,5 +83,5 @@ class DocumentProvisionSimilarViewTest(TestCase):
         documents = view.get_queryset()
 
         self.assertEqual([target.pk], [document.pk for document in documents])
-        self.assertEqual("Target section", documents[0].similar_provisions[0].title)
-        self.assertEqual(target, documents[0].similar_provisions[0].document)
+        self.assertEqual("Target section", documents[0].provisions[0].title)
+        self.assertEqual(target, documents[0].provisions[0].document)

@@ -14,7 +14,9 @@
           {{ doc_count|intcomma }} {{ doc_count_noun_plural }} {% trans 'found.' %}
         {% endif %}
       {% else %}
-        {% trans 'No similar provisions found.' %}
+        {% block empty_results_text %}
+          {% trans 'No provisions found.' %}
+        {% endblock %}
       {% endif %}
     </p>
     {% if doc_table_show_counts %}
@@ -28,9 +30,9 @@
     {% endif %}
     {% for document in documents %}
       <div class="card mb-4"
-           aria-labelledby="similar-provisions-document-{{ document.pk }}">
+           aria-labelledby="provisions-document-{{ document.pk }}">
         <div class="card-header">
-          <h2 class="h5 mb-1" id="similar-provisions-document-{{ document.pk }}">
+          <h2 class="h5 mb-1" id="provisions-document-{{ document.pk }}">
             <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
           </h2>
           {% if document.jurisdiction %}
@@ -38,35 +40,46 @@
           {% endif %}
         </div>
         <div class="card-body bg-light">
-          {% for provision in document.similar_provisions %}
+          {% for provision in document.provisions %}
             <section class="mb-3 {% if forloop.last %}mb-0{% endif %}"
-                     aria-labelledby="similar-provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
+                     aria-labelledby="provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
               <div class="mb-2 d-flex">
                 <h3 class="h6 mb-0 provision-toggle"
-                    id="similar-provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
+                    id="provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
                   <button type="button"
                           class="btn btn-sm bg-none"
                           data-bs-toggle="collapse"
-                          data-bs-target="#similar-provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
+                          data-bs-target="#provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
                           aria-label="{% blocktrans with provision=provision.title %}Toggle details for {{ provision }}{% endblocktrans %}"
                           aria-expanded="true"
-                          aria-controls="similar-provision-detail-{{ document.pk }}-{{ forloop.counter0 }}">
+                          aria-controls="provision-detail-{{ document.pk }}-{{ forloop.counter0 }}">
                     <i class="bi" aria-hidden="true"></i>
                   </button>
                   <a href="{{ provision.url }}" class="provision-link me-2">{{ provision.title }}</a>
+                  {% block provision_badges %}{% endblock %}
                 </h3>
-                <a href="{% url 'compare_portions' %}?uri-a={{ source_provision_uri|urlencode }}&uri-b={{ document.expression_frbr_uri|add:"/~"|add:provision.provision_eid|urlencode }}"
-                   class="btn btn-outline-primary ms-auto">{% trans "Compare..." %}</a>
-              </div>
-              <div id="similar-provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
-                   class="collapse show">
-                {% if provision.provision_html %}
-                  <div class="bg-white p-3 border my-2">
-                    {{ provision.provision_html|qualify_local_refs:document.expression_frbr_uri|safe }}
-                  </div>
-                {% else %}
-                  <em>{% trans "No content found" %}</em>
+                {% if provision.compare_url %}
+                  <a href="{{ provision.compare_url }}"
+                     class="btn btn-outline-primary ms-auto">{% trans "Compare..." %}</a>
                 {% endif %}
+              </div>
+              <div id="provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
+                   class="collapse show">
+                {% block provision_detail %}
+                  {% if provision.provision_popup_url %}
+                    <div class="bg-white p-3 border my-2"
+                         hx-get="{{ provision.provision_popup_url }}"
+                         hx-trigger="load"
+                         hx-target="this"
+                         hx-swap="innerHTML"
+                         hx-push-url="false"
+                         aria-live="polite">
+                      <div class="spinner-when-empty"></div>
+                    </div>
+                  {% else %}
+                    <em>{% trans "No content found" %}</em>
+                  {% endif %}
+                {% endblock %}
               </div>
             </section>
           {% endfor %}
@@ -74,7 +87,11 @@
       </div>
     {% endfor %}
     {% if not documents %}
-      <p>{% trans 'No similar provisions found.' %}</p>
+      <p>
+        {% block empty_results_paragraph %}
+          {% trans 'No provisions found.' %}
+        {% endblock %}
+      </p>
     {% endif %}
     {% if documents and not hide_pagination and paginator %}
       {% include 'peachjam/_pagination.html' %}

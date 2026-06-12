@@ -2,6 +2,7 @@ import string
 from datetime import datetime, timedelta
 from functools import cached_property
 from types import SimpleNamespace
+from urllib.parse import urlencode
 
 from django.apps import apps
 from django.contrib import messages
@@ -10,6 +11,7 @@ from django.db.models.functions.text import Substr
 from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import date as format_date
+from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
@@ -704,6 +706,67 @@ class DocumentProvisionMixin:
         }
 
 
+class LegislationProvisionListView(LegislationListView):
+    """A specialised form of LegislationListView that lists provisions of legislation.
+
+    Subclasses should implement the logic to load provisions, and override prepare_provision to add any extra
+    attributes to the provision objects that are needed for display.
+    """
+
+    document_table_template_name = "peachjam/document/provisions_table.html"
+    document_table_form_template_name = "peachjam/document/_provisions_table_form.html"
+
+    def prepare_provision(self, document, provision):
+        provision.document = document
+        provision.title = self.get_provision_title(document, provision)
+        provision.url = self.get_provision_url(document, provision)
+        provision.compare_url = self.get_compare_url(document, provision)
+        provision.provision_popup_url = self.get_provision_popup_url(
+            document, provision
+        )
+        return provision
+
+    def get_provision_title(self, document, provision):
+        title = getattr(provision, "title", None)
+        if title:
+            return title
+        if getattr(provision, "whole_work", False):
+            return document.title
+        provision_eid = getattr(provision, "provision_eid", None)
+        if provision_eid:
+            return document.friendly_provision_title(provision_eid)
+        return document.title
+
+    def get_provision_url(self, document, provision):
+        provision_eid = getattr(provision, "provision_eid", None)
+        if getattr(provision, "whole_work", False) or not provision_eid:
+            return document.get_absolute_url()
+        return f"{document.get_absolute_url()}#{provision_eid}"
+
+    def get_compare_url(self, document, provision):
+        provision_eid = getattr(provision, "provision_eid", None)
+        if not provision_eid:
+            return None
+        params = {
+            "uri-a": f"{document.expression_frbr_uri}/~{provision_eid}",
+        }
+        return f"{reverse('compare_portions')}?{urlencode(params)}"
+
+    def get_provision_popup_url(self, document, provision):
+        expression_frbr_uri = document.expression_frbr_uri
+        if not expression_frbr_uri:
+            return None
+
+        frbr_uri = expression_frbr_uri.lstrip("/")
+        provision_eid = getattr(provision, "provision_eid", None)
+        if not getattr(provision, "whole_work", False) and provision_eid:
+            frbr_uri = f"{frbr_uri}/~{provision_eid}"
+        partner = self.request.get_host().split(":")[0]
+        return reverse(
+            "document_popup", kwargs={"partner": partner, "frbr_uri": frbr_uri}
+        )
+
+
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 @method_decorator(never_cache, name="dispatch")
 class DocumentProvisionCitationView(
@@ -766,12 +829,10 @@ class DocumentProvisionCitationView(
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 @method_decorator(never_cache, name="dispatch")
-class DocumentProvisionSimilarView(DocumentProvisionMixin, LegislationListView):
+class DocumentProvisionSimilarView(
+    DocumentProvisionMixin, LegislationProvisionListView
+):
     template_name = "peachjam/document/similar_provisions.html"
-    document_table_template_name = "peachjam/document/_similar_provisions_table.html"
-    document_table_form_template_name = (
-        "peachjam/document/_similar_provisions_table_form.html"
-    )
     latest_expression_only = True
     similarity_threshold = 0.8
     n_similar = 10
@@ -786,45 +847,11 @@ class DocumentProvisionSimilarView(DocumentProvisionMixin, LegislationListView):
         qs = qs.exclude(work=self.document.work)
         return qs.filter(pk__in=self.get_similar_document_ids(qs))
 
-    def get_queryset(self):
-        qs = super().get_queryset()
-        return self.get_documents_with_similar_provisions(qs)
-
     def get_similar_document_ids(self, documents_qs):
         return {
             provision["document_id"]
             for provision in self.get_similar_provisions(documents_qs)
         }
-
-    def get_documents_with_similar_provisions(self, documents_qs):
-        similar_provisions = self.get_similar_provisions(documents_qs)
-        if not similar_provisions:
-            return []
-
-        document_ids = []
-        for provision in similar_provisions:
-            if provision["document_id"] not in document_ids:
-                document_ids.append(provision["document_id"])
-
-        documents = {
-            document.pk: document
-            for document in documents_qs.filter(pk__in=document_ids)
-        }
-
-        results = []
-        for provision in similar_provisions:
-            document = documents.get(provision["document_id"])
-            if not document:
-                continue
-
-            if not hasattr(document, "similar_provisions"):
-                document.similar_provisions = []
-                results.append(document)
-            document.similar_provisions.append(
-                self.build_similar_provision(document, provision)
-            )
-
-        return results
 
     def get_similar_provisions(self, documents_qs):
         if not apps.is_installed("peachjam_ml"):
@@ -840,29 +867,57 @@ class DocumentProvisionSimilarView(DocumentProvisionMixin, LegislationListView):
             n_similar=self.n_similar,
         )
 
-    def build_similar_provision(self, document, provision):
+    def prepare_provision(self, document, provision):
         portion_id = provision["portion"]
-        return SimpleNamespace(
-            document=document,
-            provision_eid=portion_id,
-            portion_id=portion_id,
-            title=provision["title"] or document.friendly_provision_title(portion_id),
-            similarity=provision["similarity"],
-            url=f"{document.get_absolute_url()}#{portion_id}",
-            provision_html=document.get_provision_by_eid(portion_id),
+        return super().prepare_provision(
+            document,
+            SimpleNamespace(
+                provision_eid=portion_id,
+                portion_id=portion_id,
+                title=provision["title"],
+                similarity=provision["similarity"],
+            ),
         )
+
+    def get_compare_url(self, document, provision):
+        params = {
+            "uri-a": f"{self.document.expression_frbr_uri}/~{self.provision_eid}",
+            "uri-b": f"{document.expression_frbr_uri}/~{provision.provision_eid}",
+        }
+        return f"{reverse('compare_portions')}?{urlencode(params)}"
+
+    def get_provision_title(self, document, provision):
+        return provision.title or document.friendly_provision_title(
+            provision.provision_eid
+        )
+
+    def decorate_documents_with_similar_provisions(self, documents):
+        similar_provisions = self.get_similar_provisions(documents)
+        if not similar_provisions:
+            return
+
+        document_ids = []
+        for provision in similar_provisions:
+            if provision["document_id"] not in document_ids:
+                document_ids.append(provision["document_id"])
+
+        document_map = {document.pk: document for document in documents}
+
+        results = []
+        for provision in similar_provisions:
+            document = document_map.get(provision["document_id"])
+            if not document:
+                continue
+
+            if not hasattr(document, "provisions"):
+                document.provisions = []
+                results.append(document)
+            document.provisions.append(self.prepare_provision(document, provision))
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(self.get_provision_context())
-        context["similar_provisions"] = [
-            provision
-            for document in context["documents"]
-            for provision in getattr(document, "similar_provisions", [])
-        ]
-        context["source_provision_uri"] = (
-            f"{self.document.expression_frbr_uri}/~{self.provision_eid}"
-        )
+        self.decorate_documents_with_similar_provisions(context["documents"])
         context["doc_count_noun"] = _("document with similar provisions")
         context["doc_count_noun_plural"] = _("documents with similar provisions")
         return context
