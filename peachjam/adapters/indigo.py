@@ -1017,14 +1017,6 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
         dataset = self.get_dataset()
         updated = []
 
-        updated_at = dataset.get("updated_at")
-        if (
-            last_refreshed is None
-            or not updated_at
-            or parser.parse(updated_at) > last_refreshed
-        ):
-            updated.append(self.DATASET_DOCUMENT_ID)
-
         for work_frbr_uri in self.get_dataset_work_frbr_uris(dataset):
             try:
                 work = self.get_work(work_frbr_uri)
@@ -1042,7 +1034,15 @@ class IndigoEnrichmentDatasetIngestor(IndigoAdapter):
             else:
                 updated.extend(self.check_for_updated([work], last_refreshed))
 
-        return list(dict.fromkeys(updated)), []
+        updated_at = dataset.get("updated_at")
+        if (
+            last_refreshed is None
+            or not updated_at
+            or parser.parse(updated_at) > last_refreshed
+        ):
+            updated.append(self.DATASET_DOCUMENT_ID)
+
+        return updated, []
 
     def update_document(self, document_id):
         """Update either the enrichment dataset or an Indigo document."""
