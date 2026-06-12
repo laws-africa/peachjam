@@ -7,6 +7,7 @@ import magic
 import requests
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
+from django.conf import settings
 from django.core.files import File
 from django.utils import timezone
 from django.utils.text import slugify
@@ -145,8 +146,42 @@ class JudgmentAdapter(BaseJudgmentAdapter):
             "jurisdiction": jurisdiction,
             "locality": locality,
             "flynote": doc["flynote"],
-            "case_summary": doc["case_summary"],
         }
+        if "flynote_raw" in doc:
+            data["flynote_raw"] = doc["flynote_raw"]
+        elif "flynote" in doc:
+            data["flynote_raw"] = doc["flynote"]
+
+        import_summary = self.should_import_summary(doc)
+        for field in (
+            "case_summary",
+            "case_summary_public",
+            "blurb",
+            "issues",
+            "held",
+            "order",
+            "summary_ai_generated",
+            "summary_generated_at",
+            "summary_language",
+            "summary_trace_id",
+        ):
+            if import_summary and field in doc:
+                data[field] = doc[field]
+        if not import_summary:
+            data.update(
+                {
+                    "case_summary": None,
+                    "case_summary_public": False,
+                    "blurb": None,
+                    "issues": None,
+                    "held": None,
+                    "order": None,
+                    "summary_ai_generated": False,
+                    "summary_generated_at": None,
+                    "summary_language": settings.PEACHJAM["SUMMARISER_LANGUAGE"],
+                    "summary_trace_id": None,
+                }
+            )
         content_html = self.get_content_html(doc)
 
         document = Judgment(**data)
@@ -164,7 +199,13 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         doc_content = created_doc.get_or_create_document_content(True)
         doc_content.content_html_is_akn = doc.get("content_html_is_akn", False)
         doc_content.set_source_html(content_html)
-        doc_content.save()
+        if import_summary:
+            with doc_content.suppress_attribute_hooks(
+                "DocumentContent.potentially_generate_judgment_summary"
+            ):
+                doc_content.save()
+        else:
+            doc_content.save()
 
         self.get_case_numbers(doc["case_numbers"], created_doc)
         self.get_judges(doc["judges"], created_doc)
@@ -173,6 +214,13 @@ class JudgmentAdapter(BaseJudgmentAdapter):
 
         log.info(f"Updated judgment {created_doc}")
         log.info(f"New {new}")
+
+    def should_import_summary(self, doc):
+        if not doc.get("case_summary"):
+            return False
+        if doc.get("summary_ai_generated") is not True:
+            return True
+        return doc.get("summary_language") == settings.PEACHJAM["SUMMARISER_LANGUAGE"]
 
     def get_registry(self, doc, court):
         if doc.get("registry"):

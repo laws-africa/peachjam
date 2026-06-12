@@ -7,6 +7,7 @@ from peachjam.models.lifecycle import (
     AttributeCycleError,
     AttributeDAG,
     AttributeHooksMixin,
+    SuppressableHooksLifecycleMixin,
     attribute_dag,
     on_attribute_changed,
 )
@@ -40,8 +41,19 @@ class OnAttributeChangedTestCase(TransactionTestCase):
             class Meta:
                 app_label = "peachjam"
 
+        class DirectLifecycleHookModel(SuppressableHooksLifecycleMixin, models.Model):
+            source = models.CharField(max_length=50, null=True, blank=True)
+
+            class Meta:
+                app_label = "peachjam"
+
+            @on_attribute_changed(AFTER_SAVE, ["source"], [])
+            def record_direct_lifecycle_source_change(self):
+                cls.after_save_calls.append(self.source)
+
         cls.OnClassHookModel = OnClassHookModel
         cls.OffClassHookModel = OffClassHookModel
+        cls.DirectLifecycleHookModel = DirectLifecycleHookModel
         cls.OnClassHookModel._before_save_calls = cls.before_save_calls
 
         @on_attribute_changed(
@@ -68,10 +80,12 @@ class OnAttributeChangedTestCase(TransactionTestCase):
         with connection.schema_editor() as schema_editor:
             schema_editor.create_model(cls.OnClassHookModel)
             schema_editor.create_model(cls.OffClassHookModel)
+            schema_editor.create_model(cls.DirectLifecycleHookModel)
 
     @classmethod
     def tearDownClass(cls):
         with connection.schema_editor() as schema_editor:
+            schema_editor.delete_model(cls.DirectLifecycleHookModel)
             schema_editor.delete_model(cls.OffClassHookModel)
             schema_editor.delete_model(cls.OnClassHookModel)
         attribute_dag.clear()
@@ -100,6 +114,36 @@ class OnAttributeChangedTestCase(TransactionTestCase):
 
         self.assertEqual(["updated"], self.after_save_calls)
         self.assertEqual(["updated"], self.after_save_calls_2)
+
+    def test_suppress_attribute_hooks_skips_only_named_hook(self):
+        obj = self.OffClassHookModel.objects.create(source="initial")
+        obj.track_changes()
+        obj.source = "updated"
+
+        with obj.suppress_attribute_hooks("OffClassHookModel.record_source_change"):
+            obj.save()
+
+        self.assertEqual([], self.after_save_calls)
+        self.assertEqual(["updated"], self.after_save_calls_2)
+
+    def test_suppress_attribute_hooks_requires_fully_qualified_hook_name(self):
+        obj = self.OffClassHookModel.objects.create(source="initial")
+
+        with self.assertRaises(ValueError):
+            with obj.suppress_attribute_hooks("record_source_change"):
+                pass
+
+    def test_direct_lifecycle_mixin_supports_hook_suppression(self):
+        obj = self.DirectLifecycleHookModel.objects.create(source="initial")
+        self.after_save_calls.clear()
+        obj.source = "updated"
+
+        with obj.suppress_attribute_hooks(
+            "DirectLifecycleHookModel.record_direct_lifecycle_source_change"
+        ):
+            obj.save()
+
+        self.assertEqual([], self.after_save_calls)
 
     def test_attribute_dag_records_fully_qualified_edges(self):
         edges = attribute_dag.edges()

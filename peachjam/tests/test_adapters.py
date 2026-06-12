@@ -5,7 +5,8 @@ from unittest.mock import patch
 
 import requests
 from countries_plus.models import Country
-from django.test import TestCase
+from django.conf import settings
+from django.test import TestCase, override_settings
 from django.utils.text import slugify
 from languages_plus.models import Language
 
@@ -629,6 +630,45 @@ class JudgmentAdapterTest(TestCase):
             },
         )
 
+    def remote_judgment_doc(self, **overrides):
+        doc = {
+            "title": "Remote judgment",
+            "case_name": "Foo v Bar",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-02T00:00:00Z",
+            "citation": "Remote citation",
+            "work_frbr_uri": "/akn/za/judgment/eacj/2024/1",
+            "expression_frbr_uri": "/akn/za/judgment/eacj/2024/1/eng@2024-01-01",
+            "jurisdiction": "ZA",
+            "language": "en",
+            "court": {"code": "EACJ", "name": "East African Court of Justice"},
+            "registry": None,
+            "locality": None,
+            "serial_number": 1,
+            "serial_number_override": None,
+            "mnc": "[2024] EACJ 1",
+            "date": "2024-01-01",
+            "allow_robots": True,
+            "published": True,
+            "flynote": "Remote flynote",
+            "flynote_raw": "Remote flynote raw",
+            "case_summary": "<p>Remote summary</p>",
+            "case_summary_public": True,
+            "blurb": "Remote blurb",
+            "issues": ["Issue 1"],
+            "held": ["Held 1"],
+            "order": "Remote order",
+            "summary_ai_generated": True,
+            "summary_generated_at": "2024-01-03T00:00:00Z",
+            "summary_language": "English",
+            "summary_trace_id": "trace-123",
+            "case_numbers": [],
+            "judges": [],
+            "topics": [],
+        }
+        doc.update(overrides)
+        return doc
+
     @patch("peachjam.adapters.judgments.SourceFile.track_changes", autospec=True)
     @patch("peachjam.adapters.judgments.SourceFile.ensure_file_as_pdf", autospec=True)
     def test_attach_source_file_creates_tracked_source_file(
@@ -668,3 +708,66 @@ class JudgmentAdapterTest(TestCase):
         self.assertEqual("application/pdf", source_file.mimetype)
         track_changes.assert_called_once_with(source_file)
         ensure_file_as_pdf.assert_called_once_with(source_file)
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_update_document_imports_summary_fields(self, generate_summary):
+        doc = self.remote_judgment_doc()
+
+        self.adapter.client_get = lambda url: SimpleNamespace(
+            json=lambda: doc
+        )  # noqa: E731
+        self.adapter.get_content_html = (
+            lambda doc: "<p>Remote content</p>"
+        )  # noqa: E731
+        self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
+
+        self.adapter.update_document(
+            "http://example.com/judgments/akn/za/judgment/eacj/2024/1/eng@2024-01-01"
+        )
+
+        judgment = Judgment.objects.get(expression_frbr_uri=doc["expression_frbr_uri"])
+        self.assertEqual("<p>Remote summary</p>", judgment.case_summary)
+        self.assertEqual(True, judgment.case_summary_public)
+        self.assertEqual("Remote blurb", judgment.blurb)
+        self.assertEqual("Remote flynote raw", judgment.flynote_raw)
+        self.assertEqual("Remote flynote", judgment.flynote)
+        self.assertEqual(["Issue 1"], judgment.issues)
+        self.assertEqual(["Held 1"], judgment.held)
+        self.assertEqual("Remote order", judgment.order)
+        self.assertTrue(judgment.summary_ai_generated)
+        self.assertEqual("English", judgment.summary_language)
+        self.assertEqual("trace-123", judgment.summary_trace_id)
+        self.assertIsNotNone(judgment.summary_generated_at)
+        generate_summary.assert_not_called()
+
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISER_LANGUAGE": "English"})
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_update_document_skips_wrong_language_ai_summary(self, generate_summary):
+        doc = self.remote_judgment_doc(summary_language="French")
+
+        self.adapter.client_get = lambda url: SimpleNamespace(
+            json=lambda: doc
+        )  # noqa: E731
+        self.adapter.get_content_html = (
+            lambda doc: "<p>Remote content</p>"
+        )  # noqa: E731
+        self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
+
+        self.adapter.update_document(
+            "http://example.com/judgments/akn/za/judgment/eacj/2024/1/eng@2024-01-01"
+        )
+
+        judgment = Judgment.objects.get(expression_frbr_uri=doc["expression_frbr_uri"])
+        self.assertIsNone(judgment.case_summary)
+        self.assertFalse(judgment.case_summary_public)
+        self.assertIsNone(judgment.blurb)
+        self.assertIsNone(judgment.issues)
+        self.assertIsNone(judgment.held)
+        self.assertIsNone(judgment.order)
+        self.assertFalse(judgment.summary_ai_generated)
+        self.assertIsNone(judgment.summary_generated_at)
+        self.assertEqual("English", judgment.summary_language)
+        self.assertIsNone(judgment.summary_trace_id)
+        self.assertTrue(
+            any(call.args == (judgment.pk,) for call in generate_summary.call_args_list)
+        )
