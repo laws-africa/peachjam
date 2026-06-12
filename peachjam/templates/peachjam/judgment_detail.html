@@ -118,7 +118,7 @@
 {% block post-metadata-cols %}
   {{ block.super }}
   {% with arbitration_judgment=document.arbitration_classification %}
-    {% if arbitration_judgment %}
+    {% if arbitration_judgment and document.doc_type != "judgment_stub" %}
       <div class="col-12 col-sm-6 col-lg-4">
         <div class="d-inline-flex mt-3 bg-light rounded p-2">
           <div class="p-2 h3 m-0">
