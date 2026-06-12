@@ -713,7 +713,7 @@ class LegislationProvisionListView(LegislationListView):
     attributes to the provision objects that are needed for display.
     """
 
-    document_table_template_name = "peachjam/document/provisions_table.html"
+    document_table_template_name = "peachjam/document/_provisions_table.html"
     document_table_form_template_name = "peachjam/document/_provisions_table_form.html"
 
     def prepare_provision(self, document, provision):
