@@ -6,6 +6,7 @@ import { SelectionSearch, SelectionShare, CompareProvisionProvider, SimilarProvi
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
 import { ProvisionCitations } from '../ProvisionCitations';
+import { ActiveProvisionManager } from './active-provision';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
@@ -36,6 +37,7 @@ class EnrichmentsManager {
   private provisionCitations: ProvisionCitations | null = null;
   private compareProvisionProvider: CompareProvisionProvider;
   private similarProvisionsProvider: SimilarProvisionsProvider;
+  private activeProvisionManager: ActiveProvisionManager | null = null;
 
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
@@ -58,19 +60,25 @@ class EnrichmentsManager {
       this.provisionCitations = new ProvisionCitations(this.root);
     }
 
-    this.compareProvisionProvider = new CompareProvisionProvider(this.expressionFrbrUri);
-    this.similarProvisionsProvider = new SimilarProvisionsProvider(this.expressionFrbrUri);
-    if (this.displayType === 'akn') {
-      this.gutterManager.addProvider(this.compareProvisionProvider);
-      this.gutterManager.addProvider(this.similarProvisionsProvider);
-    }
-
     this.selectionSearch = new SelectionSearch(this.gutterManager);
     this.selectionShare = new SelectionShare(this.gutterManager);
 
     if (this.displayType !== 'pdf') {
       this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.setupSelectionToolbar();
+    }
+
+    this.compareProvisionProvider = new CompareProvisionProvider(this.expressionFrbrUri);
+    this.similarProvisionsProvider = new SimilarProvisionsProvider(this.expressionFrbrUri);
+    if (this.displayType === 'akn') {
+      this.gutterManager.addProvider(this.compareProvisionProvider);
+      this.gutterManager.addProvider(this.similarProvisionsProvider);
+      this.activeProvisionManager = new ActiveProvisionManager(this.root);
+      if (this.annotationsManager) {
+        this.activeProvisionManager.addProvider(this.annotationsManager);
+      }
+      this.activeProvisionManager.addProvider(this.compareProvisionProvider);
+      this.activeProvisionManager.addProvider(this.similarProvisionsProvider);
     }
 
     this.gutter?.addEventListener('laItemChanged', (e: any) => {
