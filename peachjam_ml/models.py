@@ -375,6 +375,23 @@ class ContentChunk(models.Model):
         return avg
 
     @classmethod
+    def get_average_provision_embedding(cls, document, portion):
+        """Get the average embedding for a provision, falling back to parent EIDs."""
+        portions = [portion]
+        while "__" in portion:
+            portion = portion.rsplit("__", 1)[0]
+            portions.append(portion)
+
+        for provision in portions:
+            avg_embedding = cls.get_average_embedding(
+                document, "provision", portion=provision
+            )
+            if avg_embedding:
+                return avg_embedding
+
+        return None
+
+    @classmethod
     def get_similar_provisions(
         cls,
         source_document,
@@ -384,8 +401,8 @@ class ContentChunk(models.Model):
         n_similar=10,
     ) -> List["ContentChunk"]:
         """Get provisions in target_documents similar to source_portion."""
-        avg_embedding = cls.get_average_embedding(
-            source_document, "provision", portion=source_portion
+        avg_embedding = cls.get_average_provision_embedding(
+            source_document, source_portion
         )
         if not avg_embedding:
             return []
