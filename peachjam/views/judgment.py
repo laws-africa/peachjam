@@ -12,12 +12,11 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
-from django.utils.timezone import now
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
-from peachjam.models import CourtClass, Judgment
+from peachjam.models import CaseHistory, CourtClass, Judgment
 from peachjam.models.flynote import Flynote
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
@@ -319,69 +318,69 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
 
     def add_case_histories(self, context):
         document = self.get_object()
+        case_histories = self.get_connected_case_histories(document.work_id)
+        histories = self.get_case_history_entries(document, case_histories)
 
-        # judgments that impact this one
-        histories = [
-            {
-                "document": ch.judgment_work.documents.first(),
-                "children": [
-                    {
-                        "case_history": ch,
-                        "document": document,
-                    }
-                ],
-            }
-            for ch in document.work.incoming_case_histories.select_related(
-                "court", "historical_judgment_work", "outcome"
-            )
-            # ignore incoming history entries for dangling works that don't have a document
-            if ch.judgment_work.documents.first()
-        ]
-
-        if histories:
-            context["show_review_notice"] = True
-
-        # judgments that this one impacts
-        outgoing_histories = [
-            {
-                "case_history": ch,
-                "document": (
-                    ch.historical_judgment_work.documents.first()
-                    if ch.historical_judgment_work
-                    else None
-                ),
-            }
-            for ch in document.work.case_histories.select_related(
-                "historical_judgment_work", "outcome"
-            ).prefetch_related(
-                "historical_judgment_work__documents",
-                "historical_judgment_work__documents__outcomes",
-                "historical_judgment_work__documents__court",
-                "historical_judgment_work__documents__judges",
-            )
-        ]
-        if outgoing_histories:
-            histories.append(
-                {
-                    "document": document,
-                    "children": outgoing_histories,
-                }
-            )
-
-        today = now().date()
-        for history in histories:
-            for child in history["children"]:
-                child["info"] = child["document"] or child["case_history"]
-
-            # sort by date descending
-            history["children"].sort(
-                key=lambda x: x["info"].date or today, reverse=True
-            )
-
-        # sort by date descending
-        histories.sort(key=lambda x: x["document"].date, reverse=True)
+        context["show_review_notice"] = bool(case_histories)
 
         context["case_histories"] = histories
+        return histories
+
+    def get_connected_case_histories(self, root_work_id):
+        case_histories = {}
+        pending_work_ids = {root_work_id}
+        visited_work_ids = set()
+
+        while pending_work_ids:
+            work_ids_to_process = pending_work_ids
+            pending_work_ids = set()
+            visited_work_ids.update(work_ids_to_process)
+
+            histories = CaseHistory.objects.filter(
+                Q(judgment_work_id__in=work_ids_to_process)
+                | Q(historical_judgment_work_id__in=work_ids_to_process)
+            )
+
+            for case_history in histories:
+                if case_history.pk in case_histories:
+                    continue
+
+                case_histories[case_history.pk] = case_history
+                for work_id in (
+                    case_history.judgment_work_id,
+                    case_history.historical_judgment_work_id,
+                ):
+                    if work_id and work_id not in visited_work_ids:
+                        pending_work_ids.add(work_id)
+
+        return list(case_histories.values())
+
+    def get_case_history_entries(self, document, case_histories):
+        work_ids = {document.work_id}
+        for case_history in case_histories:
+            work_ids.add(case_history.judgment_work_id)
+            if case_history.historical_judgment_work_id:
+                work_ids.add(case_history.historical_judgment_work_id)
+
+        documents_by_work_id = {document.work_id: document}
+        related_documents = (
+            Judgment.objects.filter(work_id__in=work_ids - {document.work_id})
+            .latest_expression()
+            .select_related("court")
+            .prefetch_related("judges", "outcomes")
+        )
+        for related_document in related_documents:
+            documents_by_work_id[related_document.work_id] = related_document
+
+        histories = []
+        for case_document in documents_by_work_id.values():
+            history = {
+                "document": case_document,
+                "is_current": case_document.work_id == document.work_id,
+            }
+            histories.append(history)
+
+        histories.sort(key=lambda history: history["document"].date, reverse=True)
 
         return histories
 
