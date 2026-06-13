@@ -1,16 +1,18 @@
 import { RelationshipEnrichments } from '../RelationshipEnrichment';
 import DocDiffsManager from '../DocDiffs';
 import PDFCitationLinks from './citation-links';
-import { GutterEnrichmentManager, SelectionToolbarManager } from '@lawsafrica/indigo-akn/dist/enrichments';
-import SelectionSearch from './selection-search';
-import SelectionShare from './selection-share';
-import { PortionDetails } from './portions';
+import { GutterEnrichmentManager, SelectionToolbar } from '@lawsafrica/indigo-akn/dist/enrichments';
+import { SelectionSearch, SelectionShare, CompareProvisionProvider, SimilarProvisionsProvider } from './providers';
 import { AnnotationsProvider } from '../Annotations';
 import { ProvisionEnrichments } from '../ProvisionEnrichments';
 import { ProvisionCitations } from '../ProvisionCitations';
 
 /**
  * Class for handling the setup of all enrichments and interactions between enrichments
+ *
+ * This class sets up various managers to handle the different enrichments. Some managers provide a mechanism
+ * for providers to register themselves, and the provider is called when the selection or something else
+ * changes and the provider update itself.
  */
 class EnrichmentsManager {
   private relationshipsManager: RelationshipEnrichments | null = null;
@@ -24,12 +26,16 @@ class EnrichmentsManager {
   private readonly gutter: HTMLLaGutterElement | null;
   private readonly akn: HTMLElement | null;
   private citationLinks: PDFCitationLinks | null = null;
-  private portionDetails: PortionDetails | null = null;
+  // Allows providers to add buttons to a gutter toolbar when the selection in the document content changes
   private gutterManager: GutterEnrichmentManager;
+  // Allows providers to add buttons to a popup toolbar when the selection in the document content changes.
+  // This is only shown on mobile when the gutter is not easily accessible.
+  private selectionToolbarManager: SelectionToolbar | null = null;
   private displayType: string; // html, pdf or akn
   private expressionFrbrUri: string;
   private provisionCitations: ProvisionCitations | null = null;
-  private selectionToolbarManager: SelectionToolbarManager | null = null;
+  private compareProvisionProvider: CompareProvisionProvider;
+  private similarProvisionsProvider: SimilarProvisionsProvider;
 
   constructor (contentAndEnrichmentsElement: HTMLElement) {
     this.root = contentAndEnrichmentsElement;
@@ -50,7 +56,13 @@ class EnrichmentsManager {
       this.annotationsManager = new AnnotationsProvider(this.root, this.gutterManager, this.displayType);
       this.provisionEnrichmentsManager = new ProvisionEnrichments(this.root, this.gutterManager, this.displayType);
       this.provisionCitations = new ProvisionCitations(this.root);
-      this.portionDetails = new PortionDetails(this.root, this.gutterManager, this.displayType, this.expressionFrbrUri);
+    }
+
+    this.compareProvisionProvider = new CompareProvisionProvider(this.expressionFrbrUri);
+    this.similarProvisionsProvider = new SimilarProvisionsProvider(this.expressionFrbrUri);
+    if (this.displayType === 'akn') {
+      this.gutterManager.addProvider(this.compareProvisionProvider);
+      this.gutterManager.addProvider(this.similarProvisionsProvider);
     }
 
     this.selectionSearch = new SelectionSearch(this.gutterManager);
@@ -88,7 +100,7 @@ class EnrichmentsManager {
   setupSelectionToolbar () {
     if (this.akn) {
       // @ts-ignore
-      this.selectionToolbarManager = new SelectionToolbarManager(this.akn, {
+      this.selectionToolbarManager = new SelectionToolbar(this.akn, {
         shouldShow: () => window.matchMedia('(max-width: 991px)').matches
       });
       if (this.annotationsManager) {
@@ -96,6 +108,10 @@ class EnrichmentsManager {
       }
       this.selectionToolbarManager.addProvider(this.selectionShare);
       this.selectionToolbarManager.addProvider(this.selectionSearch);
+      if (this.displayType === 'akn') {
+        this.selectionToolbarManager.addProvider(this.compareProvisionProvider);
+        this.selectionToolbarManager.addProvider(this.similarProvisionsProvider);
+      }
     }
   }
 }
