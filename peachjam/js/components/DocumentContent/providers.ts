@@ -85,6 +85,7 @@ export class SelectionShare implements IGutterEnrichmentProvider {
 
 abstract class ProvisionEidProvider implements IGutterEnrichmentProvider {
   protected getProvisionEid (target: IRangeTarget): string | null {
+    if (!peachJam.config.documentEmbeddings) return null;
     return target.anchor_id || null;
   }
 
