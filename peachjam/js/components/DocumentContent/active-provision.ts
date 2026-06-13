@@ -5,6 +5,10 @@ import { LaGutterItem } from '@lawsafrica/law-widgets/components/la-gutter-item'
 
 type LaGutterItemElement = InstanceType<typeof LaGutterItem>;
 
+interface ActiveProvisionManagerOptions {
+  shouldShow?: () => boolean;
+}
+
 /**
  * Shows provider actions for the currently active provision.
  *
@@ -19,10 +23,12 @@ export class ActiveProvisionManager {
   gutterItem: LaGutterItemElement;
   buttonGroup: HTMLDivElement;
   providers: IGutterEnrichmentProvider[] = [];
+  shouldShow: () => boolean;
   provisionSelectors = '.akn-part, .akn-chapter, .akn-section, .akn-subsection, .akn-paragraph';
 
-  constructor (root: HTMLElement) {
+  constructor (root: HTMLElement, options: ActiveProvisionManagerOptions = {}) {
     this.root = root;
+    this.shouldShow = options.shouldShow || (() => true);
     this.akn = this.root.querySelector('.content');
     this.gutter = root.querySelector('la-gutter');
     this.gutterItem = this.createGutterItem();
@@ -55,6 +61,11 @@ export class ActiveProvisionManager {
   }
 
   onMouseOver (event: Event) {
+    if (!this.shouldShow()) {
+      this.deactivate();
+      return;
+    }
+
     const target = event.target;
 
     if (target && target instanceof HTMLElement) {

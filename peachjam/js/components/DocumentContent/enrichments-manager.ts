@@ -73,7 +73,10 @@ class EnrichmentsManager {
     if (this.displayType === 'akn') {
       this.gutterManager.addProvider(this.compareProvisionProvider);
       this.gutterManager.addProvider(this.similarProvisionsProvider);
-      this.activeProvisionManager = new ActiveProvisionManager(this.root);
+      const activeProvisionMedia = window.matchMedia('(min-width: 992px)');
+      this.activeProvisionManager = new ActiveProvisionManager(this.root, {
+        shouldShow: () => activeProvisionMedia.matches
+      });
       if (this.annotationsManager) {
         this.activeProvisionManager.addProvider(this.annotationsManager);
       }
