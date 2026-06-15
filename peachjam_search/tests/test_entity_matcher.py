@@ -1,3 +1,4 @@
+from django.core.cache import cache
 from django.test import TestCase
 
 from peachjam.models import Court, Judge
@@ -6,6 +7,9 @@ from peachjam_search.entity_matcher import EntityMatcher
 
 class EntityMatcherTest(TestCase):
     fixtures = ["tests/countries", "tests/courts"]
+
+    def setUp(self):
+        cache.clear()
 
     def test_matches_court_name_exactly(self):
         hits = EntityMatcher().match("East African Court of Justice")
@@ -62,3 +66,18 @@ class EntityMatcherTest(TestCase):
         hits = EntityMatcher().match("african")
 
         self.assertEqual([], hits)
+
+    def test_ignores_long_queries_before_checking_providers(self):
+        class Provider:
+            called = False
+
+            def match(self, query, normalized_query):
+                self.called = True
+                return []
+
+        provider = Provider()
+
+        hits = EntityMatcher(providers=[provider]).match("x" * 51)
+
+        self.assertEqual([], hits)
+        self.assertFalse(provider.called)

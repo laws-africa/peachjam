@@ -1,0 +1,7 @@
+{% if entity_hits %}
+  <div class="row g-3 my-3">
+    {% for entity_hit in entity_hits %}
+      <div class="col-12 col-md-4">{% include "peachjam_search/_entity_search_hit.html" %}</div>
+    {% endfor %}
+  </div>
+{% endif %}

@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.core.cache import cache
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
@@ -21,6 +22,7 @@ class SearchViewsTest(TestCase):
     fixtures = ["tests/countries", "tests/users", "documents/sample_documents"]
 
     def setUp(self):
+        cache.clear()
         self.user = User.objects.get(username="officer@example.com")
         # ensure user has the correct permission
         self.user.user_permissions.add(
@@ -186,18 +188,17 @@ class SearchViewsTest(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        results_html = response.json()["results_html"]
-        self.assertIn("ECOWAS Community Court of Justice", results_html)
-        self.assertIn("Court", results_html)
-        self.assertLess(
-            results_html.index("ECOWAS Community Court of Justice"),
-            results_html.index(doc.title),
-        )
+        data = response.json()
+        self.assertIn("ECOWAS Community Court of Justice", data["entity_results_html"])
+        self.assertIn("Court", data["entity_results_html"])
+        self.assertNotIn("ECOWAS Community Court of Justice", data["results_html"])
+        self.assertIn(doc.title, data["results_html"])
 
     def test_entity_hit_does_not_use_document_click_tracking_attributes(self):
         request = RequestFactory().get("/search/?search=test")
         entity_hit = EntitySearchHit(
             entity_type="court",
+            type_label="Court",
             entity_id=1,
             label="ECOWAS Community Court of Justice",
             url="/court/ecowascj/",

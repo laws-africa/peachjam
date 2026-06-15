@@ -125,11 +125,17 @@ class DocumentSearchView(TemplateView):
         response = {
             "count": es_response.hits.total.value,
             "facets": es_response.aggregations.to_dict(),
+            "entity_results_html": render_to_string(
+                "peachjam_search/_entity_search_hit_list.html",
+                {
+                    "request": request,
+                    "entity_hits": entity_hits,
+                },
+            ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
                 {
                     "request": request,
-                    "entity_hits": entity_hits,
                     "hits": hits,
                     "can_debug": self.use_explain,
                     "show_jurisdiction": settings.PEACHJAM[
@@ -235,7 +241,7 @@ class DocumentSearchView(TemplateView):
         return engine
 
     def make_entity_matcher(self):
-        return EntityMatcher()
+        return EntityMatcher.get_instance()
 
     def match_entities(self, engine):
         if engine.page != 1 or engine.field_queries:
