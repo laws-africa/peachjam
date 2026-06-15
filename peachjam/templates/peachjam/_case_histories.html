@@ -30,7 +30,7 @@
         {% if subscription_required %}
           {% include "peachjam_subs/_subscription_required.html" %}
         {% else %}
-          <p class="text-muted">Showing case history timeline – from most recent to oldest</p>
+          <p class="text-muted">{% trans 'Showing case history timeline, from most recent to oldest' %}</p>
           <div class="vertical-timeline ms-5 mt-4">
             {% for entry in case_histories %}
               <div class="vertical-timeline__item">
