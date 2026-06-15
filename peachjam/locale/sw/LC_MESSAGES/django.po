@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-15 13:30+0000\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
+"PO-Revision-Date: 2026-06-15 14:23\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -1064,10 +1064,8 @@ msgid "Provision citation"
 msgstr "Nukuu ya utoaji"
 
 #: models/enrichments.py:15
-#, fuzzy
-#| msgid "Provision citation"
 msgid "Provision topic"
-msgstr "Nukuu ya utoaji"
+msgstr "Mada ya utoaji"
 
 #: models/enrichments.py:27 models/enrichments.py:170
 msgid "provision eid"
@@ -1144,16 +1142,12 @@ msgid "topic"
 msgstr "mada"
 
 #: models/enrichments.py:135
-#, fuzzy
-#| msgid "provision enrichment"
 msgid "provision topic enrichment"
-msgstr "uboreshaji wa utoaji"
+msgstr "uboreshaji wa mada ya utoaji"
 
 #: models/enrichments.py:136
-#, fuzzy
-#| msgid "provision enrichments"
 msgid "provision topic enrichments"
-msgstr "uboreshaji wa utoaji"
+msgstr "uboreshaji wa mada ya utoaji"
 
 #: models/enrichments.py:144
 msgid "prefix"
@@ -1241,10 +1235,8 @@ msgid "flynotes"
 msgstr "maelezo ya ndege"
 
 #: models/flynote.py:70
-#, fuzzy
-#| msgid "Related judgments"
 msgid "Can view linked judgments"
-msgstr "Hukumu zinazohusiana"
+msgstr "Inaweza kuona hukumu zilizounganishwa"
 
 #: models/flynote.py:88
 msgid "A flynote cannot be active when any ancestor is deprecated."
@@ -1271,14 +1263,12 @@ msgid "Flynotes can only be merged into a sibling at the same level."
 msgstr "Maelezo ya Kuruka yanaweza kuunganishwa tu na kuwa ndugu katika kiwango sawa."
 
 #: models/flynote.py:283
-#, fuzzy
-#| msgid "Flynote must be saved before it can be renamed."
 msgid "Flynote must be saved before it can be moved."
-msgstr "Flynote lazima ihifadhiwe kabla haijabadilishwa jina."
+msgstr "Flynote lazima ihifadhiwe kabla ya kuhamishwa."
 
 #: models/flynote.py:285
 msgid "Cannot promote children of a root flynote."
-msgstr ""
+msgstr "Haiwezi kukuza watoto wa root flynote."
 
 #: models/flynote.py:501
 msgid "judgment flynote"
@@ -1544,14 +1534,12 @@ msgid "When the AI summary was generated"
 msgstr "Wakati muhtasari wa AI ulipotolewa"
 
 #: models/judgment.py:408
-#, fuzzy
-#| msgid "language"
 msgid "summary language"
-msgstr "lugha"
+msgstr "lugha ya muhtasari"
 
 #: models/judgment.py:412
 msgid "The language used for the AI-generated summary"
-msgstr ""
+msgstr "Lugha inayotumika kwa muhtasari uliozalishwa na AI"
 
 #: models/judgment.py:415
 msgid "summary trace ID"
@@ -1996,7 +1984,7 @@ msgstr "Kitambulisho cha helpscout wasiliana nasi beacon."
 
 #: models/settings.py:188
 msgid "Secret key for helpscout signature."
-msgstr ""
+msgstr "Ufunguo wa siri wa sahihi ya helpscout."
 
 #: models/settings.py:191
 msgid "allow criminal data extraction"
@@ -2697,11 +2685,11 @@ msgstr "Hukumu hii ilipitiwa na mahakama nyingine. Tazama kichupo cha Historia y
 
 #: templates/peachjam/_case_histories.html:33
 msgid "Showing case history timeline, from most recent to oldest"
-msgstr ""
+msgstr "Inaonyesha ratiba ya historia ya kesi, kuanzia ya hivi karibuni hadi ya zamani zaidi"
 
 #: templates/peachjam/_case_histories.html:42
 msgid "You are here"
-msgstr ""
+msgstr "Uko hapa"
 
 #: templates/peachjam/_case_histories.html:50
 #: templates/peachjam/causelist_detail.html:7
@@ -3131,8 +3119,7 @@ msgstr "Tembelea chaneli yetu ya YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3140,8 +3127,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Chukua %(APP_NAME)s Utafiti</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Tusaidie kufanya %(APP_NAME)s bora zaidi.\n"
@@ -3157,14 +3143,12 @@ msgstr "Chukua uchunguzi"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Tusaidie kufanya %(APP_NAME)s bora zaidi. Chukua utafiti huu mfupi wa dakika 5 na utuambie jinsi unavyotumia %(APP_NAME)s na jinsi tunavyoweza kuuboresha. Taarifa zote zinazoshirikiwa ni siri.\n"
 "            </p>\n"
@@ -3538,77 +3522,59 @@ msgid "You've used %(chats_used)s of your %(chat_limit)s document chats this mon
 msgstr "Umetumia %(chats_used)s kati ya gumzo zako za hati %(chat_limit)s mwezi huu.<br> Boresha hadi <a href=\"%(upsell_url)s\">%(lowest_product)s</a> ili kufungua gumzo zaidi."
 
 #: templates/peachjam/compare/_chooser.html:7
-#, fuzzy
-#| msgid "Uncommenced provision"
 msgid "Choose a provision"
-msgstr "Utoaji ambao haujaanza"
+msgstr "Chagua kifungu"
 
 #: templates/peachjam/compare/_chooser.html:10
 #: templates/peachjam/compare/_chooser.html:31
-#, fuzzy
-#| msgid "Related documents"
 msgid "Suggestions"
-msgstr "Nyaraka zinazohusiana"
+msgstr "Mapendekezo"
 
 #: templates/peachjam/compare/_chooser.html:17
-#, fuzzy
-#| msgid "Table of contents"
 msgid "Search table of contents"
-msgstr "Yaliyomo"
+msgstr "Tafuta yaliyomo"
 
 #: templates/peachjam/compare/_chooser.html:27
-#, fuzzy
-#| msgid "This document is not published and is not visible to the public."
 msgid "This document does not have a table of contents."
-msgstr "Hati hii haijachapishwa na haionekani kwa umma."
+msgstr "Hati hii haina jedwali la yaliyomo."
 
 #: templates/peachjam/compare/_chooser.html:39
-#, fuzzy
-#| msgid "Filter documents by title"
 msgid "Search document titles"
-msgstr "Chuja hati kwa kichwa"
+msgstr "Tafuta majina ya hati"
 
 #: templates/peachjam/compare/_column.html:17
 msgid "Choose a document and provision to compare"
-msgstr ""
+msgstr "Chagua hati na kifungu cha kulinganisha"
 
 #: templates/peachjam/compare/_column.html:18
 msgid "Search for a document, then choose a provision."
-msgstr ""
+msgstr "Tafuta hati, kisha uchague kifungu."
 
 #: templates/peachjam/compare/_column.html:29
 #: templates/peachjam/compare/_selected_portion.html:18
-#, fuzzy
-#| msgid "Save document"
 msgid "Change document"
-msgstr "Hifadhi hati"
+msgstr "Badilisha hati"
 
 #: templates/peachjam/compare/_column.html:36
 #: templates/peachjam/compare/_selected_portion.html:25
-#, fuzzy
-#| msgid "Uncommenced provision"
 msgid "Change provision"
-msgstr "Utoaji ambao haujaanza"
+msgstr "Kifungu cha mabadiliko"
 
 #: templates/peachjam/compare/_document_search_results.html:6
-#, fuzzy
-#| msgid "No recent documents."
 msgid "No matching documents."
-msgstr "Hakuna nyaraka za hivi karibuni"
+msgstr "Hakuna hati zinazolingana."
 
 #: templates/peachjam/compare/compare.html:4
 msgid "Compare provisions side-by-side"
-msgstr ""
+msgstr "Linganisha vifungu kando kwa kando"
 
 #: templates/peachjam/compare/compare.html:9
-#, fuzzy
-#| msgid "Sort documents by"
 msgid "Compare two documents side-by-side"
-msgstr "Panga hati kulingana na"
+msgstr "Linganisha hati mbili kando kwa kando"
 
 #: templates/peachjam/compare/compare.html:11
 msgid "Choose provisions of two documents to explore similarities and differences."
-msgstr ""
+msgstr "Chagua vifungu vya hati mbili ili kuchunguza kufanana na tofauti."
 
 #: templates/peachjam/document/_ask_ai_banner.html:12
 #: templates/peachjam/document/_ask_ai_banner.html:19
@@ -3664,28 +3630,22 @@ msgstr "Nukuu"
 
 #: templates/peachjam/document/_provision_header.html:24
 #: templates/peachjam/document/similar_provisions.html:4
-#, fuzzy
-#| msgid "Uncommenced provision"
 msgid "Similar provisions"
-msgstr "Utoaji ambao haujaanza"
+msgstr "Masharti yanayofanana"
 
 #: templates/peachjam/document/_provisions_table.html:18
 #: templates/peachjam/document/_provisions_table.html:90
-#, fuzzy
-#| msgid "No volumes found."
 msgid "No provisions found."
-msgstr "Hakuna juzuu zilizopatikana."
+msgstr "Hakuna masharti yaliyopatikana."
 
 #: templates/peachjam/document/_provisions_table.html:51
 #, python-format
 msgid "Toggle details for %(provision)s"
-msgstr ""
+msgstr "Badilisha maelezo ya %(provision)s"
 
 #: templates/peachjam/document/_provisions_table.html:61
-#, fuzzy
-#| msgid "More..."
 msgid "Compare..."
-msgstr "Zaidi..."
+msgstr "Linganisha..."
 
 #: templates/peachjam/document/_provisions_table.html:78
 #: templates/peachjam/provision_enrichment/uncommenced_provision_detail.html:8
@@ -3718,7 +3678,7 @@ msgstr "Masharti yote kinyume na katiba"
 
 #: templates/peachjam/document/similar_provisions.html:10
 msgid "Other provisions similar to this one"
-msgstr ""
+msgstr "Masharti mengine yanayofanana na haya"
 
 #: templates/peachjam/emails/layouts/alert.html:4
 #, python-format
@@ -3910,15 +3870,15 @@ msgstr "Soma muhtasari kamili"
 
 #: templates/peachjam/judgment_detail.html:129
 msgid "AfricanLII Arbitration Collection"
-msgstr ""
+msgstr "Mkusanyiko wa Usuluhishi wa AfricanLII"
 
 #: templates/peachjam/judgment_detail.html:130
 msgid "This judgment is part of the AfricanLII Arbitration Collection."
-msgstr ""
+msgstr "Hukumu hii ni sehemu ya Mkusanyiko wa Usuluhishi wa AfricanLII."
 
 #: templates/peachjam/judgment_detail.html:133
 msgid "Explore arbitration analysis on AfricanLII"
-msgstr ""
+msgstr "Chunguza uchanganuzi wa usuluhishi kuhusu AfricanLII"
 
 #: templates/peachjam/judgment_list.html:15 views/courts.py:206
 msgid "All courts"
@@ -4141,12 +4101,10 @@ msgid "Show provision details"
 msgstr "Onyesha maelezo ya utoaji"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid ""
-"\n"
+msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr ""
-"\n"
+msgstr "\n"
 "      Kumbuka: kifungu hiki kina baadhi ya vifungu vidogo ambavyo tayari vimeanza kutumika.\n"
 "    "
 
@@ -4720,22 +4678,10 @@ msgid "There are outstanding amendments that have not yet been applied. See the 
 msgstr "Kuna marekebisho ambayo hayajatekelezwa ambayo bado hayajatekelezwa. Tazama kichupo cha Historia kwa habari zaidi."
 
 #: views/legislation.py:929
-#, fuzzy
-#| msgid "Documents that cite this provision"
 msgid "document with similar provisions"
-msgstr "Nyaraka zinazotaja kifungu hiki"
+msgstr "hati yenye masharti sawa"
 
 #: views/legislation.py:930
-#, fuzzy
-#| msgid "Documents that cite this provision"
 msgid "documents with similar provisions"
-msgstr "Nyaraka zinazotaja kifungu hiki"
+msgstr "hati zenye masharti sawa"
 
-#~ msgid "Case"
-#~ msgstr "Kesi"
-
-#~ msgid "Appeal outcome"
-#~ msgstr "Matokeo ya rufaa"
-
-#~ msgid "This judgment"
-#~ msgstr "Hukumu hii"
