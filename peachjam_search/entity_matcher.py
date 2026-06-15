@@ -5,9 +5,10 @@ from typing import Iterable
 
 from django.core.cache import cache
 from django.db.models import Model, QuerySet
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from peachjam.models import Court, Judge
+from peachjam.models import Court, Judge, Locality
 
 
 @dataclass(frozen=True)
@@ -134,8 +135,47 @@ class JudgeEntityProvider(EntityProvider):
         return set(query_tokens).issubset(set(name_tokens))
 
 
+class LocalityEntityProvider(EntityProvider):
+    entity_type = "locality"
+    type_label = _("Locality")
+    model = Locality
+    fields = ("id", "name", "code", "jurisdiction")
+
+    def get_queryset(self) -> QuerySet:
+        return super().get_queryset().select_related("jurisdiction")
+
+    def get_url(self, entity) -> str:
+        return reverse(
+            "locality_legislation_list",
+            kwargs={"code": entity.place_code()},
+        )
+
+    def match(self, query: str, normalized_query: str) -> list[CandidateMatch]:
+        matches = []
+
+        for locality in self.get_entities():
+            normalized_names = [
+                normalize(locality.name),
+                normalize(re.sub(r"\s*\([^)]*\)", "", locality.name)),
+            ]
+            normalized_place_code = normalize(locality.place_code())
+
+            if query == locality.name:
+                matches.append(CandidateMatch(locality, "exact", 1.0))
+            elif normalized_query in normalized_names:
+                matches.append(CandidateMatch(locality, "normalized exact", 0.98))
+            elif normalized_query == normalized_place_code:
+                matches.append(CandidateMatch(locality, "place code exact", 0.98))
+
+        return matches
+
+
 class EntityMatcher:
-    default_providers = [CourtEntityProvider, JudgeEntityProvider]
+    default_providers = [
+        CourtEntityProvider,
+        JudgeEntityProvider,
+        LocalityEntityProvider,
+    ]
     max_query_length = 50
     _instance = None
 

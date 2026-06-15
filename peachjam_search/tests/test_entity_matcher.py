@@ -1,7 +1,8 @@
 from django.core.cache import cache
 from django.test import TestCase
+from django.urls import reverse
 
-from peachjam.models import Court, Judge
+from peachjam.models import Court, Judge, Locality
 from peachjam_search.entity_matcher import EntityMatcher
 
 
@@ -33,6 +34,44 @@ class EntityMatcherTest(TestCase):
         self.assertEqual("court", hits[0].entity_type)
         self.assertEqual(Court.objects.get(code="EACJ").pk, hits[0].entity_id)
         self.assertEqual("code exact", hits[0].match_type)
+
+    def test_matches_locality_name_exactly(self):
+        locality = Locality.objects.get(name="African Union (AU)")
+
+        hits = EntityMatcher().match("African Union (AU)")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("locality", hits[0].entity_type)
+        self.assertEqual("African Union (AU)", hits[0].label)
+        self.assertEqual("exact", hits[0].match_type)
+        self.assertEqual(
+            reverse(
+                "locality_legislation_list", kwargs={"code": locality.place_code()}
+            ),
+            hits[0].url,
+        )
+
+    def test_matches_locality_name_when_normalized(self):
+        hits = EntityMatcher().match("african union au")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("locality", hits[0].entity_type)
+        self.assertEqual("normalized exact", hits[0].match_type)
+
+    def test_matches_locality_name_without_parenthetical_suffix(self):
+        hits = EntityMatcher().match("African Union")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("locality", hits[0].entity_type)
+        self.assertEqual("African Union (AU)", hits[0].label)
+        self.assertEqual("normalized exact", hits[0].match_type)
+
+    def test_matches_locality_place_code(self):
+        hits = EntityMatcher().match("aa-au")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("locality", hits[0].entity_type)
+        self.assertEqual("place code exact", hits[0].match_type)
 
     def test_matches_judge_name_exactly(self):
         Judge.objects.create(name="Mwangi")
