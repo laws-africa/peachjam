@@ -62,14 +62,14 @@ class EnrichmentsManager {
 
     this.selectionSearch = new SelectionSearch(this.gutterManager);
     this.selectionShare = new SelectionShare(this.gutterManager);
+    this.compareProvisionProvider = new CompareProvisionProvider(this.expressionFrbrUri);
+    this.similarProvisionsProvider = new SimilarProvisionsProvider(this.expressionFrbrUri);
 
     if (this.displayType !== 'pdf') {
       this.relationshipsManager = new RelationshipEnrichments(this.root, this.gutterManager, this.displayType);
       this.setupSelectionToolbar();
     }
 
-    this.compareProvisionProvider = new CompareProvisionProvider(this.expressionFrbrUri);
-    this.similarProvisionsProvider = new SimilarProvisionsProvider(this.expressionFrbrUri);
     if (this.displayType === 'akn') {
       this.gutterManager.addProvider(this.compareProvisionProvider);
       this.gutterManager.addProvider(this.similarProvisionsProvider);
