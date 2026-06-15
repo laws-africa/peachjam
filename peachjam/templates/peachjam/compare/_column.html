@@ -9,6 +9,7 @@
           <h2 id="compare-side-{{ side }}-heading" class="h5 mb-1">
             <a href="{{ selected.document_url }}">{{ selected.document.title }}</a>
           </h2>
+          <div>{% include 'peachjam/document/_jurisdiction.html' with document=selected.document %}</div>
           <div>
             <a href="{{ selected.provision_url }}">{{ selected.portion_title }}</a>
           </div>

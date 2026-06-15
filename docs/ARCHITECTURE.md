@@ -89,6 +89,11 @@ Important subareas:
     - user features under `my/` and `user/`
     - admin utilities such as anonymisation/autocomplete
     - offline and widget endpoints
+- `peachjam/views/generic_views.py`
+  - Shared document listing view machinery.
+  - `DocumentListView` provides the base document queryset, document table context, pagination, and HTMX template switching for the table and table form. Views that need custom table partials should set `document_table_template_name` and `document_table_form_template_name` instead of overriding `get_template_names()` for the standard table/table-form swap.
+  - `FilteredDocumentListView` layers forms and facets on top of `DocumentListView`. Its `get_base_queryset()` is the canonical unfiltered domain queryset for the page: it must already contain every page-specific restriction, such as "only this author," "only this topic," "only documents with matching enrichments," or "only documents with similar provisions." Facet builders call `get_base_queryset()` and then apply all filters except the facet being built, so returning a broad queryset here produces incorrect facet options and counts.
+  - `get_queryset()` should apply user filters, ordering, latest-expression handling, and final display shaping. If a view needs to attach transient data to document objects, do that after filtering in `get_queryset()` or `get_context_data()`, while keeping `get_base_queryset()` as a queryset.
 - `peachjam/urls`
   - Route modules grouped by feature or content family.
 - `peachjam/adapters`

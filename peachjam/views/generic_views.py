@@ -83,6 +83,8 @@ class DocumentListView(ListView):
     paginate_by = 50
     paginator_class = ClampedPaginator
     model = CoreDocument
+    document_table_template_name = "peachjam/_document_table.html"
+    document_table_form_template_name = "peachjam/_document_table_form.html"
 
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
@@ -211,8 +213,8 @@ class DocumentListView(ListView):
     def get_template_names(self):
         if self.request.htmx:
             if self.request.htmx.target == self.get_document_table_id():
-                return ["peachjam/_document_table.html"]
-            return ["peachjam/_document_table_form.html"]
+                return [self.document_table_template_name]
+            return [self.document_table_form_template_name]
         return super().get_template_names()
 
 

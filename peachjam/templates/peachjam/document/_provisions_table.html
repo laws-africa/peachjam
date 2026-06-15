@@ -1,0 +1,98 @@
+{% load i18n peachjam humanize %}
+{% with doc_table_dom_id=doc_table_id|default:"doc-table" %}
+  <section class="table-responsive"
+           id="{{ doc_table_dom_id }}"
+           data-component="DocumentTable"
+           aria-label="{% trans 'Results' %}"
+           tabindex="-1">
+    <p class="visually-hidden" aria-live="polite" aria-atomic="true">
+      {% trans 'Results.' %}
+      {% if documents %}
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }} {% trans 'found.' %}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }} {% trans 'found.' %}
+        {% endif %}
+      {% else %}
+        {% block empty_results_text %}
+          {% trans 'No provisions found.' %}
+        {% endblock %}
+      {% endif %}
+    </p>
+    {% if doc_table_show_counts %}
+      <div class="mb-3 text-muted">
+        {% if doc_count == 1 %}
+          {{ doc_count|intcomma }} {{ doc_count_noun }}
+        {% else %}
+          {{ doc_count|intcomma }} {{ doc_count_noun_plural }}
+        {% endif %}
+      </div>
+    {% endif %}
+    {% for document in documents %}
+      <div class="card mb-4"
+           aria-labelledby="provisions-document-{{ document.pk }}">
+        <div class="card-header">
+          <h2 class="h5 mb-1" id="provisions-document-{{ document.pk }}">
+            <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+          </h2>
+          <div>{% include 'peachjam/document/_jurisdiction.html' %}</div>
+        </div>
+        <div class="card-body bg-light">
+          {% for provision in document.provisions %}
+            <section class="mb-3 {% if forloop.last %}mb-0{% endif %}"
+                     aria-labelledby="provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
+              <div class="mb-2 d-flex">
+                <h3 class="h6 mb-0 provision-toggle"
+                    id="provision-heading-{{ document.pk }}-{{ forloop.counter0 }}">
+                  <button type="button"
+                          class="btn btn-sm bg-none"
+                          data-bs-toggle="collapse"
+                          data-bs-target="#provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
+                          aria-label="{% blocktrans with provision=provision.title %}Toggle details for {{ provision }}{% endblocktrans %}"
+                          aria-expanded="true"
+                          aria-controls="provision-detail-{{ document.pk }}-{{ forloop.counter0 }}">
+                    <i class="bi" aria-hidden="true"></i>
+                  </button>
+                  <a href="{{ provision.url }}" class="provision-link me-2">{{ provision.title }}</a>
+                  {% block provision_badges %}{% endblock %}
+                </h3>
+                {% if provision.compare_url %}
+                  <a href="{{ provision.compare_url }}"
+                     class="btn btn-outline-primary ms-auto">{% trans "Compare..." %}</a>
+                {% endif %}
+              </div>
+              <div id="provision-detail-{{ document.pk }}-{{ forloop.counter0 }}"
+                   class="collapse show">
+                {% block provision_detail %}
+                  {% if provision.provision_popup_url %}
+                    <div class="bg-white p-3 border my-2"
+                         hx-get="{{ provision.provision_popup_url }}"
+                         hx-trigger="load"
+                         hx-target="this"
+                         hx-swap="innerHTML"
+                         hx-push-url="false"
+                         aria-live="polite">
+                      <div class="spinner-when-empty"></div>
+                    </div>
+                  {% else %}
+                    <em>{% trans "No content found" %}</em>
+                  {% endif %}
+                {% endblock %}
+              </div>
+            </section>
+          {% endfor %}
+        </div>
+      </div>
+    {% endfor %}
+    {% if not documents %}
+      <p>
+        {% block empty_results_paragraph %}
+          {% trans 'No provisions found.' %}
+        {% endblock %}
+      </p>
+    {% endif %}
+    {% if documents and not hide_pagination and paginator %}
+      {% include 'peachjam/_pagination.html' %}
+    {% endif %}
+  </section>
+{% endwith %}
