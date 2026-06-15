@@ -43,6 +43,7 @@ from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.classifier import QueryClassifier
 from peachjam_search.engine import SearchEngine
+from peachjam_search.entity_matcher import EntityMatcher
 from peachjam_search.forms import (
     SavedSearchCreateForm,
     SavedSearchUpdateForm,
@@ -119,6 +120,7 @@ class DocumentSearchView(TemplateView):
         SearchHit.attach_documents(hits)
         # only keep those with documents
         hits = [h for h in hits if h.document]
+        entity_hits = self.match_entities(engine)
 
         response = {
             "count": es_response.hits.total.value,
@@ -127,6 +129,7 @@ class DocumentSearchView(TemplateView):
                 "peachjam_search/_search_hit_list.html",
                 {
                     "request": request,
+                    "entity_hits": entity_hits,
                     "hits": hits,
                     "can_debug": self.use_explain,
                     "show_jurisdiction": settings.PEACHJAM[
@@ -230,6 +233,14 @@ class DocumentSearchView(TemplateView):
             engine.mode = form.cleaned_data.get("mode") or engine.mode
 
         return engine
+
+    def make_entity_matcher(self):
+        return EntityMatcher()
+
+    def match_entities(self, engine):
+        if engine.page != 1 or engine.field_queries:
+            return []
+        return self.make_entity_matcher().match(engine.query)
 
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:

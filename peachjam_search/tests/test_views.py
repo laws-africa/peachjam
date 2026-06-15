@@ -11,6 +11,7 @@ from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 
 from peachjam.models import CoreDocument
+from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import SearchTrace
 from peachjam_search.views.api import PortionSearchView
 from peachjam_search.views.search import DocumentSearchView
@@ -147,6 +148,75 @@ class SearchViewsTest(TestCase):
         response = self.client.get(reverse("search:search_documents") + "?search=test")
         self.assertEqual(response.status_code, 200)
         self.assertIn("max-age=900", response.headers["Cache-Control"])
+
+    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    def test_search_includes_entity_hits_above_document_hits(self, mock_search):
+        doc = CoreDocument.objects.first()
+
+        def resp(search):
+            return Response(
+                search,
+                {
+                    "_shards": {
+                        "failed": 0,
+                    },
+                    "hits": {
+                        "total": {
+                            "value": 1,
+                        },
+                        "hits": [
+                            {
+                                "_id": str(doc.pk),
+                                "_index": search.index,
+                                "_score": 10.0,
+                                "_source": {
+                                    "expression_frbr_uri": doc.expression_frbr_uri,
+                                },
+                            }
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = resp
+
+        response = self.client.get(
+            reverse("search:search_documents")
+            + "?search=ECOWAS%20Community%20Court%20of%20Justice"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        results_html = response.json()["results_html"]
+        self.assertIn("ECOWAS Community Court of Justice", results_html)
+        self.assertIn("Court", results_html)
+        self.assertLess(
+            results_html.index("ECOWAS Community Court of Justice"),
+            results_html.index(doc.title),
+        )
+
+    def test_entity_hit_does_not_use_document_click_tracking_attributes(self):
+        request = RequestFactory().get("/search/?search=test")
+        entity_hit = EntitySearchHit(
+            entity_type="court",
+            entity_id=1,
+            label="ECOWAS Community Court of Justice",
+            url="/court/ecowascj/",
+            match_type="exact",
+            confidence=1.0,
+        )
+
+        html = render_to_string(
+            "peachjam_search/_entity_search_hit.html",
+            {
+                "request": request,
+                "entity_hit": entity_hit,
+            },
+            request=request,
+        )
+
+        self.assertIn("ECOWAS Community Court of Justice", html)
+        self.assertNotIn("data-position", html)
+        self.assertNotIn("data-frbr-uri", html)
 
     def test_search_trace_strips_null_bytes_before_saving(self):
         captured = {}

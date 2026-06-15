@@ -65,7 +65,8 @@
                    class="collapse show">
                 {% block provision_detail %}
                   {% if provision.provision_popup_url %}
-                    <div class="bg-white p-3 border my-2"
+                    <div class="bg-white p-3 border my-2 overflow-y-auto"
+                         style="max-height: 70vh"
                          hx-get="{{ provision.provision_popup_url }}"
                          hx-trigger="load"
                          hx-target="this"
