@@ -840,6 +840,7 @@ class DocumentProvisionSimilarView(
     n_similar = 10
     exclude_facets = ["alphabet"]
     paginate_by = 0
+    _similar_provisions = None
 
     def get_subscription_required_template(self):
         return self.template_name
@@ -865,15 +866,19 @@ class DocumentProvisionSimilarView(
         if not apps.is_installed("peachjam_ml"):
             return []
 
-        from peachjam_ml.models import ContentChunk
+        # simple cache, since this is expensive
+        if self._similar_provisions is None:
+            from peachjam_ml.models import ContentChunk
 
-        return ContentChunk.get_similar_provisions(
-            self.document,
-            self.provision_eid,
-            documents_qs,
-            threshold=self.similarity_threshold,
-            n_similar=self.n_similar,
-        )
+            self._similar_provisions = ContentChunk.get_similar_provisions(
+                self.document,
+                self.provision_eid,
+                documents_qs,
+                threshold=self.similarity_threshold,
+                n_similar=self.n_similar,
+            )
+
+        return self._similar_provisions
 
     def prepare_provision(self, document, provision):
         portion_id = provision["portion"]
@@ -903,11 +908,6 @@ class DocumentProvisionSimilarView(
         similar_provisions = self.get_similar_provisions(documents)
         if not similar_provisions:
             return
-
-        document_ids = []
-        for provision in similar_provisions:
-            if provision["document_id"] not in document_ids:
-                document_ids.append(provision["document_id"])
 
         document_map = {document.pk: document for document in documents}
 
