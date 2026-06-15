@@ -24,7 +24,11 @@ export class ActiveProvisionManager {
   buttonGroup: HTMLDivElement;
   providers: IGutterEnrichmentProvider[] = [];
   shouldShow: () => boolean;
-  provisionSelectors = '.akn-part, .akn-chapter, .akn-section, .akn-subsection, .akn-paragraph';
+  // Note: .subparagraph is excluded because it's too deply nested
+  // Note: .blockContainer is included because that wraps defined terms
+  provisionSelectors = '.akn-alinea, .akn-article, .akn-chapter, .akn-clause, .akn-division, .akn-indent, .akn-level, .akn-list, .akn-paragraph, ' +
+    '.akn-part, .akn-point, .akn-proviso, .akn-rule, .akn-section, .akn-subchapter, .akn-subclause, .akn-subdivision, .akn-sublist, .akn-subpart, .akn-subrule, ' +
+    '.akn-subsection, .akn-subtitle, .akn-title, .akn-tome, .akn-transitional, .akn-blockContainer';
 
   constructor (root: HTMLElement, options: ActiveProvisionManagerOptions = {}) {
     this.root = root;
