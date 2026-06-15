@@ -99,6 +99,46 @@ class TestContentChunks(TestCase):
             ],
         )
 
+    def test_get_similar_provisions_falls_back_to_parent_provision_embedding(self):
+        target = self.make_document("Target", "target")
+        source_embedding = [1.0] + [0.0] * 1023
+
+        ContentChunk.objects.create(
+            document=self.document,
+            type="provision",
+            text="source",
+            portion="sec_2__para_a",
+            text_embedding=source_embedding,
+        )
+        ContentChunk.objects.create(
+            document=target,
+            type="provision",
+            text="matching chunk",
+            portion="sec_3",
+            title="Section 3",
+            text_embedding=source_embedding,
+        )
+
+        self.assertEqual(
+            [
+                {
+                    "document_id": target.pk,
+                    "portion": "sec_3",
+                    "title": "Section 3",
+                }
+            ],
+            [
+                {
+                    "document_id": provision["document_id"],
+                    "portion": provision["portion"],
+                    "title": provision["title"],
+                }
+                for provision in ContentChunk.get_similar_provisions(
+                    self.document, "sec_2__para_a__subpara_b__p_1", [target]
+                )
+            ],
+        )
+
     def test_make_content_chunks_text_simple(self):
         self.assertEqual(
             [

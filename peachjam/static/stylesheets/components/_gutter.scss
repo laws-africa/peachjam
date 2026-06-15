@@ -42,9 +42,11 @@ la-gutter-item[active] .gutter-item-card {
 
 .gutter-enrichment-new-buttons {
   display: none;
+}
 
-  box-shadow: 0 4px 8px 3px rgba(0, 0, 0, .15);
-  border-radius: var(--bs-border-radius-sm);
+.gutter-enrichment-new-buttons,
+.gutter-enrichment-active-portion {
+  @include box-shadow($box-shadow);
 
   .btn {
     text-align: left;
