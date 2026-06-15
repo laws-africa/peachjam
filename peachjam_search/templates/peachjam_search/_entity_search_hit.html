@@ -1,10 +1,8 @@
 <article class="card h-100">
-  <div class="card-body">
-    <div class="mb-2">
-      <span class="badge text-bg-secondary">{{ entity_hit.type_label }}</span>
-    </div>
-    <h5 class="card-title">
+  <div class="card-body d-flex align-items-start gap-2 bg-light">
+    <h5 class="card-title mb-0 flex-grow-1">
       <a class="h5 text-primary" href="{{ entity_hit.url }}">{{ entity_hit.label }}</a>
     </h5>
+    <span class="badge text-bg-secondary ms-auto">{{ entity_hit.type_label }}</span>
   </div>
 </article>
