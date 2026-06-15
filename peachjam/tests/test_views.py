@@ -27,6 +27,7 @@ from peachjam.models import (
     SavedDocument,
     SourceFile,
     UserFollowing,
+    Work,
 )
 from peachjam.views.robots import (
     _language_prefixes,
@@ -477,7 +478,7 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertContains(response, "Case history")
         self.assertContains(response, main_case.title)
-        self.assertContains(response, appeal_allowed.name)
+        self.assertNotContains(response, appeal_allowed.name)
 
         response = self.client.get(
             reverse("document_case_histories", args=[main_case.expression_frbr_uri[1:]])
@@ -485,7 +486,149 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "reviewed by another court")
         self.assertContains(response, "Case history")
         self.assertContains(response, appeal_case.title)
-        self.assertContains(response, appeal_allowed.name)
+        self.assertNotContains(response, appeal_allowed.name)
+
+    def test_case_history_hidden_without_linked_histories(self):
+        self.user = User.objects.first()
+        self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="can_view_case_history")
+        )
+
+        standalone_case = Judgment.objects.create(
+            case_name="Standalone case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 6, 1),
+            language=Language.objects.first(),
+        )
+
+        response = self.client.get(
+            reverse(
+                "document_case_histories",
+                args=[standalone_case.expression_frbr_uri[1:]],
+            )
+        )
+        self.assertNotContains(response, "Case history")
+        self.assertNotContains(response, "reviewed by another court")
+
+    def test_case_history_recurses_and_hides_unlinked_rows(self):
+        self.user = User.objects.first()
+        self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="can_view_case_history")
+        )
+
+        outcome_ancestor = Outcome.objects.create(name="Outcome Ancestor")
+        outcome_current = Outcome.objects.create(name="Outcome Current")
+        outcome_child = Outcome.objects.create(name="Outcome Child")
+        outcome_grandchild = Outcome.objects.create(name="Outcome Grandchild")
+
+        ancestor_case = Judgment.objects.create(
+            case_name="Ancestor case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+        current_case = Judgment.objects.create(
+            case_name="Current case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 3, 1),
+            language=Language.objects.first(),
+        )
+        child_case = Judgment.objects.create(
+            case_name="Child case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 4, 1),
+            language=Language.objects.first(),
+        )
+        grandchild_case = Judgment.objects.create(
+            case_name="Grandchild case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 5, 1),
+            language=Language.objects.first(),
+        )
+        great_ancestor_case = Judgment.objects.create(
+            case_name="Great ancestor case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 12, 1),
+            language=Language.objects.first(),
+        )
+
+        CaseHistory.objects.create(
+            judgment_work=ancestor_case.work,
+            historical_judgment_work=great_ancestor_case.work,
+            outcome=outcome_ancestor,
+        )
+        CaseHistory.objects.create(
+            judgment_work=current_case.work,
+            historical_judgment_work=ancestor_case.work,
+            outcome=outcome_current,
+        )
+        CaseHistory.objects.create(
+            judgment_work=child_case.work,
+            historical_judgment_work=current_case.work,
+            outcome=outcome_child,
+        )
+        CaseHistory.objects.create(
+            judgment_work=grandchild_case.work,
+            historical_judgment_work=child_case.work,
+            outcome=outcome_grandchild,
+        )
+
+        unlinked_work = Work.objects.create(
+            frbr_uri="/akn/aa/judgment/test/1900/999",
+            frbr_uri_country="aa",
+            frbr_uri_place="aa",
+            frbr_uri_doctype="judgment",
+            frbr_uri_actor="test",
+            frbr_uri_date="1900",
+            frbr_uri_number="999",
+            title="Unlinked work",
+            languages=["eng"],
+        )
+        CaseHistory.objects.create(
+            judgment_work=current_case.work,
+            historical_judgment_work=unlinked_work,
+            outcome=outcome_current,
+            case_number="Missing linked document case",
+        )
+
+        response = self.client.get(
+            reverse(
+                "document_case_histories", args=[current_case.expression_frbr_uri[1:]]
+            )
+        )
+
+        self.assertContains(response, "Case history")
+        self.assertContains(response, great_ancestor_case.title)
+        self.assertContains(response, ancestor_case.title)
+        self.assertContains(response, current_case.title)
+        self.assertContains(response, child_case.title)
+        self.assertContains(response, grandchild_case.title)
+        self.assertNotContains(response, outcome_ancestor.name)
+        self.assertNotContains(response, outcome_child.name)
+        self.assertNotContains(response, outcome_grandchild.name)
+        self.assertNotContains(response, "Missing linked document case")
+
+        response_text = response.content.decode()
+        self.assertLess(
+            response_text.index(grandchild_case.title),
+            response_text.index(child_case.title),
+        )
+        self.assertLess(
+            response_text.index(child_case.title),
+            response_text.index(current_case.title),
+        )
+        self.assertLess(
+            response_text.index(current_case.title),
+            response_text.index(ancestor_case.title),
+        )
 
     def test_document_source_file(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
