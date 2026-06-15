@@ -1,6 +1,8 @@
+from urllib.parse import urlencode
+
 from django.core.cache import cache
-from django.test import TestCase
-from django.urls import reverse
+from django.test import TestCase, override_settings
+from django.urls import NoReverseMatch, reverse
 
 from peachjam.models import Court, Judge, Locality
 from peachjam_search.entity_matcher import EntityMatcher
@@ -44,12 +46,7 @@ class EntityMatcherTest(TestCase):
         self.assertEqual("locality", hits[0].entity_type)
         self.assertEqual("African Union (AU)", hits[0].label)
         self.assertEqual("exact", hits[0].match_type)
-        self.assertEqual(
-            reverse(
-                "locality_legislation_list", kwargs={"code": locality.place_code()}
-            ),
-            hits[0].url,
-        )
+        self.assertEqual(self.locality_legislation_url(locality), hits[0].url)
 
     def test_matches_locality_name_when_normalized(self):
         hits = EntityMatcher().match("african union au")
@@ -72,6 +69,16 @@ class EntityMatcherTest(TestCase):
         self.assertEqual(1, len(hits))
         self.assertEqual("locality", hits[0].entity_type)
         self.assertEqual("place code exact", hits[0].match_type)
+
+    @override_settings(ROOT_URLCONF="peachjam.urls.i18n")
+    def test_matches_locality_without_locality_legislation_url(self):
+        hits = EntityMatcher().match("African Union")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual(
+            f"{reverse('legislation_list')}?{urlencode({'localities': 'African Union (AU)'})}",
+            hits[0].url,
+        )
 
     def test_matches_judge_name_exactly(self):
         Judge.objects.create(name="Mwangi")
@@ -120,3 +127,11 @@ class EntityMatcherTest(TestCase):
 
         self.assertEqual([], hits)
         self.assertFalse(provider.called)
+
+    def locality_legislation_url(self, locality):
+        try:
+            return reverse(
+                "locality_legislation_list", kwargs={"code": locality.place_code()}
+            )
+        except NoReverseMatch:
+            return f"{reverse('legislation_list')}?{urlencode({'localities': locality.name})}"

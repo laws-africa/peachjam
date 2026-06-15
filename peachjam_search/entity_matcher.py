@@ -2,10 +2,11 @@ import re
 import string
 from dataclasses import dataclass
 from typing import Iterable
+from urllib.parse import urlencode
 
 from django.core.cache import cache
 from django.db.models import Model, QuerySet
-from django.urls import reverse
+from django.urls import NoReverseMatch, reverse
 from django.utils.translation import gettext_lazy as _
 
 from peachjam.models import Court, Judge, Locality
@@ -145,10 +146,14 @@ class LocalityEntityProvider(EntityProvider):
         return super().get_queryset().select_related("jurisdiction")
 
     def get_url(self, entity) -> str:
-        return reverse(
-            "locality_legislation_list",
-            kwargs={"code": entity.place_code()},
-        )
+        try:
+            return reverse(
+                "locality_legislation_list",
+                kwargs={"code": entity.place_code()},
+            )
+        except NoReverseMatch:
+            # Some site URL configs don't have a locality legislation route.
+            return f"{reverse('legislation_list')}?{urlencode({'localities': entity.name})}"
 
     def match(self, query: str, normalized_query: str) -> list[CandidateMatch]:
         matches = []
