@@ -830,14 +830,22 @@ class DocumentProvisionCitationView(
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 @method_decorator(never_cache, name="dispatch")
 class DocumentProvisionSimilarView(
-    DocumentProvisionMixin, LegislationProvisionListView
+    DocumentProvisionMixin, SubscriptionRequiredMixin, LegislationProvisionListView
 ):
+    # same permission as DocumentProvisionCitationView just to simplify things
+    permission_required = "peachjam.view_provisioncitation"
     template_name = "peachjam/document/similar_provisions.html"
     latest_expression_only = True
     similarity_threshold = 0.8
     n_similar = 10
     exclude_facets = ["alphabet"]
     paginate_by = 0
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return self.get_provision_context()
 
     def get_base_queryset(self, *args, **kwargs):
         if not apps.is_installed("peachjam_ml"):
@@ -916,7 +924,7 @@ class DocumentProvisionSimilarView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context.update(self.get_provision_context())
+        context.update(self.get_subscription_required_context())
         self.decorate_documents_with_similar_provisions(context["documents"])
         context["doc_count_noun"] = _("document with similar provisions")
         context["doc_count_noun_plural"] = _("documents with similar provisions")

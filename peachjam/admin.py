@@ -15,7 +15,7 @@ from django.contrib.admin.utils import flatten_fieldsets, quote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
+from django.contrib.contenttypes.admin import GenericStackedInline
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import transaction
@@ -529,29 +529,40 @@ class AttachedFilesInline(BaseAttachmentFileInline):
     form = AttachedFilesForm
 
 
-class BackgroundTaskInline(GenericTabularInline):
-    model = Task
-    ct_field = "creator_content_type"
-    ct_fk_field = "creator_object_id"
-    fields = ("task", "run_at", "attempts", "has_error")
-    readonly_fields = fields
-    extra = 0
-    can_delete = False
+class BackgroundTasksAdminMixin:
+    @admin.display(description=gettext_lazy("Background tasks"))
+    def background_tasks(self, obj):
+        if not obj or not obj.pk:
+            return "-"
 
-    def task(self, obj):
-        return format_html(
-            '<a href="{url}">{title}</a>',
-            url=reverse(
-                "admin:background_task_task_change",
-                kwargs={
-                    "object_id": obj.pk,
-                },
+        tasks = Task.objects.filter(
+            creator_content_type=ContentType.objects.get_for_model(
+                obj, for_concrete_model=False
             ),
-            title=obj.task_name,
-        )
+            creator_object_id=obj.pk,
+        ).order_by("run_at", "pk")
+        if not tasks.exists():
+            return "-"
 
-    def has_error(self, obj):
-        return bool(obj.last_error)
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}">{}</a> ({}, attempts: {})</li>',
+                (
+                    (
+                        reverse(
+                            "admin:background_task_task_change",
+                            kwargs={"object_id": task.pk},
+                        ),
+                        task.task_name,
+                        task.run_at,
+                        task.attempts,
+                    )
+                    for task in tasks
+                ),
+            ),
+        )
 
 
 class CustomPropertyInline(admin.TabularInline):
@@ -641,7 +652,7 @@ class AccessGroupMixin(GuardedModelAdminMixin):
     document_access_link.short_description = gettext_lazy("Restricted access groups")
 
 
-class DocumentAdmin(AccessGroupMixin, BaseAdmin):
+class DocumentAdmin(BackgroundTasksAdminMixin, AccessGroupMixin, BaseAdmin):
     # used in change_form.html
     is_document_admin = True
     form = DocumentForm
@@ -799,40 +810,6 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             return obj.document_content.content_html_is_akn
         except ObjectDoesNotExist:
             return False
-
-    @admin.display(description=gettext_lazy("Background tasks"))
-    def background_tasks(self, obj):
-        if not obj or not obj.pk:
-            return "-"
-
-        tasks = Task.objects.filter(
-            creator_content_type=ContentType.objects.get_for_model(
-                obj, for_concrete_model=False
-            ),
-            creator_object_id=obj.pk,
-        ).order_by("run_at", "pk")
-        if not tasks.exists():
-            return "-"
-
-        return format_html(
-            "<ul>{}</ul>",
-            format_html_join(
-                "",
-                '<li><a href="{}">{}</a> ({}, attempts: {})</li>',
-                (
-                    (
-                        reverse(
-                            "admin:background_task_task_change",
-                            kwargs={"object_id": task.pk},
-                        ),
-                        task.task_name,
-                        task.run_at,
-                        task.attempts,
-                    )
-                    for task in tasks
-                ),
-            ),
-        )
 
     @admin.display(description=gettext_lazy("Images"))
     def images(self, obj):
@@ -1877,16 +1854,36 @@ class IngestorForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         instance = super().save(*args, **kwargs)
-        instance.queue_task()
+        if kwargs.get("commit", True):
+            instance.queue_task()
         return instance
 
 
 @admin.register(Ingestor)
-class IngestorAdmin(admin.ModelAdmin):
+class IngestorAdmin(BackgroundTasksAdminMixin, admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     actions = ["refresh_all_content", "update_latest_content"]
-    list_display = ("name", "adapter", "last_refreshed_at", "enabled")
+    list_display = (
+        "name",
+        "adapter",
+        "last_refreshed_at",
+        "enabled",
+    )
+    readonly_fields = ("background_tasks",)
+    fields = (
+        "adapter",
+        "name",
+        "last_refreshed_at",
+        "repeat",
+        "schedule",
+        "enabled",
+        "background_tasks",
+    )
     form = IngestorForm
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.queue_task()
 
     def refresh_all_content(self, request, queryset):
         queryset.update(last_refreshed_at=None)
