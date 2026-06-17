@@ -54,7 +54,11 @@ urlpatterns = [
         "anon/<int:pk>/suggestions",
         DocumentAnonymiseSuggestionsAPIView.as_view(),
     ),
-    path("check-duplicate-file", CheckDuplicateFilesView.as_view()),
+    path(
+        "check-duplicate-file",
+        CheckDuplicateFilesView.as_view(),
+        name="check_duplicate_file",
+    ),
     path(
         "flynote-manager/tree/",
         FlynoteManagerTreeView.as_view(),

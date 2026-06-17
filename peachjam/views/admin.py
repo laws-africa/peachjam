@@ -8,7 +8,7 @@ class CheckDuplicateFilesView(TemplateView):
     template_name = "admin/_check_duplicate_files.html"
 
     def get(self, request, *args, **kwargs):
-        if not request.user.is_authenticated or request.user.is_staff:
+        if not (request.user.is_authenticated and request.user.is_staff):
             return HttpResponseForbidden("Forbidden")
         return super().get(request, *args, **kwargs)
 
