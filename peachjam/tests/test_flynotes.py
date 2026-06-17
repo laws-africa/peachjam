@@ -1862,6 +1862,16 @@ class FlynoteDocumentCountTest(TestCase):
         self.assertTrue(Flynote.objects.filter(pk=criminal.pk).exists())
         self.assertTrue(Flynote.objects.filter(name="trial within a trial").exists())
 
+    def test_quick_refresh_ignores_deleted_flynote(self):
+        root = Flynote.add_root(name="Criminal law")
+        leaf = root.add_child(name="Admissibility")
+
+        Flynote.objects.filter(pk=leaf.pk).delete()
+
+        FlynoteDocumentCount.quick_refresh_for_single_flynote(leaf)
+
+        self.assertFalse(FlynoteDocumentCount.objects.exists())
+
 
 class FlynoteDeprecationTest(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
