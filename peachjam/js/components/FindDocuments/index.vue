@@ -863,7 +863,7 @@ export default {
                 this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
               }
               this.trackSearch(params);
-              this.savedSearchModal();
+              this.$nextTick(() => this.savedSearchModal());
               this.linkTraces(previousId, this.searchInfo.trace_id);
               this.loadSaveDocumentButtons();
             } else {
