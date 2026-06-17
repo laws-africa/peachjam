@@ -210,6 +210,7 @@
                 v-html="searchInfo.entity_results_html"
               />
               <div v-if="searchInfo.count">
+                <div id="saved-search-button" />
                 <div class="my-3 d-flex">
                   <div class="me-2">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
@@ -239,7 +240,6 @@
                     </option>
                   </select>
                 </div>
-                <div id="saved-search-button" />
                 <div
                   ref="results"
                   @click="itemClicked"
