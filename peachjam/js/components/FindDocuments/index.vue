@@ -209,7 +209,6 @@
                 v-if="searchInfo.entity_results_html"
                 v-html="searchInfo.entity_results_html"
               />
-              <div id="saved-search-button" />
               <div v-if="searchInfo.count">
                 <div class="my-3 d-flex">
                   <div class="me-2">
@@ -240,6 +239,7 @@
                     </option>
                   </select>
                 </div>
+                <div id="saved-search-button" />
                 <div
                   ref="results"
                   @click="itemClicked"
