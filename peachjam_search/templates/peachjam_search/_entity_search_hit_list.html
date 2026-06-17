@@ -1,11 +1,9 @@
 {% if entity_hits %}
-  <ul class="list-unstyled search-result-list p-2 bg-light rounded mb-3">
-    <li class="mb-0">
-      <div class="row g-3">
-        {% for entity_hit in entity_hits %}
-          <div class="col-12 col-md-4">{% include "peachjam_search/_entity_search_hit.html" %}</div>
-        {% endfor %}
-      </div>
-    </li>
-  </ul>
+  <div class="search-result-list p-2 bg-light rounded mb-3">
+    <div class="row g-3">
+      {% for entity_hit in entity_hits %}
+        <div class="col-12 col-md-4">{% include "peachjam_search/_entity_search_hit.html" %}</div>
+      {% endfor %}
+    </div>
+  </div>
 {% endif %}
