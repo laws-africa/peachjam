@@ -196,7 +196,6 @@
           <div class="col-md-12 col-lg-9 position-relative">
             <div>
               <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
-              <div id="saved-search-button" />
               <div
                 id="saved-search-modal"
                 class="modal fade"
@@ -206,7 +205,12 @@
               >
                 <div id="saved-search-modal-dialog" class="modal-dialog" />
               </div>
+              <div
+                v-if="searchInfo.entity_results_html"
+                v-html="searchInfo.entity_results_html"
+              />
               <div v-if="searchInfo.count">
+                <div id="saved-search-button" />
                 <div class="my-3 d-flex">
                   <div class="me-2">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
@@ -859,7 +863,7 @@ export default {
                 this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
               }
               this.trackSearch(params);
-              this.savedSearchModal();
+              this.$nextTick(() => this.savedSearchModal());
               this.linkTraces(previousId, this.searchInfo.trace_id);
               this.loadSaveDocumentButtons();
             } else {
