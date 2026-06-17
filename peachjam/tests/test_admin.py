@@ -217,6 +217,24 @@ class TestJudgmentAdmin(WebTest):
             response.text,
         )
 
+    def test_dup_files_check(self):
+        judgment = self.make_judgment(anonymised=True)
+        self.attach_source_file(judgment, file_is_anonymised=True)
+
+        url = reverse("check_duplicate_file") + "?sha256=" + judgment.source_file.sha256
+
+        response = self.app.get(url)
+        self.assertEqual(200, response.status_code)
+        self.assertIn(
+            judgment.title,
+            response.text,
+        )
+
+        # log out
+        self.app.reset()
+        response = self.app.get(url, user=None, status=403)
+        self.assertEqual(403, response.status_code)
+
 
 class TestDocumentAdminHtmlEdit(WebTest):
     fixtures = ["tests/users", "tests/countries", "tests/languages"]
