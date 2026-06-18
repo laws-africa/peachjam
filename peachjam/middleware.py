@@ -10,6 +10,7 @@ from django.utils.cache import get_max_age, patch_cache_control, patch_vary_head
 from django.utils.deprecation import MiddlewareMixin
 
 from peachjam.models import UserProfile
+from peachjam.sentry import get_sentry_sampling_mode_from_request
 
 log = logging.getLogger(__name__)
 
@@ -162,6 +163,15 @@ class TermsAcceptanceMiddleware:
         if params:
             accept_url = f"{accept_url}?{urlencode(params)}"
         return redirect(accept_url)
+
+
+class SentrySamplingMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request.sentry_sampling_mode = get_sentry_sampling_mode_from_request(request)
+        return self.get_response(request)
 
 
 class GeneralUpdateCacheMiddleware(UpdateCacheMiddleware):

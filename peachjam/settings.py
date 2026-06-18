@@ -26,6 +26,8 @@ from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
+from peachjam.sentry import sentry_profiles_sampler, sentry_traces_sampler
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -144,6 +146,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "peachjam.middleware.SentrySamplingMiddleware",
     "peachjam.middleware.TermsAcceptanceMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -473,12 +476,8 @@ if not DEBUG:
         before_send=before_send,
         before_send_transaction=before_send,
         send_default_pii=True,
-        # sample x% of requests for performance metrics
-        traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.1")),
-        profile_session_sample_rate=float(
-            os.environ.get("SENTRY_PROFILE_SESSION_SAMPLE_RATE", "0.0")
-        ),
-        profile_lifecycle="trace",
+        traces_sampler=sentry_traces_sampler,
+        profiles_sampler=sentry_profiles_sampler,
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
