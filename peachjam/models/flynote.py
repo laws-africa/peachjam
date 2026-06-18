@@ -532,6 +532,15 @@ class FlynoteDocumentCount(models.Model):
         only as a cheap threshold check; refresh_for_flynote() still computes
         the exact count if the subtree is small enough.
         """
+        flynote_id = flynote.pk
+        flynote = Flynote.objects.filter(pk=flynote_id).first()
+        if not flynote:
+            log.info(
+                "No flynote with id %s exists while quickly refreshing counts, ignoring.",
+                flynote_id,
+            )
+            return
+
         flynote.refresh_from_db(fields=["path", "numchild"])
         direct_count = (
             JudgmentFlynote.objects.filter(flynote=flynote)
