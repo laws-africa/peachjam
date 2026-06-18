@@ -49,6 +49,33 @@
         <li>
           <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
         </li>
+        {% if user.is_staff and sentry_enabled %}
+          <li>
+            <hr class="dropdown-divider"/>
+          </li>
+          {% with current_path=request.htmx.current_url_abs_path|default:request.get_full_path %}
+            <li>
+              <a class="dropdown-item"
+                 href="{% url 'sentry_sampling' 'trace' %}?next={{ current_path|urlencode }}">
+                {% if request.sentry_sampling_mode == 'trace' %}
+                  <i class="bi bi-check-lg me-1" aria-hidden="true"></i>
+                  <span class="visually-hidden">{% trans 'Enabled:' %}</span>
+                {% endif %}
+                {% trans 'Trace for 5 mins' %}
+              </a>
+            </li>
+            <li>
+              <a class="dropdown-item"
+                 href="{% url 'sentry_sampling' 'profile' %}?next={{ current_path|urlencode }}">
+                {% if request.sentry_sampling_mode == 'profile' %}
+                  <i class="bi bi-check-lg me-1" aria-hidden="true"></i>
+                  <span class="visually-hidden">{% trans 'Enabled:' %}</span>
+                {% endif %}
+                {% trans 'Profile for 5 mins' %}
+              </a>
+            </li>
+          {% endwith %}
+        {% endif %}
       </ul>
     </li>
   </ul>

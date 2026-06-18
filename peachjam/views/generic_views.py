@@ -3,18 +3,21 @@ import hmac
 import itertools
 import json
 
+from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.dispatch import Signal
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import gettext_lazy as _
 from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, TemplateView, View
@@ -37,6 +40,7 @@ from peachjam.models import (
     UnconstitutionalProvision,
     pj_settings,
 )
+from peachjam.sentry import SENTRY_SAMPLING_MODES, issue_sentry_sampling_cookie
 from peachjam_api.serializers import (
     CitationLinkSerializer,
     RelationshipSerializer,
@@ -768,6 +772,7 @@ class PageLoadedView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["sentry_enabled"] = bool(settings.PEACHJAM["SENTRY_DSN_KEY"])
 
         if self.request.user.is_authenticated:
             beacon_secret = pj_settings().helpscout_beacon_secret_key
@@ -804,6 +809,29 @@ class PageLoadedView(TemplateView):
             context["user_json"] = json.dumps({"perms": []})
 
         return context
+
+
+class SentrySamplingView(UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get(self, request, mode, *args, **kwargs):
+        if mode not in SENTRY_SAMPLING_MODES:
+            return HttpResponseBadRequest("Unknown Sentry sampling mode")
+
+        response = redirect(self.get_next_url())
+        issue_sentry_sampling_cookie(response, mode)
+        return response
+
+    def get_next_url(self):
+        next_url = self.request.GET.get("next")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return next_url
+        return reverse("home_page")
 
 
 class YearMixin:
