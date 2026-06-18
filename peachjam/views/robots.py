@@ -47,6 +47,12 @@ class RobotsView(TemplateView):
     template_name = "peachjam/robots.txt"
     content_type = "text/plain"
 
+    prefixed_disallow_patterns = [
+        "/search/",
+        # provision-level detail pages
+        "/akn/*/provision/*",
+    ]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -65,9 +71,14 @@ class RobotsView(TemplateView):
         site_settings = pj_settings()
         place_codes = _place_codes(site_settings)
 
-        context["prefixed_disallow_paths"] = "\n".join(
-            _prefixed_place_rules(prefixes, place_codes)
-        )
+        disallow_paths = [
+            f"Disallow: {prefix}{p}"
+            for p in self.prefixed_disallow_patterns
+            for prefix in prefixes
+        ]
+        disallow_paths.extend(_prefixed_place_rules(prefixes, place_codes))
+
+        context["prefixed_disallow_paths"] = "\n".join(disallow_paths)
         context["disallowed_content"] = "\n".join(disallowed_content)
         context["extra_content"] = site_settings.robots_txt or ""
 
