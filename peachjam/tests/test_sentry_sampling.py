@@ -2,9 +2,10 @@ import os
 import time
 from unittest.mock import patch
 
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.core import signing
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 
 from peachjam.models import UserProfile
@@ -112,7 +113,8 @@ class SentrySamplingTests(TestCase):
 
         self.assertEqual(sentry_profiles_sampler({}), 0.0)
 
-    def test_staff_loaded_menu_includes_sampling_items(self):
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "SENTRY_DSN_KEY": "test-dsn"})
+    def test_staff_loaded_menu_includes_sampling_items_when_sentry_enabled(self):
         self.client.force_login(self.staff)
 
         response = self.client.get(reverse("loaded"))
@@ -120,6 +122,16 @@ class SentrySamplingTests(TestCase):
         self.assertContains(response, "Trace for 5 mins")
         self.assertContains(response, "Profile for 5 mins")
 
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "SENTRY_DSN_KEY": None})
+    def test_staff_loaded_menu_excludes_sampling_items_when_sentry_disabled(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(reverse("loaded"))
+
+        self.assertNotContains(response, "Trace for 5 mins")
+        self.assertNotContains(response, "Profile for 5 mins")
+
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "SENTRY_DSN_KEY": "test-dsn"})
     def test_loaded_menu_marks_active_profile(self):
         self.client.force_login(self.staff)
         self.client.get(reverse("sentry_sampling", args=["profile"]))

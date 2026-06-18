@@ -3,6 +3,7 @@ import hmac
 import itertools
 import json
 
+from django.conf import settings
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.cache import cache
 from django.core.paginator import Paginator
@@ -771,6 +772,7 @@ class PageLoadedView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["sentry_enabled"] = bool(settings.PEACHJAM["SENTRY_DSN_KEY"])
 
         if self.request.user.is_authenticated:
             beacon_secret = pj_settings().helpscout_beacon_secret_key
