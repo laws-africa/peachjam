@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-15 13:30+0000\n"
+"POT-Creation-Date: 2026-06-18 10:27+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -3670,7 +3670,7 @@ msgid "Similar provisions"
 msgstr "Utoaji ambao haujaanza"
 
 #: templates/peachjam/document/_provisions_table.html:18
-#: templates/peachjam/document/_provisions_table.html:90
+#: templates/peachjam/document/_provisions_table.html:91
 #, fuzzy
 #| msgid "No volumes found."
 msgid "No provisions found."
@@ -3687,7 +3687,7 @@ msgstr ""
 msgid "Compare..."
 msgstr "Zaidi..."
 
-#: templates/peachjam/document/_provisions_table.html:78
+#: templates/peachjam/document/_provisions_table.html:79
 #: templates/peachjam/provision_enrichment/uncommenced_provision_detail.html:8
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:83
 msgid "No content found"
