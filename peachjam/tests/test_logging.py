@@ -27,30 +27,30 @@ class LoggingContextFilterTest(SimpleTestCase):
     def test_uses_request_id_without_task_context(self):
         record = self.make_record(request_id="request-1")
 
-        self.assertEqual("", record.task_run_id)
+        self.assertEqual(LoggingContextFilter.empty, record.task_run_id)
         self.assertEqual("request-1", record.correlation_id)
-        self.assertEqual("", record.frbr_uri)
+        self.assertEqual(LoggingContextFilter.empty, record.frbr_uri)
 
     def test_empty_value_can_be_configured(self):
         self.filter = LoggingContextFilter(empty="-")
         record = self.make_record()
 
-        self.assertEqual("-", record.task_run_id)
-        self.assertEqual("-", record.correlation_id)
-        self.assertEqual("-", record.frbr_uri)
+        self.assertEqual(LoggingContextFilter.empty, record.task_run_id)
+        self.assertEqual(LoggingContextFilter.empty, record.correlation_id)
+        self.assertEqual(LoggingContextFilter.empty, record.frbr_uri)
 
     def test_empty_value_can_be_configured_on_the_class(self):
         old_empty = LoggingContextFilter.empty
         try:
-            LoggingContextFilter.empty = "-"
+            LoggingContextFilter.empty = "x"
             self.filter = LoggingContextFilter()
             record = self.make_record()
         finally:
             LoggingContextFilter.empty = old_empty
 
-        self.assertEqual("-", record.task_run_id)
-        self.assertEqual("-", record.correlation_id)
-        self.assertEqual("-", record.frbr_uri)
+        self.assertEqual("x", record.task_run_id)
+        self.assertEqual("x", record.correlation_id)
+        self.assertEqual("x", record.frbr_uri)
 
     def test_uses_task_run_id_as_correlation_id(self):
         with log_context(task_run_id="task-1"):
@@ -66,7 +66,7 @@ class LoggingContextFilterTest(SimpleTestCase):
 
             self.assertEqual("outer", self.make_record().task_run_id)
 
-        self.assertEqual("", self.make_record().task_run_id)
+        self.assertEqual(LoggingContextFilter.empty, self.make_record().task_run_id)
 
     def test_set_log_context_sets_context_until_cleared(self):
         set_log_context(frbr_uri="/akn/za/judgment/1")
@@ -74,7 +74,7 @@ class LoggingContextFilterTest(SimpleTestCase):
         self.assertEqual("/akn/za/judgment/1", self.make_record().frbr_uri)
 
         clear_log_context()
-        self.assertEqual("", self.make_record().frbr_uri)
+        self.assertEqual(LoggingContextFilter.empty, self.make_record().frbr_uri)
 
     def test_none_values_do_not_replace_existing_context(self):
         with log_context(task_run_id="task-1", frbr_uri="/akn/za/judgment/1"):
@@ -98,7 +98,7 @@ class LoggingContextFilterTest(SimpleTestCase):
             return self.make_record().task_run_id
 
         self.assertEqual("decorated", get_task_run_id())
-        self.assertEqual("", self.make_record().task_run_id)
+        self.assertEqual(LoggingContextFilter.empty, self.make_record().task_run_id)
 
     def test_log_context_rejects_unknown_context_keys(self):
         with self.assertRaises(TypeError):
@@ -106,7 +106,7 @@ class LoggingContextFilterTest(SimpleTestCase):
 
     def test_middleware_clears_context_before_and_after_request(self):
         def get_response(request):
-            self.assertEqual("", self.make_record().frbr_uri)
+            self.assertEqual(LoggingContextFilter.empty, self.make_record().frbr_uri)
             set_log_context(frbr_uri="/akn/za/judgment/1")
             return object()
 
@@ -115,4 +115,4 @@ class LoggingContextFilterTest(SimpleTestCase):
         response = LogContextMiddleware(get_response)(object())
 
         self.assertIsNotNone(response)
-        self.assertEqual("", self.make_record().frbr_uri)
+        self.assertEqual(LoggingContextFilter.empty, self.make_record().frbr_uri)
