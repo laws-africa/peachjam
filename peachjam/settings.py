@@ -26,6 +26,7 @@ from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
+from peachjam.logging import LoggingContextFilter
 from peachjam.sentry import sentry_profiles_sampler, sentry_traces_sampler
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -656,6 +657,21 @@ LOGGING = {
         "import_export": {"level": "DEBUG"},
     },
 }
+
+if not DEBUG:
+    # in production, use json logging
+    LOGGING["formatters"]["json"] = {
+        "()": "pythonjsonlogger.json.JsonFormatter",
+        "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s %(task_name)s %(frbr_uri)s %(process)d "
+        "%(thread)d %(message)s",
+        "rename_fields": {
+            "asctime": "ts",
+            "levelname": "level",
+            "name": "logger",
+        },
+    }
+    LOGGING["handlers"]["console"]["formatter"] = "json"
+    LoggingContextFilter.empty = ""
 
 
 CKEDITOR_CONFIGS = {
