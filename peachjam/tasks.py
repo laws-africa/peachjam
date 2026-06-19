@@ -49,6 +49,14 @@ class PatchedDBTaskRunner(DBTaskRunner):
 tasks._runner = PatchedDBTaskRunner()
 
 
+def _task_str(self):
+    return f"Task<#{self.pk} {self.task_name} params={self.task_params}>"
+
+
+# override Task.__str__ so it's more description
+Task.__str__ = _task_str
+
+
 @receiver(task_error)
 def on_task_error(*args, **kwargs):
     # report the exception to Sentry
