@@ -9,10 +9,25 @@ from django.urls import Resolver404, resolve, reverse
 from django.utils.cache import get_max_age, patch_cache_control, patch_vary_headers
 from django.utils.deprecation import MiddlewareMixin
 
+from peachjam.logging import clear_log_context
 from peachjam.models import UserProfile
 from peachjam.sentry import get_sentry_sampling_mode_from_request
 
 log = logging.getLogger(__name__)
+
+
+class LogContextMiddleware:
+    """Clear log context at request boundaries to avoid leaking thread-local values."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        clear_log_context()
+        try:
+            return self.get_response(request)
+        finally:
+            clear_log_context()
 
 
 class StripDomainPrefixMiddleware:
