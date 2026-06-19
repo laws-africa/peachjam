@@ -17,8 +17,9 @@ class LoggingContextFilterTest(SimpleTestCase):
     def test_uses_request_id_without_task_context(self):
         record = self.make_record(request_id="request-1")
 
-        self.assertEqual("none", record.task_run_id)
+        self.assertEqual("-", record.task_run_id)
         self.assertEqual("request-1", record.correlation_id)
+        self.assertEqual("-", record.frbr_uri)
 
     def test_uses_task_run_id_as_correlation_id(self):
         with log_context(task_run_id="task-1"):
@@ -34,7 +35,23 @@ class LoggingContextFilterTest(SimpleTestCase):
 
             self.assertEqual("outer", self.make_record().task_run_id)
 
-        self.assertEqual("none", self.make_record().task_run_id)
+        self.assertEqual("-", self.make_record().task_run_id)
+
+    def test_none_values_do_not_replace_existing_context(self):
+        with log_context(task_run_id="task-1", frbr_uri="/akn/za/judgment/1"):
+            with log_context(frbr_uri=None):
+                record = self.make_record()
+
+        self.assertEqual("task-1", record.task_run_id)
+        self.assertEqual("/akn/za/judgment/1", record.frbr_uri)
+
+    def test_context_is_additive(self):
+        with log_context(task_run_id="task-1"):
+            with log_context(frbr_uri="/akn/za/judgment/1"):
+                record = self.make_record()
+
+        self.assertEqual("task-1", record.task_run_id)
+        self.assertEqual("/akn/za/judgment/1", record.frbr_uri)
 
     def test_log_context_can_be_used_as_a_decorator(self):
         @log_context(task_run_id="decorated")
@@ -42,7 +59,7 @@ class LoggingContextFilterTest(SimpleTestCase):
             return self.make_record().task_run_id
 
         self.assertEqual("decorated", get_task_run_id())
-        self.assertEqual("none", self.make_record().task_run_id)
+        self.assertEqual("-", self.make_record().task_run_id)
 
     def test_log_context_rejects_unknown_context_keys(self):
         with self.assertRaises(TypeError):

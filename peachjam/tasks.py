@@ -92,11 +92,12 @@ def serialise_judgment_flynote_tree(judgment_id):
         log.info("No judgment with id %s exists, ignoring.", judgment_id)
         return
 
-    log.info("Serialising flynote tree for judgment %s", judgment_id)
-    # NB: we deliberately do not track changes to prevent circular updates when flynote_raw changes
-    judgment.serialise_flynote_tree()
-    judgment.save(update_fields=["flynote", "flynote_raw"])
-    log.info("Done serialising flynote tree for judgment %s", judgment_id)
+    with log_context(frbr_uri=judgment.expression_frbr_uri):
+        log.info("Serialising flynote tree for judgment %s", judgment_id)
+        # NB: we deliberately do not track changes to prevent circular updates when flynote_raw changes
+        judgment.serialise_flynote_tree()
+        judgment.save(update_fields=["flynote", "flynote_raw"])
+        log.info("Done serialising flynote tree for judgment %s", judgment_id)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)

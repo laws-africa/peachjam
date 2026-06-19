@@ -636,7 +636,8 @@ LOGGING = {
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s %(process)d %(thread)d %(message)s",
+            "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s %(frbr_uri)s "
+            "%(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },
