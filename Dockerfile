@@ -15,12 +15,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
     && apt-get install -y nodejs
 
-RUN apt-get install -y --no-install-recommends \
-    python3.12 python3.12-venv python3.12-dev \
-    git ca-certificates build-essential file \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
 # python 3.12
 #   "file" is for python-magic
 RUN apt-get install -y --no-install-recommends \
