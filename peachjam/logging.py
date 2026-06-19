@@ -97,15 +97,19 @@ class LoggingContextFilter(logging.Filter):
     the task run id when present, otherwise the request id.
     """
 
-    def __init__(self, name="", empty=""):
+    empty = "-"
+
+    def __init__(self, name="", empty=None):
         """Create the filter.
 
-        ``empty`` is used for missing fields so formatters can always reference
-        context attributes without raising formatting errors.
+        ``empty`` overrides the class-level fallback for missing fields. It can
+        be passed from ``settings.LOGGING`` as a filter constructor kwarg, for
+        example ``{"()": "...LoggingContextFilter", "empty": "-"}``.
         """
 
         super().__init__(name)
-        self.empty = empty
+        if empty is not None:
+            self.empty = empty
 
     def filter(self, record):
         task_run_id = getattr(local, "task_run_id", None)

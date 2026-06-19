@@ -39,6 +39,19 @@ class LoggingContextFilterTest(SimpleTestCase):
         self.assertEqual("-", record.correlation_id)
         self.assertEqual("-", record.frbr_uri)
 
+    def test_empty_value_can_be_configured_on_the_class(self):
+        old_empty = LoggingContextFilter.empty
+        try:
+            LoggingContextFilter.empty = "-"
+            self.filter = LoggingContextFilter()
+            record = self.make_record()
+        finally:
+            LoggingContextFilter.empty = old_empty
+
+        self.assertEqual("-", record.task_run_id)
+        self.assertEqual("-", record.correlation_id)
+        self.assertEqual("-", record.frbr_uri)
+
     def test_uses_task_run_id_as_correlation_id(self):
         with log_context(task_run_id="task-1"):
             record = self.make_record(request_id="request-1")
