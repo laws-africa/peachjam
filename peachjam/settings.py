@@ -622,18 +622,21 @@ JAZZMIN_UI_TWEAKS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
-    "filters": {"request_id": {"()": "log_request_id.filters.RequestIDFilter"}},
+    "filters": {
+        "request_id": {"()": "log_request_id.filters.RequestIDFilter"},
+        "context": {"()": "peachjam.logging.LoggingContextFilter"},
+    },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "simple",
-            "filters": ["request_id"],
+            "filters": ["request_id", "context"],
         },
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(name)s %(request_id)s %(process)d %(thread)d %(message)s",
+            "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s %(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },

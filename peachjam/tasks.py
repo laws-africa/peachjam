@@ -1,14 +1,17 @@
 import logging
+from uuid import uuid4
 
 import sentry_sdk
 from background_task import background
 from background_task.signals import task_error
 from background_task.tasks import DBTaskRunner, Task, TaskSchedule, logger, tasks
+from django.conf import settings
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
 from sentry_sdk.tracing import TransactionSource
 
+from peachjam.logging import log_context
 from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
@@ -42,7 +45,8 @@ class PatchedDBTaskRunner(DBTaskRunner):
             op="queue.task", source=TransactionSource.TASK, name=task.task_name
         ) as tx:
             tx.set_status("ok")
-            super().run_task(tasks, task)
+            with log_context(task_run_id=task_run_id(task)):
+                super().run_task(tasks, task)
 
 
 # use the patched runner
@@ -55,6 +59,12 @@ def _task_str(self):
 
 # override Task.__str__ so it's more description
 Task.__str__ = _task_str
+
+
+# this is a logging fingerprint for a task run
+def task_run_id(task):
+    nonce = uuid4().hex[:6]
+    return f"task:{settings.PEACHJAM['APP_NAME'].lower()}:{task.pk}:{task.task_name}:{nonce}"
 
 
 @receiver(task_error)
