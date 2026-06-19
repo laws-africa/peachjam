@@ -47,7 +47,9 @@ class PatchedDBTaskRunner(DBTaskRunner):
                 op="queue.task", source=TransactionSource.TASK, name=task.task_name
             ) as tx:
                 tx.set_status("ok")
-                with log_context(task_run_id=task_run_id(task)):
+                with log_context(
+                    task_run_id=task_run_id(task), task_name=task.task_name
+                ):
                     super().run_task(tasks, task)
         finally:
             clear_log_context()

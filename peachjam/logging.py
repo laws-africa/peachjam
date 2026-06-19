@@ -20,21 +20,22 @@ except ImportError:
 
 
 local = Local()
-LOG_CONTEXT_KEYS = ("task_run_id", "frbr_uri")
+LOG_CONTEXT_KEYS = ("task_run_id", "task_name", "frbr_uri")
 
 
-def _context_values(task_run_id=None, frbr_uri=None):
+def _context_values(task_run_id=None, task_name=None, frbr_uri=None):
     return {
         key: value
         for key, value in {
             "task_run_id": task_run_id,
+            "task_name": task_name,
             "frbr_uri": frbr_uri,
         }.items()
         if value is not None
     }
 
 
-def set_log_context(task_run_id=None, frbr_uri=None):
+def set_log_context(task_run_id=None, task_name=None, frbr_uri=None):
     """Set log context fields until they are overwritten or explicitly cleared.
 
     Only explicit, non-None values are applied. Passing ``None`` is a no-op so
@@ -43,7 +44,7 @@ def set_log_context(task_run_id=None, frbr_uri=None):
     """
 
     for key, value in _context_values(
-        task_run_id=task_run_id, frbr_uri=frbr_uri
+        task_run_id=task_run_id, task_name=task_name, frbr_uri=frbr_uri
     ).items():
         setattr(local, key, value)
 
@@ -64,7 +65,7 @@ def clear_log_context():
 
 
 @contextmanager
-def log_context(task_run_id=None, frbr_uri=None):
+def log_context(task_run_id=None, task_name=None, frbr_uri=None):
     """Temporarily set log context for a block or decorated function.
 
     The previous values for any supplied fields are restored afterwards, making
@@ -72,11 +73,13 @@ def log_context(task_run_id=None, frbr_uri=None):
     instead when the code path cannot be wrapped cleanly.
     """
 
-    kwargs = _context_values(task_run_id=task_run_id, frbr_uri=frbr_uri)
+    kwargs = _context_values(
+        task_run_id=task_run_id, task_name=task_name, frbr_uri=frbr_uri
+    )
     missing = object()
     old_values = {key: getattr(local, key, missing) for key in kwargs}
     try:
-        set_log_context(task_run_id=task_run_id, frbr_uri=frbr_uri)
+        set_log_context(task_run_id=task_run_id, task_name=task_name, frbr_uri=frbr_uri)
         yield
     finally:
         for key, value in old_values.items():
@@ -92,9 +95,10 @@ def log_context(task_run_id=None, frbr_uri=None):
 class LoggingContextFilter(logging.Filter):
     """Attach request/task/document context fields to log records.
 
-    ``request_id`` comes from django-log-request-id. ``task_run_id`` and
-    ``frbr_uri`` come from this module's local context. ``correlation_id`` is
-    the task run id when present, otherwise the request id.
+    ``request_id`` comes from django-log-request-id. ``task_run_id``,
+    ``task_name`` and ``frbr_uri`` come from this module's local context.
+    ``correlation_id`` is the task run id when present, otherwise the request
+    id.
     """
 
     empty = "-"
@@ -114,6 +118,7 @@ class LoggingContextFilter(logging.Filter):
     def filter(self, record):
         task_run_id = getattr(local, "task_run_id", None)
         record.task_run_id = task_run_id or self.empty
+        record.task_name = getattr(local, "task_name", None) or self.empty
         record.correlation_id = (
             task_run_id or getattr(record, "request_id", None) or self.empty
         )

@@ -28,6 +28,7 @@ class LoggingContextFilterTest(SimpleTestCase):
         record = self.make_record(request_id="request-1")
 
         self.assertEqual(LoggingContextFilter.empty, record.task_run_id)
+        self.assertEqual(LoggingContextFilter.empty, record.task_name)
         self.assertEqual("request-1", record.correlation_id)
         self.assertEqual(LoggingContextFilter.empty, record.frbr_uri)
 
@@ -36,6 +37,7 @@ class LoggingContextFilterTest(SimpleTestCase):
         record = self.make_record()
 
         self.assertEqual(LoggingContextFilter.empty, record.task_run_id)
+        self.assertEqual(LoggingContextFilter.empty, record.task_name)
         self.assertEqual(LoggingContextFilter.empty, record.correlation_id)
         self.assertEqual(LoggingContextFilter.empty, record.frbr_uri)
 
@@ -49,14 +51,16 @@ class LoggingContextFilterTest(SimpleTestCase):
             LoggingContextFilter.empty = old_empty
 
         self.assertEqual("x", record.task_run_id)
+        self.assertEqual("x", record.task_name)
         self.assertEqual("x", record.correlation_id)
         self.assertEqual("x", record.frbr_uri)
 
     def test_uses_task_run_id_as_correlation_id(self):
-        with log_context(task_run_id="task-1"):
+        with log_context(task_run_id="task-1", task_name="peachjam.tasks.example"):
             record = self.make_record(request_id="request-1")
 
         self.assertEqual("task-1", record.task_run_id)
+        self.assertEqual("peachjam.tasks.example", record.task_name)
         self.assertEqual("task-1", record.correlation_id)
 
     def test_restores_nested_contexts(self):
@@ -77,19 +81,25 @@ class LoggingContextFilterTest(SimpleTestCase):
         self.assertEqual(LoggingContextFilter.empty, self.make_record().frbr_uri)
 
     def test_none_values_do_not_replace_existing_context(self):
-        with log_context(task_run_id="task-1", frbr_uri="/akn/za/judgment/1"):
-            with log_context(frbr_uri=None):
+        with log_context(
+            task_run_id="task-1",
+            task_name="peachjam.tasks.example",
+            frbr_uri="/akn/za/judgment/1",
+        ):
+            with log_context(task_name=None, frbr_uri=None):
                 record = self.make_record()
 
         self.assertEqual("task-1", record.task_run_id)
+        self.assertEqual("peachjam.tasks.example", record.task_name)
         self.assertEqual("/akn/za/judgment/1", record.frbr_uri)
 
     def test_context_is_additive(self):
-        with log_context(task_run_id="task-1"):
+        with log_context(task_run_id="task-1", task_name="peachjam.tasks.example"):
             with log_context(frbr_uri="/akn/za/judgment/1"):
                 record = self.make_record()
 
         self.assertEqual("task-1", record.task_run_id)
+        self.assertEqual("peachjam.tasks.example", record.task_name)
         self.assertEqual("/akn/za/judgment/1", record.frbr_uri)
 
     def test_log_context_can_be_used_as_a_decorator(self):
