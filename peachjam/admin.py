@@ -50,6 +50,7 @@ from peachjam.forms import (
     RatificationForm,
     SourceFileForm,
 )
+from peachjam.logging import set_log_context
 from peachjam.models import (
     AlternativeName,
     Article,
@@ -776,6 +777,12 @@ class DocumentAdmin(BackgroundTasksAdminMixin, AccessGroupMixin, BaseAdmin):
     ]
 
     new_document_form_mixin = NewDocumentFormMixin
+
+    def get_object(self, request, object_id, from_field=None):
+        obj = super().get_object(request, object_id, from_field=from_field)
+        if obj and request.method == "POST":
+            set_log_context(frbr_uri=obj.expression_frbr_uri)
+        return obj
 
     def get_inlines(self, request, obj):
         inlines = self.inlines

@@ -2,12 +2,22 @@ import logging
 
 from django.test import SimpleTestCase
 
-from peachjam.logging import LoggingContextFilter, log_context
+from peachjam.logging import (
+    LoggingContextFilter,
+    clear_log_context,
+    log_context,
+    set_log_context,
+)
+from peachjam.middleware import LogContextMiddleware
 
 
 class LoggingContextFilterTest(SimpleTestCase):
     def setUp(self):
         self.filter = LoggingContextFilter()
+        clear_log_context()
+
+    def tearDown(self):
+        clear_log_context()
 
     def make_record(self, **kwargs):
         record = logging.makeLogRecord(kwargs)
@@ -17,8 +27,16 @@ class LoggingContextFilterTest(SimpleTestCase):
     def test_uses_request_id_without_task_context(self):
         record = self.make_record(request_id="request-1")
 
-        self.assertEqual("-", record.task_run_id)
+        self.assertEqual("", record.task_run_id)
         self.assertEqual("request-1", record.correlation_id)
+        self.assertEqual("", record.frbr_uri)
+
+    def test_empty_value_can_be_configured(self):
+        self.filter = LoggingContextFilter(empty="-")
+        record = self.make_record()
+
+        self.assertEqual("-", record.task_run_id)
+        self.assertEqual("-", record.correlation_id)
         self.assertEqual("-", record.frbr_uri)
 
     def test_uses_task_run_id_as_correlation_id(self):
@@ -35,7 +53,15 @@ class LoggingContextFilterTest(SimpleTestCase):
 
             self.assertEqual("outer", self.make_record().task_run_id)
 
-        self.assertEqual("-", self.make_record().task_run_id)
+        self.assertEqual("", self.make_record().task_run_id)
+
+    def test_set_log_context_sets_context_until_cleared(self):
+        set_log_context(frbr_uri="/akn/za/judgment/1")
+
+        self.assertEqual("/akn/za/judgment/1", self.make_record().frbr_uri)
+
+        clear_log_context()
+        self.assertEqual("", self.make_record().frbr_uri)
 
     def test_none_values_do_not_replace_existing_context(self):
         with log_context(task_run_id="task-1", frbr_uri="/akn/za/judgment/1"):
@@ -59,8 +85,21 @@ class LoggingContextFilterTest(SimpleTestCase):
             return self.make_record().task_run_id
 
         self.assertEqual("decorated", get_task_run_id())
-        self.assertEqual("-", self.make_record().task_run_id)
+        self.assertEqual("", self.make_record().task_run_id)
 
     def test_log_context_rejects_unknown_context_keys(self):
         with self.assertRaises(TypeError):
             log_context(task_id="task-1")
+
+    def test_middleware_clears_context_before_and_after_request(self):
+        def get_response(request):
+            self.assertEqual("", self.make_record().frbr_uri)
+            set_log_context(frbr_uri="/akn/za/judgment/1")
+            return object()
+
+        set_log_context(frbr_uri="/akn/za/judgment/stale")
+
+        response = LogContextMiddleware(get_response)(object())
+
+        self.assertIsNotNone(response)
+        self.assertEqual("", self.make_record().frbr_uri)

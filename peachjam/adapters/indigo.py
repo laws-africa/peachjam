@@ -19,6 +19,7 @@ from languages_plus.models import Language
 
 from peachjam.adapters.base import RequestsAdapter
 from peachjam.helpers import get_update_or_create
+from peachjam.logging import set_log_context
 from peachjam.models import (
     AlternativeName,
     Author,
@@ -270,6 +271,8 @@ class IndigoAdapter(RequestsAdapter):
                 return
             else:
                 raise error
+
+        set_log_context(frbr_uri=document["frbr_uri"])
 
         # don't ingest stubs that don't have a publication document
         if document["stub"]:
@@ -700,6 +703,7 @@ class IndigoAdapter(RequestsAdapter):
                     )
 
     def delete_document(self, expression_frbr_uri):
+        set_log_context(frbr_uri=expression_frbr_uri)
         url = f"{self.api_url}{expression_frbr_uri}"
 
         try:
