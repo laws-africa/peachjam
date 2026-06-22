@@ -6,6 +6,7 @@ import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import { vueI18n } from '../../i18n';
 import { createAndMountApp } from '../../utils/vue-utils';
 import peachJam from "../../peachjam";
+import { readJsonScript } from '../../utils/json-script';
 
 export class RelationshipEnrichments implements IGutterEnrichmentProvider {
   root: HTMLElement;
@@ -27,12 +28,7 @@ export class RelationshipEnrichments implements IGutterEnrichmentProvider {
     this.workFrbrUri = root.dataset.workFrbrUri || '';
     this.workId = root.dataset.workId || '';
 
-    const node = document.getElementById('provision-relationships');
-    if (node) {
-      this.enrichments = JSON.parse(node.innerText || '[]');
-    } else {
-      this.enrichments = [];
-    }
+    this.enrichments = readJsonScript<IRelationshipEnrichment[]>('provision-relationships', []);
 
     // @ts-ignore
     this.listComponent = createAndMountApp({

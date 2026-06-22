@@ -1,6 +1,7 @@
 import { createAndMountApp } from "../../utils/vue-utils";
 import ProvisionCitationCount from "./ProvisionCitationCount.vue";
 import { vueI18n } from "../../i18n";
+import { readJsonScript } from "../../utils/json-script";
 
 interface ProvisionCitation {
   provision_eid: string;
@@ -18,12 +19,7 @@ export class ProvisionCitations {
     this.gutter = root.querySelector('la-gutter');
     this.expressionFrbrUri = root.querySelector('la-akoma-ntoso')?.frbrExpressionUri || '';
 
-    const node = document.getElementById('incoming-citations-json');
-    if (node) {
-      this.citations = JSON.parse(node.innerText || '[]');
-    } else {
-      this.citations = [];
-    }
+    this.citations = readJsonScript<ProvisionCitation[]>('incoming-citations-json', []);
 
     this.createGutterItems();
   }
