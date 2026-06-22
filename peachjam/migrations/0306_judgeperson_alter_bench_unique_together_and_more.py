@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0299_flynote_view_linked_judgments_permission"),
+        ("peachjam", "0305_judgment_summary_language"),
     ]
 
     operations = [
