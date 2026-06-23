@@ -8,6 +8,18 @@
       <h1 id="main-page-heading" class="h4 mb-3">
         Flynote manager
       </h1>
+      <div class="form-check form-switch mb-3">
+        <input
+          id="flynote-manager-deprecated-only"
+          v-model="deprecatedOnly"
+          class="form-check-input"
+          type="checkbox"
+          @change="reloadTree"
+        >
+        <label class="form-check-label" for="flynote-manager-deprecated-only">
+          Deprecated only
+        </label>
+      </div>
       <div v-if="loading" class="text-muted">
         Loading flynotes...
       </div>
@@ -132,6 +144,7 @@ export default {
       selectedId: null,
       activeWorkspace: 'search',
       searchLoaded: false,
+      deprecatedOnly: false,
       loading: true,
       error: null
     };
@@ -160,6 +173,19 @@ export default {
   methods: {
     nodeUrl (template, id) {
       return template.replace('/0/', `/${id}/`);
+    },
+    treeRequestUrl (url) {
+      const requestUrl = new URL(url, window.location.origin);
+      requestUrl.searchParams.set('deprecated', this.deprecatedOnly ? 'true' : 'false');
+      return requestUrl.toString();
+    },
+    currentSearchUrl () {
+      const form = this.$refs.searchWorkspace?.querySelector('form');
+      if (!form) return this.searchUrl;
+
+      const requestUrl = new URL(form.getAttribute('action') || this.searchUrl, window.location.origin);
+      requestUrl.search = new URLSearchParams(new FormData(form)).toString();
+      return requestUrl.toString();
     },
     getSelectedIdFromUrl () {
       const id = new URLSearchParams(window.location.search).get('flynote');
@@ -190,7 +216,7 @@ export default {
       this.loading = true;
       this.error = null;
       try {
-        const response = await fetch(this.treeUrl);
+        const response = await fetch(this.treeRequestUrl(this.treeUrl));
         if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
         this.nodes = data.results.map(decorateNode);
@@ -199,12 +225,24 @@ export default {
       }
       this.loading = false;
     },
+    async reloadTree () {
+      const searchUrl = this.currentSearchUrl();
+      this.nodes = [];
+      await this.loadRoots();
+      if (this.searchLoaded) {
+        this.loadSearchWorkspace(searchUrl);
+      }
+      if (this.selectedId) {
+        await this.revealFlynote(this.selectedId);
+        this.scrollSelectedNodeIntoView();
+      }
+    },
     async loadNodeChildren (node) {
       if (!node.has_children || node.loading || node.childrenLoaded) return;
       node.loading = true;
       node.error = null;
       try {
-        const response = await fetch(this.nodeUrl(this.childUrl, node.id));
+        const response = await fetch(this.treeRequestUrl(this.nodeUrl(this.childUrl, node.id)));
         if (!response.ok) throw new Error(response.statusText);
         const data = await response.json();
         node.children = data.results.map(decorateNode);
@@ -286,7 +324,7 @@ export default {
       });
     },
     loadSearchWorkspace (url) {
-      htmx.ajax('GET', url, {
+      htmx.ajax('GET', this.treeRequestUrl(url), {
         target: this.$refs.searchWorkspace,
         swap: 'innerHTML'
       });

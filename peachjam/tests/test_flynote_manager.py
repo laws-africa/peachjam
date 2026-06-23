@@ -97,29 +97,35 @@ class FlynoteManagerViewTest(TestCase):
             f'{reverse("flynote-manager")}?flynote={self.sentencing.pk}',
         )
 
-    def test_tree_endpoint_returns_root_nodes(self):
+    def test_tree_endpoint_returns_active_root_nodes_by_default(self):
         self.client.force_login(self.staff_user)
         response = self.client.get(reverse("flynote-manager-tree"))
         self.assertEqual(response.status_code, 200)
         payload = response.json()
 
         names = {node["name"] for node in payload["results"]}
-        self.assertEqual(names, {"Criminal law", "Contract law"})
+        self.assertEqual(names, {"Criminal law"})
         self.assertEqual(
             [node["name"] for node in payload["results"]],
-            ["Contract law", "Criminal law"],
+            ["Criminal law"],
         )
         criminal = next(
             node for node in payload["results"] if node["name"] == "Criminal law"
-        )
-        contract = next(
-            node for node in payload["results"] if node["name"] == "Contract law"
         )
         self.assertEqual(criminal["document_count"], 3)
         self.assertEqual(criminal["numchild"], 2)
         self.assertTrue(criminal["has_children"])
         self.assertFalse(criminal["is_new"])
-        self.assertTrue(contract["deprecated"])
+
+    def test_tree_endpoint_can_show_deprecated_root_nodes_only(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-tree"), {"deprecated": "true"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        names = {node["name"] for node in response.json()["results"]}
+        self.assertEqual(names, {"Contract law"})
 
     def test_tree_endpoint_marks_recent_root_nodes_as_new(self):
         Flynote.objects.filter(pk=self.criminal.pk).update(created_at=timezone.now())
@@ -148,7 +154,7 @@ class FlynoteManagerViewTest(TestCase):
         )
         self.assertFalse(sentencing["is_new"])
 
-    def test_children_endpoint_returns_direct_children_only(self):
+    def test_children_endpoint_returns_active_direct_children_only_by_default(self):
         self.client.force_login(self.staff_user)
         response = self.client.get(
             reverse("flynote-manager-tree-children", args=[self.criminal.pk])
@@ -163,6 +169,47 @@ class FlynoteManagerViewTest(TestCase):
             ["Bail", "Sentencing"],
         )
         self.assertNotIn("Appeals", names)
+
+    def test_children_endpoint_hides_deprecated_child_nodes_by_default(self):
+        self.bail.deprecated = True
+        self.bail.save()
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(
+            reverse("flynote-manager-tree-children", args=[self.criminal.pk]),
+        )
+
+        self.assertEqual(response.status_code, 200)
+        names = {node["name"] for node in response.json()["results"]}
+        self.assertEqual(names, {"Sentencing"})
+
+    def test_children_endpoint_can_show_deprecated_child_nodes_only(self):
+        self.bail.deprecated = True
+        self.bail.save()
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(
+            reverse("flynote-manager-tree-children", args=[self.criminal.pk]),
+            {"deprecated": "true"},
+        )
+
+        self.assertEqual(response.status_code, 200)
+        names = {node["name"] for node in response.json()["results"]}
+        self.assertEqual(names, {"Bail"})
+
+    def test_tree_endpoint_uses_filtered_child_count(self):
+        parent = Flynote.add_root(name="Only deprecated children")
+        parent.add_child(name="Hidden child", deprecated=True)
+        self.client.force_login(self.staff_user)
+
+        response = self.client.get(reverse("flynote-manager-tree"))
+
+        self.assertEqual(response.status_code, 200)
+        node = next(
+            node for node in response.json()["results"] if node["id"] == parent.pk
+        )
+        self.assertEqual(node["numchild"], 0)
+        self.assertFalse(node["has_children"])
 
     def test_path_endpoint_returns_path_to_node(self):
         self.client.force_login(self.staff_user)
@@ -460,6 +507,8 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, 'name="depth"')
         self.assertContains(response, 'name="created_after"')
         self.assertContains(response, 'name="created_before"')
+        self.assertContains(response, 'name="deprecated"')
+        self.assertContains(response, 'value="false"')
         self.assertContains(response, "Any depth")
 
     def test_workspace_search_returns_matching_flynotes(self):
@@ -478,7 +527,7 @@ class FlynoteManagerViewTest(TestCase):
         self.assertContains(response, "<td>1</td>", html=True)
         self.assertNotContains(response, "Bail")
 
-    def test_workspace_search_only_matches_flynote_name_and_marks_deprecated(self):
+    def test_workspace_search_hides_deprecated_flynotes_by_default(self):
         self.client.force_login(self.staff_user)
         response = self.client.get(
             reverse("flynote-manager-search"),
@@ -487,9 +536,22 @@ class FlynoteManagerViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, "Criminal law")
+        self.assertNotContains(response, "Contract law")
+        self.assertNotContains(response, "Sentencing")
+
+    def test_workspace_search_can_show_deprecated_flynotes_only(self):
+        self.client.force_login(self.staff_user)
+        response = self.client.get(
+            reverse("flynote-manager-search"),
+            {"q": "law", "deprecated": "true"},
+        )
+        self.assertEqual(response.status_code, 200)
+
         self.assertContains(response, "Contract law")
         self.assertContains(response, "Deprecated")
-        self.assertNotContains(response, "Sentencing")
+        self.assertNotContains(response, "Criminal law")
+        self.assertContains(response, 'name="deprecated"')
+        self.assertContains(response, 'value="true"')
 
     def test_workspace_search_filters_by_depth(self):
         self.client.force_login(self.staff_user)
@@ -500,7 +562,7 @@ class FlynoteManagerViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
         self.assertContains(response, "Criminal law")
-        self.assertContains(response, "Contract law")
+        self.assertNotContains(response, "Contract law")
         self.assertNotContains(response, "Sentencing")
         self.assertContains(
             response, '<option value="1" selected>1</option>', html=True

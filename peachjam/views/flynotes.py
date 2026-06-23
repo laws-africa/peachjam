@@ -62,11 +62,24 @@ class FlynoteManagerMixin(FlynoteViewMixin):
     def get_queryset(self):
         return self.model.objects.select_related("document_count_cache")
 
+    def deprecated_only(self):
+        return self.request.GET.get("deprecated") == "true"
+
+    def filter_deprecated_queryset(self, queryset):
+        if self.deprecated_only():
+            return queryset.filter(deprecated=True)
+        return queryset.filter(deprecated=False)
+
+    def get_visible_children(self, flynote):
+        return self.filter_deprecated_queryset(flynote.get_children())
+
     def serialize_node(self, flynote):
         try:
             document_count = flynote.document_count_cache.count
         except Flynote.document_count_cache.RelatedObjectDoesNotExist:
             document_count = 0
+        numchild = self.get_visible_children(flynote).count()
+        has_children = numchild > 0
         is_new_root = (
             flynote.depth == 1
             and flynote.created_at >= timezone.now() - self.new_flynote_window
@@ -77,9 +90,9 @@ class FlynoteManagerMixin(FlynoteViewMixin):
             "name": flynote.name,
             "deprecated": flynote.deprecated,
             "is_new": is_new_root,
-            "numchild": flynote.numchild,
+            "numchild": numchild,
             "document_count": document_count,
-            "has_children": flynote.numchild > 0,
+            "has_children": has_children,
         }
 
     def get_flynote_path_labels(self, flynotes):
@@ -180,11 +193,8 @@ class FlynoteManagerMixin(FlynoteViewMixin):
 @method_decorator(staff_member_required, name="dispatch")
 class FlynoteManagerTreeView(FlynoteManagerMixin, View):
     def get(self, request, *args, **kwargs):
-        flynotes = (
-            Flynote.get_root_nodes()
-            .select_related("document_count_cache")
-            .order_by("name")
-        )
+        flynotes = self.filter_deprecated_queryset(Flynote.get_root_nodes())
+        flynotes = flynotes.select_related("document_count_cache").order_by("name")
         return JsonResponse({"results": [self.serialize_node(f) for f in flynotes]})
 
 
@@ -192,11 +202,8 @@ class FlynoteManagerTreeView(FlynoteManagerMixin, View):
 class FlynoteManagerTreeChildrenView(FlynoteManagerMixin, View):
     def get(self, request, *args, **kwargs):
         parent = get_object_or_404(Flynote, pk=kwargs["pk"])
-        flynotes = (
-            parent.get_children()
-            .select_related("document_count_cache")
-            .order_by("name")
-        )
+        flynotes = self.get_visible_children(parent)
+        flynotes = flynotes.select_related("document_count_cache").order_by("name")
         return JsonResponse({"results": [self.serialize_node(f) for f in flynotes]})
 
 
@@ -235,7 +242,7 @@ class FlynoteManagerSearchView(FlynoteManagerMixin, TemplateView):
         path_labels = {}
 
         if query or depth or created_after or created_before:
-            queryset = Flynote.objects.all()
+            queryset = self.filter_deprecated_queryset(Flynote.objects.all())
             if query:
                 queryset = queryset.filter(name__icontains=query)
             if depth:
@@ -267,6 +274,7 @@ class FlynoteManagerSearchView(FlynoteManagerMixin, TemplateView):
         context["depth"] = depth
         context["created_after"] = created_after
         context["created_before"] = created_before
+        context["deprecated"] = "true" if self.deprecated_only() else "false"
         context["results"] = results
         context["path_labels"] = path_labels
         context["manager_url"] = reverse("flynote-manager")

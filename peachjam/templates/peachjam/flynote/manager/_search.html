@@ -6,6 +6,7 @@
         hx-get="{{ search_url }}"
         hx-target="closest section"
         hx-swap="outerHTML">
+    <input type="hidden" name="deprecated" value="{{ deprecated }}"/>
     <div class="row g-3 align-items-end">
       <div class="col-md">
         <label for="flynote-manager-search-q" class="form-label">Flynote name</label>
