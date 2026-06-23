@@ -817,7 +817,10 @@ export default {
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
-        scrollToElement(this.$refs['search-box']);
+        const searchBox = this.$refs['search-box'];
+        if (searchBox instanceof HTMLElement) {
+          scrollToElement(searchBox);
+        }
 
         // search tip
         if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
