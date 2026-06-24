@@ -969,3 +969,32 @@ class DocumentPopupViewTestCase(TestCase):
         expected = f"{doc.expression_frbr_uri}#sec_2"
         self.assertContains(response, f'href="{expected}"')
         self.assertContains(response, f'data-href="{expected}"')
+
+    def test_popup_portion_looks_up_data_eid(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Popup test document",
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html(
+            (
+                '<section id="sec_1" data-eid="sec_1">'
+                '<span data-eid="defn-term-arbitration_agreement">'
+                "arbitration agreement means an agreement to arbitrate"
+                "</span>"
+                "</section>"
+            )
+        )
+        doc_content.save()
+
+        response = self.client.get(
+            f"/en/p/localhost/e/popup{doc.expression_frbr_uri}/~defn-term-arbitration_agreement"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "arbitration agreement means")
+        self.assertNotContains(response, "Popup test document")
