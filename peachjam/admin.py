@@ -206,6 +206,17 @@ class PeachJamSettingsAdmin(admin.ModelAdmin):
         "document_jurisdictions",
     )
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "document_debug_external_links":
+            kwargs["widget"] = forms.Textarea(
+                attrs={
+                    "wrap": "off",
+                    "style": "white-space: pre; overflow-x: auto;",
+                    "class": "vLargeTextField",
+                }
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
     def has_add_permission(self, request):
         return False
 
