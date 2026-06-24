@@ -1,5 +1,6 @@
 import itertools
 import re
+from urllib.parse import quote
 
 from cobalt import FrbrUri
 from django.conf import settings
@@ -24,6 +25,7 @@ from peachjam.models import (
     DocumentNature,
     DocumentSocialImage,
     ExtractedCitation,
+    pj_settings,
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
@@ -418,7 +420,7 @@ class DocumentSocialImageView(DocumentDetailView):
 
 @method_decorator(never_cache, name="dispatch")
 class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
-    permission_required = "peachjam.change_coredocument"
+    permission_required = "peachjam.can_debug_document"
     model = CoreDocument
     queryset = CoreDocument.objects.filter(published=True)
     context_object_name = "document"
@@ -432,9 +434,38 @@ class DocumentDebugView(DocumentDebugViewBase):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["external_debug_links"] = self.get_external_debug_links()
         if self.object.doc_type == "judgment":
             context["summary_form"] = DocumentSummaryForm.build()
         return context
+
+    def get_external_debug_links(self):
+        links = []
+        replacements = self.get_external_debug_link_replacements()
+
+        for line in pj_settings().document_debug_external_links.splitlines():
+            if not line.strip() or "|" not in line:
+                continue
+
+            label, url = [part.strip() for part in line.split("|", 1)]
+            if not label or not url:
+                continue
+
+            for key, value in replacements.items():
+                url = url.replace("{" + key + "}", value)
+
+            links.append({"label": label, "url": url})
+
+        return links
+
+    def get_external_debug_link_replacements(self):
+        document = self.object
+        return {
+            "id": quote(str(document.id), safe=""),
+            "expression_frbr_uri": quote(document.expression_frbr_uri, safe=""),
+            "work_frbr_uri": quote(document.work_frbr_uri, safe=""),
+            "title": quote(document.title, safe=""),
+        }
 
 
 class DocumentSummaryView(DocumentDebugViewBase):

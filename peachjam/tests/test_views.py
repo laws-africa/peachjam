@@ -671,6 +671,62 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, pdf_content)
 
+    def test_document_debug_external_links(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        site_settings = PeachJamSettings.load()
+        site_settings.document_debug_external_links = "\n".join(
+            [
+                "Search app logs | "
+                "https://example.com/foo/?a=b&frbr_uri={expression_frbr_uri}",
+                "Document by id | https://example.com/documents?id={id}&title={title}",
+                "Missing separator",
+                " | https://example.com/missing-label",
+            ]
+        )
+        site_settings.save()
+
+        self.client.force_login(User.objects.get(username="admin@example.com"))
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["external_debug_links"],
+            [
+                {
+                    "label": "Search app logs",
+                    "url": "https://example.com/foo/?a=b&frbr_uri="
+                    "%2Fakn%2Faa-au%2Fjudgment%2Fecowascj%2F2016%2F52%2Feng%402016-11-09",
+                },
+                {
+                    "label": "Document by id",
+                    "url": f"https://example.com/documents?id={doc.id}&title="
+                    "Obi%20vs%20Federal%20Republic%20of%20Nigeria%20%5B2016%5D%20"
+                    "ECOWASCJ%2052%20%2809%20November%202016%29",
+                },
+            ],
+        )
+        self.assertContains(response, "Search app logs")
+        self.assertContains(response, "Document by id")
+        self.assertNotContains(response, "Missing separator")
+
+    def test_document_debug_requires_debug_permission(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        user = User.objects.get(username="officer@example.com")
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_coredocument")
+        )
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 403)
+
+        user.user_permissions.add(Permission.objects.get(codename="can_debug_document"))
+        self.client.force_login(User.objects.get(pk=user.pk))
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 200)
+
     def test_document_source_unpublished(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
         doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)

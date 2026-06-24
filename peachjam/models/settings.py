@@ -81,6 +81,15 @@ class PeachJamSettings(SingletonModel):
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True
     )
+    document_debug_external_links = models.TextField(
+        verbose_name=_("document debug external links"),
+        blank=True,
+        default="",
+        help_text=_(
+            "One link per line in the format: label | URL. "
+            "Allowed placeholders in URLs: {id}, {expression_frbr_uri}, {work_frbr_uri}, {title}."
+        ),
+    )
 
     mailchimp_form_url = models.URLField(
         verbose_name=_("mailchimp form url"), null=True, blank=True
