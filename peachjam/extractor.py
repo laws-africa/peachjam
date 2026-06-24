@@ -8,7 +8,14 @@ from django.db.models.functions import Lower
 from languages_plus.models import Language
 
 from peachjam.analysis.judges import judge_identity_service
-from peachjam.models import CaseNumber, Court, Judge, MatterType, pj_settings
+from peachjam.models import (
+    CaseNumber,
+    Court,
+    Judge,
+    JudgePerson,
+    MatterType,
+    pj_settings,
+)
 
 log = logging.getLogger(__name__)
 
@@ -79,73 +86,86 @@ class ExtractorService:
                 for judge_name in details["judges"]
                 if (judge_name or "").strip()
             ]
-            details["extracted_judges"] = raw_judges
-
-            exact_legacy_judges = {
-                judge.name_lower: judge
-                for judge in Judge.objects.annotate(name_lower=Lower("name")).filter(
-                    name_lower__in=[judge_name.lower() for judge_name in raw_judges]
-                )
-            }
-
-            alias_matches = defaultdict(list)
-            for judge_alias in judge_identity_service.get_matching_judge_aliases(
-                raw_judges
-            ):
-                alias_matches[judge_alias.normalized_name].append(judge_alias)
-
-            fallback_legacy_judges = {
-                judge.name: judge
-                for judge in Judge.objects.filter(
-                    name__in={
-                        aliases[0].name
-                        for aliases in alias_matches.values()
-                        if len(aliases) == 1
-                    }
-                )
-            }
-
-            bench_rows = []
-            details["judges"] = []
-
-            for raw_name in raw_judges:
-                normalized_name = judge_identity_service.normalize_judge_name(raw_name)
-                matching_aliases = alias_matches.get(normalized_name, [])
-                matched_alias = (
-                    matching_aliases[0] if len(matching_aliases) == 1 else None
-                )
-                judge_person = (
-                    matched_alias.judge_person if matched_alias is not None else None
-                )
-                judge_person_suggestion = ""
-
-                if judge_person is None:
-                    resolution = judge_identity_service.resolve_judge_person(
-                        [raw_name],
-                        dry_run=True,
+            if not JudgePerson.canonical_identity_enabled():
+                details["judges"] = list(
+                    Judge.objects.annotate(name_lower=Lower("name")).filter(
+                        name_lower__in=[judge_name.lower() for judge_name in raw_judges]
                     )
-                    judge_person_suggestion = resolution["canonical_name"]
-                    if resolution["judge_person"].pk:
-                        judge_person = resolution["judge_person"]
-
-                legacy_judge = exact_legacy_judges.get(raw_name.lower())
-                if legacy_judge is None and matched_alias is not None:
-                    legacy_judge = fallback_legacy_judges.get(matched_alias.name)
-
-                if legacy_judge is not None:
-                    details["judges"].append(legacy_judge)
-
-                bench_rows.append(
-                    {
-                        "judge": legacy_judge,
-                        "extracted_name": raw_name,
-                        "matched_alias": matched_alias,
-                        "judge_person": judge_person,
-                        "judge_person_suggestion": judge_person_suggestion,
-                    }
                 )
+            else:
+                details["extracted_judges"] = raw_judges
 
-            details["bench_rows"] = bench_rows
+                exact_legacy_judges = {
+                    judge.name_lower: judge
+                    for judge in Judge.objects.annotate(
+                        name_lower=Lower("name")
+                    ).filter(
+                        name_lower__in=[judge_name.lower() for judge_name in raw_judges]
+                    )
+                }
+
+                alias_matches = defaultdict(list)
+                for judge_alias in judge_identity_service.get_matching_judge_aliases(
+                    raw_judges
+                ):
+                    alias_matches[judge_alias.normalized_name].append(judge_alias)
+
+                fallback_legacy_judges = {
+                    judge.name: judge
+                    for judge in Judge.objects.filter(
+                        name__in={
+                            aliases[0].name
+                            for aliases in alias_matches.values()
+                            if len(aliases) == 1
+                        }
+                    )
+                }
+
+                bench_rows = []
+                details["judges"] = []
+
+                for raw_name in raw_judges:
+                    normalized_name = judge_identity_service.normalize_judge_name(
+                        raw_name
+                    )
+                    matching_aliases = alias_matches.get(normalized_name, [])
+                    matched_alias = (
+                        matching_aliases[0] if len(matching_aliases) == 1 else None
+                    )
+                    judge_person = (
+                        matched_alias.judge_person
+                        if matched_alias is not None
+                        else None
+                    )
+                    judge_person_suggestion = ""
+
+                    if judge_person is None:
+                        resolution = judge_identity_service.resolve_judge_person(
+                            [raw_name],
+                            dry_run=True,
+                        )
+                        judge_person_suggestion = resolution["canonical_name"]
+                        if resolution["judge_person"].pk:
+                            judge_person = resolution["judge_person"]
+
+                    legacy_judge = exact_legacy_judges.get(raw_name.lower())
+                    if legacy_judge is None and matched_alias is not None:
+                        legacy_judge = fallback_legacy_judges.get(matched_alias.name)
+
+                    if legacy_judge is not None:
+                        details["judges"].append(legacy_judge)
+
+                    bench_rows.append(
+                        {
+                            "judge": legacy_judge,
+                            "extracted_name": raw_name,
+                            "matched_alias": matched_alias,
+                            "judge_person": judge_person,
+                            "judge_person_suggestion": judge_person_suggestion,
+                        }
+                    )
+
+                details["bench_rows"] = bench_rows
 
         # case numbers
         if details.get("case_numbers"):

@@ -4,6 +4,7 @@ from unittest.mock import patch
 
 from countries_plus.models import Country
 from django.conf import settings
+from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
@@ -11,10 +12,21 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
 
-from peachjam.admin import BenchInlineForm, JudgmentForm
+from peachjam.admin import (
+    BenchInline,
+    BenchInlineForm,
+    JudgmentAdmin,
+    JudgmentForm,
+    LegacyBenchInline,
+)
 from peachjam.analysis.judges import judge_identity_service
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.models import Bench, Court, Judge, JudgeAlias, JudgePerson, Judgment
+
+CANONICAL_JUDGE_IDENTITY_SETTINGS = {
+    **settings.PEACHJAM,
+    "CANONICAL_JUDGE_IDENTITY": True,
+}
 
 
 class JudgeParsingTests(TestCase):
@@ -355,6 +367,7 @@ class JudgmentFormExtractorUrlTests(TestCase):
             )
 
 
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
 class ExtractorJudgeIdentityTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
@@ -441,6 +454,104 @@ class ExtractorJudgeIdentityTests(TestCase):
         self.assertEqual(existing_person.pk, bench_row["judge_person"].pk)
 
 
+class ExtractorLegacyJudgeTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def test_process_judgment_details_uses_legacy_judges_by_default(self):
+        legacy_judge = Judge.objects.create(name="ABBAN, J.A.")
+        details = {
+            "court": Court.objects.first().name,
+            "date": "2024-01-03",
+            "judges": ["ABBAN, J.A.", "Unknown J"],
+            "language": "eng",
+        }
+
+        ExtractorService().process_judgment_details(details)
+
+        self.assertEqual([legacy_judge], details["judges"])
+        self.assertNotIn("bench_rows", details)
+        self.assertNotIn("extracted_judges", details)
+
+
+class CanonicalJudgeIdentityRolloutGateTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    @override_settings(PEACHJAM={})
+    def test_missing_setting_uses_legacy_bench_inline(self):
+        judgment_admin = JudgmentAdmin(Judgment, admin.site)
+
+        self.assertFalse(JudgePerson.canonical_identity_enabled())
+        self.assertIs(LegacyBenchInline, judgment_admin.get_inlines(None)[0])
+
+    def test_judgment_admin_uses_legacy_bench_inline_by_default(self):
+        judgment_admin = JudgmentAdmin(Judgment, admin.site)
+
+        self.assertIs(LegacyBenchInline, judgment_admin.get_inlines(None)[0])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judgment_admin_uses_canonical_bench_inline_when_enabled(self):
+        judgment_admin = JudgmentAdmin(Judgment, admin.site)
+
+        self.assertIs(BenchInline, judgment_admin.get_inlines(None)[0])
+
+    def test_judge_identity_workflow_is_disabled_by_default(self):
+        admin_user = User.objects.create_user(
+            username="judge-admin-disabled@example.com",
+            email="judge-admin-disabled@example.com",
+            password="password",
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.client.force_login(admin_user)
+
+        response = self.client.get(reverse("peachjam_judgeperson_workflow"))
+
+        self.assertEqual(403, response.status_code)
+
+
+class JudgmentExtractLegacyViewRenderingTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.create_superuser(
+            username="legacy-admin",
+            email="legacy-admin@example.com",
+            password="password",
+        )
+        self.client.force_login(self.user)
+
+    def test_extract_view_uses_legacy_bench_inline_by_default(self):
+        Judge.objects.create(name="Anukam J")
+        file = SimpleUploadedFile(
+            "judgment.pdf",
+            b"%PDF-1.4 fake",
+            content_type="application/pdf",
+        )
+
+        with patch(
+            "peachjam.admin.ExtractorService.extract_judgment_details",
+            return_value={
+                "language": "eng",
+                "court": Court.objects.first().name,
+                "date": "2025-02-03",
+                "judges": ["Anukam J"],
+                "must_be_anonymised": True,
+                "case_numbers": [],
+            },
+        ):
+            response = self.client.post(
+                reverse("admin:peachjam_extract_judgment"),
+                {"file": file},
+            )
+
+        self.assertEqual(200, response.status_code)
+        content = response.content.decode()
+        self.assertIn("Anukam J", content)
+        self.assertNotIn('value="__alias_preview__"', content)
+        self.assertNotIn('value="__judge_preview__"', content)
+
+
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
 class JudgmentExtractViewRenderingTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
@@ -602,6 +713,7 @@ class BackfillJudgePeopleCommandTests(TestCase):
         self.assertEqual("JSC", acquah_jsc.title)
 
 
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
 class JudgeIdentityWorkflowAdminTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 

@@ -41,7 +41,10 @@ class JudgesAutocomplete(autocomplete.Select2QuerySetView):
 
 class JudgePeopleAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_staff:
+        if (
+            not JudgePerson.canonical_identity_enabled()
+            or not self.request.user.is_staff
+        ):
             return JudgePerson.objects.none()
 
         qs = JudgePerson.objects.all()
@@ -54,7 +57,10 @@ class JudgePeopleAutocomplete(autocomplete.Select2QuerySetView):
 
 class JudgeAliasesAutocomplete(autocomplete.Select2QuerySetView):
     def get_queryset(self):
-        if not self.request.user.is_staff:
+        if (
+            not JudgePerson.canonical_identity_enabled()
+            or not self.request.user.is_staff
+        ):
             return JudgeAlias.objects.none()
 
         qs = JudgeAlias.objects.select_related("judge_person")

@@ -97,6 +97,10 @@ class JudgePerson(models.Model):
     def __str__(self):
         return self.full_name
 
+    @staticmethod
+    def canonical_identity_enabled():
+        return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = judge_identity_service.unique_judge_slug(

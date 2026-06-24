@@ -609,7 +609,9 @@ class JudgeIdentityWorkflowMixin:
 @method_decorator(staff_member_required, name="dispatch")
 class JudgeIdentityWorkflowView(JudgeIdentityWorkflowMixin, TemplateView):
     def dispatch(self, request, *args, **kwargs):
-        if not request.user.has_perm("peachjam.change_judgeperson"):
+        if not JudgePerson.canonical_identity_enabled() or not request.user.has_perm(
+            "peachjam.change_judgeperson"
+        ):
             raise PermissionDenied
         return super().dispatch(request, *args, **kwargs)
 

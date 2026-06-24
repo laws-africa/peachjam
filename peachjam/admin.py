@@ -1613,6 +1613,23 @@ class BenchInline(admin.TabularInline):
         )
 
 
+class LegacyBenchInline(admin.TabularInline):
+    # Legacy judge editing path used while canonical judge identity is disabled.
+    model = Bench
+    extra = 3
+    fields = ("judge",)
+    verbose_name = gettext_lazy("judge")
+    verbose_name_plural = gettext_lazy("judges")
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={"judge": autocomplete.ModelSelect2(url="autocomplete-judges")},
+            **kwargs,
+        )
+
+
 class LowerBenchInline(admin.TabularInline):
     model = LowerBench
     extra = 3
@@ -1755,7 +1772,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     form = JudgmentForm
     resource_classes = [JudgmentResource]
     inlines = [
-        BenchInline,
         LowerBenchInline,
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
@@ -1850,6 +1866,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
         return fieldsets
 
+    def get_inlines(self, request, obj=None):
+        bench_inline = (
+            BenchInline
+            if JudgePerson.canonical_identity_enabled()
+            else LegacyBenchInline
+        )
+        return [bench_inline] + self.inlines
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -1920,6 +1944,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             inline.extra = len(bench_rows) + inline.extra
             inlines.append(inline)
             formsets.append(inline.get_formset(request)(initial=bench_rows))
+        elif details.get("judges"):
+            judges = [{"judge": j} for j in details["judges"]]
+            details["judges"] = "; ".join(str(j) for j in details["judges"])
+
+            inline = LegacyBenchInline(Judgment, self.admin_site)
+            inline.extra = len(judges) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=judges))
 
         if details.get("case_numbers"):
             case_numbers = [
@@ -2535,15 +2567,45 @@ class JudgeAliasInline(admin.TabularInline):
     readonly_fields = ("title", "normalized_name")
 
 
+class CanonicalJudgeIdentityAdminMixin:
+    def has_module_permission(self, request):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_module_permission(request)
+        )
+
+    def has_view_permission(self, request, obj=None):
+        return JudgePerson.canonical_identity_enabled() and super().has_view_permission(
+            request, obj=obj
+        )
+
+    def has_add_permission(self, request):
+        return JudgePerson.canonical_identity_enabled() and super().has_add_permission(
+            request
+        )
+
+    def has_change_permission(self, request, obj=None):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_change_permission(request, obj=obj)
+        )
+
+    def has_delete_permission(self, request, obj=None):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_delete_permission(request, obj=obj)
+        )
+
+
 @admin.register(JudgePerson)
-class JudgePersonAdmin(admin.ModelAdmin):
+class JudgePersonAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
     list_display = ("full_name", "slug")
     search_fields = ("full_name", "aliases__name")
     inlines = [JudgeAliasInline]
 
 
 @admin.register(JudgeAlias)
-class JudgeAliasAdmin(admin.ModelAdmin):
+class JudgeAliasAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
     list_display = ("name", "title", "judge_person", "normalized_name")
     search_fields = ("name", "title", "normalized_name", "judge_person__full_name")
     autocomplete_fields = ("judge_person",)
