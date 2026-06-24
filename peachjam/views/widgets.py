@@ -1,7 +1,6 @@
 import re
 from urllib.parse import urlparse
 
-import lxml.html
 from cobalt.uri import FrbrUri
 from corsheaders.signals import check_request_enabled
 from django.conf import settings
@@ -99,16 +98,7 @@ class DocumentPopupView(DetailView):
                 raise Http404()
 
             # try to find the portion within the object
-            try:
-                elems = doc_content.content_html_tree.xpath(
-                    f'//*[@id="{self.portion}"]'
-                )
-                if elems:
-                    context["portion_html"] = lxml.html.tostring(
-                        elems[0], encoding="unicode"
-                    )
-            except ValueError:
-                raise Http404()
+            context["portion_html"] = self.object.get_provision_by_eid(self.portion)
 
         # is this a CORS request from off-site? (the partner host is not the same as the local host)
         context["offsite_request"] = self.request.get_host() != self.kwargs["partner"]

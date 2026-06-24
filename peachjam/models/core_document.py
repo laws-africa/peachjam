@@ -813,10 +813,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         if not doc_content.content_html or not doc_content.content_html_is_akn:
             return None
 
-        # Find element with data-eId
-        xpath = f"//*[@data-eid='{eid}']"
-        elements = doc_content.content_html_tree.xpath(xpath)
-
+        elements = doc_content.content_html_tree.xpath(
+            "//*[@id=$eid or @data-eid=$eid]", eid=eid
+        )
         if elements:
             return etree.tostring(elements[0], encoding="unicode", method="html")
         return None
