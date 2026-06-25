@@ -1,30 +1,28 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-18 10:27+0000\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
-"Language-Team: Swahili\n"
-"Language: sw_KE\n"
-"Content-Type: text/plain; charset=UTF-8\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "X-Crowdin-Project-ID: 4\n"
 "X-Crowdin-Language: sw\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
+"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language-Team: Swahili\n"
+"Language: sw_KE\n"
+"PO-Revision-Date: 2026-06-18 11:10\n"
 
 #: entity_matcher.py:75
 msgid "Court"
-msgstr ""
+msgstr "Mahakama"
 
 #: entity_matcher.py:98
 msgid "Judge"
-msgstr ""
+msgstr "Jaji"
 
 #: entity_matcher.py:141
 msgid "Locality"
-msgstr ""
+msgstr "Eneo"
 
 #: models.py:174
 msgid "Search alert limit reached"
