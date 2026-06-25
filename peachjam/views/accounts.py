@@ -1,4 +1,6 @@
-from allauth.account.forms import ReauthenticateForm
+import string
+
+from allauth.account.forms import ConfirmLoginCodeForm, ReauthenticateForm
 from allauth.account.mixins import NextRedirectMixin
 from allauth.account.views import ConfirmLoginCodeView as AllauthConfirmLoginCodeView
 from allauth.account.views import SignupView as AllauthSignupView
@@ -28,6 +30,18 @@ from peachjam_subs.models import Subscription
 User = get_user_model()
 
 
+def normalise_login_code(code):
+    allowed_chars = string.ascii_letters + string.digits
+    return "".join(ch for ch in code or "" if ch in allowed_chars).lower()
+
+
+class PeachjamConfirmLoginCodeForm(ConfirmLoginCodeForm):
+    def clean_code(self):
+        code = self.cleaned_data.get("code")
+        self.cleaned_data["code"] = normalise_login_code(code)
+        return super().clean_code()
+
+
 class SignupView(AllauthSignupView):
     def dispatch(self, request, *args, **kwargs):
         if settings.PEACHJAM["AUTH_OTP"]:
@@ -36,6 +50,7 @@ class SignupView(AllauthSignupView):
 
 
 class UserAuthView(AllauthConfirmLoginCodeView):
+    form_class = PeachjamConfirmLoginCodeForm
     template_name = "account/user_auth.html"
 
     def _get_email_and_user(self):

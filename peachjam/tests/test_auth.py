@@ -405,6 +405,28 @@ class UserAuthViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
 
 
+class PeachjamConfirmLoginCodeFormTests(TestCase):
+    def test_code_allows_non_ascii_separators(self):
+        from peachjam.views.accounts import PeachjamConfirmLoginCodeForm
+
+        form = PeachjamConfirmLoginCodeForm(
+            data={"code": "qglcーbctd"},
+            code="qglcbctd",
+        )
+
+        self.assertTrue(form.is_valid())
+
+    def test_code_rejects_non_ascii_lookalikes(self):
+        from peachjam.views.accounts import PeachjamConfirmLoginCodeForm
+
+        form = PeachjamConfirmLoginCodeForm(
+            data={"code": "аbc123"},
+            code="abc123",
+        )
+
+        self.assertFalse(form.is_valid())
+
+
 class SignupViewTests(TestCase):
     @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False})
     def test_signup_view_login_link_includes_next_when_otp_disabled(self):
