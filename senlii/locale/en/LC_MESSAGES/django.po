@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-08 07:01+0000\n"
+"POT-Creation-Date: 2026-06-25 06:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,10 +87,14 @@ msgid "Articles"
 msgstr ""
 
 #: templates/peachjam/_header.html:78
+msgid "Training"
+msgstr ""
+
+#: templates/peachjam/_header.html:84
 msgid "About"
 msgstr ""
 
-#: templates/peachjam/_header.html:82
+#: templates/peachjam/_header.html:88
 msgid "Help"
 msgstr ""
 
