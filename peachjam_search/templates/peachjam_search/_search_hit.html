@@ -3,24 +3,19 @@
     data-document-id="{{ hit.document.id|default_if_none:'' }}">
   <div class="card" data-best-match="{% trans "Best match" %}">
     <div class="card-body">
-      <div class="d-flex flex-wrap justify-content-between gap-2 align-items-start mb-2">
-        <h5 class="card-title mb-0">
-          <a class="h5 text-primary"
-             href="{{ hit.document.get_absolute_url }}"
-             data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
-             data-position="{{ hit.position }}">
-            {% if hit.highlight.title %}
-              {{ hit.highlight.title.0|safe }}
-            {% else %}
-              {{ hit.document.title }}
-            {% endif %}
-          </a>
-          <span id="saved-document-star--{{ hit.document.id }}"></span>
-        </h5>
-        <div class="flex-shrink-0 ms-auto">
-          {% include 'peachjam/_document_labels.html' with labels=hit.document.labels.all %}
-        </div>
-      </div>
+      <h5 class="card-title">
+        <a class="h5 text-primary"
+           href="{{ hit.document.get_absolute_url }}"
+           data-frbr-uri="{{ hit.document.expression_frbr_uri }}"
+           data-position="{{ hit.position }}">
+          {% if hit.highlight.title %}
+            {{ hit.highlight.title.0|safe }}
+          {% else %}
+            {{ hit.document.title }}
+          {% endif %}
+        </a>
+        <span id="saved-document-star--{{ hit.document.id }}"></span>
+      </h5>
       <div class="mb-2">
         {% if hit.document.citation and hit.document.citation != hit.document.title %}
           <div>
@@ -65,6 +60,7 @@
               {% endfor %}
             </span>
           {% endif %}
+          {% include 'peachjam/_document_labels.html' with labels=hit.document.labels.all %}
           {% if can_debug %}
             <a class="me-3"
                href="#debug-{{ hit.document.id }}"
