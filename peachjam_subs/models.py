@@ -584,6 +584,29 @@ class Subscription(models.Model):
         return subscription
 
     @classmethod
+    def replace_user_subscription(
+        cls, user, product_offering, starts_on=None, close_pending=True
+    ):
+        """Create a replacement subscription, closing pending replacements first."""
+        if close_pending:
+            for sub in cls.objects.filter(user=user, status=cls.Status.PENDING):
+                log.info(
+                    f"Closing pending subscription {sub} because it is being replaced by a new one"
+                )
+                sub.close()
+
+        subscription = cls.objects.create(
+            user=user,
+            product_offering=product_offering,
+            status=cls.Status.PENDING,
+            starts_on=starts_on,
+        )
+        log.info(f"Created replacement subscription {subscription}")
+        if subscription.can_activate():
+            subscription.activate()
+        return subscription
+
+    @classmethod
     def update_subscriptions(cls):
         """Activate pending subscriptions and close active subscriptions as needed."""
         today = timezone.now().date()

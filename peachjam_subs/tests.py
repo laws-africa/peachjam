@@ -96,6 +96,38 @@ class SubscriptionTests(TestCase):
         self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
         self.assertIsNotNone(sub1.active_at)
 
+    def test_replace_user_subscription_creates_deferred_replacement(self):
+        pending = Subscription.objects.create(
+            user=self.user,
+            product_offering=self.product_offering,
+            status=Subscription.Status.PENDING,
+            starts_on=date(2023, 9, 1),
+        )
+        starts_on = date.today() + timedelta(days=30)
+
+        replacement = Subscription.replace_user_subscription(
+            self.user,
+            ProductOffering.objects.get(pk=2),
+            starts_on=starts_on,
+        )
+
+        pending.refresh_from_db()
+        self.subscription.refresh_from_db()
+        self.assertEqual(Subscription.Status.CLOSED, pending.status)
+        self.assertEqual(Subscription.Status.ACTIVE, self.subscription.status)
+        self.assertEqual(Subscription.Status.PENDING, replacement.status)
+        self.assertEqual(starts_on, replacement.starts_on)
+
+    def test_replace_user_subscription_activates_immediate_replacement(self):
+        replacement = Subscription.replace_user_subscription(
+            self.user,
+            ProductOffering.objects.get(pk=2),
+        )
+
+        self.subscription.refresh_from_db()
+        self.assertEqual(Subscription.Status.CLOSED, self.subscription.status)
+        self.assertEqual(Subscription.Status.ACTIVE, replacement.status)
+
     def test_pricing_plan_price_per_month(self):
         self.assertEqual("None100/month", self.monthly_plan.price_per_month)
         self.assertEqual("None8.33/month", self.annual_plan.price_per_month)
