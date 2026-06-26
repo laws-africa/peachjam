@@ -639,7 +639,9 @@ class SaveDocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["folders"].queryset = self.instance.user.folders.all()
+        self.fields["folders"].queryset = self.instance.user.folders.filter(
+            subscription_locked_at__isnull=True
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -654,14 +656,20 @@ class SaveDocumentForm(forms.ModelForm):
 
         if not folders:
             # default a folder
-            most_recent_saved = self.instance.user.saved_documents.order_by(
-                "-created_at"
-            ).first()
+            most_recent_saved = (
+                self.instance.user.saved_documents.filter(
+                    subscription_locked_at__isnull=True
+                )
+                .order_by("-created_at")
+                .first()
+            )
             if most_recent_saved and most_recent_saved.folders.all().last():
                 folders = [most_recent_saved.folders.all().last()]
 
             if not folders:
-                folders = self.instance.user.folders.all()[:1]
+                folders = self.instance.user.folders.filter(
+                    subscription_locked_at__isnull=True
+                )[:1]
 
             if not folders:
                 folders = [

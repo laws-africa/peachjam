@@ -10,12 +10,24 @@
     <ul class="list-group list-group-flush">
       {% for follow in object_list %}
         <li class="list-group-item d-flex align-items-center">
-          <i class="bi bi-bell me-2"></i>
+          <i class="bi {% if follow.is_subscription_locked %}bi-lock-fill{% else %}bi-bell{% endif %} me-2"></i>
           <div class="flex-grow-1 row">
             <div class="col-md">
-              <a href="{{ follow.followed_object.get_absolute_url }}">{{ follow.followed_object_name }}</a>
+              {% if follow.is_subscription_locked %}
+                <div>
+                  <a href="{{ follow.followed_object.get_absolute_url }}">{{ follow.followed_object_name }}</a>
+                </div>
+                <div class="text-muted">
+                  <div class="fw-bold">{% trans 'Paused by your subscription limit.' %}</div>
+                  {% blocktrans trimmed with expires=follow.subscription_lock_expires_at|date %}
+                    We'll keep this follow until {{ expires }}. Upgrade your subscription to resume updates.
+                  {% endblocktrans %}
+                </div>
+              {% else %}
+                <a href="{{ follow.followed_object.get_absolute_url }}">{{ follow.followed_object_name }}</a>
+              {% endif %}
             </div>
-            {% if follow.last_alerted_at %}
+            {% if follow.last_alerted_at and not follow.is_subscription_locked %}
               <div class="col-md text-muted">
                 {% blocktrans trimmed with ago=follow.last_alerted_at|timesince %}
                   Alerted {{ ago }} ago

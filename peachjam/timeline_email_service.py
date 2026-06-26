@@ -23,7 +23,6 @@ log = logging.getLogger(__name__)
 class TimelineEmailService:
     @staticmethod
     def already_alerted_today(user, event_type):
-        q = Q()
         last_24_hrs = timezone.now() - timedelta(hours=24)
 
         if isinstance(event_type, list):
@@ -49,7 +48,20 @@ class TimelineEmailService:
 
     @staticmethod
     def send_email_alerts():
-        events = TimelineEvent.objects.filter(email_alert_sent_at__isnull=True)
+        events = (
+            TimelineEvent.objects.filter(
+                email_alert_sent_at__isnull=True,
+                user_following__subscription_locked_at__isnull=True,
+            )
+            .filter(
+                Q(user_following__saved_document__isnull=True)
+                | Q(user_following__saved_document__subscription_locked_at__isnull=True)
+            )
+            .filter(
+                Q(user_following__saved_search__isnull=True)
+                | Q(user_following__saved_search__subscription_locked_at__isnull=True)
+            )
+        )
         if not events.exists():
             return
 
@@ -103,6 +115,7 @@ class TimelineEmailService:
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.NEW_DOCUMENTS,
             user_following__user=user,
+            user_following__subscription_locked_at__isnull=True,
         )
 
         if not events.exists():
@@ -152,6 +165,8 @@ class TimelineEmailService:
             email_alert_sent_at__isnull=True,
             event_type=TimelineEvent.EventTypes.SAVED_SEARCH,
             user_following__user=user,
+            user_following__subscription_locked_at__isnull=True,
+            user_following__saved_search__subscription_locked_at__isnull=True,
         )
 
         if not events.exists():
@@ -203,6 +218,8 @@ class TimelineEmailService:
                 event_type=TimelineEvent.EventTypes.NEW_CITATION,
                 user_following__user=user,
                 user_following__saved_document__isnull=False,
+                user_following__subscription_locked_at__isnull=True,
+                user_following__saved_document__subscription_locked_at__isnull=True,
             )
         )
 
@@ -292,6 +309,8 @@ class TimelineEmailService:
             email_alert_sent_at__isnull=True,
             event_type__in=email_config.event_types,
             user_following__user=user,
+            user_following__subscription_locked_at__isnull=True,
+            user_following__saved_document__subscription_locked_at__isnull=True,
         )
 
         if not events.exists():

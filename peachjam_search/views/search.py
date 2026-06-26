@@ -453,6 +453,11 @@ class SavedSearchUpdateView(BaseSavedSearchFormView, UpdateView):
     template_name = "peachjam_search/saved_search_form.html"
     form_class = SavedSearchUpdateForm
 
+    def form_valid(self, form):
+        if self.object.is_subscription_locked:
+            return HttpResponseForbidden("Search alert is locked")
+        return super().form_valid(form)
+
 
 class SavedSearchListView(BaseSavedSearchFormView, ListView):
     permission_required = "peachjam_search.view_savedsearch"

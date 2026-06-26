@@ -490,6 +490,11 @@ class Subscription(models.Model):
 
         self.save()
 
+        if self.status == Subscription.Status.ACTIVE:
+            from peachjam_subs.limits import reconcile_user_subscription_limits
+
+            reconcile_user_subscription_limits(self.user, self)
+
     @transition(
         field=status, source=[Status.ACTIVE, Status.PENDING], target=Status.CLOSED
     )
@@ -639,11 +644,19 @@ class Subscription(models.Model):
         """
         # resolve the related manager
         manager = {
-            "saved_document_limit": self.user.saved_documents,
-            "folder_limit": self.user.folders,
-            "search_alert_limit": self.user.saved_searches,
+            "saved_document_limit": self.user.saved_documents.filter(
+                subscription_locked_at__isnull=True
+            ),
+            "folder_limit": self.user.folders.filter(
+                subscription_locked_at__isnull=True
+            ),
+            "search_alert_limit": self.user.saved_searches.filter(
+                subscription_locked_at__isnull=True
+            ),
             "following_limit": self.user.following.filter(
-                saved_search__isnull=True, saved_document__isnull=True
+                subscription_locked_at__isnull=True,
+                saved_search__isnull=True,
+                saved_document__isnull=True,
             ),
         }[feature]
 

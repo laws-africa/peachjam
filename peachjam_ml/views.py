@@ -51,7 +51,16 @@ class SimilarDocumentsFolderView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        work_ids = self.object.saved_documents.values_list("work_id", flat=True)
+        if self.object.is_subscription_locked:
+            context["similar_documents"] = []
+            context["similar_documents_table_id"] = self.get_document_table_id(
+                "similar"
+            )
+            return context
+
+        work_ids = self.object.saved_documents.filter(
+            subscription_locked_at__isnull=True
+        ).values_list("work_id", flat=True)
         doc_ids = (
             CoreDocument.objects.filter(work_id__in=work_ids)
             .latest_expression()

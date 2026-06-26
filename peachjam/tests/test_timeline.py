@@ -141,6 +141,26 @@ class TimelineViewTest(TestCase):
         self.assertEqual(4, subject_docs.count())
         self.assertIn(j.pk, subject_docs)
 
+    def test_locked_follow_does_not_create_timeline_events(self):
+        self.follow.subscription_locked_at = datetime(2025, 7, 1)
+        self.follow.subscription_lock_expires_at = datetime(2025, 9, 1)
+        self.follow.save(
+            update_fields=["subscription_locked_at", "subscription_lock_expires_at"]
+        )
+        Judgment.objects.create(
+            case_name="Locked Follow Case",
+            court=self.court,
+            date=datetime(2025, 10, 1),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+        )
+
+        UserFollowing.update_follows_for_user(self.user)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(user_following__user=self.user).exists()
+        )
+
     def test_send_new_documents_email_includes_first_topic_in_subject(self):
         topic = Taxonomy.add_root(name="Employment Law")
         topic_follow = UserFollowing.objects.create(user=self.user, taxonomy=topic)
@@ -411,6 +431,24 @@ class TimelineRelationshipTests(TestCase):
         )
         self.assertIn(self.overturning_work, overturn_event.subject_works.all())
 
+    def test_locked_saved_document_does_not_create_relationship_event(self):
+        self.saved_followed.subscription_locked_at = datetime(2025, 7, 1)
+        self.saved_followed.subscription_lock_expires_at = datetime(2025, 9, 1)
+        self.saved_followed.save(
+            update_fields=["subscription_locked_at", "subscription_lock_expires_at"]
+        )
+        amendment = Relationship.objects.create(
+            subject_work=self.followed_work,
+            object_work=self.amending_work,
+            predicate=self.amended_predicate,
+        )
+
+        UserFollowing.update_new_relationship_follows(amendment)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(user_following=self.follow_followed).exists()
+        )
+
     def test_update_new_relationship_skips_if_saved_document_has_no_document(self):
         undoc_work = Work.objects.create(
             title="Undocumented Work",
@@ -528,6 +566,23 @@ class TimelineRelationshipTests(TestCase):
             event_type=TimelineEvent.EventTypes.NEW_CITATION,
         )
         self.assertIn(self.amending_work, event.subject_works.all())
+
+    def test_locked_saved_document_does_not_create_citation_event(self):
+        self.saved_followed.subscription_locked_at = datetime(2025, 7, 1)
+        self.saved_followed.subscription_lock_expires_at = datetime(2025, 9, 1)
+        self.saved_followed.save(
+            update_fields=["subscription_locked_at", "subscription_lock_expires_at"]
+        )
+        citation = ExtractedCitation.objects.create(
+            target_work=self.followed_work,
+            citing_work=self.amending_work,
+        )
+
+        UserFollowing.update_new_citation_follows(citation)
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(user_following=self.follow_followed).exists()
+        )
 
     def test_send_new_relationship_email_sends_separate_templates(self):
         amendment = Relationship.objects.create(
