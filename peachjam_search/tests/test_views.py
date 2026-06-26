@@ -11,7 +11,7 @@ from django.urls import reverse
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import SearchTrace
 from peachjam_search.views.api import PortionSearchView
@@ -298,6 +298,35 @@ class SearchViewsTest(TestCase):
         )
         self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#page-3', html)
         self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#sec_1', html)
+
+    def test_search_hit_includes_document_labels(self):
+        request = RequestFactory().get("/search/?search=test")
+        doc = CoreDocument.objects.first()
+        doc.labels.add(
+            Label.objects.create(name="Reported", code="reported", level="success")
+        )
+        hit = {
+            "document": doc,
+            "position": 1,
+            "best_match": False,
+            "highlight": {},
+            "pages": [],
+            "provisions": [],
+        }
+
+        html = render_to_string(
+            "peachjam_search/_search_hit.html",
+            {
+                "request": request,
+                "hit": hit,
+                "show_jurisdiction": False,
+                "can_debug": False,
+            },
+            request=request,
+        )
+
+        self.assertIn("Reported", html)
+        self.assertIn("badge rounded-pill bg-success", html)
 
     def test_search_hit_flynote_preserves_line_breaks(self):
         request = RequestFactory().get("/search/?search=test")
