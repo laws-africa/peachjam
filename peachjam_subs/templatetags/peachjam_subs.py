@@ -3,6 +3,8 @@ from urllib.parse import urlencode
 from django import template
 from django.urls.base import reverse
 
+from peachjam_subs.limits import get_subscription_locked_data_summary
+
 register = template.Library()
 
 
@@ -39,6 +41,14 @@ def change_subscription_url(context, next_url=None):
     if next_url:
         return url + f"?{urlencode({'next': next_url})}"
     return url
+
+
+@register.simple_tag
+def subscription_locked_data_summary(user):
+    """Return a compact summary of subscription-locked data for a user."""
+    if not user.is_authenticated:
+        return None
+    return get_subscription_locked_data_summary(user)
 
 
 @register.simple_tag

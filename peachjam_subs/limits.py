@@ -12,6 +12,7 @@ locked items are purged by the subscription maintenance task.
 import logging
 from dataclasses import dataclass
 
+from django.db.models import Count, Min
 from django.utils import timezone
 
 from peachjam.customerio import get_customerio
@@ -129,6 +130,72 @@ def track_limited_data_locked(user, subscription, feature, locked_count, active_
         expires_at=timezone.now()
         + timezone.timedelta(days=SUBSCRIPTION_LOCK_RETENTION_DAYS),
     )
+
+
+def get_subscription_locked_data_summary(user):
+    """Return a compact summary of subscription-locked data for user-facing warnings."""
+    total_count = 0
+    expires_at = None
+    by_feature = {}
+
+    for feature in limited_features():
+        summary = (
+            feature.queryset_for_user(user)
+            .filter(subscription_locked_at__isnull=False)
+            .aggregate(
+                count=Count("pk"),
+                earliest_expiry=Min("subscription_lock_expires_at"),
+            )
+        )
+        feature_count = summary["count"]
+        total_count += feature_count
+        feature_expires_at = summary["earliest_expiry"]
+        if feature_expires_at and (
+            expires_at is None or feature_expires_at < expires_at
+        ):
+            expires_at = feature_expires_at
+        if feature_count:
+            by_feature[feature.label] = {
+                "count": feature_count,
+                "expires_at": feature_expires_at,
+            }
+
+    if not total_count:
+        return None
+
+    saved_documents = combine_locked_data_summaries(
+        by_feature.get("saved_document"), by_feature.get("folder")
+    )
+    return {
+        "count": total_count,
+        "expires_at": expires_at,
+        "by_category": {
+            "saved_documents": saved_documents,
+            "following": by_feature.get("following"),
+            "search_alerts": by_feature.get("search_alert"),
+        },
+    }
+
+
+def combine_locked_data_summaries(*summaries):
+    count = 0
+    expires_at = None
+
+    for summary in summaries:
+        if not summary:
+            continue
+        count += summary["count"]
+        if summary["expires_at"] and (
+            expires_at is None or summary["expires_at"] < expires_at
+        ):
+            expires_at = summary["expires_at"]
+
+    if not count:
+        return None
+    return {
+        "count": count,
+        "expires_at": expires_at,
+    }
 
 
 def reconcile_user_subscription_limits(user, subscription):

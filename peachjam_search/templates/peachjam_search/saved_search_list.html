@@ -5,6 +5,7 @@
 {% endblock %}
 {% block my-content %}
   {% change_subscription_url as change_subscription_url %}
+  {% include "peachjam/my/_subscription_locked_banner.html" with subscription_locked_category_summary=my_locked_data_summary.by_category.search_alerts subscription_locked_category_label="search alerts" %}
   <h2>{% trans 'Search alerts' %}</h2>
   <div class="mb-4">{% trans "We'll email you when new documents are found for your search alerts." %}</div>
   <div class="card">

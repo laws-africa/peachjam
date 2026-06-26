@@ -2,14 +2,23 @@ from datetime import timedelta
 from decimal import Decimal
 
 from countries_plus.models import Country
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
+from django.urls import reverse
 from django.utils import timezone
 
-from peachjam.models import CoreDocument, Court, Folder, SavedDocument, UserFollowing
+from peachjam.models import (
+    CoreDocument,
+    Court,
+    Folder,
+    SavedDocument,
+    UserFollowing,
+    pj_settings,
+)
 from peachjam_search.models import SavedSearch
 from peachjam_subs.limits import (
     SUBSCRIPTION_LOCK_RETENTION_DAYS,
+    get_subscription_locked_data_summary,
     purge_expired_subscription_locked_data,
     reconcile_user_subscription_limits,
 )
@@ -162,6 +171,92 @@ class SubscriptionLockedDataTest(TestCase):
         limit_reached, _ = sub.check_feature_limit("saved_document_limit")
 
         self.assertFalse(limit_reached)
+
+    def test_locked_data_summary_reports_count_and_earliest_expiry(self):
+        first_expiry = timezone.now() + timedelta(days=10)
+        second_expiry = timezone.now() + timedelta(days=20)
+        SavedSearch.objects.create(
+            user=self.user,
+            q="old",
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=second_expiry,
+        )
+        Folder.objects.create(
+            user=self.user,
+            name="Locked",
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=first_expiry,
+        )
+
+        summary = get_subscription_locked_data_summary(self.user)
+
+        self.assertEqual(2, summary["count"])
+        self.assertEqual(first_expiry, summary["expires_at"])
+
+    def test_my_lii_pages_show_locked_data_banner(self):
+        expires_at = timezone.now() + timedelta(days=10)
+        Folder.objects.create(
+            user=self.user,
+            name="Locked",
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=expires_at,
+        )
+        self.client.force_login(self.user)
+
+        for url in [reverse("my_home"), reverse("my_frontpage")]:
+            response = self.client.get(url)
+
+            self.assertEqual(200, response.status_code)
+            self.assertContains(
+                response, "Some My Peachjam items are over your subscription limit."
+            )
+            self.assertContains(response, "Upgrade your subscription")
+
+    def test_my_lii_category_pages_show_category_locked_data_banner(self):
+        pjs = pj_settings()
+        pjs.allow_save_documents = True
+        pjs.allow_save_searches = True
+        pjs.save()
+
+        expires_at = timezone.now() + timedelta(days=10)
+        Folder.objects.create(
+            user=self.user,
+            name="Locked",
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=expires_at,
+        )
+        SavedSearch.objects.create(
+            user=self.user,
+            q="locked",
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=expires_at,
+        )
+        UserFollowing.objects.create(
+            user=self.user,
+            court=Court.objects.first(),
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=expires_at,
+        )
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="view_folder"),
+            Permission.objects.get(codename="view_savedsearch"),
+            Permission.objects.get(codename="view_userfollowing"),
+        )
+        self.client.force_login(self.user)
+
+        responses = [
+            (self.client.get(reverse("folder_list")), "Some saved documents"),
+            (
+                self.client.get(reverse("search:saved_search_list")),
+                "Some search alerts",
+            ),
+            (self.client.get(reverse("user_following_list")), "Some follows"),
+        ]
+
+        for response, text in responses:
+            self.assertEqual(200, response.status_code)
+            self.assertContains(response, text)
+            self.assertContains(response, "bi-exclamation-triangle-fill")
 
     def test_upgrade_unlocks_newest_locked_items_first(self):
         docs = self.create_saved_documents(3)
