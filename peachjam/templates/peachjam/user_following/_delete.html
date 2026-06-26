@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <form hx-post="{% url 'user_following_delete' object.pk %}?{{ request.GET.urlencode }}">
   {% csrf_token %}
   <button class="btn btn-primary" type="submit">
@@ -12,8 +13,8 @@
   {% if object.is_subscription_locked %}
     <div class="small text-muted mt-1">
       <div class="fw-bold">{% trans 'Following paused by your subscription limit.' %}</div>
-      {% blocktrans trimmed with expires=object.subscription_lock_expires_at|date %}
-        We'll keep this follow until {{ expires }}. Upgrade your subscription to resume updates.
+      {% blocktrans trimmed with expires=object.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+        We'll keep this follow until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume updates.
       {% endblocktrans %}
     </div>
   {% endif %}

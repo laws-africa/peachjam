@@ -1,9 +1,10 @@
 {% extends "peachjam/my/layout.html" %}
-{% load i18n %}
+{% load i18n peachjam_subs %}
 {% block title %}
   {% trans 'Search Alerts' %}
 {% endblock %}
 {% block my-content %}
+  {% change_subscription_url as change_subscription_url %}
   <h2>{% trans 'Search alerts' %}</h2>
   <div class="mb-4">{% trans "We'll email you when new documents are found for your search alerts." %}</div>
   <div class="card">
@@ -17,8 +18,8 @@
               {% if search.is_subscription_locked %}
                 <div class="text-muted">
                   <div class="fw-bold">{% trans 'Paused by your subscription limit.' %}</div>
-                  {% blocktrans trimmed with expires=search.subscription_lock_expires_at|date %}
-                    We'll keep this search alert until {{ expires }}. Upgrade your subscription to resume alerts.
+                  {% blocktrans trimmed with expires=search.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                    We'll keep this search alert until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume alerts.
                   {% endblocktrans %}
                 </div>
               {% else %}

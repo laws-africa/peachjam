@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div>
   <div class="d-flex justify-content-between align-items-center">
     <h2>{% trans 'Saved documents' %}</h2>
@@ -85,8 +86,8 @@
               <div>
                 <div class="fw-bold">{% trans 'Saved beyond your subscription limit.' %}</div>
                 <div>
-                  {% blocktrans trimmed with expires=folder.subscription_lock_expires_at|date %}
-                    We'll keep this folder until {{ expires }}. Upgrade your subscription to restore access to its contents.
+                  {% blocktrans trimmed with expires=folder.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                    We'll keep this folder until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access to its contents.
                   {% endblocktrans %}
                 </div>
               </div>

@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div id="saved-doc-{{ saved_document.pk }}" class="border-bottom">
   <div class="py-2">
     {% if saved_document.is_subscription_locked %}
@@ -10,8 +11,8 @@
           </div>
           <div class="text-muted">
             <div class="fw-bold">{% trans 'Saved beyond your subscription limit.' %}</div>
-            {% blocktrans trimmed with expires=saved_document.subscription_lock_expires_at|date %}
-              We'll keep this saved document until {{ expires }}. Upgrade your subscription to restore access.
+            {% blocktrans trimmed with expires=saved_document.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+              We'll keep this saved document until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access.
             {% endblocktrans %}
           </div>
         </div>

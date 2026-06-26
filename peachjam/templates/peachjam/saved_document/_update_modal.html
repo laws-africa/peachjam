@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div class="modal-content" id="saved-document-modal-content">
   <form hx-target="{{ target }}"
         {% if not saved_document.is_subscription_locked %}hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}"{% endif %}>
@@ -18,8 +19,8 @@
             {% trans 'Saved beyond your subscription limit' %}
           </div>
           <div>
-            {% blocktrans trimmed with expires=saved_document.subscription_lock_expires_at|date %}
-              We'll keep this saved document until {{ expires }}. Upgrade your subscription to restore access.
+            {% blocktrans trimmed with expires=saved_document.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+              We'll keep this saved document until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access.
             {% endblocktrans %}
           </div>
         </div>

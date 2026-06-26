@@ -1,10 +1,11 @@
 from datetime import date, timedelta
 from decimal import Decimal
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import RequestFactory, TestCase
 from django.utils import timezone
 from guardian.shortcuts import assign_perm
 
@@ -16,6 +17,32 @@ from peachjam_subs.models import (
     subscription_settings,
     validate_selectable_offering_catalog,
 )
+from peachjam_subs.templatetags.peachjam_subs import change_subscription_url
+
+
+class SubscriptionTemplateTagTests(TestCase):
+    def test_change_subscription_url_uses_current_request_path_as_next(self):
+        request = RequestFactory().get("/documents/123/?tab=saved")
+
+        self.assertEqual(
+            "/en/subscribe?next=%2Fdocuments%2F123%2F%3Ftab%3Dsaved",
+            change_subscription_url({"request": request}),
+        )
+
+    def test_change_subscription_url_prefers_htmx_current_url_abs_path(self):
+        request = RequestFactory().get("/saved-document/modal/")
+        request.htmx = SimpleNamespace(current_url_abs_path="/documents/123/?tab=saved")
+
+        self.assertEqual(
+            "/en/subscribe?next=%2Fdocuments%2F123%2F%3Ftab%3Dsaved",
+            change_subscription_url({"request": request}),
+        )
+
+    def test_change_subscription_url_uses_explicit_next_url(self):
+        self.assertEqual(
+            "/en/subscribe?next=%2Faccount%2F",
+            change_subscription_url({}, next_url="/account/"),
+        )
 
 
 class SubscriptionTests(TestCase):

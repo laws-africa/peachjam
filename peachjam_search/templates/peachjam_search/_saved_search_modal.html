@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div hx-swap-oob="true"
      id="saved-search-modal-dialog"
      class="modal-dialog">
@@ -11,7 +12,6 @@
               aria-label="{% trans "Close" %}"></button>
     </div>
     <div class="modal-body">
-      {{ saved_search.is_subscription_locked }}
       {% if request.user.is_authenticated %}
         {% if saved_search.is_subscription_locked %}
           <div class="mb-3">{{ saved_search.pretty_query }}</div>
@@ -22,8 +22,8 @@
               {% trans 'Paused by your subscription limit' %}
             </div>
             <div>
-              {% blocktrans trimmed with expires=saved_search.subscription_lock_expires_at|date %}
-                We'll keep this search alert until {{ expires }}. Upgrade your subscription to resume alerts.
+              {% blocktrans trimmed with expires=saved_search.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                We'll keep this search alert until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume alerts.
               {% endblocktrans %}
             </div>
           </div>

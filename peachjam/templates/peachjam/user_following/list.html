@@ -1,9 +1,10 @@
 {% extends "peachjam/my/layout.html" %}
-{% load i18n peachjam %}
+{% load i18n peachjam peachjam_subs %}
 {% block title %}
   {% trans 'Following' %}
 {% endblock %}
 {% block my-content %}
+  {% change_subscription_url as change_subscription_url %}
   <h2>{% trans 'Following' %}</h2>
   <div class="mb-4">{% trans "We'll email you when new documents are added for topics that you follow." %}</div>
   <div class="card">
@@ -19,8 +20,8 @@
                 </div>
                 <div class="text-muted">
                   <div class="fw-bold">{% trans 'Paused by your subscription limit.' %}</div>
-                  {% blocktrans trimmed with expires=follow.subscription_lock_expires_at|date %}
-                    We'll keep this follow until {{ expires }}. Upgrade your subscription to resume updates.
+                  {% blocktrans trimmed with expires=follow.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                    We'll keep this follow until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume updates.
                   {% endblocktrans %}
                 </div>
               {% else %}
