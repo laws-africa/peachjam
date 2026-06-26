@@ -25,9 +25,14 @@ Reusable scripts (data imports, translation extraction) live in `scripts/`.
 ## Coding Style & Naming Conventions
 Python code is formatted by Black and ordered with isort (Black profile) while Flake8 enforces a 120-character limit and ignores E203. Use 4-space indentation, descriptive module names, and keep Django apps cohesive.
 
-Templates must pass djLint and remain free of user-specific content when cached. Front-end files follow the ESLint Standard + Vue 3 configuration with mandatory semicolons; co-locate shared helpers under `peachjam/js/utils`.
-
-Don't use a leading underscore for protected or private method names on classes.
+- Do not use a leading underscore for protected or private method names on classes.
+- Provide short docstrings for complex classes or methods.
+- Let `black` and `isort --profile black` format code via pre-commit instead of manual shuffling.
+- Use `snake_case` for functions, `PascalCase` for classes, and align template names with their views (eg. `subscription_detail.html`).
+- Document FSM transitions and payload contracts inline whenever Payfast or Xero logic changes.
+- Templates must pass djLint and remain free of user-specific content when cached.
+- Front-end files follow the ESLint Standard + Vue 3 configuration with mandatory semicolons
+- co-locate shared helpers under `peachjam/js/utils`.
 
 ## Testing Guidelines
 Prefer Django `TestCase` classes located in `<app>/tests.py`, loading fixtures from `<app>/fixtures/`. Cover caching-sensitive paths, exercise view logic with `self.client`, and patch `timezone.now` for time-dependent assertions.
