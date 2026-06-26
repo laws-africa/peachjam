@@ -524,9 +524,7 @@ class DocumentForm(forms.ModelForm):
     def extractor_url(self):
         """URL to use if this document type supports the extractor service."""
         extractor = ExtractorService()
-        if isinstance(self.instance, Judgment) and (
-            extractor.enabled() or settings.DEBUG
-        ):
+        if extractor.enabled() and isinstance(self.instance, Judgment):
             return reverse("admin:peachjam_extract_judgment")
 
 
@@ -1410,6 +1408,13 @@ class CaseNumberAdmin(admin.StackedInline):
 
 
 class PreviewModelChoiceIterator:
+    """Yield temporary preview choices before the normal model choices.
+
+    The extractor can suggest aliases or judge people that do not exist yet.
+    These sentinel choices keep the suggestion visible in the admin form while
+    still letting normal model validation convert the value to None.
+    """
+
     def __init__(self, field, preview_choices):
         self.field = field
         self.queryset = field.queryset
@@ -1426,6 +1431,8 @@ class PreviewModelChoiceIterator:
 
 
 class BenchInlineForm(forms.ModelForm):
+    """Admin form that converts extracted judge names into editable bench rows."""
+
     alias_preview_value = "__alias_preview__"
     judge_preview_value = "__judge_preview__"
     judge_person_suggestion = forms.CharField(
@@ -1476,6 +1483,7 @@ class BenchInlineForm(forms.ModelForm):
             )
 
     def allow_preview_value(self, field_name, preview_value):
+        """Allow a sentinel preview choice to validate as an empty relation."""
         field = self.fields[field_name]
         original_to_python = field.to_python
 
@@ -1487,6 +1495,7 @@ class BenchInlineForm(forms.ModelForm):
         field.to_python = to_python
 
     def set_preview_option(self, field_name, preview_value, label):
+        """Add a temporary choice for an extracted value that is not saved yet."""
         field = self.fields[field_name]
         preview_choices = PreviewModelChoiceIterator(
             field,

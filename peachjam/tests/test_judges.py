@@ -347,16 +347,6 @@ class JudgmentFormExtractorUrlTests(TestCase):
         with patch("peachjam.admin.ExtractorService.enabled", return_value=False):
             self.assertIsNone(form.extractor_url)
 
-    @override_settings(DEBUG=True)
-    def test_extractor_url_is_available_in_debug_when_extractor_is_disabled(self):
-        form = JudgmentForm(instance=Judgment())
-
-        with patch("peachjam.admin.ExtractorService.enabled", return_value=False):
-            self.assertEqual(
-                reverse("admin:peachjam_extract_judgment"),
-                form.extractor_url,
-            )
-
     def test_extractor_url_is_available_when_extractor_is_enabled(self):
         form = JudgmentForm(instance=Judgment())
 

@@ -23,12 +23,15 @@ from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 from languages_plus.models import Language
 
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.models import (
     Annotation,
     AttachedFiles,
     CoreDocument,
     Folder,
+    JudgeAlias,
+    JudgePerson,
     PublicationFile,
     Ratification,
     SavedDocument,
@@ -65,6 +68,181 @@ def work_choices():
 
 def adapter_choices():
     return [(key, p.name) for key, p in plugins.registry["ingestor-adapter"].items()]
+
+
+class JudgeIdentityWorkflowForm(forms.Form):
+    APPLY_IDENTITY_CHANGES = "apply_identity_changes"
+    MERGE_JUDGE_PEOPLE = "merge_judge_people"
+    DELETE_RECORDS = "delete_records"
+
+    action = forms.ChoiceField(
+        choices=(
+            (APPLY_IDENTITY_CHANGES, APPLY_IDENTITY_CHANGES),
+            (MERGE_JUDGE_PEOPLE, MERGE_JUDGE_PEOPLE),
+            (DELETE_RECORDS, DELETE_RECORDS),
+        ),
+        widget=forms.HiddenInput(),
+    )
+    selected_aliases = forms.ModelMultipleChoiceField(
+        queryset=JudgeAlias.objects.select_related("judge_person").all(),
+        required=False,
+    )
+    selected_judge_people = forms.ModelMultipleChoiceField(
+        queryset=JudgePerson.objects.all(),
+        required=False,
+    )
+    target_judge_person = forms.ModelChoiceField(
+        queryset=JudgePerson.objects.all(),
+        required=False,
+        label=_("target judge person"),
+        help_text=_(
+            "Choose the judge person that should receive the selected aliases, or the judge person you want to rename."
+        ),
+        widget=autocomplete.ModelSelect2(url="autocomplete-judge-people"),
+    )
+    target_full_name = forms.CharField(
+        required=False,
+        label=_("new judge person name"),
+        help_text=_(
+            "Optional. Use this to create a new judge person, or to rename the selected target judge person."
+        ),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mogoeng Mogoeng",
+            }
+        ),
+    )
+    merge_target_judge_person = forms.ModelChoiceField(
+        queryset=JudgePerson.objects.all(),
+        required=False,
+        label=_("merge into"),
+        help_text=_(
+            "Choose the judge person that should remain after merging the selected duplicates."
+        ),
+        widget=autocomplete.ModelSelect2(url="autocomplete-judge-people"),
+    )
+    delete_mode = forms.ChoiceField(
+        required=False,
+        label=_("delete what"),
+        choices=(
+            ("aliases", _("Delete selected aliases only")),
+            ("judge_people", _("Delete selected judge people only")),
+            (
+                "both",
+                _("Delete both selected aliases and selected judge people"),
+            ),
+        ),
+        initial="aliases",
+        widget=forms.RadioSelect(),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        action = cleaned_data.get("action")
+        validators = {
+            self.APPLY_IDENTITY_CHANGES: self.clean_apply_identity_changes,
+            self.MERGE_JUDGE_PEOPLE: self.clean_merge_judge_people,
+            self.DELETE_RECORDS: self.clean_delete_records,
+        }
+        validator = validators.get(action)
+        if validator is None:
+            raise ValidationError(_("Choose a workflow action."))
+        validator(cleaned_data)
+        return cleaned_data
+
+    def clean_apply_identity_changes(self, cleaned_data):
+        selected_aliases = list(cleaned_data.get("selected_aliases") or [])
+        judge_person = cleaned_data.get("target_judge_person")
+        full_name = (cleaned_data.get("target_full_name") or "").strip()
+        cleaned_data["target_full_name"] = full_name
+
+        if selected_aliases:
+            if not judge_person and not full_name:
+                cleaned_data["target_full_name"] = (
+                    judge_identity_service.canonical_name_from_aliases(
+                        [alias.name for alias in selected_aliases]
+                    )
+                )
+        else:
+            if judge_person is None:
+                self.add_error(
+                    "target_judge_person",
+                    _("Choose the judge person you want to rename."),
+                )
+            if not full_name:
+                self.add_error(
+                    "target_full_name",
+                    _("Enter the new judge person name when no aliases are selected."),
+                )
+            if judge_person is not None and full_name == judge_person.full_name:
+                self.add_error(
+                    "target_full_name",
+                    _("Enter a different name for the selected judge person."),
+                )
+
+        if judge_person is None or not full_name:
+            return
+
+        existing = (
+            JudgePerson.objects.filter(full_name__iexact=full_name)
+            .exclude(pk=judge_person.pk)
+            .first()
+        )
+        if existing:
+            self.add_error(
+                "target_full_name",
+                _(
+                    "A judge person with this name already exists. "
+                    "Move aliases to it or merge into it instead of "
+                    "renaming."
+                ),
+            )
+
+    def clean_merge_judge_people(self, cleaned_data):
+        selected_judge_people = list(cleaned_data.get("selected_judge_people") or [])
+        merge_target = cleaned_data.get("merge_target_judge_person")
+
+        if not selected_judge_people:
+            self.add_error(
+                "selected_judge_people",
+                _("Select at least one judge person to merge."),
+            )
+        if merge_target is None:
+            self.add_error(
+                "merge_target_judge_person",
+                _("Choose the judge person that should remain."),
+            )
+            return
+
+        duplicates = [
+            judge_person
+            for judge_person in selected_judge_people
+            if judge_person.pk != merge_target.pk
+        ]
+        if not duplicates:
+            self.add_error(
+                "selected_judge_people",
+                _(
+                    "Select at least one duplicate judge person besides the merge target."
+                ),
+            )
+
+    def clean_delete_records(self, cleaned_data):
+        delete_mode = cleaned_data.get("delete_mode") or "aliases"
+        selected_aliases = list(cleaned_data.get("selected_aliases") or [])
+        selected_judge_people = list(cleaned_data.get("selected_judge_people") or [])
+
+        if delete_mode in {"aliases", "both"} and not selected_aliases:
+            self.add_error(
+                "selected_aliases",
+                _("Select at least one alias to delete."),
+            )
+        if delete_mode in {"judge_people", "both"} and not selected_judge_people:
+            self.add_error(
+                "selected_judge_people",
+                _("Select at least one judge person to delete."),
+            )
 
 
 class NewDocumentFormMixin:

@@ -87,85 +87,9 @@ class ExtractorService:
                 if (judge_name or "").strip()
             ]
             if not JudgePerson.canonical_identity_enabled():
-                details["judges"] = list(
-                    Judge.objects.annotate(name_lower=Lower("name")).filter(
-                        name_lower__in=[judge_name.lower() for judge_name in raw_judges]
-                    )
-                )
+                self.process_legacy_judges(details, raw_judges)
             else:
-                details["extracted_judges"] = raw_judges
-
-                exact_legacy_judges = {
-                    judge.name_lower: judge
-                    for judge in Judge.objects.annotate(
-                        name_lower=Lower("name")
-                    ).filter(
-                        name_lower__in=[judge_name.lower() for judge_name in raw_judges]
-                    )
-                }
-
-                alias_matches = defaultdict(list)
-                for judge_alias in judge_identity_service.get_matching_judge_aliases(
-                    raw_judges
-                ):
-                    alias_matches[judge_alias.normalized_name].append(judge_alias)
-
-                fallback_legacy_judges = {
-                    judge.name: judge
-                    for judge in Judge.objects.filter(
-                        name__in={
-                            aliases[0].name
-                            for aliases in alias_matches.values()
-                            if len(aliases) == 1
-                        }
-                    )
-                }
-
-                bench_rows = []
-                details["judges"] = []
-
-                for raw_name in raw_judges:
-                    normalized_name = judge_identity_service.normalize_judge_name(
-                        raw_name
-                    )
-                    matching_aliases = alias_matches.get(normalized_name, [])
-                    matched_alias = (
-                        matching_aliases[0] if len(matching_aliases) == 1 else None
-                    )
-                    judge_person = (
-                        matched_alias.judge_person
-                        if matched_alias is not None
-                        else None
-                    )
-                    judge_person_suggestion = ""
-
-                    if judge_person is None:
-                        resolution = judge_identity_service.resolve_judge_person(
-                            [raw_name],
-                            dry_run=True,
-                        )
-                        judge_person_suggestion = resolution["canonical_name"]
-                        if resolution["judge_person"].pk:
-                            judge_person = resolution["judge_person"]
-
-                    legacy_judge = exact_legacy_judges.get(raw_name.lower())
-                    if legacy_judge is None and matched_alias is not None:
-                        legacy_judge = fallback_legacy_judges.get(matched_alias.name)
-
-                    if legacy_judge is not None:
-                        details["judges"].append(legacy_judge)
-
-                    bench_rows.append(
-                        {
-                            "judge": legacy_judge,
-                            "extracted_name": raw_name,
-                            "matched_alias": matched_alias,
-                            "judge_person": judge_person,
-                            "judge_person_suggestion": judge_person_suggestion,
-                        }
-                    )
-
-                details["bench_rows"] = bench_rows
+                self.process_canonical_judges(details, raw_judges)
 
         # case numbers
         if details.get("case_numbers"):
@@ -196,3 +120,100 @@ class ExtractorService:
                     )
                 )
             details["case_numbers"] = case_numbers
+
+    def process_legacy_judges(self, details, raw_judges):
+        """Keep the original extractor behavior when canonical identity is off."""
+        details["judges"] = list(
+            Judge.objects.annotate(name_lower=Lower("name")).filter(
+                name_lower__in=[judge_name.lower() for judge_name in raw_judges]
+            )
+        )
+
+    def process_canonical_judges(self, details, raw_judges):
+        """Build bench-row initial data with canonical judge identity suggestions."""
+        details["extracted_judges"] = raw_judges
+
+        exact_legacy_judges = self.get_exact_legacy_judges(raw_judges)
+        alias_matches = self.get_alias_matches(raw_judges)
+        fallback_legacy_judges = self.get_fallback_legacy_judges(alias_matches)
+
+        bench_rows = []
+        details["judges"] = []
+
+        for raw_name in raw_judges:
+            bench_row = self.get_canonical_bench_row(
+                raw_name,
+                exact_legacy_judges,
+                alias_matches,
+                fallback_legacy_judges,
+            )
+            if bench_row["judge"] is not None:
+                details["judges"].append(bench_row["judge"])
+            bench_rows.append(bench_row)
+
+        details["bench_rows"] = bench_rows
+
+    def get_exact_legacy_judges(self, raw_judges):
+        """Match extracted names to existing legacy Judge records case-insensitively."""
+        return {
+            judge.name_lower: judge
+            for judge in Judge.objects.annotate(name_lower=Lower("name")).filter(
+                name_lower__in=[judge_name.lower() for judge_name in raw_judges]
+            )
+        }
+
+    def get_alias_matches(self, raw_judges):
+        """Group matching aliases by normalized extracted judge name."""
+        alias_matches = defaultdict(list)
+        for judge_alias in judge_identity_service.get_matching_judge_aliases(
+            raw_judges
+        ):
+            alias_matches[judge_alias.normalized_name].append(judge_alias)
+        return alias_matches
+
+    def get_fallback_legacy_judges(self, alias_matches):
+        """Use uniquely matched alias names to find legacy Judge rows when needed."""
+        return {
+            judge.name: judge
+            for judge in Judge.objects.filter(
+                name__in={
+                    aliases[0].name
+                    for aliases in alias_matches.values()
+                    if len(aliases) == 1
+                }
+            )
+        }
+
+    def get_canonical_bench_row(
+        self,
+        raw_name,
+        exact_legacy_judges,
+        alias_matches,
+        fallback_legacy_judges,
+    ):
+        normalized_name = judge_identity_service.normalize_judge_name(raw_name)
+        matching_aliases = alias_matches.get(normalized_name, [])
+        matched_alias = matching_aliases[0] if len(matching_aliases) == 1 else None
+        judge_person = matched_alias.judge_person if matched_alias is not None else None
+        judge_person_suggestion = ""
+
+        if judge_person is None:
+            resolution = judge_identity_service.resolve_judge_person(
+                [raw_name],
+                dry_run=True,
+            )
+            judge_person_suggestion = resolution["canonical_name"]
+            if resolution["judge_person"].pk:
+                judge_person = resolution["judge_person"]
+
+        legacy_judge = exact_legacy_judges.get(raw_name.lower())
+        if legacy_judge is None and matched_alias is not None:
+            legacy_judge = fallback_legacy_judges.get(matched_alias.name)
+
+        return {
+            "judge": legacy_judge,
+            "extracted_name": raw_name,
+            "matched_alias": matched_alias,
+            "judge_person": judge_person,
+            "judge_person_suggestion": judge_person_suggestion,
+        }
