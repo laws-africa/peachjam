@@ -3,9 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam", "0306_peachjamsettings_document_debug_external_links"),
-    ]
+    dependencies = [("peachjam", "0307_merge_20260626_0745")]
 
     operations = [
         migrations.AddField(
