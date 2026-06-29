@@ -1,0 +1,22 @@
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
+<div class="alert alert-warning" role="alert">
+  <div class="fw-bold">
+    {% if subscription_locked_category_label %}
+      {% blocktrans trimmed with label=subscription_locked_category_label %}
+        Some {{ label }} are over your subscription limit.
+      {% endblocktrans %}
+    {% else %}
+      {% blocktrans trimmed %}
+        Some {{ MY_LII }} items are over your subscription limit.
+      {% endblocktrans %}
+    {% endif %}
+  </div>
+  {% with locked_count=locked_data_summary.count %}
+    {% blocktrans trimmed with expires=locked_data_summary.expires_at|date change_subscription_url=change_subscription_url count count=locked_count %}
+      We'll keep {{ count }} excess item until {{ expires }}, after which it will be deleted. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access.
+    {% plural %}
+      We'll keep {{ count }} excess items until {{ expires }}, after which they will be deleted. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access.
+    {% endblocktrans %}
+  {% endwith %}
+</div>

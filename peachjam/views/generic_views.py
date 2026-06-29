@@ -768,7 +768,7 @@ class PageLoadedView(TemplateView):
     - user menu bar
     """
 
-    template_name = "peachjam/_loaded.html"
+    template_name = "peachjam/user/_loaded.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
