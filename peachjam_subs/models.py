@@ -490,6 +490,11 @@ class Subscription(models.Model):
 
         self.save()
 
+        if self.status == Subscription.Status.ACTIVE:
+            from peachjam_subs.limits import reconcile_user_subscription_limits
+
+            reconcile_user_subscription_limits(self.user, self)
+
     @transition(
         field=status, source=[Status.ACTIVE, Status.PENDING], target=Status.CLOSED
     )
@@ -584,6 +589,29 @@ class Subscription(models.Model):
         return subscription
 
     @classmethod
+    def replace_user_subscription(
+        cls, user, product_offering, starts_on=None, close_pending=True
+    ):
+        """Create a replacement subscription, closing pending replacements first."""
+        if close_pending:
+            for sub in cls.objects.filter(user=user, status=cls.Status.PENDING):
+                log.info(
+                    f"Closing pending subscription {sub} because it is being replaced by a new one"
+                )
+                sub.close()
+
+        subscription = cls.objects.create(
+            user=user,
+            product_offering=product_offering,
+            status=cls.Status.PENDING,
+            starts_on=starts_on,
+        )
+        log.info(f"Created replacement subscription {subscription}")
+        if subscription.can_activate():
+            subscription.activate()
+        return subscription
+
+    @classmethod
     def update_subscriptions(cls):
         """Activate pending subscriptions and close active subscriptions as needed."""
         today = timezone.now().date()
@@ -616,11 +644,19 @@ class Subscription(models.Model):
         """
         # resolve the related manager
         manager = {
-            "saved_document_limit": self.user.saved_documents,
-            "folder_limit": self.user.folders,
-            "search_alert_limit": self.user.saved_searches,
+            "saved_document_limit": self.user.saved_documents.filter(
+                subscription_locked_at__isnull=True
+            ),
+            "folder_limit": self.user.folders.filter(
+                subscription_locked_at__isnull=True
+            ),
+            "search_alert_limit": self.user.saved_searches.filter(
+                subscription_locked_at__isnull=True
+            ),
             "following_limit": self.user.following.filter(
-                saved_search__isnull=True, saved_document__isnull=True
+                subscription_locked_at__isnull=True,
+                saved_search__isnull=True,
+                saved_document__isnull=True,
             ),
         }[feature]
 

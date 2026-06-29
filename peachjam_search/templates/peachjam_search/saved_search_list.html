@@ -1,22 +1,33 @@
 {% extends "peachjam/my/layout.html" %}
-{% load i18n %}
+{% load i18n peachjam_subs %}
 {% block title %}
   {% trans 'Search Alerts' %}
 {% endblock %}
 {% block my-content %}
+  {% change_subscription_url as change_subscription_url %}
+  {% include "peachjam/my/_subscription_locked_banner.html" with subscription_locked_category_summary=my_locked_data_summary.by_category.search_alerts subscription_locked_category_label="search alerts" %}
   <h2>{% trans 'Search alerts' %}</h2>
   <div class="mb-4">{% trans "We'll email you when new documents are found for your search alerts." %}</div>
   <div class="card">
     <ul class="list-group list-group-flush">
       {% for search in saved_searches %}
         <li class="list-group-item d-flex align-items-center">
-          <i class="bi bi-search me-2"></i>
+          <i class="bi {% if search.is_subscription_locked %}bi-lock-fill{% else %}bi-search{% endif %} me-2"></i>
           <div class="flex-grow-1 row align-items-center">
             <div class="col-md">
               <a href="{{ search.get_absolute_url }}">{{ search }}</a>
-              {% if search.note %}<div class="text-muted">{{ search.note }}</div>{% endif %}
+              {% if search.is_subscription_locked %}
+                <div class="text-muted">
+                  <div class="fw-bold">{% trans 'Paused by your subscription limit.' %}</div>
+                  {% blocktrans trimmed with expires=search.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                    We'll keep this search alert until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume alerts.
+                  {% endblocktrans %}
+                </div>
+              {% else %}
+                {% if search.note %}<div class="text-muted">{{ search.note }}</div>{% endif %}
+              {% endif %}
             </div>
-            {% if search.last_alerted_at %}
+            {% if search.last_alerted_at and not search.is_subscription_locked %}
               <div class="col-md text-muted">
                 {% blocktrans trimmed with ago=search.last_alerted_at|timesince %}
                   Alerted {{ ago }} ago

@@ -108,6 +108,12 @@ class SavedSearch(models.Model):
         User, on_delete=models.CASCADE, related_name="saved_searches"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    subscription_locked_at = models.DateTimeField(
+        _("subscription locked at"), null=True, blank=True
+    )
+    subscription_lock_expires_at = models.DateTimeField(
+        _("subscription lock expires at"), null=True, blank=True
+    )
 
     # TODO: remove this field after back fill since we now use user following last alerted at
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
@@ -126,6 +132,10 @@ class SavedSearch(models.Model):
         if f:
             s = f"{s} ({f})"
         return s
+
+    @property
+    def is_subscription_locked(self):
+        return self.subscription_locked_at is not None
 
     def pretty_query(self):
         s = ""

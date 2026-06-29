@@ -6,6 +6,7 @@ from django.http.response import Http404
 from django.views.generic.base import TemplateView
 
 from peachjam.models import Folder, TimelineEvent, pj_settings
+from peachjam_subs.limits import get_subscription_locked_data_summary
 
 
 class CommonContextMixin:
@@ -23,6 +24,9 @@ class CommonContextMixin:
             context["timeline"] = timeline
             context["next_before"] = next_before
             context["timeline_truncated"] = self.timeline_truncated
+            context["subscription_locked_data_summary"] = (
+                get_subscription_locked_data_summary(self.request.user)
+            )
 
         return context
 

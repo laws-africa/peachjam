@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam_subs.models import Subscription
@@ -192,6 +193,49 @@ class SavedDocumentViewsTest(TestCase):
             reverse("saved_document_modal", kwargs={"pk": sd.pk})
         )
         self.assertContains(response, "modal-content")
+        self.assert_no_recursive(response)
+
+    def test_locked_fragment_keeps_detail_button_and_my_lii_card(self):
+        sd = SavedDocument.objects.create(
+            user=self.user,
+            work=CoreDocument.objects.get(pk=4124).work,
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=timezone.now() + timezone.timedelta(days=60),
+        )
+        sd.folders.set([self.folder])
+
+        response = self.client.get(reverse("saved_document_fragments") + "?doc_id=4124")
+
+        self.assertContains(
+            response,
+            'class="btn btn-primary btn-shrink-sm save-document-button save-document-button--4124"',
+        )
+        self.assertContains(response, 'data-bs-target="#saved-document-modal"')
+        self.assertContains(response, reverse("saved_document_modal", args=[sd.pk]))
+        self.assertContains(response, 'class="card-title"')
+        self.assertContains(response, "Saved beyond your subscription limit")
+        self.assertNotContains(response, 'name="folders"')
+        self.assertNotContains(response, 'name="note"')
+        self.assert_no_recursive(response)
+
+    def test_locked_modal_allows_unsave_only(self):
+        sd = SavedDocument.objects.create(
+            user=self.user,
+            work=CoreDocument.objects.get(pk=4124).work,
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=timezone.now() + timezone.timedelta(days=60),
+        )
+
+        response = self.client.get(
+            reverse("saved_document_modal", kwargs={"pk": sd.pk})
+        )
+
+        self.assertContains(response, "modal-content")
+        self.assertContains(response, "Saved beyond your subscription limit")
+        self.assertContains(response, "Unsave")
+        self.assertNotContains(response, 'name="folders"')
+        self.assertNotContains(response, 'name="note"')
+        self.assertNotContains(response, 'type="submit"')
         self.assert_no_recursive(response)
 
     def test_update(self):

@@ -2,6 +2,7 @@
 {% block title %}{{ MY_LII }}{% endblock %}
 {% load i18n %}
 {% block my-content %}
+  {% include "peachjam/my/_subscription_locked_banner.html" %}
   <div class="row">
     {% if PEACHJAM_SETTINGS.allow_save_documents %}
       <div class="col-lg-6">{% include "peachjam/my/_saved_documents.html" %}</div>

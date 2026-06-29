@@ -8,3 +8,7 @@ from peachjam_subs.models import Subscription
 @transaction.atomic
 def update_subscriptions():
     Subscription.update_subscriptions()
+
+    from peachjam_subs.limits import purge_expired_subscription_locked_data
+
+    purge_expired_subscription_locked_data()

@@ -1,21 +1,35 @@
 {% extends "peachjam/my/layout.html" %}
-{% load i18n peachjam %}
+{% load i18n peachjam peachjam_subs %}
 {% block title %}
   {% trans 'Following' %}
 {% endblock %}
 {% block my-content %}
+  {% change_subscription_url as change_subscription_url %}
+  {% include "peachjam/my/_subscription_locked_banner.html" with subscription_locked_category_summary=my_locked_data_summary.by_category.following subscription_locked_category_label="follows" %}
   <h2>{% trans 'Following' %}</h2>
   <div class="mb-4">{% trans "We'll email you when new documents are added for topics that you follow." %}</div>
   <div class="card">
     <ul class="list-group list-group-flush">
       {% for follow in object_list %}
         <li class="list-group-item d-flex align-items-center">
-          <i class="bi bi-bell me-2"></i>
+          <i class="bi {% if follow.is_subscription_locked %}bi-lock-fill{% else %}bi-bell{% endif %} me-2"></i>
           <div class="flex-grow-1 row">
             <div class="col-md">
-              <a href="{{ follow.followed_object.get_absolute_url }}">{{ follow.followed_object_name }}</a>
+              {% if follow.is_subscription_locked %}
+                <div>
+                  <a href="{{ follow.followed_object.get_absolute_url }}">{{ follow.followed_object_name }}</a>
+                </div>
+                <div class="text-muted">
+                  <div class="fw-bold">{% trans 'Paused by your subscription limit.' %}</div>
+                  {% blocktrans trimmed with expires=follow.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                    We'll keep this follow until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume updates.
+                  {% endblocktrans %}
+                </div>
+              {% else %}
+                <a href="{{ follow.followed_object.get_absolute_url }}">{{ follow.followed_object_name }}</a>
+              {% endif %}
             </div>
-            {% if follow.last_alerted_at %}
+            {% if follow.last_alerted_at and not follow.is_subscription_locked %}
               <div class="col-md text-muted">
                 {% blocktrans trimmed with ago=follow.last_alerted_at|timesince %}
                   Alerted {{ ago }} ago

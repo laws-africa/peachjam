@@ -1,0 +1,5 @@
+{% if subscription_locked_category_summary %}
+  {% include "peachjam/my/_subscription_locked_banner_body.html" with locked_data_summary=subscription_locked_category_summary %}
+{% elif subscription_locked_data_summary %}
+  {% include "peachjam/my/_subscription_locked_banner_body.html" with locked_data_summary=subscription_locked_data_summary %}
+{% endif %}
