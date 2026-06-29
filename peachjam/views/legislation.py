@@ -12,6 +12,7 @@ from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
@@ -273,17 +274,10 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
         current_object_date = self.object.date.strftime("%Y-%m-%d")
+        has_unapplied_amendments = self.has_unapplied_amendments(current_object_date)
 
-        if not work_amendments:
-            latest_amendment_date = None
-        else:
-            work_amendments_dates = [
-                work_amendment["date"] for work_amendment in work_amendments
-            ]
-            latest_amendment_date = max(work_amendments_dates)
-
-            if not points_in_time and latest_amendment_date > current_object_date:
-                self.set_unapplied_amendment_notice(notices)
+        if not points_in_time and has_unapplied_amendments:
+            self.set_unapplied_amendment_notice(notices)
 
         if points_in_time:
             point_in_time_dates = [
@@ -324,7 +318,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                             }
                         )
 
-                elif work_amendments and latest_amendment_date > current_object_date:
+                elif has_unapplied_amendments:
                     self.set_unapplied_amendment_notice(notices)
 
                 else:
@@ -404,6 +398,21 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     def get_work_amendments(self):
         return self.object.metadata_json.get("work_amendments", None)
 
+    def has_unapplied_amendments(self, current_object_date):
+        """Return true when an effective amendment has no matching expression."""
+        today = timezone.localdate().strftime("%Y-%m-%d")
+        point_in_time_dates = [p["date"] for p in self.get_points_in_time()]
+        for amendment in self.get_work_amendments() or []:
+            date = amendment.get("date")
+            if (
+                date
+                and date <= today
+                and date > current_object_date
+                and date not in point_in_time_dates
+            ):
+                return True
+        return False
+
     def get_commencement_info(self):
         """Returns commenced, commenced_in_full.
         commenced_in_full defaults to True.
@@ -435,6 +444,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     def get_timeline(self):
         timeline = self.object.timeline_json
         points_in_time = self.get_points_in_time()
+        today = timezone.localdate().strftime("%Y-%m-%d")
 
         # prepare for setting contains_unapplied_amendment flag
         point_in_time_dates = [p["date"] for p in points_in_time]
@@ -461,6 +471,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                 if event["type"] == "amendment":
                     entry["contains_unapplied_amendment"] = (
                         entry["date"] not in point_in_time_dates
+                        and entry["date"] <= today
                         and entry["date"] > latest_expression_date
                     )
 

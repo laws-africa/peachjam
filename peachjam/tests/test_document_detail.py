@@ -1,3 +1,6 @@
+from datetime import date
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.test import TestCase
@@ -5,6 +8,7 @@ from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
 from peachjam.models import CitationLink, Judgment, Legislation
+from peachjam.views.legislation import LegislationDetailView
 
 User = get_user_model()
 
@@ -131,3 +135,75 @@ class HistoricalLegislationCacheHeadersTestCase(TestCase):
         cache_control = response.headers.get("Cache-Control", "")
         self.assertIn("public", cache_control)
         self.assertNotIn("no-cache", cache_control)
+
+
+class LegislationAmendmentNoticeTestCase(TestCase):
+    fixtures = [
+        "tests/countries",
+        "tests/languages",
+        "documents/sample_documents",
+    ]
+
+    def setUp(self):
+        self.doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
+        )
+        self.doc.date = date(2026, 1, 30)
+        self.doc.metadata_json = {
+            "commenced": True,
+            "type_name": "legislation",
+            "points_in_time": [
+                {
+                    "date": "2026-01-30",
+                    "expressions": [
+                        {"expression_frbr_uri": "/akn/za/act/1979/70/eng@2026-01-30"}
+                    ],
+                }
+            ],
+            "work_amendments": [
+                {
+                    "date": "2026-08-01",
+                    "title": "Future amendment",
+                }
+            ],
+        }
+        self.doc.timeline_json = [
+            {
+                "date": "2026-08-01",
+                "events": [
+                    {
+                        "type": "amendment",
+                        "description": "Amended by",
+                    }
+                ],
+            }
+        ]
+
+    def get_view(self):
+        view = LegislationDetailView()
+        view.object = self.doc
+        return view
+
+    @patch("peachjam.views.legislation.timezone.localdate")
+    def test_future_amendments_do_not_trigger_outstanding_notice(self, localdate):
+        localdate.return_value = date(2026, 6, 28)
+
+        notices = self.get_view().get_notices()
+        timeline = self.get_view().get_timeline()
+
+        self.assertFalse(
+            any("outstanding amendments" in notice["html"] for notice in notices)
+        )
+        self.assertFalse(timeline[0].get("contains_unapplied_amendment", False))
+
+    @patch("peachjam.views.legislation.timezone.localdate")
+    def test_effective_unapplied_amendments_trigger_outstanding_notice(self, localdate):
+        localdate.return_value = date(2026, 8, 2)
+
+        notices = self.get_view().get_notices()
+        timeline = self.get_view().get_timeline()
+
+        self.assertTrue(
+            any("outstanding amendments" in notice["html"] for notice in notices)
+        )
+        self.assertTrue(timeline[0]["contains_unapplied_amendment"])
