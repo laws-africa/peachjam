@@ -40,6 +40,7 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
@@ -89,6 +90,8 @@ from peachjam.models import (
     Journal,
     JournalArticle,
     Judge,
+    JudgeAlias,
+    JudgePerson,
     Judgment,
     JurisdictionProfile,
     Label,
@@ -1415,10 +1418,226 @@ class CaseNumberAdmin(admin.StackedInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
+class PreviewModelChoiceIterator:
+    """Yield temporary preview choices before the normal model choices.
+
+    The extractor can suggest aliases or judge people that do not exist yet.
+    These sentinel choices keep the suggestion visible in the admin form while
+    still letting normal model validation convert the value to None.
+    """
+
+    def __init__(self, field, preview_choices):
+        self.field = field
+        self.queryset = field.queryset
+        self.preview_choices = preview_choices
+
+    def __iter__(self):
+        original_queryset = self.field.queryset
+        try:
+            self.field.queryset = self.queryset
+            yield from self.preview_choices
+            yield from forms.models.ModelChoiceIterator(self.field)
+        finally:
+            self.field.queryset = original_queryset
+
+
+class BenchInlineForm(forms.ModelForm):
+    """Admin form that converts extracted judge names into editable bench rows."""
+
+    alias_preview_value = "__alias_preview__"
+    judge_preview_value = "__judge_preview__"
+    judge_person_suggestion = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "judge" in self.fields:
+            self.fields["judge"].widget = forms.HiddenInput()
+            self.fields["judge"].required = False
+        self.allow_preview_value("matched_alias", self.alias_preview_value)
+        self.allow_preview_value("judge_person", self.judge_preview_value)
+
+        extracted_name = (
+            self.initial.get("extracted_name") or self.instance.extracted_name or ""
+        ).strip()
+        if extracted_name:
+            self.fields["extracted_name"].widget.attrs["readonly"] = True
+
+        judge_person_suggestion = (
+            self.initial.get("judge_person_suggestion") or ""
+        ).strip()
+        judge_person = self.initial.get("judge_person") or getattr(
+            self.instance, "judge_person", None
+        )
+        self.fields["judge_person_suggestion"].initial = (
+            getattr(judge_person, "full_name", None) or judge_person_suggestion
+        )
+
+        if extracted_name and not (
+            self.initial.get("matched_alias") or self.instance.matched_alias_id
+        ):
+            self.set_preview_option(
+                "matched_alias",
+                self.alias_preview_value,
+                extracted_name,
+            )
+
+        if judge_person_suggestion and not (
+            self.initial.get("judge_person") or self.instance.judge_person_id
+        ):
+            self.set_preview_option(
+                "judge_person",
+                self.judge_preview_value,
+                judge_person_suggestion,
+            )
+
+    def allow_preview_value(self, field_name, preview_value):
+        """Allow a sentinel preview choice to validate as an empty relation."""
+        field = self.fields[field_name]
+        original_to_python = field.to_python
+
+        def to_python(value):
+            if value == preview_value:
+                return None
+            return original_to_python(value)
+
+        field.to_python = to_python
+
+    def set_preview_option(self, field_name, preview_value, label):
+        """Add a temporary choice for an extracted value that is not saved yet."""
+        field = self.fields[field_name]
+        preview_choices = PreviewModelChoiceIterator(
+            field,
+            [(preview_value, label)],
+        )
+        field._choices = preview_choices
+        field.widget.choices = preview_choices
+        field.initial = preview_value
+        self.initial[field_name] = preview_value
+
+    def clean(self):
+        cleaned_data = super().clean()
+        matched_alias = cleaned_data.get("matched_alias")
+        judge_person = cleaned_data.get("judge_person")
+
+        if (
+            matched_alias
+            and judge_person
+            and matched_alias.judge_person_id != judge_person.pk
+        ):
+            self.add_error(
+                "judge_person",
+                gettext_lazy("Selected canonical judge does not own the chosen alias."),
+            )
+
+        if matched_alias and not judge_person:
+            cleaned_data["judge_person"] = matched_alias.judge_person
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        matched_alias = self.cleaned_data.get("matched_alias")
+        judge_person = self.cleaned_data.get("judge_person")
+        extracted_name = (self.cleaned_data.get("extracted_name") or "").strip()
+        if matched_alias is None and extracted_name:
+            if judge_person is None:
+                judge_person = judge_identity_service.resolve_judge_person(
+                    [extracted_name]
+                )["judge_person"]
+                instance.judge_person = judge_person
+
+            matched_alias = (
+                JudgeAlias.objects.filter(
+                    judge_person=judge_person,
+                    name__iexact=extracted_name,
+                )
+                .order_by("pk")
+                .first()
+            )
+            if matched_alias is None:
+                matched_alias = JudgeAlias(
+                    judge_person=judge_person,
+                    name=extracted_name,
+                )
+                matched_alias.save()
+            instance.matched_alias = matched_alias
+
+        if matched_alias and not instance.judge_person_id:
+            instance.judge_person = matched_alias.judge_person
+
+        if not instance.judge_id:
+            judge_name = (
+                matched_alias.name if matched_alias is not None else extracted_name
+            )
+            if judge_name:
+                instance.judge, _ = Judge.objects.get_or_create(name=judge_name)
+
+        if commit:
+            instance.save()
+            self.save_m2m()
+
+        return instance
+
+    class Meta:
+        model = Bench
+        fields = "__all__"
+        labels = {
+            "extracted_name": gettext_lazy("Extracted name"),
+            "matched_alias": gettext_lazy("Judge title"),
+            "judge_person": gettext_lazy("Judge"),
+        }
+        help_texts = {
+            "extracted_name": gettext_lazy(
+                "Exact judge name as it appeared in the uploaded judgment."
+            ),
+            "matched_alias": gettext_lazy(
+                "Judge alias or display title to use for this judgment."
+            ),
+            "judge_person": gettext_lazy(
+                "Canonical judge identity used for aggregation and future judge pages."
+            ),
+        }
+
+
 class BenchInline(admin.TabularInline):
-    # by using an inline, the ordering of the judges is preserved
+    # Keeping bench rows as an inline preserves the order in which judges are entered.
+    form = BenchInlineForm
     model = Bench
     extra = 3
+    fields = (
+        "extracted_name",
+        "matched_alias",
+        "judge_person_suggestion",
+        "judge_person",
+    )
+    verbose_name = gettext_lazy("judge")
+    verbose_name_plural = gettext_lazy("judges")
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "judge": autocomplete.ModelSelect2(url="autocomplete-judges"),
+                "judge_person": autocomplete.ModelSelect2(
+                    url="autocomplete-judge-people"
+                ),
+                "matched_alias": autocomplete.ModelSelect2(
+                    url="autocomplete-judge-aliases"
+                ),
+            },
+            **kwargs,
+        )
+
+
+class LegacyBenchInline(admin.TabularInline):
+    # Legacy judge editing path used while canonical judge identity is disabled.
+    model = Bench
+    extra = 3
+    fields = ("judge",)
     verbose_name = gettext_lazy("judge")
     verbose_name_plural = gettext_lazy("judges")
 
@@ -1573,7 +1792,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     form = JudgmentForm
     resource_classes = [JudgmentResource]
     inlines = [
-        BenchInline,
         LowerBenchInline,
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
@@ -1668,6 +1886,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
         return fieldsets
 
+    def get_inlines(self, request, obj=None):
+        bench_inline = (
+            BenchInline
+            if JudgePerson.canonical_identity_enabled()
+            else LegacyBenchInline
+        )
+        return [bench_inline] + self.inlines
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -1690,14 +1916,18 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         """
         extractor = ExtractorService()
         file = request.FILES.get("file")
-        if not extractor.enabled() or request.method != "POST" or not file:
+        if request.method != "POST" or not file:
             return HttpResponse()
 
         error = None
         details = {}
         try:
+            details = extractor.extract_judgment_details(
+                pj_settings().default_document_jurisdiction, file
+            )
+        except ExtractorError as e:
             if settings.DEBUG:
-                # for testing
+                # fall back to sample extracted data only when the real extractor fails in dev
                 details = {
                     "language": "afr",
                     "court": "Continental Court",
@@ -1714,11 +1944,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                     ],
                 }
             else:
-                details = extractor.extract_judgment_details(
-                    pj_settings().default_document_jurisdiction, file
-                )
-        except ExtractorError as e:
-            error = e
+                error = e
 
         # turn references into Django objects
         extractor.process_judgment_details(details)
@@ -1726,14 +1952,23 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         # prepare form data
         inlines = []
         formsets = []
+        bench_rows = details.pop("bench_rows", [])
+        extracted_judges = details.pop("extracted_judges", [])
 
-        if details.get("judges"):
-            judges = [{"judge": j} for j in details["judges"]]
+        if bench_rows:
             # make it pretty for the template
-            details["judges"] = "; ".join(str(j) for j in details["judges"])
+            details["judges"] = "; ".join(extracted_judges)
 
             # prepare the formset
             inline = BenchInline(Judgment, self.admin_site)
+            inline.extra = len(bench_rows) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=bench_rows))
+        elif details.get("judges"):
+            judges = [{"judge": j} for j in details["judges"]]
+            details["judges"] = "; ".join(str(j) for j in details["judges"])
+
+            inline = LegacyBenchInline(Judgment, self.admin_site)
             inline.extra = len(judges) + inline.extra
             inlines.append(inline)
             formsets.append(inline.get_formset(request)(initial=judges))
@@ -2343,6 +2578,57 @@ class JurisdictionProfileAdmin(admin.ModelAdmin):
 class JudgeAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
+
+
+class JudgeAliasInline(admin.TabularInline):
+    model = JudgeAlias
+    extra = 1
+    fields = ("name", "title", "normalized_name")
+    readonly_fields = ("title", "normalized_name")
+
+
+class CanonicalJudgeIdentityAdminMixin:
+    def has_module_permission(self, request):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_module_permission(request)
+        )
+
+    def has_view_permission(self, request, obj=None):
+        return JudgePerson.canonical_identity_enabled() and super().has_view_permission(
+            request, obj=obj
+        )
+
+    def has_add_permission(self, request):
+        return JudgePerson.canonical_identity_enabled() and super().has_add_permission(
+            request
+        )
+
+    def has_change_permission(self, request, obj=None):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_change_permission(request, obj=obj)
+        )
+
+    def has_delete_permission(self, request, obj=None):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_delete_permission(request, obj=obj)
+        )
+
+
+@admin.register(JudgePerson)
+class JudgePersonAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
+    list_display = ("full_name", "slug")
+    search_fields = ("full_name", "aliases__name")
+    inlines = [JudgeAliasInline]
+
+
+@admin.register(JudgeAlias)
+class JudgeAliasAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
+    list_display = ("name", "title", "judge_person", "normalized_name")
+    search_fields = ("name", "title", "normalized_name", "judge_person__full_name")
+    autocomplete_fields = ("judge_person",)
 
 
 @admin.register(MatterType)

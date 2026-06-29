@@ -196,6 +196,9 @@ PEACHJAM = {
     "SUMMARISE_USE_FLYNOTE_TREE": False,
     # should flynote topic navigation and linked flynote UI be shown when the flynote tree is enabled?
     "SHOW_FLYNOTE_TOPICS": False,
+    # Canonical judge identity rollout flag. Keep disabled by default so
+    # individual LIIs can opt in safely.
+    "CANONICAL_JUDGE_IDENTITY": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
