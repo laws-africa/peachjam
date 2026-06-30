@@ -3,7 +3,7 @@ msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-06-25 06:56+0000\n"
-"PO-Revision-Date: 2026-06-18 11:10\n"
+"PO-Revision-Date: 2026-06-25 07:58\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -499,7 +499,7 @@ msgstr "Lazima ukubali sheria na masharti ili kuendelea."
 #: models/settings.py:89
 #, python-brace-format
 msgid "One link per line in the format: label | URL. Allowed placeholders in URLs: {id}, {expression_frbr_uri}, {work_frbr_uri}, {title}."
-msgstr ""
+msgstr "Kiungo kimoja kwa kila mstari katika umbizo: lebo | URL. Vishikilia nafasi vilivyoruhusiwa katika URL: {id}, {expression_frbr_uri}, {work_frbr_uri}, {title}."
 
 #: models/annotation.py:11 models/attachments.py:76 models/attachments.py:110
 #: models/attachments.py:264 models/attachments.py:307
@@ -1878,7 +1878,7 @@ msgstr "kiungo cha dashibodi ya metabase"
 
 #: models/settings.py:85
 msgid "document debug external links"
-msgstr ""
+msgstr "hati ya utatuzi wa viungo vya nje"
 
 #: models/settings.py:95
 msgid "mailchimp form url"
@@ -3129,8 +3129,7 @@ msgstr "Tembelea chaneli yetu ya YouTube"
 
 #: templates/peachjam/_survey_banner_lg.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Take the %(APP_NAME)s Survey</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Help us make %(APP_NAME)s better.\n"
@@ -3138,8 +3137,7 @@ msgid ""
 "               All information shared is confidential.\n"
 "              </p>\n"
 "            "
-msgstr ""
-"\n"
+msgstr "\n"
 "              <h1 class=\"text-white fw-bold pe-lg-8\">Chukua %(APP_NAME)s Utafiti</h1>\n"
 "              <p class=\"text-white mb-4 h5 fw-bold\">\n"
 "               Tusaidie kufanya %(APP_NAME)s bora zaidi.\n"
@@ -3155,14 +3153,12 @@ msgstr "Chukua uchunguzi"
 
 #: templates/peachjam/_survey_banner_sm.html:7
 #, python-format
-msgid ""
-"\n"
+msgid "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Help us make %(APP_NAME)s better. Take this short 5 minute survey and tell us about how you use %(APP_NAME)s and how we can improve it. All information shared is confidential.\n"
 "            </p>\n"
 "          "
-msgstr ""
-"\n"
+msgstr "\n"
 "            <p class=\"text-white m-lg-0 fw-bold\">\n"
 "             Tusaidie kufanya %(APP_NAME)s bora zaidi. Chukua utafiti huu mfupi wa dakika 5 na utuambie jinsi unavyotumia %(APP_NAME)s na jinsi tunavyoweza kuuboresha. Taarifa zote zinazoshirikiwa ni siri.\n"
 "            </p>\n"
@@ -3470,18 +3466,16 @@ msgid "Admin"
 msgstr "Msimamizi"
 
 #: templates/peachjam/_user_menu.html:62 templates/peachjam/_user_menu.html:72
-#, fuzzy
-#| msgid "enabled"
 msgid "Enabled:"
-msgstr "wezeshwa"
+msgstr "Imewezeshwa:"
 
 #: templates/peachjam/_user_menu.html:64
 msgid "Trace for 5 mins"
-msgstr ""
+msgstr "Fuatilia kwa dakika 5"
 
 #: templates/peachjam/_user_menu.html:74
 msgid "Profile for 5 mins"
-msgstr ""
+msgstr "Wasifu kwa dakika 5"
 
 #: templates/peachjam/about.html:4 templates/peachjam/about.html:10
 msgid "About"
@@ -4129,12 +4123,10 @@ msgid "Show provision details"
 msgstr "Onyesha maelezo ya utoaji"
 
 #: templates/peachjam/provision_enrichment/_uncommenced_provision_detail.html:22
-msgid ""
-"\n"
+msgid "\n"
 "      Note: this provision has some subprovisions that have already come into force.\n"
 "    "
-msgstr ""
-"\n"
+msgstr "\n"
 "      Kumbuka: kifungu hiki kina baadhi ya vifungu vidogo ambavyo tayari vimeanza kutumika.\n"
 "    "
 
