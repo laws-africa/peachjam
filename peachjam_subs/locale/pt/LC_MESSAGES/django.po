@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-06-30 15:09+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -102,27 +102,27 @@ msgstr "Ativo"
 msgid "Closed"
 msgstr "Fechado"
 
-#: models.py:655
+#: models.py:691
 msgid "Default product offering"
 msgstr "Oferta de produto standard"
 
-#: models.py:660
+#: models.py:696
 msgid "These products are highlighted in the product listing."
 msgstr "Estes produtos são destacados na lista de produtos."
 
-#: models.py:668
+#: models.py:704
 msgid "Trial product offering"
 msgstr "Oferta de produto de teste"
 
-#: models.py:669
+#: models.py:705
 msgid "If set, this product offering is used for trials."
 msgstr "Se definido, esta oferta de produto será utilizada para testes."
 
-#: models.py:673
+#: models.py:709
 msgid "Trial duration (days)"
 msgstr "Duração do teste (dias)"
 
-#: models.py:674
+#: models.py:710
 msgid "Number of days for the trial period."
 msgstr "Número de dias para o período de teste."
 
