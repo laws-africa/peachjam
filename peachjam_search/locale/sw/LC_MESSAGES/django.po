@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 06:56+0000\n"
+"POT-Creation-Date: 2026-06-30 15:09+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -26,19 +26,27 @@ msgstr "Jaji"
 msgid "Locality"
 msgstr "Eneo"
 
-#: models.py:174
+#: models.py:112
+msgid "subscription locked at"
+msgstr ""
+
+#: models.py:115
+msgid "subscription lock expires at"
+msgstr ""
+
+#: models.py:184
 msgid "Search alert limit reached"
 msgstr "Kikomo cha tahadhari ya utafutaji kimefikiwa"
 
-#: models.py:258
+#: models.py:268
 msgid "feedback"
 msgstr "maoni"
 
-#: models.py:260
+#: models.py:270
 msgid "name"
 msgstr "jina"
 
-#: models.py:265
+#: models.py:275
 msgid "email address"
 msgstr "anwani ya baruapepe"
 
@@ -47,58 +55,68 @@ msgstr "anwani ya baruapepe"
 msgid "<a href=\"%(signup_url)s?next=%(next)s\">Sign up</a> or <a href=\"%(login_url)s?next=%(next)s\">log in</a> to download search results."
 msgstr "<a href=\"%(signup_url)s?next=%(next)s\">Jisajili</a> au <a href=\"%(login_url)s?next=%(next)s\">ingia</a> ili kupakua matokeo ya utafutaji."
 
-#: templates/peachjam_search/_saved_search_modal.html:7
+#: templates/peachjam_search/_saved_search_modal.html:8
 msgid "Search alert"
 msgstr "Tahadhari ya utafutaji"
 
-#: templates/peachjam_search/_saved_search_modal.html:11
-#: templates/peachjam_search/_saved_search_modal.html:70
+#: templates/peachjam_search/_saved_search_modal.html:12
+#: templates/peachjam_search/_saved_search_modal.html:85
 msgid "Close"
 msgstr "Funga"
 
-#: templates/peachjam_search/_saved_search_modal.html:16
+#: templates/peachjam_search/_saved_search_modal.html:22
+msgid "Paused by your subscription limit"
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:25
+#: templates/peachjam_search/saved_search_list.html:22
+#, python-format
+msgid "We'll keep this search alert until %(expires)s. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to resume alerts."
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:31
 msgid "We'll email you when new documents are found for this search."
 msgstr "Tutakutumia barua pepe hati mpya zitakapopatikana kwa utafutaji huu."
 
-#: templates/peachjam_search/_saved_search_modal.html:27
+#: templates/peachjam_search/_saved_search_modal.html:42
 msgid "A note to yourself about this search"
 msgstr "Ujumbe kwako mwenyewe kuhusu utafutaji huu"
 
-#: templates/peachjam_search/_saved_search_modal.html:36
+#: templates/peachjam_search/_saved_search_modal.html:51
 msgid "You have reached your limit for search alerts."
 msgstr "Umefikia kikomo chako cha arifa za utafutaji."
 
-#: templates/peachjam_search/_saved_search_modal.html:39
+#: templates/peachjam_search/_saved_search_modal.html:54
 #, python-format
 msgid "To add more, please upgrade to %(product)s."
 msgstr "Ili kuongeza zaidi, tafadhali pata toleo jipya la %(product)s."
 
-#: templates/peachjam_search/_saved_search_modal.html:47
+#: templates/peachjam_search/_saved_search_modal.html:62
 msgid "Saving..."
 msgstr "Inahifadhi..."
 
-#: templates/peachjam_search/_saved_search_modal.html:50
+#: templates/peachjam_search/_saved_search_modal.html:65
 msgid "All search alerts"
 msgstr "Arifa zote za utafutaji"
 
-#: templates/peachjam_search/_saved_search_modal.html:53
+#: templates/peachjam_search/_saved_search_modal.html:68
 msgid "You are not logged in. Please log in to receive alerts when we find new matches for your search."
 msgstr "Hujaingia. Tafadhali ingia ili kupokea arifa tutakapopata zinazolingana na utafutaji wako."
 
-#: templates/peachjam_search/_saved_search_modal.html:65
-#: templates/peachjam_search/saved_search_list.html:33
+#: templates/peachjam_search/_saved_search_modal.html:80
+#: templates/peachjam_search/saved_search_list.html:44
 msgid "Are you sure?"
 msgstr "Je, una uhakika?"
 
-#: templates/peachjam_search/_saved_search_modal.html:66
+#: templates/peachjam_search/_saved_search_modal.html:81
 msgid "Delete alert"
 msgstr "Futa tahadhari"
 
-#: templates/peachjam_search/_saved_search_modal.html:77
+#: templates/peachjam_search/_saved_search_modal.html:92
 msgid "Save"
 msgstr "Hifadhi"
 
-#: templates/peachjam_search/_saved_search_modal.html:82
+#: templates/peachjam_search/_saved_search_modal.html:97
 msgid "Login"
 msgstr "Ingia"
 
@@ -190,37 +208,49 @@ msgstr "Kitambulisho cha kufuatilia"
 msgid "Go"
 msgstr "Nenda"
 
-#: templates/peachjam_search/saved_search_button.html:18
-#: templates/peachjam_search/saved_search_form.html:10
-msgid "Get alerts for this search"
-msgstr "Pata arifa za utafutaji huu"
-
+#: templates/peachjam_search/saved_search_button.html:19
 #: templates/peachjam_search/saved_search_form.html:8
+#, fuzzy
+#| msgid "Search alerts"
+msgid "Search alert paused"
+msgstr "Tahadhari za utafutaji"
+
+#: templates/peachjam_search/saved_search_button.html:21
+#: templates/peachjam_search/saved_search_form.html:10
 msgid "Update this search alert"
 msgstr "Sasisha arifa hii ya utafutaji"
+
+#: templates/peachjam_search/saved_search_button.html:23
+#: templates/peachjam_search/saved_search_form.html:12
+msgid "Get alerts for this search"
+msgstr "Pata arifa za utafutaji huu"
 
 #: templates/peachjam_search/saved_search_list.html:4
 msgid "Search Alerts"
 msgstr "Tafuta Tahadhari"
 
-#: templates/peachjam_search/saved_search_list.html:7
+#: templates/peachjam_search/saved_search_list.html:9
 msgid "Search alerts"
 msgstr "Tahadhari za utafutaji"
 
-#: templates/peachjam_search/saved_search_list.html:8
+#: templates/peachjam_search/saved_search_list.html:10
 msgid "We'll email you when new documents are found for your search alerts."
 msgstr "Tutakutumia barua pepe hati mpya zitakapopatikana kwa arifa zako za utafutaji."
 
 #: templates/peachjam_search/saved_search_list.html:21
+msgid "Paused by your subscription limit."
+msgstr ""
+
+#: templates/peachjam_search/saved_search_list.html:32
 #, python-format
 msgid "Alerted %(ago)s ago"
 msgstr "Imearifiwa %(ago)s zilizopita"
 
-#: templates/peachjam_search/saved_search_list.html:34
+#: templates/peachjam_search/saved_search_list.html:45
 msgid "Delete"
 msgstr "Futa"
 
-#: templates/peachjam_search/saved_search_list.html:41
+#: templates/peachjam_search/saved_search_list.html:52
 msgid "You don't have any search alerts. Get started by searching for a document and clicking the search alert button."
 msgstr "Huna arifa zozote za utafutaji. Anza kwa kutafuta hati na kubofya kitufe cha arifa ya utafutaji."
 

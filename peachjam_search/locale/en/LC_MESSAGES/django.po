@@ -10,19 +10,27 @@ msgstr ""
 msgid "Locality"
 msgstr ""
 
-#: models.py:174
+#: models.py:112
+msgid "subscription locked at"
+msgstr ""
+
+#: models.py:115
+msgid "subscription lock expires at"
+msgstr ""
+
+#: models.py:184
 msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:258
+#: models.py:268
 msgid "feedback"
 msgstr ""
 
-#: models.py:260
+#: models.py:270
 msgid "name"
 msgstr ""
 
-#: models.py:265
+#: models.py:275
 msgid "email address"
 msgstr ""
 
@@ -31,58 +39,68 @@ msgstr ""
 msgid "<a href=\"%(signup_url)s?next=%(next)s\">Sign up</a> or <a href=\"%(login_url)s?next=%(next)s\">log in</a> to download search results."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:7
+#: templates/peachjam_search/_saved_search_modal.html:8
 msgid "Search alert"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:11
-#: templates/peachjam_search/_saved_search_modal.html:70
+#: templates/peachjam_search/_saved_search_modal.html:12
+#: templates/peachjam_search/_saved_search_modal.html:85
 msgid "Close"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:16
+#: templates/peachjam_search/_saved_search_modal.html:22
+msgid "Paused by your subscription limit"
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:25
+#: templates/peachjam_search/saved_search_list.html:22
+#, python-format
+msgid "We'll keep this search alert until %(expires)s. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to resume alerts."
+msgstr ""
+
+#: templates/peachjam_search/_saved_search_modal.html:31
 msgid "We'll email you when new documents are found for this search."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:27
+#: templates/peachjam_search/_saved_search_modal.html:42
 msgid "A note to yourself about this search"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:36
+#: templates/peachjam_search/_saved_search_modal.html:51
 msgid "You have reached your limit for search alerts."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:39
+#: templates/peachjam_search/_saved_search_modal.html:54
 #, python-format
 msgid "To add more, please upgrade to %(product)s."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:47
+#: templates/peachjam_search/_saved_search_modal.html:62
 msgid "Saving..."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:50
+#: templates/peachjam_search/_saved_search_modal.html:65
 msgid "All search alerts"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:53
+#: templates/peachjam_search/_saved_search_modal.html:68
 msgid "You are not logged in. Please log in to receive alerts when we find new matches for your search."
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:65
-#: templates/peachjam_search/saved_search_list.html:33
+#: templates/peachjam_search/_saved_search_modal.html:80
+#: templates/peachjam_search/saved_search_list.html:44
 msgid "Are you sure?"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:66
+#: templates/peachjam_search/_saved_search_modal.html:81
 msgid "Delete alert"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:77
+#: templates/peachjam_search/_saved_search_modal.html:92
 msgid "Save"
 msgstr ""
 
-#: templates/peachjam_search/_saved_search_modal.html:82
+#: templates/peachjam_search/_saved_search_modal.html:97
 msgid "Login"
 msgstr ""
 
@@ -174,37 +192,47 @@ msgstr ""
 msgid "Go"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_button.html:18
-#: templates/peachjam_search/saved_search_form.html:10
-msgid "Get alerts for this search"
+#: templates/peachjam_search/saved_search_button.html:19
+#: templates/peachjam_search/saved_search_form.html:8
+msgid "Search alert paused"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_form.html:8
+#: templates/peachjam_search/saved_search_button.html:21
+#: templates/peachjam_search/saved_search_form.html:10
 msgid "Update this search alert"
+msgstr ""
+
+#: templates/peachjam_search/saved_search_button.html:23
+#: templates/peachjam_search/saved_search_form.html:12
+msgid "Get alerts for this search"
 msgstr ""
 
 #: templates/peachjam_search/saved_search_list.html:4
 msgid "Search Alerts"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:7
+#: templates/peachjam_search/saved_search_list.html:9
 msgid "Search alerts"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:8
+#: templates/peachjam_search/saved_search_list.html:10
 msgid "We'll email you when new documents are found for your search alerts."
 msgstr ""
 
 #: templates/peachjam_search/saved_search_list.html:21
+msgid "Paused by your subscription limit."
+msgstr ""
+
+#: templates/peachjam_search/saved_search_list.html:32
 #, python-format
 msgid "Alerted %(ago)s ago"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:34
+#: templates/peachjam_search/saved_search_list.html:45
 msgid "Delete"
 msgstr ""
 
-#: templates/peachjam_search/saved_search_list.html:41
+#: templates/peachjam_search/saved_search_list.html:52
 msgid "You don't have any search alerts. Get started by searching for a document and clicking the search alert button."
 msgstr ""
 

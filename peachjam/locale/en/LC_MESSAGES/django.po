@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-25 06:56+0000\n"
+"POT-Creation-Date: 2026-06-30 15:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,317 +18,348 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:178
+#: admin.py:181
 msgid "Import"
 msgstr ""
 
-#: admin.py:545
+#: admin.py:548
 msgid "Background tasks"
 msgstr ""
 
-#: admin.py:645
+#: admin.py:648
 msgid "Access groups updated."
 msgstr ""
 
-#: admin.py:660
+#: admin.py:663
 msgid "Manage restricted access groups"
 msgstr ""
 
-#: admin.py:664
+#: admin.py:667
 msgid "Restricted access groups"
 msgstr ""
 
-#: admin.py:717
+#: admin.py:720
 msgid "Key details"
 msgstr ""
 
-#: admin.py:731
+#: admin.py:734
 msgid "Additional details"
 msgstr ""
 
-#: admin.py:744 admin.py:1665
+#: admin.py:747 admin.py:1883
 msgid "Work identification"
 msgstr ""
 
-#: admin.py:757
+#: admin.py:760
 msgid "Content"
 msgstr ""
 
-#: admin.py:766 admin.py:1664
+#: admin.py:769 admin.py:1882
 msgid "Advanced"
 msgstr ""
 
-#: admin.py:781
+#: admin.py:784
 msgid "Taxonomies"
 msgstr ""
 
-#: admin.py:818 models/core_document.py:902
+#: admin.py:821 models/core_document.py:902
 msgid "TOC JSON"
 msgstr ""
 
-#: admin.py:825 models/core_document.py:899
+#: admin.py:828 models/core_document.py:899
 msgid "content HTML is AKN"
 msgstr ""
 
-#: admin.py:832
+#: admin.py:835
 msgid "Images"
 msgstr ""
 
-#: admin.py:890
+#: admin.py:893
 #, python-format
 msgid "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
 msgstr ""
 
-#: admin.py:947
+#: admin.py:950
 msgid "main form (non-field)"
 msgstr ""
 
-#: admin.py:1048
+#: admin.py:1051
 msgid "Work"
 msgstr ""
 
-#: admin.py:1060
+#: admin.py:1063
 #, python-format
 msgid "Queued tasks to extract citations from %(count)d documents."
 msgstr ""
 
-#: admin.py:1064
+#: admin.py:1067
 msgid "Extract citations (background)"
 msgstr ""
 
-#: admin.py:1077
+#: admin.py:1080
 #, python-format
 msgid "Re-imported content from %(count)d documents."
 msgstr ""
 
-#: admin.py:1081
+#: admin.py:1084
 msgid "Re-extract content from DOCX files"
 msgstr ""
 
-#: admin.py:1091
+#: admin.py:1094
 #, python-format
 msgid "Queued tasks to re-index for %(count)d documents."
 msgstr ""
 
-#: admin.py:1095
+#: admin.py:1098
 msgid "Re-index for search (background)"
 msgstr ""
 
-#: admin.py:1105
+#: admin.py:1108
 #, python-format
 msgid "Applying labels for %(count)d documents."
 msgstr ""
 
-#: admin.py:1108
+#: admin.py:1111
 msgid "Apply labels"
 msgstr ""
 
-#: admin.py:1117
+#: admin.py:1120
 #, python-format
 msgid "Ensuring PDF for %(count)d documents."
 msgstr ""
 
-#: admin.py:1121
+#: admin.py:1124
 msgid "Ensure PDF for source file (background)"
 msgstr ""
 
-#: admin.py:1143
+#: admin.py:1146
 msgid "Documents published."
 msgstr ""
 
-#: admin.py:1145
+#: admin.py:1148
 msgid "Publish selected documents"
 msgstr ""
 
-#: admin.py:1150
+#: admin.py:1153
 msgid "Documents unpublished."
 msgstr ""
 
-#: admin.py:1152
+#: admin.py:1155
 msgid "Unpublish selected documents"
 msgstr ""
 
-#: admin.py:1187
+#: admin.py:1190
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
 msgstr ""
 
-#: admin.py:1279
+#: admin.py:1282
 msgid "Refresh selected flynote roots now"
 msgstr ""
 
-#: admin.py:1289
+#: admin.py:1292
 #, python-format
 msgid "Refreshed %(count)s flynote roots."
 msgstr ""
 
-#: admin.py:1293
+#: admin.py:1296
 msgid "Mark selected flynotes as deprecated"
 msgstr ""
 
-#: admin.py:1305
+#: admin.py:1308
 #, python-format
 msgid "Deprecated %(count)s flynote branches."
 msgstr ""
 
-#: admin.py:1309
+#: admin.py:1312
 msgid "Mark selected flynotes as active"
 msgstr ""
 
-#: admin.py:1321
+#: admin.py:1324
 #, python-format
 msgid "Reactivated %(count)s flynote branches."
 msgstr ""
 
-#: admin.py:1325 templates/peachjam/layouts/document_list.html:4
+#: admin.py:1328 templates/peachjam/layouts/document_list.html:4
 #: templates/peachjam/layouts/document_list.html:17
 msgid "Documents"
 msgstr ""
 
-#: admin.py:1330
+#: admin.py:1333
 msgid "Ancestors"
 msgstr ""
 
-#: admin.py:1348
+#: admin.py:1351
 msgid "Children"
 msgstr ""
 
-#: admin.py:1412 models/judgment.py:792 models/judgment.py:828
+#: admin.py:1415 models/judgment.py:886 models/judgment.py:922
 msgid "case number"
 msgstr ""
 
-#: admin.py:1413 models/judgment.py:793
+#: admin.py:1416 models/judgment.py:887
 msgid "case numbers"
 msgstr ""
 
-#: admin.py:1422 models/judgment.py:68 models/judgment.py:291
+#: admin.py:1532
+msgid "Selected canonical judge does not own the chosen alias."
+msgstr ""
+
+#: admin.py:1588
+msgid "Extracted name"
+msgstr ""
+
+#: admin.py:1589
+msgid "Judge title"
+msgstr ""
+
+#: admin.py:1590 models/judgment.py:59 models/judgment.py:81
+#: models/judgment.py:115
+msgid "Judge"
+msgstr ""
+
+#: admin.py:1594
+msgid "Exact judge name as it appeared in the uploaded judgment."
+msgstr ""
+
+#: admin.py:1597
+msgid "Judge alias or display title to use for this judgment."
+msgstr ""
+
+#: admin.py:1600
+msgid "Canonical judge identity used for aggregation and future judge pages."
+msgstr ""
+
+#: admin.py:1616 admin.py:1641 models/judgment.py:94 models/judgment.py:359
+#: models/judgment.py:366
 msgid "judge"
 msgstr ""
 
-#: admin.py:1423 models/judgment.py:69 models/judgment.py:346
-#: models/judgment.py:845 models/judgment.py:891
+#: admin.py:1617 admin.py:1642 models/judgment.py:95 models/judgment.py:440
+#: models/judgment.py:939 models/judgment.py:985
 msgid "judges"
 msgstr ""
 
-#: admin.py:1437
+#: admin.py:1656
 msgid "lower court judge"
 msgstr ""
 
-#: admin.py:1438 models/judgment.py:352
+#: admin.py:1657 models/judgment.py:446
 msgid "lower court judges"
 msgstr ""
 
-#: admin.py:1452
+#: admin.py:1671
 msgid "Related judgment"
 msgstr ""
 
-#: admin.py:1453
+#: admin.py:1672
 msgid "Related judgments"
 msgstr ""
 
-#: admin.py:1475 models/judgment.py:853
+#: admin.py:1694 models/judgment.py:947
 msgid "case history"
 msgstr ""
 
-#: admin.py:1505
+#: admin.py:1724
 msgid "Enter one flynote per line."
 msgstr ""
 
-#: admin.py:1606 templates/peachjam/_document_content_sidebar.html:22
+#: admin.py:1824 templates/peachjam/_document_content_sidebar.html:22
 #: templates/peachjam/judgment_detail.html:101
 msgid "Summary"
 msgstr ""
 
-#: admin.py:1800 admin.py:1820
+#: admin.py:2035 admin.py:2055
 msgid "You do not have permission to generate judgment summaries."
 msgstr ""
 
-#: admin.py:1809
+#: admin.py:2044
 #, python-format
 msgid "Generating summaries for %(count)d judgments."
 msgstr ""
 
-#: admin.py:1814
+#: admin.py:2049
 msgid "Generating summary for judgment with ID: {}"
 msgstr ""
 
-#: admin.py:1831
+#: admin.py:2066
 msgid "Generate summaries (background)"
 msgstr ""
 
-#: admin.py:1913
+#: admin.py:2148
 msgid "Refreshing all content for selected ingestors in the background."
 msgstr ""
 
-#: admin.py:1917
+#: admin.py:2152
 msgid "Refresh all content for selected ingestors - Full update"
 msgstr ""
 
-#: admin.py:1924
+#: admin.py:2159
 msgid "Getting content since last update in background."
 msgstr ""
 
-#: admin.py:1928
+#: admin.py:2163
 msgid "Update content for selected ingestors - Latest updates"
 msgstr ""
 
-#: admin.py:2010
+#: admin.py:2245
 msgid "Articles published."
 msgstr ""
 
-#: admin.py:2012
+#: admin.py:2247
 msgid "Publish selected articles"
 msgstr ""
 
-#: admin.py:2017
+#: admin.py:2252
 msgid "Articles unpublished."
 msgstr ""
 
-#: admin.py:2019
+#: admin.py:2254
 msgid "Unpublish selected articles"
 msgstr ""
 
-#: admin.py:2098
+#: admin.py:2333
 #, python-format
 msgid "Queued tasks to update extracted citations for %(count)d works."
 msgstr ""
 
-#: admin.py:2103
+#: admin.py:2338
 msgid "Update extracted citations (background)"
 msgstr ""
 
-#: admin.py:2112
+#: admin.py:2347
 #, python-format
 msgid "Updated languages for %(count)d works."
 msgstr ""
 
-#: admin.py:2115
+#: admin.py:2350
 msgid "Update languages"
 msgstr ""
 
-#: admin.py:2173
+#: admin.py:2408
 msgid "Gazette number"
 msgstr ""
 
-#: admin.py:2313
+#: admin.py:2548
 #, python-format
 msgid "Set 'accepted terms of use' to False for %(count)d users."
 msgstr ""
 
-#: admin.py:2318
+#: admin.py:2553
 msgid "Require selected users to accept terms of use"
 msgstr ""
 
-#: admin.py:2452 admin.py:2487
+#: admin.py:2738 admin.py:2773
 msgid "Document"
 msgstr ""
 
-#: admin.py:2460
+#: admin.py:2746
 msgid "Messages JSON"
 msgstr ""
 
 #: decorators.py:33 templates/account/logged_out.html:11
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:12
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:6
 #: templates/peachjam/causelist_court_detail.html:9
 #: templates/peachjam/court_detail.html:9
 #: templates/peachjam/flynote/detail.html:9
@@ -350,7 +381,10 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: decorators.py:65 templates/peachjam/court_detail.html:12
+#: decorators.py:65
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:138
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:217
+#: templates/peachjam/court_detail.html:12
 #: templates/peachjam/flynote/detail.html:12
 #: templates/peachjam/flynote/detail.html:46
 #: templates/peachjam/flynote/list.html:14
@@ -399,100 +433,180 @@ msgstr ""
 msgid "Bills"
 msgstr ""
 
-#: forms.py:164 forms.py:165 models/entity_profile.py:13
+#: forms.py:97
+msgid "target judge person"
+msgstr ""
+
+#: forms.py:99
+msgid "Choose the judge person that should receive the selected aliases, or the judge person you want to rename."
+msgstr ""
+
+#: forms.py:105
+msgid "new judge person name"
+msgstr ""
+
+#: forms.py:107
+msgid "Optional. Use this to create a new judge person, or to rename the selected target judge person."
+msgstr ""
+
+#: forms.py:119
+msgid "merge into"
+msgstr ""
+
+#: forms.py:121
+msgid "Choose the judge person that should remain after merging the selected duplicates."
+msgstr ""
+
+#: forms.py:127
+msgid "delete what"
+msgstr ""
+
+#: forms.py:129
+msgid "Delete selected aliases only"
+msgstr ""
+
+#: forms.py:130
+msgid "Delete selected judge people only"
+msgstr ""
+
+#: forms.py:133
+msgid "Delete both selected aliases and selected judge people"
+msgstr ""
+
+#: forms.py:150 views/judges.py:213
+msgid "Choose a workflow action."
+msgstr ""
+
+#: forms.py:171
+msgid "Choose the judge person you want to rename."
+msgstr ""
+
+#: forms.py:176
+msgid "Enter the new judge person name when no aliases are selected."
+msgstr ""
+
+#: forms.py:181
+msgid "Enter a different name for the selected judge person."
+msgstr ""
+
+#: forms.py:196
+msgid "A judge person with this name already exists. Move aliases to it or merge into it instead of renaming."
+msgstr ""
+
+#: forms.py:209
+msgid "Select at least one judge person to merge."
+msgstr ""
+
+#: forms.py:214
+msgid "Choose the judge person that should remain."
+msgstr ""
+
+#: forms.py:227
+msgid "Select at least one duplicate judge person besides the merge target."
+msgstr ""
+
+#: forms.py:239
+msgid "Select at least one alias to delete."
+msgstr ""
+
+#: forms.py:244
+msgid "Select at least one judge person to delete."
+msgstr ""
+
+#: forms.py:342 forms.py:343 models/entity_profile.py:13
 #: templates/peachjam/_ratification_table.html:6 views/generic_views.py:274
 msgid "Title"
 msgstr ""
 
-#: forms.py:166 forms.py:167 templates/peachjam/causelist_detail.html:35
+#: forms.py:344 forms.py:345 templates/peachjam/causelist_detail.html:35
 #: templates/peachjam/layouts/document_detail.html:315
 #: views/generic_views.py:275
 msgid "Date"
 msgstr ""
 
-#: forms.py:166
+#: forms.py:344
 msgid "(Newest first)"
 msgstr ""
 
-#: forms.py:167
+#: forms.py:345
 msgid "(Oldest first)"
 msgstr ""
 
-#: forms.py:487
+#: forms.py:665
 msgid "Summary prompt"
 msgstr ""
 
-#: forms.py:495
+#: forms.py:673
 msgid "Optional. Overrides the default summary prompt."
 msgstr ""
 
-#: forms.py:498
+#: forms.py:676
 msgid "Model"
 msgstr ""
 
-#: forms.py:505
+#: forms.py:683
 msgid "Optional. Overrides the configured model."
 msgstr ""
 
-#: forms.py:508
+#: forms.py:686
 msgid "Translation language"
 msgstr ""
 
-#: forms.py:516
+#: forms.py:694
 msgid "Optional. Translates the summary when set to a non-English language."
 msgstr ""
 
-#: forms.py:564
+#: forms.py:742
 msgid "Document problem reported"
 msgstr ""
 
-#: forms.py:612
+#: forms.py:790
 msgid "Contact us message"
 msgstr ""
 
-#: forms.py:630
+#: forms.py:808
 msgid "Folders"
 msgstr ""
 
-#: forms.py:679
+#: forms.py:865
 msgid "Please provide a valid name"
 msgstr ""
 
-#: forms.py:685
+#: forms.py:871
 msgid "First name"
 msgstr ""
 
-#: forms.py:688
+#: forms.py:874
 msgid "Last name"
 msgstr ""
 
-#: forms.py:697 templates/account/login.html:89
+#: forms.py:883 templates/account/login.html:89
 #: templates/account/signup.html:47 templates/account/user_auth.html:103
 #: templates/account/user_auth.html:145 templates/user_account/home.html:26
 msgid "Password"
 msgstr ""
 
-#: forms.py:698 templates/account/signup.html:61
+#: forms.py:884 templates/account/signup.html:61
 msgid "Password (again)"
 msgstr ""
 
-#: forms.py:742
+#: forms.py:928
 msgid "I understand this action cannot be undone"
 msgstr ""
 
-#: forms.py:744
+#: forms.py:930
 msgid "Please confirm account deletion."
 msgstr ""
 
-#: forms.py:747
+#: forms.py:933
 msgid "Please tell us briefly why you are deleting your account."
 msgstr ""
 
-#: forms.py:755
+#: forms.py:941
 msgid "I agree to the Terms of Use"
 msgstr ""
 
-#: forms.py:758
+#: forms.py:944
 msgid "You must accept the terms to continue."
 msgstr ""
 
@@ -505,7 +619,7 @@ msgstr ""
 #: models/annotation.py:11 models/attachments.py:76 models/attachments.py:110
 #: models/attachments.py:264 models/attachments.py:307
 #: models/attachments.py:356 models/citations.py:21 models/core_document.py:871
-#: models/core_document.py:897 models/judgment.py:787 models/taxonomies.py:287
+#: models/core_document.py:897 models/judgment.py:881 models/taxonomies.py:287
 #: templates/peachjam/_document_count.html:8
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:4
 #: views/generic_views.py:152
@@ -525,14 +639,14 @@ msgid "target selectors"
 msgstr ""
 
 #: models/annotation.py:22 models/save_document.py:21
-#: models/save_document.py:95 models/user_following.py:24
+#: models/save_document.py:105 models/user_following.py:23
 #: models/user_profile.py:32
 msgid "user"
 msgstr ""
 
 #: models/annotation.py:24 models/core_document.py:497 models/flynote.py:63
-#: models/save_document.py:24 models/save_document.py:100
-#: models/user_following.py:128
+#: models/save_document.py:24 models/save_document.py:110
+#: models/user_following.py:127
 msgid "created at"
 msgstr ""
 
@@ -548,12 +662,12 @@ msgstr ""
 msgid "Page"
 msgstr ""
 
-#: models/article.py:19 models/core_document.py:411 models/judgment.py:849
+#: models/article.py:19 models/core_document.py:411 models/judgment.py:943
 msgid "date"
 msgstr ""
 
 #: models/article.py:20 models/core_document.py:184 models/core_document.py:410
-#: models/law_reports.py:8 models/law_reports.py:26
+#: models/judgment.py:129 models/law_reports.py:8 models/law_reports.py:26
 msgid "title"
 msgstr ""
 
@@ -562,7 +676,7 @@ msgid "body"
 msgstr ""
 
 #: models/article.py:26 models/author.py:22 models/bill.py:15
-#: models/user_following.py:42
+#: models/user_following.py:41
 msgid "author"
 msgstr ""
 
@@ -574,8 +688,8 @@ msgstr ""
 msgid "summary"
 msgstr ""
 
-#: models/article.py:32 models/judgment.py:127 models/relationships.py:7
-#: models/taxonomies.py:21
+#: models/article.py:32 models/judgment.py:88 models/judgment.py:200
+#: models/relationships.py:7 models/taxonomies.py:21
 msgid "slug"
 msgstr ""
 
@@ -676,17 +790,17 @@ msgstr ""
 #: models/attachments.py:291 models/author.py:11 models/citations.py:167
 #: models/core_document.py:63 models/core_document.py:91
 #: models/core_document.py:106 models/flynote.py:60 models/ingestors.py:15
-#: models/ingestors.py:45 models/judgment.py:44 models/judgment.py:62
-#: models/judgment.py:81 models/judgment.py:96 models/judgment.py:111
-#: models/judgment.py:125 models/judgment.py:167 models/judgment.py:186
-#: models/judgment.py:256 models/partner.py:20 models/relationships.py:6
-#: models/save_document.py:17 models/taxonomies.py:19
+#: models/ingestors.py:45 models/judgment.py:45 models/judgment.py:63
+#: models/judgment.py:124 models/judgment.py:154 models/judgment.py:169
+#: models/judgment.py:184 models/judgment.py:198 models/judgment.py:240
+#: models/judgment.py:259 models/judgment.py:329 models/partner.py:20
+#: models/relationships.py:6 models/save_document.py:17 models/taxonomies.py:19
 msgid "name"
 msgstr ""
 
-#: models/attachments.py:293 models/core_document.py:94 models/judgment.py:46
-#: models/judgment.py:64 models/judgment.py:83 models/judgment.py:98
-#: models/judgment.py:113 models/judgment.py:126
+#: models/attachments.py:293 models/core_document.py:94 models/judgment.py:47
+#: models/judgment.py:65 models/judgment.py:90 models/judgment.py:156
+#: models/judgment.py:171 models/judgment.py:186 models/judgment.py:199
 msgid "description"
 msgstr ""
 
@@ -723,7 +837,7 @@ msgid "html md5sum"
 msgstr ""
 
 #: models/attachments.py:362 models/core_document.py:498
-#: models/ratification.py:22 models/save_document.py:101
+#: models/ratification.py:22 models/save_document.py:111
 msgid "updated at"
 msgstr ""
 
@@ -744,15 +858,15 @@ msgid "Authors"
 msgstr ""
 
 #: models/author.py:12 models/core_document.py:65 models/core_document.py:93
-#: models/core_document.py:110 models/judgment.py:169 models/judgment.py:187
-#: models/judgment.py:257
+#: models/core_document.py:110 models/judgment.py:242 models/judgment.py:260
+#: models/judgment.py:330
 msgid "code"
 msgstr ""
 
 #: models/author.py:15 models/core_document.py:112 models/entity_profile.py:37
 #: models/entity_profile.py:38 models/entity_profile.py:48
-#: models/journals_books.py:53 models/judgment.py:131 models/judgment.py:172
-#: models/judgment.py:196 models/taxonomies.py:23
+#: models/journals_books.py:53 models/judgment.py:204 models/judgment.py:245
+#: models/judgment.py:269 models/taxonomies.py:23
 msgid "profile"
 msgstr ""
 
@@ -834,7 +948,7 @@ msgid "jurisdiction"
 msgstr ""
 
 #: models/core_document.py:116 models/core_document.py:435
-#: models/judgment.py:211 models/user_following.py:74
+#: models/judgment.py:284 models/user_following.py:73
 msgid "locality"
 msgstr ""
 
@@ -916,7 +1030,7 @@ msgstr ""
 
 #: models/core_document.py:219 models/core_document.py:400
 #: models/enrichments.py:24 models/enrichments.py:168 models/ratification.py:16
-#: models/save_document.py:89
+#: models/save_document.py:99
 msgid "work"
 msgstr ""
 
@@ -1094,8 +1208,8 @@ msgstr ""
 msgid "provision enrichments"
 msgstr ""
 
-#: models/enrichments.py:85 models/flynote.py:490 models/judgment.py:289
-#: models/judgment.py:305 models/judgment.py:478 views/courts.py:54
+#: models/enrichments.py:85 models/flynote.py:490 models/judgment.py:357
+#: models/judgment.py:399 models/judgment.py:572 views/courts.py:54
 #: views/judgment.py:43
 msgid "judgment"
 msgstr ""
@@ -1233,7 +1347,7 @@ msgid "deprecated"
 msgstr ""
 
 #: models/flynote.py:67 models/flynote.py:496 models/flynote.py:516
-#: models/judgment.py:368 models/user_following.py:90
+#: models/judgment.py:462 models/user_following.py:89
 msgid "flynote"
 msgstr ""
 
@@ -1389,274 +1503,323 @@ msgstr ""
 msgid "Title must include a month name, e.g. 'Vol. 3 No.1 - January 1993'."
 msgstr ""
 
-#: models/judgment.py:50
+#: models/judgment.py:51
 msgid "attorney"
 msgstr ""
 
-#: models/judgment.py:51 models/judgment.py:356
+#: models/judgment.py:52 models/judgment.py:450
 msgid "attorneys"
 msgstr ""
 
-#: models/judgment.py:58
-msgid "Judge"
-msgstr ""
-
-#: models/judgment.py:59 templates/peachjam/_case_histories.html:54
+#: models/judgment.py:60 models/judgment.py:82 models/judgment.py:116
+#: templates/peachjam/_case_histories.html:54
 #: templates/peachjam/layouts/document_detail.html:301
 msgid "Judges"
 msgstr ""
 
-#: models/judgment.py:87 models/judgment.py:843
-msgid "outcome"
+#: models/judgment.py:69
+msgid "legacy judge"
 msgstr ""
 
-#: models/judgment.py:88
-msgid "outcomes"
+#: models/judgment.py:70
+msgid "legacy judges"
 msgstr ""
 
-#: models/judgment.py:102 models/judgment.py:343
-msgid "case action"
+#: models/judgment.py:85
+msgid "full name"
 msgstr ""
 
-#: models/judgment.py:103
-msgid "case actions"
+#: models/judgment.py:122
+msgid "judge person"
 msgstr ""
 
-#: models/judgment.py:117 models/judgment.py:780
-msgid "matter type"
+#: models/judgment.py:126
+msgid "normalized name"
 msgstr ""
 
-#: models/judgment.py:118
-msgid "matter types"
+#: models/judgment.py:133
+msgid "Judicial title parsed from the alias name, for example 'JA' or 'DCJ'."
 msgstr ""
 
-#: models/judgment.py:128 models/judgment.py:174 models/judgment.py:198
-#: models/judgment.py:369
-msgid "order"
-msgstr ""
-
-#: models/judgment.py:139 models/judgment.py:193 models/user_following.py:50
-msgid "court class"
+#: models/judgment.py:139
+msgid "judge alias"
 msgstr ""
 
 #: models/judgment.py:140
+msgid "judge aliases"
+msgstr ""
+
+#: models/judgment.py:160 models/judgment.py:937
+msgid "outcome"
+msgstr ""
+
+#: models/judgment.py:161
+msgid "outcomes"
+msgstr ""
+
+#: models/judgment.py:175 models/judgment.py:437
+msgid "case action"
+msgstr ""
+
+#: models/judgment.py:176
+msgid "case actions"
+msgstr ""
+
+#: models/judgment.py:190 models/judgment.py:874
+msgid "matter type"
+msgstr ""
+
+#: models/judgment.py:191
+msgid "matter types"
+msgstr ""
+
+#: models/judgment.py:201 models/judgment.py:247 models/judgment.py:271
+#: models/judgment.py:463
+msgid "order"
+msgstr ""
+
+#: models/judgment.py:212 models/judgment.py:266 models/user_following.py:49
+msgid "court class"
+msgstr ""
+
+#: models/judgment.py:213
 msgid "court classes"
 msgstr ""
 
-#: models/judgment.py:204 models/ratification.py:67 models/user_following.py:66
+#: models/judgment.py:277 models/ratification.py:67 models/user_following.py:65
 msgid "country"
 msgstr ""
 
-#: models/judgment.py:219 models/judgment.py:254 models/judgment.py:320
-#: models/judgment.py:847 models/judgment.py:874 models/user_following.py:34
+#: models/judgment.py:292 models/judgment.py:327 models/judgment.py:414
+#: models/judgment.py:941 models/judgment.py:968 models/user_following.py:33
 msgid "court"
 msgstr ""
 
-#: models/judgment.py:220
+#: models/judgment.py:293
 msgid "courts"
 msgstr ""
 
-#: models/judgment.py:230
+#: models/judgment.py:303
 msgid "The locality's jurisdiction and the court's country must match."
 msgstr ""
 
-#: models/judgment.py:245
+#: models/judgment.py:318
 msgid "Court registry"
 msgstr ""
 
-#: models/judgment.py:246
+#: models/judgment.py:319
 msgid "Court registries"
 msgstr ""
 
-#: models/judgment.py:261 models/user_following.py:58
+#: models/judgment.py:334 models/user_following.py:57
 msgid "court registry"
 msgstr ""
 
-#: models/judgment.py:262
+#: models/judgment.py:335
 msgid "court registries"
 msgstr ""
 
-#: models/judgment.py:308
-msgid "lower_court_judge"
-msgstr ""
-
-#: models/judgment.py:335
-msgid "court division"
-msgstr ""
-
-#: models/judgment.py:364
-msgid "case summary"
-msgstr ""
-
 #: models/judgment.py:367
-msgid "flynote (raw)"
+msgid "Canonical judge identity for this bench row."
 msgstr ""
 
-#: models/judgment.py:371
-msgid "case summary public"
+#: models/judgment.py:375
+msgid "matched alias"
 msgstr ""
 
-#: models/judgment.py:374
-msgid "Always show the case summary publicly, even when generated by AI."
+#: models/judgment.py:376
+msgid "Alias that matched the legacy judge name to the canonical judge."
 msgstr ""
 
-#: models/judgment.py:378
-msgid "blurb"
+#: models/judgment.py:379
+msgid "extracted name"
 msgstr ""
 
-#: models/judgment.py:382
-msgid "A quick summary of the judgment, for use in listings"
-msgstr ""
-
-#: models/judgment.py:385
-msgid "issues"
-msgstr ""
-
-#: models/judgment.py:388
-msgid "A list of issues that the judgment addresses"
-msgstr ""
-
-#: models/judgment.py:391
-msgid "held"
-msgstr ""
-
-#: models/judgment.py:394
-msgid "The main findings of the judgment"
-msgstr ""
-
-#: models/judgment.py:397
-msgid "summary AI generated"
-msgstr ""
-
-#: models/judgment.py:399
-msgid "Was this summary generated by an AI?"
+#: models/judgment.py:383
+msgid "Judge name exactly as it appeared in the source, for example 'ABBAN, J.A.'."
 msgstr ""
 
 #: models/judgment.py:402
-msgid "summary generated at"
+msgid "lower_court_judge"
 msgstr ""
 
-#: models/judgment.py:405
-msgid "When the AI summary was generated"
-msgstr ""
-
-#: models/judgment.py:408
-msgid "summary language"
-msgstr ""
-
-#: models/judgment.py:412
-msgid "The language used for the AI-generated summary"
-msgstr ""
-
-#: models/judgment.py:415
-msgid "summary trace ID"
-msgstr ""
-
-#: models/judgment.py:419
-msgid "The trace ID for the AI summary generation"
-msgstr ""
-
-#: models/judgment.py:422
-msgid "case name"
-msgstr ""
-
-#: models/judgment.py:424
-msgid "Party names for use in title"
-msgstr ""
-
-#: models/judgment.py:430
-msgid "serial number"
-msgstr ""
-
-#: models/judgment.py:432
-msgid "Serial number for MNC, unique for a year and an author."
-msgstr ""
-
-#: models/judgment.py:435
-msgid "serial number override"
-msgstr ""
-
-#: models/judgment.py:438
-msgid "Specific MNC serial number assigned by the court."
-msgstr ""
-
-#: models/judgment.py:442
-msgid "MNC"
-msgstr ""
-
-#: models/judgment.py:444
-msgid "Media neutral citation"
-msgstr ""
-
-#: models/judgment.py:451
-msgid "Auto-assign details"
-msgstr ""
-
-#: models/judgment.py:452
-msgid "Whether or not the system should assign the details"
-msgstr ""
-
-#: models/judgment.py:457
-msgid "Must be anonymised"
+#: models/judgment.py:429
+msgid "court division"
 msgstr ""
 
 #: models/judgment.py:458
+msgid "case summary"
+msgstr ""
+
+#: models/judgment.py:461
+msgid "flynote (raw)"
+msgstr ""
+
+#: models/judgment.py:465
+msgid "case summary public"
+msgstr ""
+
+#: models/judgment.py:468
+msgid "Always show the case summary publicly, even when generated by AI."
+msgstr ""
+
+#: models/judgment.py:472
+msgid "blurb"
+msgstr ""
+
+#: models/judgment.py:476
+msgid "A quick summary of the judgment, for use in listings"
+msgstr ""
+
+#: models/judgment.py:479
+msgid "issues"
+msgstr ""
+
+#: models/judgment.py:482
+msgid "A list of issues that the judgment addresses"
+msgstr ""
+
+#: models/judgment.py:485
+msgid "held"
+msgstr ""
+
+#: models/judgment.py:488
+msgid "The main findings of the judgment"
+msgstr ""
+
+#: models/judgment.py:491
+msgid "summary AI generated"
+msgstr ""
+
+#: models/judgment.py:493
+msgid "Was this summary generated by an AI?"
+msgstr ""
+
+#: models/judgment.py:496
+msgid "summary generated at"
+msgstr ""
+
+#: models/judgment.py:499
+msgid "When the AI summary was generated"
+msgstr ""
+
+#: models/judgment.py:502
+msgid "summary language"
+msgstr ""
+
+#: models/judgment.py:506
+msgid "The language used for the AI-generated summary"
+msgstr ""
+
+#: models/judgment.py:509
+msgid "summary trace ID"
+msgstr ""
+
+#: models/judgment.py:513
+msgid "The trace ID for the AI summary generation"
+msgstr ""
+
+#: models/judgment.py:516
+msgid "case name"
+msgstr ""
+
+#: models/judgment.py:518
+msgid "Party names for use in title"
+msgstr ""
+
+#: models/judgment.py:524
+msgid "serial number"
+msgstr ""
+
+#: models/judgment.py:526
+msgid "Serial number for MNC, unique for a year and an author."
+msgstr ""
+
+#: models/judgment.py:529
+msgid "serial number override"
+msgstr ""
+
+#: models/judgment.py:532
+msgid "Specific MNC serial number assigned by the court."
+msgstr ""
+
+#: models/judgment.py:536
+msgid "MNC"
+msgstr ""
+
+#: models/judgment.py:538
+msgid "Media neutral citation"
+msgstr ""
+
+#: models/judgment.py:545
+msgid "Auto-assign details"
+msgstr ""
+
+#: models/judgment.py:546
+msgid "Whether or not the system should assign the details"
+msgstr ""
+
+#: models/judgment.py:551
+msgid "Must be anonymised"
+msgstr ""
+
+#: models/judgment.py:552
 msgid "Must this judgment be anonymised?"
 msgstr ""
 
-#: models/judgment.py:462
+#: models/judgment.py:556
 msgid "Anonymised"
 msgstr ""
 
-#: models/judgment.py:463
+#: models/judgment.py:557
 msgid "Has the judgment been anonymised?"
 msgstr ""
 
-#: models/judgment.py:479 views/courts.py:55 views/judgment.py:44
+#: models/judgment.py:573 views/courts.py:55 views/judgment.py:44
 msgid "judgments"
 msgstr ""
 
-#: models/judgment.py:766
+#: models/judgment.py:860
 msgid "Full case number as printed on judgment"
 msgstr ""
 
-#: models/judgment.py:770
+#: models/judgment.py:864
 msgid "Override for full case number string"
 msgstr ""
 
-#: models/judgment.py:772
+#: models/judgment.py:866
 msgid "string"
 msgstr ""
 
-#: models/judgment.py:773
+#: models/judgment.py:867
 msgid "number"
 msgstr ""
 
-#: models/judgment.py:774
+#: models/judgment.py:868
 msgid "year"
 msgstr ""
 
-#: models/judgment.py:825
+#: models/judgment.py:919
 msgid "judgment work"
 msgstr ""
 
-#: models/judgment.py:836
+#: models/judgment.py:930
 msgid "historical judgment work"
 msgstr ""
 
-#: models/judgment.py:854
+#: models/judgment.py:948
 msgid "case histories"
 msgstr ""
 
-#: models/judgment.py:861 templates/peachjam/_case_histories.html:20
+#: models/judgment.py:955 templates/peachjam/_case_histories.html:20
 msgid "Case history"
 msgstr ""
 
-#: models/judgment.py:892
+#: models/judgment.py:986
 msgid "end date"
 msgstr ""
 
-#: models/law_reports.py:14 models/user_following.py:106
+#: models/law_reports.py:14 models/user_following.py:105
 msgid "law report"
 msgstr ""
 
@@ -1789,31 +1952,41 @@ msgstr ""
 msgid "object target ID"
 msgstr ""
 
-#: models/save_document.py:28
+#: models/save_document.py:26 models/save_document.py:113
+#: models/user_following.py:129
+msgid "subscription locked at"
+msgstr ""
+
+#: models/save_document.py:29 models/save_document.py:116
+#: models/user_following.py:132
+msgid "subscription lock expires at"
+msgstr ""
+
+#: models/save_document.py:34
 msgid "folder"
 msgstr ""
 
-#: models/save_document.py:29
+#: models/save_document.py:35
 msgid "folders"
 msgstr ""
 
-#: models/save_document.py:44
+#: models/save_document.py:54
 msgid "Folder limit reached"
 msgstr ""
 
-#: models/save_document.py:99
+#: models/save_document.py:109
 msgid "note"
 msgstr ""
 
-#: models/save_document.py:131 models/user_following.py:122
+#: models/save_document.py:151 models/user_following.py:121
 msgid "saved document"
 msgstr ""
 
-#: models/save_document.py:132
+#: models/save_document.py:152
 msgid "saved documents"
 msgstr ""
 
-#: models/save_document.py:143
+#: models/save_document.py:163
 msgid "Saved documents limit reached"
 msgstr ""
 
@@ -2041,7 +2214,7 @@ msgstr ""
 msgid "Hide this taxonomy and its descendants from public taxonomy listings."
 msgstr ""
 
-#: models/taxonomies.py:56 models/taxonomies.py:311 models/user_following.py:82
+#: models/taxonomies.py:56 models/taxonomies.py:311 models/user_following.py:81
 msgid "taxonomy"
 msgstr ""
 
@@ -2125,19 +2298,19 @@ msgstr ""
 msgid "New updates for"
 msgstr ""
 
-#: models/user_following.py:98
+#: models/user_following.py:97
 msgid "journal"
 msgstr ""
 
-#: models/user_following.py:114
+#: models/user_following.py:113
 msgid "saved search"
 msgstr ""
 
-#: models/user_following.py:126
+#: models/user_following.py:125
 msgid "last alerted at"
 msgstr ""
 
-#: models/user_following.py:272
+#: models/user_following.py:281
 msgid "Following limit reached"
 msgstr ""
 
@@ -2185,19 +2358,19 @@ msgstr ""
 msgid "user profiles"
 msgstr ""
 
-#: settings.py:378
+#: settings.py:381
 msgid "English"
 msgstr ""
 
-#: settings.py:379
+#: settings.py:382
 msgid "French"
 msgstr ""
 
-#: settings.py:380
+#: settings.py:383
 msgid "Portuguese"
 msgstr ""
 
-#: settings.py:381
+#: settings.py:384
 msgid "Swahili"
 msgstr ""
 
@@ -2280,6 +2453,8 @@ msgid "Email address"
 msgstr ""
 
 #: templates/account/email.html:26
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:139
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:220
 msgid "Status"
 msgstr ""
 
@@ -2336,10 +2511,10 @@ msgstr ""
 #: templates/account/password_reset_from_key_done.html:11
 #: templates/account/signup.html:87 templates/account/user_auth.html:48
 #: templates/account/user_auth.html:117 templates/admin/login.html:56
-#: templates/peachjam/_user_menu.html:88
 #: templates/peachjam/my/_frontpage_anon.html:8
 #: templates/peachjam/restricted_document_detail.html:24
 #: templates/peachjam/saved_document/_anon_modal.html:19
+#: templates/peachjam/user/_menu.html:88
 #: templates/peachjam/user_following/_button.html:24
 msgid "Log in"
 msgstr ""
@@ -2393,7 +2568,7 @@ msgstr ""
 msgid "Are you sure you want to log out?"
 msgstr ""
 
-#: templates/account/logout.html:16 templates/peachjam/_user_menu.html:50
+#: templates/account/logout.html:16 templates/peachjam/user/_menu.html:50
 msgid "Log out"
 msgstr ""
 
@@ -2596,15 +2771,17 @@ msgstr ""
 #: templates/admin/guardian/model/obj_perms_manage_access_groups.html:44
 #: templates/peachjam/_annotation_edit.html:11
 #: templates/peachjam/saved_document/_create.html:11
-#: templates/peachjam/saved_document/_update_modal.html:71
+#: templates/peachjam/saved_document/_update_modal.html:87
 msgid "Save"
 msgstr ""
 
 #: templates/admin/login.html:20
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:23
 msgid "Please correct the error below."
 msgstr ""
 
 #: templates/admin/login.html:22
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:25
 msgid "Please correct the errors below."
 msgstr ""
 
@@ -2629,8 +2806,171 @@ msgstr ""
 msgid "Open the flynote manager"
 msgstr ""
 
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:33
+msgid ""
+"\n"
+"            Use aliases and judge people as the editing surface. The first panel can\n"
+"            rename a judge person, move selected aliases into a judge person, or do\n"
+"            both in one step. Moving aliases also deletes the source judge person\n"
+"            automatically if nothing is left there.\n"
+"          "
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:46
+msgid "Find judge identities"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:57
+#: templates/admin/tree_change_list.html:7
+#: templates/peachjam/_document_content_sidebar.html:57
+#: templates/peachjam/_document_table_form.html:113
+#: templates/peachjam/_document_table_form.html:114
+#: templates/peachjam/_quick_search.html:4
+#: templates/peachjam/_quick_search.html:7
+msgid "Search"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:63
+msgid "Search by alias or judge person"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:66
+#: templates/peachjam/_document_table_form.html:187
+msgid "Filter"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:69
+#: templates/peachjam/_document_table_form.html:76
+msgid "Clear"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:90
+msgid "Judge identity records"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:102
+msgid "Alias connections"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:115
+msgid "Judge people"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:133
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:205
+msgid "Use"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:134
+msgid "Alias"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:135
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:208
+msgid "Judge person"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:136
+msgid "Legacy judge"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:137
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:214
+msgid "Bench rows"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:150
+#, python-format
+msgid "Select alias %(alias_name)s"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:164
+msgid "Missing"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:180
+msgid "No aliases matched this filter."
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:190
+#, python-format
+msgid "Showing at most %(workflow_limit)s aliases at a time."
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:211
+msgid "Aliases"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:232
+#, python-format
+msgid "Select judge person %(judge_person_name)s"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:263
+msgid "No judge people matched this filter."
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:273
+#, python-format
+msgid "Showing at most %(workflow_limit)s judge people at a time."
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:284
+msgid "Update selected judge identity"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:317
+msgid ""
+"\n"
+"                  If aliases are selected, they will move into the chosen judge person.\n"
+"                  If no judge person is chosen, a new one will be created from the new\n"
+"                  name or derived from the selected aliases. If you also enter a new\n"
+"                  name, the destination judge person will be renamed after the move.\n"
+"                  If no aliases are selected, this panel will rename the chosen judge\n"
+"                  person.\n"
+"                "
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:332
+msgid "Apply changes"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:339
+msgid "Merge selected judge people"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:358
+msgid "Select the duplicate judge people in the table. The merge target can also be one of the selected rows."
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:366
+msgid "Merge judge people"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:373
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:403
+msgid "Delete selected records"
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:391
+msgid ""
+"\n"
+"                  Deleting aliases clears matched alias links on related bench rows.\n"
+"                  Deleting judge people clears their bench links first, then deletes\n"
+"                  the judge person together with all aliases connected to it.\n"
+"                "
+msgstr ""
+
+#: templates/admin/peachjam/judge_identity/workflow_change_form.html:406
+msgid "Back to judges"
+msgstr ""
+
 #: templates/admin/peachjam/judgment/_extracted_form.html:7
 msgid "Extracted:"
+msgstr ""
+
+#: templates/admin/peachjam/judgment/_extracted_form.html:12
+msgid "Review the extracted name and the suggested judge title and judge below. Adjust the suggestions if needed before saving."
 msgstr ""
 
 #: templates/admin/peachjam/judgment/change_form.html:6
@@ -2647,15 +2987,6 @@ msgstr ""
 
 #: templates/admin/peachjam/judgment/change_form.html:20
 msgid "Generate summary"
-msgstr ""
-
-#: templates/admin/tree_change_list.html:7
-#: templates/peachjam/_document_content_sidebar.html:57
-#: templates/peachjam/_document_table_form.html:113
-#: templates/peachjam/_document_table_form.html:114
-#: templates/peachjam/_quick_search.html:4
-#: templates/peachjam/_quick_search.html:7
-msgid "Search"
 msgstr ""
 
 #: templates/admin/tree_change_list.html:8
@@ -2677,7 +3008,7 @@ msgstr ""
 #: templates/peachjam/article/_edit_button.html:3
 #: templates/peachjam/document/_debug.html:8
 #: templates/peachjam/document/_debug.html:21
-#: templates/peachjam/saved_document/_folder_list_item.html:12
+#: templates/peachjam/saved_document/_folder_list_item.html:37
 msgid "Edit"
 msgstr ""
 
@@ -2686,7 +3017,7 @@ msgid "Are you sure you want to delete this annotation?"
 msgstr ""
 
 #: templates/peachjam/_annotation_detail.html:21
-#: templates/peachjam/saved_document/_folders_list.html:68
+#: templates/peachjam/saved_document/_folders_list.html:75
 msgid "Delete"
 msgstr ""
 
@@ -2772,7 +3103,7 @@ msgstr ""
 
 #: templates/peachjam/_court_years_list.html:4
 #: templates/peachjam/_years_list.html:4 views/generic_views.py:424
-#: views/legislation.py:78
+#: views/legislation.py:79
 msgid "Years"
 msgstr ""
 
@@ -2944,15 +3275,15 @@ msgid "Filters"
 msgstr ""
 
 #: templates/peachjam/_document_table_form.html:26
-#: templates/peachjam/_messages.html:12
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:15
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:22
 #: templates/peachjam/saved_document/_anon_modal.html:8
 #: templates/peachjam/saved_document/_anon_modal.html:17
 #: templates/peachjam/saved_document/_limit_reached.html:8
 #: templates/peachjam/saved_document/_limit_reached.html:28
-#: templates/peachjam/saved_document/_update_modal.html:10
-#: templates/peachjam/saved_document/_update_modal.html:70
+#: templates/peachjam/saved_document/_update_modal.html:11
+#: templates/peachjam/saved_document/_update_modal.html:85
+#: templates/peachjam/user/_messages.html:12
 #: templates/peachjam/user_following/_button.html:17
 #: templates/peachjam/user_following/_button.html:21
 #: templates/peachjam/user_following/_create.html:18
@@ -2968,10 +3299,6 @@ msgstr ""
 msgid "Clear all"
 msgstr ""
 
-#: templates/peachjam/_document_table_form.html:76
-msgid "Clear"
-msgstr ""
-
 #: templates/peachjam/_document_table_form.html:82
 msgid "Skip to next filter group"
 msgstr ""
@@ -2983,10 +3310,6 @@ msgstr ""
 
 #: templates/peachjam/_document_table_form.html:173
 msgid "Sort documents by"
-msgstr ""
-
-#: templates/peachjam/_document_table_form.html:187
-msgid "Filter"
 msgstr ""
 
 #: templates/peachjam/_document_table_row.html:31
@@ -3422,51 +3745,6 @@ msgstr ""
 
 #: templates/peachjam/_timeline_events.html:40
 msgid "Read this version"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:27
-#: templates/peachjam/my/_saved_documents.html:4
-#: templates/peachjam/my/_saved_documents.html:19
-#: templates/peachjam/my/layout.html:42
-#: templates/peachjam/saved_document/_folders_list.html:4
-msgid "Saved documents"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:31 templates/peachjam/my/layout.html:51
-#: templates/peachjam/user_following/_delete.html:6
-#: templates/peachjam/user_following/list.html:4
-#: templates/peachjam/user_following/list.html:7
-msgid "Following"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:35
-#: templates/peachjam/my/_saved_searches.html:4
-#: templates/peachjam/my/_saved_searches.html:19
-#: templates/peachjam/my/layout.html:60
-msgid "Search alerts"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:42
-#: templates/peachjam/my/_frontpage.html:14
-#: templates/peachjam/my/layout.html:27 templates/user_account/home.html:10
-#: templates/user_account/layout.html:12
-msgid "My account"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:46
-msgid "Admin"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:62 templates/peachjam/_user_menu.html:72
-msgid "Enabled:"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:64
-msgid "Trace for 5 mins"
-msgstr ""
-
-#: templates/peachjam/_user_menu.html:74
-msgid "Profile for 5 mins"
 msgstr ""
 
 #: templates/peachjam/about.html:4 templates/peachjam/about.html:10
@@ -4080,6 +4358,12 @@ msgstr ""
 msgid "Explore"
 msgstr ""
 
+#: templates/peachjam/my/_frontpage.html:14
+#: templates/peachjam/my/layout.html:27 templates/peachjam/user/_menu.html:42
+#: templates/user_account/home.html:10 templates/user_account/layout.html:12
+msgid "My account"
+msgstr ""
+
 #: templates/peachjam/my/_frontpage_anon.html:4
 msgid "Your personal research space — save documents, add notes, and get updates when the law changes."
 msgstr ""
@@ -4096,12 +4380,62 @@ msgstr ""
 msgid "Follow courts and topics to stay up-to-date."
 msgstr ""
 
+#: templates/peachjam/my/_saved_documents.html:4
+#: templates/peachjam/my/_saved_documents.html:19
+#: templates/peachjam/my/layout.html:43
+#: templates/peachjam/saved_document/_folders_list.html:5
+#: templates/peachjam/user/_menu.html:27
+msgid "Saved documents"
+msgstr ""
+
 #: templates/peachjam/my/_saved_documents.html:16
 msgid "You haven't saved any documents yet."
 msgstr ""
 
+#: templates/peachjam/my/_saved_searches.html:4
+#: templates/peachjam/my/_saved_searches.html:19
+#: templates/peachjam/my/layout.html:69 templates/peachjam/user/_menu.html:35
+msgid "Search alerts"
+msgstr ""
+
 #: templates/peachjam/my/_saved_searches.html:16
 msgid "You don't have any search alerts."
+msgstr ""
+
+#: templates/peachjam/my/_subscription_locked_banner_body.html:6
+#, python-format
+msgid "Some %(label)s are over your subscription limit."
+msgstr ""
+
+#: templates/peachjam/my/_subscription_locked_banner_body.html:10
+#, python-format
+msgid "Some %(MY_LII)s items are over your subscription limit."
+msgstr ""
+
+#: templates/peachjam/my/_subscription_locked_banner_body.html:16
+#, python-format
+msgid "We'll keep %(count)s excess item until %(expires)s, after which it will be deleted. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to restore access."
+msgid_plural "We'll keep %(count)s excess items until %(expires)s, after which they will be deleted. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to restore access."
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/peachjam/my/layout.html:46
+msgid "Some saved documents are over your subscription limit"
+msgstr ""
+
+#: templates/peachjam/my/layout.html:56 templates/peachjam/user/_menu.html:31
+#: templates/peachjam/user_following/_delete.html:10
+#: templates/peachjam/user_following/list.html:4
+#: templates/peachjam/user_following/list.html:9
+msgid "Following"
+msgstr ""
+
+#: templates/peachjam/my/layout.html:59
+msgid "Some follows are over your subscription limit"
+msgstr ""
+
+#: templates/peachjam/my/layout.html:72
+msgid "Some search alerts are over your subscription limit"
 msgstr ""
 
 #: templates/peachjam/place_bill_list.html:19
@@ -4131,12 +4465,12 @@ msgid "Show uncommenced provisions for %(title)s"
 msgstr ""
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:22
-#: views/legislation.py:583 views/legislation.py:587
+#: views/legislation.py:594 views/legislation.py:598
 msgid "Resolved"
 msgstr ""
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:24
-#: views/legislation.py:588
+#: views/legislation.py:599
 msgid "Unresolved"
 msgstr ""
 
@@ -4200,65 +4534,85 @@ msgstr ""
 msgid "To save a document you need to be logged in"
 msgstr ""
 
+#: templates/peachjam/saved_document/_folder_list_item.html:13
+#: templates/peachjam/saved_document/_folders_list.html:87
+#: templates/peachjam/saved_document/_update.html:34
+#: templates/peachjam/saved_document/_update.html:62
+msgid "Saved beyond your subscription limit."
+msgstr ""
+
+#: templates/peachjam/saved_document/_folder_list_item.html:14
+#: templates/peachjam/saved_document/_update.html:65
+#: templates/peachjam/saved_document/_update_modal.html:22
+#, python-format
+msgid "We'll keep this saved document until %(expires)s. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to restore access."
+msgstr ""
+
 #: templates/peachjam/saved_document/_folder_list_item.html:21
+#: templates/peachjam/saved_document/_folder_list_item.html:46
 msgid "Remove from folder"
 msgstr ""
 
 #: templates/peachjam/saved_document/_folder_list_item.html:24
+#: templates/peachjam/saved_document/_folder_list_item.html:49
 msgid "Are you sure you want to remove this document from this folder?"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folder_list_item.html:36
+#: templates/peachjam/saved_document/_folder_list_item.html:61
 #, python-format
 msgid "%(comment_count)s comment"
 msgid_plural "%(comment_count)s comments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/peachjam/saved_document/_folders_list.html:8
+#: templates/peachjam/saved_document/_folders_list.html:9
 msgid "Folder name"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:10
+#: templates/peachjam/saved_document/_folders_list.html:11
 msgid "New Folder"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:13
-msgid "Save documents to simplify your research and stay up-to-date"
+#: templates/peachjam/saved_document/_folders_list.html:14
+msgid "Save documents to simplify your research and stay up-to-date."
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:20
-#: templates/peachjam/saved_document/_update_modal.html:44
+#: templates/peachjam/saved_document/_folders_list.html:21
+#: templates/peachjam/saved_document/_update_modal.html:58
 msgid "You have reached your limit for document folders."
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:22
-#: templates/peachjam/saved_document/_update_modal.html:46
+#: templates/peachjam/saved_document/_folders_list.html:23
 #, python-format
 msgid "<div>To add more folders, please upgrade to %(product)s.</div>"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:51
+#: templates/peachjam/saved_document/_folders_list.html:57
 msgid "Download to Excel"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:59
+#: templates/peachjam/saved_document/_folders_list.html:65
 msgid "Rename folder"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:60
+#: templates/peachjam/saved_document/_folders_list.html:66
 msgid "Rename"
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:67
+#: templates/peachjam/saved_document/_folders_list.html:74
 msgid "Are you sure you want to delete this folder? All saved documents in this folder will also be deleted."
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:81
+#: templates/peachjam/saved_document/_folders_list.html:89
+#, python-format
+msgid "We'll keep this folder until %(expires)s. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to restore access to its contents."
+msgstr ""
+
+#: templates/peachjam/saved_document/_folders_list.html:98
 msgid "No saved documents."
 msgstr ""
 
-#: templates/peachjam/saved_document/_folders_list.html:87
+#: templates/peachjam/saved_document/_folders_list.html:105
 msgid "You have no saved documents."
 msgstr ""
 
@@ -4271,40 +4625,49 @@ msgstr ""
 msgid "<div>To save more, please upgrade to %(product)s.</div>"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update.html:10
-#: templates/peachjam/saved_document/_update.html:26
+#: templates/peachjam/saved_document/_update.html:11
+#: templates/peachjam/saved_document/_update.html:27
 msgid "Saved"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update.html:67
+#: templates/peachjam/saved_document/_update.html:86
 msgid "edit"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update.html:67
+#: templates/peachjam/saved_document/_update.html:86
 msgid "Add a note"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update_modal.html:18
+#: templates/peachjam/saved_document/_update_modal.html:19
+msgid "Saved beyond your subscription limit"
+msgstr ""
+
+#: templates/peachjam/saved_document/_update_modal.html:32
 msgid "A note to yourself about this document"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update_modal.html:28
+#: templates/peachjam/saved_document/_update_modal.html:42
 msgid "New folder..."
 msgstr ""
 
-#: templates/peachjam/saved_document/_update_modal.html:36
+#: templates/peachjam/saved_document/_update_modal.html:50
 msgid "New folder name"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update_modal.html:55
+#: templates/peachjam/saved_document/_update_modal.html:60
+#, python-format
+msgid "To add more folders, please upgrade to %(product)s."
+msgstr ""
+
+#: templates/peachjam/saved_document/_update_modal.html:70
 msgid "All saved documents"
 msgstr ""
 
-#: templates/peachjam/saved_document/_update_modal.html:64
+#: templates/peachjam/saved_document/_update_modal.html:79
 msgid "Are you sure you want to unsave? This will also remove all comments."
 msgstr ""
 
-#: templates/peachjam/saved_document/_update_modal.html:65
+#: templates/peachjam/saved_document/_update_modal.html:80
 msgid "Unsave"
 msgstr ""
 
@@ -4354,6 +4717,22 @@ msgstr ""
 msgid "Navigation"
 msgstr ""
 
+#: templates/peachjam/user/_menu.html:46
+msgid "Admin"
+msgstr ""
+
+#: templates/peachjam/user/_menu.html:62 templates/peachjam/user/_menu.html:72
+msgid "Enabled:"
+msgstr ""
+
+#: templates/peachjam/user/_menu.html:64
+msgid "Trace for 5 mins"
+msgstr ""
+
+#: templates/peachjam/user/_menu.html:74
+msgid "Profile for 5 mins"
+msgstr ""
+
 #: templates/peachjam/user_following/_button.html:7
 #: templates/peachjam/user_following/_button.html:13
 #: templates/peachjam/user_following/_create.html:8
@@ -4371,6 +4750,20 @@ msgstr ""
 msgid "To follow more topics, please upgrade to %(product)s."
 msgstr ""
 
+#: templates/peachjam/user_following/_delete.html:8
+msgid "Following paused"
+msgstr ""
+
+#: templates/peachjam/user_following/_delete.html:15
+msgid "Following paused by your subscription limit."
+msgstr ""
+
+#: templates/peachjam/user_following/_delete.html:16
+#: templates/peachjam/user_following/list.html:24
+#, python-format
+msgid "We'll keep this follow until %(expires)s. <a href=\"%(change_subscription_url)s\">Upgrade your subscription</a> to resume updates."
+msgstr ""
+
 #: templates/peachjam/user_following/_timeline.html:14
 #, python-format
 msgid "%(n_more)s more for %(obj)s"
@@ -4384,20 +4777,24 @@ msgstr ""
 msgid "Load more"
 msgstr ""
 
-#: templates/peachjam/user_following/list.html:8
+#: templates/peachjam/user_following/list.html:10
 msgid "We'll email you when new documents are added for topics that you follow."
 msgstr ""
 
-#: templates/peachjam/user_following/list.html:20
+#: templates/peachjam/user_following/list.html:23
+msgid "Paused by your subscription limit."
+msgstr ""
+
+#: templates/peachjam/user_following/list.html:34
 #, python-format
 msgid "Alerted %(ago)s ago"
 msgstr ""
 
-#: templates/peachjam/user_following/list.html:29
+#: templates/peachjam/user_following/list.html:43
 msgid "Unfollow"
 msgstr ""
 
-#: templates/peachjam/user_following/list.html:34
+#: templates/peachjam/user_following/list.html:48
 msgid "You are not following anything. Click the Follow button on pages across the site to start following."
 msgstr ""
 
@@ -4524,11 +4921,11 @@ msgstr ""
 msgid "Your message has been sent. Thank you!"
 msgstr ""
 
-#: views/accounts.py:178
+#: views/accounts.py:193
 msgid "Your details have been updated."
 msgstr ""
 
-#: views/accounts.py:210
+#: views/accounts.py:225
 msgid "Your account has been deleted."
 msgstr ""
 
@@ -4604,6 +5001,66 @@ msgstr ""
 msgid "Article"
 msgstr ""
 
+#: views/judges.py:126
+msgid "{} alias records currently share this exact name."
+msgstr ""
+
+#: views/judges.py:132
+msgid "No matching legacy Judge row exists for this alias name."
+msgstr ""
+
+#: views/judges.py:181
+msgid "Bench rows still point here, but this judge person has no aliases."
+msgstr ""
+
+#: views/judges.py:186
+msgid "This judge person currently owns aliases only."
+msgstr ""
+
+#: views/judges.py:352
+msgid "No judge identity changes were applied."
+msgstr ""
+
+#: views/judges.py:355
+msgid "Created judge person"
+msgstr ""
+
+#: views/judges.py:357
+msgid "Updated judge person"
+msgstr ""
+
+#: views/judges.py:360
+msgid "Moved {} selected aliases to this judge person, refreshed their bench links automatically, and deleted {} now-empty source judge people."
+msgstr ""
+
+#: views/judges.py:402
+msgid "Deleted {} aliases"
+msgstr ""
+
+#: views/judges.py:406
+msgid "Deleted {} judge people"
+msgstr ""
+
+#: views/judges.py:412
+msgid "Cleared {} matched alias links on bench rows"
+msgstr ""
+
+#: views/judges.py:418
+msgid "Cleared {} judge person links on bench rows"
+msgstr ""
+
+#: views/judges.py:423
+msgid "No records were deleted"
+msgstr ""
+
+#: views/judges.py:426
+msgid "Judge identity workflow completed."
+msgstr ""
+
+#: views/judges.py:489
+msgid "Judge identity workflow"
+msgstr ""
+
 #: views/judgment.py:290
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr ""
@@ -4627,73 +5084,73 @@ msgid_plural "Cited by %(count)s judgments"
 msgstr[0] ""
 msgstr[1] ""
 
-#: views/legislation.py:217
+#: views/legislation.py:218
 #, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr ""
 
-#: views/legislation.py:229
+#: views/legislation.py:230
 #, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
 msgstr ""
 
-#: views/legislation.py:242
+#: views/legislation.py:243
 #, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr ""
 
-#: views/legislation.py:257
+#: views/legislation.py:258
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
 msgstr ""
 
-#: views/legislation.py:268
+#: views/legislation.py:269
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force."
 msgstr ""
 
-#: views/legislation.py:305
+#: views/legislation.py:299
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
 msgstr ""
 
-#: views/legislation.py:318
+#: views/legislation.py:312
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
 msgstr ""
 
-#: views/legislation.py:336
+#: views/legislation.py:330
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr ""
 
-#: views/legislation.py:352
+#: views/legislation.py:346
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
 msgstr ""
 
-#: views/legislation.py:357
+#: views/legislation.py:351
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
 msgstr ""
 
-#: views/legislation.py:362
+#: views/legislation.py:356
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr ""
 
-#: views/legislation.py:386
+#: views/legislation.py:380
 msgid "This version is at a future date."
 msgstr ""
 
-#: views/legislation.py:429
+#: views/legislation.py:438
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr ""
 
-#: views/legislation.py:929
+#: views/legislation.py:940
 msgid "document with similar provisions"
 msgstr ""
 
-#: views/legislation.py:930
+#: views/legislation.py:941
 msgid "documents with similar provisions"
 msgstr ""

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-06-30 15:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,27 +103,27 @@ msgstr ""
 msgid "Closed"
 msgstr ""
 
-#: models.py:655
+#: models.py:691
 msgid "Default product offering"
 msgstr ""
 
-#: models.py:660
+#: models.py:696
 msgid "These products are highlighted in the product listing."
 msgstr ""
 
-#: models.py:668
+#: models.py:704
 msgid "Trial product offering"
 msgstr ""
 
-#: models.py:669
+#: models.py:705
 msgid "If set, this product offering is used for trials."
 msgstr ""
 
-#: models.py:673
+#: models.py:709
 msgid "Trial duration (days)"
 msgstr ""
 
-#: models.py:674
+#: models.py:710
 msgid "Number of days for the trial period."
 msgstr ""
 
