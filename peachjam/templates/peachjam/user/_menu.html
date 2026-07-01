@@ -79,7 +79,7 @@
       </ul>
     </li>
   </ul>
-{% elif PEACHJAM_SETTINGS.allow_signups %}
+{% elif PEACHJAM_SETTINGS.allow_signups and not DISABLE_ACCOUNT_URLS %}
   <ul class="navbar-nav ms-auto me-2" hx-swap-oob="true" id="user-menu">
     <li class="nav-item">
       <a class="btn btn-primary"

@@ -1,3 +1,5 @@
+from importlib import reload
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from allauth.account.internal.flows.login_by_code import LoginCodeVerificationProcess
@@ -7,8 +9,9 @@ from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import AnonymousUser, Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
-from django.urls import reverse
+from django.urls import clear_url_caches, reverse
 
 from peachjam.auth import (
     _patched_finish,
@@ -427,6 +430,37 @@ class PeachjamConfirmLoginCodeFormTests(TestCase):
         self.assertFalse(form.is_valid())
 
 
+class HeaderUserMenuTests(TestCase):
+    def render_menu(self, allow_signups=True, disable_account_urls=False):
+        request = RequestFactory().get("/")
+        request.user = AnonymousUser()
+        request.htmx = SimpleNamespace(current_url_abs_path="/")
+        context = {
+            "request": request,
+            "user": request.user,
+            "PEACHJAM_SETTINGS": SimpleNamespace(allow_signups=allow_signups),
+            "DISABLE_ACCOUNT_URLS": disable_account_urls,
+        }
+        return render_to_string("peachjam/user/_menu.html", context, request=request)
+
+    def test_header_shows_login_button_when_signups_allowed_and_account_urls_enabled(
+        self,
+    ):
+        html = self.render_menu(allow_signups=True, disable_account_urls=False)
+
+        self.assertIn(f'href="{reverse("account_login")}?next=/"', html)
+
+    def test_header_hides_login_button_when_signups_disabled(self):
+        html = self.render_menu(allow_signups=False, disable_account_urls=False)
+
+        self.assertNotIn(f'href="{reverse("account_login")}?next=/"', html)
+
+    def test_header_hides_login_button_when_account_urls_disabled(self):
+        html = self.render_menu(allow_signups=True, disable_account_urls=True)
+
+        self.assertNotIn(f'href="{reverse("account_login")}?next=/"', html)
+
+
 class SignupViewTests(TestCase):
     @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False})
     def test_signup_view_login_link_includes_next_when_otp_disabled(self):
@@ -466,3 +500,40 @@ class SignupViewTests(TestCase):
 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], f"{reverse('account_login')}?next=foo")
+
+
+@override_settings(
+    PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True, "DISABLE_ACCOUNT_URLS": True}
+)
+class DisabledAccountUrlsTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        from peachjam.urls import accounts
+
+        self.accounts = reload(accounts)
+        clear_url_caches()
+
+    def test_disabled_patterns_are_prepended(self):
+        disabled_patterns = self.accounts.urlpatterns[:2]
+
+        self.assertEqual(disabled_patterns[0].pattern._route, "")
+        self.assertEqual(disabled_patterns[1].pattern._route, "<path:path>")
+        self.assertIs(
+            disabled_patterns[0].callback.view_class,
+            self.accounts.DisabledAccountUrlsView,
+        )
+        self.assertIs(
+            disabled_patterns[1].callback.view_class,
+            self.accounts.DisabledAccountUrlsView,
+        )
+
+    def test_otp_account_urls_are_still_registered_behind_disabled_catch_all(self):
+        pattern_names = [
+            pattern.name
+            for pattern in self.accounts.urlpatterns
+            if hasattr(pattern, "name") and pattern.name
+        ]
+
+        self.assertIn("account_signup", pattern_names)
+        self.assertIn("account_request_login_code", pattern_names)
+        self.assertIn("account_confirm_login_code", pattern_names)

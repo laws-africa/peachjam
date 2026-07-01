@@ -228,6 +228,7 @@ PEACHJAM = {
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
     "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
+    "DISABLE_ACCOUNT_URLS": os.environ.get("DISABLE_ACCOUNT_URLS", "false") == "true",
     "ALL_USERS_PERMISSION_GROUP": "AllUsers",
 }
 
