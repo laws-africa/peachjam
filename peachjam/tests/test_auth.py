@@ -431,38 +431,85 @@ class PeachjamConfirmLoginCodeFormTests(TestCase):
 
 
 class HeaderUserMenuTests(TestCase):
-    def render_menu(self, allow_signups=True, disable_account_urls=False):
+    fixtures = ["tests/languages", "tests/users"]
+
+    def render_menu(self, disable_accounts=False):
         request = RequestFactory().get("/")
         request.user = AnonymousUser()
         request.htmx = SimpleNamespace(current_url_abs_path="/")
         context = {
             "request": request,
             "user": request.user,
-            "PEACHJAM_SETTINGS": SimpleNamespace(allow_signups=allow_signups),
-            "DISABLE_ACCOUNT_URLS": disable_account_urls,
+            "PEACHJAM_SETTINGS": SimpleNamespace(),
+            "DISABLE_ACCOUNTS": disable_accounts,
         }
         return render_to_string("peachjam/user/_menu.html", context, request=request)
 
-    def test_header_shows_login_button_when_signups_allowed_and_account_urls_enabled(
-        self,
-    ):
-        html = self.render_menu(allow_signups=True, disable_account_urls=False)
+    def test_header_shows_login_button_when_account_urls_enabled(self):
+        html = self.render_menu(disable_accounts=False)
 
         self.assertIn(f'href="{reverse("account_login")}?next=/"', html)
 
-    def test_header_hides_login_button_when_signups_disabled(self):
-        html = self.render_menu(allow_signups=False, disable_account_urls=False)
-
-        self.assertNotIn(f'href="{reverse("account_login")}?next=/"', html)
-
     def test_header_hides_login_button_when_account_urls_disabled(self):
-        html = self.render_menu(allow_signups=True, disable_account_urls=True)
+        html = self.render_menu(disable_accounts=True)
 
         self.assertNotIn(f'href="{reverse("account_login")}?next=/"', html)
+
+    def test_authenticated_header_hides_frontend_account_links_when_accounts_disabled(
+        self,
+    ):
+        request = RequestFactory().get("/")
+        request.user = User.objects.first()
+        request.user.is_staff = True
+        request.htmx = SimpleNamespace(current_url_abs_path="/")
+        context = {
+            "request": request,
+            "user": request.user,
+            "PEACHJAM_SETTINGS": SimpleNamespace(
+                save_documents_enabled=False,
+                save_searches_enabled=False,
+                follows_enabled=False,
+            ),
+            "DISABLE_ACCOUNTS": True,
+            "MY_LII": "My Peachjam",
+            "sentry_enabled": False,
+        }
+
+        html = render_to_string("peachjam/user/_menu.html", context, request=request)
+
+        self.assertNotIn(reverse("my_home"), html)
+        self.assertNotIn(reverse("my_account"), html)
+        self.assertNotIn(reverse("account_logout"), html)
+        self.assertIn(reverse("admin:index"), html)
+
+    def test_authenticated_header_hides_feature_links_without_permissions(self):
+        request = RequestFactory().get("/")
+        request.user = User.objects.first()
+        request.htmx = SimpleNamespace(current_url_abs_path="/")
+        context = {
+            "request": request,
+            "user": request.user,
+            "PEACHJAM_SETTINGS": SimpleNamespace(
+                save_documents_enabled=True,
+                save_searches_enabled=True,
+                follows_enabled=True,
+            ),
+            "DISABLE_ACCOUNTS": False,
+            "MY_LII": "My Peachjam",
+            "sentry_enabled": False,
+        }
+
+        html = render_to_string("peachjam/user/_menu.html", context, request=request)
+
+        self.assertNotIn(reverse("folder_list"), html)
+        self.assertNotIn(reverse("user_following_list"), html)
+        self.assertNotIn(reverse("search:saved_search_list"), html)
 
 
 class SignupViewTests(TestCase):
-    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False})
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False, "DISABLE_ACCOUNTS": False}
+    )
     def test_signup_view_login_link_includes_next_when_otp_disabled(self):
         response = self.client.get(reverse("account_signup"), {"next": "foo"})
 
@@ -473,7 +520,9 @@ class SignupViewTests(TestCase):
             html=False,
         )
 
-    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False})
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": False, "DISABLE_ACCOUNTS": False}
+    )
     def test_login_view_signup_link_includes_next_when_otp_disabled(self):
         response = self.client.get(reverse("account_login"), {"next": "foo"})
 
@@ -484,7 +533,9 @@ class SignupViewTests(TestCase):
             html=False,
         )
 
-    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True})
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True, "DISABLE_ACCOUNTS": False}
+    )
     def test_signup_view_redirects_to_login_when_otp_enabled(self):
         from peachjam.views.accounts import SignupView
 
@@ -494,7 +545,9 @@ class SignupViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], reverse("account_login"))
 
-    @override_settings(PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True})
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True, "DISABLE_ACCOUNTS": False}
+    )
     def test_signup_view_redirects_to_login_with_next_when_otp_enabled(self):
         response = self.client.get(reverse("account_signup"), {"next": "foo"})
 
@@ -502,8 +555,41 @@ class SignupViewTests(TestCase):
         self.assertEqual(response["Location"], f"{reverse('account_login')}?next=foo")
 
 
+class AccountPromptTemplateTests(TestCase):
+    def render_template(self, template_name, context=None):
+        request = RequestFactory().get("/")
+        request.user = AnonymousUser()
+        request.htmx = SimpleNamespace(
+            current_url_abs_path="/", current_url="http://testserver/"
+        )
+        base_context = {
+            "request": request,
+            "user": request.user,
+            "DISABLE_ACCOUNTS": True,
+            "next_url": "/",
+            "SUPPORT_EMAIL": "support@example.com",
+            "saved_search": SimpleNamespace(pk=False, is_subscription_locked=False),
+            "taxonomy": SimpleNamespace(name="Restricted"),
+            "lowest_product": None,
+        }
+        if context:
+            base_context.update(context)
+        return render_to_string(template_name, base_context, request=request)
+
+    def test_download_403_hides_account_links_when_accounts_disabled(self):
+        html = self.render_template("peachjam_search/_download_403.html")
+
+        self.assertNotIn(reverse("account_login"), html)
+        self.assertNotIn(reverse("account_signup"), html)
+
+    def test_saved_document_modal_hides_login_button_when_accounts_disabled(self):
+        html = self.render_template("peachjam/saved_document/_anon_modal.html")
+
+        self.assertNotIn(reverse("account_login"), html)
+
+
 @override_settings(
-    PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True, "DISABLE_ACCOUNT_URLS": True}
+    PEACHJAM={**settings.PEACHJAM, "AUTH_OTP": True, "DISABLE_ACCOUNTS": True}
 )
 class DisabledAccountUrlsTests(TestCase):
     def setUp(self):

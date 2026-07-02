@@ -35,7 +35,7 @@
             <a href="{% url "my_home" %}"
                class="nav-link {% if view.tab == "my" %}active{% endif %}">{{ MY_LII }}</a>
           </li>
-          {% if PEACHJAM_SETTINGS.allow_save_documents %}
+          {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
             <li class="nav-item" role="presentation">
               <a href="{% url "folder_list" %}"
                  class="nav-link {% if view.tab == "saved_documents" %}active{% endif %}">
@@ -48,7 +48,7 @@
               </a>
             </li>
           {% endif %}
-          {% if perms.peachjam.view_userfollowing %}
+          {% if PEACHJAM_SETTINGS.follows_enabled and perms.peachjam.view_userfollowing %}
             <li class="nav-item" role="presentation">
               <a href="{% url "user_following_list" %}"
                  class="nav-link {% if view.tab == "user_following" %}active{% endif %}">
@@ -61,7 +61,7 @@
               </a>
             </li>
           {% endif %}
-          {% if PEACHJAM_SETTINGS.allow_save_searches %}
+          {% if PEACHJAM_SETTINGS.save_searches_enabled and perms.peachjam_search.view_savedsearch %}
             <li class="nav-item" role="presentation">
               <a href="{% url "search:saved_search_list" %}"
                  class="nav-link {% if view.tab == "saved_searches" %}active{% endif %}">

@@ -22,7 +22,7 @@ class DisabledAccountUrlsView(View):
 
 urlpatterns = []
 
-if settings.PEACHJAM["DISABLE_ACCOUNT_URLS"]:
+if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
     urlpatterns += [
         path("", DisabledAccountUrlsView.as_view()),
         path("<path:path>", DisabledAccountUrlsView.as_view()),

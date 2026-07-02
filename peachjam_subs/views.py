@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
@@ -6,7 +7,6 @@ from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView
 
-from peachjam.models import pj_settings
 from peachjam.views import AtomicPostMixin
 from peachjam_subs.models import Subscription
 
@@ -46,6 +46,6 @@ class SubscribeView(TemplateView):
     template_name = "peachjam_subs/subscribe.html"
 
     def get(self, request, *args, **kwargs):
-        if not pj_settings().allow_signups:
+        if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
             return redirect("home_page")
         return super().get(request, *args, **kwargs)
