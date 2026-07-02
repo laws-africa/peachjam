@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -72,12 +73,6 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow signups via social accounts"),
     )
-    allow_signups = models.BooleanField(
-        verbose_name=_("allow signups"),
-        default=True,
-        help_text=_("Allow users to create accounts"),
-    )
-
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True
     )
@@ -168,6 +163,18 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow searches to be saved."),
     )
+    allow_follows = models.BooleanField(
+        verbose_name=_("allow follows"),
+        default=True,
+        help_text=_(
+            "Allow courts, authors, topics, and other entities to be followed."
+        ),
+    )
+    allow_annotations = models.BooleanField(
+        verbose_name=_("allow annotations"),
+        default=True,
+        help_text=_("Allow private document annotations."),
+    )
     show_contact_form = models.BooleanField(
         verbose_name=_("show contact form"),
         default=False,
@@ -210,6 +217,26 @@ class PeachJamSettings(SingletonModel):
         if self.twitter_link:
             # https://foo.com/bar -> bar
             return "@" + self.twitter_link.split("/", 4)[-1]
+
+    @property
+    def accounts_enabled(self):
+        return not settings.PEACHJAM["DISABLE_ACCOUNTS"]
+
+    @property
+    def save_documents_enabled(self):
+        return self.accounts_enabled and self.allow_save_documents
+
+    @property
+    def save_searches_enabled(self):
+        return self.accounts_enabled and self.allow_save_searches
+
+    @property
+    def follows_enabled(self):
+        return self.accounts_enabled and self.allow_follows
+
+    @property
+    def annotations_enabled(self):
+        return self.accounts_enabled and self.allow_annotations
 
     def __str__(self):
         return "Settings"

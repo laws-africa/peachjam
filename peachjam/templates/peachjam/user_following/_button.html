@@ -19,7 +19,7 @@
       <div class="modal-body">{% include "peachjam_subs/_subscription_required.html" %}</div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-        {% if not request.user.is_authenticated %}
+        {% if not request.user.is_authenticated and not DISABLE_ACCOUNTS %}
           <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path }}"
              class="btn btn-primary">{% trans 'Log in' %}</a>
         {% endif %}

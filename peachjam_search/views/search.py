@@ -353,7 +353,7 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
 
 class AllowSavedSearchesMixin:
     def dispatch(self, *args, **kwargs):
-        if not pj_settings().allow_save_searches:
+        if not pj_settings().save_searches_enabled:
             raise Http404("Saving searches is not allowed.")
         return super().dispatch(*args, **kwargs)
 

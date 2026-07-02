@@ -19,9 +19,15 @@
       {% if request.user.is_authenticated %}
         <p class="lead">{% trans "You don't have permission to view this document." %}</p>
       {% else %}
-        <p class="lead">{% trans "You must be logged in to view this document." %}</p>
-        <a class="btn btn-success"
-           href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a>
+        {% if not DISABLE_ACCOUNTS %}
+          <p class="lead">{% trans "You must be logged in to view this document." %}</p>
+          <a class="btn btn-success"
+             href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a>
+        {% else %}
+          <p class="lead">
+            {% trans "Viewing this document requires an account, and accounts are not available on this site." %}
+          </p>
+        {% endif %}
       {% endif %}
     </div>
   </div>

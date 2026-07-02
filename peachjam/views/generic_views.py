@@ -482,7 +482,7 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def show_save_doc_button(self):
-        return pj_settings().allow_save_documents and (
+        return pj_settings().save_documents_enabled and (
             not self.request.user.is_authenticated
             or self.request.user.has_perm("peachjam.add_saveddocument")
         )
@@ -707,6 +707,8 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def check_annotation_permission(self, context):
+        if not pj_settings().annotations_enabled:
+            return
         if not self.request.user.has_perm("peachjam.add_annotation"):
             context["annotation_subscription_required"] = True
             context["annotation_subscription_product"] = (

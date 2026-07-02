@@ -65,9 +65,13 @@
           <a href="{% url 'search:saved_search_list' %}">{% trans "All search alerts" %}</a>
         </div>
       {% else %}
-        {% blocktrans trimmed %}
-          You are not logged in. Please log in to receive alerts when we find new matches for your search.
-        {% endblocktrans %}
+        {% if not DISABLE_ACCOUNTS %}
+          {% blocktrans trimmed %}
+            You are not logged in. Please log in to receive alerts when we find new matches for your search.
+          {% endblocktrans %}
+        {% else %}
+          {% trans "Search alerts require an account, and accounts are not available on this site." %}
+        {% endif %}
       {% endif %}
     </div>
     <div class="modal-footer {% if saved_search.pk %}d-flex justify-content-between{% endif %}">
@@ -93,8 +97,10 @@
             </button>
           {% endif %}
         {% else %}
-          <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}"
-             class="btn btn-primary">{% trans 'Login' %}</a>
+          {% if not DISABLE_ACCOUNTS %}
+            <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}"
+               class="btn btn-primary">{% trans 'Login' %}</a>
+          {% endif %}
         {% endif %}
       </div>
     </div>

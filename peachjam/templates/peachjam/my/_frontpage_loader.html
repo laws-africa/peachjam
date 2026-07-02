@@ -1,4 +1,4 @@
-{% if PEACHJAM_SETTINGS.allow_signups %}
+{% if not DISABLE_ACCOUNTS %}
   <div class="bg-light my-5">
     <div class="container py-4">
       <div hx-get="{% url 'my_frontpage' %}" hx-trigger="load">{% include 'peachjam/my/_frontpage_anon.html' %}</div>
