@@ -8,7 +8,7 @@
             aria-label="{% trans "Close" %}"></button>
   </div>
   <div class="modal-body">
-    {% if not DISABLE_ACCOUNTS %}
+    {% if PEACHJAM_SETTINGS.accounts_enabled %}
       <p>
         <strong>{% trans 'You are not logged in' %}.</strong>
       </p>
@@ -19,7 +19,7 @@
   </div>
   <div class="modal-footer d-flex">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-    {% if not DISABLE_ACCOUNTS %}
+    {% if PEACHJAM_SETTINGS.accounts_enabled %}
       <a href="{% url 'account_login' %}?next={{ next_url|urlencode }}"
          class="btn btn-primary">{% trans 'Log in' %}</a>
     {% endif %}

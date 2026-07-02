@@ -163,6 +163,13 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow searches to be saved."),
     )
+    allow_signups = models.BooleanField(
+        verbose_name=_("allow signups"),
+        default=True,
+        help_text=_(
+            "Deprecated compatibility field. Use the global accounts switch instead."
+        ),
+    )
     allow_follows = models.BooleanField(
         verbose_name=_("allow follows"),
         default=True,

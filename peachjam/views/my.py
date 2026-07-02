@@ -1,6 +1,5 @@
 import datetime
 
-from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models.aggregates import Count
 from django.http.response import Http404
@@ -38,7 +37,7 @@ class MyHomeView(LoginRequiredMixin, CommonContextMixin, TemplateView):
     timeline_truncated = False
 
     def get(self, request, *args, **kwargs):
-        if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
+        if not pj_settings().accounts_enabled:
             raise Http404()
         return super().get(request, *args, **kwargs)
 
@@ -55,7 +54,7 @@ class MyFrontpageView(CommonContextMixin, TemplateView):
     max_docs = 5
 
     def get(self, request, *args, **kwargs):
-        if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
+        if not pj_settings().accounts_enabled:
             raise Http404()
         return super().get(request, *args, **kwargs)
 

@@ -19,7 +19,7 @@
       {% if request.user.is_authenticated %}
         <p class="lead">{% trans "You don't have permission to view this document." %}</p>
       {% else %}
-        {% if not DISABLE_ACCOUNTS %}
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
           <p class="lead">{% trans "You must be logged in to view this document." %}</p>
           <a class="btn btn-success"
              href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Log in" %}</a>

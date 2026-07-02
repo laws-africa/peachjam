@@ -433,25 +433,24 @@ class PeachjamConfirmLoginCodeFormTests(TestCase):
 class HeaderUserMenuTests(TestCase):
     fixtures = ["tests/languages", "tests/users"]
 
-    def render_menu(self, disable_accounts=False):
+    def render_menu(self, accounts_enabled=True):
         request = RequestFactory().get("/")
         request.user = AnonymousUser()
         request.htmx = SimpleNamespace(current_url_abs_path="/")
         context = {
             "request": request,
             "user": request.user,
-            "PEACHJAM_SETTINGS": SimpleNamespace(),
-            "DISABLE_ACCOUNTS": disable_accounts,
+            "PEACHJAM_SETTINGS": SimpleNamespace(accounts_enabled=accounts_enabled),
         }
         return render_to_string("peachjam/user/_menu.html", context, request=request)
 
     def test_header_shows_login_button_when_account_urls_enabled(self):
-        html = self.render_menu(disable_accounts=False)
+        html = self.render_menu(accounts_enabled=True)
 
         self.assertIn(f'href="{reverse("account_login")}?next=/"', html)
 
     def test_header_hides_login_button_when_account_urls_disabled(self):
-        html = self.render_menu(disable_accounts=True)
+        html = self.render_menu(accounts_enabled=False)
 
         self.assertNotIn(f'href="{reverse("account_login")}?next=/"', html)
 
@@ -466,11 +465,11 @@ class HeaderUserMenuTests(TestCase):
             "request": request,
             "user": request.user,
             "PEACHJAM_SETTINGS": SimpleNamespace(
+                accounts_enabled=False,
                 save_documents_enabled=False,
                 save_searches_enabled=False,
                 follows_enabled=False,
             ),
-            "DISABLE_ACCOUNTS": True,
             "MY_LII": "My Peachjam",
             "sentry_enabled": False,
         }
@@ -490,11 +489,11 @@ class HeaderUserMenuTests(TestCase):
             "request": request,
             "user": request.user,
             "PEACHJAM_SETTINGS": SimpleNamespace(
+                accounts_enabled=True,
                 save_documents_enabled=True,
                 save_searches_enabled=True,
                 follows_enabled=True,
             ),
-            "DISABLE_ACCOUNTS": False,
             "MY_LII": "My Peachjam",
             "sentry_enabled": False,
         }
@@ -565,7 +564,7 @@ class AccountPromptTemplateTests(TestCase):
         base_context = {
             "request": request,
             "user": request.user,
-            "DISABLE_ACCOUNTS": True,
+            "PEACHJAM_SETTINGS": SimpleNamespace(accounts_enabled=False),
             "next_url": "/",
             "SUPPORT_EMAIL": "support@example.com",
             "saved_search": SimpleNamespace(pk=False, is_subscription_locked=False),

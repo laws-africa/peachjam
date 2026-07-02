@@ -19,7 +19,7 @@
             </div>
           {% endif %}
         </li>
-        {% if not DISABLE_ACCOUNTS %}
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
           <li>
             <a class="dropdown-item" href="{% url 'my_home' %}">{{ MY_LII }}</a>
           </li>
@@ -42,7 +42,7 @@
         <li>
           <hr class="dropdown-divider"/>
         </li>
-        {% if not DISABLE_ACCOUNTS %}
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
           <li>
             <a class="dropdown-item" href="{% url 'my_account' %}">{% trans "My account" %}</a>
           </li>
@@ -52,7 +52,7 @@
             <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
           </li>
         {% endif %}
-        {% if not DISABLE_ACCOUNTS %}
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
           <li>
             <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
           </li>
@@ -87,7 +87,7 @@
       </ul>
     </li>
   </ul>
-{% elif not DISABLE_ACCOUNTS %}
+{% elif PEACHJAM_SETTINGS.accounts_enabled %}
   <ul class="navbar-nav ms-auto me-2" hx-swap-oob="true" id="user-menu">
     <li class="nav-item">
       <a class="btn btn-primary"
