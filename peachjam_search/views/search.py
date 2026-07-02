@@ -210,6 +210,7 @@ class DocumentSearchView(TemplateView):
         # TODO: first 1000 hits
         engine.page = 1
         engine.page_size = 1000
+        engine.expand_retriever_window_to_page()
         response = engine.execute()
         pks = [int(hit.meta.id) for hit in response.hits]
 

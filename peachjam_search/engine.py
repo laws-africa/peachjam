@@ -346,6 +346,14 @@ class SearchEngine:
         # TODO: guard against going beyond end of results
         return search[(self.page - 1) * self.page_size : self.page * self.page_size]
 
+    def expand_retriever_window_to_page(self):
+        """Ensure hybrid retrievers can return the full requested page."""
+        if self.mode == "hybrid":
+            self.rrf_rank_window_size = max(
+                self.rrf_rank_window_size,
+                self.page * self.page_size,
+            )
+
     def add_extra(self, search):
         return search.extra(explain=self.explain)
 
