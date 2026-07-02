@@ -23,6 +23,9 @@ class DisabledAccountUrlsView(View):
 urlpatterns = []
 
 if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
+    # Keep the normal account URL patterns registered below so reverse() still
+    # works, but prepend catch-all routes so incoming account requests resolve
+    # to 404 while accounts are disabled.
     urlpatterns += [
         path("", DisabledAccountUrlsView.as_view()),
         path("<path:path>", DisabledAccountUrlsView.as_view()),

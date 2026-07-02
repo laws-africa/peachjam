@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0309_remove_peachjamsettings_allow_signups"),
+        ("peachjam", "0308_subscription_lock_fields"),
     ]
 
     operations = [
