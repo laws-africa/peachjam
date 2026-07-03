@@ -942,13 +942,25 @@ export default {
         params.set('position', item.getAttribute('data-position'));
         params.set('search_trace', this.searchInfo.trace_id);
         try {
-          fetch(`${this.urlPrefix}/search/api/click/`, {
+          const response = await fetch(`${this.urlPrefix}/search/api/click/`, {
             method: 'POST',
-            headers: await authHeaders(),
+            keepalive: true,
             body: params
           });
+          if (!response.ok) {
+            console.error('Search click tracking failed', {
+              status: response.status,
+              statusText: response.statusText,
+              url: response.url,
+              contentType: response.headers.get('content-type'),
+              cfMitigated: response.headers.get('cf-mitigated'),
+              cfRay: response.headers.get('cf-ray')
+            });
+            throw new Error(`Search click tracking failed with status ${response.status}`);
+          }
         } catch (err) {
-          console.log(err);
+          console.error(err);
+          throw err;
         }
       }
     },
