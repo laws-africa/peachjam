@@ -9,6 +9,10 @@ def date_to_timestamp(date):
     return int(datetime.combine(date, time(0)).timestamp())
 
 
+def datetime_to_timestamp(value):
+    return int(value.timestamp())
+
+
 class CustomerIO(PeachjamCustomerIO):
     def get_user_details(self, user):
         details = super().get_user_details(user)
@@ -85,4 +89,21 @@ class CustomerIO(PeachjamCustomerIO):
                 subscription.user.userprofile.tracking_id_str,
                 "Subscription closed",
                 self.get_subscription_details(subscription),
+            )
+
+    def track_subscription_limited_data_locked(
+        self, user, subscription, feature, locked_count, active_count, limit, expires_at
+    ):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Subscription limited data locked",
+                {
+                    **self.get_subscription_details(subscription),
+                    "feature": feature,
+                    "locked_count": locked_count,
+                    "active_count": active_count,
+                    "limit": limit,
+                    "expires_at": datetime_to_timestamp(expires_at),
+                },
             )

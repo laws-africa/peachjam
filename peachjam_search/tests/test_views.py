@@ -2,16 +2,17 @@ from types import SimpleNamespace
 from unittest.mock import patch
 from uuid import uuid4
 
+from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.template.loader import render_to_string
-from django.test import RequestFactory, TestCase
+from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import SearchTrace
 from peachjam_search.views.api import PortionSearchView
@@ -115,6 +116,53 @@ class SearchViewsTest(TestCase):
             response.headers["Content-Type"],
         )
         self.assertIn("no-cache", response.headers["Cache-Control"])
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SEARCH_SEMANTIC": True,
+        }
+    )
+    @patch("peachjam_search.engine.SearchEngine.get_query_embedding")
+    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    def test_hybrid_download_expands_retriever_window(
+        self, mock_search, mock_get_query_embedding
+    ):
+        doc = CoreDocument.objects.first()
+        mock_get_query_embedding.return_value = [0.1, 0.2]
+
+        def resp(search):
+            query = search.to_dict()
+            self.assertEqual(
+                1000,
+                query["retriever"]["rrf"]["rank_window_size"],
+            )
+            return Response(
+                search,
+                {
+                    "_shards": {
+                        "failed": 0,
+                    },
+                    "hits": {
+                        "total": {
+                            "value": 1,
+                        },
+                        "hits": [
+                            {
+                                "_id": str(doc.pk),
+                            }
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = resp
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("search:search_download") + "?search=test&mode=hybrid"
+        )
+        self.assertEqual(response.status_code, 200)
 
     @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
     def test_search(self, mock_search):
@@ -298,6 +346,35 @@ class SearchViewsTest(TestCase):
         )
         self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#page-3', html)
         self.assertNotIn(f'target="_blank">{doc.get_absolute_url}#sec_1', html)
+
+    def test_search_hit_includes_document_labels(self):
+        request = RequestFactory().get("/search/?search=test")
+        doc = CoreDocument.objects.first()
+        doc.labels.add(
+            Label.objects.create(name="Reported", code="reported", level="success")
+        )
+        hit = {
+            "document": doc,
+            "position": 1,
+            "best_match": False,
+            "highlight": {},
+            "pages": [],
+            "provisions": [],
+        }
+
+        html = render_to_string(
+            "peachjam_search/_search_hit.html",
+            {
+                "request": request,
+                "hit": hit,
+                "show_jurisdiction": False,
+                "can_debug": False,
+            },
+            request=request,
+        )
+
+        self.assertIn("Reported", html)
+        self.assertIn("badge rounded-pill bg-success", html)
 
     def test_search_hit_flynote_preserves_line_breaks(self):
         request = RequestFactory().get("/search/?search=test")

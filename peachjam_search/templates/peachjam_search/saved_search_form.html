@@ -4,7 +4,9 @@
           data-bs-toggle="modal"
           data-bs-target="#saved-search-modal">
     <i class="bi bi-bell"></i>
-    {% if saved_search.pk %}
+    {% if saved_search.is_subscription_locked %}
+      {% trans 'Search alert paused' %}
+    {% elif saved_search.pk %}
       {% trans 'Update this search alert' %}
     {% else %}
       {% trans 'Get alerts for this search' %}

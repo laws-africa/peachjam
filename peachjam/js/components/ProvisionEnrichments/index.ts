@@ -4,6 +4,7 @@ import { IRangeTarget } from '@lawsafrica/indigo-akn/dist/ranges';
 import { createAndMountApp } from '../../utils/vue-utils';
 import { vueI18n } from '../../i18n';
 import { ComponentPublicInstance } from 'vue';
+import { readJsonScript } from '../../utils/json-script';
 
 export class ProvisionEnrichments implements IGutterEnrichmentProvider {
     root: HTMLElement;
@@ -16,12 +17,7 @@ export class ProvisionEnrichments implements IGutterEnrichmentProvider {
       this.root = root;
       this.manager = manager;
       this.gutter = root.querySelector('la-gutter');
-      const node = document.getElementById('provision-enrichments-json');
-      if (node) {
-        this.enrichments = JSON.parse(node.innerText || '[]');
-      } else {
-        this.enrichments = [];
-      }
+      this.enrichments = readJsonScript<any[]>('provision-enrichments-json', []);
 
       // @ts-ignore
       this.listComponent = createAndMountApp({

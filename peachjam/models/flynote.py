@@ -315,8 +315,7 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
                 if target_child:
                     target_child._merge_other_into(child)
                 else:
-                    parent.repair_stale_numchild_if_leaf("move")
-                    child.move(parent, pos="last-child")
+                    parent.move_child_to_end(child)
 
             flynote.refresh_from_db()
             has_linked_judgments = flynote.judgments.exists()
@@ -360,11 +359,7 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
             if target_child:
                 target_child._merge_other_into(child)
             else:
-                # moving nodes updates path attributes, so always work with latest info from db
-                child.refresh_from_db()
-                self.refresh_from_db()
-                self.repair_stale_numchild_if_leaf("move")
-                child.move(self, pos="last-child")
+                self.move_child_to_end(child)
 
         source.delete()
         FlynoteDocumentCount.quick_refresh_for_single_flynote(self)
@@ -380,6 +375,26 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
             )
             Flynote.objects.filter(pk=self.pk).update(numchild=0)
             self.numchild = 0
+
+    def move_child_to_end(self, child):
+        """Move a child under this node, repairing stale tree metadata first."""
+        # moving nodes updates path attributes, so always work with latest info from db
+        child.refresh_from_db()
+        self.refresh_from_db()
+
+        last_child = self.get_last_child()
+        if last_child is None:
+            if self.numchild:
+                log.warning(
+                    "Repairing flynote %s before move: numchild=%s but no last child exists.",
+                    self.pk,
+                    self.numchild,
+                )
+                Flynote.objects.filter(pk=self.pk).update(numchild=0)
+                self.numchild = 0
+            child.move(self, pos="first-child")
+        else:
+            child.move(self, pos="last-child")
 
     def prune_empty_descendants(self):
         """Delete empty flynotes under this flynote.
@@ -532,6 +547,15 @@ class FlynoteDocumentCount(models.Model):
         only as a cheap threshold check; refresh_for_flynote() still computes
         the exact count if the subtree is small enough.
         """
+        flynote_id = flynote.pk
+        flynote = Flynote.objects.filter(pk=flynote_id).first()
+        if not flynote:
+            log.info(
+                "No flynote with id %s exists while quickly refreshing counts, ignoring.",
+                flynote_id,
+            )
+            return
+
         flynote.refresh_from_db(fields=["path", "numchild"])
         direct_count = (
             JudgmentFlynote.objects.filter(flynote=flynote)

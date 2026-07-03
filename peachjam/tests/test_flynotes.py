@@ -1862,6 +1862,16 @@ class FlynoteDocumentCountTest(TestCase):
         self.assertTrue(Flynote.objects.filter(pk=criminal.pk).exists())
         self.assertTrue(Flynote.objects.filter(name="trial within a trial").exists())
 
+    def test_quick_refresh_ignores_deleted_flynote(self):
+        root = Flynote.add_root(name="Criminal law")
+        leaf = root.add_child(name="Admissibility")
+
+        Flynote.objects.filter(pk=leaf.pk).delete()
+
+        FlynoteDocumentCount.quick_refresh_for_single_flynote(leaf)
+
+        self.assertFalse(FlynoteDocumentCount.objects.exists())
+
 
 class FlynoteDeprecationTest(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
@@ -2127,6 +2137,27 @@ class FlynoteMergeTest(TestCase):
                 flynote=target_child,
             ).exists()
         )
+
+    def test_merge_repairs_stale_nested_child_count_before_moving_grandchild(self):
+        root = Flynote.add_root(name="Civil procedure")
+        target = root.add_child(name="Stay of execution")
+        source = root.add_child(name="Stays of execution")
+        target_child = target.add_child(name="Urgent applications")
+        source_child = source.add_child(name="Urgent applications")
+        grandchild = source_child.add_child(name="Service")
+        judgment = self.make_judgment("Grandchild source judgment")
+        JudgmentFlynote.objects.create(document=judgment, flynote=grandchild)
+
+        Flynote.objects.filter(pk=target_child.pk).update(numchild=1)
+
+        target.merge_sources_into([source])
+
+        self.assertFalse(Flynote.objects.filter(pk=source.pk).exists())
+        self.assertFalse(Flynote.objects.filter(pk=source_child.pk).exists())
+        grandchild.refresh_from_db()
+        target_child.refresh_from_db()
+        self.assertEqual(grandchild.get_parent().pk, target_child.pk)
+        self.assertEqual(target_child.numchild, 1)
 
     def test_promote_children_to_parent_moves_children_and_deletes_empty_flynote(self):
         root = Flynote.add_root(name="Civil procedure")

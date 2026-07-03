@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block folder-list-card-header %}
   {{ block.super }}
-  {% if folder.saved_documents.exists %}
+  {% if folder.saved_documents.exists and not folder.is_subscription_locked %}
     <ul class="nav nav-tabs card-header-tabs">
       <li class="nav-item">
         <button class="nav-link active"

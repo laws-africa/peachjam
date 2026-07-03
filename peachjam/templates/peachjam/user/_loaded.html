@@ -1,0 +1,4 @@
+{% include 'peachjam/user/_messages.html' %}
+{% include 'peachjam/user/_menu.html' %}
+<script type="text/javascript">peachjam.user = {{ user_json|safe }}; peachjam.userLoaded();</script>
+{% block user-loaded-system-messages %}{% endblock %}

@@ -60,7 +60,7 @@
               {% endfor %}
             </span>
           {% endif %}
-          {% include 'peachjam/_document_labels.html' with document=hit.document %}
+          {% include 'peachjam/_document_labels.html' with labels=hit.document.labels.all %}
           {% if can_debug %}
             <a class="me-3"
                href="#debug-{{ hit.document.id }}"

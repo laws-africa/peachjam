@@ -82,6 +82,7 @@ dependencies = [
     "Pillow>=9.0.1",
     "pgvector>=0.4.0",
     "PyGithub>=2.6",
+    "python-json-logger>=4.1.0",
     "python-magic>=0.4.25",
     "requests>=2.27.1",
     "sentry-sdk>=2.24.1",
@@ -101,7 +102,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "coverage>=7.6",
-    "django-debug-toolbar>=4.4",
+    "django-debug-toolbar>=4.4,<7.0",
     "django-webtest>=1.9.11",
     "pre-commit>=2.17.0",
 ]

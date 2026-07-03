@@ -210,6 +210,7 @@ class DocumentSearchView(TemplateView):
         # TODO: first 1000 hits
         engine.page = 1
         engine.page_size = 1000
+        engine.expand_retriever_window_to_page()
         response = engine.execute()
         pks = [int(hit.meta.id) for hit in response.hits]
 
@@ -353,7 +354,7 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
 
 class AllowSavedSearchesMixin:
     def dispatch(self, *args, **kwargs):
-        if not pj_settings().allow_save_searches:
+        if not pj_settings().save_searches_enabled:
             raise Http404("Saving searches is not allowed.")
         return super().dispatch(*args, **kwargs)
 
@@ -452,6 +453,11 @@ class SavedSearchUpdateView(BaseSavedSearchFormView, UpdateView):
     permission_required = "peachjam_search.change_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
     form_class = SavedSearchUpdateForm
+
+    def form_valid(self, form):
+        if self.object.is_subscription_locked:
+            return HttpResponseForbidden("Search alert is locked")
+        return super().form_valid(form)
 
 
 class SavedSearchListView(BaseSavedSearchFormView, ListView):

@@ -46,6 +46,6 @@ class SubscribeView(TemplateView):
     template_name = "peachjam_subs/subscribe.html"
 
     def get(self, request, *args, **kwargs):
-        if not pj_settings().allow_signups:
+        if not pj_settings().accounts_enabled:
             return redirect("home_page")
         return super().get(request, *args, **kwargs)

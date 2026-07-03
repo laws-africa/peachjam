@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 
 
 class UserFollowing(models.Model):
-
     user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
@@ -126,6 +125,12 @@ class UserFollowing(models.Model):
         _("last alerted at"), null=True, blank=True, auto_now_add=True
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    subscription_locked_at = models.DateTimeField(
+        _("subscription locked at"), null=True, blank=True
+    )
+    subscription_lock_expires_at = models.DateTimeField(
+        _("subscription lock expires at"), null=True, blank=True
+    )
 
     follow_fields = [
         "court",
@@ -250,6 +255,10 @@ class UserFollowing(models.Model):
         return self.followed_field == "saved_search"
 
     @property
+    def is_subscription_locked(self):
+        return self.subscription_locked_at is not None
+
+    @property
     def cutoff_date(self):
         cutoff_days = 365
         return (timezone.now() - timezone.timedelta(days=cutoff_days)).date()
@@ -328,6 +337,13 @@ class UserFollowing(models.Model):
         return self.saved_search.find_new_hits()
 
     def update_follow(self):
+        if self.is_subscription_locked:
+            return False
+        if self.saved_search and self.saved_search.is_subscription_locked:
+            return False
+        if self.saved_document and self.saved_document.is_subscription_locked:
+            return False
+
         if self.is_new_docs:
             return self._update_new_docs()
 
@@ -468,7 +484,12 @@ class UserFollowing(models.Model):
 
     @classmethod
     def update_follows_for_user(cls, user):
-        follows = user.following.all()
+        follows = user.following.filter(subscription_locked_at__isnull=True).filter(
+            models.Q(saved_search__isnull=True)
+            | models.Q(saved_search__subscription_locked_at__isnull=True),
+            models.Q(saved_document__isnull=True)
+            | models.Q(saved_document__subscription_locked_at__isnull=True),
+        )
         for follow in follows:
             follow.update_follow()
 
@@ -476,6 +497,8 @@ class UserFollowing(models.Model):
     def update_new_citation_follows(cls, citation):
         follows = cls.objects.filter(
             saved_document__work=citation.target_work,
+            subscription_locked_at__isnull=True,
+            saved_document__subscription_locked_at__isnull=True,
         )
         log.info("Found %d follows for new citation update", follows.count())
         for follow in follows:
@@ -491,7 +514,9 @@ class UserFollowing(models.Model):
             return
 
         follows = cls.objects.filter(
-            saved_document__work=relationship_event.followed_work(relationship)
+            saved_document__work=relationship_event.followed_work(relationship),
+            subscription_locked_at__isnull=True,
+            saved_document__subscription_locked_at__isnull=True,
         )
         log.info("Found %d follows for new relationship update", follows.count())
 

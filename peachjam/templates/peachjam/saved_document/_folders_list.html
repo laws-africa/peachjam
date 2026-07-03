@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div>
   <div class="d-flex justify-content-between align-items-center">
     <h2>{% trans 'Saved documents' %}</h2>
@@ -10,7 +11,7 @@
       {% trans 'New Folder' %}
     </button>
   </div>
-  <div class="mb-4">{% trans "Save documents to simplify your research and stay up-to-date" %}</div>
+  <div class="mb-4">{% trans "Save documents to simplify your research and stay up-to-date." %}</div>
   {% if folder_limit_reached %}
     <div class="alert alert-warning d-flex">
       <div class="me-2">
@@ -33,7 +34,11 @@
           {% block folder-list-card-header %}
             <div class="justify-content-between d-flex">
               <p class="mb-0 h5">
-                <i class="bi bi-folder"></i> {{ folder.name }}
+                {% if folder.is_subscription_locked %}
+                  <i class="bi bi-lock-fill"></i> {{ folder.name }}
+                {% else %}
+                  <i class="bi bi-folder"></i> {{ folder.name }}
+                {% endif %}
               </p>
               <div class="dropdown">
                 <button class="btn btn-outline-secondary"
@@ -43,23 +48,25 @@
                   <i class="bi bi-three-dots"></i>
                 </button>
                 <ul class="dropdown-menu">
-                  {% if perms.peachjam.download_folder %}
+                  {% if not folder.is_subscription_locked %}
+                    {% if perms.peachjam.download_folder %}
+                      <li>
+                        <a href="{% url 'folder_download' folder.id %}"
+                           target="_blank"
+                           class="dropdown-item">
+                          {% trans 'Download to Excel' %}
+                        </a>
+                      </li>
+                    {% endif %}
                     <li>
-                      <a href="{% url 'folder_download' folder.id %}"
-                         target="_blank"
-                         class="dropdown-item">
-                        {% trans 'Download to Excel' %}
-                      </a>
+                      <button class="dropdown-item"
+                              hx-post="{% url 'folder_update' folder.id %}"
+                              hx-target="#folders-list"
+                              hx-prompt="{% trans "Rename folder" %}">
+                        {% trans 'Rename' %}
+                      </button>
                     </li>
                   {% endif %}
-                  <li>
-                    <button class="dropdown-item"
-                            hx-post="{% url 'folder_update' folder.id %}"
-                            hx-target="#folders-list"
-                            hx-prompt="{% trans "Rename folder" %}">
-                      {% trans 'Rename' %}
-                    </button>
-                  </li>
                   <li>
                     <button class="dropdown-item text-danger"
                             hx-post="{% url 'folder_delete' folder.id %}"
@@ -75,11 +82,22 @@
         </div>
         <div class="card-body">
           {% block folder-list-card-body %}
-            {% for saved_document in folder.saved_documents.all %}
-              {% include "peachjam/saved_document/_folder_list_item.html" %}
-            {% empty %}
-              <p>{% trans 'No saved documents.' %}</p>
-            {% endfor %}
+            {% if folder.is_subscription_locked %}
+              <div>
+                <div class="fw-bold">{% trans 'Saved beyond your subscription limit.' %}</div>
+                <div>
+                  {% blocktrans trimmed with expires=folder.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                    We'll keep this folder until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access to its contents.
+                  {% endblocktrans %}
+                </div>
+              </div>
+            {% else %}
+              {% for saved_document in folder.saved_documents.all %}
+                {% include "peachjam/saved_document/_folder_list_item.html" %}
+              {% empty %}
+                <p>{% trans 'No saved documents.' %}</p>
+              {% endfor %}
+            {% endif %}
           {% endblock %}
         </div>
       </div>

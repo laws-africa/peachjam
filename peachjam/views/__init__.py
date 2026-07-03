@@ -22,6 +22,7 @@ from .gazette import *
 from .generic_document import *
 from .home import *
 from .journals import *
+from .judges import *
 from .judgment import *
 from .law_reports import *
 from .legislation import *

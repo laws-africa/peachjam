@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.models import (
@@ -65,8 +66,8 @@ class Judge(models.Model):
 
     class Meta:
         ordering = ("name",)
-        verbose_name = _("judge")
-        verbose_name_plural = _("judges")
+        verbose_name = _("legacy judge")
+        verbose_name_plural = _("legacy judges")
 
     def __str__(self):
         return self.name
@@ -74,6 +75,78 @@ class Judge(models.Model):
     def get_absolute_url(self):
         base_url = reverse("court", kwargs={"code": "all"})
         return f"{base_url}?judges={quote(self.name)}"
+
+
+class JudgePerson(models.Model):
+    model_label = _("Judge")
+    model_label_plural = _("Judges")
+
+    full_name = models.CharField(
+        _("full name"), max_length=1024, null=False, blank=False, unique=True
+    )
+    slug = models.SlugField(
+        _("slug"), max_length=255, null=False, blank=True, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("full_name", "pk")
+        verbose_name = _("judge")
+        verbose_name_plural = _("judges")
+
+    def __str__(self):
+        return self.full_name
+
+    @staticmethod
+    def canonical_identity_enabled():
+        return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = judge_identity_service.unique_judge_slug(
+                self.__class__,
+                self.full_name,
+                pk=self.pk,
+            )
+        return super().save(*args, **kwargs)
+
+
+class JudgeAlias(models.Model):
+    model_label = _("Judge")
+    model_label_plural = _("Judges")
+
+    judge_person = models.ForeignKey(
+        JudgePerson,
+        related_name="aliases",
+        on_delete=models.CASCADE,
+        verbose_name=_("judge person"),
+    )
+    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    normalized_name = models.CharField(
+        _("normalized name"), max_length=1024, null=False, blank=False, db_index=True
+    )
+    title = models.CharField(
+        _("title"),
+        max_length=32,
+        blank=True,
+        help_text=_(
+            "Judicial title parsed from the alias name, for example 'JA' or 'DCJ'."
+        ),
+    )
+
+    class Meta:
+        ordering = ("name", "pk")
+        verbose_name = _("judge alias")
+        verbose_name_plural = _("judge aliases")
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        parts = judge_identity_service.parse_judge_name(self.name)
+        self.normalized_name = parts["normalized_name"]
+        self.title = parts["title"]
+        return super().save(*args, **kwargs)
 
 
 class Outcome(models.Model):
@@ -275,13 +348,8 @@ class CourtRegistry(models.Model):
 
 
 class Bench(models.Model):
-    # This model is not strictly necessary, as it's almost identical to the default that Django creates
-    # for a many-to-many relationship. However, by creating it, we can indicate that the ordering should
-    # be on the PK of the model. This means that we can preserve the ordering of Judges as the are
-    # entered in the admin interface.
-    #
-    # To use this effectively, views that need the judges to be ordered, should call "judgement.bench.all()"
-    # and not "judgment.judges.all()".
+    # Bench is a real through model because it preserves judge order and stores
+    # canonical judge identity links for each source-level judge entry.
     judgment = models.ForeignKey(
         "Judgment",
         related_name="bench",
@@ -289,6 +357,32 @@ class Bench(models.Model):
         verbose_name=_("judgment"),
     )
     judge = models.ForeignKey(Judge, on_delete=models.PROTECT, verbose_name=_("judge"))
+    judge_person = models.ForeignKey(
+        JudgePerson,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="bench_entries",
+        verbose_name=_("judge"),
+        help_text=_("Canonical judge identity for this bench row."),
+    )
+    matched_alias = models.ForeignKey(
+        JudgeAlias,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="bench_entries",
+        verbose_name=_("matched alias"),
+        help_text=_("Alias that matched the legacy judge name to the canonical judge."),
+    )
+    extracted_name = models.CharField(
+        _("extracted name"),
+        max_length=1024,
+        blank=True,
+        help_text=_(
+            "Judge name exactly as it appeared in the source, for example 'ABBAN, J.A.'."
+        ),
+    )
 
     class Meta:
         # this is to re-use the existing table rather than creating a new one

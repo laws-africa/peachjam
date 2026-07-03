@@ -1,6 +1,6 @@
 {% load i18n %}
 <div id="saved-search-button">
-  {% if request.user.is_authenticated %}
+  {% if request.user.is_authenticated and not saved_search.pk %}
     <form hx-target="#saved-search-button"
           id="saved-search-create"
           hx-post="{% url 'search:saved_search_create' %}">
@@ -11,11 +11,17 @@
   {% endif %}
   <button class="btn btn-outline-primary"
           data-bs-toggle="modal"
-          type="submit"
-          form="saved-search-create"
+          type="{% if saved_search.pk %}button{% else %}submit{% endif %}"
+          {% if not saved_search.pk %}form="saved-search-create"{% endif %}
           data-bs-target="#saved-search-modal">
     <i class="bi bi-bell"></i>
-    {% trans 'Get alerts for this search' %}
+    {% if saved_search.is_subscription_locked %}
+      {% trans 'Search alert paused' %}
+    {% elif saved_search.pk %}
+      {% trans 'Update this search alert' %}
+    {% else %}
+      {% trans 'Get alerts for this search' %}
+    {% endif %}
   </button>
 </div>
 {% include 'peachjam_search/_saved_search_modal.html' %}

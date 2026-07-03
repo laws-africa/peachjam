@@ -37,7 +37,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.db.models import Prefetch
 from django.forms.forms import Form
 from django.http import Http404
-from django.http.response import HttpResponse, HttpResponseBadRequest
+from django.http.response import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+)
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
@@ -61,7 +65,7 @@ User = get_user_model()
 
 class AllowSavedDocumentMixin:
     def dispatch(self, *args, **kwargs):
-        if not pj_settings().allow_save_documents:
+        if not pj_settings().save_documents_enabled:
             raise Http404("Saving documents is not allowed.")
         return super().dispatch(*args, **kwargs)
 
@@ -116,6 +120,11 @@ class BaseFolderFormMixin(BaseFolderMixin):
             kwargs["data"] = data
         return kwargs
 
+    def form_valid(self, form):
+        if getattr(self, "object", None) and self.object.is_subscription_locked:
+            return HttpResponseForbidden("Folder is locked")
+        return super().form_valid(form)
+
 
 class FolderCreateView(AtomicPostMixin, BaseFolderFormMixin, CreateView):
     permission_required = "peachjam.add_folder"
@@ -142,7 +151,12 @@ class FolderDownloadView(BaseFolderMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         folder = self.get_object()
-        pks = [sd.document_id for sd in folder.saved_documents.only("document_id")]
+        if folder.is_subscription_locked:
+            return HttpResponseForbidden("Folder is locked")
+        pks = [
+            sd.document_id
+            for sd in folder.saved_documents.filter(subscription_locked_at__isnull=True)
+        ]
         dataset = DownloadDocumentsResource().export(
             DownloadDocumentsResource.get_objects_for_download(pks)
         )
@@ -232,6 +246,8 @@ class SavedDocumentFormMixin(
         return self.request.user.saved_documents.all()
 
     def form_valid(self, form):
+        if self.object.is_subscription_locked:
+            return HttpResponseForbidden("Saved document is locked")
         return super().form_valid(form)
 
     def form_invalid(self, form):

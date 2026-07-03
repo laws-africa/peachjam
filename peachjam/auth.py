@@ -114,7 +114,7 @@ def user_display(user):
 
 class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
-        return pj_settings().allow_signups
+        return pj_settings().accounts_enabled
 
     def send_mail(self, template_prefix, email, context):
         # injection point for hooking into password reset initiation

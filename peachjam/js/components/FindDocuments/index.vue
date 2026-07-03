@@ -210,7 +210,6 @@
                 v-html="searchInfo.entity_results_html"
               />
               <div v-if="searchInfo.count">
-                <div id="saved-search-button" />
                 <div class="my-3 d-flex">
                   <div class="me-2">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
@@ -240,6 +239,7 @@
                     </option>
                   </select>
                 </div>
+                <div id="saved-search-button" class="mb-3" />
                 <div
                   ref="results"
                   @click="itemClicked"
@@ -817,7 +817,10 @@ export default {
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
-        scrollToElement(this.$refs['search-box']);
+        const searchBox = this.$refs['search-box'];
+        if (searchBox instanceof HTMLElement) {
+          scrollToElement(searchBox);
+        }
 
         // search tip
         if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
@@ -939,13 +942,25 @@ export default {
         params.set('position', item.getAttribute('data-position'));
         params.set('search_trace', this.searchInfo.trace_id);
         try {
-          fetch(`${this.urlPrefix}/search/api/click/`, {
+          const response = await fetch(`${this.urlPrefix}/search/api/click/`, {
             method: 'POST',
-            headers: await authHeaders(),
+            keepalive: true,
             body: params
           });
+          if (!response.ok) {
+            console.error('Search click tracking failed', {
+              status: response.status,
+              statusText: response.statusText,
+              url: response.url,
+              contentType: response.headers.get('content-type'),
+              cfMitigated: response.headers.get('cf-mitigated'),
+              cfRay: response.headers.get('cf-ray')
+            });
+            throw new Error(`Search click tracking failed with status ${response.status}`);
+          }
         } catch (err) {
-          console.log(err);
+          console.error(err);
+          throw err;
         }
       }
     },

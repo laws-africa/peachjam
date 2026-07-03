@@ -310,12 +310,12 @@ class BaseDocumentFilterFormTestCase(TestCase):
         request = RequestFactory().get("/documents/")
 
         empty_html = render_to_string(
-            "peachjam/_messages.html",
+            "peachjam/user/_messages.html",
             {"messages": []},
             request=request,
         )
         populated_html = render_to_string(
-            "peachjam/_messages.html",
+            "peachjam/user/_messages.html",
             {"messages": [Message(level=20, message="Saved", extra_tags="primary")]},
             request=request,
         )

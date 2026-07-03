@@ -4,5 +4,6 @@
   {% trans 'Saved Documents' %}
 {% endblock %}
 {% block my-content %}
+  {% include "peachjam/my/_subscription_locked_banner.html" with subscription_locked_category_summary=my_locked_data_summary.by_category.saved_documents subscription_locked_category_label="saved documents" %}
   <div id="folders-list">{% include 'peachjam/saved_document/_folders_list.html' %}</div>
 {% endblock %}

@@ -3,10 +3,13 @@ from urllib.parse import urlencode
 from django import template
 from django.urls.base import reverse
 
+from peachjam_subs.limits import get_subscription_locked_data_summary
+
 register = template.Library()
 
 
 UPSELL_URL_NAME = "check_subscription"
+CHANGE_SUBSCRIPTION_URL_NAME = "subscribe"
 
 
 @register.simple_tag
@@ -23,6 +26,29 @@ def upsell_url(product, next_url=None):
     if next_url:
         extra["next"] = next_url
     return url + f"?{urlencode(extra)}"
+
+
+@register.simple_tag(takes_context=True)
+def change_subscription_url(context, next_url=None):
+    """Generate a URL for changing a user's subscription, with a next URL back to the current page."""
+    request = context.get("request")
+    if not next_url and request:
+        next_url = getattr(getattr(request, "htmx", None), "current_url_abs_path", None)
+        if not next_url:
+            next_url = request.get_full_path()
+
+    url = reverse(CHANGE_SUBSCRIPTION_URL_NAME)
+    if next_url:
+        return url + f"?{urlencode({'next': next_url})}"
+    return url
+
+
+@register.simple_tag
+def subscription_locked_data_summary(user):
+    """Return a compact summary of subscription-locked data for a user."""
+    if not user.is_authenticated:
+        return None
+    return get_subscription_locked_data_summary(user)
 
 
 @register.simple_tag

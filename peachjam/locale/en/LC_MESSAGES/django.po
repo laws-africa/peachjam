@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-15 13:30+0000\n"
+"POT-Creation-Date: 2026-06-25 06:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,312 +18,312 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:177
+#: admin.py:178
 msgid "Import"
 msgstr ""
 
-#: admin.py:533
+#: admin.py:545
 msgid "Background tasks"
 msgstr ""
 
-#: admin.py:633
+#: admin.py:645
 msgid "Access groups updated."
 msgstr ""
 
-#: admin.py:648
+#: admin.py:660
 msgid "Manage restricted access groups"
 msgstr ""
 
-#: admin.py:652
+#: admin.py:664
 msgid "Restricted access groups"
 msgstr ""
 
-#: admin.py:705
+#: admin.py:717
 msgid "Key details"
 msgstr ""
 
-#: admin.py:719
+#: admin.py:731
 msgid "Additional details"
 msgstr ""
 
-#: admin.py:732 admin.py:1647
+#: admin.py:744 admin.py:1665
 msgid "Work identification"
 msgstr ""
 
-#: admin.py:745
+#: admin.py:757
 msgid "Content"
 msgstr ""
 
-#: admin.py:754 admin.py:1646
+#: admin.py:766 admin.py:1664
 msgid "Advanced"
 msgstr ""
 
-#: admin.py:769
+#: admin.py:781
 msgid "Taxonomies"
 msgstr ""
 
-#: admin.py:800 models/core_document.py:903
+#: admin.py:818 models/core_document.py:902
 msgid "TOC JSON"
 msgstr ""
 
-#: admin.py:807 models/core_document.py:900
+#: admin.py:825 models/core_document.py:899
 msgid "content HTML is AKN"
 msgstr ""
 
-#: admin.py:814
+#: admin.py:832
 msgid "Images"
 msgstr ""
 
-#: admin.py:872
+#: admin.py:890
 #, python-format
 msgid "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
 msgstr ""
 
-#: admin.py:929
+#: admin.py:947
 msgid "main form (non-field)"
 msgstr ""
 
-#: admin.py:1030
+#: admin.py:1048
 msgid "Work"
 msgstr ""
 
-#: admin.py:1042
+#: admin.py:1060
 #, python-format
 msgid "Queued tasks to extract citations from %(count)d documents."
 msgstr ""
 
-#: admin.py:1046
+#: admin.py:1064
 msgid "Extract citations (background)"
 msgstr ""
 
-#: admin.py:1059
+#: admin.py:1077
 #, python-format
 msgid "Re-imported content from %(count)d documents."
 msgstr ""
 
-#: admin.py:1063
+#: admin.py:1081
 msgid "Re-extract content from DOCX files"
 msgstr ""
 
-#: admin.py:1073
+#: admin.py:1091
 #, python-format
 msgid "Queued tasks to re-index for %(count)d documents."
 msgstr ""
 
-#: admin.py:1077
+#: admin.py:1095
 msgid "Re-index for search (background)"
 msgstr ""
 
-#: admin.py:1087
+#: admin.py:1105
 #, python-format
 msgid "Applying labels for %(count)d documents."
 msgstr ""
 
-#: admin.py:1090
+#: admin.py:1108
 msgid "Apply labels"
 msgstr ""
 
-#: admin.py:1099
+#: admin.py:1117
 #, python-format
 msgid "Ensuring PDF for %(count)d documents."
 msgstr ""
 
-#: admin.py:1103
+#: admin.py:1121
 msgid "Ensure PDF for source file (background)"
 msgstr ""
 
-#: admin.py:1125
+#: admin.py:1143
 msgid "Documents published."
 msgstr ""
 
-#: admin.py:1127
+#: admin.py:1145
 msgid "Publish selected documents"
 msgstr ""
 
-#: admin.py:1132
+#: admin.py:1150
 msgid "Documents unpublished."
 msgstr ""
 
-#: admin.py:1134
+#: admin.py:1152
 msgid "Unpublish selected documents"
 msgstr ""
 
-#: admin.py:1169
+#: admin.py:1187
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
 msgstr ""
 
-#: admin.py:1261
+#: admin.py:1279
 msgid "Refresh selected flynote roots now"
 msgstr ""
 
-#: admin.py:1271
+#: admin.py:1289
 #, python-format
 msgid "Refreshed %(count)s flynote roots."
 msgstr ""
 
-#: admin.py:1275
+#: admin.py:1293
 msgid "Mark selected flynotes as deprecated"
 msgstr ""
 
-#: admin.py:1287
+#: admin.py:1305
 #, python-format
 msgid "Deprecated %(count)s flynote branches."
 msgstr ""
 
-#: admin.py:1291
+#: admin.py:1309
 msgid "Mark selected flynotes as active"
 msgstr ""
 
-#: admin.py:1303
+#: admin.py:1321
 #, python-format
 msgid "Reactivated %(count)s flynote branches."
 msgstr ""
 
-#: admin.py:1307 templates/peachjam/layouts/document_list.html:4
+#: admin.py:1325 templates/peachjam/layouts/document_list.html:4
 #: templates/peachjam/layouts/document_list.html:17
 msgid "Documents"
 msgstr ""
 
-#: admin.py:1312
+#: admin.py:1330
 msgid "Ancestors"
 msgstr ""
 
-#: admin.py:1330
+#: admin.py:1348
 msgid "Children"
 msgstr ""
 
-#: admin.py:1394 models/judgment.py:792 models/judgment.py:828
+#: admin.py:1412 models/judgment.py:792 models/judgment.py:828
 msgid "case number"
 msgstr ""
 
-#: admin.py:1395 models/judgment.py:793
+#: admin.py:1413 models/judgment.py:793
 msgid "case numbers"
 msgstr ""
 
-#: admin.py:1404 models/judgment.py:68 models/judgment.py:291
+#: admin.py:1422 models/judgment.py:68 models/judgment.py:291
 msgid "judge"
 msgstr ""
 
-#: admin.py:1405 models/judgment.py:69 models/judgment.py:346
+#: admin.py:1423 models/judgment.py:69 models/judgment.py:346
 #: models/judgment.py:845 models/judgment.py:891
 msgid "judges"
 msgstr ""
 
-#: admin.py:1419
+#: admin.py:1437
 msgid "lower court judge"
 msgstr ""
 
-#: admin.py:1420 models/judgment.py:352
+#: admin.py:1438 models/judgment.py:352
 msgid "lower court judges"
 msgstr ""
 
-#: admin.py:1434
+#: admin.py:1452
 msgid "Related judgment"
 msgstr ""
 
-#: admin.py:1435
+#: admin.py:1453
 msgid "Related judgments"
 msgstr ""
 
-#: admin.py:1457 models/judgment.py:853
+#: admin.py:1475 models/judgment.py:853
 msgid "case history"
 msgstr ""
 
-#: admin.py:1487
+#: admin.py:1505
 msgid "Enter one flynote per line."
 msgstr ""
 
-#: admin.py:1588 templates/peachjam/_document_content_sidebar.html:22
+#: admin.py:1606 templates/peachjam/_document_content_sidebar.html:22
 #: templates/peachjam/judgment_detail.html:101
 msgid "Summary"
 msgstr ""
 
-#: admin.py:1782 admin.py:1802
+#: admin.py:1800 admin.py:1820
 msgid "You do not have permission to generate judgment summaries."
 msgstr ""
 
-#: admin.py:1791
+#: admin.py:1809
 #, python-format
 msgid "Generating summaries for %(count)d judgments."
 msgstr ""
 
-#: admin.py:1796
+#: admin.py:1814
 msgid "Generating summary for judgment with ID: {}"
 msgstr ""
 
-#: admin.py:1813
+#: admin.py:1831
 msgid "Generate summaries (background)"
 msgstr ""
 
-#: admin.py:1895
+#: admin.py:1913
 msgid "Refreshing all content for selected ingestors in the background."
 msgstr ""
 
-#: admin.py:1899
+#: admin.py:1917
 msgid "Refresh all content for selected ingestors - Full update"
 msgstr ""
 
-#: admin.py:1906
+#: admin.py:1924
 msgid "Getting content since last update in background."
 msgstr ""
 
-#: admin.py:1910
+#: admin.py:1928
 msgid "Update content for selected ingestors - Latest updates"
 msgstr ""
 
-#: admin.py:1992
+#: admin.py:2010
 msgid "Articles published."
 msgstr ""
 
-#: admin.py:1994
+#: admin.py:2012
 msgid "Publish selected articles"
 msgstr ""
 
-#: admin.py:1999
+#: admin.py:2017
 msgid "Articles unpublished."
 msgstr ""
 
-#: admin.py:2001
+#: admin.py:2019
 msgid "Unpublish selected articles"
 msgstr ""
 
-#: admin.py:2080
+#: admin.py:2098
 #, python-format
 msgid "Queued tasks to update extracted citations for %(count)d works."
 msgstr ""
 
-#: admin.py:2085
+#: admin.py:2103
 msgid "Update extracted citations (background)"
 msgstr ""
 
-#: admin.py:2094
+#: admin.py:2112
 #, python-format
 msgid "Updated languages for %(count)d works."
 msgstr ""
 
-#: admin.py:2097
+#: admin.py:2115
 msgid "Update languages"
 msgstr ""
 
-#: admin.py:2155
+#: admin.py:2173
 msgid "Gazette number"
 msgstr ""
 
-#: admin.py:2295
+#: admin.py:2313
 #, python-format
 msgid "Set 'accepted terms of use' to False for %(count)d users."
 msgstr ""
 
-#: admin.py:2300
+#: admin.py:2318
 msgid "Require selected users to accept terms of use"
 msgstr ""
 
-#: admin.py:2434 admin.py:2469
+#: admin.py:2452 admin.py:2487
 msgid "Document"
 msgstr ""
 
-#: admin.py:2442
+#: admin.py:2460
 msgid "Messages JSON"
 msgstr ""
 
@@ -400,13 +400,13 @@ msgid "Bills"
 msgstr ""
 
 #: forms.py:164 forms.py:165 models/entity_profile.py:13
-#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:270
+#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:274
 msgid "Title"
 msgstr ""
 
 #: forms.py:166 forms.py:167 templates/peachjam/causelist_detail.html:35
 #: templates/peachjam/layouts/document_detail.html:315
-#: views/generic_views.py:271
+#: views/generic_views.py:275
 msgid "Date"
 msgstr ""
 
@@ -496,13 +496,19 @@ msgstr ""
 msgid "You must accept the terms to continue."
 msgstr ""
 
+#: migrations/0306_peachjamsettings_document_debug_external_links.py:21
+#: models/settings.py:89
+#, python-brace-format
+msgid "One link per line in the format: label | URL. Allowed placeholders in URLs: {id}, {expression_frbr_uri}, {work_frbr_uri}, {title}."
+msgstr ""
+
 #: models/annotation.py:11 models/attachments.py:76 models/attachments.py:110
 #: models/attachments.py:264 models/attachments.py:307
-#: models/attachments.py:356 models/citations.py:21 models/core_document.py:872
-#: models/core_document.py:898 models/judgment.py:787 models/taxonomies.py:287
+#: models/attachments.py:356 models/citations.py:21 models/core_document.py:871
+#: models/core_document.py:897 models/judgment.py:787 models/taxonomies.py:287
 #: templates/peachjam/_document_count.html:8
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:4
-#: views/generic_views.py:148
+#: views/generic_views.py:152
 msgid "document"
 msgstr ""
 
@@ -987,39 +993,39 @@ msgstr ""
 msgid "Document with this Expression FRBR URI already exists!"
 msgstr ""
 
-#: models/core_document.py:875
+#: models/core_document.py:874
 msgid "Law report citation/Alternative known name"
 msgstr ""
 
-#: models/core_document.py:882
+#: models/core_document.py:881
 msgid "alternative name"
 msgstr ""
 
-#: models/core_document.py:883
+#: models/core_document.py:882
 msgid "alternative names"
 msgstr ""
 
-#: models/core_document.py:901
+#: models/core_document.py:900
 msgid "Source HTML"
 msgstr ""
 
-#: models/core_document.py:902
+#: models/core_document.py:901
 msgid "Content HTML"
 msgstr ""
 
-#: models/core_document.py:907
+#: models/core_document.py:906
 msgid "document text"
 msgstr ""
 
-#: models/core_document.py:911
+#: models/core_document.py:910
 msgid "document XML"
 msgstr ""
 
-#: models/core_document.py:915
+#: models/core_document.py:914
 msgid "document content"
 msgstr ""
 
-#: models/core_document.py:916
+#: models/core_document.py:915
 msgid "document contents"
 msgstr ""
 
@@ -1871,131 +1877,135 @@ msgstr ""
 msgid "metabase dashboard link"
 msgstr ""
 
-#: models/settings.py:86
-msgid "mailchimp form url"
-msgstr ""
-
-#: models/settings.py:89
-msgid "twitter link"
-msgstr ""
-
-#: models/settings.py:92
-msgid "facebook link"
+#: models/settings.py:85
+msgid "document debug external links"
 msgstr ""
 
 #: models/settings.py:95
-msgid "linkedin link"
+msgid "mailchimp form url"
 msgstr ""
 
 #: models/settings.py:98
-msgid "youtube link"
+msgid "twitter link"
 msgstr ""
 
 #: models/settings.py:101
-msgid "contact form URL"
+msgid "facebook link"
 msgstr ""
 
 #: models/settings.py:104
-msgid "re-extract citations"
+msgid "linkedin link"
 msgstr ""
 
 #: models/settings.py:107
-msgid "Pocket Law repo"
+msgid "youtube link"
 msgstr ""
 
 #: models/settings.py:110
-msgid "editor help link"
+msgid "contact form URL"
+msgstr ""
+
+#: models/settings.py:113
+msgid "re-extract citations"
 msgstr ""
 
 #: models/settings.py:116
+msgid "Pocket Law repo"
+msgstr ""
+
+#: models/settings.py:119
+msgid "editor help link"
+msgstr ""
+
+#: models/settings.py:125
 msgid "user help link"
 msgstr ""
 
-#: models/settings.py:122
+#: models/settings.py:131
 msgid "admin emails"
 msgstr ""
 
-#: models/settings.py:126
+#: models/settings.py:135
 msgid "Enter one or more email addresses separated by spaces."
 msgstr ""
 
-#: models/settings.py:129
+#: models/settings.py:138
 msgid "matomo domain"
 msgstr ""
 
-#: models/settings.py:133
+#: models/settings.py:142
 msgid "Matomo domain (e.g. mysite.matomo.cloud)"
 msgstr ""
 
-#: models/settings.py:136
+#: models/settings.py:145
 msgid "matomo site ID"
 msgstr ""
 
-#: models/settings.py:140
+#: models/settings.py:149
 msgid "Matomo site ID (e.g. 2)"
 msgstr ""
 
-#: models/settings.py:143
+#: models/settings.py:152
 msgid "survey link"
 msgstr ""
 
-#: models/settings.py:148
+#: models/settings.py:157
 msgid "allow save documents"
 msgstr ""
 
-#: models/settings.py:150
+#: models/settings.py:159
 msgid "Allow documents to be saved."
 msgstr ""
 
-#: models/settings.py:153
+#: models/settings.py:162
 msgid "allow anonymisation"
 msgstr ""
 
-#: models/settings.py:155
+#: models/settings.py:164
 msgid "Allow documents to be anonymised."
 msgstr ""
 
-#: models/settings.py:158
+#: models/settings.py:167
 msgid "allow save searches"
 msgstr ""
 
-#: models/settings.py:160
+#: models/settings.py:169
 msgid "Allow searches to be saved."
 msgstr ""
 
-#: models/settings.py:163
+#: models/settings.py:172
 msgid "show contact form"
 msgstr ""
 
-#: models/settings.py:165
+#: models/settings.py:174
 msgid "Show the contact form."
 msgstr ""
 
-#: models/settings.py:170
+#: models/settings.py:179
 msgid "Additional robots.txt rules."
 msgstr ""
 
-#: models/settings.py:176
+#: models/settings.py:185
 msgid "ID of a Google custom search engine."
 msgstr ""
 
-#: models/settings.py:182
+#: models/settings.py:191
 msgid "ID of a helpscout contact us beacon."
 msgstr ""
 
-#: models/settings.py:188
+#: models/settings.py:197
 msgid "Secret key for helpscout signature."
 msgstr ""
 
-#: models/settings.py:191
+#: models/settings.py:200
 msgid "allow criminal data extraction"
 msgstr ""
 
-#: models/settings.py:193
+#: models/settings.py:202
 msgid "Allow AI-based criminal data extraction for judgments."
 msgstr ""
 
-#: models/settings.py:197
+#: models/settings.py:206
 msgid "site settings"
 msgstr ""
 
@@ -2175,19 +2185,19 @@ msgstr ""
 msgid "user profiles"
 msgstr ""
 
-#: settings.py:373
+#: settings.py:378
 msgid "English"
 msgstr ""
 
-#: settings.py:374
+#: settings.py:379
 msgid "French"
 msgstr ""
 
-#: settings.py:375
+#: settings.py:380
 msgid "Portuguese"
 msgstr ""
 
-#: settings.py:376
+#: settings.py:381
 msgid "Swahili"
 msgstr ""
 
@@ -2326,7 +2336,7 @@ msgstr ""
 #: templates/account/password_reset_from_key_done.html:11
 #: templates/account/signup.html:87 templates/account/user_auth.html:48
 #: templates/account/user_auth.html:117 templates/admin/login.html:56
-#: templates/peachjam/_user_menu.html:61
+#: templates/peachjam/_user_menu.html:88
 #: templates/peachjam/my/_frontpage_anon.html:8
 #: templates/peachjam/restricted_document_detail.html:24
 #: templates/peachjam/saved_document/_anon_modal.html:19
@@ -2761,7 +2771,7 @@ msgid "Browse by month"
 msgstr ""
 
 #: templates/peachjam/_court_years_list.html:4
-#: templates/peachjam/_years_list.html:4 views/generic_views.py:420
+#: templates/peachjam/_years_list.html:4 views/generic_views.py:424
 #: views/legislation.py:78
 msgid "Years"
 msgstr ""
@@ -2832,7 +2842,7 @@ msgstr ""
 
 #: templates/peachjam/_document_count.html:14
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:5
-#: views/generic_views.py:149
+#: views/generic_views.py:153
 msgid "documents"
 msgstr ""
 
@@ -3447,6 +3457,18 @@ msgstr ""
 msgid "Admin"
 msgstr ""
 
+#: templates/peachjam/_user_menu.html:62 templates/peachjam/_user_menu.html:72
+msgid "Enabled:"
+msgstr ""
+
+#: templates/peachjam/_user_menu.html:64
+msgid "Trace for 5 mins"
+msgstr ""
+
+#: templates/peachjam/_user_menu.html:74
+msgid "Profile for 5 mins"
+msgstr ""
+
 #: templates/peachjam/about.html:4 templates/peachjam/about.html:10
 msgid "About"
 msgstr ""
@@ -3626,7 +3648,7 @@ msgid "Similar provisions"
 msgstr ""
 
 #: templates/peachjam/document/_provisions_table.html:18
-#: templates/peachjam/document/_provisions_table.html:90
+#: templates/peachjam/document/_provisions_table.html:91
 msgid "No provisions found."
 msgstr ""
 
@@ -3639,7 +3661,7 @@ msgstr ""
 msgid "Compare..."
 msgstr ""
 
-#: templates/peachjam/document/_provisions_table.html:78
+#: templates/peachjam/document/_provisions_table.html:79
 #: templates/peachjam/provision_enrichment/uncommenced_provision_detail.html:8
 #: templates/peachjam/provision_enrichment/unconstitutional_provision_detail.html:83
 msgid "No content found"
@@ -4526,7 +4548,7 @@ msgstr ""
 msgid "CauseList"
 msgstr ""
 
-#: views/causelist.py:115 views/generic_views.py:362
+#: views/causelist.py:115 views/generic_views.py:366
 msgid "Document nature"
 msgstr ""
 
@@ -4534,11 +4556,11 @@ msgstr ""
 msgid "Court divisions"
 msgstr ""
 
-#: views/causelist.py:170 views/generic_views.py:332
+#: views/causelist.py:170 views/generic_views.py:336
 msgid "Topics"
 msgstr ""
 
-#: views/causelist.py:180 views/generic_views.py:343
+#: views/causelist.py:180 views/generic_views.py:347
 msgid "Alphabet"
 msgstr ""
 

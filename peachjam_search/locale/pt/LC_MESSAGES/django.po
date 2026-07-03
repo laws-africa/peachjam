@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-02 08:20+0000\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
+"POT-Creation-Date: 2026-06-25 06:56+0000\n"
+"PO-Revision-Date: 2026-06-18 11:10\n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -13,6 +13,18 @@ msgstr ""
 "X-Crowdin-Language: pt\n"
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
+
+#: entity_matcher.py:75
+msgid "Court"
+msgstr "Tribunal"
+
+#: entity_matcher.py:98
+msgid "Judge"
+msgstr "Juiz"
+
+#: entity_matcher.py:141
+msgid "Locality"
+msgstr "Localidade"
 
 #: models.py:174
 msgid "Search alert limit reached"
@@ -239,12 +251,12 @@ msgstr "Criado em"
 msgid "No search traces found."
 msgstr "Nenhum vestígio de busca encontrado."
 
-#: views/search.py:65
+#: views/search.py:66
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Pesquisar %(app_name)s"
 
-#: views/search.py:303
+#: views/search.py:320
 msgid "Search trace not found"
 msgstr "Rastreamento de pesquisa não encontrado"
 

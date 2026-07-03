@@ -1,5 +1,5 @@
 {% extends 'peachjam/layouts/main.html' %}
-{% load i18n peachjam %}
+{% load i18n peachjam peachjam_subs %}
 {% block title %}{{ MY_LII }}{% endblock %}
 {% block page-content %}
   <div class="bg-light">
@@ -28,36 +28,49 @@
           </div>
         </div>
       </div>
+      {% subscription_locked_data_summary user as my_locked_data_summary %}
       <ul class="nav nav-tabs border-bottom">
         {% block my-tabs %}
           <li class="nav-item" role="presentation">
             <a href="{% url "my_home" %}"
                class="nav-link {% if view.tab == "my" %}active{% endif %}">{{ MY_LII }}</a>
           </li>
-          {% if PEACHJAM_SETTINGS.allow_save_documents %}
+          {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
             <li class="nav-item" role="presentation">
               <a href="{% url "folder_list" %}"
                  class="nav-link {% if view.tab == "saved_documents" %}active{% endif %}">
                 <i class="bi bi-star"></i>
                 {% trans "Saved documents" %}
+                {% if my_locked_data_summary.by_category.saved_documents %}
+                  <i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+                     title="{% trans "Some saved documents are over your subscription limit" %}"></i>
+                {% endif %}
               </a>
             </li>
           {% endif %}
-          {% if perms.peachjam.view_userfollowing %}
+          {% if PEACHJAM_SETTINGS.follows_enabled and perms.peachjam.view_userfollowing %}
             <li class="nav-item" role="presentation">
               <a href="{% url "user_following_list" %}"
                  class="nav-link {% if view.tab == "user_following" %}active{% endif %}">
                 <i class="bi bi-bell"></i>
                 {% trans "Following" %}
+                {% if my_locked_data_summary.by_category.following %}
+                  <i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+                     title="{% trans "Some follows are over your subscription limit" %}"></i>
+                {% endif %}
               </a>
             </li>
           {% endif %}
-          {% if PEACHJAM_SETTINGS.allow_save_searches %}
+          {% if PEACHJAM_SETTINGS.save_searches_enabled and perms.peachjam_search.view_savedsearch %}
             <li class="nav-item" role="presentation">
               <a href="{% url "search:saved_search_list" %}"
                  class="nav-link {% if view.tab == "saved_searches" %}active{% endif %}">
                 <i class="bi bi-search"></i>
                 {% trans "Search alerts" %}
+                {% if my_locked_data_summary.by_category.search_alerts %}
+                  <i class="bi bi-exclamation-triangle-fill text-warning ms-1"
+                     title="{% trans "Some search alerts are over your subscription limit" %}"></i>
+                {% endif %}
               </a>
             </li>
           {% endif %}

@@ -16,9 +16,13 @@
           {% endif %}
         </p>
       {% else %}
-        <p>{% trans "If your institution has access to this collection, sign in to your account to continue." %}</p>
-        <a class="btn btn-primary"
-           href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Sign in" %}</a>
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
+          <p>{% trans "If your institution has access to this collection, sign in to your account to continue." %}</p>
+          <a class="btn btn-primary"
+             href="{% url 'account_login' %}?next={{ request.get_full_path|urlencode }}">{% trans "Sign in" %}</a>
+        {% else %}
+          <p>{% trans "This collection is restricted, and accounts are not available on this site." %}</p>
+        {% endif %}
         {% if SUPPORT_EMAIL %}
           <p class="mt-3">
             {% blocktrans trimmed with email=SUPPORT_EMAIL %}

@@ -26,6 +26,9 @@ from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
+from peachjam.logging import LoggingContextFilter
+from peachjam.sentry import sentry_profiles_sampler, sentry_traces_sampler
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -135,6 +138,7 @@ MIDDLEWARE = [
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
+    "peachjam.middleware.LogContextMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -144,6 +148,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "peachjam.middleware.SentrySamplingMiddleware",
     "peachjam.middleware.TermsAcceptanceMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -191,6 +196,9 @@ PEACHJAM = {
     "SUMMARISE_USE_FLYNOTE_TREE": False,
     # should flynote topic navigation and linked flynote UI be shown when the flynote tree is enabled?
     "SHOW_FLYNOTE_TOPICS": False,
+    # Canonical judge identity rollout flag. Keep disabled by default so
+    # individual LIIs can opt in safely.
+    "CANONICAL_JUDGE_IDENTITY": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
@@ -220,6 +228,7 @@ PEACHJAM = {
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
     "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
+    "DISABLE_ACCOUNTS": os.environ.get("DISABLE_ACCOUNTS", "false") == "true",
     "ALL_USERS_PERMISSION_GROUP": "AllUsers",
 }
 
@@ -473,12 +482,8 @@ if not DEBUG:
         before_send=before_send,
         before_send_transaction=before_send,
         send_default_pii=True,
-        # sample x% of requests for performance metrics
-        traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.1")),
-        profile_session_sample_rate=float(
-            os.environ.get("SENTRY_PROFILE_SESSION_SAMPLE_RATE", "0.0")
-        ),
-        profile_lifecycle="trace",
+        traces_sampler=sentry_traces_sampler,
+        profiles_sampler=sentry_profiles_sampler,
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
@@ -623,18 +628,22 @@ JAZZMIN_UI_TWEAKS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
-    "filters": {"request_id": {"()": "log_request_id.filters.RequestIDFilter"}},
+    "filters": {
+        "request_id": {"()": "log_request_id.filters.RequestIDFilter"},
+        "context": {"()": "peachjam.logging.LoggingContextFilter"},
+    },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "simple",
-            "filters": ["request_id"],
+            "filters": ["request_id", "context"],
         },
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(name)s %(request_id)s %(process)d %(thread)d %(message)s",
+            "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s "
+            "%(frbr_uri)s %(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },
@@ -652,6 +661,21 @@ LOGGING = {
         "import_export": {"level": "DEBUG"},
     },
 }
+
+if not DEBUG:
+    # in production, use json logging
+    LOGGING["formatters"]["json"] = {
+        "()": "pythonjsonlogger.json.JsonFormatter",
+        "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s %(task_name)s %(frbr_uri)s %(process)d "
+        "%(thread)d %(message)s",
+        "rename_fields": {
+            "asctime": "ts",
+            "levelname": "level",
+            "name": "logger",
+        },
+    }
+    LOGGING["handlers"]["console"]["formatter"] = "json"
+    LoggingContextFilter.empty = ""
 
 
 CKEDITOR_CONFIGS = {
