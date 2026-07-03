@@ -9,8 +9,7 @@
       {
         "type": "startup",
         "name": "web-check",
-        "path": "/accounts/login/",
-        "content": "login",
+        "path": "/",
         "attempts": 5,
         "initialDelay": 10
       }
