@@ -1,8 +1,10 @@
 {% extends "liiweb/home.html" %}
 {% load i18n static %}
-{% block hero-headings-title %}JuriCIV: Droit des affaires et arbitrage{% endblock %}
+{% block hero-headings-title %}
+  {% trans "JuriCIV: Business law and arbitration" %}
+{% endblock %}
 {% block hero-headings-welcome %}
   {% blocktrans trimmed %}
-    Un projet du programme Open Law Africa. Une collaboration entre Laws.Africa et le Barreau de Côte d’Ivoire.
+    An Open Law Africa programme project. A collaboration between Laws.Africa and the Côte d'Ivoire Bar Association.
   {% endblocktrans %}
 {% endblock %}
