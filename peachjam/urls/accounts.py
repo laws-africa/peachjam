@@ -1,5 +1,7 @@
 from django.conf import settings
+from django.http import Http404
 from django.urls import include, path
+from django.views import View
 from django.views.generic import RedirectView
 
 from peachjam.views import (
@@ -12,7 +14,22 @@ from peachjam.views import (
 )
 from peachjam.views.accounts import OnboardView, SignupView, UserAuthView
 
+
+class DisabledAccountUrlsView(View):
+    def dispatch(self, request, *args, **kwargs):
+        raise Http404
+
+
 urlpatterns = []
+
+if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
+    # Keep the normal account URL patterns registered below so reverse() still
+    # works, but prepend catch-all routes so incoming account requests resolve
+    # to 404 while accounts are disabled.
+    urlpatterns += [
+        path("", DisabledAccountUrlsView.as_view()),
+        path("<path:path>", DisabledAccountUrlsView.as_view()),
+    ]
 
 urlpatterns += [
     path("signup/", SignupView.as_view(), name="account_signup"),

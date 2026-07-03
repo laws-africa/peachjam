@@ -1,6 +1,6 @@
 import datetime
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models.aggregates import Count
 from django.http.response import Http404
 from django.views.generic.base import TemplateView
@@ -36,6 +36,11 @@ class MyHomeView(LoginRequiredMixin, CommonContextMixin, TemplateView):
     tab = "my"
     timeline_truncated = False
 
+    def get(self, request, *args, **kwargs):
+        if not pj_settings().accounts_enabled:
+            raise Http404()
+        return super().get(request, *args, **kwargs)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["KEY_LINK_PAGE"] = "my_lii"
@@ -49,7 +54,7 @@ class MyFrontpageView(CommonContextMixin, TemplateView):
     max_docs = 5
 
     def get(self, request, *args, **kwargs):
-        if not pj_settings().allow_signups:
+        if not pj_settings().accounts_enabled:
             raise Http404()
         return super().get(request, *args, **kwargs)
 
@@ -59,9 +64,14 @@ class MyFrontpageView(CommonContextMixin, TemplateView):
         return ["peachjam/my/_frontpage_anon.html"]
 
 
-class MyTimelineView(LoginRequiredMixin, TemplateView):
+class MyTimelineView(LoginRequiredMixin, PermissionRequiredMixin, TemplateView):
     template_name = "peachjam/user_following/_timeline.html"
     permission_required = "peachjam.view_userfollowing"
+
+    def get(self, request, *args, **kwargs):
+        if not pj_settings().follows_enabled:
+            raise Http404()
+        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

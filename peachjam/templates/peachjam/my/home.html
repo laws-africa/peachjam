@@ -4,17 +4,17 @@
 {% block my-content %}
   {% include "peachjam/my/_subscription_locked_banner.html" %}
   <div class="row">
-    {% if PEACHJAM_SETTINGS.allow_save_documents %}
+    {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
       <div class="col-lg-6">{% include "peachjam/my/_saved_documents.html" %}</div>
     {% endif %}
-    {% if PEACHJAM_SETTINGS.allow_save_searches %}
+    {% if PEACHJAM_SETTINGS.save_searches_enabled and perms.peachjam_search.view_savedsearch %}
       <div class="col-lg-6">{% include "peachjam/my/_saved_searches.html" %}</div>
     {% endif %}
     {% if PEACHJAM_JS_CONFIG.chat.enabled and user.chat_threads.exists %}
       <div class="col-lg-6">{% include "peachjam/my/_chats.html" %}</div>
     {% endif %}
   </div>
-  {% if perms.peachjam.view_userfollowing %}
+  {% if PEACHJAM_SETTINGS.follows_enabled and perms.peachjam.view_userfollowing %}
     <div class="mt-3" id="timeline">{% include "peachjam/my/_recent_additions.html" %}</div>
   {% endif %}
 {% endblock %}

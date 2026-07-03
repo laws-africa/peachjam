@@ -65,7 +65,7 @@ User = get_user_model()
 
 class AllowSavedDocumentMixin:
     def dispatch(self, *args, **kwargs):
-        if not pj_settings().allow_save_documents:
+        if not pj_settings().save_documents_enabled:
             raise Http404("Saving documents is not allowed.")
         return super().dispatch(*args, **kwargs)
 

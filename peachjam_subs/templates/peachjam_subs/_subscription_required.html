@@ -5,30 +5,35 @@
     <div class="card w-100 mx-auto" style="max-width: 35rem;">
       <div class="card-body">
         {% if not request.user.is_authenticated %}
-          {% login_url_with_next upsell_url as login_url %}
-          {% block anonymous-user %}
-            <h5 class="card-title">
-              {% if lowest_offering_is_free %}
-                {% trans "Create a free account" %}
-              {% else %}
-                {% trans "Unlock this feature" %}
-              {% endif %}
-            </h5>
-            <p>{% trans "Sign up to save documents, read summaries and access more features." %}</p>
-            <a class="btn btn-primary mb-1" href="{{ login_url }}">
-              {% if lowest_offering_is_free %}
-                {% trans "Create a free account" %}
-              {% else %}
-                {% trans "Start" %} {{ lowest_product.name }}
-              {% endif %}
-            </a>
-            <p>
-              <small>
-                {% trans "Already have an account?" %}
-                <a href="{{ login_url }}">{% trans "Log in" %}</a>.
-              </small>
-            </p>
-          {% endblock %}
+          {% if PEACHJAM_SETTINGS.accounts_enabled %}
+            {% login_url_with_next upsell_url as login_url %}
+            {% block anonymous-user %}
+              <h5 class="card-title">
+                {% if lowest_offering_is_free %}
+                  {% trans "Create a free account" %}
+                {% else %}
+                  {% trans "Unlock this feature" %}
+                {% endif %}
+              </h5>
+              <p>{% trans "Sign up to save documents, read summaries and access more features." %}</p>
+              <a class="btn btn-primary mb-1" href="{{ login_url }}">
+                {% if lowest_offering_is_free %}
+                  {% trans "Create a free account" %}
+                {% else %}
+                  {% trans "Start" %} {{ lowest_product.name }}
+                {% endif %}
+              </a>
+              <p>
+                <small>
+                  {% trans "Already have an account?" %}
+                  <a href="{{ login_url }}">{% trans "Log in" %}</a>.
+                </small>
+              </p>
+            {% endblock %}
+          {% else %}
+            <h5 class="card-title">{% trans "Accounts unavailable" %}</h5>
+            <p>{% trans "This feature requires an account, and accounts are not available on this site." %}</p>
+          {% endif %}
         {% else %}
           {% block authenticated-user %}
             <h5 class="card-title">{% trans "Unlock this feature" %}</h5>

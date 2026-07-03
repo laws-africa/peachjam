@@ -19,18 +19,22 @@
             </div>
           {% endif %}
         </li>
-        <li>
-          <a class="dropdown-item" href="{% url 'my_home' %}">{{ MY_LII }}</a>
-        </li>
-        {% if PEACHJAM_SETTINGS.allow_save_documents %}
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
+          <li>
+            <a class="dropdown-item" href="{% url 'my_home' %}">{{ MY_LII }}</a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
           <li>
             <a class="dropdown-item" href="{% url 'folder_list' %}">{% trans 'Saved documents' %}</a>
           </li>
         {% endif %}
-        <li>
-          <a class="dropdown-item" href="{% url 'user_following_list' %}">{% trans 'Following' %}</a>
-        </li>
-        {% if PEACHJAM_SETTINGS.allow_save_searches %}
+        {% if PEACHJAM_SETTINGS.follows_enabled and perms.peachjam.view_userfollowing %}
+          <li>
+            <a class="dropdown-item" href="{% url 'user_following_list' %}">{% trans 'Following' %}</a>
+          </li>
+        {% endif %}
+        {% if PEACHJAM_SETTINGS.save_searches_enabled and perms.peachjam_search.view_savedsearch %}
           <li>
             <a class="dropdown-item" href="{% url 'search:saved_search_list' %}">{% trans 'Search alerts' %}</a>
           </li>
@@ -38,17 +42,21 @@
         <li>
           <hr class="dropdown-divider"/>
         </li>
-        <li>
-          <a class="dropdown-item" href="{% url 'my_account' %}">{% trans "My account" %}</a>
-        </li>
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
+          <li>
+            <a class="dropdown-item" href="{% url 'my_account' %}">{% trans "My account" %}</a>
+          </li>
+        {% endif %}
         {% if user.is_staff %}
           <li>
             <a class="dropdown-item" href="{% url 'admin:index' %}">{% trans 'Admin' %}</a>
           </li>
         {% endif %}
-        <li>
-          <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
-        </li>
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
+          <li>
+            <a class="dropdown-item" href="{% url 'account_logout' %}">{% trans 'Log out' %}</a>
+          </li>
+        {% endif %}
         {% if user.is_staff and sentry_enabled %}
           <li>
             <hr class="dropdown-divider"/>
@@ -79,7 +87,7 @@
       </ul>
     </li>
   </ul>
-{% elif PEACHJAM_SETTINGS.allow_signups %}
+{% elif PEACHJAM_SETTINGS.accounts_enabled %}
   <ul class="navbar-nav ms-auto me-2" hx-swap-oob="true" id="user-menu">
     <li class="nav-item">
       <a class="btn btn-primary"

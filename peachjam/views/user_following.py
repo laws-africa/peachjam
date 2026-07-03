@@ -1,10 +1,10 @@
 from django import forms
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView
 
-from peachjam.models import UserFollowing
+from peachjam.models import UserFollowing, pj_settings
 from peachjam.views import AtomicPostMixin
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import Subscription
@@ -67,13 +67,26 @@ class UserFollowingButtonForm(forms.Form):
         return cleaned_data
 
 
-class UserFollowingButtonView(SubscriptionRequiredMixin, FormView):
+class AllowFollowsMixin:
+    def get_follows_disabled_response(self):
+        raise Http404("Following is not allowed.")
+
+    def dispatch(self, *args, **kwargs):
+        if not pj_settings().follows_enabled:
+            return self.get_follows_disabled_response()
+        return super().dispatch(*args, **kwargs)
+
+
+class UserFollowingButtonView(AllowFollowsMixin, SubscriptionRequiredMixin, FormView):
     permission_required = "peachjam.add_userfollowing"
     form_class = UserFollowingButtonForm
     template_name = "peachjam/user_following/_button.html"
 
     def get_subscription_required_template(self):
         return self.template_name
+
+    def get_follows_disabled_response(self):
+        return HttpResponse(status=204)
 
     def get(self, *args, **kwargs):
         form = UserFollowingButtonForm(self.request.GET)
@@ -96,7 +109,7 @@ class UserFollowingButtonView(SubscriptionRequiredMixin, FormView):
         return HttpResponse(status=400)
 
 
-class BaseUserFollowingView(LoginRequiredMixin):
+class BaseUserFollowingView(AllowFollowsMixin, LoginRequiredMixin):
     model = UserFollowing
 
     def get_queryset(self):
@@ -105,7 +118,8 @@ class BaseUserFollowingView(LoginRequiredMixin):
         )
 
 
-class UserFollowingListView(BaseUserFollowingView, ListView):
+class UserFollowingListView(BaseUserFollowingView, PermissionRequiredMixin, ListView):
+    permission_required = "peachjam.view_userfollowing"
     template_name = "peachjam/user_following/list.html"
     tab = "user_following"
 
