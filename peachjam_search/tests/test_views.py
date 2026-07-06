@@ -1,5 +1,6 @@
+from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from uuid import uuid4
 
 from django.conf import settings
@@ -75,6 +76,199 @@ class SearchViewsTest(TestCase):
         response = self.client.get(reverse("search:search_explain") + "?search=test")
         self.assertEqual(response.status_code, 200)
         self.assertIn("no-cache", response.headers["Cache-Control"])
+
+    def test_search_debug_permissions(self):
+        response = self.client.get(reverse("search:search_debug"))
+        self.assertEqual(response.status_code, 302)
+
+        user = User.objects.create_user("debug-denied@example.com")
+        self.client.force_login(user)
+        response = self.client.get(reverse("search:search_debug"))
+        self.assertEqual(response.status_code, 403)
+
+        self.client.force_login(self.user)
+        response = self.client.get(reverse("search:search_debug"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Search debug")
+
+    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    def test_document_search_debug(self, mock_search):
+        doc = CoreDocument.objects.first()
+
+        def resp(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": 1},
+                        "hits": [
+                            {
+                                "_id": str(doc.pk),
+                                "_index": search.index,
+                                "_score": 10.0,
+                                "_source": {
+                                    "expression_frbr_uri": doc.expression_frbr_uri,
+                                },
+                            }
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = resp
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("search:search_debug_documents"),
+            {"query_params": "search=test&page=1&ordering=-score"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Elasticsearch query")
+        self.assertContains(response, "simple_query_string")
+        self.assertContains(response, "&quot;query&quot;: {")
+        self.assertNotContains(response, '"redacted_query"')
+        self.assertNotContains(response, '"inputs"')
+        self.assertContains(response, doc.title)
+        self.assertNotContains(response, "&lt;Response:")
+
+    @patch("peachjam_search.views.api.PortionSearchView.load_portion_details")
+    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    def test_portion_search_debug(self, mock_search, mock_load_portion_details):
+        expression_frbr_uri = "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
+
+        def resp(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": 1},
+                        "hits": [
+                            {
+                                "_score": 0.2,
+                                "_source": {
+                                    "expression_frbr_uri": expression_frbr_uri,
+                                    "title": "Charter on Democracy, Elections and Governance",
+                                    "repealed": False,
+                                    "commenced": True,
+                                    "principal": True,
+                                },
+                                "inner_hits": {
+                                    "provisions": {
+                                        "hits": {
+                                            "hits": [
+                                                {
+                                                    "_score": 0.25,
+                                                    "_source": {
+                                                        "id": "sec_1",
+                                                        "title": "Section 1",
+                                                        "parent_ids": ["chp_1"],
+                                                        "parent_titles": ["Chapter 1"],
+                                                    },
+                                                    "highlight": {
+                                                        "provisions.body": [
+                                                            "Foo <mark>bar</mark> baz"
+                                                        ]
+                                                    },
+                                                }
+                                            ]
+                                        }
+                                    }
+                                },
+                            }
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = resp
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("search:search_debug_portions"),
+            {"text": "example search", "top_k": 5, "filters": '{"principal": true}'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Elasticsearch query")
+        self.assertContains(response, "&quot;query&quot;: {")
+        self.assertNotContains(response, '"redacted_query"')
+        self.assertNotContains(response, '"inputs"')
+        self.assertContains(response, "Portions")
+        self.assertContains(response, "Foo bar baz")
+        self.assertNotContains(response, "&lt;Response:")
+        self.assertTrue(mock_load_portion_details.called)
+
+    def test_raw_search_debug_rejects_invalid_json_and_excessive_size(self):
+        self.client.force_login(self.user)
+
+        response = self.client.post(
+            reverse("search:search_debug_raw"),
+            {"query": "{"},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Invalid JSON")
+
+        response = self.client.post(
+            reverse("search:search_debug_raw"),
+            {"query": '{"size": 26, "query": {"match_all": {}}}'},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Query size must be 25 or less")
+
+    @patch("peachjam_search.views.search.SearchEngine")
+    def test_raw_search_debug_executes_against_configured_index(self, mock_engine_cls):
+        client = Mock()
+        client.search.return_value = {"hits": {"hits": []}}
+        mock_engine_cls.return_value = SimpleNamespace(
+            index=["test-index"], client=client
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.post(
+            reverse("search:search_debug_raw"),
+            {"query": '{"query": {"match_all": {}}}', "size": 5},
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "test-index")
+        client.search.assert_called_once_with(
+            index=["test-index"], body={"query": {"match_all": {}}, "size": 5}
+        )
+
+    def test_search_trace_card_links_to_debug_for_permitted_user(self):
+        self.user.is_staff = True
+        self.user.save()
+        trace = SearchTrace.objects.create(
+            user=self.user,
+            config_version="test",
+            mode="text",
+            search="example",
+            field_searches={},
+            n_results=0,
+            page=1,
+            filters={},
+        )
+
+        self.client.force_login(self.user)
+        response = self.client.get(
+            reverse("search:search_trace", kwargs={"pk": trace.pk})
+        )
+        self.assertContains(response, "Debug")
+        self.assertContains(response, reverse("search:search_debug"))
+
+    def test_find_documents_has_staff_debug_entrypoint(self):
+        source = (
+            Path(__file__).parents[2]
+            / "peachjam"
+            / "js"
+            / "components"
+            / "FindDocuments"
+            / "index.vue"
+        ).read_text()
+
+        self.assertIn("Debug", source)
+        self.assertIn("canDebugSearch", source)
+        self.assertIn("/search/debug/", source)
 
     @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
     def test_download(self, mock_search):

@@ -275,6 +275,34 @@ class TestSearchEngine(TestCase):
             json.dumps(d, indent=2, sort_keys=True),
         )
 
+    def test_debug_payload_includes_built_query(self):
+        params = QueryDict("", mutable=True)
+        params["search"] = "test"
+
+        engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(engine)
+
+        self.assertEqual(
+            engine.build_search().to_dict(),
+            engine.build_debug_payload()["query"],
+        )
+
+    @patch.object(PortionSearchEngine, "get_query_embedding", return_value=[0.1, 0.2])
+    def test_portion_debug_payload_redacts_query_vector(self, mock_get_query_embedding):
+        engine = PortionSearchEngine()
+        engine.mode = "semantic"
+        engine.query = "example search"
+
+        payload = engine.build_debug_payload()
+
+        self.assertIn("query_vector", json.dumps(payload["query"]))
+        self.assertNotIn("0.1", json.dumps(payload["redacted_query"]))
+        self.assertIn(
+            "[embedding vector omitted]", json.dumps(payload["redacted_query"])
+        )
+
     def test_basic_facets(self):
         params = QueryDict("", mutable=True)
         params["search"] = "test"

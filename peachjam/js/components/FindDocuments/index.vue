@@ -223,6 +223,13 @@
                     >
                       {{ $t('Download to Excel') }}
                     </a>
+                    <a
+                      v-if="canDebugSearch"
+                      :href="debugUrl()"
+                      class="ms-2 d-none d-md-inline"
+                    >
+                      {{ $t('Debug') }}
+                    </a>
                   </div>
                   <select
                     v-model="ordering"
@@ -484,6 +491,9 @@ export default {
     },
     facetsLoading () {
       return this.facetsLoadingCount > 0;
+    },
+    canDebugSearch () {
+      return peachJam.user.perms.includes('peachjam_search.can_debug_search');
     }
   },
 
@@ -1017,6 +1027,11 @@ export default {
     downloadUrl () {
       const params = this.generateSearchParams();
       return `${this.urlPrefix}/search/api/documents/download?${params.toString()}`;
+    },
+
+    debugUrl () {
+      const params = this.generateSearchParams();
+      return `${this.urlPrefix}/search/debug/?${params.toString()}`;
     }
   }
 };

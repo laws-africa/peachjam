@@ -1,0 +1,53 @@
+{% load i18n %}
+{% if form.errors %}
+  <div class="alert alert-danger">{{ form.errors }}</div>
+{% else %}
+  <div class="mb-3">
+    <h2 class="h4">{% trans "Portion search results" %}</h2>
+    <p class="mb-0">
+      {% blocktrans count count=raw_count %}{{ count }} raw hit{% plural %}{{ count }} raw hits{% endblocktrans %}
+      ·
+      {% blocktrans count count=portions|length %}{{ count }} portion{% plural %}{{ count }} portions{% endblocktrans %}
+    </p>
+  </div>
+  {% if not portions %}
+    <p>{% trans "No portions were returned after post-processing." %}</p>
+  {% endif %}
+  {% include "peachjam_search/_debug_json_tabs.html" with prefix="portion-debug" query_json=query_json response_json=raw_response_json extra_json=portions_json extra_label="Portions" %}
+  {% if portions %}
+    <div class="list-group">
+      {% for portion in portions %}
+        <div class="list-group-item">
+          <div class="d-flex justify-content-between">
+            <h3 class="h6 mb-1">{{ portion.metadata.title }}</h3>
+            <span>{{ portion.score }}</span>
+          </div>
+          <p class="mb-1">
+            <a href="{{ portion.metadata.public_url }}">{{ portion.metadata.expression_frbr_uri }}</a>
+          </p>
+          <dl class="row mb-2">
+            <dt class="col-sm-2">
+              {% trans "Type" %}
+            </dt>
+            <dd class="col-sm-10">
+              {{ portion.metadata.portion_type }}
+            </dd>
+            <dt class="col-sm-2">
+              {% trans "ID" %}
+            </dt>
+            <dd class="col-sm-10">
+              {{ portion.metadata.portion_id|default_if_none:"" }}
+            </dd>
+            <dt class="col-sm-2">
+              {% trans "Title" %}
+            </dt>
+            <dd class="col-sm-10">
+              {{ portion.metadata.portion_title|default_if_none:"" }}
+            </dd>
+          </dl>
+          <pre class="mb-0 text-wrap">{{ portion.content.text }}</pre>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endif %}

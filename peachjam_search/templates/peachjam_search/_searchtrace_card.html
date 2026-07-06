@@ -7,6 +7,9 @@
       <small class="text-muted">
         <a href="{% url "search:search_trace" pk=trace.pk %}" class="ms-3">{{ trace.pk }}</a>
         <a href="{{ trace.get_search_url }}" target="_blank" class="ms-3">{% trans "Try it" %}<i class="ms-1 bi bi-box-arrow-up-right"></i></a>
+        {% if perms.peachjam_search.can_debug_search %}
+          <a href="{{ trace.get_search_debug_url }}" class="ms-3">{% trans "Debug" %}</a>
+        {% endif %}
       </small>
     </h5>
     <div>
@@ -77,7 +80,9 @@
         <table class="table table-condensed">
           {% for click in clicks %}
             <tr>
-              <td>#{{ click.position }}</td>
+              <td>
+                #{{ click.position }}
+              </td>
               <td>
                 <a href="{{ click.frbr_uri }}" target="_blank">{{ click.frbr_uri }}</a>
               </td>

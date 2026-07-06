@@ -1,9 +1,11 @@
 import datetime
+import json
 
 from django import forms
 
 from peachjam.resources import DownloadDocumentsResource
 from peachjam_search.models import SavedSearch, SearchFeedback
+from peachjam_search.serializers import PortionSearchRequestSerializer
 
 
 class SearchForm(forms.Form):
@@ -83,6 +85,106 @@ class SearchForm(forms.Form):
             val = (self.data.get(f"search__{field}") or "").strip()
             if val:
                 engine.field_queries[field] = val
+
+
+class DocumentSearchDebugForm(SearchForm):
+    query_params = forms.CharField(required=False)
+
+
+class PortionSearchDebugForm(forms.Form):
+    text = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    top_k = forms.IntegerField(
+        required=True,
+        min_value=1,
+        max_value=100,
+        initial=10,
+        widget=forms.NumberInput(attrs={"class": "form-control"}),
+    )
+    pre_filters = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={"class": "form-control font-monospace", "rows": 5}
+        ),
+    )
+    filters = forms.CharField(
+        required=False,
+        widget=forms.Textarea(
+            attrs={"class": "form-control font-monospace", "rows": 5}
+        ),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.errors:
+            return cleaned_data
+
+        data = {
+            "text": cleaned_data["text"],
+            "top_k": cleaned_data["top_k"],
+        }
+
+        for field in ["pre_filters", "filters"]:
+            raw = cleaned_data.get(field)
+            if raw:
+                try:
+                    data[field] = json.loads(raw)
+                except json.JSONDecodeError as e:
+                    self.add_error(field, forms.ValidationError(f"Invalid JSON: {e}"))
+
+        if self.errors:
+            return cleaned_data
+
+        serializer = PortionSearchRequestSerializer(data=data)
+        if not serializer.is_valid():
+            for field, errors in serializer.errors.items():
+                form_field = field if field in self.fields else None
+                self.add_error(form_field, errors)
+            return cleaned_data
+
+        cleaned_data["validated_portion_search"] = serializer.validated_data
+        return cleaned_data
+
+
+class RawSearchDebugForm(forms.Form):
+    max_size = 25
+
+    query = forms.CharField(
+        required=True,
+        widget=forms.Textarea(
+            attrs={"class": "form-control font-monospace", "rows": 16}
+        ),
+    )
+    size = forms.IntegerField(
+        required=False,
+        min_value=0,
+        max_value=max_size,
+        widget=forms.NumberInput(attrs={"class": "form-control"}),
+        help_text=f"Optional result size override, maximum {max_size}.",
+    )
+
+    def clean_query(self):
+        raw = self.cleaned_data["query"]
+        try:
+            query = json.loads(raw)
+        except json.JSONDecodeError as e:
+            raise forms.ValidationError(f"Invalid JSON: {e}")
+
+        if not isinstance(query, dict):
+            raise forms.ValidationError("Query must be a JSON object.")
+
+        size = query.get("size")
+        if size is not None:
+            if not isinstance(size, int):
+                raise forms.ValidationError("Query size must be an integer.")
+            if size > self.max_size:
+                raise forms.ValidationError(
+                    f"Query size must be {self.max_size} or less."
+                )
+
+        return query
 
 
 class SavedSearchCreateForm(forms.ModelForm):

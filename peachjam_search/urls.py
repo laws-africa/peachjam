@@ -25,6 +25,29 @@ urlpatterns = [
     path("api/link-traces", views.LinkTracesView.as_view()),
     path("api/", include(router.urls)),
     path(
+        "debug/",
+        include(
+            [
+                path("", views.SearchDebugView.as_view(), name="search_debug"),
+                path(
+                    "documents",
+                    views.DocumentSearchDebugView.as_view(),
+                    name="search_debug_documents",
+                ),
+                path(
+                    "portions",
+                    views.PortionSearchDebugView.as_view(),
+                    name="search_debug_portions",
+                ),
+                path(
+                    "raw",
+                    views.RawSearchDebugView.as_view(),
+                    name="search_debug_raw",
+                ),
+            ]
+        ),
+    ),
+    path(
         "saved-searches/button",
         views.SavedSearchButtonView.as_view(),
         name="saved_search_button",

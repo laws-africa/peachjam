@@ -1,4 +1,5 @@
 import logging
+from copy import deepcopy
 from typing import List, Optional
 
 from django.conf import settings
@@ -257,6 +258,48 @@ class SearchEngine:
                 raise Exception(f"ES query failed: {response._shards.failures}")
 
         return response
+
+    def build_debug_payload(self):
+        search = self.build_search()
+        query = search.to_dict()
+        return {
+            "index": self.index,
+            "mode": self.mode,
+            "inputs": self.get_debug_inputs(),
+            "query": query,
+            "redacted_query": self.redact_debug_query(query),
+        }
+
+    def get_debug_inputs(self):
+        return {
+            "query": self.query,
+            "field_queries": self.field_queries,
+            "page": self.page,
+            "page_size": self.page_size,
+            "ordering": self.ordering,
+            "filters": self.filters,
+            "facets": self.facets,
+            "explain": self.explain,
+        }
+
+    @classmethod
+    def redact_debug_query(cls, value):
+        value = deepcopy(value)
+
+        def redact(item):
+            if isinstance(item, dict):
+                for key, child in list(item.items()):
+                    if key == "query_vector" or key.endswith("_embedding"):
+                        item[key] = "[embedding vector omitted]"
+                    else:
+                        item[key] = redact(child)
+            elif isinstance(item, list):
+                if item and all(isinstance(x, (int, float)) for x in item):
+                    return "[embedding vector omitted]"
+                return [redact(child) for child in item]
+            return item
+
+        return redact(value)
 
     def suggest(self, query):
         search = Search(using=self.client, index=self.index)
@@ -797,6 +840,20 @@ class PortionSearchEngine(SearchEngine):
         search = self.add_filters(search)
         search = self.add_retrievers(search)
         return search
+
+    def get_debug_inputs(self):
+        inputs = super().get_debug_inputs()
+        inputs["filters"] = [
+            (
+                f.model_dump(exclude_none=True)
+                if hasattr(f, "model_dump")
+                else f.dict(exclude_none=True)
+            )
+            for f in self.filters or []
+        ]
+        inputs["knn_k"] = self.knn_k
+        inputs["knn_num_candidates"] = self.knn_num_candidates
+        return inputs
 
     def add_filters(self, search):
         search = search.filter("term", is_most_recent=True)

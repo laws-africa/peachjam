@@ -1,0 +1,125 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans "Search debug" %}
+{% endblock %}
+{% block page-content %}
+  <div class="container py-3">
+    <h1 id="main-page-heading">{% trans "Search debug" %}</h1>
+    <ul class="nav nav-tabs mb-3 border-bottom" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active"
+                id="document-search-debug-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#document-search-debug"
+                type="button"
+                role="tab"
+                aria-controls="document-search-debug"
+                aria-selected="true">
+          {% trans "Document search" %}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="portion-search-debug-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#portion-search-debug"
+                type="button"
+                role="tab"
+                aria-controls="portion-search-debug"
+                aria-selected="false">
+          {% trans "Portion search" %}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                id="raw-search-debug-tab"
+                data-bs-toggle="tab"
+                data-bs-target="#raw-search-debug"
+                type="button"
+                role="tab"
+                aria-controls="raw-search-debug"
+                aria-selected="false">
+          {% trans "Raw query" %}
+        </button>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <section class="tab-pane show active"
+               id="document-search-debug"
+               role="tabpanel"
+               aria-labelledby="document-search-debug-tab">
+        <form method="post"
+              hx-post="{% url 'search:search_debug_documents' %}"
+              hx-target="#document-search-debug-results"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label" for="id_document_query_params">{% trans "Query parameters" %}</label>
+            <textarea id="id_document_query_params"
+                      name="query_params"
+                      class="form-control font-monospace"
+                      rows="3">{{ document_query_params }}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">{% trans "Run document search" %}</button>
+        </form>
+        <div id="document-search-debug-results" class="mt-3"></div>
+      </section>
+      <section class="tab-pane"
+               id="portion-search-debug"
+               role="tabpanel"
+               aria-labelledby="portion-search-debug-tab">
+        <form method="post"
+              hx-post="{% url 'search:search_debug_portions' %}"
+              hx-target="#portion-search-debug-results"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="row">
+            <div class="col-md-9 mb-3">
+              <label class="form-label" for="{{ portion_form.text.id_for_label }}">{% trans "Text" %}</label>
+              {{ portion_form.text }}
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label" for="{{ portion_form.top_k.id_for_label }}">{% trans "Top k" %}</label>
+              {{ portion_form.top_k }}
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="{{ portion_form.pre_filters.id_for_label }}">{% trans "Pre-filters JSON" %}</label>
+              {{ portion_form.pre_filters }}
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label" for="{{ portion_form.filters.id_for_label }}">{% trans "Filters JSON" %}</label>
+              {{ portion_form.filters }}
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">{% trans "Run portion search" %}</button>
+        </form>
+        <div id="portion-search-debug-results" class="mt-3"></div>
+      </section>
+      <section class="tab-pane"
+               id="raw-search-debug"
+               role="tabpanel"
+               aria-labelledby="raw-search-debug-tab">
+        <form method="post"
+              hx-post="{% url 'search:search_debug_raw' %}"
+              hx-target="#raw-search-debug-results"
+              hx-swap="innerHTML">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label" for="{{ raw_form.query.id_for_label }}">{% trans "Query JSON" %}</label>
+            {{ raw_form.query }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="{{ raw_form.size.id_for_label }}">{% trans "Size override" %}</label>
+            {{ raw_form.size }}
+            <div class="form-text">{{ raw_form.size.help_text }}</div>
+          </div>
+          <button type="submit" class="btn btn-primary">{% trans "Run raw query" %}</button>
+        </form>
+        <div id="raw-search-debug-results" class="mt-3"></div>
+      </section>
+    </div>
+  </div>
+{% endblock %}
