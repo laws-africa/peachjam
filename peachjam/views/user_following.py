@@ -81,6 +81,7 @@ class UserFollowingButtonView(AllowFollowsMixin, SubscriptionRequiredMixin, Form
     permission_required = "peachjam.add_userfollowing"
     form_class = UserFollowingButtonForm
     template_name = "peachjam/user_following/_button.html"
+    private_cache_max_age = None
 
     def get_subscription_required_template(self):
         return self.template_name

@@ -17,7 +17,6 @@ from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
-from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
 from peachjam.forms import (
@@ -524,7 +523,6 @@ class DocumentUncommencedProvisionListView(DetailView):
         return context
 
 
-@method_decorator(never_cache, name="dispatch")
 class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_uncommencedprovision"
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
@@ -561,7 +559,6 @@ class UnconstitutionalProvisionDetailView(DetailView):
     context_object_name = "enrichment"
 
 
-@method_decorator(never_cache, name="dispatch")
 class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_unconstitutionalprovision"
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
@@ -643,7 +640,6 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
         return context
 
 
-@method_decorator(never_cache, name="dispatch")
 class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
     model = Glossary
     # this is expensive and is not used
@@ -779,7 +775,6 @@ class LegislationProvisionListView(LegislationListView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class DocumentProvisionCitationView(
     DocumentProvisionMixin, SubscriptionRequiredMixin, FilteredDocumentListView
 ):
@@ -839,7 +834,6 @@ class DocumentProvisionCitationView(
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class DocumentProvisionSimilarView(
     DocumentProvisionMixin, SubscriptionRequiredMixin, LegislationProvisionListView
 ):

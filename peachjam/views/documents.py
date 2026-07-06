@@ -527,6 +527,7 @@ class DocumentCapabilitiesView(SubscriptionRequiredMixin, DetailView):
         "add_annotation": "peachjam.add_annotation",
         "view_provision_diffs": "peachjam.can_view_provision_changes",
     }
+    private_cache_max_age = None
 
     def has_permission(self):
         # Capability permissions are checked per action in get_capability().

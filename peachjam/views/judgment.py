@@ -12,7 +12,6 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
-from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
@@ -202,6 +201,7 @@ class FlynoteDetailView(
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
     permission_required = "peachjam.view_linked_judgments"
+    private_cache_max_age = None
 
     def get_flynote_document_listing_id(self):
         return f"flynote-document-listing-{self.flynote.pk}"
@@ -305,7 +305,6 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_case_history"
     model = Judgment
@@ -396,7 +395,6 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_document_summary"
     template_name = "peachjam/document/_judgment_summary.html"

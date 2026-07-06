@@ -3,12 +3,18 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import patch
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
 from django.core.exceptions import ValidationError
+from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
+from django.test.utils import override_settings
+from django.urls import path, reverse
 from django.utils import timezone
+from django.views import View
 from guardian.shortcuts import assign_perm
 
+from peachjam.models import Court, Glossary
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import (
     PricingPlan,
     Product,
@@ -43,6 +49,198 @@ class SubscriptionTemplateTagTests(TestCase):
             "/en/subscribe?next=%2Faccount%2F",
             change_subscription_url({}, next_url="/account/"),
         )
+
+
+class SubscriptionRequiredCacheTestView(SubscriptionRequiredMixin, View):
+    permission_required = "auth.change_user"
+
+    def get(self, request):
+        return HttpResponse("ok")
+
+    def head(self, request):
+        return HttpResponse()
+
+    def post(self, request):
+        return HttpResponse("ok")
+
+
+class SubscriptionRequiredPublicBypassTestView(SubscriptionRequiredMixin, View):
+    permission_required = "auth.change_user"
+
+    def has_permission(self):
+        return True
+
+    def get(self, request):
+        return HttpResponse("ok")
+
+
+class SubscriptionRequiredNoCacheTestView(SubscriptionRequiredMixin, View):
+    permission_required = "auth.change_user"
+
+    def get(self, request):
+        response = HttpResponse("ok")
+        response["Cache-Control"] = "no-cache"
+        return response
+
+
+class SubscriptionRequiredPrivateCacheDisabledTestView(SubscriptionRequiredMixin, View):
+    permission_required = "auth.change_user"
+    private_cache_max_age = None
+
+    def get(self, request):
+        return HttpResponse("ok")
+
+
+urlpatterns = [
+    path("subscription-cache/", SubscriptionRequiredCacheTestView.as_view()),
+    path(
+        "subscription-cache/public-bypass/",
+        SubscriptionRequiredPublicBypassTestView.as_view(),
+    ),
+    path("subscription-cache/no-cache/", SubscriptionRequiredNoCacheTestView.as_view()),
+    path(
+        "subscription-cache/disabled/",
+        SubscriptionRequiredPrivateCacheDisabledTestView.as_view(),
+    ),
+]
+
+
+@override_settings(ROOT_URLCONF=__name__)
+class SubscriptionRequiredMixinCacheTests(TestCase):
+    fixtures = ["tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="subscription-cache-user@example.com",
+            email="subscription-cache-user@example.com",
+            password="password",
+        )
+        self.permission = Permission.objects.get(
+            content_type__app_label="auth", codename="change_user"
+        )
+
+    def login_with_permission(self):
+        self.user.user_permissions.add(self.permission)
+        self.client.force_login(self.user)
+
+    def test_permission_granted_get_uses_private_cache(self):
+        self.login_with_permission()
+
+        response = self.client.get("/subscription-cache/")
+
+        cache_control = response.headers["Cache-Control"]
+        self.assertIn("private", cache_control)
+        self.assertIn("max-age=600", cache_control)
+        self.assertNotIn("public", cache_control)
+        self.assertNotIn("no-cache", cache_control)
+        self.assertNotIn("no-store", cache_control)
+        self.assertIn("Cookie", response.headers["Vary"])
+
+    def test_permission_granted_head_uses_private_cache(self):
+        self.login_with_permission()
+
+        response = self.client.head("/subscription-cache/")
+
+        self.assertIn("private", response.headers["Cache-Control"])
+        self.assertIn("max-age=600", response.headers["Cache-Control"])
+
+    def test_permission_granted_post_does_not_use_private_cache(self):
+        self.login_with_permission()
+
+        response = self.client.post("/subscription-cache/")
+
+        self.assertNotIn("private", response.headers.get("Cache-Control", ""))
+
+    def test_permission_denied_keeps_never_cache(self):
+        response = self.client.get("/subscription-cache/")
+
+        self.assertEqual(response.status_code, 200)
+        cache_control = response.headers["Cache-Control"]
+        self.assertIn("no-cache", cache_control)
+        self.assertIn("no-store", cache_control)
+        self.assertIn("private", cache_control)
+        self.assertNotIn("max-age=600", cache_control)
+
+    def test_public_permission_bypass_does_not_use_private_cache(self):
+        response = self.client.get("/subscription-cache/public-bypass/")
+
+        self.assertNotIn("private", response.headers.get("Cache-Control", ""))
+
+    def test_existing_no_cache_header_is_preserved(self):
+        self.login_with_permission()
+
+        response = self.client.get("/subscription-cache/no-cache/")
+
+        cache_control = response.headers["Cache-Control"]
+        self.assertIn("no-cache", cache_control)
+        self.assertNotIn("max-age=600", cache_control)
+        self.assertNotIn("private", cache_control)
+
+    def test_private_cache_can_be_disabled(self):
+        self.login_with_permission()
+
+        response = self.client.get("/subscription-cache/disabled/")
+
+        self.assertNotIn("private", response.headers.get("Cache-Control", ""))
+
+
+class ConcreteSubscriptionRequiredViewCacheTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="glossary-cache-user@example.com",
+            email="glossary-cache-user@example.com",
+            password="password",
+        )
+        self.permission = Permission.objects.get(
+            content_type__app_label="peachjam", codename="view_glossary"
+        )
+        self.glossary = Glossary.objects.create(
+            place_code="za",
+            data={"a": [{"term": "Act", "definition": "A law."}]},
+        )
+        self.url = reverse("glossary", kwargs={"place_code": self.glossary.place_code})
+
+    def login_with_permission(self):
+        self.user.user_permissions.add(self.permission)
+        self.client.force_login(self.user)
+
+    def test_permission_granted_get_uses_private_cache_on_glossary(self):
+        self.login_with_permission()
+
+        response = self.client.get(self.url)
+
+        cache_control = response.headers["Cache-Control"]
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("private", cache_control)
+        self.assertIn("max-age=600", cache_control)
+        self.assertNotIn("public", cache_control)
+        self.assertNotIn("no-store", cache_control)
+        self.assertIn("Cookie", response.headers["Vary"])
+
+    def test_permission_denied_get_uses_never_cache_on_glossary(self):
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no-store", response.headers["Cache-Control"])
+
+    def test_private_cache_disabled_on_user_following_button(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="peachjam", codename="add_userfollowing"
+            )
+        )
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            reverse("user_following_button"), {"court": Court.objects.first().pk}
+        )
+
+        cache_control = response.headers.get("Cache-Control", "")
+        self.assertEqual(response.status_code, 302)
+        self.assertNotIn("private", cache_control)
+        self.assertNotIn("max-age=600", cache_control)
 
 
 class SubscriptionTests(TestCase):

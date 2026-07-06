@@ -42,6 +42,7 @@ class StartDocumentChatView(
     http_method_names = ["get", "post"]
     subscription_required_status = 403
     subscription_required_template = "peachjam/chat/_chat_permission_denied.html"
+    private_cache_max_age = None
 
     def get(self, request, *args, **kwargs):
         document = self.get_object()
