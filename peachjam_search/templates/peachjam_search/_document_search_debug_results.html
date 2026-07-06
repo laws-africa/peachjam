@@ -1,0 +1,19 @@
+{% load i18n %}
+{% if form.errors %}
+  <div class="alert alert-danger">{{ form.errors }}</div>
+{% else %}
+  <div class="mb-3">
+    <h2 class="h4">{% trans "Document search results" %}</h2>
+    <p class="mb-0">
+      {% blocktrans count count=count %}{{ count }} result{% plural %}{{ count }} results{% endblocktrans %}
+    </p>
+    <p class="text-muted mb-0">{{ query_params }}</p>
+  </div>
+  {% if not hits %}
+    <p>{% trans "No local documents matched the Elasticsearch hits." %}</p>
+  {% endif %}
+  {% include "peachjam_search/_debug_json_tabs.html" with prefix="document-debug" query_json=query_json response_json=raw_response_json %}
+  {% if hits %}
+    {% include "peachjam_search/_search_hit_list.html" %}
+  {% endif %}
+{% endif %}

@@ -45,6 +45,9 @@ from peachjam_search.classifier import QueryClassifier
 from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
 from peachjam_search.forms import (
+    DocumentSearchDebugForm,
+    PortionSearchDebugForm,
+    RawSearchDebugForm,
     SavedSearchCreateForm,
     SavedSearchUpdateForm,
     SearchFeedbackCreateForm,
@@ -56,6 +59,24 @@ from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
+
+
+def debug_json(value):
+    return json.dumps(debug_jsonable(value), indent=2, default=str)
+
+
+def debug_jsonable(value):
+    if hasattr(value, "to_dict") and not isinstance(value, dict):
+        try:
+            value = value.to_dict()
+        except TypeError:
+            pass
+
+    if isinstance(value, dict):
+        return {key: debug_jsonable(child) for key, child in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [debug_jsonable(child) for child in value]
+    return value
 
 
 class SearchView(TemplateView):
@@ -300,6 +321,156 @@ class DocumentSearchView(TemplateView):
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
+
+
+class SearchDebugMixin(PermissionRequiredMixin):
+    permission_required = "peachjam_search.can_debug_search"
+
+    def has_permission(self):
+        return self.request.user.has_perm(self.permission_required)
+
+
+@method_decorator(never_cache, name="dispatch")
+class SearchDebugView(SearchDebugMixin, TemplateView):
+    template_name = "peachjam_search/search_debug.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query_params = self.request.GET.urlencode()
+        context.update(
+            {
+                "document_query_params": query_params,
+                "portion_form": PortionSearchDebugForm(initial={"top_k": 10}),
+                "raw_form": RawSearchDebugForm(
+                    initial={
+                        "query": json.dumps({"query": {"match_all": {}}}, indent=2)
+                    }
+                ),
+            }
+        )
+        return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class DocumentSearchDebugView(SearchDebugMixin, View):
+    template_name = "peachjam_search/_document_search_debug_results.html"
+
+    def post(self, request, *args, **kwargs):
+        params = QueryDict(request.POST.get("query_params", ""), mutable=True)
+        params.setdefault("page", "1")
+        params.setdefault("ordering", "-score")
+
+        form = DocumentSearchDebugForm(params)
+        if not form.is_valid():
+            return self.render({"form": form})
+
+        engine = SearchEngine()
+        form.configure_engine(engine)
+        if settings.PEACHJAM["SEARCH_SEMANTIC"]:
+            engine.mode = form.cleaned_data.get("mode") or engine.mode
+
+        debug_payload = engine.build_debug_payload()
+        es_response = engine.execute()
+        hits = SearchHit.from_es_hits(engine, es_response.hits)
+        SearchHit.attach_documents(hits)
+        hits = [h for h in hits if h.document]
+
+        return self.render(
+            {
+                "form": form,
+                "query_params": params.urlencode(),
+                "query_json": debug_json(debug_payload["redacted_query"]),
+                "raw_response_json": debug_json(es_response),
+                "count": es_response.hits.total.value,
+                "hits": hits,
+                "can_debug": True,
+                "show_jurisdiction": settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"],
+            }
+        )
+
+    def render(self, context):
+        return HttpResponse(render_to_string(self.template_name, context, self.request))
+
+
+@method_decorator(never_cache, name="dispatch")
+class PortionSearchDebugView(SearchDebugMixin, View):
+    template_name = "peachjam_search/_portion_search_debug_results.html"
+
+    def post(self, request, *args, **kwargs):
+        form = PortionSearchDebugForm(request.POST)
+        if not form.is_valid():
+            return self.render({"form": form})
+
+        input_data = form.cleaned_data["validated_portion_search"]
+        engine = self.make_engine(input_data)
+        debug_payload = engine.build_debug_payload()
+        es_response = engine.execute()
+
+        from peachjam_search.views.api import PortionSearchView
+
+        portion_view = PortionSearchView()
+        portion_view.request = request
+        portion_view.engine = engine
+        portions = portion_view.build_portions(es_response, request)
+        portions = portions[: input_data["top_k"]]
+
+        return self.render(
+            {
+                "form": form,
+                "query_json": debug_json(debug_payload["redacted_query"]),
+                "raw_response_json": debug_json(es_response),
+                "raw_count": es_response.hits.total.value,
+                "portions": portions,
+                "portions_json": debug_json(
+                    [p.model_dump(mode="json") for p in portions]
+                ),
+            }
+        )
+
+    def make_engine(self, input_data):
+        from peachjam_search.engine import PortionSearchEngine
+
+        engine = PortionSearchEngine()
+        engine.query = input_data["text"]
+        engine.knn_k = input_data["top_k"] * 10
+        engine.filters = []
+        if input_data.get("pre_filters", None):
+            engine.filters.append(input_data["pre_filters"])
+        if input_data.get("filters", None):
+            engine.filters.append(input_data["filters"])
+        return engine
+
+    def render(self, context):
+        return HttpResponse(render_to_string(self.template_name, context, self.request))
+
+
+@method_decorator(never_cache, name="dispatch")
+class RawSearchDebugView(SearchDebugMixin, View):
+    template_name = "peachjam_search/_raw_search_debug_results.html"
+
+    def post(self, request, *args, **kwargs):
+        form = RawSearchDebugForm(request.POST)
+        if not form.is_valid():
+            return self.render({"form": form})
+
+        query = dict(form.cleaned_data["query"])
+        if form.cleaned_data.get("size") is not None:
+            query["size"] = form.cleaned_data["size"]
+
+        engine = SearchEngine()
+        response = engine.client.search(index=engine.index, body=query)
+        response_body = response.body if hasattr(response, "body") else response
+        return self.render(
+            {
+                "form": form,
+                "index": engine.index,
+                "query_json": debug_json(query),
+                "raw_response_json": debug_json(response_body),
+            }
+        )
+
+    def render(self, context):
+        return HttpResponse(render_to_string(self.template_name, context, self.request))
 
 
 @method_decorator(never_cache, name="dispatch")

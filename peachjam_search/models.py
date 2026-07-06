@@ -77,6 +77,21 @@ class SearchTrace(models.Model):
         params.update({"ordering": self.ordering})
         return reverse("search:search") + "?" + urlencode(params, doseq=True)
 
+    def get_search_debug_url(self):
+        """Re-build a search debug URL for this trace."""
+        params = {"search": self.search}
+        params.update(
+            {k: v for k, v in (self.filters.items() or {}) if k != "is_most_recent"}
+        )
+        params.update({"page": self.page})
+        params.update({"ordering": self.ordering})
+        if self.mode and self.mode != "text":
+            params["mode"] = self.mode
+        for field, value in (self.field_searches or {}).items():
+            if value:
+                params[f"search__{field}"] = value
+        return reverse("search:search_debug") + "?" + urlencode(params, doseq=True)
+
 
 class SearchClick(models.Model):
     """A click on a search result."""
