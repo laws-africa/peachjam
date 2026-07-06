@@ -14,6 +14,8 @@ JAZZMIN_SETTINGS["site_title"] = "CIVLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "CIVLII"  # noqa
 JAZZMIN_SETTINGS["site_brand"] = "civlii.laws.africa"  # noqa
 
+MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
+
 LANGUAGES = [
     ("fr", _("French")),
     ("en", _("English")),
