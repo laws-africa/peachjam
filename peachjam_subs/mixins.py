@@ -8,12 +8,17 @@ from django.utils.cache import (
 
 from peachjam_subs.models import Product
 
+# browser-only (private) cache lifetime for permission-granted responses on
+# SubscriptionRequiredMixin views; views opt in with private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+PRIVATE_CACHE_MAX_AGE = 60 * 10
+
 
 class SubscriptionRequiredMixin(PermissionRequiredMixin):
     subscription_required_template = "peachjam_subs/_subscription_required.html"
     subscription_required_status = 200
-    # browser-only (private) cache lifetime for permission-granted responses; None disables
-    private_cache_max_age = 60 * 10
+    # opt-in: None (default) disables private caching; subclasses set this
+    # (typically to PRIVATE_CACHE_MAX_AGE) to enable it.
+    private_cache_max_age = None
     subscription_permission_granted = False
 
     def has_permission(self):
