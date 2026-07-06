@@ -40,7 +40,7 @@ from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
-from peachjam_subs.mixins import PRIVATE_CACHE_MAX_AGE, SubscriptionRequiredMixin
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 class LegislationListView(FilteredDocumentListView):
@@ -525,7 +525,7 @@ class DocumentUncommencedProvisionListView(DetailView):
 
 class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_uncommencedprovision"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
     document_table_template_name = (
         "peachjam/provision_enrichment/_uncommenced_table.html"
@@ -562,7 +562,7 @@ class UnconstitutionalProvisionDetailView(DetailView):
 
 class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_unconstitutionalprovision"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
     document_table_template_name = (
         "peachjam/provision_enrichment/_unconstitutional_table.html"
@@ -644,7 +644,7 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
 
 class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
     model = Glossary
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     # this is expensive and is not used
     queryset = Glossary.objects.defer("data")
     slug_url_kwarg = "place_code"
@@ -782,7 +782,7 @@ class DocumentProvisionCitationView(
     DocumentProvisionMixin, SubscriptionRequiredMixin, FilteredDocumentListView
 ):
     permission_required = "peachjam.view_provisioncitation"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     template_name = "peachjam/provision_enrichment/provision_citations.html"
     document_table_template_name = (
         "peachjam/provision_enrichment/_provision_citations_table.html"
@@ -843,7 +843,7 @@ class DocumentProvisionSimilarView(
 ):
     # same permission as DocumentProvisionCitationView just to simplify things
     permission_required = "peachjam.view_provisioncitation"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     template_name = "peachjam/document/similar_provisions.html"
     latest_expression_only = True
     similarity_threshold = 0.8

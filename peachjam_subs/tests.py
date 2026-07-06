@@ -14,7 +14,7 @@ from django.views import View
 from guardian.shortcuts import assign_perm
 
 from peachjam.models import Court, Glossary
-from peachjam_subs.mixins import PRIVATE_CACHE_MAX_AGE, SubscriptionRequiredMixin
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import (
     PricingPlan,
     Product,
@@ -53,7 +53,7 @@ class SubscriptionTemplateTagTests(TestCase):
 
 class SubscriptionRequiredCacheTestView(SubscriptionRequiredMixin, View):
     permission_required = "auth.change_user"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
 
     def get(self, request):
         return HttpResponse("ok")
@@ -67,7 +67,7 @@ class SubscriptionRequiredCacheTestView(SubscriptionRequiredMixin, View):
 
 class SubscriptionRequiredPublicBypassTestView(SubscriptionRequiredMixin, View):
     permission_required = "auth.change_user"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
 
     def has_permission(self):
         return True
@@ -78,7 +78,7 @@ class SubscriptionRequiredPublicBypassTestView(SubscriptionRequiredMixin, View):
 
 class SubscriptionRequiredNoCacheTestView(SubscriptionRequiredMixin, View):
     permission_required = "auth.change_user"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
 
     def get(self, request):
         response = HttpResponse("ok")
@@ -88,7 +88,7 @@ class SubscriptionRequiredNoCacheTestView(SubscriptionRequiredMixin, View):
 
 class SubscriptionRequiredPrivateCacheDisabledTestView(SubscriptionRequiredMixin, View):
     permission_required = "auth.change_user"
-    private_cache_max_age = None
+    private_cache = False
 
     def get(self, request):
         return HttpResponse("ok")

@@ -10,7 +10,6 @@ from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 class BaseAnnotationView(SubscriptionRequiredMixin):
     model = Annotation
-    private_cache_max_age = None
 
     def dispatch(self, *args, **kwargs):
         if not pj_settings().annotations_enabled:

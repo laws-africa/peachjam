@@ -22,7 +22,7 @@ from peachjam.views.generic_views import (
     BaseDocumentDetailView,
     FilteredDocumentListView,
 )
-from peachjam_subs.mixins import PRIVATE_CACHE_MAX_AGE, SubscriptionRequiredMixin
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 class JudgmentListView(TemplateView):
@@ -201,7 +201,6 @@ class FlynoteDetailView(
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
     permission_required = "peachjam.view_linked_judgments"
-    private_cache_max_age = None
 
     def get_flynote_document_listing_id(self):
         return f"flynote-document-listing-{self.flynote.pk}"
@@ -307,7 +306,7 @@ class JudgmentDetailView(BaseDocumentDetailView):
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_case_history"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     model = Judgment
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
@@ -398,7 +397,7 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
 class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_document_summary"
-    private_cache_max_age = PRIVATE_CACHE_MAX_AGE
+    private_cache = True
     template_name = "peachjam/document/_judgment_summary.html"
     model = Judgment
     slug_url_kwarg = "frbr_uri"
