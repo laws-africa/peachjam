@@ -12,7 +12,6 @@ from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
-from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
@@ -305,9 +304,9 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_case_history"
+    private_cache = True
     model = Judgment
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
@@ -396,9 +395,9 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_document_summary"
+    private_cache = True
     template_name = "peachjam/document/_judgment_summary.html"
     model = Judgment
     slug_url_kwarg = "frbr_uri"
