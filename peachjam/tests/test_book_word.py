@@ -80,7 +80,6 @@ class BookWordConversionTest(SimpleTestCase):
         )
 
         self.assertIn('class="diff"', html)
-        self.assertIn("diff_chg", html)
         self.assertIn("diff_sub", html)
         self.assertIn("diff_add", html)
 
