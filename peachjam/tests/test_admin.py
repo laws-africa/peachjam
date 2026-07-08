@@ -341,6 +341,9 @@ class TestBookAdminWordImportExport(WebTest):
         self.assertEqual(200, preview.status_code)
         self.assertIn("Preview", preview.text)
         self.assertIn("New heading", preview.text)
+        self.assertIn("Heading changes", preview.text)
+        self.assertIn('class="diff"', preview.text)
+        self.assertIn("diff_chg", preview.text)
         self.assertNotIn("Images are not supported", preview.text)
 
         confirm_form = preview.forms["book-word-confirm-form"]

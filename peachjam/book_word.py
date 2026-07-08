@@ -11,6 +11,7 @@ import subprocess
 import tempfile
 import zipfile
 from dataclasses import dataclass
+from difflib import HtmlDiff
 from functools import lru_cache
 
 DOCX_MIMETYPE = (
@@ -35,6 +36,18 @@ class BookWordAnalysis:
     law_widget_count: int
     protected_law_widget_count: int
     image_count: int
+
+
+@dataclass
+class BookWordHeading:
+    """A Markdown heading extracted for structure comparison."""
+
+    level: int
+    text: str
+
+    @property
+    def label(self):
+        return f"h{self.level} {self.text}"
 
 
 def protect_law_widgets(markdown):
@@ -71,10 +84,73 @@ def analyse_markdown(markdown):
 def count_headings(markdown):
     """Count ATX and Setext Markdown headings."""
 
-    markdown = markdown or ""
-    atx_headings = re.findall(r"(?m)^#{1,6}\s+\S", markdown)
-    setext_headings = re.findall(r"(?m)^.+\n(?:=+|-+)\s*$", markdown)
-    return len(atx_headings) + len(setext_headings)
+    return len(extract_headings(markdown))
+
+
+def extract_headings(markdown):
+    """Extract ATX and Setext headings in document order."""
+
+    lines = (markdown or "").splitlines()
+    headings = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        atx_match = re.match(r"^(#{1,6})\s+(.+?)\s*#*\s*$", line)
+        if atx_match:
+            headings.append(
+                BookWordHeading(
+                    level=len(atx_match.group(1)),
+                    text=normalise_heading_text(atx_match.group(2)),
+                )
+            )
+            i += 1
+            continue
+
+        if i + 1 < len(lines):
+            setext_match = re.match(r"^\s*(=+|-+)\s*$", lines[i + 1])
+            if line.strip() and setext_match:
+                headings.append(
+                    BookWordHeading(
+                        level=1 if setext_match.group(1).startswith("=") else 2,
+                        text=normalise_heading_text(line),
+                    )
+                )
+                i += 2
+                continue
+
+        i += 1
+    return headings
+
+
+def normalise_heading_text(text):
+    """Remove Pandoc heading attributes and normalize whitespace."""
+
+    text = re.sub(r"\s+\{#[^}]+\}\s*$", "", text or "")
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def heading_labels(markdown):
+    """Return comparable heading labels for structure diffing."""
+
+    return [heading.label for heading in extract_headings(markdown)]
+
+
+def html_diff_headings(old_markdown, new_markdown):
+    """Return a ``difflib.HtmlDiff`` table for changed heading structure."""
+
+    old_labels = heading_labels(old_markdown)
+    new_labels = heading_labels(new_markdown)
+    if old_labels == new_labels:
+        return ""
+
+    return HtmlDiff(wrapcolumn=100).make_table(
+        old_labels,
+        new_labels,
+        fromdesc="Current",
+        todesc="Imported",
+        context=True,
+        numlines=1,
+    )
 
 
 def count_image_references(markdown):

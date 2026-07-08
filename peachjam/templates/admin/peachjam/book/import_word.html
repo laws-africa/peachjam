@@ -1,5 +1,48 @@
 {% extends "admin/base_site.html" %}
 {% load admin_urls i18n %}
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    .heading-diff table.diff {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .heading-diff table.diff td,
+    .heading-diff table.diff th {
+      border: 1px solid #dee2e6;
+      padding: 0.25rem 0.4rem;
+      vertical-align: top;
+    }
+
+    .heading-diff .diff_header {
+      background: #f8f9fa;
+      color: #495057;
+      text-align: right;
+      width: 1%;
+    }
+
+    .heading-diff .diff_next {
+      display: none;
+    }
+
+    .heading-diff .diff_add {
+      background: #a6f3a6;
+    }
+
+    .heading-diff .diff_chg {
+      background: #fff3cd;
+    }
+
+    .heading-diff .diff_sub {
+      background: #f8cbcb;
+    }
+
+    .heading-diff td[nowrap] {
+      white-space: normal;
+    }
+  </style>
+{% endblock %}
 {% block breadcrumbs %}
   <ol class="breadcrumb">
     <li class="breadcrumb-item">
@@ -91,6 +134,18 @@
           </tr>
         </tbody>
       </table>
+      <h3>
+        {% trans "Heading changes" %}
+      </h3>
+      {% if heading_diff_html %}
+        <div class="heading-diff">
+          {{ heading_diff_html|safe }}
+        </div>
+      {% else %}
+        <p>
+          {% trans "No heading changes detected." %}
+        </p>
+      {% endif %}
       <div class="form-group">
         <label for="book-word-preview">
           {% trans "Imported markdown" %}

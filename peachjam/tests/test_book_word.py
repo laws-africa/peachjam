@@ -12,6 +12,8 @@ from peachjam.book_word import (
     _markdown_headings_option,
     analyse_markdown,
     docx_to_markdown,
+    extract_headings,
+    html_diff_headings,
     markdown_to_docx,
     protect_law_widgets,
     restore_law_widgets,
@@ -63,6 +65,33 @@ class BookWordConversionTest(SimpleTestCase):
         analysis = analyse_markdown("Heading\n=======\n\nSubheading\n----------\n")
 
         self.assertEqual(2, analysis.heading_count)
+
+    def test_extract_headings_normalises_pandoc_attributes(self):
+        headings = extract_headings(
+            "# 1. Title {#title .unnumbered}\n\n" "2. Subtitle\n" "-----------\n"
+        )
+
+        self.assertEqual(["h1 1. Title", "h2 2. Subtitle"], [h.label for h in headings])
+
+    def test_html_diff_headings_reports_heading_changes(self):
+        html = html_diff_headings(
+            "# 1. Current\n\n## 1.1 Removed\n\n# 2. Same\n",
+            "# 1. Imported\n\n# 2. Same\n\n## 2.1 Added\n",
+        )
+
+        self.assertIn('class="diff"', html)
+        self.assertIn("diff_chg", html)
+        self.assertIn("diff_sub", html)
+        self.assertIn("diff_add", html)
+
+    def test_html_diff_headings_escapes_heading_text(self):
+        html = html_diff_headings("# Heading <script>\n", "# Heading changed\n")
+
+        self.assertIn("&lt;script&gt;", html)
+        self.assertNotIn("<script>", html)
+
+    def test_html_diff_headings_is_empty_without_heading_changes(self):
+        self.assertEqual("", html_diff_headings("# Same\n", "# Same\n"))
 
     def test_markdown_headings_option_requests_atx_headings(self):
         self.assertIn(

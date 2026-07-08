@@ -47,6 +47,7 @@ from peachjam.book_word import (
     BookWordError,
     analyse_markdown,
     docx_to_markdown,
+    html_diff_headings,
     markdown_to_docx,
 )
 from peachjam.extractor import ExtractorError, ExtractorService
@@ -2502,6 +2503,7 @@ class BookAdmin(DocumentAdmin):
             "new_analysis": None,
             "preview_markdown": None,
             "preview_errors": [],
+            "heading_diff_html": "",
         }
 
         if request.method == "POST" and request.POST.get("confirm"):
@@ -2517,6 +2519,9 @@ class BookAdmin(DocumentAdmin):
                             "new_analysis": analysis,
                             "preview_markdown": markdown,
                             "preview_errors": errors,
+                            "heading_diff_html": html_diff_headings(
+                                obj.content_markdown or "", markdown
+                            ),
                         }
                     )
                 else:
@@ -2545,6 +2550,9 @@ class BookAdmin(DocumentAdmin):
                             "preview_markdown": markdown,
                             "preview_errors": self.get_book_word_preview_errors(
                                 analysis
+                            ),
+                            "heading_diff_html": html_diff_headings(
+                                obj.content_markdown or "", markdown
                             ),
                         }
                     )
