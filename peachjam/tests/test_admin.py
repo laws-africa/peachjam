@@ -1,5 +1,7 @@
 import os
+import shutil
 from datetime import date
+from unittest import skipUnless
 
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -7,7 +9,9 @@ from django.urls import reverse
 from django_webtest import WebTest
 from webtest import Upload
 
+from peachjam.book_word import DOCX_MIMETYPE, markdown_to_docx
 from peachjam.models import (
+    Book,
     Country,
     GenericDocument,
     Journal,
@@ -271,6 +275,89 @@ class TestDocumentAdminHtmlEdit(WebTest):
         self.assertIn("Edited body", self.document.document_content.content_html)
         self.assertIn("Edited Heading", self.document.document_content.content_text)
         self.assertTrue(self.document.document_content.toc_json)
+
+
+class TestBookAdminWordImportExport(WebTest):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.app.set_user(User.objects.get(username="admin@example.com"))
+        self.book = Book.objects.create(
+            title="Refugee law reader",
+            publisher="Laws.Africa",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=date(2026, 1, 8),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_number="refugee-law-reader",
+            content_markdown=(
+                "# Old heading\n\n"
+                "Old body\n\n"
+                '<la-akoma-ntoso frbr-expression-uri="/akn/za/act/1998/130/eng/~sec_1" '
+                'fetch partner="laws.africa">'
+            ),
+        )
+        self.book.get_or_create_document_content(True)
+        self.book.convert_content_markdown()
+        self.book.get_or_create_document_content().save()
+
+    def test_change_form_has_word_actions(self):
+        response = self.app.get(
+            reverse("admin:peachjam_book_change", kwargs={"object_id": self.book.pk})
+        )
+
+        self.assertIn("Download Word version", response.text)
+        self.assertIn("Import Word version", response.text)
+
+    @skipUnless(shutil.which("pandoc"), "pandoc is required")
+    def test_download_word_version(self):
+        response = self.app.get(
+            reverse(
+                "admin:peachjam_book_download_word",
+                kwargs={"object_id": self.book.pk},
+            )
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(DOCX_MIMETYPE, response.content_type)
+        self.assertIn("attachment;", response.headers["Content-Disposition"])
+
+    @skipUnless(shutil.which("pandoc"), "pandoc is required")
+    def test_import_word_version_preview_and_confirm(self):
+        import_url = reverse(
+            "admin:peachjam_book_import_word", kwargs={"object_id": self.book.pk}
+        )
+        markdown = (
+            "# New heading\n\n"
+            "New body\n\n"
+            '<la-akoma-ntoso frbr-expression-uri="/akn/za/act/1998/130/eng/~sec_2" '
+            'fetch partner="laws.africa">'
+        )
+        docx = markdown_to_docx(markdown)
+
+        form = self.app.get(import_url).forms["book-word-upload-form"]
+        form["word_file"] = Upload("book.docx", docx, DOCX_MIMETYPE)
+        preview = form.submit()
+
+        self.assertEqual(200, preview.status_code)
+        self.assertIn("Preview", preview.text)
+        self.assertIn("New heading", preview.text)
+        self.assertNotIn("Images are not supported", preview.text)
+
+        confirm_form = preview.forms["book-word-confirm-form"]
+        response = confirm_form.submit()
+        self.assertRedirects(
+            response,
+            reverse("admin:peachjam_book_change", kwargs={"object_id": self.book.pk}),
+        )
+
+        self.book.refresh_from_db()
+        self.assertIn("New heading", self.book.content_markdown)
+        self.assertIn(
+            '<la-akoma-ntoso frbr-expression-uri="/akn/za/act/1998/130/eng/~sec_2" '
+            'fetch partner="laws.africa">',
+            self.book.content_markdown,
+        )
+        self.assertIn("New heading", self.book.document_content.content_html)
 
 
 class TestJournalArticleAdmin(WebTest):

@@ -11,15 +11,16 @@ from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
 from django.contrib.admin import helpers
-from django.contrib.admin.utils import flatten_fieldsets, quote
+from django.contrib.admin.utils import flatten_fieldsets, quote, unquote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.admin import GenericStackedInline
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Q
+from django.http import Http404
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.defaultfilters import filesizeformat
@@ -41,6 +42,13 @@ from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
 from peachjam.analysis.judges import judge_identity_service
+from peachjam.book_word import (
+    DOCX_MIMETYPE,
+    BookWordError,
+    analyse_markdown,
+    docx_to_markdown,
+    markdown_to_docx,
+)
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
@@ -537,6 +545,24 @@ class DocumentForm(forms.ModelForm):
         extractor = ExtractorService()
         if extractor.enabled() and isinstance(self.instance, Judgment):
             return reverse("admin:peachjam_extract_judgment")
+
+
+class BookWordImportUploadForm(forms.Form):
+    """Upload step for converting a clean DOCX into preview markdown."""
+
+    word_file = forms.FileField(label=gettext_lazy("Word document"))
+
+    def clean_word_file(self):
+        word_file = self.cleaned_data["word_file"]
+        if not (word_file.name or "").lower().endswith(".docx"):
+            raise forms.ValidationError(gettext_lazy("Only .docx files are supported."))
+        return word_file
+
+
+class BookWordImportConfirmForm(forms.Form):
+    """Confirm step that carries previewed markdown into the final save."""
+
+    content_markdown = forms.CharField(widget=forms.Textarea(attrs={"hidden": True}))
 
 
 class AttachedFilesInline(BaseAttachmentFileInline):
@@ -2411,6 +2437,7 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
 
 @admin.register(Book)
 class BookAdmin(DocumentAdmin):
+    change_form_template = "admin/peachjam/book/change_form.html"
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[3][1]["fields"].insert(3, "content_markdown")
 
@@ -2419,8 +2446,149 @@ class BookAdmin(DocumentAdmin):
             "https://cdn.jsdelivr.net/npm/@lawsafrica/law-widgets@latest/dist/lawwidgets/lawwidgets.js",
         )
 
+    def get_urls(self):
+        return [
+            path(
+                "<path:object_id>/download-word/",
+                self.admin_site.admin_view(self.download_word),
+                name="peachjam_book_download_word",
+            ),
+            path(
+                "<path:object_id>/import-word/",
+                self.admin_site.admin_view(self.import_word),
+                name="peachjam_book_import_word",
+            ),
+        ] + super().get_urls()
+
+    def download_word(self, request, object_id):
+        """Download the Book's markdown source as an editor-friendly DOCX."""
+
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            raise Http404
+        if not self.has_change_permission(request, obj):
+            raise PermissionDenied
+
+        try:
+            docx = markdown_to_docx(obj.content_markdown or "")
+        except BookWordError as e:
+            self.message_user(request, str(e), level=messages.ERROR)
+            return HttpResponseRedirect(
+                reverse("admin:peachjam_book_change", args=[quote(obj.pk)])
+            )
+
+        filename = f"{slugify(obj.title) or 'book'}.docx"
+        response = HttpResponse(docx, content_type=DOCX_MIMETYPE)
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    def import_word(self, request, object_id):
+        """Preview and optionally save markdown extracted from an uploaded DOCX."""
+
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            raise Http404
+        if not self.has_change_permission(request, obj):
+            raise PermissionDenied
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "original": obj,
+            "title": _("Import Word version"),
+            "upload_form": BookWordImportUploadForm(),
+            "confirm_form": None,
+            "old_analysis": analyse_markdown(obj.content_markdown or ""),
+            "new_analysis": None,
+            "preview_markdown": None,
+            "preview_errors": [],
+        }
+
+        if request.method == "POST" and request.POST.get("confirm"):
+            form = BookWordImportConfirmForm(request.POST)
+            if form.is_valid():
+                markdown = form.cleaned_data["content_markdown"]
+                analysis = analyse_markdown(markdown)
+                errors = self.get_book_word_preview_errors(analysis)
+                if errors:
+                    context.update(
+                        {
+                            "confirm_form": form,
+                            "new_analysis": analysis,
+                            "preview_markdown": markdown,
+                            "preview_errors": errors,
+                        }
+                    )
+                else:
+                    self.save_imported_word_markdown(obj, markdown)
+                    self.message_user(
+                        request,
+                        _("Imported Word version for %(title)s.")
+                        % {"title": obj.title},
+                    )
+                    return HttpResponseRedirect(
+                        reverse("admin:peachjam_book_change", args=[quote(obj.pk)])
+                    )
+        elif request.method == "POST":
+            form = BookWordImportUploadForm(request.POST, request.FILES)
+            context["upload_form"] = form
+            if form.is_valid():
+                try:
+                    markdown = docx_to_markdown(form.cleaned_data["word_file"])
+                    analysis = analyse_markdown(markdown)
+                    context.update(
+                        {
+                            "confirm_form": BookWordImportConfirmForm(
+                                initial={"content_markdown": markdown}
+                            ),
+                            "new_analysis": analysis,
+                            "preview_markdown": markdown,
+                            "preview_errors": self.get_book_word_preview_errors(
+                                analysis
+                            ),
+                        }
+                    )
+                except BookWordError as e:
+                    form.add_error("word_file", str(e))
+
+        return TemplateResponse(
+            request,
+            "admin/peachjam/book/import_word.html",
+            context,
+        )
+
+    def get_book_word_preview_errors(self, analysis):
+        """Return import blockers found after DOCX-to-markdown conversion."""
+
+        errors = []
+        if analysis.protected_law_widget_count:
+            errors.append(
+                _(
+                    "Some protected law widget markers were not restored. The import cannot be confirmed."
+                )
+            )
+        if analysis.image_count:
+            errors.append(
+                _(
+                    "Images are not supported in this Word import. Remove images from the DOCX and upload again."
+                )
+            )
+        return errors
+
+    def save_imported_word_markdown(self, obj, markdown):
+        """Persist imported markdown through the existing Book content hooks."""
+
+        with transaction.atomic():
+            doc_content = obj.get_or_create_document_content(True)
+            obj.track_changes()
+            obj.content_markdown = markdown
+            obj.save()
+            doc_content.save()
+            obj.extract_citations()
+
     def save_model(self, request, obj, form, change):
         if "content_markdown" in form.changed_data:
+            obj.get_or_create_document_content(True)
             obj.convert_content_markdown()
 
         resp = super().save_model(request, obj, form, change)
