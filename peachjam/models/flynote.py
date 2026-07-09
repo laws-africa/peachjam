@@ -166,10 +166,18 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
         ):
             return
 
+        if any(ancestor.deprecated for ancestor in self.get_ancestors()):
+            return
+
         from peachjam.tasks import generate_judgment_summary
 
-        # this flynote is deprecated, any documents linked to it must have new summaries generated
-        judgment_ids = self.judgments.values_list("document_id", flat=True).distinct()
+        # This flynote is deprecated, so any documents linked to it or its descendants
+        # must have new summaries generated.
+        judgment_ids = (
+            JudgmentFlynote.objects.filter(flynote__path__startswith=self.path)
+            .values_list("document_id", flat=True)
+            .distinct()
+        )
         for judgment_id in judgment_ids:
             generate_judgment_summary(judgment_id)
 
