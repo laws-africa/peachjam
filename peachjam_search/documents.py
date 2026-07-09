@@ -130,6 +130,10 @@ class SearchableDocument(Document):
     nature_fr = fields.KeywordField()
     nature_pt = fields.KeywordField()
 
+    # Gazette
+    publication = fields.KeywordField()
+    sub_publication = fields.KeywordField()
+
     ranking = RankField(attr="work.pagerank")
     # a negative boost to search results; this must be a positive number, but is treated as a penalty
     # it is applied linearly, simply reducing the score by this amount
@@ -304,6 +308,12 @@ class SearchableDocument(Document):
     def prepare_authors(self, instance):
         if hasattr(instance, "author"):
             return [a.name for a in instance.author_list()]
+
+    def prepare_publication(self, instance):
+        return getattr(instance, "publication", None) or None
+
+    def prepare_sub_publication(self, instance):
+        return getattr(instance, "sub_publication", None) or None
 
     def prepare_content(self, instance):
         """Text content of document body for non-PDFs."""

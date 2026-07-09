@@ -28,6 +28,8 @@ class SearchEngine:
     filters = None
     facets = [
         "nature",
+        "publication",
+        "sub_publication",
         "court",
         "year",
         "registry",
@@ -77,6 +79,8 @@ class SearchEngine:
             "blurb",
             "court",
             "matter_type",
+            "publication",
+            "sub_publication",
         ]
     }
 
@@ -141,6 +145,8 @@ class SearchEngine:
         "locality",
         "matter_type",
         "nature",
+        "publication",
+        "sub_publication",
         "year",
         "judges",
         "registry",
@@ -178,6 +184,14 @@ class SearchEngine:
         {"field": "year", "options": {"size": 100}},
         {
             "field": "nature",
+            "options": {"size": 100},
+        },
+        {
+            "field": "publication",
+            "options": {"size": 100},
+        },
+        {
+            "field": "sub_publication",
             "options": {"size": 100},
         },
         {

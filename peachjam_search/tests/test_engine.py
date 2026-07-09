@@ -43,6 +43,8 @@ class TestSearchEngine(TestCase):
                             "blurb",
                             "court",
                             "matter_type",
+                            "publication",
+                            "sub_publication",
                         ],
                     },
                     "explain": False,
@@ -336,6 +338,8 @@ class TestSearchEngine(TestCase):
                             "blurb",
                             "court",
                             "matter_type",
+                            "publication",
+                            "sub_publication",
                         ],
                     },
                     "aggs": {
@@ -431,6 +435,14 @@ class TestSearchEngine(TestCase):
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
                         },
+                        "_filter_publication": {
+                            "aggs": {
+                                "publication": {
+                                    "terms": {"field": "publication", "size": 100}
+                                }
+                            },
+                            "filter": {"terms": {"nature": ["Act"]}},
+                        },
                         "_filter_case_action": {
                             "aggs": {
                                 "case_action": {
@@ -443,6 +455,14 @@ class TestSearchEngine(TestCase):
                             "aggs": {
                                 "registry": {
                                     "terms": {"field": "registry", "size": 100}
+                                }
+                            },
+                            "filter": {"terms": {"nature": ["Act"]}},
+                        },
+                        "_filter_sub_publication": {
+                            "aggs": {
+                                "sub_publication": {
+                                    "terms": {"field": "sub_publication", "size": 100}
                                 }
                             },
                             "filter": {"terms": {"nature": ["Act"]}},
@@ -683,6 +703,39 @@ class TestSearchEngine(TestCase):
             json.dumps(d, indent=2, sort_keys=True),
         )
 
+    def test_gazette_publication_filters(self):
+        params = QueryDict("", mutable=True)
+        params["publication"] = "Government Gazette"
+        params["sub_publication"] = "Legal Notices A"
+        params["facets"] = "1"
+
+        engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(engine)
+
+        search = engine.build_search()
+        d = search.to_dict()
+
+        self.assertEqual(["Government Gazette"], engine.filters["publication"])
+        self.assertEqual(["Legal Notices A"], engine.filters["sub_publication"])
+        self.assertIn("_filter_publication", d["aggs"])
+        self.assertIn("_filter_sub_publication", d["aggs"])
+        self.assertEqual(
+            {"terms": {"field": "publication", "size": 100}},
+            d["aggs"]["_filter_publication"]["aggs"]["publication"],
+        )
+        self.assertEqual(
+            {"terms": {"field": "sub_publication", "size": 100}},
+            d["aggs"]["_filter_sub_publication"]["aggs"]["sub_publication"],
+        )
+
+        post_filter = json.dumps(d["post_filter"], sort_keys=True)
+        self.assertIn("publication", post_filter)
+        self.assertIn("Government Gazette", post_filter)
+        self.assertIn("sub_publication", post_filter)
+        self.assertIn("Legal Notices A", post_filter)
+
     def test_created_at(self):
         params = QueryDict("", mutable=True)
         params["search"] = "test"
@@ -716,6 +769,8 @@ class TestSearchEngine(TestCase):
                             "blurb",
                             "court",
                             "matter_type",
+                            "publication",
+                            "sub_publication",
                         ],
                     },
                     "explain": False,
@@ -991,6 +1046,8 @@ class TestSearchEngine(TestCase):
                             "blurb",
                             "court",
                             "matter_type",
+                            "publication",
+                            "sub_publication",
                         ],
                     },
                     "explain": False,
@@ -1101,6 +1158,8 @@ class TestSearchEngine(TestCase):
                             "blurb",
                             "court",
                             "matter_type",
+                            "publication",
+                            "sub_publication",
                         ]
                     },
                     "explain": False,
