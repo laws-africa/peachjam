@@ -279,6 +279,8 @@
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
     <div v-if="false">
       {{ $t('Document type') }}
+      {{ $t('Publication') }}
+      {{ $t('Sub-publication') }}
       {{ $t('Author') }}
       {{ $t('Court') }}
       {{ $t('Court registry') }}
@@ -404,6 +406,20 @@ export default {
       {
         title: this.$t('Locality'),
         name: 'locality',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Publication'),
+        name: 'publication',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Sub-publication'),
+        name: 'sub_publication',
         type: 'checkboxes',
         value: [],
         options: []
