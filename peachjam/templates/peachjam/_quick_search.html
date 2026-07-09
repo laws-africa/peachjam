@@ -14,4 +14,4 @@
   {% if MULTIPLE_JURISDICTIONS and country %}<input type="hidden" name="jurisdiction" value="{{ country }}"/>{% endif %}
   {% if locality %}<input type="hidden" name="locality" value="{{ locality }}"/>{% endif %}
 </form>
-<a href="{% url 'search:search' %}?show-advanced-tab=1&nature={{ nature }}">{% trans "Advanced search" %}</a>
+<a href="{% url 'search:search' %}?show-advanced-tab=1{% if nature %}&nature={{ nature }}{% endif %}">{% trans "Advanced search" %}</a>
