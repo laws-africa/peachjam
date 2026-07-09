@@ -41,7 +41,7 @@
       {% include 'peachjam/_gazette_localities.html' %}
     {% endif %}
   {% endblock %}
-  {% include 'peachjam/_count_and_search.html' %}
+  {% include 'peachjam/_count_and_search.html' with nature=None %}
 {% endblock %}
 {% block document-table %}
   {% if doc_count %}
