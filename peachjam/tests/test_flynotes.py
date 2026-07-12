@@ -1293,27 +1293,6 @@ class GetOrCreateFlynoteNodeTest(TestCase):
         found = self.updater.get_or_create_node(None, "criminal law")
         self.assertEqual(found.name, "Criminal Law")
 
-    def test_ignores_deprecated_root_by_normalised_name(self):
-        deprecated = Flynote.add_root(name="VAT", deprecated=True)
-
-        found = self.updater.get_or_create_node(None, "VAT")
-
-        self.assertNotEqual(found.pk, deprecated.pk)
-        self.assertEqual(found.name, "VAT")
-        self.assertFalse(found.deprecated)
-        self.assertTrue(found.is_root())
-
-    def test_ignores_deprecated_child_by_normalised_name(self):
-        root = Flynote.add_root(name="VAT")
-        deprecated = root.add_child(name="mixed supplies", deprecated=True)
-
-        found = self.updater.get_or_create_node(root, "mixed supplies")
-
-        self.assertNotEqual(found.pk, deprecated.pk)
-        self.assertEqual(found.name, "mixed supplies")
-        self.assertFalse(found.deprecated)
-        self.assertEqual(found.get_parent().pk, root.pk)
-
     def test_returns_existing_by_normalised_name_with_dash_variants(self):
         root = Flynote.add_root(name="Administrative law")
         existing = root.add_child(name="Decision-making")

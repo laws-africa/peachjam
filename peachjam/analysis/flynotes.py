@@ -2880,8 +2880,7 @@ class FlynoteUpdater:
                 (
                     child
                     for child in parent.get_children()
-                    if not child.deprecated
-                    and FlynoteParser.normalise_name(child.name) == normalised
+                    if FlynoteParser.normalise_name(child.name) == normalised
                 ),
                 None,
             )
@@ -2890,8 +2889,7 @@ class FlynoteUpdater:
                 (
                     root
                     for root in Flynote.get_root_nodes()
-                    if not root.deprecated
-                    and FlynoteParser.normalise_name(root.name) == normalised
+                    if FlynoteParser.normalise_name(root.name) == normalised
                 ),
                 None,
             )
@@ -2913,8 +2911,7 @@ class FlynoteUpdater:
                     (
                         child
                         for child in parent.get_children()
-                        if not child.deprecated
-                        and FlynoteParser.normalise_name(child.name) == normalised
+                        if FlynoteParser.normalise_name(child.name) == normalised
                     ),
                     None,
                 )
@@ -2923,8 +2920,7 @@ class FlynoteUpdater:
                     (
                         root
                         for root in Flynote.get_root_nodes()
-                        if not root.deprecated
-                        and FlynoteParser.normalise_name(root.name) == normalised
+                        if FlynoteParser.normalise_name(root.name) == normalised
                     ),
                     None,
                 )
