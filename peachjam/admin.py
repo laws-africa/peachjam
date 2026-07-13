@@ -1852,6 +1852,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             {
                 "fields": [
                     "case_summary_public",
+                    "summary_ai_generated",
+                    "summary_generated_at",
+                    "summary_language",
+                    "summary_trace_id",
                     "blurb",
                     "flynote_raw",
                     "case_summary",
@@ -1867,6 +1871,10 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         "serial_number",
         "title",
         "citation",
+        "summary_ai_generated",
+        "summary_generated_at",
+        "summary_language",
+        "summary_trace_id",
         "frbr_uri_doctype",
         "frbr_uri_subtype",
         "frbr_uri_actor",

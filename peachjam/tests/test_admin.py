@@ -6,6 +6,7 @@ from unittest import skipUnless
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils import timezone
 from django_webtest import WebTest
 from webtest import Upload
 
@@ -54,6 +55,32 @@ class TestJudgmentAdmin(WebTest):
                 mimetype="application/pdf",
                 file_is_anonymised=file_is_anonymised,
             )
+
+    def test_judgment_admin_shows_readonly_summary_ai_metadata(self):
+        judgment = self.make_judgment()
+        judgment.case_summary = "AI generated summary"
+        judgment.summary_ai_generated = True
+        judgment.summary_generated_at = timezone.now()
+        judgment.summary_language = "English"
+        judgment.summary_trace_id = "trace-123"
+        judgment.save()
+
+        judgment_change_url = reverse(
+            "admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk}
+        )
+        response = self.app.get(judgment_change_url)
+
+        self.assertContains(response, "Summary AI generated")
+        self.assertContains(response, "Summary generated at")
+        self.assertContains(response, "Summary language")
+        self.assertContains(response, "Summary trace ID")
+        self.assertContains(response, "trace-123")
+
+        form = response.forms["judgment_form"]
+        self.assertNotIn("summary_ai_generated", form.fields)
+        self.assertNotIn("summary_generated_at", form.fields)
+        self.assertNotIn("summary_language", form.fields)
+        self.assertNotIn("summary_trace_id", form.fields)
 
     def test_add_judgment_docx_swap_pdf(self):
         # add judgment
