@@ -33,7 +33,7 @@ from peachjam.models import (
     Judgment,
     JudgmentFlynote,
 )
-from peachjam.views.judges import split_judge_display_name
+from peachjam.views.judges import JudgePersonDetailView, split_judge_display_name
 
 CANONICAL_JUDGE_IDENTITY_SETTINGS = {
     **settings.PEACHJAM,
@@ -774,7 +774,6 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             html=True,
         )
         self.assertEqual(1, response.context["judge_count"])
-        self.assertEqual([2024, 2019], response.context["available_years"])
         self.assertContains(response, 'aria-current="page">2020–2024</a>')
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
@@ -875,7 +874,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertContains(response, "Topics")
         self.assertNotContains(response, ">ALL</a>")
         self.assertContains(response, "Civil law")
-        self.assertEqual(civil, response.context["selected_flynote_topic"])
+        self.assertEqual([civil], response.context["selected_flynote_topics"])
         self.assertEqual(1, response.context["judge_count"])
         self.assertContains(response, f'name="topics" value="{civil.pk}"')
 
@@ -967,6 +966,24 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertNotContains(response, "Alphabet")
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
+    def test_judge_detail_htmx_response_skips_dashboard_analysis(self):
+        with patch.object(
+            JudgePersonDetailView, "get_citation_analysis"
+        ) as get_citation_analysis:
+            response = self.client.get(
+                self.judge_person.get_absolute_url(),
+                HTTP_HX_REQUEST="true",
+                HTTP_HX_TARGET="judge-detail-filters",
+            )
+
+        self.assertEqual(200, response.status_code)
+        self.assertTemplateUsed(
+            response, "peachjam/_judge_detail_document_table_form.html"
+        )
+        get_citation_analysis.assert_not_called()
+        self.assertNotContains(response, "Judicial activity")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
     def test_judge_surname_is_bold_in_list_and_detail_views(self):
         self.judge_person.full_name = "Kempe, Greg AJ"
         self.judge_person.save(update_fields=["full_name"])
@@ -1014,6 +1031,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             response,
             f'name="courts" value="{self.judgment.court.name}"',
         )
+        self.assertContains(response, 'hx-disinherit="hx-include"')
 
         response = self.client.get(
             self.judge_person.get_absolute_url(), {"years": "2025"}
@@ -1054,7 +1072,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn(self.judgment, response.context["documents"])
         self.assertNotIn(other_judgment, response.context["documents"])
-        self.assertEqual(civil, response.context["selected_flynote_topic"])
+        self.assertEqual([civil], response.context["selected_flynote_topics"])
         self.assertNotContains(response, ">ALL</a>")
         self.assertContains(response, "Civil law")
         self.assertContains(response, "Criminal law")
@@ -1109,19 +1127,19 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
                     "judgment_count": 2,
                     "first_year": 2024,
                     "latest_year": 2025,
+                    "percentage": 100,
                 }
             ],
-            response.context["judge_court_breakdown"],
+            response.context["judge_court_chart"],
         )
         self.assertEqual(
             [
-                {"judgment__date__year": 2025, "judgment_count": 1},
-                {"judgment__date__year": 2024, "judgment_count": 1},
+                {"year": 2024, "judgment_count": 1, "percentage": 100},
+                {"year": 2025, "judgment_count": 1, "percentage": 100},
             ],
-            response.context["judge_year_breakdown"],
+            response.context["judge_year_activity"],
         )
         self.assertEqual(["JA"], response.context["judge_titles"])
-        self.assertEqual(2, response.context["judge_active_year_count"])
         self.assertEqual(1.0, response.context["judge_average_per_active_year"])
         self.assertEqual(2, len(response.context["judge_year_activity"]))
         self.assertContains(response, "Judicial record profile")

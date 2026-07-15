@@ -24,13 +24,12 @@
         </p>
       </div>
       <div class="row g-4 align-items-start">
-        {% include "peachjam/_judge_list_year_filter.html" %}
-        <div class="col-lg-9 judge-scroll-pane"
+        {% include "peachjam/_judge_filters.html" with judge_filter_scope="list" %}
+        <div class="col-lg-9 d-flex flex-column gap-3"
              role="region"
              aria-label="{% trans 'Judge directory' %}"
-             aria-live="polite"
-             tabindex="0">
-          <div class="judge-list-layout__controls">
+             aria-live="polite">
+          <div>
             <form method="get"
                   id="judge-list-search-form"
                   role="search"
@@ -81,7 +80,7 @@
               </div>
             </form>
           </div>
-          <div class="judge-list-layout__results">
+          <div>
             {% if grouped_judges %}
               <div class="judge-directory bg-light rounded shadow-sm p-3">
                 <div class="judge-directory-header d-none d-md-grid" aria-hidden="true">
