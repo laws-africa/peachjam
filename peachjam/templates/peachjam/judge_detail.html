@@ -1,0 +1,28 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n humanize %}
+{% block title %}{{ judge_person.full_name }}{% endblock %}
+{% block page-content %}
+  {# Breadcrumb sits above the hero, inside a container for alignment #}
+  <div class="container">
+    <nav aria-label="{% trans 'breadcrumb' %}">
+      <ol class="breadcrumb mt-3 mb-0">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans "Judgments" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judges' %}">{% trans "Judges" %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ judge_person.full_name }}</li>
+      </ol>
+    </nav>
+  </div>
+  {# Profile card header and judicial activity panels. #}
+  {% include "peachjam/_judge_profile_dashboard.html" %}
+  {# Judgments section. #}
+  <div class="container pb-5" data-component="DocumentList">
+    {% include "peachjam/_judge_detail_document_table_form.html" %}
+  </div>
+{% endblock %}
