@@ -38,7 +38,8 @@ export function setUpI8n () {
     resources,
     interpolation: {
       prefix: '{',
-      suffix: '}'
+      suffix: '}',
+      escapeValue: false
     },
     returnEmptyString: false
   });
