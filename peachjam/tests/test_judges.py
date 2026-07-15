@@ -647,8 +647,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(2, response.context["judge_count"])
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
-    def test_judge_list_paginates_eight_judges_per_page(self):
-        for index in range(8):
+    def test_judge_list_paginates_ten_judges_per_page(self):
+        for index in range(10):
             legacy_judge = Judge.objects.create(name=f"Pagination Judge {index:02d}")
             judge_person = JudgePerson.objects.create(
                 full_name=f"Pagination Judge {index:02d}"
@@ -670,8 +670,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertTrue(response.context["is_paginated"])
-        self.assertEqual(9, response.context["judge_count"])
-        self.assertEqual(8, len(response.context["judges"]))
+        self.assertEqual(11, response.context["judge_count"])
+        self.assertEqual(10, len(response.context["judges"]))
         self.assertEqual(2, response.context["paginator"].num_pages)
 
         second_page = self.client.get(reverse("judges"), {"page": 2})

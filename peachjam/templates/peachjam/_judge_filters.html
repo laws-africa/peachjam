@@ -13,32 +13,8 @@
     </button>
     <div class="collapse d-lg-block"
          id="judge-{{ judge_filter_scope }}-filters">
-      {% if judge_year_filters %}
-        <div class="card">
-          <div class="card-header fw-semibold"
-               id="judge-{{ judge_filter_scope }}-year-filter-heading">
-            {% trans "Active year" %}
-          </div>
-          <div class="card-body">
-            <nav class="overflow-auto p-2 bg-light rounded"
-                 style="max-height: 13rem"
-                 aria-label="{% if judge_filter_scope == 'detail' %}{% trans 'Filter judgments by year' %}{% else %}{% trans 'Filter judges by active year' %}{% endif %}">
-              <div class="row row-cols-2 g-2 m-0">
-                {% for year_range in judge_year_filters %}
-                  <div class="col">
-                    <a href="{{ year_range.url }}"
-                       {% if judge_filter_scope == 'detail' %}hx-get="{{ year_range.url }}"{% endif %}
-                       class="btn btn-sm w-100 text-nowrap {% if year_range.selected %}btn-primary{% else %}btn-outline-secondary{% endif %}"
-                       {% if year_range.selected %}aria-current="page"{% endif %}>{{ year_range.label }}</a>
-                  </div>
-                {% endfor %}
-              </div>
-            </nav>
-          </div>
-        </div>
-      {% endif %}
       {% if judge_court_filters %}
-        <div class="card {% if judge_year_filters %}mt-3{% endif %}">
+        <div class="card">
           <div class="card-header fw-semibold"
                id="judge-{{ judge_filter_scope }}-court-filter-heading">
             {% trans "Courts" %}
@@ -58,7 +34,7 @@
         </div>
       {% endif %}
       {% if judge_topic_filters %}
-        <div class="card {% if judge_year_filters or judge_court_filters %}mt-3{% endif %}">
+        <div class="card {% if judge_court_filters %}mt-3{% endif %}">
           <div class="card-header fw-semibold"
                id="judge-{{ judge_filter_scope }}-topic-filter-heading">
             {% trans "Topics" %}
@@ -73,6 +49,30 @@
                    class="judge-topic-link d-block {% if not forloop.last %}border-bottom{% endif %} px-3 py-2 text-decoration-none {% if topic.selected %}bg-primary text-white fw-semibold rounded{% else %}text-body{% endif %}"
                    {% if topic.selected %}aria-current="page"{% endif %}>{{ topic.label }}</a>
               {% endfor %}
+            </nav>
+          </div>
+        </div>
+      {% endif %}
+      {% if judge_year_filters %}
+        <div class="card {% if judge_court_filters or judge_topic_filters %}mt-3{% endif %}">
+          <div class="card-header fw-semibold"
+               id="judge-{{ judge_filter_scope }}-year-filter-heading">
+            {% trans "Active year" %}
+          </div>
+          <div class="card-body">
+            <nav class="overflow-auto p-2 bg-light rounded"
+                 style="max-height: 13rem"
+                 aria-label="{% if judge_filter_scope == 'detail' %}{% trans 'Filter judgments by year' %}{% else %}{% trans 'Filter judges by active year' %}{% endif %}">
+              <div class="row row-cols-2 g-2 m-0">
+                {% for year_range in judge_year_filters %}
+                  <div class="col">
+                    <a href="{{ year_range.url }}"
+                       {% if judge_filter_scope == 'detail' %}hx-get="{{ year_range.url }}"{% endif %}
+                       class="btn btn-sm w-100 text-nowrap {% if year_range.selected %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+                       {% if year_range.selected %}aria-current="page"{% endif %}>{{ year_range.label }}</a>
+                  </div>
+                {% endfor %}
+              </div>
             </nav>
           </div>
         </div>
