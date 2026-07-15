@@ -10,38 +10,9 @@
   justify-content: center;
   font-weight: 700;
   color: #fff;
-  background-color: $primary;
   flex-shrink: 0;
-  text-transform: uppercase;
   line-height: 1;
   user-select: none;
-}
-
-// Judge results layout.
-
-.judge-scroll-pane {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  min-width: 0;
-  padding: 0.125rem 0 0;
-}
-
-.judge-list-layout__controls {
-  min-width: 0;
-  padding-bottom: 0.25rem;
-}
-
-.judge-list-layout__results {
-  min-width: 0;
-}
-
-@media (max-width: 991.98px) {
-  .judge-scroll-pane {
-    display: flex;
-    padding: 0;
-  }
-
 }
 
 .judge-topic-link {
@@ -55,12 +26,7 @@
 // Letter-group divider.
 
 .judge-letter-divider {
-  display: grid;
-  grid-template-columns: 2.5rem minmax(0, 1fr);
-  align-items: center;
-  gap: 0.875rem;
   padding: 0.375rem 0.75rem 0.125rem;
-  background: transparent;
 }
 
 .judge-letter-divider__label {
@@ -74,20 +40,17 @@
 
 .judge-card {
   display: grid;
-  grid-template-columns: 2.5rem minmax(10rem, 1fr) minmax(14rem, 1.75fr) 7rem 5rem;
+  grid-template-columns: 2.5rem minmax(9rem, 1fr) minmax(12rem, 1.75fr) 7rem 5rem;
   align-items: center;
   gap: 0.875rem;
   padding: 0.75rem;
   text-decoration: none;
   color: inherit;
-  background: transparent;
   border-top: 1px solid var(--bs-border-color);
   transition: background 0.15s ease;
 
   &:hover {
     background: var(--bs-body-bg, #fff);
-    color: inherit;
-    text-decoration: none;
   }
 
   &:focus-visible {
@@ -101,16 +64,11 @@
 }
 
 .judge-directory {
-  min-width: 0;
   overflow: hidden;
-  padding: 0.75rem;
-  background: var(--bs-tertiary-bg, #f5f6f7);
-  border-radius: var(--bs-border-radius-lg, 0.75rem);
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.08);
 }
 
 .judge-directory-header {
-  grid-template-columns: 2.5rem minmax(10rem, 1fr) minmax(14rem, 1.75fr) 7rem 5rem;
+  grid-template-columns: 2.5rem minmax(9rem, 1fr) minmax(12rem, 1.75fr) 7rem 5rem;
   gap: 0.875rem;
   padding: 0.625rem 0.75rem;
   color: var(--bs-secondary-color, #6c757d);
@@ -132,10 +90,8 @@
 }
 
 .judge-card__name {
-  font-weight: 400;
   font-size: 0.9375rem;
   line-height: 1.3;
-  color: var(--bs-body-color);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -163,7 +119,6 @@
 // Count pill for the judgment count on the list.
 // Uses the same colour logic as the stat cards on the detail page.
 .judge-count-pill {
-  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -207,20 +162,6 @@
 
 // Judge detail profile card layout.
 
-@keyframes judge-bar-rise {
-  from {
-    transform: scaleY(0);
-    opacity: 0;
-  }
-
-  to {
-    transform: scaleY(1);
-    opacity: 1;
-  }
-}
-
-// ─── Profile header section (outer wrapper) ──────────────────────────────────
-
 .judge-profile-header-section {
   margin-top: 0.75rem;
   margin-bottom: 0.25rem;
@@ -231,30 +172,23 @@
   border-radius: 0.75rem;
 }
 
-// ─── Profile card (inner flex row) ────────────────────────────────────────────
-
 .judge-profile-card {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
   gap: 2rem;
-  padding-bottom: 0;
-  border-bottom: none;
 }
 
 .judge-profile-card__identity {
   display: flex;
-  align-items: flex-start;
   gap: clamp(1rem, 2.5vw, 1.5rem);
   flex: 1 1 auto;
   min-width: 0;
 }
 
 .judge-profile-card__avatar {
-  width: clamp(3.75rem, 8vw, 5.5rem) !important;
-  height: clamp(3.75rem, 8vw, 5.5rem) !important;
-  font-size: clamp(1.375rem, 2.5vw, 2.125rem) !important;
-  flex-shrink: 0;
+  width: clamp(3.75rem, 8vw, 5.5rem);
+  height: clamp(3.75rem, 8vw, 5.5rem);
+  font-size: clamp(1.375rem, 2.5vw, 2.125rem);
   box-shadow:
     0 0 0 3px #fff,
     0 0 0 4px rgba($primary, 0.25),
@@ -300,9 +234,7 @@
 
 .judge-profile-card__stats {
   display: flex;
-  gap: 0;
   flex-shrink: 0;
-  background: var(--bs-light, #f8f9fa);
   border: 1px solid var(--bs-border-color, #e9ecef);
   border-radius: 1rem;
   overflow: hidden;
@@ -331,7 +263,6 @@
 }
 
 .judge-key-stat__label {
-  display: block;
   margin-bottom: 0.35rem;
   color: var(--bs-secondary-color, #6c757d);
   font-size: 0.68rem;
@@ -341,7 +272,6 @@
 }
 
 .judge-key-stat__value {
-  display: block;
   font-size: clamp(1.375rem, 2.5vw, 1.875rem);
   font-weight: 800;
   line-height: 1.1;
@@ -423,11 +353,6 @@
   border: 1px solid var(--bs-border-color);
   border-radius: var(--bs-border-radius-lg, 0.75rem);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.07);
-  }
 
   // Accent-top variant for the activity chart panel.
   &--primary {
@@ -472,10 +397,6 @@
   font-size: 0.75rem;
   white-space: nowrap;
 
-  strong {
-    font-weight: 700;
-  }
-
   .bi {
     font-size: 0.8em;
   }
@@ -485,7 +406,6 @@
 
 .judge-timeline {
   display: flex;
-  align-items: stretch;
   gap: 0.3rem;
   min-height: 14rem;
   overflow-x: auto;
@@ -499,7 +419,6 @@
   flex: 1 0 2rem;
   grid-template-rows: 1.25rem minmax(8rem, 1fr) 1.75rem;
   align-items: end;
-  min-width: 2rem;
   text-align: center;
 }
 
@@ -517,18 +436,6 @@
   margin-inline: auto;
   background: linear-gradient(180deg, lighten($primary, 15%), $primary);
   border-radius: 0.35rem 0.35rem 0 0;
-  transform-origin: bottom center;
-  // Bars grow up from the baseline.
-  animation: judge-bar-rise 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  // Stagger via CSS custom property set on the element
-  animation-delay: calc(var(--judge-bar-delay, 0) * 18ms);
-
-  // Hover highlight
-  transition: filter 0.15s ease;
-
-  &:hover {
-    filter: brightness(1.15);
-  }
 }
 
 .judge-timeline__year {
@@ -554,11 +461,6 @@
     border-left: 0.25rem solid rgba($primary, 0.5);
     border-radius: 0 var(--bs-border-radius, 0.375rem)
       var(--bs-border-radius, 0.375rem) 0;
-    transition: border-left-color 0.15s ease;
-
-    &:hover {
-      border-left-color: $primary;
-    }
   }
 }
 
@@ -600,7 +502,6 @@
     height: 100%;
     background: linear-gradient(90deg, rgba($primary, 0.6), $primary);
     border-radius: inherit;
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
@@ -631,7 +532,6 @@
 // Citation panel.
 
 .judge-citation-panel {
-  overflow: hidden;
   background:
     linear-gradient(135deg, rgba($primary, 0.07) 0%, transparent 50%),
     var(--bs-tertiary-bg, #f5f6f7);
@@ -730,9 +630,31 @@
 // Responsive overrides.
 
 @media (max-width: 767.98px) {
+  .judge-profile-card {
+    flex-direction: column;
+  }
+
+  .judge-profile-card__stats {
+    width: 100%;
+  }
+
+  .judge-key-stat {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 1rem 0.75rem;
+  }
 }
 
 @media (max-width: 575.98px) {
+  .judge-profile-card__stats {
+    flex-direction: column;
+  }
+
+  .judge-key-stat + .judge-key-stat {
+    border-top: 1px solid var(--bs-border-color, #e9ecef);
+    border-left: 0;
+  }
+
   .judge-insight-panel__header {
     display: block;
   }

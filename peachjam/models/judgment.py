@@ -106,7 +106,7 @@ class JudgePerson(models.Model):
         return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY_PUBLIC", False)
 
     def get_absolute_url(self):
-        return reverse("judge", kwargs={"slug": quote(self.slug)})
+        return reverse("judge", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:

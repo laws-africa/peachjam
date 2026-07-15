@@ -14,12 +14,11 @@
     <p class="text-muted mb-0">{% trans "Search and filter this judge's judgments." %}</p>
   </div>
   <div class="row g-4 align-items-start">
-    {% include "peachjam/_judge_detail_year_filter.html" %}
-    <div class="{% if judge_year_filters or judge_court_filters or judge_topic_filters %}col-lg-9{% else %}col-12{% endif %} judge-scroll-pane"
+    {% include "peachjam/_judge_filters.html" with judge_filter_scope="detail" %}
+    <div class="{% if judge_year_filters or judge_court_filters or judge_topic_filters %}col-lg-9{% else %}col-12{% endif %} d-flex flex-column gap-3"
          role="region"
-         aria-label="{% trans 'Judgments by this judge' %}"
-         tabindex="0">
-      <div class="judge-list-layout__controls">
+         aria-label="{% trans 'Judgments by this judge' %}">
+      <div>
         <div class="row g-2 align-items-end mb-3">
           <div class="col-md">
             <label class="form-label fw-semibold mb-1"
@@ -56,7 +55,7 @@
           </div>
         </div>
       </div>
-      <div class="judge-list-layout__results">
+      <div>
         <div class="htmx-progress progress mb-2">
           <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
         </div>
