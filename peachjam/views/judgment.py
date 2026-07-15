@@ -297,9 +297,7 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        bench_rows = (
-            self.get_object().bench.select_related("judge", "judge_person").all()
-        )
+        bench_rows = self.object.bench.select_related("judge", "judge_person").all()
         if JudgePerson.canonical_identity_public_enabled():
             judges = []
             seen = set()

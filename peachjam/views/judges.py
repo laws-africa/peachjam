@@ -160,11 +160,6 @@ class JudgePublicPageMixin:
             topic for topic in self.available_flynote_topics if topic.pk in selected_ids
         ]
 
-    @property
-    def selected_flynote_topic(self):
-        """Retain the first selected topic for existing template integrations."""
-        return self.selected_flynote_topics[0] if self.selected_flynote_topics else None
-
     def selected_courts(self):
         courts = self.request.GET.getlist("courts")
         legacy_court = self.request.GET.get("court", "").strip()
@@ -178,7 +173,7 @@ class JudgePublicPageMixin:
     def build_filter_url(self, **updates):
         params = self.request.GET.copy()
         params.pop("page", None)
-        if self.selected_flynote_topic is None:
+        if not self.selected_flynote_topics:
             params.pop("topic", None)
         for name, value in updates.items():
             params.pop(name, None)
@@ -233,15 +228,11 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
     paginate_by = 8
 
     def get_base_queryset(self):
-        return (
-            JudgePerson.objects.filter(bench_entries__isnull=False)
-            .annotate(
-                judgment_count=Count("bench_entries__judgment", distinct=True),
-                first_year=Min("bench_entries__judgment__date__year"),
-                latest_year=Max("bench_entries__judgment__date__year"),
-            )
-            .filter(judgment_count__gt=0)
-        )
+        return JudgePerson.objects.annotate(
+            judgment_count=Count("bench_entries__judgment", distinct=True),
+            first_year=Min("bench_entries__judgment__date__year"),
+            latest_year=Max("bench_entries__judgment__date__year"),
+        ).filter(judgment_count__gt=0)
 
     def get_queryset(self):
         queryset = self.get_base_queryset()
@@ -352,12 +343,11 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         context["sort"] = self.request.GET.get("sort", "name")
         context["selected_judge_courts"] = self.selected_courts()
         context["selected_flynote_topics"] = self.selected_flynote_topics
-        context["selected_flynote_topic"] = self.selected_flynote_topic
         context["selected_judge_years"] = self.request.GET.getlist("years")
         context["year_from"] = self.request.GET.get("year_from", "").strip()
         context["year_to"] = self.request.GET.get("year_to", "").strip()
         context["judge_count"] = context["paginator"].count
-        context["available_courts"] = list(
+        available_courts = list(
             Bench.objects.filter(judge_person__isnull=False)
             .values_list("judgment__court__name", flat=True)
             .exclude(judgment__court__name__isnull=True)
@@ -376,9 +366,9 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
                 ),
                 "selected": court in context["selected_judge_courts"],
             }
-            for court in context["available_courts"]
+            for court in available_courts
         ]
-        context["available_years"] = list(
+        available_years = list(
             Bench.objects.filter(
                 judge_person__isnull=False, judgment__date__isnull=False
             )
@@ -393,11 +383,11 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         ):
             context["selected_judge_years"] = [
                 str(year)
-                for year in context["available_years"]
+                for year in available_years
                 if int(context["year_from"]) <= year <= int(context["year_to"])
             ]
         context["judge_year_filters"] = self.year_filter_context(
-            context["available_years"],
+            available_years,
             selected_years=context["selected_judge_years"],
             year_from=None,
             year_to=None,
@@ -423,8 +413,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
 
     @cached_property
     def judge_person(self):
-        if not JudgePerson.canonical_identity_public_enabled():
-            raise Http404("Canonical judge identity public pages are disabled.")
         return get_object_or_404(JudgePerson, slug=self.kwargs["slug"])
 
     def base_view_name(self):
@@ -554,7 +542,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     def get_primary_court_context(self, primary_court):
         context = {
             "judge_primary_court": primary_court,
-            "judge_primary_court_median": None,
             "judge_primary_court_comparison": [],
         }
         if not primary_court:
@@ -570,7 +557,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .values_list("judgment_count", flat=True)
         )
         if peer_counts:
-            context["judge_primary_court_median"] = round(float(median(peer_counts)), 1)
+            primary_court_median = round(float(median(peer_counts)), 1)
             context["judge_primary_court_comparison"] = percentage_chart_rows(
                 [
                     {
@@ -579,7 +566,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
                     },
                     {
                         "label": _("Court median"),
-                        "judgment_count": context["judge_primary_court_median"],
+                        "judgment_count": primary_court_median,
                     },
                 ]
             )
@@ -592,7 +579,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             "selected_judge_courts": selected_courts,
             "selected_judge_years": selected_years,
             "selected_flynote_topics": self.selected_flynote_topics,
-            "selected_flynote_topic": self.selected_flynote_topic,
             "judge_court_filters": [
                 {
                     "label": row["judgment__court__name"],
@@ -615,18 +601,9 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["judge_person"] = self.judge_person
-        (
-            context["judge_display_surname"],
-            context["judge_display_name_remainder"],
-        ) = split_judge_display_name(self.judge_person.full_name)
         context["doc_table_show_court"] = True
         bench_entries = Bench.objects.filter(judge_person=self.judge_person)
-
-        date_range = bench_entries.aggregate(
-            first_year=Min("judgment__date__year"),
-            latest_year=Max("judgment__date__year"),
-        )
-        context["judge_court_breakdown"] = list(
+        judge_court_breakdown = list(
             bench_entries.exclude(judgment__court__name__isnull=True)
             .exclude(judgment__court__name="")
             .values("judgment__court__name")
@@ -637,17 +614,35 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             )
             .order_by("-judgment_count", "judgment__court__name")
         )
-        context["judge_year_breakdown"] = list(
+        judge_year_breakdown = list(
             bench_entries.exclude(judgment__date__isnull=True)
             .values("judgment__date__year")
             .annotate(judgment_count=Count("judgment", distinct=True))
             .order_by("-judgment__date__year")
         )
+        context.update(
+            self.get_filter_context(judge_court_breakdown, judge_year_breakdown)
+        )
+        if self.request.htmx:
+            return context
+
+        (
+            context["judge_display_surname"],
+            context["judge_display_name_remainder"],
+        ) = split_judge_display_name(self.judge_person.full_name)
         context["judge_judgment_count"] = (
             bench_entries.values("judgment_id").distinct().count()
         )
-        context["judge_first_year"] = date_range["first_year"]
-        context["judge_latest_year"] = date_range["latest_year"]
+        context["judge_first_year"] = (
+            judge_year_breakdown[-1]["judgment__date__year"]
+            if judge_year_breakdown
+            else None
+        )
+        context["judge_latest_year"] = (
+            judge_year_breakdown[0]["judgment__date__year"]
+            if judge_year_breakdown
+            else None
+        )
         alias_records = list(self.judge_person.aliases.only("name", "title"))
         context["judge_aliases"] = [alias.name for alias in alias_records]
         context["judge_titles"] = sorted(
@@ -659,11 +654,10 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
                     "year": row["judgment__date__year"],
                     "judgment_count": row["judgment_count"],
                 }
-                for row in reversed(context["judge_year_breakdown"])
+                for row in reversed(judge_year_breakdown)
             ]
         )
         active_year_count = len(context["judge_year_activity"])
-        context["judge_active_year_count"] = active_year_count
         context["judge_average_per_active_year"] = (
             round(context["judge_judgment_count"] / active_year_count, 1)
             if active_year_count
@@ -675,22 +669,12 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             default=None,
         )
         context["judge_court_chart"] = percentage_chart_rows(
-            [dict(row) for row in context["judge_court_breakdown"]]
+            [dict(row) for row in judge_court_breakdown]
         )
         context["judge_topic_chart"] = self.get_topic_chart()
-        primary_court = (
-            context["judge_court_breakdown"][0]
-            if context["judge_court_breakdown"]
-            else None
-        )
+        primary_court = judge_court_breakdown[0] if judge_court_breakdown else None
         context.update(self.get_primary_court_context(primary_court))
         context["judge_citation_analysis"] = self.get_citation_analysis(bench_entries)
-        context.update(
-            self.get_filter_context(
-                context["judge_court_breakdown"],
-                context["judge_year_breakdown"],
-            )
-        )
         return context
 
 

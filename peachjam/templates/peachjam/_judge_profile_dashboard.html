@@ -53,8 +53,7 @@
     {% endif %}
   </div>
   {# Judicial activity section. #}
-  <section class="judge-intelligence mt-4"
-           aria-labelledby="judge-intelligence-heading">
+  <section class="mt-4" aria-labelledby="judge-intelligence-heading">
     <div class="judge-intelligence__header">
       <div>
         <h2 class="judge-intelligence__title" id="judge-intelligence-heading">{% trans "Judicial activity" %}</h2>
@@ -91,15 +90,12 @@
             {% endif %}
           </div>
           {% if judge_year_activity %}
-            <div class="judge-timeline"
-                 role="img"
-                 aria-label="{% trans 'Bar chart of available judgments by year' %}">
+            <div class="judge-timeline">
               {% for row in judge_year_activity %}
                 <div class="judge-timeline__item">
                   <span class="judge-timeline__count">{{ row.judgment_count|intcomma }}</span>
                   <span class="judge-timeline__bar"
-                        style="--judge-activity-height: {{ row.percentage }}%;
-                               --judge-bar-delay: {{ forloop.counter0 }}"
+                        style="--judge-activity-height: {{ row.percentage }}%"
                         title="{{ row.year }}: {{ row.judgment_count }}"></span>
                   <span class="judge-timeline__year">{{ row.year }}</span>
                 </div>
