@@ -115,27 +115,35 @@
                                    data-facet-search-input/>
                           </div>
                         {% endif %}
-                        {% for value, label in facet.options %}
+                        {# Facet options are (value, label), with an optional URL as (value, label, url). #}
+                        {% for option in facet.options %}
                           <div class="d-flex justify-content-between align-items-center"
                                data-facet-option>
                             {% with facet_option_id=doc_table_form_id|add:"-"|add:facet_name %}
-                              <div class="form-check flex-grow-1"
-                                   data-track-event="Listing | Filter | {{ facet_name }}">
-                                <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
-                                       class="form-check-input"
-                                       name="{{ facet_name }}"
-                                       type="{{ facet.type }}"
-                                       hx-get="{{ request.path }}"
-                                       {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
-                                       {% if value in facet.values %}checked{% endif %}
-                                       hx-include="#{{ doc_table_form_id }}"
-                                       value="{{ value }}"/>
-                                <label class="form-check-label"
-                                       data-facet-option-label
-                                       for="{{ facet_option_id }}-{{ forloop.counter0 }}">
-                                  {{ label }}
-                                </label>
-                              </div>
+                              {% with value=option.0 label=option.1 url=option.2 %}
+                                <div class="form-check flex-grow-1"
+                                     data-track-event="Listing | Filter | {{ facet_name }}">
+                                  <input id="{{ facet_option_id }}-{{ forloop.counter0 }}"
+                                         class="form-check-input"
+                                         name="{{ facet_name }}"
+                                         type="{{ facet.type }}"
+                                         hx-get="{{ request.path }}"
+                                         {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}
+                                         {% if value in facet.values %}checked{% endif %}
+                                         hx-include="#{{ doc_table_form_id }}"
+                                         {% if url %}aria-label="{{ label }}"{% endif %}
+                                         value="{{ value }}"/>
+                                  {% if url %}
+                                    <a class="form-check-label" data-facet-option-label href="{{ url }}">{{ label }}</a>
+                                  {% else %}
+                                    <label class="form-check-label"
+                                           data-facet-option-label
+                                           for="{{ facet_option_id }}-{{ forloop.counter0 }}">
+                                      {{ label }}
+                                    </label>
+                                  {% endif %}
+                                </div>
+                              {% endwith %}
                             {% endwith %}
                           </div>
                         {% endfor %}

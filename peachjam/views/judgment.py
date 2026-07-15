@@ -16,7 +16,7 @@ from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, ListView, TemplateView
 
 from peachjam.helpers import add_slash_to_frbr_uri
-from peachjam.models import CaseHistory, CourtClass, Judgment
+from peachjam.models import CaseHistory, CourtClass, JudgePerson, Judgment
 from peachjam.models.flynote import Flynote
 from peachjam.registry import registry
 from peachjam.views.generic_views import (
@@ -297,10 +297,21 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["judges"] = [
-            bench.judge
-            for bench in self.get_object().bench.select_related("judge").all()
-        ]
+        bench_rows = (
+            self.get_object().bench.select_related("judge", "judge_person").all()
+        )
+        if JudgePerson.canonical_identity_public_enabled():
+            judges = []
+            seen = set()
+            for bench in bench_rows:
+                judge = bench.judge_person or bench.judge
+                key = (judge.__class__, judge.pk)
+                if key not in seen:
+                    judges.append(judge)
+                    seen.add(key)
+            context["judges"] = judges
+        else:
+            context["judges"] = [bench.judge for bench in bench_rows]
         return context
 
 

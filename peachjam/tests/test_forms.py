@@ -129,6 +129,63 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn('id="doc-table-form-test-filters-section"', html)
         self.assertIn('aria-labelledby="doc-table-form-test-filters-heading"', html)
 
+    def test_document_table_form_renders_linked_facet_labels(self):
+        request = RequestFactory().get("/documents/")
+        form = BaseDocumentFilterForm({}, {})
+        html = render_to_string(
+            "peachjam/_document_table_form.html",
+            {
+                "request": request,
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+                "doc_table_offcanvas_id": "doc-table-filters-offcanvas-test",
+                "doc_table_offcanvas_title_id": "doc-table-filters-offcanvas-test-title",
+                "doc_table_filter_input_id": "doc-table-form-test-filter-input",
+                "taxonomy_tree": [],
+                "is_leaf_node": False,
+                "show_clear_all": False,
+                "facet_data": {
+                    "judge_people": {
+                        "label": "Judges",
+                        "options": [("1", "Justice Abban", "/judges/justice-abban/")],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                },
+                "rendered_facets": [
+                    {
+                        "name": "judge_people",
+                        "facet": {
+                            "label": "Judges",
+                            "options": [
+                                ("1", "Justice Abban", "/judges/justice-abban/")
+                            ],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-test",
+                    },
+                ],
+                "form": form,
+                "documents": [],
+                "doc_count": 0,
+                "doc_count_noun": "document",
+                "doc_count_noun_plural": "documents",
+                "doc_table_show_counts": True,
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('value="1"', html)
+        self.assertIn('aria-label="Justice Abban"', html)
+        self.assertIn(
+            '<a class="form-check-label" data-facet-option-label '
+            'href="/judges/justice-abban/">Justice Abban</a>',
+            " ".join(html.split()),
+        )
+
     def test_document_table_form_skips_hidden_facets_when_building_next_links(self):
         request = RequestFactory().get("/documents/")
         form = BaseDocumentFilterForm({}, {})
