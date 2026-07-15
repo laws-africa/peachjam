@@ -7,6 +7,8 @@ INSTALLED_APPS = ["senlii.apps.SenLIIConfig", "peachjam_ml"] + INSTALLED_APPS  #
 ROOT_URLCONF = "senlii.urls"
 ALLOWED_HOSTS = build_allowed_hosts("senlii.org", "www.senlii.org")  # noqa
 
+MIDDLEWARE = ["peachjam.middleware.ForceDefaultLanguageMiddleware"] + MIDDLEWARE  # noqa
+
 LANGUAGE_CODE = "fr"
 
 LANGUAGES = [
