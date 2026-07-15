@@ -225,7 +225,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
     navbar_link = "judges"
     # Keep the directory manageable while preserving alphabetical grouping within
     # each page. Filter query parameters are retained by the shared paginator.
-    paginate_by = 8
+    paginate_by = 10
 
     def get_base_queryset(self):
         return JudgePerson.objects.annotate(
