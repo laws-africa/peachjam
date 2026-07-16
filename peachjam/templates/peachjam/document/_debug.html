@@ -43,7 +43,7 @@
           <li class="nav-item">
             <a class="nav-link active" data-bs-toggle="tab" href="#debug-main-tab">Debug</a>
           </li>
-          {% if document.doc_type == "judgment" %}
+          {% if document.doc_type == "judgment" and perms.peachjam.can_generate_judgment_summary %}
             <li class="nav-item">
               <a class="nav-link" data-bs-toggle="tab" href="#debug-summary-tab">Summary</a>
             </li>
@@ -62,7 +62,7 @@
               {% endfor %}
             </ul>
           </div>
-          {% if document.doc_type == "judgment" %}
+          {% if document.doc_type == "judgment" and perms.peachjam.can_generate_judgment_summary %}
             <div class="tab-pane" id="debug-summary-tab">
               <div id="debug-summary-content">
                 {% with form=summary_form %}
