@@ -513,6 +513,15 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
 
+class FlynoteDocumentFilterForm(BaseDocumentFilterForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["sort"].choices = [
+            *self.fields["sort"].choices,
+            ("-work__n_citing_works", _("Most cited")),
+        ]
+
+
 class JournalArticleFilterForm(BaseDocumentFilterForm):
     journals = PermissiveTypedListField(coerce=int, required=False)
 

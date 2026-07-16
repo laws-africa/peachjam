@@ -14,6 +14,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
 
+from peachjam.forms import FlynoteDocumentFilterForm
 from peachjam.helpers import add_slash_to_frbr_uri
 from peachjam.models import CaseHistory, CourtClass, Judgment
 from peachjam.models.flynote import Flynote
@@ -198,6 +199,7 @@ class FlynoteDetailView(
 ):
     """List of documents and children under a flynote. In HTMX mode, updates the document list."""
 
+    form_class = FlynoteDocumentFilterForm
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
     permission_required = "peachjam.view_linked_judgments"
