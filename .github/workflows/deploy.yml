@@ -249,34 +249,10 @@ jobs:
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/mauritiuslii-peachjam'
           git_push_flags: '--force'
 
-  deploy-civlii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-mauritiuslii
-      - preconditions
-    name: Deploy to civlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to civlii.laws.africa
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/civlii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/civlii-peachjam'
-          git_push_flags: '--force'
-
   deploy-open-by-laws:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     needs:
-      - deploy-civlii
+      - deploy-mauritiuslii
       - preconditions
     name: Deploy to open-by-laws
     runs-on: ubuntu-latest
@@ -301,34 +277,10 @@ jobs:
   # web4.laws.africa
   # ------------------
 
-  deploy-senlii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - preconditions
-    name: Deploy to senlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to senlii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web4.laws.africa:22/senlii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/senlii-peachjam'
-          git_push_flags: '--force'
-
   deploy-rwandalii:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to rwandalii
     needs:
-      - deploy-senlii
       - preconditions
     runs-on: ubuntu-latest
     steps:
