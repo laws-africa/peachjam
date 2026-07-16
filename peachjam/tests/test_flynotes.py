@@ -2500,6 +2500,31 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
         self.judgment.save()
         self.updater.update_for_judgment(self.judgment)
 
+    def grant_linked_judgments_permission(self):
+        permission = Permission.objects.get(
+            content_type=ContentType.objects.get_for_model(Flynote),
+            codename="view_linked_judgments",
+        )
+        group = get_or_create_all_users_permission_group()
+        group.permissions.add(permission)
+
+    def make_topic_judgment(self, case_name, date, n_citing_works):
+        judgment = Judgment.objects.create(
+            case_name=case_name,
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=date,
+            language=Language.objects.first(),
+            case_summary="A short summary.",
+        )
+        judgment.track_changes()
+        judgment.flynote_raw = "Administrative law — judicial review"
+        judgment.save()
+        self.updater.update_for_judgment(judgment)
+        judgment.work.n_citing_works = n_citing_works
+        judgment.work.save(update_fields=["n_citing_works"])
+        return judgment
+
     def test_judgment_detail_links_to_flynote_topic_pages(self):
         response = self.client.get(self.judgment.get_absolute_url())
         leaf = Flynote.objects.get(name="judicial review")
@@ -2560,12 +2585,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
     def test_flynote_detail_htmx_listing_allows_anonymous_access_with_permission(self):
         leaf = Flynote.objects.get(name="judicial review")
-        permission = Permission.objects.get(
-            content_type=ContentType.objects.get_for_model(Flynote),
-            codename="view_linked_judgments",
-        )
-        group = get_or_create_all_users_permission_group()
-        group.permissions.add(permission)
+        self.grant_linked_judgments_permission()
 
         response = self.client.get(
             reverse("flynote_detail", kwargs={"pk": leaf.pk}),
@@ -2578,6 +2598,32 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
         self.assertContains(response, "doc-table-form-")
         self.assertNotContains(response, "This feature is not currently available.")
         self.assertIn("no-cache", response["Cache-Control"])
+
+    def test_flynote_detail_htmx_listing_sorts_by_most_cited(self):
+        leaf = Flynote.objects.get(name="judicial review")
+        self.grant_linked_judgments_permission()
+        self.judgment.work.n_citing_works = 1
+        self.judgment.work.save(update_fields=["n_citing_works"])
+        moderately_cited = self.make_topic_judgment(
+            "Moderately cited judgment", datetime.date(2025, 1, 2), 5
+        )
+        most_cited = self.make_topic_judgment(
+            "Most cited judgment", datetime.date(2025, 1, 3), 12
+        )
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": leaf.pk}),
+            {"sort": "-work__n_citing_works"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET=f"flynote-document-listing-{leaf.pk}",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Most cited")
+        self.assertEqual(
+            [doc.pk for doc in response.context["documents"]],
+            [most_cited.pk, moderately_cited.pk, self.judgment.pk],
+        )
 
     @override_settings(
         PEACHJAM={
