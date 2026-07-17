@@ -710,19 +710,18 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "Document by id")
         self.assertNotContains(response, "Missing separator")
 
-    def test_document_debug_requires_debug_permission(self):
+    def test_document_debug_requires_change_permission(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
         doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
         user = User.objects.get(username="officer@example.com")
-        user.user_permissions.add(
-            Permission.objects.get(codename="change_coredocument")
-        )
 
         self.client.force_login(user)
         response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
         self.assertEqual(response.status_code, 403)
 
-        user.user_permissions.add(Permission.objects.get(codename="can_debug_document"))
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_coredocument")
+        )
         self.client.force_login(User.objects.get(pk=user.pk))
         response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
         self.assertEqual(response.status_code, 200)
@@ -731,7 +730,9 @@ class PeachjamViewsTest(TestCase):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
         doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
         user = User.objects.get(username="officer@example.com")
-        user.user_permissions.add(Permission.objects.get(codename="can_debug_document"))
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_coredocument")
+        )
 
         self.client.force_login(User.objects.get(pk=user.pk))
         response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))

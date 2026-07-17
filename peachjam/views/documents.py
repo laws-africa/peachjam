@@ -430,6 +430,7 @@ class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
 
 
 class DocumentDebugView(DocumentDebugViewBase):
+    permission_required = "peachjam.change_coredocument"
     template_name = "peachjam/document/_debug.html"
 
     def get_context_data(self, **kwargs):
