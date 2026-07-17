@@ -57,6 +57,10 @@ class SearchableDocument(Document):
     language = fields.KeywordField(attr="language.name_native")
     jurisdiction = fields.KeywordField(attr="jurisdiction.name")
     locality = fields.KeywordField(attr="locality.name")
+    locality_en = fields.KeywordField()
+    locality_sw = fields.KeywordField()
+    locality_fr = fields.KeywordField()
+    locality_pt = fields.KeywordField()
     expression_frbr_uri = fields.KeywordField()
     work_frbr_uri = fields.KeywordField()
     is_most_recent = fields.BooleanField()
@@ -192,6 +196,7 @@ class SearchableDocument(Document):
         ("court", "name"),
         ("registry", "name"),
         ("nature", "name"),
+        ("locality", "name"),
     ]
 
     # ES's max request size is 100mb, so limit the size of the text fields to a little below that
