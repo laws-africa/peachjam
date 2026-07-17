@@ -14,7 +14,7 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.utils.html import format_html
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy
 from django.views.generic import ListView, TemplateView
 
 from peachjam.analysis.judges import judge_identity_service
@@ -39,6 +39,7 @@ def available_judge_flynote_topics(judge_person=None):
 
     linked_judgments = JudgmentFlynote.objects.filter(
         flynote__path__startswith=OuterRef("path"),
+        document__published=True,
         document__bench__judge_person__isnull=False,
     )
     if judge_person is not None:
@@ -78,15 +79,6 @@ def group_years_into_ranges(years):
     ]
 
 
-def toggle_filter_values(selected_values, option_values):
-    """Toggle one or more values while preserving the other filter selections."""
-    selected = [str(value) for value in selected_values]
-    options = [str(value) for value in option_values]
-    if set(options).issubset(selected):
-        return [value for value in selected if value not in options]
-    return selected + [value for value in options if value not in selected]
-
-
 def percentage_chart_rows(rows, count_key="judgment_count"):
     """Add relative percentages to count rows for server-rendered bar charts."""
     rows = list(rows)
@@ -113,7 +105,7 @@ JUDGE_SURNAME_PARTICLES = {
 
 
 def split_judge_display_name(name):
-    """Split a surname-first judge name without discarding its punctuation."""
+    """Split a surname-first full name while preserving the complete display name."""
     name = " ".join((name or "").split())
     if not name:
         return "", ""
@@ -152,54 +144,36 @@ class JudgePublicPageMixin:
     @cached_property
     def selected_flynote_topics(self):
         topic_ids = self.request.GET.getlist("topics")
-        legacy_topic_id = self.request.GET.get("topic", "").strip()
-        if legacy_topic_id:
-            topic_ids.append(legacy_topic_id)
         selected_ids = {int(value) for value in topic_ids if value.isdigit()}
         return [
             topic for topic in self.available_flynote_topics if topic.pk in selected_ids
         ]
 
     def selected_courts(self):
-        courts = self.request.GET.getlist("courts")
-        legacy_court = self.request.GET.get("court", "").strip()
-        if legacy_court:
-            courts.append(legacy_court)
-        return courts
+        return self.request.GET.getlist("courts")
 
     def selected_years(self):
-        return self.request.GET.getlist("years")
-
-    def build_filter_url(self, **updates):
-        params = self.request.GET.copy()
-        params.pop("page", None)
-        if not self.selected_flynote_topics:
-            params.pop("topic", None)
-        for name, value in updates.items():
-            params.pop(name, None)
-            if value is not None:
-                values = value if isinstance(value, (list, tuple, set)) else [value]
-                for item in values:
-                    params.appendlist(name, str(item))
-        query = params.urlencode()
-        return f"{self.request.path}?{query}" if query else self.request.path
+        years = set()
+        for value in self.request.GET.getlist("year_ranges"):
+            try:
+                start, end = (int(part) for part in value.split(":", 1))
+            except (TypeError, ValueError):
+                continue
+            if 1000 <= start <= end <= 9999 and end - start <= 9:
+                years.update(range(start, end + 1))
+        return sorted(years)
 
     def topic_filter_context(self):
         return [
             {
                 "label": topic.name,
-                "url": self.build_filter_url(
-                    topic=None,
-                    topics=toggle_filter_values(
-                        [item.pk for item in self.selected_flynote_topics], [topic.pk]
-                    ),
-                ),
+                "value": topic.pk,
                 "selected": topic in self.selected_flynote_topics,
             }
             for topic in self.available_flynote_topics
         ]
 
-    def year_filter_context(self, years, selected_years=None, **url_resets):
+    def year_filter_context(self, years, selected_years=None):
         selected_years = (
             self.selected_years() if selected_years is None else selected_years
         )
@@ -209,10 +183,7 @@ class JudgePublicPageMixin:
         return [
             {
                 **year_range,
-                "url": self.build_filter_url(
-                    **url_resets,
-                    years=toggle_filter_values(selected_years, year_range["years"]),
-                ),
+                "value": f"{year_range['start']}:{year_range['end']}",
                 "selected": set(year_range["years"]).issubset(selected_year_values),
             }
             for year_range in group_years_into_ranges(years)
@@ -222,17 +193,31 @@ class JudgePublicPageMixin:
 class JudgePersonListView(JudgePublicPageMixin, ListView):
     template_name = "peachjam/judge_list.html"
     context_object_name = "judges"
-    navbar_link = "judges"
+    navbar_link = "judgments"
     # Keep the directory manageable while preserving alphabetical grouping within
     # each page. Filter query parameters are retained by the shared paginator.
     paginate_by = 10
 
     def get_base_queryset(self):
-        return JudgePerson.objects.annotate(
-            judgment_count=Count("bench_entries__judgment", distinct=True),
-            first_year=Min("bench_entries__judgment__date__year"),
-            latest_year=Max("bench_entries__judgment__date__year"),
-        ).filter(judgment_count__gt=0)
+        return (
+            JudgePerson.objects.filter(bench_entries__isnull=False)
+            .annotate(
+                judgment_count=Count(
+                    "bench_entries__judgment",
+                    filter=Q(bench_entries__judgment__published=True),
+                    distinct=True,
+                ),
+                first_year=Min(
+                    "bench_entries__judgment__date__year",
+                    filter=Q(bench_entries__judgment__published=True),
+                ),
+                latest_year=Max(
+                    "bench_entries__judgment__date__year",
+                    filter=Q(bench_entries__judgment__published=True),
+                ),
+            )
+            .distinct()
+        )
 
     def get_queryset(self):
         queryset = self.get_base_queryset()
@@ -244,6 +229,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         selected_courts = self.selected_courts()
         if selected_courts:
             judge_ids = Bench.objects.filter(
+                judgment__published=True,
                 judgment__court__name__in=selected_courts,
                 judge_person__isnull=False,
             ).values_list("judge_person_id", flat=True)
@@ -257,35 +243,19 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
                 )
             judge_ids = Bench.objects.filter(
                 topic_query,
+                judgment__published=True,
                 judge_person__isnull=False,
             ).values_list("judge_person_id", flat=True)
             queryset = queryset.filter(pk__in=judge_ids)
 
-        selected_years = {
-            int(value) for value in self.request.GET.getlist("years") if value.isdigit()
-        }
+        selected_years = set(self.selected_years())
         if selected_years:
             judge_ids = Bench.objects.filter(
+                judgment__published=True,
                 judgment__date__year__in=selected_years,
                 judge_person__isnull=False,
             ).values_list("judge_person_id", flat=True)
             queryset = queryset.filter(pk__in=judge_ids)
-
-        year_from = self.request.GET.get("year_from", "").strip()
-        year_to = self.request.GET.get("year_to", "").strip()
-        if not selected_years and (year_from.isdigit() or year_to.isdigit()):
-            matching_benches = Bench.objects.filter(judge_person__isnull=False)
-            if year_from.isdigit():
-                matching_benches = matching_benches.filter(
-                    judgment__date__year__gte=int(year_from)
-                )
-            if year_to.isdigit():
-                matching_benches = matching_benches.filter(
-                    judgment__date__year__lte=int(year_to)
-                )
-            queryset = queryset.filter(
-                pk__in=matching_benches.values_list("judge_person_id", flat=True)
-            )
 
         # Default to A-Z for the address-book layout; "judgments" is an explicit opt-in.
         if self.request.GET.get("sort") == "judgments":
@@ -299,7 +269,10 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         courts_by_judge = {judge_id: [] for judge_id in judge_ids}
 
         for judge_id, court_name in (
-            Bench.objects.filter(judge_person_id__in=judge_ids)
+            Bench.objects.filter(
+                judge_person_id__in=judge_ids,
+                judgment__published=True,
+            )
             .values_list("judge_person_id", "judgment__court__name")
             .order_by("judgment__court__name")
             .distinct()
@@ -343,12 +316,13 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         context["sort"] = self.request.GET.get("sort", "name")
         context["selected_judge_courts"] = self.selected_courts()
         context["selected_flynote_topics"] = self.selected_flynote_topics
-        context["selected_judge_years"] = self.request.GET.getlist("years")
-        context["year_from"] = self.request.GET.get("year_from", "").strip()
-        context["year_to"] = self.request.GET.get("year_to", "").strip()
+        context["selected_judge_years"] = [str(year) for year in self.selected_years()]
         context["judge_count"] = context["paginator"].count
         available_courts = list(
-            Bench.objects.filter(judge_person__isnull=False)
+            Bench.objects.filter(
+                judgment__published=True,
+                judge_person__isnull=False,
+            )
             .values_list("judgment__court__name", flat=True)
             .exclude(judgment__court__name__isnull=True)
             .exclude(judgment__court__name="")
@@ -358,48 +332,25 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         context["judge_court_filters"] = [
             {
                 "label": court,
-                "url": self.build_filter_url(
-                    court=None,
-                    courts=toggle_filter_values(
-                        context["selected_judge_courts"], [court]
-                    ),
-                ),
+                "value": court,
                 "selected": court in context["selected_judge_courts"],
             }
             for court in available_courts
         ]
         available_years = list(
             Bench.objects.filter(
-                judge_person__isnull=False, judgment__date__isnull=False
+                judge_person__isnull=False,
+                judgment__published=True,
+                judgment__date__isnull=False,
             )
             .values_list("judgment__date__year", flat=True)
             .distinct()
             .order_by("-judgment__date__year")
         )
-        if (
-            not context["selected_judge_years"]
-            and context["year_from"].isdigit()
-            and context["year_to"].isdigit()
-        ):
-            context["selected_judge_years"] = [
-                str(year)
-                for year in available_years
-                if int(context["year_from"]) <= year <= int(context["year_to"])
-            ]
         context["judge_year_filters"] = self.year_filter_context(
             available_years,
             selected_years=context["selected_judge_years"],
-            year_from=None,
-            year_to=None,
         )
-        selected_year_values = {
-            int(value) for value in context["selected_judge_years"] if value.isdigit()
-        }
-        if not selected_year_values:
-            for year_range in context["judge_year_filters"]:
-                year_range["selected"] = context["year_from"] == str(
-                    year_range["start"]
-                ) and context["year_to"] == str(year_range["end"])
         context["judge_topic_filters"] = self.topic_filter_context()
         return context
 
@@ -409,7 +360,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     document_table_form_template_name = (
         "peachjam/_judge_detail_document_table_form.html"
     )
-    navbar_link = "judge_detail"
+    navbar_link = "judgments"
 
     @cached_property
     def judge_person(self):
@@ -432,6 +383,8 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             for topic in self.selected_flynote_topics:
                 topic_query |= Q(flynotes__flynote__path__startswith=topic.path)
             queryset = queryset.filter(topic_query)
+        if self.selected_years():
+            queryset = queryset.filter(date__year__in=self.selected_years())
         return queryset
 
     def add_facets(self, context):
@@ -441,12 +394,8 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
 
     def get_citation_analysis(self, bench_entries):
         """Build citation influence data from the judge's linked judgment works."""
-        work_ids = list(
-            bench_entries.exclude(judgment__work_id__isnull=True)
-            .values_list("judgment__work_id", flat=True)
-            .distinct()
-        )
-        if not work_ids:
+        work_ids = bench_entries.values_list("judgment__work_id", flat=True).distinct()
+        if not work_ids.exists():
             return {
                 "incoming_count": 0,
                 "outgoing_count": 0,
@@ -456,10 +405,12 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             }
 
         incoming_citations = ExtractedCitation.objects.filter(
-            target_work_id__in=work_ids
+            target_work_id__in=work_ids,
+            citing_work__documents__published=True,
         ).exclude(citing_work_id__in=work_ids)
         outgoing_citations = ExtractedCitation.objects.filter(
-            citing_work_id__in=work_ids
+            citing_work_id__in=work_ids,
+            target_work__documents__published=True,
         ).exclude(target_work_id__in=work_ids)
         incoming_work_ids = incoming_citations.values_list(
             "citing_work_id", flat=True
@@ -472,6 +423,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         citing_judges = list(
             Bench.objects.filter(
                 judgment__work_id__in=incoming_work_ids,
+                judgment__published=True,
                 judge_person__isnull=False,
             )
             .exclude(judge_person=self.judge_person)
@@ -482,6 +434,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         cited_judges = list(
             Bench.objects.filter(
                 judgment__work_id__in=outgoing_work_ids,
+                judgment__published=True,
                 judge_person__isnull=False,
             )
             .exclude(judge_person=self.judge_person)
@@ -491,11 +444,16 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         )
         most_cited_judgments = list(
             Judgment.objects.filter(bench__judge_person=self.judge_person)
-            .select_related("work")
+            .filter(published=True)
             .annotate(
                 incoming_citation_count=Count(
                     "work__incoming_citations__citing_work",
-                    filter=~Q(work__incoming_citations__citing_work_id__in=work_ids),
+                    filter=(
+                        ~Q(work__incoming_citations__citing_work_id__in=work_ids)
+                        & Q(
+                            work__incoming_citations__citing_work__documents__published=True
+                        )
+                    ),
                     distinct=True,
                 )
             )
@@ -518,6 +476,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         rows = (
             JudgmentFlynote.objects.filter(
                 document__bench__judge_person=self.judge_person,
+                document__published=True,
             )
             .values("document_id", "flynote__path")
             .distinct()
@@ -550,6 +509,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         peer_counts = list(
             Bench.objects.filter(
                 judgment__court__name=primary_court["judgment__court__name"],
+                judgment__published=True,
                 judge_person__isnull=False,
             )
             .values("judge_person_id")
@@ -561,11 +521,11 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             context["judge_primary_court_comparison"] = percentage_chart_rows(
                 [
                     {
-                        "label": _("This judge"),
+                        "label": gettext_lazy("This judge"),
                         "judgment_count": primary_court["judgment_count"],
                     },
                     {
-                        "label": _("Court median"),
+                        "label": gettext_lazy("Court median"),
                         "judgment_count": primary_court_median,
                     },
                 ]
@@ -574,7 +534,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
 
     def get_filter_context(self, judge_court_breakdown, judge_year_breakdown):
         selected_courts = self.selected_courts()
-        selected_years = self.selected_years()
+        selected_years = [str(year) for year in self.selected_years()]
         return {
             "selected_judge_courts": selected_courts,
             "selected_judge_years": selected_years,
@@ -582,11 +542,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             "judge_court_filters": [
                 {
                     "label": row["judgment__court__name"],
-                    "url": self.build_filter_url(
-                        courts=toggle_filter_values(
-                            selected_courts, [row["judgment__court__name"]]
-                        )
-                    ),
+                    "value": row["judgment__court__name"],
                     "selected": row["judgment__court__name"] in selected_courts,
                 }
                 for row in judge_court_breakdown
@@ -602,7 +558,10 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         context = super().get_context_data(**kwargs)
         context["judge_person"] = self.judge_person
         context["doc_table_show_court"] = True
-        bench_entries = Bench.objects.filter(judge_person=self.judge_person)
+        bench_entries = Bench.objects.filter(
+            judge_person=self.judge_person,
+            judgment__published=True,
+        )
         judge_court_breakdown = list(
             bench_entries.exclude(judgment__court__name__isnull=True)
             .exclude(judgment__court__name="")
@@ -781,13 +740,15 @@ class JudgeIdentityWorkflowMixin:
             notes = []
             if alias_duplicates.get(alias.name, 0) > 1:
                 notes.append(
-                    _("{} alias records currently share this exact name.").format(
-                        alias_duplicates[alias.name]
-                    )
+                    gettext_lazy(
+                        "{} alias records currently share this exact name."
+                    ).format(alias_duplicates[alias.name])
                 )
             if legacy_judge is None:
                 notes.append(
-                    _("No matching legacy Judge row exists for this alias name.")
+                    gettext_lazy(
+                        "No matching legacy Judge row exists for this alias name."
+                    )
                 )
 
             rows.append(
@@ -834,12 +795,14 @@ class JudgeIdentityWorkflowMixin:
             notes = []
             if judge_person.alias_count == 0 and judge_person.bench_rows:
                 notes.append(
-                    _(
+                    gettext_lazy(
                         "Bench rows still point here, but this judge person has no aliases."
                     )
                 )
             if judge_person.alias_count and judge_person.bench_rows == 0:
-                notes.append(_("This judge person currently owns aliases only."))
+                notes.append(
+                    gettext_lazy("This judge person currently owns aliases only.")
+                )
 
             rows.append(
                 {
@@ -865,7 +828,7 @@ class JudgeIdentityWorkflowMixin:
         try:
             return handlers[action](cleaned_data)
         except KeyError as exc:
-            raise ValidationError(_("Choose a workflow action.")) from exc
+            raise ValidationError(gettext_lazy("Choose a workflow action.")) from exc
 
     def apply_identity_changes(self, cleaned_data):
         with transaction.atomic():
@@ -1004,14 +967,14 @@ class JudgeIdentityWorkflowMixin:
                     judge_person.full_name,
                 )
             if result["count"] == 0:
-                return _("No judge identity changes were applied.")
+                return gettext_lazy("No judge identity changes were applied.")
 
             action_label = (
-                _("Created judge person")
+                gettext_lazy("Created judge person")
                 if result["created"]
-                else _("Updated judge person")
+                else gettext_lazy("Updated judge person")
             )
-            summary = _(
+            summary = gettext_lazy(
                 "Moved {} selected aliases to this judge person, refreshed their "
                 "bench links automatically, and deleted {} now-empty source judge "
                 "people."
@@ -1054,29 +1017,31 @@ class JudgeIdentityWorkflowMixin:
             message_bits = []
             if result["alias_count"]:
                 message_bits.append(
-                    _("Deleted {} aliases").format(result["alias_count"])
+                    gettext_lazy("Deleted {} aliases").format(result["alias_count"])
                 )
             if result["judge_person_count"]:
                 message_bits.append(
-                    _("Deleted {} judge people").format(result["judge_person_count"])
+                    gettext_lazy("Deleted {} judge people").format(
+                        result["judge_person_count"]
+                    )
                 )
             if result["cleared_matched_alias_count"]:
                 message_bits.append(
-                    _("Cleared {} matched alias links on bench rows").format(
+                    gettext_lazy("Cleared {} matched alias links on bench rows").format(
                         result["cleared_matched_alias_count"]
                     )
                 )
             if result["cleared_judge_person_count"]:
                 message_bits.append(
-                    _("Cleared {} judge person links on bench rows").format(
+                    gettext_lazy("Cleared {} judge person links on bench rows").format(
                         result["cleared_judge_person_count"]
                     )
                 )
             if not message_bits:
-                message_bits.append(_("No records were deleted"))
+                message_bits.append(gettext_lazy("No records were deleted"))
             return " ".join(f"{message}." for message in message_bits)
 
-        return _("Judge identity workflow completed.")
+        return gettext_lazy("Judge identity workflow completed.")
 
 
 @method_decorator(staff_member_required, name="dispatch")
@@ -1139,7 +1104,7 @@ class JudgeIdentityWorkflowView(JudgeIdentityWorkflowMixin, TemplateView):
         context = {
             **admin.site.each_context(request),
             "opts": self.model._meta,
-            "title": _("Judge identity workflow"),
+            "title": gettext_lazy("Judge identity workflow"),
             "subtitle": None,
             "form": form,
             "media": form.media,

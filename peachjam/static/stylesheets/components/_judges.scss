@@ -15,14 +15,6 @@
   user-select: none;
 }
 
-.judge-topic-link {
-  transition: background-color 0.15s ease;
-
-  &:not([aria-current="page"]):hover {
-    background: var(--bs-body-bg, #fff);
-  }
-}
-
 // Letter-group divider.
 
 .judge-letter-divider {
@@ -95,10 +87,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-.judge-name__surname {
-  font-weight: 700;
 }
 
 .judge-card__meta {

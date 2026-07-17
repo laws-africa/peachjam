@@ -24,7 +24,7 @@
         </p>
       </div>
       <div class="row g-4 align-items-start">
-        {% include "peachjam/_judge_filters.html" with judge_filter_scope="list" %}
+        {% include "peachjam/_judge_filters.html" with judge_filter_scope="list" judge_filter_form_id="judge-list-search-form" %}
         <div class="col-lg-9 d-flex flex-column gap-3"
              role="region"
              aria-label="{% trans 'Judge directory' %}"
@@ -35,13 +35,6 @@
                   role="search"
                   aria-label="{% trans 'Search judges' %}"
                   class="mb-0">
-              {% for court in selected_judge_courts %}<input type="hidden" name="courts" value="{{ court }}"/>{% endfor %}
-              {% for topic in selected_flynote_topics %}<input type="hidden" name="topics" value="{{ topic.pk }}"/>{% endfor %}
-              {% for year in selected_judge_years %}<input type="hidden" name="years" value="{{ year }}"/>{% endfor %}
-              {% if not selected_judge_years %}
-                {% if year_from %}<input type="hidden" name="year_from" value="{{ year_from }}"/>{% endif %}
-                {% if year_to %}<input type="hidden" name="year_to" value="{{ year_to }}"/>{% endif %}
-              {% endif %}
               <div class="row g-2 align-items-end">
                 <div class="col-md">
                   <label for="judge-search" class="form-label fw-semibold mb-1">{% trans "Search judges" %}</label>
@@ -102,7 +95,7 @@
                   {% for judge in letter_judges %}
                     <a href="{{ judge.get_absolute_url }}" class="judge-card">
                       <span class="judge-avatar bg-primary" aria-hidden="true">{{ judge.full_name|first|upper }}</span>
-                      <span class="judge-card__name"><strong class="judge-name__surname">{{ judge.display_surname }}</strong>{{ judge.display_name_remainder }}</span>
+                      <span class="judge-card__name"><strong>{{ judge.display_surname }}</strong>{{ judge.display_name_remainder }}</span>
                       <span class="judge-card__meta">
                         {{ judge.court_names|join:", " }}
                         {% if judge.more_courts_count %}&ensp;+{{ judge.more_courts_count }}{% endif %}
@@ -132,7 +125,7 @@
             {% else %}
               <div class="text-center py-5">
                 <p class="text-muted mb-0">{% trans "No matching judges found." %}</p>
-                {% if q or selected_judge_courts or selected_flynote_topics or selected_judge_years or year_from or year_to %}
+                {% if q or selected_judge_courts or selected_flynote_topics or selected_judge_years %}
                   <a class="btn btn-outline-secondary btn-sm mt-3"
                      href="{% url 'judges' %}">{% trans "Clear all filters" %}</a>
                 {% endif %}
