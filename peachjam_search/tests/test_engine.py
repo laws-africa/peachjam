@@ -6,6 +6,7 @@ from django.test import TestCase  # noqa
 
 from peachjam_search.engine import PortionSearchEngine, SearchEngine
 from peachjam_search.forms import SearchForm
+from peachjam_search.profiles import SearchProfile
 from peachjam_search.serializers import PortionSearchRequestSerializer
 
 
@@ -735,6 +736,92 @@ class TestSearchEngine(TestCase):
         self.assertIn("Government Gazette", post_filter)
         self.assertIn("sub_publication", post_filter)
         self.assertIn("Legal Notices A", post_filter)
+
+    def test_default_search_profile_preserves_query(self):
+        params = QueryDict("", mutable=True)
+        params["search"] = "civil procedure code"
+
+        unprofiled_engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(unprofiled_engine)
+
+        profiled_engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(profiled_engine)
+        profiled_engine.apply_profile(SearchProfile.default())
+
+        self.assertEqual(
+            unprofiled_engine.build_search().to_dict(),
+            profiled_engine.build_search().to_dict(),
+        )
+
+    def test_custom_search_profile_changes_query_parameters(self):
+        params = QueryDict("", mutable=True)
+        params["search"] = "civil procedure code"
+
+        engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(engine)
+        engine.apply_profile(
+            SearchProfile(
+                search_field_boosts={
+                    "title": 12,
+                    "title_expanded": 6,
+                    "citation": 2,
+                    "alternative_names": 4,
+                    "content": 1,
+                    "summary": 1,
+                    "flynote": 1,
+                    "blurb": 1,
+                },
+                phrase_match_content_boost=7,
+                phrase_match_slop=2,
+                simple_query_string_options={
+                    "default_operator": "AND",
+                    "minimum_should_match": "2<75%",
+                },
+                provision_title_boost=9,
+                provision_parent_titles_boost=3,
+            )
+        )
+
+        query = json.dumps(engine.build_search().to_dict(), sort_keys=True)
+
+        self.assertIn('"fields": ["title^12"]', query)
+        self.assertIn('"fields": ["title_expanded^6"]', query)
+        self.assertIn('"fields": ["summary"]', query)
+        self.assertIn('"default_operator": "AND"', query)
+        self.assertIn('"minimum_should_match": "2<75%"', query)
+        self.assertIn('"boost": 7', query)
+        self.assertIn('"slop": 2', query)
+        self.assertIn('"provisions.title^9"', query)
+        self.assertIn('"provisions.parent_titles^3"', query)
+
+    def test_search_profile_can_override_pagerank_boost(self):
+        engine = SearchEngine()
+        engine.apply_profile(
+            SearchProfile(
+                use_pagerank_settings=False,
+                pagerank_boost_value=5,
+                pagerank_pivot_value=10,
+            )
+        )
+
+        query = engine.build_search().to_dict()["query"]
+
+        self.assertEqual(
+            {
+                "rank_feature": {
+                    "field": "ranking",
+                    "boost": 5.0,
+                    "saturation": {"pivot": 10},
+                }
+            },
+            query["bool"]["must"][0],
+        )
 
     def test_created_at(self):
         params = QueryDict("", mutable=True)

@@ -10,6 +10,7 @@ from pydantic import BaseModel
 
 from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
+from peachjam_search.profiles import SearchProfile
 
 log = logging.getLogger(__name__)
 
@@ -211,6 +212,12 @@ class SearchEngine:
     # when doing a SHOULD phrase match on content fields, what should we boost by?
     optimistic_phrase_match_content_boost = 4
     optimistic_phrase_match_slop = 0
+    provision_title_boost = 4
+    provision_parent_titles_boost = 2
+    search_profile = None
+    use_pagerank_settings = True
+    pagerank_boost_value = None
+    pagerank_pivot_value = None
 
     # this means that at least 70% of terms must appear in ANY of the searched fields
     simple_query_string_options = {
@@ -260,6 +267,32 @@ class SearchEngine:
         )
         self.field_queries = {}
         self.filters = {}
+        self.search_fields = deepcopy(self.search_fields)
+        self.advanced_search_fields = deepcopy(self.advanced_search_fields)
+        self.simple_query_string_options = deepcopy(self.simple_query_string_options)
+        self.advanced_simple_query_string_options = deepcopy(
+            self.advanced_simple_query_string_options
+        )
+
+    def apply_profile(self, profile):
+        if not isinstance(profile, SearchProfile):
+            profile = SearchProfile.from_dict(profile)
+
+        self.search_profile = profile
+        self.search_fields = profile.build_search_fields()
+        self.advanced_search_fields = profile.build_advanced_search_fields()
+        self.optimistic_phrase_match_content_boost = profile.phrase_match_content_boost
+        self.optimistic_phrase_match_slop = profile.phrase_match_slop
+        self.simple_query_string_options = deepcopy(profile.simple_query_string_options)
+        self.advanced_simple_query_string_options = deepcopy(
+            profile.advanced_simple_query_string_options
+        )
+        self.provision_title_boost = profile.provision_title_boost
+        self.provision_parent_titles_boost = profile.provision_parent_titles_boost
+        self.use_pagerank_settings = profile.use_pagerank_settings
+        self.pagerank_boost_value = profile.pagerank_boost_value
+        self.pagerank_pivot_value = profile.pagerank_pivot_value
+        return self
 
     def execute(self):
         search = self.build_search()
@@ -294,6 +327,9 @@ class SearchEngine:
             "filters": self.filters,
             "facets": self.facets,
             "explain": self.explain,
+            "search_profile": (
+                self.search_profile.to_dict() if self.search_profile else None
+            ),
         }
 
     @classmethod
@@ -481,16 +517,23 @@ class SearchEngine:
 
     def build_rank_feature_queries(self, factor=1.0):
         """Apply a rank_feature query to boost the score based on the ranking field."""
-        if pj_settings().pagerank_boost_value:
+        pagerank_boost_value, pagerank_pivot_value = self.get_pagerank_settings()
+        if pagerank_boost_value:
             # apply pagerank boost to the score using the saturation function
             kwargs = {
                 "field": "ranking",
-                "boost": pj_settings().pagerank_boost_value * factor,
+                "boost": pagerank_boost_value * factor,
             }
-            if pj_settings().pagerank_pivot_value:
-                kwargs["saturation"] = {"pivot": pj_settings().pagerank_pivot_value}
+            if pagerank_pivot_value:
+                kwargs["saturation"] = {"pivot": pagerank_pivot_value}
             return [Q("rank_feature", **kwargs)]
         return []
+
+    def get_pagerank_settings(self):
+        if self.use_pagerank_settings:
+            settings = pj_settings()
+            return settings.pagerank_boost_value, settings.pagerank_pivot_value
+        return self.pagerank_boost_value, self.pagerank_pivot_value
 
     def build_per_field_queries(self):
         """Supports searching across multiple fields. Specify zero or more query parameters such as search__title=foo"""
@@ -626,7 +669,15 @@ class SearchEngine:
                         ),
                         SimpleQueryString(
                             query=self.query,
-                            fields=["provisions.title^4", "provisions.parent_titles^2"],
+                            fields=[
+                                self.get_boosted_field(
+                                    "provisions.title", self.provision_title_boost
+                                ),
+                                self.get_boosted_field(
+                                    "provisions.parent_titles",
+                                    self.provision_parent_titles_boost,
+                                ),
+                            ],
                             **self.simple_query_string_options,
                         ),
                     ],
@@ -718,7 +769,15 @@ class SearchEngine:
                         ),
                         SimpleQueryString(
                             query=self.query,
-                            fields=["provisions.title^4", "provisions.parent_titles^2"],
+                            fields=[
+                                self.get_boosted_field(
+                                    "provisions.title", self.provision_title_boost
+                                ),
+                                self.get_boosted_field(
+                                    "provisions.parent_titles",
+                                    self.provision_parent_titles_boost,
+                                ),
+                            ],
                             **self.advanced_simple_query_string_options,
                         ),
                     ],
@@ -786,8 +845,15 @@ class SearchEngine:
             or {}
         )
         if "boost" in options:
-            return f'{field}^{options["boost"]}'
+            return self.get_boosted_field(field, options["boost"])
         return field
+
+    def get_boosted_field(self, field, boost):
+        if boost is None or float(boost) == 1.0:
+            return field
+        boost = float(boost)
+        boost_value = int(boost) if boost.is_integer() else boost
+        return f"{field}^{boost_value}"
 
 
 class PortionSearchFilters(BaseModel):
