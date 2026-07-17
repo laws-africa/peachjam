@@ -326,7 +326,7 @@ class BaseDocumentFilterForm(forms.Form):
     courts = PermissiveTypedListField(coerce=remove_nulls, required=False)
     doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
     judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
-    judge_people = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    judge_people = PermissiveTypedListField(coerce=int, required=False)
     natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
     localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
     registries = PermissiveTypedListField(coerce=remove_nulls, required=False)

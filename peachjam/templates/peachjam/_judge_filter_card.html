@@ -1,0 +1,32 @@
+{% load i18n %}
+<div class="card {{ filter_card_class }}">
+  <div class="card-header fw-semibold"
+       id="judge-{{ judge_filter_scope }}-{{ filter_key }}-filter-heading">
+    {{ filter_heading }}
+  </div>
+  <div class="card-body">
+    <fieldset class="facets-scrollable bg-light rounded p-3"
+              aria-labelledby="judge-{{ judge_filter_scope }}-{{ filter_key }}-filter-heading">
+      {% for option in filter_options %}
+        <div class="form-check{% if not forloop.last %} mb-2{% endif %}">
+          <input id="judge-{{ judge_filter_scope }}-{{ filter_key }}-filter-{{ forloop.counter0 }}"
+                 class="form-check-input"
+                 type="checkbox"
+                 name="{{ filter_name }}"
+                 value="{{ option.value }}"
+                 form="{{ judge_filter_form_id }}"
+                 hx-get="{{ request.path }}"
+                 hx-trigger="change"
+                 hx-include="#{{ judge_filter_form_id }}"
+                 hx-sync="#{{ judge_filter_form_id }}:replace"
+                 {% if judge_filter_scope == 'list' %}hx-target="#judge-list-page" hx-select="#judge-list-page" hx-swap="outerHTML" hx-push-url="true"{% endif %}
+                 {% if option.selected %}checked{% endif %}/>
+          <label class="form-check-label"
+                 for="judge-{{ judge_filter_scope }}-{{ filter_key }}-filter-{{ forloop.counter0 }}">
+            {{ option.label }}
+          </label>
+        </div>
+      {% endfor %}
+    </fieldset>
+  </div>
+</div>
