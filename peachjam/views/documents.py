@@ -430,6 +430,7 @@ class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
 
 
 class DocumentDebugView(DocumentDebugViewBase):
+    permission_required = "peachjam.change_coredocument"
     template_name = "peachjam/document/_debug.html"
 
     def get_context_data(self, **kwargs):
@@ -469,6 +470,7 @@ class DocumentDebugView(DocumentDebugViewBase):
 
 
 class DocumentSummaryView(DocumentDebugViewBase):
+    permission_required = "peachjam.can_generate_judgment_summary"
     template_name = "peachjam/document/_summary.html"
     http_method_names = ["get", "post"]
 

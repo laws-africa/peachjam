@@ -710,7 +710,23 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "Document by id")
         self.assertNotContains(response, "Missing separator")
 
-    def test_document_debug_requires_debug_permission(self):
+    def test_document_debug_requires_change_permission(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        user = User.objects.get(username="officer@example.com")
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 403)
+
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_coredocument")
+        )
+        self.client.force_login(User.objects.get(pk=user.pk))
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_document_debug_hides_summary_tab_without_generate_permission(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
         doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
         user = User.objects.get(username="officer@example.com")
@@ -718,14 +734,21 @@ class PeachjamViewsTest(TestCase):
             Permission.objects.get(codename="change_coredocument")
         )
 
-        self.client.force_login(user)
-        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
-        self.assertEqual(response.status_code, 403)
-
-        user.user_permissions.add(Permission.objects.get(codename="can_debug_document"))
         self.client.force_login(User.objects.get(pk=user.pk))
         response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+
         self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'href="#debug-summary-tab"', html=False)
+
+    def test_document_summary_requires_generate_permission(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        user = User.objects.get(username="officer@example.com")
+        user.user_permissions.add(Permission.objects.get(codename="can_debug_document"))
+
+        self.client.force_login(User.objects.get(pk=user.pk))
+        response = self.client.post(reverse("document_summary", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 403)
 
     def test_document_source_unpublished(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
