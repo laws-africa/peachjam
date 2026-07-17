@@ -118,7 +118,6 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     .values_list(
                         "bench__judge_person_id",
                         "bench__judge_person__full_name",
-                        "bench__judge_person__slug",
                     )
                     .distinct(),
                     key=lambda judge: judge[1],
@@ -128,12 +127,8 @@ class FilteredJudgmentView(FilteredDocumentListView):
                         "label": JudgePerson.model_label_plural,
                         "type": "checkbox",
                         "options": [
-                            (
-                                str(judge_id),
-                                judge_name,
-                                reverse("judge", kwargs={"slug": judge_slug}),
-                            )
-                            for judge_id, judge_name, judge_slug in judges
+                            (str(judge_id), judge_name)
+                            for judge_id, judge_name in judges
                         ],
                         "values": self.request.GET.getlist("judge_people"),
                     }

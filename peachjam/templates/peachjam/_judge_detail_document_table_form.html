@@ -6,15 +6,12 @@
       hx-target="#{{ doc_table_form_id }}"
       hx-swap="outerHTML"
       {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
-  {% for court in selected_judge_courts %}<input type="hidden" name="courts" value="{{ court }}"/>{% endfor %}
-  {% for year in selected_judge_years %}<input type="hidden" name="years" value="{{ year }}"/>{% endfor %}
-  {% for topic in selected_flynote_topics %}<input type="hidden" name="topics" value="{{ topic.pk }}"/>{% endfor %}
   <div class="mb-3">
     <h2 class="h3 mb-1">{% trans "Judgments" %}</h2>
     <p class="text-muted mb-0">{% trans "Search and filter this judge's judgments." %}</p>
   </div>
   <div class="row g-4 align-items-start">
-    {% include "peachjam/_judge_filters.html" with judge_filter_scope="detail" %}
+    {% include "peachjam/_judge_filters.html" with judge_filter_scope="detail" judge_filter_form_id=doc_table_form_id %}
     <div class="{% if judge_year_filters or judge_court_filters or judge_topic_filters %}col-lg-9{% else %}col-12{% endif %} d-flex flex-column gap-3"
          role="region"
          aria-label="{% trans 'Judgments by this judge' %}">
