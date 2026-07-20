@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import RankFeature, token_filter
+from elasticsearch_dsl import MetaField, RankFeature, token_filter
 from elasticsearch_dsl.analysis import CustomAnalyzer
 
 from peachjam.models import (
@@ -211,6 +211,9 @@ class SearchableDocument(Document):
     class Index:
         name = settings.PEACHJAM["ES_INDEX"]
         settings = {"index.mapping.nested_objects.limit": 50000}
+
+    class Meta:
+        dynamic = MetaField("strict")
 
     class Django:
         # Because CoreDocument's default manager is a polymorphic manager, the actual instances
