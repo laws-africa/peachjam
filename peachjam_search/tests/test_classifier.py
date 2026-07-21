@@ -7,6 +7,7 @@ from unittest.mock import Mock, patch
 from django.core.management import call_command
 
 from peachjam_search.classifier import QueryClassifier
+from peachjam_search.management.commands import search_classifier
 
 
 class ClassifierTest(TestCase):
@@ -79,13 +80,12 @@ class ClassifierTest(TestCase):
 
 
 class SearchClassifierCommandTest(TestCase):
-    @patch(
-        "peachjam_search.management.commands.search_classifier.MLQueryClassifier.predict_queries",
+    @patch.object(
+        search_classifier.MLQueryClassifier,
+        "predict_queries",
         return_value=[("case_name", 0.8)],
     )
-    @patch(
-        "peachjam_search.management.commands.search_classifier.MLQueryClassifier.load_model"
-    )
+    @patch.object(search_classifier.MLQueryClassifier, "load_model")
     def test_evaluate_uses_rules_and_writes_per_query_results(
         self, load_model, predict_queries
     ):
