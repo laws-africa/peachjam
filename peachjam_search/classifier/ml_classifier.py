@@ -109,14 +109,26 @@ class MLQueryClassifier:
     def preprocess_queries(self, queries: Sequence[str]) -> List[str]:
         return [self.preprocess_query(q) for q in queries]
 
-    def pre_clean_raw_data(self, data):
-        """Clean up raw data exported from openrefine, used when training."""
-        if "search_clean" in data.columns:
+    def normalise_labelled_data(self, data):
+        """Normalise column names used by labelled-search CSV exports."""
+        data = data.copy()
+        if "search_clean" in data.columns and "query" not in data.columns:
             data.rename(columns={"search_clean": "query"}, inplace=True)
 
-        if "search_classification" in data.columns:
+        if "search_classification" in data.columns and "label" not in data.columns:
             data.rename(columns={"search_classification": "label"}, inplace=True)
 
+        missing_columns = {"label", "query"} - set(data.columns)
+        if missing_columns:
+            raise ValueError(
+                f"Labelled CSV must contain columns: {', '.join(sorted(missing_columns))}"
+            )
+
+        return data
+
+    def pre_clean_raw_data(self, data):
+        """Clean up raw data exported from openrefine, used when training."""
+        data = self.normalise_labelled_data(data)
         data.drop_duplicates(inplace=True)
 
         data.dropna(subset=["query"], inplace=True)
@@ -140,12 +152,6 @@ class MLQueryClassifier:
         log.info(f"Number of rows: {len(data)}")
         data = self.pre_clean_raw_data(data)
         log.info(f"Number of rows after pre-cleaning: {len(data)}")
-
-        missing_columns = {"label", "query"} - set(data.columns)
-        if missing_columns:
-            raise ValueError(
-                f"Training CSV must contain columns: {', '.join(sorted(missing_columns))}"
-            )
 
         data = data[["label", "query"]].dropna(subset=["label"]).fillna({"query": ""})
         raw_queries = data["query"].astype(str).tolist()
@@ -174,7 +180,6 @@ class MLQueryClassifier:
             n_jobs=None,
             class_weight="balanced",
             solver="lbfgs",
-            multi_class="auto",
         )
         classifier.fit(X, train_labels)
         X_test, _ = self.build_feature_matrix(
