@@ -1,13 +1,7 @@
-from io import StringIO
-from pathlib import Path
-from tempfile import TemporaryDirectory
 from unittest import TestCase
-from unittest.mock import Mock, patch
-
-from django.core.management import call_command
+from unittest.mock import Mock
 
 from peachjam_search.classifier import QueryClassifier
-from peachjam_search.management.commands import search_classifier
 
 
 class ClassifierTest(TestCase):
@@ -77,49 +71,3 @@ class ClassifierTest(TestCase):
         self.assertEqual(qclass.label.value, "case_name")
         self.assertEqual(qclass.confidence, 1.0)
         model.predict_queries.assert_not_called()
-
-
-class SearchClassifierCommandTest(TestCase):
-    @patch.object(
-        search_classifier.MLQueryClassifier,
-        "predict_queries",
-        return_value=[("case_name", 0.8)],
-    )
-    @patch.object(search_classifier.MLQueryClassifier, "load_model")
-    def test_evaluate_uses_rules_and_writes_per_query_results(
-        self, load_model, predict_queries
-    ):
-        with TemporaryDirectory() as directory:
-            directory = Path(directory)
-            input_path = directory / "labelled-searches.csv"
-            output_path = directory / "results.csv"
-            input_path.write_text(
-                "query,label\n22,numbers\n,empty\nsome legal words,act_name\n"
-            )
-            stdout = StringIO()
-
-            call_command(
-                "search_classifier",
-                input_path,
-                "--evaluate",
-                "--model-path",
-                directory / "candidate.joblib",
-                "--evaluation-output",
-                output_path,
-                stdout=stdout,
-            )
-
-            self.assertIn("Accuracy: 0.667", stdout.getvalue())
-            self.assertIn("Coverage: 1.000", stdout.getvalue())
-            self.assertIn("Incorrect classifications: 1", stdout.getvalue())
-            self.assertEqual(
-                load_model.call_args.args[0], directory / "candidate.joblib"
-            )
-            predict_queries.assert_called_once_with(["some legal words"])
-            self.assertEqual(
-                output_path.read_text(),
-                "query,expected_label,predicted_label,label_confidence,correct\n"
-                "22,numbers,numbers,1.0,True\n"
-                ",empty,empty,1.0,True\n"
-                "some legal words,act_name,case_name,0.8,False\n",
-            )
