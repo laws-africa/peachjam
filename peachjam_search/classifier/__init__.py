@@ -38,15 +38,40 @@ class QueryClassifier:
     LEADING_JUNK_RE = re.compile(r"^[^\w]+")
     CONFIDENCE_THRESHOLD = 0.7
     NUM_RE = re.compile(r"^[\d -]+$")
+    SHORT_ALPHA_RE = re.compile(r"^[a-z]{1,2}$")
+    CASE_NAME_RE = re.compile(r"\b(?:v|vs|versus)\b", re.IGNORECASE)
+    DEFAULT_LABELS = {
+        "constitution": QueryLabel.ACT_NAME,
+        "rule 19": QueryLabel.LEGAL_TERM,
+        "application for leave to amend statement of claim": QueryLabel.LEGAL_TERM,
+        "duty to protect": QueryLabel.LEGAL_TERM,
+    }
+
+    def __init__(self, ml_classifier=None):
+        """Optionally use a pre-loaded ML classifier instead of the packaged model."""
+        self.ml_classifier = ml_classifier
 
     def classify(self, query: str) -> QueryClass:
-        qclass = self.clean_query(query)
+        return self.classify_queries([query])[0]
 
-        self.classify_with_rules(qclass)
-        if not qclass.label:
-            self.classify_with_model(qclass)
+    def classify_queries(self, queries: list[str]) -> list[QueryClass]:
+        """Classify queries, batching ML predictions after applying fixed rules."""
+        qclasses = [self.clean_query(query) for query in queries]
+        unclassified = []
+        for qclass in qclasses:
+            self.classify_with_rules(qclass)
+            if not qclass.label:
+                unclassified.append(qclass)
 
-        return qclass
+        if unclassified:
+            self.classify_with_model_batch(unclassified)
+
+        for qclass in unclassified:
+            if not qclass.label and qclass.n_words == 1:
+                qclass.label = QueryLabel.TOO_SHORT
+                qclass.confidence = 1.0
+
+        return qclasses
 
     def clean_query(self, query: str) -> QueryClass:
         qclass = QueryClass(query)
@@ -62,10 +87,8 @@ class QueryClassifier:
         return qclass
 
     def classify_with_rules(self, qclass: QueryClass):
-        """Fixed classifications based on simple rules.
-        numbers: 99, 99a, 55 2
-        fixed list of classifications for 1-2 word queries?
-        """
+        """Apply high-confidence, deterministic query classifications."""
+        normalized_query = " ".join((qclass.query_clean or "").casefold().split())
         if self.NUM_RE.match(qclass.query_clean):
             qclass.label = QueryLabel.NUMBERS
             qclass.confidence = 1.0
@@ -74,7 +97,11 @@ class QueryClassifier:
             qclass.label = QueryLabel.EMPTY
             qclass.confidence = 1.0
 
-        elif qclass.n_chars < 2 or qclass.n_words < 2:
+        elif normalized_query in self.DEFAULT_LABELS:
+            qclass.label = self.DEFAULT_LABELS[normalized_query]
+            qclass.confidence = 1.0
+
+        elif qclass.n_chars < 2:
             qclass.label = QueryLabel.TOO_SHORT
             qclass.confidence = 1.0
 
@@ -83,29 +110,45 @@ class QueryClassifier:
             qclass.label = QueryLabel.QUOTE
             qclass.confidence = 1.0
 
+        elif self.SHORT_ALPHA_RE.fullmatch(normalized_query):
+            qclass.label = QueryLabel.TOO_SHORT
+            qclass.confidence = 1.0
+
+        elif self.CASE_NAME_RE.search(normalized_query):
+            qclass.label = QueryLabel.CASE_NAME
+            qclass.confidence = 1.0
+
     def classify_with_model(self, qclass: QueryClass):
         """Attempt to classify the query via the ML model if the rules failed."""
-        try:
-            from .ml_classifier import get_ml_classifier
-        except ImportError as e:
-            log.warning(
-                "ML classifier module not available, skipping ML classification.",
-                exc_info=e,
-            )
-            return
+        self.classify_with_model_batch([qclass])
 
-        try:
-            ml_classifier = get_ml_classifier()
-        except FileNotFoundError as e:
-            log.warning(
-                "ML classifier model file not found, skipping ML classification.",
-                exc_info=e,
-            )
-            return
+    def classify_with_model_batch(self, qclasses: list[QueryClass]):
+        """Classify rule-free queries in one ML prediction batch."""
+        ml_classifier = self.ml_classifier
+        if ml_classifier is None:
+            try:
+                from .ml_classifier import get_ml_classifier
+            except ImportError as e:
+                log.warning(
+                    "ML classifier module not available, skipping ML classification.",
+                    exc_info=e,
+                )
+                return
 
-        predictions = ml_classifier.predict_queries([qclass.query_clean or ""])
-        if len(predictions) == 1:
-            label, confidence = predictions[0]
+            try:
+                ml_classifier = get_ml_classifier()
+            except FileNotFoundError as e:
+                log.warning(
+                    "ML classifier model file not found, skipping ML classification.",
+                    exc_info=e,
+                )
+                return
+
+        predictions = ml_classifier.predict_queries(
+            [qclass.query_clean or "" for qclass in qclasses]
+        )
+        for qclass, prediction in zip(qclasses, predictions):
+            label, confidence = prediction
             if confidence >= self.CONFIDENCE_THRESHOLD:
                 qclass.label = QueryLabel(label)
                 qclass.confidence = confidence

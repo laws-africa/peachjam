@@ -311,6 +311,20 @@ To set up dependencies to train new models, run:
 pip install -e '.[dev,ml,ml_train]'
 ```
 
+Evaluate the packaged model, or a model trained to a temporary path, against a
+labelled CSV with `query` and `label` columns:
+
+```bash
+python manage.py search_classifier labelled-searches.csv --evaluate
+python manage.py search_classifier labelled-searches.csv --evaluate \
+  --model-path /tmp/query-classifier-candidate.joblib \
+  --evaluation-output /tmp/query-classifier-results.csv
+```
+
+The evaluation includes the production rules and ML confidence threshold. It
+reports accuracy, coverage, per-label metrics, and writes individual predictions
+when `--evaluation-output` is supplied.
+
 ## Admin theme
 
 Peachjam customises the Django admin view using [Django Jazzmin](https://django-jazzmin.readthedocs.io/). We build
