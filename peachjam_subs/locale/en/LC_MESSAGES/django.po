@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-07-23 09:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -103,27 +103,27 @@ msgstr ""
 msgid "Closed"
 msgstr ""
 
-#: models.py:655
+#: models.py:691
 msgid "Default product offering"
 msgstr ""
 
-#: models.py:660
+#: models.py:696
 msgid "These products are highlighted in the product listing."
 msgstr ""
 
-#: models.py:668
+#: models.py:704
 msgid "Trial product offering"
 msgstr ""
 
-#: models.py:669
+#: models.py:705
 msgid "If set, this product offering is used for trials."
 msgstr ""
 
-#: models.py:673
+#: models.py:709
 msgid "Trial duration (days)"
 msgstr ""
 
-#: models.py:674
+#: models.py:710
 msgid "Number of days for the trial period."
 msgstr ""
 
@@ -167,42 +167,50 @@ msgstr ""
 msgid "Active since"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:12
-#: templates/peachjam_subs/_subscription_required.html:20
+#: templates/peachjam_subs/_subscription_required.html:13
+#: templates/peachjam_subs/_subscription_required.html:21
 msgid "Create a free account"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:14
-#: templates/peachjam_subs/_subscription_required.html:34
+#: templates/peachjam_subs/_subscription_required.html:15
+#: templates/peachjam_subs/_subscription_required.html:39
 msgid "Unlock this feature"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:17
+#: templates/peachjam_subs/_subscription_required.html:18
 msgid "Sign up to save documents, read summaries and access more features."
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:22
+#: templates/peachjam_subs/_subscription_required.html:23
 msgid "Start"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:27
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "Already have an account?"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:28
+#: templates/peachjam_subs/_subscription_required.html:29
 msgid "Log in"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:36
+#: templates/peachjam_subs/_subscription_required.html:34
+msgid "Accounts unavailable"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:35
+msgid "This feature requires an account, and accounts are not available on this site."
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:41
 #, python-format
 msgid "This feature is available with %(lowest_product)s."
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:40
+#: templates/peachjam_subs/_subscription_required.html:45
 msgid "Upgrade to"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:48
+#: templates/peachjam_subs/_subscription_required.html:53
 msgid "This feature is not currently available."
 msgstr ""
 
