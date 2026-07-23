@@ -343,7 +343,7 @@ class PortionHitSerializer(serializers.Serializer):
     metadata = PydanticModelField(PortionMetadata)
     score = serializers.FloatField(
         min_value=0,
-        help_text="The relevance score of the item (higher is better)",
+        help_text="Opaque relevance score for ranking results (higher is better)",
     )
 
 
