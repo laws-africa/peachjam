@@ -11,7 +11,8 @@ from django.contrib.auth.models import AnonymousUser, Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
-from django.urls import clear_url_caches, reverse
+from django.urls import URLResolver, clear_url_caches, reverse
+from django.urls.resolvers import RoutePattern
 
 from peachjam.auth import (
     _patched_finish,
@@ -599,7 +600,7 @@ class DisabledAccountUrlsTests(TestCase):
         clear_url_caches()
 
     def test_disabled_patterns_are_prepended(self):
-        disabled_patterns = self.accounts.urlpatterns[:2]
+        disabled_patterns = self.accounts.urlpatterns[5:7]
 
         self.assertEqual(disabled_patterns[0].pattern._route, "")
         self.assertEqual(disabled_patterns[1].pattern._route, "<path:path>")
@@ -611,6 +612,38 @@ class DisabledAccountUrlsTests(TestCase):
             disabled_patterns[1].callback.view_class,
             self.accounts.DisabledAccountUrlsView,
         )
+
+    def test_google_callback_remains_available(self):
+        resolver = URLResolver(RoutePattern(""), self.accounts.urlpatterns)
+
+        trailing_slash_match = resolver.resolve("google/login/callback/")
+        no_trailing_slash_match = resolver.resolve("google/login/callback")
+
+        self.assertIs(trailing_slash_match.func, self.accounts.oauth2_callback)
+        self.assertIs(no_trailing_slash_match.func, self.accounts.oauth2_callback)
+
+    def test_google_login_remains_available(self):
+        resolver = URLResolver(RoutePattern(""), self.accounts.urlpatterns)
+
+        match = resolver.resolve("google/login/")
+
+        self.assertIs(match.func, self.accounts.oauth2_login)
+
+    def test_logout_routes_remain_available(self):
+        resolver = URLResolver(RoutePattern(""), self.accounts.urlpatterns)
+
+        logout_match = resolver.resolve("logout/")
+        logged_out_match = resolver.resolve("logged-out")
+
+        self.assertIs(logout_match.func, self.accounts.account_logout)
+        self.assertIs(logged_out_match.func.view_class, self.accounts.LoggedOutView)
+
+    def test_other_account_urls_are_disabled(self):
+        resolver = URLResolver(RoutePattern(""), self.accounts.urlpatterns)
+
+        match = resolver.resolve("login/")
+
+        self.assertIs(match.func.view_class, self.accounts.DisabledAccountUrlsView)
 
     def test_otp_account_urls_are_still_registered_behind_disabled_catch_all(self):
         pattern_names = [
