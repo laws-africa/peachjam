@@ -1,0 +1,37 @@
+{% load i18n %}
+{% if judge_year_filters or judge_court_filters or judge_topic_filters %}
+  <aside class="col-lg-3"
+         aria-label="{% if judge_filter_scope == 'detail' %}{% trans 'Judgment filters' %}{% else %}{% trans 'Judge filters' %}{% endif %}">
+    <button class="btn btn-outline-secondary d-lg-none w-100 mb-3"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#judge-{{ judge_filter_scope }}-filters"
+            aria-expanded="false"
+            aria-controls="judge-{{ judge_filter_scope }}-filters">
+      <i class="bi bi-funnel me-2" aria-hidden="true"></i>{% trans "Filters" %}
+    </button>
+    <div class="collapse d-lg-block"
+         id="judge-{{ judge_filter_scope }}-filters">
+      {% if judge_court_filters %}
+        {% trans "Courts" as court_filter_heading %}
+        {% include "peachjam/_judge_filter_card.html" with filter_options=judge_court_filters filter_key="court" filter_name="courts" filter_heading=court_filter_heading %}
+      {% endif %}
+      {% if judge_topic_filters %}
+        {% trans "Topics" as topic_filter_heading %}
+        {% if judge_court_filters %}
+          {% include "peachjam/_judge_filter_card.html" with filter_options=judge_topic_filters filter_key="topic" filter_name="topics" filter_heading=topic_filter_heading filter_card_class="mt-3" %}
+        {% else %}
+          {% include "peachjam/_judge_filter_card.html" with filter_options=judge_topic_filters filter_key="topic" filter_name="topics" filter_heading=topic_filter_heading %}
+        {% endif %}
+      {% endif %}
+      {% if judge_year_filters %}
+        {% trans "Active year" as year_filter_heading %}
+        {% if judge_court_filters or judge_topic_filters %}
+          {% include "peachjam/_judge_filter_card.html" with filter_options=judge_year_filters filter_key="year" filter_name="year_ranges" filter_heading=year_filter_heading filter_card_class="mt-3" %}
+        {% else %}
+          {% include "peachjam/_judge_filter_card.html" with filter_options=judge_year_filters filter_key="year" filter_name="year_ranges" filter_heading=year_filter_heading %}
+        {% endif %}
+      {% endif %}
+    </div>
+  </aside>
+{% endif %}

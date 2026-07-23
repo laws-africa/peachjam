@@ -101,6 +101,13 @@ class JudgePerson(models.Model):
     def canonical_identity_enabled():
         return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
 
+    @staticmethod
+    def canonical_identity_public_enabled():
+        return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY_PUBLIC", False)
+
+    def get_absolute_url(self):
+        return reverse("judge", kwargs={"slug": self.slug})
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = judge_identity_service.unique_judge_slug(

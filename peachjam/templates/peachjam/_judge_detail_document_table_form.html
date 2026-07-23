@@ -1,0 +1,63 @@
+{% load i18n humanize %}
+<form method="get"
+      id="{{ doc_table_form_id }}"
+      hx-include="#{{ doc_table_form_id }}"
+      hx-indicator=".htmx-progress"
+      hx-target="#{{ doc_table_form_id }}"
+      hx-swap="outerHTML"
+      {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
+  <div class="mb-3">
+    <h2 class="h3 mb-1">{% trans "Judgments" %}</h2>
+    <p class="text-muted mb-0">{% trans "Search and filter this judge's judgments." %}</p>
+  </div>
+  <div class="row g-4 align-items-start">
+    {% include "peachjam/_judge_filters.html" with judge_filter_scope="detail" judge_filter_form_id=doc_table_form_id %}
+    <div class="{% if judge_year_filters or judge_court_filters or judge_topic_filters %}col-lg-9{% else %}col-12{% endif %} d-flex flex-column gap-3"
+         role="region"
+         aria-label="{% trans 'Judgments by this judge' %}">
+      <div>
+        <div class="row g-2 align-items-end mb-3">
+          <div class="col-md">
+            <label class="form-label fw-semibold mb-1"
+                   for="{{ doc_table_filter_input_id }}">{% trans "Search judgments" %}</label>
+            <input id="{{ doc_table_filter_input_id }}"
+                   hx-get="{{ request.path }}"
+                   hx-trigger="keyup changed delay:300ms"
+                   hx-sync="this:replace"
+                   class="form-control"
+                   type="search"
+                   value="{{ form.q.value|default_if_none:'' }}"
+                   name="q"
+                   placeholder="{% trans 'Search by title or citation' %}"/>
+          </div>
+          {% with doc_table_sort_select_id=doc_table_form_id|add:"-sort" %}
+            <div class="col-md-auto">
+              <label class="form-label fw-semibold mb-1"
+                     for="{{ doc_table_sort_select_id }}">{% trans "Sort" %}</label>
+              <select id="{{ doc_table_sort_select_id }}"
+                      class="form-select"
+                      hx-get="{{ request.path }}"
+                      name="sort">
+                {% for opt in form.sort %}{{ opt }}{% endfor %}
+              </select>
+            </div>
+          {% endwith %}
+          <div class="col-md-auto">
+            <button class="btn btn-primary w-100"
+                    hx-get="{{ request.path }}"
+                    hx-sync="#{{ doc_table_filter_input_id }}:replace"
+                    type="submit">
+              {% trans "Search" %}
+            </button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="htmx-progress progress mb-2">
+          <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+        </div>
+        {% include 'peachjam/_document_table.html' %}
+      </div>
+    </div>
+  </div>
+</form>

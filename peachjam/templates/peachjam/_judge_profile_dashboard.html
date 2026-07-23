@@ -1,0 +1,308 @@
+{% load i18n humanize %}
+{# Profile header section. #}
+<div class="container">
+  <div class="judge-profile-header-section">
+    <div class="judge-profile-card">
+      {# Left: identity #}
+      <div class="judge-profile-card__identity">
+        <span class="judge-avatar judge-profile-card__avatar bg-primary"
+              aria-hidden="true">{{ judge_person.full_name|first|upper }}</span>
+        <div class="judge-profile-card__bio">
+          <p class="judge-profile-card__eyebrow">{% trans "Judicial record profile" %}</p>
+          <h1 id="main-page-heading" class="judge-profile-card__name">
+            <strong>{{ judge_display_surname }}</strong>{{ judge_display_name_remainder }}
+          </h1>
+          {% if judge_person.description %}
+            <p class="judge-profile-card__description">{{ judge_person.description }}</p>
+          {% endif %}
+        </div>
+      </div>
+      {# Right: key stats as large numbers #}
+      <div class="judge-profile-card__stats"
+           aria-label="{% trans 'Key statistics' %}">
+        {% if judge_titles %}
+          <div class="judge-key-stat">
+            <span class="judge-key-stat__label">{% trans "Title" %}{{ judge_titles|length|pluralize }}</span>
+            <span class="judge-key-stat__value judge-key-stat__value--text">{{ judge_titles|join:", " }}</span>
+          </div>
+        {% endif %}
+        {% if judge_first_year %}
+          <div class="judge-key-stat">
+            <span class="judge-key-stat__label">{% trans "Active" %}</span>
+            <span class="judge-key-stat__value">
+              {% if judge_first_year == judge_latest_year %}
+                {{ judge_first_year }}
+              {% else %}
+                {{ judge_first_year }}–{{ judge_latest_year }}
+              {% endif %}
+            </span>
+          </div>
+        {% endif %}
+        <div class="judge-key-stat judge-key-stat--accent">
+          <span class="judge-key-stat__label">{% trans "Judgments" %}</span>
+          <span class="judge-key-stat__value">{{ judge_judgment_count|intcomma }}</span>
+        </div>
+      </div>
+    </div>
+    {# Primary court badge. #}
+    {% if judge_primary_court %}
+      <p class="judge-primary-court-tag">
+        <i class="bi bi-building-fill" aria-hidden="true"></i>
+        {% trans "Primary court:" %} <strong>{{ judge_primary_court.judgment__court__name }}</strong>
+      </p>
+    {% endif %}
+  </div>
+  {# Judicial activity section. #}
+  <section class="mt-4" aria-labelledby="judge-intelligence-heading">
+    <div class="judge-intelligence__header">
+      <div>
+        <h2 class="judge-intelligence__title" id="judge-intelligence-heading">{% trans "Judicial activity" %}</h2>
+        <p class="judge-intelligence__subtitle">
+          {% blocktrans count count=judge_judgment_count %}Analysis of {{ count }} judgment currently available in PeachJam.{% plural %}Analysis of {{ count }} judgments currently available in PeachJam.{% endblocktrans %}
+        </p>
+      </div>
+      <p class="judge-data-note">
+        <i class="bi bi-info-circle" aria-hidden="true"></i>
+        {% trans "Describes database coverage, not judicial performance." %}
+      </p>
+    </div>
+    <div class="row g-3">
+      {# Activity timeline chart. #}
+      <div class="col-xl-8">
+        <article class="judge-insight-panel judge-insight-panel--primary h-100"
+                 aria-labelledby="judge-activity-heading">
+          <div class="judge-insight-panel__header">
+            <div>
+              <p class="judge-insight-panel__kicker">{% trans "Career activity" %}</p>
+              <h3 class="h5 mb-0" id="judge-activity-heading">{% trans "Judgments by year" %}</h3>
+            </div>
+            {% if judge_peak_year %}
+              <div class="judge-peak-badges">
+                <span class="judge-peak-badge">
+                  <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+                  <span>{% trans "Peak" %} <strong>{{ judge_peak_year.year }}</strong> · {{ judge_peak_year.judgment_count|intcomma }}</span>
+                </span>
+                <span class="judge-peak-badge">
+                  <i class="bi bi-calculator" aria-hidden="true"></i>
+                  <span>{% trans "Avg/year" %} <strong>{{ judge_average_per_active_year|floatformat:1 }}</strong></span>
+                </span>
+              </div>
+            {% endif %}
+          </div>
+          {% if judge_year_activity %}
+            <div class="judge-timeline">
+              {% for row in judge_year_activity %}
+                <div class="judge-timeline__item">
+                  <span class="judge-timeline__count">{{ row.judgment_count|intcomma }}</span>
+                  <span class="judge-timeline__bar"
+                        style="--judge-activity-height: {{ row.percentage }}%"
+                        title="{{ row.year }}: {{ row.judgment_count }}"></span>
+                  <span class="judge-timeline__year">{{ row.year }}</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">{% trans "No dated judgments are available for this judge." %}</p>
+          {% endif %}
+        </article>
+      </div>
+      {# Identity and aliases panel. #}
+      <div class="col-xl-4">
+        <article class="judge-insight-panel h-100"
+                 aria-labelledby="judge-identity-heading">
+          <p class="judge-insight-panel__kicker">{% trans "Identity record" %}</p>
+          <h3 class="h5" id="judge-identity-heading">{% trans "Names found in the sources" %}</h3>
+          {% if judge_aliases %}
+            <ul class="judge-alias-list mb-0">
+              {% for alias in judge_aliases %}<li>{{ alias }}</li>{% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0">{% trans "No additional aliases have been linked." %}</p>
+          {% endif %}
+        </article>
+      </div>
+      {# Court history panel. #}
+      <div class="col-lg-6">
+        <article class="judge-insight-panel h-100"
+                 aria-labelledby="judge-courts-heading">
+          <div class="judge-insight-panel__header">
+            <div>
+              <p class="judge-insight-panel__kicker">{% trans "Court history" %}</p>
+              <h3 class="h5 mb-0" id="judge-courts-heading">{% trans "Judgments by court" %}</h3>
+            </div>
+          </div>
+          <div class="judge-horizontal-chart">
+            {% for row in judge_court_chart %}
+              <div class="judge-horizontal-chart__row">
+                <div class="judge-horizontal-chart__label">
+                  <span>{{ row.judgment__court__name }}</span>
+                  <strong>{{ row.judgment_count|intcomma }}</strong>
+                </div>
+                <div class="judge-horizontal-chart__track" aria-hidden="true">
+                  <span style="width: {{ row.percentage }}%"></span>
+                </div>
+                {% if row.first_year %}
+                  <small class="text-muted">
+                    {% if row.first_year == row.latest_year %}
+                      {{ row.first_year }}
+                    {% else %}
+                      {{ row.first_year }}–{{ row.latest_year }}
+                    {% endif %}
+                  </small>
+                {% endif %}
+              </div>
+            {% empty %}
+              <p class="text-muted mb-0">
+                {% trans "No court history is available." %}
+              </p>
+            {% endfor %}
+          </div>
+          {% if judge_primary_court_comparison %}
+            <div class="judge-benchmark mt-4">
+              <p class="small fw-semibold mb-2">
+                {% trans "Context within the primary court" %}
+              </p>
+              {% for row in judge_primary_court_comparison %}
+                <div class="judge-benchmark__row">
+                  <span>{{ row.label }}</span>
+                  <span class="judge-benchmark__track" aria-hidden="true">
+                    <span style="width: {{ row.percentage }}%"></span>
+                  </span>
+                  <strong>{{ row.judgment_count|floatformat:"-1" }}</strong>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </article>
+      </div>
+      {# Flynote topics panel. #}
+      <div class="col-lg-6">
+        <article class="judge-insight-panel h-100"
+                 aria-labelledby="judge-topics-heading">
+          <div class="judge-insight-panel__header">
+            <div>
+              <p class="judge-insight-panel__kicker">
+                {% trans "Subject profile" %}
+              </p>
+              <h3 class="h5 mb-0" id="judge-topics-heading">
+                {% trans "Leading flynote topics" %}
+              </h3>
+            </div>
+          </div>
+          <div class="judge-horizontal-chart">
+            {% for row in judge_topic_chart %}
+              <div class="judge-horizontal-chart__row">
+                <div class="judge-horizontal-chart__label">
+                  <span>{{ row.name }}</span>
+                  <strong>{{ row.judgment_count|intcomma }}</strong>
+                </div>
+                <div class="judge-horizontal-chart__track" aria-hidden="true">
+                  <span style="width: {{ row.percentage }}%"></span>
+                </div>
+              </div>
+            {% empty %}
+              <p class="text-muted mb-0">
+                {% trans "No flynote topic analysis is available." %}
+              </p>
+            {% endfor %}
+          </div>
+        </article>
+      </div>
+      {# Citation network panel. #}
+      <div class="col-12">
+        <article class="judge-insight-panel judge-citation-panel"
+                 aria-labelledby="judge-citations-heading">
+          <div class="judge-insight-panel__header">
+            <div>
+              <p class="judge-insight-panel__kicker">
+                {% trans "Citation network" %}
+              </p>
+              <h3 class="h5 mb-0" id="judge-citations-heading">
+                {% trans "Citation influence" %}
+              </h3>
+            </div>
+          </div>
+          <div class="judge-citation-flow">
+            <div class="judge-citation-flow__metric">
+              <strong>{{ judge_citation_analysis.outgoing_count|intcomma }}</strong>
+              <span>{% trans "other judgments cited" %}</span>
+            </div>
+            <div class="judge-citation-flow__line" aria-hidden="true">
+            </div>
+            <div class="judge-citation-flow__identity">
+              <span class="judge-avatar bg-primary" aria-hidden="true">{{ judge_person.full_name|first|upper }}</span>
+              <span>{{ judge_person.full_name }}</span>
+            </div>
+            <div class="judge-citation-flow__line" aria-hidden="true">
+            </div>
+            <div class="judge-citation-flow__metric">
+              <strong>{{ judge_citation_analysis.incoming_count|intcomma }}</strong>
+              <span>{% trans "judgments citing this judge's work" %}</span>
+            </div>
+          </div>
+          {% if judge_citation_analysis.citing_judges or judge_citation_analysis.cited_judges or judge_citation_analysis.most_cited_judgments %}
+            <div class="row g-4 mt-2">
+              <div class="col-lg-4">
+                <h4 class="h6">
+                  {% trans "Frequently cited judges" %}
+                </h4>
+                <ul class="judge-connection-list mb-0">
+                  {% for connection in judge_citation_analysis.cited_judges %}
+                    <li>
+                      <a href="{% url 'judge' slug=connection.judge_person__slug %}">{{ connection.judge_person__full_name }}</a>
+                      <span>{{ connection.judgment_count|intcomma }}</span>
+                    </li>
+                  {% empty %}
+                    <li class="text-muted">
+                      {% trans "No linked judge data." %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div class="col-lg-4">
+                <h4 class="h6">
+                  {% trans "Judges citing this work" %}
+                </h4>
+                <ul class="judge-connection-list mb-0">
+                  {% for connection in judge_citation_analysis.citing_judges %}
+                    <li>
+                      <a href="{% url 'judge' slug=connection.judge_person__slug %}">{{ connection.judge_person__full_name }}</a>
+                      <span>{{ connection.judgment_count|intcomma }}</span>
+                    </li>
+                  {% empty %}
+                    <li class="text-muted">
+                      {% trans "No linked judge data." %}
+                    </li>
+                  {% endfor %}
+                </ul>
+              </div>
+              <div class="col-lg-4">
+                <h4 class="h6">
+                  {% trans "Most cited judgments" %}
+                </h4>
+                <ol class="judge-cited-judgments mb-0">
+                  {% for judgment in judge_citation_analysis.most_cited_judgments %}
+                    <li>
+                      <a href="{{ judgment.get_absolute_url }}">{{ judgment.title }}</a>
+                      <span>{% blocktrans count count=judgment.incoming_citation_count %}{{ count }} citing judgment{% plural %}{{ count }} citing judgments{% endblocktrans %}</span>
+                    </li>
+                  {% empty %}
+                    <li class="text-muted">
+                      {% trans "No linked citation data." %}
+                    </li>
+                  {% endfor %}
+                </ol>
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted text-center mt-3 mb-0">
+              {% trans "No linked citation relationships are currently available for this judge's judgments." %}
+            </p>
+          {% endif %}
+        </article>
+      </div>
+    </div>
+    {# /row #}
+  </section>
+</div>
+{# /container #}

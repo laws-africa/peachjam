@@ -16,6 +16,7 @@ from peachjam.models import (
     CourtDivision,
     CourtRegistry,
     Judge,
+    JudgePerson,
     Judgment,
     Outcome,
 )
@@ -61,6 +62,32 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
     def add_judges_facet(self, context):
         if "judges" not in self.exclude_facets:
+            if JudgePerson.canonical_identity_public_enabled():
+                judges = sorted(
+                    self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="judge_people"
+                    )
+                    .filter(bench__judge_person__isnull=False)
+                    .order_by()
+                    .values_list(
+                        "bench__judge_person_id",
+                        "bench__judge_person__full_name",
+                    )
+                    .distinct(),
+                    key=lambda judge: judge[1],
+                )
+                if judges:
+                    context["facet_data"]["judge_people"] = {
+                        "label": JudgePerson.model_label_plural,
+                        "type": "checkbox",
+                        "options": [
+                            (str(judge_id), judge_name)
+                            for judge_id, judge_name in judges
+                        ],
+                        "values": self.request.GET.getlist("judge_people"),
+                    }
+                return
+
             judges = list(
                 judge
                 for judge in self.form.filter_queryset(
