@@ -1,6 +1,7 @@
 import logging
 from copy import deepcopy
-from typing import List, Optional
+from dataclasses import replace
+from typing import Any, List, Optional, Self
 
 from django.conf import settings
 from elasticsearch_dsl import Search, TermsFacet
@@ -8,26 +9,32 @@ from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl.query import Bool, MatchAll, MatchPhrase, Q, SimpleQueryString
 from pydantic import BaseModel
 
-from peachjam.models import pj_settings
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.profiles import SearchProfile
+from peachjam_search.search_pipeline import (
+    QueryAnalyser,
+    QueryAnalysis,
+    SearchPlan,
+    SearchPlanner,
+    SearchQuery,
+)
 
 log = logging.getLogger(__name__)
 
 
-class SearchEngine:
+class ElasticsearchSearchCompiler:
     document = SearchableDocument
     index = None
 
-    # query details that can be passed in by the client
-    query = None
-    field_queries = None
-    page = 1
-    ordering = "-score"
-    explain = False
-    # dict from field name to list of values
-    filters = None
-    facets = [
+    advanced_only_search_fields = {
+        "case_number": None,
+        "case_name": None,
+        "judges_text": None,
+    }
+
+    # search configuration
+    default_page_size = 10
+    default_facets = [
         "nature",
         "publication",
         "sub_publication",
@@ -43,13 +50,8 @@ class SearchEngine:
         "attorneys",
         "matter_type",
     ]
-    # text / semantic / hybrid
-    mode = "text"
-
-    # search configuration
-    page_size = 10
     # this should be enough for up to 5 pages, 10 per page with 3 chunks each
-    knn_k = 5 * page_size * 3
+    knn_k = 5 * default_page_size * 3
     # number of candidates to find on each shard
     knn_num_candidates = knn_k * 10
     knn_embedding_field = "content_chunks.text_embedding"
@@ -63,7 +65,7 @@ class SearchEngine:
     rrf_rank_window_size = knn_k
     rrf_rank_constant = 60
 
-    source = {
+    default_source = {
         "includes": [
             "expression_frbr_uri",
             "date",
@@ -85,7 +87,7 @@ class SearchEngine:
         ]
     }
 
-    highlight = {
+    default_highlight = {
         "title": {
             "pre_tags": ["<mark>"],
             "post_tags": ["</mark>"],
@@ -115,24 +117,6 @@ class SearchEngine:
             "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
         },
     }
-
-    search_fields = {
-        "title": {"boost": 8},
-        "title_expanded": {"boost": 3},
-        "citation": {"boost": 2},
-        "alternative_names": {"boost": 4},
-        "content": None,
-        "summary": {"boost": 2},
-        "flynote": {"boost": 2},
-        "blurb": {"boost": 2},
-    }
-
-    advanced_search_fields = {
-        "case_number": None,
-        "case_name": None,
-        "judges_text": None,
-    }
-    advanced_search_fields.update(search_fields)
 
     # allowed filter fields
     filter_fields = {
@@ -209,28 +193,6 @@ class SearchEngine:
         {"field": "labels", "options": {"size": 100}},
     ]
 
-    # when doing a SHOULD phrase match on content fields, what should we boost by?
-    optimistic_phrase_match_content_boost = 4
-    optimistic_phrase_match_slop = 0
-    provision_title_boost = 4
-    provision_parent_titles_boost = 2
-    search_profile = None
-    use_pagerank_settings = True
-    pagerank_boost_value = None
-    pagerank_pivot_value = None
-
-    # this means that at least 70% of terms must appear in ANY of the searched fields
-    simple_query_string_options = {
-        "default_operator": "OR",
-        # all for 1-4 terms, 5 or more requires at 80% to match
-        "minimum_should_match": "4<80%",
-    }
-
-    # how to treat queries for advanced search: AND
-    advanced_simple_query_string_options = {
-        "default_operator": "AND",
-    }
-
     pages_inner_hits = {
         "_source": ["pages.page_num"],
         "highlight": {
@@ -260,98 +222,45 @@ class SearchEngine:
         },
     }
 
-    def __init__(self):
+    search_query: SearchQuery | None = None
+    plan: SearchPlan | None = None
+
+    def __init__(self) -> None:
         self.client = connections.get_connection(self.document._get_using())
         self.index = (
             MultiLanguageIndexManager.get_instance().get_all_search_index_names()
         )
-        self.field_queries = {}
-        self.filters = {}
-        self.search_fields = deepcopy(self.search_fields)
-        self.advanced_search_fields = deepcopy(self.advanced_search_fields)
-        self.simple_query_string_options = deepcopy(self.simple_query_string_options)
-        self.advanced_simple_query_string_options = deepcopy(
-            self.advanced_simple_query_string_options
-        )
 
-    def apply_profile(self, profile):
-        if not isinstance(profile, SearchProfile):
-            profile = SearchProfile.from_dict(profile)
+    @property
+    def profile(self) -> SearchProfile:
+        """The profile selected by the plan being compiled."""
+        return self.plan.profile
 
-        self.search_profile = profile
-        self.search_fields = profile.build_search_fields()
-        self.advanced_search_fields = profile.build_advanced_search_fields()
-        self.optimistic_phrase_match_content_boost = profile.phrase_match_content_boost
-        self.optimistic_phrase_match_slop = profile.phrase_match_slop
-        self.simple_query_string_options = deepcopy(profile.simple_query_string_options)
-        self.advanced_simple_query_string_options = deepcopy(
-            profile.advanced_simple_query_string_options
-        )
-        self.provision_title_boost = profile.provision_title_boost
-        self.provision_parent_titles_boost = profile.provision_parent_titles_boost
-        self.use_pagerank_settings = profile.use_pagerank_settings
-        self.pagerank_boost_value = profile.pagerank_boost_value
-        self.pagerank_pivot_value = profile.pagerank_pivot_value
-        return self
-
-    def execute(self):
-        search = self.build_search()
-        response = search.execute()
-
-        if response._shards.failed:
-            # it's better to fail here than to silently return partial (or no) results
-            log.error(f"ES query failed: {response._shards.failures}")
-            if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
-                raise Exception(f"ES query failed: {response._shards.failures}")
-
-        return response
-
-    def build_debug_payload(self):
-        search = self.build_search()
-        query = search.to_dict()
+    @staticmethod
+    def build_search_fields(profile: SearchProfile) -> dict[str, dict[str, Any] | None]:
+        """Translate profile boosts into compiler field definitions."""
         return {
-            "index": self.index,
-            "mode": self.mode,
-            "inputs": self.get_debug_inputs(),
-            "query": query,
-            "redacted_query": self.redact_debug_query(query),
-        }
-
-    def get_debug_inputs(self):
-        return {
-            "query": self.query,
-            "field_queries": self.field_queries,
-            "page": self.page,
-            "page_size": self.page_size,
-            "ordering": self.ordering,
-            "filters": self.filters,
-            "facets": self.facets,
-            "explain": self.explain,
-            "search_profile": (
-                self.search_profile.to_dict() if self.search_profile else None
-            ),
+            field_name: (
+                None if boost is None or float(boost) == 1.0 else {"boost": boost}
+            )
+            for field_name, boost in profile.search_field_boosts.items()
         }
 
     @classmethod
-    def redact_debug_query(cls, value):
-        value = deepcopy(value)
+    def build_advanced_search_fields(
+        cls, profile: SearchProfile
+    ) -> dict[str, dict[str, Any] | None]:
+        """Add fixed advanced-only fields to the profile-driven fields."""
+        fields = dict(cls.advanced_only_search_fields)
+        fields.update(cls.build_search_fields(profile))
+        return fields
 
-        def redact(item):
-            if isinstance(item, dict):
-                for key, child in list(item.items()):
-                    if key == "query_vector" or key.endswith("_embedding"):
-                        item[key] = "[embedding vector omitted]"
-                    else:
-                        item[key] = redact(child)
-            elif isinstance(item, list):
-                if item and all(isinstance(x, (int, float)) for x in item):
-                    return "[embedding vector omitted]"
-                return [redact(child) for child in item]
-            return item
+    @classmethod
+    def advanced_search_field_names(cls) -> list[str]:
+        """Return the advanced form fields accepted by the default compiler."""
+        return list(cls.build_advanced_search_fields(SearchProfile.default()))
 
-        return redact(value)
-
-    def suggest(self, query):
+    def suggest(self, query: str) -> Any:
         search = Search(using=self.client, index=self.index)
         search = search.source(["_id"]).suggest(
             "prefix",
@@ -364,9 +273,15 @@ class SearchEngine:
         )
         return search.execute()
 
-    def build_search(self):
-        search = RetrieverSearch(using=self.client, index=self.index)
-        search = self.add_query(search)
+    def compile(self, search_query: SearchQuery, plan: SearchPlan) -> "RetrieverSearch":
+        """Compile one query and plan into an Elasticsearch request."""
+        self.search_query = search_query
+        self.plan = plan
+        return self.build_search()
+
+    def build_search(self) -> "RetrieverSearch":
+        search = self.create_search()
+        search = self.add_query_from_plan(search)
         search = self.add_filters(search)
         search = self.add_sort(search)
         search = self.add_paging(search)
@@ -374,19 +289,22 @@ class SearchEngine:
         search = self.add_highlight(search)
         search = self.add_aggs(search)
         search = self.add_extra(search)
-        search = self.add_retrievers(search)
-        return search
+        return self.add_retrievers(search)
 
-    def add_source(self, search):
-        return search.source(self.source)
+    def create_search(self) -> "RetrieverSearch":
+        return RetrieverSearch(using=self.client, index=self.index)
 
-    def add_filters(self, search):
+    def add_source(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        return search.source(self.search_query.source or self.default_source)
+
+    def add_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
         # always applied
         search = search.filter("term", is_most_recent=True)
+        facetable_fields = {facet["field"] for facet in self.facet_fields}
 
-        for field, values in self.filters.items():
+        for field, values in self.search_query.filters.items():
             # if this field is faceted, then apply it as a post-filter
-            if field in self.facets:
+            if field in facetable_fields:
                 search = search.post_filter("terms", **{field: values})
             elif field in self.range_filter_fields:
                 # range fields (can't be faceted)
@@ -403,11 +321,14 @@ class SearchEngine:
 
         return search
 
-    def add_aggs(self, search):
+    def add_aggs(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        if not self.search_query.facets:
+            return search
+
         aggs = self.build_aggs()
 
         filters = {}
-        for field, values in self.filters.items():
+        for field, values in self.search_query.filters.items():
             filters[field] = Q("terms", **{field: values})
 
         for agg_field, facet in aggs.items():
@@ -415,7 +336,7 @@ class SearchEngine:
             agg_filter = MatchAll()
             for field, filter in filters.items():
                 # apply filters that are applicable for facets other than this one
-                if agg_field == field or field not in self.facets:
+                if agg_field == field or field not in self.search_query.facets:
                     continue
                 agg_filter &= filter
 
@@ -425,56 +346,60 @@ class SearchEngine:
 
         return search
 
-    def add_highlight(self, search):
-        for field, options in self.highlight.items():
+    def add_highlight(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        highlight = self.search_query.highlight or self.default_highlight
+        for field, options in highlight.items():
             search = search.highlight(field, **options)
         return search
 
-    def add_sort(self, search):
-        if self.ordering == "-score":
+    def add_sort(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        if self.search_query.ordering == "-score":
             return search.sort("_score")
-        return search.sort(self.ordering)
+        return search.sort(self.search_query.ordering)
 
-    def add_paging(self, search):
+    def add_paging(self, search: "RetrieverSearch") -> "RetrieverSearch":
         # TODO: guard against going beyond end of results
-        return search[(self.page - 1) * self.page_size : self.page * self.page_size]
+        return search[
+            (self.search_query.page - 1)
+            * self.search_query.page_size : self.search_query.page
+            * self.search_query.page_size
+        ]
 
-    def expand_retriever_window_to_page(self):
+    def expand_retriever_window_to_page(self) -> None:
         """Ensure hybrid retrievers can return the full requested page."""
-        if self.mode == "hybrid":
+        if self.plan is not None and self.plan.mode == "hybrid":
             self.rrf_rank_window_size = max(
                 self.rrf_rank_window_size,
-                self.page * self.page_size,
+                self.search_query.page * self.search_query.page_size,
             )
 
-    def add_extra(self, search):
-        return search.extra(explain=self.explain)
+    def add_extra(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        return search.extra(explain=self.search_query.explain)
 
-    def add_query(self, search):
-        """Build the actual search queries."""
+    def add_query_from_plan(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        """Compile the retrieval and ranking clauses selected by the plan."""
         must_queries = []
         should_queries = []
 
-        if self.mode in ["text", "hybrid"]:
-            must_queries.extend(self.build_rank_feature_queries())
+        # pagerank etc.
+        must_queries.extend(self.build_rank_feature_queries())
 
-        if self.is_advanced_search():
-            # we only support text mode with advanced search
-            self.mode = "text"
+        clause_names = {clause.name for clause in self.plan.retrieval_clauses}
 
-            # these handle advanced search, and can't be combined with normal search because they both
-            # build queries to return nested content, and ES complains if multiple queries try to return the
-            # same nested content fields
+        if "advanced_per_field" in clause_names:
             must_queries.extend(self.build_per_field_queries())
+        if "advanced_all" in clause_names:
             must_queries.extend(self.build_advanced_all_queries())
+        if "advanced_content" in clause_names:
             must_queries.extend(self.build_advanced_content_queries())
-        else:
-            # these handle basic search
-            if self.mode in ["text", "hybrid"]:
-                should_queries.extend(self.build_basic_queries())
-                should_queries.extend(self.build_content_phrase_queries())
-                should_queries.extend(self.build_nested_page_queries())
-                should_queries.extend(self.build_nested_provision_queries())
+        if "basic" in clause_names:
+            should_queries.extend(self.build_basic_queries())
+        if "content_phrase" in clause_names:
+            should_queries.extend(self.build_content_phrase_queries())
+        if "nested_pages" in clause_names:
+            should_queries.extend(self.build_nested_page_queries())
+        if "nested_provisions" in clause_names:
+            should_queries.extend(self.build_nested_provision_queries())
 
         return search.query(
             "bool",
@@ -483,12 +408,12 @@ class SearchEngine:
             minimum_should_match=1 if should_queries else 0,
         )
 
-    def add_retrievers(self, search):
-        if self.mode == "text":
+    def add_retrievers(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        if self.plan.mode == "text":
             return search
 
-        knn_query = self.build_knn_query(search, self.mode)
-        if self.mode == "semantic":
+        knn_query = self.build_knn_query(search, self.plan.mode)
+        if self.plan.mode == "semantic":
             # we don't need a retriever, just a normal knn-based query
             return search.query(knn_query)
 
@@ -515,102 +440,96 @@ class SearchEngine:
 
         return search
 
-    def build_rank_feature_queries(self, factor=1.0):
-        """Apply a rank_feature query to boost the score based on the ranking field."""
-        pagerank_boost_value, pagerank_pivot_value = self.get_pagerank_settings()
-        if pagerank_boost_value:
-            # apply pagerank boost to the score using the saturation function
+    def build_rank_feature_queries(self, factor: float = 1.0) -> list[Any]:
+        """Compile the plan's resolved rank-feature signals."""
+        queries = []
+        for signal in self.plan.ranking_signals:
+            if not signal.boost:
+                continue
             kwargs = {
-                "field": "ranking",
-                "boost": pagerank_boost_value * factor,
+                "field": signal.field,
+                "boost": signal.boost * factor,
             }
-            if pagerank_pivot_value:
-                kwargs["saturation"] = {"pivot": pagerank_pivot_value}
-            return [Q("rank_feature", **kwargs)]
-        return []
+            if signal.saturation_pivot:
+                kwargs["saturation"] = {"pivot": signal.saturation_pivot}
+            queries.append(Q("rank_feature", **kwargs))
+        return queries
 
-    def get_pagerank_settings(self):
-        if self.use_pagerank_settings:
-            settings = pj_settings()
-            return settings.pagerank_boost_value, settings.pagerank_pivot_value
-        return self.pagerank_boost_value, self.pagerank_pivot_value
-
-    def build_per_field_queries(self):
+    def build_per_field_queries(self) -> list[Any]:
         """Supports searching across multiple fields. Specify zero or more query parameters such as search__title=foo"""
         queries = []
 
-        for field in self.advanced_search_fields.keys():
+        profile = self.profile
+        for field in self.build_advanced_search_fields(profile):
             if field == "content":
                 # advanced search on the "content" field (which must include pages and provisions too), is handled
                 # by build_advanced_content_queries
                 continue
-            query = self.field_queries.get(field)
+            query = self.search_query.field_queries.get(field)
             if query:
                 queries.append(
                     SimpleQueryString(
                         query=query,
                         fields=[self.get_field(field)],
-                        **self.advanced_simple_query_string_options,
+                        **profile.advanced_simple_query_string_options,
                     )
                 )
 
         return queries
 
-    def is_advanced_search(self):
+    def is_advanced_search(self) -> bool:
         """It's an advanced search if any of the search__* query parameters are present."""
-        return any(
-            self.field_queries.get(field)
-            for field in list(self.advanced_search_fields.keys()) + ["all"]
-        )
+        return self.search_query.is_advanced
 
-    def build_basic_queries(self):
+    def build_basic_queries(self) -> list[Any]:
         """This implements a simple_query_string query across multiple fields, using AND logic for the terms
         in a field, but effectively OR (should) logic between the fields."""
-        if not self.query:
+        query = self.search_query.query
+        if not query:
             return []
 
-        query_fields = [
-            self.get_field(field) for field, options in self.search_fields.items()
-        ]
+        profile = self.profile
+        search_fields = self.build_search_fields(profile)
+        query_fields = [self.get_field(field) for field in search_fields]
         queries = [
             SimpleQueryString(
-                query=self.query,
+                query=query,
                 fields=[field],
-                **self.simple_query_string_options,
+                **profile.simple_query_string_options,
             )
             for field in query_fields
         ]
 
-        if " " in self.query:
+        if " " in query:
             # do optimistic match-phrase queries for multi-word queries
-            for field, options in self.search_fields.items():
-                query = {"query": self.query, "slop": self.optimistic_phrase_match_slop}
+            for field, options in search_fields.items():
+                phrase_query = {"query": query, "slop": profile.phrase_match_slop}
                 if "boost" in (options or {}):
-                    query["boost"] = options["boost"]
+                    phrase_query["boost"] = options["boost"]
                 if field == "content":
-                    query["boost"] = self.optimistic_phrase_match_content_boost
-                queries.append(MatchPhrase(**{field: query}))
+                    phrase_query["boost"] = profile.phrase_match_content_boost
+                queries.append(MatchPhrase(**{field: phrase_query}))
 
         return queries
 
-    def build_content_phrase_queries(self):
+    def build_content_phrase_queries(self) -> list[Any]:
         """Adds a best-effort phrase match query on the content field."""
-        if not self.query:
+        if not self.search_query.query:
             return []
 
         return [
             MatchPhrase(
                 content={
-                    "query": self.query,
-                    "slop": self.optimistic_phrase_match_slop,
-                    "boost": self.optimistic_phrase_match_content_boost,
+                    "query": self.search_query.query,
+                    "slop": self.profile.phrase_match_slop,
+                    "boost": self.profile.phrase_match_content_boost,
                 }
             )
         ]
 
-    def build_nested_page_queries(self):
+    def build_nested_page_queries(self) -> list[Any]:
         """Does a nested page search, and includes highlights."""
-        if not self.query:
+        if not self.search_query.query:
             return []
 
         return [
@@ -622,18 +541,18 @@ class SearchEngine:
                     "bool",
                     must=[
                         SimpleQueryString(
-                            query=self.query,
+                            query=self.search_query.query,
                             fields=["pages.body"],
                             quote_field_suffix=".exact",
-                            **self.simple_query_string_options,
+                            **self.profile.simple_query_string_options,
                         )
                     ],
                     should=[
                         MatchPhrase(
                             pages__body={
-                                "query": self.query,
-                                "slop": self.optimistic_phrase_match_slop,
-                                "boost": self.optimistic_phrase_match_content_boost,
+                                "query": self.search_query.query,
+                                "slop": self.profile.phrase_match_slop,
+                                "boost": self.profile.phrase_match_content_boost,
                             }
                         ),
                     ],
@@ -641,9 +560,9 @@ class SearchEngine:
             )
         ]
 
-    def build_nested_provision_queries(self):
+    def build_nested_provision_queries(self) -> list[Any]:
         """Does a nested provision search, and includes highlights."""
-        if not self.query:
+        if not self.search_query.query:
             return []
 
         return [
@@ -656,45 +575,47 @@ class SearchEngine:
                     should=[
                         MatchPhrase(
                             provisions__body={
-                                "query": self.query,
-                                "slop": self.optimistic_phrase_match_slop,
-                                "boost": self.optimistic_phrase_match_content_boost,
+                                "query": self.search_query.query,
+                                "slop": self.profile.phrase_match_slop,
+                                "boost": self.profile.phrase_match_content_boost,
                             }
                         ),
                         SimpleQueryString(
-                            query=self.query,
+                            query=self.search_query.query,
                             fields=["provisions.body"],
                             quote_field_suffix=".exact",
-                            **self.simple_query_string_options,
+                            **self.profile.simple_query_string_options,
                         ),
                         SimpleQueryString(
-                            query=self.query,
+                            query=self.search_query.query,
                             fields=[
                                 self.get_boosted_field(
-                                    "provisions.title", self.provision_title_boost
+                                    "provisions.title",
+                                    self.profile.provision_title_boost,
                                 ),
                                 self.get_boosted_field(
                                     "provisions.parent_titles",
-                                    self.provision_parent_titles_boost,
+                                    self.profile.provision_parent_titles_boost,
                                 ),
                             ],
-                            **self.simple_query_string_options,
+                            **self.profile.simple_query_string_options,
                         ),
                     ],
                 ),
             )
         ]
 
-    def build_advanced_all_queries(self):
+    def build_advanced_all_queries(self) -> list[Any]:
         """Build queries for search__all (advanced search across all fields). Similar logic to build_basic_queries,
         but all terms are required by default."""
-        query = self.field_queries.get("all")
+        query = self.search_query.field_queries.get("all")
         if not query:
             return []
 
+        profile = self.profile
         query_fields = [
             self.get_field(field)
-            for field, options in self.advanced_search_fields.items()
+            for field in self.build_advanced_search_fields(profile)
         ]
         return [
             Q(
@@ -704,7 +625,7 @@ class SearchEngine:
                     SimpleQueryString(
                         query=query,
                         fields=[field],
-                        **self.advanced_simple_query_string_options,
+                        **profile.advanced_simple_query_string_options,
                     )
                     for field in query_fields
                 ]
@@ -712,13 +633,13 @@ class SearchEngine:
             )
         ]
 
-    def build_advanced_content_queries(self):
+    def build_advanced_content_queries(self) -> list[Any]:
         """Adds advanced search queries for search__content, which searches across content, pages.body and
         provisions.body."""
-        query = self.field_queries.get("content")
+        query = self.search_query.field_queries.get("content")
 
         # don't allow search__content and search__all to clash, only one is needed to search content fields
-        if query and self.field_queries.get("all"):
+        if query and self.search_query.field_queries.get("all"):
             return []
 
         if query:
@@ -731,7 +652,7 @@ class SearchEngine:
             ]
         return []
 
-    def build_advanced_content_query(self, query):
+    def build_advanced_content_query(self, query: str) -> list[Any]:
         # TODO: negative queries don't work, because they must be applied to the whole content, not just a
         # particular page or provision
         return [
@@ -739,7 +660,7 @@ class SearchEngine:
             SimpleQueryString(
                 query=query,
                 fields=["content"],
-                **self.advanced_simple_query_string_options,
+                **self.profile.advanced_simple_query_string_options,
             ),
             # pages.body
             Q(
@@ -750,7 +671,7 @@ class SearchEngine:
                     query=query,
                     fields=["pages.body"],
                     quote_field_suffix=".exact",
-                    **self.advanced_simple_query_string_options,
+                    **self.profile.advanced_simple_query_string_options,
                 ),
             ),
             # provisions.body
@@ -765,34 +686,35 @@ class SearchEngine:
                             query=query,
                             fields=["provisions.body"],
                             quote_field_suffix=".exact",
-                            **self.advanced_simple_query_string_options,
+                            **self.profile.advanced_simple_query_string_options,
                         ),
                         SimpleQueryString(
-                            query=self.query,
+                            query=self.search_query.query,
                             fields=[
                                 self.get_boosted_field(
-                                    "provisions.title", self.provision_title_boost
+                                    "provisions.title",
+                                    self.profile.provision_title_boost,
                                 ),
                                 self.get_boosted_field(
                                     "provisions.parent_titles",
-                                    self.provision_parent_titles_boost,
+                                    self.profile.provision_parent_titles_boost,
                                 ),
                             ],
-                            **self.advanced_simple_query_string_options,
+                            **self.profile.advanced_simple_query_string_options,
                         ),
                     ],
                 ),
             ),
         ]
 
-    def build_aggs(self):
+    def build_aggs(self) -> dict[str, Any]:
         aggs = {}
         for field in self.facet_fields:
             facet = field.get("facet", TermsFacet)
             aggs[field["field"]] = facet(field=field["field"], **field["options"])
         return aggs
 
-    def build_knn_query(self, search, mode):
+    def build_knn_query(self, search: "RetrieverSearch", mode: str) -> dict[str, Any]:
         """Builds a KNN query."""
         must_queries = [q.to_dict() for q in self.build_rank_feature_queries(0.1)]
         must_queries.append(
@@ -811,7 +733,9 @@ class SearchEngine:
                             "k": self.knn_k,
                             "num_candidates": self.knn_num_candidates,
                             "similarity": self.knn_similarity,
-                            "query_vector": self.get_query_embedding(self.query),
+                            "query_vector": self.get_query_embedding(
+                                self.search_query.query
+                            ),
                         }
                     },
                 }
@@ -833,27 +757,311 @@ class SearchEngine:
 
         return knn
 
-    def get_query_embedding(self, query):
+    def get_query_embedding(self, query: str | None) -> list[float]:
         from peachjam_ml.embeddings import get_query_embedding
 
         return get_query_embedding(query)
 
-    def get_field(self, field):
+    def get_field(self, field: str) -> str:
+        profile = self.profile
         options = (
-            self.search_fields.get(field, {})
-            or self.advanced_search_fields.get(field, {})
+            self.build_search_fields(profile).get(field, {})
+            or self.build_advanced_search_fields(profile).get(field, {})
             or {}
         )
         if "boost" in options:
             return self.get_boosted_field(field, options["boost"])
         return field
 
-    def get_boosted_field(self, field, boost):
+    def get_boosted_field(self, field: str, boost: float | int | None) -> str:
         if boost is None or float(boost) == 1.0:
             return field
         boost = float(boost)
         boost_value = int(boost) if boost.is_integer() else boost
         return f"{field}^{boost_value}"
+
+    def execute(self) -> Any:
+        """Execute a directly compiled search.
+
+        Portion search remains intentionally lower-level for now, so it uses
+        the compiler directly rather than the document-search pipeline.
+        """
+        response = self.build_search().execute()
+        if response._shards.failed:
+            log.error(f"ES query failed: {response._shards.failures}")
+            if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
+                raise Exception(f"ES query failed: {response._shards.failures}")
+        return response
+
+    def get_debug_inputs(self) -> dict[str, Any]:
+        return {
+            "query": self.search_query.query,
+            "field_queries": self.search_query.field_queries,
+            "filters": self.search_query.filters,
+            "mode": self.plan.mode,
+            "page": self.search_query.page,
+            "page_size": self.search_query.page_size,
+            "ordering": self.search_query.ordering,
+        }
+
+    def build_debug_payload(self) -> dict[str, Any]:
+        search = self.build_search()
+        query = search.to_dict()
+        return {
+            "index": self.index,
+            "mode": self.plan.mode,
+            "inputs": self.get_debug_inputs(),
+            "query": query,
+            "redacted_query": self.redact_debug_query(query),
+        }
+
+    @classmethod
+    def redact_debug_query(cls, value: Any) -> Any:
+        value = deepcopy(value)
+
+        def redact(item):
+            if isinstance(item, dict):
+                return {
+                    key: (
+                        "[embedding vector omitted]"
+                        if key == "query_vector" or key.endswith("_embedding")
+                        else redact(child)
+                    )
+                    for key, child in item.items()
+                }
+            if isinstance(item, list):
+                if item and all(isinstance(x, (int, float)) for x in item):
+                    return "[embedding vector omitted]"
+                return [redact(child) for child in item]
+            return item
+
+        return redact(value)
+
+
+class SearchEngine:
+    """One-shot document-search orchestration.
+
+    Inputs, analysis and plan are deliberately explicit instance data.  The
+    compiler owns Elasticsearch details and receives a complete plan.
+    """
+
+    document = SearchableDocument
+
+    def __init__(
+        self,
+        search_query: SearchQuery | None = None,
+        analyser: QueryAnalyser | None = None,
+        planner: SearchPlanner | None = None,
+        compiler: ElasticsearchSearchCompiler | None = None,
+    ) -> None:
+        # ``None`` is retained only for utility callers such as suggestions.
+        # Document searches should always be constructed with a SearchQuery.
+        self.search_query = search_query or SearchQuery(
+            query=None,
+            field_queries={},
+            mode="text",
+            filters={},
+            facets=[],
+            page=1,
+            page_size=10,
+            ordering="-score",
+            explain=False,
+        )
+        self.analyser = analyser or QueryAnalyser()
+        self.planner = planner or SearchPlanner()
+        self.compiler = compiler or ElasticsearchSearchCompiler()
+        self.analysis: QueryAnalysis | None = None
+        self.plan: SearchPlan | None = None
+        self.compiled_search: RetrieverSearch | None = None
+
+    def set_search_query(self, search_query: SearchQuery) -> Self:
+        """Replace the caller input and discard derived pipeline state."""
+        self.search_query = search_query
+        self.analysis = None
+        self.plan = None
+        self.compiled_search = None
+        return self
+
+    def _replace_search_query(self, **changes: Any) -> Self:
+        return self.set_search_query(replace(self.search_query, **changes))
+
+    @property
+    def query(self):
+        return self.search_query.query
+
+    @query.setter
+    def query(self, value):
+        self._replace_search_query(query=value)
+
+    @property
+    def field_queries(self):
+        return self.search_query.field_queries
+
+    @field_queries.setter
+    def field_queries(self, value):
+        self._replace_search_query(field_queries=value)
+
+    @property
+    def filters(self):
+        return self.search_query.filters
+
+    @filters.setter
+    def filters(self, value):
+        self._replace_search_query(filters=value)
+
+    @property
+    def page(self):
+        return self.search_query.page
+
+    @page.setter
+    def page(self, value):
+        self._replace_search_query(page=value)
+
+    @property
+    def page_size(self):
+        return self.search_query.page_size
+
+    @page_size.setter
+    def page_size(self, value):
+        self._replace_search_query(page_size=value)
+
+    @property
+    def mode(self):
+        return self.search_query.mode
+
+    @mode.setter
+    def mode(self, value):
+        self._replace_search_query(mode=value)
+
+    @property
+    def ordering(self):
+        return self.search_query.ordering
+
+    @ordering.setter
+    def ordering(self, value):
+        self._replace_search_query(ordering=value)
+
+    @property
+    def explain(self):
+        return self.search_query.explain
+
+    @explain.setter
+    def explain(self, value):
+        self._replace_search_query(explain=value)
+
+    @property
+    def facets(self):
+        return self.search_query.facets
+
+    @facets.setter
+    def facets(self, value):
+        self._replace_search_query(facets=value)
+
+    @property
+    def index(self):
+        return self.compiler.index
+
+    @index.setter
+    def index(self, value):
+        self.compiler.index = value
+
+    @property
+    def client(self):
+        return self.compiler.client
+
+    @property
+    def source(self):
+        return self.search_query.source
+
+    @source.setter
+    def source(self, value):
+        self._replace_search_query(source=value)
+
+    @property
+    def highlight(self):
+        return self.search_query.highlight
+
+    @highlight.setter
+    def highlight(self, value):
+        self._replace_search_query(highlight=value)
+
+    def execute(self) -> Any:
+        """The main entry-point for running the search in search_query. This analysis the search, builds a search
+        plan, compiles it to an Elasticsearch query, and executes it."""
+        self.build_search()
+        return self.execute_search()
+
+    def build_search(self) -> "RetrieverSearch":
+        """Analyse, plan and compile the search query into an Elasticsearch query."""
+        self.analyse()
+        self.build_plan()
+        return self.compile()
+
+    def analyse(self) -> QueryAnalysis:
+        if self.analysis is None:
+            if self.search_query.is_advanced:
+                self.analysis = QueryAnalysis(
+                    raw_query=self.search_query.query or "",
+                    clean_query=self.search_query.query or "",
+                )
+            else:
+                self.analysis = self.analyser.analyse(self.search_query.query or "")
+        return self.analysis
+
+    def build_plan(self) -> SearchPlan:
+        if self.plan is None:
+            self.plan = self.planner.build(self.search_query, self.analyse())
+        return self.plan
+
+    def compile(self) -> "RetrieverSearch":
+        if self.plan is None:
+            self.build_plan()
+        self.compiled_search = self.compiler.compile(self.search_query, self.plan)
+        return self.compiled_search
+
+    def execute_search(self) -> Any:
+        response = self.compiled_search.execute()
+        if response._shards.failed:
+            log.error(f"ES query failed: {response._shards.failures}")
+            if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
+                raise Exception(f"ES query failed: {response._shards.failures}")
+        return response
+
+    def expand_retriever_window_to_page(self) -> None:
+        if self.search_query.mode == "hybrid":
+            self.compiler.rrf_rank_window_size = max(
+                self.compiler.rrf_rank_window_size,
+                self.search_query.page * self.search_query.page_size,
+            )
+
+    def suggest(self, query: str) -> Any:
+        return self.compiler.suggest(query)
+
+    def build_debug_payload(self) -> dict[str, Any]:
+        search = self.build_search()
+        query = search.to_dict()
+        return {
+            "index": self.index,
+            "mode": self.search_query.mode,
+            "inputs": {
+                "query": self.search_query.query,
+                "field_queries": self.search_query.field_queries,
+                "filters": self.search_query.filters,
+                "facets": self.search_query.facets,
+                "page": self.search_query.page,
+                "page_size": self.search_query.page_size,
+                "ordering": self.search_query.ordering,
+                "explain": self.search_query.explain,
+                "source": self.search_query.source,
+                "highlight": self.search_query.highlight,
+            },
+            "query": query,
+            "redacted_query": self.redact_debug_query(query),
+            "analysis": self.analysis.to_dict(),
+            "plan": self.plan.to_dict(),
+        }
+
+    redact_debug_query = ElasticsearchSearchCompiler.redact_debug_query
 
 
 class PortionSearchFilters(BaseModel):
@@ -890,12 +1098,12 @@ class PortionSearchFilters(BaseModel):
         return must
 
 
-class PortionSearchEngine(SearchEngine):
+class PortionSearchEngine(ElasticsearchSearchCompiler):
     """A SearchEngine designed for hybrid search returning portions of documents, rather than documents. Useful
     for RAG.
     """
 
-    source = [
+    default_source = [
         "title",
         "expression_frbr_uri",
         "frbr_uri_subtype",
@@ -907,38 +1115,68 @@ class PortionSearchEngine(SearchEngine):
         "blurb",
     ]
 
-    filters: Optional[List[PortionSearchFilters]] = None
+    def __init__(self) -> None:
+        super().__init__()
+        self.query: str | None = None
+        self.filters: list[PortionSearchFilters] = []
+        self.mode = "text"
 
-    def build_search(self):
+    def build_search(self) -> "RetrieverSearch":
+        """Build the legacy portion search using a transient document plan.
+
+        Portion search has its own input shape and filters, but shares the
+        document retrieval and semantic-query compilation helpers. Supplying a
+        concrete query and plan here keeps those helpers free of compatibility
+        accessors.
+        """
         # number of candidates to find on each shard
         self.knn_num_candidates = self.knn_k * 10
+        self.search_query = SearchQuery(
+            query=self.query,
+            field_queries={},
+            mode=self.mode,
+            filters={},
+            facets=[],
+            page=1,
+            page_size=self.default_page_size,
+            ordering="-score",
+            explain=False,
+            source=self.default_source,
+            highlight={},
+        )
+        self.plan = SearchPlanner().build(
+            self.search_query,
+            QueryAnalysis(raw_query=self.query or "", clean_query=self.query),
+        )
 
         search = RetrieverSearch(using=self.client, index=self.index)
         search = self.add_source(search)
-        search = self.add_query(search)
+        search = self.add_query_from_plan(search)
         search = self.add_sort(search)
         search = self.add_filters(search)
         search = self.add_retrievers(search)
         return search
 
-    def get_debug_inputs(self):
-        inputs = super().get_debug_inputs()
-        inputs["filters"] = [
-            (
-                f.model_dump(exclude_none=True)
-                if hasattr(f, "model_dump")
-                else f.dict(exclude_none=True)
-            )
-            for f in self.filters or []
-        ]
-        inputs["knn_k"] = self.knn_k
-        inputs["knn_num_candidates"] = self.knn_num_candidates
-        return inputs
+    def get_debug_inputs(self) -> dict[str, Any]:
+        return {
+            "query": self.query,
+            "filters": [
+                (
+                    f.model_dump(exclude_none=True)
+                    if hasattr(f, "model_dump")
+                    else f.dict(exclude_none=True)
+                )
+                for f in self.filters
+            ],
+            "mode": self.mode,
+            "knn_k": self.knn_k,
+            "knn_num_candidates": self.knn_num_candidates,
+        }
 
-    def add_filters(self, search):
+    def add_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
         search = search.filter("term", is_most_recent=True)
 
-        for f in self.filters or []:
+        for f in self.filters:
             search = search.query(Bool(filter=f.to_es_query()))
 
         return search

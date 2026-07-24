@@ -1,6 +1,7 @@
 import json
 import logging
 import uuid
+from dataclasses import replace
 from datetime import timedelta
 from math import exp
 from urllib.parse import urlencode
@@ -49,6 +50,8 @@ class SearchTrace(models.Model):
     query_clean_n_chars = models.IntegerField(null=True)
     query_classification = models.CharField(max_length=50, null=True)
     query_classification_confidence = models.FloatField(null=True)
+    query_analysis = models.JSONField(null=True)
+    search_profile = models.CharField(max_length=100, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
@@ -260,11 +263,10 @@ class SavedSearch(models.Model):
         else:
             self.generate_advanced_search_params(params)
 
-        engine = SearchEngine()
-        engine.page_size = 20
         form = SearchForm(params)
         form.is_valid()
-        form.configure_engine(engine)
+        query = replace(form.build_search_query(), page_size=20)
+        engine = SearchEngine(query)
         es_response = engine.execute()
 
         # unpack the hits

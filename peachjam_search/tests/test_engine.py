@@ -1,17 +1,42 @@
 import json
-from unittest.mock import patch
+from dataclasses import replace
+from unittest.mock import Mock, call, patch
 
 from django.http import QueryDict
 from django.test import TestCase  # noqa
 
-from peachjam_search.engine import PortionSearchEngine, SearchEngine
+from peachjam_search.engine import (
+    PortionSearchEngine,
+    SearchEngine,
+)
 from peachjam_search.forms import SearchForm
-from peachjam_search.profiles import SearchProfile
+from peachjam_search.profiles import SearchProfile, SearchProfileSet
+from peachjam_search.search_pipeline import QueryAnalysis, SearchPlanner
 from peachjam_search.serializers import PortionSearchRequestSerializer
 
 
 class TestSearchEngine(TestCase):
     maxDiff = None
+
+    def test_execute_runs_the_stateful_pipeline_in_order(self):
+        engine = SearchEngine()
+        stages = Mock()
+        engine.analyse = stages.analyse
+        engine.build_plan = stages.build_plan
+        engine.compile = stages.compile
+        engine.execute_search = stages.execute_search
+        stages.execute_search.return_value = "response"
+
+        self.assertEqual("response", engine.execute())
+        self.assertEqual(
+            [
+                call.analyse(),
+                call.build_plan(),
+                call.compile(),
+                call.execute_search(),
+            ],
+            stages.mock_calls,
+        )
 
     def test_basic(self):
         params = QueryDict("", mutable=True)
@@ -737,57 +762,79 @@ class TestSearchEngine(TestCase):
         self.assertIn("sub_publication", post_filter)
         self.assertIn("Legal Notices A", post_filter)
 
-    def test_default_search_profile_preserves_query(self):
+    def test_static_default_profile_preserves_query(self):
         params = QueryDict("", mutable=True)
         params["search"] = "civil procedure code"
 
-        unprofiled_engine = SearchEngine()
+        unprofiled_engine = SearchEngine(planner=SearchPlanner(SearchProfileSet()))
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(unprofiled_engine)
 
-        profiled_engine = SearchEngine()
+        profiled_engine = SearchEngine(planner=SearchPlanner(SearchProfileSet()))
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(profiled_engine)
-        profiled_engine.apply_profile(SearchProfile.default())
-
         self.assertEqual(
             unprofiled_engine.build_search().to_dict(),
             profiled_engine.build_search().to_dict(),
         )
 
+    def test_analysis_override_selects_profile_from_profile_set(self):
+        engine = SearchEngine(
+            planner=SearchPlanner(
+                SearchProfileSet(
+                    labels={
+                        "case_name": replace(SearchProfile.default(), name="case_name")
+                    }
+                )
+            )
+        )
+        engine.query = "Example v State"
+        engine.analysis = QueryAnalysis(
+            raw_query="Example v State", intent="case_name", confidence=1.0
+        )
+
+        plan = engine.build_plan()
+
+        self.assertEqual("Example v State", engine.search_query.query)
+        self.assertEqual("case_name", plan.profile.name)
+        self.assertEqual("case_name", plan.analysis.intent)
+
     def test_custom_search_profile_changes_query_parameters(self):
         params = QueryDict("", mutable=True)
         params["search"] = "civil procedure code"
 
-        engine = SearchEngine()
+        engine = SearchEngine(
+            planner=SearchPlanner(
+                SearchProfileSet(
+                    default=replace(
+                        SearchProfile.default(),
+                        search_field_boosts={
+                            "title": 12,
+                            "title_expanded": 6,
+                            "citation": 2,
+                            "alternative_names": 4,
+                            "content": 1,
+                            "summary": 1,
+                            "flynote": 1,
+                            "blurb": 1,
+                        },
+                        phrase_match_content_boost=7,
+                        phrase_match_slop=2,
+                        simple_query_string_options={
+                            "default_operator": "AND",
+                            "minimum_should_match": "2<75%",
+                        },
+                        provision_title_boost=9,
+                        provision_parent_titles_boost=3,
+                    )
+                )
+            )
+        )
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
-        engine.apply_profile(
-            SearchProfile(
-                search_field_boosts={
-                    "title": 12,
-                    "title_expanded": 6,
-                    "citation": 2,
-                    "alternative_names": 4,
-                    "content": 1,
-                    "summary": 1,
-                    "flynote": 1,
-                    "blurb": 1,
-                },
-                phrase_match_content_boost=7,
-                phrase_match_slop=2,
-                simple_query_string_options={
-                    "default_operator": "AND",
-                    "minimum_should_match": "2<75%",
-                },
-                provision_title_boost=9,
-                provision_parent_titles_boost=3,
-            )
-        )
-
         query = json.dumps(engine.build_search().to_dict(), sort_keys=True)
 
         self.assertIn('"fields": ["title^12"]', query)
@@ -801,12 +848,16 @@ class TestSearchEngine(TestCase):
         self.assertIn('"provisions.parent_titles^3"', query)
 
     def test_search_profile_can_override_pagerank_boost(self):
-        engine = SearchEngine()
-        engine.apply_profile(
-            SearchProfile(
-                use_pagerank_settings=False,
-                pagerank_boost_value=5,
-                pagerank_pivot_value=10,
+        engine = SearchEngine(
+            planner=SearchPlanner(
+                SearchProfileSet(
+                    default=replace(
+                        SearchProfile.default(),
+                        use_pagerank_settings=False,
+                        pagerank_boost_value=5,
+                        pagerank_pivot_value=10,
+                    )
+                )
             )
         )
 
@@ -1109,7 +1160,9 @@ class TestSearchEngine(TestCase):
         form.configure_engine(engine)
         engine.mode = "semantic"
 
-        with patch.object(engine, "get_query_embedding", return_value=[0.1, 0.2]):
+        with patch.object(
+            engine.compiler, "get_query_embedding", return_value=[0.1, 0.2]
+        ):
             search = engine.build_search()
 
         d = search.to_dict()
@@ -1221,7 +1274,9 @@ class TestSearchEngine(TestCase):
         form.configure_engine(engine)
         engine.mode = "hybrid"
 
-        with patch.object(engine, "get_query_embedding", return_value=[0.1, 0.2]):
+        with patch.object(
+            engine.compiler, "get_query_embedding", return_value=[0.1, 0.2]
+        ):
             search = engine.build_search()
 
         d = search.to_dict()

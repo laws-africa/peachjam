@@ -1,0 +1,30 @@
+{
+  "default": {
+    "advanced_simple_query_string_options": {
+      "default_operator": "AND"
+    },
+    "name": "default",
+    "pagerank_boost_value": null,
+    "pagerank_pivot_value": null,
+    "phrase_match_content_boost": 4,
+    "phrase_match_slop": 0,
+    "provision_parent_titles_boost": 2,
+    "provision_title_boost": 4,
+    "search_field_boosts": {
+      "title": 8,
+      "title_expanded": 3,
+      "citation": 2,
+      "alternative_names": 4,
+      "content": 1,
+      "summary": 2,
+      "flynote": 2,
+      "blurb": 2
+    },
+    "simple_query_string_options": {
+      "default_operator": "OR",
+      "minimum_should_match": "4<80%"
+    },
+    "use_pagerank_settings": true
+  },
+  "labels": {}
+}

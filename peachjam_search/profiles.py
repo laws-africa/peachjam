@@ -1,61 +1,30 @@
 import json
-from copy import deepcopy
 from dataclasses import asdict, dataclass, field
+from importlib.resources import files
 from pathlib import Path
 from typing import Any
-
-DEFAULT_SEARCH_FIELD_BOOSTS = {
-    "title": 8,
-    "title_expanded": 3,
-    "citation": 2,
-    "alternative_names": 4,
-    "content": 1,
-    "summary": 2,
-    "flynote": 2,
-    "blurb": 2,
-}
-
-DEFAULT_SIMPLE_QUERY_STRING_OPTIONS = {
-    "default_operator": "OR",
-    "minimum_should_match": "4<80%",
-}
-
-DEFAULT_ADVANCED_SIMPLE_QUERY_STRING_OPTIONS = {
-    "default_operator": "AND",
-}
-
-ADVANCED_ONLY_SEARCH_FIELDS = {
-    "case_number": None,
-    "case_name": None,
-    "judges_text": None,
-}
 
 
 @dataclass(frozen=True)
 class SearchProfile:
     """Serializable text-search tuning values for SearchEngine."""
 
-    name: str = "default"
-    search_field_boosts: dict[str, float | int] = field(
-        default_factory=lambda: deepcopy(DEFAULT_SEARCH_FIELD_BOOSTS)
-    )
-    phrase_match_content_boost: float | int = 4
-    phrase_match_slop: int = 0
-    simple_query_string_options: dict[str, Any] = field(
-        default_factory=lambda: deepcopy(DEFAULT_SIMPLE_QUERY_STRING_OPTIONS)
-    )
-    advanced_simple_query_string_options: dict[str, Any] = field(
-        default_factory=lambda: deepcopy(DEFAULT_ADVANCED_SIMPLE_QUERY_STRING_OPTIONS)
-    )
-    provision_title_boost: float | int = 4
-    provision_parent_titles_boost: float | int = 2
-    use_pagerank_settings: bool = True
-    pagerank_boost_value: float | None = None
-    pagerank_pivot_value: float | None = None
+    name: str
+    search_field_boosts: dict[str, float | int]
+    phrase_match_content_boost: float | int
+    phrase_match_slop: int
+    simple_query_string_options: dict[str, Any]
+    advanced_simple_query_string_options: dict[str, Any]
+    provision_title_boost: float | int
+    provision_parent_titles_boost: float | int
+    use_pagerank_settings: bool
+    pagerank_boost_value: float | None
+    pagerank_pivot_value: float | None
 
     @classmethod
     def default(cls):
-        return cls()
+        """Load the required packaged default profile."""
+        return get_default_search_profile_set().default
 
     @classmethod
     def from_dict(cls, data):
@@ -63,20 +32,6 @@ class SearchProfile:
 
     def to_dict(self):
         return asdict(self)
-
-    def build_search_fields(self):
-        search_fields = {}
-        for field_name, boost in self.search_field_boosts.items():
-            if boost is None or float(boost) == 1.0:
-                search_fields[field_name] = None
-            else:
-                search_fields[field_name] = {"boost": boost}
-        return search_fields
-
-    def build_advanced_search_fields(self):
-        advanced_search_fields = dict(ADVANCED_ONLY_SEARCH_FIELDS)
-        advanced_search_fields.update(self.build_search_fields())
-        return advanced_search_fields
 
 
 @dataclass(frozen=True)
@@ -89,7 +44,7 @@ class SearchProfileSet:
     @classmethod
     def from_dict(cls, data):
         return cls(
-            default=SearchProfile.from_dict(data.get("default", {})),
+            default=SearchProfile.from_dict(data["default"]),
             labels={
                 label: SearchProfile.from_dict(profile)
                 for label, profile in data.get("labels", {}).items()
@@ -116,3 +71,14 @@ class SearchProfileSet:
 
     def get_profile(self, query_label=None):
         return self.labels.get(query_label) or self.default
+
+
+def get_default_search_profile_set():
+    """Load the packaged production profile set.
+
+    Keeping this data beside the search code lets sites use tuned profiles
+    without requiring a dependency on peachjam-pro.
+    """
+    path = files("peachjam_search").joinpath("search_profile_set.json")
+    with path.open(encoding="utf-8") as f:
+        return SearchProfileSet.from_dict(json.load(f))
