@@ -43,7 +43,8 @@ from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
 from peachjam_search.classifier import QueryClassifier
-from peachjam_search.engine import ElasticsearchSearchCompiler, SearchEngine
+from peachjam_search.compiler import ElasticsearchSearchCompiler
+from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
 from peachjam_search.forms import (
     DocumentSearchDebugForm,

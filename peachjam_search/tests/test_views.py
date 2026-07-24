@@ -39,7 +39,7 @@ class SearchViewsTest(TestCase):
             ),
         )
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_explain(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -92,7 +92,7 @@ class SearchViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Search debug")
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_document_search_debug(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -134,7 +134,7 @@ class SearchViewsTest(TestCase):
         self.assertNotContains(response, "&lt;Response:")
 
     @patch("peachjam_search.views.api.PortionSearchView.load_portion_details")
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_portion_search_debug(self, mock_search, mock_load_portion_details):
         expression_frbr_uri = "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
 
@@ -273,7 +273,7 @@ class SearchViewsTest(TestCase):
         self.assertIn("canDebugSearch", source)
         self.assertIn("/search/debug/", source)
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_download(self, mock_search):
         doc = CoreDocument.objects.first()
         # this tests escaping dodgy chars in xlsx
@@ -320,8 +320,8 @@ class SearchViewsTest(TestCase):
             "SEARCH_SEMANTIC": True,
         }
     )
-    @patch("peachjam_search.engine.ElasticsearchSearchCompiler.get_query_embedding")
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.ElasticsearchSearchCompiler.get_query_embedding")
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_hybrid_download_expands_retriever_window(
         self, mock_search, mock_get_query_embedding
     ):
@@ -361,7 +361,7 @@ class SearchViewsTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_search(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -396,7 +396,7 @@ class SearchViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("max-age=900", response.headers["Cache-Control"])
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_search_includes_entity_hits_above_document_hits(self, mock_search):
         doc = CoreDocument.objects.first()
 

@@ -4,7 +4,7 @@ import json
 from django import forms
 
 from peachjam.resources import DownloadDocumentsResource
-from peachjam_search.engine import ElasticsearchSearchCompiler
+from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.models import SavedSearch, SearchFeedback
 from peachjam_search.search_pipeline import SearchQuery
 from peachjam_search.serializers import PortionSearchRequestSerializer
