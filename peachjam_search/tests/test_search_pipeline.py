@@ -31,11 +31,15 @@ class SearchPipelineTest(SimpleTestCase):
     def setUp(self):
         packaged_profile_set = get_default_search_profile_set()
         self.profile_set = SearchProfileSet(
-            default=packaged_profile_set.default,
+            default=replace(
+                packaged_profile_set.default,
+                use_pagerank_settings=True,
+            ),
             labels={
                 "case_name": replace(
                     packaged_profile_set.default,
                     name="case_name",
+                    use_pagerank_settings=True,
                 )
             },
         )

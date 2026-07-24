@@ -21,6 +21,40 @@ from peachjam_search.search_pipeline import (
     SearchPlanner,
 )
 
+LEGACY_PROFILE = SearchProfile(
+    name="legacy",
+    search_field_boosts={
+        "title": 8,
+        "title_expanded": 3,
+        "citation": 2,
+        "alternative_names": 4,
+        "content": 1,
+        "summary": 2,
+        "flynote": 2,
+        "blurb": 2,
+    },
+    phrase_match_content_boost=4,
+    phrase_match_slop=0,
+    simple_query_string_options={
+        "default_operator": "OR",
+        "minimum_should_match": "4<80%",
+    },
+    advanced_simple_query_string_options={
+        "default_operator": "AND",
+        "minimum_should_match": "4<80%",
+    },
+    provision_title_boost=4,
+    provision_parent_titles_boost=2,
+    use_pagerank_settings=False,
+    pagerank_boost_value=None,
+    pagerank_pivot_value=None,
+)
+
+
+def legacy_engine() -> SearchEngine:
+    """Build a stable legacy-profile engine for compiler regression fixtures."""
+    return SearchEngine(planner=SearchPlanner(SearchProfileSet(default=LEGACY_PROFILE)))
+
 
 class TestSearchEngine(TestCase):
     maxDiff = None
@@ -49,7 +83,7 @@ class TestSearchEngine(TestCase):
         params = QueryDict("", mutable=True)
         params["search"] = "test"
 
-        engine = SearchEngine()
+        engine = legacy_engine()
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
@@ -374,7 +408,7 @@ class TestSearchEngine(TestCase):
         params["nature"] = "Act"
         params["facets"] = "language"
 
-        engine = SearchEngine()
+        engine = legacy_engine()
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
@@ -921,7 +955,7 @@ class TestSearchEngine(TestCase):
         params["created_at__gte"] = "2025-01-01T00:00:00Z"
         params["nature"] = "Act"
 
-        engine = SearchEngine()
+        engine = legacy_engine()
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
@@ -1309,7 +1343,7 @@ class TestSearchEngine(TestCase):
         params["search"] = "test"
         params["nature"] = "Act"
 
-        engine = SearchEngine()
+        engine = legacy_engine()
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
