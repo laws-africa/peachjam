@@ -161,6 +161,16 @@ class RankFeature:
 
 
 @dataclass(frozen=True)
+class FilteredWeight:
+    """A Boolean document-status multiplier for lexical retrieval."""
+
+    name: str
+    field: str
+    value: bool
+    weight: float
+
+
+@dataclass(frozen=True)
 class PageRankSettings:
     """Site-specific PageRank calibration supplied to the planner."""
 
@@ -196,6 +206,7 @@ class SearchPlan:
     mode: str
     retrieval_clauses: tuple[RetrievalClause, ...]
     ranking_signals: tuple[RankFeature, ...] = ()
+    function_scores: tuple[FilteredWeight, ...] = ()
     semantic_retrieval: KnnRetrieval | None = None
     rrf_retrieval: RrfRetrieval | None = None
 
@@ -302,6 +313,11 @@ class SearchPlanner:
             if search_query.mode in {"text", "hybrid"}
             else ()
         )
+        function_scores = (
+            self.build_function_scores(profile)
+            if search_query.mode in {"text", "hybrid"}
+            else ()
+        )
         semantic_retrieval = (
             self.build_semantic_retrieval()
             if plan_mode in {"semantic", "hybrid"}
@@ -317,6 +333,7 @@ class SearchPlanner:
             mode=plan_mode,
             retrieval_clauses=retrieval_clauses,
             ranking_signals=ranking_signals,
+            function_scores=function_scores,
             semantic_retrieval=semantic_retrieval,
             rrf_retrieval=rrf_retrieval,
         )
@@ -361,6 +378,31 @@ class SearchPlanner:
             boost=boost,
             saturation_pivot=pivot,
         )
+
+    @staticmethod
+    def build_function_scores(profile: SearchProfile) -> tuple[FilteredWeight, ...]:
+        """Resolve non-neutral legislation-status multipliers from a profile."""
+        signals = (
+            FilteredWeight(
+                name="principal",
+                field="principal",
+                value=True,
+                weight=profile.function_score_weights["principal"],
+            ),
+            FilteredWeight(
+                name="commenced",
+                field="commenced",
+                value=True,
+                weight=profile.function_score_weights["commenced"],
+            ),
+            FilteredWeight(
+                name="repealed",
+                field="repealed",
+                value=True,
+                weight=profile.function_score_weights["repealed"],
+            ),
+        )
+        return tuple(signal for signal in signals if signal.weight != 1.0)
 
     @staticmethod
     def get_pagerank_settings() -> PageRankSettings:

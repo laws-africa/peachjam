@@ -16,6 +16,7 @@ from peachjam_search.forms import SearchForm
 from peachjam_search.profiles import SearchProfile, SearchProfileSet
 from peachjam_search.search_pipeline import (
     FilterClause,
+    FilteredWeight,
     QueryAnalyser,
     QueryAnalysis,
     RetrievalClause,
@@ -49,6 +50,11 @@ LEGACY_PROFILE = SearchProfile(
     use_pagerank_settings=False,
     pagerank_boost_value=None,
     pagerank_pivot_value=None,
+    function_score_weights={
+        "principal": 1.0,
+        "commenced": 1.0,
+        "repealed": 1.0,
+    },
 )
 
 
@@ -221,7 +227,7 @@ class TestSearchEngine(TestCase):
                                 {
                                     "match_phrase": {
                                         "content": {
-                                            "boost": 4,
+                                            "boost": 4.0,
                                             "query": "test",
                                             "slop": 0,
                                         }
@@ -677,7 +683,7 @@ class TestSearchEngine(TestCase):
                                 {
                                     "match_phrase": {
                                         "content": {
-                                            "boost": 4,
+                                            "boost": 4.0,
                                             "query": "test",
                                             "slop": 0,
                                         }
@@ -950,6 +956,117 @@ class TestSearchEngine(TestCase):
             query["bool"]["must"][0],
         )
 
+    def test_search_profile_function_weights_are_resolved_and_compiled(self):
+        profile = replace(
+            SearchProfile.default(),
+            pagerank_boost_value=0,
+            function_score_weights={
+                "principal": 1.25,
+                "commenced": 1.1,
+                "repealed": 0.3,
+            },
+        )
+        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet(default=profile)))
+        engine.set_search_query(replace(engine.search_query, query="income tax"))
+
+        plan = engine.build_plan()
+
+        self.assertEqual(
+            (
+                FilteredWeight("principal", "principal", True, 1.25),
+                FilteredWeight("commenced", "commenced", True, 1.1),
+                FilteredWeight("repealed", "repealed", True, 0.3),
+            ),
+            plan.function_scores,
+        )
+        self.assertEqual(
+            [
+                {
+                    "name": "principal",
+                    "field": "principal",
+                    "value": True,
+                    "weight": 1.25,
+                },
+                {
+                    "name": "commenced",
+                    "field": "commenced",
+                    "value": True,
+                    "weight": 1.1,
+                },
+                {
+                    "name": "repealed",
+                    "field": "repealed",
+                    "value": True,
+                    "weight": 0.3,
+                },
+            ],
+            plan.to_dict()["function_scores"],
+        )
+        function_score = engine.compile().to_dict()["query"]["function_score"]
+        self.assertEqual("multiply", function_score["score_mode"])
+        self.assertEqual("multiply", function_score["boost_mode"])
+        self.assertEqual(
+            [
+                {"filter": {"term": {"principal": True}}, "weight": 1.25},
+                {"filter": {"term": {"commenced": True}}, "weight": 1.1},
+                {"filter": {"term": {"repealed": True}}, "weight": 0.3},
+            ],
+            function_score["functions"],
+        )
+        self.assertEqual(
+            [{"term": {"is_most_recent": True}}],
+            function_score["query"]["bool"]["filter"],
+        )
+
+    def test_neutral_function_weights_do_not_wrap_the_lexical_query(self):
+        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet()))
+        engine.set_search_query(replace(engine.search_query, query="income tax"))
+
+        self.assertEqual((), engine.build_plan().function_scores)
+        self.assertIn("bool", engine.compile().to_dict()["query"])
+
+    def test_hybrid_function_scores_only_change_the_lexical_retriever(self):
+        profile = replace(
+            SearchProfile.default(),
+            pagerank_boost_value=0,
+            function_score_weights={
+                "principal": 1.25,
+                "commenced": 1.1,
+                "repealed": 0.3,
+            },
+        )
+        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet(default=profile)))
+        engine.set_search_query(
+            replace(
+                engine.search_query,
+                query="income tax",
+                mode="hybrid",
+                filters={
+                    "date": ("2020-01-01", "2021-01-01"),
+                    "nature": ["Act"],
+                },
+                hard_filters=(FilterClause("frbr_uri_doctype", "term", "act"),),
+            )
+        )
+
+        with patch.object(
+            engine.compiler, "get_query_embedding", return_value=[0.1, 0.2]
+        ):
+            query = engine.build_search().to_dict()
+
+        text_retriever, semantic_retriever = query["retriever"]["rrf"]["retrievers"]
+        self.assertIn("function_score", text_retriever["standard"]["query"])
+        self.assertNotIn("function_score", semantic_retriever["standard"]["query"])
+        self.assertEqual(
+            [
+                {"term": {"is_most_recent": True}},
+                {"range": {"date": {"gte": "2020-01-01", "lte": "2021-01-01"}}},
+                {"term": {"frbr_uri_doctype": "act"}},
+            ],
+            semantic_retriever["standard"]["filter"],
+        )
+        self.assertEqual({"terms": {"nature": ["Act"]}}, query["post_filter"])
+
     def test_search_profile_query_boosts_are_compiled_from_the_plan(self):
         profile = replace(
             SearchProfile.default(),
@@ -1143,7 +1260,7 @@ class TestSearchEngine(TestCase):
                                 {
                                     "match_phrase": {
                                         "content": {
-                                            "boost": 4,
+                                            "boost": 4.0,
                                             "query": "test",
                                             "slop": 0,
                                         }
@@ -1543,7 +1660,7 @@ class TestSearchEngine(TestCase):
                                                     {
                                                         "match_phrase": {
                                                             "content": {
-                                                                "boost": 4,
+                                                                "boost": 4.0,
                                                                 "query": "test",
                                                                 "slop": 0,
                                                             }

@@ -195,7 +195,7 @@ class ElasticsearchSearchCompiler:
     def build_search(self) -> "RetrieverSearch":
         search = self.create_search()
         search = self.add_query_from_plan(search)
-        search = self.add_filters(search)
+        search = self.add_post_filters(search)
         search = self.add_sort(search)
         search = self.add_paging(search)
         search = self.add_source(search)
@@ -210,35 +210,45 @@ class ElasticsearchSearchCompiler:
     def add_source(self, search: "RetrieverSearch") -> "RetrieverSearch":
         return search.source(self.search_query.source)
 
-    def add_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
-        # always applied
-        search = search.filter("term", is_most_recent=True)
+    def add_post_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
+        """Apply facet post-filters after hard filters were added to the query."""
         facetable_fields = {facet["field"] for facet in self.facet_fields}
 
         for field, values in self.search_query.filters.items():
             # if this field is faceted, then apply it as a post-filter
             if field in facetable_fields:
                 search = search.post_filter("terms", **{field: values})
-            elif field in self.range_filter_fields:
-                # range fields (can't be faceted)
-                start, end = values
-                values = {}
-                if start:
-                    values["gte"] = start
-                if end:
-                    values["lte"] = end
-                search = search.filter("range", **{field: values})
-            else:
-                # normal filter field
-                search = search.filter("terms", **{field: values})
-
-        for filter_clause in self.search_query.hard_filters:
-            search = search.filter(
-                filter_clause.operator,
-                **{filter_clause.field: filter_clause.value},
-            )
 
         return search
+
+    def build_hard_filter_queries(self) -> list[Any]:
+        """Build constraints shared by lexical and semantic retrieval."""
+        queries = [Q("term", is_most_recent=True)]
+        facetable_fields = {facet["field"] for facet in self.facet_fields}
+
+        for field, values in self.search_query.filters.items():
+            if field in facetable_fields:
+                continue
+            if field in self.range_filter_fields:
+                start, end = values
+                range_values = {}
+                if start:
+                    range_values["gte"] = start
+                if end:
+                    range_values["lte"] = end
+                queries.append(Q("range", **{field: range_values}))
+            else:
+                queries.append(Q("terms", **{field: values}))
+
+        for filter_clause in self.search_query.hard_filters:
+            queries.append(
+                Q(
+                    filter_clause.operator,
+                    **{filter_clause.field: filter_clause.value},
+                )
+            )
+
+        return queries
 
     def add_aggs(self, search: "RetrieverSearch") -> "RetrieverSearch":
         if not self.search_query.facets:
@@ -312,12 +322,37 @@ class ElasticsearchSearchCompiler:
             elif clause.name == "nested_provisions":
                 should_queries.extend(self.build_nested_provision_queries(clause))
 
-        return search.query(
+        query = Q(
             "bool",
             must=must_queries,
             should=should_queries,
+            filter=self.build_hard_filter_queries(),
             minimum_should_match=1 if should_queries else 0,
         )
+        return search.query(self.build_function_score_query(query))
+
+    def build_function_score_query(self, query: Any) -> Any:
+        """Wrap lexical retrieval in the plan's resolved status multipliers."""
+        if not self.plan.function_scores:
+            return query
+
+        return Q(
+            "function_score",
+            query=query,
+            functions=self.build_filtered_weight_functions(),
+            score_mode="multiply",
+            boost_mode="multiply",
+        )
+
+    def build_filtered_weight_functions(self) -> list[dict[str, Any]]:
+        """Translate the planner's Boolean multipliers into ES functions."""
+        return [
+            {
+                "filter": Q("term", **{signal.field: signal.value}),
+                "weight": signal.weight,
+            }
+            for signal in self.plan.function_scores
+        ]
 
     def add_retrievers(self, search: "RetrieverSearch") -> "RetrieverSearch":
         semantic_retrieval = self.plan.semantic_retrieval
@@ -683,13 +718,10 @@ class ElasticsearchSearchCompiler:
         if not hybrid:
             return knn
 
-        # hybrid mode needs the filters from the original search
-        search_dict = search.to_dict()
         knn = {
             "query": knn,
+            "filter": [query.to_dict() for query in self.build_hard_filter_queries()],
         }
-        if "filter" in search_dict["query"]["bool"]:
-            knn["filter"] = search_dict["query"]["bool"]["filter"]
 
         return knn
 

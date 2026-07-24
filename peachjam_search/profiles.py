@@ -28,6 +28,7 @@ class SearchProfile:
     use_pagerank_settings: bool
     pagerank_boost_value: float | None
     pagerank_pivot_value: float | None
+    function_score_weights: dict[str, float]
     basic_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS["basic_query_boost"]
     basic_phrase_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS[
         "basic_phrase_query_boost"

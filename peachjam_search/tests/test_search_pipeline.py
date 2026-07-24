@@ -166,7 +166,8 @@ class SearchPipelineTest(SimpleTestCase):
         planner = SearchPlanner(
             SearchProfileSet(
                 default=self.profile_set.default, labels={"case_name": profile}
-            )
+            ),
+            pagerank_settings=PageRankSettings(5, 10),
         )
 
         plan = planner.build(
