@@ -18,6 +18,7 @@ from peachjam_search.search_pipeline import (
     FilterClause,
     QueryAnalyser,
     QueryAnalysis,
+    RetrievalClause,
     SearchPlanner,
 )
 
@@ -947,6 +948,48 @@ class TestSearchEngine(TestCase):
                 }
             },
             query["bool"]["must"][0],
+        )
+
+    def test_search_profile_query_boosts_are_compiled_from_the_plan(self):
+        profile = replace(
+            SearchProfile.default(),
+            search_field_boosts={"title": 1, "content": 1},
+            phrase_match_content_boost=2,
+            basic_query_boost=2,
+            basic_phrase_query_boost=3,
+            content_phrase_query_boost=4,
+            nested_pages_query_boost=5,
+            nested_provisions_query_boost=6,
+        )
+        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet(default=profile)))
+        engine.set_search_query(replace(engine.search_query, query="civil procedure"))
+
+        should_queries = engine.build_search().to_dict()["query"]["bool"]["should"]
+
+        self.assertEqual(2, should_queries[0]["simple_query_string"]["boost"])
+        self.assertEqual(3, should_queries[2]["match_phrase"]["title"]["boost"])
+        self.assertEqual(6, should_queries[3]["match_phrase"]["content"]["boost"])
+        self.assertEqual(8, should_queries[4]["match_phrase"]["content"]["boost"])
+        self.assertEqual(5, should_queries[5]["nested"]["boost"])
+        self.assertEqual(6, should_queries[6]["nested"]["boost"])
+
+    def test_compiler_keeps_duplicate_retrieval_clauses_with_distinct_queries(self):
+        engine = SearchEngine()
+        engine.set_search_query(replace(engine.search_query, query="original"))
+        engine.build_plan()
+        engine.plan = replace(
+            engine.plan,
+            retrieval_clauses=(
+                RetrievalClause("content_phrase", query="first query"),
+                RetrievalClause("content_phrase", query="second query"),
+            ),
+        )
+
+        should_queries = engine.compile().to_dict()["query"]["bool"]["should"]
+
+        self.assertEqual(
+            ["first query", "second query"],
+            [query["match_phrase"]["content"]["query"] for query in should_queries],
         )
 
     def test_created_at(self):

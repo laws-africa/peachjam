@@ -4,6 +4,14 @@ from importlib.resources import files
 from pathlib import Path
 from typing import Any
 
+RETRIEVAL_QUERY_BOOST_DEFAULTS = {
+    "basic_query_boost": 1.0,
+    "basic_phrase_query_boost": 1.0,
+    "content_phrase_query_boost": 1.0,
+    "nested_pages_query_boost": 1.0,
+    "nested_provisions_query_boost": 1.0,
+}
+
 
 @dataclass(frozen=True)
 class SearchProfile:
@@ -20,6 +28,19 @@ class SearchProfile:
     use_pagerank_settings: bool
     pagerank_boost_value: float | None
     pagerank_pivot_value: float | None
+    basic_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS["basic_query_boost"]
+    basic_phrase_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS[
+        "basic_phrase_query_boost"
+    ]
+    content_phrase_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS[
+        "content_phrase_query_boost"
+    ]
+    nested_pages_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS[
+        "nested_pages_query_boost"
+    ]
+    nested_provisions_query_boost: float = RETRIEVAL_QUERY_BOOST_DEFAULTS[
+        "nested_provisions_query_boost"
+    ]
 
     @classmethod
     def default(cls):
@@ -28,6 +49,7 @@ class SearchProfile:
 
     @classmethod
     def from_dict(cls, data):
+        data = {**RETRIEVAL_QUERY_BOOST_DEFAULTS, **data}
         return cls(**data)
 
     def to_dict(self):

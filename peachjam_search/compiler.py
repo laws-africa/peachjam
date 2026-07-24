@@ -11,7 +11,12 @@ from elasticsearch_dsl.query import MatchAll, MatchPhrase, Q, SimpleQueryString
 
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.profiles import SearchProfile
-from peachjam_search.search_pipeline import KnnRetrieval, SearchPlan, SearchQuery
+from peachjam_search.search_pipeline import (
+    KnnRetrieval,
+    RetrievalClause,
+    SearchPlan,
+    SearchQuery,
+)
 
 log = logging.getLogger(__name__)
 
@@ -289,24 +294,23 @@ class ElasticsearchSearchCompiler:
         # pagerank etc.
         must_queries.extend(self.build_rank_feature_queries())
 
-        clause_names = {clause.name for clause in self.plan.retrieval_clauses}
-
-        if "advanced_per_field" in clause_names:
-            must_queries.extend(self.build_per_field_queries())
-        if "advanced_all" in clause_names:
-            must_queries.extend(self.build_advanced_all_queries())
-        if "advanced_content" in clause_names:
-            must_queries.extend(self.build_advanced_content_queries())
-        if "basic" in clause_names:
-            should_queries.extend(self.build_basic_queries())
-        if "basic_phrase" in clause_names:
-            should_queries.extend(self.build_basic_phrase_queries())
-        if "content_phrase" in clause_names:
-            should_queries.extend(self.build_content_phrase_queries())
-        if "nested_pages" in clause_names:
-            should_queries.extend(self.build_nested_page_queries())
-        if "nested_provisions" in clause_names:
-            should_queries.extend(self.build_nested_provision_queries())
+        for clause in self.plan.retrieval_clauses:
+            if clause.name == "advanced_per_field":
+                must_queries.extend(self.build_per_field_queries())
+            elif clause.name == "advanced_all":
+                must_queries.extend(self.build_advanced_all_queries())
+            elif clause.name == "advanced_content":
+                must_queries.extend(self.build_advanced_content_queries())
+            elif clause.name == "basic":
+                should_queries.extend(self.build_basic_queries(clause))
+            elif clause.name == "basic_phrase":
+                should_queries.extend(self.build_basic_phrase_queries(clause))
+            elif clause.name == "content_phrase":
+                should_queries.extend(self.build_content_phrase_queries(clause))
+            elif clause.name == "nested_pages":
+                should_queries.extend(self.build_nested_page_queries(clause))
+            elif clause.name == "nested_provisions":
+                should_queries.extend(self.build_nested_provision_queries(clause))
 
         return search.query(
             "bool",
@@ -391,10 +395,10 @@ class ElasticsearchSearchCompiler:
 
         return queries
 
-    def build_basic_queries(self) -> list[Any]:
+    def build_basic_queries(self, clause: RetrievalClause) -> list[Any]:
         """This implements a simple_query_string query across multiple fields, using AND logic for the terms
         in a field, but effectively OR (should) logic between the fields."""
-        query = self.search_query.query
+        query = self.get_clause_query(clause)
         if not query:
             return []
 
@@ -405,6 +409,7 @@ class ElasticsearchSearchCompiler:
             SimpleQueryString(
                 query=query,
                 fields=[field],
+                **self.boost_options(clause.boost),
                 **profile.simple_query_string_options,
             )
             for field in query_fields
@@ -412,9 +417,9 @@ class ElasticsearchSearchCompiler:
 
         return queries
 
-    def build_basic_phrase_queries(self) -> list[Any]:
+    def build_basic_phrase_queries(self, clause: RetrievalClause) -> list[Any]:
         """Compile the planner-selected phrase matches across document fields."""
-        query = self.search_query.query
+        query = self.get_clause_query(clause)
         if not query:
             return []
 
@@ -422,31 +427,35 @@ class ElasticsearchSearchCompiler:
         queries = []
         for field, options in self.build_search_fields(profile).items():
             phrase_query = {"query": query, "slop": profile.phrase_match_slop}
-            if "boost" in (options or {}):
-                phrase_query["boost"] = options["boost"]
+            field_boost = (options or {}).get("boost", 1.0)
             if field == "content":
-                phrase_query["boost"] = profile.phrase_match_content_boost
+                field_boost = profile.phrase_match_content_boost
+            boost = field_boost * clause.boost
+            if boost != 1.0:
+                phrase_query["boost"] = boost
             queries.append(MatchPhrase(**{field: phrase_query}))
         return queries
 
-    def build_content_phrase_queries(self) -> list[Any]:
+    def build_content_phrase_queries(self, clause: RetrievalClause) -> list[Any]:
         """Adds a best-effort phrase match query on the content field."""
-        if not self.search_query.query:
+        query = self.get_clause_query(clause)
+        if not query:
             return []
 
         return [
             MatchPhrase(
                 content={
-                    "query": self.search_query.query,
+                    "query": query,
                     "slop": self.profile.phrase_match_slop,
-                    "boost": self.profile.phrase_match_content_boost,
+                    "boost": self.profile.phrase_match_content_boost * clause.boost,
                 }
             )
         ]
 
-    def build_nested_page_queries(self) -> list[Any]:
+    def build_nested_page_queries(self, clause: RetrievalClause) -> list[Any]:
         """Does a nested page search, and includes highlights."""
-        if not self.search_query.query:
+        query = self.get_clause_query(clause)
+        if not query:
             return []
 
         return [
@@ -454,11 +463,12 @@ class ElasticsearchSearchCompiler:
                 "nested",
                 path="pages",
                 inner_hits=self.pages_inner_hits,
+                **self.boost_options(clause.boost),
                 query=Q(
                     "bool",
                     must=[
                         SimpleQueryString(
-                            query=self.search_query.query,
+                            query=query,
                             fields=["pages.body"],
                             quote_field_suffix=".exact",
                             **self.profile.simple_query_string_options,
@@ -467,7 +477,7 @@ class ElasticsearchSearchCompiler:
                     should=[
                         MatchPhrase(
                             pages__body={
-                                "query": self.search_query.query,
+                                "query": query,
                                 "slop": self.profile.phrase_match_slop,
                                 "boost": self.profile.phrase_match_content_boost,
                             }
@@ -477,9 +487,10 @@ class ElasticsearchSearchCompiler:
             )
         ]
 
-    def build_nested_provision_queries(self) -> list[Any]:
+    def build_nested_provision_queries(self, clause: RetrievalClause) -> list[Any]:
         """Does a nested provision search, and includes highlights."""
-        if not self.search_query.query:
+        query = self.get_clause_query(clause)
+        if not query:
             return []
 
         return [
@@ -487,24 +498,25 @@ class ElasticsearchSearchCompiler:
                 "nested",
                 path="provisions",
                 inner_hits=self.provisions_inner_hits,
+                **self.boost_options(clause.boost),
                 query=Q(
                     "bool",
                     should=[
                         MatchPhrase(
                             provisions__body={
-                                "query": self.search_query.query,
+                                "query": query,
                                 "slop": self.profile.phrase_match_slop,
                                 "boost": self.profile.phrase_match_content_boost,
                             }
                         ),
                         SimpleQueryString(
-                            query=self.search_query.query,
+                            query=query,
                             fields=["provisions.body"],
                             quote_field_suffix=".exact",
                             **self.profile.simple_query_string_options,
                         ),
                         SimpleQueryString(
-                            query=self.search_query.query,
+                            query=query,
                             fields=[
                                 self.get_boosted_field(
                                     "provisions.title",
@@ -685,6 +697,14 @@ class ElasticsearchSearchCompiler:
         from peachjam_ml.embeddings import get_query_embedding
 
         return get_query_embedding(query)
+
+    def get_clause_query(self, clause: RetrievalClause) -> str | None:
+        return clause.query if clause.query is not None else self.search_query.query
+
+    @staticmethod
+    def boost_options(boost: float) -> dict[str, float]:
+        """Omit neutral boosts to preserve the legacy Elasticsearch query."""
+        return {} if boost == 1.0 else {"boost": boost}
 
     def get_field(self, field: str) -> str:
         profile = self.profile

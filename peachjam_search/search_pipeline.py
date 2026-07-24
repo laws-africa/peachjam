@@ -145,6 +145,8 @@ class RetrievalClause:
     """A named retrieval behaviour understood by the ES compiler."""
 
     name: str
+    query: str | None = None
+    boost: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -257,13 +259,39 @@ class SearchPlanner:
             retrieval_clauses = []
             if search_query.query:
                 retrieval_clauses = [
-                    RetrievalClause("basic"),
-                    RetrievalClause("content_phrase"),
-                    RetrievalClause("nested_pages"),
-                    RetrievalClause("nested_provisions"),
+                    RetrievalClause(
+                        "basic",
+                        query=search_query.query,
+                        boost=profile.basic_query_boost,
+                    )
                 ]
                 if " " in search_query.query:
-                    retrieval_clauses.append(RetrievalClause("basic_phrase"))
+                    retrieval_clauses.append(
+                        RetrievalClause(
+                            "basic_phrase",
+                            query=search_query.query,
+                            boost=profile.basic_phrase_query_boost,
+                        )
+                    )
+                retrieval_clauses.extend(
+                    [
+                        RetrievalClause(
+                            "content_phrase",
+                            query=search_query.query,
+                            boost=profile.content_phrase_query_boost,
+                        ),
+                        RetrievalClause(
+                            "nested_pages",
+                            query=search_query.query,
+                            boost=profile.nested_pages_query_boost,
+                        ),
+                        RetrievalClause(
+                            "nested_provisions",
+                            query=search_query.query,
+                            boost=profile.nested_provisions_query_boost,
+                        ),
+                    ]
+                )
             retrieval_clauses = tuple(retrieval_clauses)
         else:
             retrieval_clauses = ()

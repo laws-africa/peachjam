@@ -4,7 +4,11 @@ from unittest.mock import patch
 
 from django.test import SimpleTestCase
 
-from peachjam_search.profiles import SearchProfileSet, get_default_search_profile_set
+from peachjam_search.profiles import (
+    SearchProfile,
+    SearchProfileSet,
+    get_default_search_profile_set,
+)
 from peachjam_search.search_pipeline import (
     PageRankSettings,
     QueryAnalyser,
@@ -83,12 +87,25 @@ class SearchPipelineTest(SimpleTestCase):
         self.assertEqual(
             [
                 "basic",
+                "basic_phrase",
                 "content_phrase",
                 "nested_pages",
                 "nested_provisions",
-                "basic_phrase",
             ],
             [clause.name for clause in plan.retrieval_clauses],
+        )
+        self.assertEqual(
+            {
+                "basic": ("Example v State", 1.0),
+                "basic_phrase": ("Example v State", 1.0),
+                "content_phrase": ("Example v State", 1.0),
+                "nested_pages": ("Example v State", 1.0),
+                "nested_provisions": ("Example v State", 1.0),
+            },
+            {
+                clause.name: (clause.query, clause.boost)
+                for clause in plan.retrieval_clauses
+            },
         )
         self.assertEqual(["pagerank"], [signal.name for signal in plan.ranking_signals])
         self.assertEqual(5, plan.ranking_signals[0].boost)
@@ -136,6 +153,59 @@ class SearchPipelineTest(SimpleTestCase):
         plan = self.planner.build(self.request(), analysis)
 
         self.assertEqual("default", plan.profile.name)
+
+    def test_planner_resolves_retrieval_query_boosts_from_the_profile(self):
+        profile = replace(
+            self.profile_set.labels["case_name"],
+            basic_query_boost=1.5,
+            basic_phrase_query_boost=2.0,
+            content_phrase_query_boost=2.5,
+            nested_pages_query_boost=3.0,
+            nested_provisions_query_boost=3.5,
+        )
+        planner = SearchPlanner(
+            SearchProfileSet(
+                default=self.profile_set.default, labels={"case_name": profile}
+            )
+        )
+
+        plan = planner.build(
+            self.request(),
+            QueryAnalysis(raw_query="Example v State", intent="case_name"),
+        )
+
+        self.assertEqual(
+            {
+                "basic": ("Example v State", 1.5),
+                "basic_phrase": ("Example v State", 2.0),
+                "content_phrase": ("Example v State", 2.5),
+                "nested_pages": ("Example v State", 3.0),
+                "nested_provisions": ("Example v State", 3.5),
+            },
+            {
+                clause.name: (clause.query, clause.boost)
+                for clause in plan.retrieval_clauses
+            },
+        )
+
+    def test_profile_loader_defaults_missing_retrieval_query_boosts(self):
+        profile_data = SearchProfile.default().to_dict()
+        for field in (
+            "basic_query_boost",
+            "basic_phrase_query_boost",
+            "content_phrase_query_boost",
+            "nested_pages_query_boost",
+            "nested_provisions_query_boost",
+        ):
+            profile_data.pop(field)
+
+        profile = SearchProfile.from_dict(profile_data)
+
+        self.assertEqual(1.0, profile.basic_query_boost)
+        self.assertEqual(1.0, profile.basic_phrase_query_boost)
+        self.assertEqual(1.0, profile.content_phrase_query_boost)
+        self.assertEqual(1.0, profile.nested_pages_query_boost)
+        self.assertEqual(1.0, profile.nested_provisions_query_boost)
 
     @patch("peachjam_search.search_pipeline.pj_settings")
     def test_planner_reads_production_pagerank_settings_into_the_plan(
