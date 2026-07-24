@@ -296,6 +296,9 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
 ACCOUNT_ADAPTER = "peachjam.auth.AccountAdapter"
+# When frontend account URLs are disabled, retain the direct Google sign-in
+# endpoint used by staff instead of rendering allauth's confirmation page.
+SOCIALACCOUNT_LOGIN_ON_GET = PEACHJAM["DISABLE_ACCOUNTS"]
 
 # Recaptcha
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")

@@ -1,3 +1,5 @@
+from allauth.account.views import logout as account_logout
+from allauth.socialaccount.providers.google.views import oauth2_callback, oauth2_login
 from django.conf import settings
 from django.http import Http404
 from django.urls import include, path
@@ -25,8 +27,18 @@ urlpatterns = []
 if settings.PEACHJAM["DISABLE_ACCOUNTS"]:
     # Keep the normal account URL patterns registered below so reverse() still
     # works, but prepend catch-all routes so incoming account requests resolve
-    # to 404 while accounts are disabled.
+    # to 404 while accounts are disabled. The Google login flow and logout
+    # routes remain available so staff can sign in to and out of the Django
+    # admin.
     urlpatterns += [
+        path("google/login/", oauth2_login, name="google_login"),
+        # Google OAuth redirect URIs are sometimes configured without a trailing
+        # slash. Allow that exact callback too because the catch-all below would
+        # otherwise prevent Django's APPEND_SLASH redirect.
+        path("google/login/callback", oauth2_callback),
+        path("google/login/callback/", oauth2_callback, name="google_callback"),
+        path("logout/", account_logout, name="account_logout"),
+        path("logged-out", LoggedOutView.as_view(), name="account_logged_out"),
         path("", DisabledAccountUrlsView.as_view()),
         path("<path:path>", DisabledAccountUrlsView.as_view()),
     ]

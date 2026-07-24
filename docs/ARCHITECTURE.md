@@ -206,7 +206,7 @@ Important modules:
 
 - `apps.py`
   - connects ML context modification into `BaseDocumentDetailView`
-  - switches `PortionSearchEngine.mode` to `hybrid`
+  - switches `PortionSearchEngine.mode` to `text`
 - `embeddings.py`, `models.py`, `tasks.py`: vector/embedding pipeline
 - `views.py`, `urls.py`: similar-documents endpoints
 

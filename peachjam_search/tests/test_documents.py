@@ -15,6 +15,23 @@ class SearchableDocumentTestCase(TestCase):
         doc.nature.name_fr = "Rapport d'activité"
         self.assertEqual("Rapport d'activité", sd.prepare_nature_fr(doc))
 
+    def test_translated_locality_field(self):
+        doc = CoreDocument.objects.exclude(locality=None).first()
+        sd = SearchableDocument()
+
+        self.assertEqual(doc.locality.name, sd.prepare_locality_en(doc))
+        doc.locality.name_fr = "Union africaine (UA)"
+        self.assertEqual("Union africaine (UA)", sd.prepare_locality_fr(doc))
+
+    def test_mapping_is_strict_with_translated_locality_fields(self):
+        mapping = SearchableDocument._index.to_dict()["mappings"]
+
+        self.assertEqual("strict", mapping["dynamic"])
+        for language in ("en", "fr", "pt", "sw"):
+            self.assertEqual(
+                "keyword", mapping["properties"][f"locality_{language}"]["type"]
+            )
+
     def test_summary_field(self):
         sd = SearchableDocument()
         j = Judgment()

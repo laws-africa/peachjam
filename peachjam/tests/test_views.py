@@ -22,6 +22,7 @@ from peachjam.models import (
     Folder,
     GenericDocument,
     Judgment,
+    Locality,
     Outcome,
     PeachJamSettings,
     SavedDocument,
@@ -91,6 +92,37 @@ class PeachjamViewsTest(TestCase):
         self.assertIn(
             "Activity Report of the Pan-African Parliament, July 2016 to June 2017",
             recent_documents,
+        )
+
+    def test_place_page_uses_translated_locality_name(self):
+        Locality.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            code="ecowas",
+            name="Communauté Économique des États de l'Afrique de l'Ouest",
+            name_en="Economic Community of West African States (ECOWAS)",
+            name_fr="Communauté Économique des États de l'Afrique de l'Ouest",
+        )
+
+        response = self.client.get("/en/place/aa-ecowas")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            '<h1 id="main-page-heading">Economic Community of West African States (ECOWAS)</h1>',
+        )
+        self.assertNotContains(
+            response, "Communauté Économique des États de l'Afrique de l'Ouest"
+        )
+
+        response = self.client.get("/fr/place/aa-ecowas")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Communauté Économique des États de l&#x27;Afrique de l&#x27;Ouest",
+        )
+        self.assertNotContains(
+            response, "Economic Community of West African States (ECOWAS)"
         )
 
     def test_judgment_listing(self):

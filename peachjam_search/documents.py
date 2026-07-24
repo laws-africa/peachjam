@@ -5,7 +5,7 @@ from django.conf import settings
 from django.utils.functional import classproperty
 from django_elasticsearch_dsl import Document, Text, fields
 from django_elasticsearch_dsl.registries import registry
-from elasticsearch_dsl import RankFeature, token_filter
+from elasticsearch_dsl import MetaField, RankFeature, token_filter
 from elasticsearch_dsl.analysis import CustomAnalyzer
 
 from peachjam.models import (
@@ -57,6 +57,10 @@ class SearchableDocument(Document):
     language = fields.KeywordField(attr="language.name_native")
     jurisdiction = fields.KeywordField(attr="jurisdiction.name")
     locality = fields.KeywordField(attr="locality.name")
+    locality_en = fields.KeywordField()
+    locality_sw = fields.KeywordField()
+    locality_fr = fields.KeywordField()
+    locality_pt = fields.KeywordField()
     expression_frbr_uri = fields.KeywordField()
     work_frbr_uri = fields.KeywordField()
     is_most_recent = fields.BooleanField()
@@ -192,6 +196,7 @@ class SearchableDocument(Document):
         ("court", "name"),
         ("registry", "name"),
         ("nature", "name"),
+        ("locality", "name"),
     ]
 
     # ES's max request size is 100mb, so limit the size of the text fields to a little below that
@@ -206,6 +211,9 @@ class SearchableDocument(Document):
     class Index:
         name = settings.PEACHJAM["ES_INDEX"]
         settings = {"index.mapping.nested_objects.limit": 50000}
+
+    class Meta:
+        dynamic = MetaField("strict")
 
     class Django:
         # Because CoreDocument's default manager is a polymorphic manager, the actual instances
