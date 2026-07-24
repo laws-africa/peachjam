@@ -3,9 +3,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    dependencies = [
-        ("peachjam_search", "0026_es_mapping_add_gazette_publication_fields")
-    ]
+    dependencies = [("peachjam_search", "0027_es_mapping_add_locality_translations")]
 
     operations = [
         migrations.AddField(
