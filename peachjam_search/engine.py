@@ -1,17 +1,18 @@
 import logging
-from typing import Any, List, Optional, Self
+from typing import Any, Iterable, List, Literal, Optional, Self
 
 from django.conf import settings
-from elasticsearch_dsl.query import Bool
 from pydantic import BaseModel
 
 from peachjam_search.compiler import ElasticsearchSearchCompiler, RetrieverSearch
 from peachjam_search.search_pipeline import (
+    FilterClause,
     QueryAnalyser,
     QueryAnalysis,
     SearchPlan,
     SearchPlanner,
     SearchQuery,
+    serialise,
 )
 
 log = logging.getLogger(__name__)
@@ -110,18 +111,7 @@ class SearchEngine:
         return {
             "index": self.compiler.index,
             "mode": self.search_query.mode,
-            "inputs": {
-                "query": self.search_query.query,
-                "field_queries": self.search_query.field_queries,
-                "filters": self.search_query.filters,
-                "facets": self.search_query.facets,
-                "page": self.search_query.page,
-                "page_size": self.search_query.page_size,
-                "ordering": self.search_query.ordering,
-                "explain": self.search_query.explain,
-                "source": self.search_query.source,
-                "highlight": self.search_query.highlight,
-            },
+            "inputs": serialise(self.search_query),
             "query": query,
             "redacted_query": self.redact_debug_query(query),
             "analysis": self.analysis.to_dict(),
@@ -146,8 +136,8 @@ class PortionSearchFilters(BaseModel):
     commenced: Optional[bool] = None
     principal: Optional[bool] = None
 
-    def to_es_query(self):
-        must = []
+    def to_filter_clauses(self) -> tuple[FilterClause, ...]:
+        clauses = []
         for key, value in self.model_dump(exclude_none=True).items():
             field, *lookup = key.split("__")
             lookup = lookup[0] if lookup else "exact"
@@ -157,18 +147,46 @@ class PortionSearchFilters(BaseModel):
                 field = "frbr_uri_" + field[5:]
 
             if lookup == "exact":
-                must.append({"term": {field: value}})
+                clauses.append(FilterClause(field=field, operator="term", value=value))
             elif lookup == "in":
-                must.append({"terms": {field: value}})
+                clauses.append(
+                    FilterClause(field=field, operator="terms", value=tuple(value))
+                )
             else:
                 raise ValueError(f"Unsupported lookup: {lookup}")
-        return must
+        return tuple(clauses)
 
 
-class PortionSearchEngine(ElasticsearchSearchCompiler):
-    """A SearchEngine designed for hybrid search returning portions of documents, rather than documents. Useful
-    for RAG.
-    """
+def make_portion_search_query(
+    query: str,
+    filters: Iterable[PortionSearchFilters] = (),
+    mode: Literal["text", "semantic", "hybrid"] = "text",
+) -> SearchQuery:
+    """Build the regular query used by the portion-search pipeline."""
+
+    hard_filters = tuple(
+        filter_clause
+        for portion_filters in filters
+        for filter_clause in portion_filters.to_filter_clauses()
+    )
+    return SearchQuery(
+        query=query,
+        field_queries={},
+        mode=mode,
+        filters={},
+        hard_filters=hard_filters,
+        facets=[],
+        page=1,
+        page_size=SearchQuery.default_page_size,
+        ordering="-score",
+        explain=False,
+        source=PortionSearchEngine.default_source,
+        highlight={},
+    )
+
+
+class PortionSearchEngine(SearchEngine):
+    """Search portions through the standard engine pipeline."""
 
     default_source = [
         "title",
@@ -182,73 +200,16 @@ class PortionSearchEngine(ElasticsearchSearchCompiler):
         "blurb",
     ]
 
-    def __init__(self) -> None:
-        super().__init__()
-        self.query: str | None = None
-        self.filters: list[PortionSearchFilters] = []
-        self.mode = "text"
-        self.semantic_k = SearchPlanner.default_semantic_k
-
-    def build_search(self) -> "RetrieverSearch":
-        """Build the legacy portion search using a transient document plan.
-
-        Portion search has its own input shape and filters, but shares the
-        document retrieval and semantic-query compilation helpers. Supplying a
-        concrete query and plan here keeps those helpers free of compatibility
-        accessors.
-        """
-        self.search_query = SearchQuery(
-            query=self.query,
-            field_queries={},
-            mode=self.mode,
-            filters={},
-            facets=[],
-            page=1,
-            page_size=SearchQuery.default_page_size,
-            ordering="-score",
-            explain=False,
-            source=self.default_source,
-            highlight={},
+    def __init__(
+        self,
+        search_query: SearchQuery,
+        planner: SearchPlanner | None = None,
+        compiler: ElasticsearchSearchCompiler | None = None,
+        analyser: QueryAnalyser | None = None,
+    ) -> None:
+        super().__init__(
+            search_query=search_query,
+            analyser=analyser,
+            planner=planner,
+            compiler=compiler,
         )
-        self.plan = SearchPlanner(semantic_k=self.semantic_k).build(
-            self.search_query,
-            QueryAnalysis(raw_query=self.query or "", clean_query=self.query),
-        )
-
-        search = RetrieverSearch(using=self.client, index=self.index)
-        search = self.add_source(search)
-        search = self.add_query_from_plan(search)
-        search = self.add_sort(search)
-        search = self.add_filters(search)
-        search = self.add_retrievers(search)
-        return search
-
-    def get_debug_inputs(self) -> dict[str, Any]:
-        inputs = {
-            "query": self.query,
-            "filters": [
-                (
-                    f.model_dump(exclude_none=True)
-                    if hasattr(f, "model_dump")
-                    else f.dict(exclude_none=True)
-                )
-                for f in self.filters
-            ],
-            "mode": self.mode,
-        }
-        if self.plan.semantic_retrieval:
-            inputs.update(
-                {
-                    "semantic_k": self.plan.semantic_retrieval.k,
-                    "semantic_num_candidates": self.plan.semantic_retrieval.num_candidates,
-                }
-            )
-        return inputs
-
-    def add_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
-        search = search.filter("term", is_most_recent=True)
-
-        for f in self.filters:
-            search = search.query(Bool(filter=f.to_es_query()))
-
-        return search

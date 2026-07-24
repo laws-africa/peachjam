@@ -227,6 +227,12 @@ class ElasticsearchSearchCompiler:
                 # normal filter field
                 search = search.filter("terms", **{field: values})
 
+        for filter_clause in self.search_query.hard_filters:
+            search = search.filter(
+                filter_clause.operator,
+                **{filter_clause.field: filter_clause.value},
+            )
+
         return search
 
     def add_aggs(self, search: "RetrieverSearch") -> "RetrieverSearch":

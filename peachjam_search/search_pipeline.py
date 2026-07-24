@@ -23,6 +23,15 @@ from peachjam_search.profiles import (
 
 
 @dataclass(frozen=True)
+class FilterClause:
+    """An exact Elasticsearch filter that must apply to every retriever."""
+
+    field: str
+    operator: Literal["term", "terms"]
+    value: Any
+
+
+@dataclass(frozen=True)
 class SearchQuery:
     """Details of a user's search query for a single document search."""
 
@@ -104,6 +113,7 @@ class SearchQuery:
     page_size: int
     ordering: Literal["-score", "date", "-date"]
     explain: bool
+    hard_filters: tuple[FilterClause, ...] = ()
     source: dict[str, Any] | list[str] = field(
         default_factory=lambda: deepcopy(SearchQuery.default_source)
     )

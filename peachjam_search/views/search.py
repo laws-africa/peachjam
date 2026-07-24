@@ -462,17 +462,20 @@ class PortionSearchDebugView(SearchDebugMixin, View):
         )
 
     def make_engine(self, input_data):
-        from peachjam_search.engine import PortionSearchEngine
+        from peachjam_search.engine import (
+            PortionSearchEngine,
+            make_portion_search_query,
+        )
+        from peachjam_search.search_pipeline import SearchPlanner
 
-        engine = PortionSearchEngine()
-        engine.query = input_data["text"]
-        engine.semantic_k = input_data["top_k"] * 10
-        engine.filters = []
-        if input_data.get("pre_filters", None):
-            engine.filters.append(input_data["pre_filters"])
-        if input_data.get("filters", None):
-            engine.filters.append(input_data["filters"])
-        return engine
+        filters = [
+            input_data[field]
+            for field in ("pre_filters", "filters")
+            if input_data.get(field)
+        ]
+        search_query = make_portion_search_query(input_data["text"], filters)
+        planner = SearchPlanner(semantic_k=input_data["top_k"] * 10)
+        return PortionSearchEngine(search_query, planner=planner)
 
     def render(self, context):
         return HttpResponse(render_to_string(self.template_name, context, self.request))
