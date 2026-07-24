@@ -4,27 +4,244 @@
       "default_operator": "AND"
     },
     "name": "default",
-    "pagerank_boost_value": null,
+    "pagerank_boost_value": 7.75,
     "pagerank_pivot_value": null,
-    "phrase_match_content_boost": 4,
-    "phrase_match_slop": 0,
-    "provision_parent_titles_boost": 2,
-    "provision_title_boost": 4,
+    "phrase_match_content_boost": 2.0,
+    "phrase_match_slop": 1,
+    "provision_parent_titles_boost": 9.75,
+    "provision_title_boost": 11.5,
     "search_field_boosts": {
-      "title": 8,
-      "title_expanded": 3,
-      "citation": 2,
-      "alternative_names": 4,
-      "content": 1,
-      "summary": 2,
-      "flynote": 2,
-      "blurb": 2
+      "alternative_names": 0.75,
+      "blurb": 1.25,
+      "citation": 4.0,
+      "content": 0.25,
+      "flynote": 2.0,
+      "summary": 1.0,
+      "title": 14.5,
+      "title_expanded": 7.25
     },
     "simple_query_string_options": {
       "default_operator": "OR",
-      "minimum_should_match": "4<80%"
+      "minimum_should_match": "1<70%"
     },
-    "use_pagerank_settings": true
+    "use_pagerank_settings": false
   },
-  "labels": {}
+  "labels": {
+    "act_name": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "act_name",
+      "pagerank_boost_value": 6.75,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 0.75,
+      "phrase_match_slop": 0,
+      "provision_parent_titles_boost": 3.75,
+      "provision_title_boost": 15.75,
+      "search_field_boosts": {
+        "alternative_names": 14.0,
+        "blurb": 0.75,
+        "citation": 6.25,
+        "content": 2.75,
+        "flynote": 2.75,
+        "summary": 0.25,
+        "title": 23.0,
+        "title_expanded": 15.75
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "1<70%"
+      },
+      "use_pagerank_settings": false
+    },
+    "act_number": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "act_number",
+      "pagerank_boost_value": 0.75,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 13.75,
+      "phrase_match_slop": 3,
+      "provision_parent_titles_boost": 1.0,
+      "provision_title_boost": 7.75,
+      "search_field_boosts": {
+        "alternative_names": 6.5,
+        "blurb": 1.25,
+        "citation": 13.75,
+        "content": 4.25,
+        "flynote": 3.0,
+        "summary": 0.25,
+        "title": 1.75,
+        "title_expanded": 14.5
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "1<70%"
+      },
+      "use_pagerank_settings": false
+    },
+    "act_section": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "act_section",
+      "pagerank_boost_value": 5.25,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 12.0,
+      "phrase_match_slop": 4,
+      "provision_parent_titles_boost": 2.5,
+      "provision_title_boost": 9.75,
+      "search_field_boosts": {
+        "alternative_names": 8.5,
+        "blurb": 1.5,
+        "citation": 2.75,
+        "content": 0.75,
+        "flynote": 1.25,
+        "summary": 1.0,
+        "title": 21.75,
+        "title_expanded": 2.75
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "1<70%"
+      },
+      "use_pagerank_settings": false
+    },
+    "case_name": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "case_name",
+      "pagerank_boost_value": 8.25,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 1.75,
+      "phrase_match_slop": 0,
+      "provision_parent_titles_boost": 2.75,
+      "provision_title_boost": 8.75,
+      "search_field_boosts": {
+        "alternative_names": 11.25,
+        "blurb": 9.5,
+        "citation": 6.25,
+        "content": 3.0,
+        "flynote": 5.25,
+        "summary": 5.5,
+        "title": 10.25,
+        "title_expanded": 4.25
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "2<80%"
+      },
+      "use_pagerank_settings": false
+    },
+    "case_number": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "case_number",
+      "pagerank_boost_value": 4.75,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 12.5,
+      "phrase_match_slop": 3,
+      "provision_parent_titles_boost": 7.75,
+      "provision_title_boost": 8.0,
+      "search_field_boosts": {
+        "alternative_names": 10.5,
+        "blurb": 7.0,
+        "citation": 0.5,
+        "content": 0.25,
+        "flynote": 0.75,
+        "summary": 9.5,
+        "title": 12.0,
+        "title_expanded": 4.5
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "2<80%"
+      },
+      "use_pagerank_settings": false
+    },
+    "gazette_number": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "gazette_number",
+      "pagerank_boost_value": 4.25,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 9.75,
+      "phrase_match_slop": 3,
+      "provision_parent_titles_boost": 5.25,
+      "provision_title_boost": 5.0,
+      "search_field_boosts": {
+        "alternative_names": 9.75,
+        "blurb": 8.75,
+        "citation": 11.75,
+        "content": 1,
+        "flynote": 0.75,
+        "summary": 1.75,
+        "title": 9.5,
+        "title_expanded": 15.25
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "3<75%"
+      },
+      "use_pagerank_settings": false
+    },
+    "legal_term": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "legal_term",
+      "pagerank_boost_value": 10.0,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 7.5,
+      "phrase_match_slop": 3,
+      "provision_parent_titles_boost": 0.5,
+      "provision_title_boost": 12.5,
+      "search_field_boosts": {
+        "alternative_names": 11.75,
+        "blurb": 3.5,
+        "citation": 1.5,
+        "content": 0.5,
+        "flynote": 2.75,
+        "summary": 4.25,
+        "title": 20.5,
+        "title_expanded": 2.25
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "2<75%"
+      },
+      "use_pagerank_settings": false
+    },
+    "quote": {
+      "advanced_simple_query_string_options": {
+        "default_operator": "AND"
+      },
+      "name": "quote",
+      "pagerank_boost_value": 7.0,
+      "pagerank_pivot_value": null,
+      "phrase_match_content_boost": 13.0,
+      "phrase_match_slop": 0,
+      "provision_parent_titles_boost": 4.0,
+      "provision_title_boost": 2.0,
+      "search_field_boosts": {
+        "alternative_names": 14.5,
+        "blurb": 6.5,
+        "citation": 4.75,
+        "content": 0.25,
+        "flynote": 8.0,
+        "summary": 4.25,
+        "title": 12.25,
+        "title_expanded": 11.5
+      },
+      "simple_query_string_options": {
+        "default_operator": "OR",
+        "minimum_should_match": "4<80%"
+      },
+      "use_pagerank_settings": false
+    }
+  }
 }
