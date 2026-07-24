@@ -37,7 +37,7 @@ class PortionSearchView(APIView):
 
         self.engine = PortionSearchEngine()
         self.engine.query = input_data["text"]
-        self.engine.knn_k = (
+        self.engine.semantic_k = (
             input_data["top_k"] * 10
         )  # retrieve more to allow for combining chunks
 

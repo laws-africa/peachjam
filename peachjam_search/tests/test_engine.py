@@ -743,8 +743,12 @@ class TestSearchEngine(TestCase):
         search = engine.build_search()
         d = search.to_dict()
 
-        self.assertEqual(["Government Gazette"], engine.filters["publication"])
-        self.assertEqual(["Legal Notices A"], engine.filters["sub_publication"])
+        self.assertEqual(
+            ["Government Gazette"], engine.search_query.filters["publication"]
+        )
+        self.assertEqual(
+            ["Legal Notices A"], engine.search_query.filters["sub_publication"]
+        )
         self.assertIn("_filter_publication", d["aggs"])
         self.assertIn("_filter_sub_publication", d["aggs"])
         self.assertEqual(
@@ -790,7 +794,7 @@ class TestSearchEngine(TestCase):
                 )
             )
         )
-        engine.query = "Example v State"
+        engine.set_search_query(replace(engine.search_query, query="Example v State"))
         engine.analysis = QueryAnalysis(
             raw_query="Example v State", intent="case_name", confidence=1.0
         )
@@ -1158,7 +1162,7 @@ class TestSearchEngine(TestCase):
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
-        engine.mode = "semantic"
+        engine.set_search_query(replace(engine.search_query, mode="semantic"))
 
         with patch.object(
             engine.compiler, "get_query_embedding", return_value=[0.1, 0.2]
@@ -1272,7 +1276,7 @@ class TestSearchEngine(TestCase):
         form = SearchForm(params)
         self.assertTrue(form.is_valid())
         form.configure_engine(engine)
-        engine.mode = "hybrid"
+        engine.set_search_query(replace(engine.search_query, mode="hybrid"))
 
         with patch.object(
             engine.compiler, "get_query_embedding", return_value=[0.1, 0.2]
@@ -1617,7 +1621,7 @@ class TestSearchEngine(TestCase):
         engine = PortionSearchEngine()
         engine.mode = "hybrid"
         engine.query = input_data["text"]
-        engine.knn_k = input_data["top_k"]
+        engine.semantic_k = input_data["top_k"]
 
         engine.filters = []
         engine.filters.append(input_data["pre_filters"])

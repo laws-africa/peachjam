@@ -16,7 +16,7 @@ from elasticsearch_dsl.response import Response
 from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import SearchTrace
-from peachjam_search.search_pipeline import QueryAnalysis
+from peachjam_search.search_pipeline import QueryAnalysis, SearchQuery
 from peachjam_search.views.api import PortionSearchView
 from peachjam_search.views.search import DocumentSearchView
 
@@ -484,7 +484,20 @@ class SearchViewsTest(TestCase):
 
         view = DocumentSearchView()
         view.request = request
-        engine = SimpleNamespace(field_queries={}, filters={}, mode="text", page=1)
+        engine = SimpleNamespace(
+            search_query=SearchQuery(
+                query=None,
+                field_queries={},
+                mode="text",
+                filters={},
+                facets=[],
+                page=1,
+                page_size=10,
+                ordering="-score",
+                explain=False,
+            ),
+            plan=SimpleNamespace(mode="text", profile=None),
+        )
 
         with patch(
             "peachjam_search.views.search.SearchTrace.objects.create",
@@ -519,17 +532,26 @@ class SearchViewsTest(TestCase):
         view = DocumentSearchView()
         view.request = request
         engine = SimpleNamespace(
-            field_queries={},
-            filters={},
-            mode="text",
-            page=1,
+            search_query=SearchQuery(
+                query=None,
+                field_queries={},
+                mode="text",
+                filters={},
+                facets=[],
+                page=1,
+                page_size=10,
+                ordering="-score",
+                explain=False,
+            ),
             analysis=QueryAnalysis(
                 raw_query="nul\x00search",
                 clean_query="nul\x00search",
                 intent="legal_term",
                 confidence=0.9,
             ),
-            plan=SimpleNamespace(profile=SimpleNamespace(name="legal_term")),
+            plan=SimpleNamespace(
+                mode="text", profile=SimpleNamespace(name="legal_term")
+            ),
         )
 
         with patch(

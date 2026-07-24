@@ -123,7 +123,7 @@ class DocumentSearchView(TemplateView):
             form.cleaned_data["facets"] = True
 
         engine = self.make_search_engine(form)
-        if not engine.query and not engine.field_queries:
+        if not engine.search_query.query and not engine.search_query.field_queries:
             # no search term
             return JsonResponse({"error": "No search term"}, status=400), None, None
 
@@ -227,11 +227,15 @@ class DocumentSearchView(TemplateView):
             return HttpResponseClientRedirect(request.get_full_path())
 
         # only need the ids
-        engine.source = ["_id"]
         engine.set_search_query(
-            replace(engine.search_query, explain=False, page=1, page_size=1000)
+            replace(
+                engine.search_query,
+                source=["_id"],
+                explain=False,
+                page=1,
+                page_size=1000,
+            )
         )
-        engine.expand_retriever_window_to_page()
         response = engine.execute()
         pks = [int(hit.meta.id) for hit in response.hits]
 
@@ -264,9 +268,9 @@ class DocumentSearchView(TemplateView):
         return EntityMatcher.get_instance()
 
     def match_entities(self, engine):
-        if engine.page != 1 or engine.field_queries:
+        if engine.search_query.page != 1 or engine.search_query.field_queries:
             return []
-        return self.make_entity_matcher().match(engine.query)
+        return self.make_entity_matcher().match(engine.search_query.query)
 
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
@@ -289,7 +293,9 @@ class DocumentSearchView(TemplateView):
                 return [strip_null_bytes(child) for child in value]
             return value
 
-        filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
+        filters_string = "; ".join(
+            f"{k}={v}" for k, v in engine.search_query.filters.items()
+        )
 
         search = strip_null_bytes(self.request.GET.get("search", "")[:2048])
         suggestion = strip_null_bytes(self.request.GET.get("suggestion", "")[:1024])
@@ -315,12 +321,12 @@ class DocumentSearchView(TemplateView):
                 user=self.request.user if self.request.user.is_authenticated else None,
                 config_version=self.config_version,
                 request_id=self.request.id if self.request.id != "none" else None,
-                mode=engine.mode,
+                mode=engine.plan.mode,
                 search=search,
-                field_searches=engine.field_queries,
+                field_searches=engine.search_query.field_queries,
                 n_results=n_results,
-                page=engine.page,
-                filters=engine.filters,
+                page=engine.search_query.page,
+                filters=engine.search_query.filters,
                 filters_string=filters_string,
                 ordering=self.request.GET.get("ordering"),
                 suggestion=suggestion,
@@ -459,7 +465,7 @@ class PortionSearchDebugView(SearchDebugMixin, View):
 
         engine = PortionSearchEngine()
         engine.query = input_data["text"]
-        engine.knn_k = input_data["top_k"] * 10
+        engine.semantic_k = input_data["top_k"] * 10
         engine.filters = []
         if input_data.get("pre_filters", None):
             engine.filters.append(input_data["pre_filters"])

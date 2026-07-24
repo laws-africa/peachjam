@@ -86,12 +86,12 @@ class SearchForm(forms.Form):
             mode=mode,
             filters=filters,
             facets=(
-                list(ElasticsearchSearchCompiler.default_facets)
+                list(SearchQuery.default_facets)
                 if self.cleaned_data.get("facets")
                 else []
             ),
             page=self.cleaned_data.get("page") or 1,
-            page_size=10,
+            page_size=SearchQuery.default_page_size,
             ordering=self.cleaned_data.get("ordering") or "-score",
             explain=False,
         )

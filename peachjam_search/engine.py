@@ -1,6 +1,5 @@
 import logging
 from copy import deepcopy
-from dataclasses import replace
 from typing import Any, List, Optional, Self
 
 from django.conf import settings
@@ -12,6 +11,7 @@ from pydantic import BaseModel
 from peachjam_search.documents import MultiLanguageIndexManager, SearchableDocument
 from peachjam_search.profiles import SearchProfile
 from peachjam_search.search_pipeline import (
+    KnnRetrieval,
     QueryAnalyser,
     QueryAnalysis,
     SearchPlan,
@@ -30,92 +30,6 @@ class ElasticsearchSearchCompiler:
         "case_number": None,
         "case_name": None,
         "judges_text": None,
-    }
-
-    # search configuration
-    default_page_size = 10
-    default_facets = [
-        "nature",
-        "publication",
-        "sub_publication",
-        "court",
-        "year",
-        "registry",
-        "locality",
-        "outcome",
-        "judges",
-        "authors",
-        "language",
-        "labels",
-        "attorneys",
-        "matter_type",
-    ]
-    # this should be enough for up to 5 pages, 10 per page with 3 chunks each
-    knn_k = 5 * default_page_size * 3
-    # number of candidates to find on each shard
-    knn_num_candidates = knn_k * 10
-    knn_embedding_field = "content_chunks.text_embedding"
-    # https://www.elastic.co/guide/en/elasticsearch/reference/current/knn-search.html#knn-similarity-search  # noqa: E501
-    # minimum cosine similarity (ranges from -1 to 1)
-    # work backwards from score in [0, 1] and use
-    #   similarity = 2 * score - 1
-    # eg: 2 * 0.6 - 1 = 0.2
-    knn_similarity = 0.4
-    # ES clamps this at knn_k in any case
-    rrf_rank_window_size = knn_k
-    rrf_rank_constant = 60
-
-    default_source = {
-        "includes": [
-            "expression_frbr_uri",
-            "date",
-            "nature",
-            "doc_type",
-            "title",
-            "jurisdiction",
-            "locality",
-            "citation",
-            "authors",
-            "labels",
-            "alternative_names",
-            "flynote",
-            "blurb",
-            "court",
-            "matter_type",
-            "publication",
-            "sub_publication",
-        ]
-    }
-
-    default_highlight = {
-        "title": {
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"],
-            "fragment_size": 0,
-            "number_of_fragments": 0,
-            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-        },
-        "alternative_names": {
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"],
-            "fragment_size": 0,
-            "number_of_fragments": 0,
-            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-        },
-        "citation": {
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"],
-            "fragment_size": 0,
-            "number_of_fragments": 0,
-            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-        },
-        "content": {
-            "pre_tags": ["<mark>"],
-            "post_tags": ["</mark>"],
-            "fragment_size": 80,
-            "number_of_fragments": 2,
-            "max_analyzed_offset": settings.ELASTICSEARCH_MAX_ANALYZED_OFFSET,
-        },
     }
 
     # allowed filter fields
@@ -295,7 +209,7 @@ class ElasticsearchSearchCompiler:
         return RetrieverSearch(using=self.client, index=self.index)
 
     def add_source(self, search: "RetrieverSearch") -> "RetrieverSearch":
-        return search.source(self.search_query.source or self.default_source)
+        return search.source(self.search_query.source)
 
     def add_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
         # always applied
@@ -347,8 +261,7 @@ class ElasticsearchSearchCompiler:
         return search
 
     def add_highlight(self, search: "RetrieverSearch") -> "RetrieverSearch":
-        highlight = self.search_query.highlight or self.default_highlight
-        for field, options in highlight.items():
+        for field, options in self.search_query.highlight.items():
             search = search.highlight(field, **options)
         return search
 
@@ -364,14 +277,6 @@ class ElasticsearchSearchCompiler:
             * self.search_query.page_size : self.search_query.page
             * self.search_query.page_size
         ]
-
-    def expand_retriever_window_to_page(self) -> None:
-        """Ensure hybrid retrievers can return the full requested page."""
-        if self.plan is not None and self.plan.mode == "hybrid":
-            self.rrf_rank_window_size = max(
-                self.rrf_rank_window_size,
-                self.search_query.page * self.search_query.page_size,
-            )
 
     def add_extra(self, search: "RetrieverSearch") -> "RetrieverSearch":
         return search.extra(explain=self.search_query.explain)
@@ -394,6 +299,8 @@ class ElasticsearchSearchCompiler:
             must_queries.extend(self.build_advanced_content_queries())
         if "basic" in clause_names:
             should_queries.extend(self.build_basic_queries())
+        if "basic_phrase" in clause_names:
+            should_queries.extend(self.build_basic_phrase_queries())
         if "content_phrase" in clause_names:
             should_queries.extend(self.build_content_phrase_queries())
         if "nested_pages" in clause_names:
@@ -409,11 +316,17 @@ class ElasticsearchSearchCompiler:
         )
 
     def add_retrievers(self, search: "RetrieverSearch") -> "RetrieverSearch":
-        if self.plan.mode == "text":
+        semantic_retrieval = self.plan.semantic_retrieval
+        if semantic_retrieval is None:
             return search
 
-        knn_query = self.build_knn_query(search, self.plan.mode)
-        if self.plan.mode == "semantic":
+        rrf_retrieval = self.plan.rrf_retrieval
+        knn_query = self.build_knn_query(
+            search,
+            semantic_retrieval,
+            hybrid=rrf_retrieval is not None,
+        )
+        if rrf_retrieval is None:
             # we don't need a retriever, just a normal knn-based query
             return search.query(knn_query)
 
@@ -429,8 +342,8 @@ class ElasticsearchSearchCompiler:
         # TODO: elasticsearch 8 client supports this directly
         search.retriever = {
             "rrf": {
-                "rank_window_size": self.rrf_rank_window_size,
-                "rank_constant": self.rrf_rank_constant,
+                "rank_window_size": rrf_retrieval.rank_window_size,
+                "rank_constant": rrf_retrieval.rank_constant,
                 "retrievers": [
                     {"standard": standard_query},
                     {"standard": knn_query},
@@ -440,12 +353,13 @@ class ElasticsearchSearchCompiler:
 
         return search
 
-    def build_rank_feature_queries(self, factor: float = 1.0) -> list[Any]:
+    def build_rank_feature_queries(self, semantic: bool = False) -> list[Any]:
         """Compile the plan's resolved rank-feature signals."""
         queries = []
         for signal in self.plan.ranking_signals:
             if not signal.boost:
                 continue
+            factor = signal.semantic_factor if semantic else 1.0
             kwargs = {
                 "field": signal.field,
                 "boost": signal.boost * factor,
@@ -477,10 +391,6 @@ class ElasticsearchSearchCompiler:
 
         return queries
 
-    def is_advanced_search(self) -> bool:
-        """It's an advanced search if any of the search__* query parameters are present."""
-        return self.search_query.is_advanced
-
     def build_basic_queries(self) -> list[Any]:
         """This implements a simple_query_string query across multiple fields, using AND logic for the terms
         in a field, but effectively OR (should) logic between the fields."""
@@ -500,16 +410,23 @@ class ElasticsearchSearchCompiler:
             for field in query_fields
         ]
 
-        if " " in query:
-            # do optimistic match-phrase queries for multi-word queries
-            for field, options in search_fields.items():
-                phrase_query = {"query": query, "slop": profile.phrase_match_slop}
-                if "boost" in (options or {}):
-                    phrase_query["boost"] = options["boost"]
-                if field == "content":
-                    phrase_query["boost"] = profile.phrase_match_content_boost
-                queries.append(MatchPhrase(**{field: phrase_query}))
+        return queries
 
+    def build_basic_phrase_queries(self) -> list[Any]:
+        """Compile the planner-selected phrase matches across document fields."""
+        query = self.search_query.query
+        if not query:
+            return []
+
+        profile = self.profile
+        queries = []
+        for field, options in self.build_search_fields(profile).items():
+            phrase_query = {"query": query, "slop": profile.phrase_match_slop}
+            if "boost" in (options or {}):
+                phrase_query["boost"] = options["boost"]
+            if field == "content":
+                phrase_query["boost"] = profile.phrase_match_content_boost
+            queries.append(MatchPhrase(**{field: phrase_query}))
         return queries
 
     def build_content_phrase_queries(self) -> list[Any]:
@@ -714,25 +631,32 @@ class ElasticsearchSearchCompiler:
             aggs[field["field"]] = facet(field=field["field"], **field["options"])
         return aggs
 
-    def build_knn_query(self, search: "RetrieverSearch", mode: str) -> dict[str, Any]:
+    def build_knn_query(
+        self,
+        search: "RetrieverSearch",
+        semantic_retrieval: KnnRetrieval,
+        hybrid: bool,
+    ) -> dict[str, Any]:
         """Builds a KNN query."""
-        must_queries = [q.to_dict() for q in self.build_rank_feature_queries(0.1)]
+        must_queries = [
+            q.to_dict() for q in self.build_rank_feature_queries(semantic=True)
+        ]
         must_queries.append(
             {
                 "nested": {
                     "path": "content_chunks",
                     "inner_hits": {
                         "_source": {
-                            "excludes": ["content_chunks.text_embedding"],
+                            "excludes": [semantic_retrieval.embedding_field],
                         }
                     },
                     "score_mode": "max",
                     "query": {
                         "knn": {
-                            "field": self.knn_embedding_field,
-                            "k": self.knn_k,
-                            "num_candidates": self.knn_num_candidates,
-                            "similarity": self.knn_similarity,
+                            "field": semantic_retrieval.embedding_field,
+                            "k": semantic_retrieval.k,
+                            "num_candidates": semantic_retrieval.num_candidates,
+                            "similarity": semantic_retrieval.similarity,
                             "query_vector": self.get_query_embedding(
                                 self.search_query.query
                             ),
@@ -744,7 +668,7 @@ class ElasticsearchSearchCompiler:
 
         knn = {"bool": {"must": must_queries}}
 
-        if mode == "semantic":
+        if not hybrid:
             return knn
 
         # hybrid mode needs the filters from the original search
@@ -863,7 +787,7 @@ class SearchEngine:
             filters={},
             facets=[],
             page=1,
-            page_size=10,
+            page_size=SearchQuery.default_page_size,
             ordering="-score",
             explain=False,
         )
@@ -881,109 +805,6 @@ class SearchEngine:
         self.plan = None
         self.compiled_search = None
         return self
-
-    def _replace_search_query(self, **changes: Any) -> Self:
-        return self.set_search_query(replace(self.search_query, **changes))
-
-    @property
-    def query(self):
-        return self.search_query.query
-
-    @query.setter
-    def query(self, value):
-        self._replace_search_query(query=value)
-
-    @property
-    def field_queries(self):
-        return self.search_query.field_queries
-
-    @field_queries.setter
-    def field_queries(self, value):
-        self._replace_search_query(field_queries=value)
-
-    @property
-    def filters(self):
-        return self.search_query.filters
-
-    @filters.setter
-    def filters(self, value):
-        self._replace_search_query(filters=value)
-
-    @property
-    def page(self):
-        return self.search_query.page
-
-    @page.setter
-    def page(self, value):
-        self._replace_search_query(page=value)
-
-    @property
-    def page_size(self):
-        return self.search_query.page_size
-
-    @page_size.setter
-    def page_size(self, value):
-        self._replace_search_query(page_size=value)
-
-    @property
-    def mode(self):
-        return self.search_query.mode
-
-    @mode.setter
-    def mode(self, value):
-        self._replace_search_query(mode=value)
-
-    @property
-    def ordering(self):
-        return self.search_query.ordering
-
-    @ordering.setter
-    def ordering(self, value):
-        self._replace_search_query(ordering=value)
-
-    @property
-    def explain(self):
-        return self.search_query.explain
-
-    @explain.setter
-    def explain(self, value):
-        self._replace_search_query(explain=value)
-
-    @property
-    def facets(self):
-        return self.search_query.facets
-
-    @facets.setter
-    def facets(self, value):
-        self._replace_search_query(facets=value)
-
-    @property
-    def index(self):
-        return self.compiler.index
-
-    @index.setter
-    def index(self, value):
-        self.compiler.index = value
-
-    @property
-    def client(self):
-        return self.compiler.client
-
-    @property
-    def source(self):
-        return self.search_query.source
-
-    @source.setter
-    def source(self, value):
-        self._replace_search_query(source=value)
-
-    @property
-    def highlight(self):
-        return self.search_query.highlight
-
-    @highlight.setter
-    def highlight(self, value):
-        self._replace_search_query(highlight=value)
 
     def execute(self) -> Any:
         """The main entry-point for running the search in search_query. This analysis the search, builds a search
@@ -1027,13 +848,6 @@ class SearchEngine:
                 raise Exception(f"ES query failed: {response._shards.failures}")
         return response
 
-    def expand_retriever_window_to_page(self) -> None:
-        if self.search_query.mode == "hybrid":
-            self.compiler.rrf_rank_window_size = max(
-                self.compiler.rrf_rank_window_size,
-                self.search_query.page * self.search_query.page_size,
-            )
-
     def suggest(self, query: str) -> Any:
         return self.compiler.suggest(query)
 
@@ -1041,7 +855,7 @@ class SearchEngine:
         search = self.build_search()
         query = search.to_dict()
         return {
-            "index": self.index,
+            "index": self.compiler.index,
             "mode": self.search_query.mode,
             "inputs": {
                 "query": self.search_query.query,
@@ -1120,6 +934,7 @@ class PortionSearchEngine(ElasticsearchSearchCompiler):
         self.query: str | None = None
         self.filters: list[PortionSearchFilters] = []
         self.mode = "text"
+        self.semantic_k = SearchPlanner.default_semantic_k
 
     def build_search(self) -> "RetrieverSearch":
         """Build the legacy portion search using a transient document plan.
@@ -1129,8 +944,6 @@ class PortionSearchEngine(ElasticsearchSearchCompiler):
         concrete query and plan here keeps those helpers free of compatibility
         accessors.
         """
-        # number of candidates to find on each shard
-        self.knn_num_candidates = self.knn_k * 10
         self.search_query = SearchQuery(
             query=self.query,
             field_queries={},
@@ -1138,13 +951,13 @@ class PortionSearchEngine(ElasticsearchSearchCompiler):
             filters={},
             facets=[],
             page=1,
-            page_size=self.default_page_size,
+            page_size=SearchQuery.default_page_size,
             ordering="-score",
             explain=False,
             source=self.default_source,
             highlight={},
         )
-        self.plan = SearchPlanner().build(
+        self.plan = SearchPlanner(semantic_k=self.semantic_k).build(
             self.search_query,
             QueryAnalysis(raw_query=self.query or "", clean_query=self.query),
         )
@@ -1158,7 +971,7 @@ class PortionSearchEngine(ElasticsearchSearchCompiler):
         return search
 
     def get_debug_inputs(self) -> dict[str, Any]:
-        return {
+        inputs = {
             "query": self.query,
             "filters": [
                 (
@@ -1169,9 +982,15 @@ class PortionSearchEngine(ElasticsearchSearchCompiler):
                 for f in self.filters
             ],
             "mode": self.mode,
-            "knn_k": self.knn_k,
-            "knn_num_candidates": self.knn_num_candidates,
         }
+        if self.plan.semantic_retrieval:
+            inputs.update(
+                {
+                    "semantic_k": self.plan.semantic_retrieval.k,
+                    "semantic_num_candidates": self.plan.semantic_retrieval.num_candidates,
+                }
+            )
+        return inputs
 
     def add_filters(self, search: "RetrieverSearch") -> "RetrieverSearch":
         search = search.filter("term", is_most_recent=True)

@@ -77,7 +77,13 @@ class SearchPipelineTest(SimpleTestCase):
 
         self.assertEqual("case_name", plan.profile.name)
         self.assertEqual(
-            ["basic", "content_phrase", "nested_pages", "nested_provisions"],
+            [
+                "basic",
+                "content_phrase",
+                "nested_pages",
+                "nested_provisions",
+                "basic_phrase",
+            ],
             [clause.name for clause in plan.retrieval_clauses],
         )
         self.assertEqual(["pagerank"], [signal.name for signal in plan.ranking_signals])
@@ -92,7 +98,7 @@ class SearchPipelineTest(SimpleTestCase):
 
         self.assertEqual("default", plan.profile.name)
         self.assertEqual(
-            ["advanced_per_field", "advanced_all", "advanced_content"],
+            ["advanced_per_field"],
             [clause.name for clause in plan.retrieval_clauses],
         )
 
@@ -105,6 +111,18 @@ class SearchPipelineTest(SimpleTestCase):
 
         self.assertEqual((), plan.retrieval_clauses)
         self.assertEqual((), plan.ranking_signals)
+        self.assertEqual(150, plan.semantic_retrieval.k)
+        self.assertEqual(1500, plan.semantic_retrieval.num_candidates)
+        self.assertIsNone(plan.rrf_retrieval)
+
+    def test_hybrid_plan_resolves_the_rrf_window_for_the_requested_page(self):
+        plan = self.planner.build(
+            self.request(mode="hybrid", page=20, page_size=10),
+            QueryAnalysis(raw_query="Example v State"),
+        )
+
+        self.assertEqual(200, plan.rrf_retrieval.rank_window_size)
+        self.assertEqual(60, plan.rrf_retrieval.rank_constant)
 
     def test_unknown_label_uses_default_profile(self):
         analysis = QueryAnalysis(
