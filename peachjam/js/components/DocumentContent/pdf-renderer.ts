@@ -18,6 +18,67 @@ interface iPdfLib {
 
 const pdfjsLib = require('pdfjs-dist');
 
+type PdfLinkTarget = {
+  scrollToPage: (pageNumber: string | number | undefined) => void,
+  scrollToPdfDestination: (pageNumber: number, page: any, destination: any[]) => void,
+  scrollToRelativePage: (direction: number) => void,
+}
+
+/**
+ * Provides the small part of PDF.js' link-service interface needed by its
+ * annotation layer, without embedding the full PDF.js viewer.
+ */
+class PdfLinkService {
+  protected pdf: any;
+  protected renderer: PdfLinkTarget;
+
+  constructor (pdf: any, renderer: PdfLinkTarget) {
+    this.pdf = pdf;
+    this.renderer = renderer;
+  }
+
+  addLinkAttributes (link: HTMLAnchorElement, url: string) {
+    link.href = url;
+    link.title = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+  }
+
+  async goToDestination (destination: any) {
+    const explicitDestination = typeof destination === 'string'
+      ? await this.pdf.getDestination(destination)
+      : destination;
+    if (!Array.isArray(explicitDestination)) return;
+
+    const pageReference = explicitDestination[0];
+    if (pageReference === null || pageReference === undefined) return;
+    try {
+      const pageIndex = Number.isInteger(pageReference)
+        ? pageReference
+        : await this.pdf.getPageIndex(pageReference);
+      const pageNumber = pageIndex + 1;
+      this.renderer.scrollToPdfDestination(
+        pageNumber, await this.pdf.getPage(pageNumber), explicitDestination
+      );
+    } catch (error) {
+      console.warn('Unable to follow PDF destination', error);
+    }
+  }
+
+  getDestinationHash () {
+    return '#';
+  }
+
+  getAnchorUrl () {
+    return '#';
+  }
+
+  executeNamedAction (action: string) {
+    if (action === 'NextPage') this.renderer.scrollToRelativePage(1);
+    if (action === 'PrevPage') this.renderer.scrollToRelativePage(-1);
+  }
+}
+
 class PdfRenderer {
   protected pdfjsLib: iPdfLib;
   protected pdfUrl: any;
@@ -30,6 +91,7 @@ class PdfRenderer {
   protected sidebarProgressBarElement: HTMLElement | null;
   protected previewPanelsContainer: Element | null;
   protected manager: DocumentContent;
+  protected linkService: PdfLinkService | null = null;
   public onPreviewPanelClick: () => void = () => {};
   public onPdfLoaded: () => void = () => {};
 
@@ -61,7 +123,9 @@ class PdfRenderer {
     if ((document.location.hash || '').startsWith('#page-')) {
       try {
         initialPage = parseInt(document.location.hash.substring(6));
-      } catch {}
+      } catch {
+        // An invalid page hash should not prevent the document from loading.
+      }
     }
 
     this.root.removeAttribute('data-large-pdf');
@@ -142,13 +206,28 @@ class PdfRenderer {
     this.scrollToPage(e.currentTarget.dataset.page);
   }
 
-  scrollToPage (pageNumber: string | number | undefined) {
+  scrollToPage (pageNumber: string | number | undefined, offset: number = 0) {
     const targetPage = this.root.querySelector(`.pdf-content__page[data-page="${pageNumber}"]`);
     if (!targetPage) return;
     this.scrollListenerActive = false;
     scrollToElement(targetPage as HTMLElement, () => {
       this.scrollListenerActive = true;
-    });
+    }, offset);
+  }
+
+  scrollToPdfDestination (pageNumber: number, page: any, destination: any[]) {
+    const targetPage = this.root.querySelector<HTMLElement>(`.pdf-content__page[data-page="${pageNumber}"]`);
+    const destinationType = destination[1]?.name;
+    const destinationY = destination[3];
+    if (!targetPage || destinationType !== 'XYZ' || typeof destinationY !== 'number') {
+      this.scrollToPage(pageNumber);
+      return;
+    }
+
+    const unscaledViewport = page.getViewport({ scale: 1 });
+    const viewport = page.getViewport({ scale: targetPage.clientWidth / unscaledViewport.width });
+    const [, offset] = viewport.convertToViewportPoint(destination[2] || 0, destinationY);
+    this.scrollToPage(pageNumber, offset);
   }
 
   triggerScrollToPage (pageNumber: string | number) {
@@ -156,6 +235,13 @@ class PdfRenderer {
     if (!panel) return;
     this.activatePreviewPanel(panel);
     this.scrollToPage(pageNumber);
+  }
+
+  scrollToRelativePage (direction: number) {
+    const pages = Array.from(this.root.querySelectorAll<HTMLElement>('.pdf-content__page'));
+    const currentPage = pages.findIndex(page => window.scrollY < page.offsetTop + page.offsetHeight);
+    const nextPage = pages[currentPage + direction];
+    if (nextPage) this.scrollToPage(nextPage.dataset.page);
   }
 
   async setupPdfAndPreviewPanels (initialPage: number | null) {
@@ -201,6 +287,7 @@ class PdfRenderer {
 
     try {
       const pdf = await loadingTask.promise;
+      this.linkService = new PdfLinkService(pdf, this);
       this.root.removeAttribute('data-pdf-loading');
       this.updateSidebarPageProgress(0, pdf.numPages);
 
@@ -260,6 +347,7 @@ class PdfRenderer {
     // add the text layer
     pageContainer.append(this.addImageLayer(page, containerWidth, canvas));
     pageContainer.append(await this.addTextLayer(page, containerWidth, canvas));
+    pageContainer.append(await this.addLinkLayer(page, containerWidth, canvas));
     // add image previews
     this.addPreviewPanel(canvas, index + 1);
   }
@@ -309,6 +397,43 @@ class PdfRenderer {
     });
 
     return textLayer;
+  }
+
+  async addLinkLayer (page: any, containerWidth: number, canvas: HTMLCanvasElement) {
+    const linkLayer = document.createElement('div');
+    linkLayer.classList.add('annotationLayer');
+
+    let viewport = page.getViewport({ scale: 1 });
+    const linkScale = containerWidth / viewport.width;
+    viewport = page.getViewport({ scale: linkScale });
+
+    linkLayer.style.left = `${canvas.offsetLeft}px`;
+    linkLayer.style.top = `${canvas.offsetTop}px`;
+    linkLayer.style.height = `${viewport.height}px`;
+    linkLayer.style.width = `${viewport.width}px`;
+
+    const annotations = (await page.getAnnotations({ intent: 'display' }))
+      // AnnotationType is not publicly exported by PDF.js 2.14, while the
+      // subtype string is part of the annotation data returned by getAnnotations.
+      .filter((annotation: any) => annotation.subtype === 'Link');
+
+    if (annotations.length && this.linkService) {
+      this.pdfjsLib.AnnotationLayer.render({
+        annotations,
+        div: linkLayer,
+        page,
+        viewport: viewport.clone({ dontFlip: true }),
+        linkService: this.linkService,
+        downloadManager: null,
+        renderForms: false
+      });
+
+      for (const anchor of Array.from(linkLayer.querySelectorAll<HTMLAnchorElement>('a'))) {
+        anchor.setAttribute('aria-label', anchor.title || i18next.t('PDF link'));
+      }
+    }
+
+    return linkLayer;
   }
 
   addPreviewPanel (canvas: HTMLCanvasElement, pageNum: number) {
