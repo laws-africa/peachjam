@@ -7,8 +7,10 @@ search behaviour without attempting to recreate Elasticsearch's entire query DSL
 keeps ownership of filters, aggregations, retrievers and concrete query objects.
 """
 
+from collections.abc import Callable
 from copy import deepcopy
 from dataclasses import asdict, dataclass, field, is_dataclass
+from functools import lru_cache
 from typing import Any, ClassVar, Literal
 
 from django.conf import settings
@@ -135,6 +137,10 @@ class QueryAnalysis:
     intent: str | None = None
     confidence: float | None = None
     components: dict[str, Any] = field(default_factory=dict)
+    # The label returned by the classifier or supplied by a deterministic
+    # caller. ``intent`` is the effective label used for profile selection.
+    classifier_intent: str | None = None
+    intent_reason: str | None = None
 
     def to_dict(self):
         return asdict(self)
@@ -214,20 +220,144 @@ class SearchPlan:
         return serialise(self)
 
 
+def get_model_nature_names(model: Any) -> frozenset[str]:
+    """Return a model's indexed nature names in every configured language."""
+    fields = ["nature__name"]
+    fields.extend(
+        f"nature__name_{language_code.replace('-', '_')}"
+        for language_code, _language_name in settings.LANGUAGES
+    )
+
+    return frozenset(
+        name
+        for names in model.objects.order_by().values_list(*fields).distinct()
+        for name in names
+        if name
+    )
+
+
+@lru_cache(maxsize=1)
+def get_profile_compatible_natures() -> dict[str, frozenset[str]]:
+    """Get nature names supported by each model-specific classifier label.
+
+    The three small queries are cached for the process lifetime. This avoids
+    database work on ordinary searches while still naturally refreshing when a
+    worker restarts after document-nature changes.
+    """
+    from peachjam.models import Gazette, Judgment, Legislation
+
+    legislation_natures = get_model_nature_names(Legislation)
+    judgment_natures = get_model_nature_names(Judgment)
+    gazette_natures = get_model_nature_names(Gazette)
+
+    return {
+        "act_name": legislation_natures,
+        "act_number": legislation_natures,
+        "act_section": legislation_natures,
+        "case_name": judgment_natures,
+        "case_number": judgment_natures,
+        "gazette_number": gazette_natures,
+    }
+
+
+def clear_profile_compatible_natures_cache() -> None:
+    """Clear the process-local cache for tests and explicit maintenance."""
+    get_profile_compatible_natures.cache_clear()
+
+
 class QueryAnalyser:
     """Adapt the query classifier to the search-planning interface."""
 
-    def __init__(self, classifier=None):
+    def __init__(
+        self,
+        classifier: Any | None = None,
+        compatible_natures: Callable[
+            [], dict[str, frozenset[str]]
+        ] = get_profile_compatible_natures,
+    ) -> None:
         self.classifier = classifier or QueryClassifier()
+        self.compatible_natures = compatible_natures
 
-    def analyse(self, query):
-        qclass = self.classifier.classify(query or "")
-        return QueryAnalysis(
-            raw_query=query or "",
+    def analyse(self, search_query: SearchQuery) -> QueryAnalysis:
+        """Classify an ordinary search, then resolve its effective intent."""
+        if search_query.is_advanced:
+            query = search_query.query or ""
+            return QueryAnalysis(
+                raw_query=query,
+                clean_query=query,
+                intent_reason="advanced_manual",
+            )
+
+        qclass = self.classifier.classify(search_query.query or "")
+        classifier_intent = qclass.label.value if qclass.label else None
+        return self.build_analysis(
+            search_query,
             clean_query=qclass.query_clean,
-            intent=qclass.label.value if qclass.label else None,
+            classifier_intent=classifier_intent,
             confidence=qclass.confidence,
+            intent_reason="classifier",
         )
+
+    def analyse_with_intent(
+        self,
+        search_query: SearchQuery,
+        classifier_intent: str | None,
+        confidence: float | None = None,
+    ) -> QueryAnalysis:
+        """Apply a known label without running the classifier.
+
+        Benchmarking uses this to keep relevance measurements deterministic
+        while retaining the same nature-compatibility behaviour as production.
+        """
+        return self.build_analysis(
+            search_query,
+            clean_query=search_query.query or "",
+            classifier_intent=classifier_intent,
+            confidence=confidence,
+            intent_reason="override",
+        )
+
+    def build_analysis(
+        self,
+        search_query: SearchQuery,
+        clean_query: str,
+        classifier_intent: str | None,
+        confidence: float | None,
+        intent_reason: str,
+    ) -> QueryAnalysis:
+        """Create analysis with a profile intent that honours nature filters."""
+        intent, intent_reason = self.resolve_intent(
+            search_query, classifier_intent, intent_reason
+        )
+        return QueryAnalysis(
+            raw_query=search_query.query or "",
+            clean_query=clean_query,
+            classifier_intent=classifier_intent,
+            intent=intent,
+            confidence=confidence,
+            intent_reason=intent_reason,
+        )
+
+    def resolve_intent(
+        self,
+        search_query: SearchQuery,
+        classifier_intent: str | None,
+        intent_reason: str,
+    ) -> tuple[str | None, str]:
+        """Use the default profile when the selected nature rejects an intent."""
+        if not classifier_intent:
+            return None, "unclassified"
+
+        selected_natures = search_query.filters.get("nature", [])
+        if isinstance(selected_natures, str):
+            selected_natures = [selected_natures]
+        selected_natures = frozenset(selected_natures)
+        if selected_natures:
+            compatible_natures = self.compatible_natures().get(classifier_intent)
+            if compatible_natures and compatible_natures.isdisjoint(selected_natures):
+                return None, "nature_incompatible"
+
+        return classifier_intent, intent_reason
 
 
 class SearchPlanner:
@@ -253,11 +383,7 @@ class SearchPlanner:
         self.semantic_k = semantic_k or self.default_semantic_k
 
     def build(self, search_query: SearchQuery, analysis: QueryAnalysis) -> SearchPlan:
-        if search_query.is_advanced:
-            # don't use label classification search profiles for advanced searches
-            profile = self.profile_set.default
-        else:
-            profile = self.profile_set.get_profile(analysis.intent)
+        profile = self.profile_set.get_profile(analysis.intent)
 
         if search_query.is_advanced:
             retrieval_clauses = [RetrievalClause("advanced_per_field")]

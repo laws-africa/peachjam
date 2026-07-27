@@ -464,7 +464,7 @@ class SearchViewsTest(TestCase):
         self.assertNotIn("data-position", html)
         self.assertNotIn("data-frbr-uri", html)
 
-    def test_search_trace_strips_null_bytes_before_saving(self):
+    def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
 
         def create(**kwargs):
@@ -512,8 +512,11 @@ class SearchViewsTest(TestCase):
         self.assertEqual({}, captured["filters"])
         self.assertEqual("prefix selected", captured["suggestion"])
         self.assertEqual("agent-browser", captured["user_agent"])
-        self.assertEqual("nul search", captured["query_clean"])
-        self.assertEqual("nul search", captured["query_analysis"]["clean_query"])
+        self.assertIsNone(captured["query_clean"])
+        self.assertIsNone(captured["query_clean_n_chars"])
+        self.assertIsNone(captured["query_clean_n_words"])
+        self.assertIsNone(captured["query_classification"])
+        self.assertIsNone(captured["query_analysis"])
         self.assertIsNone(captured["search_profile"])
         self.assertNotIn("\x00", captured["filters_string"])
 

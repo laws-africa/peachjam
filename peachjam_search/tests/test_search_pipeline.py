@@ -69,12 +69,68 @@ class SearchPipelineTest(SimpleTestCase):
 
     def test_analyser_adapts_query_classifier(self):
         analysis = QueryAnalyser(classifier=FakeClassifier()).analyse(
-            " Example v State "
+            self.request(query=" Example v State ")
         )
 
         self.assertEqual("Example v State", analysis.clean_query)
+        self.assertEqual("case_name", analysis.classifier_intent)
         self.assertEqual("case_name", analysis.intent)
         self.assertEqual(0.9, analysis.confidence)
+
+    def test_analyser_uses_default_profile_when_nature_is_incompatible(self):
+        analyser = QueryAnalyser(
+            classifier=FakeClassifier(),
+            compatible_natures=lambda: {"case_name": frozenset({"Judgment"})},
+        )
+
+        analysis = analyser.analyse(self.request(filters={"nature": ["Act"]}))
+
+        self.assertEqual("case_name", analysis.classifier_intent)
+        self.assertIsNone(analysis.intent)
+        self.assertEqual("nature_incompatible", analysis.intent_reason)
+        self.assertEqual(
+            "default", self.planner.build(self.request(), analysis).profile.name
+        )
+
+    def test_analyser_keeps_intent_when_nature_is_compatible(self):
+        analyser = QueryAnalyser(
+            classifier=FakeClassifier(),
+            compatible_natures=lambda: {"case_name": frozenset({"Judgment"})},
+        )
+
+        analysis = analyser.analyse(
+            self.request(filters={"nature": ["Judgment", "Act"]})
+        )
+
+        self.assertEqual("case_name", analysis.classifier_intent)
+        self.assertEqual("case_name", analysis.intent)
+        self.assertEqual("classifier", analysis.intent_reason)
+
+    def test_analyser_does_not_classify_advanced_searches(self):
+        classifier = FakeClassifier()
+        classifier.classify = lambda query: self.fail("classifier must not run")
+        analysis = QueryAnalyser(classifier=classifier).analyse(
+            self.request(field_queries={"case_name": "Example v State"})
+        )
+
+        self.assertIsNone(analysis.classifier_intent)
+        self.assertIsNone(analysis.intent)
+        self.assertEqual("advanced_manual", analysis.intent_reason)
+
+    def test_analyser_applies_nature_compatibility_to_label_overrides(self):
+        analyser = QueryAnalyser(
+            compatible_natures=lambda: {"act_name": frozenset({"Act"})}
+        )
+
+        analysis = analyser.analyse_with_intent(
+            self.request(filters={"nature": ["Judgment"]}),
+            classifier_intent="act_name",
+            confidence=1.0,
+        )
+
+        self.assertEqual("act_name", analysis.classifier_intent)
+        self.assertIsNone(analysis.intent)
+        self.assertEqual("nature_incompatible", analysis.intent_reason)
 
     def test_planner_uses_label_profile_and_legacy_text_clauses(self):
         analysis = QueryAnalysis(
@@ -96,11 +152,23 @@ class SearchPipelineTest(SimpleTestCase):
         )
         self.assertEqual(
             {
-                "basic": ("Example v State", 1.0),
-                "basic_phrase": ("Example v State", 1.0),
-                "content_phrase": ("Example v State", 1.0),
-                "nested_pages": ("Example v State", 1.0),
-                "nested_provisions": ("Example v State", 1.0),
+                "basic": ("Example v State", plan.profile.basic_query_boost),
+                "basic_phrase": (
+                    "Example v State",
+                    plan.profile.basic_phrase_query_boost,
+                ),
+                "content_phrase": (
+                    "Example v State",
+                    plan.profile.content_phrase_query_boost,
+                ),
+                "nested_pages": (
+                    "Example v State",
+                    plan.profile.nested_pages_query_boost,
+                ),
+                "nested_provisions": (
+                    "Example v State",
+                    plan.profile.nested_provisions_query_boost,
+                ),
             },
             {
                 clause.name: (clause.query, clause.boost)
@@ -113,7 +181,9 @@ class SearchPipelineTest(SimpleTestCase):
 
     def test_manual_advanced_search_uses_default_profile_without_analysis(self):
         request = self.request(field_queries={"case_name": "Example v State"})
-        analysis = QueryAnalysis(raw_query="", clean_query="")
+        analysis = QueryAnalysis(
+            raw_query="", clean_query="", intent_reason="advanced_manual"
+        )
 
         plan = self.planner.build(request, analysis)
 

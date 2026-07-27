@@ -380,7 +380,7 @@ class TestSearchEngine(TestCase):
 
         payload = engine.build_debug_payload()
 
-        analyser.analyse.assert_called_once_with("example search")
+        analyser.analyse.assert_called_once_with(engine.search_query)
         self.assertEqual("case_name", engine.analysis.intent)
         self.assertIn("query_vector", json.dumps(payload["query"]))
         self.assertNotIn("0.1", json.dumps(payload["redacted_query"]))
@@ -403,7 +403,7 @@ class TestSearchEngine(TestCase):
 
         plan = engine.build_plan()
 
-        analyser.analyse.assert_called_once_with("example search")
+        analyser.analyse.assert_called_once_with(engine.search_query)
         self.assertEqual("case_name", plan.analysis.intent)
         self.assertEqual("text", plan.mode)
         self.assertIsNone(plan.semantic_retrieval)
@@ -938,6 +938,11 @@ class TestSearchEngine(TestCase):
                         use_pagerank_settings=False,
                         pagerank_boost_value=5,
                         pagerank_pivot_value=10,
+                        function_score_weights={
+                            "principal": 1.0,
+                            "commenced": 1.0,
+                            "repealed": 1.0,
+                        },
                     )
                 )
             )
@@ -1019,7 +1024,15 @@ class TestSearchEngine(TestCase):
         )
 
     def test_neutral_function_weights_do_not_wrap_the_lexical_query(self):
-        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet()))
+        profile = replace(
+            SearchProfile.default(),
+            function_score_weights={
+                "principal": 1.0,
+                "commenced": 1.0,
+                "repealed": 1.0,
+            },
+        )
+        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet(default=profile)))
         engine.set_search_query(replace(engine.search_query, query="income tax"))
 
         self.assertEqual((), engine.build_plan().function_scores)
@@ -1077,6 +1090,11 @@ class TestSearchEngine(TestCase):
             content_phrase_query_boost=4,
             nested_pages_query_boost=5,
             nested_provisions_query_boost=6,
+            function_score_weights={
+                "principal": 1.0,
+                "commenced": 1.0,
+                "repealed": 1.0,
+            },
         )
         engine = SearchEngine(planner=SearchPlanner(SearchProfileSet(default=profile)))
         engine.set_search_query(replace(engine.search_query, query="civil procedure"))
@@ -1091,7 +1109,15 @@ class TestSearchEngine(TestCase):
         self.assertEqual(6, should_queries[6]["nested"]["boost"])
 
     def test_compiler_keeps_duplicate_retrieval_clauses_with_distinct_queries(self):
-        engine = SearchEngine()
+        profile = replace(
+            SearchProfile.default(),
+            function_score_weights={
+                "principal": 1.0,
+                "commenced": 1.0,
+                "repealed": 1.0,
+            },
+        )
+        engine = SearchEngine(planner=SearchPlanner(SearchProfileSet(default=profile)))
         engine.set_search_query(replace(engine.search_query, query="original"))
         engine.build_plan()
         engine.plan = replace(
@@ -1860,7 +1886,19 @@ class TestSearchEngine(TestCase):
         )
         engine = PortionSearchEngine(
             search_query,
-            planner=SearchPlanner(semantic_k=5),
+            planner=SearchPlanner(
+                SearchProfileSet(
+                    default=replace(
+                        SearchProfile.default(),
+                        function_score_weights={
+                            "principal": 1.0,
+                            "commenced": 1.0,
+                            "repealed": 1.0,
+                        },
+                    )
+                ),
+                semantic_k=5,
+            ),
             analyser=analyser,
         )
         with patch.object(

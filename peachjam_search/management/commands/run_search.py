@@ -15,7 +15,7 @@ from peachjam_search.documents import MultiLanguageIndexManager
 from peachjam_search.engine import SearchEngine
 from peachjam_search.forms import SearchForm
 from peachjam_search.profiles import SearchProfileSet
-from peachjam_search.search_pipeline import QueryAnalysis, SearchPlanner, SearchQuery
+from peachjam_search.search_pipeline import SearchPlanner, SearchQuery
 from peachjam_search.serializers import SearchHit
 
 
@@ -165,10 +165,9 @@ class Command(BaseCommand):
 
     def apply_intent_override(self, engine: SearchEngine, intent: str | None) -> None:
         if intent:
-            engine.analysis = QueryAnalysis(
-                raw_query=engine.search_query.query or "",
-                clean_query=engine.search_query.query or "",
-                intent=intent,
+            engine.analysis = engine.analyser.analyse_with_intent(
+                engine.search_query,
+                classifier_intent=intent,
                 confidence=1.0,
             )
 

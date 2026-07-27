@@ -74,13 +74,7 @@ class SearchEngine:
 
     def analyse(self) -> QueryAnalysis:
         if self.analysis is None:
-            if self.search_query.is_advanced:
-                self.analysis = QueryAnalysis(
-                    raw_query=self.search_query.query or "",
-                    clean_query=self.search_query.query or "",
-                )
-            else:
-                self.analysis = self.analyser.analyse(self.search_query.query or "")
+            self.analysis = self.analyser.analyse(self.search_query)
         return self.analysis
 
     def build_plan(self) -> SearchPlan:

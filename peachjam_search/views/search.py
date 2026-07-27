@@ -42,7 +42,6 @@ from peachjam.resources import DownloadDocumentsResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
-from peachjam_search.classifier import QueryClassifier
 from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
@@ -302,20 +301,10 @@ class DocumentSearchView(TemplateView):
         suggestion = strip_null_bytes(self.request.GET.get("suggestion", "")[:1024])
 
         analysis = getattr(engine, "analysis", None)
-        if analysis is None:
-            qclass = self.classify_query(search)
-            analysis_data = {
-                "raw_query": search,
-                "clean_query": qclass.query_clean,
-                "intent": qclass.label.value if qclass.label else None,
-                "confidence": qclass.confidence,
-                "components": {},
-            }
-            profile_name = None
-        else:
-            analysis_data = strip_null_bytes(analysis.to_dict())
-            profile = getattr(getattr(engine, "plan", None), "profile", None)
-            profile_name = profile.name if profile else None
+        analysis_data = strip_null_bytes(analysis.to_dict()) if analysis else None
+        profile = getattr(getattr(engine, "plan", None), "profile", None)
+        profile_name = profile.name if profile else None
+        clean_query = analysis_data["clean_query"] if analysis_data else None
 
         with transaction.atomic():
             return SearchTrace.objects.create(
@@ -333,17 +322,20 @@ class DocumentSearchView(TemplateView):
                 suggestion=suggestion,
                 ip_address=self.request.headers.get("x-forwarded-for"),
                 user_agent=self.request.headers.get("user-agent"),
-                query_clean=analysis_data["clean_query"],
-                query_clean_n_words=len((analysis_data["clean_query"] or "").split()),
-                query_clean_n_chars=len(analysis_data["clean_query"] or ""),
-                query_classification=analysis_data["intent"],
-                query_classification_confidence=analysis_data["confidence"],
+                query_clean=clean_query,
+                query_clean_n_words=len(clean_query.split()) if clean_query else None,
+                query_clean_n_chars=len(clean_query) if clean_query else None,
+                query_classification=(
+                    analysis_data.get("classifier_intent") or analysis_data["intent"]
+                    if analysis_data
+                    else None
+                ),
+                query_classification_confidence=(
+                    analysis_data["confidence"] if analysis_data else None
+                ),
                 query_analysis=analysis_data,
                 search_profile=profile_name,
             )
-
-    def classify_query(self, query):
-        return QueryClassifier().classify(query)
 
 
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
