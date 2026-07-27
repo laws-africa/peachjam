@@ -1,8 +1,12 @@
+import base64
+import binascii
+import hmac
 import logging
 import re
 from urllib.parse import urlencode
 
 from django.conf import settings
+from django.http import HttpResponse
 from django.middleware.cache import UpdateCacheMiddleware
 from django.shortcuts import redirect
 from django.urls import Resolver404, resolve, reverse
@@ -14,6 +18,60 @@ from peachjam.models import UserProfile
 from peachjam.sentry import get_sentry_sampling_mode_from_request
 
 log = logging.getLogger(__name__)
+
+
+class BasicAuthMiddleware:
+    """Protect requests with HTTP Basic auth when configured in Django settings."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.username = getattr(settings, "BASIC_AUTH_USERNAME", "")
+        self.password = getattr(settings, "BASIC_AUTH_PASSWORD", "")
+        self.realm = getattr(settings, "BASIC_AUTH_REALM", "Restricted")
+        self.excluded_path_prefixes = tuple(
+            getattr(settings, "BASIC_AUTH_EXCLUDED_PATH_PREFIXES", ())
+        )
+
+    def __call__(self, request):
+        if not self.is_enabled() or self.is_excluded(request):
+            return self.get_response(request)
+
+        if self.is_authorized(request):
+            return self.get_response(request)
+
+        response = HttpResponse("Authentication required", status=401)
+        response["WWW-Authenticate"] = f'Basic realm="{self.clean_realm()}"'
+        return response
+
+    def is_enabled(self):
+        return bool(self.username and self.password)
+
+    def is_excluded(self, request):
+        return any(
+            request.path_info.startswith(prefix)
+            for prefix in self.excluded_path_prefixes
+        )
+
+    def is_authorized(self, request):
+        auth = request.META.get("HTTP_AUTHORIZATION", "")
+        auth_scheme, has_credentials, credentials = auth.partition(" ")
+        if auth_scheme.lower() != "basic" or not has_credentials:
+            return False
+
+        try:
+            decoded_credentials = base64.b64decode(credentials.strip()).decode("utf-8")
+            username, password = decoded_credentials.split(":", 1)
+        except (binascii.Error, UnicodeDecodeError, ValueError):
+            return False
+
+        return hmac.compare_digest(
+            username.encode("utf-8"), self.username.encode("utf-8")
+        ) and hmac.compare_digest(
+            password.encode("utf-8"), self.password.encode("utf-8")
+        )
+
+    def clean_realm(self):
+        return self.realm.replace('"', "")
 
 
 class LogContextMiddleware:
