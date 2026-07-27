@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 
 [tool.setuptools.package-data]
+"peachjam_search" = ["search_profile_set.json"]
 "peachjam_search.classifier" = ["query_classifier_model.joblib"]
 
 [project]

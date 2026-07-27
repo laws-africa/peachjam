@@ -12,7 +12,7 @@
   {% if not hits %}
     <p>{% trans "No local documents matched the Elasticsearch hits." %}</p>
   {% endif %}
-  {% include "peachjam_search/_debug_json_tabs.html" with prefix="document-debug" query_json=query_json response_json=raw_response_json %}
+  {% include "peachjam_search/_debug_json_tabs.html" with prefix="document-debug" query_json=query_json response_json=raw_response_json extra_json=planning_json extra_label="Analysis and plan" %}
   {% if hits %}
     {% include "peachjam_search/_search_hit_list.html" %}
   {% endif %}

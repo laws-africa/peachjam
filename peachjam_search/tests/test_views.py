@@ -16,6 +16,7 @@ from elasticsearch_dsl.response import Response
 from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import SearchTrace
+from peachjam_search.search_pipeline import QueryAnalysis, SearchQuery
 from peachjam_search.views.api import PortionSearchView
 from peachjam_search.views.search import DocumentSearchView
 
@@ -38,7 +39,7 @@ class SearchViewsTest(TestCase):
             ),
         )
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_explain(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -91,7 +92,7 @@ class SearchViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Search debug")
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_document_search_debug(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -133,7 +134,7 @@ class SearchViewsTest(TestCase):
         self.assertNotContains(response, "&lt;Response:")
 
     @patch("peachjam_search.views.api.PortionSearchView.load_portion_details")
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_portion_search_debug(self, mock_search, mock_load_portion_details):
         expression_frbr_uri = "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
 
@@ -216,11 +217,13 @@ class SearchViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Query size must be 25 or less")
 
-    @patch("peachjam_search.views.search.SearchEngine")
-    def test_raw_search_debug_executes_against_configured_index(self, mock_engine_cls):
+    @patch("peachjam_search.views.search.ElasticsearchSearchCompiler")
+    def test_raw_search_debug_executes_against_configured_index(
+        self, mock_compiler_cls
+    ):
         client = Mock()
         client.search.return_value = {"hits": {"hits": []}}
-        mock_engine_cls.return_value = SimpleNamespace(
+        mock_compiler_cls.return_value = SimpleNamespace(
             index=["test-index"], client=client
         )
 
@@ -270,7 +273,7 @@ class SearchViewsTest(TestCase):
         self.assertIn("canDebugSearch", source)
         self.assertIn("/search/debug/", source)
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_download(self, mock_search):
         doc = CoreDocument.objects.first()
         # this tests escaping dodgy chars in xlsx
@@ -317,8 +320,8 @@ class SearchViewsTest(TestCase):
             "SEARCH_SEMANTIC": True,
         }
     )
-    @patch("peachjam_search.engine.SearchEngine.get_query_embedding")
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.ElasticsearchSearchCompiler.get_query_embedding")
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_hybrid_download_expands_retriever_window(
         self, mock_search, mock_get_query_embedding
     ):
@@ -358,7 +361,7 @@ class SearchViewsTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_search(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -393,7 +396,7 @@ class SearchViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("max-age=900", response.headers["Cache-Control"])
 
-    @patch("peachjam_search.engine.RetrieverSearch.execute", autospec=True)
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_search_includes_entity_hits_above_document_hits(self, mock_search):
         doc = CoreDocument.objects.first()
 
@@ -461,7 +464,7 @@ class SearchViewsTest(TestCase):
         self.assertNotIn("data-position", html)
         self.assertNotIn("data-frbr-uri", html)
 
-    def test_search_trace_strips_null_bytes_before_saving(self):
+    def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
 
         def create(**kwargs):
@@ -481,7 +484,20 @@ class SearchViewsTest(TestCase):
 
         view = DocumentSearchView()
         view.request = request
-        engine = SimpleNamespace(field_queries={}, filters={}, mode="text", page=1)
+        engine = SimpleNamespace(
+            search_query=SearchQuery(
+                query=None,
+                field_queries={},
+                mode="text",
+                filters={},
+                facets=[],
+                page=1,
+                page_size=10,
+                ordering="-score",
+                explain=False,
+            ),
+            plan=SimpleNamespace(mode="text", profile=None),
+        )
 
         with patch(
             "peachjam_search.views.search.SearchTrace.objects.create",
@@ -496,8 +512,60 @@ class SearchViewsTest(TestCase):
         self.assertEqual({}, captured["filters"])
         self.assertEqual("prefix selected", captured["suggestion"])
         self.assertEqual("agent-browser", captured["user_agent"])
-        self.assertEqual("nul search", captured["query_clean"])
+        self.assertIsNone(captured["query_clean"])
+        self.assertIsNone(captured["query_clean_n_chars"])
+        self.assertIsNone(captured["query_clean_n_words"])
+        self.assertIsNone(captured["query_classification"])
+        self.assertIsNone(captured["query_analysis"])
+        self.assertIsNone(captured["search_profile"])
         self.assertNotIn("\x00", captured["filters_string"])
+
+    def test_search_trace_uses_pipeline_analysis(self):
+        captured = {}
+
+        def create(**kwargs):
+            captured.update(kwargs)
+            return SimpleNamespace(id=uuid4())
+
+        request = RequestFactory().get(
+            reverse("search:search_documents"), {"search": "nul\x00search"}
+        )
+        request.user = self.user
+        request.id = "none"
+        view = DocumentSearchView()
+        view.request = request
+        engine = SimpleNamespace(
+            search_query=SearchQuery(
+                query=None,
+                field_queries={},
+                mode="text",
+                filters={},
+                facets=[],
+                page=1,
+                page_size=10,
+                ordering="-score",
+                explain=False,
+            ),
+            analysis=QueryAnalysis(
+                raw_query="nul\x00search",
+                clean_query="nul\x00search",
+                intent="legal_term",
+                confidence=0.9,
+            ),
+            plan=SimpleNamespace(
+                mode="text", profile=SimpleNamespace(name="legal_term")
+            ),
+        )
+
+        with patch(
+            "peachjam_search.views.search.SearchTrace.objects.create",
+            side_effect=create,
+        ):
+            view.save_search_trace(engine, 1)
+
+        self.assertEqual("legal_term", captured["query_classification"])
+        self.assertEqual("legal_term", captured["search_profile"])
+        self.assertEqual("nul search", captured["query_analysis"]["clean_query"])
 
     def test_search_hit_links_open_in_same_tab(self):
         request = RequestFactory().get("/search/?search=test")

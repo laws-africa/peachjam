@@ -10,7 +10,8 @@ from rest_framework.views import APIView
 
 from peachjam.models import Judgment
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
-from peachjam_search.engine import PortionSearchEngine
+from peachjam_search.engine import PortionSearchEngine, make_portion_search_query
+from peachjam_search.search_pipeline import SearchPlanner
 from peachjam_search.serializers import (
     PortionContent,
     PortionHit,
@@ -35,17 +36,14 @@ class PortionSearchView(APIView):
         serializer.is_valid(raise_exception=True)
         input_data = serializer.validated_data
 
-        self.engine = PortionSearchEngine()
-        self.engine.query = input_data["text"]
-        self.engine.knn_k = (
-            input_data["top_k"] * 10
-        )  # retrieve more to allow for combining chunks
-
-        self.engine.filters = []
-        if input_data.get("pre_filters", None):
-            self.engine.filters.append(input_data["pre_filters"])
-        if input_data.get("filters", None):
-            self.engine.filters.append(input_data["filters"])
+        filters = [
+            input_data[field]
+            for field in ("pre_filters", "filters")
+            if input_data.get(field)
+        ]
+        search_query = make_portion_search_query(input_data["text"], filters)
+        planner = SearchPlanner(semantic_k=input_data["top_k"] * 10)
+        self.engine = PortionSearchEngine(search_query, planner=planner)
 
         es_response = self.engine.execute()
 
@@ -266,7 +264,10 @@ class PortionSearchView(APIView):
         have multiple chunks. We do this by querying Elasticsearch again, using the "provisions" and "pages" nested
         fields."""
 
-        search = Search(using=self.engine.client, index=self.engine.index)
+        search = Search(
+            using=self.engine.compiler.client,
+            index=self.engine.compiler.index,
+        )
         search = search.source(["expression_frbr_uri"])
         provision_filters = [
             [

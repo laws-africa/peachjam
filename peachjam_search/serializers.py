@@ -53,7 +53,7 @@ class SearchHit:
         # determine best match: is the first result's score significantly better than the next?
         # hits may not have scores if results are not ordered by score
         if (
-            engine.page == 1
+            engine.search_query.page == 1
             and len(hits) > 1
             and hits[0].score
             and hits[1].score
@@ -70,7 +70,9 @@ class SearchHit:
             id=int(es_hit.meta.id),
             index=es_hit.meta.index,
             score=es_hit.meta.score,
-            position=(engine.page - 1) * engine.page_size + i + 1,
+            position=(engine.search_query.page - 1) * engine.search_query.page_size
+            + i
+            + 1,
             expression_frbr_uri=es_hit.expression_frbr_uri,
         )
 

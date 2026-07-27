@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -41,7 +42,7 @@ from peachjam.resources import DownloadDocumentsResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
-from peachjam_search.classifier import QueryClassifier
+from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
 from peachjam_search.forms import (
@@ -102,7 +103,7 @@ class DocumentSearchView(TemplateView):
     http_method_names = ["get"]
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
-    config_version = "2025-07-28"
+    config_version = "2026-07-24"
     user_can_debug = False
     # used by the /explain endpoint
     use_explain = False
@@ -122,7 +123,7 @@ class DocumentSearchView(TemplateView):
             form.cleaned_data["facets"] = True
 
         engine = self.make_search_engine(form)
-        if not engine.query and not engine.field_queries:
+        if not engine.search_query.query and not engine.search_query.field_queries:
             # no search term
             return JsonResponse({"error": "No search term"}, status=400), None, None
 
@@ -184,7 +185,7 @@ class DocumentSearchView(TemplateView):
         suggestions = []
 
         if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            suggestions = SearchEngine().suggest(q).suggest.to_dict()
+            suggestions = ElasticsearchSearchCompiler().suggest(q).suggest.to_dict()
             suggestions["prefix"] = suggestions["prefix"][0]
 
         response = {"suggestions": suggestions}
@@ -197,7 +198,7 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        engine.page_size = 0
+        engine.set_search_query(replace(engine.search_query, page_size=0))
         es_response = engine.execute()
 
         return self.render(
@@ -226,12 +227,15 @@ class DocumentSearchView(TemplateView):
             return HttpResponseClientRedirect(request.get_full_path())
 
         # only need the ids
-        engine.source = ["_id"]
-        engine.explain = False
-        # TODO: first 1000 hits
-        engine.page = 1
-        engine.page_size = 1000
-        engine.expand_retriever_window_to_page()
+        engine.set_search_query(
+            replace(
+                engine.search_query,
+                source=["_id"],
+                explain=False,
+                page=1,
+                page_size=1000,
+            )
+        )
         response = engine.execute()
         pks = [int(hit.meta.id) for hit in response.hits]
 
@@ -253,22 +257,20 @@ class DocumentSearchView(TemplateView):
         return response
 
     def make_search_engine(self, form):
-        engine = SearchEngine()
-        form.configure_engine(engine)
-
-        engine.explain = self.use_explain
+        mode = "text"
         if settings.PEACHJAM["SEARCH_SEMANTIC"]:
-            engine.mode = form.cleaned_data.get("mode") or engine.mode
-
-        return engine
+            mode = form.cleaned_data.get("mode") or mode
+        search_query = form.build_search_query(mode=mode)
+        search_query = replace(search_query, explain=self.use_explain)
+        return SearchEngine(search_query)
 
     def make_entity_matcher(self):
         return EntityMatcher.get_instance()
 
     def match_entities(self, engine):
-        if engine.page != 1 or engine.field_queries:
+        if engine.search_query.page != 1 or engine.search_query.field_queries:
             return []
-        return self.make_entity_matcher().match(engine.query)
+        return self.make_entity_matcher().match(engine.search_query.query)
 
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
@@ -281,41 +283,59 @@ class DocumentSearchView(TemplateView):
 
         return response
 
-    def save_search_trace(self, engine, n_results):
-        filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
+    def save_search_trace(self, engine: SearchEngine, n_results):
+        def strip_null_bytes(value):
+            if isinstance(value, str):
+                return value.replace("\00", " ")
+            if isinstance(value, dict):
+                return {key: strip_null_bytes(child) for key, child in value.items()}
+            if isinstance(value, list):
+                return [strip_null_bytes(child) for child in value]
+            return value
 
-        search = self.request.GET.get("search", "")[:2048]
-        search = search.replace("\00", " ")
-        suggestion = self.request.GET.get("suggestion", "")[:1024]
-        suggestion = suggestion.replace("\00", " ")
+        filters_string = "; ".join(
+            f"{k}={v}" for k, v in engine.search_query.filters.items()
+        )
 
-        qclass = self.classify_query(search)
+        search = strip_null_bytes(self.request.GET.get("search", "")[:2048])
+        suggestion = strip_null_bytes(self.request.GET.get("suggestion", "")[:1024])
+
+        analysis = getattr(engine, "analysis", None)
+        analysis_data = strip_null_bytes(analysis.to_dict()) if analysis else None
+        profile = getattr(getattr(engine, "plan", None), "profile", None)
+        profile_name = profile.name if profile else None
+        clean_query = analysis_data["clean_query"] if analysis_data else None
 
         with transaction.atomic():
             return SearchTrace.objects.create(
                 user=self.request.user if self.request.user.is_authenticated else None,
                 config_version=self.config_version,
                 request_id=self.request.id if self.request.id != "none" else None,
-                mode=engine.mode,
+                mode=engine.plan.mode,
                 search=search,
-                field_searches=engine.field_queries,
+                field_searches=engine.search_query.field_queries,
                 n_results=n_results,
-                page=engine.page,
-                filters=engine.filters,
+                page=engine.search_query.page,
+                filters=engine.search_query.filters,
                 filters_string=filters_string,
                 ordering=self.request.GET.get("ordering"),
                 suggestion=suggestion,
                 ip_address=self.request.headers.get("x-forwarded-for"),
                 user_agent=self.request.headers.get("user-agent"),
-                query_clean=qclass.query_clean,
-                query_clean_n_words=qclass.n_words,
-                query_clean_n_chars=qclass.n_chars,
-                query_classification=(qclass.label.value if qclass.label else None),
-                query_classification_confidence=qclass.confidence,
+                query_clean=clean_query,
+                query_clean_n_words=len(clean_query.split()) if clean_query else None,
+                query_clean_n_chars=len(clean_query) if clean_query else None,
+                query_classification=(
+                    analysis_data.get("classifier_intent") or analysis_data["intent"]
+                    if analysis_data
+                    else None
+                ),
+                query_classification_confidence=(
+                    analysis_data["confidence"] if analysis_data else None
+                ),
+                query_analysis=analysis_data,
+                search_profile=profile_name,
             )
-
-    def classify_query(self, query):
-        return QueryClassifier().classify(query)
 
 
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
@@ -364,10 +384,10 @@ class DocumentSearchDebugView(SearchDebugMixin, View):
         if not form.is_valid():
             return self.render({"form": form})
 
-        engine = SearchEngine()
-        form.configure_engine(engine)
+        mode = "text"
         if settings.PEACHJAM["SEARCH_SEMANTIC"]:
-            engine.mode = form.cleaned_data.get("mode") or engine.mode
+            mode = form.cleaned_data.get("mode") or mode
+        engine = SearchEngine(form.build_search_query(mode=mode))
 
         debug_payload = engine.build_debug_payload()
         es_response = engine.execute()
@@ -381,6 +401,12 @@ class DocumentSearchDebugView(SearchDebugMixin, View):
                 "query_params": params.urlencode(),
                 "query_json": debug_json(debug_payload["redacted_query"]),
                 "raw_response_json": debug_json(es_response),
+                "planning_json": debug_json(
+                    {
+                        "analysis": debug_payload["analysis"],
+                        "plan": debug_payload["plan"],
+                    }
+                ),
                 "count": es_response.hits.total.value,
                 "hits": hits,
                 "can_debug": True,
@@ -428,17 +454,20 @@ class PortionSearchDebugView(SearchDebugMixin, View):
         )
 
     def make_engine(self, input_data):
-        from peachjam_search.engine import PortionSearchEngine
+        from peachjam_search.engine import (
+            PortionSearchEngine,
+            make_portion_search_query,
+        )
+        from peachjam_search.search_pipeline import SearchPlanner
 
-        engine = PortionSearchEngine()
-        engine.query = input_data["text"]
-        engine.knn_k = input_data["top_k"] * 10
-        engine.filters = []
-        if input_data.get("pre_filters", None):
-            engine.filters.append(input_data["pre_filters"])
-        if input_data.get("filters", None):
-            engine.filters.append(input_data["filters"])
-        return engine
+        filters = [
+            input_data[field]
+            for field in ("pre_filters", "filters")
+            if input_data.get(field)
+        ]
+        search_query = make_portion_search_query(input_data["text"], filters)
+        planner = SearchPlanner(semantic_k=input_data["top_k"] * 10)
+        return PortionSearchEngine(search_query, planner=planner)
 
     def render(self, context):
         return HttpResponse(render_to_string(self.template_name, context, self.request))
@@ -457,13 +486,13 @@ class RawSearchDebugView(SearchDebugMixin, View):
         if form.cleaned_data.get("size") is not None:
             query["size"] = form.cleaned_data["size"]
 
-        engine = SearchEngine()
-        response = engine.client.search(index=engine.index, body=query)
+        compiler = ElasticsearchSearchCompiler()
+        response = compiler.client.search(index=compiler.index, body=query)
         response_body = response.body if hasattr(response, "body") else response
         return self.render(
             {
                 "form": form,
-                "index": engine.index,
+                "index": compiler.index,
                 "query_json": debug_json(query),
                 "raw_response_json": debug_json(response_body),
             }
