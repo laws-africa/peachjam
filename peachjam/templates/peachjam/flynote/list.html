@@ -18,16 +18,58 @@
     </nav>
     <h1 id="main-page-heading">{% trans "Explore case law by topic" %}</h1>
     <p class="lead">
-      {% trans "Browse judgments organised by legal subject. Popular topics highlight where most decisions have been delivered, or explore all available topics below." %}
+      {% trans "Browse judgments organised by legal subject. Select a topic to explore more specific topics and judgments." %}
     </p>
-    <h2 class="mt-4">{% trans "Popular topics" %}</h2>
-    {% include 'peachjam/flynote/_popular.html' %}
-    <div class="d-flex justify-content-between align-items-center mb-3 mt-4">
-      <h2 class="mb-0">
-        {% trans "All topics" %}
-        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ paginator.count|intcomma }}</span>
-      </h2>
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-2 mt-4">
+      <h2 class="h4 mb-0">{% trans "Topics" %}</h2>
+      <span class="badge rounded-pill text-bg-secondary fs-6">
+        {% blocktranslate with count=topic_count|intcomma %}{{ count }} topics{% endblocktranslate %}
+      </span>
     </div>
-    {% include 'peachjam/flynote/_filter_form.html' %}
+    <form id="flynote-topic-controls"
+          class="d-flex align-items-end mb-2"
+          role="search">
+      <div class="flex-grow-1">
+        <label class="form-label fw-normal" for="flynote-topic-filter">{% trans "Filter topics" %}</label>
+        <input id="flynote-topic-filter"
+               name="q"
+               type="search"
+               class="form-control"
+               placeholder="{% trans 'Filter topics' %}"
+               value="{{ topic_query }}"
+               hx-get="{% url 'flynote_list' %}"
+               hx-trigger="input changed delay:400ms, search"
+               hx-include="#flynote-topic-controls"
+               hx-target="#flynote-topic-results"
+               hx-swap="outerHTML"
+               hx-indicator="#flynote-topic-filter-progress"/>
+      </div>
+      <div class="ms-2">
+        <label class="form-label fw-normal" for="flynote-topic-sort">{% trans "Sort topics" %}</label>
+        <select id="flynote-topic-sort"
+                name="sort"
+                class="form-select"
+                hx-get="{% url 'flynote_list' %}"
+                hx-trigger="change"
+                hx-include="#flynote-topic-controls"
+                hx-target="#flynote-topic-results"
+                hx-swap="outerHTML"
+                hx-indicator="#flynote-topic-filter-progress">
+          <option value="judgments"{% if topic_sort != 'name' %} selected{% endif %}>
+            {% trans "Most judgments" %}
+          </option>
+          <option value="name"{% if topic_sort == 'name' %} selected{% endif %}>
+            {% trans "Topic (A–Z)" %}
+          </option>
+        </select>
+      </div>
+    </form>
+    <div id="flynote-topic-filter-progress"
+         class="htmx-progress progress mb-3"
+         role="status"
+         aria-label="{% trans 'Filtering topics' %}">
+      <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
+    </div>
+    {% include 'peachjam/flynote/_topic_results.html' %}
   </section>
 {% endblock %}

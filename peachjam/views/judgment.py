@@ -9,7 +9,6 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
-from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
 from django.views.generic import DetailView, ListView, TemplateView
@@ -58,6 +57,8 @@ class JudgmentListView(TemplateView):
 
 
 class FlynoteViewMixin:
+    matching_subtopics_per_card = 3
+
     @staticmethod
     def flynote_tree_enabled():
         return Judgment.flynote_tree_enabled()
@@ -128,16 +129,84 @@ class FlynoteViewMixin:
             for f in flynotes
         ]
 
+    def filter_flynote_descendants_by_query(self, children_qs, query, parent_path):
+        """Filter direct children by matching descendants and collect the matching paths."""
+        matching_flynotes = list(
+            self.annotate_with_counts(
+                Flynote.objects.filter(
+                    path__startswith=parent_path,
+                    name__icontains=query,
+                )
+            )
+            .exclude(path=parent_path)
+            .only("pk", "path", "name", "depth")
+        )
+        child_path_length = len(parent_path) + Flynote.steplen
+        matching_child_paths = {
+            flynote.path[:child_path_length] for flynote in matching_flynotes
+        }
+        children_qs = children_qs.filter(path__in=matching_child_paths)
+        visible_child_paths = set(children_qs.values_list("path", flat=True))
+
+        matching_flynotes_by_child = defaultdict(list)
+        for flynote in matching_flynotes:
+            child_path = flynote.path[:child_path_length]
+            if child_path not in visible_child_paths or flynote.path == child_path:
+                continue
+            matching_flynotes_by_child[child_path].append(flynote)
+
+        requested_paths = set()
+        matching_paths = defaultdict(list)
+        matching_more_counts = {}
+        for child_path, child_matches in matching_flynotes_by_child.items():
+            child_matches.sort(
+                key=lambda flynote: (
+                    flynote.depth,
+                    -flynote.doc_count,
+                    flynote.name.casefold(),
+                )
+            )
+            matching_more_counts[child_path] = max(
+                0, len(child_matches) - self.matching_subtopics_per_card
+            )
+            for flynote in child_matches[: self.matching_subtopics_per_card]:
+                path = [
+                    flynote.path[:end]
+                    for end in range(
+                        child_path_length + Flynote.steplen,
+                        len(flynote.path) + 1,
+                        Flynote.steplen,
+                    )
+                ]
+                requested_paths.update(path)
+                matching_paths[child_path].append(path)
+
+        flynotes_by_path = {
+            flynote.path: flynote
+            for flynote in Flynote.objects.filter(path__in=requested_paths).order_by(
+                "path"
+            )
+        }
+        return (
+            children_qs,
+            {
+                child_path: [
+                    {"nodes": [flynotes_by_path[path] for path in path_group]}
+                    for path_group in path_groups
+                ]
+                for child_path, path_groups in matching_paths.items()
+            },
+            matching_more_counts,
+        )
+
 
 class FlynoteListView(FlynoteViewMixin, ListView):
-    """Lists flynotes. By default, it lists popular top-level flynotes. With htmx, it lists paginated top-level
-    flynotes, or subtopics if a root flynote is given.
-    """
+    """Lists top-level flynotes for exploration."""
 
     model = Flynote
     template_name = "peachjam/flynote/list.html"
     context_object_name = "flynotes"
-    paginate_by = 30
+    paginate_by = None
 
     def get(self, request, *args, **kwargs):
         if not self.flynote_tree_enabled() or not Flynote.get_root_nodes().exists():
@@ -146,53 +215,44 @@ class FlynoteListView(FlynoteViewMixin, ListView):
 
     def get_template_names(self):
         if self.request.htmx:
-            return ["peachjam/flynote/_list.html"]
+            return ["peachjam/flynote/_topic_results.html"]
         return super().get_template_names()
 
-    def get_paginate_by(self, queryset):
-        if self.flynote:
-            return self.paginate_by
-        # always return 100 top-level flynotes, because that is usually the full list
-        return 100
-
-    @cached_property
-    def flynote(self):
-        """In htmx mode, the ?flynote=<pk> parameter anchors the list of subtopics."""
-        if self.request.GET.get("flynote"):
-            return get_object_or_404(Flynote, pk=self.request.GET.get("flynote"))
-
     def get_queryset(self):
-        if self.flynote:
-            # children of the provided root
-            qs = self.flynote.get_children()
-        else:
-            # all roots
-            qs = Flynote.get_root_nodes()
-
-        q = self.request.GET.get("q", "").strip()
-        if q:
-            qs = qs.filter(name__icontains=q)
-
-        return self.annotate_with_counts(qs).filter(doc_count__gt=0).order_by("name")
+        return self.annotate_with_counts(Flynote.get_root_nodes()).filter(
+            doc_count__gt=0
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["flynotes"] = self.make_flynote_list(list(context["flynotes"]))
-        # ensure that the template appends, rather than replaces, when "load more" is clicked
-        context["more"] = "more" in self.request.GET
+        topics_qs = context["flynotes"]
+        query = self.request.GET.get("q", "").strip()
+        sort = self.request.GET.get("sort", "judgments")
+        if query:
+            (
+                topics_qs,
+                matching_paths,
+                matching_more_counts,
+            ) = self.filter_flynote_descendants_by_query(topics_qs, query, "")
+        else:
+            matching_paths = {}
+            matching_more_counts = {}
 
-        if not self.request.htmx:
-            # for non-htmx, load popular flynotes
-            self.popular_flynotes(context)
-
+        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
+        topic_items = self.make_flynote_list(list(topics_qs.order_by(*ordering)))
+        for item in topic_items:
+            item["matching_paths"] = matching_paths.get(item["flynote"].path, [])
+            item["matching_more_count"] = matching_more_counts.get(
+                item["flynote"].path, 0
+            )
+            item["inline_child_names"] = True
+        context["flynotes"] = topic_items
+        context["flynote_cards"] = topic_items
+        context["topic_count"] = len(topic_items)
+        context["topic_query"] = query
+        context["topic_sort"] = sort
         return context
-
-    def popular_flynotes(self, context):
-        qs = self.annotate_with_counts(Flynote.get_root_nodes()).order_by(
-            "-doc_count", "name"
-        )[:16]
-        context["popular_flynotes"] = self.make_flynote_list(list(qs))
 
 
 class FlynoteDetailView(
@@ -206,6 +266,7 @@ class FlynoteDetailView(
     permission_required = "peachjam.view_linked_judgments"
     initial_subtopics_page_size = 9
     more_subtopics_page_size = 15
+    search_subtopics_page_size = 12
 
     def get_flynote_document_listing_id(self):
         return f"flynote-document-listing-{self.flynote.pk}"
@@ -222,6 +283,11 @@ class FlynoteDetailView(
             self.request.htmx and self.request.htmx.target == "flynote-more-subtopics"
         )
 
+    def is_subtopics_search_htmx_request(self):
+        return (
+            self.request.htmx and self.request.htmx.target == "flynote-subtopic-results"
+        )
+
     def has_permission(self):
         if not self.is_linked_judgments_htmx_request():
             return True
@@ -229,7 +295,9 @@ class FlynoteDetailView(
 
     def get_template_names(self):
         if self.is_subtopics_htmx_request():
-            return ["peachjam/flynote/_popular_more.html"]
+            return ["peachjam/flynote/_more_cards.html"]
+        if self.is_subtopics_search_htmx_request():
+            return ["peachjam/flynote/_cards_results.html"]
         if (
             self.request.htmx
             and self.request.htmx.target == self.get_flynote_document_listing_id()
@@ -258,8 +326,12 @@ class FlynoteDetailView(
         context["doc_table_show_doc_type"] = False
         context["flynote_document_listing_id"] = self.get_flynote_document_listing_id()
 
-        if not self.request.htmx or self.is_subtopics_htmx_request():
-            self.popular_subtopics(context)
+        if (
+            not self.request.htmx
+            or self.is_subtopics_htmx_request()
+            or self.is_subtopics_search_htmx_request()
+        ):
+            self.subtopic_cards(context)
             context["flynote"] = self.flynote
             context["ancestors"] = self.flynote.get_ancestors()
 
@@ -271,10 +343,12 @@ class FlynoteDetailView(
             add_never_cache_headers(response)
         return response
 
-    def popular_subtopics(self, context):
+    def subtopic_cards(self, context):
         children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
             doc_count__gt=0
         )
+        query = self.request.GET.get("q", "").strip()
+        sort = self.request.GET.get("sort", "judgments")
         subtopics_offset = 0
         if self.is_subtopics_htmx_request():
             try:
@@ -284,25 +358,46 @@ class FlynoteDetailView(
             except (TypeError, ValueError):
                 pass
 
-        page_size = (
-            self.more_subtopics_page_size
-            if self.is_subtopics_htmx_request()
-            else self.initial_subtopics_page_size
-        )
+        if query:
+            (
+                children_qs,
+                matching_paths,
+                matching_more_counts,
+            ) = self.filter_flynote_descendants_by_query(
+                children_qs, query, self.flynote.path
+            )
+            page_size = self.search_subtopics_page_size
+        else:
+            matching_paths = {}
+            matching_more_counts = {}
+            page_size = (
+                self.more_subtopics_page_size
+                if self.is_subtopics_htmx_request()
+                else self.initial_subtopics_page_size
+            )
+
+        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
         total_subtopic_count = children_qs.count()
-        popular_flynotes = list(
-            children_qs.order_by("-doc_count", "name")[
+        flynote_cards = list(
+            children_qs.order_by(*ordering)[
                 subtopics_offset : subtopics_offset + page_size
             ]
         )
-        next_subtopics_offset = subtopics_offset + len(popular_flynotes)
+        next_subtopics_offset = subtopics_offset + len(flynote_cards)
 
-        context["popular_flynotes"] = self.make_flynote_list(popular_flynotes)
+        context["flynote_cards"] = self.make_flynote_list(flynote_cards)
+        for item in context["flynote_cards"]:
+            item["matching_paths"] = matching_paths.get(item["flynote"].path, [])
+            item["matching_more_count"] = matching_more_counts.get(
+                item["flynote"].path, 0
+            )
         context["has_more_topics"] = next_subtopics_offset < total_subtopic_count
         context["next_subtopics_offset"] = (
             next_subtopics_offset if context["has_more_topics"] else None
         )
         context["total_subtopic_count"] = total_subtopic_count
+        context["subtopic_query"] = query
+        context["subtopic_sort"] = sort
 
 
 @registry.register_doc_type("judgment")

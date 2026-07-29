@@ -40,6 +40,10 @@ ul.flynotes > li {
   font-size: small;
 }
 
+.text-h5 {
+  font-size: $h5-font-size;
+}
+
 h1.doc-title {
   font-size: $font-size-base * 1.75; // h3
 }

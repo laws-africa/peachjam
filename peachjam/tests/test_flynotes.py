@@ -2348,6 +2348,62 @@ class FlynoteListViewTest(TestCase):
         self.assertIsNotNone(admin_item)
         self.assertEqual(admin_item["count"], 1)
 
+    def test_filters_top_level_topics_and_matching_descendants(self):
+        judgment = Judgment.objects.create(
+            case_name="View Search Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — homicide — murder",
+        )
+        self.updater.update_for_judgment(judgment)
+        root = Flynote.objects.get(name="Administrative law")
+        FlynoteDocumentCount.refresh_for_flynote(root)
+
+        response = self.client.get(
+            reverse("flynote_list"),
+            {"q": "murder"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-topic-results",
+        )
+
+        self.assertTemplateUsed(response, "peachjam/flynote/_topic_results.html")
+        self.assertEqual(
+            [item["flynote"] for item in response.context["flynote_cards"]],
+            [root],
+        )
+        self.assertEqual(
+            [
+                node.name
+                for node in response.context["flynote_cards"][0]["matching_paths"][0][
+                    "nodes"
+                ]
+            ],
+            ["homicide", "murder"],
+        )
+
+    def test_renders_all_topics_as_cards_with_filter_progress(self):
+        judgment = Judgment.objects.create(
+            case_name="View Cards Test",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+            flynote_raw="Administrative law — judicial review",
+        )
+        self.updater.update_for_judgment(judgment)
+        root = Flynote.objects.get(name="Administrative law")
+        root.add_child(name="Appeals")
+
+        response = self.client.get(reverse("flynote_list"))
+
+        self.assertContains(response, "row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3")
+        self.assertContains(response, 'id="flynote-topic-filter-progress"')
+        self.assertContains(response, "judicial review · Appeals")
+        self.assertNotContains(response, "All topics")
+        self.assertNotContains(response, 'id="flynote-list-group"')
+
     def test_redirects_to_judgment_list_when_no_flynotes(self):
         response = self.client.get(reverse("flynote_list"))
         self.assertEqual(response.status_code, 302)
@@ -2569,12 +2625,151 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         judicial_review_item = next(
             item
-            for item in response.context["popular_flynotes"]
+            for item in response.context["flynote_cards"]
             if item["flynote"] == judicial_review
         )
         self.assertEqual(len(judicial_review_item["child_names"]), 3)
         self.assertEqual(judicial_review_item["more_child_count"], 1)
         self.assertContains(response, "1 more")
+
+    def test_flynote_detail_shows_progress_while_filtering_subtopics(self):
+        root = Flynote.objects.get(name="Administrative law")
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": root.pk}))
+
+        self.assertContains(response, 'id="flynote-subtopic-filter-progress"')
+        self.assertContains(
+            response, 'hx-indicator="#flynote-subtopic-filter-progress"', count=2
+        )
+
+    def test_flynote_detail_searches_direct_children_and_descendants(self):
+        root = Flynote.objects.get(name="Administrative law")
+        death_penalty = root.add_child(name="Death penalty")
+        foo = death_penalty.add_child(name="foo")
+        murder = foo.add_child(name="murder")
+        direct_murder = root.add_child(name="a murder")
+        FlynoteDocumentCount.objects.create(flynote=death_penalty, count=10)
+        FlynoteDocumentCount.objects.create(flynote=direct_murder, count=1)
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": root.pk}),
+            {"q": "murder", "sort": "judgments"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-subtopic-results",
+        )
+
+        self.assertTemplateUsed(response, "peachjam/flynote/_cards_results.html")
+        self.assertEqual(
+            [item["flynote"] for item in response.context["flynote_cards"]],
+            [death_penalty, direct_murder],
+        )
+        death_penalty_item = response.context["flynote_cards"][0]
+        self.assertEqual(
+            [node.name for node in death_penalty_item["matching_paths"][0]["nodes"]],
+            ["foo", "murder"],
+        )
+        self.assertEqual(response.context["flynote_cards"][1]["matching_paths"], [])
+        self.assertContains(response, 'class="card h-100 card-clickable"')
+        for flynote in [death_penalty, murder, direct_murder]:
+            self.assertContains(response, flynote.get_absolute_url())
+        self.assertContains(
+            response,
+            f'<a href="{murder.get_absolute_url()}">{murder.name}</a>',
+        )
+        self.assertNotContains(response, f'<a href="{foo.get_absolute_url()}">')
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": root.pk}),
+            {"q": "murder", "sort": "name"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-subtopic-results",
+        )
+
+        self.assertEqual(
+            [item["flynote"] for item in response.context["flynote_cards"]],
+            [direct_murder, death_penalty],
+        )
+
+    def test_flynote_detail_search_shows_more_cards_at_the_end(self):
+        root = Flynote.objects.get(name="Administrative law")
+        for index in range(25):
+            child = root.add_child(name=f"murder topic {index:02d}")
+            FlynoteDocumentCount.objects.create(flynote=child, count=1)
+
+        detail_url = reverse("flynote_detail", kwargs={"pk": root.pk})
+        response = self.client.get(
+            detail_url,
+            {"q": "murder", "sort": "judgments"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-subtopic-results",
+        )
+
+        self.assertEqual(len(response.context["flynote_cards"]), 12)
+        self.assertContains(response, 'id="flynote-more-subtopics"')
+        self.assertContains(response, "subtopics_offset=12")
+
+        response = self.client.get(
+            detail_url,
+            {"q": "murder", "sort": "judgments", "subtopics_offset": 12},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-more-subtopics",
+        )
+
+        self.assertEqual(len(response.context["flynote_cards"]), 12)
+        self.assertContains(response, "Show more…")
+        self.assertContains(
+            response,
+            'hx-swap-oob="beforeend:#flynote-subtopic-cards"',
+            count=13,
+        )
+
+        response = self.client.get(
+            detail_url,
+            {"q": "murder", "sort": "judgments", "subtopics_offset": 24},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-more-subtopics",
+        )
+
+        self.assertEqual(len(response.context["flynote_cards"]), 1)
+        self.assertNotContains(response, "Show more…")
+
+    def test_flynote_detail_search_limits_and_ranks_matching_descendants(self):
+        root = Flynote.objects.get(name="Administrative law")
+        death_penalty = root.add_child(name="Death penalty")
+        murder_low = death_penalty.add_child(name="murder low")
+        murder_popular = death_penalty.add_child(name="murder popular")
+        foo = death_penalty.add_child(name="foo")
+        murder_high = foo.add_child(name="murder high")
+        bar = death_penalty.add_child(name="bar")
+        murder_middle = bar.add_child(name="murder middle")
+        FlynoteDocumentCount.objects.bulk_create(
+            [
+                FlynoteDocumentCount(flynote=death_penalty, count=10),
+                FlynoteDocumentCount(flynote=murder_low, count=1),
+                FlynoteDocumentCount(flynote=murder_popular, count=10),
+                FlynoteDocumentCount(flynote=murder_high, count=100),
+                FlynoteDocumentCount(flynote=murder_middle, count=5),
+            ]
+        )
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": root.pk}),
+            {"q": "murder"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-subtopic-results",
+        )
+
+        item = response.context["flynote_cards"][0]
+        self.assertEqual(
+            [[node.name for node in path["nodes"]] for path in item["matching_paths"]],
+            [
+                ["murder popular"],
+                ["murder low"],
+                ["foo", "murder high"],
+            ],
+        )
+        self.assertEqual(item["matching_more_count"], 1)
+        self.assertContains(response, "1 more matching subtopic")
 
     def test_flynote_detail_loads_fifteen_more_subtopic_cards(self):
         root = Flynote.objects.get(name="Administrative law")
@@ -2588,7 +2783,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
         response = self.client.get(detail_url)
 
         self.assertEqual(response.context["total_subtopic_count"], 26)
-        self.assertEqual(len(response.context["popular_flynotes"]), 9)
+        self.assertEqual(len(response.context["flynote_cards"]), 9)
         self.assertContains(response, "subtopics_offset=9")
         self.assertContains(response, "Show more…")
 
@@ -2599,8 +2794,8 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             HTTP_HX_TARGET="flynote-more-subtopics",
         )
 
-        self.assertTemplateUsed(response, "peachjam/flynote/_popular_more.html")
-        self.assertEqual(len(response.context["popular_flynotes"]), 15)
+        self.assertTemplateUsed(response, "peachjam/flynote/_more_cards.html")
+        self.assertEqual(len(response.context["flynote_cards"]), 15)
         self.assertContains(
             response,
             'hx-swap-oob="beforeend:#flynote-subtopic-cards"',
@@ -2616,7 +2811,7 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             HTTP_HX_TARGET="flynote-more-subtopics",
         )
 
-        self.assertEqual(len(response.context["popular_flynotes"]), 2)
+        self.assertEqual(len(response.context["flynote_cards"]), 2)
         self.assertNotContains(response, "Show more…")
 
     def test_flynote_detail_shell_loads_judgment_listing_via_htmx(self):

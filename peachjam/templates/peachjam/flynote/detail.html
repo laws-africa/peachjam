@@ -37,38 +37,42 @@
           </div>
         {% endif %}
         <h1 id="main-page-heading" class="mb-0">{{ flynote.name }}</h1>
-        <div hx-get="{% url 'user_following_button' %}?{{ flynote|get_follow_params }}"
-             hx-trigger="load"></div>
       </div>
       <div data-component="FlynoteDetailActions"
            data-manage-url="{% url 'flynote-manager' %}?flynote={{ flynote.pk }}">
       </div>
     </div>
-    <div class="d-flex align-items-start justify-content-between gap-3 mt-3 mb-5">
-      <p class="lead mt-2">
-        {% blocktranslate with judgment_count=doc_count|intcomma subtopic_count=total_subtopic_count|intcomma %}
-          This topic has <a href="#documents">{{ judgment_count }} judgments</a> and <a href="#subtopics">{{ subtopic_count }} subtopics</a>.
-        {% endblocktranslate %}
-      </p>
-      <a href="#documents" class="btn btn-primary">
-        {% blocktranslate with count=doc_count|intcomma %}Browse {{ count }} judgments{% endblocktranslate %}
-      </a>
+    <p class="lead mt-3">
+      {% blocktranslate with judgment_count=doc_count|intcomma subtopic_count=total_subtopic_count|intcomma %}
+        This topic has <a href="#documents">{{ judgment_count }} judgments</a> and <a href="#subtopics">{{ subtopic_count }} subtopics</a>.
+      {% endblocktranslate %}
+    </p>
+    <div class="d-flex justify-content-start gap-3 mb-5">
+      {% if total_subtopic_count %}
+        <a href="#documents" class="btn btn-primary">
+          {% blocktranslate with count=doc_count|intcomma %}Browse {{ count }} judgments{% endblocktranslate %}
+        </a>
+      {% endif %}
+      <div hx-get="{% url 'user_following_button' %}?{{ flynote|get_follow_params }}"
+           hx-trigger="load"></div>
     </div>
   </div>
 {% endblock %}
 {% block page-header %}
-  <div class="h5 text-muted mt-4">
-    {% for ancestor in ancestors %}
-      {{ ancestor.name }}
-      —
-    {% endfor %}
-    {{ flynote.name }}
-  </div>
+  {% if total_subtopic_count %}
+    <div class="h5 text-muted mt-4">
+      {% for ancestor in ancestors %}
+        {{ ancestor.name }}
+        —
+      {% endfor %}
+      {{ flynote.name }}
+    </div>
+  {% endif %}
   <h2 class="h4">{% trans "Judgments" %}</h2>
   {% include 'peachjam/_count_and_search.html' with hide_search=True %}
 {% endblock %}
 {% block document-list-container %}
-  {% if popular_flynotes %}
+  {% if flynote_cards %}
     <div class="bg-light pt-4 pb-5" id="subtopics">
       <div class="container">
         <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
@@ -77,29 +81,53 @@
             {% blocktranslate with count=total_subtopic_count|intcomma %}{{ count }} subtopics{% endblocktranslate %}
           </span>
         </div>
-        <div class="mb-2 d-flex align-items-center mb-3">
+        <form id="flynote-subtopic-controls"
+              class="d-flex align-items-end mb-2"
+              role="search">
           <div class="flex-grow-1">
             <label class="form-label fw-normal" for="flynote-subtopic-filter">
               {% blocktranslate with flynote_name=flynote.name %}Find a subtopic inside {{ flynote_name }}.{% endblocktranslate %}
             </label>
             <input id="flynote-subtopic-filter"
+                   name="q"
                    type="search"
                    class="form-control"
-                   placeholder="{% trans 'Filter subtopics' %}"/>
+                   placeholder="{% trans 'Filter subtopics' %}"
+                   value="{{ subtopic_query }}"
+                   hx-get="{% url 'flynote_detail' flynote.pk %}"
+                   hx-trigger="input changed delay:400ms, search"
+                   hx-include="#flynote-subtopic-controls"
+                   hx-target="#flynote-subtopic-results"
+                   hx-swap="outerHTML"
+                   hx-indicator="#flynote-subtopic-filter-progress"/>
           </div>
           <div class="ms-2">
             <label class="form-label fw-normal" for="flynote-subtopic-sort">{% trans "Sort subtopics" %}</label>
-            <select id="flynote-subtopic-sort" class="form-select">
-              <option value="popular" selected>
+            <select id="flynote-subtopic-sort"
+                    name="sort"
+                    class="form-select"
+                    hx-get="{% url 'flynote_detail' flynote.pk %}"
+                    hx-trigger="change"
+                    hx-include="#flynote-subtopic-controls"
+                    hx-target="#flynote-subtopic-results"
+                    hx-swap="outerHTML"
+                    hx-indicator="#flynote-subtopic-filter-progress">
+              <option value="judgments"{% if subtopic_sort != 'name' %} selected{% endif %}>
                 {% trans "Most judgments" %}
               </option>
-              <option value="title">
-                {% trans "A–Z" %}
+              <option value="name"{% if subtopic_sort == 'name' %} selected{% endif %}>
+                {% trans "Subtopic (A–Z)" %}
               </option>
             </select>
           </div>
+        </form>
+        <div id="flynote-subtopic-filter-progress"
+             class="htmx-progress progress mb-3"
+             role="status"
+             aria-label="{% trans 'Filtering subtopics' %}">
+          <div class="progress-bar progress-bar-striped progress-bar-animated w-100"></div>
         </div>
-        {% include 'peachjam/flynote/_popular.html' %}
+        {% include 'peachjam/flynote/_cards_results.html' %}
       </div>
     </div>
   {% endif %}

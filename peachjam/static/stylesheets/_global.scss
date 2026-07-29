@@ -235,6 +235,15 @@ a:visited:not(.btn, .nav-link, .dropdown-item) {
   --bs-breadcrumb-divider: "—";
 }
 
+.card-clickable {
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0.75rem rgb(0 0 0 / 12%);
+  }
+}
+
 select.form-select.select-narrow {
   width: initial;
 }

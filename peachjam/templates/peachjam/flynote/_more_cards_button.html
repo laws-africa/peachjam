@@ -3,6 +3,7 @@
   <button class="btn btn-outline-primary"
           type="button"
           hx-get="{% url 'flynote_detail' flynote.pk %}?subtopics_offset={{ next_subtopics_offset }}"
+          hx-include="#flynote-subtopic-controls"
           hx-target="#flynote-more-subtopics"
           hx-swap="outerHTML">
     {% trans "Show more…" %}
