@@ -1,0 +1,26 @@
+{% load humanize i18n %}
+{% for item in popular_flynotes %}
+  {% if append_cards %}<div hx-swap-oob="beforeend:#flynote-subtopic-cards">{% endif %}
+  <div class="col">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start gap-2">
+          <div>
+            <a href="{% url 'flynote_detail' item.flynote.pk %}"
+               class="stretched-link mb-1">{{ item.flynote.name }}</a>
+          </div>
+          <span class="badge rounded-pill bg-secondary flex-shrink-0">{{ item.count|intcomma }}</span>
+        </div>
+        {% if item.child_names %}
+          <ul class="list-unstyled text-muted ms-3 mt-2 mb-0 flynotes">
+            {% for child in item.child_names %}<li class="mb-0 fst-normal">{{ child }}</li>{% endfor %}
+            {% if item.more_child_count %}
+              <li>... {% blocktranslate with count=item.more_child_count %}{{ count }} more{% endblocktranslate %}</li>
+            {% endif %}
+          </ul>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% if append_cards %}</div>{% endif %}
+{% endfor %}

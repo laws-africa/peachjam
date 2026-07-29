@@ -123,6 +123,7 @@ class FlynoteViewMixin:
                 "flynote": f,
                 "count": f.doc_count,
                 "child_names": child_names.get(f.pk, []),
+                "more_child_count": max(0, f.numchild - len(child_names.get(f.pk, []))),
             }
             for f in flynotes
         ]
@@ -203,6 +204,8 @@ class FlynoteDetailView(
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
     permission_required = "peachjam.view_linked_judgments"
+    initial_subtopics_page_size = 9
+    more_subtopics_page_size = 15
 
     def get_flynote_document_listing_id(self):
         return f"flynote-document-listing-{self.flynote.pk}"
@@ -214,12 +217,19 @@ class FlynoteDetailView(
             self.get_document_table_id(),
         }
 
+    def is_subtopics_htmx_request(self):
+        return (
+            self.request.htmx and self.request.htmx.target == "flynote-more-subtopics"
+        )
+
     def has_permission(self):
         if not self.is_linked_judgments_htmx_request():
             return True
         return super().has_permission()
 
     def get_template_names(self):
+        if self.is_subtopics_htmx_request():
+            return ["peachjam/flynote/_popular_more.html"]
         if (
             self.request.htmx
             and self.request.htmx.target == self.get_flynote_document_listing_id()
@@ -248,7 +258,7 @@ class FlynoteDetailView(
         context["doc_table_show_doc_type"] = False
         context["flynote_document_listing_id"] = self.get_flynote_document_listing_id()
 
-        if not self.request.htmx:
+        if not self.request.htmx or self.is_subtopics_htmx_request():
             self.popular_subtopics(context)
             context["flynote"] = self.flynote
             context["ancestors"] = self.flynote.get_ancestors()
@@ -262,16 +272,37 @@ class FlynoteDetailView(
         return response
 
     def popular_subtopics(self, context):
-        # Top 16 subtopcis by count
         children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
             doc_count__gt=0
         )
-        total_children = children_qs.count()
-        popular_flynotes = list(children_qs.order_by("-doc_count", "name")[:16])
+        subtopics_offset = 0
+        if self.is_subtopics_htmx_request():
+            try:
+                subtopics_offset = max(
+                    0, int(self.request.GET.get("subtopics_offset", 0))
+                )
+            except (TypeError, ValueError):
+                pass
+
+        page_size = (
+            self.more_subtopics_page_size
+            if self.is_subtopics_htmx_request()
+            else self.initial_subtopics_page_size
+        )
+        total_subtopic_count = children_qs.count()
+        popular_flynotes = list(
+            children_qs.order_by("-doc_count", "name")[
+                subtopics_offset : subtopics_offset + page_size
+            ]
+        )
+        next_subtopics_offset = subtopics_offset + len(popular_flynotes)
 
         context["popular_flynotes"] = self.make_flynote_list(popular_flynotes)
-        context["has_more_topics"] = total_children > len(popular_flynotes)
-        context["total_subtopic_count"] = total_children
+        context["has_more_topics"] = next_subtopics_offset < total_subtopic_count
+        context["next_subtopics_offset"] = (
+            next_subtopics_offset if context["has_more_topics"] else None
+        )
+        context["total_subtopic_count"] = total_subtopic_count
 
 
 @registry.register_doc_type("judgment")

@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if has_more_topics %}
+  <button class="btn btn-outline-primary"
+          type="button"
+          hx-get="{% url 'flynote_detail' flynote.pk %}?subtopics_offset={{ next_subtopics_offset }}"
+          hx-target="#flynote-more-subtopics"
+          hx-swap="outerHTML">
+    {% trans "Show more…" %}
+  </button>
+{% endif %}

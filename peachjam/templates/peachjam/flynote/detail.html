@@ -24,10 +24,18 @@
     </nav>
   </div>
 {% endblock %}
-{% block page-header %}
-  <div class="mb-4">
-    <div class="mb-4 d-flex align-items-start justify-content-between gap-3">
+{% block entity-profile %}
+  <div class="container">
+    <div class="d-flex align-items-start justify-content-between gap-3">
       <div>
+        {% if ancestors %}
+          <div class="h4 text-muted mb-1">
+            {% for ancestor in ancestors %}
+              {{ ancestor.name }}
+              —
+            {% endfor %}
+          </div>
+        {% endif %}
         <h1 id="main-page-heading" class="mb-0">{{ flynote.name }}</h1>
         <div hx-get="{% url 'user_following_button' %}?{{ flynote|get_follow_params }}"
              hx-trigger="load"></div>
@@ -36,16 +44,66 @@
            data-manage-url="{% url 'flynote-manager' %}?flynote={{ flynote.pk }}">
       </div>
     </div>
-    {% if popular_flynotes %}
-      <h2 class="h4">
-        {% trans "Subtopics" %}
-        <span class="badge rounded-pill text-bg-secondary fs-6 ms-2 align-middle">{{ total_subtopic_count|intcomma }}</span>
-      </h2>
-      {% include 'peachjam/flynote/_popular.html' %}
-    {% endif %}
-    <h2 class="h4 mt-4">{% trans "Judgments" %}</h2>
-    {% include 'peachjam/_count_and_search.html' with hide_search=True %}
+    <div class="d-flex align-items-start justify-content-between gap-3 mt-3 mb-5">
+      <p class="lead mt-2">
+        {% blocktranslate with judgment_count=doc_count|intcomma subtopic_count=total_subtopic_count|intcomma %}
+          This topic has <a href="#documents">{{ judgment_count }} judgments</a> and <a href="#subtopics">{{ subtopic_count }} subtopics</a>.
+        {% endblocktranslate %}
+      </p>
+      <a href="#documents" class="btn btn-primary">
+        {% blocktranslate with count=doc_count|intcomma %}Browse {{ count }} judgments{% endblocktranslate %}
+      </a>
+    </div>
   </div>
+{% endblock %}
+{% block page-header %}
+  <div class="h5 text-muted mt-4">
+    {% for ancestor in ancestors %}
+      {{ ancestor.name }}
+      —
+    {% endfor %}
+    {{ flynote.name }}
+  </div>
+  <h2 class="h4">{% trans "Judgments" %}</h2>
+  {% include 'peachjam/_count_and_search.html' with hide_search=True %}
+{% endblock %}
+{% block document-list-container %}
+  {% if popular_flynotes %}
+    <div class="bg-light pt-4 pb-5" id="subtopics">
+      <div class="container">
+        <div class="d-flex justify-content-between align-items-center gap-3 mb-2">
+          <h2 class="h4 mb-0">{% trans "Explore subtopics" %}</h2>
+          <span class="badge rounded-pill text-bg-secondary fs-6">
+            {% blocktranslate with count=total_subtopic_count|intcomma %}{{ count }} subtopics{% endblocktranslate %}
+          </span>
+        </div>
+        <div class="mb-2 d-flex align-items-center mb-3">
+          <div class="flex-grow-1">
+            <label class="form-label fw-normal" for="flynote-subtopic-filter">
+              {% blocktranslate with flynote_name=flynote.name %}Find a subtopic inside {{ flynote_name }}.{% endblocktranslate %}
+            </label>
+            <input id="flynote-subtopic-filter"
+                   type="search"
+                   class="form-control"
+                   placeholder="{% trans 'Filter subtopics' %}"/>
+          </div>
+          <div class="ms-2">
+            <label class="form-label fw-normal" for="flynote-subtopic-sort">{% trans "Sort subtopics" %}</label>
+            <select id="flynote-subtopic-sort" class="form-select">
+              <option value="popular" selected>
+                {% trans "Most judgments" %}
+              </option>
+              <option value="title">
+                {% trans "A–Z" %}
+              </option>
+            </select>
+          </div>
+        </div>
+        {% include 'peachjam/flynote/_popular.html' %}
+      </div>
+    </div>
+  {% endif %}
+  {{ block.super }}
 {% endblock %}
 {% block document-table %}
   <div id="{{ flynote_document_listing_id }}"

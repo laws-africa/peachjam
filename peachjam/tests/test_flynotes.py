@@ -2556,6 +2556,69 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             reverse("user_following_button") + f"?flynote={leaf.pk}",
         )
 
+    def test_flynote_detail_shows_correct_remaining_child_count(self):
+        root = Flynote.objects.get(name="Administrative law")
+        judicial_review = Flynote.objects.get(name="judicial review")
+        FlynoteDocumentCount.refresh_for_flynote(root)
+
+        for index in range(4):
+            child = judicial_review.add_child(name=f"ground {index}")
+            FlynoteDocumentCount.objects.create(flynote=child, count=1)
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": root.pk}))
+
+        judicial_review_item = next(
+            item
+            for item in response.context["popular_flynotes"]
+            if item["flynote"] == judicial_review
+        )
+        self.assertEqual(len(judicial_review_item["child_names"]), 3)
+        self.assertEqual(judicial_review_item["more_child_count"], 1)
+        self.assertContains(response, "1 more")
+
+    def test_flynote_detail_loads_fifteen_more_subtopic_cards(self):
+        root = Flynote.objects.get(name="Administrative law")
+        FlynoteDocumentCount.refresh_for_flynote(root)
+
+        for index in range(25):
+            child = root.add_child(name=f"topic {index:02d}")
+            FlynoteDocumentCount.objects.create(flynote=child, count=1)
+
+        detail_url = reverse("flynote_detail", kwargs={"pk": root.pk})
+        response = self.client.get(detail_url)
+
+        self.assertEqual(response.context["total_subtopic_count"], 26)
+        self.assertEqual(len(response.context["popular_flynotes"]), 9)
+        self.assertContains(response, "subtopics_offset=9")
+        self.assertContains(response, "Show more…")
+
+        response = self.client.get(
+            detail_url,
+            {"subtopics_offset": 9},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-more-subtopics",
+        )
+
+        self.assertTemplateUsed(response, "peachjam/flynote/_popular_more.html")
+        self.assertEqual(len(response.context["popular_flynotes"]), 15)
+        self.assertContains(
+            response,
+            'hx-swap-oob="beforeend:#flynote-subtopic-cards"',
+            count=15,
+        )
+        self.assertContains(response, '<div class="col">', count=15)
+        self.assertContains(response, "subtopics_offset=24")
+
+        response = self.client.get(
+            detail_url,
+            {"subtopics_offset": 24},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-more-subtopics",
+        )
+
+        self.assertEqual(len(response.context["popular_flynotes"]), 2)
+        self.assertNotContains(response, "Show more…")
+
     def test_flynote_detail_shell_loads_judgment_listing_via_htmx(self):
         leaf = Flynote.objects.get(name="judicial review")
 
