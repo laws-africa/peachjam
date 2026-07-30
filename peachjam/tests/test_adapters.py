@@ -607,6 +607,7 @@ class IndigoAdapterTest(TestCase):
             "http://example.com/source.pdf",
             document,
             "Fixture PDF",
+            start_page=36,
         )
 
         document.refresh_from_db()
@@ -614,7 +615,95 @@ class IndigoAdapterTest(TestCase):
         self.assertEqual("fixture-pdf.pdf", source_file.filename)
         self.assertEqual("application/pdf", source_file.mimetype)
         self.assertEqual(len(pdf_content), source_file.size)
+        self.assertEqual(36, source_file.start_page)
         track_changes.assert_called_once_with(source_file)
+
+    @patch.object(IndigoAdapter, "create_publication_file")
+    @patch.object(IndigoAdapter, "clear_publication_file")
+    @patch.object(IndigoAdapter, "download_source_file")
+    def test_stub_uses_publication_document_start_page(
+        self, download_source_file, clear_publication_file, create_publication_file
+    ):
+        created_document = object()
+        publication_document = {
+            "url": "http://example.com/gazette.pdf",
+            "start_page": 36,
+        }
+        document = {
+            "title": "Fixture PDF",
+            "stub": True,
+            "publication_document": publication_document,
+        }
+
+        self.adapter.attach_source_and_publication_file(
+            "http://example.com/document", document, created_document
+        )
+
+        download_source_file.assert_called_once_with(
+            "http://example.com/gazette.pdf",
+            created_document,
+            "Fixture PDF",
+            start_page=36,
+        )
+        clear_publication_file.assert_called_once_with(created_document)
+        create_publication_file.assert_called_once_with(
+            publication_document, created_document, "Fixture PDF", stub=True
+        )
+
+    @patch.object(IndigoAdapter, "create_publication_file")
+    @patch.object(IndigoAdapter, "clear_publication_file")
+    @patch.object(IndigoAdapter, "download_source_file")
+    def test_stub_allows_publication_document_without_start_page(
+        self, download_source_file, clear_publication_file, create_publication_file
+    ):
+        created_document = object()
+        document = {
+            "title": "Fixture PDF",
+            "stub": True,
+            "publication_document": {"url": "http://example.com/gazette.pdf"},
+        }
+
+        self.adapter.attach_source_and_publication_file(
+            "http://example.com/document", document, created_document
+        )
+
+        download_source_file.assert_called_once_with(
+            "http://example.com/gazette.pdf",
+            created_document,
+            "Fixture PDF",
+            start_page=None,
+        )
+
+    @patch.object(IndigoAdapter, "create_publication_file")
+    @patch.object(IndigoAdapter, "clear_publication_file")
+    @patch.object(IndigoAdapter, "download_source_file")
+    def test_non_stub_does_not_use_publication_document_start_page(
+        self, download_source_file, clear_publication_file, create_publication_file
+    ):
+        created_document = object()
+        publication_document = {
+            "url": "http://example.com/gazette.pdf",
+            "start_page": 36,
+        }
+        document = {
+            "title": "Fixture PDF",
+            "stub": False,
+            "publication_document": publication_document,
+        }
+
+        self.adapter.attach_source_and_publication_file(
+            "http://example.com/document", document, created_document
+        )
+
+        download_source_file.assert_called_once_with(
+            "http://example.com/document.pdf",
+            created_document,
+            "Fixture PDF",
+        )
+        clear_publication_file.assert_called_once_with(created_document)
+        create_publication_file.assert_called_once_with(
+            publication_document, created_document, "Fixture PDF", stub=False
+        )
 
 
 class JudgmentAdapterTest(TestCase):
