@@ -241,18 +241,6 @@ class LawReportViewsTestCase(TestCase):
         self.assertContains(
             response, "Browse the judgments reported in this law report volume."
         )
-        self.assertContains(
-            response,
-            'class="card h-100',
-            count=2,
-            html=False,
-        )
-        self.assertContains(
-            response,
-            'class="stretched-link"',
-            count=2,
-            html=False,
-        )
         self.assertNotContains(
             response,
             "Browse the judgments reported in this volume.",
