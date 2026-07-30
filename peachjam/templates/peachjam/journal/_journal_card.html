@@ -1,6 +1,6 @@
 {% load i18n %}
 {% with profile=journal.entity_profile.first %}
-  <div class="card h-100 border">
+  <div class="card card-clickable h-100">
     <div class="card-body d-flex gap-3 align-items-start">
       {% if profile and profile.profile_photo %}
         <img class="journal-card__media border rounded"
