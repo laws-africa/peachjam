@@ -713,6 +713,7 @@ class DocumentProvisionMixin:
             ),
             "provision_html": self.document.get_provision_by_eid(self.provision_eid),
             "provision_eid": self.provision_eid,
+            "provision_tab": self.provision_tab,
         }
 
 
@@ -791,6 +792,7 @@ class DocumentProvisionCitationView(
         "peachjam/provision_enrichment/_provision_citations_table_form.html"
     )
     latest_expression_only = True
+    provision_tab = "citations"
 
     def get_subscription_required_template(self):
         return self.template_name
@@ -825,6 +827,7 @@ class DocumentProvisionCitationView(
         context = super().get_context_data(**kwargs)
         context.update(self.get_subscription_required_context())
         context["citation_contexts"] = self.provision_citations
+        context["page_title"] = _("Citations")
         target_eid = self.provision_eid or None
         citing_documents_count = (
             ProvisionCitationCount.objects.filter(
@@ -850,6 +853,7 @@ class DocumentProvisionSimilarView(
     n_similar = 10
     exclude_facets = ["alphabet"]
     paginate_by = 0
+    provision_tab = "similar"
     _similar_provisions = None
 
     def get_subscription_required_template(self):
@@ -938,4 +942,5 @@ class DocumentProvisionSimilarView(
         self.decorate_documents_with_similar_provisions(context["documents"])
         context["doc_count_noun"] = _("document with similar provisions")
         context["doc_count_noun_plural"] = _("documents with similar provisions")
+        context["page_title"] = _("Similar provisions")
         return context

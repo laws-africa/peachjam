@@ -1,19 +1,12 @@
-{% extends 'peachjam/layouts/document_list.html' %}
+{% extends 'peachjam/document/provision_detail.html' %}
 {% load i18n peachjam %}
-{% block title %}
-  {{ document.title }} - {% trans 'Similar provisions' %}
-  {% if provision %}- {{ provision }}{% endif %}
-{% endblock %}
-{% block page-title %}
-  {% include "peachjam/document/_breadcrumbs.html" %}
-  {% include "peachjam/document/_provision_header.html" with portion_tab="similar" %}
-  <h3 class="mt-3 mb-4">{% trans "Other provisions similar to this one" %}</h3>
-{% endblock %}
-{% block count-and-search %}{% endblock %}
-{% block document-table %}
-  {% if subscription_required %}
-    {% include "peachjam_subs/_subscription_required.html" %}
-  {% else %}
-    {% include "peachjam/document/_provisions_table_form.html" %}
-  {% endif %}
+{% block provision-page-content %}
+  <div class="container">
+    <h3 class="mt-3 mb-4">{% trans "Other provisions similar to this one" %}</h3>
+    {% if subscription_required %}
+      {% include "peachjam_subs/_subscription_required.html" %}
+    {% else %}
+      {% include "peachjam/document/_provisions_table_form.html" %}
+    {% endif %}
+  </div>
 {% endblock %}

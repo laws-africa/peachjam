@@ -1,21 +1,14 @@
-{% extends 'peachjam/layouts/document_list.html' %}
+{% extends 'peachjam/document/provision_detail.html' %}
 {% load i18n peachjam %}
-{% block title %}
-  {{ document.title }} - {% trans 'Citations' %}
-  {% if provision %}- {{ provision }}{% endif %}
-{% endblock %}
-{% block page-title %}
-  {% include "peachjam/document/_breadcrumbs.html" %}
-  {% include "peachjam/document/_provision_header.html" with portion_tab="citations" %}
-  <h4 class="mt-3 mb-4">
-    {% trans "Documents that cite this provision" %} <span class="badge bg-secondary">{{ citing_documents_count }}</span>
-  </h4>
-{% endblock %}
-{% block count-and-search %}{% endblock %}
-{% block document-table %}
-  {% if subscription_required %}
-    {% include "peachjam_subs/_subscription_required.html" %}
-  {% else %}
-    {% include "peachjam/provision_enrichment/_provision_citations_table_form.html" %}
-  {% endif %}
+{% block provision-page-content %}
+  <div class="container">
+    <h3 class="mt-3 mb-4">
+      {% trans "Documents that cite this provision" %} <span class="badge bg-secondary">{{ citing_documents_count }}</span>
+    </h3>
+    {% if subscription_required %}
+      {% include "peachjam_subs/_subscription_required.html" %}
+    {% else %}
+      {% include "peachjam/provision_enrichment/_provision_citations_table_form.html" %}
+    {% endif %}
+  </div>
 {% endblock %}
