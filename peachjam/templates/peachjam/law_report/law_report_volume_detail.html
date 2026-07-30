@@ -46,10 +46,10 @@
       <h2 class="h5 mb-3">{% trans 'Explore related indexes' %}</h2>
       <div class="row row-cols-1 row-cols-md-2 g-3">
         <div class="col">
-          <div class="card h-100 position-relative">
+          <div class="card card-clickable h-100 position-relative">
             <div class="card-body">
               <h3 class="h5 card-title mb-2">
-                <a class="stretched-link"
+                <a class="stretched-link text-decoration-none"
                    href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">
                   {% trans 'Cited cases' %}
                 </a>
@@ -59,10 +59,10 @@
           </div>
         </div>
         <div class="col">
-          <div class="card h-100 position-relative">
+          <div class="card card-clickable h-100 position-relative">
             <div class="card-body">
               <h3 class="h5 card-title mb-2">
-                <a class="stretched-link"
+                <a class="stretched-link text-decoration-none"
                    href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">
                   {% trans 'Cited legislation' %}
                 </a>
