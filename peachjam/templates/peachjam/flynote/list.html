@@ -30,7 +30,7 @@
           class="d-flex align-items-end mb-2"
           role="search">
       <div class="flex-grow-1">
-        <label class="form-label fw-normal" for="flynote-topic-filter">{% trans "Filter topics" %}</label>
+        <label class="form-label" for="flynote-topic-filter">{% trans "Filter topics" %}</label>
         <input id="flynote-topic-filter"
                name="q"
                type="search"
@@ -45,7 +45,7 @@
                hx-indicator="#flynote-topic-filter-progress"/>
       </div>
       <div class="ms-2">
-        <label class="form-label fw-normal" for="flynote-topic-sort">{% trans "Sort topics" %}</label>
+        <label class="form-label" for="flynote-topic-sort">{% trans "Sort topics by" %}</label>
         <select id="flynote-topic-sort"
                 name="sort"
                 class="form-select"
@@ -59,7 +59,7 @@
             {% trans "Most judgments" %}
           </option>
           <option value="name"{% if topic_sort == 'name' %} selected{% endif %}>
-            {% trans "Topic (A–Z)" %}
+            {% trans "A – Z" %}
           </option>
         </select>
       </div>
