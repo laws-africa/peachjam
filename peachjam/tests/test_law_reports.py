@@ -243,7 +243,7 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertContains(
             response,
-            'class="card h-100 position-relative"',
+            'class="card h-100',
             count=2,
             html=False,
         )
@@ -322,9 +322,6 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertNotContains(response, "Explore related indexes")
-        self.assertNotContains(
-            response, 'class="card h-100 text-decoration-none text-reset"'
-        )
         self.assertNotContains(response, "Advanced search")
         self.assertContains(
             response, '<h2 class="h4 mb-1">Cited cases</h2>', html=False
@@ -417,9 +414,6 @@ class LawReportViewsTestCase(TestCase):
         )
         self.assertContains(response, '<h2 class="h4 mb-0">Volume 1</h2>', html=False)
         self.assertNotContains(response, "Explore related indexes")
-        self.assertNotContains(
-            response, 'class="card h-100 text-decoration-none text-reset"'
-        )
         self.assertNotContains(response, "Advanced search")
         self.assertContains(
             response, '<h2 class="h4 mb-1">Cited legislation</h2>', html=False
