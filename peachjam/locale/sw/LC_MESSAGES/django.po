@@ -2512,17 +2512,22 @@ msgid "Already have an account?"
 msgstr "Je, tayari una akaunti?"
 
 #: templates/account/user_auth.html:15
-msgid "Enter the one-time code"
-msgstr "Ingiza msimbo wa mara moja"
+msgid "Check your email for a one-time code"
+msgstr "Angalia barua pepe yako kwa msimbo wa mara moja"
+
+#: templates/account/messages/login_code_sent.txt:2
+#, python-format
+msgid "A one-time code has been sent to %(recipient)s."
+msgstr "Msimbo wa mara moja umetumwa kwa %(recipient)s."
 
 #: templates/account/user_auth.html:17
 #, python-format
-msgid "Please enter the verification code we sent to <b>%(email)s</b>."
-msgstr "Tafadhali ingiza msimbo wa uthibitishaji tuliotuma kwa <b>%(email)s</b>."
+msgid "Please enter the one-time code we sent to <b>%(email)s</b>."
+msgstr "Tafadhali ingiza msimbo wa mara moja tuliotuma kwa <b>%(email)s</b>."
 
 #: templates/account/user_auth.html:61
-msgid "Request a new code"
-msgstr "Omba msimbo mpya"
+msgid "Request a new one-time code"
+msgstr "Omba msimbo mpya wa mara moja"
 
 #: templates/account/user_auth.html:73 templates/account/user_auth.html:78
 msgid "Use a password instead"
@@ -2551,8 +2556,8 @@ msgid "Confirm password"
 msgstr "Thibitisha nenosiri"
 
 #: templates/account/user_auth.html:181
-msgid "Use a code instead"
-msgstr "Tumia msimbo badala yake"
+msgid "Use a one-time code instead"
+msgstr "Tumia msimbo wa mara moja badala yake"
 
 #: templates/account/user_auth.html:187
 msgid "Back to login"
@@ -4714,4 +4719,3 @@ msgstr "hati yenye masharti sawa"
 #: views/legislation.py:930
 msgid "documents with similar provisions"
 msgstr "hati zenye masharti sawa"
-

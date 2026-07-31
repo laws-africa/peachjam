@@ -10,7 +10,7 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.models import AnonymousUser, Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.template.loader import render_to_string
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import URLResolver, clear_url_caches, reverse
 from django.urls.resolvers import RoutePattern
 
@@ -230,6 +230,34 @@ class PatchedSendByEmailTests(TestCase):
         mock_adapter.send_mail.assert_called_once()
 
 
+class LoginCodeCopyTests(SimpleTestCase):
+    def test_login_code_email_uses_one_time_code_terminology(self):
+        html = render_to_string(
+            "peachjam/emails/account/email/login_code.email",
+            {
+                "APP_NAME": "Example LII",
+                "PRIMARY_COLOUR": "#000000",
+                "code": "123456",
+                "site": "example.com",
+            },
+        )
+
+        self.assertIn("Use this one-time code to log in to your account.", html)
+        self.assertIn(
+            "Enter the one-time code in your open browser window to continue.", html
+        )
+        self.assertIn("If you didn't request this one-time code", html)
+
+    def test_login_code_success_message_uses_one_time_code_terminology(self):
+        message = render_to_string(
+            "account/messages/login_code_sent.txt", {"recipient": "test@example.com"}
+        )
+
+        self.assertEqual(
+            message.strip(), "A one-time code has been sent to test@example.com."
+        )
+
+
 class CompleteProfileViewTests(TestCase):
 
     fixtures = ["tests/users", "tests/countries", "tests/languages"]
@@ -343,6 +371,16 @@ class UserAuthViewTests(TestCase):
         view = self._setup_view(request, "test@example.com")
         response = view.get(request)
         self.assertEqual(response.status_code, 200)
+
+    def test_get_explains_where_to_find_the_login_code(self):
+        request = self._make_request()
+        view = self._setup_view(request, "test@example.com")
+        response = view.get(request)
+
+        self.assertContains(response, "Check your email for a one-time code")
+        self.assertContains(response, "Please enter the one-time code we sent to")
+        self.assertContains(response, "Request a new one-time code")
+        self.assertContains(response, "Use a one-time code instead")
 
     def test_context_for_new_user(self):
         request = self._make_request()

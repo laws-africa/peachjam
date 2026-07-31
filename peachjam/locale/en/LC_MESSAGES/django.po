@@ -2513,16 +2513,21 @@ msgid "Already have an account?"
 msgstr ""
 
 #: templates/account/user_auth.html:15
-msgid "Enter the one-time code"
+msgid "Check your email for a one-time code"
+msgstr ""
+
+#: templates/account/messages/login_code_sent.txt:2
+#, python-format
+msgid "A one-time code has been sent to %(recipient)s."
 msgstr ""
 
 #: templates/account/user_auth.html:17
 #, python-format
-msgid "Please enter the verification code we sent to <b>%(email)s</b>."
+msgid "Please enter the one-time code we sent to <b>%(email)s</b>."
 msgstr ""
 
 #: templates/account/user_auth.html:61
-msgid "Request a new code"
+msgid "Request a new one-time code"
 msgstr ""
 
 #: templates/account/user_auth.html:73 templates/account/user_auth.html:78
@@ -2552,7 +2557,7 @@ msgid "Confirm password"
 msgstr ""
 
 #: templates/account/user_auth.html:181
-msgid "Use a code instead"
+msgid "Use a one-time code instead"
 msgstr ""
 
 #: templates/account/user_auth.html:187

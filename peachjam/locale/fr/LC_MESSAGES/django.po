@@ -2512,17 +2512,22 @@ msgid "Already have an account?"
 msgstr "Vous avez déjà un compte ?"
 
 #: templates/account/user_auth.html:15
-msgid "Enter the one-time code"
-msgstr "Saisissez le code à usage unique"
+msgid "Check your email for a one-time code"
+msgstr "Consultez vos e-mails pour obtenir un code à usage unique"
+
+#: templates/account/messages/login_code_sent.txt:2
+#, python-format
+msgid "A one-time code has been sent to %(recipient)s."
+msgstr "Un code à usage unique a été envoyé à %(recipient)s."
 
 #: templates/account/user_auth.html:17
 #, python-format
-msgid "Please enter the verification code we sent to <b>%(email)s</b>."
-msgstr "Veuillez saisir le code de vérification que nous avons envoyé à <b>%(email)s</b>."
+msgid "Please enter the one-time code we sent to <b>%(email)s</b>."
+msgstr "Veuillez saisir le code à usage unique que nous avons envoyé à <b>%(email)s</b>."
 
 #: templates/account/user_auth.html:61
-msgid "Request a new code"
-msgstr "Demander un nouveau code"
+msgid "Request a new one-time code"
+msgstr "Demander un nouveau code à usage unique"
 
 #: templates/account/user_auth.html:73 templates/account/user_auth.html:78
 msgid "Use a password instead"
@@ -2551,8 +2556,8 @@ msgid "Confirm password"
 msgstr "Confirmez le mot de passe"
 
 #: templates/account/user_auth.html:181
-msgid "Use a code instead"
-msgstr "Utilisez plutôt un code"
+msgid "Use a one-time code instead"
+msgstr "Utilisez plutôt un code à usage unique"
 
 #: templates/account/user_auth.html:187
 msgid "Back to login"
@@ -4714,4 +4719,3 @@ msgstr "document contenant des dispositions similaires"
 #: views/legislation.py:930
 msgid "documents with similar provisions"
 msgstr "documents comportant des dispositions similaires"
-

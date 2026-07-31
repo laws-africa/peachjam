@@ -12,9 +12,9 @@
     <div id="code-section"
          {% if show_password_section %} style="display: none;"{% endif %}>
       <div class="mb-4">
-        <h2>{% trans 'Enter the one-time code' %}</h2>
+        <h2>{% trans 'Check your email for a one-time code' %}</h2>
         <p>
-          {% blocktrans trimmed %}Please enter the verification code we sent to <b>{{ email }}</b>.{% endblocktrans %}
+          {% blocktrans trimmed %}Please enter the one-time code we sent to <b>{{ email }}</b>.{% endblocktrans %}
         </p>
       </div>
       <form method="post" action="{% url 'account_confirm_login_code' %}">
@@ -58,7 +58,7 @@
               class="d-inline">
           {% csrf_token %}
           <input type="hidden" name="action" value="resend" />
-          <button type="submit" class="btn btn-link">{% trans 'Request a new code' %}</button>
+          <button type="submit" class="btn btn-link">{% trans 'Request a new one-time code' %}</button>
         </form>
       </div>
       {% include 'account/_or.html' %}
@@ -178,7 +178,7 @@
       {% endif %}
       {% include 'account/_or.html' %}
       <div class="d-grid text-center">
-        <a href="#" id="show-code-btn" class="btn btn-outline-primary">{% trans 'Use a code instead' %}</a>
+        <a href="#" id="show-code-btn" class="btn btn-outline-primary">{% trans 'Use a one-time code instead' %}</a>
       </div>
     </div>
     <form method="post" action="{% url 'account_logout' %}" class="text-center">
