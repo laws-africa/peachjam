@@ -77,12 +77,12 @@
                aria-live="polite">
             {% if grouped_judges %}
               <div class="table-responsive">
-                <table class="table">
+                <table class="doc-table">
                   <thead>
                     <tr>
-                      <th scope="col">{% trans "Judge" %}</th>
-                      <th scope="col" class="text-end text-nowrap">{% trans "Judgment years" %}</th>
-                      <th scope="col" class="text-end">{% trans "Judgments" %}</th>
+                      <th scope="col" class="cell-title">{% trans "Judge" %}</th>
+                      <th scope="col" class="d-none d-md-table-cell text-end text-nowrap">{% trans "Judgment years" %}</th>
+                      <th scope="col" class="d-none d-md-table-cell text-end">{% trans "Judgments" %}</th>
                     </tr>
                   </thead>
                   {% for letter, letter_judges in grouped_judges %}
@@ -94,7 +94,7 @@
                       {% endif %}
                       {% for judge in letter_judges %}
                         <tr>
-                          <td>
+                          <td class="cell-title">
                             <div class="d-flex align-items-start gap-2">
                               <span class="user-avatar-letter bg-primary fs-6 fw-bold flex-shrink-0"
                                     aria-hidden="true">{{ judge.initials }}</span>
@@ -106,10 +106,21 @@
                                     {% if judge.more_courts_count %}+{{ judge.more_courts_count }}{% endif %}
                                   </div>
                                 {% endif %}
+                                <div class="d-md-none small text-muted mt-1">
+                                  {% if judge.first_year and judge.latest_year %}
+                                    {% if judge.first_year == judge.latest_year %}
+                                      {{ judge.first_year }}
+                                    {% else %}
+                                      {{ judge.first_year }}–{{ judge.latest_year }}
+                                    {% endif %}
+                                    <span aria-hidden="true">·</span>
+                                  {% endif %}
+                                  {% blocktrans count count=judge.judgment_count with formatted_count=judge.judgment_count|intcomma %}{{ formatted_count }} judgment{% plural %}{{ formatted_count }} judgments{% endblocktrans %}
+                                </div>
                               </div>
                             </div>
                           </td>
-                          <td class="text-end text-nowrap">
+                          <td class="d-none d-md-table-cell text-end text-nowrap">
                             {% if judge.first_year and judge.latest_year %}
                               {% if judge.first_year == judge.latest_year %}
                                 {{ judge.first_year }}
@@ -120,7 +131,7 @@
                               <span aria-hidden="true">—</span><span class="visually-hidden">{% trans "Unknown" %}</span>
                             {% endif %}
                           </td>
-                          <td class="text-end">{{ judge.judgment_count|intcomma }}</td>
+                          <td class="d-none d-md-table-cell text-end">{{ judge.judgment_count|intcomma }}</td>
                         </tr>
                       {% endfor %}
                     </tbody>
