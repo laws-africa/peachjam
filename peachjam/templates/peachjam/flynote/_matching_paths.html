@@ -1,0 +1,16 @@
+{% load peachjam %}
+<ul class="list-unstyled flynotes">
+  {% for path in matching_paths %}
+    <li>
+      —
+      {% for node in path.nodes %}
+        {% if not forloop.first %}—{% endif %}
+        {% if forloop.last %}
+          <a href="{{ node.get_absolute_url }}">{{ node.name|highlight_matches:query }}</a>
+        {% else %}
+          {{ node.name|highlight_matches:query }}
+        {% endif %}
+      {% endfor %}
+    </li>
+  {% endfor %}
+</ul>

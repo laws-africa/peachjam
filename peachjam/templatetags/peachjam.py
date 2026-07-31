@@ -1,6 +1,7 @@
 import datetime
 import hashlib
 import json
+import re
 from urllib.parse import urljoin
 
 from django import template
@@ -9,7 +10,7 @@ from django.db.models.functions import RowNumber
 from django.http import QueryDict
 from django.templatetags.static import static
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
 
 from peachjam.analysis.flynotes import FlynoteDisplayGrouper
@@ -165,6 +166,27 @@ def group_flynote_lines(lines):
 @register.filter
 def group_linked_flynotes(linked_flynotes):
     return FlynoteDisplayGrouper.group_linked_flynotes(linked_flynotes)
+
+
+@register.filter
+def highlight_matches(value, query):
+    """Wrap case-insensitive occurrences of a search query in ``<mark>`` tags."""
+    value = str(value or "")
+    query = str(query or "").strip()
+    if not query:
+        return value
+
+    parts = re.split(f"({re.escape(query)})", value, flags=re.IGNORECASE)
+    return mark_safe(
+        "".join(
+            (
+                str(format_html("<mark>{}</mark>", part))
+                if index % 2
+                else str(conditional_escape(part))
+            )
+            for index, part in enumerate(parts)
+        )
+    )
 
 
 @register.filter

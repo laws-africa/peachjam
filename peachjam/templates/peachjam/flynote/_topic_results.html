@@ -1,0 +1,8 @@
+{% load i18n %}
+<div id="flynote-topic-results">
+  {% if flynote_cards %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">{% include 'peachjam/flynote/_cards.html' %}</div>
+  {% elif topic_query %}
+    <p class="text-muted mb-0">{% trans "No matching topics found." %}</p>
+  {% endif %}
+</div>

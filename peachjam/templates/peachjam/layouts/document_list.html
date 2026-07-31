@@ -4,29 +4,33 @@
   {% trans "Documents" %}
 {% endblock %}
 {% block page-content %}
-  {% block breadcrumbs %}{% endblock %}
-  {% block entity-profile %}
-    {% if entity_profile %}
-      {% include 'peachjam/_entity_profile.html' %}
-    {% endif %}
+  {% block page-content-header %}
+    {% block breadcrumbs %}{% endblock %}
+    {% block entity-profile %}
+      {% if entity_profile %}
+        {% include 'peachjam/_entity_profile.html' %}
+      {% endif %}
+    {% endblock %}
   {% endblock %}
-  <div class="container pb-5" data-component="DocumentList">
-    {% block page-header %}
-      {% block page-title %}
-        {% if not entity_profile %}
-          <h1 id="main-page-heading" class="mt-4">{% trans 'Documents' %}</h1>
-          {% block follow-button %}{% endblock %}
-        {% endif %}
+  {% block document-list-container %}
+    <div class="container pb-5" data-component="DocumentList" id="documents">
+      {% block page-header %}
+        {% block page-title %}
+          {% if not entity_profile %}
+            <h1 id="main-page-heading" class="mt-4">{% trans 'Documents' %}</h1>
+            {% block follow-button %}{% endblock %}
+          {% endif %}
+        {% endblock %}
+        {% block count-and-search %}
+          {% include 'peachjam/_count_and_search.html' %}
+        {% endblock %}
       {% endblock %}
-      {% block count-and-search %}
-        {% include 'peachjam/_count_and_search.html' %}
+      {% block nav-tabs %}{% endblock %}
+      {% block alerts %}{% endblock %}
+      {% block document-table %}
+        {% include "peachjam/_document_table_form.html" %}
       {% endblock %}
-    {% endblock %}
-    {% block nav-tabs %}{% endblock %}
-    {% block alerts %}{% endblock %}
-    {% block document-table %}
-      {% include "peachjam/_document_table_form.html" %}
-    {% endblock %}
-    {% block taxonomy-json %}{% endblock %}
-  </div>
+      {% block taxonomy-json %}{% endblock %}
+    </div>
+  {% endblock %}
 {% endblock %}
