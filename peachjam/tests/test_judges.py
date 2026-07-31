@@ -32,7 +32,7 @@ from peachjam.models import (
     Judgment,
     JudgmentFlynote,
 )
-from peachjam.views.judges import JudgePersonDetailView, split_judge_display_name
+from peachjam.views.judges import judge_initials, split_judge_display_name
 
 CANONICAL_JUDGE_IDENTITY_SETTINGS = {
     **settings.PEACHJAM,
@@ -569,6 +569,13 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         surname, remainder = split_judge_display_name(name)
         return f"<strong>{surname}</strong>{remainder}"
 
+    def test_judge_initials_use_first_and_last_name(self):
+        self.assertEqual("JA", judge_initials("Justice Abban"))
+        self.assertEqual("AC", judge_initials("Abban, Charles"))
+        self.assertEqual("A", judge_initials("Abban"))
+        self.assertEqual("AJ", judge_initials("Ackermann J"))
+        self.assertEqual("AA", judge_initials("Abraham AJ"))
+
     def test_public_setting_is_disabled_by_default(self):
         self.assertFalse(JudgePerson.canonical_identity_public_enabled())
 
@@ -633,6 +640,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             html=True,
         )
         self.assertContains(response, self.judge_person.get_absolute_url())
+        self.assertContains(response, "JA")
         self.assertContains(
             response,
             self.judge_name_markup(other_person.full_name),
@@ -762,7 +770,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(1, response.context["judge_count"])
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
-    def test_judge_list_sorts_names_z_to_a(self):
+    def test_judge_list_ignores_removed_z_to_a_sort(self):
         other_person = JudgePerson.objects.create(full_name="Zulu Judge")
         other_judgment = Judgment.objects.create(
             language=Language.objects.get(pk="en"),
@@ -780,9 +788,10 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         response = self.client.get(reverse("judges"), {"sort": "name_desc"})
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual([other_person, self.judge_person], response.context["judges"])
+        self.assertEqual("name", response.context["sort"])
+        self.assertEqual([self.judge_person, other_person], response.context["judges"])
         self.assertEqual(
-            ["Z", "J"], [letter for letter, _ in response.context["grouped_judges"]]
+            ["J", "Z"], [letter for letter, _ in response.context["grouped_judges"]]
         )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
@@ -819,17 +828,19 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             html=True,
         )
         self.assertEqual(1, response.context["judge_count"])
-        self.assertContains(response, 'id="judge-list-year-filter-0"')
+        self.assertContains(response, 'id="judge-list-search-form-year_ranges-0"')
         self.assertContains(response, 'type="checkbox"')
         self.assertContains(response, 'name="year_ranges"')
         self.assertContains(response, 'value="2020:2024"')
         self.assertContains(response, 'form="judge-list-search-form"')
         self.assertContains(response, 'hx-include="#judge-list-search-form"')
-        self.assertContains(response, 'hx-trigger="change"')
+        self.assertContains(response, 'hx-target="#judge-list-updates"')
+        self.assertContains(response, 'hx-select="#judge-list-updates"')
         self.assertContains(response, "checked")
         self.assertContains(
             response,
-            '<label class="form-check-label" for="judge-list-year-filter-0">'
+            '<label class="form-check-label" data-facet-option-label '
+            'for="judge-list-search-form-year_ranges-0">'
             "2020–2024</label>",
             html=True,
         )
@@ -1030,20 +1041,15 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
     def test_judge_detail_htmx_response_skips_dashboard_analysis(self):
-        with patch.object(
-            JudgePersonDetailView, "get_citation_analysis"
-        ) as get_citation_analysis:
-            response = self.client.get(
-                self.judge_person.get_absolute_url(),
-                HTTP_HX_REQUEST="true",
-                HTTP_HX_TARGET="judge-detail-filters",
-            )
+        response = self.client.get(
+            self.judge_person.get_absolute_url(),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="judge-detail-filters",
+        )
 
         self.assertEqual(200, response.status_code)
-        self.assertTemplateUsed(
-            response, "peachjam/_judge_detail_document_table_form.html"
-        )
-        get_citation_analysis.assert_not_called()
+        self.assertTemplateUsed(response, "peachjam/_document_table_form.html")
+        self.assertNotIn("judge_citation_relationships", response.context)
         self.assertNotContains(response, "Judicial activity")
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
@@ -1092,7 +1098,14 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         )
         self.assertContains(response, 'name="courts"')
         self.assertContains(response, f'value="{self.judgment.court.name}"')
-        self.assertContains(response, f'form="{response.context["doc_table_form_id"]}"')
+        self.assertContains(
+            response,
+            f"?courts={self.judgment.court.name.replace(' ', '%20')}"
+            "#judge-judgments-heading",
+        )
+        self.assertContains(
+            response, f'hx-include="#{response.context["doc_table_form_id"]}"'
+        )
 
         response = self.client.get(
             self.judge_person.get_absolute_url(), {"year_ranges": "2025:2025"}
@@ -1139,6 +1152,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertContains(response, "Criminal law")
         self.assertContains(response, 'name="topics"')
         self.assertContains(response, f'value="{civil.pk}"')
+        self.assertContains(response, f"?topics={civil.pk}#judge-judgments-heading")
 
         response = self.client.get(
             self.judge_person.get_absolute_url(),
@@ -1188,26 +1202,28 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
                     "judgment_count": 2,
                     "first_year": 2024,
                     "latest_year": 2025,
-                    "percentage": 100,
                 }
             ],
             response.context["judge_court_chart"],
         )
         self.assertEqual(
             [
-                {"year": 2024, "judgment_count": 1, "percentage": 100},
-                {"year": 2025, "judgment_count": 1, "percentage": 100},
+                {"year": 2024, "judgment_count": 1},
+                {"year": 2025, "judgment_count": 1},
             ],
             response.context["judge_year_activity"],
         )
         self.assertEqual(["JA"], response.context["judge_titles"])
-        self.assertEqual(1.0, response.context["judge_average_per_active_year"])
         self.assertEqual(2, len(response.context["judge_year_activity"]))
-        self.assertContains(response, "Judicial record profile")
+        self.assertContains(response, "Justice Abban")
         self.assertContains(response, "Judgments by year")
+        self.assertContains(
+            response,
+            f"currently available on {settings.PEACHJAM['APP_NAME']}",
+        )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
-    def test_judge_detail_shows_citation_network_context(self):
+    def test_judge_detail_shows_citation_relationships(self):
         other_person = JudgePerson.objects.create(
             full_name="Justice Other",
             slug="justice-other",
@@ -1236,21 +1252,26 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         response = self.client.get(self.judge_person.get_absolute_url())
 
         self.assertEqual(200, response.status_code)
-        analysis = response.context["judge_citation_analysis"]
-        self.assertEqual(1, analysis["incoming_count"])
-        self.assertEqual(1, analysis["outgoing_count"])
+        relationships = response.context["judge_citation_relationships"]
+        self.assertEqual(1, relationships["incoming_count"])
+        self.assertEqual(1, relationships["outgoing_count"])
         self.assertEqual(
-            "Justice Other", analysis["citing_judges"][0]["judge_person__full_name"]
+            "Justice Other",
+            relationships["citing_judges"][0]["judge_person__full_name"],
         )
+        self.assertEqual("JO", relationships["citing_judges"][0]["initials"])
         self.assertEqual(
-            "Justice Other", analysis["cited_judges"][0]["judge_person__full_name"]
+            "Justice Other",
+            relationships["cited_judges"][0]["judge_person__full_name"],
         )
-        self.assertEqual(self.judgment, analysis["most_cited_judgments"][0])
-        self.assertEqual(
-            1,
-            analysis["most_cited_judgments"][0].incoming_citation_count,
+        self.assertEqual("JO", relationships["cited_judges"][0]["initials"])
+        self.assertEqual(self.judgment, relationships["most_cited_judgments"][0])
+        self.assertContains(response, "Citation relationships")
+        self.assertContains(
+            response,
+            f"citation data currently available on {settings.PEACHJAM['APP_NAME']}",
         )
-        self.assertContains(response, "Citation influence")
+        self.assertNotContains(response, "Citation influence")
         self.assertContains(response, "Justice Other")
 
 

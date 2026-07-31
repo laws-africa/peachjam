@@ -1,5 +1,4 @@
 from functools import cached_property
-from statistics import median
 from urllib.parse import urlencode
 
 from django.contrib import admin, messages
@@ -79,17 +78,6 @@ def group_years_into_ranges(years):
     ]
 
 
-def percentage_chart_rows(rows, count_key="judgment_count"):
-    """Add relative percentages to count rows for server-rendered bar charts."""
-    rows = list(rows)
-    maximum = max((row[count_key] for row in rows), default=0)
-    for row in rows:
-        row["percentage"] = (
-            max(round(row[count_key] / maximum * 100), 3) if maximum else 0
-        )
-    return rows
-
-
 JUDGE_SURNAME_PARTICLES = {
     "da",
     "de",
@@ -126,6 +114,24 @@ def split_judge_display_name(name):
     surname = " ".join(parts[:surname_end])
     remainder = " ".join(parts[surname_end:])
     return surname, f" {remainder}" if remainder else ""
+
+
+def judge_initials(name):
+    """Return phonebook-style initials for a judge name."""
+    name = " ".join(name.split())
+    if not name:
+        return ""
+
+    if "," in name:
+        surname, remainder = name.split(",", 1)
+        parts = [part for part in [surname.strip(), remainder.strip()] if part]
+    else:
+        parts = name.split()
+
+    if len(parts) == 1:
+        return parts[0][0].upper()
+
+    return f"{parts[0][0]}{parts[-1][0]}".upper()
 
 
 class JudgePublicPageMixin:
@@ -257,11 +263,8 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             ).values_list("judge_person_id", flat=True)
             queryset = queryset.filter(pk__in=judge_ids)
 
-        # Default to A-Z for the address-book layout; "judgments" is an explicit opt-in.
         if self.request.GET.get("sort") == "judgments":
             return queryset.order_by("-judgment_count", "full_name", "pk")
-        if self.request.GET.get("sort") == "name_desc":
-            return queryset.order_by("-full_name", "-pk")
         return queryset.order_by("full_name", "pk")
 
     def add_judge_metadata(self, judges):
@@ -296,24 +299,22 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             judge.display_surname, judge.display_name_remainder = (
                 split_judge_display_name(judge.full_name)
             )
+            judge.initials = judge_initials(judge.full_name)
 
-        if self.request.GET.get("sort") == "judgments":
+        sort = "judgments" if self.request.GET.get("sort") == "judgments" else "name"
+        if sort == "judgments":
             context["grouped_judges"] = [(None, judges)]
         else:
             grouped = {}
             for judge in judges:
                 grouped.setdefault(judge.first_letter, []).append(judge)
             context["grouped_judges"] = [
-                (letter, grouped[letter])
-                for letter in sorted(
-                    grouped,
-                    reverse=self.request.GET.get("sort") == "name_desc",
-                )
+                (letter, grouped[letter]) for letter in sorted(grouped)
             ]
 
         context["judges"] = judges
         context["q"] = self.request.GET.get("q", "").strip()
-        context["sort"] = self.request.GET.get("sort", "name")
+        context["sort"] = sort
         context["selected_judge_courts"] = self.selected_courts()
         context["selected_flynote_topics"] = self.selected_flynote_topics
         context["selected_judge_years"] = [str(year) for year in self.selected_years()]
@@ -352,14 +353,59 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             selected_years=context["selected_judge_years"],
         )
         context["judge_topic_filters"] = self.topic_filter_context()
+        context["judge_facet_data"] = {
+            "courts": {
+                "label": gettext_lazy("Courts"),
+                "type": "checkbox",
+                "options": [
+                    (item["value"], item["label"])
+                    for item in context["judge_court_filters"]
+                ],
+                "values": self.request.GET.getlist("courts"),
+            },
+            "topics": {
+                "label": gettext_lazy("Topics"),
+                "type": "checkbox",
+                "options": [
+                    (str(item["value"]), item["label"])
+                    for item in context["judge_topic_filters"]
+                ],
+                "values": self.request.GET.getlist("topics"),
+            },
+            "year_ranges": {
+                "label": gettext_lazy("Judgment year"),
+                "type": "checkbox",
+                "options": [
+                    (item["value"], item["label"])
+                    for item in context["judge_year_filters"]
+                ],
+                "values": self.request.GET.getlist("year_ranges"),
+            },
+        }
+        context["judge_rendered_facets"] = [
+            {"name": name, "facet": facet}
+            for name, facet in context["judge_facet_data"].items()
+            if facet["options"]
+        ]
+        for index, item in enumerate(context["judge_rendered_facets"]):
+            next_item = (
+                context["judge_rendered_facets"][index + 1]
+                if index + 1 < len(context["judge_rendered_facets"])
+                else None
+            )
+            item["next_target_id"] = (
+                f'judge-list-search-form-group-{next_item["name"]}'
+                if next_item
+                else "judge-list-results"
+            )
+        context["judge_show_clear_all"] = any(
+            facet["values"] for facet in context["judge_facet_data"].values()
+        ) or bool(context["q"])
         return context
 
 
 class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     template_name = "peachjam/judge_detail.html"
-    document_table_form_template_name = (
-        "peachjam/_judge_detail_document_table_form.html"
-    )
     navbar_link = "judgments"
 
     @cached_property
@@ -378,22 +424,75 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .get_base_queryset(exclude=exclude)
             .filter(bench__judge_person=self.judge_person)
         )
-        if self.selected_flynote_topics:
+        if exclude != "topics" and self.selected_flynote_topics:
             topic_query = Q()
             for topic in self.selected_flynote_topics:
                 topic_query |= Q(flynotes__flynote__path__startswith=topic.path)
             queryset = queryset.filter(topic_query)
-        if self.selected_years():
+        if exclude != "year_ranges" and self.selected_years():
             queryset = queryset.filter(date__year__in=self.selected_years())
         return queryset
 
     def add_facets(self, context):
-        # Judge pages use focused court, year, and topic filters instead of the
-        # generic document sidebar, whose alphabet filter is not useful here.
         context["facet_data"] = {}
+        self.add_courts_facet(context)
+        self.add_topics_facet(context)
+        self.add_year_ranges_facet(context)
 
-    def get_citation_analysis(self, bench_entries):
-        """Build citation influence data from the judge's linked judgment works."""
+    def add_courts_facet(self, context):
+        courts = list(
+            self.form.filter_queryset(self.get_base_queryset(), exclude="courts")
+            .exclude(court__name__isnull=True)
+            .exclude(court__name="")
+            .order_by("court__name")
+            .values_list("court__name", flat=True)
+            .distinct()
+        )
+        if courts:
+            context["facet_data"]["courts"] = {
+                "label": gettext_lazy("Courts"),
+                "type": "checkbox",
+                "options": [(court, court) for court in courts],
+                "values": self.request.GET.getlist("courts"),
+            }
+
+    def add_topics_facet(self, context):
+        if self.available_flynote_topics:
+            context["facet_data"]["topics"] = {
+                "label": gettext_lazy("Topics"),
+                "type": "checkbox",
+                "options": [
+                    (str(topic.pk), topic.name)
+                    for topic in self.available_flynote_topics
+                ],
+                "values": self.request.GET.getlist("topics"),
+            }
+
+    def add_year_ranges_facet(self, context):
+        years = list(
+            self.form.filter_queryset(self.get_base_queryset(), exclude="year_ranges")
+            .exclude(date__isnull=True)
+            .order_by("-date__year")
+            .values_list("date__year", flat=True)
+            .distinct()
+        )
+        year_ranges = self.year_filter_context(
+            years,
+            selected_years=[str(year) for year in self.selected_years()],
+        )
+        if year_ranges:
+            context["facet_data"]["year_ranges"] = {
+                "label": gettext_lazy("Judgment year"),
+                "type": "checkbox",
+                "options": [
+                    (year_range["value"], year_range["label"])
+                    for year_range in year_ranges
+                ],
+                "values": self.request.GET.getlist("year_ranges"),
+            }
+
+    def get_citation_relationships(self, bench_entries):
+        """Return citation relationships for the judge's linked judgments."""
         work_ids = bench_entries.values_list("judgment__work_id", flat=True).distinct()
         if not work_ids.exists():
             return {
@@ -442,6 +541,11 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .annotate(judgment_count=Count("judgment__work_id", distinct=True))
             .order_by("-judgment_count", "judge_person__full_name")[:5]
         )
+        for connections in (citing_judges, cited_judges):
+            for connection in connections:
+                connection["initials"] = judge_initials(
+                    connection["judge_person__full_name"]
+                )
         most_cited_judgments = list(
             Judgment.objects.filter(bench__judge_person=self.judge_person)
             .filter(published=True)
@@ -489,6 +593,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
 
         topic_rows = [
             {
+                "id": topic_id,
                 "name": topic_names[topic_id],
                 "judgment_count": len(document_ids),
             }
@@ -496,41 +601,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             if document_ids
         ]
         topic_rows.sort(key=lambda row: (-row["judgment_count"], row["name"]))
-        return percentage_chart_rows(topic_rows[:8])
-
-    def get_primary_court_context(self, primary_court):
-        context = {
-            "judge_primary_court": primary_court,
-            "judge_primary_court_comparison": [],
-        }
-        if not primary_court:
-            return context
-
-        peer_counts = list(
-            Bench.objects.filter(
-                judgment__court__name=primary_court["judgment__court__name"],
-                judgment__published=True,
-                judge_person__isnull=False,
-            )
-            .values("judge_person_id")
-            .annotate(judgment_count=Count("judgment_id", distinct=True))
-            .values_list("judgment_count", flat=True)
-        )
-        if peer_counts:
-            primary_court_median = round(float(median(peer_counts)), 1)
-            context["judge_primary_court_comparison"] = percentage_chart_rows(
-                [
-                    {
-                        "label": gettext_lazy("This judge"),
-                        "judgment_count": primary_court["judgment_count"],
-                    },
-                    {
-                        "label": gettext_lazy("Court median"),
-                        "judgment_count": primary_court_median,
-                    },
-                ]
-            )
-        return context
+        return topic_rows[:8]
 
     def get_filter_context(self, judge_court_breakdown, judge_year_breakdown):
         selected_courts = self.selected_courts()
@@ -589,6 +660,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             context["judge_display_surname"],
             context["judge_display_name_remainder"],
         ) = split_judge_display_name(self.judge_person.full_name)
+        context["judge_initials"] = judge_initials(self.judge_person.full_name)
         context["judge_judgment_count"] = (
             bench_entries.values("judgment_id").distinct().count()
         )
@@ -607,33 +679,21 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         context["judge_titles"] = sorted(
             {alias.title for alias in alias_records if alias.title}
         )
-        context["judge_year_activity"] = percentage_chart_rows(
-            [
-                {
-                    "year": row["judgment__date__year"],
-                    "judgment_count": row["judgment_count"],
-                }
-                for row in reversed(judge_year_breakdown)
-            ]
-        )
-        active_year_count = len(context["judge_year_activity"])
-        context["judge_average_per_active_year"] = (
-            round(context["judge_judgment_count"] / active_year_count, 1)
-            if active_year_count
-            else 0
-        )
-        context["judge_peak_year"] = max(
-            context["judge_year_activity"],
-            key=lambda row: row["judgment_count"],
-            default=None,
-        )
-        context["judge_court_chart"] = percentage_chart_rows(
-            [dict(row) for row in judge_court_breakdown]
-        )
+        context["judge_year_activity"] = [
+            {
+                "year": row["judgment__date__year"],
+                "judgment_count": row["judgment_count"],
+            }
+            for row in reversed(judge_year_breakdown)
+        ]
+        context["judge_court_chart"] = [dict(row) for row in judge_court_breakdown]
         context["judge_topic_chart"] = self.get_topic_chart()
-        primary_court = judge_court_breakdown[0] if judge_court_breakdown else None
-        context.update(self.get_primary_court_context(primary_court))
-        context["judge_citation_analysis"] = self.get_citation_analysis(bench_entries)
+        context["judge_leading_court"] = (
+            judge_court_breakdown[0] if judge_court_breakdown else None
+        )
+        context["judge_citation_relationships"] = self.get_citation_relationships(
+            bench_entries
+        )
         return context
 
 
