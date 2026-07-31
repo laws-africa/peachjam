@@ -251,6 +251,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         context["flynote_cards"] = topic_items
         context["topic_count"] = len(topic_items)
         context["topic_query"] = query
+        context["flynote_query"] = query
         context["topic_sort"] = sort
         return context
 
@@ -397,6 +398,7 @@ class FlynoteDetailView(
         )
         context["total_subtopic_count"] = total_subtopic_count
         context["subtopic_query"] = query
+        context["flynote_query"] = query
         context["subtopic_sort"] = sort
 
 

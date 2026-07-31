@@ -25,6 +25,15 @@ from peachjam.tasks import (
     FLYNOTE_REFRESH_DELAY,
     refresh_flynote_document_count,
 )
+from peachjam.templatetags.peachjam import highlight_matches
+
+
+class HighlightMatchesTest(TestCase):
+    def test_marks_case_insensitive_matches_and_escapes_the_remaining_title(self):
+        self.assertEqual(
+            highlight_matches("Murder & trial", "murder"),
+            "<mark>Murder</mark> &amp; trial",
+        )
 
 
 class ParseFlynoteTextTest(TestCase):
@@ -2382,6 +2391,7 @@ class FlynoteListViewTest(TestCase):
             ],
             ["homicide", "murder"],
         )
+        self.assertContains(response, "<mark>murder</mark>")
 
     def test_renders_all_topics_as_cards_with_filter_progress(self):
         judgment = Judgment.objects.create(
@@ -2674,8 +2684,9 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             self.assertContains(response, flynote.get_absolute_url())
         self.assertContains(
             response,
-            f'<a href="{murder.get_absolute_url()}">{murder.name}</a>',
+            f'<a href="{murder.get_absolute_url()}"><mark>murder</mark></a>',
         )
+        self.assertContains(response, "a <mark>murder</mark>")
         self.assertNotContains(response, f'<a href="{foo.get_absolute_url()}">')
 
         response = self.client.get(

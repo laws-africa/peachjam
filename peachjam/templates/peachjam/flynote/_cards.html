@@ -1,37 +1,39 @@
-{% load humanize i18n %}
-{% for item in flynote_cards %}
-  {% if append_cards %}<div hx-swap-oob="beforeend:#flynote-subtopic-cards">{% endif %}
-  <div class="col">
-    <div class="card h-100{% if not item.matching_paths %} card-clickable{% endif %}">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
-          <div>
-            <a href="{% url 'flynote_detail' item.flynote.pk %}"
-               class="text-h5 mb-1 text-decoration-none {% if not item.matching_paths %}stretched-link{% endif %}">{{ item.flynote.name }}</a>
-          </div>
-          <span class="badge rounded-pill bg-secondary flex-shrink-0">{{ item.count|intcomma }}</span>
-        </div>
-        {% if item.matching_paths %}
-          {% include 'peachjam/flynote/_matching_paths.html' with matching_paths=item.matching_paths %}
-          {% if item.matching_more_count %}
-            <div class="text-muted ms-3">
-              {% blocktranslate count count=item.matching_more_count %}… {{ count }} more matching subtopic{% plural %}… {{ count }} more matching subtopics{% endblocktranslate %}
+{% load humanize i18n peachjam %}
+{% with query=flynote_query %}
+  {% for item in flynote_cards %}
+    {% if append_cards %}<div hx-swap-oob="beforeend:#flynote-subtopic-cards">{% endif %}
+    <div class="col">
+      <div class="card h-100{% if not item.matching_paths %} card-clickable{% endif %}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+            <div>
+              <a href="{% url 'flynote_detail' item.flynote.pk %}"
+                 class="text-h5 mb-1 text-decoration-none {% if not item.matching_paths %}stretched-link{% endif %}">{{ item.flynote.name|highlight_matches:query }}</a>
             </div>
+            <span class="badge rounded-pill bg-secondary flex-shrink-0">{{ item.count|intcomma }}</span>
+          </div>
+          {% if item.matching_paths %}
+            {% include 'peachjam/flynote/_matching_paths.html' with matching_paths=item.matching_paths query=query %}
+            {% if item.matching_more_count %}
+              <div class="text-muted ms-3">
+                {% blocktranslate count count=item.matching_more_count %}… {{ count }} more matching subtopic{% plural %}… {{ count }} more matching subtopics{% endblocktranslate %}
+              </div>
+            {% endif %}
+          {% elif item.child_names %}
+            {% if item.inline_child_names %}
+              <small class="text-muted d-block">{{ item.child_names|join:" · " }}</small>
+            {% else %}
+              <ul class="list-unstyled text-muted mt-2 mb-0 flynotes">
+                {% for child in item.child_names %}<li class="mb-0 fst-normal">— {{ child }}</li>{% endfor %}
+                {% if item.more_child_count %}
+                  <li>... {% blocktranslate with count=item.more_child_count %}{{ count }} more{% endblocktranslate %}</li>
+                {% endif %}
+              </ul>
+            {% endif %}
           {% endif %}
-        {% elif item.child_names %}
-          {% if item.inline_child_names %}
-            <small class="text-muted d-block">{{ item.child_names|join:" · " }}</small>
-          {% else %}
-            <ul class="list-unstyled text-muted mt-2 mb-0 flynotes">
-              {% for child in item.child_names %}<li class="mb-0 fst-normal">— {{ child }}</li>{% endfor %}
-              {% if item.more_child_count %}
-                <li>... {% blocktranslate with count=item.more_child_count %}{{ count }} more{% endblocktranslate %}</li>
-              {% endif %}
-            </ul>
-          {% endif %}
-        {% endif %}
+        </div>
       </div>
     </div>
-  </div>
-  {% if append_cards %}</div>{% endif %}
-{% endfor %}
+    {% if append_cards %}</div>{% endif %}
+  {% endfor %}
+{% endwith %}
