@@ -2868,30 +2868,38 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
         self.assertNotContains(response, "This feature is not currently available.")
         self.assertIn("no-cache", response["Cache-Control"])
 
-    def test_flynote_detail_htmx_listing_sorts_by_most_cited(self):
+    def test_flynote_detail_htmx_listing_defaults_to_most_cited_then_newest(self):
         leaf = Flynote.objects.get(name="judicial review")
         self.grant_linked_judgments_permission()
         self.judgment.work.n_citing_works = 1
         self.judgment.work.save(update_fields=["n_citing_works"])
-        moderately_cited = self.make_topic_judgment(
-            "Moderately cited judgment", datetime.date(2025, 1, 2), 5
+        older_equally_cited = self.make_topic_judgment(
+            "Older equally cited judgment", datetime.date(2025, 1, 2), 5
+        )
+        newer_equally_cited = self.make_topic_judgment(
+            "Newer equally cited judgment", datetime.date(2025, 1, 3), 5
         )
         most_cited = self.make_topic_judgment(
-            "Most cited judgment", datetime.date(2025, 1, 3), 12
+            "Most cited judgment", datetime.date(2025, 1, 4), 12
         )
 
         response = self.client.get(
             reverse("flynote_detail", kwargs={"pk": leaf.pk}),
-            {"sort": "-work__n_citing_works"},
             HTTP_HX_REQUEST="true",
             HTTP_HX_TARGET=f"flynote-document-listing-{leaf.pk}",
         )
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Most cited")
+        self.assertEqual(response.context["form"].cleaned_data["sort"], "most_cited")
         self.assertEqual(
             [doc.pk for doc in response.context["documents"]],
-            [most_cited.pk, moderately_cited.pk, self.judgment.pk],
+            [
+                most_cited.pk,
+                newer_equally_cited.pk,
+                older_equally_cited.pk,
+                self.judgment.pk,
+            ],
         )
 
     @override_settings(

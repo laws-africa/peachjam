@@ -262,6 +262,10 @@ class FlynoteDetailView(
     """List of documents and children under a flynote. In HTMX mode, updates the document list."""
 
     form_class = FlynoteDocumentFilterForm
+    form_defaults = {
+        "sort": FlynoteDocumentFilterForm.most_cited_sort,
+        "secondary_sort": "-date",
+    }
     template_name = "peachjam/flynote/detail.html"
     navbar_link = "judgments"
     permission_required = "peachjam.view_linked_judgments"

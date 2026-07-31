@@ -514,12 +514,19 @@ class BaseDocumentFilterForm(forms.Form):
 
 
 class FlynoteDocumentFilterForm(BaseDocumentFilterForm):
+    most_cited_sort = "most_cited"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["sort"].choices = [
             *self.fields["sort"].choices,
-            ("-work__n_citing_works", _("Most cited")),
+            (self.most_cited_sort, _("Most cited")),
         ]
+
+    def order_queryset(self, queryset, exclude=None):
+        if self.cleaned_data.get("sort") == self.most_cited_sort:
+            return queryset.order_by("-work__n_citing_works", self.secondary_sort)
+        return super().order_queryset(queryset, exclude)
 
 
 class JournalArticleFilterForm(BaseDocumentFilterForm):
