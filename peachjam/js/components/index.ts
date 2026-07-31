@@ -3,6 +3,7 @@ import { RelationshipEnrichments } from './RelationshipEnrichment';
 import { ProvisionEnrichments } from './ProvisionEnrichments';
 import { AnnotationsProvider } from './Annotations';
 import DocumentFilterForm from './document-filter-form';
+import FormValidation from './form-validation';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
@@ -36,6 +37,7 @@ const components: Record<string, any> = {
   DocumentContent,
   DocumentDetail,
   DocumentFilterForm,
+  FormValidation,
   DocumentTable,
   FloatingHeader,
   FlynoteDetailActions,
