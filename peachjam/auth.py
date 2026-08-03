@@ -16,6 +16,7 @@ from django.db import IntegrityError, OperationalError, ProgrammingError
 from django.utils import translation
 from templated_email import send_templated_mail
 
+from peachjam.customerio import track_account_created_signup_event
 from peachjam.models import pj_settings
 from peachjam.signals import password_reset_started
 
@@ -48,6 +49,7 @@ def _patched_finish(self, redirect_url):
             if created:
                 user.set_unusable_password()
                 user.save()
+                track_account_created_signup_event(user)
             self.state["user_id"] = user_id_to_str(user)
             self._user = user
     return _original_finish(self, redirect_url)

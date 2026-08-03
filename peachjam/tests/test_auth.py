@@ -35,7 +35,9 @@ class PatchedFinishTests(TestCase):
         proc = self._make_process(state={"email": "newuser@example.com"})
         proc.user = None
 
-        with patch("peachjam.auth._original_finish") as mock_finish:
+        with patch("peachjam.auth._original_finish") as mock_finish, patch(
+            "peachjam.auth.track_account_created_signup_event"
+        ) as mock_track_signup_event:
             mock_finish.return_value = "redirect"
             result = _patched_finish(proc, "/")
 
@@ -45,6 +47,7 @@ class PatchedFinishTests(TestCase):
         self.assertEqual(proc.state["user_id"], str(user.pk))
         self.assertEqual(proc._user, user)
         mock_finish.assert_called_once_with(proc, "/")
+        mock_track_signup_event.assert_called_once_with(user)
         self.assertEqual(result, "redirect")
 
     def test_existing_user_not_duplicated(self):
@@ -56,7 +59,9 @@ class PatchedFinishTests(TestCase):
         proc = self._make_process(state={"email": "existing@example.com"})
         proc.user = None
 
-        with patch("peachjam.auth._original_finish") as mock_finish:
+        with patch("peachjam.auth._original_finish") as mock_finish, patch(
+            "peachjam.auth.track_account_created_signup_event"
+        ) as mock_track_signup_event:
             mock_finish.return_value = "redirect"
             _patched_finish(proc, "/")
 
@@ -64,6 +69,7 @@ class PatchedFinishTests(TestCase):
         self.assertEqual(proc._user, existing)
         existing.refresh_from_db()
         self.assertTrue(existing.has_usable_password())
+        mock_track_signup_event.assert_not_called()
 
     def test_no_email_in_state(self):
         proc = self._make_process(state={})
