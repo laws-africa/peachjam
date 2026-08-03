@@ -13,7 +13,7 @@
           <a href="{% url 'judgment_list' %}">{% trans 'Judgments' %}</a>
         </li>
         <li class="breadcrumb-item">
-          <a href="{% url 'flynote_list' %}{% if flynote_query %}?q={{ flynote_query|urlencode }}{% endif %}">{% trans 'Explore by topic' %}</a>
+          <a href="{% url 'flynote_list' %}">{% trans 'Explore by topic' %}</a>
         </li>
         {% for ancestor in ancestors %}
           <li class="breadcrumb-item">
