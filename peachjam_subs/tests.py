@@ -356,6 +356,48 @@ class SubscriptionTests(TestCase):
         self.assertEqual(Subscription.Status.CLOSED, self.subscription.status)
         self.assertEqual(Subscription.Status.ACTIVE, replacement.status)
 
+    def test_admin_close_subscription_restores_customer_default_subscription(self):
+        admin_user = User.objects.create_superuser(
+            username="subscription-admin@example.com",
+            email="subscription-admin@example.com",
+            password="password",
+        )
+        free_plan = PricingPlan.objects.create(
+            name="Free Plan",
+            price=Decimal("0.00"),
+            period=PricingPlan.Period.MONTHLY,
+        )
+        free_offering = ProductOffering.objects.create(
+            product=self.product,
+            pricing_plan=free_plan,
+        )
+        self.sub_settings.default_product_offering = free_offering
+        self.sub_settings.save()
+        self.client.force_login(admin_user)
+
+        response = self.client.post(
+            reverse(
+                "admin:peachjam_subs_subscription_close", args=[self.subscription.pk]
+            )
+        )
+
+        self.assertEqual(302, response.status_code)
+        self.subscription.refresh_from_db()
+        self.assertEqual(Subscription.Status.CLOSED, self.subscription.status)
+        self.assertTrue(
+            Subscription.objects.filter(
+                user=self.user,
+                product_offering=free_offering,
+                status=Subscription.Status.ACTIVE,
+            ).exists()
+        )
+        self.assertFalse(
+            Subscription.objects.filter(
+                user=admin_user,
+                product_offering=free_offering,
+            ).exists()
+        )
+
     def test_pricing_plan_price_per_month(self):
         self.assertEqual("None100/month", self.monthly_plan.price_per_month)
         self.assertEqual("None8.33/month", self.annual_plan.price_per_month)

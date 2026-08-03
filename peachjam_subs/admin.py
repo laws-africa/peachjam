@@ -172,7 +172,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
             try:
                 subscription.close()
                 # ensure the user has an active subscription
-                Subscription.get_or_create_active_for_user(request.user)
+                Subscription.get_or_create_active_for_user(subscription.user)
                 messages.success(request, _("Subscription cancelled."))
             except TransitionNotAllowed:
                 messages.warning(request, _("Subscription cannot be cancelled."))
