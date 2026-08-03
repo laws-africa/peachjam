@@ -95,8 +95,8 @@
         {% block main-aria-labelledby %}
         aria-labelledby="main-page-heading"
         {% endblock %}>
-    {% block page-content %}{% endblock %}
     <div id="messages" aria-hidden="true"></div>
+    {% block page-content %}{% endblock %}
     {% include 'peachjam/saved_document/_modal_placeholder.html' %}
   </main>
 {% endblock %}
