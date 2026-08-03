@@ -2393,6 +2393,29 @@ class FlynoteListViewTest(TestCase):
         )
         self.assertContains(response, "<mark>murder</mark>")
 
+    def test_topic_search_links_more_matching_subtopics_to_containing_topic(self):
+        root = Flynote.add_root(name="Criminal law")
+        homicide = root.add_child(name="Homicide")
+        FlynoteDocumentCount.objects.create(flynote=root, count=10)
+
+        for index in range(4):
+            child = homicide.add_child(name=f"murder topic {index}")
+            FlynoteDocumentCount.objects.create(flynote=child, count=1)
+
+        response = self.client.get(
+            reverse("flynote_list"),
+            {"q": "murder"},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-topic-results",
+        )
+
+        self.assertEqual(response.context["flynote_cards"][0]["matching_more_count"], 1)
+        self.assertContains(
+            response,
+            f'<a href="{root.get_absolute_url()}?q=murder">',
+        )
+        self.assertContains(response, "1 more matching subtopic")
+
     def test_renders_all_topics_as_cards_with_filter_progress(self):
         judgment = Judgment.objects.create(
             case_name="View Cards Test",
@@ -2652,6 +2675,18 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             response, 'hx-indicator="#flynote-subtopic-filter-progress"', count=2
         )
 
+    def test_flynote_detail_search_links_back_to_topic_search_results(self):
+        root = Flynote.objects.get(name="Administrative law")
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": root.pk}),
+            {"q": "murder"},
+        )
+
+        topic_search_url = f"{reverse('flynote_list')}?q=murder"
+        self.assertContains(response, "Back to topic search results")
+        self.assertContains(response, f'href="{topic_search_url}"', count=2)
+
     def test_flynote_detail_searches_direct_children_and_descendants(self):
         root = Flynote.objects.get(name="Administrative law")
         death_penalty = root.add_child(name="Death penalty")
@@ -2780,6 +2815,10 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             ],
         )
         self.assertEqual(item["matching_more_count"], 1)
+        self.assertContains(
+            response,
+            f'<a href="{death_penalty.get_absolute_url()}?q=murder">',
+        )
         self.assertContains(response, "1 more matching subtopic")
 
     def test_flynote_detail_loads_fifteen_more_subtopic_cards(self):
