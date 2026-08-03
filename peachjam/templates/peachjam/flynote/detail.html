@@ -38,11 +38,6 @@
           </div>
         {% endif %}
         <h1 id="main-page-heading" class="mb-0">{{ flynote.name }}</h1>
-        {% if flynote_query %}
-          <div class="mt-2">
-            <a href="{% url 'flynote_list' %}?q={{ flynote_query|urlencode }}">{% trans "Back to topic search results" %}</a>
-          </div>
-        {% endif %}
       </div>
       <div data-component="FlynoteDetailActions"
            data-manage-url="{% url 'flynote-manager' %}?flynote={{ flynote.pk }}">
