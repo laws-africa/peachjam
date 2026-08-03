@@ -193,3 +193,8 @@ def get_customerio():
         customerio_class = import_string(settings.PEACHJAM["CUSTOMERIO_CLASS"])
         _customerio = customerio_class()
     return _customerio
+
+
+def track_account_created_signup_event(user):
+    """Track the Customer.io Signed up event for explicit account creation flows."""
+    get_customerio().track_user_signed_up(user)

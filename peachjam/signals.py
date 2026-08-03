@@ -12,7 +12,7 @@ from django.dispatch.dispatcher import Signal
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
 
-from peachjam.customerio import get_customerio
+from peachjam.customerio import get_customerio, track_account_created_signup_event
 from peachjam.models import (
     Annotation,
     CitationLink,
@@ -136,7 +136,7 @@ def user_saved_updated_customerio(sender, instance, **kwargs):
 
 @receiver(allauth_signals.user_signed_up)
 def user_signed_up_update_customerio(sender, request, user, **kwargs):
-    get_customerio().track_user_signed_up(user)
+    track_account_created_signup_event(user)
 
 
 @receiver(signals.post_save, sender=UserProfile)
