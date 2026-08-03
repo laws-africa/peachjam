@@ -36,7 +36,7 @@ class PatchedFinishTests(TestCase):
         proc.user = None
 
         with patch("peachjam.auth._original_finish") as mock_finish, patch(
-            "peachjam.customerio.track_account_created_signup_event"
+            "peachjam.auth.track_account_created_signup_event"
         ) as mock_track_signup_event:
             mock_finish.return_value = "redirect"
             result = _patched_finish(proc, "/")
@@ -60,7 +60,7 @@ class PatchedFinishTests(TestCase):
         proc.user = None
 
         with patch("peachjam.auth._original_finish") as mock_finish, patch(
-            "peachjam.customerio.track_account_created_signup_event"
+            "peachjam.auth.track_account_created_signup_event"
         ) as mock_track_signup_event:
             mock_finish.return_value = "redirect"
             _patched_finish(proc, "/")
