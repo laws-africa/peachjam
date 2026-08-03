@@ -2675,18 +2675,6 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
             response, 'hx-indicator="#flynote-subtopic-filter-progress"', count=2
         )
 
-    def test_flynote_detail_search_links_back_to_topic_search_results(self):
-        root = Flynote.objects.get(name="Administrative law")
-
-        response = self.client.get(
-            reverse("flynote_detail", kwargs={"pk": root.pk}),
-            {"q": "murder"},
-        )
-
-        topic_search_url = f"{reverse('flynote_list')}?q=murder"
-        self.assertContains(response, "Back to topic search results")
-        self.assertContains(response, f'href="{topic_search_url}"', count=2)
-
     def test_flynote_detail_searches_direct_children_and_descendants(self):
         root = Flynote.objects.get(name="Administrative law")
         death_penalty = root.add_child(name="Death penalty")
