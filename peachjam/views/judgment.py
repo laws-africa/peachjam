@@ -352,7 +352,7 @@ class FlynoteDetailView(
         children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
             doc_count__gt=0
         )
-        query = self.request.GET.get("q", "").strip()
+        query = self.request.GET.get("subtopic_q", "").strip()
         sort = self.request.GET.get("sort", "judgments")
         subtopics_offset = 0
         if self.is_subtopics_htmx_request():
