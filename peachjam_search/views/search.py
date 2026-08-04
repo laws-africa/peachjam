@@ -357,10 +357,23 @@ class SearchDebugView(SearchDebugMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         query_params = self.request.GET.urlencode()
+        portion_initial = {"top_k": 10}
+        if self.request.GET.get("debug_tab") == "portions":
+            portion_initial.update(
+                {
+                    "text": self.request.GET.get("portion_text", ""),
+                    "top_k": self.request.GET.get("portion_top_k", 10),
+                }
+            )
+            for field in ("pre_filters", "filters"):
+                value = self.request.GET.get(f"portion_{field}")
+                if value:
+                    portion_initial[field] = value
         context.update(
             {
                 "document_query_params": query_params,
-                "portion_form": PortionSearchDebugForm(initial={"top_k": 10}),
+                "portion_form": PortionSearchDebugForm(initial=portion_initial),
+                "debug_tab": self.request.GET.get("debug_tab", "documents"),
                 "raw_form": RawSearchDebugForm(
                     initial={
                         "query": json.dumps({"query": {"match_all": {}}}, indent=2)

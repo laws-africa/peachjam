@@ -8,44 +8,44 @@
     <h1 id="main-page-heading">{% trans "Search debug" %}</h1>
     <ul class="nav nav-tabs mb-3 border-bottom" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active"
+        <button class="nav-link {% if debug_tab == 'documents' %}active{% endif %}"
                 id="document-search-debug-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#document-search-debug"
                 type="button"
                 role="tab"
                 aria-controls="document-search-debug"
-                aria-selected="true">
+                aria-selected="{% if debug_tab == 'documents' %}true{% else %}false{% endif %}">
           {% trans "Document search" %}
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link"
+        <button class="nav-link {% if debug_tab == 'portions' %}active{% endif %}"
                 id="portion-search-debug-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#portion-search-debug"
                 type="button"
                 role="tab"
                 aria-controls="portion-search-debug"
-                aria-selected="false">
+                aria-selected="{% if debug_tab == 'portions' %}true{% else %}false{% endif %}">
           {% trans "Portion search" %}
         </button>
       </li>
       <li class="nav-item" role="presentation">
-        <button class="nav-link"
+        <button class="nav-link {% if debug_tab == 'raw' %}active{% endif %}"
                 id="raw-search-debug-tab"
                 data-bs-toggle="tab"
                 data-bs-target="#raw-search-debug"
                 type="button"
                 role="tab"
                 aria-controls="raw-search-debug"
-                aria-selected="false">
+                aria-selected="{% if debug_tab == 'raw' %}true{% else %}false{% endif %}">
           {% trans "Raw query" %}
         </button>
       </li>
     </ul>
     <div class="tab-content">
-      <section class="tab-pane show active"
+      <section class="tab-pane {% if debug_tab == 'documents' %}show active{% endif %}"
                id="document-search-debug"
                role="tabpanel"
                aria-labelledby="document-search-debug-tab">
@@ -65,7 +65,7 @@
         </form>
         <div id="document-search-debug-results" class="mt-3"></div>
       </section>
-      <section class="tab-pane"
+      <section class="tab-pane {% if debug_tab == 'portions' %}show active{% endif %}"
                id="portion-search-debug"
                role="tabpanel"
                aria-labelledby="portion-search-debug-tab">
@@ -98,7 +98,7 @@
         </form>
         <div id="portion-search-debug-results" class="mt-3"></div>
       </section>
-      <section class="tab-pane"
+      <section class="tab-pane {% if debug_tab == 'raw' %}show active{% endif %}"
                id="raw-search-debug"
                role="tabpanel"
                aria-labelledby="raw-search-debug-tab">

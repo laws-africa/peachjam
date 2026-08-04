@@ -351,3 +351,4 @@ class PortionHitSerializer(serializers.Serializer):
 
 class PortionSearchResponseSerializer(serializers.Serializer):
     results = PortionHitSerializer(many=True)
+    trace_id = serializers.UUIDField(read_only=True)

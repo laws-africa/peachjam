@@ -1,3 +1,4 @@
+import json
 from collections import defaultdict
 
 from cobalt.uri import FrbrUri
@@ -11,6 +12,7 @@ from rest_framework.views import APIView
 from peachjam.models import Judgment
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.engine import PortionSearchEngine, make_portion_search_query
+from peachjam_search.models import SearchTrace
 from peachjam_search.search_pipeline import SearchPlanner
 from peachjam_search.serializers import (
     PortionContent,
@@ -29,6 +31,7 @@ class PortionSearchPermission(BasePermission):
 
 class PortionSearchView(APIView):
     permission_classes = [PortionSearchPermission]
+    config_version = "2026-08-03"
     engine = None
 
     def post(self, request, *args, **kwargs):
@@ -46,11 +49,72 @@ class PortionSearchView(APIView):
         self.engine = PortionSearchEngine(search_query, planner=planner)
 
         es_response = self.engine.execute()
+        trace = self.save_search_trace(input_data, es_response.hits.total.value)
 
         portions = self.build_portions(es_response, request)
         portions = portions[: input_data["top_k"]]
 
-        return Response(PortionSearchResponseSerializer({"results": portions}).data)
+        return Response(
+            PortionSearchResponseSerializer(
+                {"results": portions, "trace_id": trace.id}
+            ).data
+        )
+
+    def save_search_trace(self, input_data, n_results):
+        """Record a portion-search API request for debugging."""
+
+        def strip_null_bytes(value):
+            if isinstance(value, str):
+                return value.replace("\00", " ")
+            if isinstance(value, dict):
+                return {key: strip_null_bytes(child) for key, child in value.items()}
+            if isinstance(value, list):
+                return [strip_null_bytes(child) for child in value]
+            return value
+
+        trace_filters = {"top_k": input_data["top_k"]}
+        for field in ("pre_filters", "filters"):
+            if input_data.get(field):
+                trace_filters[field] = input_data[field].model_dump(exclude_none=True)
+        trace_filters = strip_null_bytes(trace_filters)
+
+        analysis = getattr(self.engine, "analysis", None)
+        analysis_data = strip_null_bytes(analysis.to_dict()) if analysis else None
+        profile = getattr(getattr(self.engine, "plan", None), "profile", None)
+        profile_name = profile.name if profile else None
+        clean_query = analysis_data.get("clean_query") if analysis_data else None
+        request_id = getattr(self.request, "id", None)
+
+        return SearchTrace.objects.create(
+            kind=SearchTrace.Kind.PORTIONS,
+            user=self.request.user if self.request.user.is_authenticated else None,
+            config_version=self.config_version,
+            request_id=request_id if request_id != "none" else None,
+            mode=self.engine.plan.mode,
+            search=strip_null_bytes(input_data["text"])[:2048],
+            field_searches={},
+            n_results=n_results,
+            page=1,
+            filters=trace_filters,
+            filters_string=json.dumps(trace_filters, sort_keys=True)[:2048],
+            ordering="-score",
+            suggestion=None,
+            ip_address=self.request.headers.get("x-forwarded-for"),
+            user_agent=self.request.headers.get("user-agent"),
+            query_clean=clean_query,
+            query_clean_n_words=len(clean_query.split()) if clean_query else None,
+            query_clean_n_chars=len(clean_query) if clean_query else None,
+            query_classification=(
+                analysis_data.get("classifier_intent") or analysis_data.get("intent")
+                if analysis_data
+                else None
+            ),
+            query_classification_confidence=(
+                analysis_data.get("confidence") if analysis_data else None
+            ),
+            query_analysis=analysis_data,
+            search_profile=profile_name,
+        )
 
     def build_portions(self, es_response, request):
         portions = []

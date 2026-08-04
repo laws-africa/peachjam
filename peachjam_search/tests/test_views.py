@@ -12,6 +12,7 @@ from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
@@ -821,3 +822,179 @@ class PortionSearchViewTest(TestCase):
         self.assertTrue(load_portion_details.called)
         pages_to_load = load_portion_details.call_args[0][2]
         self.assertIn(12, [pid for ids in pages_to_load.values() for pid in ids])
+
+
+class PortionSearchTraceTest(TestCase):
+    fixtures = ["tests/countries", "tests/users"]
+
+    def setUp(self):
+        self.api_request_factory = APIRequestFactory()
+        self.user = User.objects.get(username="officer@example.com")
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="can_search_portions",
+                content_type=ContentType.objects.get_for_model(SearchTrace),
+            )
+        )
+
+    def api_request(self, data, user=None):
+        request = self.api_request_factory.post(
+            "/api/v1/search/portions", data, format="json", HTTP_USER_AGENT="api-test"
+        )
+        if user:
+            force_authenticate(request, user=user)
+        return request
+
+    @patch.object(PortionSearchView, "build_portions", return_value=[])
+    @patch("peachjam_search.views.api.PortionSearchEngine")
+    def test_post_records_portion_search_trace(self, mock_engine, mock_build_portions):
+        mock_engine.return_value.execute.return_value = SimpleNamespace(
+            hits=SimpleNamespace(total=SimpleNamespace(value=12))
+        )
+        mock_engine.return_value.analysis = QueryAnalysis(
+            raw_query="example search",
+            clean_query="example search",
+            intent="case_name",
+            confidence=0.9,
+        )
+        mock_engine.return_value.plan = SimpleNamespace(
+            mode="text", profile=SimpleNamespace(name="case_name")
+        )
+        request = self.api_request(
+            {
+                "text": "example search",
+                "top_k": 5,
+                "pre_filters": {"frbr_doctype": "judgment"},
+                "filters": {"principal": True},
+            },
+            user=self.user,
+        )
+        request.id = "request-123"
+
+        response = PortionSearchView.as_view()(request)
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([], response.data["results"])
+        trace = SearchTrace.objects.get(pk=response.data["trace_id"])
+        self.assertEqual(SearchTrace.Kind.PORTIONS, trace.kind)
+        self.assertEqual("example search", trace.search)
+        self.assertEqual(12, trace.n_results)
+        self.assertEqual("request-123", trace.request_id)
+        self.assertEqual("api-test", trace.user_agent)
+        self.assertEqual(
+            {
+                "top_k": 5,
+                "pre_filters": {"frbr_doctype": "judgment"},
+                "filters": {"principal": True},
+            },
+            trace.filters,
+        )
+        self.assertEqual("case_name", trace.query_classification)
+        self.assertEqual("case_name", trace.search_profile)
+        mock_build_portions.assert_called_once()
+
+    @patch.object(PortionSearchView, "build_portions", return_value=[])
+    @patch("peachjam_search.views.api.PortionSearchEngine")
+    def test_post_records_zero_result_portion_search(
+        self, mock_engine, mock_build_portions
+    ):
+        mock_engine.return_value.execute.return_value = SimpleNamespace(
+            hits=SimpleNamespace(total=SimpleNamespace(value=0))
+        )
+        mock_engine.return_value.analysis = None
+        mock_engine.return_value.plan = SimpleNamespace(mode="text", profile=None)
+
+        response = PortionSearchView.as_view()(
+            self.api_request({"text": "no results"}, user=self.user)
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            0, SearchTrace.objects.get(pk=response.data["trace_id"]).n_results
+        )
+        mock_build_portions.assert_called_once()
+
+    def test_invalid_and_permission_denied_requests_do_not_create_traces(self):
+        response = PortionSearchView.as_view()(
+            self.api_request({"top_k": 5}, user=self.user)
+        )
+        self.assertEqual(400, response.status_code)
+        self.assertEqual(0, SearchTrace.objects.count())
+
+        response = PortionSearchView.as_view()(self.api_request({"text": "query"}))
+        self.assertEqual(403, response.status_code)
+        self.assertEqual(0, SearchTrace.objects.count())
+
+
+class SearchTraceViewTest(TestCase):
+    fixtures = ["tests/countries", "tests/users"]
+
+    def setUp(self):
+        self.user = User.objects.get(username="officer@example.com")
+        self.user.is_staff = True
+        self.user.save()
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="can_debug_search",
+                content_type=ContentType.objects.get_for_model(SearchTrace),
+            )
+        )
+        self.client.force_login(self.user)
+
+    def make_trace(self, **kwargs):
+        data = {
+            "config_version": "test",
+            "search": "example search",
+            "n_results": 1,
+            "page": 1,
+            "field_searches": {},
+            "filters": {},
+        }
+        data.update(kwargs)
+        return SearchTrace.objects.create(**data)
+
+    def test_portion_trace_detail_shows_analysis_and_debug_link(self):
+        trace = self.make_trace(
+            kind=SearchTrace.Kind.PORTIONS,
+            filters={
+                "top_k": 5,
+                "pre_filters": {"frbr_doctype": "judgment"},
+                "filters": {"principal": True},
+            },
+            query_analysis={"intent": "case_name", "components": {"foo": "bar"}},
+        )
+
+        response = self.client.get(
+            reverse("search:search_trace", kwargs={"pk": trace.pk})
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, "Portions")
+        self.assertContains(response, "Query analysis")
+        self.assertContains(response, "&quot;intent&quot;")
+        self.assertContains(response, "debug_tab=portions")
+        self.assertNotContains(response, "Try it")
+
+    def test_portion_debug_link_prefills_the_portion_form(self):
+        trace = self.make_trace(
+            kind=SearchTrace.Kind.PORTIONS,
+            filters={"top_k": 5, "filters": {"principal": True}},
+        )
+
+        response = self.client.get(trace.get_search_debug_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, "portion-search-debug-tab")
+        self.assertContains(response, 'name="text" value="example search"')
+        self.assertContains(response, 'name="top_k" value="5"')
+        self.assertContains(response, "&quot;principal&quot;")
+
+    def test_document_trace_keeps_the_existing_debug_url(self):
+        trace = self.make_trace()
+
+        self.assertEqual(SearchTrace.Kind.DOCUMENTS, trace.kind)
+        self.assertEqual(
+            reverse("search:search_debug")
+            + "?search=example+search&page=1&ordering=None",
+            trace.get_search_debug_url(),
+        )

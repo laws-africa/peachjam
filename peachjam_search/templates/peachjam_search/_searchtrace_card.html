@@ -6,7 +6,9 @@
       {{ trace.search|default:trace.field_searches }}
       <small class="text-muted">
         <a href="{% url "search:search_trace" pk=trace.pk %}" class="ms-3">{{ trace.pk }}</a>
-        <a href="{{ trace.get_search_url }}" target="_blank" class="ms-3">{% trans "Try it" %}<i class="ms-1 bi bi-box-arrow-up-right"></i></a>
+        {% if trace.kind == 'documents' %}
+          <a href="{{ trace.get_search_url }}" target="_blank" class="ms-3">{% trans "Try it" %}<i class="ms-1 bi bi-box-arrow-up-right"></i></a>
+        {% endif %}
         {% if perms.peachjam_search.can_debug_search %}
           <a href="{{ trace.get_search_debug_url }}" class="ms-3">{% trans "Debug" %}</a>
         {% endif %}
@@ -39,10 +41,14 @@
       </td>
     </tr>
     <tr>
+      <th>{% trans "Kind" %}</th>
+      <td>{{ trace.get_kind_display }}</td>
       <th>{% trans "Mode" %}</th>
       <td>{{ trace.mode }}</td>
+    </tr>
+    <tr>
       <th>{% trans "Ordering" %}</th>
-      <td>{{ trace.ordering }}</td>
+      <td colspan="3">{{ trace.ordering }}</td>
     </tr>
     <tr>
       <th>{% trans "Page" %}</th>
@@ -71,13 +77,25 @@
       <th>{% trans "Config version" %}</th>
       <td>{{ trace.config_version }}</td>
       <th>{% trans "Request ID" %}</th>
-      <td>{{ trace.request_id }}</td>
+      <td>
+        {{ trace.request_id }}
+      </td>
     </tr>
   </table>
+  {% if trace.query_analysis %}
+    <div class="card-body pt-0">
+      <h5>
+        {% trans "Query analysis" %}
+      </h5>
+      <pre class="mb-0"><code>{{ trace.get_query_analysis_json }}</code></pre>
+    </div>
+  {% endif %}
   {% with trace.clicks.all as clicks %}
     {% if clicks %}
       <div class="card-body">
-        <h5>{% trans "Clicks" %}</h5>
+        <h5>
+          {% trans "Clicks" %}
+        </h5>
         <table class="table table-condensed">
           {% for click in clicks %}
             <tr>

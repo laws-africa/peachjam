@@ -23,6 +23,10 @@ log = logging.getLogger(__name__)
 class SearchTrace(models.Model):
     """A search performed by a user."""
 
+    class Kind(models.TextChoices):
+        DOCUMENTS = "documents", "Documents"
+        PORTIONS = "portions", "Portions"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # this is the name of the search configuration, for tracking changes across versions
     config_version = models.CharField(max_length=50, null=False)
@@ -44,6 +48,7 @@ class SearchTrace(models.Model):
     filters_string = models.CharField(max_length=2048, null=True)
     ordering = models.CharField(max_length=1024, null=True)
     suggestion = models.CharField(max_length=1024, null=True)
+    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.DOCUMENTS)
 
     query_clean = models.CharField(max_length=2048, null=True)
     query_clean_n_words = models.IntegerField(null=True)
@@ -82,6 +87,18 @@ class SearchTrace(models.Model):
 
     def get_search_debug_url(self):
         """Re-build a search debug URL for this trace."""
+        if self.kind == self.Kind.PORTIONS:
+            portion_inputs = self.filters or {}
+            params = {
+                "debug_tab": "portions",
+                "portion_text": self.search,
+                "portion_top_k": portion_inputs.get("top_k", 10),
+            }
+            for field in ("pre_filters", "filters"):
+                if portion_inputs.get(field):
+                    params[f"portion_{field}"] = json.dumps(portion_inputs[field])
+            return reverse("search:search_debug") + "?" + urlencode(params)
+
         params = {"search": self.search}
         params.update(
             {k: v for k, v in (self.filters.items() or {}) if k != "is_most_recent"}
@@ -94,6 +111,10 @@ class SearchTrace(models.Model):
             if value:
                 params[f"search__{field}"] = value
         return reverse("search:search_debug") + "?" + urlencode(params, doseq=True)
+
+    def get_query_analysis_json(self):
+        """Return query analysis formatted for display in the search trace UI."""
+        return json.dumps(self.query_analysis, indent=2, sort_keys=True)
 
 
 class SearchClick(models.Model):
