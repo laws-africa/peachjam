@@ -81,7 +81,9 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
         content = obj.get_or_create_document_content()
 
         # return content.content_text as a normal drf response object
-        return HttpResponse(content.content_text, content_type="text/plain")
+        return HttpResponse(
+            content.content_text, content_type="text/plain; charset=utf-8"
+        )
 
     @extend_schema(responses={(200, "text/html"): OpenApiTypes.STR})
     @action(detail=True, url_path=".html")
@@ -90,7 +92,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
         content = obj.get_or_create_document_content().content_html
         if not content:
             raise Http404()
-        return HttpResponse(content, content_type="text/html")
+        return HttpResponse(content, content_type="text/html; charset=utf-8")
 
     @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
     @action(detail=True, url_path="source.pdf")
