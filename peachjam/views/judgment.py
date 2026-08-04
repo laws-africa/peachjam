@@ -329,6 +329,7 @@ class FlynoteDetailView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["doc_table_show_doc_type"] = False
+        context["doc_table_show_jurisdiction"] = False
         context["flynote_document_listing_id"] = self.get_flynote_document_listing_id()
 
         if (
