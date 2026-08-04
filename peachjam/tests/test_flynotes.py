@@ -2442,6 +2442,46 @@ class FlynoteListViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("judgment_list"))
 
+    def test_hides_deprecated_topics(self):
+        active = Flynote.add_root(name="Active topic")
+        deprecated = Flynote.add_root(name="Deprecated topic")
+        FlynoteDocumentCount.objects.create(flynote=active, count=1)
+        FlynoteDocumentCount.objects.create(flynote=deprecated, count=1)
+        Flynote.objects.filter(pk=deprecated.pk).update(deprecated=True)
+
+        response = self.client.get(reverse("flynote_list"))
+
+        self.assertContains(response, active.name)
+        self.assertNotContains(response, deprecated.name)
+        self.assertEqual(
+            list(Flynote.objects.undeprecated().values_list("pk", flat=True)),
+            [active.pk],
+        )
+
+    def test_search_ignores_deprecated_descendants(self):
+        root = Flynote.add_root(name="Active topic")
+        deprecated = root.add_child(name="Deprecated descendant")
+        FlynoteDocumentCount.objects.create(flynote=root, count=1)
+        Flynote.objects.filter(pk=deprecated.pk).update(deprecated=True)
+
+        response = self.client.get(
+            reverse("flynote_list"),
+            {"q": deprecated.name},
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="flynote-topic-results",
+        )
+
+        self.assertEqual(response.context["flynote_cards"], [])
+
+    def test_redirects_to_judgment_list_when_only_flynotes_are_deprecated(self):
+        deprecated = Flynote.add_root(name="Deprecated topic")
+        Flynote.objects.filter(pk=deprecated.pk).update(deprecated=True)
+
+        response = self.client.get(reverse("flynote_list"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("judgment_list"))
+
     @override_settings(
         PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": False}
     )
@@ -2520,6 +2560,15 @@ class JudgmentListFlynoteTopicsTest(TestCase):
 
     def test_judgment_list_hides_topic_link_without_flynotes(self):
         response = self.client.get(reverse("judgment_list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, reverse("flynote_list"))
+
+    def test_judgment_list_hides_topic_link_when_flynotes_are_deprecated(self):
+        deprecated = Flynote.add_root(name="Deprecated topic")
+        Flynote.objects.filter(pk=deprecated.pk).update(deprecated=True)
+
+        response = self.client.get(reverse("judgment_list"))
+
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse("flynote_list"))
 
@@ -2633,6 +2682,25 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertFalse(response.context.get("doc_table_show_doc_type"))
+
+    def test_flynote_detail_hides_deprecated_subtopics(self):
+        leaf = Flynote.objects.get(name="judicial review")
+        Flynote.objects.filter(pk=leaf.pk).update(deprecated=True)
+
+        response = self.client.get(
+            reverse("flynote_detail", kwargs={"pk": leaf.get_root().pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, leaf.name)
+
+    def test_flynote_detail_returns_not_found_for_deprecated_topic(self):
+        leaf = Flynote.objects.get(name="judicial review")
+        Flynote.objects.filter(pk=leaf.pk).update(deprecated=True)
+
+        response = self.client.get(reverse("flynote_detail", kwargs={"pk": leaf.pk}))
+
+        self.assertEqual(response.status_code, 404)
 
     def test_flynote_detail_includes_follow_button(self):
         leaf = Flynote.objects.get(name="judicial review")

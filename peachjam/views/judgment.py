@@ -43,7 +43,8 @@ class JudgmentListView(TemplateView):
         context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
         context["show_flynote_topics"] = (
-            Judgment.flynote_topics_enabled() and Flynote.get_root_nodes().exists()
+            Judgment.flynote_topics_enabled()
+            and Flynote.objects.undeprecated().filter(depth=1).exists()
         )
         self.add_entity_profile(context)
         self.get_court_classes(context)
@@ -89,7 +90,8 @@ class FlynoteViewMixin:
         )
 
         children_qs = (
-            Flynote.objects.filter(depth=depth + 1)
+            Flynote.objects.undeprecated()
+            .filter(depth=depth + 1)
             .filter(direct_child_filter)
             .annotate(
                 parent_path=Substr("path", 1, Length("path") - Flynote.steplen),
@@ -133,7 +135,7 @@ class FlynoteViewMixin:
         """Filter direct children by matching descendants and collect the matching paths."""
         matching_flynotes = list(
             self.annotate_with_counts(
-                Flynote.objects.filter(
+                Flynote.objects.undeprecated().filter(
                     path__startswith=parent_path,
                     name__icontains=query,
                 )
@@ -183,9 +185,9 @@ class FlynoteViewMixin:
 
         flynotes_by_path = {
             flynote.path: flynote
-            for flynote in Flynote.objects.filter(path__in=requested_paths).order_by(
-                "path"
-            )
+            for flynote in Flynote.objects.undeprecated()
+            .filter(path__in=requested_paths)
+            .order_by("path")
         }
         return (
             children_qs,
@@ -209,7 +211,10 @@ class FlynoteListView(FlynoteViewMixin, ListView):
     paginate_by = None
 
     def get(self, request, *args, **kwargs):
-        if not self.flynote_tree_enabled() or not Flynote.get_root_nodes().exists():
+        if (
+            not self.flynote_tree_enabled()
+            or not Flynote.objects.undeprecated().filter(depth=1).exists()
+        ):
             return redirect(reverse("judgment_list"))
         return super().get(request, *args, **kwargs)
 
@@ -219,9 +224,9 @@ class FlynoteListView(FlynoteViewMixin, ListView):
         return super().get_template_names()
 
     def get_queryset(self):
-        return self.annotate_with_counts(Flynote.get_root_nodes()).filter(
-            doc_count__gt=0
-        )
+        return self.annotate_with_counts(
+            Flynote.objects.undeprecated().filter(depth=1)
+        ).filter(doc_count__gt=0)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -313,7 +318,9 @@ class FlynoteDetailView(
     def dispatch(self, request, *args, **kwargs):
         if not self.flynote_tree_enabled():
             return redirect(reverse("judgment_list"))
-        self.flynote = get_object_or_404(Flynote, pk=self.kwargs["pk"])
+        self.flynote = get_object_or_404(
+            Flynote.objects.undeprecated(), pk=self.kwargs["pk"]
+        )
         return super().dispatch(request, *args, **kwargs)
 
     def get_base_queryset(self):
@@ -350,9 +357,9 @@ class FlynoteDetailView(
         return response
 
     def subtopic_cards(self, context):
-        children_qs = self.annotate_with_counts(self.flynote.get_children()).filter(
-            doc_count__gt=0
-        )
+        children_qs = self.annotate_with_counts(
+            self.flynote.get_children().filter(deprecated=False)
+        ).filter(doc_count__gt=0)
         query = self.request.GET.get("subtopic_q", "").strip()
         sort = self.request.GET.get("sort", "judgments")
         subtopics_offset = 0
