@@ -3001,7 +3001,10 @@ class JudgmentDetailFlynoteNavigationTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Most cited")
+        self.assertContains(response, "Citation")
+        self.assertContains(response, "Judgment date")
         self.assertEqual(response.context["form"].cleaned_data["sort"], "most_cited")
+        self.assertIn("years", response.context["facet_data"])
         self.assertEqual(
             [doc.pk for doc in response.context["documents"]],
             [

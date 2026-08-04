@@ -152,6 +152,7 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "/judgments/ECOWASCJ/2018/")
         self.assertContains(response, "/judgments/ECOWASCJ/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+        self.assertNotIn("courts", response.context["facet_data"])
 
     def test_court_year_listing(self):
         response = self.client.get(
@@ -201,6 +202,28 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "/judgments/all/2018/")
         self.assertContains(response, "/judgments/all/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+        self.assertIn("courts", response.context["facet_data"])
+        self.assertIn(
+            ("ECOWAS Community Court of Justice", "ECOWAS Community Court of Justice"),
+            response.context["facet_data"]["courts"]["options"],
+        )
+        self.assertIn(
+            ("most_cited", "Most cited"),
+            response.context["form"].fields["sort"].choices,
+        )
+
+    def test_all_judgments_listing_keeps_most_cited_results_ungrouped(self):
+        response = self.client.get(
+            reverse("court", kwargs={"code": "all"}), {"sort": "most_cited"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            any(
+                getattr(document, "is_group", False)
+                for document in response.context["documents"]
+            )
+        )
 
     @override_settings(
         DEBUG=False,

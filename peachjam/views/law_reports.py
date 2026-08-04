@@ -15,8 +15,8 @@ from peachjam.models import (
     LawReport,
     LawReportVolume,
 )
-from peachjam.views.courts import FilteredJudgmentView
 from peachjam.views.generic_views import FilteredDocumentListView
+from peachjam.views.judgment import FilteredJudgmentView
 from peachjam.views.legislation import LegislationListView
 
 

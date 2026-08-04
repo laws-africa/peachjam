@@ -513,7 +513,7 @@ class BaseDocumentFilterForm(forms.Form):
         return queryset
 
 
-class FlynoteDocumentFilterForm(BaseDocumentFilterForm):
+class JudgmentDocumentFilterForm(BaseDocumentFilterForm):
     most_cited_sort = "most_cited"
 
     def __init__(self, *args, **kwargs):
