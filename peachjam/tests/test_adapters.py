@@ -1,5 +1,7 @@
 import datetime
 import os
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -14,6 +16,7 @@ from peachjam.adapters import (
     IndigoAdapter,
     IndigoEnrichmentDatasetIngestor,
     JudgmentAdapter,
+    RequestsAdapter,
 )
 from peachjam.models import (
     Court,
@@ -771,3 +774,55 @@ class JudgmentAdapterTest(TestCase):
         self.assertTrue(
             any(call.args == (judgment.pk,) for call in generate_summary.call_args_list)
         )
+
+
+class HtmlServer:
+    """Tiny HTTP server that serves UTF-8 HTML, optionally declaring a charset."""
+
+    BODY = "<p>le Président du Tribunal d’Abidjan</p>"
+
+    def __init__(self, content_type):
+        server = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = server.BODY.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+
+        self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.url = f"http://127.0.0.1:{self.httpd.server_address[1]}"
+
+    def __enter__(self):
+        self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
+        self.thread.start()
+        return self
+
+    def __exit__(self, *args):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+        self.thread.join()
+
+
+class RequestsAdapterEncodingTest(TestCase):
+    def test_assumes_utf8_when_charset_not_declared(self):
+        # requests defaults to ISO-8859-1 for text/* without a charset, which mangles UTF-8
+        with HtmlServer("text/html") as server:
+            adapter = RequestsAdapter(None, {"api_url": server.url})
+            r = adapter.client_get(server.url + "/foo")
+
+        self.assertEqual("utf-8", r.encoding)
+        self.assertEqual(HtmlServer.BODY, r.text)
+
+    def test_respects_declared_charset(self):
+        with HtmlServer("text/html; charset=utf-8") as server:
+            adapter = RequestsAdapter(None, {"api_url": server.url})
+            r = adapter.client_get(server.url + "/foo")
+
+        self.assertEqual(HtmlServer.BODY, r.text)
