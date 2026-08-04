@@ -16,7 +16,9 @@
             {% include 'peachjam/flynote/_matching_paths.html' with matching_paths=item.matching_paths query=query %}
             {% if item.matching_more_count %}
               <div class="text-muted ms-3">
-                {% blocktranslate count count=item.matching_more_count %}… {{ count }} more matching subtopic{% plural %}… {{ count }} more matching subtopics{% endblocktranslate %}
+                <a href="{{ item.flynote.get_absolute_url }}?subtopic_q={{ query|urlencode }}">
+                  {% blocktranslate count count=item.matching_more_count %}… {{ count }} more matching subtopic{% plural %}… {{ count }} more matching subtopics{% endblocktranslate %}
+                </a>
               </div>
             {% endif %}
           {% elif item.child_names %}
