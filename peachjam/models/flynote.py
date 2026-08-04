@@ -11,7 +11,7 @@ from django.utils.html import format_html
 from django.utils.http import urlencode
 from django.utils.translation import gettext_lazy as _
 from django_lifecycle import AFTER_SAVE
-from treebeard.mp_tree import MP_Node
+from treebeard.mp_tree import MP_Node, MP_NodeManager
 
 from peachjam.models.lifecycle import (
     SuppressableHooksLifecycleMixin,
@@ -22,6 +22,11 @@ from peachjam.tasks import refresh_flynote_document_count
 log = logging.getLogger(__name__)
 
 __all__ = ["Flynote", "JudgmentFlynote", "FlynoteDocumentCount"]
+
+
+class FlynoteManager(MP_NodeManager):
+    def undeprecated(self):
+        return self.get_queryset().filter(deprecated=False)
 
 
 class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
@@ -62,6 +67,8 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
     created_at = models.DateTimeField(
         _("created at"), default=timezone.now, db_index=True
     )
+
+    objects = FlynoteManager()
 
     class Meta:
         verbose_name = _("flynote")
