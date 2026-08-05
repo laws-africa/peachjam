@@ -31,6 +31,8 @@ from peachjam.models import (
 )
 from peachjam.views.judgment import FilteredJudgmentView
 
+COMPACT_COURT_CHART_MAX_ROWS = 2
+
 JUDICIAL_TITLE_NAMES = {
     "AJ": gettext_lazy("Acting judge"),
     "AJA": gettext_lazy("Acting judge of appeal"),
@@ -708,8 +710,9 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             (row["judgment_count"] for row in judge_year_breakdown), default=0
         )
         context["judge_court_chart"] = [dict(row) for row in judge_court_breakdown]
-        # Up to two court rows leave room for the titles card in the right column.
-        context["judge_court_chart_is_compact"] = len(judge_court_breakdown) <= 2
+        context["judge_court_chart_is_compact"] = (
+            len(judge_court_breakdown) <= COMPACT_COURT_CHART_MAX_ROWS
+        )
         context["judge_court_max"] = max(
             (row["judgment_count"] for row in judge_court_breakdown), default=0
         )
