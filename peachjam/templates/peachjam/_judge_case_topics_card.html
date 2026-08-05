@@ -1,9 +1,10 @@
 {% load i18n %}
-<section class="card shadow-sm h-100" aria-labelledby="judge-topics-heading">
-  <div class="card-body p-4">
+<section class="card shadow-sm flex-grow-1"
+         aria-labelledby="judge-topics-heading">
+  <div class="card-body p-4 d-flex flex-column">
     <h2 class="h4" id="judge-topics-heading">{% trans "Case topics" %}</h2>
     {% if judge_case_topics %}
-      <div class="facets-scrollable pe-2"
+      <div class="overflow-auto flex-grow-1 pe-2"
            role="region"
            aria-labelledby="judge-topics-heading">
         <ul class="{% if two_columns %}row row-cols-1 row-cols-md-2 g-0 list-unstyled mb-0{% else %}list-group list-group-flush{% endif %}">
