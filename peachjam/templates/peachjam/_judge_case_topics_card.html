@@ -1,14 +1,11 @@
 {% load i18n %}
-<section class="card border shadow-sm h-100"
-         aria-labelledby="judge-topics-heading">
+<section class="card shadow-sm h-100" aria-labelledby="judge-topics-heading">
   <div class="card-body p-4">
     <h2 class="h4" id="judge-topics-heading">{% trans "Case topics" %}</h2>
     {% if judge_case_topics %}
-      <div class="overflow-auto pe-2"
-           style="max-height: 18rem"
+      <div class="facets-scrollable pe-2"
            role="region"
-           aria-labelledby="judge-topics-heading"
-           tabindex="0">
+           aria-labelledby="judge-topics-heading">
         <ul class="{% if two_columns %}row row-cols-1 row-cols-md-2 g-0 list-unstyled mb-0{% else %}list-group list-group-flush{% endif %}">
           {% for row in judge_case_topics %}
             <li class="{% if two_columns %}col border-bottom{% else %}list-group-item{% endif %} px-0 py-2 d-flex justify-content-between align-items-start gap-3">
