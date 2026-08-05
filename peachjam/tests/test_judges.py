@@ -102,6 +102,10 @@ class JudgeParsingTests(TestCase):
             "CJ",
             judge_identity_service.parse_judge_name("Van Lare, AG, C J")["title"],
         )
+        self.assertEqual(
+            "DJP",
+            judge_identity_service.parse_judge_name("Mlambo DJP")["title"],
+        )
 
     def test_canonical_name_from_aliases_strips_attached_title_suffix(self):
         self.assertEqual(

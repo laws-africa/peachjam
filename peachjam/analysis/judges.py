@@ -15,6 +15,7 @@ TITLE_TOKENS = {
     "CJ",
     "CM",
     "DCJ",
+    "DJP",
     "J",
     "JA",
     "JCC",
