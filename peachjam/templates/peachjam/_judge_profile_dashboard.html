@@ -1,7 +1,7 @@
 {% load i18n humanize %}
 <div class="entity-profile entity-profile--judge">
   <div class="entity-profile__body">
-    <span class="entity-profile__body__profile-image judge-profile-avatar d-flex align-items-center justify-content-center bg-primary text-white fw-bold border-0"
+    <span class="entity-profile__body__profile-image d-flex align-items-center justify-content-center bg-primary text-white fw-bold border-0"
           aria-hidden="true">{{ judge_initials }}</span>
     <div class="entity-profile__body__info">
       <h1 id="main-page-heading">
@@ -41,9 +41,9 @@
   </div>
 </div>
 <div class="container">
-  <div class="row g-4 mb-4 align-items-start">
-    <div class="col-xl-8">
-      <div class="d-flex flex-column gap-4">
+  <div class="row g-4 mb-4 align-items-stretch">
+    <div class="col-xl-8 d-flex">
+      <div class="d-flex flex-column gap-4 flex-grow-1">
         <section class="card shadow-sm overflow-hidden"
                  aria-labelledby="judge-activity-heading">
           <div class="card-body p-4">
@@ -80,14 +80,16 @@
           </div>
         </section>
         {% if judge_court_chart_is_compact %}
-          {% include "peachjam/_judge_case_topics_card.html" with two_columns=True %}
+          <div class="judge-profile-secondary d-flex">
+            {% include "peachjam/_judge_case_topics_card.html" with two_columns=True %}
+          </div>
         {% else %}
-          <div class="row g-4 align-items-stretch">
-            <div class="{% if judge_titles %}col-lg-8{% else %}col-12{% endif %}">
+          <div class="judge-profile-secondary row gx-4 gy-4 gy-lg-0 align-items-stretch">
+            <div class="judge-profile-secondary__column {% if judge_titles %}col-lg-8{% else %}col-12{% endif %} d-flex">
               {% include "peachjam/_judge_case_topics_card.html" %}
             </div>
             {% if judge_titles %}
-              <div class="col-lg-4">{% include "peachjam/_judge_titles_card.html" %}</div>
+              <div class="judge-profile-secondary__column col-lg-4 d-flex">{% include "peachjam/_judge_titles_card.html" %}</div>
             {% endif %}
           </div>
         {% endif %}
@@ -104,9 +106,9 @@
                 <figcaption class="visually-hidden" id="judge-courts-caption">
                   {% trans "Ranked chart showing the number of judgments available for each court." %}
                 </figcaption>
-                <ol class="list-unstyled mb-0">
+                <ol class="list-group list-group-flush">
                   {% for row in judge_court_chart %}
-                    <li class="judge-court-chart__item">
+                    <li class="list-group-item px-0 py-3">
                       <div class="d-flex justify-content-between align-items-start gap-3">
                         <div>
                           <a href="{{ request.path }}?courts={{ row.judgment__court__name|urlencode }}#judge-judgments-heading">{{ row.judgment__court__name }}</a>

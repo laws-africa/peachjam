@@ -25,7 +25,6 @@
 .judge-year-chart__scroll {
   overflow-x: auto;
   padding-top: $spacer;
-  scrollbar-gutter: stable;
 }
 
 .judge-year-chart__plot {
@@ -73,14 +72,6 @@
 .judge-year-chart__year {
   margin-top: $spacer * 0.25;
   color: $body-color;
-}
-
-.judge-court-chart__item {
-  padding: $spacer 0;
-
-  &:not(:last-child) {
-    border-bottom: $border-width solid $border-color;
-  }
 }
 
 .judge-court-chart__progress {
