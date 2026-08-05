@@ -1314,7 +1314,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertNotContains(response, "Names found in the sources")
         self.assertContains(
             response,
-            f"currently available on {settings.PEACHJAM['APP_NAME']}",
+            "currently available",
         )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
@@ -1377,7 +1377,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertContains(response, "Citation relationships")
         self.assertContains(
             response,
-            f"citation data currently available on {settings.PEACHJAM['APP_NAME']}",
+            "Based on currently available citation data",
         )
         self.assertNotContains(response, "Citation influence")
         self.assertNotContains(response, "Judges citing these judgments")

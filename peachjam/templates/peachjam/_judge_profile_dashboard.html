@@ -44,12 +44,12 @@
   <div class="row g-4 mb-4 align-items-start">
     <div class="col-xl-8">
       <div class="d-flex flex-column gap-4">
-        <section class="card border shadow-sm overflow-hidden"
+        <section class="card shadow-sm overflow-hidden"
                  aria-labelledby="judge-activity-heading">
           <div class="card-body p-4">
             <h2 class="h4" id="judge-activity-heading">{% trans "Judgments by year" %}</h2>
             <p class="text-muted">
-              {% blocktrans count count=judge_judgment_count with judge=judge_person.full_name %}Based on {{ count }} judgment by {{ judge }} currently available on {{ APP_NAME }}.{% plural %}Based on {{ count }} judgments by {{ judge }} currently available on {{ APP_NAME }}.{% endblocktrans %}
+              {% blocktrans count count=judge_judgment_count with judge=judge_person.full_name %}Based on {{ count }} judgment by {{ judge }} currently available.{% plural %}Based on {{ count }} judgments by {{ judge }} currently available.{% endblocktrans %}
             </p>
             {% if judge_year_activity %}
               <figure class="judge-year-chart mb-0"
@@ -59,8 +59,7 @@
                 </figcaption>
                 <div class="judge-year-chart__scroll"
                      role="region"
-                     aria-label="{% trans 'Judgments by year chart' %}"
-                     tabindex="0">
+                     aria-label="{% trans 'Judgments by year chart' %}">
                   <div class="judge-year-chart__plot">
                     {% for row in judge_year_activity %}
                       <div class="judge-year-chart__column">
@@ -96,7 +95,7 @@
     </div>
     <div class="col-xl-4">
       <div class="d-flex flex-column gap-4">
-        <section class="card border shadow-sm" aria-labelledby="judge-courts-heading">
+        <section class="card shadow-sm" aria-labelledby="judge-courts-heading">
           <div class="card-body p-4">
             <h2 class="h4" id="judge-courts-heading">{% trans "Judgments by court" %}</h2>
             {% if judge_court_chart %}
@@ -150,13 +149,10 @@
   </div>
   <div class="mb-5">
     {% with citations=judge_citation_relationships %}
-      <section class="card border shadow-sm"
-               aria-labelledby="judge-citations-heading">
+      <section class="card shadow-sm" aria-labelledby="judge-citations-heading">
         <div class="card-body p-4">
           <h2 class="h4" id="judge-citations-heading">{% trans "Citation relationships" %}</h2>
-          <p class="text-muted">
-            {% blocktrans %}Based on citation data currently available on {{ APP_NAME }}.{% endblocktrans %}
-          </p>
+          <p class="text-muted">{% trans "Based on currently available citation data." %}</p>
           <div class="row g-3 mb-4">
             <div class="col-md-6">
               <strong>{{ citations.outgoing_count|intcomma }}</strong>
