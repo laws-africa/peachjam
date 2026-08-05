@@ -1,0 +1,28 @@
+{% load i18n peachjam %}
+<ol class="document-history">
+  {% for entry in history_entries %}
+    <li class="document-history__item {% if entry.is_current %}document-history__item--current{% endif %}">
+      <time class="document-history__date text-muted fw-semibold"
+            datetime="{{ entry.date|parse_string_date|date:'Y-m-d' }}">
+        {{ entry.date|parse_string_date|date:"d F Y" }}
+        {% if entry.is_current %}
+          <span class="badge rounded-pill bg-primary mt-1">{% trans 'You are here' %}</span>
+        {% endif %}
+      </time>
+      <div class="document-history__content">
+        <article class="card {% if entry.is_current %}document-history__card--current{% endif %}">
+          <header class="card-header document-history__mobile-date">
+            <time class="fw-semibold"
+                  datetime="{{ entry.date|parse_string_date|date:'Y-m-d' }}">
+              {{ entry.date|parse_string_date|date:"d F Y" }}
+            </time>
+            {% if entry.is_current %}
+              <span class="badge rounded-pill bg-primary">{% trans 'You are here' %}</span>
+            {% endif %}
+          </header>
+          {% include history_entry_template %}
+        </article>
+      </div>
+    </li>
+  {% endfor %}
+</ol>

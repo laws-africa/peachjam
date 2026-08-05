@@ -506,6 +506,7 @@ class PeachjamViewsTest(TestCase):
 
         main_case = Judgment.objects.create(
             case_name="Main case",
+            blurb="The case blurb",
             jurisdiction=Country.objects.first(),
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
@@ -533,6 +534,7 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertContains(response, "Case history")
         self.assertContains(response, main_case.title)
+        self.assertContains(response, main_case.blurb)
         self.assertNotContains(response, appeal_allowed.name)
 
         response = self.client.get(

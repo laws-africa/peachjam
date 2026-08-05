@@ -463,6 +463,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         }
 
         for entry in timeline:
+            entry["is_current"] = entry["date"] == self.object.date.strftime("%Y-%m-%d")
             # add expression_frbr_uri
             for event in entry["events"]:
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
