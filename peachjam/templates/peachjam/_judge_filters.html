@@ -1,18 +1,18 @@
 {% load i18n %}
 {% if judge_rendered_facets %}
-  <aside id="judge-{{ judge_filter_scope }}-filters-section"
+  <aside id="{{ judge_filter_form_id }}-filters-section"
          class="col-lg-3"
          aria-labelledby="{{ judge_filter_form_id }}-filters-heading">
     <button class="btn btn-primary d-lg-none w-100 mb-3"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#judge-{{ judge_filter_scope }}-filters"
+            data-bs-target="#{{ judge_filter_form_id }}-filters"
             aria-expanded="false"
-            aria-controls="judge-{{ judge_filter_scope }}-filters">
+            aria-controls="{{ judge_filter_form_id }}-filters">
       {% trans "Filters" %}
     </button>
     <div class="collapse d-lg-block"
-         id="judge-{{ judge_filter_scope }}-filters"
+         id="{{ judge_filter_form_id }}-filters"
          data-component="DocumentFilterForm"
          hx-include="#{{ judge_filter_form_id }}"
          hx-target="#judge-list-updates"
@@ -27,6 +27,7 @@
                 class="h6 mb-0 skip-link-target">{% trans "Filters" %}</h2>
             {% if judge_show_clear_all %}
               <a href="{{ request.path }}"
+                 data-track-event="Listing | Clear filter | all"
                  hx-get="{{ request.path }}"
                  hx-params="none">{% trans "Clear all" %}</a>
             {% endif %}
@@ -45,6 +46,7 @@
                     {% if facet.values %}
                       <a class="ms-2"
                          href="{{ request.path }}"
+                         data-track-event="Listing | Clear filter | {{ facet_name }}"
                          hx-get="{{ request.path }}"
                          hx-params="not {{ facet_name }}">{% trans "Clear" %}</a>
                     {% endif %}
@@ -66,7 +68,8 @@
                     {% for value, label in facet.options %}
                       <div class="d-flex justify-content-between align-items-center"
                            data-facet-option>
-                        <div class="form-check flex-grow-1">
+                        <div class="form-check flex-grow-1"
+                             data-track-event="Listing | Filter | {{ facet_name }}">
                           <input id="{{ judge_filter_form_id }}-{{ facet_name }}-{{ forloop.counter0 }}"
                                  class="form-check-input"
                                  name="{{ facet_name }}"

@@ -840,6 +840,10 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertContains(response, 'hx-include="#judge-list-search-form"')
         self.assertContains(response, 'hx-target="#judge-list-updates"')
         self.assertContains(response, 'hx-select="#judge-list-updates"')
+        self.assertContains(response, 'id="judge-list-search-form-filters"')
+        self.assertContains(
+            response, 'data-track-event="Listing | Filter | year_ranges"'
+        )
         self.assertContains(response, "checked")
         self.assertContains(
             response,
@@ -874,7 +878,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             reverse("judges"),
             {
                 "courts": [self.judgment.court.name, other_court.name],
-                "year_ranges": ["2024:2024", "2019:2019"],
+                "year_ranges": ["2020:2024", "2015:2019"],
             },
         )
 
@@ -890,20 +894,17 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             self.judge_name_markup(other_person.full_name),
             html=True,
         )
-        selected_court = next(
-            item
-            for item in response.context["judge_court_filters"]
-            if item["label"] == self.judgment.court.name
+        facets = {
+            item["name"]: item["facet"]
+            for item in response.context["judge_rendered_facets"]
+        }
+        self.assertIn(
+            (self.judgment.court.name, self.judgment.court.name),
+            facets["courts"]["options"],
         )
-        self.assertEqual(self.judgment.court.name, selected_court["value"])
-        self.assertTrue(selected_court["selected"])
-        selected_year_range = next(
-            item
-            for item in response.context["judge_year_filters"]
-            if item["label"] == "2020–2024"
-        )
-        self.assertEqual("2020:2024", selected_year_range["value"])
-        self.assertTrue(selected_year_range["selected"])
+        self.assertIn(self.judgment.court.name, facets["courts"]["values"])
+        self.assertIn(("2020:2024", "2020–2024"), facets["year_ranges"]["options"])
+        self.assertIn("2020:2024", facets["year_ranges"]["values"])
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_FLYNOTE_SETTINGS)
     def test_judge_list_filters_by_flynote_topic_and_descendants(self):
@@ -960,13 +961,12 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(
             {civil, criminal}, set(response.context["selected_flynote_topics"])
         )
-        civil_filter = next(
-            item
-            for item in response.context["judge_topic_filters"]
-            if item["label"] == civil.name
-        )
-        self.assertEqual(civil.pk, civil_filter["value"])
-        self.assertTrue(civil_filter["selected"])
+        facets = {
+            item["name"]: item["facet"]
+            for item in response.context["judge_rendered_facets"]
+        }
+        self.assertIn((str(civil.pk), civil.name), facets["topics"]["options"])
+        self.assertIn(str(civil.pk), facets["topics"]["values"])
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_PUBLIC_SETTINGS)
     def test_judgment_list_filters_by_canonical_judge_when_public_enabled(self):
