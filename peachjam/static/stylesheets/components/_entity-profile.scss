@@ -61,4 +61,38 @@
       margin-bottom: 0;
     }
   }
+
+  &.entity-profile--judge {
+    .judge-profile-avatar {
+      font-size: $h1-font-size;
+    }
+
+    @include media-breakpoint-down(sm) {
+      .entity-profile__body {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+
+      .entity-profile__body__profile-image {
+        flex: 0 0 4.5rem;
+        width: 4.5rem;
+        height: 4.5rem;
+        margin: 0;
+      }
+
+      .judge-profile-avatar {
+        font-size: $h4-font-size;
+      }
+
+      .entity-profile__body__info {
+        min-width: 0;
+        align-self: flex-start;
+      }
+
+      h1 {
+        font-size: $h2-font-size;
+      }
+    }
+  }
 }

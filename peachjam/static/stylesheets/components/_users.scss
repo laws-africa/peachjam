@@ -11,11 +11,14 @@ img.user-avatar {
 }
 
 .user-avatar-letter {
-  width: 2.5rem;
-  height: 2.5rem;
   border-radius: 50%;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.user-avatar-letter--judge {
+  width: 2.5rem;
+  height: 2.5rem;
 }
