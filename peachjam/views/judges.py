@@ -190,29 +190,12 @@ class JudgePublicPageMixin:
                 years.update(range(start, end + 1))
         return sorted(years)
 
-    def topic_filter_context(self):
+    def year_filter_options(self, years):
         return [
-            {
-                "label": topic.name,
-                "value": topic.pk,
-                "selected": topic in self.selected_flynote_topics,
-            }
-            for topic in self.available_flynote_topics
-        ]
-
-    def year_filter_context(self, years, selected_years=None):
-        selected_years = (
-            self.selected_years() if selected_years is None else selected_years
-        )
-        selected_year_values = {
-            int(value) for value in selected_years if str(value).isdigit()
-        }
-        return [
-            {
-                **year_range,
-                "value": f"{year_range['start']}:{year_range['end']}",
-                "selected": set(year_range["years"]).issubset(selected_year_values),
-            }
+            (
+                f"{year_range['start']}:{year_range['end']}",
+                year_range["label"],
+            )
             for year_range in group_years_into_ranges(years)
         ]
 
@@ -351,14 +334,6 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             .distinct()
             .order_by("judgment__court__name")
         )
-        context["judge_court_filters"] = [
-            {
-                "label": court,
-                "value": court,
-                "selected": court in context["selected_judge_courts"],
-            }
-            for court in available_courts
-        ]
         available_years = list(
             Bench.objects.filter(
                 judge_person__isnull=False,
@@ -369,43 +344,33 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             .distinct()
             .order_by("-judgment__date__year")
         )
-        context["judge_year_filters"] = self.year_filter_context(
-            available_years,
-            selected_years=context["selected_judge_years"],
-        )
-        context["judge_topic_filters"] = self.topic_filter_context()
-        context["judge_facet_data"] = {
+        year_options = self.year_filter_options(available_years)
+        facet_data = {
             "courts": {
                 "label": gettext_lazy("Courts"),
                 "type": "checkbox",
-                "options": [
-                    (item["value"], item["label"])
-                    for item in context["judge_court_filters"]
-                ],
+                "options": [(court, court) for court in available_courts],
                 "values": self.request.GET.getlist("courts"),
             },
             "topics": {
                 "label": gettext_lazy("Case topics"),
                 "type": "checkbox",
                 "options": [
-                    (str(item["value"]), item["label"])
-                    for item in context["judge_topic_filters"]
+                    (str(topic.pk), topic.name)
+                    for topic in self.available_flynote_topics
                 ],
                 "values": self.request.GET.getlist("topics"),
             },
             "year_ranges": {
                 "label": gettext_lazy("Judgment year"),
                 "type": "checkbox",
-                "options": [
-                    (item["value"], item["label"])
-                    for item in context["judge_year_filters"]
-                ],
+                "options": year_options,
                 "values": self.request.GET.getlist("year_ranges"),
             },
         }
         context["judge_rendered_facets"] = [
             {"name": name, "facet": facet}
-            for name, facet in context["judge_facet_data"].items()
+            for name, facet in facet_data.items()
             if facet["options"]
         ]
         for index, item in enumerate(context["judge_rendered_facets"]):
@@ -420,7 +385,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
                 else "judge-list-results"
             )
         context["judge_show_clear_all"] = any(
-            facet["values"] for facet in context["judge_facet_data"].values()
+            facet["values"] for facet in facet_data.values()
         ) or bool(context["q"])
         return context
 
@@ -534,18 +499,12 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .values_list("date__year", flat=True)
             .distinct()
         )
-        year_ranges = self.year_filter_context(
-            years,
-            selected_years=[str(year) for year in self.selected_years()],
-        )
-        if year_ranges:
+        year_options = self.year_filter_options(years)
+        if year_options:
             context["facet_data"]["year_ranges"] = {
                 "label": gettext_lazy("Judgment year"),
                 "type": "checkbox",
-                "options": [
-                    (year_range["value"], year_range["label"])
-                    for year_range in year_ranges
-                ],
+                "options": year_options,
                 "values": self.request.GET.getlist("year_ranges"),
             }
 
