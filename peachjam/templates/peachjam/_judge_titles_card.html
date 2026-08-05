@@ -1,0 +1,17 @@
+{% load i18n %}
+<section class="card border shadow-sm h-100"
+         aria-labelledby="judge-titles-heading">
+  <div class="card-body p-4">
+    <h2 class="h4" id="judge-titles-heading">{% trans "Judicial titles" %}</h2>
+    <ul class="list-group list-group-flush">
+      {% for title in judge_titles %}
+        <li class="list-group-item px-0 py-2 d-flex justify-content-between align-items-center gap-3">
+          <a href="{{ request.path }}?titles={{ title.abbreviation|urlencode }}#judge-judgments-heading">{{ title.label }}</a>
+          {% if title.abbreviation == judge_latest_title %}
+            <span class="badge text-bg-primary">{% trans "Most recent" %}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+</section>
