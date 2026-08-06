@@ -42,9 +42,6 @@ CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS = {
     **settings.PEACHJAM,
     "CANONICAL_JUDGE_IDENTITY": False,
 }
-CANONICAL_JUDGE_IDENTITY_SETTINGS = {
-    **CANONICAL_JUDGE_IDENTITY_SETTINGS,
-}
 CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS = {
     **CANONICAL_JUDGE_IDENTITY_SETTINGS,
     "SUMMARISE_USE_FLYNOTE_TREE": True,
@@ -594,8 +591,6 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual([self.judge_person], response.context["judges"])
         self.assertContains(response, "Justice Abban")
         self.assertContains(response, self.judge_person.get_absolute_url())
-
-        self.assertEqual(404, response.status_code)
 
     def test_judge_detail_is_disabled_by_default(self):
         response = self.client.get(self.judge_person.get_absolute_url())
