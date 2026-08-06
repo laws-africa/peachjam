@@ -8,7 +8,7 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Count, Exists, Max, Min, OuterRef, Q
 from django.db.models.functions import Substr
-from django.http import HttpResponseRedirect
+from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
@@ -151,9 +151,12 @@ def judge_initials(name):
 
 
 class JudgePublicPageMixin:
+    def canonical_identity_disabled_response(self):
+        return redirect("home_page")
+
     def dispatch(self, request, *args, **kwargs):
         if not JudgePerson.canonical_identity_enabled():
-            return redirect("home_page")
+            return self.canonical_identity_disabled_response()
         return super().dispatch(request, *args, **kwargs)
 
     @cached_property
@@ -400,6 +403,9 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
 class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     template_name = "peachjam/judge_detail.html"
     navbar_link = "judgments"
+
+    def canonical_identity_disabled_response(self):
+        raise Http404("Canonical judge identity public pages are disabled.")
 
     @cached_property
     def judge_person(self):
