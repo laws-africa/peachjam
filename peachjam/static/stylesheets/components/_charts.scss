@@ -21,3 +21,63 @@
     }
   }
 }
+
+.judge-year-chart__scroll {
+  overflow-x: auto;
+  padding-top: $spacer;
+}
+
+.judge-year-chart__plot {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacer * 0.5;
+  width: max-content;
+  min-width: 100%;
+  min-height: 13rem;
+  padding: 0 $spacer * 0.25;
+  border-bottom: $border-width solid $border-color;
+}
+
+.judge-year-chart__column {
+  display: flex;
+  flex: 1 0 2.5rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.judge-year-chart__count,
+.judge-year-chart__year {
+  font-size: $font-size-sm;
+}
+
+.judge-year-chart__count {
+  margin-bottom: $spacer * 0.25;
+  color: $text-muted;
+}
+
+.judge-year-chart__bar {
+  display: block;
+  min-height: 0.25rem;
+  background-color: $primary;
+  border-radius: $border-radius-sm $border-radius-sm 0 0;
+
+  &:hover,
+  &:focus-visible {
+    background-color: shade-color($primary, 20%);
+  }
+}
+
+.judge-year-chart__year {
+  margin-top: $spacer * 0.25;
+  color: $body-color;
+}
+
+.judge-court-chart__progress {
+  height: $spacer * 0.5;
+}
+
+.judge-court-chart__bar {
+  min-width: $spacer * 0.25;
+}

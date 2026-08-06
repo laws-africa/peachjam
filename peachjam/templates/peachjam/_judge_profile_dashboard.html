@@ -1,0 +1,209 @@
+{% load i18n humanize %}
+<div class="entity-profile entity-profile--judge">
+  <div class="entity-profile__body">
+    <span class="entity-profile__body__profile-image d-flex align-items-center justify-content-center bg-primary text-white fw-bold border-0"
+          aria-hidden="true">{{ judge_initials }}</span>
+    <div class="entity-profile__body__info">
+      <h1 id="main-page-heading">
+        <strong>{{ judge_display_surname }}</strong>{{ judge_display_name_remainder }}
+      </h1>
+      {% if judge_person.description %}<p class="text-muted">{{ judge_person.description }}</p>{% endif %}
+      {% if judge_leading_court %}
+        <p>
+          {% trans "Most judgments from:" %} <strong>{{ judge_leading_court.judgment__court__name }}</strong>
+        </p>
+      {% endif %}
+      <div class="row g-3">
+        {% if judge_latest_title %}
+          <div class="col-6 col-sm-4">
+            <strong>{% trans "Most recent title" %}</strong>
+            <div>{{ judge_latest_title_label }}</div>
+          </div>
+        {% endif %}
+        {% if judge_first_year %}
+          <div class="col-6 col-sm-4">
+            <strong>{% trans "Judgment years" %}</strong>
+            <div>
+              {% if judge_first_year == judge_latest_year %}
+                {{ judge_first_year }}
+              {% else %}
+                {{ judge_first_year }}–{{ judge_latest_year }}
+              {% endif %}
+            </div>
+          </div>
+        {% endif %}
+        <div class="col-6 col-sm-4">
+          <strong>{% trans "Judgments" %}</strong>
+          <div>{{ judge_judgment_count|intcomma }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="container">
+  <div class="row g-4 mb-4 align-items-stretch">
+    <div class="col-xl-8 d-flex">
+      <div class="d-flex flex-column gap-4 flex-grow-1">
+        <section class="card shadow-sm overflow-hidden"
+                 aria-labelledby="judge-activity-heading">
+          <div class="card-body p-4">
+            <h2 class="h4" id="judge-activity-heading">{% trans "Judgments by year" %}</h2>
+            <p class="text-muted">
+              {% blocktrans count count=judge_judgment_count with judge=judge_person.full_name %}Based on {{ count }} judgment by {{ judge }} currently available.{% plural %}Based on {{ count }} judgments by {{ judge }} currently available.{% endblocktrans %}
+            </p>
+            {% if judge_year_activity %}
+              <figure class="judge-year-chart mb-0"
+                      aria-labelledby="judge-activity-heading judge-activity-caption">
+                <figcaption class="visually-hidden" id="judge-activity-caption">
+                  {% trans "Column chart showing the number of judgments available for each year." %}
+                </figcaption>
+                <div class="judge-year-chart__scroll"
+                     role="region"
+                     aria-label="{% trans 'Judgments by year chart' %}">
+                  <div class="judge-year-chart__plot">
+                    {% for row in judge_year_activity %}
+                      <div class="judge-year-chart__column">
+                        <span class="judge-year-chart__count">{{ row.judgment_count|intcomma }}</span>
+                        <a class="judge-year-chart__bar"
+                           href="{{ request.path }}?year_ranges={{ row.year_range }}#judge-judgments-heading"
+                           style="height: {% widthratio row.judgment_count judge_year_max 160 %}px"
+                           aria-label="{% blocktrans count count=row.judgment_count with year=row.year %}{{ count }} judgment in {{ year }}{% plural %}{{ count }} judgments in {{ year }}{% endblocktrans %}"></a>
+                        <span class="judge-year-chart__year">{{ row.year }}</span>
+                      </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </figure>
+            {% else %}
+              <p class="text-muted mb-0">{% trans "No dated judgments are available for this judge." %}</p>
+            {% endif %}
+          </div>
+        </section>
+        {% if judge_court_chart_is_compact %}
+          <div class="judge-profile-secondary d-flex">
+            {% include "peachjam/_judge_case_topics_card.html" with two_columns=True %}
+          </div>
+        {% else %}
+          <div class="judge-profile-secondary row gx-4 gy-4 gy-lg-0 align-items-stretch">
+            <div class="judge-profile-secondary__column {% if judge_titles %}col-lg-8{% else %}col-12{% endif %} d-flex">
+              {% include "peachjam/_judge_case_topics_card.html" %}
+            </div>
+            {% if judge_titles %}
+              <div class="judge-profile-secondary__column col-lg-4 d-flex">{% include "peachjam/_judge_titles_card.html" %}</div>
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="col-xl-4">
+      <div class="d-flex flex-column gap-4">
+        <section class="card shadow-sm" aria-labelledby="judge-courts-heading">
+          <div class="card-body p-4">
+            <h2 class="h4" id="judge-courts-heading">{% trans "Judgments by court" %}</h2>
+            {% if judge_court_chart %}
+              <figure class="judge-court-chart mb-0"
+                      aria-labelledby="judge-courts-heading judge-courts-caption">
+                <figcaption class="visually-hidden" id="judge-courts-caption">
+                  {% trans "Ranked chart showing the number of judgments available for each court." %}
+                </figcaption>
+                <ol class="list-group list-group-flush">
+                  {% for row in judge_court_chart %}
+                    <li class="list-group-item px-0 py-3">
+                      <div class="d-flex justify-content-between align-items-start gap-3">
+                        <div>
+                          <a href="{{ request.path }}?courts={{ row.judgment__court__name|urlencode }}#judge-judgments-heading">{{ row.judgment__court__name }}</a>
+                          {% if row.first_year %}
+                            <div class="small text-muted mt-1">
+                              {% if row.first_year == row.latest_year %}
+                                {{ row.first_year }}
+                              {% else %}
+                                {{ row.first_year }}–{{ row.latest_year }}
+                              {% endif %}
+                            </div>
+                          {% endif %}
+                        </div>
+                        <div class="text-end flex-shrink-0">
+                          <strong>{{ row.judgment_count|intcomma }}</strong>
+                          <div class="small text-muted">
+                            {% blocktrans count count=row.judgment_count %}judgment{% plural %}judgments{% endblocktrans %}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="progress judge-court-chart__progress mt-2" aria-hidden="true">
+                        <div class="progress-bar judge-court-chart__bar"
+                             style="width: {% widthratio row.judgment_count judge_court_max 100 %}%">
+                        </div>
+                      </div>
+                    </li>
+                  {% endfor %}
+                </ol>
+              </figure>
+            {% else %}
+              <p class="text-muted mb-0">{% trans "No court history is available." %}</p>
+            {% endif %}
+          </div>
+        </section>
+        {% if judge_court_chart_is_compact and judge_titles %}
+          {% include "peachjam/_judge_titles_card.html" %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="mb-5">
+    {% with citations=judge_citation_relationships %}
+      <section class="card shadow-sm" aria-labelledby="judge-citations-heading">
+        <div class="card-body p-4">
+          <h2 class="h4" id="judge-citations-heading">{% trans "Citation relationships" %}</h2>
+          <p class="text-muted">{% trans "Based on currently available citation data." %}</p>
+          <div class="row g-3 mb-4">
+            <div class="col-md-6">
+              <strong>{{ citations.outgoing_count|intcomma }}</strong>
+              {% trans "other judgments cited" %}
+            </div>
+            <div class="col-md-6">
+              <strong>{{ citations.incoming_count|intcomma }}</strong>
+              {% trans "other judgments citing this judge's judgments" %}
+            </div>
+          </div>
+          {% if citations.most_cited_judgments %}
+            <div>
+              <h3 class="h5">
+                {% trans "Most cited judgments" %}
+              </h3>
+              <div class="table-responsive">
+                <table class="table table-sm mb-0">
+                  <thead>
+                    <tr>
+                      <th scope="col">
+                        {% trans "Judgment" %}
+                      </th>
+                      <th scope="col" class="text-end text-nowrap">
+                        {% trans "Citing judgments" %}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for judgment in citations.most_cited_judgments %}
+                      <tr>
+                        <td>
+                          <a href="{{ judgment.get_absolute_url }}">{{ judgment.title }}</a>
+                        </td>
+                        <td class="text-end">
+                          {{ judgment.incoming_citation_count|intcomma }}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% else %}
+            <p class="text-muted mb-0">
+              {% trans "No linked citation relationships are currently available for this judge's judgments." %}
+            </p>
+          {% endif %}
+        </div>
+      </section>
+    {% endwith %}
+  </div>
+</div>

@@ -323,8 +323,10 @@ class BaseDocumentFilterForm(forms.Form):
     years = PermissiveTypedListField(coerce=int, required=False)
     alphabet = forms.CharField(required=False)
     authors = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    courts = PermissiveTypedListField(coerce=remove_nulls, required=False)
     doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
     judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    judge_people = PermissiveTypedListField(coerce=int, required=False)
     natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
     localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
     registries = PermissiveTypedListField(coerce=remove_nulls, required=False)
@@ -354,6 +356,7 @@ class BaseDocumentFilterForm(forms.Form):
         "courts",
         "doc_type",
         "judges",
+        "judge_people",
         "natures",
         "localities",
         "registries",
@@ -431,6 +434,14 @@ class BaseDocumentFilterForm(forms.Form):
         return (
             queryset.filter(judges__name__in=judges).distinct()
             if judges and hasattr(queryset.model, "judges")
+            else queryset
+        )
+
+    def apply_filter_judge_people(self, queryset):
+        judge_people = self.cleaned_data.get("judge_people", [])
+        return (
+            queryset.filter(bench__judge_person_id__in=judge_people).distinct()
+            if judge_people and hasattr(queryset.model, "bench")
             else queryset
         )
 

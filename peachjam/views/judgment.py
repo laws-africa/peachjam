@@ -5,7 +5,7 @@ from functools import reduce
 from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import F, IntegerField, Q, Value, Window
-from django.db.models.functions import Coalesce, Length, RowNumber, Substr
+from django.db.models.functions import Coalesce, Length, Lower, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
@@ -24,6 +24,7 @@ from peachjam.models import (
     CourtClass,
     CourtDivision,
     Judge,
+    JudgePerson,
     Judgment,
     Outcome,
 )
@@ -107,6 +108,32 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
     def add_judges_facet(self, context):
         if "judges" not in self.exclude_facets:
+            if JudgePerson.canonical_identity_enabled():
+                judges = sorted(
+                    self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="judge_people"
+                    )
+                    .filter(bench__judge_person__isnull=False)
+                    .order_by()
+                    .values_list(
+                        "bench__judge_person_id",
+                        "bench__judge_person__full_name",
+                    )
+                    .distinct(),
+                    key=lambda judge: judge[1],
+                )
+                if judges:
+                    context["facet_data"]["judge_people"] = {
+                        "label": JudgePerson.model_label_plural,
+                        "type": "checkbox",
+                        "options": [
+                            (str(judge_id), judge_name)
+                            for judge_id, judge_name in judges
+                        ],
+                        "values": self.request.GET.getlist("judge_people"),
+                    }
+                return
+
             judges = list(
                 judge
                 for judge in self.form.filter_queryset(
@@ -459,7 +486,8 @@ class FlynoteListView(FlynoteViewMixin, ListView):
             matching_paths = {}
             matching_more_counts = {}
 
-        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
+        name_order = Lower("name")
+        ordering = (name_order,) if sort == "name" else ("-doc_count", name_order)
         topic_items = self.make_flynote_list(list(topics_qs.order_by(*ordering)))
         for item in topic_items:
             item["matching_paths"] = matching_paths.get(item["flynote"].path, [])
@@ -602,7 +630,8 @@ class FlynoteDetailView(
                 else self.initial_subtopics_page_size
             )
 
-        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
+        name_order = Lower("name")
+        ordering = (name_order,) if sort == "name" else ("-doc_count", name_order)
         total_subtopic_count = children_qs.count()
         flynote_cards = list(
             children_qs.order_by(*ordering)[
@@ -651,10 +680,19 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["judges"] = [
-            bench.judge
-            for bench in self.get_object().bench.select_related("judge").all()
-        ]
+        bench_rows = self.object.bench.select_related("judge", "judge_person").all()
+        if JudgePerson.canonical_identity_enabled():
+            judges = []
+            seen = set()
+            for bench in bench_rows:
+                judge = bench.judge_person or bench.judge
+                key = (judge.__class__, judge.pk)
+                if key not in seen:
+                    judges.append(judge)
+                    seen.add(key)
+            context["judges"] = judges
+        else:
+            context["judges"] = [bench.judge for bench in bench_rows]
         return context
 
 

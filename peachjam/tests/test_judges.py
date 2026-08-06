@@ -21,15 +21,46 @@ from peachjam.admin import (
 )
 from peachjam.analysis.judges import judge_identity_service
 from peachjam.extractor import ExtractorError, ExtractorService
-from peachjam.models import Bench, Court, Judge, JudgeAlias, JudgePerson, Judgment
+from peachjam.models import (
+    Bench,
+    Court,
+    ExtractedCitation,
+    Flynote,
+    Judge,
+    JudgeAlias,
+    JudgePerson,
+    Judgment,
+    JudgmentFlynote,
+)
+from peachjam.views.judges import judge_initials, split_judge_display_name
 
 CANONICAL_JUDGE_IDENTITY_SETTINGS = {
     **settings.PEACHJAM,
     "CANONICAL_JUDGE_IDENTITY": True,
 }
+CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS = {
+    **settings.PEACHJAM,
+    "CANONICAL_JUDGE_IDENTITY": False,
+}
+CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS = {
+    **CANONICAL_JUDGE_IDENTITY_SETTINGS,
+    "SUMMARISE_USE_FLYNOTE_TREE": True,
+    "SHOW_FLYNOTE_TOPICS": True,
+}
 
 
 class JudgeParsingTests(TestCase):
+    def test_split_judge_display_name_keeps_only_surname_boldable(self):
+        self.assertEqual(
+            ("Kempe", ", Greg AJ"),
+            split_judge_display_name("Kempe, Greg AJ"),
+        )
+        self.assertEqual(("Kempe", " AJ"), split_judge_display_name("Kempe AJ"))
+        self.assertEqual(
+            ("Da Silva", " Sallie"),
+            split_judge_display_name("Da Silva Sallie"),
+        )
+
     def test_parse_judge_name_splits_source_name_and_title(self):
         parts = judge_identity_service.parse_judge_name(" ABBAN, J.A. ")
 
@@ -65,6 +96,10 @@ class JudgeParsingTests(TestCase):
         self.assertEqual(
             "CJ",
             judge_identity_service.parse_judge_name("Van Lare, AG, C J")["title"],
+        )
+        self.assertEqual(
+            "DJP",
+            judge_identity_service.parse_judge_name("Mlambo DJP")["title"],
         )
 
     def test_canonical_name_from_aliases_strips_attached_title_suffix(self):
@@ -444,6 +479,7 @@ class ExtractorJudgeIdentityTests(TestCase):
         self.assertEqual(existing_person.pk, bench_row["judge_person"].pk)
 
 
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS)
 class ExtractorLegacyJudgeTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
@@ -463,6 +499,7 @@ class ExtractorLegacyJudgeTests(TestCase):
         self.assertNotIn("extracted_judges", details)
 
 
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS)
 class CanonicalJudgeIdentityRolloutGateTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
@@ -499,6 +536,849 @@ class CanonicalJudgeIdentityRolloutGateTests(TestCase):
         self.assertEqual(403, response.status_code)
 
 
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS)
+class CanonicalJudgeIdentityPublicPageTests(TestCase):
+    fixtures = ["tests/countries", "tests/courts", "tests/languages"]
+
+    def setUp(self):
+        self.legacy_judge = Judge.objects.create(name="ABBAN, J.A.")
+        self.judge_person = JudgePerson.objects.create(
+            full_name="Justice Abban",
+            slug="justice-abban",
+        )
+        self.alias = JudgeAlias.objects.create(
+            judge_person=self.judge_person,
+            name="ABBAN, J.A.",
+        )
+        self.judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 3),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Abban v Republic",
+        )
+        Bench.objects.create(
+            judgment=self.judgment,
+            judge=self.legacy_judge,
+            judge_person=self.judge_person,
+            matched_alias=self.alias,
+        )
+
+    def judge_name_markup(self, name):
+        surname, remainder = split_judge_display_name(name)
+        return f"<strong>{surname}</strong>{remainder}"
+
+    def test_judge_initials_use_first_and_last_name(self):
+        self.assertEqual("JA", judge_initials("Justice Abban"))
+        self.assertEqual("AC", judge_initials("Abban, Charles"))
+        self.assertEqual("A", judge_initials("Abban"))
+        self.assertEqual("AJ", judge_initials("Ackermann J"))
+        self.assertEqual("AA", judge_initials("Abraham AJ"))
+
+    def test_judgment_detail_uses_legacy_judge_by_default(self):
+        response = self.client.get(self.judgment.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([self.legacy_judge], response.context["judges"])
+        self.assertContains(response, "ABBAN, J.A.")
+        self.assertContains(response, "?judges=ABBAN%2C%20J.A.")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judgment_detail_uses_canonical_judge_when_public_enabled(self):
+        response = self.client.get(self.judgment.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([self.judge_person], response.context["judges"])
+        self.assertContains(response, "Justice Abban")
+        self.assertContains(response, self.judge_person.get_absolute_url())
+
+    def test_judge_detail_is_disabled_by_default(self):
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(404, response.status_code)
+
+    def test_judge_list_is_disabled_by_default(self):
+        response = self.client.get(reverse("judges"))
+
+        self.assertRedirects(response, reverse("home_page"))
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_shows_linked_canonical_judges(self):
+        other_judge = Judge.objects.create(name="Other J")
+        other_person = JudgePerson.objects.create(
+            full_name="Other Judge",
+            slug="other-judge",
+        )
+        unlinked_person = JudgePerson.objects.create(
+            full_name="Unlinked Judge",
+            slug="unlinked-judge",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=other_judge,
+            judge_person=other_person,
+        )
+
+        response = self.client.get(reverse("judges"))
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, "Judges")
+        self.assertContains(
+            response,
+            self.judge_name_markup(self.judge_person.full_name),
+            html=True,
+        )
+        self.assertContains(response, self.judge_person.get_absolute_url())
+        self.assertContains(response, "JA")
+        self.assertContains(
+            response,
+            self.judge_name_markup(other_person.full_name),
+            html=True,
+        )
+        self.assertNotContains(
+            response,
+            self.judge_name_markup(unlinked_person.full_name),
+            html=True,
+        )
+        self.assertEqual(2, response.context["judge_count"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_public_judge_pages_exclude_unpublished_judgments(self):
+        unpublished_person = JudgePerson.objects.create(
+            full_name="Unpublished Judge",
+            slug="unpublished-judge",
+        )
+        for judge_person in (self.judge_person, unpublished_person):
+            unpublished_judgment = Judgment.objects.create(
+                language=Language.objects.get(pk="en"),
+                court=Court.objects.first(),
+                date=datetime.date(2030, 1, 4),
+                jurisdiction=Country.objects.get(pk="ZA"),
+                case_name=f"Unpublished matter for {judge_person.full_name}",
+                published=False,
+            )
+            Bench.objects.create(
+                judgment=unpublished_judgment,
+                judge=Judge.objects.create(name=f"{judge_person.full_name} legacy"),
+                judge_person=judge_person,
+            )
+
+        list_response = self.client.get(reverse("judges"))
+
+        self.assertEqual(200, list_response.status_code)
+        self.assertEqual(1, list_response.context["judge_count"])
+        self.assertNotContains(
+            list_response,
+            self.judge_name_markup(unpublished_person.full_name),
+            html=True,
+        )
+        self.assertNotContains(list_response, "2030")
+
+        detail_response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, detail_response.status_code)
+        self.assertEqual(1, detail_response.context["judge_judgment_count"])
+        self.assertEqual(2024, detail_response.context["judge_latest_year"])
+        self.assertNotContains(detail_response, "2030")
+
+        unpublished_detail_response = self.client.get(
+            unpublished_person.get_absolute_url()
+        )
+
+        self.assertEqual(200, unpublished_detail_response.status_code)
+        self.assertEqual(0, unpublished_detail_response.context["judge_judgment_count"])
+        self.assertEqual(0, len(unpublished_detail_response.context["documents"]))
+        self.assertContains(unpublished_detail_response, "No documents found")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_paginates_ten_judges_per_page(self):
+        for index in range(10):
+            legacy_judge = Judge.objects.create(name=f"Pagination Judge {index:02d}")
+            judge_person = JudgePerson.objects.create(
+                full_name=f"Pagination Judge {index:02d}"
+            )
+            judgment = Judgment.objects.create(
+                language=Language.objects.get(pk="en"),
+                court=Court.objects.first(),
+                date=datetime.date(2024, 1, 4),
+                jurisdiction=Country.objects.get(pk="ZA"),
+                case_name=f"Pagination matter {index:02d}",
+            )
+            Bench.objects.create(
+                judgment=judgment,
+                judge=legacy_judge,
+                judge_person=judge_person,
+            )
+
+        response = self.client.get(reverse("judges"))
+
+        self.assertEqual(200, response.status_code)
+        self.assertTrue(response.context["is_paginated"])
+        self.assertEqual(11, response.context["judge_count"])
+        self.assertEqual(10, len(response.context["judges"]))
+        self.assertEqual(2, response.context["paginator"].num_pages)
+
+        second_page = self.client.get(reverse("judges"), {"page": 2})
+
+        self.assertEqual(200, second_page.status_code)
+        self.assertEqual(1, len(second_page.context["judges"]))
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_filters_by_search(self):
+        other_judge = Judge.objects.create(name="Other J")
+        other_person = JudgePerson.objects.create(
+            full_name="Other Judge",
+            slug="other-judge",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=other_judge,
+            judge_person=other_person,
+        )
+
+        response = self.client.get(reverse("judges"), {"q": "abban"})
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(
+            response,
+            self.judge_name_markup(self.judge_person.full_name),
+            html=True,
+        )
+        self.assertNotContains(
+            response,
+            self.judge_name_markup(other_person.full_name),
+            html=True,
+        )
+        self.assertEqual(1, response.context["judge_count"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_ignores_removed_z_to_a_sort(self):
+        other_person = JudgePerson.objects.create(full_name="Zulu Judge")
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=Judge.objects.create(name="Zulu J"),
+            judge_person=other_person,
+        )
+
+        response = self.client.get(reverse("judges"), {"sort": "name_desc"})
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual("name", response.context["sort"])
+        self.assertEqual([self.judge_person, other_person], response.context["judges"])
+        self.assertEqual(
+            ["J", "Z"], [letter for letter, _ in response.context["grouped_judges"]]
+        )
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_filters_by_active_year(self):
+        other_judge = Judge.objects.create(name="Other J")
+        other_person = JudgePerson.objects.create(
+            full_name="Other Judge",
+            slug="other-judge",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=other_judge,
+            judge_person=other_person,
+        )
+
+        response = self.client.get(reverse("judges"), {"year_ranges": "2020:2024"})
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(
+            response,
+            self.judge_name_markup(self.judge_person.full_name),
+            html=True,
+        )
+        self.assertNotContains(
+            response,
+            self.judge_name_markup(other_person.full_name),
+            html=True,
+        )
+        self.assertEqual(1, response.context["judge_count"])
+        self.assertContains(response, 'id="judge-list-search-form-year_ranges-0"')
+        self.assertContains(response, 'type="checkbox"')
+        self.assertContains(response, 'name="year_ranges"')
+        self.assertContains(response, 'value="2020:2024"')
+        self.assertContains(response, 'form="judge-list-search-form"')
+        self.assertContains(response, 'hx-include="#judge-list-search-form"')
+        self.assertContains(response, 'hx-target="#judge-list-updates"')
+        self.assertContains(response, 'hx-select="#judge-list-updates"')
+        self.assertContains(response, 'id="judge-list-search-form-filters"')
+        self.assertContains(
+            response, 'data-track-event="Listing | Filter | year_ranges"'
+        )
+        self.assertContains(response, "checked")
+        self.assertContains(
+            response,
+            '<label class="form-check-label" data-facet-option-label '
+            'for="judge-list-search-form-year_ranges-0">'
+            "2020–2024</label>",
+            html=True,
+        )
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_combines_multiple_courts_and_year_ranges(self):
+        other_court = Court.objects.create(
+            name="Appeal Court",
+            code="AC",
+            court_class=self.judgment.court.court_class,
+        )
+        other_person = JudgePerson.objects.create(full_name="Other Judge")
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=other_court,
+            date=datetime.date(2019, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=Judge.objects.create(name="Other J"),
+            judge_person=other_person,
+        )
+
+        response = self.client.get(
+            reverse("judges"),
+            {
+                "courts": [self.judgment.court.name, other_court.name],
+                "year_ranges": ["2020:2024", "2010:2019"],
+            },
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2, response.context["judge_count"])
+        self.assertContains(
+            response,
+            self.judge_name_markup(self.judge_person.full_name),
+            html=True,
+        )
+        self.assertContains(
+            response,
+            self.judge_name_markup(other_person.full_name),
+            html=True,
+        )
+        facets = {
+            item["name"]: item["facet"]
+            for item in response.context["judge_rendered_facets"]
+        }
+        self.assertIn(
+            (self.judgment.court.name, self.judgment.court.name),
+            facets["courts"]["options"],
+        )
+        self.assertIn(self.judgment.court.name, facets["courts"]["values"])
+        self.assertIn(("2020:2024", "2020–2024"), facets["year_ranges"]["options"])
+        self.assertIn("2020:2024", facets["year_ranges"]["values"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS)
+    def test_judge_list_filters_by_flynote_topic_and_descendants(self):
+        civil = Flynote.add_root(name="Civil law")
+        contract = civil.add_child(name="Contract")
+        JudgmentFlynote.objects.create(document=self.judgment, flynote=contract)
+
+        other_person = JudgePerson.objects.create(
+            full_name="Other Judge",
+            slug="other-judge",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=Judge.objects.create(name="Other J"),
+            judge_person=other_person,
+        )
+        criminal = Flynote.add_root(name="Criminal law")
+        offence = criminal.add_child(name="Offences")
+        JudgmentFlynote.objects.create(document=other_judgment, flynote=offence)
+
+        response = self.client.get(reverse("judges"), {"topics": civil.pk})
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(
+            response,
+            self.judge_name_markup(self.judge_person.full_name),
+            html=True,
+        )
+        self.assertNotContains(
+            response,
+            self.judge_name_markup(other_person.full_name),
+            html=True,
+        )
+        self.assertContains(response, "Case topics")
+        self.assertNotContains(response, ">ALL</a>")
+        self.assertContains(response, "Civil law")
+        self.assertEqual([civil], response.context["selected_flynote_topics"])
+        self.assertEqual(1, response.context["judge_count"])
+        self.assertContains(response, 'name="topics"')
+        self.assertContains(response, f'value="{civil.pk}"')
+
+        response = self.client.get(
+            reverse("judges"), {"topics": [civil.pk, criminal.pk]}
+        )
+
+        self.assertEqual(2, response.context["judge_count"])
+        self.assertEqual(
+            {civil, criminal}, set(response.context["selected_flynote_topics"])
+        )
+        facets = {
+            item["name"]: item["facet"]
+            for item in response.context["judge_rendered_facets"]
+        }
+        self.assertIn((str(civil.pk), civil.name), facets["topics"]["options"])
+        self.assertIn(str(civil.pk), facets["topics"]["values"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judgment_list_filters_by_canonical_judge_when_public_enabled(self):
+        other_judge = Judge.objects.create(name="Other J")
+        other_person = JudgePerson.objects.create(
+            full_name="Other Judge",
+            slug="other-judge",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=other_judge,
+            judge_person=other_person,
+        )
+
+        response = self.client.get(
+            reverse("court", kwargs={"code": "all"}),
+            {"judge_people": [str(self.judge_person.pk)]},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn(self.judgment, response.context["documents"])
+        self.assertNotIn(other_judgment, response.context["documents"])
+        self.assertIn("judge_people", response.context["facet_data"])
+        self.assertNotIn("judges", response.context["facet_data"])
+        self.assertIn(
+            (str(self.judge_person.pk), self.judge_person.full_name),
+            response.context["facet_data"]["judge_people"]["options"],
+        )
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_invalid_canonical_judge_filter_is_ignored(self):
+        response = self.client.get(
+            reverse("court", kwargs={"code": "all"}),
+            {"judge_people": "not-an-id"},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn(self.judgment, response.context["documents"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_lists_canonical_judge_judgments(self):
+        other_judge = Judge.objects.create(name="Other J")
+        other_person = JudgePerson.objects.create(
+            full_name="Other Judge",
+            slug="other-judge",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=other_judge,
+            judge_person=other_person,
+        )
+
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, "Justice Abban")
+        self.assertIn(self.judgment, response.context["documents"])
+        self.assertNotIn(other_judgment, response.context["documents"])
+        self.assertContains(response, "Courts")
+        self.assertNotContains(response, ">ALL</a>")
+        self.assertNotContains(response, "Alphabet")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_htmx_response_skips_dashboard_analysis(self):
+        response = self.client.get(
+            self.judge_person.get_absolute_url(),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="judge-detail-filters",
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertTemplateUsed(response, "peachjam/_document_table_form.html")
+        self.assertNotIn("judge_citation_relationships", response.context)
+        self.assertNotContains(response, "Judicial activity")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_surname_is_bold_in_list_and_detail_views(self):
+        self.judge_person.full_name = "Kempe, Greg AJ"
+        self.judge_person.save(update_fields=["full_name"])
+        expected_name = "<strong>Kempe</strong>, Greg AJ"
+
+        list_response = self.client.get(reverse("judges"))
+        detail_response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertContains(list_response, expected_name, html=True)
+        self.assertContains(detail_response, expected_name, html=True)
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_filters_judgments_by_court_and_year(self):
+        other_court = Court.objects.create(
+            name="Appeal Court",
+            code="AC",
+            court_class=self.judgment.court.court_class,
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=other_court,
+            date=datetime.date(2019, 2, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Second v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=self.legacy_judge,
+            judge_person=self.judge_person,
+            matched_alias=self.alias,
+        )
+
+        response = self.client.get(
+            self.judge_person.get_absolute_url(),
+            {"courts": self.judgment.court.name},
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn(self.judgment, response.context["documents"])
+        self.assertNotIn(other_judgment, response.context["documents"])
+        self.assertEqual(
+            [self.judgment.court.name],
+            response.context["facet_data"]["courts"]["values"],
+        )
+        self.assertContains(response, 'name="courts"')
+        self.assertContains(response, f'value="{self.judgment.court.name}"')
+        self.assertContains(
+            response,
+            f"?courts={self.judgment.court.name.replace(' ', '%20')}"
+            "#judge-judgments-heading",
+        )
+        self.assertContains(
+            response, f'hx-include="#{response.context["doc_table_form_id"]}"'
+        )
+
+        response = self.client.get(
+            self.judge_person.get_absolute_url(), {"year_ranges": "2010:2019"}
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertNotIn(self.judgment, response.context["documents"])
+        self.assertIn(other_judgment, response.context["documents"])
+        self.assertEqual(
+            [("2010:2019", "2010–2019"), ("2020:2024", "2020–2024")],
+            response.context["facet_data"]["year_ranges"]["options"],
+        )
+        self.assertEqual(
+            ["2010:2019"],
+            response.context["facet_data"]["year_ranges"]["values"],
+        )
+        self.assertContains(response, 'name="year_ranges"')
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_filters_judgments_by_judicial_title(self):
+        other_alias = JudgeAlias.objects.create(
+            judge_person=self.judge_person,
+            name="Abban J",
+        )
+        JudgeAlias.objects.create(
+            judge_person=self.judge_person,
+            name="Abban JSC",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 2, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Second v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=Judge.objects.create(name="Abban J"),
+            judge_person=self.judge_person,
+            matched_alias=other_alias,
+        )
+
+        response = self.client.get(
+            self.judge_person.get_absolute_url(), {"titles": "JA"}
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn(self.judgment, response.context["documents"])
+        self.assertNotIn(other_judgment, response.context["documents"])
+        self.assertEqual(["JA"], response.context["facet_data"]["titles"]["values"])
+        self.assertEqual("J", response.context["judge_latest_title"])
+        self.assertEqual("Judge (J)", response.context["judge_latest_title_label"])
+        self.assertEqual(
+            [
+                {"abbreviation": "J", "label": "Judge (J)"},
+                {"abbreviation": "JA", "label": "Judge of appeal (JA)"},
+            ],
+            response.context["judge_titles"],
+        )
+        self.assertEqual(
+            [("JA", "Judge of appeal (JA)"), ("J", "Judge (J)")],
+            response.context["facet_data"]["titles"]["options"],
+        )
+        self.assertContains(response, "Judicial title")
+        self.assertNotContains(response, "Justice of the Supreme Court (JSC)")
+        self.assertNotContains(response, "Post abbreviation")
+        self.assertContains(response, 'name="titles"')
+        self.assertContains(response, 'value="J"', count=1)
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS)
+    def test_judge_detail_filters_judgments_by_flynote_topic_and_descendants(self):
+        civil = Flynote.add_root(name="Civil law")
+        contract = civil.add_child(name="Contract")
+        JudgmentFlynote.objects.create(document=self.judgment, flynote=contract)
+
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 2, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Second v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=self.legacy_judge,
+            judge_person=self.judge_person,
+            matched_alias=self.alias,
+        )
+        criminal = Flynote.add_root(name="Criminal law")
+        offence = criminal.add_child(name="Offences")
+        JudgmentFlynote.objects.create(document=other_judgment, flynote=offence)
+
+        response = self.client.get(
+            self.judge_person.get_absolute_url(), {"topics": civil.pk}
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertIn(self.judgment, response.context["documents"])
+        self.assertNotIn(other_judgment, response.context["documents"])
+        self.assertEqual(
+            [str(civil.pk)], response.context["facet_data"]["topics"]["values"]
+        )
+        self.assertNotContains(response, ">ALL</a>")
+        self.assertContains(response, "Civil law")
+        self.assertContains(response, "Criminal law")
+        self.assertContains(response, "Case topics")
+        self.assertNotContains(response, "Leading flynote topics")
+        self.assertContains(response, 'name="topics"')
+        self.assertContains(response, f'value="{civil.pk}"')
+        self.assertContains(response, f"?topics={civil.pk}#judge-judgments-heading")
+
+        response = self.client.get(
+            self.judge_person.get_absolute_url(),
+            {"topics": [civil.pk, criminal.pk]},
+        )
+
+        self.assertIn(self.judgment, response.context["documents"])
+        self.assertIn(other_judgment, response.context["documents"])
+        self.assertEqual(
+            {str(civil.pk), str(criminal.pk)},
+            set(response.context["facet_data"]["topics"]["values"]),
+        )
+        self.assertIn(
+            (str(civil.pk), civil.name),
+            response.context["facet_data"]["topics"]["options"],
+        )
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS)
+    def test_judge_detail_shows_all_associated_root_case_topics(self):
+        topics = [Flynote.add_root(name=f"Topic {index}") for index in range(1, 10)]
+        for topic in topics:
+            JudgmentFlynote.objects.create(document=self.judgment, flynote=topic)
+
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(9, len(response.context["judge_case_topics"]))
+        self.assertContains(response, "Topic 9")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_shows_summary_context(self):
+        second_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 2, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Second v Republic",
+        )
+        Bench.objects.create(
+            judgment=second_judgment,
+            judge=self.legacy_judge,
+            judge_person=self.judge_person,
+            matched_alias=self.alias,
+        )
+
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(2024, response.context["judge_first_year"])
+        self.assertEqual(2025, response.context["judge_latest_year"])
+        self.assertEqual(2, response.context["judge_judgment_count"])
+        self.assertEqual(
+            [
+                {
+                    "judgment__court__name": self.judgment.court.name,
+                    "judgment_count": 2,
+                    "first_year": 2024,
+                    "latest_year": 2025,
+                }
+            ],
+            response.context["judge_court_chart"],
+        )
+        self.assertEqual(
+            [
+                {"year": 2024, "judgment_count": 1, "year_range": "2020:2025"},
+                {"year": 2025, "judgment_count": 1, "year_range": "2020:2025"},
+            ],
+            response.context["judge_year_activity"],
+        )
+        self.assertEqual("JA", response.context["judge_latest_title"])
+        self.assertEqual(
+            "Judge of appeal (JA)", response.context["judge_latest_title_label"]
+        )
+        self.assertEqual(
+            [{"abbreviation": "JA", "label": "Judge of appeal (JA)"}],
+            response.context["judge_titles"],
+        )
+        self.assertEqual(1, response.context["judge_year_max"])
+        self.assertEqual(2, response.context["judge_court_max"])
+        self.assertTrue(response.context["judge_court_chart_is_compact"])
+        self.assertEqual(2, len(response.context["judge_year_activity"]))
+        self.assertContains(response, "Justice Abban")
+        self.assertContains(response, "Judgments by year")
+        self.assertContains(response, "judge-year-chart__bar", count=2)
+        self.assertContains(response, "judge-court-chart__bar")
+        self.assertContains(response, "Ranked chart showing the number of judgments")
+        self.assertContains(response, "Most recent title")
+        self.assertContains(response, "Judicial titles")
+        self.assertContains(response, "Most recent")
+        self.assertContains(response, "titles=JA")
+        self.assertContains(response, "year_ranges=2020:2025", count=2)
+        self.assertNotContains(response, "Names found in the sources")
+        self.assertContains(
+            response,
+            "currently available",
+        )
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_uses_long_court_layout_for_three_courts(self):
+        for index in range(2):
+            court = Court.objects.create(
+                name=f"Additional Court {index}",
+                code=f"additional-court-{index}",
+                court_class=self.judgment.court.court_class,
+            )
+            judgment = Judgment.objects.create(
+                language=Language.objects.get(pk="en"),
+                court=court,
+                date=datetime.date(2023 - index, 1, 4),
+                jurisdiction=Country.objects.get(pk="ZA"),
+                case_name=f"Additional matter {index}",
+            )
+            Bench.objects.create(
+                judgment=judgment,
+                judge=self.legacy_judge,
+                judge_person=self.judge_person,
+                matched_alias=self.alias,
+            )
+
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(3, len(response.context["judge_court_chart"]))
+        self.assertFalse(response.context["judge_court_chart_is_compact"])
+        self.assertContains(response, 'id="judge-topics-heading"', count=1)
+        self.assertContains(response, 'id="judge-titles-heading"', count=1)
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_shows_citation_relationships(self):
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 4, 2),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        ExtractedCitation.objects.create(
+            citing_work=other_judgment.work,
+            target_work=self.judgment.work,
+        )
+        ExtractedCitation.objects.create(
+            citing_work=self.judgment.work,
+            target_work=other_judgment.work,
+        )
+
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        relationships = response.context["judge_citation_relationships"]
+        self.assertEqual(1, relationships["incoming_count"])
+        self.assertEqual(1, relationships["outgoing_count"])
+        self.assertNotIn("citing_judges", relationships)
+        self.assertNotIn("cited_judges", relationships)
+        self.assertEqual(self.judgment, relationships["most_cited_judgments"][0])
+        self.assertContains(response, "Citation relationships")
+        self.assertContains(
+            response,
+            "Based on currently available citation data",
+        )
+        self.assertNotContains(response, "Citation influence")
+        self.assertNotContains(response, "Judges citing these judgments")
+        self.assertNotContains(response, "Frequently cited judges")
+        self.assertTrue(response.context["doc_table_show_court"])
+
+
+@override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS)
 class JudgmentExtractLegacyViewRenderingTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
 
