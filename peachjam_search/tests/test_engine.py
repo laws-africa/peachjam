@@ -1410,6 +1410,42 @@ class TestSearchEngine(TestCase):
             json.dumps(d, indent=2, sort_keys=True),
         )
 
+    def test_range_fields_normalise_plain_filter_parameters(self):
+        params = QueryDict("", mutable=True)
+        params["search"] = "test"
+        params["date"] = "1966"
+        params["created_at"] = "2025-01-01T00:00:00Z"
+
+        engine = legacy_engine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(engine)
+
+        self.assertEqual(
+            ["1966-01-01", "1966-12-31"], engine.search_query.filters["date"]
+        )
+        self.assertEqual(
+            ["2025-01-01T00:00:00Z", "2025-01-01T00:00:00Z"],
+            engine.search_query.filters["created_at"],
+        )
+        filters = engine.build_search().to_dict()["query"]["bool"]["filter"]
+        self.assertEqual({"term": {"is_most_recent": True}}, filters[0])
+        self.assertIn(
+            {"range": {"date": {"gte": "1966-01-01", "lte": "1966-12-31"}}},
+            filters,
+        )
+        self.assertIn(
+            {
+                "range": {
+                    "created_at": {
+                        "gte": "2025-01-01T00:00:00Z",
+                        "lte": "2025-01-01T00:00:00Z",
+                    }
+                }
+            },
+            filters,
+        )
+
     def test_semantic(self):
         params = QueryDict("", mutable=True)
         params["search"] = "test"
