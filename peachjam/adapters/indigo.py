@@ -595,7 +595,7 @@ class IndigoAdapter(RequestsAdapter):
             remove_subparagraph(i)
         return toc_json
 
-    def download_source_file(self, url, doc, title):
+    def download_source_file(self, url, doc, title, start_page=None):
         logger.info(f"Downloading source file from {url}")
 
         with NamedTemporaryFile() as f:
@@ -615,6 +615,7 @@ class IndigoAdapter(RequestsAdapter):
             source_file.file = File(f, name=filename)
             source_file.mimetype = magic.from_file(f.name, mime=True)
             source_file.size = len(r.content)
+            source_file.start_page = start_page
             source_file.save()
 
     def get_size_from_url(self, url):
@@ -732,11 +733,15 @@ class IndigoAdapter(RequestsAdapter):
     def attach_source_and_publication_file(self, url, document, created_document):
         pubdoc = document["publication_document"] or {}
         pubdoc_url = pubdoc.get("url")
+        start_page = pubdoc.get("start_page")
         if document["stub"]:
             # for stub documents, use the publication document as the source file
             if pubdoc_url:
                 self.download_source_file(
-                    pubdoc_url, created_document, document["title"]
+                    pubdoc_url,
+                    created_document,
+                    document["title"],
+                    start_page=start_page,
                 )
         else:
             # the source file is the PDF version
