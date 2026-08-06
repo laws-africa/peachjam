@@ -52,6 +52,8 @@ def strip_first_character(value):
 
 @register.filter
 def parse_string_date(date):
+    if not isinstance(date, str):
+        return date
     return datetime.datetime.strptime(date, "%Y-%m-%d")
 
 

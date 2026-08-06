@@ -721,7 +721,7 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
             Judgment.objects.filter(work_id__in=work_ids - {document.work_id})
             .latest_expression()
             .select_related("court")
-            .prefetch_related("judges", "outcomes")
+            .prefetch_related("judges", "outcomes", "labels")
         )
         for related_document in related_documents:
             documents_by_work_id[related_document.work_id] = related_document
@@ -730,6 +730,7 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
         for case_document in documents_by_work_id.values():
             history = {
                 "document": case_document,
+                "date": case_document.date,
                 "is_current": case_document.work_id == document.work_id,
             }
             histories.append(history)

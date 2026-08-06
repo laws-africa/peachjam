@@ -1,0 +1,26 @@
+{% load i18n peachjam %}
+<div class="card-body">
+  {% if entry.contains_unapplied_amendment %}
+    <span class="badge rounded-pill bg-secondary mb-2">{% trans 'amendment not yet applied' %}</span>
+  {% endif %}
+  {% for event in entry.events %}
+    <div>
+      {% if event.type == "publication" %}
+        {% if document.publication_file %}
+          <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
+             target="_blank">{{ event.description }}</a>
+        {% else %}
+          {{ event.description }}
+        {% endif %}
+      {% else %}
+        {{ event.description }}
+        {% if event.by_frbr_uri %}<a href="{{ event.by_frbr_uri }}">{{ event.by_title }}</a>{% endif %}
+      {% endif %}
+      {% if event.note %}<p>{{ event.note }}</p>{% endif %}
+    </div>
+  {% endfor %}
+  {% if not entry.is_current and entry.expression_frbr_uri %}
+    <a class="btn btn-outline-primary mt-2"
+       href="{{ entry.expression_frbr_uri }}">{% trans 'Read this version' %}</a>
+  {% endif %}
+</div>

@@ -31,49 +31,7 @@
           {% include "peachjam_subs/_subscription_required.html" %}
         {% else %}
           <p class="text-muted">{% trans 'Showing case history timeline, from most recent to oldest' %}</p>
-          <div class="vertical-timeline ms-5 mt-4">
-            {% for entry in case_histories %}
-              <div class="vertical-timeline__item">
-                <div class="card mb-3">
-                  <div class="card-body">
-                    <div class="mb-1">
-                      <span class="text-muted">{{ entry.document.date }}</span>
-                      {% if entry.is_current %}
-                        <span class="badge rounded-pill bg-primary ms-1">{% trans 'You are here' %}</span>
-                      {% endif %}
-                    </div>
-                    <h5 class="mb-0 card-title">
-                      <a href="{{ entry.document.get_absolute_url }}">{{ entry.document.title }}</a>
-                    </h5>
-                    <div class="d-flex mt-2">
-                      <section>
-                        <span class="text-muted text-uppercase">{% trans 'Court' %}</span>
-                        <span class="card-text d-block fw-semibold">{{ entry.document.court }}</span>
-                      </section>
-                      <section class="ms-4">
-                        <span class="text-muted text-uppercase fs-6">{% trans 'Judges' %}</span>
-                        <span class="card-text d-block fw-semibold">
-                          {% for judge in entry.document.judges.all %}
-                            {{ judge }}
-                            {% if not forloop.last %},{% endif %}
-                          {% endfor %}
-                        </span>
-                      </section>
-                    </div>
-                    {% with entry.document.outcomes.all as outcomes %}
-                      {% if outcomes %}
-                        <div class="mt-1">
-                          {% for outcome in outcomes %}
-                            <span class="badge rounded-pill bg-primary-subtle text-primary">{{ outcome }}</span>
-                          {% endfor %}
-                        </div>
-                      {% endif %}
-                    {% endwith %}
-                  </div>
-                </div>
-              </div>
-            {% endfor %}
-          </div>
+          {% include "peachjam/document/_document_history.html" with history_entries=case_histories history_entry_template="peachjam/document/_document_history_case_entry.html" %}
         {% endif %}
       </div>
     </div>
