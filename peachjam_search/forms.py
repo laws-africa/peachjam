@@ -57,11 +57,21 @@ class SearchForm(forms.Form):
         if val and is_valid(val):
             return [None, val]
 
+        val = self.data.get(field)
+        if val and is_valid(val):
+            return [val, val]
+
+        if field == "date" and val and len(val) == 4 and val.isdigit():
+            return [f"{val}-01-01", f"{val}-12-31"]
+
     def build_search_query(self, mode="text") -> SearchQuery:
         filters = {}
 
         for key in self.data.keys():
-            if key in ElasticsearchSearchCompiler.filter_fields:
+            if (
+                key in ElasticsearchSearchCompiler.filter_fields
+                and key not in ElasticsearchSearchCompiler.range_filter_fields
+            ):
                 vals = [x.strip() for x in self.data.getlist(key) if x.strip()]
                 if vals:
                     filters[key] = vals
