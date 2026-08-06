@@ -8,8 +8,8 @@ from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
 from django.db.models import Count, Exists, Max, Min, OuterRef, Q
 from django.db.models.functions import Substr
-from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404
+from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.decorators import method_decorator
@@ -83,19 +83,14 @@ def group_years_into_ranges(years):
         return []
 
     latest_year = years[0]
-    years_by_decade = {}
-    for year in years:
-        decade = year // 10 * 10
-        years_by_decade.setdefault(decade, []).append(year)
-
+    decades = sorted({year // 10 * 10 for year in years}, reverse=True)
     return [
         {
             "label": f"{decade}–{min(decade + 9, latest_year)}",
             "start": decade,
             "end": min(decade + 9, latest_year),
-            "years": years_by_decade[decade],
         }
-        for decade in sorted(years_by_decade, reverse=True)
+        for decade in decades
     ]
 
 
@@ -157,8 +152,8 @@ def judge_initials(name):
 
 class JudgePublicPageMixin:
     def dispatch(self, request, *args, **kwargs):
-        if not JudgePerson.canonical_identity_public_enabled():
-            raise Http404("Canonical judge identity public pages are disabled.")
+        if not JudgePerson.canonical_identity_enabled():
+            return redirect("home_page")
         return super().dispatch(request, *args, **kwargs)
 
     @cached_property
@@ -179,18 +174,30 @@ class JudgePublicPageMixin:
     def selected_courts(self):
         return self.request.GET.getlist("courts")
 
-    def selected_years(self):
-        years = set()
+    @cached_property
+    def selected_year_ranges(self):
+        ranges = []
         for value in self.request.GET.getlist("year_ranges"):
             try:
                 start, end = (int(part) for part in value.split(":", 1))
             except (TypeError, ValueError):
                 continue
-            if 1000 <= start <= end <= 9999 and end - start <= 9:
-                years.update(range(start, end + 1))
+            year_range = (start, end)
+            if (
+                1000 <= start <= end <= 9999
+                and end - start <= 9
+                and year_range not in ranges
+            ):
+                ranges.append(year_range)
+        return ranges
+
+    def selected_years(self):
+        years = set()
+        for start, end in self.selected_year_ranges:
+            years.update(range(start, end + 1))
         return sorted(years)
 
-    def year_filter_options(self, years):
+    def year_range_options(self, years):
         return [
             (
                 f"{year_range['start']}:{year_range['end']}",
@@ -344,7 +351,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             .distinct()
             .order_by("-judgment__date__year")
         )
-        year_options = self.year_filter_options(available_years)
+        year_range_options = self.year_range_options(available_years)
         facet_data = {
             "courts": {
                 "label": gettext_lazy("Courts"),
@@ -362,9 +369,9 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
                 "values": self.request.GET.getlist("topics"),
             },
             "year_ranges": {
-                "label": gettext_lazy("Judgment year"),
+                "label": gettext_lazy("Judgment years"),
                 "type": "checkbox",
-                "options": year_options,
+                "options": year_range_options,
                 "values": self.request.GET.getlist("year_ranges"),
             },
         }
@@ -456,7 +463,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             }
 
     def add_titles_facet(self, context):
-        titles = sorted(
+        titles = list(
             self.form.filter_queryset(
                 self.get_base_queryset(exclude="titles"), exclude="titles"
             )
@@ -465,6 +472,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
                 bench__matched_alias__title__isnull=False,
             )
             .exclude(bench__matched_alias__title="")
+            .order_by("bench__matched_alias__title")
             .values_list("bench__matched_alias__title", flat=True)
             .distinct()
         )
@@ -499,12 +507,12 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .values_list("date__year", flat=True)
             .distinct()
         )
-        year_options = self.year_filter_options(years)
-        if year_options:
+        options = self.year_range_options(years)
+        if options:
             context["facet_data"]["year_ranges"] = {
-                "label": gettext_lazy("Judgment year"),
+                "label": gettext_lazy("Judgment years"),
                 "type": "checkbox",
-                "options": year_options,
+                "options": options,
                 "values": self.request.GET.getlist("year_ranges"),
             }
 
@@ -658,10 +666,17 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             }
             for title in matched_titles
         ]
+        year_ranges = {
+            year_range["start"]: f"{year_range['start']}:{year_range['end']}"
+            for year_range in group_years_into_ranges(
+                row["judgment__date__year"] for row in judge_year_breakdown
+            )
+        }
         context["judge_year_activity"] = [
             {
                 "year": row["judgment__date__year"],
                 "judgment_count": row["judgment_count"],
+                "year_range": year_ranges[row["judgment__date__year"] // 10 * 10],
             }
             for row in reversed(judge_year_breakdown)
         ]
