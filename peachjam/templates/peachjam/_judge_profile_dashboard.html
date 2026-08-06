@@ -65,7 +65,7 @@
                       <div class="judge-year-chart__column">
                         <span class="judge-year-chart__count">{{ row.judgment_count|intcomma }}</span>
                         <a class="judge-year-chart__bar"
-                           href="{{ request.path }}?year_ranges={{ row.year }}:{{ row.year }}#judge-judgments-heading"
+                           href="{{ request.path }}?year_ranges={{ row.year_range }}#judge-judgments-heading"
                            style="height: {% widthratio row.judgment_count judge_year_max 160 %}px"
                            aria-label="{% blocktrans count count=row.judgment_count with year=row.year %}{{ count }} judgment in {{ year }}{% plural %}{{ count }} judgments in {{ year }}{% endblocktrans %}"></a>
                         <span class="judge-year-chart__year">{{ row.year }}</span>
