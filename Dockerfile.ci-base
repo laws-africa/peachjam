@@ -41,7 +41,9 @@ ENV NODE_PATH=/app/node_modules/
 
 # Copy only Python dependency inputs, so source-only changes reuse this layer.
 # Keeping it last also means a pyproject.toml change does not reinstall Node
-# packages. The checked-out source is installed editable by the test workflow.
+# packages. Remove Peachjam itself afterwards: core tests install their checkout
+# editable, and other packages install the commit pinned in their pyproject.
 COPY pyproject.toml /app/
 COPY bin /app/bin
-RUN pip install ".[ml,dev]"
+RUN pip install ".[ml,dev]" \
+    && pip uninstall --yes peachjam

@@ -102,8 +102,10 @@ job.
 
 `Dockerfile.ci-base` starts from the same `ubuntu:24.04` base as the deployment
 `Dockerfile`. It installs the stable system tools, production Node packages, and
-the Python extras used in CI (`.[ml,dev]`). It does not include Peachjam's
-application source.
+the Python extras used in CI (`.[ml,dev]`). It removes the temporary Peachjam
+distribution after resolving those dependencies, so it provides no Peachjam
+application code. Core tests install their checkout, while other projects can
+install the exact Peachjam commit pinned in their own `pyproject.toml`.
 
 At the start of each test workflow, the `build-ci-base` job calculates an image
 tag from every dependency input copied into the Dockerfile:
