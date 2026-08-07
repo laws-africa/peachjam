@@ -114,11 +114,11 @@ tag from every dependency input copied into the Dockerfile:
 
 The resulting immutable tag looks like
 `ghcr.io/laws-africa/peachjam-ci-base:deps-<hash>`. Source-only changes do not
-change this tag, so Docker restores all image layers instead of rerunning APT,
-pip, or npm. The workflow also maintains a `:cache` tag with Docker's inline
-cache metadata. When a dependency input changes, the new image can still reuse
-unchanged earlier layers: a `pyproject.toml` change normally reruns only the
-final Python dependency installation.
+change this tag, so the workflow finds the existing image in GHCR and skips the
+Docker build entirely. The workflow also maintains a `:cache` tag with Docker's
+inline cache metadata. When a dependency input changes, the new image can still
+reuse unchanged earlier layers: a `pyproject.toml` change normally reruns only
+the final Python dependency installation.
 
 Each test job checks out the pull request and runs:
 

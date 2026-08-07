@@ -28,7 +28,7 @@ jobs:
     outputs:
       image: ${{ steps.image.outputs.ref }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       # This immutable tag changes only when an input copied into
       # Dockerfile.ci-base changes. Source-only pull requests reuse its image.
       - name: Set image reference
@@ -42,13 +42,22 @@ jobs:
           )
           echo "ref=ghcr.io/${GITHUB_REPOSITORY_OWNER}/peachjam-ci-base:deps-${dependency_hash}" >> "$GITHUB_OUTPUT"
           echo "cache=ghcr.io/${GITHUB_REPOSITORY_OWNER}/peachjam-ci-base:cache" >> "$GITHUB_OUTPUT"
-      - uses: docker/login-action@v3
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check for existing CI base image
+        id: image-cache
+        run: |
+          if docker manifest inspect "${{ steps.image.outputs.ref }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
       - name: Build and publish CI base image
-        uses: docker/build-push-action@v6
+        if: steps.image-cache.outputs.exists != 'true'
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: Dockerfile.ci-base
@@ -65,13 +74,13 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
       - name: Cache pre-commit environments
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/pre-commit
           key: pre-commit-${{ runner.os }}-python-3.12-${{ hashFiles('.pre-commit-config.yaml') }}
@@ -106,7 +115,7 @@ jobs:
           --health-timeout 5s
           --health-retries 3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The checkout is mounted into the container with runner ownership.
       # setuptools-scm reads Git metadata while creating the editable install.
       - name: Mark checkout as safe for Git
