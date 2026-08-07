@@ -17,6 +17,7 @@ from django.urls.resolvers import RoutePattern
 from peachjam.auth import (
     _patched_finish,
     _patched_send_by_email,
+    create_all_users_permission_group_after_migrate,
     get_or_create_all_users_permission_group,
 )
 
@@ -162,6 +163,14 @@ class AllUsersPermissionBackendTests(TestCase):
         user = AnonymousUser()
 
         self.assertFalse(user.has_perm("auth.can_use_baseline_feature"))
+
+
+class AllUsersPermissionGroupMigrationTests(SimpleTestCase):
+    @patch("peachjam.auth.get_or_create_all_users_permission_group")
+    def test_group_is_created_after_migrations(self, create_group):
+        create_all_users_permission_group_after_migrate()
+
+        create_group.assert_called_once_with()
 
 
 class PatchedSendByEmailTests(TestCase):

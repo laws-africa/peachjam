@@ -93,6 +93,51 @@ the following to allow Precommit to format and fix any linting errors on your co
 pre-commit install
 ```
 
+## Continuous integration test environment
+
+The [test workflow](../.github/workflows/test.yml) runs the test matrix in the
+`peachjam-ci-base` container image. This avoids installing LibreOffice, Pandoc,
+Poppler, Node, Sass, and the Python dependency set separately for every test
+job.
+
+`Dockerfile.ci-base` starts from the same `ubuntu:24.04` base as the deployment
+`Dockerfile`. It installs the stable system tools, production Node packages, and
+the Python extras used in CI (`.[ml,dev]`). It removes the temporary Peachjam
+distribution after resolving those dependencies, so it provides no Peachjam
+application code. Core tests install their checkout, while other projects can
+install the exact Peachjam commit pinned in their own `pyproject.toml`.
+
+At the start of each test workflow, the `build-ci-base` job calculates an image
+tag from every dependency input copied into the Dockerfile:
+
+- `Dockerfile.ci-base`
+- `pyproject.toml` and `bin/`
+- `package.json` and `package-lock.json`
+
+The resulting immutable tag looks like
+`ghcr.io/laws-africa/peachjam-ci-base:deps-<hash>`. Source-only changes do not
+change this tag, so the workflow finds the existing image in GHCR and skips the
+Docker build entirely. The workflow also maintains a `:cache` tag with Docker's
+inline cache metadata. When a dependency input changes, the new image can still
+reuse unchanged earlier layers: a `pyproject.toml` change normally reruns only
+the final Python dependency installation.
+
+Each test job checks out the pull request and runs:
+
+```bash
+pip install --no-deps -e .
+```
+
+This editable install is fast and ensures that tests execute the current pull
+request's Python code while using the dependencies from the CI image. The
+containerized test job reaches its PostgreSQL service at `postgres:5432`, rather
+than `localhost:5432`.
+
+When changing system tooling, update both `Dockerfile.ci-base` and the
+deployment `Dockerfile` so their platform setup remains aligned. When changing
+Python dependencies, update `pyproject.toml`; the workflow automatically builds
+a new image for the changed dependency inputs.
+
 ## Adding translation strings
 
 Translations for strings are added on [CrowdIn](https://laws-africa.crowdin.com/).
