@@ -28,7 +28,7 @@ jobs:
     outputs:
       image: ${{ steps.image.outputs.ref }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       # This immutable tag changes only when an input copied into
       # Dockerfile.ci-base changes. Source-only pull requests reuse its image.
       - name: Set image reference
@@ -107,6 +107,10 @@ jobs:
           --health-retries 3
     steps:
       - uses: actions/checkout@v4
+      # The checkout is mounted into the container with runner ownership.
+      # setuptools-scm reads Git metadata while creating the editable install.
+      - name: Mark checkout as safe for Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
       # The image intentionally excludes application source. This editable, no-dependency install ensures tests run
       # the pull request's code, using dependencies from the pre-built image.
       - name: Install checked-out source
