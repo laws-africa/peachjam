@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.conf import settings
+from django.db.models.signals import post_migrate
 from django.utils import timezone
 
 
@@ -15,13 +16,17 @@ class PeachJamConfig(AppConfig):
         import peachjam.adapters  # noqa
         import peachjam.checks  # noqa
         import peachjam.signals  # noqa
-        from peachjam.auth import get_or_create_all_users_permission_group
+        from peachjam.auth import create_all_users_permission_group_after_migrate
         from peachjam.helpers import get_country_absolute_url
 
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
         Country.get_absolute_url = get_country_absolute_url
-        get_or_create_all_users_permission_group()
+        post_migrate.connect(
+            create_all_users_permission_group_after_migrate,
+            sender=self,
+            dispatch_uid="peachjam.create_all_users_permission_group",
+        )
         # bump up the context for citation extraction
         CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 100
 
