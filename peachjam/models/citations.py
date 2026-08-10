@@ -14,6 +14,10 @@ log = logging.getLogger(__name__)
 
 
 class CitationLink(models.Model):
+    class Origin(models.TextChoices):
+        AUTOMATIC = "automatic", _("Automatically extracted")
+        MANUAL = "manual", _("Manually created")
+
     document = models.ForeignKey(
         "peachjam.CoreDocument",
         related_name="citation_links",
@@ -26,6 +30,9 @@ class CitationLink(models.Model):
         _("target id"), max_length=1024, null=False, blank=False
     )
     target_selectors = models.JSONField(verbose_name=_("target selectors"))
+    origin = models.CharField(
+        _("origin"), max_length=16, choices=Origin.choices, default=Origin.AUTOMATIC
+    )
 
     class Meta:
         verbose_name = _("citation link")
@@ -57,6 +64,7 @@ class CitationLink(models.Model):
             text=citation.text,
             url=citation.href,
             target_id=f"page-{citation.target_id + 1}",
+            origin=cls.Origin.AUTOMATIC,
             target_selectors=[
                 {
                     "type": "TextPositionSelector",

@@ -1039,10 +1039,8 @@ class DocumentAdmin(BackgroundTasksAdminMixin, AccessGroupMixin, BaseAdmin):
         else:
             alternative_names_has_changed = False
 
-        if (
-            not change
-            or ["date", "title", "citation"] in form.changed_data
-            or alternative_names_has_changed
+        if self.should_queue_re_extract_citations(
+            form, alternative_names_has_changed, change
         ):
             cp = citations_processor()
             cp.queue_re_extract_citations(form.instance.date)
@@ -1057,6 +1055,18 @@ class DocumentAdmin(BackgroundTasksAdminMixin, AccessGroupMixin, BaseAdmin):
             sf = getattr(form.instance, "source_file", None)
             if sf:
                 sf.set_download_filename()
+
+    def should_queue_re_extract_citations(
+        self, form, alternative_names_has_changed, change
+    ):
+        """Return whether this edit can affect citation extraction in other documents."""
+        return (
+            not change
+            or any(
+                field in form.changed_data for field in ("date", "title", "citation")
+            )
+            or alternative_names_has_changed
+        )
 
     def get_urls(self):
         return [
@@ -2961,11 +2971,20 @@ if ChatThreadInline not in UserAdminCustom.inlines:
     UserAdminCustom.inlines.append(ChatThreadInline)
 
 
+@admin.register(CitationLink)
+class CitationLinkAdmin(admin.ModelAdmin):
+    readonly_fields = ("origin",)
+
+    def save_model(self, request, obj, form, change):
+        if not change or form.has_changed():
+            obj.origin = CitationLink.Origin.MANUAL
+        super().save_model(request, obj, form, change)
+
+
 admin.site.register(
     [
         AttachedFileNature,
         CaseAction,
-        CitationLink,
         CitationProcessing,
         CourtDivision,
         CustomPropertyLabel,

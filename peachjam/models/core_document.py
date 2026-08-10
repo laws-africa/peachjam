@@ -741,10 +741,12 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
         return work_ids
 
     def delete_citations(self):
-        """Delete existing citation links and added citations from this document."""
+        """Delete automatically extracted citation links from this document."""
         from peachjam.models.citations import CitationLink
 
-        CitationLink.objects.filter(document=self).delete()
+        CitationLink.objects.filter(
+            document=self, origin=CitationLink.Origin.AUTOMATIC
+        ).delete()
 
     def prepare_content_html_for_pdf(self):
         """Prepare the content HTML for PDF generation by inlining images as base64."""
