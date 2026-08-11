@@ -7,7 +7,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.db import models
-from django.db.models import Max, Prefetch
+from django.db.models import Exists, Max, OuterRef, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
 from django.utils import timezone
@@ -27,6 +27,7 @@ from peachjam.models import (
     SourceFile,
     on_attribute_changed,
 )
+from peachjam.models.flynote import Flynote, JudgmentFlynote
 from peachjam.tasks import (
     create_anonymised_source_file_pdf,
     generate_judgment_summary,
@@ -80,6 +81,18 @@ class Judge(models.Model):
 class JudgePerson(models.Model):
     model_label = _("Judge")
     model_label_plural = _("Judges")
+    SURNAME_PARTICLES = {
+        "da",
+        "de",
+        "del",
+        "der",
+        "di",
+        "du",
+        "la",
+        "le",
+        "van",
+        "von",
+    }
 
     full_name = models.CharField(
         _("full name"), max_length=1024, null=False, blank=False, unique=True
@@ -100,6 +113,62 @@ class JudgePerson(models.Model):
     @staticmethod
     def canonical_identity_enabled():
         return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
+
+    @cached_property
+    def display_name_parts(self):
+        """Split a surname-first name while preserving its display formatting."""
+        name = " ".join((self.full_name or "").split())
+        if not name:
+            return "", ""
+
+        if "," in name:
+            surname, remainder = name.split(",", 1)
+            remainder = remainder.strip()
+            return surname.strip(), f", {remainder}" if remainder else ","
+
+        parts = name.split()
+        surname_end = 1
+        while (
+            surname_end < len(parts) - 1
+            and parts[surname_end - 1].rstrip(".").casefold() in self.SURNAME_PARTICLES
+        ):
+            surname_end += 1
+
+        surname = " ".join(parts[:surname_end])
+        remainder = " ".join(parts[surname_end:])
+        return surname, f" {remainder}" if remainder else ""
+
+    @property
+    def surname(self):
+        return self.display_name_parts[0]
+
+    @property
+    def name_remainder(self):
+        return self.display_name_parts[1]
+
+    @staticmethod
+    def available_flynote_topics(judge_person=None):
+        """Return root flynote topics linked to canonical judges' judgments."""
+        if not Judgment.flynote_topics_enabled():
+            return Flynote.objects.none()
+
+        linked_judgments = JudgmentFlynote.objects.filter(
+            flynote__path__startswith=OuterRef("path"),
+            document__published=True,
+            document__bench__judge_person__isnull=False,
+        )
+        if judge_person is not None:
+            linked_judgments = linked_judgments.filter(
+                document__bench__judge_person=judge_person
+            )
+
+        return (
+            Flynote.get_root_nodes()
+            .filter(deprecated=False)
+            .annotate(has_judge_judgments=Exists(linked_judgments))
+            .filter(has_judge_judgments=True)
+            .order_by("name")
+        )
 
     def get_absolute_url(self):
         return reverse("judge", kwargs={"slug": self.slug})

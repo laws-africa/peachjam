@@ -5,7 +5,7 @@
           aria-hidden="true">{{ judge_initials }}</span>
     <div class="entity-profile__body__info">
       <h1 id="main-page-heading">
-        <strong>{{ judge_display_surname }}</strong>{{ judge_display_name_remainder }}
+        <strong>{{ judge_person.surname }}</strong>{{ judge_person.name_remainder }}
       </h1>
       {% if judge_person.description %}<p class="text-muted">{{ judge_person.description }}</p>{% endif %}
       {% if judge_leading_court %}
@@ -81,15 +81,15 @@
         </section>
         {% if judge_court_chart_is_compact %}
           <div class="judge-profile-secondary d-flex">
-            {% include "peachjam/_judge_case_topics_card.html" with two_columns=True %}
+            {% include "peachjam/judge/_case_topics_card.html" with two_columns=True %}
           </div>
         {% else %}
           <div class="judge-profile-secondary row gx-4 gy-4 gy-lg-0 align-items-stretch">
             <div class="judge-profile-secondary__column {% if judge_titles %}col-lg-8{% else %}col-12{% endif %} d-flex">
-              {% include "peachjam/_judge_case_topics_card.html" %}
+              {% include "peachjam/judge/_case_topics_card.html" %}
             </div>
             {% if judge_titles %}
-              <div class="judge-profile-secondary__column col-lg-4 d-flex">{% include "peachjam/_judge_titles_card.html" %}</div>
+              <div class="judge-profile-secondary__column col-lg-4 d-flex">{% include "peachjam/judge/_titles_card.html" %}</div>
             {% endif %}
           </div>
         {% endif %}
@@ -144,7 +144,7 @@
           </div>
         </section>
         {% if judge_court_chart_is_compact and judge_titles %}
-          {% include "peachjam/_judge_titles_card.html" %}
+          {% include "peachjam/judge/_titles_card.html" %}
         {% endif %}
       </div>
     </div>

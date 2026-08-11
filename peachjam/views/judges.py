@@ -6,7 +6,7 @@ from django.contrib.admin.utils import quote
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Count, Exists, Max, Min, OuterRef, Q
+from django.db.models import Count, Max, Min, Q
 from django.db.models.functions import Substr
 from django.http import Http404, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
@@ -52,30 +52,6 @@ def judicial_title_label(title):
     return f"{title_name} ({title})" if title_name else title
 
 
-def available_judge_flynote_topics(judge_person=None):
-    """Return top-level flynote topics linked to canonical judges' judgments."""
-    if not Judgment.flynote_topics_enabled():
-        return Flynote.objects.none()
-
-    linked_judgments = JudgmentFlynote.objects.filter(
-        flynote__path__startswith=OuterRef("path"),
-        document__published=True,
-        document__bench__judge_person__isnull=False,
-    )
-    if judge_person is not None:
-        linked_judgments = linked_judgments.filter(
-            document__bench__judge_person=judge_person
-        )
-
-    return (
-        Flynote.get_root_nodes()
-        .filter(deprecated=False)
-        .annotate(has_judge_judgments=Exists(linked_judgments))
-        .filter(has_judge_judgments=True)
-        .order_by("name")
-    )
-
-
 def group_years_into_ranges(years):
     """Group available years into descending decade ranges for compact filters."""
     years = sorted({int(year) for year in years if year is not None}, reverse=True)
@@ -92,44 +68,6 @@ def group_years_into_ranges(years):
         }
         for decade in decades
     ]
-
-
-JUDGE_SURNAME_PARTICLES = {
-    "da",
-    "de",
-    "del",
-    "der",
-    "di",
-    "du",
-    "la",
-    "le",
-    "van",
-    "von",
-}
-
-
-def split_judge_display_name(name):
-    """Split a surname-first full name while preserving the complete display name."""
-    name = " ".join((name or "").split())
-    if not name:
-        return "", ""
-
-    if "," in name:
-        surname, remainder = name.split(",", 1)
-        remainder = remainder.strip()
-        return surname.strip(), f", {remainder}" if remainder else ","
-
-    parts = name.split()
-    surname_end = 1
-    while (
-        surname_end < len(parts) - 1
-        and parts[surname_end - 1].rstrip(".").casefold() in JUDGE_SURNAME_PARTICLES
-    ):
-        surname_end += 1
-
-    surname = " ".join(parts[:surname_end])
-    remainder = " ".join(parts[surname_end:])
-    return surname, f" {remainder}" if remainder else ""
 
 
 def judge_initials(name):
@@ -161,7 +99,7 @@ class JudgePublicPageMixin:
 
     @cached_property
     def available_flynote_topics(self):
-        return list(available_judge_flynote_topics(self.get_topic_judge_person()))
+        return list(JudgePerson.available_flynote_topics(self.get_topic_judge_person()))
 
     def get_topic_judge_person(self):
         return None
@@ -211,12 +149,10 @@ class JudgePublicPageMixin:
 
 
 class JudgePersonListView(JudgePublicPageMixin, ListView):
-    template_name = "peachjam/judge_list.html"
+    template_name = "peachjam/judge/list.html"
     context_object_name = "judges"
     navbar_link = "judgments"
-    # Keep the directory manageable while preserving alphabetical grouping within
-    # each page. Filter query parameters are retained by the shared paginator.
-    paginate_by = 10
+    paginate_by = 50
 
     def get_base_queryset(self):
         return (
@@ -310,9 +246,6 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         for judge in judges:
             first_letter = judge.full_name[0].upper() if judge.full_name else "#"
             judge.first_letter = first_letter
-            judge.display_surname, judge.display_name_remainder = (
-                split_judge_display_name(judge.full_name)
-            )
             judge.initials = judge_initials(judge.full_name)
 
         sort = "judgments" if self.request.GET.get("sort") == "judgments" else "name"
@@ -401,7 +334,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
 
 
 class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
-    template_name = "peachjam/judge_detail.html"
+    template_name = "peachjam/judge/detail.html"
     navbar_link = "judgments"
 
     def canonical_identity_disabled_response(self):
@@ -450,23 +383,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         self.add_titles_facet(context)
         self.add_topics_facet(context)
         self.add_year_ranges_facet(context)
-
-    def add_courts_facet(self, context):
-        courts = list(
-            self.form.filter_queryset(self.get_base_queryset(), exclude="courts")
-            .exclude(court__name__isnull=True)
-            .exclude(court__name="")
-            .order_by("court__name")
-            .values_list("court__name", flat=True)
-            .distinct()
-        )
-        if courts:
-            context["facet_data"]["courts"] = {
-                "label": gettext_lazy("Courts"),
-                "type": "checkbox",
-                "options": [(court, court) for court in courts],
-                "values": self.request.GET.getlist("courts"),
-            }
 
     def add_titles_facet(self, context):
         titles = list(
@@ -627,10 +543,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .annotate(judgment_count=Count("judgment", distinct=True))
             .order_by("-judgment__date__year")
         )
-        (
-            context["judge_display_surname"],
-            context["judge_display_name_remainder"],
-        ) = split_judge_display_name(self.judge_person.full_name)
         context["judge_initials"] = judge_initials(self.judge_person.full_name)
         context["judge_judgment_count"] = (
             bench_entries.values("judgment_id").distinct().count()

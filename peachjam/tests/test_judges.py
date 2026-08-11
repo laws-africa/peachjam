@@ -32,7 +32,7 @@ from peachjam.models import (
     Judgment,
     JudgmentFlynote,
 )
-from peachjam.views.judges import judge_initials, split_judge_display_name
+from peachjam.views.judges import judge_initials
 
 CANONICAL_JUDGE_IDENTITY_SETTINGS = {
     **settings.PEACHJAM,
@@ -50,15 +50,18 @@ CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS = {
 
 
 class JudgeParsingTests(TestCase):
-    def test_split_judge_display_name_keeps_only_surname_boldable(self):
+    def test_judge_person_display_name_parts_keep_only_surname_boldable(self):
         self.assertEqual(
             ("Kempe", ", Greg AJ"),
-            split_judge_display_name("Kempe, Greg AJ"),
+            JudgePerson(full_name="Kempe, Greg AJ").display_name_parts,
         )
-        self.assertEqual(("Kempe", " AJ"), split_judge_display_name("Kempe AJ"))
+        self.assertEqual(
+            ("Kempe", " AJ"),
+            JudgePerson(full_name="Kempe AJ").display_name_parts,
+        )
         self.assertEqual(
             ("Da Silva", " Sallie"),
-            split_judge_display_name("Da Silva Sallie"),
+            JudgePerson(full_name="Da Silva Sallie").display_name_parts,
         )
 
     def test_parse_judge_name_splits_source_name_and_title(self):
@@ -565,8 +568,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         )
 
     def judge_name_markup(self, name):
-        surname, remainder = split_judge_display_name(name)
-        return f"<strong>{surname}</strong>{remainder}"
+        judge_person = JudgePerson(full_name=name)
+        return f"<strong>{judge_person.surname}</strong>{judge_person.name_remainder}"
 
     def test_judge_initials_use_first_and_last_name(self):
         self.assertEqual("JA", judge_initials("Justice Abban"))
@@ -698,8 +701,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertContains(unpublished_detail_response, "No documents found")
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
-    def test_judge_list_paginates_ten_judges_per_page(self):
-        for index in range(10):
+    def test_judge_list_paginates_fifty_judges_per_page(self):
+        for index in range(50):
             legacy_judge = Judge.objects.create(name=f"Pagination Judge {index:02d}")
             judge_person = JudgePerson.objects.create(
                 full_name=f"Pagination Judge {index:02d}"
@@ -721,8 +724,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertTrue(response.context["is_paginated"])
-        self.assertEqual(11, response.context["judge_count"])
-        self.assertEqual(10, len(response.context["judges"]))
+        self.assertEqual(51, response.context["judge_count"])
+        self.assertEqual(50, len(response.context["judges"]))
         self.assertEqual(2, response.context["paginator"].num_pages)
 
         second_page = self.client.get(reverse("judges"), {"page": 2})

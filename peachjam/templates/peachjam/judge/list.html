@@ -30,7 +30,7 @@
             class="mb-3">
         <div class="row g-2 align-items-end">
           <div class="col-md">
-            <label for="judge-search" class="form-label fw-semibold mb-1">{% trans "Search judges" %}</label>
+            <label for="judge-search" class="form-label mb-1">{% trans "Search judges" %}</label>
             <input id="judge-search"
                    class="form-control"
                    type="search"
@@ -47,7 +47,7 @@
                    placeholder="{% trans 'Search by name' %}"/>
           </div>
           <div class="col-md-auto">
-            <label for="judge-sort" class="form-label fw-semibold mb-1">{% trans "Sort" %}</label>
+            <label for="judge-sort" class="form-label mb-1">{% trans "Sort" %}</label>
             <select id="judge-sort"
                     name="sort"
                     class="form-select"
@@ -69,7 +69,7 @@
       </form>
       <div id="judge-list-updates">
         <div class="row g-4 align-items-start">
-          {% include "peachjam/_judge_filters.html" with judge_filter_form_id="judge-list-search-form" %}
+          {% include "peachjam/judge/_filters.html" with judge_filter_form_id="judge-list-search-form" %}
           <div id="judge-list-results"
                class="col-lg-9"
                role="region"
@@ -99,7 +99,7 @@
                               <span class="user-avatar-letter user-avatar-letter--judge bg-primary fs-6 fw-bold flex-shrink-0"
                                     aria-hidden="true">{{ judge.initials }}</span>
                               <div>
-                                <a href="{{ judge.get_absolute_url }}"><strong>{{ judge.display_surname }}</strong>{{ judge.display_name_remainder }}</a>
+                                <a href="{{ judge.get_absolute_url }}"><strong>{{ judge.surname }}</strong>{{ judge.name_remainder }}</a>
                                 {% if judge.court_names %}
                                   <div class="text-muted small">
                                     {{ judge.court_names|join:", " }}
