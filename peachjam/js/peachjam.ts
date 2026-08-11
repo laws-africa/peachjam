@@ -19,6 +19,7 @@ import { csrfToken } from './api';
 import analytics, { Analytics } from './analytics';
 import { User } from './user';
 import * as Sentry from '@sentry/browser';
+import type { StackFrame } from '@sentry/browser';
 
 export interface PeachJamConfig {
   appName: string;
@@ -220,22 +221,11 @@ class PeachJam {
       ],
       beforeSend (event) {
         try {
-          // if there is no stacktrace, ignore it
-          const values = event.exception?.values;
-          if (!values?.[0]?.stacktrace) {
-            return null;
-          }
+          const frames = event.exception?.values?.[0]?.stacktrace?.frames;
 
-          const frames = values[0].stacktrace.frames;
+          if (!frames?.length) return null;
 
-          // if first frame is anonymous, don't send this event
-          // see https://github.com/getsentry/sentry-javascript/issues/3147
-          if (frames && frames.length > 0) {
-            const firstFrame = frames[0];
-            if (!firstFrame.filename || firstFrame.filename === '<anonymous>') {
-              return null;
-            }
-          }
+          return frames.some((frame) => isPeachJamFrame(frame, window.location.host)) ? event : null;
         } catch (err) {
           // ignore error, send event
           console.log(err);
@@ -461,6 +451,19 @@ class PeachJam {
       }
     });
   }
+}
+
+function isPeachJamFrame (frame: StackFrame, host: string): boolean {
+  const filename = frame.filename;
+
+  if (!filename || filename === '<anonymous>') return false;
+  if (filename.indexOf('/node_modules/@sentry/') !== -1) return false;
+  if (filename.indexOf('/static/lib/pdfjs/') !== -1) return false;
+
+  if (filename.indexOf(`${host}/static/`) !== -1) return true;
+
+  return filename.indexOf('/peachjam/js/') !== -1 ||
+    filename.indexOf('peach-jam/./peachjam/js/') !== -1;
 }
 
 const peachJam = new PeachJam();
