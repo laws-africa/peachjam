@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
   pull-requests: write
   statuses: write
 
@@ -16,24 +17,90 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Build a dependency-only image before the test matrix. The image contains
+  # slow-to-install system tools and Python/Node dependencies, but never the
+  # application source. Lint does not depend on this job and runs in parallel.
+  build-ci-base:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image: ${{ steps.image.outputs.ref }}
+    steps:
+      - uses: actions/checkout@v7
+      # This immutable tag changes only when an input copied into
+      # Dockerfile.ci-base changes. Source-only pull requests reuse its image.
+      - name: Set image reference
+        id: image
+        run: |
+          dependency_hash=$(
+            {
+              shasum -a 256 Dockerfile.ci-base pyproject.toml package.json package-lock.json
+              find bin -type f -print | LC_ALL=C sort | xargs shasum -a 256
+            } | shasum -a 256 | cut -d ' ' -f 1
+          )
+          echo "ref=ghcr.io/${GITHUB_REPOSITORY_OWNER}/peachjam-ci-base:deps-${dependency_hash}" >> "$GITHUB_OUTPUT"
+          echo "cache=ghcr.io/${GITHUB_REPOSITORY_OWNER}/peachjam-ci-base:cache" >> "$GITHUB_OUTPUT"
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check for existing CI base image
+        id: image-cache
+        run: |
+          if docker manifest inspect "${{ steps.image.outputs.ref }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Build and publish CI base image
+        if: steps.image-cache.outputs.exists != 'true'
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: Dockerfile.ci-base
+          push: true
+          tags: |
+            ${{ steps.image.outputs.ref }}
+            ${{ steps.image.outputs.cache }}
+          labels: org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          # The mutable cache tag lets a new dependency hash reuse earlier
+          # Docker layers, including the LibreOffice and other APT layers.
+          cache-from: type=registry,ref=${{ steps.image.outputs.cache }}
+          cache-to: type=inline
+
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
+      - name: Cache pre-commit environments
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-python-3.12-${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Install lint deps
         run: |
           python -m pip install --upgrade "setuptools<82" wheel
-          pip install .[dev]
+          pip install "pre-commit>=2.17.0"
       - name: Run pre-commit
         run: pre-commit run --all-files
 
   test:
-    needs: lint
+    needs: build-ci-base
     runs-on: ubuntu-latest
+    # Each matrix job pulls the same dependency image. Postgres is a sibling
+    # service container, so it is available as hostname "postgres" below.
+    container:
+      image: ${{ needs.build-ci-base.outputs.image }}
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     strategy:
       matrix:
         app: [peachjam, liiweb]
@@ -42,42 +109,24 @@ jobs:
         image: pgvector/pgvector:pg17
         env:
           POSTGRES_PASSWORD: postgres
-        ports:
-          - 5432:5432
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 3
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-          cache: pip
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-      - name: Cache apt packages
-        uses: awalsh128/cache-apt-pkgs-action@v1.6.0
-        with:
-          packages: libreoffice poppler-utils pandoc
-          version: test-apt-v1
-          execute_install_scripts: true
-      - name: Install libreoffice
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libreoffice
-      - name: Install deps
-        run: |
-          python -m pip install --upgrade "setuptools<82" wheel
-          pip install .[dev]
-          pip install psycopg[binary]==3.2.12 unittest-xml-reporting
-          npm ci --no-audit --ignore-scripts --only=prod
-          npm i -g sass
+      - uses: actions/checkout@v7
+      # The checkout is mounted into the container with runner ownership.
+      # setuptools-scm reads Git metadata while creating the editable install.
+      - name: Mark checkout as safe for Git
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      # The image intentionally excludes application source. This editable, no-dependency install ensures tests run
+      # the pull request's code, using dependencies from the pre-built image.
+      - name: Install checked-out source
+        run: pip install --no-deps -e .
       - name: Run tests
         env:
-          DATABASE_URL: postgres://postgres:postgres@localhost:5432/peach-jam
+          DATABASE_URL: postgres://postgres:postgres@postgres:5432/peach-jam
           TEST_RUNNER: xmlrunner.extra.djangotestrunner.XMLTestRunner
         run: |
           coverage run manage.py test peachjam_subs peachjam_search ${{ matrix.app }} --settings=${{ matrix.app }}.settings

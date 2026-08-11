@@ -1,0 +1,49 @@
+FROM ubuntu:24.04
+
+ENV PYTHONUNBUFFERED=1
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Keep this aligned with the system tooling in Dockerfile. These packages change
+# far less frequently than the application dependencies installed below.
+RUN apt-get update && apt-get install -y \
+    libreoffice poppler-utils pandoc
+
+# NodeJS 24.x
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_24.x | bash - \
+    && apt-get install -y nodejs
+
+# Python 3.12 and build dependencies. "file" is required by python-magic.
+RUN apt-get install -y --no-install-recommends \
+    python3.12 python3.12-venv python3.12-dev \
+    git ca-certificates build-essential file \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN python3.12 -m venv /opt/venv
+ENV VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+RUN python -m pip install --upgrade pip "setuptools<82" wheel
+
+WORKDIR /app
+
+# install sass for compiling assets during tests
+RUN npm i -g sass
+
+# Keep runtime Node dependencies available to test commands without copying the
+# application source into the base image.
+COPY package*.json /app/
+RUN npm ci --no-audit --ignore-scripts --only=prod
+ENV NODE_PATH=/app/node_modules/
+
+# Copy only Python dependency inputs, so source-only changes reuse this layer.
+# Keeping it last also means a pyproject.toml change does not reinstall Node
+# packages. Remove Peachjam itself afterwards: core tests install their checkout
+# editable, and other packages install the commit pinned in their pyproject.
+COPY pyproject.toml /app/
+COPY bin /app/bin
+RUN pip install ".[ml,dev]" \
+    && pip uninstall --yes peachjam

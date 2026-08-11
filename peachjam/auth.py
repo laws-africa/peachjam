@@ -77,6 +77,11 @@ def get_or_create_all_users_permission_group():
         return None
 
 
+def create_all_users_permission_group_after_migrate(**kwargs):
+    """Create the group only after the auth tables have been migrated."""
+    get_or_create_all_users_permission_group()
+
+
 class AllUsersPermissionBackend(BaseBackend):
     """Grant a configured baseline group of permissions to every user."""
 

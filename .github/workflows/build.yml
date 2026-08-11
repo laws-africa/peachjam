@@ -16,12 +16,12 @@ jobs:
     # avoid circular build commits
     if: ${{ !contains(github.event.head_commit.message, 'nobuild') }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           # use a token that has admin perms to bypass direct commits to master
           token: ${{ secrets.LA_ACTIONS_TOKEN }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v7
         with:
           node-version: '24'
 

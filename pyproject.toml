@@ -106,6 +106,8 @@ dev = [
     "django-debug-toolbar>=4.4,<7.0",
     "django-webtest>=1.9.11",
     "pre-commit>=2.17.0",
+    "psycopg[binary]==3.2.12",
+    "unittest-xml-reporting",
 ]
 # necessary for using peachjam_search ML classifiers
 # NOTE: if these change, update Dockerfile as well
