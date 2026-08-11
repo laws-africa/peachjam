@@ -10,6 +10,7 @@ from django.contrib.auth.models import Permission, User
 from django.core.cache import caches
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
+from django.template.loader import render_to_string
 from django.test import TestCase, override_settings
 from django.urls import include, path, reverse
 from languages_plus.models import Language
@@ -727,6 +728,35 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, pdf_content)
+
+    def test_pdf_document_content_includes_source_file_start_page(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Gazette instrument",
+        )
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"pdf", name="gazette.pdf"),
+            mimetype="application/pdf",
+            start_page=36,
+        )
+        context = {
+            "display_type": "pdf",
+            "document": doc,
+            "document_diffs_url": "",
+            "show_sidebar": False,
+        }
+
+        content = render_to_string("peachjam/_document_content.html", context)
+        self.assertIn('data-pdf-start-page="36"', content)
+
+        source_file.start_page = None
+        source_file.save()
+        content = render_to_string("peachjam/_document_content.html", context)
+        self.assertNotIn("data-pdf-start-page", content)
 
     def test_document_debug_external_links(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"

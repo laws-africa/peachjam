@@ -8,6 +8,7 @@ import re
 import magic
 from django.contrib.staticfiles.finders import find as find_static
 from django.core.files import File
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -114,6 +115,13 @@ class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
     )
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
+    )
+    start_page = models.PositiveIntegerField(
+        _("start page"),
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
+        help_text=_("The page in the source PDF where this document starts."),
     )
     file_as_pdf = models.FileField(
         _("file as pdf"),

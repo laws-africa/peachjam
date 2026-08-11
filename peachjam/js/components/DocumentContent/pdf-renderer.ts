@@ -119,14 +119,7 @@ class PdfRenderer {
 
   loadPdf () {
     // should we jump to a specific page?
-    let initialPage = null;
-    if ((document.location.hash || '').startsWith('#page-')) {
-      try {
-        initialPage = parseInt(document.location.hash.substring(6));
-      } catch {
-        // An invalid page hash should not prevent the document from loading.
-      }
-    }
+    const initialPage = this.getInitialPage();
 
     this.root.removeAttribute('data-large-pdf');
     this.setupPdfAndPreviewPanels(initialPage).then(() => {
@@ -135,6 +128,20 @@ class PdfRenderer {
     }).catch((e:ErrorEvent) => {
       throw e;
     });
+  }
+
+  getInitialPage () {
+    const hash = document.location.hash || '';
+    const hashPage = hash.startsWith('#page-')
+      ? this.parsePageNumber(hash.substring(6))
+      : null;
+    return hashPage || this.parsePageNumber(this.root.dataset.pdfStartPage);
+  }
+
+  parsePageNumber (value: string | undefined) {
+    if (!value || !/^[1-9]\d*$/.test(value)) return null;
+    const page = Number(value);
+    return Number.isSafeInteger(page) ? page : null;
   }
 
   updateDownloadProgress (loaded: number, total: number) {
