@@ -13,6 +13,8 @@ from django.template.loader import render_to_string
 from django.test import RequestFactory, SimpleTestCase, TestCase, override_settings
 from django.urls import URLResolver, clear_url_caches, reverse
 from django.urls.resolvers import RoutePattern
+from django.utils import timezone
+from languages_plus.models import Language
 
 from peachjam.auth import (
     _patched_finish,
@@ -20,6 +22,7 @@ from peachjam.auth import (
     create_all_users_permission_group_after_migrate,
     get_or_create_all_users_permission_group,
 )
+from peachjam.models import OnboardingIntent, PracticeType
 
 
 class PatchedFinishTests(TestCase):
@@ -282,6 +285,12 @@ class CompleteProfileViewTests(TestCase):
         self.user.first_name = ""
         self.user.last_name = ""
         self.user.save()
+        self.profile = self.user.userprofile
+        self.profile.onboarding_completed_at = None
+        self.profile.onboarding_skipped_at = None
+        self.profile.save()
+        self.intent = OnboardingIntent.objects.get(label="Research case law")
+        self.practice_type = PracticeType.objects.get(label="Sole practitioner")
 
     def _login(self):
         self.client.force_login(self.user)
@@ -291,48 +300,116 @@ class CompleteProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("accounts", response["Location"])
 
-    def test_shows_form_when_no_first_name(self):
+    def test_shows_form_when_onboarding_incomplete(self):
         self._login()
         response = self.client.get(reverse("account_onboard"))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "first_name")
+        self.assertContains(response, "What are you hoping to do today?")
 
-    def test_redirects_when_first_name_already_set(self):
-        self.user.first_name = "Jane"
-        self.user.save()
+    def test_redirects_when_onboarding_already_completed(self):
+        self.profile.onboarding_completed_at = timezone.now()
+        self.profile.save()
         self._login()
         response = self.client.get(reverse("account_onboard"))
         self.assertEqual(response.status_code, 302)
 
-    def test_submit_saves_name(self):
+    def test_get_does_not_complete_or_skip_onboarding(self):
+        self._login()
+        self.client.get(reverse("account_onboard"))
+        self.profile.refresh_from_db()
+        self.assertIsNone(self.profile.onboarding_completed_at)
+        self.assertIsNone(self.profile.onboarding_skipped_at)
+
+    def test_submit_saves_answers(self):
         self._login()
         response = self.client.post(
             reverse("account_onboard"),
-            data={"first_name": "Jane", "last_name": "Doe"},
+            data={
+                "onboarding_intent": self.intent.pk,
+                "practice_type": self.practice_type.pk,
+                "action": "save",
+            },
         )
         self.assertEqual(response.status_code, 302)
-        self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, "Jane")
-        self.assertEqual(self.user.last_name, "Doe")
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.onboarding_intent, self.intent)
+        self.assertEqual(self.profile.practice_type, self.practice_type)
+        self.assertIsNotNone(self.profile.onboarding_completed_at)
+
+    def test_submit_can_save_one_answer(self):
+        self._login()
+        response = self.client.post(
+            reverse("account_onboard"),
+            data={
+                "onboarding_intent": self.intent.pk,
+                "practice_type": "",
+                "action": "save",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertEqual(self.profile.onboarding_intent, self.intent)
+        self.assertIsNone(self.profile.practice_type)
+        self.assertIsNotNone(self.profile.onboarding_completed_at)
+
+    def test_submit_can_skip_without_answers(self):
+        self._login()
+        response = self.client.post(
+            reverse("account_onboard"),
+            data={"onboarding_intent": "", "practice_type": "", "action": "skip"},
+        )
+        self.assertEqual(response.status_code, 302)
+        self.profile.refresh_from_db()
+        self.assertIsNone(self.profile.onboarding_completed_at)
+        self.assertIsNotNone(self.profile.onboarding_skipped_at)
 
     def test_submit_preserves_next_url(self):
         self._login()
         next_url = reverse("home_page")
         response = self.client.post(
             reverse("account_onboard") + f"?next={next_url}",
-            data={"first_name": "Jane", "last_name": "Doe", "next": next_url},
+            data={
+                "onboarding_intent": self.intent.pk,
+                "practice_type": self.practice_type.pk,
+                "next": next_url,
+                "action": "save",
+            },
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], next_url)
 
-    def test_submit_requires_first_name(self):
+    def test_submit_requires_at_least_one_answer_when_saving(self):
         self._login()
         response = self.client.post(
             reverse("account_onboard"),
-            data={"first_name": "", "last_name": "Doe"},
+            data={"onboarding_intent": "", "practice_type": "", "action": "save"},
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].errors)
+
+    def test_existing_users_can_update_onboarding_fields_from_profile(self):
+        self.profile.onboarding_completed_at = timezone.now()
+        self.profile.save()
+        language = Language.objects.get(iso_639_1="en")
+        self._login()
+
+        response = self.client.post(
+            reverse("edit_account"),
+            data={
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "preferred_language": language.pk,
+                "onboarding_intent": self.intent.pk,
+                "practice_type": self.practice_type.pk,
+            },
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.profile.refresh_from_db()
+        self.assertEqual(self.user.first_name, "Jane")
+        self.assertEqual(self.profile.onboarding_intent, self.intent)
+        self.assertEqual(self.profile.practice_type, self.practice_type)
 
 
 class UserAuthViewTests(TestCase):

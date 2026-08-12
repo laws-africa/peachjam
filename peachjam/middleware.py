@@ -238,6 +238,91 @@ class TermsAcceptanceMiddleware:
         return redirect(accept_url)
 
 
+class OnboardingMiddleware:
+    """Prompt authenticated users to complete profile onboarding."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.exempt_url_names = {
+            "account_accept_terms",
+            "account_login",
+            "account_logout",
+            "account_signup",
+            "account_onboard",
+            "account_reset_password",
+            "account_reset_password_done",
+            "account_reset_password_from_key",
+            "account_reset_password_from_key_done",
+            "account_change_password",
+            "account_change_password_done",
+            "csrf_token",
+        }
+        self.exempt_namespaces = {"socialaccount"}
+        self.exempt_prefixes = tuple(
+            prefix
+            for prefix in (
+                getattr(settings, "STATIC_URL", None),
+                "/favicon.ico",
+                "/robots.txt",
+                "/admin/",
+                "/api/",
+            )
+            if prefix
+        )
+
+    def __call__(self, request):
+        if self.should_redirect(request):
+            return self.redirect(request)
+        return self.get_response(request)
+
+    def should_redirect(self, request):
+        user = getattr(request, "user", None)
+        if not user or not user.is_authenticated:
+            return False
+
+        if request.method == "OPTIONS":
+            return False
+
+        if self.is_exempt(request):
+            return False
+
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+        return profile.requires_onboarding()
+
+    def is_exempt(self, request):
+        path = request.path
+
+        if request.headers.get("HX-Request") == "true":
+            return True
+
+        for prefix in self.exempt_prefixes:
+            if path.startswith(prefix):
+                return True
+
+        try:
+            match = resolve(path)
+        except Resolver404:
+            return False
+
+        if match.url_name in self.exempt_url_names:
+            return True
+
+        if match.namespace and match.namespace.split(":")[0] in self.exempt_namespaces:
+            return True
+
+        return False
+
+    def redirect(self, request):
+        onboard_url = reverse("account_onboard")
+        next_url = request.get_full_path()
+        if next_url == onboard_url:
+            return redirect(onboard_url)
+
+        if next_url:
+            onboard_url = f"{onboard_url}?{urlencode({'next': next_url})}"
+        return redirect(onboard_url)
+
+
 class SentrySamplingMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response

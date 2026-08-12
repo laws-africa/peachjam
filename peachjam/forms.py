@@ -17,6 +17,7 @@ from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
@@ -32,6 +33,8 @@ from peachjam.models import (
     Folder,
     JudgeAlias,
     JudgePerson,
+    OnboardingIntent,
+    PracticeType,
     PublicationFile,
     Ratification,
     SavedDocument,
@@ -945,29 +948,100 @@ class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
         return cleaned
 
 
+class OnboardingProfileForm(forms.Form):
+    onboarding_intent = forms.ModelChoiceField(
+        label=_("What are you hoping to do today?"),
+        queryset=OnboardingIntent.objects.none(),
+        required=False,
+        empty_label=_("Select an option"),
+    )
+    practice_type = forms.ModelChoiceField(
+        label=_("What best describes your practice?"),
+        queryset=PracticeType.objects.none(),
+        required=False,
+        empty_label=_("Select an option"),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        super().__init__(*args, **kwargs)
+        profile = self.user.userprofile
+        self.fields["onboarding_intent"].queryset = OnboardingIntent.objects.filter(
+            Q(active=True) | Q(pk=getattr(profile.onboarding_intent, "pk", None))
+        )
+        self.fields["practice_type"].queryset = PracticeType.objects.filter(
+            Q(active=True) | Q(pk=getattr(profile.practice_type, "pk", None))
+        )
+        self.initial.update(
+            {
+                "onboarding_intent": profile.onboarding_intent,
+                "practice_type": profile.practice_type,
+            }
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if self.data.get("action") != "skip" and not any(cleaned_data.values()):
+            raise ValidationError(_("Please answer at least one question or skip."))
+        return cleaned_data
+
+    def save(self, skipped=False):
+        profile = self.user.userprofile
+        profile.onboarding_intent = self.cleaned_data["onboarding_intent"]
+        profile.practice_type = self.cleaned_data["practice_type"]
+        if skipped:
+            profile.onboarding_skipped_at = timezone.now()
+        else:
+            profile.onboarding_completed_at = timezone.now()
+        profile.save()
+        return profile
+
+
 class UserProfileForm(forms.Form):
     first_name = forms.CharField(max_length=255, required=False)
     last_name = forms.CharField(max_length=255, required=False)
     preferred_language = forms.ModelChoiceField(
         queryset=Language.objects.filter(iso_639_1__in=get_languages())
     )
+    onboarding_intent = forms.ModelChoiceField(
+        label=_("What are you hoping to do today?"),
+        queryset=OnboardingIntent.objects.none(),
+        required=False,
+        empty_label=_("Select an option"),
+    )
+    practice_type = forms.ModelChoiceField(
+        label=_("What best describes your practice?"),
+        queryset=PracticeType.objects.none(),
+        required=False,
+        empty_label=_("Select an option"),
+    )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
+        profile = self.user.userprofile
         kwargs["initial"] = {
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
-            "preferred_language": self.user.userprofile.preferred_language,
+            "preferred_language": profile.preferred_language,
+            "onboarding_intent": profile.onboarding_intent,
+            "practice_type": profile.practice_type,
         }
         super().__init__(*args, **kwargs)
+        self.fields["onboarding_intent"].queryset = OnboardingIntent.objects.filter(
+            Q(active=True) | Q(pk=getattr(profile.onboarding_intent, "pk", None))
+        )
+        self.fields["practice_type"].queryset = PracticeType.objects.filter(
+            Q(active=True) | Q(pk=getattr(profile.practice_type, "pk", None))
+        )
 
     def save(self):
         self.user.first_name = self.cleaned_data["first_name"]
         self.user.last_name = self.cleaned_data["last_name"]
-        self.user.userprofile.preferred_language = self.cleaned_data[
-            "preferred_language"
-        ]
-        self.user.userprofile.save()
+        profile = self.user.userprofile
+        profile.preferred_language = self.cleaned_data["preferred_language"]
+        profile.onboarding_intent = self.cleaned_data["onboarding_intent"]
+        profile.practice_type = self.cleaned_data["practice_type"]
+        profile.save()
         self.user.save()
         self.user.refresh_from_db()
         return self.user

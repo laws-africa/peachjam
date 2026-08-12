@@ -23,6 +23,18 @@
               {{ user.userprofile.preferred_language }}
             </dd>
             <dt class="col-4 col-md-2">
+              {% trans "Intent" %}
+            </dt>
+            <dd class="col-8 col-md-10">
+              {{ user.userprofile.onboarding_intent|default:"-" }}
+            </dd>
+            <dt class="col-4 col-md-2">
+              {% trans "Practice" %}
+            </dt>
+            <dd class="col-8 col-md-10">
+              {{ user.userprofile.practice_type|default:"-" }}
+            </dd>
+            <dt class="col-4 col-md-2">
               {% trans "Password" %}
             </dt>
             <dd class="col-8 col-md-10">
@@ -54,13 +66,13 @@
           <a href="{% url 'edit_account' %}" class="d-block mb-3">{% trans "Update details" %}</a>
         {% endblock %}
         {% block account-content-third-party %}
-          <hr class="my-5"/>
+          <hr class="my-5" />
           <h3>{% trans "Log in with social accounts" %}</h3>
           <p>{% trans "Manage the accounts you can use to log in to this account." %}</p>
           <a href="{% url 'socialaccount_connections' %}">{% trans "Manage social accounts" %}</a>
         {% endblock %}
         {% block account-document-access-groups %}
-          <hr class="my-5"/>
+          <hr class="my-5" />
           <h3>{% trans 'Document access groups' %}</h3>
           <p>
             {% blocktrans trimmed %}
@@ -80,7 +92,7 @@
           </div>
         {% endblock %}
         {% block account-content-delete %}
-          <hr class="my-5"/>
+          <hr class="my-5" />
           <h3>{% trans "Delete account" %}</h3>
           <p>{% trans "Permanently delete your account and remove your personal information." %}</p>
           <a href="{% url 'delete_account' %}" class="btn btn-danger mb-3">{% trans "Delete account" %}</a>

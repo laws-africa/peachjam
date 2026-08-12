@@ -51,6 +51,32 @@
               </div>
             {% endif %}
           </div>
+          <div class="col mb-3">
+            <label class="form-label" for="{{ form.onboarding_intent.id_for_label }}">{{ form.onboarding_intent.label }}</label>
+            <select class="form-select"
+                    name="{{ form.onboarding_intent.name }}"
+                    id="{{ form.onboarding_intent.id_for_label }}">
+              {% for opt in form.onboarding_intent %}{{ opt }}{% endfor %}
+            </select>
+            {% if form.onboarding_intent.errors %}
+              <div class="text-danger">
+                {% for error in form.onboarding_intent.errors %}<p>{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="col mb-3">
+            <label class="form-label" for="{{ form.practice_type.id_for_label }}">{{ form.practice_type.label }}</label>
+            <select class="form-select"
+                    name="{{ form.practice_type.name }}"
+                    id="{{ form.practice_type.id_for_label }}">
+              {% for opt in form.practice_type %}{{ opt }}{% endfor %}
+            </select>
+            {% if form.practice_type.errors %}
+              <div class="text-danger">
+                {% for error in form.practice_type.errors %}<p>{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
         </div>
         <button type="submit" class="btn btn-primary">{% trans "Update" %}</button>
       </form>

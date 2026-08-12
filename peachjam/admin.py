@@ -112,10 +112,12 @@ from peachjam.models import (
     Locality,
     LowerBench,
     MatterType,
+    OnboardingIntent,
     Outcome,
     Partner,
     PartnerLogo,
     PeachJamSettings,
+    PracticeType,
     Predicate,
     ProvisionEnrichment,
     PublicationFile,
@@ -2302,7 +2304,34 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "user",
+        "onboarding_intent",
+        "practice_type",
+        "onboarding_completed_at",
+        "onboarding_skipped_at",
+    )
+    list_filter = (
+        "onboarding_intent",
+        "practice_type",
+        "onboarding_completed_at",
+        "onboarding_skipped_at",
+    )
+    search_fields = (
+        "user__username",
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+    )
+
+
+@admin.register(OnboardingIntent, PracticeType)
+class OnboardingOptionAdmin(admin.ModelAdmin):
+    list_display = ("label", "order", "active")
+    list_editable = ("order", "active")
+    list_filter = ("active",)
+    ordering = ("order", "label")
+    search_fields = ("label",)
 
 
 class RelationshipInline(admin.TabularInline):

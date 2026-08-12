@@ -5,22 +5,27 @@
 {% endblock %}
 {% block content %}
   <div class="text-center mb-4">
-    <h2>{% trans 'Welcome' %}</h2>
-    <p>{% trans 'Please tell us a bit about yourself to get started.' %}</p>
+    <h1 id="main-page-heading">{% trans 'Welcome' %}</h1>
+    <p>{% trans 'Answer two quick questions to help us tailor your experience.' %}</p>
   </div>
   <form method="post">
     {% csrf_token %}
     {{ redirect_field }}
-    {% for field in form %}
+    {% if next %}<input type="hidden" name="next" value="{{ next }}" />{% endif %}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger" role="alert">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
+    {% for field in form.visible_fields %}
       <div class="mb-3">
         <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        <input type="text"
-               class="form-control py-2 px-3 fs-6{% if field.errors %} is-invalid{% endif %}"
-               name="{{ field.name }}"
-               id="{{ field.id_for_label }}"
-               value="{{ field.value|default:'' }}"
-               maxlength="150"
-               {% if forloop.first %}autofocus required{% endif %}/>
+        <select class="form-select{% if field.errors %} is-invalid{% endif %}"
+                name="{{ field.name }}"
+                id="{{ field.id_for_label }}"
+                {% if forloop.first %}autofocus{% endif %}>
+          {% for option in field %}{{ option }}{% endfor %}
+        </select>
         {% if field.errors %}
           <div class="invalid-feedback">
             {% for error in field.errors %}{{ error }}{% endfor %}
@@ -28,8 +33,9 @@
         {% endif %}
       </div>
     {% endfor %}
-    <div class="d-grid">
-      <button class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
+    <div class="d-grid gap-2">
+      <button class="btn btn-primary" type="submit" name="action" value="save">{% trans 'Save and continue' %}</button>
+      <button class="btn btn-secondary" type="submit" name="action" value="skip">{% trans 'Skip' %}</button>
     </div>
   </form>
 {% endblock %}
