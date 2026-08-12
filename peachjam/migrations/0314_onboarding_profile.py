@@ -42,7 +42,7 @@ def unseed_onboarding_options(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0312_merge_20260811_1345"),
+        ("peachjam", "0313_mark_external_citation_links_manual"),
     ]
 
     operations = [
