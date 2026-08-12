@@ -1,7 +1,7 @@
 from datetime import date, timedelta
 from decimal import Decimal
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import ValidationError
@@ -323,6 +323,34 @@ class SubscriptionTests(TestCase):
         sub1.activate()
         self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
         self.assertIsNotNone(sub1.active_at)
+
+    @patch("peachjam_subs.signals.get_customerio")
+    def test_closing_activated_subscription_tracks_customerio_event(
+        self, mock_get_customerio
+    ):
+        customerio = MagicMock()
+        mock_get_customerio.return_value = customerio
+
+        self.subscription.close()
+
+        customerio.track_subscription_closed.assert_called_once_with(self.subscription)
+
+    @patch("peachjam_subs.signals.get_customerio")
+    def test_closing_unactivated_subscription_does_not_track_customerio_event(
+        self, mock_get_customerio
+    ):
+        customerio = MagicMock()
+        mock_get_customerio.return_value = customerio
+        subscription = Subscription.objects.create(
+            user=self.user,
+            product_offering=self.product_offering,
+            status=Subscription.Status.PENDING,
+        )
+
+        subscription.close()
+
+        mock_get_customerio.assert_not_called()
+        customerio.track_subscription_closed.assert_not_called()
 
     def test_replace_user_subscription_creates_deferred_replacement(self):
         pending = Subscription.objects.create(
