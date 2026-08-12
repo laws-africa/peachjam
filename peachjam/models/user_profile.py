@@ -1,6 +1,7 @@
 import hashlib
 import os
 import uuid
+from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialToken
@@ -112,8 +113,12 @@ class UserProfile(models.Model):
     def tracking_id_str(self):
         return str(self.tracking_id)
 
-    def requires_onboarding(self):
-        return not self.onboarding_completed_at and not self.onboarding_skipped_at
+    def should_show_onboarding(self):
+        if self.onboarding_completed_at:
+            return False
+        if not self.onboarding_skipped_at:
+            return True
+        return self.onboarding_skipped_at <= timezone.now() - timedelta(days=7)
 
     def is_primary_email_verified(self):
         return self.user.emailaddress_set.filter(

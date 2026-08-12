@@ -33,9 +33,19 @@
         {% endif %}
       </div>
     {% endfor %}
-    <div class="d-grid gap-2">
-      <button class="btn btn-primary" type="submit" name="action" value="save">{% trans 'Save and continue' %}</button>
-      <button class="btn btn-secondary" type="submit" name="action" value="skip">{% trans 'Skip' %}</button>
+    <div class="row g-2">
+      <div class="col-6">
+        <button class="btn btn-secondary w-100"
+                type="submit"
+                name="action"
+                value="skip">{% trans 'Skip' %}</button>
+      </div>
+      <div class="col-6">
+        <button class="btn btn-primary w-100"
+                type="submit"
+                name="action"
+                value="save">{% trans 'Save and continue' %}</button>
+      </div>
     </div>
   </form>
 {% endblock %}

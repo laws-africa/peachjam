@@ -287,7 +287,7 @@ class OnboardingMiddleware:
             return False
 
         profile, _ = UserProfile.objects.get_or_create(user=user)
-        return profile.requires_onboarding()
+        return profile.should_show_onboarding()
 
     def is_exempt(self, request):
         path = request.path

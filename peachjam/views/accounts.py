@@ -68,7 +68,7 @@ class UserAuthView(AllauthConfirmLoginCodeView):
 
     def user_requires_onboarding(self, user):
         profile, _ = UserProfile.objects.get_or_create(user=user)
-        return profile.requires_onboarding()
+        return profile.should_show_onboarding()
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action")
@@ -158,7 +158,7 @@ class OnboardView(NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormVi
 
     def onboarding_is_complete(self):
         profile = getattr(self.request.user, "userprofile", None)
-        return profile and not profile.requires_onboarding()
+        return profile and not profile.should_show_onboarding()
 
     def clean_next_url(self, default=None, allow_default=True):
         next_url = self.request.POST.get("next") or self.request.GET.get("next")

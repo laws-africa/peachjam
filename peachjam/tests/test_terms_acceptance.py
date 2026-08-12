@@ -1,3 +1,4 @@
+from datetime import timedelta
 from urllib.parse import parse_qs, urlparse
 
 from allauth.socialaccount.models import SocialAccount
@@ -116,6 +117,18 @@ class OnboardingMiddlewareTests(TestCase):
         response = self.client.get(reverse("about"))
 
         self.assertEqual(response.status_code, 200)
+
+    def test_skipped_users_are_redirected_after_cooldown(self):
+        self.profile.onboarding_skipped_at = timezone.now() - timedelta(days=8)
+        self.profile.save()
+        self._login()
+
+        response = self.client.get(reverse("about"))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            urlparse(response["Location"]).path, reverse("account_onboard")
+        )
 
     def test_completed_users_are_not_redirected_after_skip_timestamp(self):
         self.profile.onboarding_completed_at = timezone.now()
