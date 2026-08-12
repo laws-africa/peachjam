@@ -4719,3 +4719,63 @@ msgstr "document contenant des dispositions similaires"
 #: views/legislation.py:930
 msgid "documents with similar provisions"
 msgstr "documents comportant des dispositions similaires"
+
+#: forms.py:919
+msgid "What are you hoping to do today?"
+msgstr ""
+
+#: forms.py:925
+msgid "What best describes your practice?"
+msgstr ""
+
+#: forms.py:951
+msgid "Please answer at least one question or skip."
+msgstr ""
+
+#: models/user_profile.py:44 models/user_profile.py:85
+msgid "onboarding intent"
+msgstr ""
+
+#: models/user_profile.py:45
+msgid "onboarding intents"
+msgstr ""
+
+#: models/user_profile.py:50 models/user_profile.py:92
+msgid "practice type"
+msgstr ""
+
+#: models/user_profile.py:51
+msgid "practice types"
+msgstr ""
+
+#: models/user_profile.py:98
+msgid "onboarding completed at"
+msgstr ""
+
+#: models/user_profile.py:103
+msgid "onboarding skipped at"
+msgstr ""
+
+#: templates/account/onboard.html:9
+msgid "Answer two quick questions to help us tailor your experience."
+msgstr ""
+
+#: templates/account/onboard.html:40
+msgid "Skip"
+msgstr ""
+
+#: templates/account/onboard.html:46
+msgid "Save and continue"
+msgstr ""
+
+#: templates/user_account/home.html:25
+msgid "Intent"
+msgstr ""
+
+#: templates/user_account/home.html:31
+msgid "Practice"
+msgstr ""
+
+#: forms.py:922 forms.py:928 forms.py:978 forms.py:984
+msgid "Select an option"
+msgstr ""
