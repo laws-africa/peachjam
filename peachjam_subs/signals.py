@@ -38,11 +38,10 @@ def feature_saved(sender, instance, **kwargs):
 @receiver(post_transition, sender=Subscription)
 def subscription_changed(sender, instance, target, field, **kwargs):
     if field.name == "status":
-        cio = get_customerio()
         if target == Subscription.Status.ACTIVE:
-            cio.track_subscription_activated(instance)
-        elif target == Subscription.Status.CLOSED:
-            cio.track_subscription_closed(instance)
+            get_customerio().track_subscription_activated(instance)
+        elif target == Subscription.Status.CLOSED and instance.active_at:
+            get_customerio().track_subscription_closed(instance)
 
 
 User = get_user_model()
