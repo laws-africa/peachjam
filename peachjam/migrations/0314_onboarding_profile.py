@@ -10,7 +10,7 @@ def seed_onboarding_options(apps, schema_editor):
             "Research case law",
             "Research legislation",
             "Track legal updates",
-            "AI legal research",
+            "Use AI-assisted legal research",
             "Just exploring",
         ],
         "PracticeType": [
