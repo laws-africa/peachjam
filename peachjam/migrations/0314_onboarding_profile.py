@@ -18,7 +18,7 @@ def seed_onboarding_options(apps, schema_editor):
             "Sole practitioner",
             "Law firm (2–5 lawyers)",
             "6+ lawyer firm",
-            "Government",
+            "Government or public sector",
             "Corporate legal department",
             "Other",
         ],
