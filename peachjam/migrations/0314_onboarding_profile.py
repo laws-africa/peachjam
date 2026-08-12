@@ -16,7 +16,7 @@ def seed_onboarding_options(apps, schema_editor):
         "PracticeType": [
             "Student",
             "Sole practitioner",
-            "2-5 lawyer firm",
+            "Law firm (2–5 lawyers)",
             "6+ lawyer firm",
             "Government",
             "Corporate legal department",
