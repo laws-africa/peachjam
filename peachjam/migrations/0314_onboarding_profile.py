@@ -26,17 +26,9 @@ def seed_onboarding_options(apps, schema_editor):
 
     for model_name, labels in options.items():
         model = apps.get_model("peachjam", model_name)
-        for order, label in enumerate(labels):
-            model.objects.get_or_create(
-                label=label,
-                defaults={"order": order, "active": True},
-            )
-
-
-def unseed_onboarding_options(apps, schema_editor):
-    for model_name in ("OnboardingIntent", "PracticeType"):
-        model = apps.get_model("peachjam", model_name)
-        model.objects.all().delete()
+        model.objects.bulk_create(
+            [model(label=label, order=order) for order, label in enumerate(labels)]
+        )
 
 
 class Migration(migrations.Migration):
@@ -136,5 +128,5 @@ class Migration(migrations.Migration):
                 verbose_name="practice type",
             ),
         ),
-        migrations.RunPython(seed_onboarding_options, unseed_onboarding_options),
+        migrations.RunPython(seed_onboarding_options, migrations.RunPython.noop),
     ]

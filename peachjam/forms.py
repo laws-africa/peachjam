@@ -990,9 +990,11 @@ class OnboardingProfileForm(forms.Form):
         profile.onboarding_intent = self.cleaned_data["onboarding_intent"]
         profile.practice_type = self.cleaned_data["practice_type"]
         if skipped:
+            profile.onboarding_completed_at = None
             profile.onboarding_skipped_at = timezone.now()
         else:
             profile.onboarding_completed_at = timezone.now()
+            profile.onboarding_skipped_at = None
         profile.save()
         return profile
 
@@ -1041,6 +1043,11 @@ class UserProfileForm(forms.Form):
         profile.preferred_language = self.cleaned_data["preferred_language"]
         profile.onboarding_intent = self.cleaned_data["onboarding_intent"]
         profile.practice_type = self.cleaned_data["practice_type"]
+        if profile.onboarding_intent or profile.practice_type:
+            profile.onboarding_completed_at = (
+                profile.onboarding_completed_at or timezone.now()
+            )
+            profile.onboarding_skipped_at = None
         profile.save()
         self.user.save()
         self.user.refresh_from_db()

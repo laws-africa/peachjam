@@ -1,6 +1,8 @@
+from datetime import timedelta
 from importlib import reload
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
+from urllib.parse import parse_qs, urlparse
 
 from allauth.account.internal.flows.login_by_code import LoginCodeVerificationProcess
 from allauth.account.models import Login
@@ -17,6 +19,7 @@ from django.utils import timezone
 from languages_plus.models import Language
 
 from peachjam.auth import (
+    AccountAdapter,
     _patched_finish,
     _patched_send_by_email,
     create_all_users_permission_group_after_migrate,
@@ -276,6 +279,84 @@ class LoginCodeCopyTests(SimpleTestCase):
         )
 
 
+@override_settings(
+    PEACHJAM={**settings.PEACHJAM, "DISABLE_ACCOUNTS": False},
+)
+class AccountAdapterOnboardingTests(TestCase):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.get(pk=1)
+        self.profile = self.user.userprofile
+        self.profile.onboarding_completed_at = None
+        self.profile.onboarding_skipped_at = None
+        self.profile.save()
+
+    def post_login_destination(self, destination=None, signup=False):
+        request = RequestFactory().get(reverse("account_login"))
+        request.user = self.user
+
+        with patch(
+            "allauth.account.adapter.DefaultAccountAdapter.post_login",
+            return_value=MagicMock(),
+        ) as parent_post_login:
+            AccountAdapter().post_login(
+                request,
+                self.user,
+                email_verification="none",
+                signal_kwargs={},
+                email=None,
+                signup=signup,
+                redirect_url=destination,
+            )
+
+        return parent_post_login.call_args.kwargs["redirect_url"]
+
+    def assert_onboarding_destination(self, destination, expected_next):
+        parsed = urlparse(destination)
+        self.assertEqual(parsed.path, reverse("account_onboard"))
+        self.assertEqual(parse_qs(parsed.query)["next"], [expected_next])
+
+    def test_incomplete_user_is_sent_to_onboarding_after_login(self):
+        destination = self.post_login_destination(reverse("about"))
+
+        self.assert_onboarding_destination(destination, reverse("about"))
+
+    def test_incomplete_user_is_sent_to_onboarding_after_signup(self):
+        destination = self.post_login_destination(reverse("about"), signup=True)
+
+        self.assert_onboarding_destination(destination, reverse("about"))
+
+    def test_completed_user_continues_to_original_destination(self):
+        self.profile.onboarding_completed_at = timezone.now()
+        self.profile.save()
+
+        destination = self.post_login_destination(reverse("about"))
+
+        self.assertEqual(destination, reverse("about"))
+
+    def test_recently_skipped_user_continues_to_original_destination(self):
+        self.profile.onboarding_skipped_at = timezone.now()
+        self.profile.save()
+
+        destination = self.post_login_destination(reverse("about"))
+
+        self.assertEqual(destination, reverse("about"))
+
+    def test_user_is_prompted_again_after_skip_cooldown(self):
+        self.profile.onboarding_skipped_at = timezone.now() - timedelta(days=8)
+        self.profile.save()
+
+        destination = self.post_login_destination(reverse("about"))
+
+        self.assert_onboarding_destination(destination, reverse("about"))
+
+    def test_onboarding_destination_is_not_nested(self):
+        destination = self.post_login_destination(reverse("account_onboard"))
+
+        self.assertEqual(destination, reverse("account_onboard"))
+
+
 class CompleteProfileViewTests(TestCase):
 
     fixtures = ["tests/users", "tests/countries", "tests/languages"]
@@ -321,6 +402,8 @@ class CompleteProfileViewTests(TestCase):
         self.assertIsNone(self.profile.onboarding_skipped_at)
 
     def test_submit_saves_answers(self):
+        self.profile.onboarding_skipped_at = timezone.now() - timedelta(days=8)
+        self.profile.save()
         self._login()
         response = self.client.post(
             reverse("account_onboard"),
@@ -335,6 +418,7 @@ class CompleteProfileViewTests(TestCase):
         self.assertEqual(self.profile.onboarding_intent, self.intent)
         self.assertEqual(self.profile.practice_type, self.practice_type)
         self.assertIsNotNone(self.profile.onboarding_completed_at)
+        self.assertIsNone(self.profile.onboarding_skipped_at)
 
     def test_submit_can_save_one_answer(self):
         self._login()
@@ -388,7 +472,7 @@ class CompleteProfileViewTests(TestCase):
         self.assertTrue(response.context["form"].errors)
 
     def test_existing_users_can_update_onboarding_fields_from_profile(self):
-        self.profile.onboarding_completed_at = timezone.now()
+        self.profile.onboarding_skipped_at = timezone.now()
         self.profile.save()
         language = Language.objects.get(iso_639_1="en")
         self._login()
@@ -410,6 +494,8 @@ class CompleteProfileViewTests(TestCase):
         self.assertEqual(self.user.first_name, "Jane")
         self.assertEqual(self.profile.onboarding_intent, self.intent)
         self.assertEqual(self.profile.practice_type, self.practice_type)
+        self.assertIsNotNone(self.profile.onboarding_completed_at)
+        self.assertIsNone(self.profile.onboarding_skipped_at)
 
 
 class UserAuthViewTests(TestCase):

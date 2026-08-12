@@ -151,7 +151,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "peachjam.middleware.SentrySamplingMiddleware",
     "peachjam.middleware.TermsAcceptanceMiddleware",
-    "peachjam.middleware.OnboardingMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",

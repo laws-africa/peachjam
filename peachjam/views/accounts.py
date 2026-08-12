@@ -60,16 +60,6 @@ class UserAuthView(AllauthConfirmLoginCodeView):
         user = User.objects.filter(email=email).first() if email else None
         return email, user
 
-    def get_next_url(self):
-        email, user = self._get_email_and_user()
-        if email and (user is None or self.user_requires_onboarding(user)):
-            return self.passthrough_next_url(reverse("account_onboard"))
-        return super().get_next_url()
-
-    def user_requires_onboarding(self, user):
-        profile, _ = UserProfile.objects.get_or_create(user=user)
-        return profile.should_show_onboarding()
-
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action")
 
@@ -160,33 +150,13 @@ class OnboardView(NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormVi
         profile = getattr(self.request.user, "userprofile", None)
         return profile and not profile.should_show_onboarding()
 
-    def clean_next_url(self, default=None, allow_default=True):
-        next_url = self.request.POST.get("next") or self.request.GET.get("next")
-        if next_url and url_has_allowed_host_and_scheme(
-            next_url,
-            allowed_hosts={self.request.get_host()},
-            require_https=self.request.is_secure(),
-        ):
-            return next_url
-        if allow_default:
-            return default if default is not None else reverse("home_page")
-        return ""
-
-    def get_next_url(self):
-        return self.clean_next_url()
-
-    def get_success_url(self):
-        return self.get_next_url()
+    def get_default_success_url(self):
+        return reverse("home_page")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["user"] = self.request.user
         return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["next"] = self.clean_next_url(allow_default=False)
-        return context
 
     def form_valid(self, form):
         form.save(skipped=self.request.POST.get("action") == "skip")
