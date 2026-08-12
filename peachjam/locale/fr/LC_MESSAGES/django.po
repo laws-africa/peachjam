@@ -4728,10 +4728,6 @@ msgstr ""
 msgid "What best describes your practice?"
 msgstr ""
 
-#: forms.py:951
-msgid "Please answer at least one question or skip."
-msgstr ""
-
 #: models/user_profile.py:44 models/user_profile.py:85
 msgid "onboarding intent"
 msgstr ""
@@ -4756,20 +4752,12 @@ msgstr ""
 msgid "onboarding skipped at"
 msgstr ""
 
-#: templates/account/onboard.html:9
-msgid "Answer two quick questions to help us tailor your experience."
-msgstr ""
-
 #: templates/account/onboard.html:40
 msgid "Skip"
 msgstr ""
 
-#: templates/account/onboard.html:46
-msgid "Save and continue"
-msgstr ""
-
 #: templates/user_account/home.html:25
-msgid "Intent"
+msgid "Intents"
 msgstr ""
 
 #: templates/user_account/home.html:31

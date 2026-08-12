@@ -80,12 +80,10 @@ class UserProfile(models.Model):
     deleted_at = models.DateTimeField(_("deleted at"), null=True, blank=True)
     deleted_reason = models.TextField(_("deleted reason"), null=True, blank=True)
     email_hash = models.CharField(_("email hash"), max_length=64, null=True, blank=True)
-    onboarding_intent = models.ForeignKey(
+    onboarding_intents = models.ManyToManyField(
         OnboardingIntent,
-        verbose_name=_("onboarding intent"),
-        null=True,
+        verbose_name=_("onboarding intents"),
         blank=True,
-        on_delete=models.SET_NULL,
     )
     practice_type = models.ForeignKey(
         PracticeType,

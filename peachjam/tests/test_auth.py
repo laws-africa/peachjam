@@ -371,6 +371,7 @@ class CompleteProfileViewTests(TestCase):
         self.profile.onboarding_skipped_at = None
         self.profile.save()
         self.intent = OnboardingIntent.objects.get(label="Research case law")
+        self.second_intent = OnboardingIntent.objects.get(label="Research legislation")
         self.practice_type = PracticeType.objects.get(label="Sole practitioner")
 
     def _login(self):
@@ -408,31 +409,42 @@ class CompleteProfileViewTests(TestCase):
         response = self.client.post(
             reverse("account_onboard"),
             data={
-                "onboarding_intent": self.intent.pk,
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "onboarding_intents": [self.intent.pk, self.second_intent.pk],
                 "practice_type": self.practice_type.pk,
                 "action": "save",
             },
         )
         self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
         self.profile.refresh_from_db()
-        self.assertEqual(self.profile.onboarding_intent, self.intent)
+        self.assertEqual(self.user.first_name, "Jane")
+        self.assertEqual(self.user.last_name, "Doe")
+        self.assertQuerySetEqual(
+            self.profile.onboarding_intents.all(),
+            [self.intent, self.second_intent],
+            ordered=False,
+        )
         self.assertEqual(self.profile.practice_type, self.practice_type)
         self.assertIsNotNone(self.profile.onboarding_completed_at)
         self.assertIsNone(self.profile.onboarding_skipped_at)
 
-    def test_submit_can_save_one_answer(self):
+    def test_submit_can_save_without_optional_answers(self):
         self._login()
         response = self.client.post(
             reverse("account_onboard"),
             data={
-                "onboarding_intent": self.intent.pk,
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "onboarding_intents": [],
                 "practice_type": "",
                 "action": "save",
             },
         )
         self.assertEqual(response.status_code, 302)
         self.profile.refresh_from_db()
-        self.assertEqual(self.profile.onboarding_intent, self.intent)
+        self.assertFalse(self.profile.onboarding_intents.exists())
         self.assertIsNone(self.profile.practice_type)
         self.assertIsNotNone(self.profile.onboarding_completed_at)
 
@@ -440,7 +452,13 @@ class CompleteProfileViewTests(TestCase):
         self._login()
         response = self.client.post(
             reverse("account_onboard"),
-            data={"onboarding_intent": "", "practice_type": "", "action": "skip"},
+            data={
+                "first_name": "",
+                "last_name": "",
+                "onboarding_intents": [],
+                "practice_type": "",
+                "action": "skip",
+            },
         )
         self.assertEqual(response.status_code, 302)
         self.profile.refresh_from_db()
@@ -453,7 +471,9 @@ class CompleteProfileViewTests(TestCase):
         response = self.client.post(
             reverse("account_onboard") + f"?next={next_url}",
             data={
-                "onboarding_intent": self.intent.pk,
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "onboarding_intents": [self.intent.pk],
                 "practice_type": self.practice_type.pk,
                 "next": next_url,
                 "action": "save",
@@ -462,11 +482,17 @@ class CompleteProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response["Location"], next_url)
 
-    def test_submit_requires_at_least_one_answer_when_saving(self):
+    def test_submit_requires_existing_name_fields_when_continuing(self):
         self._login()
         response = self.client.post(
             reverse("account_onboard"),
-            data={"onboarding_intent": "", "practice_type": "", "action": "save"},
+            data={
+                "first_name": "",
+                "last_name": "",
+                "onboarding_intents": [self.intent.pk],
+                "practice_type": "",
+                "action": "save",
+            },
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].errors)
@@ -483,7 +509,7 @@ class CompleteProfileViewTests(TestCase):
                 "first_name": "Jane",
                 "last_name": "Doe",
                 "preferred_language": language.pk,
-                "onboarding_intent": self.intent.pk,
+                "onboarding_intents": [self.intent.pk, self.second_intent.pk],
                 "practice_type": self.practice_type.pk,
             },
         )
@@ -492,7 +518,11 @@ class CompleteProfileViewTests(TestCase):
         self.user.refresh_from_db()
         self.profile.refresh_from_db()
         self.assertEqual(self.user.first_name, "Jane")
-        self.assertEqual(self.profile.onboarding_intent, self.intent)
+        self.assertQuerySetEqual(
+            self.profile.onboarding_intents.all(),
+            [self.intent, self.second_intent],
+            ordered=False,
+        )
         self.assertEqual(self.profile.practice_type, self.practice_type)
         self.assertIsNotNone(self.profile.onboarding_completed_at)
         self.assertIsNone(self.profile.onboarding_skipped_at)

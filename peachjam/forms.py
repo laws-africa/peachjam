@@ -861,7 +861,7 @@ class SaveDocumentForm(forms.ModelForm):
         label=_("Folders"),
         queryset=Folder.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
     )
 
     class Meta:
@@ -949,45 +949,68 @@ class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
 
 
 class OnboardingProfileForm(forms.Form):
-    onboarding_intent = forms.ModelChoiceField(
+    first_name = forms.CharField(
+        label=_("First name"),
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control", "autofocus": True}),
+    )
+    last_name = forms.CharField(
+        label=_("Last name"),
+        max_length=150,
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    onboarding_intents = forms.ModelMultipleChoiceField(
         label=_("What are you hoping to do today?"),
         queryset=OnboardingIntent.objects.none(),
         required=False,
-        empty_label=_("Select an option"),
+        widget=forms.CheckboxSelectMultiple,
     )
     practice_type = forms.ModelChoiceField(
         label=_("What best describes your role or organisation?"),
         queryset=PracticeType.objects.none(),
         required=False,
         empty_label=_("Select an option"),
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
         profile = self.user.userprofile
-        self.fields["onboarding_intent"].queryset = OnboardingIntent.objects.filter(
-            Q(active=True) | Q(pk=getattr(profile.onboarding_intent, "pk", None))
-        )
+        selected_intents = profile.onboarding_intents.all()
+        self.fields["onboarding_intents"].queryset = OnboardingIntent.objects.filter(
+            Q(active=True) | Q(pk__in=selected_intents)
+        ).distinct()
         self.fields["practice_type"].queryset = PracticeType.objects.filter(
             Q(active=True) | Q(pk=getattr(profile.practice_type, "pk", None))
         )
         self.initial.update(
             {
-                "onboarding_intent": profile.onboarding_intent,
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "onboarding_intents": selected_intents,
                 "practice_type": profile.practice_type,
             }
         )
 
     def clean(self):
         cleaned_data = super().clean()
-        if self.data.get("action") != "skip" and not any(cleaned_data.values()):
-            raise ValidationError(_("Please answer at least one question or skip."))
+        if self.data.get("action") != "skip":
+            if not cleaned_data.get("first_name"):
+                self.add_error("first_name", _("This field is required."))
+            if not cleaned_data.get("last_name"):
+                self.add_error("last_name", _("This field is required."))
         return cleaned_data
 
     def save(self, skipped=False):
         profile = self.user.userprofile
-        profile.onboarding_intent = self.cleaned_data["onboarding_intent"]
+        if not skipped or self.cleaned_data["first_name"]:
+            self.user.first_name = self.cleaned_data["first_name"]
+        if not skipped or self.cleaned_data["last_name"]:
+            self.user.last_name = self.cleaned_data["last_name"]
+        self.user.save()
         profile.practice_type = self.cleaned_data["practice_type"]
         if skipped:
             profile.onboarding_completed_at = None
@@ -996,6 +1019,7 @@ class OnboardingProfileForm(forms.Form):
             profile.onboarding_completed_at = timezone.now()
             profile.onboarding_skipped_at = None
         profile.save()
+        profile.onboarding_intents.set(self.cleaned_data["onboarding_intents"])
         return profile
 
 
@@ -1005,11 +1029,11 @@ class UserProfileForm(forms.Form):
     preferred_language = forms.ModelChoiceField(
         queryset=Language.objects.filter(iso_639_1__in=get_languages())
     )
-    onboarding_intent = forms.ModelChoiceField(
+    onboarding_intents = forms.ModelMultipleChoiceField(
         label=_("What are you hoping to do today?"),
         queryset=OnboardingIntent.objects.none(),
         required=False,
-        empty_label=_("Select an option"),
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
     )
     practice_type = forms.ModelChoiceField(
         label=_("What best describes your practice?"),
@@ -1025,13 +1049,13 @@ class UserProfileForm(forms.Form):
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
             "preferred_language": profile.preferred_language,
-            "onboarding_intent": profile.onboarding_intent,
+            "onboarding_intents": profile.onboarding_intents.all(),
             "practice_type": profile.practice_type,
         }
         super().__init__(*args, **kwargs)
-        self.fields["onboarding_intent"].queryset = OnboardingIntent.objects.filter(
-            Q(active=True) | Q(pk=getattr(profile.onboarding_intent, "pk", None))
-        )
+        self.fields["onboarding_intents"].queryset = OnboardingIntent.objects.filter(
+            Q(active=True) | Q(pk__in=profile.onboarding_intents.all())
+        ).distinct()
         self.fields["practice_type"].queryset = PracticeType.objects.filter(
             Q(active=True) | Q(pk=getattr(profile.practice_type, "pk", None))
         )
@@ -1041,14 +1065,14 @@ class UserProfileForm(forms.Form):
         self.user.last_name = self.cleaned_data["last_name"]
         profile = self.user.userprofile
         profile.preferred_language = self.cleaned_data["preferred_language"]
-        profile.onboarding_intent = self.cleaned_data["onboarding_intent"]
         profile.practice_type = self.cleaned_data["practice_type"]
-        if profile.onboarding_intent or profile.practice_type:
+        if self.cleaned_data["onboarding_intents"] or profile.practice_type:
             profile.onboarding_completed_at = (
                 profile.onboarding_completed_at or timezone.now()
             )
             profile.onboarding_skipped_at = None
         profile.save()
+        profile.onboarding_intents.set(self.cleaned_data["onboarding_intents"])
         self.user.save()
         self.user.refresh_from_db()
         return self.user

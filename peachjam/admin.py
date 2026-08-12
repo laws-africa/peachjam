@@ -2306,13 +2306,13 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = (
         "user",
-        "onboarding_intent",
+        "onboarding_intents_display",
         "practice_type",
         "onboarding_completed_at",
         "onboarding_skipped_at",
     )
     list_filter = (
-        "onboarding_intent",
+        "onboarding_intents",
         "practice_type",
         "onboarding_completed_at",
         "onboarding_skipped_at",
@@ -2323,6 +2323,10 @@ class UserProfileAdmin(admin.ModelAdmin):
         "user__first_name",
         "user__last_name",
     )
+
+    @admin.display(description=_("onboarding intents"))
+    def onboarding_intents_display(self, obj):
+        return ", ".join(str(intent) for intent in obj.onboarding_intents.all())
 
 
 @admin.register(OnboardingIntent, PracticeType)

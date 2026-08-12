@@ -23,10 +23,15 @@
               {{ user.userprofile.preferred_language }}
             </dd>
             <dt class="col-4 col-md-2">
-              {% trans "Intent" %}
+              {% trans "Intents" %}
             </dt>
             <dd class="col-8 col-md-10">
-              {{ user.userprofile.onboarding_intent|default:"-" }}
+              {% for intent in user.userprofile.onboarding_intents.all %}
+                {{ intent }}
+                {% if not forloop.last %},{% endif %}
+              {% empty %}
+                -
+              {% endfor %}
             </dd>
             <dt class="col-4 col-md-2">
               {% trans "Practice" %}

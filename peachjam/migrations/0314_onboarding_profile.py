@@ -99,13 +99,11 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name="userprofile",
-            name="onboarding_intent",
-            field=models.ForeignKey(
+            name="onboarding_intents",
+            field=models.ManyToManyField(
                 blank=True,
-                null=True,
-                on_delete=django.db.models.deletion.SET_NULL,
                 to="peachjam.onboardingintent",
-                verbose_name="onboarding intent",
+                verbose_name="onboarding intents",
             ),
         ),
         migrations.AddField(

@@ -5,8 +5,8 @@
 {% endblock %}
 {% block content %}
   <div class="text-center mb-4">
-    <h1 id="main-page-heading">{% trans 'Welcome' %}</h1>
-    <p>{% trans 'Answer two quick questions to help us tailor your experience.' %}</p>
+    <h2>{% trans 'Welcome' %}</h2>
+    <p>{% trans 'Please tell us a bit about yourself to get started.' %}</p>
   </div>
   <form method="post">
     {% csrf_token %}
@@ -17,20 +17,29 @@
       </div>
     {% endif %}
     {% for field in form.visible_fields %}
-      <div class="mb-3">
-        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-        <select class="form-select{% if field.errors %} is-invalid{% endif %}"
-                name="{{ field.name }}"
-                id="{{ field.id_for_label }}"
-                {% if forloop.first %}autofocus{% endif %}>
-          {% for option in field %}{{ option }}{% endfor %}
-        </select>
-        {% if field.errors %}
-          <div class="invalid-feedback">
-            {% for error in field.errors %}{{ error }}{% endfor %}
-          </div>
-        {% endif %}
-      </div>
+      {% if field.name == "onboarding_intents" %}
+        <fieldset class="mb-3">
+          <legend class="form-label">
+            {{ field.label }}
+          </legend>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger">
+              {% for error in field.errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+        </fieldset>
+      {% else %}
+        <div class="mb-3">
+          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}
+            <div class="text-danger">
+              {% for error in field.errors %}{{ error }}{% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
     {% endfor %}
     <div class="row g-2">
       <div class="col-6">
@@ -43,7 +52,7 @@
         <button class="btn btn-primary w-100"
                 type="submit"
                 name="action"
-                value="save">{% trans 'Save and continue' %}</button>
+                value="save">{% trans 'Continue' %}</button>
       </div>
     </div>
   </form>

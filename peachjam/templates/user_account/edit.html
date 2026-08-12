@@ -52,15 +52,15 @@
             {% endif %}
           </div>
           <div class="col mb-3">
-            <label class="form-label" for="{{ form.onboarding_intent.id_for_label }}">{{ form.onboarding_intent.label }}</label>
-            <select class="form-select"
-                    name="{{ form.onboarding_intent.name }}"
-                    id="{{ form.onboarding_intent.id_for_label }}">
-              {% for opt in form.onboarding_intent %}{{ opt }}{% endfor %}
-            </select>
-            {% if form.onboarding_intent.errors %}
+            <fieldset>
+              <legend class="form-label">
+                {{ form.onboarding_intents.label }}
+              </legend>
+              {{ form.onboarding_intents }}
+            </fieldset>
+            {% if form.onboarding_intents.errors %}
               <div class="text-danger">
-                {% for error in form.onboarding_intent.errors %}<p>{{ error }}</p>{% endfor %}
+                {% for error in form.onboarding_intents.errors %}<p>{{ error }}</p>{% endfor %}
               </div>
             {% endif %}
           </div>
