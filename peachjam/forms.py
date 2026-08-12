@@ -956,7 +956,7 @@ class OnboardingProfileForm(forms.Form):
         empty_label=_("Select an option"),
     )
     practice_type = forms.ModelChoiceField(
-        label=_("What best describes your practice?"),
+        label=_("What best describes your role or organisation?"),
         queryset=PracticeType.objects.none(),
         required=False,
         empty_label=_("Select an option"),
