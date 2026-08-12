@@ -92,3 +92,13 @@ class BasicAuthMiddlewareTests(SimpleTestCase):
         response = self.get_response("/api/v1/")
 
         self.assertEqual(response.status_code, 200)
+
+    @override_settings(
+        BASIC_AUTH_USERNAME="user",
+        BASIC_AUTH_PASSWORD="secret",
+        BASIC_AUTH_EXCLUDED_PATH_PREFIXES=["/admin/"],
+    )
+    def test_allows_admin_path_prefix_without_credentials(self):
+        response = self.get_response("/admin/login/")
+
+        self.assertEqual(response.status_code, 200)
