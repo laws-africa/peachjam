@@ -2324,6 +2324,14 @@ class UserProfileAdmin(admin.ModelAdmin):
         "user__last_name",
     )
 
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("user", "practice_type")
+            .prefetch_related("onboarding_intents")
+        )
+
     @admin.display(description=_("onboarding intents"))
     def onboarding_intents_display(self, obj):
         return ", ".join(str(intent) for intent in obj.onboarding_intents.all())

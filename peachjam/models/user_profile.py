@@ -118,6 +118,12 @@ class UserProfile(models.Model):
             return True
         return self.onboarding_skipped_at <= timezone.now() - timedelta(days=7)
 
+    def requires_name_onboarding(self):
+        return not self.user.first_name or not self.user.last_name
+
+    def requires_onboarding(self):
+        return self.requires_name_onboarding() or self.should_show_onboarding()
+
     def is_primary_email_verified(self):
         return self.user.emailaddress_set.filter(
             verified=True, email=self.user.email

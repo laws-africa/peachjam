@@ -861,7 +861,7 @@ class SaveDocumentForm(forms.ModelForm):
         label=_("Folders"),
         queryset=Folder.objects.none(),
         required=False,
-        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+        widget=forms.CheckboxSelectMultiple,
     )
 
     class Meta:
@@ -949,6 +949,18 @@ class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
 
 
 class OnboardingProfileForm(forms.Form):
+    first_name = forms.CharField(
+        label=_("First name"),
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "autofocus": True}),
+    )
+    last_name = forms.CharField(
+        label=_("Last name"),
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
     onboarding_intents = forms.ModelMultipleChoiceField(
         label=_("What are you hoping to do today?"),
         queryset=OnboardingIntent.objects.none(),
@@ -965,26 +977,59 @@ class OnboardingProfileForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
+        self.skipped = kwargs.pop("skipped", False)
         super().__init__(*args, **kwargs)
         profile = self.user.userprofile
+        if not profile.requires_name_onboarding():
+            self.hide_name_fields()
+
         selected_intents = profile.onboarding_intents.all()
         self.fields["onboarding_intents"].queryset = OnboardingIntent.objects.filter(
             Q(active=True) | Q(pk__in=selected_intents)
         ).distinct()
         self.fields["practice_type"].queryset = PracticeType.objects.filter(
-            Q(active=True) | Q(pk=getattr(profile.practice_type, "pk", None))
+            Q(active=True) | Q(pk=profile.practice_type_id)
         )
         self.initial.update(
             {
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
                 "onboarding_intents": selected_intents,
                 "practice_type": profile.practice_type,
             }
         )
 
-    def save(self, skipped=False):
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            not self.skipped
+            and not cleaned_data.get("onboarding_intents")
+            and not cleaned_data.get("practice_type")
+        ):
+            raise forms.ValidationError(
+                _("Choose at least one option or select Not now.")
+            )
+        return cleaned_data
+
+    def hide_name_fields(self):
+        self.fields["first_name"].widget = forms.HiddenInput()
+        self.fields["last_name"].widget = forms.HiddenInput()
+
+    def save_names(self):
+        updated_fields = []
+        for field_name in ("first_name", "last_name"):
+            value = self.cleaned_data.get(field_name)
+            if value and value != getattr(self.user, field_name):
+                setattr(self.user, field_name, value)
+                updated_fields.append(field_name)
+        if updated_fields:
+            self.user.save(update_fields=updated_fields)
+
+    def save(self):
         profile = self.user.userprofile
+        self.save_names()
         profile.practice_type = self.cleaned_data["practice_type"]
-        if skipped:
+        if self.skipped:
             profile.onboarding_completed_at = None
             profile.onboarding_skipped_at = timezone.now()
         else:
@@ -1004,20 +1049,20 @@ class UserProfileForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
-        profile = self.user.userprofile
         kwargs["initial"] = {
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
-            "preferred_language": profile.preferred_language,
+            "preferred_language": self.user.userprofile.preferred_language,
         }
         super().__init__(*args, **kwargs)
 
     def save(self):
         self.user.first_name = self.cleaned_data["first_name"]
         self.user.last_name = self.cleaned_data["last_name"]
-        profile = self.user.userprofile
-        profile.preferred_language = self.cleaned_data["preferred_language"]
-        profile.save()
+        self.user.userprofile.preferred_language = self.cleaned_data[
+            "preferred_language"
+        ]
+        self.user.userprofile.save()
         self.user.save()
         self.user.refresh_from_db()
         return self.user

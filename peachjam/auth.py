@@ -144,19 +144,9 @@ class AccountAdapter(DefaultAccountAdapter):
         )
         profile, _ = UserProfile.objects.get_or_create(user=user)
 
-        if pj_settings().accounts_enabled:
-            name_onboard_url = reverse("account_onboard")
-            profile_onboard_url = reverse("account_onboard_profile")
-            onboarding_urls = {name_onboard_url, profile_onboard_url}
-
-            if not user.first_name or not user.last_name:
-                onboard_url = name_onboard_url
-            elif profile.should_show_onboarding():
-                onboard_url = profile_onboard_url
-            else:
-                onboard_url = None
-
-            if onboard_url and urlsplit(destination).path not in onboarding_urls:
+        if pj_settings().accounts_enabled and profile.requires_onboarding():
+            onboard_url = reverse("account_onboard")
+            if urlsplit(destination).path != onboard_url:
                 destination = f"{onboard_url}?{urlencode({'next': destination})}"
 
         return super().post_login(

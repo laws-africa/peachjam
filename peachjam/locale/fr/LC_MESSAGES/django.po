@@ -4720,12 +4720,16 @@ msgstr "document contenant des dispositions similaires"
 msgid "documents with similar provisions"
 msgstr "documents comportant des dispositions similaires"
 
-#: forms.py:919
+#: forms.py:931
 msgid "What are you hoping to do today?"
 msgstr ""
 
-#: forms.py:925
+#: forms.py:937
 msgid "What best describes your role or organisation?"
+msgstr ""
+
+#: forms.py:977
+msgid "Choose at least one option or select Not now."
 msgstr ""
 
 #: models/user_profile.py:44 models/user_profile.py:85
@@ -4736,7 +4740,7 @@ msgstr ""
 msgid "onboarding intents"
 msgstr ""
 
-#: models/user_profile.py:50 models/user_profile.py:92
+#: models/user_profile.py:50 models/user_profile.py:90
 msgid "practice type"
 msgstr ""
 
@@ -4744,14 +4748,14 @@ msgstr ""
 msgid "practice types"
 msgstr ""
 
-#: models/user_profile.py:98
+#: models/user_profile.py:96
 msgid "onboarding completed at"
 msgstr ""
 
-#: models/user_profile.py:103
+#: models/user_profile.py:101
 msgid "onboarding skipped at"
 msgstr ""
 
-#: templates/account/onboard.html:40
+#: templates/account/onboard.html:55
 msgid "Not now"
 msgstr ""
