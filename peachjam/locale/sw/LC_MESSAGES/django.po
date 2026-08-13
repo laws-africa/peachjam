@@ -4725,7 +4725,7 @@ msgid "What are you hoping to do today?"
 msgstr ""
 
 #: forms.py:925
-msgid "What best describes your practice?"
+msgid "What best describes your role or organisation?"
 msgstr ""
 
 #: models/user_profile.py:44 models/user_profile.py:85
@@ -4753,17 +4753,5 @@ msgid "onboarding skipped at"
 msgstr ""
 
 #: templates/account/onboard.html:40
-msgid "Skip"
-msgstr ""
-
-#: templates/user_account/home.html:25
-msgid "Intents"
-msgstr ""
-
-#: templates/user_account/home.html:31
-msgid "Practice"
-msgstr ""
-
-#: forms.py:922 forms.py:928 forms.py:978 forms.py:984
-msgid "Select an option"
+msgid "Not now"
 msgstr ""

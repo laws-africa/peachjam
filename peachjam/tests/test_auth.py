@@ -386,7 +386,40 @@ class CompleteProfileViewTests(TestCase):
         self._login()
         response = self.client.get(reverse("account_onboard"))
         self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "First name")
+        self.assertContains(response, "Last name")
         self.assertContains(response, "What are you hoping to do today?")
+        self.assertContains(response, 'type="checkbox"')
+        self.assertContains(response, 'type="radio"')
+
+    def test_hides_both_name_fields_when_names_are_already_set(self):
+        self.user.first_name = "Jane"
+        self.user.last_name = "Doe"
+        self.user.save()
+        self._login()
+
+        response = self.client.get(reverse("account_onboard"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(
+            response, '<label class="form-label" for="id_first_name">'
+        )
+        self.assertNotContains(
+            response, '<label class="form-label" for="id_last_name">'
+        )
+        self.assertContains(response, 'type="hidden" name="first_name" value="Jane"')
+        self.assertContains(response, 'type="hidden" name="last_name" value="Doe"')
+
+    def test_shows_both_name_fields_when_only_one_name_is_missing(self):
+        self.user.first_name = "Jane"
+        self.user.last_name = ""
+        self.user.save()
+        self._login()
+
+        response = self.client.get(reverse("account_onboard"))
+
+        self.assertContains(response, "First name")
+        self.assertContains(response, "Last name")
 
     def test_redirects_when_onboarding_already_completed(self):
         self.profile.onboarding_completed_at = timezone.now()
@@ -448,8 +481,29 @@ class CompleteProfileViewTests(TestCase):
         self.assertIsNone(self.profile.practice_type)
         self.assertIsNotNone(self.profile.onboarding_completed_at)
 
-    def test_submit_can_skip_without_answers(self):
+    def test_submit_can_save_names_and_skip_optional_answers(self):
         self._login()
+        response = self.client.post(
+            reverse("account_onboard"),
+            data={
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "onboarding_intents": [],
+                "practice_type": "",
+                "action": "skip",
+            },
+        )
+        self.assertEqual(response.status_code, 302)
+        self.user.refresh_from_db()
+        self.profile.refresh_from_db()
+        self.assertEqual(self.user.first_name, "Jane")
+        self.assertEqual(self.user.last_name, "Doe")
+        self.assertIsNone(self.profile.onboarding_completed_at)
+        self.assertIsNotNone(self.profile.onboarding_skipped_at)
+
+    def test_skip_requires_names_when_they_are_missing(self):
+        self._login()
+
         response = self.client.post(
             reverse("account_onboard"),
             data={
@@ -460,10 +514,10 @@ class CompleteProfileViewTests(TestCase):
                 "action": "skip",
             },
         )
-        self.assertEqual(response.status_code, 302)
-        self.profile.refresh_from_db()
-        self.assertIsNone(self.profile.onboarding_completed_at)
-        self.assertIsNotNone(self.profile.onboarding_skipped_at)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("first_name", response.context["form"].errors)
+        self.assertIn("last_name", response.context["form"].errors)
 
     def test_submit_preserves_next_url(self):
         self._login()
@@ -497,11 +551,24 @@ class CompleteProfileViewTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(response.context["form"].errors)
 
-    def test_existing_users_can_update_onboarding_fields_from_profile(self):
-        self.profile.onboarding_skipped_at = timezone.now()
+    def test_account_profile_does_not_expose_onboarding_fields(self):
+        self.profile.onboarding_intents.set([self.intent])
+        self.profile.practice_type = self.practice_type
         self.profile.save()
         language = Language.objects.get(iso_639_1="en")
         self._login()
+
+        response = self.client.get(reverse("edit_account"))
+
+        self.assertNotContains(response, "What are you hoping to do today?")
+        self.assertNotContains(
+            response, "What best describes your role or organisation?"
+        )
+
+        response = self.client.get(reverse("my_account"))
+
+        self.assertNotContains(response, self.intent.label)
+        self.assertNotContains(response, self.practice_type.label)
 
         response = self.client.post(
             reverse("edit_account"),
@@ -509,8 +576,6 @@ class CompleteProfileViewTests(TestCase):
                 "first_name": "Jane",
                 "last_name": "Doe",
                 "preferred_language": language.pk,
-                "onboarding_intents": [self.intent.pk, self.second_intent.pk],
-                "practice_type": self.practice_type.pk,
             },
         )
 
@@ -520,12 +585,10 @@ class CompleteProfileViewTests(TestCase):
         self.assertEqual(self.user.first_name, "Jane")
         self.assertQuerySetEqual(
             self.profile.onboarding_intents.all(),
-            [self.intent, self.second_intent],
+            [self.intent],
             ordered=False,
         )
         self.assertEqual(self.profile.practice_type, self.practice_type)
-        self.assertIsNotNone(self.profile.onboarding_completed_at)
-        self.assertIsNone(self.profile.onboarding_skipped_at)
 
 
 class UserAuthViewTests(TestCase):

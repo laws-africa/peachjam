@@ -11,13 +11,14 @@
   <form method="post">
     {% csrf_token %}
     {{ redirect_field }}
+    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
     {% if form.non_field_errors %}
       <div class="alert alert-danger" role="alert">
         {% for error in form.non_field_errors %}{{ error }}{% endfor %}
       </div>
     {% endif %}
     {% for field in form.visible_fields %}
-      {% if field.name == "onboarding_intents" %}
+      {% if field.name == "onboarding_intents" or field.name == "practice_type" %}
         <fieldset class="mb-3">
           <legend class="form-label">
             {{ field.label }}
