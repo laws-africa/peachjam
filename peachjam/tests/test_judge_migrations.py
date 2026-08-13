@@ -21,8 +21,8 @@ class JudgePersonNameMigrationTests(TransactionTestCase):
             slug="savage-katherine",
         )
         JudgePerson.objects.create(
-            full_name="Sallie Van der Merwe",
-            slug="sallie-van-der-merwe",
+            full_name="Dennis M Mwangi",
+            slug="dennis-m-mwangi",
         )
         duplicate = JudgePerson.objects.create(
             full_name="Katherine Savage",
@@ -49,11 +49,11 @@ class JudgePersonNameMigrationTests(TransactionTestCase):
         JudgeAlias = self.apps.get_model("peachjam", "JudgeAlias")
 
         savage = JudgePerson.objects.get(last_name="Savage")
-        merwe = JudgePerson.objects.get(last_name="Van der Merwe")
+        mwangi = JudgePerson.objects.get(last_name="M Mwangi")
         alias = JudgeAlias.objects.select_related("title").get(name="Savage JA")
 
         self.assertEqual("Katherine", savage.first_name)
-        self.assertEqual("Sallie", merwe.first_name)
+        self.assertEqual("Dennis", mwangi.first_name)
         self.assertEqual(savage.pk, alias.judge_person_id)
         self.assertEqual("Judge of appeal", alias.title.name)
         self.assertEqual("JA", alias.title.abbreviation)
@@ -68,5 +68,5 @@ class JudgePersonNameMigrationTests(TransactionTestCase):
             JudgePerson.objects.filter(full_name="Katherine Savage").exists()
         )
         self.assertTrue(
-            JudgePerson.objects.filter(full_name="Sallie Van der Merwe").exists()
+            JudgePerson.objects.filter(full_name="Dennis M Mwangi").exists()
         )

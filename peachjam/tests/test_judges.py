@@ -57,7 +57,7 @@ class JudgeParsingTests(TestCase):
 
         self.assertEqual("Greg AJ Kempe", judge_person.full_name)
 
-    def test_split_person_name_supports_common_source_formats(self):
+    def test_split_person_name_supports_explicit_and_simple_source_formats(self):
         self.assertEqual(
             ("Katherine", "Savage"),
             judge_identity_service.split_person_name("Savage, Katherine"),
@@ -69,6 +69,10 @@ class JudgeParsingTests(TestCase):
         self.assertEqual(
             ("Sallie", "Van der Merwe"),
             judge_identity_service.split_person_name("Sallie Van der Merwe"),
+        )
+        self.assertEqual(
+            ("Dennis", "M Mwangi"),
+            judge_identity_service.split_person_name("Dennis M Mwangi"),
         )
         self.assertEqual(
             ("", "Ackermann"),

@@ -36,19 +36,6 @@ TITLE_PREFIX_TOKENS = {
     "AG",
 }
 
-SURNAME_PARTICLES = {
-    "da",
-    "de",
-    "del",
-    "der",
-    "di",
-    "du",
-    "la",
-    "le",
-    "van",
-    "von",
-}
-
 PUNCTUATION_PATTERN = re.compile(r"[.,;:()]+")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 NON_ALNUM_PATTERN = re.compile(r"[^0-9A-Za-z]+")
@@ -148,14 +135,7 @@ class JudgeIdentityService:
         if len(parts) == 1:
             return "", name
 
-        last_name_start = len(parts) - 1
-        while (
-            last_name_start > 0
-            and parts[last_name_start - 1].rstrip(".").casefold() in SURNAME_PARTICLES
-        ):
-            last_name_start -= 1
-
-        return " ".join(parts[:last_name_start]), " ".join(parts[last_name_start:])
+        return parts[0], " ".join(parts[1:])
 
     def title_tokens(self):
         """Return title abbreviations configured in the database."""

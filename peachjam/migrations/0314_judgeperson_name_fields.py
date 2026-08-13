@@ -2,19 +2,6 @@ import re
 
 from django.db import migrations, models
 
-SURNAME_PARTICLES = {
-    "da",
-    "de",
-    "del",
-    "der",
-    "di",
-    "du",
-    "la",
-    "le",
-    "van",
-    "von",
-}
-
 JUDICIAL_TITLES = {
     "AG",
     "ACJ",
@@ -73,14 +60,7 @@ def split_full_name(full_name):
     if len(parts) == 1:
         return "", name
 
-    last_name_start = len(parts) - 1
-    while (
-        last_name_start > 0
-        and parts[last_name_start - 1].rstrip(".").casefold() in SURNAME_PARTICLES
-    ):
-        last_name_start -= 1
-
-    return " ".join(parts[:last_name_start]), " ".join(parts[last_name_start:])
+    return parts[0], " ".join(parts[1:])
 
 
 def move_related_judge_data(source, target, JudgeAlias, Bench):
