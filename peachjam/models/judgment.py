@@ -81,70 +81,34 @@ class Judge(models.Model):
 class JudgePerson(models.Model):
     model_label = _("Judge")
     model_label_plural = _("Judges")
-    SURNAME_PARTICLES = {
-        "da",
-        "de",
-        "del",
-        "der",
-        "di",
-        "du",
-        "la",
-        "le",
-        "van",
-        "von",
-    }
-
-    full_name = models.CharField(
-        _("full name"), max_length=1024, null=False, blank=False, unique=True
-    )
+    first_name = models.CharField(_("first name"), max_length=1024, blank=True)
+    last_name = models.CharField(_("last name"), max_length=1024)
     slug = models.SlugField(
         _("slug"), max_length=255, null=False, blank=True, unique=True
     )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
-        ordering = ("full_name", "pk")
+        ordering = ("last_name", "first_name", "pk")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("first_name", "last_name"),
+                name="unique_judge_person_name",
+            )
+        ]
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
 
     def __str__(self):
         return self.full_name
 
+    @property
+    def full_name(self):
+        return " ".join(part for part in (self.first_name, self.last_name) if part)
+
     @staticmethod
     def canonical_identity_enabled():
         return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
-
-    @cached_property
-    def display_name_parts(self):
-        """Split a surname-first name while preserving its display formatting."""
-        name = " ".join((self.full_name or "").split())
-        if not name:
-            return "", ""
-
-        if "," in name:
-            surname, remainder = name.split(",", 1)
-            remainder = remainder.strip()
-            return surname.strip(), f", {remainder}" if remainder else ","
-
-        parts = name.split()
-        surname_end = 1
-        while (
-            surname_end < len(parts) - 1
-            and parts[surname_end - 1].rstrip(".").casefold() in self.SURNAME_PARTICLES
-        ):
-            surname_end += 1
-
-        surname = " ".join(parts[:surname_end])
-        remainder = " ".join(parts[surname_end:])
-        return surname, f" {remainder}" if remainder else ""
-
-    @property
-    def surname(self):
-        return self.display_name_parts[0]
-
-    @property
-    def name_remainder(self):
-        return self.display_name_parts[1]
 
     @staticmethod
     def available_flynote_topics(judge_person=None):
@@ -183,6 +147,24 @@ class JudgePerson(models.Model):
         return super().save(*args, **kwargs)
 
 
+class JudgeTitle(models.Model):
+    name = models.CharField(_("name"), max_length=255)
+    abbreviation = models.CharField(_("abbreviation"), max_length=32, unique=True)
+
+    class Meta:
+        ordering = ("name", "abbreviation")
+        verbose_name = _("judicial title")
+        verbose_name_plural = _("judicial titles")
+
+    def __str__(self):
+        return f"{self.name} ({self.abbreviation})"
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.strip()
+        self.abbreviation = self.abbreviation.strip().upper()
+        return super().save(*args, **kwargs)
+
+
 class JudgeAlias(models.Model):
     model_label = _("Judge")
     model_label_plural = _("Judges")
@@ -197,13 +179,13 @@ class JudgeAlias(models.Model):
     normalized_name = models.CharField(
         _("normalized name"), max_length=1024, null=False, blank=False, db_index=True
     )
-    title = models.CharField(
-        _("title"),
-        max_length=32,
+    title = models.ForeignKey(
+        JudgeTitle,
+        related_name="aliases",
+        on_delete=models.PROTECT,
+        null=True,
         blank=True,
-        help_text=_(
-            "Judicial title parsed from the alias name, for example 'JA' or 'DCJ'."
-        ),
+        verbose_name=_("judicial title"),
     )
 
     class Meta:
@@ -215,9 +197,34 @@ class JudgeAlias(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        parts = judge_identity_service.parse_judge_name(self.name)
+        parts = judge_identity_service.parse_configured_judge_name(self.name)
         self.normalized_name = parts["normalized_name"]
-        self.title = parts["title"]
+        title_changed = False
+        if parts["title"]:
+            self.title = JudgeTitle.objects.filter(
+                abbreviation__iexact=parts["title"]
+            ).first()
+            title_changed = True
+        elif self.pk:
+            previous = JudgeAlias.objects.select_related("title").get(pk=self.pk)
+            previous_parts = judge_identity_service.parse_configured_judge_name(
+                previous.name
+            )
+            title_was_inferred = (
+                previous.title
+                and previous_parts["title"]
+                and previous.title.abbreviation.casefold()
+                == previous_parts["title"].casefold()
+            )
+            if title_was_inferred and self.title_id == previous.title_id:
+                self.title = None
+                title_changed = True
+        if kwargs.get("update_fields") is not None:
+            update_fields = set(kwargs["update_fields"])
+            update_fields.add("normalized_name")
+            if title_changed:
+                update_fields.add("title")
+            kwargs["update_fields"] = update_fields
         return super().save(*args, **kwargs)
 
 

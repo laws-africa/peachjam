@@ -93,22 +93,3 @@
     }
   }
 }
-
-@include media-breakpoint-up(xl) {
-  // Keep long topic lists inside the height available beside the court card.
-  .judge-profile-secondary {
-    flex: 1 1 18rem;
-    height: 18rem;
-    min-height: 0;
-
-    .card,
-    .card-body {
-      min-height: 0;
-    }
-  }
-
-  .judge-profile-secondary__column {
-    height: 100%;
-    min-height: 0;
-  }
-}

@@ -84,7 +84,7 @@ class JudgeIdentityWorkflowForm(forms.Form):
         widget=forms.HiddenInput(),
     )
     selected_aliases = forms.ModelMultipleChoiceField(
-        queryset=JudgeAlias.objects.select_related("judge_person").all(),
+        queryset=JudgeAlias.objects.select_related("judge_person", "title").all(),
         required=False,
     )
     selected_judge_people = forms.ModelMultipleChoiceField(
@@ -100,16 +100,27 @@ class JudgeIdentityWorkflowForm(forms.Form):
         ),
         widget=autocomplete.ModelSelect2(url="autocomplete-judge-people"),
     )
-    target_full_name = forms.CharField(
+    target_first_name = forms.CharField(
         required=False,
-        label=_("new judge person name"),
-        help_text=_(
-            "Optional. Use this to create a new judge person, or to rename the selected target judge person."
-        ),
+        label=_("first name"),
+        help_text=_("Optional. Enter the judge person's given names."),
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
                 "placeholder": "Mogoeng Mogoeng",
+            }
+        ),
+    )
+    target_last_name = forms.CharField(
+        required=False,
+        label=_("last name"),
+        help_text=_(
+            "Use these name fields to create a new judge person or rename the selected judge person."
+        ),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mogoeng",
             }
         ),
     )
@@ -154,44 +165,56 @@ class JudgeIdentityWorkflowForm(forms.Form):
     def clean_apply_identity_changes(self, cleaned_data):
         selected_aliases = list(cleaned_data.get("selected_aliases") or [])
         judge_person = cleaned_data.get("target_judge_person")
-        full_name = (cleaned_data.get("target_full_name") or "").strip()
-        cleaned_data["target_full_name"] = full_name
+        first_name = (cleaned_data.get("target_first_name") or "").strip()
+        last_name = (cleaned_data.get("target_last_name") or "").strip()
+        cleaned_data["target_first_name"] = first_name
+        cleaned_data["target_last_name"] = last_name
 
         if selected_aliases:
-            if not judge_person and not full_name:
-                cleaned_data["target_full_name"] = (
-                    judge_identity_service.canonical_name_from_aliases(
-                        [alias.name for alias in selected_aliases]
-                    )
+            if not judge_person and not last_name:
+                canonical_name = judge_identity_service.canonical_name_from_aliases(
+                    [alias.name for alias in selected_aliases],
+                    title_tokens=judge_identity_service.title_tokens(),
                 )
+                first_name, last_name = judge_identity_service.split_person_name(
+                    canonical_name
+                )
+                cleaned_data["target_first_name"] = first_name
+                cleaned_data["target_last_name"] = last_name
         else:
             if judge_person is None:
                 self.add_error(
                     "target_judge_person",
                     _("Choose the judge person you want to rename."),
                 )
-            if not full_name:
+            if not last_name:
                 self.add_error(
-                    "target_full_name",
-                    _("Enter the new judge person name when no aliases are selected."),
+                    "target_last_name",
+                    _("Enter the new last name when no aliases are selected."),
                 )
-            if judge_person is not None and full_name == judge_person.full_name:
+            if judge_person is not None and (
+                first_name,
+                last_name,
+            ) == (judge_person.first_name, judge_person.last_name):
                 self.add_error(
-                    "target_full_name",
+                    "target_last_name",
                     _("Enter a different name for the selected judge person."),
                 )
 
-        if judge_person is None or not full_name:
+        if judge_person is None or not last_name:
             return
 
         existing = (
-            JudgePerson.objects.filter(full_name__iexact=full_name)
+            JudgePerson.objects.filter(
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+            )
             .exclude(pk=judge_person.pk)
             .first()
         )
         if existing:
             self.add_error(
-                "target_full_name",
+                "target_last_name",
                 _(
                     "A judge person with this name already exists. "
                     "Move aliases to it or merge into it instead of "

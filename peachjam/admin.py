@@ -101,6 +101,7 @@ from peachjam.models import (
     Judge,
     JudgeAlias,
     JudgePerson,
+    JudgeTitle,
     Judgment,
     JurisdictionProfile,
     Label,
@@ -2813,16 +2814,29 @@ class CanonicalJudgeIdentityAdminMixin:
 
 @admin.register(JudgePerson)
 class JudgePersonAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
-    list_display = ("full_name", "slug")
-    search_fields = ("full_name", "aliases__name")
+    list_display = ("first_name", "last_name", "slug")
+    search_fields = ("first_name", "last_name", "aliases__name")
     inlines = [JudgeAliasInline]
 
 
 @admin.register(JudgeAlias)
 class JudgeAliasAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
     list_display = ("name", "title", "judge_person", "normalized_name")
-    search_fields = ("name", "title", "normalized_name", "judge_person__full_name")
+    search_fields = (
+        "name",
+        "title__name",
+        "title__abbreviation",
+        "normalized_name",
+        "judge_person__first_name",
+        "judge_person__last_name",
+    )
     autocomplete_fields = ("judge_person",)
+
+
+@admin.register(JudgeTitle)
+class JudgeTitleAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
+    list_display = ("name", "abbreviation")
+    search_fields = ("name", "abbreviation")
 
 
 @admin.register(MatterType)

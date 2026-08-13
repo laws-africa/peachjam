@@ -31,26 +31,6 @@ from peachjam.models import (
 )
 from peachjam.views.judgment import FilteredJudgmentView
 
-COMPACT_COURT_CHART_MAX_ROWS = 2
-
-JUDICIAL_TITLE_NAMES = {
-    "AJ": gettext_lazy("Acting judge"),
-    "AJA": gettext_lazy("Acting judge of appeal"),
-    "CJ": gettext_lazy("Chief justice"),
-    "DCJ": gettext_lazy("Deputy chief justice"),
-    "DJP": gettext_lazy("Deputy judge president"),
-    "J": gettext_lazy("Judge"),
-    "JA": gettext_lazy("Judge of appeal"),
-    "JP": gettext_lazy("Judge president"),
-    "JSC": gettext_lazy("Justice of the Supreme Court"),
-}
-
-
-def judicial_title_label(title):
-    """Expand a known judicial title while retaining its source abbreviation."""
-    title_name = JUDICIAL_TITLE_NAMES.get(title.upper())
-    return f"{title_name} ({title})" if title_name else title
-
 
 def group_years_into_ranges(years):
     """Group available years into descending decade ranges for compact filters."""
@@ -180,7 +160,9 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
 
         q = self.request.GET.get("q", "").strip()
         if q:
-            queryset = queryset.filter(full_name__icontains=q)
+            queryset = queryset.filter(
+                Q(first_name__icontains=q) | Q(last_name__icontains=q)
+            )
 
         selected_courts = self.selected_courts()
         if selected_courts:
@@ -214,8 +196,8 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             queryset = queryset.filter(pk__in=judge_ids)
 
         if self.request.GET.get("sort") == "judgments":
-            return queryset.order_by("-judgment_count", "full_name", "pk")
-        return queryset.order_by("full_name", "pk")
+            return queryset.order_by("-judgment_count", "last_name", "first_name", "pk")
+        return queryset.order_by("last_name", "first_name", "pk")
 
     def add_judge_metadata(self, judges):
         judge_ids = [judge.pk for judge in judges]
@@ -244,7 +226,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         self.add_judge_metadata(judges)
 
         for judge in judges:
-            first_letter = judge.full_name[0].upper() if judge.full_name else "#"
+            first_letter = judge.last_name[0].upper() if judge.last_name else "#"
             judge.first_letter = first_letter
             judge.initials = judge_initials(judge.full_name)
 
@@ -296,7 +278,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
                 "values": self.request.GET.getlist("courts"),
             },
             "topics": {
-                "label": gettext_lazy("Case topics"),
+                "label": gettext_lazy("Judgment topics"),
                 "type": "checkbox",
                 "options": [
                     (str(topic.pk), topic.name)
@@ -371,7 +353,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         if exclude != "titles" and self.selected_titles():
             queryset = queryset.filter(
                 bench__judge_person=self.judge_person,
-                bench__matched_alias__title__in=self.selected_titles(),
+                bench__matched_alias__title__abbreviation__in=self.selected_titles(),
             )
         if exclude != "year_ranges" and self.selected_years():
             queryset = queryset.filter(date__year__in=self.selected_years())
@@ -380,8 +362,8 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     def add_facets(self, context):
         context["facet_data"] = {}
         self.add_courts_facet(context)
-        self.add_titles_facet(context)
         self.add_topics_facet(context)
+        self.add_titles_facet(context)
         self.add_year_ranges_facet(context)
 
     def add_titles_facet(self, context):
@@ -393,23 +375,28 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
                 bench__judge_person=self.judge_person,
                 bench__matched_alias__title__isnull=False,
             )
-            .exclude(bench__matched_alias__title="")
-            .order_by("bench__matched_alias__title")
-            .values_list("bench__matched_alias__title", flat=True)
+            .order_by("bench__matched_alias__title__name")
+            .values_list(
+                "bench__matched_alias__title__abbreviation",
+                "bench__matched_alias__title__name",
+            )
             .distinct()
         )
         if titles:
             context["facet_data"]["titles"] = {
                 "label": gettext_lazy("Judicial title"),
                 "type": "checkbox",
-                "options": [(title, judicial_title_label(title)) for title in titles],
+                "options": [
+                    (abbreviation, f"{name} ({abbreviation})")
+                    for abbreviation, name in titles
+                ],
                 "values": self.request.GET.getlist("titles"),
             }
 
     def add_topics_facet(self, context):
         if self.available_flynote_topics:
             context["facet_data"]["topics"] = {
-                "label": gettext_lazy("Case topics"),
+                "label": gettext_lazy("Judgment topics"),
                 "type": "checkbox",
                 "options": [
                     (str(topic.pk), topic.name)
@@ -444,27 +431,21 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         if not work_ids.exists():
             return {
                 "incoming_count": 0,
-                "outgoing_count": 0,
                 "most_cited_judgments": [],
             }
 
         incoming_citations = ExtractedCitation.objects.filter(
             target_work_id__in=work_ids,
             citing_work__documents__published=True,
+            citing_work__documents__doc_type="judgment",
         ).exclude(citing_work_id__in=work_ids)
-        outgoing_citations = ExtractedCitation.objects.filter(
-            citing_work_id__in=work_ids,
-            target_work__documents__published=True,
-        ).exclude(target_work_id__in=work_ids)
         incoming_work_ids = incoming_citations.values_list(
             "citing_work_id", flat=True
         ).distinct()
-        outgoing_work_ids = outgoing_citations.values_list(
-            "target_work_id", flat=True
-        ).distinct()
 
         most_cited_judgments = list(
-            Judgment.objects.filter(bench__judge_person=self.judge_person)
+            Judgment.objects.for_document_table()
+            .filter(bench__judge_person=self.judge_person)
             .filter(published=True)
             .annotate(
                 incoming_citation_count=Count(
@@ -472,7 +453,8 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
                     filter=(
                         ~Q(work__incoming_citations__citing_work_id__in=work_ids)
                         & Q(
-                            work__incoming_citations__citing_work__documents__published=True
+                            work__incoming_citations__citing_work__documents__published=True,
+                            work__incoming_citations__citing_work__documents__doc_type="judgment",
                         )
                     ),
                     distinct=True,
@@ -483,7 +465,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
         )
         return {
             "incoming_count": incoming_work_ids.count(),
-            "outgoing_count": outgoing_work_ids.count(),
             "most_cited_judgments": most_cited_judgments,
         }
 
@@ -518,7 +499,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["judge_person"] = self.judge_person
-        context["doc_table_show_court"] = True
+        context["doc_table_show_court"] = False
         if self.request.htmx:
             return context
 
@@ -557,32 +538,40 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             if judge_year_breakdown
             else None
         )
-        context["judge_latest_title"] = (
+        latest_title = (
             bench_entries.exclude(judgment__date__isnull=True)
             .exclude(matched_alias__title__isnull=True)
-            .exclude(matched_alias__title="")
             .order_by("-judgment__date", "-judgment_id", "-pk")
-            .values_list("matched_alias__title", flat=True)
+            .values(
+                "matched_alias__title__abbreviation",
+                "matched_alias__title__name",
+            )
             .first()
         )
+        context["judge_latest_title"] = (
+            latest_title["matched_alias__title__abbreviation"] if latest_title else None
+        )
         context["judge_latest_title_label"] = (
-            judicial_title_label(context["judge_latest_title"])
-            if context["judge_latest_title"]
+            f'{latest_title["matched_alias__title__name"]} '
+            f'({latest_title["matched_alias__title__abbreviation"]})'
+            if latest_title
             else None
         )
         matched_titles = (
             bench_entries.exclude(matched_alias__title__isnull=True)
-            .exclude(matched_alias__title="")
-            .order_by("matched_alias__title")
-            .values_list("matched_alias__title", flat=True)
+            .order_by("matched_alias__title__name")
+            .values_list(
+                "matched_alias__title__abbreviation",
+                "matched_alias__title__name",
+            )
             .distinct()
         )
         context["judge_titles"] = [
             {
-                "abbreviation": title,
-                "label": judicial_title_label(title),
+                "abbreviation": abbreviation,
+                "label": f"{name} ({abbreviation})",
             }
-            for title in matched_titles
+            for abbreviation, name in matched_titles
         ]
         year_ranges = {
             year_range["start"]: f"{year_range['start']}:{year_range['end']}"
@@ -602,13 +591,13 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             (row["judgment_count"] for row in judge_year_breakdown), default=0
         )
         context["judge_court_chart"] = [dict(row) for row in judge_court_breakdown]
-        context["judge_court_chart_is_compact"] = (
-            len(judge_court_breakdown) <= COMPACT_COURT_CHART_MAX_ROWS
-        )
         context["judge_court_max"] = max(
             (row["judgment_count"] for row in judge_court_breakdown), default=0
         )
         context["judge_case_topics"] = self.get_case_topics()
+        context["judge_case_topic_max"] = max(
+            (row["judgment_count"] for row in context["judge_case_topics"]), default=0
+        )
         context["judge_leading_court"] = (
             judge_court_breakdown[0] if judge_court_breakdown else None
         )
@@ -663,16 +652,18 @@ class JudgeIdentityWorkflowMixin:
         return active_tab
 
     def get_alias_workflow_rows(self, query):
-        alias_qs = JudgeAlias.objects.select_related("judge_person").order_by(
+        alias_qs = JudgeAlias.objects.select_related("judge_person", "title").order_by(
             "name",
             "pk",
         )
         if query:
             alias_qs = alias_qs.filter(
                 Q(name__icontains=query)
-                | Q(title__icontains=query)
+                | Q(title__abbreviation__icontains=query)
+                | Q(title__name__icontains=query)
                 | Q(normalized_name__icontains=query)
-                | Q(judge_person__full_name__icontains=query)
+                | Q(judge_person__first_name__icontains=query)
+                | Q(judge_person__last_name__icontains=query)
             ).distinct()
 
         aliases = list(alias_qs[: self.workflow_limit])
@@ -748,14 +739,18 @@ class JudgeIdentityWorkflowMixin:
         return rows
 
     def get_judge_person_workflow_rows(self, query):
-        judge_person_qs = JudgePerson.objects.order_by("full_name", "pk").annotate(
+        judge_person_qs = JudgePerson.objects.order_by(
+            "last_name", "first_name", "pk"
+        ).annotate(
             alias_count=Count("aliases", distinct=True),
             bench_rows=Count("bench_entries", distinct=True),
             judgments=Count("bench_entries__judgment_id", distinct=True),
         )
         if query:
             judge_person_qs = judge_person_qs.filter(
-                Q(full_name__icontains=query) | Q(aliases__name__icontains=query)
+                Q(first_name__icontains=query)
+                | Q(last_name__icontains=query)
+                | Q(aliases__name__icontains=query)
             ).distinct()
 
         rows = []
@@ -815,13 +810,17 @@ class JudgeIdentityWorkflowMixin:
         with transaction.atomic():
             selected_aliases = list(cleaned_data["selected_aliases"])
             judge_person = cleaned_data["target_judge_person"]
-            requested_name = cleaned_data["target_full_name"]
+            requested_first_name = cleaned_data["target_first_name"]
+            requested_last_name = cleaned_data["target_last_name"]
             created = False
             renamed = False
             old_name = None
             if judge_person is None:
                 judge_person, created = (
-                    judge_identity_service.get_or_create_judge_person(requested_name)
+                    judge_identity_service.get_or_create_judge_person(
+                        requested_last_name,
+                        requested_first_name,
+                    )
                 )
 
             source_judge_people = set()
@@ -838,9 +837,16 @@ class JudgeIdentityWorkflowMixin:
                         judge_alias, judge_person
                     )
 
-            if requested_name and judge_person.full_name != requested_name:
+            requested_name = " ".join(
+                part for part in (requested_first_name, requested_last_name) if part
+            )
+            if requested_last_name and judge_person.full_name != requested_name:
                 old_name = judge_person.full_name
-                judge_identity_service.rename_judge_person(judge_person, requested_name)
+                judge_identity_service.rename_judge_person(
+                    judge_person,
+                    first_name=requested_first_name,
+                    last_name=requested_last_name,
+                )
                 renamed = True
 
             deleted_count = 0

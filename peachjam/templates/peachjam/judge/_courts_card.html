@@ -1,0 +1,48 @@
+{% load i18n humanize %}
+<section class="card shadow-sm flex-grow-1"
+         aria-labelledby="judge-courts-heading">
+  <div class="card-body d-flex flex-column">
+    <h2 class="h4" id="judge-courts-heading">{% trans "Judgments by court" %}</h2>
+    {% if judge_court_chart %}
+      <figure class="judge-court-chart mb-0"
+              aria-labelledby="judge-courts-heading judge-courts-caption">
+        <figcaption class="visually-hidden" id="judge-courts-caption">
+          {% trans "Ranked chart showing the number of judgments available for each court." %}
+        </figcaption>
+        <div class="judge-horizontal-chart__scroll judge-horizontal-chart__scroll--courts pe-2"
+             role="region"
+             aria-labelledby="judge-courts-heading">
+          <ol class="list-group list-group-flush">
+            {% for row in judge_court_chart %}
+              <li class="list-group-item px-0 py-3">
+                <div class="judge-horizontal-chart__row">
+                  <div class="judge-horizontal-chart__label">
+                    <a href="{{ request.path }}?courts={{ row.judgment__court__name|urlencode }}#judge-judgments-heading">{{ row.judgment__court__name }}</a>
+                    {% if row.first_year %}
+                      <div class="small text-muted mt-1">
+                        {% if row.first_year == row.latest_year %}
+                          {{ row.first_year }}
+                        {% else %}
+                          {{ row.first_year }}–{{ row.latest_year }}
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="judge-horizontal-chart__plot">
+                    <a class="judge-horizontal-chart__bar"
+                       href="{{ request.path }}?courts={{ row.judgment__court__name|urlencode }}#judge-judgments-heading"
+                       style="width: {% widthratio row.judgment_count judge_court_max 100 %}%"
+                       aria-label="{% blocktrans count judgment_count=row.judgment_count with court=row.judgment__court__name %}Filter judgments from {{ court }}, {{ judgment_count }} judgment{% plural %}Filter judgments from {{ court }}, {{ judgment_count }} judgments{% endblocktrans %}"></a>
+                    <span class="judge-horizontal-chart__value">{{ row.judgment_count|intcomma }}</span>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ol>
+        </div>
+      </figure>
+    {% else %}
+      <p class="text-muted mb-0">{% trans "No court history is available." %}</p>
+    {% endif %}
+  </div>
+</section>

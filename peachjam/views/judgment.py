@@ -117,18 +117,24 @@ class FilteredJudgmentView(FilteredDocumentListView):
                     .order_by()
                     .values_list(
                         "bench__judge_person_id",
-                        "bench__judge_person__full_name",
+                        "bench__judge_person__first_name",
+                        "bench__judge_person__last_name",
                     )
                     .distinct(),
-                    key=lambda judge: judge[1],
+                    key=lambda judge: (judge[2], judge[1]),
                 )
                 if judges:
                     context["facet_data"]["judge_people"] = {
                         "label": JudgePerson.model_label_plural,
                         "type": "checkbox",
                         "options": [
-                            (str(judge_id), judge_name)
-                            for judge_id, judge_name in judges
+                            (
+                                str(judge_id),
+                                " ".join(
+                                    part for part in (first_name, last_name) if part
+                                ),
+                            )
+                            for judge_id, first_name, last_name in judges
                         ],
                         "values": self.request.GET.getlist("judge_people"),
                     }

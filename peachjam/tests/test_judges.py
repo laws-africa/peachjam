@@ -26,9 +26,11 @@ from peachjam.models import (
     Court,
     ExtractedCitation,
     Flynote,
+    GenericDocument,
     Judge,
     JudgeAlias,
     JudgePerson,
+    JudgeTitle,
     Judgment,
     JudgmentFlynote,
 )
@@ -50,18 +52,27 @@ CANONICAL_JUDGE_IDENTITY_FLYNOTE_SETTINGS = {
 
 
 class JudgeParsingTests(TestCase):
-    def test_judge_person_display_name_parts_keep_only_surname_boldable(self):
+    def test_judge_person_full_name_uses_concrete_name_fields(self):
+        judge_person = JudgePerson(first_name="Greg AJ", last_name="Kempe")
+
+        self.assertEqual("Greg AJ Kempe", judge_person.full_name)
+
+    def test_split_person_name_supports_common_source_formats(self):
         self.assertEqual(
-            ("Kempe", ", Greg AJ"),
-            JudgePerson(full_name="Kempe, Greg AJ").display_name_parts,
+            ("Katherine", "Savage"),
+            judge_identity_service.split_person_name("Savage, Katherine"),
         )
         self.assertEqual(
-            ("Kempe", " AJ"),
-            JudgePerson(full_name="Kempe AJ").display_name_parts,
+            ("Katherine", "Savage"),
+            judge_identity_service.split_person_name("Katherine Savage"),
         )
         self.assertEqual(
-            ("Da Silva", " Sallie"),
-            JudgePerson(full_name="Da Silva Sallie").display_name_parts,
+            ("Sallie", "Van der Merwe"),
+            judge_identity_service.split_person_name("Sallie Van der Merwe"),
+        )
+        self.assertEqual(
+            ("", "Ackermann"),
+            judge_identity_service.split_person_name("Ackermann"),
         )
 
     def test_parse_judge_name_splits_source_name_and_title(self):
@@ -162,7 +173,7 @@ class JudgeParsingTests(TestCase):
 
 class JudgeAliasModelTests(TestCase):
     def test_save_sets_normalized_name_and_title(self):
-        judge_person = JudgePerson.objects.create(full_name="Abban", slug="abban")
+        judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
 
         alias = JudgeAlias.objects.create(
             judge_person=judge_person,
@@ -170,7 +181,75 @@ class JudgeAliasModelTests(TestCase):
         )
 
         self.assertEqual("abban ja", alias.normalized_name)
-        self.assertEqual("JA", alias.title)
+        self.assertEqual("JA", alias.title.abbreviation)
+        self.assertEqual("Judge of appeal", alias.title.name)
+
+    def test_save_does_not_create_missing_title(self):
+        JudgeAlias.objects.filter(title__abbreviation="JA").delete()
+        JudgeTitle.objects.filter(abbreviation="JA").delete()
+        judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
+
+        alias = JudgeAlias.objects.create(
+            judge_person=judge_person,
+            name="Abban JA",
+        )
+
+        self.assertIsNone(alias.title)
+        self.assertFalse(JudgeTitle.objects.filter(abbreviation="JA").exists())
+
+    def test_save_uses_database_title_and_preserves_explicit_title(self):
+        title = JudgeTitle.objects.create(
+            name="Senior resident magistrate",
+            abbreviation="srm",
+        )
+        judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
+
+        parsed_alias = JudgeAlias.objects.create(
+            judge_person=judge_person,
+            name="Abban SRM",
+        )
+        explicit_alias = JudgeAlias.objects.create(
+            judge_person=judge_person,
+            name="Abban",
+            title=title,
+        )
+
+        title.refresh_from_db()
+        self.assertEqual("SRM", title.abbreviation)
+        self.assertEqual(title, parsed_alias.title)
+        self.assertEqual(title, explicit_alias.title)
+
+    def test_save_clears_an_inferred_title_removed_from_the_alias(self):
+        judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
+        alias = JudgeAlias.objects.create(
+            judge_person=judge_person,
+            name="Abban JA",
+        )
+
+        alias.name = "Abban"
+        alias.save(update_fields=["name"])
+
+        self.assertIsNone(alias.title)
+
+    def test_save_preserves_an_explicitly_changed_title(self):
+        judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
+        alias = JudgeAlias.objects.create(
+            judge_person=judge_person,
+            name="Abban JA",
+        )
+        explicit_title = JudgeTitle.objects.get(abbreviation="J")
+
+        alias.name = "Abban"
+        alias.title = explicit_title
+        alias.save()
+
+        self.assertEqual(explicit_title, alias.title)
+
+    def test_judge_title_stores_name_and_abbreviation(self):
+        title = JudgeTitle.objects.get(abbreviation="JSC")
+
+        self.assertEqual("Justice of the Supreme Court", title.name)
+        self.assertEqual("Justice of the Supreme Court (JSC)", str(title))
 
 
 class BenchInlineFormTests(TestCase):
@@ -185,7 +264,7 @@ class BenchInlineFormTests(TestCase):
             case_name="Abban v Republic",
         )
         self.judge_person = JudgePerson.objects.create(
-            full_name="Abban",
+            last_name="Abban",
             slug="abban",
         )
         self.alias = JudgeAlias.objects.create(
@@ -313,7 +392,7 @@ class BenchInlineFormTests(TestCase):
 
     def test_form_uses_selected_canonical_judge_when_editor_overrides_suggestion(self):
         other_person = JudgePerson.objects.create(
-            full_name="Anukum",
+            last_name="Anukum",
             slug="anukum",
         )
         form = BenchInlineForm(
@@ -334,7 +413,7 @@ class BenchInlineFormTests(TestCase):
 
 class JudgeIdentityResolutionTests(TestCase):
     def test_resolve_judge_person_reuses_existing_alias_owner(self):
-        judge_person = JudgePerson.objects.create(full_name="Abban", slug="abban")
+        judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
         alias = JudgeAlias.objects.create(
             judge_person=judge_person,
             name="ABBAN, J.A.",
@@ -348,7 +427,7 @@ class JudgeIdentityResolutionTests(TestCase):
         self.assertFalse(resolved["created"])
 
     def test_resolve_judge_person_reuses_existing_person_without_alias(self):
-        judge_person = JudgePerson.objects.create(full_name="ABBAN", slug="abban")
+        judge_person = JudgePerson.objects.create(last_name="ABBAN", slug="abban")
 
         resolved = judge_identity_service.resolve_judge_person(["Abban JA"])
 
@@ -356,6 +435,13 @@ class JudgeIdentityResolutionTests(TestCase):
         self.assertEqual([], resolved["aliases"])
         self.assertEqual("Abban", resolved["canonical_name"])
         self.assertFalse(resolved["created"])
+
+    def test_resolve_judge_person_populates_concrete_name_fields(self):
+        resolved = judge_identity_service.resolve_judge_person(["Savage, Katherine JA"])
+
+        self.assertTrue(resolved["created"])
+        self.assertEqual("Katherine", resolved["judge_person"].first_name)
+        self.assertEqual("Savage", resolved["judge_person"].last_name)
 
     def test_resolve_judge_person_creates_new_person_when_needed(self):
         resolved = judge_identity_service.resolve_judge_person(["Abban JA"])
@@ -401,7 +487,7 @@ class ExtractorJudgeIdentityTests(TestCase):
 
     def setUp(self):
         self.extractor = ExtractorService()
-        self.judge_person = JudgePerson.objects.create(full_name="Abban", slug="abban")
+        self.judge_person = JudgePerson.objects.create(last_name="Abban", slug="abban")
         self.alias = JudgeAlias.objects.create(
             judge_person=self.judge_person,
             name="Abban JA",
@@ -447,7 +533,7 @@ class ExtractorJudgeIdentityTests(TestCase):
         self,
     ):
         other_person = JudgePerson.objects.create(
-            full_name="Another Abban",
+            last_name="Another Abban",
             slug="another-abban",
         )
         JudgeAlias.objects.create(
@@ -468,7 +554,7 @@ class ExtractorJudgeIdentityTests(TestCase):
         self,
     ):
         existing_person = JudgePerson.objects.create(
-            full_name="Unknown",
+            last_name="Unknown",
             slug="unknown",
         )
         details = {
@@ -546,7 +632,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def setUp(self):
         self.legacy_judge = Judge.objects.create(name="ABBAN, J.A.")
         self.judge_person = JudgePerson.objects.create(
-            full_name="Justice Abban",
+            last_name="Justice Abban",
             slug="justice-abban",
         )
         self.alias = JudgeAlias.objects.create(
@@ -568,8 +654,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         )
 
     def judge_name_markup(self, name):
-        judge_person = JudgePerson(full_name=name)
-        return f"<strong>{judge_person.surname}</strong>{judge_person.name_remainder}"
+        return f"<strong>{name}</strong>"
 
     def test_judge_initials_use_first_and_last_name(self):
         self.assertEqual("JA", judge_initials("Justice Abban"))
@@ -609,11 +694,11 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def test_judge_list_shows_linked_canonical_judges(self):
         other_judge = Judge.objects.create(name="Other J")
         other_person = JudgePerson.objects.create(
-            full_name="Other Judge",
+            last_name="Other Judge",
             slug="other-judge",
         )
         unlinked_person = JudgePerson.objects.create(
-            full_name="Unlinked Judge",
+            last_name="Unlinked Judge",
             slug="unlinked-judge",
         )
         other_judgment = Judgment.objects.create(
@@ -655,7 +740,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_public_judge_pages_exclude_unpublished_judgments(self):
         unpublished_person = JudgePerson.objects.create(
-            full_name="Unpublished Judge",
+            last_name="Unpublished Judge",
             slug="unpublished-judge",
         )
         for judge_person in (self.judge_person, unpublished_person):
@@ -705,7 +790,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         for index in range(50):
             legacy_judge = Judge.objects.create(name=f"Pagination Judge {index:02d}")
             judge_person = JudgePerson.objects.create(
-                full_name=f"Pagination Judge {index:02d}"
+                last_name=f"Pagination Judge {index:02d}"
             )
             judgment = Judgment.objects.create(
                 language=Language.objects.get(pk="en"),
@@ -737,7 +822,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def test_judge_list_filters_by_search(self):
         other_judge = Judge.objects.create(name="Other J")
         other_person = JudgePerson.objects.create(
-            full_name="Other Judge",
+            last_name="Other Judge",
             slug="other-judge",
         )
         other_judgment = Judgment.objects.create(
@@ -770,7 +855,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_list_ignores_removed_z_to_a_sort(self):
-        other_person = JudgePerson.objects.create(full_name="Zulu Judge")
+        other_person = JudgePerson.objects.create(last_name="Zulu Judge")
         other_judgment = Judgment.objects.create(
             language=Language.objects.get(pk="en"),
             court=Court.objects.first(),
@@ -797,7 +882,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def test_judge_list_filters_by_active_year(self):
         other_judge = Judge.objects.create(name="Other J")
         other_person = JudgePerson.objects.create(
-            full_name="Other Judge",
+            last_name="Other Judge",
             slug="other-judge",
         )
         other_judgment = Judgment.objects.create(
@@ -855,7 +940,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             code="AC",
             court_class=self.judgment.court.court_class,
         )
-        other_person = JudgePerson.objects.create(full_name="Other Judge")
+        other_person = JudgePerson.objects.create(last_name="Other Judge")
         other_judgment = Judgment.objects.create(
             language=Language.objects.get(pk="en"),
             court=other_court,
@@ -908,7 +993,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         JudgmentFlynote.objects.create(document=self.judgment, flynote=contract)
 
         other_person = JudgePerson.objects.create(
-            full_name="Other Judge",
+            last_name="Other Judge",
             slug="other-judge",
         )
         other_judgment = Judgment.objects.create(
@@ -940,7 +1025,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             self.judge_name_markup(other_person.full_name),
             html=True,
         )
-        self.assertContains(response, "Case topics")
+        self.assertContains(response, "Judgment topics")
         self.assertNotContains(response, ">ALL</a>")
         self.assertContains(response, "Civil law")
         self.assertEqual([civil], response.context["selected_flynote_topics"])
@@ -967,7 +1052,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def test_judgment_list_filters_by_canonical_judge_when_public_enabled(self):
         other_judge = Judge.objects.create(name="Other J")
         other_person = JudgePerson.objects.create(
-            full_name="Other Judge",
+            last_name="Other Judge",
             slug="other-judge",
         )
         other_judgment = Judgment.objects.create(
@@ -1012,7 +1097,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def test_judge_detail_lists_canonical_judge_judgments(self):
         other_judge = Judge.objects.create(name="Other J")
         other_person = JudgePerson.objects.create(
-            full_name="Other Judge",
+            last_name="Other Judge",
             slug="other-judge",
         )
         other_judgment = Judgment.objects.create(
@@ -1053,8 +1138,9 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_surname_is_bold_in_list_and_detail_views(self):
-        self.judge_person.full_name = "Kempe, Greg AJ"
-        self.judge_person.save(update_fields=["full_name"])
+        self.judge_person.first_name = "Greg AJ"
+        self.judge_person.last_name = "Kempe"
+        self.judge_person.save(update_fields=["first_name", "last_name"])
         expected_name = "<strong>Kempe</strong>, Greg AJ"
 
         list_response = self.client.get(reverse("judges"))
@@ -1211,7 +1297,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertNotContains(response, ">ALL</a>")
         self.assertContains(response, "Civil law")
         self.assertContains(response, "Criminal law")
-        self.assertContains(response, "Case topics")
+        self.assertContains(response, "Judgment topics")
+        self.assertContains(response, "judge-horizontal-chart__bar")
         self.assertNotContains(response, "Leading flynote topics")
         self.assertContains(response, 'name="topics"')
         self.assertContains(response, f'value="{civil.pk}"')
@@ -1295,12 +1382,11 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         )
         self.assertEqual(1, response.context["judge_year_max"])
         self.assertEqual(2, response.context["judge_court_max"])
-        self.assertTrue(response.context["judge_court_chart_is_compact"])
         self.assertEqual(2, len(response.context["judge_year_activity"]))
         self.assertContains(response, "Justice Abban")
         self.assertContains(response, "Judgments by year")
         self.assertContains(response, "judge-year-chart__bar", count=2)
-        self.assertContains(response, "judge-court-chart__bar")
+        self.assertContains(response, "judge-horizontal-chart__bar")
         self.assertContains(response, "Ranked chart showing the number of judgments")
         self.assertContains(response, "Most recent title")
         self.assertContains(response, "Judicial titles")
@@ -1314,7 +1400,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
-    def test_judge_detail_uses_long_court_layout_for_three_courts(self):
+    def test_judge_detail_keeps_dashboard_cards_in_stable_order(self):
         for index in range(2):
             court = Court.objects.create(
                 name=f"Additional Court {index}",
@@ -1339,9 +1425,23 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
         self.assertEqual(200, response.status_code)
         self.assertEqual(3, len(response.context["judge_court_chart"]))
-        self.assertFalse(response.context["judge_court_chart_is_compact"])
+        content = response.content.decode()
+        self.assertLess(
+            content.index('id="judge-activity-heading"'),
+            content.index('id="judge-titles-heading"'),
+        )
+        self.assertLess(
+            content.index('id="judge-titles-heading"'),
+            content.index('id="judge-topics-heading"'),
+        )
+        self.assertLess(
+            content.index('id="judge-topics-heading"'),
+            content.index('id="judge-courts-heading"'),
+        )
+        self.assertContains(response, 'id="judge-activity-heading"', count=1)
         self.assertContains(response, 'id="judge-topics-heading"', count=1)
         self.assertContains(response, 'id="judge-titles-heading"', count=1)
+        self.assertContains(response, 'id="judge-courts-heading"', count=1)
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_detail_shows_citation_relationships(self):
@@ -1360,25 +1460,39 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             citing_work=self.judgment.work,
             target_work=other_judgment.work,
         )
+        other_document = GenericDocument.objects.create(
+            language=Language.objects.get(pk="en"),
+            date=datetime.date(2025, 4, 3),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            frbr_uri_doctype="doc",
+            title="Commentary citing the judgment",
+        )
+        ExtractedCitation.objects.create(
+            citing_work=other_document.work,
+            target_work=self.judgment.work,
+        )
 
         response = self.client.get(self.judge_person.get_absolute_url())
 
         self.assertEqual(200, response.status_code)
         relationships = response.context["judge_citation_relationships"]
         self.assertEqual(1, relationships["incoming_count"])
-        self.assertEqual(1, relationships["outgoing_count"])
+        self.assertNotIn("outgoing_count", relationships)
         self.assertNotIn("citing_judges", relationships)
         self.assertNotIn("cited_judges", relationships)
         self.assertEqual(self.judgment, relationships["most_cited_judgments"][0])
         self.assertContains(response, "Citation relationships")
         self.assertContains(
             response,
-            "Based on currently available citation data",
+            f"Based on citation data available in {settings.PEACHJAM['APP_NAME']}.",
         )
         self.assertNotContains(response, "Citation influence")
         self.assertNotContains(response, "Judges citing these judgments")
         self.assertNotContains(response, "Frequently cited judges")
-        self.assertTrue(response.context["doc_table_show_court"])
+        self.assertFalse(response.context["doc_table_show_court"])
+        self.assertContains(response, 'id="judge-most-cited-doc-table"')
+        self.assertContains(response, "Most cited judgments")
+        self.assertNotContains(response, "None judgments")
 
 
 @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_DISABLED_SETTINGS)
@@ -1511,9 +1625,9 @@ class BackfillJudgePeopleCommandTests(TestCase):
         self.assertEqual(alias_one.judge_person_id, alias_two.judge_person_id)
         self.assertEqual(alias_one.judge_person_id, alias_three.judge_person_id)
         self.assertEqual("abban", alias_one.judge_person.full_name.casefold())
-        self.assertEqual("JA", alias_one.title)
-        self.assertEqual("JA", alias_two.title)
-        self.assertEqual("J", alias_three.title)
+        self.assertEqual("JA", alias_one.title.abbreviation)
+        self.assertEqual("JA", alias_two.title.abbreviation)
+        self.assertEqual("J", alias_three.title.abbreviation)
 
         self.bench_one.refresh_from_db()
         self.bench_two.refresh_from_db()
@@ -1540,7 +1654,7 @@ class BackfillJudgePeopleCommandTests(TestCase):
 
     def test_command_reuses_existing_case_insensitive_judge_person(self):
         existing = JudgePerson.objects.create(
-            full_name="ABBAN",
+            last_name="ABBAN",
             slug="abban-existing",
         )
 
@@ -1556,7 +1670,7 @@ class BackfillJudgePeopleCommandTests(TestCase):
 
         output = out.getvalue()
 
-        self.assertIn("JudgePerson(full_name='Abban')", output)
+        self.assertIn("JudgePerson(first_name='', last_name='Abban')", output)
         self.assertIn(
             "JudgeAlias(name='Abban JA', normalized_name='abban ja', title='JA')",
             output,
@@ -1582,8 +1696,8 @@ class BackfillJudgePeopleCommandTests(TestCase):
 
         self.assertEqual(acquah_cj.judge_person_id, acquah_jsc.judge_person_id)
         self.assertEqual("Acquah", acquah_cj.judge_person.full_name)
-        self.assertEqual("CJ", acquah_cj.title)
-        self.assertEqual("JSC", acquah_jsc.title)
+        self.assertEqual("CJ", acquah_cj.title.abbreviation)
+        self.assertEqual("JSC", acquah_jsc.title.abbreviation)
 
 
 @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
@@ -1600,13 +1714,13 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
         )
         self.client.force_login(self.admin_user)
         self.workflow_url = reverse("peachjam_judgeperson_workflow")
-        self.target = JudgePerson.objects.create(full_name="Abban", slug="abban")
+        self.target = JudgePerson.objects.create(last_name="Abban", slug="abban")
         self.duplicate = JudgePerson.objects.create(
-            full_name="Abban duplicate",
+            last_name="Abban duplicate",
             slug="abban-duplicate",
         )
         self.empty_judge_person = JudgePerson.objects.create(
-            full_name="Unused judge person",
+            last_name="Unused judge person",
             slug="unused-judge-person",
         )
         self.alias_one = JudgeAlias.objects.create(
@@ -1656,7 +1770,8 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
             {
                 "action": "apply_identity_changes",
                 "target_judge_person": str(self.target.pk),
-                "target_full_name": "",
+                "target_first_name": "",
+                "target_last_name": "",
                 "selected_aliases": [
                     str(self.alias_one.pk),
                     str(self.alias_two.pk),
@@ -1700,7 +1815,8 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
             {
                 "action": "apply_identity_changes",
                 "target_judge_person": "",
-                "target_full_name": "",
+                "target_first_name": "",
+                "target_last_name": "",
                 "selected_aliases": [str(self.alias_two.pk)],
                 "q": "",
             },
@@ -1708,10 +1824,10 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(JudgePerson.objects.filter(full_name="ABBAN").exists())
+        self.assertTrue(JudgePerson.objects.filter(last_name="ABBAN").exists())
         self.assertTrue(JudgePerson.objects.filter(pk=self.duplicate.pk).exists())
 
-        created_person = JudgePerson.objects.get(full_name="ABBAN")
+        created_person = JudgePerson.objects.get(last_name="ABBAN")
         alias = JudgeAlias.objects.get(
             judge_person=created_person,
             name="ABBAN, J.A.",
@@ -1727,7 +1843,8 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
             {
                 "action": "apply_identity_changes",
                 "target_judge_person": str(self.target.pk),
-                "target_full_name": "Justice Abban",
+                "target_first_name": "Justice",
+                "target_last_name": "Abban",
                 "q": "",
             },
             follow=True,
@@ -1737,6 +1854,8 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
         self.assertContains(response, "Renamed judge person")
 
         self.target.refresh_from_db()
+        self.assertEqual(self.target.first_name, "Justice")
+        self.assertEqual(self.target.last_name, "Abban")
         self.assertEqual(self.target.full_name, "Justice Abban")
         self.assertEqual(self.target.slug, "justice-abban")
 
@@ -1746,7 +1865,8 @@ class JudgeIdentityWorkflowAdminTests(TestCase):
             {
                 "action": "apply_identity_changes",
                 "target_judge_person": str(self.target.pk),
-                "target_full_name": "Justice Abban",
+                "target_first_name": "Justice",
+                "target_last_name": "Abban",
                 "selected_aliases": [
                     str(self.alias_one.pk),
                     str(self.alias_two.pk),

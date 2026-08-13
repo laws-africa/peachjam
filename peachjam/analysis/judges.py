@@ -36,6 +36,19 @@ TITLE_PREFIX_TOKENS = {
     "AG",
 }
 
+SURNAME_PARTICLES = {
+    "da",
+    "de",
+    "del",
+    "der",
+    "di",
+    "du",
+    "la",
+    "le",
+    "van",
+    "von",
+}
+
 PUNCTUATION_PATTERN = re.compile(r"[.,;:()]+")
 WHITESPACE_PATTERN = re.compile(r"\s+")
 NON_ALNUM_PATTERN = re.compile(r"[^0-9A-Za-z]+")
@@ -47,16 +60,18 @@ class JudgeIdentityService:
             return re.escape(token)
         return r"[.\s-]*".join(re.escape(char) for char in token)
 
-    def strip_trailing_titles(self, raw_name):
+    def strip_trailing_titles(self, raw_name, title_tokens=None):
         value = (raw_name or "").strip()
         if not value:
             return value
 
+        if title_tokens is None:
+            title_tokens = TITLE_TOKENS
         stripped_real_title = False
         while True:
             removed = False
 
-            for token in sorted(TITLE_TOKENS, key=len, reverse=True):
+            for token in sorted(title_tokens, key=len, reverse=True):
                 token_pattern = self.title_token_pattern(token)
                 pattern = rf"[\s,.;:-]*{token_pattern}[.\s,.;:-]*$"
                 updated = re.sub(pattern, "", value, flags=re.IGNORECASE)
@@ -93,22 +108,24 @@ class JudgeIdentityService:
         value = WHITESPACE_PATTERN.sub(" ", value)
         return value.casefold().strip()
 
-    def extract_title(self, tokens):
+    def extract_title(self, tokens, title_tokens=None):
+        if title_tokens is None:
+            title_tokens = TITLE_TOKENS
         max_size = min(3, len(tokens))
         for size in range(max_size, 0, -1):
             candidate = "".join(tokens[-size:]).upper()
-            if candidate in TITLE_TOKENS:
+            if candidate in title_tokens:
                 return candidate, tokens[:-size]
         return "", tokens
 
-    def parse_judge_name(self, value):
+    def parse_judge_name(self, value, title_tokens=None):
         """Split a source judge string into raw, normalized, canonical, and title parts."""
         raw_name = (value or "").strip()
         normalized_name = self.normalize_judge_name(raw_name)
         tokens = normalized_name.split()
         title = ""
         if tokens:
-            title, tokens = self.extract_title(tokens)
+            title, tokens = self.extract_title(tokens, title_tokens=title_tokens)
 
         return {
             "raw_name": raw_name,
@@ -117,16 +134,56 @@ class JudgeIdentityService:
             "title": title,
         }
 
-    def canonical_name_from_aliases(self, names):
+    def split_person_name(self, value):
+        """Split a display name into concrete first-name and last-name values."""
+        name = " ".join((value or "").split())
+        if not name:
+            return "", ""
+
+        if "," in name:
+            last_name, first_name = name.split(",", 1)
+            return first_name.strip(), last_name.strip()
+
+        parts = name.split()
+        if len(parts) == 1:
+            return "", name
+
+        last_name_start = len(parts) - 1
+        while (
+            last_name_start > 0
+            and parts[last_name_start - 1].rstrip(".").casefold() in SURNAME_PARTICLES
+        ):
+            last_name_start -= 1
+
+        return " ".join(parts[:last_name_start]), " ".join(parts[last_name_start:])
+
+    def title_tokens(self):
+        """Return title abbreviations configured in the database."""
+        from peachjam.models import JudgeTitle
+
+        return {
+            abbreviation.upper()
+            for abbreviation in JudgeTitle.objects.values_list(
+                "abbreviation", flat=True
+            )
+        }
+
+    def parse_configured_judge_name(self, value):
+        return self.parse_judge_name(value, title_tokens=self.title_tokens())
+
+    def canonical_name_from_aliases(self, names, title_tokens=None):
         candidates = []
         for name in names:
-            parts = self.parse_judge_name(name)
+            parts = self.parse_judge_name(name, title_tokens=title_tokens)
             base_name = parts["base_name"] or parts["normalized_name"]
             if not base_name:
                 continue
 
             if parts["title"]:
-                display_name = self.strip_trailing_titles(parts["raw_name"])
+                display_name = self.strip_trailing_titles(
+                    parts["raw_name"],
+                    title_tokens=title_tokens,
+                )
             else:
                 display_name = parts["raw_name"].strip(" ,.;:-")
             candidates.append(display_name or (name or "").strip())
@@ -149,19 +206,26 @@ class JudgeIdentityService:
             slug = f"{base_slug}-{suffix}"
             suffix += 1
 
-    def get_or_create_judge_person(self, full_name):
+    def get_or_create_judge_person(self, last_name, first_name=""):
         from peachjam.models import JudgePerson
 
-        full_name = (full_name or "").strip() or "judge"
+        first_name = (first_name or "").strip()
+        last_name = (last_name or "").strip() or "judge"
         existing_person = (
-            JudgePerson.objects.filter(full_name__iexact=full_name)
+            JudgePerson.objects.filter(
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+            )
             .order_by("pk")
             .first()
         )
         if existing_person is not None:
             return existing_person, False
 
-        return (JudgePerson.objects.create(full_name=full_name), True)
+        return (
+            JudgePerson.objects.create(first_name=first_name, last_name=last_name),
+            True,
+        )
 
     def get_matching_judge_aliases(self, names):
         from peachjam.models import JudgeAlias
@@ -175,7 +239,7 @@ class JudgeIdentityService:
 
         return list(
             JudgeAlias.objects.filter(normalized_name__in=normalized_names)
-            .select_related("judge_person")
+            .select_related("judge_person", "title")
             .order_by("pk")
         )
 
@@ -184,7 +248,12 @@ class JudgeIdentityService:
         from peachjam.models import JudgePerson
 
         source_names = [(name or "").strip() for name in names if (name or "").strip()]
-        canonical_name = self.canonical_name_from_aliases(source_names)
+        title_tokens = self.title_tokens()
+        canonical_name = self.canonical_name_from_aliases(
+            source_names,
+            title_tokens=title_tokens,
+        )
+        first_name, last_name = self.split_person_name(canonical_name)
         aliases = self.get_matching_judge_aliases(source_names)
 
         for alias in aliases:
@@ -200,7 +269,10 @@ class JudgeIdentityService:
                 }
 
         existing_person = (
-            JudgePerson.objects.filter(full_name__iexact=canonical_name)
+            JudgePerson.objects.filter(
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+            )
             .order_by("pk")
             .first()
         )
@@ -214,13 +286,19 @@ class JudgeIdentityService:
 
         if dry_run:
             return {
-                "judge_person": JudgePerson(full_name=canonical_name),
+                "judge_person": JudgePerson(
+                    first_name=first_name,
+                    last_name=last_name,
+                ),
                 "aliases": aliases,
                 "canonical_name": canonical_name,
                 "created": True,
             }
 
-        judge_person, created = self.get_or_create_judge_person(canonical_name)
+        judge_person, created = self.get_or_create_judge_person(
+            last_name,
+            first_name=first_name,
+        )
         return {
             "judge_person": judge_person,
             "aliases": aliases,
@@ -228,20 +306,22 @@ class JudgeIdentityService:
             "created": created,
         }
 
-    def rename_judge_person(self, judge_person, full_name):
-        full_name = (full_name or "").strip()
-        if not full_name:
+    def rename_judge_person(self, judge_person, *, first_name, last_name):
+        first_name = (first_name or "").strip()
+        last_name = (last_name or "").strip()
+        if not last_name:
             return judge_person
 
-        judge_person.full_name = full_name
+        judge_person.first_name = first_name
+        judge_person.last_name = last_name
         judge_person.slug = ""
-        judge_person.save(update_fields=["full_name", "slug"])
+        judge_person.save(update_fields=["first_name", "last_name", "slug"])
         return judge_person
 
     def ensure_judge_alias(self, judge_person, name):
         from peachjam.models import JudgeAlias
 
-        parts = self.parse_judge_name(name)
+        parts = self.parse_configured_judge_name(name)
         alias = (
             JudgeAlias.objects.filter(judge_person=judge_person, name=name)
             .order_by("pk")
@@ -250,7 +330,7 @@ class JudgeIdentityService:
         if alias is not None:
             if (
                 alias.normalized_name != parts["normalized_name"]
-                or alias.title != parts["title"]
+                or (alias.title.abbreviation if alias.title else "") != parts["title"]
             ):
                 alias.save(update_fields=["normalized_name", "title"])
             return alias, False

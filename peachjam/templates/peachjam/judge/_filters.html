@@ -32,65 +32,7 @@
                  hx-params="none">{% trans "Clear all" %}</a>
             {% endif %}
           </li>
-          {% for rendered_facet in judge_rendered_facets %}
-            {% with facet_name=rendered_facet.name facet=rendered_facet.facet %}
-              <li class="list-group-item">
-                <fieldset id="{{ judge_filter_form_id }}-group-{{ facet_name }}"
-                          class="mb-0 skip-link-target"
-                          data-filter-group
-                          tabindex="-1">
-                  <div class="d-flex justify-content-between mb-2 align-items-start">
-                    <legend class="h6 mb-0">
-                      {{ facet.label }}
-                    </legend>
-                    {% if facet.values %}
-                      <a class="ms-2"
-                         href="{{ request.path }}"
-                         data-track-event="Listing | Clear filter | {{ facet_name }}"
-                         hx-get="{{ request.path }}"
-                         hx-params="not {{ facet_name }}">{% trans "Clear" %}</a>
-                    {% endif %}
-                  </div>
-                  <a class="visually-hidden-focusable d-inline-block mb-2"
-                     href="#{{ rendered_facet.next_target_id }}"
-                     data-skip-link>{% trans "Skip to next filter group" %}</a>
-                  <div class="facets-scrollable"
-                       {% if facet.options|length > 8 %}data-facet-search{% endif %}>
-                    {% if facet.options|length > 8 %}
-                      <div class="facet-search-sticky mb-2">
-                        <input type="search"
-                               class="form-control form-control-sm"
-                               placeholder="{% trans "Search" %} {{ facet.label }}"
-                               aria-label="{% trans "Search" %} {{ facet.label }}"
-                               data-facet-search-input/>
-                      </div>
-                    {% endif %}
-                    {% for value, label in facet.options %}
-                      <div class="d-flex justify-content-between align-items-center"
-                           data-facet-option>
-                        <div class="form-check flex-grow-1"
-                             data-track-event="Listing | Filter | {{ facet_name }}">
-                          <input id="{{ judge_filter_form_id }}-{{ facet_name }}-{{ forloop.counter0 }}"
-                                 class="form-check-input"
-                                 name="{{ facet_name }}"
-                                 type="checkbox"
-                                 hx-get="{{ request.path }}"
-                                 {% if value in facet.values %}checked{% endif %}
-                                 form="{{ judge_filter_form_id }}"
-                                 value="{{ value }}"/>
-                          <label class="form-check-label"
-                                 data-facet-option-label
-                                 for="{{ judge_filter_form_id }}-{{ facet_name }}-{{ forloop.counter0 }}">
-                            {{ label }}
-                          </label>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                </fieldset>
-              </li>
-            {% endwith %}
-          {% endfor %}
+          {% include "peachjam/_facet_groups.html" with rendered_facets=judge_rendered_facets filter_form_id=judge_filter_form_id disable_push_url=True %}
         </ul>
       </div>
     </div>

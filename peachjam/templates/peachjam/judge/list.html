@@ -99,7 +99,9 @@
                               <span class="user-avatar-letter user-avatar-letter--judge bg-primary fs-6 fw-bold flex-shrink-0"
                                     aria-hidden="true">{{ judge.initials }}</span>
                               <div>
-                                <a href="{{ judge.get_absolute_url }}"><strong>{{ judge.surname }}</strong>{{ judge.name_remainder }}</a>
+                                <a href="{{ judge.get_absolute_url }}"><strong>{{ judge.last_name }}</strong>
+                                  {% if judge.first_name %}, {{ judge.first_name }}{% endif %}
+                                </a>
                                 {% if judge.court_names %}
                                   <div class="text-muted small">
                                     {{ judge.court_names|join:", " }}
