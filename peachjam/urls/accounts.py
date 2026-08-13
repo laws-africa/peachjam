@@ -14,7 +14,12 @@ from peachjam.views import (
     EditAccountView,
     LoggedOutView,
 )
-from peachjam.views.accounts import OnboardView, SignupView, UserAuthView
+from peachjam.views.accounts import (
+    OnboardingProfileView,
+    OnboardView,
+    SignupView,
+    UserAuthView,
+)
 
 
 class DisabledAccountUrlsView(View):
@@ -51,6 +56,11 @@ urlpatterns += [
         "onboard",
         OnboardView.as_view(),
         name="account_onboard",
+    ),
+    path(
+        "onboard/profile",
+        OnboardingProfileView.as_view(),
+        name="account_onboard_profile",
     ),
     path("profile/", AccountView.as_view(), name="my_account"),
     path("profile/edit", EditAccountView.as_view(), name="edit_account"),

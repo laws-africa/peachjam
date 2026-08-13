@@ -1,0 +1,52 @@
+{% extends "allauth/layouts/base.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Welcome' %}
+{% endblock %}
+{% block content %}
+  <div class="text-center mb-4">
+    <h2>{% trans 'Welcome' %}</h2>
+    <p>{% trans 'Please tell us a bit about yourself to get started.' %}</p>
+  </div>
+  <form method="post">
+    {% csrf_token %}
+    {{ redirect_field }}
+    {% if form.non_field_errors %}
+      <div class="alert alert-danger" role="alert">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+    {% endif %}
+    {% for field in form %}
+      <fieldset class="mb-3">
+        <legend class="h5 mb-2">
+          {{ field.label }}
+        </legend>
+        {% for choice in field %}
+          <div class="form-check mb-2">
+            {{ choice.tag }}
+            <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+          </div>
+        {% endfor %}
+        {% if field.errors %}
+          <div class="text-danger">
+            {% for error in field.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
+      </fieldset>
+    {% endfor %}
+    <div class="row g-2">
+      <div class="col-6">
+        <button class="btn btn-secondary w-100"
+                type="submit"
+                name="action"
+                value="skip">{% trans 'Not now' %}</button>
+      </div>
+      <div class="col-6">
+        <button class="btn btn-primary w-100"
+                type="submit"
+                name="action"
+                value="save">{% trans 'Continue' %}</button>
+      </div>
+    </div>
+  </form>
+{% endblock %}

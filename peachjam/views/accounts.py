@@ -16,6 +16,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
+from django.views.generic.edit import UpdateView
 
 from peachjam.customerio import get_customerio
 from peachjam.forms import (
@@ -137,18 +138,53 @@ class UserAuthView(AllauthConfirmLoginCodeView):
         return ctx
 
 
-class OnboardView(NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormView):
+class OnboardView(NextRedirectMixin, LoginRequiredMixin, UpdateView):
     template_name = "account/onboard.html"
-    form_class = OnboardingProfileForm
+    fields = ["first_name", "last_name"]
+
+    def get_object(self):
+        return self.request.user
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields["first_name"].required = True
+        form.fields["last_name"].required = True
+        return form
 
     def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and self.onboarding_is_complete():
+        if (
+            request.user.is_authenticated
+            and request.user.first_name
+            and request.user.last_name
+        ):
             return redirect(self.get_success_url())
         return super().dispatch(request, *args, **kwargs)
 
-    def onboarding_is_complete(self):
+    def get_default_success_url(self):
+        return reverse("home_page")
+
+    def get_success_url(self):
         profile = getattr(self.request.user, "userprofile", None)
-        return profile and not profile.should_show_onboarding()
+        if profile and profile.should_show_onboarding():
+            return self.passthrough_next_url(reverse("account_onboard_profile"))
+        return super().get_success_url()
+
+
+class OnboardingProfileView(
+    NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormView
+):
+    template_name = "account/onboard_profile.html"
+    form_class = OnboardingProfileForm
+
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.is_authenticated:
+            if not request.user.first_name or not request.user.last_name:
+                return redirect(self.passthrough_next_url(reverse("account_onboard")))
+
+            profile = getattr(request.user, "userprofile", None)
+            if profile and not profile.should_show_onboarding():
+                return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
 
     def get_default_success_url(self):
         return reverse("home_page")

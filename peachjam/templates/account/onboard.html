@@ -11,50 +11,25 @@
   <form method="post">
     {% csrf_token %}
     {{ redirect_field }}
-    {% for field in form.hidden_fields %}{{ field }}{% endfor %}
-    {% if form.non_field_errors %}
-      <div class="alert alert-danger" role="alert">
-        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        <input type="text"
+               class="form-control py-2 px-3 fs-6{% if field.errors %} is-invalid{% endif %}"
+               name="{{ field.name }}"
+               id="{{ field.id_for_label }}"
+               value="{{ field.value|default:'' }}"
+               maxlength="150"
+               {% if forloop.first %}autofocus required{% endif %}/>
+        {% if field.errors %}
+          <div class="invalid-feedback">
+            {% for error in field.errors %}{{ error }}{% endfor %}
+          </div>
+        {% endif %}
       </div>
-    {% endif %}
-    {% for field in form.visible_fields %}
-      {% if field.name == "onboarding_intents" or field.name == "practice_type" %}
-        <fieldset class="mb-3">
-          <legend class="form-label">
-            {{ field.label }}
-          </legend>
-          {{ field }}
-          {% if field.errors %}
-            <div class="text-danger">
-              {% for error in field.errors %}{{ error }}{% endfor %}
-            </div>
-          {% endif %}
-        </fieldset>
-      {% else %}
-        <div class="mb-3">
-          <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
-          {{ field }}
-          {% if field.errors %}
-            <div class="text-danger">
-              {% for error in field.errors %}{{ error }}{% endfor %}
-            </div>
-          {% endif %}
-        </div>
-      {% endif %}
     {% endfor %}
-    <div class="row g-2">
-      <div class="col-6">
-        <button class="btn btn-secondary w-100"
-                type="submit"
-                name="action"
-                value="skip">{% trans 'Not now' %}</button>
-      </div>
-      <div class="col-6">
-        <button class="btn btn-primary w-100"
-                type="submit"
-                name="action"
-                value="save">{% trans 'Continue' %}</button>
-      </div>
+    <div class="d-grid">
+      <button class="btn btn-primary" type="submit">{% trans 'Continue' %}</button>
     </div>
   </form>
 {% endblock %}

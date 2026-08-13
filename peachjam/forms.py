@@ -949,18 +949,6 @@ class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
 
 
 class OnboardingProfileForm(forms.Form):
-    first_name = forms.CharField(
-        label=_("First name"),
-        max_length=150,
-        required=True,
-        widget=forms.TextInput(attrs={"class": "form-control", "autofocus": True}),
-    )
-    last_name = forms.CharField(
-        label=_("Last name"),
-        max_length=150,
-        required=True,
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-    )
     onboarding_intents = forms.ModelMultipleChoiceField(
         label=_("What are you hoping to do today?"),
         queryset=OnboardingIntent.objects.none(),
@@ -978,11 +966,6 @@ class OnboardingProfileForm(forms.Form):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
         super().__init__(*args, **kwargs)
-        names_complete = bool(self.user.first_name and self.user.last_name)
-        if names_complete:
-            self.fields["first_name"].widget = forms.HiddenInput()
-            self.fields["last_name"].widget = forms.HiddenInput()
-
         profile = self.user.userprofile
         selected_intents = profile.onboarding_intents.all()
         self.fields["onboarding_intents"].queryset = OnboardingIntent.objects.filter(
@@ -993,8 +976,6 @@ class OnboardingProfileForm(forms.Form):
         )
         self.initial.update(
             {
-                "first_name": self.user.first_name,
-                "last_name": self.user.last_name,
                 "onboarding_intents": selected_intents,
                 "practice_type": profile.practice_type,
             }
@@ -1002,9 +983,6 @@ class OnboardingProfileForm(forms.Form):
 
     def save(self, skipped=False):
         profile = self.user.userprofile
-        self.user.first_name = self.cleaned_data["first_name"]
-        self.user.last_name = self.cleaned_data["last_name"]
-        self.user.save()
         profile.practice_type = self.cleaned_data["practice_type"]
         if skipped:
             profile.onboarding_completed_at = None
