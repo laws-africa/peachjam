@@ -17,6 +17,7 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView, UpdateView
 from django.views.generic.base import TemplateView
 
+from peachjam.customerio import get_customerio
 from peachjam.forms import (
     DeleteAccountForm,
     PasswordSignupForm,
@@ -219,8 +220,10 @@ class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
+        feedback = form.record_account_deletion()
+        get_customerio().track_offboarding_feedback(self.request.user, feedback)
         self.request.user.userprofile.delete_account(
-            deleted_reason=form.cleaned_data["deleted_reason"]
+            deleted_reason=feedback.get_reason_display()
         )
         messages.success(self.request, _("Your account has been deleted."))
         return redirect(self.get_success_url())

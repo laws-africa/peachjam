@@ -41,6 +41,7 @@ from peachjam.models import (
 )
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+from peachjam_subs.forms import OffboardingFeedbackForm
 
 log = logging.getLogger(__name__)
 
@@ -939,17 +940,18 @@ class UserProfileForm(forms.Form):
         return self.user
 
 
-class DeleteAccountForm(forms.Form):
+class DeleteAccountForm(OffboardingFeedbackForm):
     confirm_delete = forms.BooleanField(
         label=_("I understand this action cannot be undone"),
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
         error_messages={"required": _("Please confirm account deletion.")},
     )
-    deleted_reason = forms.CharField(
-        label=_("Please tell us briefly why you are deleting your account."),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
-        max_length=2000,
-    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["reason"].label = _(
+            "What is the main reason you are deleting your account?"
+        )
 
 
 class TermsAcceptanceForm(forms.Form):

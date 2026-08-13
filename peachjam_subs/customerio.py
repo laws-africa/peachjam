@@ -107,3 +107,24 @@ class CustomerIO(PeachjamCustomerIO):
                     "expires_at": datetime_to_timestamp(expires_at),
                 },
             )
+
+    def track_offboarding_feedback(self, user, feedback):
+        if self.enabled():
+            details = {
+                "event_type": feedback.event_type,
+                "reason": feedback.reason,
+                "comment": feedback.comment,
+            }
+            if feedback.current_product_offering:
+                details["current_product"] = (
+                    feedback.current_product_offering.product.name
+                )
+            if feedback.requested_product_offering:
+                details["requested_product"] = (
+                    feedback.requested_product_offering.product.name
+                )
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Subscription offboarding feedback",
+                details,
+            )
