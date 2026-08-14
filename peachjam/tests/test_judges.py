@@ -895,7 +895,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual("name", response.context["sort"])
         self.assertEqual([self.judge_person, other_person], response.context["judges"])
         self.assertEqual(
-            ["J", "Z"], [letter for letter, _ in response.context["grouped_judges"]]
+            ["A", "Z"], [letter for letter, _ in response.context["grouped_judges"]]
         )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
