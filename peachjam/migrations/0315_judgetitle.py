@@ -7,7 +7,6 @@ TITLE_NAMES = {
     "AJ": "Acting judge",
     "AJA": "Acting judge of appeal",
     "AJP": "Acting judge president",
-    "AJA": "Acting judge of appeal",
     "AP": "Acting president",
     "CJ": "Chief justice",
     "CM": "Chief magistrate",

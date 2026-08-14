@@ -5,7 +5,7 @@ from functools import reduce
 from django.contrib import messages
 from django.core.cache import cache
 from django.db.models import F, IntegerField, Q, Value, Window
-from django.db.models.functions import Coalesce, Length, Lower, RowNumber, Substr
+from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.cache import add_never_cache_headers
@@ -492,8 +492,7 @@ class FlynoteListView(FlynoteViewMixin, ListView):
             matching_paths = {}
             matching_more_counts = {}
 
-        name_order = Lower("name")
-        ordering = (name_order,) if sort == "name" else ("-doc_count", name_order)
+        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
         topic_items = self.make_flynote_list(list(topics_qs.order_by(*ordering)))
         for item in topic_items:
             item["matching_paths"] = matching_paths.get(item["flynote"].path, [])
@@ -636,8 +635,7 @@ class FlynoteDetailView(
                 else self.initial_subtopics_page_size
             )
 
-        name_order = Lower("name")
-        ordering = (name_order,) if sort == "name" else ("-doc_count", name_order)
+        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
         total_subtopic_count = children_qs.count()
         flynote_cards = list(
             children_qs.order_by(*ordering)[

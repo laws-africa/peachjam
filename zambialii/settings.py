@@ -5,9 +5,6 @@ from liiweb.settings import *  # noqa
 INSTALLED_APPS = ["zambialii.apps.ZambiaLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
-PEACHJAM["CANONICAL_JUDGE_IDENTITY"] = True  # noqa
-PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"] = True  # noqa
-PEACHJAM["SHOW_FLYNOTE_TOPICS"] = True  # noqa
 
 ROOT_URLCONF = "zambialii.urls"
 ALLOWED_HOSTS = build_allowed_hosts("zambialii.org", "www.zambialii.org")  # noqa
