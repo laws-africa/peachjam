@@ -1,0 +1,35 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% load i18n humanize %}
+{% block title %}
+  {{ judge_person.last_name }}
+  {% if judge_person.first_name %}{{ judge_person.first_name }}{% endif %}
+{% endblock %}
+{% block page-content %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans "Judgments" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judges' %}">{% trans "Judges" %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">
+          {{ judge_person.last_name }}
+          {% if judge_person.first_name %}{{ judge_person.first_name }}{% endif %}
+        </li>
+      </ol>
+    </nav>
+  </div>
+  {% include "peachjam/judge/_profile_dashboard.html" %}
+  <div class="container pb-5">
+    <div class="mb-3">
+      <h2 id="judge-judgments-heading" class="h3 mb-1">{% trans "Judgments" %}</h2>
+      <p class="text-muted mb-0">{% trans "Search and filter this judge's judgments." %}</p>
+    </div>
+    {% include "peachjam/_document_table_form.html" %}
+  </div>
+{% endblock %}

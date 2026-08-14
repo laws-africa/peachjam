@@ -1,6 +1,7 @@
 from dal import autocomplete
 from django.db.models import Q
 
+from peachjam.analysis.judges import judge_identity_service
 from peachjam.models import Judge, JudgeAlias, JudgePerson, VolumeIssue, Work
 
 
@@ -49,9 +50,7 @@ class JudgePeopleAutocomplete(autocomplete.Select2QuerySetView):
 
         qs = JudgePerson.objects.all()
         if self.q:
-            qs = qs.filter(
-                Q(full_name__icontains=self.q) | Q(aliases__name__icontains=self.q)
-            ).distinct()
+            qs = judge_identity_service.filter_judge_people_by_name(qs, self.q)
         return qs
 
 
@@ -63,12 +62,14 @@ class JudgeAliasesAutocomplete(autocomplete.Select2QuerySetView):
         ):
             return JudgeAlias.objects.none()
 
-        qs = JudgeAlias.objects.select_related("judge_person")
+        qs = JudgeAlias.objects.select_related("judge_person", "title")
         if self.q:
             qs = qs.filter(
                 Q(name__icontains=self.q)
-                | Q(title__icontains=self.q)
-                | Q(judge_person__full_name__icontains=self.q)
+                | Q(title__abbreviation__icontains=self.q)
+                | Q(title__name__icontains=self.q)
+                | Q(judge_person__first_name__icontains=self.q)
+                | Q(judge_person__last_name__icontains=self.q)
             ).distinct()
         return qs
 

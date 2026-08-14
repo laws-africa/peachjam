@@ -24,6 +24,7 @@ from peachjam.models import (
     CourtClass,
     CourtDivision,
     Judge,
+    JudgePerson,
     Judgment,
     Outcome,
 )
@@ -107,6 +108,38 @@ class FilteredJudgmentView(FilteredDocumentListView):
 
     def add_judges_facet(self, context):
         if "judges" not in self.exclude_facets:
+            if JudgePerson.canonical_identity_enabled():
+                judges = sorted(
+                    self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="judge_people"
+                    )
+                    .filter(bench__judge_person__isnull=False)
+                    .order_by()
+                    .values_list(
+                        "bench__judge_person_id",
+                        "bench__judge_person__first_name",
+                        "bench__judge_person__last_name",
+                    )
+                    .distinct(),
+                    key=lambda judge: (judge[2], judge[1]),
+                )
+                if judges:
+                    context["facet_data"]["judge_people"] = {
+                        "label": JudgePerson.model_label_plural,
+                        "type": "checkbox",
+                        "options": [
+                            (
+                                str(judge_id),
+                                " ".join(
+                                    part for part in (first_name, last_name) if part
+                                ),
+                            )
+                            for judge_id, first_name, last_name in judges
+                        ],
+                        "values": self.request.GET.getlist("judge_people"),
+                    }
+                return
+
             judges = list(
                 judge
                 for judge in self.form.filter_queryset(
@@ -651,10 +684,19 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["judges"] = [
-            bench.judge
-            for bench in self.get_object().bench.select_related("judge").all()
-        ]
+        bench_rows = self.object.bench.select_related("judge", "judge_person").all()
+        if JudgePerson.canonical_identity_enabled():
+            judges = []
+            seen = set()
+            for bench in bench_rows:
+                judge = bench.judge_person or bench.judge
+                key = (judge.__class__, judge.pk)
+                if key not in seen:
+                    judges.append(judge)
+                    seen.add(key)
+            context["judges"] = judges
+        else:
+            context["judges"] = [bench.judge for bench in bench_rows]
         return context
 
 

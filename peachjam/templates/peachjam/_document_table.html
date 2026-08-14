@@ -25,6 +25,7 @@ variables like "hide_xxx" default to being "on".
 * doc_table_show_jurisdiction: show document jurisdiction (and jurisdiction column)
 * doc_table_show_sub_publication: show document sub_publication (and sub_publication column)
 * doc_table_show_treatments: show treatments for documents as labels
+* doc_table_show_incoming_citation_count: show incoming citation counts
 * hide_pagination: Hide pagination
 {% endcomment %}
 {% with doc_table_dom_id=doc_table_id|default:"doc-table" %}
@@ -88,6 +89,9 @@ variables like "hide_xxx" default to being "on".
             {% if doc_table_show_sub_publication %}<th scope="col"></th>{% endif %}
             {% if doc_table_show_frbr_uri_number %}<th scope="col"></th>{% endif %}
             {% if doc_table_show_doc_type %}<th scope="col"></th>{% endif %}
+            {% if doc_table_show_incoming_citation_count %}
+              <th scope="col" class="text-end">{% trans "Citing judgments" %}</th>
+            {% endif %}
             {% if doc_table_show_date %}
               <th scope="col"
                   class="cell-date"

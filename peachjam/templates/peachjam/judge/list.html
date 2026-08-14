@@ -1,0 +1,160 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load humanize i18n %}
+{% block title %}
+  {% trans "Judges" %}
+{% endblock %}
+{% block page-content %}
+  <div class="container pb-5">
+    <nav aria-label="{% trans 'breadcrumb' %}">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'judgment_list' %}">{% trans "Judgments" %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{% trans "Judges" %}</li>
+      </ol>
+    </nav>
+    <div>
+      <div class="mb-4">
+        <h1 id="main-page-heading" class="mb-1">{% trans "Judges" %}</h1>
+        <p class="text-muted mb-0">
+          {% blocktrans count count=judge_count with formatted_count=judge_count|intcomma %}Browse {{ formatted_count }} judge.{% plural %}Browse {{ formatted_count }} judges.{% endblocktrans %}
+        </p>
+      </div>
+      <form method="get"
+            id="judge-list-search-form"
+            role="search"
+            aria-label="{% trans 'Search judges' %}"
+            class="mb-3">
+        <div class="row g-2 align-items-end">
+          <div class="col-md">
+            <label for="judge-search" class="form-label mb-1">{% trans "Search judges" %}</label>
+            <input id="judge-search"
+                   class="form-control"
+                   type="search"
+                   name="q"
+                   value="{{ q }}"
+                   hx-get="{{ request.path }}"
+                   hx-trigger="keyup changed delay:300ms, search"
+                   hx-include="#judge-list-search-form"
+                   hx-target="#judge-list-updates"
+                   hx-select="#judge-list-updates"
+                   hx-swap="outerHTML"
+                   hx-push-url="true"
+                   hx-sync="this:replace"
+                   placeholder="{% trans 'Search by name' %}"/>
+          </div>
+          <div class="col-md-auto">
+            <label for="judge-sort" class="form-label mb-1">{% trans "Sort" %}</label>
+            <select id="judge-sort"
+                    name="sort"
+                    class="form-select"
+                    hx-get="{{ request.path }}"
+                    hx-include="#judge-list-search-form"
+                    hx-target="#judge-list-updates"
+                    hx-select="#judge-list-updates"
+                    hx-swap="outerHTML"
+                    hx-push-url="true">
+              <option value="name" {% if sort == "name" %}selected{% endif %}>
+                {% trans "A – Z" %}
+              </option>
+              <option value="judgments" {% if sort == "judgments" %}selected{% endif %}>
+                {% trans "Most judgments" %}
+              </option>
+            </select>
+          </div>
+        </div>
+      </form>
+      <div id="judge-list-updates">
+        <div class="row g-4 align-items-start">
+          {% include "peachjam/judge/_filters.html" with judge_filter_form_id="judge-list-search-form" %}
+          <div id="judge-list-results"
+               class="col-lg-9"
+               role="region"
+               aria-label="{% trans 'Judge directory' %}"
+               aria-live="polite">
+            {% if grouped_judges %}
+              <div class="table-responsive">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col" class="cell-title">{% trans "Judge" %}</th>
+                      <th scope="col" class="d-none d-md-table-cell text-end text-nowrap">{% trans "Judgment years" %}</th>
+                      <th scope="col" class="d-none d-md-table-cell text-end">{% trans "Judgments" %}</th>
+                    </tr>
+                  </thead>
+                  {% for letter, letter_judges in grouped_judges %}
+                    <tbody>
+                      {% if letter %}
+                        <tr>
+                          <th colspan="3" scope="colgroup" id="letter-{{ letter }}">{{ letter }}</th>
+                        </tr>
+                      {% endif %}
+                      {% for judge in letter_judges %}
+                        <tr>
+                          <td class="cell-title">
+                            <div class="d-flex align-items-start gap-2">
+                              <span class="user-avatar-letter user-avatar-letter--judge bg-primary fs-6 fw-bold flex-shrink-0"
+                                    aria-hidden="true">{{ judge.initials }}</span>
+                              <div>
+                                <a href="{{ judge.get_absolute_url }}"><strong>{{ judge.last_name }}</strong>
+                                  {% if judge.first_name %}{{ judge.first_name }}{% endif %}
+                                </a>
+                                {% if judge.court_names %}
+                                  <div class="text-muted small">
+                                    {{ judge.court_names|join:", " }}
+                                    {% if judge.more_courts_count %}+{{ judge.more_courts_count }}{% endif %}
+                                  </div>
+                                {% endif %}
+                                <div class="d-md-none small text-muted mt-1">
+                                  {% if judge.first_year and judge.latest_year %}
+                                    {% if judge.first_year == judge.latest_year %}
+                                      {{ judge.first_year }}
+                                    {% else %}
+                                      {{ judge.first_year }}–{{ judge.latest_year }}
+                                    {% endif %}
+                                    <span aria-hidden="true">·</span>
+                                  {% endif %}
+                                  {% blocktrans count count=judge.judgment_count with formatted_count=judge.judgment_count|intcomma %}{{ formatted_count }} judgment{% plural %}{{ formatted_count }} judgments{% endblocktrans %}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td class="d-none d-md-table-cell text-end text-nowrap">
+                            {% if judge.first_year and judge.latest_year %}
+                              {% if judge.first_year == judge.latest_year %}
+                                {{ judge.first_year }}
+                              {% else %}
+                                {{ judge.first_year }}–{{ judge.latest_year }}
+                              {% endif %}
+                            {% else %}
+                              <span aria-hidden="true">—</span><span class="visually-hidden">{% trans "Unknown" %}</span>
+                            {% endif %}
+                          </td>
+                          <td class="d-none d-md-table-cell text-end">{{ judge.judgment_count|intcomma }}</td>
+                        </tr>
+                      {% endfor %}
+                    </tbody>
+                  {% endfor %}
+                </table>
+              </div>
+              {% if is_paginated %}
+                <div class="mt-4">{% include "peachjam/_pagination.html" %}</div>
+              {% endif %}
+            {% else %}
+              <div class="text-center py-5">
+                <p class="text-muted mb-0">{% trans "No matching judges found." %}</p>
+                {% if q or selected_judge_courts or selected_flynote_topics or selected_judge_years %}
+                  <a class="btn btn-outline-secondary btn-sm mt-3"
+                     href="{% url 'judges' %}">{% trans "Clear all filters" %}</a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

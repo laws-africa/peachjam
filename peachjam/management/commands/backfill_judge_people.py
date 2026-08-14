@@ -25,6 +25,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         dry_run = options["dry_run"]
         judge_groups = defaultdict(list)
+        title_tokens = judge_identity_service.title_tokens()
 
         legacy_judges = list(Judge.objects.order_by("pk"))
         if not legacy_judges:
@@ -33,7 +34,8 @@ class Command(BaseCommand):
 
         for judge in legacy_judges:
             canonical_name = judge_identity_service.canonical_name_from_aliases(
-                [judge.name]
+                [judge.name],
+                title_tokens=title_tokens,
             )
             judge_groups[
                 judge_identity_service.normalize_judge_name(canonical_name)
@@ -59,7 +61,7 @@ class Command(BaseCommand):
             merge_count += len(duplicates)
 
             if dry_run:
-                self.print_dry_run_group(canonical_name, judges)
+                self.print_dry_run_group(canonical_name, judges, title_tokens)
                 continue
 
             with transaction.atomic():
@@ -72,14 +74,19 @@ class Command(BaseCommand):
                         )
                         alias_by_name[judge.name] = alias
                     else:
-                        parts = judge_identity_service.parse_judge_name(judge.name)
+                        parts = judge_identity_service.parse_judge_name(
+                            judge.name,
+                            title_tokens=title_tokens,
+                        )
                         updated_fields = []
                         if alias.judge_person_id != primary.pk:
                             alias.judge_person = primary
                             updated_fields.append("judge_person")
                         if alias.normalized_name != parts["normalized_name"]:
                             updated_fields.append("normalized_name")
-                        if alias.title != parts["title"]:
+                        if (alias.title.abbreviation if alias.title else "") != parts[
+                            "title"
+                        ]:
                             updated_fields.append("title")
                         if updated_fields:
                             alias.save(update_fields=updated_fields)
@@ -112,10 +119,16 @@ class Command(BaseCommand):
             )
         )
 
-    def print_dry_run_group(self, canonical_name, judges):
-        self.stdout.write(f"JudgePerson(full_name='{canonical_name}')")
+    def print_dry_run_group(self, canonical_name, judges, title_tokens):
+        first_name, last_name = judge_identity_service.split_person_name(canonical_name)
+        self.stdout.write(
+            f"JudgePerson(first_name='{first_name}', last_name='{last_name}')"
+        )
         for judge in judges:
-            parts = judge_identity_service.parse_judge_name(judge.name)
+            parts = judge_identity_service.parse_judge_name(
+                judge.name,
+                title_tokens=title_tokens,
+            )
             self.stdout.write(
                 "  JudgeAlias("
                 f"name='{judge.name}', "

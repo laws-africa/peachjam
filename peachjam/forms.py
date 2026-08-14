@@ -84,7 +84,7 @@ class JudgeIdentityWorkflowForm(forms.Form):
         widget=forms.HiddenInput(),
     )
     selected_aliases = forms.ModelMultipleChoiceField(
-        queryset=JudgeAlias.objects.select_related("judge_person").all(),
+        queryset=JudgeAlias.objects.select_related("judge_person", "title").all(),
         required=False,
     )
     selected_judge_people = forms.ModelMultipleChoiceField(
@@ -100,16 +100,27 @@ class JudgeIdentityWorkflowForm(forms.Form):
         ),
         widget=autocomplete.ModelSelect2(url="autocomplete-judge-people"),
     )
-    target_full_name = forms.CharField(
+    target_first_name = forms.CharField(
         required=False,
-        label=_("new judge person name"),
-        help_text=_(
-            "Optional. Use this to create a new judge person, or to rename the selected target judge person."
-        ),
+        label=_("first name"),
+        help_text=_("Optional. Enter the judge person's given names."),
         widget=forms.TextInput(
             attrs={
                 "class": "form-control",
                 "placeholder": "Mogoeng Mogoeng",
+            }
+        ),
+    )
+    target_last_name = forms.CharField(
+        required=False,
+        label=_("last name"),
+        help_text=_(
+            "Use these name fields to create a new judge person or rename the selected judge person."
+        ),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mogoeng",
             }
         ),
     )
@@ -154,44 +165,55 @@ class JudgeIdentityWorkflowForm(forms.Form):
     def clean_apply_identity_changes(self, cleaned_data):
         selected_aliases = list(cleaned_data.get("selected_aliases") or [])
         judge_person = cleaned_data.get("target_judge_person")
-        full_name = (cleaned_data.get("target_full_name") or "").strip()
-        cleaned_data["target_full_name"] = full_name
+        first_name = (cleaned_data.get("target_first_name") or "").strip()
+        last_name = (cleaned_data.get("target_last_name") or "").strip()
+        cleaned_data["target_first_name"] = first_name
+        cleaned_data["target_last_name"] = last_name
 
         if selected_aliases:
-            if not judge_person and not full_name:
-                cleaned_data["target_full_name"] = (
-                    judge_identity_service.canonical_name_from_aliases(
-                        [alias.name for alias in selected_aliases]
-                    )
+            if not judge_person and not last_name:
+                canonical_name = judge_identity_service.canonical_name_from_aliases(
+                    [alias.name for alias in selected_aliases],
                 )
+                first_name, last_name = judge_identity_service.split_person_name(
+                    canonical_name
+                )
+                cleaned_data["target_first_name"] = first_name
+                cleaned_data["target_last_name"] = last_name
         else:
             if judge_person is None:
                 self.add_error(
                     "target_judge_person",
                     _("Choose the judge person you want to rename."),
                 )
-            if not full_name:
+            if not last_name:
                 self.add_error(
-                    "target_full_name",
-                    _("Enter the new judge person name when no aliases are selected."),
+                    "target_last_name",
+                    _("Enter the new last name when no aliases are selected."),
                 )
-            if judge_person is not None and full_name == judge_person.full_name:
+            if judge_person is not None and (
+                first_name,
+                last_name,
+            ) == (judge_person.first_name, judge_person.last_name):
                 self.add_error(
-                    "target_full_name",
+                    "target_last_name",
                     _("Enter a different name for the selected judge person."),
                 )
 
-        if judge_person is None or not full_name:
+        if judge_person is None or not last_name:
             return
 
         existing = (
-            JudgePerson.objects.filter(full_name__iexact=full_name)
+            JudgePerson.objects.filter(
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+            )
             .exclude(pk=judge_person.pk)
             .first()
         )
         if existing:
             self.add_error(
-                "target_full_name",
+                "target_last_name",
                 _(
                     "A judge person with this name already exists. "
                     "Move aliases to it or merge into it instead of "
@@ -323,8 +345,10 @@ class BaseDocumentFilterForm(forms.Form):
     years = PermissiveTypedListField(coerce=int, required=False)
     alphabet = forms.CharField(required=False)
     authors = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    courts = PermissiveTypedListField(coerce=remove_nulls, required=False)
     doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
     judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    judge_people = PermissiveTypedListField(coerce=int, required=False)
     natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
     localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
     registries = PermissiveTypedListField(coerce=remove_nulls, required=False)
@@ -354,6 +378,7 @@ class BaseDocumentFilterForm(forms.Form):
         "courts",
         "doc_type",
         "judges",
+        "judge_people",
         "natures",
         "localities",
         "registries",
@@ -431,6 +456,14 @@ class BaseDocumentFilterForm(forms.Form):
         return (
             queryset.filter(judges__name__in=judges).distinct()
             if judges and hasattr(queryset.model, "judges")
+            else queryset
+        )
+
+    def apply_filter_judge_people(self, queryset):
+        judge_people = self.cleaned_data.get("judge_people", [])
+        return (
+            queryset.filter(bench__judge_person_id__in=judge_people).distinct()
+            if judge_people and hasattr(queryset.model, "bench")
             else queryset
         )
 

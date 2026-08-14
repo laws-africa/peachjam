@@ -57,5 +57,8 @@
   {% if doc_table_show_sub_publication %}<td>{{ document.sub_publication|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_frbr_uri_number %}<td>{{ document.frbr_uri_number }}</td>{% endif %}
   {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
+  {% if doc_table_show_incoming_citation_count %}
+    <td class="text-end text-nowrap">{{ document.incoming_citation_count|default_if_none:'' }}</td>
+  {% endif %}
   {% if doc_table_show_date %}<td class="cell-date text-nowrap">{{ document.date|default_if_none:'' }}</td>{% endif %}
 </tr>

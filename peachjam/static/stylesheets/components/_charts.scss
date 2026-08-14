@@ -21,3 +21,108 @@
     }
   }
 }
+
+.judge-year-chart__scroll {
+  overflow-x: auto;
+  padding-top: $spacer;
+}
+
+.judge-year-chart__plot {
+  display: flex;
+  align-items: flex-end;
+  gap: $spacer * 0.5;
+  width: max-content;
+  min-width: 100%;
+  min-height: 13rem;
+  padding: 0 $spacer * 0.25;
+}
+
+.judge-year-chart__column {
+  display: flex;
+  flex: 1 0 2.5rem;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-width: 2.5rem;
+  text-align: center;
+}
+
+.judge-year-chart__count,
+.judge-year-chart__year {
+  font-size: $font-size-sm;
+}
+
+.judge-year-chart__count {
+  margin-bottom: $spacer * 0.25;
+  color: $text-muted;
+}
+
+.judge-year-chart__bar {
+  display: block;
+  min-height: 0.25rem;
+  background-color: $primary;
+  border-radius: $border-radius-sm $border-radius-sm 0 0;
+
+  &:hover,
+  &:focus-visible {
+    background-color: shade-color($primary, 20%);
+  }
+}
+
+.judge-year-chart__year {
+  margin-top: $spacer * 0.25;
+  color: $body-color;
+}
+
+$judge-horizontal-chart-courts-max-height: $spacer * 28;
+$judge-horizontal-chart-topics-max-height: $spacer * 32;
+
+.judge-horizontal-chart__row {
+  display: grid;
+  gap: $spacer * 0.75;
+
+  @include media-breakpoint-up(md) {
+    grid-template-columns: minmax(0, 45%) minmax(8rem, 1fr);
+    align-items: center;
+  }
+}
+
+.judge-horizontal-chart__scroll {
+  overflow-y: auto;
+}
+
+.judge-horizontal-chart__scroll--courts {
+  max-height: $judge-horizontal-chart-courts-max-height;
+}
+
+.judge-horizontal-chart__scroll--topics {
+  max-height: $judge-horizontal-chart-topics-max-height;
+}
+
+.judge-horizontal-chart__label {
+  min-width: 0;
+}
+
+.judge-horizontal-chart__plot {
+  display: flex;
+  align-items: center;
+  gap: $spacer * 0.5;
+  min-width: 0;
+}
+
+.judge-horizontal-chart__bar {
+  display: block;
+  min-width: $spacer * 0.25;
+  height: $spacer;
+  background-color: $primary;
+
+  &:hover,
+  &:focus-visible {
+    background-color: shade-color($primary, 20%);
+  }
+}
+
+.judge-horizontal-chart__value {
+  flex-shrink: 0;
+  color: $text-muted;
+  font-size: $font-size-sm;
+}

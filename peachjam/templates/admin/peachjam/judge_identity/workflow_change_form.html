@@ -299,26 +299,40 @@
                   {{ form.target_judge_person.help_text }}
                 </div>
               </div>
-              <div class="form-group{% if form.target_full_name.errors %} errors{% endif %}">
-                <label for="{{ form.target_full_name.id_for_label }}">
-                  {{ form.target_full_name.label }}
+              <div class="form-group{% if form.target_first_name.errors %} errors{% endif %}">
+                <label for="{{ form.target_first_name.id_for_label }}">
+                  {{ form.target_first_name.label }}
                 </label>
-                {{ form.target_full_name }}
-                {% for error in form.target_full_name.errors %}
+                {{ form.target_first_name }}
+                {% for error in form.target_first_name.errors %}
                   <div class="text-danger small">
                     {{ error }}
                   </div>
                 {% endfor %}
                 <div class="text-muted small">
-                  {{ form.target_full_name.help_text }}
+                  {{ form.target_first_name.help_text }}
+                </div>
+              </div>
+              <div class="form-group{% if form.target_last_name.errors %} errors{% endif %}">
+                <label for="{{ form.target_last_name.id_for_label }}">
+                  {{ form.target_last_name.label }}
+                </label>
+                {{ form.target_last_name }}
+                {% for error in form.target_last_name.errors %}
+                  <div class="text-danger small">
+                    {{ error }}
+                  </div>
+                {% endfor %}
+                <div class="text-muted small">
+                  {{ form.target_last_name.help_text }}
                 </div>
               </div>
               <div class="text-muted small">
                 {% blocktrans %}
                   If aliases are selected, they will move into the chosen judge person.
                   If no judge person is chosen, a new one will be created from the new
-                  name or derived from the selected aliases. If you also enter a new
-                  name, the destination judge person will be renamed after the move.
+                  last name derived from the selected aliases. If you also enter new
+                  names, the destination judge person will be renamed after the move.
                   If no aliases are selected, this panel will rename the chosen judge
                   person.
                 {% endblocktrans %}

@@ -7,7 +7,7 @@ from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
 from django.db import models
-from django.db.models import Max, Prefetch
+from django.db.models import Exists, Max, OuterRef, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
 from django.utils import timezone
@@ -27,6 +27,7 @@ from peachjam.models import (
     SourceFile,
     on_attribute_changed,
 )
+from peachjam.models.flynote import Flynote, JudgmentFlynote
 from peachjam.tasks import (
     create_anonymised_source_file_pdf,
     generate_judgment_summary,
@@ -80,26 +81,61 @@ class Judge(models.Model):
 class JudgePerson(models.Model):
     model_label = _("Judge")
     model_label_plural = _("Judges")
-
-    full_name = models.CharField(
-        _("full name"), max_length=1024, null=False, blank=False, unique=True
-    )
+    first_name = models.CharField(_("first name"), max_length=1024, blank=True)
+    last_name = models.CharField(_("last name"), max_length=1024)
     slug = models.SlugField(
         _("slug"), max_length=255, null=False, blank=True, unique=True
     )
     description = models.TextField(_("description"), blank=True)
 
     class Meta:
-        ordering = ("full_name", "pk")
+        ordering = ("last_name", "first_name", "pk")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("first_name", "last_name"),
+                name="unique_judge_person_name",
+            )
+        ]
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
 
     def __str__(self):
         return self.full_name
 
+    @property
+    def full_name(self):
+        return " ".join(part for part in (self.first_name, self.last_name) if part)
+
     @staticmethod
     def canonical_identity_enabled():
         return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
+
+    @staticmethod
+    def available_flynote_topics(judge_person=None):
+        """Return root flynote topics linked to canonical judges' judgments."""
+        if not Judgment.flynote_topics_enabled():
+            return Flynote.objects.none()
+
+        linked_judgments = JudgmentFlynote.objects.filter(
+            flynote__path__startswith=OuterRef("path"),
+            document__published=True,
+            document__bench__judge_person__isnull=False,
+        )
+        if judge_person is not None:
+            linked_judgments = linked_judgments.filter(
+                document__bench__judge_person=judge_person
+            )
+
+        return (
+            Flynote.get_root_nodes()
+            .filter(deprecated=False)
+            .annotate(has_judge_judgments=Exists(linked_judgments))
+            .filter(has_judge_judgments=True)
+            .order_by("name")
+        )
+
+    def get_absolute_url(self):
+        return reverse("judge", kwargs={"slug": self.slug})
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -108,6 +144,24 @@ class JudgePerson(models.Model):
                 self.full_name,
                 pk=self.pk,
             )
+        return super().save(*args, **kwargs)
+
+
+class JudgeTitle(models.Model):
+    name = models.CharField(_("name"), max_length=255)
+    abbreviation = models.CharField(_("abbreviation"), max_length=32, unique=True)
+
+    class Meta:
+        ordering = ("name", "abbreviation")
+        verbose_name = _("judicial title")
+        verbose_name_plural = _("judicial titles")
+
+    def __str__(self):
+        return f"{self.name} ({self.abbreviation})"
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.strip()
+        self.abbreviation = self.abbreviation.strip().upper()
         return super().save(*args, **kwargs)
 
 
@@ -125,13 +179,13 @@ class JudgeAlias(models.Model):
     normalized_name = models.CharField(
         _("normalized name"), max_length=1024, null=False, blank=False, db_index=True
     )
-    title = models.CharField(
-        _("title"),
-        max_length=32,
+    title = models.ForeignKey(
+        JudgeTitle,
+        related_name="aliases",
+        on_delete=models.PROTECT,
+        null=True,
         blank=True,
-        help_text=_(
-            "Judicial title parsed from the alias name, for example 'JA' or 'DCJ'."
-        ),
+        verbose_name=_("judicial title"),
     )
 
     class Meta:
@@ -143,9 +197,34 @@ class JudgeAlias(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        parts = judge_identity_service.parse_judge_name(self.name)
+        parts = judge_identity_service.parse_configured_judge_name(self.name)
         self.normalized_name = parts["normalized_name"]
-        self.title = parts["title"]
+        title_changed = False
+        if parts["title"]:
+            self.title = JudgeTitle.objects.filter(
+                abbreviation__iexact=parts["title"]
+            ).first()
+            title_changed = True
+        elif self.pk:
+            previous = JudgeAlias.objects.select_related("title").get(pk=self.pk)
+            previous_parts = judge_identity_service.parse_configured_judge_name(
+                previous.name
+            )
+            title_was_inferred = (
+                previous.title
+                and previous_parts["title"]
+                and previous.title.abbreviation.casefold()
+                == previous_parts["title"].casefold()
+            )
+            if title_was_inferred and self.title_id == previous.title_id:
+                self.title = None
+                title_changed = True
+        if kwargs.get("update_fields") is not None:
+            update_fields = set(kwargs["update_fields"])
+            update_fields.add("normalized_name")
+            if title_changed:
+                update_fields.add("title")
+            kwargs["update_fields"] = update_fields
         return super().save(*args, **kwargs)
 
 
