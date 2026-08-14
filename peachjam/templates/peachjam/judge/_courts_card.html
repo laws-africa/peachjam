@@ -14,7 +14,7 @@
              aria-labelledby="judge-courts-heading">
           <ol class="list-group list-group-flush">
             {% for row in judge_court_chart %}
-              <li class="list-group-item px-0 py-3">
+              <li class="list-group-item border-0 px-0 py-3">
                 <div class="judge-horizontal-chart__row">
                   <div class="judge-horizontal-chart__label">
                     <a href="{{ request.path }}?courts={{ row.judgment__court__name|urlencode }}#judge-judgments-heading">{{ row.judgment__court__name }}</a>

@@ -9,7 +9,7 @@
            aria-labelledby="judge-topics-heading">
         <ul class="list-group list-group-flush">
           {% for row in judge_case_topics %}
-            <li class="list-group-item px-0 py-3">
+            <li class="list-group-item border-0 px-0 py-3">
               <div class="judge-horizontal-chart__row">
                 <div class="judge-horizontal-chart__label">
                   <a href="{{ request.path }}?topics={{ row.id }}#judge-judgments-heading">{{ row.name }}</a>
