@@ -5,7 +5,7 @@ from django.test import TransactionTestCase
 
 class JudgePersonNameMigrationTests(TransactionTestCase):
     migrate_from = ("peachjam", "0313_mark_external_citation_links_manual")
-    migrate_to = ("peachjam", "0315_judgetitle")
+    migrate_to = ("peachjam", "0316_finalize_judge_identity_fields")
 
     def setUp(self):
         super().setUp()
@@ -34,6 +34,16 @@ class JudgePersonNameMigrationTests(TransactionTestCase):
             normalized_name="savage ja",
             title="JA",
         )
+        custom_title_person = JudgePerson.objects.create(
+            full_name="Ada Lovelace SRM",
+            slug="ada-lovelace-srm",
+        )
+        JudgeAlias.objects.create(
+            judge_person=custom_title_person,
+            name="Lovelace SRM",
+            normalized_name="lovelace srm",
+            title="SRM",
+        )
 
         executor = MigrationExecutor(connection)
         executor.migrate([self.migrate_to])
@@ -50,13 +60,19 @@ class JudgePersonNameMigrationTests(TransactionTestCase):
 
         savage = JudgePerson.objects.get(last_name="Savage")
         mwangi = JudgePerson.objects.get(last_name="M Mwangi")
+        lovelace = JudgePerson.objects.get(last_name="Lovelace")
         alias = JudgeAlias.objects.select_related("title").get(name="Savage JA")
+        custom_title_alias = JudgeAlias.objects.select_related("title").get(
+            name="Lovelace SRM"
+        )
 
         self.assertEqual("Katherine", savage.first_name)
         self.assertEqual("Dennis", mwangi.first_name)
+        self.assertEqual("Ada", lovelace.first_name)
         self.assertEqual(savage.pk, alias.judge_person_id)
         self.assertEqual("Judge of appeal", alias.title.name)
         self.assertEqual("JA", alias.title.abbreviation)
+        self.assertEqual("SRM", custom_title_alias.title.abbreviation)
 
     def test_restores_full_names_when_reversed(self):
         executor = MigrationExecutor(connection)

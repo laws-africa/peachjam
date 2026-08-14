@@ -5,33 +5,6 @@ from django.db import transaction
 from django.db.models import Count, Q
 from django.utils.text import slugify
 
-TITLE_TOKENS = {
-    "ACJ",
-    "ACTJ",
-    "AJ",
-    "AJP",
-    "AJA",
-    "AP",
-    "CJ",
-    "CM",
-    "DCJ",
-    "DJP",
-    "J",
-    "JA",
-    "JCC",
-    "JCS",
-    "JP",
-    "PJ",
-    "PM",
-    "P",
-    "R",
-    "DR",
-    "JSC",
-    "SCJ",
-    "SCM",
-    "VP",
-}
-
 TITLE_PREFIX_TOKENS = {
     "AG",
 }
@@ -53,7 +26,7 @@ class JudgeIdentityService:
             return value
 
         if title_tokens is None:
-            title_tokens = TITLE_TOKENS
+            title_tokens = self.title_tokens()
         stripped_real_title = False
         while True:
             removed = False
@@ -97,7 +70,7 @@ class JudgeIdentityService:
 
     def extract_title(self, tokens, title_tokens=None):
         if title_tokens is None:
-            title_tokens = TITLE_TOKENS
+            title_tokens = self.title_tokens()
         max_size = min(3, len(tokens))
         for size in range(max_size, 0, -1):
             candidate = "".join(tokens[-size:]).upper()
@@ -152,6 +125,8 @@ class JudgeIdentityService:
         return self.parse_judge_name(value, title_tokens=self.title_tokens())
 
     def canonical_name_from_aliases(self, names, title_tokens=None):
+        if title_tokens is None:
+            title_tokens = self.title_tokens()
         candidates = []
         for name in names:
             parts = self.parse_judge_name(name, title_tokens=title_tokens)
@@ -172,6 +147,16 @@ class JudgeIdentityService:
             return "judge"
 
         return sorted(candidates, key=lambda value: (-len(value), value.casefold()))[0]
+
+    def filter_judge_people_by_name(self, queryset, value):
+        """Filter judge people by every term across names and aliases."""
+        for term in (value or "").split():
+            queryset = queryset.filter(
+                Q(first_name__icontains=term)
+                | Q(last_name__icontains=term)
+                | Q(aliases__name__icontains=term)
+            )
+        return queryset.distinct()
 
     def unique_judge_slug(self, model, name, *, pk=None):
         base_slug = slugify(name) or "judge"

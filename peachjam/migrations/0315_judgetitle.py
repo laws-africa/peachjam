@@ -5,6 +5,7 @@ TITLE_NAMES = {
     "ACJ": "Acting chief justice",
     "ACTJ": "Acting judge",
     "AJ": "Acting judge",
+    "AJA": "Acting judge of appeal",
     "AJP": "Acting judge president",
     "AJA": "Acting judge of appeal",
     "AP": "Acting president",
@@ -125,9 +126,5 @@ class Migration(migrations.Migration):
         migrations.RunPython(
             create_titles_and_link_aliases,
             reverse_code=restore_alias_title_abbreviations,
-        ),
-        migrations.RemoveField(
-            model_name="judgealias",
-            name="title_abbreviation",
         ),
     ]

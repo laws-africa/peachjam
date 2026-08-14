@@ -174,7 +174,6 @@ class JudgeIdentityWorkflowForm(forms.Form):
             if not judge_person and not last_name:
                 canonical_name = judge_identity_service.canonical_name_from_aliases(
                     [alias.name for alias in selected_aliases],
-                    title_tokens=judge_identity_service.title_tokens(),
                 )
                 first_name, last_name = judge_identity_service.split_person_name(
                     canonical_name

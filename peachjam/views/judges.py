@@ -160,9 +160,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
 
         q = self.request.GET.get("q", "").strip()
         if q:
-            queryset = queryset.filter(
-                Q(first_name__icontains=q) | Q(last_name__icontains=q)
-            )
+            queryset = judge_identity_service.filter_judge_people_by_name(queryset, q)
 
         selected_courts = self.selected_courts()
         if selected_courts:
@@ -747,11 +745,9 @@ class JudgeIdentityWorkflowMixin:
             judgments=Count("bench_entries__judgment_id", distinct=True),
         )
         if query:
-            judge_person_qs = judge_person_qs.filter(
-                Q(first_name__icontains=query)
-                | Q(last_name__icontains=query)
-                | Q(aliases__name__icontains=query)
-            ).distinct()
+            judge_person_qs = judge_identity_service.filter_judge_people_by_name(
+                judge_person_qs, query
+            )
 
         rows = []
         for judge_person in judge_person_qs[: self.workflow_limit]:

@@ -255,6 +255,9 @@ class JudgeAliasModelTests(TestCase):
         self.assertEqual("Justice of the Supreme Court", title.name)
         self.assertEqual("Justice of the Supreme Court (JSC)", str(title))
 
+        acting_appeal_title = JudgeTitle.objects.get(abbreviation="AJA")
+        self.assertEqual("Acting judge of appeal", acting_appeal_title.name)
+
 
 class BenchInlineFormTests(TestCase):
     fixtures = ["tests/countries", "tests/courts", "tests/languages"]
@@ -855,6 +858,18 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             self.judge_name_markup(other_person.full_name),
             html=True,
         )
+        self.assertEqual(1, response.context["judge_count"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_filters_by_full_name(self):
+        self.judge_person.first_name = "Justice"
+        self.judge_person.last_name = "Abban"
+        self.judge_person.save(update_fields=["first_name", "last_name"])
+
+        response = self.client.get(reverse("judges"), {"q": "Justice Abban"})
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual([self.judge_person], response.context["judges"])
         self.assertEqual(1, response.context["judge_count"])
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
