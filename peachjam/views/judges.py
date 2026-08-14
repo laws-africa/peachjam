@@ -50,22 +50,13 @@ def group_years_into_ranges(years):
     ]
 
 
-def judge_initials(name):
-    """Return phonebook-style initials for a judge name."""
-    name = " ".join(name.split())
-    if not name:
-        return ""
-
-    if "," in name:
-        surname, remainder = name.split(",", 1)
-        parts = [part for part in [surname.strip(), remainder.strip()] if part]
-    else:
-        parts = name.split()
-
-    if len(parts) == 1:
-        return parts[0][0].upper()
-
-    return f"{parts[0][0]}{parts[-1][0]}".upper()
+def judge_initials(first_name, last_name):
+    """Return surname-first initials from concrete judge name fields."""
+    return "".join(
+        name.strip()[0].upper()
+        for name in (last_name, first_name)
+        if name and name.strip()
+    )
 
 
 class JudgePublicPageMixin:
@@ -226,7 +217,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         for judge in judges:
             first_letter = judge.last_name[0].upper() if judge.last_name else "#"
             judge.first_letter = first_letter
-            judge.initials = judge_initials(judge.full_name)
+            judge.initials = judge_initials(judge.first_name, judge.last_name)
 
         sort = "judgments" if self.request.GET.get("sort") == "judgments" else "name"
         if sort == "judgments":
@@ -522,7 +513,10 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             .annotate(judgment_count=Count("judgment", distinct=True))
             .order_by("-judgment__date__year")
         )
-        context["judge_initials"] = judge_initials(self.judge_person.full_name)
+        context["judge_initials"] = judge_initials(
+            self.judge_person.first_name,
+            self.judge_person.last_name,
+        )
         context["judge_judgment_count"] = (
             bench_entries.values("judgment_id").distinct().count()
         )

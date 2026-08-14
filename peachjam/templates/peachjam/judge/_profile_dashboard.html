@@ -6,7 +6,7 @@
     <div class="entity-profile__body__info">
       <h1 id="main-page-heading">
         <strong>{{ judge_person.last_name }}</strong>
-        {% if judge_person.first_name %}, {{ judge_person.first_name }}{% endif %}
+        {% if judge_person.first_name %}{{ judge_person.first_name }}{% endif %}
       </h1>
       {% if judge_person.description %}<p class="text-muted">{{ judge_person.description }}</p>{% endif %}
       {% if judge_leading_court %}
@@ -54,7 +54,7 @@
         <div class="card-body">
           <h2 class="h4" id="judge-activity-heading">{% trans "Judgments by year" %}</h2>
           <p class="text-muted">
-            {% blocktrans count count=judge_judgment_count with judge=judge_person.full_name %}Based on {{ count }} judgment by {{ judge }} currently available.{% plural %}Based on {{ count }} judgments by {{ judge }} currently available.{% endblocktrans %}
+            {% blocktrans count count=judge_judgment_count with judge=judge_person.full_name %}Based on {{ count }} judgment by {{ judge }} currently available in {{ APP_NAME }}.{% plural %}Based on {{ count }} judgments by {{ judge }} currently available in {{ APP_NAME }}.{% endblocktrans %}
           </p>
           {% if judge_year_activity %}
             <figure class="judge-year-chart mb-0"

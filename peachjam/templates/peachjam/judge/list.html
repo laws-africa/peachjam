@@ -100,7 +100,7 @@
                                     aria-hidden="true">{{ judge.initials }}</span>
                               <div>
                                 <a href="{{ judge.get_absolute_url }}"><strong>{{ judge.last_name }}</strong>
-                                  {% if judge.first_name %}, {{ judge.first_name }}{% endif %}
+                                  {% if judge.first_name %}{{ judge.first_name }}{% endif %}
                                 </a>
                                 {% if judge.court_names %}
                                   <div class="text-muted small">

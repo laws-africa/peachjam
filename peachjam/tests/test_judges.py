@@ -639,7 +639,8 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def setUp(self):
         self.legacy_judge = Judge.objects.create(name="ABBAN, J.A.")
         self.judge_person = JudgePerson.objects.create(
-            last_name="Justice Abban",
+            first_name="Justice",
+            last_name="Abban",
             slug="justice-abban",
         )
         self.alias = JudgeAlias.objects.create(
@@ -660,15 +661,15 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
             matched_alias=self.alias,
         )
 
-    def judge_name_markup(self, name):
-        return f"<strong>{name}</strong>"
+    def judge_name_markup(self, judge_person):
+        first_name = f" {judge_person.first_name}" if judge_person.first_name else ""
+        return f"<strong>{judge_person.last_name}</strong>{first_name}"
 
     def test_judge_initials_use_first_and_last_name(self):
-        self.assertEqual("JA", judge_initials("Justice Abban"))
-        self.assertEqual("AC", judge_initials("Abban, Charles"))
-        self.assertEqual("A", judge_initials("Abban"))
-        self.assertEqual("AJ", judge_initials("Ackermann J"))
-        self.assertEqual("AA", judge_initials("Abraham AJ"))
+        self.assertEqual("MD", judge_initials("Dennis", "Mwangi"))
+        self.assertEqual("AC", judge_initials("Charles", "Abban"))
+        self.assertEqual("A", judge_initials("", "Abban"))
+        self.assertEqual("KG", judge_initials("Greg AJ", "Kempe"))
 
     def test_judgment_detail_uses_legacy_judge_by_default(self):
         response = self.client.get(self.judgment.get_absolute_url())
@@ -727,19 +728,19 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertContains(response, "Judges")
         self.assertContains(
             response,
-            self.judge_name_markup(self.judge_person.full_name),
+            self.judge_name_markup(self.judge_person),
             html=True,
         )
         self.assertContains(response, self.judge_person.get_absolute_url())
-        self.assertContains(response, "JA")
+        self.assertContains(response, "AJ")
         self.assertContains(
             response,
-            self.judge_name_markup(other_person.full_name),
+            self.judge_name_markup(other_person),
             html=True,
         )
         self.assertNotContains(
             response,
-            self.judge_name_markup(unlinked_person.full_name),
+            self.judge_name_markup(unlinked_person),
             html=True,
         )
         self.assertEqual(2, response.context["judge_count"])
@@ -771,7 +772,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(1, list_response.context["judge_count"])
         self.assertNotContains(
             list_response,
-            self.judge_name_markup(unpublished_person.full_name),
+            self.judge_name_markup(unpublished_person),
             html=True,
         )
         self.assertNotContains(list_response, "2030")
@@ -850,12 +851,12 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(
             response,
-            self.judge_name_markup(self.judge_person.full_name),
+            self.judge_name_markup(self.judge_person),
             html=True,
         )
         self.assertNotContains(
             response,
-            self.judge_name_markup(other_person.full_name),
+            self.judge_name_markup(other_person),
             html=True,
         )
         self.assertEqual(1, response.context["judge_count"])
@@ -922,12 +923,12 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(
             response,
-            self.judge_name_markup(self.judge_person.full_name),
+            self.judge_name_markup(self.judge_person),
             html=True,
         )
         self.assertNotContains(
             response,
-            self.judge_name_markup(other_person.full_name),
+            self.judge_name_markup(other_person),
             html=True,
         )
         self.assertEqual(1, response.context["judge_count"])
@@ -985,12 +986,12 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(2, response.context["judge_count"])
         self.assertContains(
             response,
-            self.judge_name_markup(self.judge_person.full_name),
+            self.judge_name_markup(self.judge_person),
             html=True,
         )
         self.assertContains(
             response,
-            self.judge_name_markup(other_person.full_name),
+            self.judge_name_markup(other_person),
             html=True,
         )
         facets = {
@@ -1036,12 +1037,12 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertContains(
             response,
-            self.judge_name_markup(self.judge_person.full_name),
+            self.judge_name_markup(self.judge_person),
             html=True,
         )
         self.assertNotContains(
             response,
-            self.judge_name_markup(other_person.full_name),
+            self.judge_name_markup(other_person),
             html=True,
         )
         self.assertContains(response, "Judgment topics")
@@ -1157,16 +1158,18 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_surname_is_bold_in_list_and_detail_views(self):
-        self.judge_person.first_name = "Greg AJ"
-        self.judge_person.last_name = "Kempe"
+        self.judge_person.first_name = "Dennis"
+        self.judge_person.last_name = "Mwangi"
         self.judge_person.save(update_fields=["first_name", "last_name"])
-        expected_name = "<strong>Kempe</strong>, Greg AJ"
+        expected_name = "<strong>Mwangi</strong> Dennis"
 
         list_response = self.client.get(reverse("judges"))
         detail_response = self.client.get(self.judge_person.get_absolute_url())
 
         self.assertContains(list_response, expected_name, html=True)
         self.assertContains(detail_response, expected_name, html=True)
+        self.assertContains(list_response, ">MD</span>")
+        self.assertContains(detail_response, ">MD</span>")
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_detail_filters_judgments_by_court_and_year(self):
@@ -1415,7 +1418,7 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertNotContains(response, "Names found in the sources")
         self.assertContains(
             response,
-            "currently available",
+            f"currently available in {settings.PEACHJAM['APP_NAME']}.",
         )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
