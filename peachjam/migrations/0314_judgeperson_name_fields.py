@@ -57,11 +57,13 @@ def split_full_name(full_name, judicial_titles):
             last_name.strip(),
         )
 
-    name = strip_judicial_title(name, judicial_titles)
-
-    parts = name.split()
-    if len(parts) == 1:
+    stripped_name = strip_judicial_title(name, judicial_titles)
+    if not stripped_name:
         return "", name
+
+    parts = stripped_name.split()
+    if len(parts) == 1:
+        return "", stripped_name
 
     return parts[0], " ".join(parts[1:])
 
