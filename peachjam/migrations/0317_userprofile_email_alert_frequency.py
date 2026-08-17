@@ -1,7 +1,5 @@
 from django.db import migrations, models
 
-import peachjam.models.user_profile
-
 
 def set_site_default_frequency(apps, schema_editor):
     from django.conf import settings
@@ -28,7 +26,7 @@ class Migration(migrations.Migration):
                     ("monthly", "Monthly"),
                     ("none", "None"),
                 ],
-                default=peachjam.models.user_profile.default_email_alert_frequency,
+                default="daily",
                 help_text="How often to receive email notification digests.",
                 max_length=16,
                 verbose_name="email alert frequency",

@@ -5,7 +5,6 @@ from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialToken
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.utils import timezone
@@ -19,6 +18,7 @@ from peachjam_subs.models import Subscription
 from .annotation import Annotation
 from .chat import DocumentChatThread
 from .save_document import Folder, SavedDocument
+from .settings import pj_settings
 from .user_following import UserFollowing
 
 
@@ -53,7 +53,7 @@ class PracticeType(OnboardingOption):
 
 
 def default_email_alert_frequency():
-    return settings.PEACHJAM["EMAIL_ALERT_DEFAULT_FREQUENCY"]
+    return pj_settings().email_alert_default_frequency
 
 
 class UserProfile(models.Model):

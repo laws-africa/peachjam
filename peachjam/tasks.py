@@ -341,8 +341,10 @@ def send_timeline_digest_email_alert(user_id):
         return
 
     log.info(f"Sending timeline email digest for user {user_id}")
-    TimelineEmailService.send_digest_email(user)
-    log.info("Timeline email digest sent")
+    if TimelineEmailService.send_digest_email(user):
+        log.info("Timeline email digest sent")
+    else:
+        log.info("Timeline email digest was not sent")
 
 
 @background(

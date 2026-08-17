@@ -215,6 +215,18 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow AI-based criminal data extraction for judgments."),
     )
+    email_alert_default_frequency = models.CharField(
+        verbose_name=_("default email alert frequency"),
+        max_length=16,
+        choices=(
+            ("daily", _("Daily")),
+            ("weekly", _("Weekly")),
+            ("monthly", _("Monthly")),
+            ("none", _("None")),
+        ),
+        default="daily",
+        help_text=_("Default frequency for new users' email alert digests."),
+    )
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")

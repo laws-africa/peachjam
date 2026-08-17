@@ -19,6 +19,13 @@ class TimelineEmailService:
     MAX_ENTRIES_PER_CATEGORY = 10
 
     @staticmethod
+    def already_sent_digest_within_last_24_hours(user):
+        return TimelineEvent.objects.filter(
+            email_alert_sent_at__gte=timezone.now() - timedelta(hours=24),
+            user_following__user=user,
+        ).exists()
+
+    @staticmethod
     def is_delivery_day(today=None):
         """Return whether digests should be delivered on this site-local day."""
         today = today or timezone.localdate()
@@ -268,26 +275,34 @@ class TimelineEmailService:
     @classmethod
     def send_digest_email(cls, user):
         if not cls.is_digest_due(user):
-            return
+            return False
+        if cls.already_sent_digest_within_last_24_hours(user):
+            log.info(
+                "A timeline email digest was sent within the last 24 hours for %s", user
+            )
+            return False
 
         events = cls.get_user_events(user)
         if not events:
-            return
+            return False
 
         context = cls.digest_context(user, events)
         if not context["displayed_events"]:
             log.info("No renderable timeline events to alert for %s", user)
-            return
+            return False
 
-        if settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] and user.email:
-            with override(user.userprofile.preferred_language.pk):
-                send_templated_mail(
-                    template_name="email_alert_digest",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[user.email],
-                    context=context,
-                )
+        if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] or not user.email:
+            return False
 
-            TimelineEvent.objects.filter(
-                pk__in=[event.pk for event in context["displayed_events"]]
-            ).update(email_alert_sent_at=timezone.now())
+        with override(user.userprofile.preferred_language.pk):
+            send_templated_mail(
+                template_name="email_alert_digest",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                context=context,
+            )
+
+        TimelineEvent.objects.filter(
+            pk__in=[event.pk for event in context["displayed_events"]]
+        ).update(email_alert_sent_at=timezone.now())
+        return True

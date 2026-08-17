@@ -27,7 +27,9 @@ from peachjam.models import (
     TimelineEvent,
     UserFollowing,
     Work,
+    pj_settings,
 )
+from peachjam.models.user_profile import default_email_alert_frequency
 from peachjam.timeline_email_service import TimelineEmailService
 from peachjam_subs.models import Feature, Subscription
 
@@ -208,6 +210,39 @@ class TimelineViewTest(TestCase):
         self.assertFalse(
             TimelineEmailService.is_digest_due(self.user, date(2026, 8, 4))
         )
+
+    def test_new_user_default_frequency_uses_site_settings(self):
+        site_settings = pj_settings()
+        site_settings.email_alert_default_frequency = "weekly"
+        site_settings.save(update_fields=["email_alert_default_frequency"])
+
+        self.assertEqual("weekly", default_email_alert_frequency())
+
+    def test_digest_waits_24_hours_after_a_previous_delivery(self):
+        topic = Taxonomy.add_root(name="Employment Law")
+        follow = UserFollowing.objects.create(user=self.user, taxonomy=topic)
+        document = Judgment.objects.first()
+        previous_event = TimelineEvent.add_new_documents_event(follow, [document])
+        previous_event.mark_as_sent()
+        pending_event = TimelineEvent.add_new_documents_event(follow, [document])
+
+        with (
+            override_settings(
+                PEACHJAM={
+                    **settings.PEACHJAM,
+                    "EMAIL_ALERTS_ENABLED": True,
+                    "CUSTOMERIO_EMAIL_API_KEY": "test",
+                },
+                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
+            ),
+            patch.object(TimelineEmailService, "is_digest_due", return_value=True),
+            patch("peachjam.emails.APIClient.send_email") as mailer,
+        ):
+            TimelineEmailService.send_digest_email(self.user)
+
+        self.assertFalse(mailer.called)
+        pending_event.refresh_from_db()
+        self.assertIsNone(pending_event.email_alert_sent_at)
 
     def test_journal_follow_creates_new_documents_timeline_event(self):
         journal = Journal.objects.create(
@@ -652,6 +687,7 @@ class TimelineRelationshipTests(TestCase):
                 request.identifiers,
             )
             self.assertIn("<html", request.body)
+            self.assertIn("utm_campaign=email_digest", request.body)
             self.assertEqual({}, request.attachments)
 
         self.assertEqual(

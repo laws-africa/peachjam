@@ -5,58 +5,66 @@
   <p>{% trans "Here is a summary of your latest alerts." %}</p>
 
   {% if followed_documents %}
-    <h2>{% trans "New documents" %}</h2>
-    <p>{% trans "New documents for topics you follow." %}</p>
-    {% for item in followed_documents %}
-      <p><strong>{{ item.followed_object }}</strong></p>
-      <ul>
-        {% for doc in item.documents %}
-          {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
-        {% endfor %}
-      </ul>
-    {% endfor %}
-    {% if followed_more %}
-      <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
-    {% endif %}
+    <div class="digest-section">
+      <h2 class="digest-section-heading">{% trans "New documents" %}</h2>
+      <p class="digest-section-description">{% trans "New documents for topics you follow." %}</p>
+      {% for item in followed_documents %}
+        <p class="digest-followed-object">{{ item.followed_object }}</p>
+        <ul>
+          {% for doc in item.documents %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      {% if followed_more %}
+        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% if saved_searches %}
-    <h2>{% trans "Search alerts" %}</h2>
-    {% for item in saved_searches %}
-      <p><strong><a href="{% absolute_url site item.saved_search.get_absolute_url %}">{{ item.saved_search.q }}</a></strong></p>
-      <ul>
-        {% for hit in item.hits %}
-          <li>
-            <a href="{% absolute_url site hit.expression_frbr_uri %}">{% if hit.highlight.title %}{{ hit.highlight.title|first|safe }}{% else %}{{ hit.document.title }}{% endif %}</a>
-          </li>
-        {% endfor %}
-      </ul>
-    {% endfor %}
-    {% if searches_more %}
-      <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
-    {% endif %}
+    <div class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Search alerts" %}</h2>
+      {% for item in saved_searches %}
+        <p class="digest-followed-object"><a href="{% absolute_url site item.saved_search.get_absolute_url %}">{{ item.saved_search.q }}</a></p>
+        <ul>
+          {% for hit in item.hits %}
+            <li>
+              <a href="{% absolute_url site hit.expression_frbr_uri %}">{% if hit.highlight.title %}{{ hit.highlight.title|first|safe }}{% else %}{{ hit.document.title }}{% endif %}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      {% if searches_more %}
+        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% if citations %}
-    <h2>{% trans "New citations" %}</h2>
-    {% for item in citations %}
-      <p><strong><a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></strong></p>
-      <ul>
-        {% for citing in item.citing_documents %}
-          {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.title blurb=citing.document.blurb flynote=citing.document.flynote only %}
-        {% endfor %}
-      </ul>
-    {% endfor %}
-    {% if citations_more %}
-      <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
-    {% endif %}
+    <div class="digest-section">
+      <h2 class="digest-section-heading">{% trans "New citations" %}</h2>
+      {% for item in citations %}
+        <p class="digest-followed-object"><a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></p>
+        <ul>
+          {% for citing in item.citing_documents %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.title blurb=citing.document.blurb flynote=citing.document.flynote only %}
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      {% if citations_more %}
+        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% if relationships %}
-    <h2>{% trans "Updates to saved documents" %}</h2>
-    {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=relationships %}
-    {% if relationships_more %}
-      <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
-    {% endif %}
+    <div class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Updates to saved documents" %}</h2>
+      {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=relationships utm_campaign="email_digest" %}
+      {% if relationships_more %}
+        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+      {% endif %}
+    </div>
   {% endif %}
 {% endblock %}
