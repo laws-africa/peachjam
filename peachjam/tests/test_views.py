@@ -37,7 +37,7 @@ from peachjam.views.robots import (
     _prefixed_place_rules,
 )
 from peachjam_search.models import SavedSearch
-from peachjam_subs.models import Subscription
+from peachjam_subs.models import OffboardingFeedback, Subscription
 
 
 def home_page_view(request):
@@ -466,7 +466,8 @@ class PeachjamViewsTest(TestCase):
             reverse("delete_account"),
             data={
                 "confirm_delete": True,
-                "deleted_reason": "No longer needed",
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
             },
         )
 
@@ -482,8 +483,11 @@ class PeachjamViewsTest(TestCase):
         self.assertFalse(user.has_usable_password())
 
         self.assertIsNotNone(profile.deleted_at)
-        self.assertEqual(profile.deleted_reason, "No longer needed")
+        self.assertEqual(profile.deleted_reason, "Not using it enough")
         self.assertEqual(len(profile.email_hash), 64)
+        feedback = OffboardingFeedback.objects.get()
+        self.assertIsNone(feedback.user)
+        self.assertEqual(feedback.comment, "No longer needed")
 
         self.assertEqual(Annotation.objects.filter(user=user).count(), 0)
         self.assertEqual(Folder.objects.filter(user=user).count(), 0)

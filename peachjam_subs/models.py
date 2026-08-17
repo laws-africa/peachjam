@@ -427,6 +427,10 @@ class Subscription(models.Model):
     def is_closed(self):
         return self.status == Subscription.Status.CLOSED
 
+    def is_downgrade_to(self, product_offering):
+        """Return whether an offering moves the user to a lower entitlement tier."""
+        return product_offering.product.tier < self.product.tier
+
     @transition(
         field=status,
         source=[Status.PENDING],
@@ -679,6 +683,94 @@ class Subscription(models.Model):
         ).first()
 
         return True, upgrade
+
+
+class OffboardingFeedback(models.Model):
+    """A customer's stated reason for reducing their subscription or deleting an account."""
+
+    class EventType(models.TextChoices):
+        SUBSCRIPTION_DOWNGRADE = "subscription-downgrade", _("Subscription downgrade")
+        ACCOUNT_DELETION = "account-deletion", _("Account deletion")
+
+    class Reason(models.TextChoices):
+        TOO_EXPENSIVE = "too-expensive", _("Too expensive")
+        NOT_USING_ENOUGH = "not-using-enough", _("Not using it enough")
+        MISSING_FEATURE = "missing-feature", _("Missing a feature")
+        TECHNICAL_ISSUE = "technical-issue", _("Technical issue")
+        SWITCHING_ALTERNATIVE = "switching-alternative", _(
+            "Switching to an alternative"
+        )
+        TEMPORARY_NEED = "temporary-need", _("Temporary need")
+        OTHER = "other", _("Other")
+
+    user = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="offboarding_feedback",
+    )
+    event_type = models.CharField(max_length=32, choices=EventType.choices)
+    reason = models.CharField(max_length=32, choices=Reason.choices)
+    comment = models.TextField(blank=True)
+    confirmation_token = models.UUIDField(null=True, blank=True)
+    current_product_offering = models.ForeignKey(
+        ProductOffering,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="current_offboarding_feedback",
+    )
+    requested_product_offering = models.ForeignKey(
+        ProductOffering,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="requested_offboarding_feedback",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("user", "event_type", "confirmation_token"),
+                name="unique_offboarding_feedback_confirmation",
+            )
+        ]
+
+    @classmethod
+    def record_downgrade(
+        cls,
+        user,
+        current_subscription,
+        requested_product_offering,
+        reason,
+        comment,
+        confirmation_token,
+    ):
+        return cls.objects.get_or_create(
+            user=user,
+            event_type=cls.EventType.SUBSCRIPTION_DOWNGRADE,
+            confirmation_token=confirmation_token,
+            defaults={
+                "reason": reason,
+                "comment": comment,
+                "current_product_offering": current_subscription.product_offering,
+                "requested_product_offering": requested_product_offering,
+            },
+        )
+
+    @classmethod
+    def record_account_deletion(cls, reason, comment):
+        return cls.objects.create(
+            event_type=cls.EventType.ACCOUNT_DELETION,
+            reason=reason,
+            comment=comment,
+        )
+
+    def __str__(self):
+        return f"{self.get_event_type_display()}: {self.get_reason_display()}"
 
 
 class SubscriptionSettings(SingletonModel):

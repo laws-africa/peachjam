@@ -14,6 +14,7 @@ from peachjam.admin import UserAdminCustom
 
 from .models import (
     Feature,
+    OffboardingFeedback,
     PricingPlan,
     Product,
     ProductOffering,
@@ -193,6 +194,34 @@ class SubscriptionAdmin(admin.ModelAdmin):
             ),
         ]
         return custom_urls + urls
+
+
+@admin.register(OffboardingFeedback)
+class OffboardingFeedbackAdmin(admin.ModelAdmin):
+    list_display = (
+        "event_type",
+        "reason",
+        "current_product_offering",
+        "requested_product_offering",
+        "created_at",
+    )
+    list_filter = (
+        "event_type",
+        "reason",
+        "created_at",
+        "current_product_offering",
+        "requested_product_offering",
+    )
+    search_fields = ("comment", "user__username")
+    readonly_fields = (
+        "user",
+        "event_type",
+        "reason",
+        "comment",
+        "current_product_offering",
+        "requested_product_offering",
+        "created_at",
+    )
 
 
 @admin.register(SubscriptionSettings)
