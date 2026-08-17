@@ -82,6 +82,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         "new_citation_alert",
         "new_relationship_alert",
         "new_overturn_alert",
+        "email_alert_digest",
         "account/email/login_code",
     ]
 

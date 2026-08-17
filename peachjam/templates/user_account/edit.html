@@ -51,6 +51,23 @@
               </div>
             {% endif %}
           </div>
+          <div class="col mb-3">
+            <label class="form-label"
+                   for="{{ form.email_alert_frequency.id_for_label }}">
+              {{ form.email_alert_frequency.label }}
+            </label>
+            <select class="form-control"
+                    name="{{ form.email_alert_frequency.name }}"
+                    id="{{ form.email_alert_frequency.id_for_label }}">
+              {% for opt in form.email_alert_frequency %}{{ opt }}{% endfor %}
+            </select>
+            <div class="form-text">{% trans "Receive a single digest of your alerts on weekdays at 10:00 AM." %}</div>
+            {% if form.email_alert_frequency.errors %}
+              <div class="text-danger">
+                {% for error in form.email_alert_frequency.errors %}<p>{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
         </div>
         <button type="submit" class="btn btn-primary">{% trans "Update" %}</button>
       </form>

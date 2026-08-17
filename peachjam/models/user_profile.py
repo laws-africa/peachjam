@@ -5,6 +5,7 @@ from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialToken
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models, transaction
 from django.utils import timezone
@@ -51,8 +52,18 @@ class PracticeType(OnboardingOption):
         verbose_name_plural = _("practice types")
 
 
+def default_email_alert_frequency():
+    return settings.PEACHJAM["EMAIL_ALERT_DEFAULT_FREQUENCY"]
+
+
 class UserProfile(models.Model):
     SAVE_FOLDER = "user_profiles"
+
+    class EmailAlertFrequency(models.TextChoices):
+        DAILY = "daily", _("Daily")
+        WEEKLY = "weekly", _("Weekly")
+        MONTHLY = "monthly", _("Monthly")
+        NONE = "none", _("None")
 
     user = models.OneToOneField(
         get_user_model(), on_delete=models.CASCADE, verbose_name=_("user")
@@ -80,6 +91,13 @@ class UserProfile(models.Model):
     deleted_at = models.DateTimeField(_("deleted at"), null=True, blank=True)
     deleted_reason = models.TextField(_("deleted reason"), null=True, blank=True)
     email_hash = models.CharField(_("email hash"), max_length=64, null=True, blank=True)
+    email_alert_frequency = models.CharField(
+        _("email alert frequency"),
+        max_length=16,
+        choices=EmailAlertFrequency.choices,
+        default=default_email_alert_frequency,
+        help_text=_("How often to receive email notification digests."),
+    )
     onboarding_intents = models.ManyToManyField(
         OnboardingIntent,
         verbose_name=_("onboarding intents"),

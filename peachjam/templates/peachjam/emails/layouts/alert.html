@@ -7,7 +7,7 @@
   <p>{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
   <p>
     <small>
-      <a href="{% absolute_url site manage_url_path %}?utm_campaign=following&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
+      <a href="{% absolute_url site manage_url_path %}?utm_campaign={{ utm_campaign|default:'following' }}&utm_source=alert&utm_medium=email">{% trans "Manage these email alerts" %}</a>
     </small>
   </p>
 {% endblock %}

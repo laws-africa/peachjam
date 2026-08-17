@@ -71,4 +71,15 @@ class PeachJamConfig(AppConfig):
             ).replace(hour=3, minute=0, second=0)
             rank_works(schedule=run_at, repeat=Task.WEEKLY)
             update_user_follows(schedule=Task.HOURLY, repeat=Task.DAILY)
-            send_timeline_email_alerts(schedule=Task.HOURLY, repeat=Task.DAILY)
+            digest_run_at = timezone.localtime()
+            if digest_run_at.hour >= 10:
+                digest_run_at += timezone.timedelta(days=1)
+            while digest_run_at.weekday() >= 5:
+                digest_run_at += timezone.timedelta(days=1)
+            digest_run_at = digest_run_at.replace(
+                hour=10,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            send_timeline_email_alerts(schedule=digest_run_at, repeat=Task.DAILY)
