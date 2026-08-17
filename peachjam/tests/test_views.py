@@ -22,7 +22,9 @@ from peachjam.models import (
     Court,
     Folder,
     GenericDocument,
+    Judge,
     Judgment,
+    LawReport,
     Locality,
     Outcome,
     PeachJamSettings,
@@ -140,6 +142,49 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertIn("High Court", court_classes)
+        self.assertEqual(
+            Judgment.objects.filter(published=True).count(),
+            response.context["doc_count"],
+        )
+        self.assertEqual(
+            Judgment.objects.filter(published=True)
+            .exclude(court__isnull=True)
+            .values("court")
+            .distinct()
+            .count(),
+            response.context["court_count"],
+        )
+        self.assertEqual(
+            Judge.objects.filter(judgment__published=True).distinct().count(),
+            response.context["judge_count"],
+        )
+        self.assertEqual(
+            LawReport.objects.count(), response.context["law_report_count"]
+        )
+        self.assertContains(response, 'href="#court-hierarchy-heading"')
+        for court_class in response.context["court_classes"]:
+            self.assertContains(response, f'href="{court_class.get_absolute_url()}"')
+
+    def test_judgment_listing_limits_recent_judgments_to_ten(self):
+        for day in range(1, 13):
+            Judgment.objects.create(
+                language=Language.objects.first(),
+                court=Court.objects.first(),
+                date=datetime.date(2025, 1, day),
+                jurisdiction=Country.objects.first(),
+                case_name=f"Recent judgment {day}",
+            )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        recent_judgments = list(response.context["recent_judgments"])
+        self.assertEqual(10, len(recent_judgments))
+        self.assertEqual(recent_judgments, list(response.context["documents"]))
+        self.assertEqual(datetime.date(2025, 1, 12), recent_judgments[0].date)
+        self.assertEqual(
+            datetime.date(2025, 1, 12), response.context["latest_judgment_date"]
+        )
 
     def test_court_listing(self):
         response = self.client.get(reverse("court", kwargs={"code": "ECOWASCJ"}))
