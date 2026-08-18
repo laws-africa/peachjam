@@ -47,6 +47,16 @@ class RobotsView(TemplateView):
     template_name = "peachjam/robots.txt"
     content_type = "text/plain"
 
+    common_disallow_paths = [
+        "/api/",
+        "/accounts/",
+        "/my/",
+        "/user/",
+        "/purchase/",
+        "/judgments/",
+        "/gazettes/",
+    ]
+
     prefixed_disallow_patterns = [
         "/search/",
         # provision-level detail pages
@@ -81,5 +91,11 @@ class RobotsView(TemplateView):
         context["prefixed_disallow_paths"] = "\n".join(disallow_paths)
         context["disallowed_content"] = "\n".join(disallowed_content)
         context["extra_content"] = site_settings.robots_txt or ""
+        context["common_disallow_paths"] = self.common_disallow_paths
+        context["ai_search_disallow_paths"] = [
+            *self.common_disallow_paths,
+            "/search/",
+            "/akn/",
+        ]
 
         return context
