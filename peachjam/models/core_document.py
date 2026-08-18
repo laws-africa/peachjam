@@ -1218,6 +1218,20 @@ class DocumentContent(AttributeHooksMixin, models.Model):
 
     @on_attribute_changed(
         AFTER_SAVE,
+        ["content_html"],
+        ["SourceFile.anonymised_file_as_pdf"],
+    )
+    def update_anonymised_source_file(self):
+        """Regenerate a judgment's derived anonymised PDF after its rendered content changes."""
+        from peachjam.models import CoreDocument, Judgment
+
+        if self.document_id:
+            document = CoreDocument.objects.get(pk=self.document_id)
+            if isinstance(document, Judgment):
+                document.ensure_anonymised_source_file()
+
+    @on_attribute_changed(
+        AFTER_SAVE,
         ["content_text"],
         [
             "Judgment.blurb",
