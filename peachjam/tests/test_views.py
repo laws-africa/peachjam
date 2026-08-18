@@ -1,5 +1,6 @@
 import datetime
 import os
+from unittest.mock import patch
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
@@ -1002,6 +1003,55 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"anon")
+
+    def test_anonymised_source_files_do_not_redirect_to_storage_or_remote_urls(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        doc.anonymised = True
+        doc.save()
+
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"source", name="original-parties.docx"),
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_is_anonymised=True,
+        )
+        with patch.object(
+            source_file.file.storage,
+            "custom_domain",
+            "files.example",
+            create=True,
+        ):
+            response = self.client.get(f"{doc.get_absolute_url()}/source")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("original-parties", response.get("Location", ""))
+        self.assertIn(
+            source_file.filename_for_download(), response["Content-Disposition"]
+        )
+
+        source_file.delete()
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"original", name="original-parties.pdf"),
+            mimetype="application/pdf",
+            source_url="https://example.com/original-parties.pdf",
+            anonymised_file_as_pdf=ContentFile(b"anonymised", name="safe.pdf"),
+        )
+        with patch.object(
+            source_file.anonymised_file_as_pdf.storage,
+            "custom_domain",
+            "files.example",
+            create=True,
+        ):
+            response = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"anonymised")
+        self.assertNotIn("original-parties", response.get("Location", ""))
+        self.assertIn(
+            source_file.filename_for_download(".pdf"), response["Content-Disposition"]
+        )
 
     @override_settings(
         PEACHJAM={

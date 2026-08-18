@@ -125,7 +125,8 @@ class DocumentSourceView(DocumentDetailView):
             source_file = self.object.source_file
             anonymised = getattr(self.object, "anonymised", False)
 
-            # redirect to the PDF view if necessary
+            # The PDF endpoint chooses the safe derived PDF for anonymised judgments. Do not serve the original
+            # non-PDF source file when that derived PDF is available.
             if (
                 source_file.file
                 and source_file.mimetype == "application/pdf"
@@ -139,11 +140,18 @@ class DocumentSourceView(DocumentDetailView):
                     )
                 )
 
+            # An anonymised judgment may expose its attached source only when editors have explicitly confirmed
+            # that attachment is anonymised. Otherwise it must remain private and the derived PDF is used instead.
             if source_file.file and (not anonymised or source_file.file_is_anonymised):
-                if source_file.source_url:
+                # Redirects expose the storage or remote URL, which can include the uploaded filename. Stream
+                # anonymised files through this view so we control the safe Content-Disposition filename.
+                if source_file.source_url and not anonymised:
                     return redirect(source_file.source_url)
 
-                if getattr(source_file.file.storage, "custom_domain", None):
+                if (
+                    getattr(source_file.file.storage, "custom_domain", None)
+                    and not anonymised
+                ):
                     # use the storage's custom domain to serve the file
                     return redirect(source_file.file.url)
 
@@ -170,23 +178,26 @@ class DocumentSourcePDFView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
-
-            # if the source file is remote and a pdf, just redirect there
-            if source_file.source_url and source_file.mimetype == "application/pdf":
-                return redirect(source_file.source_url)
+            anonymised = getattr(self.object, "anonymised", False)
 
             pdf = source_file.as_pdf()
 
             # special case for anonymised judgments: use the anonymised file if available
-            if (
-                getattr(self.object, "anonymised", False)
-                and not source_file.file_is_anonymised
-            ):
+            if anonymised and not source_file.file_is_anonymised:
                 # this may be None
                 pdf = source_file.anonymised_file_as_pdf
 
             if pdf:
-                if getattr(pdf.storage, "custom_domain", None):
+                # Anonymised files must be served through Peachjam. A storage redirect can reveal the original
+                # uploaded filename in its URL, even when the download header has a safe filename.
+                if (
+                    source_file.source_url
+                    and source_file.mimetype == "application/pdf"
+                    and not anonymised
+                ):
+                    return redirect(source_file.source_url)
+
+                if getattr(pdf.storage, "custom_domain", None) and not anonymised:
                     # use the storage's custom domain to serve the file
                     return redirect(pdf.url)
                 else:
