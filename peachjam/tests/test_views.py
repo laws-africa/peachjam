@@ -33,6 +33,7 @@ from peachjam.models import (
     Work,
 )
 from peachjam.views.robots import (
+    RobotsView,
     _language_prefixes,
     _place_codes,
     _prefixed_place_rules,
@@ -406,6 +407,22 @@ class PeachjamViewsTest(TestCase):
 
         body = response.content.decode()
         self.assertIn("Disallow: /search/", body)
+        self.assertIn("Sitemap: http://testserver/sitemap.xml", body)
+        self.assertIn("User-agent: OAI-SearchBot", body)
+        self.assertIn("User-agent: Claude-SearchBot", body)
+        self.assertIn("Disallow: /akn/", body)
+        self.assertEqual(
+            RobotsView.common_disallow_paths,
+            [
+                "/api/",
+                "/accounts/",
+                "/my/",
+                "/user/",
+                "/purchase/",
+                "/judgments/",
+                "/gazettes/",
+            ],
+        )
 
         for code, _ in settings.LANGUAGES:
             self.assertIn(f"Disallow: /{code}/search/", body)
@@ -423,6 +440,22 @@ class PeachjamViewsTest(TestCase):
 
         response = self.client.get("/robots.txt")
         self.assertContains(response, "foo\nbar")
+
+    def test_sitemap_index(self):
+        response = self.client.get("/sitemap.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/xml")
+        self.assertContains(response, "/sitemaps/pages.xml")
+        self.assertContains(response, "/sitemaps/articles.xml")
+        self.assertContains(response, "/sitemaps/legislation.xml")
+
+    def test_legislation_sitemap_excludes_non_indexable_documents(self):
+        response = self.client.get("/sitemaps/legislation.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "/judgment/")
+        self.assertNotContains(response, "/officialGazette/")
 
     def test_account_profile(self):
         response = self.client.get(reverse("my_account"))

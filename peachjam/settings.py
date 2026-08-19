@@ -115,6 +115,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.humanize",
     "django.contrib.messages",
+    "django.contrib.sitemaps",
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "sass_processor",
@@ -210,6 +211,15 @@ PEACHJAM = {
     "SEARCH_FAKE_DOCUMENTS": False,
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
+    # Curated public landing pages in /sitemaps/pages.xml. Add a URL name here only
+    # when a new route is a canonical, indexable marketing or information page;
+    # document and article URLs are maintained by their dedicated sitemaps.
+    "SITEMAP_STATIC_URL_NAMES": [
+        "home_page",
+        "about",
+        "article_list",
+        "terms_of_use",
+    ],
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
     "HTML_TO_PNG": "bin/html-to-png" if DEBUG else "html-to-png",
     # Customer.io
