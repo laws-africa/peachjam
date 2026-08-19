@@ -186,9 +186,11 @@ class TimelineViewTest(TestCase):
         request = mailer.call_args[0][0]
         self.assertEqual("Employment Law: 1 new judgment", str(request.subject))
         self.assertIn("1 new judgment for Employment Law", request.body)
+        self.assertIn("Employment Law – 1 new judgment", request.body)
         self.assertIn("Updates for courts and topics you follow", request.body)
-        self.assertIn("Manage court and topic alerts", request.body)
-        self.assertIn("View all updates in My Peachjam", request.body)
+        self.assertIn("Manage these email alerts", request.body)
+        self.assertNotIn("Manage court and topic alerts", request.body)
+        self.assertNotIn('href="#followed-documents"', request.body)
 
     def test_digest_frequency_uses_business_days(self):
         profile = self.user.userprofile
@@ -702,7 +704,8 @@ class TimelineRelationshipTests(TestCase):
             self.assertIn("<html", request.body)
             self.assertIn("utm_campaign=email_digest", request.body)
             self.assertIn("1 new amendment published for", request.body)
-            self.assertIn("Manage saved documents", request.body)
+            self.assertIn("Manage these email alerts", request.body)
+            self.assertNotIn("Manage saved documents", request.body)
             self.assertEqual({}, request.attachments)
 
         self.assertEqual(

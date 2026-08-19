@@ -127,24 +127,75 @@ class TimelineEmailService:
             "followed_object": followed_object,
         }
 
-    @staticmethod
-    def saved_search_heading(saved_search, count):
+    @classmethod
+    def followed_documents_summary_label(cls, followed_object, documents, count):
         return ngettext(
-            "%(count)d new match for “%(search)s”",
-            "%(count)d new matches for “%(search)s”",
+            "%(followed_object)s – %(count)d new %(document_kind)s",
+            "%(followed_object)s – %(count)d new %(document_kind)s",
             count,
-        ) % {"count": count, "search": saved_search.q}
+        ) % {
+            "followed_object": followed_object,
+            "count": count,
+            "document_kind": cls.document_kind(documents, count),
+        }
 
     @staticmethod
-    def citation_heading(document, count):
+    def saved_search_update_label(count):
         return ngettext(
-            "%(count)d new citation of %(document)s",
-            "%(count)d new citations of %(document)s",
+            "%(count)d new search result",
+            "%(count)d new search results",
             count,
-        ) % {"count": count, "document": document.title}
+        ) % {"count": count}
 
     @staticmethod
-    def relationship_heading(event_type, count):
+    def saved_search_body_label(count):
+        return ngettext(
+            "%(count)d new search result for",
+            "%(count)d new search results for",
+            count,
+        ) % {"count": count}
+
+    @staticmethod
+    def citation_update_label(count):
+        return ngettext(
+            "%(count)d new citation",
+            "%(count)d new citations",
+            count,
+        ) % {"count": count}
+
+    @staticmethod
+    def citation_body_label(count):
+        return ngettext(
+            "%(count)d new citation of",
+            "%(count)d new citations of",
+            count,
+        ) % {"count": count}
+
+    @staticmethod
+    def relationship_update_label(event_type, count):
+        relationship_labels = {
+            TimelineEvent.EventTypes.NEW_AMENDMENT: (
+                "%(count)d new amendment",
+                "%(count)d new amendments",
+            ),
+            TimelineEvent.EventTypes.NEW_REPEAL: (
+                "%(count)d new repeal",
+                "%(count)d new repeals",
+            ),
+            TimelineEvent.EventTypes.NEW_COMMENCEMENT: (
+                "%(count)d new commencement notice",
+                "%(count)d new commencement notices",
+            ),
+            TimelineEvent.EventTypes.NEW_OVERTURN: (
+                "%(count)d new overturning decision",
+                "%(count)d new overturning decisions",
+            ),
+        }
+        singular, plural = relationship_labels[event_type]
+        return ngettext(singular, plural, count) % {"count": count}
+
+    @staticmethod
+    def relationship_body_label(event_type, count):
         relationship_labels = {
             TimelineEvent.EventTypes.NEW_AMENDMENT: (
                 "%(count)d new amendment published for",
@@ -258,6 +309,11 @@ class TimelineEmailService:
                         item["all_documents"],
                         len(item["all_documents"]),
                     ),
+                    "summary_label": cls.followed_documents_summary_label(
+                        follow.followed_object_name,
+                        item["all_documents"],
+                        len(item["all_documents"]),
+                    ),
                     "subject": cls.followed_documents_subject(
                         follow.followed_object_name,
                         item["all_documents"],
@@ -287,9 +343,8 @@ class TimelineEmailService:
                         "saved_search": event.user_following.saved_search,
                         "hits": hits,
                         "total_count": len(all_hits),
-                        "heading": cls.saved_search_heading(
-                            event.user_following.saved_search, len(all_hits)
-                        ),
+                        "update_label": cls.saved_search_update_label(len(all_hits)),
+                        "body_label": cls.saved_search_body_label(len(all_hits)),
                         "subject": cls.saved_search_subject(
                             event.user_following.saved_search, len(all_hits)
                         ),
@@ -333,7 +388,8 @@ class TimelineEmailService:
                     "saved_document": document,
                     "citing_documents": item["citing_documents"],
                     "total_count": item["total_count"],
-                    "heading": cls.citation_heading(document, item["total_count"]),
+                    "update_label": cls.citation_update_label(item["total_count"]),
+                    "body_label": cls.citation_body_label(item["total_count"]),
                     "subject": cls.citation_subject(document, item["total_count"]),
                 }
                 for document, item in saved_documents.items()
@@ -365,7 +421,10 @@ class TimelineEmailService:
 
         for relationships in saved_documents.values():
             for relationship in relationships.values():
-                relationship["label"] = cls.relationship_heading(
+                relationship["update_label"] = cls.relationship_update_label(
+                    relationship["event_type"], relationship["total_count"]
+                )
+                relationship["body_label"] = cls.relationship_body_label(
                     relationship["event_type"], relationship["total_count"]
                 )
 
@@ -417,32 +476,40 @@ class TimelineEmailService:
         summary_items = []
         summary_items.extend(
             {
-                "anchor": "followed-documents",
-                "label": item["heading"],
+                "label": item["summary_label"],
                 "subject": item["subject"],
             }
             for item in followed_documents
         )
         summary_items.extend(
             {
-                "anchor": "saved-searches",
-                "label": item["heading"],
+                "label": _("“%(search)s” – %(update_label)s")
+                % {
+                    "search": item["saved_search"].q,
+                    "update_label": item["update_label"],
+                },
                 "subject": item["subject"],
             }
             for item in saved_searches
         )
         summary_items.extend(
             {
-                "anchor": "citations",
-                "label": item["heading"],
+                "label": _("%(document)s – %(update_label)s")
+                % {
+                    "document": item["saved_document"].title,
+                    "update_label": item["update_label"],
+                },
                 "subject": item["subject"],
             }
             for item in citations
         )
         summary_items.extend(
             {
-                "anchor": "relationships",
-                "label": f"{relationship['label']} {document.title}",
+                "label": _("%(document)s – %(update_label)s")
+                % {
+                    "document": document.title,
+                    "update_label": relationship["update_label"],
+                },
                 "subject": cls.relationship_subject(
                     relationship["event_type"],
                     document,
@@ -478,9 +545,6 @@ class TimelineEmailService:
             "relationships_total": relationships_total,
             "relationships_more": relationships_total > cls.MAX_ENTRIES_PER_CATEGORY,
             "timeline_url_path": reverse("my_home") + "#timeline",
-            "manage_following_url_path": reverse("user_following_list"),
-            "manage_searches_url_path": reverse("search:saved_search_list"),
-            "manage_saved_documents_url_path": reverse("folder_list"),
             "manage_url_path": reverse("edit_account"),
             "utm_campaign": "email_digest",
             "displayed_events": displayed_events,
