@@ -95,7 +95,7 @@
                 <p class="text-muted">{% trans "Topics group judgments by the legal principles in each decision." %}</p>
                 <ul class="list-unstyled mb-4">
                   {% for item in top_flynote_topics %}
-                    <li class="d-flex justify-content-between gap-3 py-1">
+                    <li class="d-flex justify-content-between gap-3">
                       <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
                       <span class="text-muted text-nowrap">
                         {% blocktrans count counter=item.doc_count with formatted_count=item.doc_count|intcomma %}{{ formatted_count }} judgment{% plural %}{{ formatted_count }} judgments{% endblocktrans %}
