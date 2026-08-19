@@ -34,7 +34,7 @@ def seed_onboarding_options(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("peachjam", "0313_mark_external_citation_links_manual"),
+        ("peachjam", "0317_backfill_anonymised_source_file_pdfs"),
     ]
 
     operations = [
