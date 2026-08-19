@@ -155,7 +155,7 @@ class JudgmentSummariserE2ETest(TestCase):
             language=Language.objects.first(),
         )
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("""
+        doc_content.set_source_html("""
             <p>The appellant sought leave to appeal out of time after failing to comply with the
             prescribed rules. The High Court considered the explanation for the delay, the
             prospects of success, and the interests of justice.</p>

@@ -43,7 +43,7 @@ class JudgmentTestCase(TestCase):
             case_name="Foo v Bar",
         )
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
         return judgment
 
@@ -1052,7 +1052,7 @@ class JudgmentTestCase(TestCase):
         )
         judgment.save()
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         judgment.track_changes()
@@ -1084,7 +1084,7 @@ class JudgmentTestCase(TestCase):
         )
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         self.assertTrue(
@@ -1113,7 +1113,7 @@ class JudgmentTestCase(TestCase):
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
@@ -1144,7 +1144,7 @@ class JudgmentTestCase(TestCase):
         initial_calls = len(generate_summary_task.call_args_list)
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
@@ -1170,7 +1170,7 @@ class JudgmentTestCase(TestCase):
         initial_calls = len(generate_summary_task.call_args_list)
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is updated judgment text.</p>")
+        doc_content.set_source_html("<p>This is updated judgment text.</p>")
         doc_content.save()
 
         self.assertGreater(len(generate_summary_task.call_args_list), initial_calls)

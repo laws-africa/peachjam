@@ -65,7 +65,7 @@ class ComparePortionsViewTest(TestCase):
         )
         content = document.get_or_create_document_content(True)
         content.content_html_is_akn = False
-        content.content_html = f"""
+        content.source_html = f"""
           <div>
             <section id="chp_1">
               <h2>Chapter 1</h2>
