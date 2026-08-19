@@ -1,15 +1,27 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
 {% load i18n peachjam %}
-{% block subject %}{% blocktrans %}Your latest legal updates{% endblocktrans %}{% endblock %}
+{% block subject %}{{ digest_subject }}{% endblock %}
 {% block alert-body %}
   <p>{% trans "Here is a summary of your latest alerts." %}</p>
 
+  {% if summary_items %}
+    <div class="digest-summary">
+      <ul>
+        {% for item in summary_items %}
+          <li><a href="#{{ item.anchor }}">{{ item.label }}</a></li>
+        {% endfor %}
+      </ul>
+      <p class="digest-summary-timeline"><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with app_name=APP_NAME %}View all updates in My {{ app_name }}{% endblocktrans %}</a></p>
+    </div>
+  {% endif %}
+
   {% if followed_documents %}
-    <div class="digest-section">
-      <h2 class="digest-section-heading">{% trans "New documents" %}</h2>
-      <p class="digest-section-description">{% trans "New documents for topics you follow." %}</p>
+    <div id="followed-documents" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Updates for courts and topics you follow" %}</h2>
+      <p class="digest-section-description">{% trans "These newly published documents are for courts and topics you follow." %}</p>
+      <p class="digest-section-manage"><a href="{% absolute_url site manage_following_url_path %}">{% trans "Manage court and topic alerts" %}</a></p>
       {% for item in followed_documents %}
-        <p class="digest-followed-object">{{ item.followed_object }}</p>
+        <h3 class="digest-item-heading">{{ item.heading }}</h3>
         <ul>
           {% for doc in item.documents %}
             {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
@@ -17,16 +29,20 @@
         </ul>
       {% endfor %}
       {% if followed_more %}
-        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+        <ul>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=followed_total app_name=APP_NAME %}View all {{ count }} updates in {{ app_name }}{% endblocktrans %}</a></li>
+        </ul>
       {% endif %}
     </div>
   {% endif %}
 
   {% if saved_searches %}
-    <div class="digest-section">
-      <h2 class="digest-section-heading">{% trans "Search alerts" %}</h2>
+    <div id="saved-searches" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "New matches for your saved searches" %}</h2>
+      <p class="digest-section-description">{% trans "These newly published documents match searches you have saved." %}</p>
+      <p class="digest-section-manage"><a href="{% absolute_url site manage_searches_url_path %}">{% trans "Manage saved searches" %}</a></p>
       {% for item in saved_searches %}
-        <p class="digest-followed-object"><a href="{% absolute_url site item.saved_search.get_absolute_url %}">{{ item.saved_search.q }}</a></p>
+        <h3 class="digest-item-heading"><a href="{% absolute_url site item.saved_search.get_absolute_url %}">{{ item.heading }}</a></h3>
         <ul>
           {% for hit in item.hits %}
             <li>
@@ -36,16 +52,20 @@
         </ul>
       {% endfor %}
       {% if searches_more %}
-        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+        <ul>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=searches_total app_name=APP_NAME %}View all {{ count }} matches in {{ app_name }}{% endblocktrans %}</a></li>
+        </ul>
       {% endif %}
     </div>
   {% endif %}
 
   {% if citations %}
-    <div class="digest-section">
-      <h2 class="digest-section-heading">{% trans "New citations" %}</h2>
+    <div id="citations" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "New citations of your saved documents" %}</h2>
+      <p class="digest-section-description">{% trans "These newly published documents cite documents you have saved." %}</p>
+      <p class="digest-section-manage"><a href="{% absolute_url site manage_saved_documents_url_path %}">{% trans "Manage saved documents" %}</a></p>
       {% for item in citations %}
-        <p class="digest-followed-object"><a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></p>
+        <h3 class="digest-item-heading"><a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.heading }}</a></h3>
         <ul>
           {% for citing in item.citing_documents %}
             {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.title blurb=citing.document.blurb flynote=citing.document.flynote only %}
@@ -53,17 +73,23 @@
         </ul>
       {% endfor %}
       {% if citations_more %}
-        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+        <ul>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=citations_total app_name=APP_NAME %}View all {{ count }} citations in {{ app_name }}{% endblocktrans %}</a></li>
+        </ul>
       {% endif %}
     </div>
   {% endif %}
 
   {% if relationships %}
-    <div class="digest-section">
-      <h2 class="digest-section-heading">{% trans "Updates to saved documents" %}</h2>
+    <div id="relationships" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Updates to your saved documents" %}</h2>
+      <p class="digest-section-description">{% trans "These updates affect documents you have saved." %}</p>
+      <p class="digest-section-manage"><a href="{% absolute_url site manage_saved_documents_url_path %}">{% trans "Manage saved documents" %}</a></p>
       {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=relationships utm_campaign="email_digest" %}
       {% if relationships_more %}
-        <p><a href="{% absolute_url site timeline_url_path %}">{% trans "View more updates in My LII" %}</a></p>
+        <ul>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=relationships_total app_name=APP_NAME %}View all {{ count }} updates in {{ app_name }}{% endblocktrans %}</a></li>
+        </ul>
       {% endif %}
     </div>
   {% endif %}

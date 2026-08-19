@@ -184,7 +184,11 @@ class TimelineViewTest(TestCase):
 
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
-        self.assertEqual("Your latest legal updates", str(request.subject))
+        self.assertEqual("Employment Law: 1 new judgment", str(request.subject))
+        self.assertIn("1 new judgment for Employment Law", request.body)
+        self.assertIn("Updates for courts and topics you follow", request.body)
+        self.assertIn("Manage court and topic alerts", request.body)
+        self.assertIn("View all updates in My Peachjam", request.body)
 
     def test_digest_frequency_uses_business_days(self):
         profile = self.user.userprofile
@@ -341,7 +345,7 @@ class TimelineViewTest(TestCase):
 
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
-        self.assertEqual("Your latest legal updates", str(request.subject))
+        self.assertEqual("Regional Law Journal: 1 new judgment", str(request.subject))
 
     def test_send_digest_email_includes_flynote_follow(self):
         flynote = Flynote.add_root(name="Administrative law")
@@ -364,7 +368,16 @@ class TimelineViewTest(TestCase):
 
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
-        self.assertEqual("Your latest legal updates", str(request.subject))
+        self.assertEqual("Administrative law: 1 new judgment", str(request.subject))
+
+    def test_digest_subject_shortens_long_entities_at_a_word_boundary(self):
+        shortened = TimelineEmailService.shorten_subject_entity(
+            "A subject entity with enough words to be shortened neatly while keeping the "
+            "important legal context visible in the inbox " * 10
+        )
+        self.assertLessEqual(len(shortened), 500)
+        self.assertTrue(shortened.endswith("…"))
+        self.assertFalse(shortened[:-1].endswith(" "))
 
 
 class TimelineRelationshipTests(TestCase):
@@ -688,6 +701,8 @@ class TimelineRelationshipTests(TestCase):
             )
             self.assertIn("<html", request.body)
             self.assertIn("utm_campaign=email_digest", request.body)
+            self.assertIn("1 new amendment published for", request.body)
+            self.assertIn("Manage saved documents", request.body)
             self.assertEqual({}, request.attachments)
 
         self.assertEqual(
@@ -695,7 +710,8 @@ class TimelineRelationshipTests(TestCase):
             transactional_message_ids,
         )
         self.assertEqual({self.user.email}, recipient_emails)
-        self.assertEqual({"Your latest legal updates"}, subject_lines)
+        self.assertEqual(1, len(subject_lines))
+        self.assertTrue(subject_lines.pop().endswith("and other updates"))
 
         sent_events = TimelineEvent.objects.filter(
             user_following__user=self.user,

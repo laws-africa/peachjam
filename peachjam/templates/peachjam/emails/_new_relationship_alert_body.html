@@ -2,7 +2,7 @@
 {% for item in saved_documents %}
   {% for rel in item.relationships.values %}
     <div style="margin-top: 1rem;">
-      <p>
+      <p class="digest-item-heading">
         {{ rel.label }}
         <a href="{% absolute_url site item.saved_document.get_absolute_url %}?utm_campaign={{ utm_campaign|default:'new_relationship' }}&utm_source=alert&utm_medium=email">
           <b>{{ item.saved_document.work.title }}</b>

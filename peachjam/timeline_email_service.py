@@ -6,7 +6,8 @@ from django.conf import settings
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.translation import override
+from django.utils.translation import gettext as _
+from django.utils.translation import ngettext, override
 from templated_email import send_templated_mail
 
 from peachjam.models import ProvisionCitation, TimelineEvent
@@ -17,6 +18,7 @@ log = logging.getLogger(__name__)
 
 class TimelineEmailService:
     MAX_ENTRIES_PER_CATEGORY = 10
+    SUBJECT_ENTITY_MAX_LENGTH = 500
 
     @staticmethod
     def already_sent_digest_within_last_24_hours(user):
@@ -106,70 +108,218 @@ class TimelineEmailService:
                     has_more = True
         return documents, has_more
 
+    @staticmethod
+    def document_kind(documents, count):
+        """Return a reader-facing document type when the documents are uniform."""
+        if documents and all(document.doc_type == "judgment" for document in documents):
+            return ngettext("judgment", "judgments", count)
+        return ngettext("document", "documents", count)
+
+    @classmethod
+    def followed_documents_heading(cls, followed_object, documents, count):
+        return ngettext(
+            "%(count)d new %(document_kind)s for %(followed_object)s",
+            "%(count)d new %(document_kind)s for %(followed_object)s",
+            count,
+        ) % {
+            "count": count,
+            "document_kind": cls.document_kind(documents, count),
+            "followed_object": followed_object,
+        }
+
+    @staticmethod
+    def saved_search_heading(saved_search, count):
+        return ngettext(
+            "%(count)d new match for “%(search)s”",
+            "%(count)d new matches for “%(search)s”",
+            count,
+        ) % {"count": count, "search": saved_search.q}
+
+    @staticmethod
+    def citation_heading(document, count):
+        return ngettext(
+            "%(count)d new citation of %(document)s",
+            "%(count)d new citations of %(document)s",
+            count,
+        ) % {"count": count, "document": document.title}
+
+    @staticmethod
+    def relationship_heading(event_type, count):
+        relationship_labels = {
+            TimelineEvent.EventTypes.NEW_AMENDMENT: (
+                "%(count)d new amendment published for",
+                "%(count)d new amendments published for",
+            ),
+            TimelineEvent.EventTypes.NEW_REPEAL: (
+                "%(count)d new repeal published for",
+                "%(count)d new repeals published for",
+            ),
+            TimelineEvent.EventTypes.NEW_COMMENCEMENT: (
+                "%(count)d new commencement published for",
+                "%(count)d new commencements published for",
+            ),
+            TimelineEvent.EventTypes.NEW_OVERTURN: (
+                "%(count)d new overturn published for",
+                "%(count)d new overturns published for",
+            ),
+        }
+        singular, plural = relationship_labels[event_type]
+        return ngettext(singular, plural, count) % {"count": count}
+
+    @classmethod
+    def shorten_subject_entity(cls, entity):
+        """Keep a featured subject entity readable in a compact inbox subject line."""
+        if len(entity) <= cls.SUBJECT_ENTITY_MAX_LENGTH:
+            return entity
+
+        shortened = entity[: cls.SUBJECT_ENTITY_MAX_LENGTH - 1].rsplit(" ", 1)[0]
+        return f"{shortened or entity[: cls.SUBJECT_ENTITY_MAX_LENGTH - 1]}…"
+
+    @classmethod
+    def followed_documents_subject(cls, followed_object, documents, count):
+        return _("%(followed_object)s: %(count)d new %(document_kind)s") % {
+            "followed_object": cls.shorten_subject_entity(followed_object),
+            "count": count,
+            "document_kind": cls.document_kind(documents, count),
+        }
+
+    @classmethod
+    def saved_search_subject(cls, saved_search, count):
+        return ngettext(
+            "%(search)s: %(count)d new match",
+            "%(search)s: %(count)d new matches",
+            count,
+        ) % {"search": cls.shorten_subject_entity(saved_search.q), "count": count}
+
+    @classmethod
+    def citation_subject(cls, document, count):
+        return ngettext(
+            "New citation of %(document)s",
+            "New citations of %(document)s",
+            count,
+        ) % {"document": cls.shorten_subject_entity(document.title)}
+
+    @classmethod
+    def relationship_subject(cls, event_type, document, count):
+        subject_labels = {
+            TimelineEvent.EventTypes.NEW_AMENDMENT: (
+                "New amendment to %(document)s",
+                "New amendments to %(document)s",
+            ),
+            TimelineEvent.EventTypes.NEW_REPEAL: (
+                "New repeal affecting %(document)s",
+                "New repeals affecting %(document)s",
+            ),
+            TimelineEvent.EventTypes.NEW_COMMENCEMENT: (
+                "New commencement notice for %(document)s",
+                "New commencement notices for %(document)s",
+            ),
+            TimelineEvent.EventTypes.NEW_OVERTURN: (
+                "New decision overturning %(document)s",
+                "New decisions overturning %(document)s",
+            ),
+        }
+        singular, plural = subject_labels[event_type]
+        return ngettext(singular, plural, count) % {
+            "document": cls.shorten_subject_entity(document.title)
+        }
+
+    @staticmethod
+    def digest_subject(summary_items):
+        if not summary_items:
+            return _("Your latest legal updates")
+
+        subject = summary_items[0]["subject"]
+        if len(summary_items) > 1:
+            subject = _("%(subject)s and other updates") % {"subject": subject}
+        return subject
+
     @classmethod
     def followed_documents(cls, events):
         follows = OrderedDict()
         count = 0
-        has_more = False
         for event in events:
             follow = event.user_following
-            documents = follows.setdefault(follow, [])
+            item = follows.setdefault(follow, {"documents": [], "all_documents": []})
             for document in event.subject_documents:
+                item["all_documents"].append(document)
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
-                    documents.append(document)
+                    item["documents"].append(document)
                     count += 1
-                else:
-                    has_more = True
+        total_count = sum(len(item["all_documents"]) for item in follows.values())
         return (
             [
-                {"followed_object": follow.followed_object_name, "documents": documents}
-                for follow, documents in follows.items()
-                if documents
+                {
+                    "followed_object": follow.followed_object_name,
+                    "documents": item["documents"],
+                    "total_count": len(item["all_documents"]),
+                    "heading": cls.followed_documents_heading(
+                        follow.followed_object_name,
+                        item["all_documents"],
+                        len(item["all_documents"]),
+                    ),
+                    "subject": cls.followed_documents_subject(
+                        follow.followed_object_name,
+                        item["all_documents"],
+                        len(item["all_documents"]),
+                    ),
+                }
+                for follow, item in follows.items()
+                if item["documents"]
             ],
-            has_more,
+            total_count,
         )
 
     @classmethod
     def saved_searches(cls, events):
         searches = []
         count = 0
-        has_more = False
         for event in events:
             hits = []
-            for hit in (event.extra_data or {}).get("hits", []):
+            all_hits = (event.extra_data or {}).get("hits", [])
+            for hit in all_hits:
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
                     hits.append(hit)
                     count += 1
-                else:
-                    has_more = True
             if hits:
                 searches.append(
-                    {"saved_search": event.user_following.saved_search, "hits": hits}
+                    {
+                        "saved_search": event.user_following.saved_search,
+                        "hits": hits,
+                        "total_count": len(all_hits),
+                        "heading": cls.saved_search_heading(
+                            event.user_following.saved_search, len(all_hits)
+                        ),
+                        "subject": cls.saved_search_subject(
+                            event.user_following.saved_search, len(all_hits)
+                        ),
+                    }
                 )
-        return searches, has_more
+        return searches, sum(item["total_count"] for item in searches)
 
     @classmethod
     def citations(cls, events):
         saved_documents = OrderedDict()
         count = 0
-        has_more = False
         for event in events:
             saved_document = event.user_following.saved_document
             document = saved_document.document if saved_document else None
             if not document:
                 continue
 
-            citing_documents = saved_documents.setdefault(document, [])
+            item = saved_documents.setdefault(
+                document, {"citing_documents": [], "total_count": 0}
+            )
             for citing_document in event.subject_documents:
+                item["total_count"] += 1
                 if count >= cls.MAX_ENTRIES_PER_CATEGORY:
-                    has_more = True
                     continue
                 provision_citations = ProvisionCitation.objects.filter(
                     citing_document=citing_document,
                     work=saved_document.work,
                     whole_work=False,
                 )[:2]
-                citing_documents.append(
+                item["citing_documents"].append(
                     {
                         "document": citing_document,
                         "provision_citations": provision_citations,
@@ -179,18 +329,23 @@ class TimelineEmailService:
 
         return (
             [
-                {"saved_document": document, "citing_documents": citing_documents}
-                for document, citing_documents in saved_documents.items()
-                if citing_documents
+                {
+                    "saved_document": document,
+                    "citing_documents": item["citing_documents"],
+                    "total_count": item["total_count"],
+                    "heading": cls.citation_heading(document, item["total_count"]),
+                    "subject": cls.citation_subject(document, item["total_count"]),
+                }
+                for document, item in saved_documents.items()
+                if item["citing_documents"]
             ],
-            has_more,
+            sum(item["total_count"] for item in saved_documents.values()),
         )
 
     @classmethod
     def relationships(cls, events):
         saved_documents = OrderedDict()
         count = 0
-        has_more = False
         for event in events:
             saved_document = event.user_following.saved_document
             document = saved_document.document if saved_document else None
@@ -200,14 +355,19 @@ class TimelineEmailService:
             relationships = saved_documents.setdefault(document, OrderedDict())
             relationship = relationships.setdefault(
                 event.event_type,
-                {"label": str(event.description_text()), "documents": []},
+                {"documents": [], "total_count": 0, "event_type": event.event_type},
             )
             for related_document in event.subject_documents:
+                relationship["total_count"] += 1
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
                     relationship["documents"].append(related_document)
                     count += 1
-                else:
-                    has_more = True
+
+        for relationships in saved_documents.values():
+            for relationship in relationships.values():
+                relationship["label"] = cls.relationship_heading(
+                    relationship["event_type"], relationship["total_count"]
+                )
 
         return (
             [
@@ -215,7 +375,11 @@ class TimelineEmailService:
                 for document, relationships in saved_documents.items()
                 if any(item["documents"] for item in relationships.values())
             ],
-            has_more,
+            sum(
+                item["total_count"]
+                for relationships in saved_documents.values()
+                for item in relationships.values()
+            ),
         )
 
     @classmethod
@@ -245,10 +409,51 @@ class TimelineEmailService:
             ]
         ]
 
-        followed_documents, followed_more = cls.followed_documents(followed_events)
-        saved_searches, searches_more = cls.saved_searches(search_events)
-        citations, citations_more = cls.citations(citation_events)
-        relationships, relationships_more = cls.relationships(relationship_events)
+        followed_documents, followed_total = cls.followed_documents(followed_events)
+        saved_searches, searches_total = cls.saved_searches(search_events)
+        citations, citations_total = cls.citations(citation_events)
+        relationships, relationships_total = cls.relationships(relationship_events)
+
+        summary_items = []
+        summary_items.extend(
+            {
+                "anchor": "followed-documents",
+                "label": item["heading"],
+                "subject": item["subject"],
+            }
+            for item in followed_documents
+        )
+        summary_items.extend(
+            {
+                "anchor": "saved-searches",
+                "label": item["heading"],
+                "subject": item["subject"],
+            }
+            for item in saved_searches
+        )
+        summary_items.extend(
+            {
+                "anchor": "citations",
+                "label": item["heading"],
+                "subject": item["subject"],
+            }
+            for item in citations
+        )
+        summary_items.extend(
+            {
+                "anchor": "relationships",
+                "label": f"{relationship['label']} {document.title}",
+                "subject": cls.relationship_subject(
+                    relationship["event_type"],
+                    document,
+                    relationship["total_count"],
+                ),
+            }
+            for item in relationships
+            for document in [item["saved_document"]]
+            for relationship in item["relationships"].values()
+            if relationship["documents"]
+        )
 
         displayed_events = followed_events + search_events
         if citations:
@@ -258,15 +463,24 @@ class TimelineEmailService:
 
         return {
             "user": user,
+            "summary_items": summary_items,
+            "digest_subject": cls.digest_subject(summary_items),
             "followed_documents": followed_documents,
-            "followed_more": followed_more,
+            "followed_total": followed_total,
+            "followed_more": followed_total > cls.MAX_ENTRIES_PER_CATEGORY,
             "saved_searches": saved_searches,
-            "searches_more": searches_more,
+            "searches_total": searches_total,
+            "searches_more": searches_total > cls.MAX_ENTRIES_PER_CATEGORY,
             "citations": citations,
-            "citations_more": citations_more,
+            "citations_total": citations_total,
+            "citations_more": citations_total > cls.MAX_ENTRIES_PER_CATEGORY,
             "relationships": relationships,
-            "relationships_more": relationships_more,
+            "relationships_total": relationships_total,
+            "relationships_more": relationships_total > cls.MAX_ENTRIES_PER_CATEGORY,
             "timeline_url_path": reverse("my_home") + "#timeline",
+            "manage_following_url_path": reverse("user_following_list"),
+            "manage_searches_url_path": reverse("search:saved_search_list"),
+            "manage_saved_documents_url_path": reverse("folder_list"),
             "manage_url_path": reverse("edit_account"),
             "utm_campaign": "email_digest",
             "displayed_events": displayed_events,
