@@ -17,7 +17,7 @@
                 <div class="text-uppercase opacity-75 mb-2">{% trans "Case law" %}</div>
                 <h1 id="main-page-heading">{% trans 'Judgments' %}</h1>
                 <p class="lead mb-0">
-                  {% blocktrans count counter=doc_count with formatted_count=doc_count|intcomma %}Explore {{ formatted_count }} decision from courts and tribunals.{% plural %}Explore {{ formatted_count }} decisions from courts and tribunals.{% endblocktrans %}
+                  {% blocktrans count counter=doc_count with formatted_count=doc_count|intcomma %}Explore {{ formatted_count }} court decision.{% plural %}Explore {{ formatted_count }} court decisions.{% endblocktrans %}
                 </p>
                 {% if help_link %}
                   <div class="mt-3">{% include "peachjam/_help_button.html" %}</div>
