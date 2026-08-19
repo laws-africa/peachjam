@@ -114,7 +114,7 @@
               <p class="text-muted">{% trans "Browse judgments by court level and deciding body." %}</p>
               <ul class="list-unstyled mb-4">
                 {% for court_class in court_classes %}
-                  <li class="d-flex justify-content-between gap-3 py-1">
+                  <li class="d-flex justify-content-between gap-3">
                     <a href="{{ court_class.get_absolute_url }}">{{ court_class.name }}</a>
                     <span class="text-muted text-nowrap">
                       {% blocktrans count count=court_class.courts.all|length %}{{ count }} court{% plural %}{{ count }} courts{% endblocktrans %}
