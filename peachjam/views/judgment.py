@@ -4,7 +4,7 @@ from functools import reduce
 
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import F, IntegerField, Max, Prefetch, Q, Value, Window
+from django.db.models import F, IntegerField, Prefetch, Q, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -45,26 +45,19 @@ class JudgmentListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["recent_judgments"] = (
+        context["recent_judgments"] = list(
             Judgment.objects.for_document_table()
-            .exclude(published=False)
+            .filter(published=True)
             .order_by("-date")[:10]
         )
-        context["documents"] = context["recent_judgments"]
-        context["latest_judgment_date"] = Judgment.objects.filter(
-            published=True
-        ).aggregate(latest=Max("date"))["latest"]
+        context["latest_judgment_date"] = (
+            context["recent_judgments"][0].date if context["recent_judgments"] else None
+        )
         context["nature"] = "Judgment"
         context["doc_count"] = Judgment.objects.filter(published=True).count()
-        context["doc_count_noun"] = _("judgment")
-        context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
         context["court_count"] = (
-            Judgment.objects.filter(published=True)
-            .exclude(court__isnull=True)
-            .values("court")
-            .distinct()
-            .count()
+            Judgment.objects.filter(published=True).values("court").distinct().count()
         )
         context["show_canonical_judges"] = JudgePerson.canonical_identity_enabled()
         if context["show_canonical_judges"]:
@@ -82,18 +75,21 @@ class JudgmentListView(TemplateView):
             Judgment.flynote_topics_enabled()
             and Flynote.objects.undeprecated().filter(depth=1).exists()
         )
+        self.get_court_classes(context)
         if context["show_flynote_topics"]:
             flynote_topics = self.get_flynote_topics_queryset()
             context["flynote_topic_count"] = flynote_topics.count()
-            context["top_flynote_topics"] = flynote_topics[:8]
-        self.add_entity_profile(context)
-        self.get_court_classes(context)
+            context["top_flynote_topic_default_count"] = 10
+            topic_limit = context["top_flynote_topic_default_count"] + sum(
+                len(court_class.courts.all())
+                for court_class in context["court_classes"]
+            )
+            context["top_flynote_topics"] = flynote_topics[:topic_limit]
         return context
 
     def get_court_classes(self, context):
-        context["court_classes"] = (
+        context["court_classes"] = list(
             CourtClass.objects.filter(courts__judgment__published=True)
-            .exclude(slug="")
             .prefetch_related(
                 Prefetch(
                     "courts",
@@ -111,9 +107,6 @@ class JudgmentListView(TemplateView):
             .filter(doc_count__gt=0)
             .order_by("-doc_count", "name")
         )
-
-    def add_entity_profile(self, context):
-        pass
 
 
 class FilteredJudgmentView(FilteredDocumentListView):

@@ -20,6 +20,9 @@ from peachjam.models import (
     CaseHistory,
     CoreDocument,
     Court,
+    CourtClass,
+    Flynote,
+    FlynoteDocumentCount,
     Folder,
     GenericDocument,
     Judge,
@@ -132,7 +135,7 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
 
-        documents = [doc.title for doc in response.context.get("documents")]
+        documents = [doc.title for doc in response.context.get("recent_judgments")]
         court_classes = [
             court_class.name for court_class in response.context.get("court_classes")
         ]
@@ -147,11 +150,7 @@ class PeachjamViewsTest(TestCase):
             response.context["doc_count"],
         )
         self.assertEqual(
-            Judgment.objects.filter(published=True)
-            .exclude(court__isnull=True)
-            .values("court")
-            .distinct()
-            .count(),
+            Judgment.objects.filter(published=True).values("court").distinct().count(),
             response.context["court_count"],
         )
         self.assertEqual(
@@ -164,6 +163,55 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, 'href="#court-hierarchy-heading"')
         for court_class in response.context["court_classes"]:
             self.assertContains(response, f'href="{court_class.get_absolute_url()}"')
+            for court in court_class.courts.all():
+                self.assertTrue(court.judgment_set.filter(published=True).exists())
+        self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_judgment_listing_excludes_court_classes_without_published_judgments(self):
+        court_class = CourtClass.objects.create(name="Unpublished courts")
+        court = Court.objects.create(
+            name="Unpublished court",
+            code="unpublished-court",
+            court_class=court_class,
+        )
+        judgment = Judgment.objects.filter(published=True).first()
+        Judgment.objects.filter(pk=judgment.pk).update(
+            court=court,
+            published=False,
+        )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertNotIn(court_class, response.context["court_classes"])
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": True,
+        }
+    )
+    def test_judgment_listing_supplies_topics_for_dynamic_card_balancing(self):
+        for index in range(12):
+            flynote = Flynote.add_root(name=f"Topic {index + 1}")
+            FlynoteDocumentCount.objects.create(
+                flynote=flynote,
+                count=12 - index,
+            )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(10, response.context["top_flynote_topic_default_count"])
+        court_count = sum(
+            len(court_class.courts.all())
+            for court_class in response.context["court_classes"]
+        )
+        self.assertEqual(
+            min(12, 10 + court_count),
+            len(response.context["top_flynote_topics"]),
+        )
+        self.assertContains(response, 'data-component="TopicCourtBalance"')
+        self.assertContains(response, 'data-default-visible="false"')
 
     def test_judgment_listing_limits_recent_judgments_to_ten(self):
         for day in range(1, 13):
@@ -180,7 +228,6 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         recent_judgments = list(response.context["recent_judgments"])
         self.assertEqual(10, len(recent_judgments))
-        self.assertEqual(recent_judgments, list(response.context["documents"]))
         self.assertEqual(datetime.date(2025, 1, 12), recent_judgments[0].date)
         self.assertEqual(
             datetime.date(2025, 1, 12), response.context["latest_judgment_date"]

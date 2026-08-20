@@ -15,6 +15,7 @@ import NavigationSelect from './navigation-select';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
+import TopicCourtBalance from './topic-court-balance';
 import UserAuth from './user-auth';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
@@ -53,6 +54,7 @@ const components: Record<string, any> = {
   ToggleTab,
   TaxonomyTree,
   TermsOfUse,
+  TopicCourtBalance,
   UserAuth,
 
   // Vue components

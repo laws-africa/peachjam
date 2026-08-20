@@ -1,11 +1,11 @@
-{% extends "peachjam/layouts/document_list.html" %}
+{% extends "peachjam/layouts/main.html" %}
 {% load humanize i18n static %}
 {% block title %}
   {% trans 'Judgments' %}
 {% endblock %}
-{% block document-list-container %}
+{% block page-content %}
   <div id="documents">
-    <div class="position-relative overflow-hidden bg-white border-bottom mb-5">
+    <div class="position-relative overflow-hidden bg-white border-bottom">
       <img src="{% static 'images/banner.jpg' %}"
            class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-25"
            alt=""/>
@@ -40,133 +40,176 @@
                    href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search and filters" %}</a>
               </div>
             </div>
-            <div class="row g-0 border border-primary border-opacity-25 bg-white bg-opacity-75 mb-4">
-              <div class="col-12 {% if show_flynote_topics %}col-md-4{% else %}col-md-6{% endif %} border-bottom border-end border-primary border-opacity-25">
-                <div class="p-4 h-100 position-relative">
-                  <h2 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="{% url 'court' 'all' %}">{% trans "All judgments" %}</a>
-                  </h2>
-                  <p class="opacity-75 mb-0">
-                    {% blocktrans count counter=doc_count with formatted_count=doc_count|intcomma %}{{ formatted_count }} decision{% plural %}{{ formatted_count }} decisions{% endblocktrans %}
-                  </p>
-                </div>
-              </div>
-              <div class="col-12 {% if show_flynote_topics %}col-md-4{% else %}col-md-6{% endif %} border-bottom border-end border-primary border-opacity-25">
-                <div class="p-4 h-100 position-relative">
-                  <h2 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="#court-hierarchy-heading">{% trans "Courts and tribunals" %}</a>
-                  </h2>
-                  <p class="opacity-75 mb-0">
-                    {% blocktrans count counter=court_count with formatted_count=court_count|intcomma %}{{ formatted_count }} deciding body{% plural %}{{ formatted_count }} deciding bodies{% endblocktrans %}
-                  </p>
-                </div>
-              </div>
-              {% if show_flynote_topics %}
-                <div class="col-12 col-md-4">
-                  <div class="p-4 h-100 position-relative">
+            <div class="row g-4 mb-4">
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
                     <h2 class="h5 mb-2">
                       <a class="stretched-link text-decoration-none"
-                         href="{% url 'flynote_list' %}">{% trans "Legal topics" %}</a>
+                         href="{% url 'court' 'all' %}">{% trans "All judgments" %}</a>
                     </h2>
-                    <p class="opacity-75 mb-0">
-                      {% blocktrans %}Explore judgments by topic and area of law{% endblocktrans %}
+                    <p class="card-text opacity-75 mb-0">
+                      {% blocktrans count counter=doc_count with formatted_count=doc_count|intcomma %}{{ formatted_count }} decision{% plural %}{{ formatted_count }} decisions{% endblocktrans %}
                     </p>
                   </div>
                 </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h2 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="#court-hierarchy-heading">{% trans "Courts and tribunals" %}</a>
+                    </h2>
+                    <p class="card-text opacity-75 mb-0">
+                      {% blocktrans count counter=court_count with formatted_count=court_count|intcomma %}{{ formatted_count }} judicial body{% plural %}{{ formatted_count }} judicial bodies{% endblocktrans %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {% if show_flynote_topics %}
+                <div class="col-12 col-md-6 col-xl-4">
+                  <div class="card card-clickable h-100 position-relative">
+                    <div class="card-body">
+                      <h2 class="h5 mb-2">
+                        <a class="stretched-link text-decoration-none"
+                           href="{% url 'flynote_list' %}">{% trans "Legal topics" %}</a>
+                      </h2>
+                      <p class="card-text opacity-75 mb-0">{% blocktrans %}Explore judgments by topic and area of law{% endblocktrans %}</p>
+                    </div>
+                  </div>
+                </div>
               {% endif %}
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h2 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="{% if show_canonical_judges %}{% url 'judges' %}{% else %}{% url 'court' 'all' %}#facets{% endif %}">{% trans "Judges" %}</a>
+                    </h2>
+                    <p class="card-text opacity-75 mb-0">
+                      {% blocktrans count counter=judge_count with formatted_count=judge_count|intcomma %}Browse judgments by {{ formatted_count }} judge.{% plural %}Browse judgments by {{ formatted_count }} judges.{% endblocktrans %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h2 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="{% url 'law_report_list' %}">{% trans "Law reports" %}</a>
+                    </h2>
+                    <p class="card-text opacity-75 mb-0">
+                      {% blocktrans count counter=law_report_count with formatted_count=law_report_count|intcomma %}Find reported judgments from {{ formatted_count }} publication.{% plural %}Find reported judgments from {{ formatted_count }} publications.{% endblocktrans %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h2 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="{% url 'top_level_taxonomy_list' %}">{% trans "Indexes and collections" %}</a>
+                    </h2>
+                    <p class="card-text opacity-75 mb-0">{% trans "Explore specialist collections and indexes." %}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         {% endblock %}
       </div>
     </div>
-    <div class="container pb-5">
-      {% block document-table %}
-        <div class="text-center mb-3">
-          <h2 class="h4 mb-1">{% trans "Find the law from what you know" %}</h2>
-          <p class="text-muted mb-0">{% trans "Start with a legal topic or move through the court hierarchy." %}</p>
-        </div>
-        <div class="row g-4 mb-5">
-          {% if show_flynote_topics %}
-            <section class="col-12 col-lg-6" aria-labelledby="legal-topics-heading">
-              <div class="border h-100 p-4">
-                <h3 id="legal-topics-heading" class="h5">{% trans "Legal topics" %}</h3>
-                <p class="text-muted">{% trans "Topics group judgments by the legal principles in each decision." %}</p>
-                <ul class="list-unstyled mb-4">
-                  {% for item in top_flynote_topics %}
-                    <li class="d-flex justify-content-between gap-3">
-                      <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
-                      <span class="text-muted text-nowrap">
-                        {% blocktrans count counter=item.doc_count with formatted_count=item.doc_count|intcomma %}{{ formatted_count }} judgment{% plural %}{{ formatted_count }} judgments{% endblocktrans %}
-                      </span>
-                    </li>
-                  {% endfor %}
-                </ul>
-                <a href="{% url 'flynote_list' %}">{% trans "View all legal topics" %}</a>
+    {% block document-table %}
+      <div class="bg-light py-3 mb-5">
+        <div class="container">
+          <div class="text-center mb-3">
+            <h2 class="h4 mb-1">{% trans "Find the law from what you know" %}</h2>
+            <p class="text-muted mb-0">{% trans "Start with a legal topic or move through the courts." %}</p>
+          </div>
+          <div class="row g-4"
+               {% if show_flynote_topics %}data-component="TopicCourtBalance"{% endif %}>
+            {% if show_flynote_topics %}
+              <section class="col-12 col-lg-6" aria-labelledby="legal-topics-heading">
+                <div class="card h-100">
+                  <div class="card-body d-flex flex-column">
+                    <div class="d-flex flex-column flex-grow-1">
+                      <h3 id="legal-topics-heading" class="h5">{% trans "Legal topics" %}</h3>
+                      <p class="text-muted">{% trans "Topics group judgments by the legal principles in each decision." %}</p>
+                      <ul class="list-unstyled mb-4" data-topic-court-balance-topic-list>
+                        {% for item in top_flynote_topics %}
+                          <li class="d-flex justify-content-between gap-3 {% if forloop.counter > top_flynote_topic_default_count %}d-none{% endif %}"
+                              data-topic-court-balance-topic
+                              data-default-visible="{% if forloop.counter <= top_flynote_topic_default_count %}true{% else %}false{% endif %}">
+                            <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
+                            <span class="text-muted text-nowrap">
+                              {% blocktrans count counter=item.doc_count with formatted_count=item.doc_count|intcomma %}{{ formatted_count }} judgment{% plural %}{{ formatted_count }} judgments{% endblocktrans %}
+                            </span>
+                          </li>
+                        {% endfor %}
+                      </ul>
+                      <a class="btn btn-secondary mt-auto align-self-start"
+                         href="{% url 'flynote_list' %}">{% trans "View all legal topics" %}</a>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            {% endif %}
+            <section class="{% if show_flynote_topics %}col-12 col-lg-6{% else %}col-12{% endif %}"
+                     aria-labelledby="court-hierarchy-heading">
+              <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                  <div class="d-flex flex-column flex-grow-1">
+                    <h3 id="court-hierarchy-heading" class="h5">
+                      {% trans "Courts" %}
+                    </h3>
+                    <p class="text-muted">
+                      {% trans "Browse judgments by court level and judicial body." %}
+                    </p>
+                    <ul class="list-unstyled mb-4" data-topic-court-balance-court-list>
+                      {% for court_class in court_classes %}
+                        <li class="mb-2">
+                          <div class="provision-toggle d-flex align-items-start">
+                            <button class="btn btn-sm bg-none collapsed me-1"
+                                    type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#courts-for-{{ court_class.slug }}"
+                                    aria-label="{% blocktrans with court_class_name=court_class.name %}Show courts for {{ court_class_name }}{% endblocktrans %}"
+                                    aria-expanded="false"
+                                    aria-controls="courts-for-{{ court_class.slug }}">
+                              <i class="bi" aria-hidden="true"></i>
+                            </button>
+                            <div class="d-flex justify-content-between align-items-start gap-3 w-100">
+                              <a href="{{ court_class.get_absolute_url }}">{{ court_class.name }}</a>
+                              <span class="text-muted text-nowrap">
+                                {% blocktrans count count=court_class.courts.all|length %}{{ count }} court{% plural %}{{ count }} courts{% endblocktrans %}
+                              </span>
+                            </div>
+                          </div>
+                          <div id="courts-for-{{ court_class.slug }}" class="collapse">
+                            <ul class="list-unstyled ms-5 ps-1 mt-2 mb-0">
+                              {% for court in court_class.courts.all %}
+                                <li>
+                                  <a href="{{ court.get_absolute_url }}">{{ court.name }}</a>
+                                </li>
+                              {% endfor %}
+                            </ul>
+                          </div>
+                        </li>
+                      {% endfor %}
+                    </ul>
+                    <a class="btn btn-secondary mt-auto align-self-start"
+                       href="{% url 'court' 'all' %}">{% trans "View all courts" %}</a>
+                  </div>
+                </div>
               </div>
             </section>
-          {% endif %}
-          <section class="{% if show_flynote_topics %}col-12 col-lg-6{% else %}col-12{% endif %}"
-                   aria-labelledby="court-hierarchy-heading">
-            <div class="border h-100 p-4">
-              <h3 id="court-hierarchy-heading" class="h5">{% trans "Court hierarchy" %}</h3>
-              <p class="text-muted">{% trans "Browse judgments by court level and deciding body." %}</p>
-              <ul class="list-unstyled mb-4">
-                {% for court_class in court_classes %}
-                  <li class="d-flex justify-content-between gap-3">
-                    <a href="{{ court_class.get_absolute_url }}">{{ court_class.name }}</a>
-                    <span class="text-muted text-nowrap">
-                      {% blocktrans count count=court_class.courts.all|length %}{{ count }} court{% plural %}{{ count }} courts{% endblocktrans %}
-                    </span>
-                  </li>
-                {% endfor %}
-              </ul>
-              <a href="{% url 'court' 'all' %}">{% trans "View all courts" %}</a>
-            </div>
-          </section>
-        </div>
-        <div class="text-center mb-3">
-          <h2 class="h4 mb-1">{% trans "Continue your case-law research" %}</h2>
-          <p class="text-muted mb-0">
-            {% trans "Use a judge, publication or specialist index as another way into the law." %}
-          </p>
-        </div>
-        <div class="row g-0 mb-5 border">
-          <div class="col-12 col-md-4 border-bottom border-end">
-            <div class="p-4 h-100 position-relative">
-              <h3 class="h5 mb-2">
-                <a class="stretched-link text-decoration-none"
-                   href="{% if show_canonical_judges %}{% url 'judges' %}{% else %}{% url 'court' 'all' %}#facets{% endif %}">{% trans "Judges" %}</a>
-              </h3>
-              <p class="text-muted mb-0">
-                {% blocktrans count counter=judge_count with formatted_count=judge_count|intcomma %}Browse judgments by {{ formatted_count }} judge.{% plural %}Browse judgments by {{ formatted_count }} judges.{% endblocktrans %}
-              </p>
-            </div>
-          </div>
-          <div class="col-12 col-md-4 border-bottom border-end">
-            <div class="p-4 h-100 position-relative">
-              <h3 class="h5 mb-2">
-                <a class="stretched-link text-decoration-none"
-                   href="{% url 'law_report_list' %}">{% trans "Law reports" %}</a>
-              </h3>
-              <p class="text-muted mb-0">
-                {% blocktrans count counter=law_report_count with formatted_count=law_report_count|intcomma %}Find reported judgments from {{ formatted_count }} publication.{% plural %}Find reported judgments from {{ formatted_count }} publications.{% endblocktrans %}
-              </p>
-            </div>
-          </div>
-          <div class="col-12 col-md-4">
-            <div class="p-4 h-100 position-relative">
-              <h3 class="h5 mb-2">
-                <a class="stretched-link text-decoration-none"
-                   href="{% url 'top_level_taxonomy_list' %}">{% trans "Indexes and collections" %}</a>
-              </h3>
-              <p class="text-muted mb-0">
-                {% trans "Explore specialist collections and indexes." %}
-              </p>
-            </div>
           </div>
         </div>
+      </div>
+      <div class="container pb-5">
         <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
           <div>
             <h2 class="h4 mb-1">
@@ -181,7 +224,7 @@
           <a href="{% url 'court' 'all' %}">{% trans "View all judgments" %}</a>
         </div>
         {% include 'peachjam/_recent_document_list.html' with documents=recent_judgments %}
-      {% endblock %}
-    </div>
+      </div>
+    {% endblock %}
   </div>
 {% endblock %}
