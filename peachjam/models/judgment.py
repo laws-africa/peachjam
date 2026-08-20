@@ -704,12 +704,12 @@ class Judgment(CoreDocument):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court_id:
             if (
-                self.mnc != self.generate_citation()
+                self.mnc != self.decorator.assign_mnc(self)
                 or self.serial_number_override
                 and self.serial_number != self.serial_number_override
             ):
                 self.serial_number = self.generate_serial_number()
-                self.mnc = self.generate_citation()
+                self.mnc = self.decorator.assign_mnc(self)
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
