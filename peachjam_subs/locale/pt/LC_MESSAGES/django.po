@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-08-20 14:38+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -17,39 +17,51 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_subs/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 267\n"
 
-#: admin.py:42
+#: admin.py:43
 msgid "Save the product first, then configure selectable offerings."
 msgstr "Primeiro, guarde o produto e, em seguida, configure as ofertas selecionáveis."
 
-#: admin.py:50
+#: admin.py:51
 #, python-format
 msgid "Selectable offerings for '%(product)s' must belong to that product."
 msgstr "As ofertas selecionáveis para '%(product)s' devem pertencer a esse produto."
 
-#: admin.py:89
+#: admin.py:90
 #, python-format
 msgid "Key products must have at least one selectable offering configured: %(products)s"
 msgstr "Os produtos principais devem ter pelo menos uma oferta selecionável configurada: %(products)s"
 
-#: admin.py:164
+#: admin.py:165
 msgid "Subscription activated."
 msgstr "Assinatura ativada."
 
-#: admin.py:166
+#: admin.py:167
 msgid "Subscription cannot be activated."
 msgstr "A subscrição não pode ser ativada."
 
-#: admin.py:176
+#: admin.py:177
 msgid "Subscription cancelled."
 msgstr "Subscrição cancelada."
 
-#: admin.py:178
+#: admin.py:179
 msgid "Subscription cannot be cancelled."
 msgstr "A subscrição não pode ser cancelada."
 
-#: admin.py:257
+#: admin.py:286
 msgid "View"
 msgstr "Ver"
+
+#: forms.py:12
+msgid "What is the main reason for this change?"
+msgstr ""
+
+#: forms.py:17
+msgid "Tell us more (optional)"
+msgstr ""
+
+#: forms.py:33
+msgid "Please tell us briefly why."
+msgstr ""
 
 #: models.py:30
 #, python-format
@@ -102,27 +114,65 @@ msgstr "Ativo"
 msgid "Closed"
 msgstr "Fechado"
 
-#: models.py:655
+#: models.py:692
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription downgrade"
+msgstr "Subscrição"
+
+#: models.py:693
+msgid "Account deletion"
+msgstr ""
+
+#: models.py:696
+msgid "Too expensive"
+msgstr ""
+
+#: models.py:697
+msgid "Not using it enough"
+msgstr ""
+
+#: models.py:698
+msgid "Missing a feature"
+msgstr ""
+
+#: models.py:699
+msgid "Technical issue"
+msgstr ""
+
+#: models.py:701
+msgid "Switching to an alternative"
+msgstr ""
+
+#: models.py:703
+msgid "Temporary need"
+msgstr ""
+
+#: models.py:704
+msgid "Other"
+msgstr ""
+
+#: models.py:783
 msgid "Default product offering"
 msgstr "Oferta de produto standard"
 
-#: models.py:660
+#: models.py:788
 msgid "These products are highlighted in the product listing."
 msgstr "Estes produtos são destacados na lista de produtos."
 
-#: models.py:668
+#: models.py:796
 msgid "Trial product offering"
 msgstr "Oferta de produto de teste"
 
-#: models.py:669
+#: models.py:797
 msgid "If set, this product offering is used for trials."
 msgstr "Se definido, esta oferta de produto será utilizada para testes."
 
-#: models.py:673
+#: models.py:801
 msgid "Trial duration (days)"
 msgstr "Duração do teste (dias)"
 
-#: models.py:674
+#: models.py:802
 msgid "Number of days for the trial period."
 msgstr "Número de dias para o período de teste."
 
@@ -142,66 +192,76 @@ msgstr "Mudança futura"
 msgid "Trial"
 msgstr "Ensaio"
 
-#: templates/peachjam_subs/_subscription_card.html:15
+#: templates/peachjam_subs/_subscription_card.html:16
 msgid "Next payment due on"
 msgstr "Próximo pagamento devido em"
 
-#: templates/peachjam_subs/_subscription_card.html:22
+#: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
 msgstr "Começa em"
 
-#: templates/peachjam_subs/_subscription_card.html:25
+#: templates/peachjam_subs/_subscription_card.html:27
 msgid "Ends on"
 msgstr "Termina em"
 
-#: templates/peachjam_subs/_subscription_card.html:34
+#: templates/peachjam_subs/_subscription_card.html:36
 msgid "Are you sure?"
 msgstr "Tem certeza?"
 
-#: templates/peachjam_subs/_subscription_card.html:35
+#: templates/peachjam_subs/_subscription_card.html:37
 msgid "Cancel change"
 msgstr "Cancelar alteração"
 
-#: templates/peachjam_subs/_subscription_card.html:42
+#: templates/peachjam_subs/_subscription_card.html:44
 msgid "Active since"
 msgstr "Ativo desde"
 
-#: templates/peachjam_subs/_subscription_required.html:12
-#: templates/peachjam_subs/_subscription_required.html:20
+#: templates/peachjam_subs/_subscription_required.html:13
+#: templates/peachjam_subs/_subscription_required.html:21
 msgid "Create a free account"
 msgstr "Crie uma conta gratuita"
 
-#: templates/peachjam_subs/_subscription_required.html:14
-#: templates/peachjam_subs/_subscription_required.html:34
+#: templates/peachjam_subs/_subscription_required.html:15
+#: templates/peachjam_subs/_subscription_required.html:39
 msgid "Unlock this feature"
 msgstr "Desbloqueie esta funcionalidade"
 
-#: templates/peachjam_subs/_subscription_required.html:17
+#: templates/peachjam_subs/_subscription_required.html:18
 msgid "Sign up to save documents, read summaries and access more features."
 msgstr "Registe-se para guardar documentos, ler resumos e aceder a mais recursos."
 
-#: templates/peachjam_subs/_subscription_required.html:22
+#: templates/peachjam_subs/_subscription_required.html:23
 msgid "Start"
 msgstr "Iniciar"
 
-#: templates/peachjam_subs/_subscription_required.html:27
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "Already have an account?"
 msgstr "Já tem uma conta?"
 
-#: templates/peachjam_subs/_subscription_required.html:28
+#: templates/peachjam_subs/_subscription_required.html:29
 msgid "Log in"
 msgstr "Efetuar Login"
 
-#: templates/peachjam_subs/_subscription_required.html:36
+#: templates/peachjam_subs/_subscription_required.html:34
+msgid "Accounts unavailable"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:35
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This feature requires an account, and accounts are not available on this site."
+msgstr "Esta funcionalidade não está disponível de momento."
+
+#: templates/peachjam_subs/_subscription_required.html:41
 #, python-format
 msgid "This feature is available with %(lowest_product)s."
 msgstr "Esta funcionalidade está disponível com %(lowest_product)s."
 
-#: templates/peachjam_subs/_subscription_required.html:40
+#: templates/peachjam_subs/_subscription_required.html:45
 msgid "Upgrade to"
 msgstr "Atualize para"
 
-#: templates/peachjam_subs/_subscription_required.html:48
+#: templates/peachjam_subs/_subscription_required.html:53
 msgid "This feature is not currently available."
 msgstr "Esta funcionalidade não está disponível de momento."
 
