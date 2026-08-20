@@ -38,6 +38,10 @@ class DocumentDecorator:
 class JudgmentDecorator(DocumentDecorator):
     """Judgment decorators are used to add extra functionality to judgments."""
 
+    def assign_mnc(self, document):
+        """Build the judgment's media-neutral citation."""
+        return document.generate_citation()
+
     def apply_labels(self, document):
         """Apply labels to this judgment based on its properties."""
         from peachjam.models import Label
