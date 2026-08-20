@@ -1,9 +1,10 @@
 import logging
+from urllib.parse import urlencode, urlsplit
 
 from allauth.account.adapter import DefaultAccountAdapter, get_adapter
 from allauth.account.internal.flows.code_verification import user_id_to_str
 from allauth.account.internal.flows.login_by_code import LoginCodeVerificationProcess
-from allauth.account.utils import perform_login
+from allauth.account.utils import get_login_redirect_url, perform_login
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
@@ -13,11 +14,12 @@ from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import redirect_to_login
 from django.db import IntegrityError, OperationalError, ProgrammingError
+from django.urls import reverse
 from django.utils import translation
 from templated_email import send_templated_mail
 
 from peachjam.customerio import track_account_created_signup_event
-from peachjam.models import pj_settings
+from peachjam.models import UserProfile, pj_settings
 from peachjam.signals import password_reset_started
 
 logger = logging.getLogger(__name__)
@@ -122,6 +124,40 @@ def user_display(user):
 class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
         return pj_settings().accounts_enabled
+
+    def post_login(
+        self,
+        request,
+        user,
+        *,
+        email_verification,
+        signal_kwargs,
+        email,
+        signup,
+        redirect_url,
+    ):
+        """Apply onboarding to every allauth login flow, including social login."""
+        destination = get_login_redirect_url(
+            request,
+            redirect_url,
+            signup=signup,
+        )
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        if pj_settings().accounts_enabled and profile.requires_onboarding():
+            onboard_url = reverse("account_onboard")
+            if urlsplit(destination).path != onboard_url:
+                destination = f"{onboard_url}?{urlencode({'next': destination})}"
+
+        return super().post_login(
+            request,
+            user,
+            email_verification=email_verification,
+            signal_kwargs=signal_kwargs,
+            email=email,
+            signup=signup,
+            redirect_url=destination,
+        )
 
     def send_mail(self, template_prefix, email, context):
         # injection point for hooking into password reset initiation
