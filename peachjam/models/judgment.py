@@ -298,8 +298,19 @@ class CourtClass(models.Model):
     def get_absolute_url(self):
         return reverse("court_class", args=[self.slug])
 
+    def clean(self):
+        super().clean()
+        if self.name and not slugify(self.name):
+            raise ValidationError(
+                {"name": _("Name must contain at least one letter or number.")}
+            )
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+        if not self.slug:
+            raise ValidationError(
+                {"name": _("Name must contain at least one letter or number.")}
+            )
         return super().save(*args, **kwargs)
 
     @classmethod

@@ -946,6 +946,17 @@ class JudgmentTestCase(TestCase):
 
         court.full_clean()
 
+    def test_court_class_rejects_name_with_empty_slug(self):
+        court_class = CourtClass(name="---")
+
+        with self.assertRaises(ValidationError) as cm:
+            court_class.full_clean()
+
+        self.assertIn("name", cm.exception.message_dict)
+
+        with self.assertRaises(ValidationError):
+            court_class.save()
+
     def test_judgment_save_clears_locality_when_court_has_none(self):
         za = Country.objects.get(pk="ZA")
         old_locality = Locality.objects.create(
