@@ -645,6 +645,7 @@ class OnboardingViewTests(TestCase):
                 "first_name": "Janet",
                 "last_name": "Doe",
                 "preferred_language": language.pk,
+                "email_alert_frequency": self.profile.email_alert_frequency,
             },
         )
 

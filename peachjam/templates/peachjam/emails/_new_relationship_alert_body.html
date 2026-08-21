@@ -2,15 +2,15 @@
 {% for item in saved_documents %}
   {% for rel in item.relationships.values %}
     <div style="margin-top: 1rem;">
-      <p>
-        {{ rel.label }}
-        <a href="{% absolute_url site item.saved_document.get_absolute_url %}?utm_campaign=new_relationship&utm_source=alert&utm_medium=email">
+      <p class="digest-item-heading">
+        {{ rel.body_label }}
+        <a href="{% absolute_url site item.saved_document.get_absolute_url %}?utm_campaign={{ utm_campaign|default:'new_relationship' }}&utm_source=alert&utm_medium=email">
           <b>{{ item.saved_document.work.title }}</b>
         </a>
       </p>
       <ul>
         {% for doc in rel.documents %}
-          {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.get_absolute_url utm_campaign="new_relationship" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
+          {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=doc.get_absolute_url utm_campaign=utm_campaign|default:'new_relationship' title=doc.email_title|default:doc.title citation_metadata=doc.email_citation_metadata added_date=doc.created_at document_date=doc.date document_type=doc.doc_type blurb=doc.blurb flynote=doc.flynote only %}
         {% endfor %}
       </ul>
     </div>

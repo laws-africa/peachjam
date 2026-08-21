@@ -82,6 +82,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         "new_citation_alert",
         "new_relationship_alert",
         "new_overturn_alert",
+        "email_alert_digest",
         "account/email/login_code",
     ]
 
@@ -125,6 +126,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
             transactional_message_id=transactional_message_id,
             subject=parts["subject"],
             body=parts["html"],
+            preheader=context.get("preheader"),
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
             to=",".join(recipient_list),

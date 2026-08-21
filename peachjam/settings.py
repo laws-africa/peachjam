@@ -237,6 +237,11 @@ PEACHJAM = {
     "CHAT_PUBLIC": False,
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
+    # Used only by migrations to seed the admin-managed site setting. Runtime code
+    # reads PeachJamSettings.email_alert_default_frequency instead.
+    "EMAIL_ALERT_DEFAULT_FREQUENCY": os.environ.get(
+        "EMAIL_ALERT_DEFAULT_FREQUENCY", "daily"
+    ),
     "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
     "DISABLE_ACCOUNTS": os.environ.get("DISABLE_ACCOUNTS", "false") == "true",
     "ALL_USERS_PERMISSION_GROUP": "AllUsers",

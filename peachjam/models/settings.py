@@ -2,6 +2,8 @@ from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from .email_alerts import EmailAlertFrequency
+
 
 class SingletonModel(models.Model):
     class Meta:
@@ -214,6 +216,13 @@ class PeachJamSettings(SingletonModel):
         verbose_name=_("allow criminal data extraction"),
         default=False,
         help_text=_("Allow AI-based criminal data extraction for judgments."),
+    )
+    email_alert_default_frequency = models.CharField(
+        verbose_name=_("default email alert frequency"),
+        max_length=16,
+        choices=EmailAlertFrequency.choices,
+        default="daily",
+        help_text=_("Default frequency for new users' email alert digests."),
     )
 
     class Meta:

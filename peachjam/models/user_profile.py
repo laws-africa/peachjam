@@ -17,7 +17,9 @@ from peachjam_subs.models import Subscription
 
 from .annotation import Annotation
 from .chat import DocumentChatThread
+from .email_alerts import EmailAlertFrequency
 from .save_document import Folder, SavedDocument
+from .settings import pj_settings
 from .user_following import UserFollowing
 
 
@@ -51,8 +53,13 @@ class PracticeType(OnboardingOption):
         verbose_name_plural = _("practice types")
 
 
+def default_email_alert_frequency():
+    return pj_settings().email_alert_default_frequency
+
+
 class UserProfile(models.Model):
     SAVE_FOLDER = "user_profiles"
+    EmailAlertFrequency = EmailAlertFrequency
 
     user = models.OneToOneField(
         get_user_model(), on_delete=models.CASCADE, verbose_name=_("user")
@@ -80,6 +87,13 @@ class UserProfile(models.Model):
     deleted_at = models.DateTimeField(_("deleted at"), null=True, blank=True)
     deleted_reason = models.TextField(_("deleted reason"), null=True, blank=True)
     email_hash = models.CharField(_("email hash"), max_length=64, null=True, blank=True)
+    email_alert_frequency = models.CharField(
+        _("email alert frequency"),
+        max_length=16,
+        choices=EmailAlertFrequency.choices,
+        default=default_email_alert_frequency,
+        help_text=_("How often to receive email notification digests."),
+    )
     onboarding_intents = models.ManyToManyField(
         OnboardingIntent,
         verbose_name=_("onboarding intents"),

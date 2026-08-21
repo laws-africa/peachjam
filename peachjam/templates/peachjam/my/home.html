@@ -3,6 +3,34 @@
 {% load i18n %}
 {% block my-content %}
   {% include "peachjam/my/_subscription_locked_banner.html" %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-end g-3">
+        <div class="col-md">
+          <h2 class="h5 mb-1">{% trans "Email alerts" %}</h2>
+          <p class="mb-0 text-muted">
+            {% trans "Choose how often you would like to receive your alert digest. Digests are sent on weekdays at 10:00 AM." %}
+          </p>
+        </div>
+        <div class="col-md-auto">
+          <form method="post" class="d-flex align-items-end gap-2">
+            {% csrf_token %}
+            <div>
+              <label class="form-label mb-1"
+                     for="{{ email_alert_frequency_form.email_alert_frequency.id_for_label }}">
+                {{ email_alert_frequency_form.email_alert_frequency.label }}
+              </label>
+              {{ email_alert_frequency_form.email_alert_frequency }}
+              {% for error in email_alert_frequency_form.email_alert_frequency.errors %}
+                <div class="text-danger small">{{ error }}</div>
+              {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
   <div class="row">
     {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
       <div class="col-lg-6">{% include "peachjam/my/_saved_documents.html" %}</div>

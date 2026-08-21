@@ -8,6 +8,7 @@ from .citations import *
 from .core_document import *
 from .custom_property import *
 from .document_access_group import *
+from .email_alerts import *
 from .enrichments import *
 from .entity_profile import *
 from .external_document import *

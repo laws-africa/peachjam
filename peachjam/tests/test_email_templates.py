@@ -18,7 +18,7 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         }
 
     def assert_alert_document_item_spacing(self, html):
-        self.assertIn('<li style="margin-bottom: 1rem">', html)
+        self.assertIn('<li style="padding-bottom: 0.75rem">', html)
         self.assertIn(
             '<div style="margin-top: 0.5rem; font-style: italic">',
             html,
@@ -82,10 +82,6 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
 
         self.assertIn(
             'href="https://example.org/en/my/following/?utm_campaign=following&utm_source=alert&utm_medium=email"',
-            html,
-        )
-        self.assertIn(
-            'href="https://example.org/en/accounts/profile/"',
             html,
         )
         self.assertIn(

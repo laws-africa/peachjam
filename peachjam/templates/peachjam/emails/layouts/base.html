@@ -46,6 +46,13 @@
           table.button table td a {
               border-color: {{ PRIMARY_COLOUR }}; }
 
+          table.button.digest-cta table td {
+              border: 0;
+              border-color: transparent;
+              border-radius: 8px; }
+          table.button.digest-cta table td a {
+              border-radius: 8px; }
+
           /*------------
            FONT FAMILY
           ------------*/
@@ -92,6 +99,39 @@
           h1 {
               font-weight: 700; }
 
+          .digest-section {
+              border-top: 1px solid #dee2e6;
+              margin-top: 24px;
+              padding-top: 24px; }
+
+          .digest-section-heading {
+              font-size: 18px;
+              line-height: 1.35;
+              margin-bottom: 8px;
+              Margin-bottom: 8px; }
+
+          .digest-section-description {
+              margin-bottom: 16px;
+              Margin-bottom: 16px; }
+
+          .digest-followed-object {
+              font-weight: 700;
+              margin-bottom: 8px;
+              Margin-bottom: 8px; }
+
+          .digest-summary {
+              background-color: #f8f9fa;
+              border-left: 3px solid {{ PRIMARY_COLOUR }};
+              margin-top: 20px;
+              padding: 16px 20px; }
+
+          .digest-item-heading {
+              font-size: 16px;
+              font-weight: 700;
+              line-height: 1.4;
+              margin-bottom: 8px;
+              Margin-bottom: 8px; }
+
           .footer p {
               margin-bottom: 5px;
               Margin-bottom: 5px; }
@@ -106,7 +146,9 @@
       {% block head %}{% endblock %}
     </head>
     <body>
-      <span class="preheader"></span>
+      {% if preheader %}
+        <span class="preheader">{{ preheader }}&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;</span>
+      {% endif %}
       <table class="body">
         <tr>
           <td class="center" align="center" valign="top">
