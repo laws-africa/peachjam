@@ -5,6 +5,7 @@ from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -219,6 +220,15 @@ class TimelineViewTest(TestCase):
         self.assertFalse(
             TimelineEmailService.is_digest_due(self.user, date(2026, 8, 4))
         )
+
+    def test_my_lii_updates_email_alert_frequency(self):
+        response = self.client.post(
+            reverse("my_home"), {"email_alert_frequency": "weekly"}
+        )
+
+        self.assertRedirects(response, reverse("my_home"))
+        self.user.userprofile.refresh_from_db()
+        self.assertEqual("weekly", self.user.userprofile.email_alert_frequency)
 
     def test_new_user_default_frequency_uses_site_settings(self):
         site_settings = pj_settings()

@@ -1077,6 +1077,28 @@ class UserProfileForm(forms.Form):
         return self.user
 
 
+class EmailAlertFrequencyForm(forms.Form):
+    email_alert_frequency = forms.ChoiceField(
+        label=_("Email alert frequency"),
+        choices=UserProfile.EmailAlertFrequency.choices,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        kwargs.setdefault(
+            "initial",
+            {"email_alert_frequency": self.user.userprofile.email_alert_frequency},
+        )
+        super().__init__(*args, **kwargs)
+
+    def save(self):
+        self.user.userprofile.email_alert_frequency = self.cleaned_data[
+            "email_alert_frequency"
+        ]
+        self.user.userprofile.save(update_fields=["email_alert_frequency"])
+
+
 class DeleteAccountForm(OffboardingFeedbackForm):
     confirm_delete = forms.BooleanField(
         label=_("I understand this action cannot be undone"),

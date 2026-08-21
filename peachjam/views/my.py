@@ -1,10 +1,14 @@
 import datetime
 
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.db.models.aggregates import Count
 from django.http.response import Http404
+from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 from django.views.generic.base import TemplateView
 
+from peachjam.forms import EmailAlertFrequencyForm
 from peachjam.models import Folder, TimelineEvent, pj_settings
 from peachjam_subs.limits import get_subscription_locked_data_summary
 
@@ -36,14 +40,30 @@ class MyHomeView(LoginRequiredMixin, CommonContextMixin, TemplateView):
     tab = "my"
     timeline_truncated = False
 
-    def get(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):
         if not pj_settings().accounts_enabled:
             raise Http404()
-        return super().get(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
-    def get_context_data(self, **kwargs):
+    def get_email_alert_frequency_form(self, data=None):
+        return EmailAlertFrequencyForm(data=data, user=self.request.user)
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_email_alert_frequency_form(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, _("Your email alert frequency has been updated."))
+            return redirect("my_home")
+        return self.render_to_response(
+            self.get_context_data(email_alert_frequency_form=form)
+        )
+
+    def get_context_data(self, email_alert_frequency_form=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["KEY_LINK_PAGE"] = "my_lii"
+        context["email_alert_frequency_form"] = (
+            email_alert_frequency_form or self.get_email_alert_frequency_form()
+        )
         return context
 
 
