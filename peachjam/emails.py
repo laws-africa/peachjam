@@ -50,17 +50,17 @@ class TemplateBackend(BaseTemplateBackend):
 
     def get_primary_colour(self):
         if self.primary_colour is None:
-            # try to get the primary colour from the _variables.scss file, looked up using the static files finder
-            path = finders.find("stylesheets/_variables.scss")
-            if path:
-                print(f"Found _variables.scss at {path}")
+            paths = finders.find("stylesheets/_variables.scss", all=True) or []
+            for path in paths:
                 with open(path, "r") as f:
                     for line in f:
-                        if line.startswith("$primary:"):
+                        if line.lstrip().startswith("$primary:"):
                             self.__class__.primary_colour = (
                                 line.split(":", 1)[1].strip().rstrip(";")
                             )
                             break
+                if self.primary_colour:
+                    break
 
         return (
             self.primary_colour or settings.PEACHJAM.get("PRIMARY_COLOUR") or "#0000ff"

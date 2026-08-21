@@ -1,5 +1,4 @@
 import logging
-import re
 from collections import OrderedDict
 from datetime import timedelta
 
@@ -130,25 +129,6 @@ class TimelineEmailService:
         if documents and all(document.doc_type == "judgment" for document in documents):
             return ngettext("judgment", "judgments", count)
         return ngettext("document", "documents", count)
-
-    @staticmethod
-    def prepare_document_display(document):
-        """Add the compact fields used by the email document item template."""
-        document.email_title = document.title
-        document.email_citation_metadata = ""
-        if document.doc_type != "judgment":
-            return document
-
-        document.email_title = re.sub(
-            r"\bvs\.?\b", "v", document.case_name or document.title
-        )
-        case_numbers = "; ".join(
-            number.get_case_number_string() for number in document.case_numbers.all()
-        )
-        document.email_citation_metadata = " · ".join(
-            part for part in [case_numbers, document.mnc] if part
-        )
-        return document
 
     @classmethod
     def followed_documents_heading(cls, followed_object, documents, count):
@@ -404,7 +384,7 @@ class TimelineEmailService:
                 update_count,
             ) % {
                 "count": update_count,
-                "date": date_format(timezone.localtime(last_digest_sent_at), "j F"),
+                "date": date_format(timezone.localtime(last_digest_sent_at), "j F Y"),
             }
         return ngettext(
             "%(count)d update since your last alert",
@@ -429,7 +409,6 @@ class TimelineEmailService:
             follow = event.user_following
             item = follows.setdefault(follow, {"documents": [], "all_documents": []})
             for document in event.subject_documents:
-                cls.prepare_document_display(document)
                 item["all_documents"].append(document)
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
                     item["documents"].append(document)
@@ -475,8 +454,7 @@ class TimelineEmailService:
         for event in events:
             hits = []
             documents_by_id = {
-                document.pk: cls.prepare_document_display(document)
-                for document in event.subject_documents
+                document.pk: document for document in event.subject_documents
             }
             all_hits = (event.extra_data or {}).get("hits", [])
             for hit in all_hits:
@@ -517,7 +495,6 @@ class TimelineEmailService:
                 document, {"citing_documents": [], "total_count": 0}
             )
             for citing_document in event.subject_documents:
-                cls.prepare_document_display(citing_document)
                 item["total_count"] += 1
                 if count >= cls.MAX_ENTRIES_PER_CATEGORY:
                     continue
@@ -569,7 +546,6 @@ class TimelineEmailService:
                 {"documents": [], "total_count": 0, "event_type": event.event_type},
             )
             for related_document in event.subject_documents:
-                cls.prepare_document_display(related_document)
                 relationship["total_count"] += 1
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
                     relationship["documents"].append(related_document)

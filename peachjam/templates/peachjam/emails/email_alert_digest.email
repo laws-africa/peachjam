@@ -2,7 +2,7 @@
 {% load i18n peachjam %}
 {% block subject %}{{ digest_subject }}{% endblock %}
 {% block alert-body %}
-  <p>{% blocktrans with app_name=APP_NAME %}Your {{ app_name }} update{% endblocktrans %}</p>
+  <p>{% blocktrans with frequency=email_alert_frequency app_name=APP_NAME %}Here is your {{ frequency }} My {{ app_name }} update.{% endblocktrans %}</p>
   <p>{{ digest_intro }}</p>
 
   {% if summary_items %}
@@ -31,13 +31,13 @@
         <h3 class="digest-item-heading">{{ item.summary_label }}</h3>
         <ul>
           {% for doc in item.documents %}
-            {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.email_title citation_metadata=doc.email_citation_metadata added_date=doc.created_at document_date=doc.date document_type=doc.doc_type blurb=doc.blurb flynote=doc.flynote only %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title added_date=doc.created_at document_date=doc.date blurb=doc.blurb flynote=doc.flynote %}
           {% endfor %}
         </ul>
       {% endfor %}
       {% if followed_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=followed_total app_name=APP_NAME %}View all {{ count }} updates in {{ app_name }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=followed_total app_name=APP_NAME %}View all {{ count }} updates in My {{ app_name }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
@@ -50,17 +50,13 @@
         <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_search.get_absolute_url %}">“{{ item.saved_search.q }}”</a></h3>
         <ul>
           {% for hit in item.hits %}
-            {% if hit.highlight.title %}
-              {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.highlight.title|first|safe citation_metadata=hit.metadata_document.email_citation_metadata added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date document_type=hit.metadata_document.doc_type blurb=hit.document.blurb flynote=hit.document.flynote only %}
-            {% else %}
-              {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.metadata_document.email_title citation_metadata=hit.metadata_document.email_citation_metadata added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date document_type=hit.metadata_document.doc_type blurb=hit.document.blurb flynote=hit.document.flynote only %}
-            {% endif %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.metadata_document.title added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date blurb=hit.document.blurb flynote=hit.document.flynote %}
           {% endfor %}
         </ul>
       {% endfor %}
       {% if searches_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=searches_total app_name=APP_NAME %}View all {{ count }} matches in {{ app_name }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=searches_total app_name=APP_NAME %}View all {{ count }} matches in My {{ app_name }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
@@ -74,13 +70,13 @@
         <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></h3>
         <ul>
           {% for citing in item.citing_documents %}
-            {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.email_title citation_metadata=citing.document.email_citation_metadata added_date=citing.document.created_at document_date=citing.document.date document_type=citing.document.doc_type blurb=citing.document.blurb flynote=citing.document.flynote only %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.title added_date=citing.document.created_at document_date=citing.document.date blurb=citing.document.blurb flynote=citing.document.flynote provision_citations=citing.provision_citations %}
           {% endfor %}
         </ul>
       {% endfor %}
       {% if citations_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=citations_total app_name=APP_NAME %}View all {{ count }} citations in {{ app_name }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=citations_total app_name=APP_NAME %}View all {{ count }} citations in My {{ app_name }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
@@ -92,7 +88,7 @@
       {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=relationships utm_campaign="email_digest" %}
       {% if relationships_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=relationships_total app_name=APP_NAME %}View all {{ count }} updates in {{ app_name }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=relationships_total app_name=APP_NAME %}View all {{ count }} updates in My {{ app_name }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
@@ -100,5 +96,5 @@
 
   {% absolute_url site timeline_url_path as timeline_url %}
   {% blocktrans asvar view_all_updates with app_name=APP_NAME %}View all updates in My {{ app_name }}{% endblocktrans %}
-  {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url button_class="digest-cta" %}
+  {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url %}
 {% endblock %}

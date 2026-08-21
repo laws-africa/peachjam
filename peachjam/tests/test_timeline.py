@@ -189,6 +189,7 @@ class TimelineViewTest(TestCase):
         request = mailer.call_args[0][0]
         self.assertEqual("Employment Law: 1 new judgment", str(request.subject))
         self.assertEqual("1 Employment Law judgment", request.preheader)
+        self.assertIn("Here is your daily My Peachjam update.", request.body)
         self.assertIn("1 new judgment for Employment Law", request.body)
         self.assertIn("1 new judgment for Employment Law", request.body)
         self.assertIn("From courts and topics you follow", request.body)

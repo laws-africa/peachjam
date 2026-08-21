@@ -13,7 +13,7 @@
     <b>{{ item.followed_object }}</b>
     <ul>
       {% for doc in item.documents %}
-        {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.expression_frbr_uri utm_campaign="following" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
+        {% include "peachjam/emails/_alert_document_list_item.html" with url_path=doc.expression_frbr_uri utm_campaign="following" title=doc.title blurb=doc.blurb flynote=doc.flynote %}
       {% endfor %}
     </ul>
     <hr/>

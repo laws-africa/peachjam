@@ -2,14 +2,14 @@
 {% load i18n peachjam %}
 {% block body %}
   {% if user.first_name %}
-    <p>{% blocktrans with name=user.first_name %}Hello {{ name }}{% endblocktrans %}</p>
+    <p>{% blocktrans with name=user.first_name %}Hello {{ name }},{% endblocktrans %}</p>
   {% endif %}
   {% block alert-body %}{% endblock %}
   <p>&nbsp;</p>
   <p>{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
   {% if email_alert_frequency %}
     <p>
-      <small>{% blocktrans with frequency=email_alert_frequency %}You're receiving this {{ frequency }}.{% endblocktrans %}</small>
+      <small>{% blocktrans with frequency=email_alert_frequency app_name=APP_NAME %}You're receiving My {{ app_name }} updates {{ frequency }}.{% endblocktrans %}</small>
     </p>
   {% endif %}
   <p>
