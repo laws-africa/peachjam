@@ -16,7 +16,7 @@ def seed_site_default_frequency(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0318_userprofile_email_alert_frequency"),
+        ("peachjam", "0319_userprofile_email_alert_frequency"),
     ]
 
     operations = [

@@ -12,7 +12,7 @@ def set_site_default_frequency(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0317_backfill_anonymised_source_file_pdfs"),
+        ("peachjam", "0318_onboarding_profile"),
     ]
 
     operations = [
