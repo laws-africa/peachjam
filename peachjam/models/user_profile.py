@@ -17,6 +17,7 @@ from peachjam_subs.models import Subscription
 
 from .annotation import Annotation
 from .chat import DocumentChatThread
+from .email_alerts import EmailAlertFrequency
 from .save_document import Folder, SavedDocument
 from .settings import pj_settings
 from .user_following import UserFollowing
@@ -58,12 +59,7 @@ def default_email_alert_frequency():
 
 class UserProfile(models.Model):
     SAVE_FOLDER = "user_profiles"
-
-    class EmailAlertFrequency(models.TextChoices):
-        DAILY = "daily", _("Daily")
-        WEEKLY = "weekly", _("Weekly")
-        MONTHLY = "monthly", _("Monthly")
-        NONE = "none", _("None")
+    EmailAlertFrequency = EmailAlertFrequency
 
     user = models.OneToOneField(
         get_user_model(), on_delete=models.CASCADE, verbose_name=_("user")

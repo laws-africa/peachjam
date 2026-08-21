@@ -21,12 +21,14 @@ from peachjam.models import (
     LawReportVolume,
     Legislation,
     Locality,
+    PeachJamSettings,
     Predicate,
     Relationship,
     SavedDocument,
     Taxonomy,
     TimelineEvent,
     UserFollowing,
+    UserProfile,
     Work,
     pj_settings,
 )
@@ -236,6 +238,10 @@ class TimelineViewTest(TestCase):
         site_settings.save(update_fields=["email_alert_default_frequency"])
 
         self.assertEqual("weekly", default_email_alert_frequency())
+
+    def test_site_frequency_choices_match_user_profile_choices(self):
+        field = PeachJamSettings._meta.get_field("email_alert_default_frequency")
+        self.assertEqual(UserProfile.EmailAlertFrequency.choices, field.choices)
 
     def test_digest_waits_24_hours_after_a_previous_delivery(self):
         topic = Taxonomy.add_root(name="Employment Law")
