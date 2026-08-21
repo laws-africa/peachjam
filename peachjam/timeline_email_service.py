@@ -1,4 +1,5 @@
 import logging
+import re
 from collections import OrderedDict
 from datetime import timedelta
 
@@ -6,6 +7,7 @@ from django.conf import settings
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext, override
 from templated_email import send_templated_mail
@@ -18,7 +20,9 @@ log = logging.getLogger(__name__)
 
 class TimelineEmailService:
     MAX_ENTRIES_PER_CATEGORY = 10
+    MAX_SUMMARY_ENTRIES = 5
     SUBJECT_ENTITY_MAX_LENGTH = 500
+    PREHEADER_MAX_LENGTH = 90
 
     @staticmethod
     def already_sent_digest_within_last_24_hours(user):
@@ -96,6 +100,18 @@ class TimelineEmailService:
             )
         )
 
+    @staticmethod
+    def last_digest_sent_at(user):
+        return (
+            TimelineEvent.objects.filter(
+                user_following__user=user,
+                email_alert_sent_at__isnull=False,
+            )
+            .order_by("-email_alert_sent_at")
+            .values_list("email_alert_sent_at", flat=True)
+            .first()
+        )
+
     @classmethod
     def limit_documents(cls, events):
         documents = []
@@ -115,6 +131,25 @@ class TimelineEmailService:
             return ngettext("judgment", "judgments", count)
         return ngettext("document", "documents", count)
 
+    @staticmethod
+    def prepare_document_display(document):
+        """Add the compact fields used by the email document item template."""
+        document.email_title = document.title
+        document.email_citation_metadata = ""
+        if document.doc_type != "judgment":
+            return document
+
+        document.email_title = re.sub(
+            r"\bvs\.?\b", "v", document.case_name or document.title
+        )
+        case_numbers = "; ".join(
+            number.get_case_number_string() for number in document.case_numbers.all()
+        )
+        document.email_citation_metadata = " · ".join(
+            part for part in [case_numbers, document.mnc] if part
+        )
+        return document
+
     @classmethod
     def followed_documents_heading(cls, followed_object, documents, count):
         return ngettext(
@@ -129,13 +164,17 @@ class TimelineEmailService:
 
     @classmethod
     def followed_documents_summary_label(cls, followed_object, documents, count):
+        return cls.followed_documents_heading(followed_object, documents, count)
+
+    @classmethod
+    def followed_documents_preheader_label(cls, followed_object, documents, count):
         return ngettext(
-            "%(followed_object)s – %(count)d new %(document_kind)s",
-            "%(followed_object)s – %(count)d new %(document_kind)s",
+            "%(count)d %(followed_object)s %(document_kind)s",
+            "%(count)d %(followed_object)s %(document_kind)s",
             count,
         ) % {
-            "followed_object": followed_object,
             "count": count,
+            "followed_object": followed_object,
             "document_kind": cls.document_kind(documents, count),
         }
 
@@ -156,6 +195,14 @@ class TimelineEmailService:
         ) % {"count": count}
 
     @staticmethod
+    def saved_search_preheader_label(saved_search, count):
+        return ngettext(
+            "%(count)d search result for “%(search)s”",
+            "%(count)d search results for “%(search)s”",
+            count,
+        ) % {"count": count, "search": saved_search.q}
+
+    @staticmethod
     def citation_update_label(count):
         return ngettext(
             "%(count)d new citation",
@@ -170,6 +217,12 @@ class TimelineEmailService:
             "%(count)d new citations of",
             count,
         ) % {"count": count}
+
+    @staticmethod
+    def citation_preheader_label(count):
+        return ngettext("%(count)d citation", "%(count)d citations", count) % {
+            "count": count
+        }
 
     @staticmethod
     def relationship_update_label(event_type, count):
@@ -216,6 +269,58 @@ class TimelineEmailService:
         }
         singular, plural = relationship_labels[event_type]
         return ngettext(singular, plural, count) % {"count": count}
+
+    @staticmethod
+    def relationship_preheader_label(event_type, count):
+        relationship_labels = {
+            TimelineEvent.EventTypes.NEW_AMENDMENT: (
+                "%(count)d amendment",
+                "%(count)d amendments",
+            ),
+            TimelineEvent.EventTypes.NEW_REPEAL: (
+                "%(count)d repeal",
+                "%(count)d repeals",
+            ),
+            TimelineEvent.EventTypes.NEW_COMMENCEMENT: (
+                "%(count)d commencement",
+                "%(count)d commencements",
+            ),
+            TimelineEvent.EventTypes.NEW_OVERTURN: (
+                "%(count)d overturning decision",
+                "%(count)d overturning decisions",
+            ),
+        }
+        singular, plural = relationship_labels[event_type]
+        return ngettext(singular, plural, count) % {"count": count}
+
+    @staticmethod
+    def summary_priority(event_type):
+        priorities = {
+            # Lead with newly published material from a court or topic the
+            # reader follows, then with their saved-search results.
+            TimelineEvent.EventTypes.NEW_DOCUMENTS: 1,
+            TimelineEvent.EventTypes.SAVED_SEARCH: 2,
+            TimelineEvent.EventTypes.NEW_CITATION: 3,
+            TimelineEvent.EventTypes.NEW_OVERTURN: 4,
+            TimelineEvent.EventTypes.NEW_REPEAL: 5,
+            TimelineEvent.EventTypes.NEW_AMENDMENT: 6,
+            TimelineEvent.EventTypes.NEW_COMMENCEMENT: 6,
+        }
+        return priorities[event_type]
+
+    @staticmethod
+    def join_update_labels(labels):
+        if len(labels) == 1:
+            return labels[0]
+        if len(labels) == 2:
+            return _("%(first)s and %(second)s") % {
+                "first": labels[0],
+                "second": labels[1],
+            }
+        return _("%(items)s, and %(last)s") % {
+            "items": ", ".join(labels[:-1]),
+            "last": labels[-1],
+        }
 
     @classmethod
     def shorten_subject_entity(cls, entity):
@@ -278,12 +383,43 @@ class TimelineEmailService:
     @staticmethod
     def digest_subject(summary_items):
         if not summary_items:
-            return _("Your latest legal updates")
+            return ""
 
-        subject = summary_items[0]["subject"]
-        if len(summary_items) > 1:
-            subject = _("%(subject)s and other updates") % {"subject": subject}
-        return subject
+        lead = min(summary_items, key=lambda item: item["priority"])
+        remaining_count = len(summary_items) - 1
+        if not remaining_count:
+            return lead["subject"]
+        return ngettext(
+            "%(lead)s and %(count)d more update",
+            "%(lead)s and %(count)d more updates",
+            remaining_count,
+        ) % {"lead": lead["subject"], "count": remaining_count}
+
+    @staticmethod
+    def digest_intro(update_count, last_digest_sent_at):
+        if last_digest_sent_at:
+            return ngettext(
+                "%(count)d update since %(date)s",
+                "%(count)d updates since %(date)s",
+                update_count,
+            ) % {
+                "count": update_count,
+                "date": date_format(timezone.localtime(last_digest_sent_at), "j F"),
+            }
+        return ngettext(
+            "%(count)d update since your last alert",
+            "%(count)d updates since your last alert",
+            update_count,
+        ) % {"count": update_count}
+
+    @classmethod
+    def digest_preheader(cls, summary_items):
+        preheader = " · ".join(item["preheader"] for item in summary_items)
+        if len(preheader) <= cls.PREHEADER_MAX_LENGTH:
+            return preheader
+
+        shortened = preheader[: cls.PREHEADER_MAX_LENGTH - 1].rsplit(" ", 1)[0]
+        return f"{shortened or preheader[: cls.PREHEADER_MAX_LENGTH - 1]}…"
 
     @classmethod
     def followed_documents(cls, events):
@@ -293,6 +429,7 @@ class TimelineEmailService:
             follow = event.user_following
             item = follows.setdefault(follow, {"documents": [], "all_documents": []})
             for document in event.subject_documents:
+                cls.prepare_document_display(document)
                 item["all_documents"].append(document)
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
                     item["documents"].append(document)
@@ -310,6 +447,11 @@ class TimelineEmailService:
                         len(item["all_documents"]),
                     ),
                     "summary_label": cls.followed_documents_summary_label(
+                        follow.followed_object_name,
+                        item["all_documents"],
+                        len(item["all_documents"]),
+                    ),
+                    "preheader_label": cls.followed_documents_preheader_label(
                         follow.followed_object_name,
                         item["all_documents"],
                         len(item["all_documents"]),
@@ -332,9 +474,15 @@ class TimelineEmailService:
         count = 0
         for event in events:
             hits = []
+            documents_by_id = {
+                document.pk: cls.prepare_document_display(document)
+                for document in event.subject_documents
+            }
             all_hits = (event.extra_data or {}).get("hits", [])
             for hit in all_hits:
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
+                    hit = hit.copy()
+                    hit["metadata_document"] = documents_by_id.get(hit["id"])
                     hits.append(hit)
                     count += 1
             if hits:
@@ -345,6 +493,9 @@ class TimelineEmailService:
                         "total_count": len(all_hits),
                         "update_label": cls.saved_search_update_label(len(all_hits)),
                         "body_label": cls.saved_search_body_label(len(all_hits)),
+                        "preheader_label": cls.saved_search_preheader_label(
+                            event.user_following.saved_search, len(all_hits)
+                        ),
                         "subject": cls.saved_search_subject(
                             event.user_following.saved_search, len(all_hits)
                         ),
@@ -366,6 +517,7 @@ class TimelineEmailService:
                 document, {"citing_documents": [], "total_count": 0}
             )
             for citing_document in event.subject_documents:
+                cls.prepare_document_display(citing_document)
                 item["total_count"] += 1
                 if count >= cls.MAX_ENTRIES_PER_CATEGORY:
                     continue
@@ -390,6 +542,9 @@ class TimelineEmailService:
                     "total_count": item["total_count"],
                     "update_label": cls.citation_update_label(item["total_count"]),
                     "body_label": cls.citation_body_label(item["total_count"]),
+                    "preheader_label": cls.citation_preheader_label(
+                        item["total_count"]
+                    ),
                     "subject": cls.citation_subject(document, item["total_count"]),
                 }
                 for document, item in saved_documents.items()
@@ -414,6 +569,7 @@ class TimelineEmailService:
                 {"documents": [], "total_count": 0, "event_type": event.event_type},
             )
             for related_document in event.subject_documents:
+                cls.prepare_document_display(related_document)
                 relationship["total_count"] += 1
                 if count < cls.MAX_ENTRIES_PER_CATEGORY:
                     relationship["documents"].append(related_document)
@@ -425,6 +581,9 @@ class TimelineEmailService:
                     relationship["event_type"], relationship["total_count"]
                 )
                 relationship["body_label"] = cls.relationship_body_label(
+                    relationship["event_type"], relationship["total_count"]
+                )
+                relationship["preheader_label"] = cls.relationship_preheader_label(
                     relationship["event_type"], relationship["total_count"]
                 )
 
@@ -478,6 +637,11 @@ class TimelineEmailService:
             {
                 "label": item["summary_label"],
                 "subject": item["subject"],
+                "preheader": item["preheader_label"],
+                "priority": cls.summary_priority(
+                    TimelineEvent.EventTypes.NEW_DOCUMENTS
+                ),
+                "section_id": "followed-documents",
             }
             for item in followed_documents
         )
@@ -489,37 +653,68 @@ class TimelineEmailService:
                     "update_label": item["update_label"],
                 },
                 "subject": item["subject"],
+                "preheader": item["preheader_label"],
+                "priority": cls.summary_priority(TimelineEvent.EventTypes.SAVED_SEARCH),
+                "section_id": "saved-searches",
             }
             for item in saved_searches
         )
+        document_summary_items = OrderedDict()
+        for item in citations:
+            document = item["saved_document"]
+            document_summary_items[document] = {
+                "document": document,
+                "update_labels": [item["update_label"]],
+                "preheader_labels": [item["preheader_label"]],
+                "subject": item["subject"],
+                "priority": cls.summary_priority(TimelineEvent.EventTypes.NEW_CITATION),
+                "has_relationships": False,
+            }
+        for item in relationships:
+            document = item["saved_document"]
+            summary_item = document_summary_items.setdefault(
+                document,
+                {
+                    "document": document,
+                    "update_labels": [],
+                    "preheader_labels": [],
+                    "subject": None,
+                    "priority": None,
+                    "has_relationships": True,
+                },
+            )
+            for relationship in item["relationships"].values():
+                if not relationship["documents"]:
+                    continue
+                summary_item["has_relationships"] = True
+                priority = cls.summary_priority(relationship["event_type"])
+                summary_item["update_labels"].append(relationship["update_label"])
+                summary_item["preheader_labels"].append(relationship["preheader_label"])
+                if (
+                    summary_item["priority"] is None
+                    or priority < summary_item["priority"]
+                ):
+                    summary_item["priority"] = priority
+                    summary_item["subject"] = cls.relationship_subject(
+                        relationship["event_type"],
+                        document,
+                        relationship["total_count"],
+                    )
         summary_items.extend(
             {
-                "label": _("%(document)s – %(update_label)s")
+                "label": _("%(document)s – %(updates)s")
                 % {
-                    "document": item["saved_document"].title,
-                    "update_label": item["update_label"],
+                    "document": item["document"].title,
+                    "updates": cls.join_update_labels(item["update_labels"]),
                 },
                 "subject": item["subject"],
-            }
-            for item in citations
-        )
-        summary_items.extend(
-            {
-                "label": _("%(document)s – %(update_label)s")
-                % {
-                    "document": document.title,
-                    "update_label": relationship["update_label"],
-                },
-                "subject": cls.relationship_subject(
-                    relationship["event_type"],
-                    document,
-                    relationship["total_count"],
+                "preheader": cls.join_update_labels(item["preheader_labels"]),
+                "priority": item["priority"],
+                "section_id": (
+                    "relationships" if item["has_relationships"] else "citations"
                 ),
             }
-            for item in relationships
-            for document in [item["saved_document"]]
-            for relationship in item["relationships"].values()
-            if relationship["documents"]
+            for item in document_summary_items.values()
         )
 
         displayed_events = followed_events + search_events
@@ -528,10 +723,23 @@ class TimelineEmailService:
         if relationships:
             displayed_events += relationship_events
 
+        total_update_count = (
+            followed_total + searches_total + citations_total + relationships_total
+        )
+        section_count = sum(
+            bool(items)
+            for items in [followed_documents, saved_searches, citations, relationships]
+        )
+        last_digest_sent_at = cls.last_digest_sent_at(user)
         return {
             "user": user,
-            "summary_items": summary_items,
+            "summary_items": summary_items[: cls.MAX_SUMMARY_ENTRIES],
+            "summary_more_count": max(len(summary_items) - cls.MAX_SUMMARY_ENTRIES, 0),
+            "summary_has_anchor_links": section_count > 3,
             "digest_subject": cls.digest_subject(summary_items),
+            "preheader": cls.digest_preheader(summary_items),
+            "digest_intro": cls.digest_intro(total_update_count, last_digest_sent_at),
+            "email_alert_frequency": user.userprofile.get_email_alert_frequency_display().lower(),
             "followed_documents": followed_documents,
             "followed_total": followed_total,
             "followed_more": followed_total > cls.MAX_ENTRIES_PER_CATEGORY,
@@ -564,15 +772,14 @@ class TimelineEmailService:
         if not events:
             return False
 
-        context = cls.digest_context(user, events)
-        if not context["displayed_events"]:
-            log.info("No renderable timeline events to alert for %s", user)
-            return False
-
         if not settings.PEACHJAM["EMAIL_ALERTS_ENABLED"] or not user.email:
             return False
 
         with override(user.userprofile.preferred_language.pk):
+            context = cls.digest_context(user, events)
+            if not context["displayed_events"] or not context["summary_items"]:
+                log.info("No renderable timeline events to alert for %s", user)
+                return False
             send_templated_mail(
                 template_name="email_alert_digest",
                 from_email=settings.DEFAULT_FROM_EMAIL,

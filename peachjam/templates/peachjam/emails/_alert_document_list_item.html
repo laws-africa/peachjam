@@ -1,6 +1,25 @@
-{% load peachjam %}
-<li style="margin-bottom: 1rem">
+{% load i18n peachjam %}
+<li style="padding-bottom: 0.75rem">
   <a href="{% absolute_url site url_path %}?utm_campaign={{ utm_campaign }}&utm_source=alert&utm_medium=email">{{ title }}</a>
+  {% if citation_metadata %}
+    <div style="margin-top: 0.25rem; color: #6F7488; font-size: 13px">{{ citation_metadata }}</div>
+  {% endif %}
+  {% if added_date or document_date %}
+    <div style="margin-top: 0.25rem; color: #6F7488; font-size: 13px">
+      {% if added_date %}
+        {% blocktrans with app_name=app_name added_date=added_date|date:"j M Y" %}Added to {{ app_name }} {{ added_date }}{% endblocktrans %}
+      {% endif %}
+      {% if document_date %}
+        {% if added_date %}·{% endif %}
+        {% if document_type == "judgment" %}
+          {% trans "Decided" %}
+        {% else %}
+          {% trans "Published" %}
+        {% endif %}
+        {{ document_date|date:"j M Y" }}
+      {% endif %}
+    </div>
+  {% endif %}
   {% if blurb %}<div>{{ blurb }}</div>{% endif %}
   {% if flynote %}<div style="margin-top: 0.5rem; font-style: italic">{{ flynote|linebreaksbr }}</div>{% endif %}
 </li>

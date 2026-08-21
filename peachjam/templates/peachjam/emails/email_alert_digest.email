@@ -2,27 +2,36 @@
 {% load i18n peachjam %}
 {% block subject %}{{ digest_subject }}{% endblock %}
 {% block alert-body %}
-  <p>{% blocktrans with app_name=APP_NAME %}Here's what's new on {{ app_name }}.{% endblocktrans %}</p>
+  <p>{% blocktrans with app_name=APP_NAME %}Your {{ app_name }} update{% endblocktrans %}</p>
+  <p>{{ digest_intro }}</p>
 
   {% if summary_items %}
     <div class="digest-summary">
       <ul>
         {% for item in summary_items %}
-          <li>{{ item.label }}</li>
+          <li{% if not forloop.last %} style="padding-bottom: 0.5rem"{% endif %}>
+            {% if summary_has_anchor_links %}
+              <a href="#{{ item.section_id }}">{{ item.label }}</a>
+            {% else %}
+              {{ item.label }}
+            {% endif %}
+          </li>
         {% endfor %}
+        {% if summary_more_count %}
+          <li>+{{ summary_more_count }} {% trans "more" %}</li>
+        {% endif %}
       </ul>
     </div>
   {% endif %}
 
   {% if followed_documents %}
     <div id="followed-documents" class="digest-section">
-      <h2 class="digest-section-heading">{% trans "Updates for courts and topics you follow" %}</h2>
-      <p class="digest-section-description">{% trans "These newly published documents are for courts and topics you follow." %}</p>
+      <h2 class="digest-section-heading">{% trans "From courts and topics you follow" %}</h2>
       {% for item in followed_documents %}
-        <h3 class="digest-item-heading">{{ item.heading }}</h3>
+        <h3 class="digest-item-heading">{{ item.summary_label }}</h3>
         <ul>
           {% for doc in item.documents %}
-            {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.email_title citation_metadata=doc.email_citation_metadata added_date=doc.created_at document_date=doc.date document_type=doc.doc_type blurb=doc.blurb flynote=doc.flynote only %}
           {% endfor %}
         </ul>
       {% endfor %}
@@ -36,15 +45,16 @@
 
   {% if saved_searches %}
     <div id="saved-searches" class="digest-section">
-      <h2 class="digest-section-heading">{% trans "New matches for your saved searches" %}</h2>
-      <p class="digest-section-description">{% trans "These newly published documents match searches you have saved." %}</p>
+      <h2 class="digest-section-heading">{% trans "Matches for your saved searches" %}</h2>
       {% for item in saved_searches %}
         <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_search.get_absolute_url %}">“{{ item.saved_search.q }}”</a></h3>
         <ul>
           {% for hit in item.hits %}
-            <li>
-              <a href="{% absolute_url site hit.expression_frbr_uri %}">{% if hit.highlight.title %}{{ hit.highlight.title|first|safe }}{% else %}{{ hit.document.title }}{% endif %}</a>
-            </li>
+            {% if hit.highlight.title %}
+              {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.highlight.title|first|safe citation_metadata=hit.metadata_document.email_citation_metadata added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date document_type=hit.metadata_document.doc_type blurb=hit.document.blurb flynote=hit.document.flynote only %}
+            {% else %}
+              {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.metadata_document.email_title citation_metadata=hit.metadata_document.email_citation_metadata added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date document_type=hit.metadata_document.doc_type blurb=hit.document.blurb flynote=hit.document.flynote only %}
+            {% endif %}
           {% endfor %}
         </ul>
       {% endfor %}
@@ -58,13 +68,13 @@
 
   {% if citations %}
     <div id="citations" class="digest-section">
-      <h2 class="digest-section-heading">{% trans "New citations of your saved documents" %}</h2>
-      <p class="digest-section-description">{% trans "These newly published documents cite documents you have saved." %}</p>
+      <h2 class="digest-section-heading">{% trans "Citations of your saved documents" %}</h2>
+      <p class="digest-section-description">{% trans "These newly published documents cite items you have saved." %}</p>
       {% for item in citations %}
         <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></h3>
         <ul>
           {% for citing in item.citing_documents %}
-            {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.title blurb=citing.document.blurb flynote=citing.document.flynote only %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.email_title citation_metadata=citing.document.email_citation_metadata added_date=citing.document.created_at document_date=citing.document.date document_type=citing.document.doc_type blurb=citing.document.blurb flynote=citing.document.flynote only %}
           {% endfor %}
         </ul>
       {% endfor %}
@@ -78,8 +88,7 @@
 
   {% if relationships %}
     <div id="relationships" class="digest-section">
-      <h2 class="digest-section-heading">{% trans "Updates to your saved documents" %}</h2>
-      <p class="digest-section-description">{% trans "These updates affect documents you have saved." %}</p>
+      <h2 class="digest-section-heading">{% trans "Changes to your saved documents" %}</h2>
       {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=relationships utm_campaign="email_digest" %}
       {% if relationships_more %}
         <ul>
@@ -88,4 +97,8 @@
       {% endif %}
     </div>
   {% endif %}
+
+  {% absolute_url site timeline_url_path as timeline_url %}
+  {% blocktrans asvar view_all_updates with app_name=APP_NAME %}View all updates in My {{ app_name }}{% endblocktrans %}
+  {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url button_class="digest-cta" %}
 {% endblock %}

@@ -10,7 +10,7 @@
       </p>
       <ul>
         {% for doc in rel.documents %}
-          {% include "peachjam/emails/_alert_document_list_item.html" with site=site url_path=doc.get_absolute_url utm_campaign=utm_campaign|default:'new_relationship' title=doc.title blurb=doc.blurb flynote=doc.flynote only %}
+          {% include "peachjam/emails/_alert_document_list_item.html" with site=site app_name=APP_NAME url_path=doc.get_absolute_url utm_campaign=utm_campaign|default:'new_relationship' title=doc.email_title|default:doc.title citation_metadata=doc.email_citation_metadata added_date=doc.created_at document_date=doc.date document_type=doc.doc_type blurb=doc.blurb flynote=doc.flynote only %}
         {% endfor %}
       </ul>
     </div>

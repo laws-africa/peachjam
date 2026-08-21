@@ -185,10 +185,13 @@ class TimelineViewTest(TestCase):
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
         self.assertEqual("Employment Law: 1 new judgment", str(request.subject))
+        self.assertEqual("1 Employment Law judgment", request.preheader)
         self.assertIn("1 new judgment for Employment Law", request.body)
-        self.assertIn("Employment Law – 1 new judgment", request.body)
-        self.assertIn("Updates for courts and topics you follow", request.body)
-        self.assertIn("Manage these email alerts", request.body)
+        self.assertIn("1 new judgment for Employment Law", request.body)
+        self.assertIn("From courts and topics you follow", request.body)
+        self.assertIn("Manage alerts and delivery preferences", request.body)
+        self.assertIn("View all updates in My Peachjam", request.body)
+        self.assertIn('style="padding-bottom: 0.5rem"', request.body)
         self.assertNotIn("Manage court and topic alerts", request.body)
         self.assertNotIn('href="#followed-documents"', request.body)
 
@@ -380,6 +383,33 @@ class TimelineViewTest(TestCase):
         self.assertLessEqual(len(shortened), 500)
         self.assertTrue(shortened.endswith("…"))
         self.assertFalse(shortened[:-1].endswith(" "))
+
+    def test_digest_subject_prioritises_new_followed_documents(self):
+        summary_items = [
+            {
+                "subject": "New amendment to a saved Act",
+                "priority": TimelineEmailService.summary_priority(
+                    TimelineEvent.EventTypes.NEW_AMENDMENT
+                ),
+            },
+            {
+                "subject": "High Court of Tanzania: 2 new judgments",
+                "priority": TimelineEmailService.summary_priority(
+                    TimelineEvent.EventTypes.NEW_DOCUMENTS
+                ),
+            },
+            {
+                "subject": "New citation of a saved judgment",
+                "priority": TimelineEmailService.summary_priority(
+                    TimelineEvent.EventTypes.NEW_CITATION
+                ),
+            },
+        ]
+
+        self.assertEqual(
+            "High Court of Tanzania: 2 new judgments and 2 more updates",
+            TimelineEmailService.digest_subject(summary_items),
+        )
 
 
 class TimelineRelationshipTests(TestCase):
@@ -704,7 +734,7 @@ class TimelineRelationshipTests(TestCase):
             self.assertIn("<html", request.body)
             self.assertIn("utm_campaign=email_digest", request.body)
             self.assertIn("1 new amendment published for", request.body)
-            self.assertIn("Manage these email alerts", request.body)
+            self.assertIn("Manage alerts and delivery preferences", request.body)
             self.assertNotIn("Manage saved documents", request.body)
             self.assertEqual({}, request.attachments)
 
@@ -714,7 +744,7 @@ class TimelineRelationshipTests(TestCase):
         )
         self.assertEqual({self.user.email}, recipient_emails)
         self.assertEqual(1, len(subject_lines))
-        self.assertTrue(subject_lines.pop().endswith("and other updates"))
+        self.assertTrue(subject_lines.pop().endswith("and 1 more update"))
 
         sent_events = TimelineEvent.objects.filter(
             user_following__user=self.user,
