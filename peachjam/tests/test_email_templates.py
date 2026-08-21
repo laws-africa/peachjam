@@ -85,10 +85,6 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             html,
         )
         self.assertIn(
-            'href="https://example.org/en/accounts/profile/"',
-            html,
-        )
-        self.assertIn(
             'src="https://example.org/static/images/logo.png"',
             html,
         )

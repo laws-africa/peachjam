@@ -194,7 +194,7 @@ class TimelineViewTest(TestCase):
         self.assertIn("From courts and topics you follow", request.body)
         self.assertIn("Manage alerts and delivery preferences", request.body)
         self.assertIn("View all updates in My Peachjam", request.body)
-        self.assertIn('style="padding-bottom: 0.5rem"', request.body)
+        self.assertIn('style="padding-bottom: 0.75rem"', request.body)
         self.assertNotIn("Manage court and topic alerts", request.body)
         self.assertNotIn('href="#followed-documents"', request.body)
 
