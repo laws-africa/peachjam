@@ -1,15 +1,15 @@
-.list-unstyled>li {
+.list-unstyled > li {
   margin-bottom: 0.5rem;
 }
 
-ul.flynotes>li {
+ul.flynotes > li {
   font-style: italic;
   text-indent: -1em;
   margin-left: 1em;
   margin-bottom: 0;
 }
 
-ul.flynotes>li:has(> .flynote-chain) {
+ul.flynotes > li:has(> .flynote-chain) {
   margin-left: unset;
   text-indent: 0;
 }
@@ -37,7 +37,7 @@ ul.flynotes>li:has(> .flynote-chain) {
   margin-left: 1rem;
 }
 
-.flynote-chain-children ul.flynotes>li {
+.flynote-chain-children ul.flynotes > li {
   overflow-wrap: anywhere;
 }
 
