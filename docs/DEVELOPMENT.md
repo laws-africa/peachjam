@@ -220,6 +220,12 @@ Wrap the smallest meaningful feature/container around a group of key links, for 
 
 Use a stable machine-friendly name such as `courts`, `document_metadata`, `incoming_citations`, or `my_lii_timeline`.
 
+Do not nest feature wrappers merely to describe individual links. A feature is the UI
+component that contains the links, while `data-key-link` distinguishes the individual
+destinations. For example, a row of judgment discovery cards should have one
+`data-key-link-feature="discovery_cards"` on the row and a `data-key-link` on each
+card link, rather than a separate feature wrapper around each card.
+
 ### When to add `data-key-link`
 
 Add `data-key-link` to the actual links you care about, using a short human-friendly label such as:
@@ -230,6 +236,10 @@ Add `data-key-link` to the actual links you care about, using a short human-frie
 - `judge`
 
 Prefer annotating shared partials like document tables and relationship lists so all reused instances stay consistent.
+
+Use `topic` for all taxonomy and flynote destinations. Flynotes are the topic
+implementation, not a distinct key-link type, so do not introduce labels such as
+`flynote`, `flynotes`, or `topics` for those links.
 
 ## Caching
 

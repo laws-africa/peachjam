@@ -45,6 +45,7 @@ class JudgmentListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context["KEY_LINK_PAGE"] = "judgment_list"
         context["recent_judgments"] = list(
             Judgment.objects.for_document_table()
             .filter(published=True)

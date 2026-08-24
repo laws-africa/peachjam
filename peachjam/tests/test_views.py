@@ -135,6 +135,10 @@ class PeachjamViewsTest(TestCase):
     def test_judgment_listing(self):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "judgment_list")
+        self.assertContains(response, 'data-key-link-feature="discovery_cards"')
+        self.assertContains(response, 'data-key-link-feature="courts"')
+        self.assertContains(response, 'data-key-link-feature="recent_judgments"')
 
         documents = [doc.title for doc in response.context.get("recent_judgments")]
         court_classes = [
