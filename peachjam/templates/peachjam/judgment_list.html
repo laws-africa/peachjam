@@ -117,7 +117,13 @@
       <div class="container">
         <div class="text-center mb-4">
           <h2>{% trans "Find the law from what you know" %}</h2>
-          <p class="lead mb-0">{% trans "Start with a legal topic or explore the courts." %}</p>
+          <p class="lead mb-0">
+            {% if show_flynote_topics %}
+              {% trans "Start with a legal topic or explore by court." %}
+            {% else %}
+              {% trans "Explore by court." %}
+            {% endif %}
+          </p>
         </div>
         <div class="row g-4">
           {% if show_flynote_topics %}
