@@ -27,6 +27,7 @@ from peachjam.models import (
     Folder,
     GenericDocument,
     Judgment,
+    LawReport,
     Locality,
     Outcome,
     PeachJamSettings,
@@ -149,12 +150,26 @@ class PeachjamViewsTest(TestCase):
             Judgment.objects.filter(published=True).count(),
             response.context["doc_count"],
         )
+        self.assertEqual(
+            LawReport.objects.count(), response.context["law_report_count"]
+        )
+        self.assertFalse(response.context["show_law_reports"])
         self.assertContains(response, 'href="#court-hierarchy-heading"')
+        self.assertNotContains(response, f'href="{reverse("law_report_list")}"')
         for court_class in response.context["court_classes"]:
             self.assertContains(response, f'href="{court_class.get_absolute_url()}"')
             for court in court_class.courts.all():
                 self.assertTrue(court.judgment_set.filter(published=True).exists())
         self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_judgment_listing_shows_law_reports_card_when_configured(self):
+        LawReport.objects.create(title="Zambia Law Reports", slug="zambia-law-reports")
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["show_law_reports"])
+        self.assertContains(response, f'href="{reverse("law_report_list")}"')
 
     def test_judgment_listing_excludes_court_classes_without_published_judgments(self):
         court_class = CourtClass.objects.create(name="Unpublished courts")

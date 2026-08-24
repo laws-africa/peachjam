@@ -26,6 +26,7 @@ from peachjam.models import (
     Judge,
     JudgePerson,
     Judgment,
+    LawReport,
     Outcome,
 )
 from peachjam.models.flynote import Flynote
@@ -56,6 +57,8 @@ class JudgmentListView(TemplateView):
         context["doc_count"] = Judgment.objects.filter(published=True).count()
         context["help_link"] = "judgments/courts"
         context["show_canonical_judges"] = JudgePerson.canonical_identity_enabled()
+        context["law_report_count"] = LawReport.objects.count()
+        context["show_law_reports"] = context["law_report_count"] > 0
         context["show_flynote_topics"] = (
             Judgment.flynote_topics_enabled()
             and Flynote.objects.undeprecated().filter(depth=1).exists()
