@@ -954,6 +954,59 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         )
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_list_filters_by_judicial_title(self):
+        other_person = JudgePerson.objects.create(
+            last_name="Other Judge",
+            slug="other-judge",
+        )
+        other_alias = JudgeAlias.objects.create(
+            judge_person=other_person,
+            name="Other J",
+        )
+        other_judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 1, 4),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Other v Republic",
+        )
+        Bench.objects.create(
+            judgment=other_judgment,
+            judge=Judge.objects.create(name="Other J"),
+            judge_person=other_person,
+            matched_alias=other_alias,
+        )
+
+        response = self.client.get(reverse("judges"), {"titles": "JA"})
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(
+            response, self.judge_name_markup(self.judge_person), html=True
+        )
+        self.assertNotContains(
+            response, self.judge_name_markup(other_person), html=True
+        )
+        self.assertEqual(1, response.context["judge_count"])
+        self.assertEqual(["JA"], response.context["selected_judge_titles"])
+        facets = {
+            item["name"]: item["facet"]
+            for item in response.context["judge_rendered_facets"]
+        }
+        self.assertEqual(["JA"], facets["titles"]["values"])
+        self.assertIn(("JA", "Judge of appeal (JA)"), facets["titles"]["options"])
+        self.assertIn(("J", "Judge (J)"), facets["titles"]["options"])
+        self.assertContains(response, "Judicial title")
+        self.assertContains(response, 'name="titles"')
+        self.assertContains(response, 'value="JA"')
+        self.assertContains(response, "checked")
+
+        response = self.client.get(reverse("judges"), {"titles": "UNKNOWN"})
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, response.context["judge_count"])
+        self.assertContains(response, "Clear all filters")
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_list_combines_multiple_courts_and_year_ranges(self):
         other_court = Court.objects.create(
             name="Appeal Court",
@@ -1067,6 +1120,13 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         }
         self.assertIn((str(civil.pk), civil.name), facets["topics"]["options"])
         self.assertIn(str(civil.pk), facets["topics"]["values"])
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judgment_landing_links_to_canonical_judge_directory(self):
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, f'href="{reverse("judges")}"')
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judgment_list_filters_by_canonical_judge_when_public_enabled(self):

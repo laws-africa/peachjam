@@ -86,6 +86,13 @@ class JudgePublicPageMixin:
     def selected_courts(self):
         return self.request.GET.getlist("courts")
 
+    def selected_titles(self):
+        return [
+            title.strip()
+            for title in self.request.GET.getlist("titles")
+            if title.strip()
+        ]
+
     @cached_property
     def selected_year_ranges(self):
         ranges = []
@@ -162,6 +169,15 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             ).values_list("judge_person_id", flat=True)
             queryset = queryset.filter(pk__in=judge_ids)
 
+        selected_titles = self.selected_titles()
+        if selected_titles:
+            judge_ids = Bench.objects.filter(
+                judgment__published=True,
+                judge_person__isnull=False,
+                matched_alias__title__abbreviation__in=selected_titles,
+            ).values_list("judge_person_id", flat=True)
+            queryset = queryset.filter(pk__in=judge_ids)
+
         if self.selected_flynote_topics:
             topic_query = Q()
             for topic in self.selected_flynote_topics:
@@ -234,6 +250,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
         context["q"] = self.request.GET.get("q", "").strip()
         context["sort"] = sort
         context["selected_judge_courts"] = self.selected_courts()
+        context["selected_judge_titles"] = self.selected_titles()
         context["selected_flynote_topics"] = self.selected_flynote_topics
         context["selected_judge_years"] = [str(year) for year in self.selected_years()]
         context["judge_count"] = context["paginator"].count
@@ -258,8 +275,30 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
             .distinct()
             .order_by("-judgment__date__year")
         )
+        available_titles = list(
+            Bench.objects.filter(
+                judgment__published=True,
+                judge_person__isnull=False,
+                matched_alias__title__isnull=False,
+            )
+            .order_by("matched_alias__title__name")
+            .values_list(
+                "matched_alias__title__abbreviation",
+                "matched_alias__title__name",
+            )
+            .distinct()
+        )
         year_range_options = self.year_range_options(available_years)
         facet_data = {
+            "titles": {
+                "label": gettext_lazy("Judicial title"),
+                "type": "checkbox",
+                "options": [
+                    (abbreviation, f"{name} ({abbreviation})")
+                    for abbreviation, name in available_titles
+                ],
+                "values": self.selected_titles(),
+            },
             "courts": {
                 "label": gettext_lazy("Courts"),
                 "type": "checkbox",
@@ -320,13 +359,6 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
 
     def get_topic_judge_person(self):
         return self.judge_person
-
-    def selected_titles(self):
-        return [
-            title.strip()
-            for title in self.request.GET.getlist("titles")
-            if title.strip()
-        ]
 
     def get_base_queryset(self, exclude=None):
         queryset = (

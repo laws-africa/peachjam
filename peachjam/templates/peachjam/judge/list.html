@@ -146,7 +146,7 @@
             {% else %}
               <div class="text-center py-5">
                 <p class="text-muted mb-0">{% trans "No matching judges found." %}</p>
-                {% if q or selected_judge_courts or selected_flynote_topics or selected_judge_years %}
+                {% if q or selected_judge_titles or selected_judge_courts or selected_flynote_topics or selected_judge_years %}
                   <a class="btn btn-outline-secondary btn-sm mt-3"
                      href="{% url 'judges' %}">{% trans "Clear all filters" %}</a>
                 {% endif %}
