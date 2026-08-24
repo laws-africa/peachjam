@@ -26,9 +26,7 @@ from peachjam.models import (
     FlynoteDocumentCount,
     Folder,
     GenericDocument,
-    Judge,
     Judgment,
-    LawReport,
     Locality,
     Outcome,
     PeachJamSettings,
@@ -150,17 +148,6 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(
             Judgment.objects.filter(published=True).count(),
             response.context["doc_count"],
-        )
-        self.assertEqual(
-            Judgment.objects.filter(published=True).values("court").distinct().count(),
-            response.context["court_count"],
-        )
-        self.assertEqual(
-            Judge.objects.filter(judgment__published=True).distinct().count(),
-            response.context["judge_count"],
-        )
-        self.assertEqual(
-            LawReport.objects.count(), response.context["law_report_count"]
         )
         self.assertContains(response, 'href="#court-hierarchy-heading"')
         for court_class in response.context["court_classes"]:
