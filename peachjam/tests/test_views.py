@@ -190,7 +190,7 @@ class PeachjamViewsTest(TestCase):
 
         response = self.client.get(reverse("judgment_list"))
 
-        self.assertEqual(15, len(response.context["top_flynote_topics"]))
+        self.assertEqual(10, len(response.context["top_flynote_topics"]))
         self.assertNotContains(response, 'data-component="TopicCourtBalance"')
 
     def test_judgment_listing_limits_recent_judgments_to_ten(self):
