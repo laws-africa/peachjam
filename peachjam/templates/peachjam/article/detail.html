@@ -64,7 +64,7 @@
       </div>
     </header>
     {% if article.summary %}<p class="lead">{{ article.summary }}</p>{% endif %}
-    <div class="article-body">{{ article.body|safe }}</div>
+    <div class="article-body prose">{{ article.body|safe }}</div>
     {% if attachments %}
       {% for attachment in attachments %}
         <p>
