@@ -63,13 +63,7 @@ class JudgmentListView(TemplateView):
         self.get_court_classes(context)
         if context["show_flynote_topics"]:
             flynote_topics = self.get_flynote_topics_queryset()
-            context["flynote_topic_count"] = flynote_topics.count()
-            context["top_flynote_topic_default_count"] = 10
-            topic_limit = context["top_flynote_topic_default_count"] + sum(
-                len(court_class.courts.all())
-                for court_class in context["court_classes"]
-            )
-            context["top_flynote_topics"] = flynote_topics[:topic_limit]
+            context["top_flynote_topics"] = flynote_topics[:15]
         return context
 
     def get_court_classes(self, context):

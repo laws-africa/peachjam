@@ -180,27 +180,18 @@ class PeachjamViewsTest(TestCase):
             "SHOW_FLYNOTE_TOPICS": True,
         }
     )
-    def test_judgment_listing_supplies_topics_for_dynamic_card_balancing(self):
-        for index in range(12):
+    def test_judgment_listing_limits_topic_preview_to_fifteen(self):
+        for index in range(17):
             flynote = Flynote.add_root(name=f"Topic {index + 1}")
             FlynoteDocumentCount.objects.create(
                 flynote=flynote,
-                count=12 - index,
+                count=17 - index,
             )
 
         response = self.client.get(reverse("judgment_list"))
 
-        self.assertEqual(10, response.context["top_flynote_topic_default_count"])
-        court_count = sum(
-            len(court_class.courts.all())
-            for court_class in response.context["court_classes"]
-        )
-        self.assertEqual(
-            min(12, 10 + court_count),
-            len(response.context["top_flynote_topics"]),
-        )
-        self.assertContains(response, 'data-component="TopicCourtBalance"')
-        self.assertContains(response, 'data-default-visible="false"')
+        self.assertEqual(15, len(response.context["top_flynote_topics"]))
+        self.assertNotContains(response, 'data-component="TopicCourtBalance"')
 
     def test_judgment_listing_limits_recent_judgments_to_ten(self):
         for day in range(1, 13):

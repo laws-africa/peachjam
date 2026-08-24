@@ -36,7 +36,7 @@
                 </div>
               </form>
               <a class="d-inline-block mt-1"
-                 href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search and filters" %}</a>
+                 href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search" %}</a>
             </div>
           </div>
           <div class="row g-4 mb-4">
@@ -120,8 +120,7 @@
           <h2>{% trans "Find the law from what you know" %}</h2>
           <p class="lead mb-0">{% trans "Start with a legal topic or explore the courts." %}</p>
         </div>
-        <div class="row g-4"
-             {% if show_flynote_topics %}data-component="TopicCourtBalance"{% endif %}>
+        <div class="row g-4">
           {% if show_flynote_topics %}
             <section class="col-12 col-lg-6" aria-labelledby="legal-topics-heading">
               <div class="card h-100">
@@ -129,11 +128,9 @@
                   <div class="d-flex flex-column flex-grow-1">
                     <h3 id="legal-topics-heading" class="h5">{% trans "Legal topics" %}</h3>
                     <p class="text-muted">{% trans "Legal topics help you find judgments by the legal principles they address." %}</p>
-                    <ul class="list-unstyled mb-4" data-topic-court-balance-topic-list>
+                    <ul class="list-unstyled mb-4">
                       {% for item in top_flynote_topics %}
-                        <li class="d-flex justify-content-between gap-3 {% if forloop.counter > top_flynote_topic_default_count %}d-none{% endif %}"
-                            data-topic-court-balance-topic
-                            data-default-visible="{% if forloop.counter <= top_flynote_topic_default_count %}true{% else %}false{% endif %}">
+                        <li class="d-flex justify-content-between gap-3">
                           <a href="{{ item.get_absolute_url }}">{{ item.name }}</a>
                           <span class="text-muted text-nowrap">
                             {% blocktrans count counter=item.doc_count with formatted_count=item.doc_count|intcomma %}{{ formatted_count }} judgment{% plural %}{{ formatted_count }} judgments{% endblocktrans %}
@@ -159,11 +156,11 @@
                   <p class="text-muted">
                     {% trans "Browse judgments by court or level of court." %}
                   </p>
-                  <ul class="list-unstyled mb-4" data-topic-court-balance-court-list>
+                  <ul class="list-unstyled mb-4">
                     {% for court_class in court_classes %}
                       <li class="mb-2">
                         <div class="provision-toggle d-flex align-items-start">
-                          <button class="btn btn-sm bg-none collapsed me-1"
+                          <button class="btn btn-sm bg-none collapsed"
                                   type="button"
                                   data-bs-toggle="collapse"
                                   data-bs-target="#courts-for-{{ court_class.slug }}"
@@ -172,15 +169,10 @@
                                   aria-controls="courts-for-{{ court_class.slug }}">
                             <i class="bi" aria-hidden="true"></i>
                           </button>
-                          <div class="d-flex justify-content-between align-items-start gap-3 w-100">
-                            <a href="{{ court_class.get_absolute_url }}">{{ court_class.name }}</a>
-                            <span class="text-muted text-nowrap">
-                              {% blocktrans count count=court_class.courts.all|length %}{{ count }} court{% plural %}{{ count }} courts{% endblocktrans %}
-                            </span>
-                          </div>
+                          <a href="{{ court_class.get_absolute_url }}">{{ court_class.name }}</a>
                         </div>
                         <div id="courts-for-{{ court_class.slug }}" class="collapse">
-                          <ul class="list-unstyled ms-5 ps-1 mt-2 mb-0">
+                          <ul class="list-unstyled ms-5 mb-0">
                             {% for court in court_class.courts.all %}
                               <li>
                                 <a href="{{ court.get_absolute_url }}">{{ court.name }}</a>
