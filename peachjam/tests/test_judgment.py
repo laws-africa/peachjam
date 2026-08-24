@@ -1,9 +1,11 @@
 import datetime
+import io
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.template.loader import render_to_string
 from django.test import TestCase
@@ -17,6 +19,7 @@ from peachjam.models import (
     CourtRegistry,
     Judgment,
     Locality,
+    SourceFile,
 )
 from peachjam.templatetags.peachjam import group_flynote_lines, group_linked_flynotes
 
@@ -40,7 +43,7 @@ class JudgmentTestCase(TestCase):
             case_name="Foo v Bar",
         )
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
         return judgment
 
@@ -57,6 +60,89 @@ class JudgmentTestCase(TestCase):
             flynote=flynote,
             blurb="Appeal dismissed.",
         )
+
+    @patch("peachjam.models.judgment.create_anonymised_source_file_pdf")
+    def test_case_name_change_regenerates_anonymised_source_file(self, create_pdf):
+        judgment = self.make_judgment()
+        judgment.anonymised = True
+        judgment.track_changes()
+        judgment.save()
+        create_pdf.reset_mock()
+
+        judgment.case_name = "Anonymised case"
+        judgment.save()
+
+        create_pdf.assert_called_once_with(judgment.pk, creator=judgment, schedule=60)
+
+    @patch("peachjam.models.judgment.create_anonymised_source_file_pdf")
+    def test_content_change_regenerates_anonymised_source_file(self, create_pdf):
+        judgment = self.make_judgment()
+        judgment.anonymised = True
+        judgment.track_changes()
+        judgment.save()
+        create_pdf.reset_mock()
+
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_content_html("<p>Updated anonymised judgment text.</p>")
+        doc_content.save()
+
+        create_pdf.assert_called_once_with(judgment.pk, creator=judgment, schedule=60)
+
+    def test_removing_anonymisation_deletes_derived_source_file_pdf(self):
+        judgment = self.make_judgment()
+        source_file = SourceFile.objects.create(
+            document=judgment,
+            file=ContentFile(b"source", name="source.docx"),
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            anonymised_file_as_pdf=ContentFile(b"anonymised", name="anonymised.pdf"),
+        )
+
+        judgment.anonymised = True
+        judgment.track_changes()
+        judgment.save()
+        judgment.anonymised = False
+        judgment.save()
+
+        source_file.refresh_from_db()
+        self.assertFalse(source_file.anonymised_file_as_pdf)
+
+    @patch("peachjam.models.judgment.create_anonymised_source_file_pdf")
+    def test_source_file_safety_change_regenerates_anonymised_source_file(
+        self, create_pdf
+    ):
+        judgment = self.make_judgment()
+        Judgment.objects.filter(pk=judgment.pk).update(anonymised=True)
+        source_file = SourceFile.objects.create(
+            document=judgment,
+            file=ContentFile(b"source", name="source.docx"),
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_is_anonymised=True,
+        )
+        source_file.track_changes()
+
+        source_file.file_is_anonymised = False
+        source_file.save()
+
+        create_pdf.assert_called_once_with(judgment.pk, creator=judgment, schedule=60)
+
+    def test_stale_anonymised_source_file_pdf_is_not_saved(self):
+        judgment = self.make_judgment()
+        # Set up the task's initial state without scheduling the normal background regeneration hook.
+        Judgment.objects.filter(pk=judgment.pk).update(anonymised=True)
+        judgment.anonymised = True
+
+        def update_content_while_rendering():
+            judgment.document_content.__class__.objects.filter(
+                pk=judgment.document_content.pk
+            ).update(content_html="<p>Newer content.</p>")
+            return io.BytesIO(b"pdf")
+
+        with patch.object(
+            judgment, "convert_html_to_pdf", side_effect=update_content_while_rendering
+        ):
+            judgment.create_anonymised_source_file_pdf()
+
+        self.assertFalse(SourceFile.objects.filter(document=judgment).exists())
 
     def test_flynote_lines_splits_and_trims_multiline_flynotes(self):
         judgment = Judgment(flynote=" Line one \n\nLine two\n  Line three  ")
@@ -977,7 +1063,7 @@ class JudgmentTestCase(TestCase):
         )
         judgment.save()
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         judgment.track_changes()
@@ -1009,7 +1095,7 @@ class JudgmentTestCase(TestCase):
         )
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         self.assertTrue(
@@ -1038,7 +1124,7 @@ class JudgmentTestCase(TestCase):
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
@@ -1069,7 +1155,7 @@ class JudgmentTestCase(TestCase):
         initial_calls = len(generate_summary_task.call_args_list)
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is the judgment text.</p>")
+        doc_content.set_source_html("<p>This is the judgment text.</p>")
         doc_content.save()
 
         self.assertEqual(initial_calls, len(generate_summary_task.call_args_list))
@@ -1095,7 +1181,7 @@ class JudgmentTestCase(TestCase):
         initial_calls = len(generate_summary_task.call_args_list)
 
         doc_content = judgment.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>This is updated judgment text.</p>")
+        doc_content.set_source_html("<p>This is updated judgment text.</p>")
         doc_content.save()
 
         self.assertGreater(len(generate_summary_task.call_args_list), initial_calls)

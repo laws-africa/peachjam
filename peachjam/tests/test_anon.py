@@ -26,8 +26,8 @@ class DocumentAnonymiseSerializerTestCase(TestCase):
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
-        doc_content = self.judgment.get_or_create_document_content()
-        doc_content.set_content_html("<h1>Original heading</h1><p>Original text</p>")
+        doc_content = self.judgment.get_or_create_document_content(True)
+        doc_content.set_source_html("<h1>Original heading</h1><p>Original text</p>")
         doc_content.save()
 
     def test_update_persists_content_html_to_document_content(self):

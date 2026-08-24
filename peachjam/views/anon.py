@@ -43,6 +43,9 @@ class DocumentAnonymiseSerializer(serializers.ModelSerializer):
         replacements_data = validated_data.pop("replacements")
         content_html = validated_data.pop("content_html", serializers.empty)
 
+        # Enable the judgment-level hooks that keep derived artifacts, such as the anonymised PDF, up to date.
+        instance.track_changes()
+
         # force anonymised flag
         validated_data["anonymised"] = True
         super().update(instance, validated_data)

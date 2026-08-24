@@ -1,5 +1,6 @@
 import datetime
 import os
+from unittest.mock import patch
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount
@@ -37,12 +38,13 @@ from peachjam.models import (
     Work,
 )
 from peachjam.views.robots import (
+    RobotsView,
     _language_prefixes,
     _place_codes,
     _prefixed_place_rules,
 )
 from peachjam_search.models import SavedSearch
-from peachjam_subs.models import Subscription
+from peachjam_subs.models import OffboardingFeedback, Subscription
 
 
 def home_page_view(request):
@@ -497,6 +499,22 @@ class PeachjamViewsTest(TestCase):
 
         body = response.content.decode()
         self.assertIn("Disallow: /search/", body)
+        self.assertIn("Sitemap: http://testserver/sitemap.xml", body)
+        self.assertIn("User-agent: OAI-SearchBot", body)
+        self.assertIn("User-agent: Claude-SearchBot", body)
+        self.assertIn("Disallow: /akn/", body)
+        self.assertEqual(
+            RobotsView.common_disallow_paths,
+            [
+                "/api/",
+                "/accounts/",
+                "/my/",
+                "/user/",
+                "/purchase/",
+                "/judgments/",
+                "/gazettes/",
+            ],
+        )
 
         for code, _ in settings.LANGUAGES:
             self.assertIn(f"Disallow: /{code}/search/", body)
@@ -514,6 +532,22 @@ class PeachjamViewsTest(TestCase):
 
         response = self.client.get("/robots.txt")
         self.assertContains(response, "foo\nbar")
+
+    def test_sitemap_index(self):
+        response = self.client.get("/sitemap.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/xml")
+        self.assertContains(response, "/sitemaps/pages.xml")
+        self.assertContains(response, "/sitemaps/articles.xml")
+        self.assertContains(response, "/sitemaps/legislation.xml")
+
+    def test_legislation_sitemap_excludes_non_indexable_documents(self):
+        response = self.client.get("/sitemaps/legislation.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "/judgment/")
+        self.assertNotContains(response, "/officialGazette/")
 
     def test_account_profile(self):
         response = self.client.get(reverse("my_account"))
@@ -558,7 +592,8 @@ class PeachjamViewsTest(TestCase):
             reverse("delete_account"),
             data={
                 "confirm_delete": True,
-                "deleted_reason": "No longer needed",
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
             },
         )
 
@@ -574,8 +609,11 @@ class PeachjamViewsTest(TestCase):
         self.assertFalse(user.has_usable_password())
 
         self.assertIsNotNone(profile.deleted_at)
-        self.assertEqual(profile.deleted_reason, "No longer needed")
+        self.assertEqual(profile.deleted_reason, "Not using it enough")
         self.assertEqual(len(profile.email_hash), 64)
+        feedback = OffboardingFeedback.objects.get()
+        self.assertIsNone(feedback.user)
+        self.assertEqual(feedback.comment, "No longer needed")
 
         self.assertEqual(Annotation.objects.filter(user=user).count(), 0)
         self.assertEqual(Folder.objects.filter(user=user).count(), 0)
@@ -1090,6 +1128,55 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"anon")
+
+    def test_anonymised_source_files_do_not_redirect_to_storage_or_remote_urls(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        doc.anonymised = True
+        doc.save()
+
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"source", name="original-parties.docx"),
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_is_anonymised=True,
+        )
+        with patch.object(
+            source_file.file.storage,
+            "custom_domain",
+            "files.example",
+            create=True,
+        ):
+            response = self.client.get(f"{doc.get_absolute_url()}/source")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("original-parties", response.get("Location", ""))
+        self.assertIn(
+            source_file.filename_for_download(), response["Content-Disposition"]
+        )
+
+        source_file.delete()
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"original", name="original-parties.pdf"),
+            mimetype="application/pdf",
+            source_url="https://example.com/original-parties.pdf",
+            anonymised_file_as_pdf=ContentFile(b"anonymised", name="safe.pdf"),
+        )
+        with patch.object(
+            source_file.anonymised_file_as_pdf.storage,
+            "custom_domain",
+            "files.example",
+            create=True,
+        ):
+            response = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"anonymised")
+        self.assertNotIn("original-parties", response.get("Location", ""))
+        self.assertIn(
+            source_file.filename_for_download(".pdf"), response["Content-Disposition"]
+        )
 
     @override_settings(
         PEACHJAM={

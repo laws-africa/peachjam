@@ -10,12 +10,14 @@
     {% if subscription.product_offering.pricing_plan.price %}
       <div class="text-muted">{{ subscription.product_offering.pricing_plan.price_per_period }}</div>
       {% if subscription.is_active and not subscription.is_trial %}
-        {% if not subscription.ends_on or subscription.ends_on > subscription.next_billing_date %}
-          <div class="text-muted">
-            {% trans "Next payment due on" %}
-            {{ subscription.next_billing_date|date }}
-          </div>
-        {% endif %}
+        {% block subscription_card_active_details %}
+          {% if not subscription.ends_on or subscription.ends_on > subscription.next_billing_date %}
+            <div class="text-muted">
+              {% trans "Next payment due on" %}
+              {{ subscription.next_billing_date|date }}
+            </div>
+          {% endif %}
+        {% endblock %}
       {% endif %}
     {% endif %}
     {% if not subscription.is_active and subscription.starts_on %}

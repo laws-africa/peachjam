@@ -4702,3 +4702,43 @@ msgstr ""
 #: views/legislation.py:930
 msgid "documents with similar provisions"
 msgstr ""
+
+#: forms.py:931
+msgid "What are you hoping to do today?"
+msgstr ""
+
+#: forms.py:937
+msgid "What best describes your role or organisation?"
+msgstr ""
+
+#: forms.py:977
+msgid "Choose at least one option or select Not now."
+msgstr ""
+
+#: models/user_profile.py:44 models/user_profile.py:85
+msgid "onboarding intent"
+msgstr ""
+
+#: models/user_profile.py:45
+msgid "onboarding intents"
+msgstr ""
+
+#: models/user_profile.py:50 models/user_profile.py:90
+msgid "practice type"
+msgstr ""
+
+#: models/user_profile.py:51
+msgid "practice types"
+msgstr ""
+
+#: models/user_profile.py:96
+msgid "onboarding completed at"
+msgstr ""
+
+#: models/user_profile.py:101
+msgid "onboarding skipped at"
+msgstr ""
+
+#: templates/account/onboard.html:55
+msgid "Not now"
+msgstr ""

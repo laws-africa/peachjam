@@ -225,6 +225,20 @@ class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
         doc_content.extract_content_from_source_file()
         doc_content.save()
 
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["file", "file_is_anonymised"],
+        ["SourceFile.anonymised_file_as_pdf"],
+    )
+    def update_anonymised_source_file(self):
+        """Regenerate a judgment's derived PDF after its source-file safety changes."""
+        from peachjam.models import Judgment
+
+        if self.document_id:
+            judgment = Judgment.objects.filter(pk=self.document_id).first()
+            if judgment:
+                judgment.ensure_anonymised_source_file()
+
     def get_duplicate_documents(self):
         """Return a list of documents that have the same SHA256 hash as this source file."""
         from peachjam.models import CoreDocument

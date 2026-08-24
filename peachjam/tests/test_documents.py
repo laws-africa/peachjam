@@ -34,7 +34,7 @@ class CoreDocumentTestCase(TestCase):
 
         # change the source and update
         doc_content = doc.get_or_create_document_content(True)
-        doc_content.set_content_html("<p>test</p>")
+        doc_content.set_source_html("<p>test</p>")
         doc_content.save()
         self.assertEqual("test", doc_content.get_content_as_text())
 

@@ -17,6 +17,7 @@ from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
@@ -32,6 +33,8 @@ from peachjam.models import (
     Folder,
     JudgeAlias,
     JudgePerson,
+    OnboardingIntent,
+    PracticeType,
     PublicationFile,
     Ratification,
     SavedDocument,
@@ -41,6 +44,7 @@ from peachjam.models import (
 )
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+from peachjam_subs.forms import OffboardingFeedbackForm
 
 log = logging.getLogger(__name__)
 
@@ -944,6 +948,98 @@ class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
         return cleaned
 
 
+class OnboardingProfileForm(forms.Form):
+    first_name = forms.CharField(
+        label=_("First name"),
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "autofocus": True}),
+    )
+    last_name = forms.CharField(
+        label=_("Last name"),
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    onboarding_intents = forms.ModelMultipleChoiceField(
+        label=_("What are you hoping to do today?"),
+        queryset=OnboardingIntent.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+    )
+    practice_type = forms.ModelChoiceField(
+        label=_("What best describes your role or organisation?"),
+        queryset=PracticeType.objects.none(),
+        required=False,
+        empty_label=None,
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        self.skipped = kwargs.pop("skipped", False)
+        super().__init__(*args, **kwargs)
+        profile = self.user.userprofile
+        if not profile.requires_name_onboarding():
+            self.hide_name_fields()
+
+        selected_intents = profile.onboarding_intents.all()
+        self.fields["onboarding_intents"].queryset = OnboardingIntent.objects.filter(
+            Q(active=True) | Q(pk__in=selected_intents)
+        ).distinct()
+        self.fields["practice_type"].queryset = PracticeType.objects.filter(
+            Q(active=True) | Q(pk=profile.practice_type_id)
+        )
+        self.initial.update(
+            {
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "onboarding_intents": selected_intents,
+                "practice_type": profile.practice_type,
+            }
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            not self.skipped
+            and not cleaned_data.get("onboarding_intents")
+            and not cleaned_data.get("practice_type")
+        ):
+            raise forms.ValidationError(
+                _("Choose at least one option or select Not now.")
+            )
+        return cleaned_data
+
+    def hide_name_fields(self):
+        self.fields["first_name"].widget = forms.HiddenInput()
+        self.fields["last_name"].widget = forms.HiddenInput()
+
+    def save_names(self):
+        updated_fields = []
+        for field_name in ("first_name", "last_name"):
+            value = self.cleaned_data.get(field_name)
+            if value and value != getattr(self.user, field_name):
+                setattr(self.user, field_name, value)
+                updated_fields.append(field_name)
+        if updated_fields:
+            self.user.save(update_fields=updated_fields)
+
+    def save(self):
+        profile = self.user.userprofile
+        self.save_names()
+        profile.practice_type = self.cleaned_data["practice_type"]
+        if self.skipped:
+            profile.onboarding_completed_at = None
+            profile.onboarding_skipped_at = timezone.now()
+        else:
+            profile.onboarding_completed_at = timezone.now()
+            profile.onboarding_skipped_at = None
+        profile.save()
+        profile.onboarding_intents.set(self.cleaned_data["onboarding_intents"])
+        return profile
+
+
 class UserProfileForm(forms.Form):
     first_name = forms.CharField(max_length=255, required=False)
     last_name = forms.CharField(max_length=255, required=False)
@@ -972,17 +1068,18 @@ class UserProfileForm(forms.Form):
         return self.user
 
 
-class DeleteAccountForm(forms.Form):
+class DeleteAccountForm(OffboardingFeedbackForm):
     confirm_delete = forms.BooleanField(
         label=_("I understand this action cannot be undone"),
         widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
         error_messages={"required": _("Please confirm account deletion.")},
     )
-    deleted_reason = forms.CharField(
-        label=_("Please tell us briefly why you are deleting your account."),
-        widget=forms.Textarea(attrs={"class": "form-control", "rows": 4}),
-        max_length=2000,
-    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["reason"].label = _(
+            "What is the main reason you are deleting your account?"
+        )
 
 
 class TermsAcceptanceForm(forms.Form):

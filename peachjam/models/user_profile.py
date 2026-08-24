@@ -1,6 +1,7 @@
 import hashlib
 import os
 import uuid
+from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from allauth.socialaccount.models import SocialAccount, SocialToken
@@ -23,6 +24,31 @@ from .user_following import UserFollowing
 def file_location(instance, filename):
     filename = os.path.basename(filename)
     return f"{instance.SAVE_FOLDER}/{instance.pk}/{filename}"
+
+
+class OnboardingOption(models.Model):
+    label = models.CharField(_("label"), max_length=100)
+    order = models.PositiveIntegerField(_("order"), default=0)
+    active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["order", "label"]
+
+    def __str__(self):
+        return self.label
+
+
+class OnboardingIntent(OnboardingOption):
+    class Meta(OnboardingOption.Meta):
+        verbose_name = _("onboarding intent")
+        verbose_name_plural = _("onboarding intents")
+
+
+class PracticeType(OnboardingOption):
+    class Meta(OnboardingOption.Meta):
+        verbose_name = _("practice type")
+        verbose_name_plural = _("practice types")
 
 
 class UserProfile(models.Model):
@@ -54,6 +80,28 @@ class UserProfile(models.Model):
     deleted_at = models.DateTimeField(_("deleted at"), null=True, blank=True)
     deleted_reason = models.TextField(_("deleted reason"), null=True, blank=True)
     email_hash = models.CharField(_("email hash"), max_length=64, null=True, blank=True)
+    onboarding_intents = models.ManyToManyField(
+        OnboardingIntent,
+        verbose_name=_("onboarding intents"),
+        blank=True,
+    )
+    practice_type = models.ForeignKey(
+        PracticeType,
+        verbose_name=_("practice type"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    onboarding_completed_at = models.DateTimeField(
+        _("onboarding completed at"),
+        null=True,
+        blank=True,
+    )
+    onboarding_skipped_at = models.DateTimeField(
+        _("onboarding skipped at"),
+        null=True,
+        blank=True,
+    )
 
     class Meta:
         verbose_name = _("user profile")
@@ -62,6 +110,19 @@ class UserProfile(models.Model):
     @property
     def tracking_id_str(self):
         return str(self.tracking_id)
+
+    def should_show_onboarding(self):
+        if self.onboarding_completed_at:
+            return False
+        if not self.onboarding_skipped_at:
+            return True
+        return self.onboarding_skipped_at <= timezone.now() - timedelta(days=7)
+
+    def requires_name_onboarding(self):
+        return not self.user.first_name or not self.user.last_name
+
+    def requires_onboarding(self):
+        return self.requires_name_onboarding() or self.should_show_onboarding()
 
     def is_primary_email_verified(self):
         return self.user.emailaddress_set.filter(

@@ -161,6 +161,66 @@ class DocumentContentTestCase(TestCase):
         )
 
 
+class ContentHtmlGuardTestCase(TestCase):
+    fixtures = ["tests/countries", "tests/languages"]
+
+    def test_direct_content_html_without_source_html_raises(self):
+        """Saving non-AKN content_html without source_html is a programming error."""
+        doc = _make_doc("Guard tracked direct set")
+        doc_content = doc.get_or_create_document_content(True)
+        doc_content.content_html = "<p>Set directly</p>"
+        with self.assertRaises(ValueError):
+            doc_content.save()
+
+    def test_untracked_content_html_without_source_html_raises(self):
+        """The guard also catches untracked saves, where hooks don't fire at all."""
+        doc = _make_doc("Guard untracked direct set")
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html = "<p>Set directly</p>"
+        with self.assertRaises(ValueError):
+            doc_content.save()
+
+    def test_akn_content_html_without_source_html_allowed(self):
+        """AKN content_html comes from XML, not source_html."""
+        doc = _make_doc("Guard AKN exemption", is_akn=True)
+        doc_content = doc.get_or_create_document_content(True)
+        doc_content.set_content_html("<div class='akn-akomaNtoso'><p>AKN</p></div>")
+        doc_content.save()
+        self.assertIn("AKN", doc_content.content_html)
+
+    def test_clearing_source_html_clears_content_html(self):
+        """A tracked clearing of source_html must not trip the guard: the sync hook
+        clears content_html during the save."""
+        doc = _make_doc("Guard source clearing")
+        doc_content = doc.get_or_create_document_content(True)
+        doc_content.set_source_html("<p>Source</p>")
+        doc_content.save()
+        # reset change tracking, as the admin does when loading the document
+        doc_content.refresh_from_db()
+
+        doc_content.set_source_html(None)
+        doc_content.save()
+        doc_content.refresh_from_db()
+
+        self.assertIsNone(doc_content.source_html)
+        self.assertIsNone(doc_content.content_html)
+
+    def test_content_html_with_source_html_allowed(self):
+        """Re-setting content_html (eg. citation markup) is fine once source_html exists."""
+        doc = _make_doc("Guard content with source")
+        doc_content = doc.get_or_create_document_content(True)
+        doc_content.set_source_html("<p>Source</p>")
+        doc_content.save()
+        # reset change tracking so the source_html change above isn't re-applied
+        doc_content.refresh_from_db()
+
+        doc_content.set_content_html('<p><a href="/akn/za/act/2009/5">Source</a></p>')
+        doc_content.save()
+        doc_content.refresh_from_db()
+
+        self.assertIn("/akn/za/act/2009/5", doc_content.content_html)
+
+
 class GetOrCreateDocumentContentTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
 
@@ -211,6 +271,11 @@ class SetContentHtmlTestCase(TestCase):
         """Content set via DocumentContent.set_content_html() is written to DB when the document is saved."""
         doc = _make_doc("Persist set_content_html")
         doc_content = doc.get_or_create_document_content(True)
+        doc_content.set_source_html("<p>Source</p>")
+        doc_content.save()
+        # reset change tracking so the source_html change above isn't re-applied
+        doc_content.refresh_from_db()
+        # content_html can be re-set directly (eg. citation markup) once source_html exists
         doc_content.set_content_html("<p>Persisted</p>")
         doc_content.save()
         self.assertIn("Persisted", doc_content.content_html)
@@ -289,7 +354,11 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         """The BEFORE_SAVE hook generates a TOC when content_html changes."""
         doc = _make_doc("TOC hook")
         doc_content = doc.get_or_create_document_content(True)
-        doc_content.content_html = "<h1>Section</h1><p>Text</p>"
+        doc_content.set_source_html("<p>placeholder</p>")
+        doc_content.save()
+        # reset change tracking so the source_html change above isn't re-applied
+        doc_content.refresh_from_db()
+        doc_content.set_content_html("<h1>Section</h1><p>Text</p>")
         doc_content.save()
         doc_content.refresh_from_db()
         self.assertIsNotNone(doc_content.toc_json)
@@ -299,7 +368,11 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         """The BEFORE_SAVE hook extracts plain text when content_html changes."""
         doc = _make_doc("Text hook")
         doc_content = doc.get_or_create_document_content(True)
-        doc_content.content_html = "<p>Extracted text</p>"
+        doc_content.set_source_html("<p>placeholder</p>")
+        doc_content.save()
+        # reset change tracking so the source_html change above isn't re-applied
+        doc_content.refresh_from_db()
+        doc_content.set_content_html("<p>Extracted text</p>")
         doc_content.save()
         self.assertIsNotNone(doc_content.content_text)
         self.assertIn("Extracted text", doc_content.content_text)
@@ -308,6 +381,8 @@ class DocumentContentDerivedFieldsTestCase(TestCase):
         """The AFTER_SAVE hook updates work extracted citations when content_html changes."""
         doc = _make_doc("Hook extracted citations")
         doc_content = doc.get_or_create_document_content(True)
+        doc_content.set_source_html("<p>placeholder</p>")
+        doc_content.save()
 
         with patch("peachjam.tasks.update_extracted_citations_for_a_work") as update:
             doc_content.content_html = (
@@ -419,6 +494,8 @@ class GetContentAsTextTestCase(TestCase):
         """get_content_as_text() triggers update_text_content() when content_text is None."""
         doc = _make_doc("Trigger extraction")
         doc_content = doc.get_or_create_document_content()
+        # untracked, so no hooks fire and content_text stays None
+        doc_content.source_html = "<p>Auto-extracted</p>"
         doc_content.content_html = "<p>Auto-extracted</p>"
         doc_content.content_text = None
         doc_content.save()

@@ -21,12 +21,26 @@
       </p>
       <form method="post">
         {% csrf_token %}
-        <div class="mb-3">
-          <label class="form-label" for="{{ form.deleted_reason.id_for_label }}">{{ form.deleted_reason.label }}</label>
-          {{ form.deleted_reason }}
-          {% if form.deleted_reason.errors %}
+        <fieldset class="mb-3">
+          <label class="form-label">{{ form.reason.label }}</label>
+          {% for choice in form.reason %}
+            <div class="form-check">
+              {{ choice.tag }}
+              <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+            </div>
+          {% endfor %}
+          {% if form.reason.errors %}
             <div class="text-danger">
-              {% for error in form.deleted_reason.errors %}<p>{{ error }}</p>{% endfor %}
+              {% for error in form.reason.errors %}<p>{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
+        </fieldset>
+        <div class="mb-3">
+          <label class="form-label" for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label>
+          {{ form.comment }}
+          {% if form.comment.errors %}
+            <div class="text-danger">
+              {% for error in form.comment.errors %}<p>{{ error }}</p>{% endfor %}
             </div>
           {% endif %}
         </div>
@@ -39,11 +53,14 @@
             </div>
           {% endif %}
         </div>
-        <button type="submit"
-                class="btn btn-danger"
-                data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
-          {% trans "Delete account" %}
-        </button>
+        <div class="d-flex">
+          <a href="{% url 'my_account' %}" class="btn btn-link">{% trans "Cancel" %}</a>
+          <button type="submit"
+                  class="btn btn-danger ms-auto"
+                  data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
+            {% trans "Delete account" %}
+          </button>
+        </div>
       </form>
     </div>
   </div>

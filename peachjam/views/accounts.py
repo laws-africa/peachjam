@@ -14,11 +14,13 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
-from django.views.generic import FormView, UpdateView
+from django.views.generic import FormView
 from django.views.generic.base import TemplateView
 
+from peachjam.customerio import get_customerio
 from peachjam.forms import (
     DeleteAccountForm,
+    OnboardingProfileForm,
     PasswordSignupForm,
     TermsAcceptanceForm,
     UserProfileForm,
@@ -57,12 +59,6 @@ class UserAuthView(AllauthConfirmLoginCodeView):
         email = self._process.state.get("email")
         user = User.objects.filter(email=email).first() if email else None
         return email, user
-
-    def get_next_url(self):
-        email, user = self._get_email_and_user()
-        if email and (user is None or not user.first_name):
-            return self.passthrough_next_url(reverse("account_onboard"))
-        return super().get_next_url()
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action")
@@ -141,26 +137,36 @@ class UserAuthView(AllauthConfirmLoginCodeView):
         return ctx
 
 
-class OnboardView(NextRedirectMixin, LoginRequiredMixin, UpdateView):
+class OnboardView(NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormView):
+    """Collect required names and optional onboarding profile answers."""
+
     template_name = "account/onboard.html"
-    fields = ["first_name", "last_name"]
+    form_class = OnboardingProfileForm
 
-    def get_object(self):
-        return self.request.user
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields["first_name"].required = True
-        form.fields["last_name"].required = True
-        return form
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "userprofile", None)
+        if profile and not profile.requires_onboarding():
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
 
     def get_default_success_url(self):
         return reverse("home_page")
 
-    def dispatch(self, request, *args, **kwargs):
-        if request.user.is_authenticated and request.user.first_name:
-            return redirect(self.get_success_url())
-        return super().dispatch(request, *args, **kwargs)
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        kwargs["skipped"] = self.request.POST.get("action") == "skip"
+        return kwargs
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        form.save_names()
+        if not self.request.user.userprofile.requires_name_onboarding():
+            form.hide_name_fields()
+        return super().form_invalid(form)
 
 
 class AccountView(LoginRequiredMixin, TemplateView):
@@ -219,8 +225,10 @@ class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
         return context
 
     def form_valid(self, form):
+        feedback = form.record_account_deletion()
+        get_customerio().track_offboarding_feedback(self.request.user, feedback)
         self.request.user.userprofile.delete_account(
-            deleted_reason=form.cleaned_data["deleted_reason"]
+            deleted_reason=feedback.get_reason_display()
         )
         messages.success(self.request, _("Your account has been deleted."))
         return redirect(self.get_success_url())

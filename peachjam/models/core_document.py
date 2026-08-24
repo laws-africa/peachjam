@@ -965,6 +965,27 @@ class DocumentContent(AttributeHooksMixin, models.Model):
         self.content_html = self.clean_content_html(content_html)
         self._content_html_tree = None
 
+    def save(self, *args, **kwargs):
+        if (
+            self.content_html
+            and not self.content_html_is_akn
+            and not self.source_html
+            # a tracked change to source_html is fine: the sync hook re-derives content_html
+            # from the new source_html during save
+            and not (
+                self._tracking_changes
+                and not kwargs.get("skip_hooks")
+                and self.has_changed("source_html")
+            )
+        ):
+            raise ValueError(
+                "content_html is set but source_html is blank on a non-AKN document. "
+                "content_html must be derived from source_html: call set_source_html() "
+                "on an instance with track_changes() enabled, instead of setting "
+                "content_html directly."
+            )
+        return super().save(*args, **kwargs)
+
     def extract_content_from_source_file(self):
         """Refresh content from the attached source file.
 
@@ -1215,6 +1236,20 @@ class DocumentContent(AttributeHooksMixin, models.Model):
 
         if self.document_id:
             update_extracted_citations_for_a_work(self.document.work_id)
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["content_html"],
+        ["SourceFile.anonymised_file_as_pdf"],
+    )
+    def update_anonymised_source_file(self):
+        """Regenerate a judgment's derived anonymised PDF after its rendered content changes."""
+        from peachjam.models import CoreDocument, Judgment
+
+        if self.document_id:
+            document = CoreDocument.objects.get(pk=self.document_id)
+            if isinstance(document, Judgment):
+                document.ensure_anonymised_source_file()
 
     @on_attribute_changed(
         AFTER_SAVE,

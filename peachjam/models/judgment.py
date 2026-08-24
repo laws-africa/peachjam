@@ -1,3 +1,4 @@
+import hashlib
 import logging
 from urllib.parse import quote
 
@@ -6,7 +7,7 @@ from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.core.exceptions import ValidationError
 from django.core.files.base import File
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Exists, Max, OuterRef, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
@@ -714,12 +715,12 @@ class Judgment(CoreDocument):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
         if self.date and self.court_id:
             if (
-                self.mnc != self.generate_citation()
+                self.mnc != self.decorator.assign_mnc(self)
                 or self.serial_number_override
                 and self.serial_number != self.serial_number_override
             ):
                 self.serial_number = self.generate_serial_number()
-                self.mnc = self.generate_citation()
+                self.mnc = self.decorator.assign_mnc(self)
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
@@ -846,6 +847,17 @@ class Judgment(CoreDocument):
             self.source_file.anonymised_file_as_pdf = None
             self.source_file.save()
 
+    def anonymised_source_file_fingerprint(self):
+        """Return a fingerprint of the values used to render an anonymised PDF."""
+        content_html = (
+            DocumentContent.objects.filter(document_id=self.pk)
+            .values_list("content_html", flat=True)
+            .first()
+            or ""
+        )
+        values = (self.case_name or "", self.title or "", content_html)
+        return hashlib.sha256("\0".join(values).encode()).hexdigest()
+
     def create_anonymised_source_file_pdf(self):
         """Create an anonymised source file from the HTML of this judgment. If there is already a source file,
         store this new one as the anonymised pdf. Otherwise, create a new source file using this PDF and set
@@ -857,21 +869,45 @@ class Judgment(CoreDocument):
             and doc_content.content_html
             and not doc_content.content_html_is_akn
         ):
+            fingerprint = self.anonymised_source_file_fingerprint()
             pdf = self.convert_html_to_pdf()
             f = File(pdf, name=f"{slugify(self.case_name)}.pdf")
 
-            try:
-                self.source_file.anonymised_file_as_pdf = f
-                self.source_file.save()
-            except SourceFile.DoesNotExist:
-                # create a new source file with this PDF as the main file, and the anonymised flag set.
-                # there's a small chance of a race condition here, the task will just be retried
-                SourceFile.objects.create(
-                    document=self,
-                    file=f,
-                    mimetype="application/pdf",
-                    file_is_anonymised=True,
-                )
+            # Rendering can take some time. Re-check the inputs while holding the judgment row lock so that an
+            # outdated queued task cannot overwrite a newer PDF, or restore one after anonymisation is removed.
+            with transaction.atomic():
+                current = Judgment.objects.select_for_update().get(pk=self.pk)
+                if (
+                    not current.anonymised
+                    or current.anonymised_source_file_fingerprint() != fingerprint
+                ):
+                    return
+
+                try:
+                    source_file = current.source_file
+                except SourceFile.DoesNotExist:
+                    # Create a source file using the anonymised PDF when there is no original source file.
+                    # There is a small chance of a race condition here; the task will then be retried.
+                    SourceFile.objects.create(
+                        document=current,
+                        file=f,
+                        mimetype="application/pdf",
+                        file_is_anonymised=True,
+                    )
+                else:
+                    if source_file.file_is_anonymised:
+                        return
+                    source_file.anonymised_file_as_pdf = f
+                    source_file.save()
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["case_name", "title", "anonymised"],
+        ["SourceFile.anonymised_file_as_pdf"],
+    )
+    def update_anonymised_source_file(self):
+        """Keep the derived anonymised PDF aligned with judgment metadata and state."""
+        self.ensure_anonymised_source_file()
 
     @on_attribute_changed(
         AFTER_SAVE,

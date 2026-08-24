@@ -14,8 +14,10 @@ from django.views import View
 from guardian.shortcuts import assign_perm
 
 from peachjam.models import Court, Glossary
+from peachjam_subs.forms import OffboardingFeedbackForm
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import (
+    OffboardingFeedback,
     PricingPlan,
     Product,
     ProductOffering,
@@ -323,6 +325,26 @@ class SubscriptionTests(TestCase):
         sub1.activate()
         self.assertEqual(sub1.status, Subscription.Status.ACTIVE)
         self.assertIsNotNone(sub1.active_at)
+
+    def test_subscription_identifies_lower_product_tier_as_downgrade(self):
+        lower_product = Product.objects.create(
+            name="Lower tier", tier=self.product.tier - 1
+        )
+        lower_offering = ProductOffering.objects.create(
+            product=lower_product,
+            pricing_plan=self.monthly_plan,
+        )
+
+        self.assertTrue(self.subscription.is_downgrade_to(lower_offering))
+        self.assertFalse(self.subscription.is_downgrade_to(self.product_offering))
+
+    def test_other_offboarding_feedback_requires_comment(self):
+        form = OffboardingFeedbackForm(
+            data={"reason": OffboardingFeedback.Reason.OTHER}
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("comment", form.errors)
 
     @patch("peachjam_subs.signals.get_customerio")
     def test_closing_activated_subscription_tracks_customerio_event(
