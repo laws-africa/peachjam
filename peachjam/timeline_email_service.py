@@ -137,6 +137,7 @@ class EmailAlert:
         return {
             "email_alert": self,
             "user": self.user,
+            "preheader": self.preheader,
             "email_alert_frequency": self.frequency,
             "manage_url_path": self.manage_url_path,
             "utm_campaign": "email_digest",

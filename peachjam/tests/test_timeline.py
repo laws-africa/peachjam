@@ -204,7 +204,7 @@ class TimelineViewTest(TestCase):
         self.assertIn("Here is your daily My Peachjam update.", request.body)
         self.assertIn("1 new judgment for", request.body)
         self.assertIn(
-            f'href="https://example.org{topic.get_absolute_url()}">Employment Law</a>',
+            f'href="https://example.com{topic.get_absolute_url()}">Employment Law</a>',
             request.body,
         )
         self.assertIn("From courts and topics you follow", request.body)
