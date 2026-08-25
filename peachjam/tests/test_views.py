@@ -21,9 +21,13 @@ from peachjam.models import (
     CaseHistory,
     CoreDocument,
     Court,
+    CourtClass,
+    Flynote,
+    FlynoteDocumentCount,
     Folder,
     GenericDocument,
     Judgment,
+    LawReport,
     Locality,
     Outcome,
     PeachJamSettings,
@@ -131,8 +135,12 @@ class PeachjamViewsTest(TestCase):
     def test_judgment_listing(self):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "judgment_list")
+        self.assertContains(response, 'data-key-link-feature="discovery_cards"')
+        self.assertContains(response, 'data-key-link-feature="courts"')
+        self.assertContains(response, 'data-key-link-feature="recent_judgments"')
 
-        documents = [doc.title for doc in response.context.get("documents")]
+        documents = [doc.title for doc in response.context.get("recent_judgments")]
         court_classes = [
             court_class.name for court_class in response.context.get("court_classes")
         ]
@@ -142,6 +150,87 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertIn("High Court", court_classes)
+        self.assertEqual(
+            Judgment.objects.filter(published=True).count(),
+            response.context["doc_count"],
+        )
+        self.assertEqual(
+            LawReport.objects.count(), response.context["law_report_count"]
+        )
+        self.assertFalse(response.context["show_law_reports"])
+        self.assertContains(response, 'href="#court-hierarchy-heading"')
+        self.assertNotContains(response, f'href="{reverse("law_report_list")}"')
+        for court_class in response.context["court_classes"]:
+            self.assertContains(response, f'href="{court_class.get_absolute_url()}"')
+            for court in court_class.courts.all():
+                self.assertTrue(court.judgment_set.filter(published=True).exists())
+        self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_judgment_listing_shows_law_reports_card_when_configured(self):
+        LawReport.objects.create(title="Zambia Law Reports", slug="zambia-law-reports")
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["show_law_reports"])
+        self.assertContains(response, f'href="{reverse("law_report_list")}"')
+
+    def test_judgment_listing_excludes_court_classes_without_published_judgments(self):
+        court_class = CourtClass.objects.create(name="Unpublished courts")
+        court = Court.objects.create(
+            name="Unpublished court",
+            code="unpublished-court",
+            court_class=court_class,
+        )
+        judgment = Judgment.objects.filter(published=True).first()
+        Judgment.objects.filter(pk=judgment.pk).update(
+            court=court,
+            published=False,
+        )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertNotIn(court_class, response.context["court_classes"])
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": True,
+        }
+    )
+    def test_judgment_listing_limits_topic_preview_to_fifteen(self):
+        for index in range(17):
+            flynote = Flynote.add_root(name=f"Topic {index + 1}")
+            FlynoteDocumentCount.objects.create(
+                flynote=flynote,
+                count=17 - index,
+            )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(10, len(response.context["top_flynote_topics"]))
+        self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_judgment_listing_limits_recent_judgments_to_ten(self):
+        for day in range(1, 13):
+            Judgment.objects.create(
+                language=Language.objects.first(),
+                court=Court.objects.first(),
+                date=datetime.date(2025, 1, day),
+                jurisdiction=Country.objects.first(),
+                case_name=f"Recent judgment {day}",
+            )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        recent_judgments = list(response.context["recent_judgments"])
+        self.assertEqual(10, len(recent_judgments))
+        self.assertEqual(datetime.date(2025, 1, 12), recent_judgments[0].date)
+        self.assertEqual(
+            datetime.date(2025, 1, 12), response.context["latest_judgment_date"]
+        )
 
     def test_court_listing(self):
         response = self.client.get(reverse("court", kwargs={"code": "ECOWASCJ"}))

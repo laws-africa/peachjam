@@ -2557,6 +2557,9 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, reverse("flynote_list"))
+        self.assertContains(response, 'action="%s"' % reverse("flynote_list"))
+        self.assertContains(response, 'aria-label="Search legal topics"')
+        self.assertContains(response, "judicial review")
 
     def test_judgment_list_hides_topic_link_without_flynotes(self):
         response = self.client.get(reverse("judgment_list"))

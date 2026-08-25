@@ -9,6 +9,11 @@ ul.flynotes > li {
   margin-bottom: 0;
 }
 
+ul.flynotes > li:has(> .flynote-chain) {
+  margin-left: unset;
+  text-indent: 0;
+}
+
 .flynote-chain-separator {
   white-space: nowrap;
 }
