@@ -464,7 +464,10 @@ class Subscription(models.Model):
                 log.info(
                     f"Subscription closes {sub} which is a trial, and so also closes {sub.trial_replaces}"
                 )
-                if not sub.trial_replaces.is_closed:
+                if (
+                    sub.trial_replaces_id != self.pk
+                    and not sub.trial_replaces.is_closed
+                ):
                     # the trial is being replaced by a new subscription, so close the replaced one too
                     sub.trial_replaces.close()
 

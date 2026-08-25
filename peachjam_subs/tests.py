@@ -494,8 +494,10 @@ class SubscriptionTests(TestCase):
         trial.ends_on = date.today() - timedelta(days=1)
         trial.save()
 
-        # the trial ends because the real subscription activates
-        sub.activate()
+        # the trial ends because the real subscription activates. Closing the
+        # trial must not emit a false close transition for its own replacement.
+        with patch("peachjam_subs.signals.get_customerio") as get_customerio:
+            sub.activate()
         sub.refresh_from_db()
         trial.refresh_from_db()
 
@@ -504,6 +506,12 @@ class SubscriptionTests(TestCase):
         self.assertEqual(active_at, sub.active_at)
 
         self.assertEqual(Subscription.Status.CLOSED, trial.status)
+        closed_subscription_ids = [
+            call.args[0].pk
+            for call in get_customerio.return_value.track_subscription_closed.call_args_list
+        ]
+        self.assertIn(trial.pk, closed_subscription_ids)
+        self.assertNotIn(sub.pk, closed_subscription_ids)
 
     def test_upgrade_during_trial(self):
         """The user upgrades their plan during a trial period, which should cancel the trial and immediately upgrade
