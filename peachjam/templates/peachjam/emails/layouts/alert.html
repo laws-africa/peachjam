@@ -9,7 +9,7 @@
   <p class="email-signoff">{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
   {% if email_alert_frequency %}
     <p>
-      <small>{% blocktrans with frequency=email_alert_frequency app_name=APP_NAME %}You're receiving My {{ app_name }} updates {{ frequency }}.{% endblocktrans %}</small>
+      <small>{% blocktrans with frequency=email_alert_frequency my_lii=MY_LII %}You're receiving {{ my_lii }} updates {{ frequency }}.{% endblocktrans %}</small>
     </p>
   {% endif %}
   <p>

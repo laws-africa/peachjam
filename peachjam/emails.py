@@ -18,6 +18,7 @@ class TemplateBackend(BaseTemplateBackend):
         # inject common context
         context["site"] = Site.objects.get_current()
         context["APP_NAME"] = settings.PEACHJAM["APP_NAME"]
+        context["MY_LII"] = settings.PEACHJAM["MY_LII"]
         context["PRIMARY_COLOUR"] = self.get_primary_colour()
 
     def _render_email(

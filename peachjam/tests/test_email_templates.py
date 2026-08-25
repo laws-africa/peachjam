@@ -14,6 +14,7 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             "site": SimpleNamespace(domain=domain),
             "user": SimpleNamespace(get_full_name="Test User"),
             "APP_NAME": "Peach Jam",
+            "MY_LII": "My Peach Jam",
             "PRIMARY_COLOUR": "#123456",
         }
 
