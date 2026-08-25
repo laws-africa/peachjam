@@ -340,11 +340,11 @@ def send_timeline_digest_email_alert(user_id):
         log.info(f"No user with id {user_id} exists, ignoring.")
         return
 
-    log.info(f"Sending timeline email digest for user {user_id}")
-    if TimelineEmailService.send_digest_email(user):
-        log.info("Timeline email digest sent")
+    log.info(f"Sending timeline email alert for user {user_id}")
+    if TimelineEmailService.send_email_alert(user):
+        log.info("Timeline email alert sent")
     else:
-        log.info("Timeline email digest was not sent")
+        log.info("Timeline email alert was not sent")
 
 
 @background(

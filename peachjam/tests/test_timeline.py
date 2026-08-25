@@ -1,4 +1,6 @@
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from countries_plus.models import Country
@@ -33,8 +35,28 @@ from peachjam.models import (
     pj_settings,
 )
 from peachjam.models.user_profile import default_email_alert_frequency
-from peachjam.timeline_email_service import TimelineEmailService
+from peachjam.timeline_email_service import (
+    EmailAlertBuilder,
+    EmailAlertSummaryItem,
+    TimelineEmailService,
+)
 from peachjam_subs.models import Feature, Subscription
+
+
+@contextmanager
+def mock_email_alert_sender():
+    with (
+        override_settings(
+            PEACHJAM={
+                **settings.PEACHJAM,
+                "EMAIL_ALERTS_ENABLED": True,
+                "CUSTOMERIO_EMAIL_API_KEY": "test",
+            },
+            TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
+        ),
+        patch("peachjam.emails.APIClient.send_email") as mailer,
+    ):
+        yield mailer
 
 
 class TimelineViewTest(TestCase):
@@ -166,24 +188,14 @@ class TimelineViewTest(TestCase):
             TimelineEvent.objects.filter(user_following__user=self.user).exists()
         )
 
-    def test_send_digest_email_includes_followed_documents(self):
+    def test_send_email_alert_includes_followed_documents(self):
         topic = Taxonomy.add_root(name="Employment Law")
         topic_follow = UserFollowing.objects.create(user=self.user, taxonomy=topic)
         doc = Judgment.objects.first()
         TimelineEvent.add_new_documents_event(topic_follow, [doc])
 
-        with (
-            override_settings(
-                PEACHJAM={
-                    **settings.PEACHJAM,
-                    "EMAIL_ALERTS_ENABLED": True,
-                    "CUSTOMERIO_EMAIL_API_KEY": "test",
-                },
-                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
-            ),
-            patch("peachjam.emails.APIClient.send_email") as mailer,
-        ):
-            TimelineEmailService.send_digest_email(self.user)
+        with mock_email_alert_sender() as mailer:
+            TimelineEmailService.send_email_alert(self.user)
 
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
@@ -207,24 +219,26 @@ class TimelineViewTest(TestCase):
 
         profile.email_alert_frequency = profile.EmailAlertFrequency.DAILY
         self.assertTrue(
-            TimelineEmailService.is_digest_due(self.user, date(2026, 8, 14))
+            TimelineEmailService.is_email_alert_due(self.user, date(2026, 8, 14))
         )
         self.assertFalse(
-            TimelineEmailService.is_digest_due(self.user, date(2026, 8, 15))
+            TimelineEmailService.is_email_alert_due(self.user, date(2026, 8, 15))
         )
 
         profile.email_alert_frequency = profile.EmailAlertFrequency.WEEKLY
         self.assertTrue(
-            TimelineEmailService.is_digest_due(self.user, date(2026, 8, 17))
+            TimelineEmailService.is_email_alert_due(self.user, date(2026, 8, 17))
         )
         self.assertFalse(
-            TimelineEmailService.is_digest_due(self.user, date(2026, 8, 18))
+            TimelineEmailService.is_email_alert_due(self.user, date(2026, 8, 18))
         )
 
         profile.email_alert_frequency = profile.EmailAlertFrequency.MONTHLY
-        self.assertTrue(TimelineEmailService.is_digest_due(self.user, date(2026, 8, 3)))
+        self.assertTrue(
+            TimelineEmailService.is_email_alert_due(self.user, date(2026, 8, 3))
+        )
         self.assertFalse(
-            TimelineEmailService.is_digest_due(self.user, date(2026, 8, 4))
+            TimelineEmailService.is_email_alert_due(self.user, date(2026, 8, 4))
         )
 
     def test_my_lii_updates_email_alert_frequency(self):
@@ -256,18 +270,10 @@ class TimelineViewTest(TestCase):
         pending_event = TimelineEvent.add_new_documents_event(follow, [document])
 
         with (
-            override_settings(
-                PEACHJAM={
-                    **settings.PEACHJAM,
-                    "EMAIL_ALERTS_ENABLED": True,
-                    "CUSTOMERIO_EMAIL_API_KEY": "test",
-                },
-                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
-            ),
-            patch.object(TimelineEmailService, "is_digest_due", return_value=True),
-            patch("peachjam.emails.APIClient.send_email") as mailer,
+            mock_email_alert_sender() as mailer,
+            patch.object(TimelineEmailService, "is_email_alert_due", return_value=True),
         ):
-            TimelineEmailService.send_digest_email(self.user)
+            TimelineEmailService.send_email_alert(self.user)
 
         self.assertFalse(mailer.called)
         pending_event.refresh_from_db()
@@ -346,7 +352,7 @@ class TimelineViewTest(TestCase):
         self.assertEqual(TimelineEvent.EventTypes.NEW_DOCUMENTS, event.event_type)
         self.assertIn(judgment.work, event.subject_works.all())
 
-    def test_send_digest_email_includes_journal_follow(self):
+    def test_send_email_alert_includes_journal_follow(self):
         journal = Journal.objects.create(
             title="Regional Law Journal",
             slug="regional-law-journal",
@@ -355,48 +361,28 @@ class TimelineViewTest(TestCase):
         doc = Judgment.objects.first()
         TimelineEvent.add_new_documents_event(follow, [doc])
 
-        with (
-            override_settings(
-                PEACHJAM={
-                    **settings.PEACHJAM,
-                    "EMAIL_ALERTS_ENABLED": True,
-                    "CUSTOMERIO_EMAIL_API_KEY": "test",
-                },
-                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
-            ),
-            patch("peachjam.emails.APIClient.send_email") as mailer,
-        ):
-            TimelineEmailService.send_digest_email(self.user)
+        with mock_email_alert_sender() as mailer:
+            TimelineEmailService.send_email_alert(self.user)
 
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
         self.assertEqual("Regional Law Journal: 1 new judgment", str(request.subject))
 
-    def test_send_digest_email_includes_flynote_follow(self):
+    def test_send_email_alert_includes_flynote_follow(self):
         flynote = Flynote.add_root(name="Administrative law")
         follow = UserFollowing.objects.create(user=self.user, flynote=flynote)
         doc = Judgment.objects.first()
         TimelineEvent.add_new_documents_event(follow, [doc])
 
-        with (
-            override_settings(
-                PEACHJAM={
-                    **settings.PEACHJAM,
-                    "EMAIL_ALERTS_ENABLED": True,
-                    "CUSTOMERIO_EMAIL_API_KEY": "test",
-                },
-                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
-            ),
-            patch("peachjam.emails.APIClient.send_email") as mailer,
-        ):
-            TimelineEmailService.send_digest_email(self.user)
+        with mock_email_alert_sender() as mailer:
+            TimelineEmailService.send_email_alert(self.user)
 
         self.assertEqual(1, mailer.call_count)
         request = mailer.call_args[0][0]
         self.assertEqual("Administrative law: 1 new judgment", str(request.subject))
 
-    def test_digest_subject_shortens_long_entities_at_a_word_boundary(self):
-        shortened = TimelineEmailService.shorten_subject_entity(
+    def test_email_subject_shortens_long_entities_at_a_word_boundary(self):
+        shortened = EmailAlertBuilder.shorten_subject_entity(
             "A subject entity with enough words to be shortened neatly while keeping the "
             "important legal context visible in the inbox " * 10
         )
@@ -404,31 +390,82 @@ class TimelineViewTest(TestCase):
         self.assertTrue(shortened.endswith("…"))
         self.assertFalse(shortened[:-1].endswith(" "))
 
-    def test_digest_subject_prioritises_new_followed_documents(self):
+    def test_email_subject_prioritises_new_followed_documents(self):
         summary_items = [
-            {
-                "subject": "New amendment to a saved Act",
-                "priority": TimelineEmailService.summary_priority(
+            EmailAlertSummaryItem(
+                label="",
+                subject="New amendment to a saved Act",
+                preheader="",
+                priority=EmailAlertBuilder.summary_priority(
                     TimelineEvent.EventTypes.NEW_AMENDMENT
                 ),
-            },
-            {
-                "subject": "High Court of Tanzania: 2 new judgments",
-                "priority": TimelineEmailService.summary_priority(
+                section_id="relationships",
+            ),
+            EmailAlertSummaryItem(
+                label="",
+                subject="High Court of Tanzania: 2 new judgments",
+                preheader="",
+                priority=EmailAlertBuilder.summary_priority(
                     TimelineEvent.EventTypes.NEW_DOCUMENTS
                 ),
-            },
-            {
-                "subject": "New citation of a saved judgment",
-                "priority": TimelineEmailService.summary_priority(
+                section_id="followed-documents",
+            ),
+            EmailAlertSummaryItem(
+                label="",
+                subject="New citation of a saved judgment",
+                preheader="",
+                priority=EmailAlertBuilder.summary_priority(
                     TimelineEvent.EventTypes.NEW_CITATION
                 ),
-            },
+                section_id="citations",
+            ),
         ]
 
         self.assertEqual(
             "High Court of Tanzania: 2 new judgments and 2 more updates",
-            TimelineEmailService.digest_subject(summary_items),
+            EmailAlertBuilder.email_subject(summary_items),
+        )
+
+    def test_relationship_alert_copy_centralises_labels_and_priorities(self):
+        event_type = TimelineEvent.EventTypes.NEW_AMENDMENT
+
+        self.assertEqual(
+            "2 new amendments",
+            EmailAlertBuilder.relationship_label(event_type, "update", 2),
+        )
+        self.assertEqual(
+            "New amendment to Saved Act",
+            EmailAlertBuilder.relationship_label(
+                event_type,
+                "subject",
+                1,
+                document="Saved Act",
+            ),
+        )
+        self.assertEqual(6, EmailAlertBuilder.summary_priority(event_type))
+
+    def test_alert_label_copy_formats_each_presentation(self):
+        documents = [SimpleNamespace(doc_type="judgment")]
+
+        self.assertEqual(
+            "2 new judgments for High Court of Tanzania",
+            EmailAlertBuilder.followed_documents_label(
+                "update",
+                documents,
+                2,
+                followed_object="High Court of Tanzania",
+            ),
+        )
+        self.assertEqual(
+            "2 search results for “constitutional rights”",
+            EmailAlertBuilder.saved_search_label(
+                "preheader",
+                2,
+                saved_search=SimpleNamespace(q="constitutional rights"),
+            ),
+        )
+        self.assertEqual(
+            "2 new citations", EmailAlertBuilder.citation_label("update", 2)
         )
 
 
@@ -709,7 +746,7 @@ class TimelineRelationshipTests(TestCase):
             TimelineEvent.objects.filter(user_following=self.follow_followed).exists()
         )
 
-    def test_send_digest_email_consolidates_relationship_updates(self):
+    def test_send_email_alert_consolidates_relationship_updates(self):
         amendment = Relationship.objects.create(
             subject_work=self.followed_work,
             object_work=self.amending_work,
@@ -724,18 +761,8 @@ class TimelineRelationshipTests(TestCase):
         UserFollowing.update_new_relationship_follows(amendment)
         UserFollowing.update_new_relationship_follows(overturn)
 
-        with (
-            override_settings(
-                PEACHJAM={
-                    **settings.PEACHJAM,
-                    "EMAIL_ALERTS_ENABLED": True,
-                    "CUSTOMERIO_EMAIL_API_KEY": "test",
-                },
-                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
-            ),
-            patch("peachjam.emails.APIClient.send_email") as mailer,
-        ):
-            TimelineEmailService.send_digest_email(self.user)
+        with mock_email_alert_sender() as mailer:
+            TimelineEmailService.send_email_alert(self.user)
 
         self.assertEqual(1, mailer.call_count)
         transactional_message_ids = set()
@@ -788,18 +815,8 @@ class TimelineRelationshipTests(TestCase):
 
         TimelineEvent.add_new_citation_events(follow, self.amending_work)
 
-        with (
-            override_settings(
-                PEACHJAM={
-                    **settings.PEACHJAM,
-                    "EMAIL_ALERTS_ENABLED": True,
-                    "CUSTOMERIO_EMAIL_API_KEY": "test",
-                },
-                TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
-            ),
-            patch("peachjam.emails.APIClient.send_email") as mailer,
-        ):
-            TimelineEmailService.send_digest_email(self.user)
+        with mock_email_alert_sender() as mailer:
+            TimelineEmailService.send_email_alert(self.user)
 
         self.assertFalse(mailer.called)
         event = TimelineEvent.objects.get(

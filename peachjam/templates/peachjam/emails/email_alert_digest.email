@@ -1,33 +1,33 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
 {% load i18n peachjam %}
-{% block subject %}{{ digest_subject }}{% endblock %}
+{% block subject %}{{ email_alert.subject }}{% endblock %}
 {% block alert-body %}
   <p>{% blocktrans with frequency=email_alert_frequency my_lii=MY_LII %}Here is your {{ frequency }} {{ my_lii }} update.{% endblocktrans %}</p>
-  <p>{{ digest_intro }}</p>
+  <p>{{ email_alert.intro }}</p>
 
-  {% if summary_items %}
+  {% if email_alert.summary_items %}
     <div class="digest-summary">
       <ul>
-        {% for item in summary_items %}
+        {% for item in email_alert.summary_items %}
           <li{% if not forloop.last %} class="digest-summary-item--spaced"{% endif %}>
-            {% if summary_has_anchor_links %}
+            {% if email_alert.summary_has_anchor_links %}
               <a href="#{{ item.section_id }}">{{ item.label }}</a>
             {% else %}
               {{ item.label }}
             {% endif %}
           </li>
         {% endfor %}
-        {% if summary_more_count %}
-          <li>+{{ summary_more_count }} {% trans "more" %}</li>
+        {% if email_alert.summary_more_count %}
+          <li>+{{ email_alert.summary_more_count }} {% trans "more" %}</li>
         {% endif %}
       </ul>
     </div>
   {% endif %}
 
-  {% if followed_documents %}
+  {% if email_alert.followed_documents %}
     <div id="followed-documents" class="digest-section">
       <h2 class="digest-section-heading">{% trans "From courts and topics you follow" %}</h2>
-      {% for item in followed_documents %}
+      {% for item in email_alert.followed_documents %}
         <h3 class="digest-item-heading">
           {{ item.body_label }}
           {% if item.followed_object_url %}
@@ -42,18 +42,18 @@
           {% endfor %}
         </ul>
       {% endfor %}
-      {% if followed_more %}
+      {% if email_alert.followed_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=followed_total my_lii=MY_LII %}View all {{ count }} updates in {{ my_lii }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.followed_total my_lii=MY_LII %}View all {{ count }} updates in {{ my_lii }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
   {% endif %}
 
-  {% if saved_searches %}
+  {% if email_alert.saved_searches %}
     <div id="saved-searches" class="digest-section">
       <h2 class="digest-section-heading">{% trans "Matches for your saved searches" %}</h2>
-      {% for item in saved_searches %}
+      {% for item in email_alert.saved_searches %}
         <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_search.get_absolute_url %}">“{{ item.saved_search.q }}”</a></h3>
         <ul>
           {% for hit in item.hits %}
@@ -61,19 +61,19 @@
           {% endfor %}
         </ul>
       {% endfor %}
-      {% if searches_more %}
+      {% if email_alert.searches_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=searches_total my_lii=MY_LII %}View all {{ count }} matches in {{ my_lii }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.searches_total my_lii=MY_LII %}View all {{ count }} matches in {{ my_lii }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
   {% endif %}
 
-  {% if citations %}
+  {% if email_alert.citations %}
     <div id="citations" class="digest-section">
       <h2 class="digest-section-heading">{% trans "Citations of your saved documents" %}</h2>
       <p class="digest-section-description">{% trans "These newly published documents cite items you have saved." %}</p>
-      {% for item in citations %}
+      {% for item in email_alert.citations %}
         <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></h3>
         <ul>
           {% for citing in item.citing_documents %}
@@ -81,27 +81,27 @@
           {% endfor %}
         </ul>
       {% endfor %}
-      {% if citations_more %}
+      {% if email_alert.citations_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=citations_total my_lii=MY_LII %}View all {{ count }} citations in {{ my_lii }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.citations_total my_lii=MY_LII %}View all {{ count }} citations in {{ my_lii }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
   {% endif %}
 
-  {% if relationships %}
+  {% if email_alert.relationships %}
     <div id="relationships" class="digest-section">
       <h2 class="digest-section-heading">{% trans "Changes to your saved documents" %}</h2>
-      {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=relationships utm_campaign="email_digest" %}
-      {% if relationships_more %}
+      {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=email_alert.relationships utm_campaign="email_digest" %}
+      {% if email_alert.relationships_more %}
         <ul>
-          <li><a href="{% absolute_url site timeline_url_path %}">{% blocktrans with count=relationships_total my_lii=MY_LII %}View all {{ count }} updates in {{ my_lii }}{% endblocktrans %}</a></li>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.relationships_total my_lii=MY_LII %}View all {{ count }} updates in {{ my_lii }}{% endblocktrans %}</a></li>
         </ul>
       {% endif %}
     </div>
   {% endif %}
 
-  {% absolute_url site timeline_url_path as timeline_url %}
+  {% absolute_url site email_alert.timeline_url_path as timeline_url %}
   {% blocktrans asvar view_all_updates with my_lii=MY_LII %}View all updates in {{ my_lii }}{% endblocktrans %}
   <hr class="digest-cta-separator"/>
   {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url button_class="digest-cta" %}
