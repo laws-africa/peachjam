@@ -6,7 +6,7 @@
   {% endif %}
   {% block alert-body %}{% endblock %}
   <p>&nbsp;</p>
-  <p>{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+  <p class="email-signoff">{% blocktrans %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
   {% if email_alert_frequency %}
     <p>
       <small>{% blocktrans with frequency=email_alert_frequency app_name=APP_NAME %}You're receiving My {{ app_name }} updates {{ frequency }}.{% endblocktrans %}</small>

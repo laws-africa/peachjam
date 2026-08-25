@@ -18,11 +18,8 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         }
 
     def assert_alert_document_item_spacing(self, html):
-        self.assertIn('<li style="padding-bottom: 0.75rem">', html)
-        self.assertIn(
-            '<div style="margin-top: 0.5rem; font-style: italic">',
-            html,
-        )
+        self.assertIn('<li class="alert-document-list-item">', html)
+        self.assertIn('<div class="alert-document-flynote">', html)
 
     def test_absolute_url_tag_adds_https_and_preserves_existing_scheme(self):
         template = Template(

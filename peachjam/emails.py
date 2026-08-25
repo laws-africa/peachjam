@@ -1,6 +1,5 @@
 import logging
 
-import css_inline
 from customerio import APIClient, Regions, SendEmailRequest
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -33,10 +32,6 @@ class TemplateBackend(BaseTemplateBackend):
             file_extension=file_extension,
         )
 
-        if parts.get("html"):
-            # inline CSS styles into the HTML
-            parts["html"] = css_inline.inline(parts["html"])
-
         if parts.get("subject"):
             parts["subject"] = (
                 parts["subject"]
@@ -50,17 +45,15 @@ class TemplateBackend(BaseTemplateBackend):
 
     def get_primary_colour(self):
         if self.primary_colour is None:
-            paths = finders.find("stylesheets/_variables.scss", all=True) or []
-            for path in paths:
+            path = finders.find("stylesheets/_variables.scss")
+            if path:
                 with open(path, "r") as f:
                     for line in f:
-                        if line.lstrip().startswith("$primary:"):
+                        if line.startswith("$primary:"):
                             self.__class__.primary_colour = (
                                 line.split(":", 1)[1].strip().rstrip(";")
                             )
                             break
-                if self.primary_colour:
-                    break
 
         return (
             self.primary_colour or settings.PEACHJAM.get("PRIMARY_COLOUR") or "#0000ff"

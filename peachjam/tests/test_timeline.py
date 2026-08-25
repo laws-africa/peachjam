@@ -190,12 +190,15 @@ class TimelineViewTest(TestCase):
         self.assertEqual("Employment Law: 1 new judgment", str(request.subject))
         self.assertEqual("1 Employment Law judgment", request.preheader)
         self.assertIn("Here is your daily My Peachjam update.", request.body)
-        self.assertIn("1 new judgment for Employment Law", request.body)
-        self.assertIn("1 new judgment for Employment Law", request.body)
+        self.assertIn("1 new judgment for", request.body)
+        self.assertIn(
+            f'href="https://example.org{topic.get_absolute_url()}">Employment Law</a>',
+            request.body,
+        )
         self.assertIn("From courts and topics you follow", request.body)
         self.assertIn("Manage alerts and delivery preferences", request.body)
         self.assertIn("View all updates in My Peachjam", request.body)
-        self.assertIn('style="padding-bottom: 0.75rem"', request.body)
+        self.assertIn('class="alert-document-list-item"', request.body)
         self.assertNotIn("Manage court and topic alerts", request.body)
         self.assertNotIn('href="#followed-documents"', request.body)
 

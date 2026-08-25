@@ -111,18 +111,6 @@ class TimelineEmailService:
             .first()
         )
 
-    @classmethod
-    def limit_documents(cls, events):
-        documents = []
-        has_more = False
-        for event in events:
-            for document in event.subject_documents:
-                if len(documents) < cls.MAX_ENTRIES_PER_CATEGORY:
-                    documents.append(document)
-                else:
-                    has_more = True
-        return documents, has_more
-
     @staticmethod
     def document_kind(documents, count):
         """Return a reader-facing document type when the documents are uniform."""
@@ -131,7 +119,7 @@ class TimelineEmailService:
         return ngettext("document", "documents", count)
 
     @classmethod
-    def followed_documents_heading(cls, followed_object, documents, count):
+    def followed_documents_update_label(cls, followed_object, documents, count):
         return ngettext(
             "%(count)d new %(document_kind)s for %(followed_object)s",
             "%(count)d new %(document_kind)s for %(followed_object)s",
@@ -143,8 +131,15 @@ class TimelineEmailService:
         }
 
     @classmethod
-    def followed_documents_summary_label(cls, followed_object, documents, count):
-        return cls.followed_documents_heading(followed_object, documents, count)
+    def followed_documents_body_label(cls, documents, count):
+        return ngettext(
+            "%(count)d new %(document_kind)s for",
+            "%(count)d new %(document_kind)s for",
+            count,
+        ) % {
+            "count": count,
+            "document_kind": cls.document_kind(documents, count),
+        }
 
     @classmethod
     def followed_documents_preheader_label(cls, followed_object, documents, count):
@@ -379,16 +374,16 @@ class TimelineEmailService:
     def digest_intro(update_count, last_digest_sent_at):
         if last_digest_sent_at:
             return ngettext(
-                "%(count)d update since %(date)s",
-                "%(count)d updates since %(date)s",
+                "You have %(count)d update since %(date)s.",
+                "You have %(count)d updates since %(date)s.",
                 update_count,
             ) % {
                 "count": update_count,
                 "date": date_format(timezone.localtime(last_digest_sent_at), "j F Y"),
             }
         return ngettext(
-            "%(count)d update since your last alert",
-            "%(count)d updates since your last alert",
+            "You have %(count)d update since your last alert.",
+            "You have %(count)d updates since your last alert.",
             update_count,
         ) % {"count": update_count}
 
@@ -418,17 +413,18 @@ class TimelineEmailService:
             [
                 {
                     "followed_object": follow.followed_object_name,
+                    "followed_object_url": getattr(
+                        follow.followed_object, "get_absolute_url", lambda: None
+                    )(),
                     "documents": item["documents"],
                     "total_count": len(item["all_documents"]),
-                    "heading": cls.followed_documents_heading(
+                    "update_label": cls.followed_documents_update_label(
                         follow.followed_object_name,
                         item["all_documents"],
                         len(item["all_documents"]),
                     ),
-                    "summary_label": cls.followed_documents_summary_label(
-                        follow.followed_object_name,
-                        item["all_documents"],
-                        len(item["all_documents"]),
+                    "body_label": cls.followed_documents_body_label(
+                        item["all_documents"], len(item["all_documents"])
                     ),
                     "preheader_label": cls.followed_documents_preheader_label(
                         follow.followed_object_name,
@@ -611,7 +607,7 @@ class TimelineEmailService:
         summary_items = []
         summary_items.extend(
             {
-                "label": item["summary_label"],
+                "label": item["update_label"],
                 "subject": item["subject"],
                 "preheader": item["preheader_label"],
                 "priority": cls.summary_priority(

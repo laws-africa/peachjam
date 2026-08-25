@@ -1,8 +1,8 @@
 {% load i18n peachjam %}
-<li style="padding-bottom: 0.75rem">
+<li class="alert-document-list-item">
   <a href="{% absolute_url site url_path %}?utm_campaign={{ utm_campaign }}&utm_source=alert&utm_medium=email">{{ title }}</a>
   {% if added_date or document_date %}
-    <div style="margin-top: 0.25rem; color: #6F7488">
+    <div class="alert-document-metadata">
       {% if document_date %}{{ document_date|date:"j M Y" }}{% endif %}
       {% if added_date %}
         {% if document_date %}&nbsp;·&nbsp;{% endif %}
@@ -11,9 +11,9 @@
     </div>
   {% endif %}
   {% if blurb %}<div>{{ blurb }}</div>{% endif %}
-  {% if flynote %}<div style="margin-top: 0.5rem; font-style: italic">{{ flynote|linebreaksbr }}</div>{% endif %}
+  {% if flynote %}<div class="alert-document-flynote">{{ flynote|linebreaksbr }}</div>{% endif %}
   {% if provision_citations %}
-    <ul style="margin-top: 0.5rem">
+    <ul class="alert-provision-citations">
       {% for pc in provision_citations %}
         <li>
           [...] {{ pc.prefix }}<strong>{{ pc.exact }}</strong>{{ pc.suffix }} [...]

@@ -9,7 +9,7 @@
     <div class="digest-summary">
       <ul>
         {% for item in summary_items %}
-          <li{% if not forloop.last %} style="padding-bottom: 0.5rem"{% endif %}>
+          <li{% if not forloop.last %} class="digest-summary-item--spaced"{% endif %}>
             {% if summary_has_anchor_links %}
               <a href="#{{ item.section_id }}">{{ item.label }}</a>
             {% else %}
@@ -28,7 +28,14 @@
     <div id="followed-documents" class="digest-section">
       <h2 class="digest-section-heading">{% trans "From courts and topics you follow" %}</h2>
       {% for item in followed_documents %}
-        <h3 class="digest-item-heading">{{ item.summary_label }}</h3>
+        <h3 class="digest-item-heading">
+          {{ item.body_label }}
+          {% if item.followed_object_url %}
+            <a href="{% absolute_url site item.followed_object_url %}">{{ item.followed_object }}</a>
+          {% else %}
+            {{ item.followed_object }}
+          {% endif %}
+        </h3>
         <ul>
           {% for doc in item.documents %}
             {% include "peachjam/emails/_alert_document_list_item.html" with url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title added_date=doc.created_at document_date=doc.date blurb=doc.blurb flynote=doc.flynote %}
@@ -96,5 +103,6 @@
 
   {% absolute_url site timeline_url_path as timeline_url %}
   {% blocktrans asvar view_all_updates with app_name=APP_NAME %}View all updates in My {{ app_name }}{% endblocktrans %}
-  {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url %}
+  <hr class="digest-cta-separator"/>
+  {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url button_class="digest-cta" %}
 {% endblock %}

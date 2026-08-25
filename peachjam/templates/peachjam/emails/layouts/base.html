@@ -12,10 +12,7 @@
       Learn more about Foundation for Emails and customizing their settings here - https://get.foundation/emails/docs/ -->
       <style>
         {% include 'peachjam/emails/layouts/foundation-emails.css' %}
-          /*----------------------------------------------------------------------------------------
-           Override some of the 'Foundation for Emails' styles
-           -----------------------------------------------------------------------------------------*/
-
+          /* Peachjam email styles */
           body,
           table.body,
           h1,
@@ -29,30 +26,6 @@
           th {
               color: #4B4B60; }
 
-          small {
-              color: #6F7488; }
-
-          a {
-              color: {{ PRIMARY_COLOUR }};
-              text-decoration: underline; }
-          a:hover,
-          a:active,
-          a:visited {
-              color: {{ PRIMARY_COLOUR }}; }
-
-          table.button table td {
-              background: {{ PRIMARY_COLOUR }};
-              border: 0;
-              border-color: transparent;
-              border-radius: 8px; }
-          table.button table td a {
-              border: 0;
-              border-color: transparent;
-              border-radius: 8px; }
-
-          /*------------
-           FONT FAMILY
-          ------------*/
           body,
           table.body,
           h1,
@@ -67,21 +40,45 @@
           a {
               font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
 
-          h1,
-          h2,
-          h3,
-          h4,
-          h5,
-          h6 {
-              font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+          small {
+              color: #6F7488; }
 
+          a {
+              color: {{ PRIMARY_COLOUR }};
+              text-decoration: underline; }
+          a:hover,
+          a:active {
+              color: {{ PRIMARY_COLOUR }}; }
+
+          h1 a,
+          h2 a,
+          h3 a,
+          h4 a,
+          h5 a,
+          h6 a,
+          h1 a:hover,
+          h2 a:hover,
+          h3 a:hover,
+          h4 a:hover,
+          h5 a:hover,
+          h6 a:hover,
+          h1 a:active,
+          h2 a:active,
+          h3 a:active,
+          h4 a:active,
+          h5 a:active,
+          h6 a:active {
+              color: {{ PRIMARY_COLOUR }}; }
+
+          table.button table td {
+              background: {{ PRIMARY_COLOUR }};
+              border: 0;
+              border-radius: 8px; }
           table.button table td a {
-              font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+              border: 0;
+              border-radius: 8px; }
 
           table.body { background-color: #f8f9fa; }
-          /*------------------------
-          End Foundation Overrides
-          ------------------------*/
 
           .container.outer-container {
               background-color: #f8f9fa; }
@@ -90,8 +87,50 @@
               border-radius: 10px; }
 
           .inner-container {
-              border: 1px solid #dee2e6
-          }
+              border: 1px solid #dee2e6; }
+
+          .email-spacer--32 {
+              font-size: 32px;
+              line-height: 32px; }
+
+          .email-spacer--24 {
+              font-size: 24px;
+              line-height: 24px; }
+
+          .email-logo {
+              height: 60px; }
+
+          .email-ios-font-fix {
+              display: none;
+              white-space: nowrap;
+              font: 15px courier;
+              line-height: 0; }
+
+          .account-login-code {
+              font-size: 24px;
+              font-weight: 600;
+              letter-spacing: 2px;
+              text-align: center; }
+
+          .alert-document-list-item {
+              padding-bottom: 0.75rem; }
+
+          .alert-document-metadata {
+              color: #6F7488;
+              margin-top: 0.25rem; }
+
+          .alert-document-flynote,
+          .alert-provision-citations {
+              margin-top: 0.5rem; }
+
+          .alert-document-flynote {
+              font-style: italic; }
+
+          .digest-relationship {
+              margin-top: 1rem; }
+
+          .digest-summary-item--spaced {
+              padding-bottom: 0.5rem; }
 
           h1 {
               font-weight: 700; }
@@ -111,11 +150,6 @@
               margin-bottom: 16px;
               Margin-bottom: 16px; }
 
-          .digest-followed-object {
-              font-weight: 700;
-              margin-bottom: 8px;
-              Margin-bottom: 8px; }
-
           .digest-summary {
               background-color: #f8f9fa;
               border-left: 3px solid {{ PRIMARY_COLOUR }};
@@ -129,6 +163,19 @@
               margin-bottom: 8px;
               Margin-bottom: 8px; }
 
+          .digest-cta-separator {
+              border: 0;
+              border-top: 1px solid #dee2e6;
+              margin-top: 24px;
+              Margin-top: 24px;
+              margin-bottom: 24px;
+              Margin-bottom: 24px; }
+
+          .digest-cta,
+          .email-signoff {
+              clear: both;
+              text-align: left; }
+
           .footer p {
               margin-bottom: 5px;
               Margin-bottom: 5px; }
@@ -136,9 +183,9 @@
           .footer a {
               color: #6F7488;
               text-decoration: underline; }
-          .footer a:hover {
-              cursor: pointer;
-              color: #5721CC; }
+          .footer a:hover,
+          .footer a:active {
+              color: {{ PRIMARY_COLOUR }}; }
       </style>
       {% block head %}{% endblock %}
     </head>
@@ -157,7 +204,7 @@
                       <table class="spacer">
                         <tbody>
                           <tr>
-                            <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                            <td height="32px" class="email-spacer--32">&#xA0;</td>
                           </tr>
                         </tbody>
                       </table>
@@ -171,7 +218,7 @@
                                     {% block header %}
                                       <center>
                                         {% block header-logo %}
-                                          <img src="{% absolute_static_url site 'images/logo.png' %}" alt="{% trans "logo" %}" style="height: 60px" align="center" class="float-center"/>
+                                          <img src="{% absolute_static_url site 'images/logo.png' %}" alt="{% trans "logo" %}" align="center" class="email-logo float-center"/>
                                         {% endblock %}
                                       </center>
                                     {% endblock %}
@@ -186,7 +233,7 @@
                       <table class="spacer">
                         <tbody>
                           <tr>
-                            <td height="24px" style="font-size:24px;line-height:24px;">&#xA0;</td>
+                            <td height="24px" class="email-spacer--24">&#xA0;</td>
                           </tr>
                         </tbody>
                       </table>
@@ -197,7 +244,7 @@
                               <table class="spacer">
                                 <tbody>
                                   <tr>
-                                    <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                                    <td height="32px" class="email-spacer--32">&#xA0;</td>
                                   </tr>
                                 </tbody>
                               </table>
@@ -235,7 +282,7 @@
                                     <table class="spacer">
                                       <tbody>
                                         <tr>
-                                          <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                                          <td height="32px" class="email-spacer--32">&#xA0;</td>
                                         </tr>
                                       </tbody>
                                     </table>
@@ -243,7 +290,7 @@
                                     <table class="spacer">
                                       <tbody>
                                         <tr>
-                                          <td height="32px" style="font-size:32px;line-height:32px;">&#xA0;</td>
+                                          <td height="32px" class="email-spacer--32">&#xA0;</td>
                                         </tr>
                                       </tbody>
                                     </table>
@@ -264,7 +311,7 @@
         </tr>
       </table>
       <!-- prevent Gmail on iOS font size manipulation -->
-      <div style="display:none; white-space:nowrap; font:15px courier; line-height:0">
+      <div class="email-ios-font-fix">
         &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
       </div>
     </body>
