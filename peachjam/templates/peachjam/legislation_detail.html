@@ -45,3 +45,25 @@
   {% endif %}
   {{ block.super }}
 {% endblock %}
+{% block document-metadata-content-publication %}
+  {% legislation_publication_detail document as publication_detail %}
+  {% if publication_detail %}
+    <dt>
+      {% trans 'Published in' %}
+    </dt>
+    <dd class="text-muted">
+      {% if document.publication_file %}
+        <a href="{% url 'document_publication' document.expression_frbr_uri|strip_first_character %}"
+           target="_blank">{{ publication_detail }}</a>
+      {% else %}
+        {{ publication_detail }}
+      {% endif %}
+      {% if document.publication_page %}
+        {% blocktrans trimmed %}on page {{ document.publication_page }}{% endblocktrans %}
+      {% endif %}
+      ({{ document.publication_file.size|filesizeformat }})
+    </dd>
+  {% else %}
+    {{ block.super }}
+  {% endif %}
+{% endblock %}

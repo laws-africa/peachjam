@@ -10,8 +10,11 @@ from django.db.models.functions import RowNumber
 from django.http import QueryDict
 from django.templatetags.static import static
 from django.urls import reverse
+from django.utils import formats
+from django.utils.dateparse import parse_date
 from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 
 from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.auth import user_display
@@ -19,6 +22,24 @@ from peachjam.models import DocumentChatThread
 from peachjam.xmlutils import qualify_local_refs as qualify_local_refs_html
 
 register = template.Library()
+
+
+@register.simple_tag
+def legislation_publication_detail(document):
+    metadata = document.metadata_json
+    publication_name = metadata.get("publication_name")
+    publication_number = metadata.get("publication_number")
+    if not publication_name or not publication_number:
+        return None
+
+    publication = f"{publication_name} {publication_number}"
+    publication_date = parse_date(metadata.get("publication_date") or "")
+    if publication_date:
+        return _("%(publication)s on %(publication_date)s") % {
+            "publication": publication,
+            "publication_date": formats.date_format(publication_date, "DATE_FORMAT"),
+        }
+    return publication
 
 
 def normalize_base_url(value, protocol="https"):
