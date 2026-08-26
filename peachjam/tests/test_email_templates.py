@@ -87,6 +87,7 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         html = message.alternatives[0][0] if message.alternatives else message.body
 
         self.assertEqual("High Court of Tanzania: 1 new judgment", message.subject)
+        self.assertIn("Hi there,", html)
         self.assertIn("Here is your daily My Peach Jam update.", html)
         self.assertIn("You have 1 update since 25 August 2026.", html)
         self.assertIn("High Court of Tanzania – 1 new judgment", html)

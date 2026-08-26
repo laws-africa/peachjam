@@ -3,6 +3,8 @@
 {% block body %}
   {% if user.first_name %}
     <p>{% blocktrans with name=user.first_name %}Hello {{ name }},{% endblocktrans %}</p>
+  {% else %}
+    <p>{% trans "Hi there," %}</p>
   {% endif %}
   {% block alert-body %}{% endblock %}
   <p>&nbsp;</p>
