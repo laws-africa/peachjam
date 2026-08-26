@@ -33,7 +33,10 @@ def legislation_publication_detail(document):
         return None
 
     publication = f"{publication_name} {publication_number}"
-    publication_date = parse_date(metadata.get("publication_date") or "")
+    try:
+        publication_date = parse_date(metadata.get("publication_date") or "")
+    except (TypeError, ValueError):
+        publication_date = None
     if publication_date:
         return _("%(publication)s on %(publication_date)s") % {
             "publication": publication,
