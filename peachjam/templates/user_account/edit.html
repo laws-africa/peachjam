@@ -63,11 +63,11 @@
             </select>
             <div class="form-text">
               {% if form.email_alert_frequency.value == 'daily' %}
-                {% trans "You are currently receiving a daily digest on weekdays at 10:00 AM." %}
+                {% trans "You are currently receiving a daily digest on weekdays." %}
               {% elif form.email_alert_frequency.value == 'weekly' %}
-                {% trans "You are currently receiving a weekly digest on Mondays at 10:00 AM." %}
+                {% trans "You are currently receiving a weekly digest on Mondays." %}
               {% elif form.email_alert_frequency.value == 'monthly' %}
-                {% trans "You are currently receiving a monthly digest on the first weekday of each month at 10:00 AM." %}
+                {% trans "You are currently receiving a monthly digest on the first weekday of each month." %}
               {% else %}
                 {% trans "You are not receiving email digests." %}
               {% endif %}
