@@ -535,6 +535,7 @@ class SearchViewsTest(TestCase):
         request.id = "none"
         view = DocumentSearchView()
         view.request = request
+        long_clean_query = "x" * 2100 + "\x00"
         engine = SimpleNamespace(
             search_query=SearchQuery(
                 query=None,
@@ -549,7 +550,7 @@ class SearchViewsTest(TestCase):
             ),
             analysis=QueryAnalysis(
                 raw_query="nul\x00search",
-                clean_query="nul\x00search",
+                clean_query=long_clean_query,
                 intent="legal_term",
                 confidence=0.9,
             ),
@@ -566,7 +567,12 @@ class SearchViewsTest(TestCase):
 
         self.assertEqual("legal_term", captured["query_classification"])
         self.assertEqual("legal_term", captured["search_profile"])
-        self.assertEqual("nul search", captured["query_analysis"]["clean_query"])
+        self.assertEqual(2048, len(captured["query_clean"]))
+        self.assertEqual(len(long_clean_query), captured["query_clean_n_chars"])
+        self.assertEqual(
+            long_clean_query.replace("\x00", " "),
+            captured["query_analysis"]["clean_query"],
+        )
 
     def test_search_hit_links_open_in_same_tab(self):
         request = RequestFactory().get("/search/?search=test")

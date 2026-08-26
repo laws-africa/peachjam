@@ -69,6 +69,13 @@ class SearchTrace(models.Model):
         ]
 
     @classmethod
+    def truncate_field_value(cls, field_name, value):
+        """Trim a string to the maximum length of a model field."""
+        if value is None:
+            return None
+        return value[: cls._meta.get_field(field_name).max_length]
+
+    @classmethod
     def prune(cls, days=90):
         cutoff = now() - timedelta(days=days)
         log.info(f"Pruning search traces older than {days} days")

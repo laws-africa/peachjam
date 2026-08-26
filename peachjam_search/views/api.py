@@ -84,6 +84,7 @@ class PortionSearchView(APIView):
         profile_name = profile.name if profile else None
         clean_query = analysis_data.get("clean_query") if analysis_data else None
         request_id = getattr(self.request, "id", None)
+        truncate = SearchTrace.truncate_field_value
 
         return SearchTrace.objects.create(
             kind=SearchTrace.Kind.PORTIONS,
@@ -91,17 +92,21 @@ class PortionSearchView(APIView):
             config_version=self.config_version,
             request_id=request_id if request_id != "none" else None,
             mode=self.engine.plan.mode,
-            search=strip_null_bytes(input_data["text"])[:2048],
+            search=truncate("search", strip_null_bytes(input_data["text"])),
             field_searches={},
             n_results=n_results,
             page=1,
             filters=trace_filters,
-            filters_string=json.dumps(trace_filters, sort_keys=True)[:2048],
+            filters_string=truncate(
+                "filters_string", json.dumps(trace_filters, sort_keys=True)
+            ),
             ordering="-score",
             suggestion=None,
-            ip_address=self.request.headers.get("x-forwarded-for"),
-            user_agent=self.request.headers.get("user-agent"),
-            query_clean=clean_query,
+            ip_address=truncate(
+                "ip_address", self.request.headers.get("x-forwarded-for")
+            ),
+            user_agent=truncate("user_agent", self.request.headers.get("user-agent")),
+            query_clean=truncate("query_clean", clean_query),
             query_clean_n_words=len(clean_query.split()) if clean_query else None,
             query_clean_n_chars=len(clean_query) if clean_query else None,
             query_classification=(

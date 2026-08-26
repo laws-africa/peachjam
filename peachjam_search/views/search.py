@@ -297,8 +297,9 @@ class DocumentSearchView(TemplateView):
             f"{k}={v}" for k, v in engine.search_query.filters.items()
         )
 
-        search = strip_null_bytes(self.request.GET.get("search", "")[:2048])
-        suggestion = strip_null_bytes(self.request.GET.get("suggestion", "")[:1024])
+        truncate = SearchTrace.truncate_field_value
+        search = strip_null_bytes(self.request.GET.get("search", ""))
+        suggestion = strip_null_bytes(self.request.GET.get("suggestion", ""))
 
         analysis = getattr(engine, "analysis", None)
         analysis_data = strip_null_bytes(analysis.to_dict()) if analysis else None
@@ -312,17 +313,21 @@ class DocumentSearchView(TemplateView):
                 config_version=self.config_version,
                 request_id=self.request.id if self.request.id != "none" else None,
                 mode=engine.plan.mode,
-                search=search,
+                search=truncate("search", search),
                 field_searches=engine.search_query.field_queries,
                 n_results=n_results,
                 page=engine.search_query.page,
                 filters=engine.search_query.filters,
-                filters_string=filters_string,
+                filters_string=truncate("filters_string", filters_string),
                 ordering=self.request.GET.get("ordering"),
-                suggestion=suggestion,
-                ip_address=self.request.headers.get("x-forwarded-for"),
-                user_agent=self.request.headers.get("user-agent"),
-                query_clean=clean_query,
+                suggestion=truncate("suggestion", suggestion),
+                ip_address=truncate(
+                    "ip_address", self.request.headers.get("x-forwarded-for")
+                ),
+                user_agent=truncate(
+                    "user_agent", self.request.headers.get("user-agent")
+                ),
+                query_clean=truncate("query_clean", clean_query),
                 query_clean_n_words=len(clean_query.split()) if clean_query else None,
                 query_clean_n_chars=len(clean_query) if clean_query else None,
                 query_classification=(
