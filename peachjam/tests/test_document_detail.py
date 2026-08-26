@@ -3,14 +3,39 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
+from django.utils.translation import override
 from django_webtest import WebTest
 from guardian.shortcuts import assign_perm
 
 from peachjam.models import CitationLink, Judgment, Legislation
+from peachjam.templatetags.peachjam import legislation_publication_detail
 from peachjam.views.legislation import LegislationDetailView
 
 User = get_user_model()
+
+
+class LegislationPublicationTestCase(SimpleTestCase):
+    def setUp(self):
+        self.doc = Legislation(
+            metadata_json={
+                "publication_name": "Government Gazette",
+                "publication_number": "1234",
+                "publication_date": "1979-06-15",
+            }
+        )
+
+    def test_publication_date_uses_active_language(self):
+        with override("en"):
+            self.assertEqual(
+                legislation_publication_detail(self.doc),
+                "Government Gazette 1234 on 15 June 1979",
+            )
+        with override("af"):
+            self.assertEqual(
+                legislation_publication_detail(self.doc),
+                "Government Gazette 1234 on 15 Junie 1979",
+            )
 
 
 class DocumentViewTestCase(WebTest):

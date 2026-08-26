@@ -55,6 +55,12 @@ class Legislation(CoreDocument):
     def commenced(self):
         return self.metadata_json.get("commenced", None)
 
+    @property
+    def publication_page(self):
+        return self.metadata_json.get("publication_document", {}).get(
+            "start_page", None
+        )
+
     def pre_save(self):
         self.doc_type = "legislation"
         return super().pre_save()
