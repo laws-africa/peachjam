@@ -37,6 +37,60 @@ class LegislationPublicationTestCase(SimpleTestCase):
                 "Government Gazette 1234 on 15 Junie 1979",
             )
 
+    def test_publication_detail_requires_name_and_number(self):
+        metadata_variants = [
+            {},
+            {"publication_name": "Government Gazette"},
+            {"publication_number": "1234"},
+            {"publication_name": None, "publication_number": "1234"},
+            {"publication_name": "Government Gazette", "publication_number": None},
+        ]
+
+        for metadata in metadata_variants:
+            with self.subTest(metadata=metadata):
+                self.doc.metadata_json = metadata
+                self.assertIsNone(legislation_publication_detail(self.doc))
+
+    def test_publication_detail_handles_missing_null_or_invalid_date(self):
+        date_variants = [
+            {},
+            {"publication_date": None},
+            {"publication_date": ""},
+            {"publication_date": "not-a-date"},
+            {"publication_date": "1979-99-15"},
+        ]
+
+        for date_metadata in date_variants:
+            with self.subTest(date_metadata=date_metadata):
+                self.doc.metadata_json = {
+                    "publication_name": "Government Gazette",
+                    "publication_number": "1234",
+                    **date_metadata,
+                }
+
+                self.assertEqual(
+                    legislation_publication_detail(self.doc),
+                    "Government Gazette 1234",
+                )
+
+    def test_publication_page_handles_missing_fields(self):
+        metadata_variants = [
+            {},
+            {"publication_document": None},
+            {"publication_document": {}},
+            {"publication_document": {"start_page": None}},
+        ]
+
+        for metadata in metadata_variants:
+            with self.subTest(metadata=metadata):
+                self.doc.metadata_json = metadata
+                self.assertIsNone(self.doc.publication_page)
+
+    def test_publication_page(self):
+        self.doc.metadata_json["publication_document"] = {"start_page": 12}
+
+        self.assertEqual(self.doc.publication_page, 12)
+
 
 class DocumentViewTestCase(WebTest):
     fixtures = [
