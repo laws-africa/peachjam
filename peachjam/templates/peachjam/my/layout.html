@@ -35,6 +35,13 @@
             <a href="{% url "my_home" %}"
                class="nav-link {% if view.tab == "my" %}active{% endif %}">{{ MY_LII }}</a>
           </li>
+          <li class="nav-item" role="presentation">
+            <a href="{% url "email_alerts" %}"
+               class="nav-link {% if view.tab == "email_alerts" %}active{% endif %}">
+              <i class="bi bi-envelope"></i>
+              {% trans "Email updates" %}
+            </a>
+          </li>
           {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
             <li class="nav-item" role="presentation">
               <a href="{% url "folder_list" %}"

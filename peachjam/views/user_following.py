@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse
 from django.urls import reverse
 from django.views.generic import CreateView, DeleteView, FormView, ListView
 
@@ -64,6 +64,15 @@ class UserFollowingButtonForm(forms.Form):
         if len(set_fields) > 1:
             raise forms.ValidationError("Only one follow target can be set")
 
+        self.followed_field = set_fields[0]
+        model_field = UserFollowing._meta.get_field(self.followed_field)
+        try:
+            self.followed_object = model_field.related_model.objects.get(
+                pk=cleaned_data[self.followed_field]
+            )
+        except model_field.related_model.DoesNotExist:
+            raise forms.ValidationError("The follow target no longer exists.")
+
         return cleaned_data
 
 
@@ -88,25 +97,40 @@ class UserFollowingButtonView(AllowFollowsMixin, SubscriptionRequiredMixin, Form
     def get_follows_disabled_response(self):
         return HttpResponse(status=204)
 
+    def get_button_context(self, form):
+        follow = None
+        if self.request.user.is_authenticated:
+            follow = UserFollowing.objects.filter(
+                **form.cleaned_data, user=self.request.user
+            ).first()
+
+        return {
+            "follow": follow,
+            "followed_object": form.followed_object,
+            "followed_object_type": UserFollowing._meta.get_field(
+                form.followed_field
+            ).verbose_name,
+            "email_alerts_disabled": self.request.user.is_authenticated
+            and self.request.user.userprofile.email_alert_frequency
+            == self.request.user.userprofile.EmailAlertFrequency.NONE,
+            "email_alert_frequency": (
+                self.request.user.userprofile.get_email_alert_frequency_display().lower()
+                if self.request.user.is_authenticated
+                else None
+            ),
+        }
+
+    def get_subscription_required_context(self):
+        form = UserFollowingButtonForm(self.request.GET)
+        if not form.is_valid():
+            return {}
+        return self.get_button_context(form)
+
     def get(self, *args, **kwargs):
         form = UserFollowingButtonForm(self.request.GET)
-        if self.request.user.is_authenticated:
-            if form.is_valid():
-                follow = UserFollowing.objects.filter(
-                    **form.cleaned_data, user=self.request.user
-                ).first()
-                if follow:
-                    return HttpResponseRedirect(
-                        reverse("user_following_delete", kwargs={"pk": follow.pk})
-                        + f"?{self.request.GET.urlencode()}"
-                    )
-                return HttpResponseRedirect(
-                    reverse("user_following_create")
-                    + f"?{self.request.GET.urlencode()}"
-                )
-            return super().get(*args, **kwargs)
-        # invalid form, return empty response i.e no button
-        return HttpResponse(status=400)
+        if not form.is_valid():
+            return HttpResponse(status=400)
+        return self.render_to_response(self.get_button_context(form))
 
 
 class BaseUserFollowingView(AllowFollowsMixin, LoginRequiredMixin):
@@ -152,10 +176,7 @@ class UserFollowingCreateView(
         return context
 
     def get_success_url(self):
-        return (
-            reverse("user_following_delete", kwargs={"pk": self.object.pk})
-            + f"?{self.request.GET.urlencode()}"
-        )
+        return reverse("user_following_button") + f"?{self.request.GET.urlencode()}"
 
 
 class UserFollowingDeleteView(

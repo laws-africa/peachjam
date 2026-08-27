@@ -5,9 +5,13 @@
 {% endblock %}
 {% block my-content %}
   {% change_subscription_url as change_subscription_url %}
+  {% url "email_alerts" as email_alerts_url %}
   {% include "peachjam/my/_subscription_locked_banner.html" with subscription_locked_category_summary=my_locked_data_summary.by_category.following subscription_locked_category_label="follows" %}
   <h2>{% trans 'Following' %}</h2>
-  <div class="mb-4">{% trans "We'll email you when new documents are added for topics that you follow." %}</div>
+  <div class="mb-4">
+    {% blocktrans trimmed %}Updates for courts and topics you follow can be included in your email updates.{% endblocktrans %}
+    <a href="{{ email_alerts_url }}">{% trans "Manage email updates" %}</a>.
+  </div>
   <div class="card">
     <ul class="list-group list-group-flush">
       {% for follow in object_list %}

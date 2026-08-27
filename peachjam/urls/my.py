@@ -6,6 +6,7 @@ from peachjam.views import (
     FolderDownloadView,
     FolderListView,
     FolderUpdateView,
+    EmailAlertsView,
     MyFrontpageView,
     MyHomeView,
     MyTimelineView,
@@ -14,6 +15,7 @@ from peachjam.views import (
 
 urlpatterns = [
     path("", MyHomeView.as_view(), name="my_home"),
+    path("email-alerts/", EmailAlertsView.as_view(), name="email_alerts"),
     path("timeline", MyTimelineView.as_view(), name="my_timeline"),
     path("frontpage", MyFrontpageView.as_view(), name="my_frontpage"),
     path(
