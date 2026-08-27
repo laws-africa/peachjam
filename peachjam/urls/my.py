@@ -1,12 +1,12 @@
 from django.urls import include, path
 
 from peachjam.views import (
+    EmailAlertsView,
     FolderCreateView,
     FolderDeleteView,
     FolderDownloadView,
     FolderListView,
     FolderUpdateView,
-    EmailAlertsView,
     MyFrontpageView,
     MyHomeView,
     MyTimelineView,
