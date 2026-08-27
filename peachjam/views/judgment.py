@@ -4,7 +4,7 @@ from functools import reduce
 
 from django.contrib import messages
 from django.core.cache import cache
-from django.db.models import F, IntegerField, Prefetch, Q, Value, Window
+from django.db.models import F, IntegerField, Q, Value, Window
 from django.db.models.functions import Coalesce, Length, RowNumber, Substr
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
@@ -65,6 +65,7 @@ class JudgmentListView(TemplateView):
             and Flynote.objects.undeprecated().filter(depth=1).exists()
         )
         self.get_court_classes(context)
+        self.get_other_courts(context)
         if context["show_flynote_topics"]:
             flynote_topics = list(self.get_flynote_topics_queryset()[:10])
             context["top_flynote_topics"] = FlynoteViewMixin().make_flynote_list(
@@ -73,16 +74,10 @@ class JudgmentListView(TemplateView):
         return context
 
     def get_court_classes(self, context):
-        context["court_classes"] = list(
-            CourtClass.objects.filter(courts__judgment__published=True)
-            .prefetch_related(
-                Prefetch(
-                    "courts",
-                    queryset=Court.objects.filter(judgment__published=True).distinct(),
-                )
-            )
-            .distinct()
-        )
+        context["court_classes"] = list(CourtClass.get_court_classes_with_judgments())
+
+    def get_other_courts(self, context):
+        context["other_courts"] = list(Court.get_unclassified_with_judgments())
 
     def get_flynote_topics_queryset(self):
         return (

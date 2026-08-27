@@ -4742,3 +4742,29 @@ msgstr ""
 #: templates/account/onboard.html:55
 msgid "Not now"
 msgstr ""
+
+
+#: templates/peachjam/court_list.html:20
+msgid "Courts and tribunals"
+msgstr ""
+
+#: templates/peachjam/court_list.html:21
+#: templates/peachjam/judgment_list.html:194
+msgid "Browse judgments by court or level of court."
+msgstr ""
+
+#: templates/peachjam/_court_index.html:8
+#: templates/peachjam/judgment_list.html:234
+msgid "Other courts"
+msgstr ""
+
+#: templates/peachjam/judgment_list.html:229
+msgid "Show other courts"
+msgstr ""
+
+#: templates/peachjam/_court_index_card.html:8
+#, python-format
+msgid "%(count)s court"
+msgid_plural "%(count)s courts"
+msgstr[0] ""
+msgstr[1] ""

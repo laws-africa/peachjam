@@ -219,9 +219,34 @@
                         </div>
                       </li>
                     {% endfor %}
+                    {% if other_courts %}
+                      <li class="mb-2">
+                        <div class="provision-toggle d-flex align-items-start">
+                          <button class="btn btn-sm bg-none collapsed"
+                                  type="button"
+                                  data-bs-toggle="collapse"
+                                  data-bs-target="#other-courts"
+                                  aria-label="{% trans 'Show other courts' %}"
+                                  aria-expanded="false"
+                                  aria-controls="other-courts">
+                            <i class="bi" aria-hidden="true"></i>
+                          </button>
+                          <span>{% trans "Other courts" %}</span>
+                        </div>
+                        <div id="other-courts" class="collapse">
+                          <ul class="list-unstyled ms-5 mb-0">
+                            {% for court in other_courts %}
+                              <li>
+                                <a href="{{ court.get_absolute_url }}" data-key-link="court">{{ court.name }}</a>
+                              </li>
+                            {% endfor %}
+                          </ul>
+                        </div>
+                      </li>
+                    {% endif %}
                   </ul>
                   <a class="btn btn-primary mt-auto align-self-start"
-                     href="{% url 'court' 'all' %}"
+                     href="{% url 'court_list' %}"
                      data-key-link="courts">{% trans "View all courts" %}</a>
                 </div>
               </div>

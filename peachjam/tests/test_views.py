@@ -159,12 +159,60 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertFalse(response.context["show_law_reports"])
         self.assertContains(response, 'href="#court-hierarchy-heading"')
+        self.assertContains(response, f'href="{reverse("court_list")}"')
         self.assertNotContains(response, f'href="{reverse("law_report_list")}"')
         for court_class in response.context["court_classes"]:
             self.assertContains(response, f'href="{court_class.get_absolute_url()}"')
             for court in court_class.courts.all():
                 self.assertTrue(court.judgment_set.filter(published=True).exists())
         self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_court_list_page(self):
+        response = self.client.get(reverse("court_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "peachjam/court_list.html")
+        self.assertContains(
+            response,
+            '<h1 id="main-page-heading" class="mb-1">Courts and tribunals</h1>',
+        )
+        self.assertContains(response, "ECOWAS Community Court of Justice")
+        self.assertContains(
+            response,
+            f'href="{reverse("court", kwargs={"code": "ECOWASCJ"})}"',
+        )
+        self.assertFalse(response.context["other_courts"])
+        self.assertNotContains(response, "Other courts")
+        for court_class in response.context["court_classes"]:
+            for court in court_class.courts.all():
+                self.assertContains(response, f'href="{court.get_absolute_url()}"')
+                self.assertTrue(court.judgment_set.filter(published=True).exists())
+
+    def test_court_lists_include_courts_without_class(self):
+        court = Court.objects.create(
+            name="Court without a class",
+            code="court-without-a-class",
+            court_class=None,
+        )
+        court_without_judgments = Court.objects.create(
+            name="Court without published judgments",
+            code="court-without-published-judgments",
+            court_class=None,
+        )
+        judgment = Judgment.objects.filter(published=True).first()
+        Judgment.objects.filter(pk=judgment.pk).update(court=court)
+
+        for view_name in ["judgment_list", "court_list"]:
+            response = self.client.get(reverse(view_name))
+
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(court, response.context["other_courts"])
+            self.assertNotIn(court_without_judgments, response.context["other_courts"])
+            self.assertContains(response, "Other courts")
+            self.assertContains(response, f'href="{court.get_absolute_url()}"')
+            self.assertNotContains(
+                response, f'href="{court_without_judgments.get_absolute_url()}"'
+            )
 
     def test_judgment_listing_shows_law_reports_card_when_configured(self):
         LawReport.objects.create(title="Zambia Law Reports", slug="zambia-law-reports")

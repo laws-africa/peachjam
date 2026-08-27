@@ -5,11 +5,23 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.dates import MONTHS
 from django.utils.text import gettext_lazy as _
+from django.views.generic import TemplateView
 
 from peachjam.helpers import chunks
 from peachjam.models import Court, CourtClass, CourtRegistry
 from peachjam.views.generic_views import YearListMixin
 from peachjam.views.judgment import FilteredJudgmentView
+
+
+class CourtListView(TemplateView):
+    template_name = "peachjam/court_list.html"
+    navbar_link = "judgments"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["court_classes"] = list(CourtClass.get_court_classes_with_judgments())
+        context["other_courts"] = list(Court.get_unclassified_with_judgments())
+        return context
 
 
 class CourtDetailView(FilteredJudgmentView):

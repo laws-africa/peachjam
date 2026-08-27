@@ -314,6 +314,19 @@ class CourtClass(models.Model):
         return super().save(*args, **kwargs)
 
     @classmethod
+    def get_court_classes_with_judgments(cls):
+        return (
+            cls.objects.filter(courts__judgment__published=True)
+            .prefetch_related(
+                Prefetch(
+                    "courts",
+                    queryset=Court.objects.filter(judgment__published=True).distinct(),
+                )
+            )
+            .distinct()
+        )
+
+    @classmethod
     def get_court_classes_with_cause_lists(cls):
         return (
             cls.objects.filter(courts__causelists__isnull=False)
@@ -398,6 +411,12 @@ class Court(models.Model):
 
     def get_absolute_url(self):
         return reverse("court", args=[self.code])
+
+    @classmethod
+    def get_unclassified_with_judgments(cls):
+        return cls.objects.filter(
+            court_class__isnull=True, judgment__published=True
+        ).distinct()
 
 
 class CourtRegistryManager(models.Manager):
