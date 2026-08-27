@@ -4760,11 +4760,6 @@ msgstr ""
 msgid "Not now"
 msgstr ""
 
-
-#: templates/peachjam/court_list.html:20
-msgid "Courts and tribunals"
-msgstr ""
-
 #: templates/peachjam/court_list.html:21
 #: templates/peachjam/judgment_list.html:194
 msgid "Browse judgments by court or level of court."

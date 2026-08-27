@@ -174,7 +174,7 @@ class PeachjamViewsTest(TestCase):
         self.assertTemplateUsed(response, "peachjam/court_list.html")
         self.assertContains(
             response,
-            '<h1 id="main-page-heading" class="mb-1">Courts and tribunals</h1>',
+            '<h1 id="main-page-heading" class="mb-1">Courts</h1>',
         )
         self.assertContains(response, "ECOWAS Community Court of Justice")
         self.assertContains(
