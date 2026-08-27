@@ -1,6 +1,5 @@
 import logging
 
-import css_inline
 from customerio import APIClient, Regions, SendEmailRequest
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -19,6 +18,7 @@ class TemplateBackend(BaseTemplateBackend):
         # inject common context
         context["site"] = Site.objects.get_current()
         context["APP_NAME"] = settings.PEACHJAM["APP_NAME"]
+        context["MY_LII"] = settings.PEACHJAM["MY_LII"]
         context["PRIMARY_COLOUR"] = self.get_primary_colour()
 
     def _render_email(
@@ -33,10 +33,6 @@ class TemplateBackend(BaseTemplateBackend):
             file_extension=file_extension,
         )
 
-        if parts.get("html"):
-            # inline CSS styles into the HTML
-            parts["html"] = css_inline.inline(parts["html"])
-
         if parts.get("subject"):
             parts["subject"] = (
                 parts["subject"]
@@ -50,10 +46,8 @@ class TemplateBackend(BaseTemplateBackend):
 
     def get_primary_colour(self):
         if self.primary_colour is None:
-            # try to get the primary colour from the _variables.scss file, looked up using the static files finder
             path = finders.find("stylesheets/_variables.scss")
             if path:
-                print(f"Found _variables.scss at {path}")
                 with open(path, "r") as f:
                     for line in f:
                         if line.startswith("$primary:"):
@@ -82,6 +76,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
         "new_citation_alert",
         "new_relationship_alert",
         "new_overturn_alert",
+        "email_alert_digest",
         "account/email/login_code",
     ]
 
@@ -125,6 +120,7 @@ class CustomerIOTemplateBackend(TemplateBackend):
             transactional_message_id=transactional_message_id,
             subject=parts["subject"],
             body=parts["html"],
+            preheader=context.get("preheader"),
             identifiers=identifiers,
             attachments=context.get("attachments", {}),
             to=",".join(recipient_list),

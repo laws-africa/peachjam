@@ -330,7 +330,7 @@ def send_timeline_email_alerts():
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 @transaction.atomic
-def send_new_document_email_alert(user_id):
+def send_timeline_digest_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
     from peachjam.timeline_email_service import TimelineEmailService
@@ -340,58 +340,11 @@ def send_new_document_email_alert(user_id):
         log.info(f"No user with id {user_id} exists, ignoring.")
         return
 
-    log.info(f"Sending new document email alerts for user {user_id}")
-    TimelineEmailService.send_new_documents_email(user)
-    log.info("New document email alerts sent")
-
-
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
-@transaction.atomic
-def send_saved_search_email_alert(user_id):
-    from django.contrib.auth import get_user_model
-
-    from peachjam.timeline_email_service import TimelineEmailService
-
-    user = get_user_model().objects.filter(pk=user_id).first()
-    if not user:
-        log.info(f"No user with id {user_id} exists, ignoring.")
-        return
-
-    log.info(f"Sending saved search email alerts for user {user_id}")
-    TimelineEmailService.send_saved_search_email(user)
-    log.info("Saved search email alerts sent")
-
-
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
-@transaction.atomic
-def send_new_citation_email_alert(user_id):
-    from django.contrib.auth import get_user_model
-
-    from peachjam.timeline_email_service import TimelineEmailService
-
-    user = get_user_model().objects.filter(pk=user_id).first()
-    if not user:
-        log.info(f"No user with id {user_id} exists, ignoring.")
-        return
-    log.info(f"Sending new citation email alerts for user {user_id}")
-    TimelineEmailService.send_new_citation_email(user)
-    log.info("New citation email alerts sent")
-
-
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
-@transaction.atomic
-def send_new_relationship_email_alert(user_id):
-    from django.contrib.auth import get_user_model
-
-    from peachjam.timeline_email_service import TimelineEmailService
-
-    user = get_user_model().objects.filter(pk=user_id).first()
-    if not user:
-        log.info(f"No user with id {user_id} exists, ignoring.")
-        return
-    log.info(f"Sending new relationship email alerts for user {user_id}")
-    TimelineEmailService.send_new_relationship_email(user)
-    log.info("New relationship email alerts sent")
+    log.info(f"Sending timeline email alert for user {user_id}")
+    if TimelineEmailService.send_email_alert(user):
+        log.info("Timeline email alert sent")
+    else:
+        log.info("Timeline email alert was not sent")
 
 
 @background(

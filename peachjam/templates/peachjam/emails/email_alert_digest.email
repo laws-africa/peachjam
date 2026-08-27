@@ -1,0 +1,108 @@
+{% extends 'peachjam/emails/layouts/alert.html' %}
+{% load i18n peachjam %}
+{% block subject %}{{ email_alert.subject }}{% endblock %}
+{% block alert-body %}
+  <p>{% blocktrans with frequency=email_alert_frequency my_lii=MY_LII %}Here is your {{ frequency }} {{ my_lii }} update.{% endblocktrans %}</p>
+  <p>{{ email_alert.intro }}</p>
+
+  {% if email_alert.summary_items %}
+    <div class="digest-summary">
+      <ul>
+        {% for item in email_alert.summary_items %}
+          <li{% if not forloop.last %} class="digest-summary-item--spaced"{% endif %}>
+            {% if email_alert.summary_has_anchor_links %}
+              <a href="#{{ item.section_id }}">{{ item.label }}</a>
+            {% else %}
+              {{ item.label }}
+            {% endif %}
+          </li>
+        {% endfor %}
+        {% if email_alert.summary_more_count %}
+          <li>+{{ email_alert.summary_more_count }} {% trans "more" %}</li>
+        {% endif %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if email_alert.followed_documents %}
+    <div id="followed-documents" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "From courts and topics you follow" %}</h2>
+      {% for item in email_alert.followed_documents %}
+        <h3 class="digest-item-heading">
+          {{ item.body_label }}
+          {% if item.followed_object_url %}
+            <a href="{% absolute_url site item.followed_object_url %}">{{ item.followed_object }}</a>
+          {% else %}
+            {{ item.followed_object }}
+          {% endif %}
+        </h3>
+        <ul>
+          {% for doc in item.documents %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with url_path=doc.expression_frbr_uri utm_campaign="email_digest" title=doc.title added_date=doc.created_at document_date=doc.date blurb=doc.blurb flynote=doc.flynote %}
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      {% if email_alert.followed_more %}
+        <ul>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.followed_total my_lii=MY_LII %}View all {{ count }} updates in {{ my_lii }}{% endblocktrans %}</a></li>
+        </ul>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if email_alert.saved_searches %}
+    <div id="saved-searches" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Matches for your saved searches" %}</h2>
+      {% for item in email_alert.saved_searches %}
+        <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_search.get_absolute_url %}">“{{ item.saved_search.q }}”</a></h3>
+        <ul>
+          {% for hit in item.hits %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.metadata_document.title added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date blurb=hit.document.blurb flynote=hit.document.flynote %}
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      {% if email_alert.searches_more %}
+        <ul>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.searches_total my_lii=MY_LII %}View all {{ count }} matches in {{ my_lii }}{% endblocktrans %}</a></li>
+        </ul>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if email_alert.citations %}
+    <div id="citations" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Citations of your saved documents" %}</h2>
+      <p class="digest-section-description">{% trans "These newly published documents cite items you have saved." %}</p>
+      {% for item in email_alert.citations %}
+        <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_document.get_absolute_url %}">{{ item.saved_document.title }}</a></h3>
+        <ul>
+          {% for citing in item.citing_documents %}
+            {% include "peachjam/emails/_alert_document_list_item.html" with url_path=citing.document.get_absolute_url utm_campaign="email_digest" title=citing.document.title added_date=citing.document.created_at document_date=citing.document.date blurb=citing.document.blurb flynote=citing.document.flynote provision_citations=citing.provision_citations %}
+          {% endfor %}
+        </ul>
+      {% endfor %}
+      {% if email_alert.citations_more %}
+        <ul>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.citations_total my_lii=MY_LII %}View all {{ count }} citations in {{ my_lii }}{% endblocktrans %}</a></li>
+        </ul>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if email_alert.relationships %}
+    <div id="relationships" class="digest-section">
+      <h2 class="digest-section-heading">{% trans "Changes to your saved documents" %}</h2>
+      {% include 'peachjam/emails/_new_relationship_alert_body.html' with saved_documents=email_alert.relationships utm_campaign="email_digest" %}
+      {% if email_alert.relationships_more %}
+        <ul>
+          <li><a href="{% absolute_url site email_alert.timeline_url_path %}">{% blocktrans with count=email_alert.relationships_total my_lii=MY_LII %}View all {{ count }} updates in {{ my_lii }}{% endblocktrans %}</a></li>
+        </ul>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% absolute_url site email_alert.timeline_url_path as timeline_url %}
+  {% blocktrans asvar view_all_updates with my_lii=MY_LII %}View all updates in {{ my_lii }}{% endblocktrans %}
+  <hr class="digest-cta-separator"/>
+  {% include "peachjam/emails/layouts/_button.html" with text=view_all_updates href=timeline_url button_class="digest-cta" %}
+{% endblock %}

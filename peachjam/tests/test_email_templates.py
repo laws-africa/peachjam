@@ -5,6 +5,8 @@ from django.template.loader import render_to_string
 from django.test import SimpleTestCase
 from templated_email import get_templated_mail
 
+from peachjam.timeline_email_service import EmailAlert, EmailAlertSummaryItem
+
 
 class EmailTemplateUrlTestCase(SimpleTestCase):
     maxDiff = None
@@ -14,15 +16,13 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             "site": SimpleNamespace(domain=domain),
             "user": SimpleNamespace(get_full_name="Test User"),
             "APP_NAME": "Peach Jam",
+            "MY_LII": "My Peach Jam",
             "PRIMARY_COLOUR": "#123456",
         }
 
     def assert_alert_document_item_spacing(self, html):
-        self.assertIn('<li style="margin-bottom: 1rem">', html)
-        self.assertIn(
-            '<div style="margin-top: 0.5rem; font-style: italic">',
-            html,
-        )
+        self.assertIn('<li class="alert-document-list-item">', html)
+        self.assertIn('<div class="alert-document-flynote">', html)
 
     def test_absolute_url_tag_adds_https_and_preserves_existing_scheme(self):
         template = Template(
@@ -44,6 +44,53 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
             rendered,
             "https://example.org/en/documents/|https://example.org/en/documents/",
         )
+
+    def test_email_alert_digest_renders_an_email_alert_object(self):
+        context = self.base_context("example.org")
+        email_alert = EmailAlert(
+            user=context["user"],
+            summary_items=[
+                EmailAlertSummaryItem(
+                    label="High Court of Tanzania – 1 new judgment",
+                    subject="High Court of Tanzania: 1 new judgment",
+                    preheader="1 High Court of Tanzania judgment",
+                    priority=1,
+                    section_id="followed-documents",
+                )
+            ],
+            summary_more_count=0,
+            summary_has_anchor_links=False,
+            subject="High Court of Tanzania: 1 new judgment",
+            preheader="1 High Court of Tanzania judgment",
+            intro="You have 1 update since 25 August 2026.",
+            frequency="daily",
+            followed_documents=[],
+            followed_total=0,
+            saved_searches=[],
+            searches_total=0,
+            citations=[],
+            citations_total=0,
+            relationships=[],
+            relationships_total=0,
+            timeline_url_path="/en/my/#timeline",
+            manage_url_path="/en/account/",
+            displayed_events=[],
+        )
+        context.update(email_alert.template_context())
+
+        message = get_templated_mail(
+            template_name="email_alert_digest",
+            from_email="test@example.org",
+            to=["user@example.org"],
+            context=context,
+        )
+        html = message.alternatives[0][0] if message.alternatives else message.body
+
+        self.assertEqual("High Court of Tanzania: 1 new judgment", message.subject)
+        self.assertIn("Hi there,", html)
+        self.assertIn("Here is your daily My Peach Jam update.", html)
+        self.assertIn("You have 1 update since 25 August 2026.", html)
+        self.assertIn("High Court of Tanzania – 1 new judgment", html)
 
     def test_alert_email_templates_render_absolute_links(self):
         context = self.base_context("example.org")
@@ -82,10 +129,6 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
 
         self.assertIn(
             'href="https://example.org/en/my/following/?utm_campaign=following&utm_source=alert&utm_medium=email"',
-            html,
-        )
-        self.assertIn(
-            'href="https://example.org/en/accounts/profile/"',
             html,
         )
         self.assertIn(
