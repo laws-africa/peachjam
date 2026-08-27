@@ -5,6 +5,7 @@ from peachjam.views import (
     CourtClassMonthView,
     CourtClassYearView,
     CourtDetailView,
+    CourtListView,
     CourtMonthView,
     CourtRegistryDetailView,
     CourtRegistryMonthView,
@@ -37,6 +38,7 @@ urlpatterns = [
         CourtClassMonthView.as_view(),
         name="court_class_month",
     ),
+    path("courts/", CourtListView.as_view(), name="court_list"),
     path(
         "<str:code>/",
         CourtDetailView.as_view(),
