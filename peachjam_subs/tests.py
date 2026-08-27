@@ -245,7 +245,7 @@ class ConcreteSubscriptionRequiredViewCacheTests(TestCase):
         cache_control = response.headers.get("Cache-Control", "")
         self.assertEqual(response.status_code, 200)
         self.assertIn("no-store", cache_control)
-        self.assertNotIn("private", cache_control)
+        self.assertIn("private", cache_control)
         self.assertNotIn("max-age=600", cache_control)
 
 
