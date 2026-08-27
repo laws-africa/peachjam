@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.http import Http404, HttpResponse
 from django.urls import reverse
+from django.utils.cache import patch_cache_control
 from django.views.generic import CreateView, DeleteView, FormView, ListView
 
 from peachjam.models import UserFollowing, pj_settings
@@ -130,7 +131,9 @@ class UserFollowingButtonView(AllowFollowsMixin, SubscriptionRequiredMixin, Form
         form = UserFollowingButtonForm(self.request.GET)
         if not form.is_valid():
             return HttpResponse(status=400)
-        return self.render_to_response(self.get_button_context(form))
+        response = self.render_to_response(self.get_button_context(form))
+        patch_cache_control(response, no_store=True)
+        return response
 
 
 class BaseUserFollowingView(AllowFollowsMixin, LoginRequiredMixin):
