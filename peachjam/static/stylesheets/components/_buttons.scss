@@ -35,18 +35,3 @@
     box-shadow: 0 0 0.75rem rgb(0 0 0 / 12%);
   }
 }
-
-.dropdown-follow-button {
-  --bs-dropdown-link-color: var(--bs-primary);
-  --bs-dropdown-link-hover-color: var(--bs-primary);
-  --bs-dropdown-link-active-bg: var(--bs-primary);
-  --bs-dropdown-link-active-color: #fff;
-
-  transition: background-color 0.15s ease, color 0.15s ease;
-
-  &.unfollow {
-    --bs-dropdown-link-color: var(--bs-danger);
-    --bs-dropdown-link-hover-color: var(--bs-danger);
-    --bs-dropdown-link-active-bg: var(--bs-danger);
-  }
-}

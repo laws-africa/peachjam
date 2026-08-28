@@ -270,7 +270,10 @@ class TimelineViewTest(TestCase):
         )
 
         self.assertContains(response, "Following")
-        self.assertContains(response, "You are following this court.")
+        self.assertContains(
+            response,
+            "You are following this court and will receive daily email updates.",
+        )
         self.assertContains(response, reverse("email_alerts"))
         self.assertContains(response, "Unfollow")
 
@@ -287,7 +290,9 @@ class TimelineViewTest(TestCase):
             reverse("user_following_button") + f"?court={self.court.pk}"
         )
 
-        self.assertContains(response, "Your email updates are disabled.")
+        self.assertContains(
+            response, "You are following this court, but email updates are disabled."
+        )
 
     def test_follow_button_offers_follow_action_before_following(self):
         self.user.user_permissions.add(

@@ -6,4 +6,4 @@ class EmailAlertFrequency(models.TextChoices):
     DAILY = "daily", _("Daily")
     WEEKLY = "weekly", _("Weekly")
     MONTHLY = "monthly", _("Monthly")
-    NONE = "none", _("None")
+    NONE = "none", _("No email updates")

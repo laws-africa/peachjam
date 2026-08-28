@@ -45,20 +45,17 @@
       {% if follow %}
         <li>
           <div class="dropdown-item-text">
-            <div class="text-success">
-              <i class="bi bi-check-circle-fill"></i>
+            <div>
+              <i class="bi bi-check-circle-fill text-success"></i>
               <strong>{% trans "Following" %}</strong>
               <div>
-                {% blocktrans with followed_object_type=followed_object_type %}You are following this {{ followed_object_type }}.{% endblocktrans %}
+                {% if email_alerts_disabled %}
+                  {% blocktrans with followed_object_type=followed_object_type %}You are following this {{ followed_object_type }}, but email updates are disabled.{% endblocktrans %}
+                {% else %}
+                  {% blocktrans with followed_object_type=followed_object_type frequency=email_alert_frequency %}You are following this {{ followed_object_type }} and will receive {{ frequency }} email updates.{% endblocktrans %}
+                {% endif %}
               </div>
             </div>
-            {% if email_alerts_disabled %}
-              <div>{% trans "Your email updates are disabled." %}</div>
-            {% else %}
-              <div>
-                {% blocktrans with frequency=email_alert_frequency %}Your email updates are sent {{ frequency }}.{% endblocktrans %}
-              </div>
-            {% endif %}
             <a href="{% url "email_alerts" %}">{% trans "Manage email updates" %}</a>
           </div>
         </li>
@@ -70,11 +67,11 @@
                 hx-target="closest .follow-control"
                 hx-swap="outerHTML">
             {% csrf_token %}
-            <button class="dropdown-item dropdown-follow-button unfollow" type="submit">
+            <button class="dropdown-item" type="submit">
               <strong>
                 <i class="bi bi-bell-slash"></i>
               {% trans "Unfollow" %}</strong>
-              <small class="d-block">{% trans "Stop receiving updates about this item." %}</small>
+              <div class="mt-1">{% trans "Stop receiving updates about this item." %}</div>
             </button>
           </form>
         </li>
@@ -85,13 +82,13 @@
                 hx-swap="outerHTML">
             {% csrf_token %}
             {{ form }}
-            <button class="dropdown-item dropdown-follow-button" type="submit">
+            <button class="dropdown-item" type="submit">
               <strong>
                 <i class="bi bi-bell"></i>
               {% trans "Follow" %}</strong>
-              <small class="d-block">
+              <div class="mt-1">
                 {% blocktrans with followed_object=followed_object %}Follow this {{ followed_object_type }} to receive updates about new documents.{% endblocktrans %}
-              </small>
+              </div>
             </button>
           </form>
         </li>

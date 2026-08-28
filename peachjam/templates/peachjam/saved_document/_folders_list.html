@@ -14,7 +14,8 @@
   </div>
   <div class="mb-4">
     {% trans "Save documents to simplify your research and stay up-to-date." %}
-    {% blocktrans trimmed %}Changes to your saved documents can be included in your email updates.{% endblocktrans %}
+    <br />
+    {% blocktrans trimmed %}Updates and citations of your saved documents will be included in your email updates.{% endblocktrans %}
     <a href="{{ email_alerts_url }}">{% trans "Manage email updates" %}</a>.
   </div>
   {% if folder_limit_reached %}

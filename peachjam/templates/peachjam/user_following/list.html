@@ -9,7 +9,7 @@
   {% include "peachjam/my/_subscription_locked_banner.html" with subscription_locked_category_summary=my_locked_data_summary.by_category.following subscription_locked_category_label="follows" %}
   <h2>{% trans 'Following' %}</h2>
   <div class="mb-4">
-    {% blocktrans trimmed %}Updates for courts and topics you follow can be included in your email updates.{% endblocktrans %}
+    {% blocktrans trimmed %}Updates for courts and topics you follow will be included in your email updates.{% endblocktrans %}
     <a href="{{ email_alerts_url }}">{% trans "Manage email updates" %}</a>.
   </div>
   <div class="card">
