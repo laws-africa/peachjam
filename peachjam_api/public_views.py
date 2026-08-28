@@ -1,4 +1,5 @@
 from django.http import Http404, HttpResponse
+from django.utils.http import content_disposition_header
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import status, viewsets
@@ -131,7 +132,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"inline; filename={fname}"
+        response["Content-Disposition"] = content_disposition_header(False, fname)
         response["Content-Length"] = str(len(file_bytes))
         return response
 

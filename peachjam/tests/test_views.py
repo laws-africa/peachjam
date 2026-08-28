@@ -884,6 +884,10 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
+            resp["Content-Disposition"],
+            f'attachment; filename="{sf.filename_for_download()}"',
+        )
+        self.assertEqual(
             self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
         )
         doc.published = True

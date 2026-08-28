@@ -12,6 +12,7 @@ from django.shortcuts import get_list_or_404, get_object_or_404, redirect, rever
 from django.template.loader import render_to_string
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
+from django.utils.http import content_disposition_header
 from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
@@ -166,7 +167,7 @@ class DocumentSourceView(DocumentDetailView):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"attachment; filename={fname}"
+        response["Content-Disposition"] = content_disposition_header(True, fname)
         response["Content-Length"] = str(len(file_bytes))
         return response
 
@@ -267,7 +268,7 @@ class DocumentAttachmentView(DocumentDetailView):
             file_bytes = file.file.open().read()
             response = HttpResponse(file_bytes, content_type=file.mimetype)
             filename = re.sub(r"[^A-Za-z0-9._-]", "", file.filename)
-            response["Content-Disposition"] = f"attachment; filename={filename}"
+            response["Content-Disposition"] = content_disposition_header(True, filename)
             response["Content-Length"] = str(len(file_bytes))
             return response
         raise Http404
@@ -523,7 +524,7 @@ class DocumentTextContentView(DocumentDebugViewBase):
         text = self.object.get_content_as_text()
         filename = clean_filename(self.object.title) + ".txt"
         response = FileResponse(text, as_attachment=True, content_type="text/plain")
-        response["Content-Disposition"] = f"attachment; filename={filename}"
+        response["Content-Disposition"] = content_disposition_header(True, filename)
         return response
 
 
