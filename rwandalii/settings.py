@@ -2,6 +2,8 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "Africa/Kigali"
+
 INSTALLED_APPS = ["rwandalii.apps.RwandaLIIConfig"] + INSTALLED_APPS  # noqa
 
 ALLOWED_HOSTS = build_allowed_hosts(  # noqa

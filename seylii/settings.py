@@ -4,6 +4,8 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "Indian/Mahe"
+
 INSTALLED_APPS = ["seylii.apps.SeyLIIConfig"] + INSTALLED_APPS  # noqa
 MIDDLEWARE = ["peachjam.middleware.BasicAuthMiddleware"] + MIDDLEWARE  # noqa
 

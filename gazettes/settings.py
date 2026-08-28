@@ -1,5 +1,7 @@
 from peachjam.settings import *  # noqa
 
+TIME_ZONE = "UTC"
+
 # Application definition
 INSTALLED_APPS = [
     "gazettes",

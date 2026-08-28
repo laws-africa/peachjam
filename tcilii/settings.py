@@ -2,6 +2,8 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "America/Grand_Turk"
+
 INSTALLED_APPS = ["tcilii.apps.TCILIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa

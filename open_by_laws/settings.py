@@ -2,6 +2,8 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "Africa/Johannesburg"
+
 INSTALLED_APPS = ["open_by_laws.apps.OpenByLawsConfig"] + INSTALLED_APPS  # noqa
 
 ROOT_URLCONF = "open_by_laws.urls"
