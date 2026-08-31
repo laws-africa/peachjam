@@ -6,6 +6,7 @@ from unittest.mock import patch
 from countries_plus.models import Country
 from django.conf import settings
 from django.contrib.auth.models import Permission, User
+from django.contrib.messages import get_messages
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
@@ -243,12 +244,101 @@ class TimelineViewTest(TestCase):
 
     def test_my_lii_updates_email_alert_frequency(self):
         response = self.client.post(
-            reverse("my_home"), {"email_alert_frequency": "weekly"}
+            reverse("email_alerts"), {"email_alert_frequency": "weekly"}, follow=True
         )
 
-        self.assertRedirects(response, reverse("my_home"))
+        self.assertIn(
+            "Your email update frequency has been updated to weekly.",
+            [str(message) for message in get_messages(response.wsgi_request)],
+        )
         self.user.userprofile.refresh_from_db()
         self.assertEqual("weekly", self.user.userprofile.email_alert_frequency)
+
+    def test_email_alerts_has_its_own_my_lii_tab(self):
+        response = self.client.get(reverse("email_alerts"))
+
+        self.assertContains(response, "Email updates")
+        self.assertContains(response, 'class="nav-link active"', count=1)
+
+    def test_follow_button_shows_following_status_and_email_updates_link(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="add_userfollowing")
+        )
+
+        response = self.client.get(
+            reverse("user_following_button") + f"?court={self.court.pk}"
+        )
+
+        self.assertContains(response, "Following")
+        self.assertContains(
+            response,
+            "You are following this court and will receive daily email updates.",
+        )
+        self.assertContains(response, reverse("email_alerts"))
+        self.assertContains(response, "Unfollow")
+
+    def test_follow_button_explains_when_email_updates_are_disabled(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="add_userfollowing")
+        )
+        self.user.userprofile.email_alert_frequency = (
+            self.user.userprofile.EmailAlertFrequency.NONE
+        )
+        self.user.userprofile.save(update_fields=["email_alert_frequency"])
+
+        response = self.client.get(
+            reverse("user_following_button") + f"?court={self.court.pk}"
+        )
+
+        self.assertContains(
+            response, "You are following this court, but email updates are disabled."
+        )
+
+    def test_follow_button_offers_follow_action_before_following(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="add_userfollowing")
+        )
+        self.follow.delete()
+
+        response = self.client.get(
+            reverse("user_following_button") + f"?court={self.court.pk}"
+        )
+
+        self.assertContains(response, "dropdown-toggle")
+        self.assertContains(response, "Follow this court to receive updates")
+
+    def test_anonymous_user_can_open_follow_account_modal_from_dropdown(self):
+        self.client.logout()
+
+        response = self.client.get(
+            reverse("user_following_button") + f"?court={self.court.pk}"
+        )
+
+        self.assertContains(response, "dropdown-toggle")
+        self.assertContains(response, "Follow this court to receive updates")
+        self.assertContains(response, 'data-bs-target="#followModal"')
+
+    def test_follow_actions_return_the_updated_button(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="add_userfollowing")
+        )
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="delete_userfollowing")
+        )
+        self.follow.delete()
+        button_url = reverse("user_following_button") + f"?court={self.court.pk}"
+
+        response = self.client.post(
+            reverse("user_following_create") + f"?court={self.court.pk}"
+        )
+        self.assertRedirects(response, button_url, fetch_redirect_response=False)
+
+        follow = UserFollowing.objects.get(user=self.user, court=self.court)
+        response = self.client.post(
+            reverse("user_following_delete", kwargs={"pk": follow.pk})
+            + f"?court={self.court.pk}"
+        )
+        self.assertRedirects(response, button_url, fetch_redirect_response=False)
 
     def test_new_user_default_frequency_uses_site_settings(self):
         site_settings = pj_settings()

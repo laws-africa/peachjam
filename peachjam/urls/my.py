@@ -1,6 +1,7 @@
 from django.urls import include, path
 
 from peachjam.views import (
+    EmailAlertsView,
     FolderCreateView,
     FolderDeleteView,
     FolderDownloadView,
@@ -14,6 +15,7 @@ from peachjam.views import (
 
 urlpatterns = [
     path("", MyHomeView.as_view(), name="my_home"),
+    path("email-alerts/", EmailAlertsView.as_view(), name="email_alerts"),
     path("timeline", MyTimelineView.as_view(), name="my_timeline"),
     path("frontpage", MyFrontpageView.as_view(), name="my_frontpage"),
     path(

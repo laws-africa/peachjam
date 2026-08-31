@@ -1047,10 +1047,6 @@ class UserProfileForm(forms.Form):
     preferred_language = forms.ModelChoiceField(
         queryset=Language.objects.filter(iso_639_1__in=get_languages())
     )
-    email_alert_frequency = forms.ChoiceField(
-        label=_("Email alert frequency"),
-        choices=UserProfile.EmailAlertFrequency.choices,
-    )
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop("user")
@@ -1058,7 +1054,6 @@ class UserProfileForm(forms.Form):
             "first_name": self.user.first_name,
             "last_name": self.user.last_name,
             "preferred_language": self.user.userprofile.preferred_language,
-            "email_alert_frequency": self.user.userprofile.email_alert_frequency,
         }
         super().__init__(*args, **kwargs)
 
@@ -1067,9 +1062,6 @@ class UserProfileForm(forms.Form):
         self.user.last_name = self.cleaned_data["last_name"]
         self.user.userprofile.preferred_language = self.cleaned_data[
             "preferred_language"
-        ]
-        self.user.userprofile.email_alert_frequency = self.cleaned_data[
-            "email_alert_frequency"
         ]
         self.user.userprofile.save()
         self.user.save()

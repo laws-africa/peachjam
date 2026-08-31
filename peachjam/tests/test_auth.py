@@ -633,6 +633,7 @@ class OnboardingViewTests(TestCase):
         self.assertNotContains(
             response, "What best describes your role or organisation?"
         )
+        self.assertNotContains(response, "Email alert frequency")
 
         response = self.client.get(reverse("my_account"))
 
@@ -645,7 +646,6 @@ class OnboardingViewTests(TestCase):
                 "first_name": "Janet",
                 "last_name": "Doe",
                 "preferred_language": language.pk,
-                "email_alert_frequency": self.profile.email_alert_frequency,
             },
         )
 

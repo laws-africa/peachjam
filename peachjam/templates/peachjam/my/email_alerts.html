@@ -1,0 +1,31 @@
+{% extends "peachjam/my/layout.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans "Email updates" %}
+{% endblock %}
+{% block my-content %}
+  <div class="card">
+    <div class="card-body">
+      <h2 class="h5 mb-1">{% trans "Email updates" %}</h2>
+      <p class="text-muted">
+        {% blocktrans with my_lii=MY_LII %}We'll email you with updates about your saved searches, saved documents, courts and topics you follow. Choose how often you would like to receive your {{ my_lii }} updates email.{% endblocktrans %}
+      </p>
+      <form method="post" class="row align-items-end g-3">
+        {% csrf_token %}
+        <div class="col-md-auto">
+          <label class="form-label"
+                 for="{{ email_alert_frequency_form.email_alert_frequency.id_for_label }}">
+            {{ email_alert_frequency_form.email_alert_frequency.label }}
+          </label>
+          {{ email_alert_frequency_form.email_alert_frequency }}
+          {% for error in email_alert_frequency_form.email_alert_frequency.errors %}
+            <div class="text-danger small">{{ error }}</div>
+          {% endfor %}
+        </div>
+        <div class="col-md-auto">
+          <button type="submit" class="btn btn-primary">{% trans "Save" %}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

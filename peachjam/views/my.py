@@ -45,25 +45,42 @@ class MyHomeView(LoginRequiredMixin, CommonContextMixin, TemplateView):
             raise Http404()
         return super().dispatch(request, *args, **kwargs)
 
-    def get_email_alert_frequency_form(self, data=None):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["KEY_LINK_PAGE"] = "my_lii"
+        return context
+
+
+class EmailAlertsView(LoginRequiredMixin, TemplateView):
+    template_name = "peachjam/my/email_alerts.html"
+    tab = "email_alerts"
+
+    def dispatch(self, request, *args, **kwargs):
+        if not pj_settings().accounts_enabled:
+            raise Http404()
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_form(self, data=None):
         return EmailAlertFrequencyForm(data=data, user=self.request.user)
 
     def post(self, request, *args, **kwargs):
-        form = self.get_email_alert_frequency_form(request.POST)
+        form = self.get_form(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, _("Your email alert frequency has been updated."))
-            return redirect("my_home")
-        return self.render_to_response(
-            self.get_context_data(email_alert_frequency_form=form)
-        )
+            frequency = (
+                self.request.user.userprofile.get_email_alert_frequency_display().lower()
+            )
+            messages.success(
+                request,
+                _("Your email update frequency has been updated to %(frequency)s.")
+                % {"frequency": frequency},
+            )
+            return redirect("email_alerts")
+        return self.render_to_response(self.get_context_data(form=form))
 
-    def get_context_data(self, email_alert_frequency_form=None, **kwargs):
+    def get_context_data(self, form=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["KEY_LINK_PAGE"] = "my_lii"
-        context["email_alert_frequency_form"] = (
-            email_alert_frequency_form or self.get_email_alert_frequency_form()
-        )
+        context["email_alert_frequency_form"] = form or self.get_form()
         return context
 
 

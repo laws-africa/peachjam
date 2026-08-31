@@ -74,6 +74,13 @@
               </a>
             </li>
           {% endif %}
+          <li class="nav-item" role="presentation">
+            <a href="{% url "email_alerts" %}"
+               class="nav-link {% if view.tab == "email_alerts" %}active{% endif %}">
+              <i class="bi bi-envelope"></i>
+              {% trans "Email updates" %}
+            </a>
+          </li>
         {% endblock %}
       </ul>
     </div>

@@ -1,5 +1,6 @@
 {% load i18n peachjam_subs %}
 {% change_subscription_url as change_subscription_url %}
+{% url "email_alerts" as email_alerts_url %}
 <div>
   <div class="d-flex justify-content-between align-items-center">
     <h2>{% trans 'Saved documents' %}</h2>
@@ -11,7 +12,12 @@
       {% trans 'New Folder' %}
     </button>
   </div>
-  <div class="mb-4">{% trans "Save documents to simplify your research and stay up-to-date." %}</div>
+  <div class="mb-4">
+    {% trans "Save documents to simplify your research and stay up-to-date." %}
+    <br />
+    {% blocktrans trimmed %}Updates and citations of your saved documents will be included in your email updates.{% endblocktrans %}
+    <a href="{{ email_alerts_url }}">{% trans "Manage email updates" %}</a>.
+  </div>
   {% if folder_limit_reached %}
     <div class="alert alert-warning d-flex">
       <div class="me-2">
