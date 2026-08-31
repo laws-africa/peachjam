@@ -295,9 +295,9 @@ class FilteredDocumentListView(DocumentListView):
         context["rendered_facets"] = rendered_facets
 
     def order_facet_options(self, context):
-        for facet_name, facet in context.get("facet_data", {}).items():
+        for facet in context.get("facet_data", {}).values():
             options = facet.get("options")
-            if not options or facet_name == "alphabet":
+            if not options or facet.get("type") == "radio":
                 continue
 
             selected_values = self.facet_selected_values(facet)

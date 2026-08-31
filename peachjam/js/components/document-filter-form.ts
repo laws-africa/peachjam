@@ -7,7 +7,7 @@ export default class DocumentFilterForm {
 
     // ensure the bootstrap offcanvas element is closed before htmx swaps the content, otherwise it can end up in a
     // broken state
-    this.root.addEventListener('htmx:beforeSwap', () => this.cleanupOffcanvas());
+    this.root.addEventListener('htmx:beforeSwap', (event) => this.prepareForSwap(event));
 
     // setup a resize observer to move the filters when the window is resized
     const observer = new ResizeObserver(() => this.moveFilters());
@@ -15,6 +15,19 @@ export default class DocumentFilterForm {
     this.moveFilters();
     this.setupFacetSearch();
     this.setupSkipLinks();
+  }
+
+  prepareForSwap (event: Event) {
+    this.cleanupOffcanvas();
+    if (!(event as CustomEvent).detail.shouldSwap) {
+      return;
+    }
+
+    // outerHTML inserts the new form before removing this one, so ensure the
+    // outgoing radio group cannot override the new state.
+    this.root.querySelectorAll<HTMLInputElement>('input[type="radio"]:checked').forEach((radio) => {
+      radio.checked = false;
+    });
   }
 
   moveFilters () {
