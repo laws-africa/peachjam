@@ -18,6 +18,7 @@ import TermsOfUse from './terms-of-use';
 import UserAuth from './user-auth';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
+import SearchInput from './search-input';
 import { SavedDocumentModal } from './saved-documents';
 import { DocumentChatBanner, DocumentChatOpenButton } from './chat';
 
@@ -49,6 +50,7 @@ const components: Record<string, any> = {
   AnnotationsProvider,
   SavedDocumentModal,
   SearchTypeahead,
+  SearchInput,
   ShareMenuItem,
   ToggleTab,
   TaxonomyTree,
