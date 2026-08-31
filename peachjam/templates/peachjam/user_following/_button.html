@@ -1,12 +1,30 @@
 {% load i18n %}
 {% if subscription_required %}
-  <button class="btn btn-outline-primary ms-2"
-          type="button"
-          data-bs-toggle="modal"
-          data-bs-target="#followModal">
-    <i class="bi bi-bell"></i>
-    <span>{% trans "Follow" %}</span>
-  </button>
+  <div class="dropdown follow-control">
+    <button class="btn btn-outline-primary dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">
+      <i class="bi bi-bell"></i>
+      {% trans "Follow" %}
+    </button>
+    <ul class="dropdown-menu">
+      <li>
+        <button class="dropdown-item"
+                type="button"
+                data-bs-toggle="modal"
+                data-bs-target="#followModal">
+          <strong>
+            <i class="bi bi-bell"></i>
+            {% trans "Follow" %}
+          </strong>
+          <div class="mt-1">
+            {% blocktrans with followed_object_type=followed_object_type %}Follow this {{ followed_object_type }} to receive updates about new documents.{% endblocktrans %}
+          </div>
+        </button>
+      </li>
+    </ul>
+  </div>
   <div class="modal" id="followModal" tabindex="-1">
     <div class="modal-dialog">
       <div class="modal-content">

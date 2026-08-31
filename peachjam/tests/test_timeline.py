@@ -307,6 +307,17 @@ class TimelineViewTest(TestCase):
         self.assertContains(response, "dropdown-toggle")
         self.assertContains(response, "Follow this court to receive updates")
 
+    def test_anonymous_user_can_open_follow_account_modal_from_dropdown(self):
+        self.client.logout()
+
+        response = self.client.get(
+            reverse("user_following_button") + f"?court={self.court.pk}"
+        )
+
+        self.assertContains(response, "dropdown-toggle")
+        self.assertContains(response, "Follow this court to receive updates")
+        self.assertContains(response, 'data-bs-target="#followModal"')
+
     def test_follow_actions_return_the_updated_button(self):
         self.user.user_permissions.add(
             Permission.objects.get(codename="add_userfollowing")
