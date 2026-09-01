@@ -12,7 +12,7 @@ from django.core.cache import caches
 from django.core.files.base import ContentFile
 from django.http import HttpResponse
 from django.template.loader import render_to_string
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import include, path, reverse
 from languages_plus.models import Language
 
@@ -36,6 +36,7 @@ from peachjam.models import (
     UserFollowing,
     Work,
 )
+from peachjam.views.generic_views import FilteredDocumentListView
 from peachjam.views.robots import (
     RobotsView,
     _language_prefixes,
@@ -58,6 +59,28 @@ urlpatterns = [
     path("", home_page_view, name="home_page"),
     path("", include("peachjam.urls.i18n")),
 )
+
+
+class FacetOrderingTestCase(SimpleTestCase):
+    def test_radio_options_keep_stable_order(self):
+        options = [
+            ("act", "Act"),
+            ("government-notice", "Government Notice"),
+            ("statutory-instrument", "Statutory Instrument"),
+        ]
+        context = {
+            "facet_data": {
+                "natures": {
+                    "type": "radio",
+                    "options": options,
+                    "values": ["statutory-instrument"],
+                }
+            }
+        }
+
+        FilteredDocumentListView().order_facet_options(context)
+
+        self.assertEqual(options, context["facet_data"]["natures"]["options"])
 
 
 class PeachjamViewsTest(TestCase):
