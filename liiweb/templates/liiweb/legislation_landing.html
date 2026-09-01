@@ -1,0 +1,346 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load humanize i18n static %}
+{% block title %}
+  {% trans "Legislation" %}
+{% endblock %}
+{% block page-content %}
+  <div class="position-relative overflow-hidden bg-white border-bottom">
+    <img src="{% static 'images/banner.jpg' %}"
+         class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover opacity-25"
+         style="object-position: 75% center"
+         alt=""/>
+    <div class="container position-relative py-4">
+      <div class="row align-items-end g-4 pb-4">
+        <div class="col-12 col-lg-4">
+          <h1 id="main-page-heading">{% trans "Legislation" %}</h1>
+          <p class="lead mb-0">
+            {% blocktrans count counter=legislation_counts.total with formatted_count=legislation_counts.total|intcomma %}Explore {{ formatted_count }} published legislation document.{% plural %}Explore {{ formatted_count }} published legislation documents.{% endblocktrans %}
+          </p>
+          {% if help_link %}
+            <div class="mt-3">{% include "peachjam/_help_button.html" %}</div>
+          {% endif %}
+        </div>
+        <div class="col-12 col-lg-8">
+          <form action="{% url 'legislation_list_all' %}" method="get" role="search">
+            <fieldset>
+              <legend class="h5">
+                {% trans "Find legislation" %}
+              </legend>
+              <div class="row g-2 align-items-end">
+                <div class="col-12 col-md-6">
+                  <label class="form-label" for="legislation-search">{% trans "Title or citation" %}</label>
+                  <input id="legislation-search"
+                         type="search"
+                         class="form-control"
+                         name="q"
+                         placeholder="{% trans 'For example, Income Tax Act' %}"/>
+                </div>
+                <div class="col-6 col-md-2">
+                  <label class="form-label" for="legislation-year">{% trans "Year" %}</label>
+                  <select id="legislation-year" class="form-select" name="years">
+                    <option value="">
+                      {% trans "Any year" %}
+                    </option>
+                    {% for year in legislation_search_years %}
+                      <option value="{{ year }}">
+                        {{ year }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-6 col-md-3">
+                  <label class="form-label" for="legislation-nature">{% trans "Document nature" %}</label>
+                  <select id="legislation-nature" class="form-select" name="natures">
+                    <option value="">
+                      {% trans "Any nature" %}
+                    </option>
+                    {% for item in legislation_search_natures %}
+                      <option value="{{ item.nature__code }}">
+                        {{ item.nature__name }}
+                      </option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-12 col-md-1 d-grid">
+                  <button class="btn btn-primary" type="submit">
+                    <span class="d-md-none">{% trans "Search" %}</span>
+                    <i class="bi bi-search d-none d-md-inline" aria-hidden="true"></i>
+                    <span class="visually-hidden d-none d-md-inline">{% trans "Search legislation" %}</span>
+                  </button>
+                </div>
+              </div>
+            </fieldset>
+          </form>
+          <a class="d-inline-block mt-2"
+             href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search" %}</a>
+        </div>
+      </div>
+      <div class="row g-3"
+           aria-label="{% trans 'National legislation collections' %}">
+        <div class="col-12 col-md-4">
+          <div class="card card-clickable h-100 position-relative">
+            <div class="card-body">
+              <div class="d-flex justify-content-between gap-3 align-items-baseline">
+                <h2 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'legislation_list_current' %}">{% trans "Current legislation" %}</a>
+                </h2>
+                <small class="text-muted text-nowrap">{{ legislation_counts.current|intcomma }}</small>
+              </div>
+              <p class="card-text mb-0">{% trans "Principal legislation in force." %}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card card-clickable h-100 position-relative">
+            <div class="card-body">
+              <div class="d-flex justify-content-between gap-3 align-items-baseline">
+                <h2 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'legislation_list_recent' %}">{% trans "Recent legislation" %}</a>
+                </h2>
+                <small class="text-muted text-nowrap">{{ legislation_counts.recent|intcomma }}</small>
+              </div>
+              <p class="card-text mb-0">{% trans "Published in the past year." %}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card card-clickable h-100 position-relative">
+            <div class="card-body">
+              <div class="d-flex justify-content-between gap-3 align-items-baseline">
+                <h2 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'legislation_list_subsidiary' %}">{{ PEACHJAM_SETTINGS.subleg_label }}</a>
+                </h2>
+                <small class="text-muted text-nowrap">{{ legislation_counts.subsidiary|intcomma }}</small>
+              </div>
+              <p class="card-text mb-0">{% trans "Regulations, rules and notices." %}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="mt-3 mb-0">
+        {% trans "Looking for provincial or municipal legislation?" %}
+        <a href="{% url 'locality_legislation' %}">{% trans "Browse local legislation" %}</a>.
+      </p>
+    </div>
+  </div>
+  <section class="bg-light py-5" aria-labelledby="browse-legislation-heading">
+    <div class="container">
+      <div class="text-center mb-4">
+        <h2 id="browse-legislation-heading">{% trans "Browse legislation" %}</h2>
+        <p class="lead mb-0">{% trans "Start with the year or document nature you know." %}</p>
+      </div>
+      <div class="row g-4 justify-content-center">
+        <section class="col-12 col-lg-6" aria-labelledby="browse-by-year-heading">
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+              <h3 id="browse-by-year-heading" class="h4">{% trans "Browse by year" %}</h3>
+              <p class="text-muted">{% trans "Find legislation by the year it was enacted." %}</p>
+              <ul class="list-group list-group-flush mb-4">
+                {% for year in legislation_years %}
+                  <li class="list-group-item px-0 d-flex justify-content-between align-items-center position-relative">
+                    <a class="stretched-link"
+                       href="{% url 'legislation_list_all' %}?years={{ year }}">{{ year }}</a>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                  </li>
+                {% endfor %}
+              </ul>
+              <a class="btn btn-primary mt-auto align-self-start"
+                 href="{% url 'legislation_list_all' %}#documents">{% trans "Browse legislation from all years" %}</a>
+            </div>
+          </div>
+        </section>
+        <section class="col-12 col-lg-6"
+                 aria-labelledby="browse-by-document-nature-heading">
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+              <h3 id="browse-by-document-nature-heading" class="h4">{% trans "Document nature" %}</h3>
+              <p class="text-muted">
+                {% trans "Choose the nature of the legislation you need." %}
+              </p>
+              <div class="list-group list-group-flush mb-4">
+                {% for item in legislation_natures %}
+                  <a class="list-group-item list-group-item-action px-0 d-flex justify-content-between align-items-center"
+                     href="{% url 'legislation_list_all' %}?natures={{ item.nature__code|urlencode }}">
+                    <span>
+                      <span class="d-block fw-semibold">{{ item.nature__name }}</span>
+                      <small class="text-muted">
+                        {% blocktrans count counter=item.count with formatted_count=item.count|intcomma %}{{ formatted_count }} document{% plural %}{{ formatted_count }} documents{% endblocktrans %}
+                      </small>
+                    </span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                  </a>
+                {% endfor %}
+              </div>
+              <a class="btn btn-primary mt-auto align-self-start"
+                 href="{% url 'legislation_list_all' %}#documents">{% trans "Browse legislation of all natures" %}</a>
+            </div>
+          </div>
+        </section>
+      </div>
+      <section class="mt-5" aria-labelledby="status-collections-heading">
+        <div class="text-center mb-4">
+          <h2 id="status-collections-heading">
+            {% trans "Legislation by status" %}
+          </h2>
+          <p class="mb-0">
+            {% trans "Find legislation that is not currently in force." %}
+          </p>
+        </div>
+        <div class="row g-4 justify-content-center">
+          <div class="col-12 col-md-6">
+            <div class="card card-clickable h-100 position-relative">
+              <div class="card-body">
+                <div class="d-flex justify-content-between gap-3 align-items-baseline">
+                  <h3 class="h5 mb-2">
+                    <a class="stretched-link text-decoration-none"
+                       href="{% url 'legislation_list_uncommenced' %}">{% trans "Uncommenced legislation" %}</a>
+                  </h3>
+                  <small class="text-muted text-nowrap">{{ legislation_counts.uncommenced|intcomma }}</small>
+                </div>
+                <p class="card-text mb-0">
+                  {% trans "Legislation that is not yet in force." %}
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-md-6">
+            <div class="card card-clickable h-100 position-relative">
+              <div class="card-body">
+                <div class="d-flex justify-content-between gap-3 align-items-baseline">
+                  <h3 class="h5 mb-2">
+                    <a class="stretched-link text-decoration-none"
+                       href="{% url 'legislation_list_repealed' %}">{% trans "Repealed legislation" %}</a>
+                  </h3>
+                  <small class="text-muted text-nowrap">{{ legislation_counts.repealed|intcomma }}</small>
+                </div>
+                <p class="card-text mb-0">
+                  {% trans "Legislation that is no longer in force." %}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      {% if show_more_resources or show_glossary %}
+        <section class="mt-5" aria-labelledby="research-tools-heading">
+          <div class="text-center mb-4">
+            <h2 id="research-tools-heading">
+              {% trans "More resources" %}
+            </h2>
+            <p class="mb-0">
+              {% trans "Check individual provisions and look up defined legal terms." %}
+            </p>
+          </div>
+          <div class="row g-4 justify-content-center">
+            {% if show_unconstitutional_provisions %}
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h3 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="{% url 'unconstitutional_provision_list' %}">{% trans "Unconstitutional provisions" %}</a>
+                    </h3>
+                    <p class="card-text mb-0">
+                      {% trans "See provisions affected by constitutional decisions." %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if show_uncommenced_provisions %}
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h3 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="{% url 'uncommenced_provision_list' %}">{% trans "Uncommenced provisions" %}</a>
+                    </h3>
+                    <p class="card-text mb-0">
+                      {% trans "See individual sections that are not yet in force." %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+            {% if show_glossary %}
+              <div class="col-12 col-md-6 col-xl-4">
+                <div class="card card-clickable h-100 position-relative">
+                  <div class="card-body">
+                    <h3 class="h5 mb-2">
+                      <a class="stretched-link text-decoration-none"
+                         href="{% url 'glossary' place_code=place_code %}">{% trans "Glossary of defined terms" %}</a>
+                    </h3>
+                    <p class="card-text mb-0">
+                      {% trans "Look up terms defined across legislation." %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </section>
+      {% endif %}
+    </div>
+  </section>
+  <section class="container py-5"
+           aria-labelledby="legislation-highlights-heading">
+    <div class="text-center mb-4">
+      <h2 id="legislation-highlights-heading">
+        {% trans "Legislation highlights" %}
+      </h2>
+      <p class="lead mb-0">
+        {% trans "Frequently referenced legislation and the latest publications." %}
+      </p>
+    </div>
+    <div class="row g-5">
+      <section class="col-12 col-lg-6" aria-labelledby="popular-legislation-heading">
+        <div class="d-flex justify-content-between align-items-baseline gap-3 mb-3">
+          <h3 id="popular-legislation-heading" class="h4 mb-0">
+            {% trans "Popular legislation" %}
+          </h3>
+          <a href="{% url 'legislation_list_all' %}">{% trans "View all" %}</a>
+        </div>
+        <div class="list-group list-group-flush border-top">
+          {% for document in popular_legislation %}
+            <a class="list-group-item list-group-item-action px-0 py-3"
+               href="{{ document.get_absolute_url }}">
+              <span class="d-block fw-semibold">{{ document.title }}</span>
+              {% if document.citation %}<small class="text-muted">{{ document.citation }}</small>{% endif %}
+            </a>
+          {% empty %}
+            <p class="py-3 mb-0 text-muted">
+              {% trans "No legislation is available." %}
+            </p>
+          {% endfor %}
+        </div>
+      </section>
+      <section class="col-12 col-lg-6" aria-labelledby="recent-legislation-heading">
+        <div class="d-flex justify-content-between align-items-baseline gap-3 mb-3">
+          <h3 id="recent-legislation-heading" class="h4 mb-0">
+            {% trans "Recent legislation" %}
+          </h3>
+          <a href="{% url 'legislation_list_recent' %}">{% trans "View all" %}</a>
+        </div>
+        <div class="list-group list-group-flush border-top">
+          {% for document in recent_legislation %}
+            <a class="list-group-item list-group-item-action px-0 py-3"
+               href="{{ document.get_absolute_url }}">
+              <span class="d-flex justify-content-between gap-3">
+                <span class="fw-semibold">{{ document.title }}</span>
+                <small class="text-muted text-nowrap">{{ document.date|date:"j M Y" }}</small>
+              </span>
+              {% if document.citation %}<small class="text-muted">{{ document.citation }}</small>{% endif %}
+            </a>
+          {% empty %}
+            <p class="py-3 mb-0 text-muted">
+              {% trans "No recent legislation is available." %}
+            </p>
+          {% endfor %}
+        </div>
+      </section>
+    </div>
+  </section>
+{% endblock %}
