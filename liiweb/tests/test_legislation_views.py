@@ -11,10 +11,37 @@ from peachjam.models import Legislation
 class LegislationViewsTest(TestCase):
     fixtures = ["tests/countries", "tests/languages", "documents/sample_documents"]
 
+    def test_legislation_landing_page(self):
+        response = self.client.get(reverse("legislation_list"), {"nocache": "1"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "liiweb/legislation_landing.html")
+        self.assertEqual(1, response.context["legislation_counts"]["total"])
+        self.assertContains(response, "Find legislation")
+        self.assertContains(response, f'action="{reverse("legislation_list_all")}"')
+        self.assertContains(response, 'name="years"')
+        self.assertContains(response, 'name="natures"')
+        self.assertContains(response, "Browse by year")
+        self.assertContains(response, "Current legislation")
+        self.assertContains(response, "Document nature")
+        self.assertContains(response, "Legislation by status")
+        self.assertContains(response, "Popular legislation")
+        self.assertNotContains(response, "Browse by legal topic")
+        self.assertNotContains(response, 'data-component="DocumentList"')
+        self.assertEqual(1, len(response.context["popular_legislation"]))
+
+    def test_current_legislation_has_its_own_listing_page(self):
+        response = self.client.get(reverse("legislation_list_current"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "liiweb/legislation_list.html")
+        self.assertContains(response, 'data-component="DocumentList"')
+
     def test_legislation_listing_national_only(self):
         response = self.client.get(reverse("legislation_list_all"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["KEY_LINK_PAGE"], "legislation_list")
+        self.assertTemplateUsed(response, "liiweb/legislation_list.html")
 
         self.assertEqual(
             ["D", "Divorce Act, 1979"],
@@ -66,7 +93,7 @@ class LegislationViewsTest(TestCase):
         )
         self.assertEqual(english_child.work_id, french_child.work_id)
 
-        response = self.client.get(reverse("legislation_list"), {"languages": "fr"})
+        response = self.client.get(reverse("legislation_list_all"), {"languages": "fr"})
         self.assertEqual(response.status_code, 200)
         listed_parent = next(
             doc
@@ -76,7 +103,7 @@ class LegislationViewsTest(TestCase):
         self.assertIn(french_child, listed_parent.children)
         self.assertNotIn(english_child, listed_parent.children)
 
-        default_response = self.client.get(reverse("legislation_list"))
+        default_response = self.client.get(reverse("legislation_list_all"))
         default_parent = next(
             doc
             for doc in default_response.context["documents"]
@@ -84,3 +111,11 @@ class LegislationViewsTest(TestCase):
         )
         self.assertIn(english_child, default_parent.children)
         self.assertNotIn(french_child, default_parent.children)
+
+    def test_legislation_listing_ignores_non_legislation_nature_filter(self):
+        response = self.client.get(
+            reverse("legislation_list_all"), {"natures": "judgment"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([], list(response.context.get("documents")))
