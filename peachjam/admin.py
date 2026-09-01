@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import date
 
+from allauth.socialaccount.models import SocialAccount
 from background_task.models import Task
 from ckeditor.widgets import CKEditorWidget
 from countries_plus.models import Country
@@ -2770,9 +2771,35 @@ class SavedSearchInline(admin.TabularInline):
         return False
 
 
+class SocialAccountInline(admin.TabularInline):
+    """Show OAuth identities linked to a user without exposing their tokens."""
+
+    model = SocialAccount
+    extra = 0
+    can_delete = False
+    fields = ("provider", "uid_link", "date_joined", "last_login")
+    readonly_fields = fields
+    verbose_name = "Linked social account"
+    verbose_name_plural = "Linked social accounts"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def uid_link(self, obj):
+        if not obj.pk:
+            return "-"
+        url = reverse("admin:socialaccount_socialaccount_change", args=[obj.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.uid)
+
+    uid_link.short_description = _("UID")
+
+
 class UserAdminCustom(ImportExportMixin, UserAdmin):
     resource_classes = [UserResource]
-    inlines = [UserFollowingInline, SavedSearchInline]
+    inlines = [SocialAccountInline, UserFollowingInline, SavedSearchInline]
     actions = ["require_accept_terms"]
 
     def require_accept_terms(self, request, queryset):
