@@ -206,7 +206,7 @@ def search_flynotes(keywords: list[str], parent_id: int) -> str:
 
 
 class JudgmentSummariser:
-    default_llm_model = "gpt-5-mini"
+    default_llm_model = "gpt-5.6-luna"
     llm_model = None
     summary_prompt_name = "summarise/judgment"
     summary_prompt_str = None
@@ -267,7 +267,7 @@ class JudgmentSummariser:
             instructions=self.get_summary_prompt_str(jurisdiction=jurisdiction),
             output_type=JudgmentSummary,
             model_settings=ModelSettings(
-                reasoning=Reasoning(effort="medium", summary="auto"),
+                reasoning=Reasoning(effort="low", summary="auto"),
                 response_include=["reasoning.encrypted_content"],
                 store=False,
             ),

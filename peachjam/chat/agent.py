@@ -86,7 +86,7 @@ def get_session(thread) -> SQLAlchemySession:
 
 class DocumentChat:
     INITIAL_PROMPT_NAME = "chat/document/initial"
-    CHAT_MODEL_NAME = "gpt-5-mini"
+    CHAT_MODEL_NAME = "gpt-5.6-luna"
 
     def __init__(self, thread):
         self.thread = thread
