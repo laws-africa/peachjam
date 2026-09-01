@@ -78,16 +78,42 @@ class CustomerIO:
         return details
 
     def get_user_details(self, user):
+        profile = user.userprofile
         details = {
             "email": user.email,
             "first_name": user.first_name,
             "last_name": user.last_name,
             "is_staff": user.is_staff,
-            "language": user.userprofile.preferred_language.iso,
+            "language": profile.preferred_language.iso,
             "created_at": int(user.date_joined.timestamp()),
+            "onboarding_intents": [
+                intent.label for intent in profile.onboarding_intents.all()
+            ],
+            "onboarding_practice_type": (
+                profile.practice_type.label if profile.practice_type else None
+            ),
+            "onboarding_completed_at": (
+                int(profile.onboarding_completed_at.timestamp())
+                if profile.onboarding_completed_at
+                else None
+            ),
+            "onboarding_skipped_at": (
+                int(profile.onboarding_skipped_at.timestamp())
+                if profile.onboarding_skipped_at
+                else None
+            ),
         }
         details.update(self.get_common_details())
         return details
+
+    def track_onboarding_completed(self, user):
+        if self.enabled():
+            self.update_user_details(user)
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Onboarding completed",
+                self.get_user_details(user),
+            )
 
     def track_user_logged_in(self, user):
         if self.enabled():

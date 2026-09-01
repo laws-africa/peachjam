@@ -159,7 +159,9 @@ class OnboardView(NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormVi
         return kwargs
 
     def form_valid(self, form):
-        form.save()
+        profile = form.save()
+        if profile.onboarding_completed_at:
+            get_customerio().track_onboarding_completed(self.request.user)
         return super().form_valid(form)
 
     def form_invalid(self, form):
