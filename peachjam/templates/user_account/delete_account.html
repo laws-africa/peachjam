@@ -10,58 +10,65 @@
       {% block paid-account %}
         {% if has_paid_subscription %}
           <div class="alert alert-warning" role="alert">
-            {% trans "You have a paid subscription. Deleting your account will remove your billing information and active subscription access." %}
+            <p class="mb-2">{% trans "You have a paid subscription. Cancel your subscription before deleting your account." %}</p>
+            <p class="mb-0">
+              {% trans "Your account will remain active on your current paid plan until the end of the paid period, then move to the free plan. You can delete your account after the free plan is active." %}
+            </p>
           </div>
         {% else %}
           <div class="alert alert-secondary" role="alert">{% trans "You have a free account." %}</div>
         {% endif %}
       {% endblock %}
-      <p>
-        {% trans "This action is permanent. Your annotations, follows, saved searches and saved documents will be deleted, and your personal information will be removed from your account." %}
-      </p>
-      <form method="post">
-        {% csrf_token %}
-        <fieldset class="mb-3">
-          <label class="form-label">{{ form.reason.label }}</label>
-          {% for choice in form.reason %}
-            <div class="form-check">
-              {{ choice.tag }}
-              <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
-            </div>
-          {% endfor %}
-          {% if form.reason.errors %}
-            <div class="text-danger">
-              {% for error in form.reason.errors %}<p>{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
-        </fieldset>
-        <div class="mb-3">
-          <label class="form-label" for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label>
-          {{ form.comment }}
-          {% if form.comment.errors %}
-            <div class="text-danger">
-              {% for error in form.comment.errors %}<p>{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
-        </div>
-        <div class="form-check mb-3">
-          {{ form.confirm_delete }}
-          <label class="form-check-label" for="{{ form.confirm_delete.id_for_label }}">{{ form.confirm_delete.label }}</label>
-          {% if form.confirm_delete.errors %}
-            <div class="text-danger">
-              {% for error in form.confirm_delete.errors %}<p>{{ error }}</p>{% endfor %}
-            </div>
-          {% endif %}
-        </div>
-        <div class="d-flex">
-          <a href="{% url 'my_account' %}" class="btn btn-link">{% trans "Cancel" %}</a>
-          <button type="submit"
-                  class="btn btn-danger ms-auto"
-                  data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
-            {% trans "Delete account" %}
-          </button>
-        </div>
-      </form>
+      {% if has_paid_subscription %}
+        {% include "user_account/_paid_delete_account_actions.html" %}
+      {% else %}
+        <p>
+          {% trans "This action is permanent. Your annotations, follows, saved searches and saved documents will be deleted, and your personal information will be removed from your account." %}
+        </p>
+        <form method="post">
+          {% csrf_token %}
+          <fieldset class="mb-3">
+            <label class="form-label">{{ form.reason.label }}</label>
+            {% for choice in form.reason %}
+              <div class="form-check">
+                {{ choice.tag }}
+                <label class="form-check-label" for="{{ choice.id_for_label }}">{{ choice.choice_label }}</label>
+              </div>
+            {% endfor %}
+            {% if form.reason.errors %}
+              <div class="text-danger">
+                {% for error in form.reason.errors %}<p>{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          </fieldset>
+          <div class="mb-3">
+            <label class="form-label" for="{{ form.comment.id_for_label }}">{{ form.comment.label }}</label>
+            {{ form.comment }}
+            {% if form.comment.errors %}
+              <div class="text-danger">
+                {% for error in form.comment.errors %}<p>{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="form-check mb-3">
+            {{ form.confirm_delete }}
+            <label class="form-check-label" for="{{ form.confirm_delete.id_for_label }}">{{ form.confirm_delete.label }}</label>
+            {% if form.confirm_delete.errors %}
+              <div class="text-danger">
+                {% for error in form.confirm_delete.errors %}<p>{{ error }}</p>{% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="d-flex">
+            <a href="{% url 'my_account' %}" class="btn btn-link">{% trans "Cancel" %}</a>
+            <button type="submit"
+                    class="btn btn-danger ms-auto"
+                    data-confirm="{% trans 'Are you sure you want to delete your account? This action cannot be undone.' %}">
+              {% trans "Delete account" %}
+            </button>
+          </div>
+        </form>
+      {% endif %}
     </div>
   </div>
 {% endblock %}

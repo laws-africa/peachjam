@@ -17,12 +17,30 @@ class CustomerIO:
             "app_name": settings.PEACHJAM["APP_NAME"],
         }
 
-    def track_user_deleted(self, user):
+    def get_user_deleted_details(self, user, feedback=None):
+        details = self.get_common_details()
+        details.update(
+            {
+                "user_id": user.pk,
+                "tracking_id": user.userprofile.tracking_id_str,
+                "email": user.email,
+                "email_hash": (
+                    user.userprofile.hashed_email(user.email) if user.email else None
+                ),
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "reason": feedback.reason if feedback else None,
+                "comment": feedback.comment if feedback else "",
+            }
+        )
+        return details
+
+    def track_user_deleted(self, user, feedback=None):
         if self.enabled():
             analytics.track(
                 user.userprofile.tracking_id_str,
                 "User Deleted",
-                self.get_common_details(),
+                self.get_user_deleted_details(user, feedback=feedback),
             )
 
     def get_document_track_properties(self, doc):

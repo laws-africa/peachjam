@@ -44,7 +44,11 @@ from peachjam.views.robots import (
     _prefixed_place_rules,
 )
 from peachjam_search.models import SavedSearch
-from peachjam_subs.models import OffboardingFeedback, Subscription
+from peachjam_subs.models import (
+    OffboardingFeedback,
+    ProductOffering,
+    Subscription,
+)
 
 
 def home_page_view(request):
@@ -636,6 +640,52 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Delete account")
 
+    def test_delete_account_page_blocks_paid_subscription(self):
+        user = User.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+        Subscription.objects.create(
+            user=user,
+            product_offering=ProductOffering.objects.get(pricing_plan__price=10),
+            status=Subscription.Status.ACTIVE,
+            active_at=datetime.datetime.now(datetime.timezone.utc),
+        )
+
+        response = self.client.get(reverse("delete_account"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Cancel your subscription")
+        self.assertNotContains(response, "I understand this action cannot be undone")
+        self.assertNotContains(
+            response, "Are you sure you want to delete your account?"
+        )
+
+    def test_delete_account_post_blocks_paid_subscription(self):
+        user = User.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+        sub = Subscription.objects.create(
+            user=user,
+            product_offering=ProductOffering.objects.get(pricing_plan__price=10),
+            status=Subscription.Status.ACTIVE,
+            active_at=datetime.datetime.now(datetime.timezone.utc),
+        )
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("delete_account"))
+        user.refresh_from_db()
+        sub.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertEqual(Subscription.Status.ACTIVE, sub.status)
+        self.assertFalse(user.username.startswith("deleted-"))
+        self.assertFalse(OffboardingFeedback.objects.exists())
+
     def test_delete_account_anonymises_user(self):
         user = User.objects.first()
         sub = Subscription.get_or_create_active_for_user(user)
@@ -693,6 +743,41 @@ class PeachjamViewsTest(TestCase):
 
         sub.refresh_from_db()
         self.assertEqual(sub.status, Subscription.Status.CLOSED)
+
+    @patch("peachjam.customerio.CustomerIO.enabled", return_value=True)
+    @patch("peachjam.customerio.analytics.identify")
+    @patch("peachjam.customerio.analytics.track")
+    def test_delete_account_tracks_customerio_with_user_details(
+        self, mock_track, mock_identify, mock_enabled
+    ):
+        user = User.objects.first()
+        User.objects.filter(pk=user.pk).update(first_name="Test", last_name="User")
+        user.refresh_from_db()
+        original_email = user.email
+        Subscription.get_or_create_active_for_user(user)
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("account_logged_out"))
+        deleted_call = [
+            call for call in mock_track.call_args_list if call.args[1] == "User Deleted"
+        ][0]
+        details = deleted_call.args[2]
+        self.assertEqual(user.pk, details["user_id"])
+        self.assertEqual("Test", details["first_name"])
+        self.assertEqual("User", details["last_name"])
+        self.assertEqual(original_email, details["email"])
+        self.assertEqual(64, len(details["email_hash"]))
+        self.assertEqual(OffboardingFeedback.Reason.NOT_USING_ENOUGH, details["reason"])
+        self.assertEqual("No longer needed", details["comment"])
 
     def test_case_history(self):
         self.user = User.objects.first()

@@ -216,19 +216,35 @@ class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
     def get_success_url(self):
         return reverse("account_logged_out")
 
+    def get_subscription(self):
+        return Subscription.get_or_create_active_for_user(self.request.user)
+
+    def has_paid_subscription(self):
+        subscription = self.get_subscription()
+        return bool(
+            subscription and subscription.product_offering.pricing_plan.price > 0
+        )
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        subscription = Subscription.get_or_create_active_for_user(self.request.user)
-        context["has_paid_subscription"] = (
-            subscription.product_offering.pricing_plan.price > 0
-        )
+        context["has_paid_subscription"] = self.has_paid_subscription()
         return context
 
     def form_valid(self, form):
+        if self.has_paid_subscription():
+            messages.warning(
+                self.request,
+                _(
+                    "Cancel your subscription before deleting your account. Your account will remain on the free "
+                    "plan after the paid period ends."
+                ),
+            )
+            return redirect("delete_account")
         feedback = form.record_account_deletion()
         get_customerio().track_offboarding_feedback(self.request.user, feedback)
         self.request.user.userprofile.delete_account(
-            deleted_reason=feedback.get_reason_display()
+            deleted_reason=feedback.get_reason_display(),
+            deletion_feedback=feedback,
         )
         messages.success(self.request, _("Your account has been deleted."))
         return redirect(self.get_success_url())
