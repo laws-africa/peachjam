@@ -73,6 +73,25 @@ class CustomerIO(PeachjamCustomerIO):
         )
         return details
 
+    def get_user_deleted_details(self, user, feedback=None):
+        details = super().get_user_deleted_details(user, feedback=feedback)
+        sub = Subscription.objects.active_for_user(user).first()
+        details.update(
+            {
+                "is_paid": bool(sub and sub.product_offering.pricing_plan.price > 0),
+                "subscription_product": (
+                    sub.product_offering.product.name if sub else None
+                ),
+                "subscription_billing_period": (
+                    sub.product_offering.pricing_plan.period if sub else None
+                ),
+                "subscription_pricing_plan": (
+                    str(sub.product_offering.pricing_plan) if sub else None
+                ),
+            }
+        )
+        return details
+
     def track_subscription_activated(self, subscription):
         if self.enabled():
             self.update_user_details(subscription.user)

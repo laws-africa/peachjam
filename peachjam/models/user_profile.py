@@ -148,7 +148,7 @@ class UserProfile(models.Model):
         return hashlib.sha256(email.strip().lower().encode("utf-8")).hexdigest()
 
     @transaction.atomic
-    def delete_account(self, deleted_reason):
+    def delete_account(self, deleted_reason, deletion_feedback=None):
         original_email = self.user.email or ""
 
         Annotation.objects.filter(user=self.user).delete()
@@ -162,7 +162,7 @@ class UserProfile(models.Model):
         if sub:
             sub.close()
 
-        get_customerio().track_user_deleted(self.user)
+        get_customerio().track_user_deleted(self.user, feedback=deletion_feedback)
 
         self.deleted_at = timezone.now()
         self.deleted_reason = deleted_reason
