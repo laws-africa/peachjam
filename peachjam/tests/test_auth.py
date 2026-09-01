@@ -25,6 +25,7 @@ from peachjam.auth import (
     create_all_users_permission_group_after_migrate,
     get_or_create_all_users_permission_group,
 )
+from peachjam.customerio import CustomerIO
 from peachjam.models import OnboardingIntent, PracticeType
 
 
@@ -473,16 +474,17 @@ class OnboardingViewTests(TestCase):
     def test_submit_saves_names_and_answers(self):
         self.login()
 
-        response = self.client.post(
-            reverse("account_onboard"),
-            data={
-                "first_name": "Jane",
-                "last_name": "Doe",
-                "onboarding_intents": [self.intent.pk, self.second_intent.pk],
-                "practice_type": self.practice_type.pk,
-                "action": "save",
-            },
-        )
+        with patch("peachjam.views.accounts.get_customerio") as get_customerio:
+            response = self.client.post(
+                reverse("account_onboard"),
+                data={
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "onboarding_intents": [self.intent.pk, self.second_intent.pk],
+                    "practice_type": self.practice_type.pk,
+                    "action": "save",
+                },
+            )
 
         self.assertEqual(response.status_code, 302)
         self.user.refresh_from_db()
@@ -497,6 +499,58 @@ class OnboardingViewTests(TestCase):
         self.assertEqual(self.profile.practice_type, self.practice_type)
         self.assertIsNotNone(self.profile.onboarding_completed_at)
         self.assertIsNone(self.profile.onboarding_skipped_at)
+        get_customerio.return_value.track_onboarding_completed.assert_called_once_with(
+            self.user
+        )
+
+    def test_customerio_user_details_include_onboarding_details(self):
+        completed_at = timezone.now()
+        self.user.first_name = "Jane"
+        self.user.last_name = "Doe"
+        self.user.save()
+        self.profile.onboarding_completed_at = completed_at
+        self.profile.practice_type = self.practice_type
+        self.profile.save()
+        self.profile.onboarding_intents.set([self.intent, self.second_intent])
+
+        details = CustomerIO().get_user_details(self.user)
+
+        self.assertEqual(
+            details["onboarding_intents"],
+            [self.intent.label, self.second_intent.label],
+        )
+        self.assertEqual(details["onboarding_practice_type"], self.practice_type.label)
+        self.assertEqual(
+            details["onboarding_completed_at"], int(completed_at.timestamp())
+        )
+        self.assertIsNone(details["onboarding_skipped_at"])
+
+    @patch("peachjam.customerio.CustomerIO.enabled", return_value=True)
+    @patch("peachjam.customerio.analytics.identify")
+    @patch("peachjam.customerio.analytics.track")
+    def test_customerio_tracks_onboarding_completed_with_details(
+        self, track, identify, enabled
+    ):
+        self.user.first_name = "Jane"
+        self.user.last_name = "Doe"
+        self.user.save()
+        self.profile.onboarding_completed_at = timezone.now()
+        self.profile.practice_type = self.practice_type
+        self.profile.save()
+        self.profile.onboarding_intents.set([self.intent])
+        identify.reset_mock()
+        track.reset_mock()
+
+        CustomerIO().track_onboarding_completed(self.user)
+
+        identify.assert_called_once()
+        track.assert_called_once()
+        self.assertEqual(track.call_args.args[1], "Onboarding completed")
+        details = track.call_args.args[2]
+        self.assertEqual(details["first_name"], "Jane")
+        self.assertEqual(details["last_name"], "Doe")
+        self.assertEqual(details["onboarding_intents"], [self.intent.label])
+        self.assertEqual(details["onboarding_practice_type"], self.practice_type.label)
 
     def test_continue_requires_at_least_one_answer(self):
         self.login()
@@ -533,16 +587,17 @@ class OnboardingViewTests(TestCase):
     def test_skip_saves_names_answers_and_sets_cooldown(self):
         self.login()
 
-        response = self.client.post(
-            reverse("account_onboard"),
-            data={
-                "first_name": "Jane",
-                "last_name": "Doe",
-                "onboarding_intents": [self.intent.pk],
-                "practice_type": self.practice_type.pk,
-                "action": "skip",
-            },
-        )
+        with patch("peachjam.views.accounts.get_customerio") as get_customerio:
+            response = self.client.post(
+                reverse("account_onboard"),
+                data={
+                    "first_name": "Jane",
+                    "last_name": "Doe",
+                    "onboarding_intents": [self.intent.pk],
+                    "practice_type": self.practice_type.pk,
+                    "action": "skip",
+                },
+            )
 
         self.assertEqual(response.status_code, 302)
         self.user.refresh_from_db()
@@ -557,6 +612,7 @@ class OnboardingViewTests(TestCase):
         self.assertEqual(self.profile.practice_type, self.practice_type)
         self.assertIsNone(self.profile.onboarding_completed_at)
         self.assertIsNotNone(self.profile.onboarding_skipped_at)
+        get_customerio.return_value.track_onboarding_completed.assert_not_called()
 
     def test_skip_requires_no_optional_answers(self):
         self.login()
