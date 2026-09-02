@@ -67,9 +67,7 @@ class EmailAlertsView(LoginRequiredMixin, TemplateView):
         form = self.get_form(request.POST)
         if form.is_valid():
             form.save()
-            frequency = (
-                self.request.user.userprofile.get_email_alert_frequency_display().lower()
-            )
+            frequency = self.request.user.userprofile.get_email_alert_frequency_display().lower()
             messages.success(
                 request,
                 _("Your email update frequency has been updated to %(frequency)s.")

@@ -11,7 +11,6 @@ def delete_saved_documents_without_folder(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0236_alter_unconstitutionalprovision_read_in_text_html"),
     ]

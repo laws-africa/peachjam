@@ -13,7 +13,6 @@ def set_allusers(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0162_make_image_filenames_unique"),
     ]

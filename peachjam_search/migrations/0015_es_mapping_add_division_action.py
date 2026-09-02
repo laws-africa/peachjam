@@ -25,7 +25,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_search", "0014_alter_searchtrace_options"),
     ]

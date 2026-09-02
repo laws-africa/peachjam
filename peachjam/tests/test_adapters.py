@@ -805,12 +805,8 @@ class JudgmentAdapterTest(TestCase):
     def test_update_document_imports_summary_fields(self, generate_summary):
         doc = self.remote_judgment_doc()
 
-        self.adapter.client_get = lambda url: SimpleNamespace(
-            json=lambda: doc
-        )  # noqa: E731
-        self.adapter.get_content_html = (
-            lambda doc: "<p>Remote content</p>"
-        )  # noqa: E731
+        self.adapter.client_get = lambda url: SimpleNamespace(json=lambda: doc)  # noqa: E731
+        self.adapter.get_content_html = lambda doc: "<p>Remote content</p>"  # noqa: E731
         self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
 
         self.adapter.update_document(
@@ -837,12 +833,8 @@ class JudgmentAdapterTest(TestCase):
     def test_update_document_skips_wrong_language_ai_summary(self, generate_summary):
         doc = self.remote_judgment_doc(summary_language="French")
 
-        self.adapter.client_get = lambda url: SimpleNamespace(
-            json=lambda: doc
-        )  # noqa: E731
-        self.adapter.get_content_html = (
-            lambda doc: "<p>Remote content</p>"
-        )  # noqa: E731
+        self.adapter.client_get = lambda url: SimpleNamespace(json=lambda: doc)  # noqa: E731
+        self.adapter.get_content_html = lambda doc: "<p>Remote content</p>"  # noqa: E731
         self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
 
         self.adapter.update_document(

@@ -10,7 +10,6 @@ import peachjam.models.user_profile
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0282_flynotedocumentcount_count_index"),
     ]

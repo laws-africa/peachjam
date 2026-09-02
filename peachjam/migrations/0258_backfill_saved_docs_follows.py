@@ -16,7 +16,6 @@ def forwards_func(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0257_userfollowing_saved_document_and_more"),
     ]

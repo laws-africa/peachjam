@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_ml", "0005_alter_chatthread_options_chatthread_score_and_more"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0267_alter_journal_doi_alter_volumeissue_slug_and_more"),
     ]

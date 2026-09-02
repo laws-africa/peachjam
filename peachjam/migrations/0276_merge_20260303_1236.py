@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0274_clean_flynotes"),
         ("peachjam", "0275_taxonomy_document_count"),

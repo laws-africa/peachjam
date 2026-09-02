@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0246_userprofile_accepted_terms_at"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

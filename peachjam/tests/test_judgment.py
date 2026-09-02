@@ -359,9 +359,7 @@ class JudgmentTestCase(TestCase):
         )
 
     def test_grouped_flynote_lines_keeps_explicit_ancestor_topic(self):
-        judgment = Judgment(
-            flynote=("Administrative law\n" "Administrative law — PAJA")
-        )
+        judgment = Judgment(flynote=("Administrative law\nAdministrative law — PAJA"))
 
         self.assertGroupedFlynotesEqual(
             [
@@ -742,7 +740,7 @@ class JudgmentTestCase(TestCase):
         judgment = Judgment(
             blurb="Appeal dismissed.",
             flynote=(
-                "Contract law — offer and acceptance\n" "Contract law — consideration"
+                "Contract law — offer and acceptance\nContract law — consideration"
             ),
         )
 

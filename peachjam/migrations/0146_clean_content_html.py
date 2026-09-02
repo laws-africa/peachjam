@@ -43,7 +43,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0145_alter_courtregistry_options"),
     ]

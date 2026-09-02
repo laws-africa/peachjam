@@ -7,7 +7,6 @@ import peachjam.storage
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0034_dynamic_storage"),
     ]

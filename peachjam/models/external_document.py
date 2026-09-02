@@ -2,7 +2,6 @@ from .core_document import CoreDocument
 
 
 class ExternalDocument(CoreDocument):
-
     frbr_uri_doctypes = ["doc"]
 
     def pre_save(self):

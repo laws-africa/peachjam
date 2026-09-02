@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0311_citationlink_origin"),
         ("peachjam", "0311_sourcefile_start_page"),
