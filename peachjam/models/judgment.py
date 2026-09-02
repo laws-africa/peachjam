@@ -721,14 +721,20 @@ class Judgment(CoreDocument):
         return [line.strip() for line in self.flynote.splitlines() if line.strip()]
 
     @property
-    def needs_source_file_anonymisation(self):
-        if not self.anonymised:
-            return False
-
+    def missing_public_source_file(self):
+        """Whether users have no source document that is safe to download."""
         try:
-            return not self.source_file.file_is_anonymised
+            source_file = self.source_file
         except SourceFile.DoesNotExist:
-            return False
+            return True
+
+        if self.anonymised:
+            return not (
+                (source_file.file and source_file.file_is_anonymised)
+                or source_file.anonymised_file_as_pdf
+            )
+
+        return not source_file.file
 
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
