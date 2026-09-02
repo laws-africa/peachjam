@@ -26,7 +26,6 @@ def forwards_func(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0273_peachjam_settings_helpscout_beacon_fix"),
     ]

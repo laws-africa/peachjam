@@ -288,7 +288,7 @@ class FilteredDocumentListView(DocumentListView):
                 rendered_facets[index + 1] if index + 1 < len(rendered_facets) else None
             )
             item["next_target_id"] = (
-                f'{context["doc_table_form_id"]}-group-{next_item["name"]}'
+                f"{context['doc_table_form_id']}-group-{next_item['name']}"
                 if next_item
                 else context["doc_table_id"]
             )

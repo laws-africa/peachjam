@@ -139,8 +139,7 @@ class Migration(migrations.Migration):
             field=models.ForeignKey(
                 blank=True,
                 help_text=(
-                    "Alias that matched the legacy judge name to the "
-                    "canonical judge."
+                    "Alias that matched the legacy judge name to the canonical judge."
                 ),
                 null=True,
                 on_delete=django.db.models.deletion.PROTECT,

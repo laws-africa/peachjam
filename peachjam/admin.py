@@ -478,13 +478,13 @@ class DocumentForm(forms.ModelForm):
             if site_settings.document_languages.exists():
                 self.fields["language"].queryset = site_settings.document_languages
         if "jurisdiction" in self.fields:
-            self.fields["jurisdiction"].initial = (
-                site_settings.default_document_jurisdiction
-            )
+            self.fields[
+                "jurisdiction"
+            ].initial = site_settings.default_document_jurisdiction
             if site_settings.document_jurisdictions.exists():
-                self.fields["jurisdiction"].queryset = (
-                    site_settings.document_jurisdictions
-                )
+                self.fields[
+                    "jurisdiction"
+                ].queryset = site_settings.document_jurisdictions
 
         if "frbr_uri_doctype" in self.fields:
             # customise doctype options for different document models
@@ -646,11 +646,11 @@ class AccessGroupForm(forms.Form):
 
 
 # better forms for django guardian admin views
-GuardedModelAdminMixin.get_obj_perms_group_select_form = (
-    lambda self, request: GuardianGroupForm
+GuardedModelAdminMixin.get_obj_perms_group_select_form = lambda self, request: (
+    GuardianGroupForm
 )
-GuardedModelAdminMixin.get_obj_perms_user_select_form = (
-    lambda self, request: GuardianUserForm
+GuardedModelAdminMixin.get_obj_perms_user_select_form = lambda self, request: (
+    GuardianUserForm
 )
 
 
@@ -951,9 +951,9 @@ class DocumentAdmin(BackgroundTasksAdminMixin, AccessGroupMixin, BaseAdmin):
 
         # this is our only chance to inject a pre-filled field from the querystring for both add and change
         if request.GET.get("stage"):
-            context["adminform"].form.fields["edit_activity_stage"].initial = (
-                request.GET["stage"]
-            )
+            context["adminform"].form.fields[
+                "edit_activity_stage"
+            ].initial = request.GET["stage"]
         return super().render_change_form(request, context, *args, **kwargs)
 
     def _build_validation_error_report(self, context):
@@ -1859,27 +1859,29 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets.insert(
-        4,
-        (
-            gettext_lazy("Summary"),
-            {
-                "fields": [
-                    "case_summary_public",
-                    "summary_ai_generated",
-                    "summary_generated_at",
-                    "summary_language",
-                    "summary_trace_id",
-                    "blurb",
-                    "flynote_raw",
-                    "case_summary",
-                    "issues",
-                    "held",
-                    "order",
-                ]
-            },
+    (
+        fieldsets.insert(
+            4,
+            (
+                gettext_lazy("Summary"),
+                {
+                    "fields": [
+                        "case_summary_public",
+                        "summary_ai_generated",
+                        "summary_generated_at",
+                        "summary_language",
+                        "summary_trace_id",
+                        "blurb",
+                        "flynote_raw",
+                        "case_summary",
+                        "issues",
+                        "held",
+                        "order",
+                    ]
+                },
+            ),
         ),
-    ),
+    )
     readonly_fields = [
         "mnc",
         "serial_number",

@@ -105,7 +105,6 @@ def noop_reverse(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0287_userfollowing_journal_userfollowing_law_report_and_more"),
     ]

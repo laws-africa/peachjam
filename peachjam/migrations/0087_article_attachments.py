@@ -8,7 +8,6 @@ import peachjam.storage
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0086_auto_20230629_1015"),
     ]

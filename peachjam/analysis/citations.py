@@ -170,7 +170,6 @@ class CitationAnalyser:
         from peachjam.models import Work
 
         for citation_link in CitationLink.objects.filter(document=document):
-
             try:
                 url = citation_link.url
                 frbr_uri = FrbrUri.parse(url).work_uri()

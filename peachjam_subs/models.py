@@ -700,8 +700,9 @@ class OffboardingFeedback(models.Model):
         NOT_USING_ENOUGH = "not-using-enough", _("Not using it enough")
         MISSING_FEATURE = "missing-feature", _("Missing a feature")
         TECHNICAL_ISSUE = "technical-issue", _("Technical issue")
-        SWITCHING_ALTERNATIVE = "switching-alternative", _(
-            "Switching to an alternative"
+        SWITCHING_ALTERNATIVE = (
+            "switching-alternative",
+            _("Switching to an alternative"),
         )
         TEMPORARY_NEED = "temporary-need", _("Temporary need")
         OTHER = "other", _("Other")

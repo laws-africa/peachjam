@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0213_sourcefile_anonymised_file_as_pdf_and_more"),
     ]

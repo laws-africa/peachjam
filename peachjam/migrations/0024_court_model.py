@@ -29,7 +29,6 @@ def forwards(apps, _):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0023_article_userprofile"),
     ]

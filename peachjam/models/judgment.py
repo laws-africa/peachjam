@@ -1101,7 +1101,6 @@ class CaseHistory(models.Model):
 
 
 class CauseList(CoreDocument):
-
     decorator = CauseListDecorator()
 
     frbr_uri_doctypes = ["doc"]

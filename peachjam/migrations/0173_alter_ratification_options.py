@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0172_alter_ingestor_options_delete_legalinstrument"),
     ]

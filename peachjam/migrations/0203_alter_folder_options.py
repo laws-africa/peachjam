@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0202_alter_userfollowing_last_alerted_at")]
 
     operations = [

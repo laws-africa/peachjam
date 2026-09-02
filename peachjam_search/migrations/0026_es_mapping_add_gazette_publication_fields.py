@@ -26,7 +26,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam_search", "0025_savedsearch_subscription_lock_fields")]
 
     operations = [

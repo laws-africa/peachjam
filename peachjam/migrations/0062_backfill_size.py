@@ -15,7 +15,6 @@ def backfill_size(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0061_alter_attorney_name"),
     ]

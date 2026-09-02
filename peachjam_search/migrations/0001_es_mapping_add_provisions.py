@@ -23,7 +23,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0125_judgment_auto_assign_title"),
     ]

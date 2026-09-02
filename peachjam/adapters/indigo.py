@@ -870,9 +870,9 @@ class IndigoAdapter(RequestsAdapter):
                             f"Creating taxonomy {target_slug} not found locally"
                         )
                         local_tree[target_slug] = parent.add_child(name=topic["name"])
-                        assert (
-                            target_slug == local_tree[target_slug].slug
-                        ), f"Expected slug {target_slug}, got {local_tree[target_slug].slug}"
+                        assert target_slug == local_tree[target_slug].slug, (
+                            f"Expected slug {target_slug}, got {local_tree[target_slug].slug}"
+                        )
                     tree_mapping[topic["slug"]] = local_topic = local_tree[target_slug]
 
                     # ensure the name is correct
@@ -887,9 +887,9 @@ class IndigoAdapter(RequestsAdapter):
                     f"Importing taxonomy topic tree rooted at {src_prefix} into {target_prefix}"
                 )
                 for child in src_tree[src_prefix]["children"]:
-                    assert child["slug"].startswith(
-                        src_prefix
-                    ), f"Child slug {child['slug']} does not start with root prefix {src_prefix}"
+                    assert child["slug"].startswith(src_prefix), (
+                        f"Child slug {child['slug']} does not start with root prefix {src_prefix}"
+                    )
                     import_tree(child, local_tree[target_prefix])
 
             # delete any local topics that are no longer present on the server

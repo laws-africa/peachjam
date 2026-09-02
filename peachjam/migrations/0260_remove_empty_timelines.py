@@ -10,7 +10,6 @@ def forwards_func(apps, schema):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0259_remove_old_timeline_subject_works"),
     ]

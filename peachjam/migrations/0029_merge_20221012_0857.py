@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0028_auto_20221004_1617"),
         ("peachjam", "0028_judgment_serial_number_override"),

@@ -469,7 +469,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": f'{PEACHJAM["APP_NAME"]} API',
+    "TITLE": f"{PEACHJAM['APP_NAME']} API",
     "DESCRIPTION": "Read-only API for this website.",
     "VERSION": "v1",
     "SCHEMA_PATH_PREFIX_INSERT": "/api",

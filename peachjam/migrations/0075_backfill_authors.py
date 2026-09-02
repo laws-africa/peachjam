@@ -16,7 +16,6 @@ def backfill_authors(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0074_auto_20230516_1128"),
     ]
