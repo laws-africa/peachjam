@@ -1,5 +1,7 @@
 {% load i18n %}
-<div id="search" class="row justify-content-center">
+<div id="search"
+     class="row justify-content-center"
+     data-key-link-feature="search">
   <div class="col col-md-10 col-lg-8">
     <form method="get" action="{% url 'search:search' %}" class="d-flex mb-2">
       <input type="hidden" name="suggestion"/>
