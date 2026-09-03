@@ -828,6 +828,8 @@ class HeaderUserMenuTests(TestCase):
         html = self.render_menu(accounts_enabled=True)
 
         self.assertIn(f'href="{reverse("account_login")}?next=/"', html)
+        self.assertIn('data-key-link-feature="user_menu"', html)
+        self.assertIn('data-key-link="login"', html)
 
     def test_header_hides_login_button_when_account_urls_disabled(self):
         html = self.render_menu(accounts_enabled=False)
@@ -860,6 +862,8 @@ class HeaderUserMenuTests(TestCase):
         self.assertNotIn(reverse("my_account"), html)
         self.assertNotIn(reverse("account_logout"), html)
         self.assertIn(reverse("admin:index"), html)
+        self.assertIn('data-key-link="user_menu_dropdown"', html)
+        self.assertIn('data-key-link="admin"', html)
 
     def test_authenticated_header_hides_feature_links_without_permissions(self):
         request = RequestFactory().get("/")
@@ -883,6 +887,9 @@ class HeaderUserMenuTests(TestCase):
         self.assertNotIn(reverse("folder_list"), html)
         self.assertNotIn(reverse("user_following_list"), html)
         self.assertNotIn(reverse("search:saved_search_list"), html)
+        self.assertIn('data-key-link="my_home"', html)
+        self.assertIn('data-key-link="my_account"', html)
+        self.assertIn('data-key-link="logout"', html)
 
 
 class SignupViewTests(TestCase):

@@ -28,7 +28,9 @@
       <div class="collapse navbar-collapse" id="secondary-nav-content">
         <form method="get"
               action="{% url 'search:search' %}"
-              class="my-2 my-lg-0 ms-auto">
+              class="my-2 my-lg-0 ms-auto"
+              data-key-link-feature="navbar_search"
+              data-key-link="search">
           <input type="hidden" name="suggestion"/>
           {% block search-form %}
             <div class="input-group">

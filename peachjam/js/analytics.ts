@@ -74,11 +74,7 @@ export class Analytics {
     const page = document.body.dataset.keyLinkPage;
     if (!page) return;
 
-    document.addEventListener('click', (e) => {
-      if (!(e.target instanceof Element)) return;
-
-      const element = e.target.closest('[data-key-link]');
-      if (!(element instanceof HTMLElement)) return;
+    const trackElement = (element: HTMLElement) => {
       if (!element.dataset.keyLink?.trim()) return;
 
       const featureRoot = element.closest('[data-key-link-feature]');
@@ -98,6 +94,19 @@ export class Analytics {
         page,
         featureRoot?.getAttribute('data-key-link-feature') || 'none'
       );
+    };
+
+    document.addEventListener('click', (e) => {
+      if (!(e.target instanceof Element)) return;
+
+      const element = e.target.closest('[data-key-link]');
+      if (!(element instanceof HTMLElement) || element instanceof HTMLFormElement) return;
+      trackElement(element);
+    });
+
+    document.addEventListener('submit', (e) => {
+      if (!(e.target instanceof HTMLFormElement) || !e.target.matches('[data-key-link]')) return;
+      trackElement(e.target);
     });
   }
 
