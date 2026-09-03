@@ -126,9 +126,8 @@ export class GA4 implements AnalyticsProvider {
   }
 
   trackKeyLink (link: string, href: string, page: string, feature: string) {
-    // Matomo associates the event with its source Event URL automatically.
     // @ts-ignore
-    window._paq.push(['trackEvent', 'Key link', `${feature}:${link}`, href]);
+    window.gtag('event', 'key_link_clicked', { link, href, page, feature });
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
@@ -156,6 +155,9 @@ export class Matomo implements AnalyticsProvider {
   }
 
   trackKeyLink (link: string, href: string, page: string, feature: string) {
+    // Matomo associates the event with its source Event URL automatically.
+    // @ts-ignore
+    window._paq.push(['trackEvent', page, feature, link]);
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
