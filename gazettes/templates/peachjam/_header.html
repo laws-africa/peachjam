@@ -25,14 +25,17 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0"
+          data-key-link-feature="navbar">
         <li class="nav-item">
           <a class="nav-link {% if page.navbar_item == 'home' %}active{% endif %}"
+             data-key-link="home_page"
              aria-current="page"
              href="{% url 'home_page' %}">Home</a>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle"
+          <a data-key-link="choose_country_dropdown"
+             class="nav-link dropdown-toggle"
              href="#"
              id="navbarDropdown"
              role="button"
@@ -44,7 +47,8 @@
             {% for juri in jurisdictions %}
               {% if not juri.parent_code %}
                 <li class="dropdown-item">
-                  <a href="{% url 'jurisdiction' juri.code %}">{{ juri.name }}</a>
+                  <a href="{% url 'jurisdiction' juri.code %}"
+                     data-key-link="jurisdiction">{{ juri.name }}</a>
                 </li>
               {% endif %}
             {% endfor %}
