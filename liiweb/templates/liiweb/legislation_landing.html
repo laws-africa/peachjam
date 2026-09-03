@@ -75,9 +75,8 @@
              href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search" %}</a>
         </div>
       </div>
-      <div class="row g-3"
-           aria-label="{% trans 'National legislation collections' %}">
-        <div class="col-12 col-md-4">
+      <div class="row g-3" aria-label="{% trans 'Legislation collections' %}">
+        <div class="col-12 col-md-6 col-xl-3">
           <div class="card card-clickable h-100 position-relative">
             <div class="card-body">
               <div class="d-flex justify-content-between gap-3 align-items-baseline">
@@ -91,7 +90,7 @@
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6 col-xl-3">
           <div class="card card-clickable h-100 position-relative">
             <div class="card-body">
               <div class="d-flex justify-content-between gap-3 align-items-baseline">
@@ -105,7 +104,7 @@
             </div>
           </div>
         </div>
-        <div class="col-12 col-md-4">
+        <div class="col-12 col-md-6 col-xl-3">
           <div class="card card-clickable h-100 position-relative">
             <div class="card-body">
               <div class="d-flex justify-content-between gap-3 align-items-baseline">
@@ -119,25 +118,64 @@
             </div>
           </div>
         </div>
+        <div class="col-12 col-md-6 col-xl-3">
+          <div class="card card-clickable h-100 position-relative">
+            <div class="card-body">
+              <h2 class="h5 mb-2">
+                <a class="stretched-link text-decoration-none"
+                   href="{% url 'locality_legislation' %}">{% trans "Local legislation" %}</a>
+              </h2>
+              <p class="card-text mb-0">{% trans "Browse provincial legislation and municipal by-laws." %}</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <p class="mt-3 mb-0">
-        {% trans "Looking for provincial or municipal legislation?" %}
-        <a href="{% url 'locality_legislation' %}">{% trans "Browse local legislation" %}</a>.
-      </p>
     </div>
   </div>
   <section class="bg-light py-5" aria-labelledby="browse-legislation-heading">
     <div class="container">
       <div class="text-center mb-4">
         <h2 id="browse-legislation-heading">{% trans "Browse legislation" %}</h2>
-        <p class="lead mb-0">{% trans "Start with the year or document nature you know." %}</p>
+        <p class="lead mb-0">{% trans "Start with a legal topic, year or document nature." %}</p>
       </div>
       <div class="row g-4 justify-content-center">
-        <section class="col-12 col-lg-6" aria-labelledby="browse-by-year-heading">
+        <section class="col-12 col-lg-4" aria-labelledby="browse-by-topic-heading">
           <div class="card h-100">
             <div class="card-body d-flex flex-column">
-              <h3 id="browse-by-year-heading" class="h4">{% trans "Browse by year" %}</h3>
-              <p class="text-muted">{% trans "Find legislation by the year it was enacted." %}</p>
+              <h3 id="browse-by-topic-heading" class="h4">{% trans "Browse by legal topic" %}</h3>
+              <p class="text-muted">{% trans "Find legislation by its area of law." %}</p>
+              <div class="list-group list-group-flush mb-4">
+                {% for item in legislation_topics %}
+                  <a class="list-group-item list-group-item-action px-0 d-flex justify-content-between align-items-center"
+                     href="{% url 'legislation_list_all' %}?taxonomies={{ item.taxonomies__topic__slug|urlencode }}">
+                    <span>
+                      <span class="d-block fw-semibold">{{ item.taxonomies__topic__name }}</span>
+                      <small class="text-muted">
+                        {% blocktrans count counter=item.count with formatted_count=item.count|intcomma %}{{ formatted_count }} document{% plural %}{{ formatted_count }} documents{% endblocktrans %}
+                      </small>
+                    </span>
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                  </a>
+                {% empty %}
+                  <p class="text-muted mb-0">
+                    {% trans "No legal topics are available." %}
+                  </p>
+                {% endfor %}
+              </div>
+              <a class="btn btn-primary mt-auto align-self-start"
+                 href="{% url 'legislation_list_all' %}#documents">{% trans "Browse legislation across all topics" %}</a>
+            </div>
+          </div>
+        </section>
+        <section class="col-12 col-lg-4" aria-labelledby="browse-by-year-heading">
+          <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+              <h3 id="browse-by-year-heading" class="h4">
+                {% trans "Browse by year" %}
+              </h3>
+              <p class="text-muted">
+                {% trans "Find legislation by the year it was enacted." %}
+              </p>
               <ul class="list-group list-group-flush mb-4">
                 {% for year in legislation_years %}
                   <li class="list-group-item px-0 d-flex justify-content-between align-items-center position-relative">
@@ -152,11 +190,13 @@
             </div>
           </div>
         </section>
-        <section class="col-12 col-lg-6"
+        <section class="col-12 col-lg-4"
                  aria-labelledby="browse-by-document-nature-heading">
           <div class="card h-100">
             <div class="card-body d-flex flex-column">
-              <h3 id="browse-by-document-nature-heading" class="h4">{% trans "Document nature" %}</h3>
+              <h3 id="browse-by-document-nature-heading" class="h4">
+                {% trans "Document nature" %}
+              </h3>
               <p class="text-muted">
                 {% trans "Choose the nature of the legislation you need." %}
               </p>

@@ -163,6 +163,15 @@ class LegislationListView(FilteredDocumentListView):
             .annotate(count=Count("id"))
             .order_by("-count", "nature__name")
         )
+        topics = list(
+            latest_expressions.filter(taxonomies__topic__isnull=False)
+            .values(
+                "taxonomies__topic__name",
+                "taxonomies__topic__slug",
+            )
+            .annotate(count=Count("id", distinct=True))
+            .order_by("-count", "taxonomies__topic__name")[:5]
+        )
         today = timezone.now().date()
         recent_since = (today - timedelta(days=365)).isoformat()
         recent_queryset = latest_expressions.filter(
@@ -201,6 +210,7 @@ class LegislationListView(FilteredDocumentListView):
             "legislation_search_years": search_years,
             "legislation_natures": search_natures[:5],
             "legislation_search_natures": search_natures,
+            "legislation_topics": topics,
             "popular_legislation": popular_legislation,
             "recent_legislation": recent_legislation,
         }

@@ -17,10 +17,14 @@ class LegislationViewsTest(TestCase):
         self.assertContains(response, 'name="natures"')
         self.assertContains(response, "Browse by year")
         self.assertContains(response, "Current legislation")
+        self.assertContains(response, "Local legislation")
+        self.assertContains(
+            response, "Browse provincial legislation and municipal by-laws."
+        )
+        self.assertContains(response, "Browse by legal topic")
         self.assertContains(response, "Document nature")
         self.assertContains(response, "Legislation by status")
         self.assertContains(response, "Popular legislation")
-        self.assertNotContains(response, "Browse by legal topic")
         self.assertNotContains(response, 'data-component="DocumentList"')
         self.assertEqual(1, len(response.context["popular_legislation"]))
 
