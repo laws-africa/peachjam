@@ -107,6 +107,7 @@ class PeachjamViewsTest(TestCase):
     def test_login_page(self):
         response = self.client.get(reverse("account_login"))
         self.assertTemplateUsed(response, "account/login.html")
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "account_login")
 
     def test_homepage(self):
         response = self.client.get(reverse("home_page"))

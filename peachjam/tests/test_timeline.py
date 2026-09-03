@@ -276,6 +276,10 @@ class TimelineViewTest(TestCase):
         )
         self.assertContains(response, reverse("email_alerts"))
         self.assertContains(response, "Unfollow")
+        self.assertContains(response, 'data-key-link-feature="following"')
+        self.assertContains(response, 'data-key-link="unfollow_dropdown"')
+        self.assertContains(response, 'data-key-link="unfollow"')
+        self.assertContains(response, 'data-key-link="manage_email_updates"')
 
     def test_follow_button_explains_when_email_updates_are_disabled(self):
         self.user.user_permissions.add(
@@ -306,6 +310,8 @@ class TimelineViewTest(TestCase):
 
         self.assertContains(response, "dropdown-toggle")
         self.assertContains(response, "Follow this court to receive updates")
+        self.assertContains(response, 'data-key-link="follow_dropdown"')
+        self.assertContains(response, 'data-key-link="follow"')
 
     def test_anonymous_user_can_open_follow_account_modal_from_dropdown(self):
         self.client.logout()

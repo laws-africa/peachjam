@@ -77,14 +77,24 @@ export class Analytics {
     document.addEventListener('click', (e) => {
       if (!(e.target instanceof Element)) return;
 
-      const link = e.target.closest('a[data-key-link]');
-      if (!(link instanceof HTMLAnchorElement)) return;
-      if (!link.dataset.keyLink?.trim()) return;
+      const element = e.target.closest('[data-key-link]');
+      if (!(element instanceof HTMLElement)) return;
+      if (!element.dataset.keyLink?.trim()) return;
 
-      const featureRoot = link.closest('[data-key-link-feature]');
+      const featureRoot = element.closest('[data-key-link-feature]');
+      let href = window.location.href;
+      if (element instanceof HTMLAnchorElement) {
+        href = element.href;
+      } else {
+        const form = element.closest('form');
+        if (form) {
+          const formTarget = form.getAttribute('hx-post') || form.getAttribute('action');
+          if (formTarget) href = new URL(formTarget, document.baseURI).href;
+        }
+      }
       this.trackKeyLink(
-        link.dataset.keyLink.trim(),
-        link.getAttribute('href') || link.href,
+        element.dataset.keyLink.trim(),
+        href,
         page,
         featureRoot?.getAttribute('data-key-link-feature') || 'none'
       );
@@ -116,6 +126,9 @@ export class GA4 implements AnalyticsProvider {
   }
 
   trackKeyLink (link: string, href: string, page: string, feature: string) {
+    // Matomo associates the event with its source Event URL automatically.
+    // @ts-ignore
+    window._paq.push(['trackEvent', 'Key link', `${feature}:${link}`, href]);
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
