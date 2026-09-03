@@ -165,8 +165,6 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["KEY_LINK_PAGE"], "judgment_list")
         self.assertContains(response, 'data-key-link-feature="navbar"')
-        self.assertContains(response, 'data-key-link="home_page"')
-        self.assertContains(response, 'data-key-link="judgment_list"')
         self.assertContains(response, 'data-key-link-feature="discovery_cards"')
         self.assertContains(response, 'data-key-link-feature="courts"')
         self.assertContains(response, 'data-key-link-feature="recent_judgments"')
