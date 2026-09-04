@@ -83,6 +83,39 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
     def get_absolute_url(self):
         return reverse("flynote_detail", kwargs={"pk": self.pk})
 
+    @classmethod
+    def get_path_labels(cls, flynotes):
+        """Return the root-to-node labels for each supplied flynote in bulk."""
+        flynotes = list(flynotes)
+        paths = set()
+        for flynote in flynotes:
+            for end in range(
+                flynote.steplen,
+                len(flynote.path) + 1,
+                flynote.steplen,
+            ):
+                paths.add(flynote.path[:end])
+
+        path_names = {
+            flynote.path: flynote.name
+            for flynote in cls.objects.filter(path__in=paths).only("name", "path")
+        }
+        return {
+            flynote.pk: [
+                path_names[path]
+                for path in (
+                    flynote.path[:end]
+                    for end in range(
+                        flynote.steplen,
+                        len(flynote.path) + 1,
+                        flynote.steplen,
+                    )
+                )
+                if path in path_names
+            ]
+            for flynote in flynotes
+        }
+
     def validate_deprecated_invariant(self):
         """Ensure an active node cannot exist under a deprecated ancestor."""
         if self.deprecated or self.is_root():

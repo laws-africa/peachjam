@@ -37,7 +37,7 @@ from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
+from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
 from peachjam.resources import DownloadDocumentsResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
@@ -45,6 +45,7 @@ from peachjam_api.serializers import LabelSerializer
 from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
+from peachjam_search.flynotes import FlynoteSearchMatcher
 from peachjam_search.forms import (
     DocumentSearchDebugForm,
     PortionSearchDebugForm,
@@ -143,6 +144,7 @@ class DocumentSearchView(TemplateView):
         # only keep those with documents
         hits = [h for h in hits if h.document]
         entity_hits = self.match_entities(engine)
+        flynote_hits = self.match_flynotes(engine, hits)
 
         response = {
             "count": es_response.hits.total.value,
@@ -163,6 +165,7 @@ class DocumentSearchView(TemplateView):
                     "show_jurisdiction": settings.PEACHJAM[
                         "SEARCH_JURISDICTION_FILTER"
                     ],
+                    "flynote_hits": flynote_hits,
                 },
             ),
             "trace_id": str(trace.id) if trace else None,
@@ -271,6 +274,18 @@ class DocumentSearchView(TemplateView):
         if engine.search_query.page != 1 or engine.search_query.field_queries:
             return []
         return self.make_entity_matcher().match(engine.search_query.query)
+
+    def match_flynotes(self, engine, hits):
+        """Find supplementary legal-topic cards for a first-page legal-term search."""
+        if (
+            engine.search_query.page != 1
+            or engine.search_query.field_queries
+            or not Judgment.flynote_topics_enabled()
+            or getattr(getattr(engine, "analysis", None), "intent", None)
+            != "legal_term"
+        ):
+            return []
+        return FlynoteSearchMatcher().match(engine.search_query.query, hits)
 
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:

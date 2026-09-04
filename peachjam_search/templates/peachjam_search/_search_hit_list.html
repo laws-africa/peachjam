@@ -1,4 +1,7 @@
 <ul class="list-unstyled search-result-list">
+  {% if flynote_hits %}
+    {% include "peachjam_search/_flynote_search_hit_list.html" %}
+  {% endif %}
   {% for hit in hits %}
     {% include "peachjam_search/_search_hit.html" %}
   {% endfor %}

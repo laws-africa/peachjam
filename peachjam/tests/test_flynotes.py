@@ -3222,6 +3222,33 @@ class UpdateFlynoteTaxonomiesCommandTest(TestCase):
 
         self.assertIn("Processed 1 judgments", output)
 
+    def test_court_code_filters_judgments(self):
+        """--court-code should only process judgments for that court."""
+        other_court = Court.objects.create(name="Other Court", code="other-court")
+        other_judgment = Judgment.objects.create(
+            case_name="Other case",
+            jurisdiction=Country.objects.first(),
+            court=other_court,
+            date=datetime.date(2025, 4, 1),
+            language=Language.objects.first(),
+            flynote_raw="Tax law — assessment",
+        )
+
+        out = StringIO()
+        call_command(
+            "update_flynote_taxonomies",
+            court_code=self.j1.court.code,
+            skip_counts=True,
+            stdout=out,
+            stderr=StringIO(),
+        )
+
+        self.assertIn(f"Filtering by court code={self.j1.court.code}", out.getvalue())
+        self.assertTrue(JudgmentFlynote.objects.filter(document=self.j1).exists())
+        self.assertFalse(
+            JudgmentFlynote.objects.filter(document=other_judgment).exists()
+        )
+
     def test_reports_last_pk_processed(self):
         """Output should include the last pk so users know where to resume."""
         out = StringIO()
