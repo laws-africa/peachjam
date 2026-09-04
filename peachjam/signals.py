@@ -159,9 +159,7 @@ def user_logged_out_update_customerio(sender, request, user, **kwargs):
 @receiver(signals.post_save, sender=SavedSearch)
 def saved_search_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        customerio = get_customerio()
-        customerio.track_saved_search(instance)
-        customerio.update_user_details(instance.user)
+        get_customerio().track_saved_search(instance)
 
 
 @receiver(signals.pre_delete, sender=SavedSearch)
@@ -177,9 +175,7 @@ def saved_search_deleted_update_customerio(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=SavedDocument)
 def saved_document_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        customerio = get_customerio()
-        customerio.track_saved_document(instance)
-        customerio.update_user_details(instance.user)
+        get_customerio().track_saved_document(instance)
 
 
 @receiver(signals.pre_delete, sender=SavedDocument)
@@ -195,10 +191,7 @@ def saved_document_deleted_update_customerio(sender, instance, **kwargs):
 @receiver(signals.post_save, sender=UserFollowing)
 def user_followed_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        customerio = get_customerio()
-        customerio.track_follow(instance)
-        if not instance.saved_search_id and not instance.saved_document_id:
-            customerio.update_user_details(instance.user)
+        get_customerio().track_follow(instance)
 
 
 @receiver(signals.pre_delete, sender=UserFollowing)

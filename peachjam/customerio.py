@@ -148,6 +148,7 @@ class CustomerIO:
 
     def track_saved_search(self, saved_search):
         if self.enabled():
+            self.update_user_details(saved_search.user)
             analytics.track(
                 saved_search.user.userprofile.tracking_id_str,
                 "Saved search",
@@ -164,6 +165,7 @@ class CustomerIO:
 
     def track_saved_document(self, saved_doc):
         if self.enabled():
+            self.update_user_details(saved_doc.user)
             analytics.track(
                 saved_doc.user.userprofile.tracking_id_str,
                 "Saved document",
@@ -180,6 +182,11 @@ class CustomerIO:
 
     def track_follow(self, user_following):
         if self.enabled():
+            if (
+                not user_following.saved_search_id
+                and not user_following.saved_document_id
+            ):
+                self.update_user_details(user_following.user)
             analytics.track(
                 user_following.user.userprofile.tracking_id_str,
                 "Started following",
