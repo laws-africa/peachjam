@@ -1,7 +1,8 @@
 {% load i18n %}
 {% if subscription_required %}
-  <div class="dropdown follow-control">
+  <div class="dropdown follow-control" data-key-link-feature="following">
     <button class="btn btn-outline-primary dropdown-toggle"
+            data-key-link="follow_dropdown"
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false">
@@ -11,6 +12,7 @@
     <ul class="dropdown-menu">
       <li>
         <button class="dropdown-item"
+                data-key-link="follow"
                 type="button"
                 data-bs-toggle="modal"
                 data-bs-target="#followModal">
@@ -47,8 +49,9 @@
     </div>
   </div>
 {% else %}
-  <div class="dropdown follow-control">
+  <div class="dropdown follow-control" data-key-link-feature="following">
     <button class="btn {% if follow %}btn-primary{% else %}btn-outline-primary{% endif %} dropdown-toggle"
+            data-key-link="{% if follow %}unfollow_dropdown{% else %}follow_dropdown{% endif %}"
             type="button"
             data-bs-toggle="dropdown"
             aria-expanded="false">
@@ -74,7 +77,7 @@
                 {% endif %}
               </div>
             </div>
-            <a href="{% url "email_alerts" %}">{% trans "Manage email updates" %}</a>
+            <a href="{% url "email_alerts" %}" data-key-link="manage_email_updates">{% trans "Manage email updates" %}</a>
           </div>
         </li>
         <li>
@@ -85,7 +88,7 @@
                 hx-target="closest .follow-control"
                 hx-swap="outerHTML">
             {% csrf_token %}
-            <button class="dropdown-item" type="submit">
+            <button class="dropdown-item" type="submit" data-key-link="unfollow">
               <strong>
                 <i class="bi bi-bell-slash"></i>
               {% trans "Unfollow" %}</strong>
@@ -100,7 +103,7 @@
                 hx-swap="outerHTML">
             {% csrf_token %}
             {{ form }}
-            <button class="dropdown-item" type="submit">
+            <button class="dropdown-item" type="submit" data-key-link="follow">
               <strong>
                 <i class="bi bi-bell"></i>
               {% trans "Follow" %}</strong>

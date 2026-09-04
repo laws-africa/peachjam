@@ -107,6 +107,7 @@ class PeachjamViewsTest(TestCase):
     def test_login_page(self):
         response = self.client.get(reverse("account_login"))
         self.assertTemplateUsed(response, "account/login.html")
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "account_login")
 
     def test_homepage(self):
         response = self.client.get(reverse("home_page"))
@@ -163,6 +164,9 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["KEY_LINK_PAGE"], "judgment_list")
+        self.assertContains(response, 'data-key-link-feature="navbar"')
+        self.assertContains(response, 'data-key-link-feature="navbar_search"')
+        self.assertContains(response, 'data-key-link="search"')
         self.assertContains(response, 'data-key-link-feature="discovery_cards"')
         self.assertContains(response, 'data-key-link-feature="courts"')
         self.assertContains(response, 'data-key-link-feature="recent_judgments"')
