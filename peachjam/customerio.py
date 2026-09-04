@@ -102,6 +102,12 @@ class CustomerIO:
                 if profile.onboarding_skipped_at
                 else None
             ),
+            "saved_document_count": user.saved_documents.count(),
+            "saved_search_count": user.saved_searches.count(),
+            "following_count": user.following.filter(
+                saved_search__isnull=True,
+                saved_document__isnull=True,
+            ).count(),
         }
         details.update(self.get_common_details())
         return details

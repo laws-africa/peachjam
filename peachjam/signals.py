@@ -159,7 +159,9 @@ def user_logged_out_update_customerio(sender, request, user, **kwargs):
 @receiver(signals.post_save, sender=SavedSearch)
 def saved_search_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        get_customerio().track_saved_search(instance)
+        customerio = get_customerio()
+        customerio.track_saved_search(instance)
+        customerio.update_user_details(instance.user)
 
 
 @receiver(signals.pre_delete, sender=SavedSearch)
@@ -167,10 +169,17 @@ def unsaved_search_customerio(sender, instance, **kwargs):
     get_customerio().track_unsaved_search(instance)
 
 
+@receiver(signals.post_delete, sender=SavedSearch)
+def saved_search_deleted_update_customerio(sender, instance, **kwargs):
+    get_customerio().update_user_details(instance.user)
+
+
 @receiver(signals.post_save, sender=SavedDocument)
 def saved_document_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        get_customerio().track_saved_document(instance)
+        customerio = get_customerio()
+        customerio.track_saved_document(instance)
+        customerio.update_user_details(instance.user)
 
 
 @receiver(signals.pre_delete, sender=SavedDocument)
@@ -178,15 +187,29 @@ def unsaved_document_customerio(sender, instance, **kwargs):
     get_customerio().track_unsaved_document(instance)
 
 
+@receiver(signals.post_delete, sender=SavedDocument)
+def saved_document_deleted_update_customerio(sender, instance, **kwargs):
+    get_customerio().update_user_details(instance.user)
+
+
 @receiver(signals.post_save, sender=UserFollowing)
 def user_followed_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
-        get_customerio().track_follow(instance)
+        customerio = get_customerio()
+        customerio.track_follow(instance)
+        if not instance.saved_search_id and not instance.saved_document_id:
+            customerio.update_user_details(instance.user)
 
 
 @receiver(signals.pre_delete, sender=UserFollowing)
 def user_unfollowed_customerio(sender, instance, **kwargs):
     get_customerio().track_unfollow(instance)
+
+
+@receiver(signals.post_delete, sender=UserFollowing)
+def user_following_deleted_update_customerio(sender, instance, **kwargs):
+    if not instance.saved_search_id and not instance.saved_document_id:
+        get_customerio().update_user_details(instance.user)
 
 
 @receiver(signals.post_save, sender=Annotation)
