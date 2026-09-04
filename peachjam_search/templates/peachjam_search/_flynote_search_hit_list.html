@@ -1,0 +1,27 @@
+{% load humanize i18n %}
+<li class="my-4" data-flynote-search-results>
+  <section class="p-3 bg-light rounded">
+    <h2 class="h5 mb-3">{% trans "Explore legal topics related to your search" %}</h2>
+    <div class="row g-3">
+      {% for topic_hit in flynote_hits %}
+        <div class="col-12 col-md-4">
+          <article class="card h-100 bg-white card-clickable"
+                   data-flynote-id="{{ topic_hit.flynote.pk }}"
+                   data-flynote-source="{{ topic_hit.source }}">
+            <div class="card-body d-flex flex-column">
+              <a class="stretched-link text-decoration-none text-h5 mb-2"
+                 href="{{ topic_hit.flynote.get_absolute_url }}">{{ topic_hit.flynote.name }}</a>
+              <p class="small text-muted mb-3">{{ topic_hit.path_labels|join:" — " }}</p>
+              <div class="mt-auto d-flex justify-content-between align-items-center gap-2">
+                <small class="text-muted">
+                  {% blocktranslate count count=topic_hit.count %}{{ count }} judgment{% plural %}{{ count }} judgments{% endblocktranslate %}
+                </small>
+                <span class="btn btn-sm btn-outline-primary">{% trans "Explore topic" %}</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</li>
