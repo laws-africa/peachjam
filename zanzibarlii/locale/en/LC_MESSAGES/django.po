@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-04 08:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,11 +18,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: settings.py:18
+#: settings.py:20
 msgid "Swahili"
 msgstr ""
 
-#: settings.py:19
+#: settings.py:21
 msgid "English"
 msgstr ""
 
@@ -51,31 +51,31 @@ msgstr ""
 msgid "Our partners"
 msgstr ""
 
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:9
 msgid "Home"
 msgstr ""
 
-#: templates/peachjam/_header.html:13
+#: templates/peachjam/_header.html:15
 msgid "Judgments"
 msgstr ""
 
-#: templates/peachjam/_header.html:19
+#: templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr ""
 
-#: templates/peachjam/_header.html:25
+#: templates/peachjam/_header.html:29
 msgid "Licensed Advocates"
 msgstr ""
 
-#: templates/peachjam/_header.html:31
+#: templates/peachjam/_header.html:36
 msgid "Gazettes"
 msgstr ""
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:43
 msgid "About"
 msgstr ""
 
-#: templates/peachjam/_header.html:41
+#: templates/peachjam/_header.html:49
 msgid "Help"
 msgstr ""
 

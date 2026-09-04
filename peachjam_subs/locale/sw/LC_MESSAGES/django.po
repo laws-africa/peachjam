@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-04 08:35+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,39 +17,51 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_subs/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 267\n"
 
-#: admin.py:42
+#: admin.py:43
 msgid "Save the product first, then configure selectable offerings."
 msgstr "Hifadhi bidhaa kwanza, kisha usanidi matoleo yanayoweza kuchaguliwa."
 
-#: admin.py:50
+#: admin.py:51
 #, python-format
 msgid "Selectable offerings for '%(product)s' must belong to that product."
 msgstr "Matoleo yanayoweza kuchaguliwa kwa '%(product)s' lazima yawe ya bidhaa hiyo."
 
-#: admin.py:89
+#: admin.py:90
 #, python-format
 msgid "Key products must have at least one selectable offering configured: %(products)s"
 msgstr "Bidhaa muhimu lazima ziwe na angalau toleo moja linaloweza kuchaguliwa lililosanidiwa: %(products)s"
 
-#: admin.py:164
+#: admin.py:165
 msgid "Subscription activated."
 msgstr "Usajili umewezeshwa."
 
-#: admin.py:166
+#: admin.py:167
 msgid "Subscription cannot be activated."
 msgstr "Usajili hauwezi kuwezeshwa."
 
-#: admin.py:176
+#: admin.py:177
 msgid "Subscription cancelled."
 msgstr "Usajili umeghairiwa."
 
-#: admin.py:178
+#: admin.py:179
 msgid "Subscription cannot be cancelled."
 msgstr "Usajili hauwezi kughairiwa."
 
-#: admin.py:257
+#: admin.py:286
 msgid "View"
 msgstr "Tazama"
+
+#: forms.py:12
+msgid "What is the main reason for this change?"
+msgstr ""
+
+#: forms.py:17
+msgid "Tell us more (optional)"
+msgstr ""
+
+#: forms.py:33
+msgid "Please tell us briefly why."
+msgstr ""
 
 #: models.py:30
 #, python-format
@@ -102,27 +114,65 @@ msgstr "Inayotumika"
 msgid "Closed"
 msgstr "Imefungwa"
 
-#: models.py:655
+#: models.py:695
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription downgrade"
+msgstr "Usajili"
+
+#: models.py:696
+msgid "Account deletion"
+msgstr ""
+
+#: models.py:699
+msgid "Too expensive"
+msgstr ""
+
+#: models.py:700
+msgid "Not using it enough"
+msgstr ""
+
+#: models.py:701
+msgid "Missing a feature"
+msgstr ""
+
+#: models.py:702
+msgid "Technical issue"
+msgstr ""
+
+#: models.py:704
+msgid "Switching to an alternative"
+msgstr ""
+
+#: models.py:706
+msgid "Temporary need"
+msgstr ""
+
+#: models.py:707
+msgid "Other"
+msgstr ""
+
+#: models.py:786
 msgid "Default product offering"
 msgstr "Utoaji wa bidhaa chaguomsingi"
 
-#: models.py:660
+#: models.py:791
 msgid "These products are highlighted in the product listing."
 msgstr "Bidhaa hizi zimeangaziwa kwenye orodha ya bidhaa."
 
-#: models.py:668
+#: models.py:799
 msgid "Trial product offering"
 msgstr "Sadaka ya bidhaa ya majaribio"
 
-#: models.py:669
+#: models.py:800
 msgid "If set, this product offering is used for trials."
 msgstr "Ikiwa imewekwa, toleo la bidhaa hii linatumika kwa majaribio."
 
-#: models.py:673
+#: models.py:804
 msgid "Trial duration (days)"
 msgstr "Muda wa majaribio (siku)"
 
-#: models.py:674
+#: models.py:805
 msgid "Number of days for the trial period."
 msgstr "Idadi ya siku kwa kipindi cha majaribio."
 
@@ -142,66 +192,76 @@ msgstr "Mabadiliko yajayo"
 msgid "Trial"
 msgstr "Jaribio"
 
-#: templates/peachjam_subs/_subscription_card.html:15
+#: templates/peachjam_subs/_subscription_card.html:16
 msgid "Next payment due on"
 msgstr "Malipo yanayofuata yatalipwa"
 
-#: templates/peachjam_subs/_subscription_card.html:22
+#: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
 msgstr "Huanza"
 
-#: templates/peachjam_subs/_subscription_card.html:25
+#: templates/peachjam_subs/_subscription_card.html:27
 msgid "Ends on"
 msgstr "Inaisha"
 
-#: templates/peachjam_subs/_subscription_card.html:34
+#: templates/peachjam_subs/_subscription_card.html:36
 msgid "Are you sure?"
 msgstr "Je, una uhakika?"
 
-#: templates/peachjam_subs/_subscription_card.html:35
+#: templates/peachjam_subs/_subscription_card.html:37
 msgid "Cancel change"
 msgstr "Ghairi mabadiliko"
 
-#: templates/peachjam_subs/_subscription_card.html:42
+#: templates/peachjam_subs/_subscription_card.html:44
 msgid "Active since"
 msgstr "Imetumika tangu"
 
-#: templates/peachjam_subs/_subscription_required.html:12
-#: templates/peachjam_subs/_subscription_required.html:20
+#: templates/peachjam_subs/_subscription_required.html:13
+#: templates/peachjam_subs/_subscription_required.html:21
 msgid "Create a free account"
 msgstr "Fungua akaunti ya bure"
 
-#: templates/peachjam_subs/_subscription_required.html:14
-#: templates/peachjam_subs/_subscription_required.html:34
+#: templates/peachjam_subs/_subscription_required.html:15
+#: templates/peachjam_subs/_subscription_required.html:39
 msgid "Unlock this feature"
 msgstr "Fungua kipengele hiki"
 
-#: templates/peachjam_subs/_subscription_required.html:17
+#: templates/peachjam_subs/_subscription_required.html:18
 msgid "Sign up to save documents, read summaries and access more features."
 msgstr "Jisajili ili kuhifadhi hati, kusoma muhtasari na kufikia vipengele zaidi."
 
-#: templates/peachjam_subs/_subscription_required.html:22
+#: templates/peachjam_subs/_subscription_required.html:23
 msgid "Start"
 msgstr "Anza"
 
-#: templates/peachjam_subs/_subscription_required.html:27
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "Already have an account?"
 msgstr "Je, tayari una akaunti?"
 
-#: templates/peachjam_subs/_subscription_required.html:28
+#: templates/peachjam_subs/_subscription_required.html:29
 msgid "Log in"
 msgstr "Ingia"
 
-#: templates/peachjam_subs/_subscription_required.html:36
+#: templates/peachjam_subs/_subscription_required.html:34
+msgid "Accounts unavailable"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:35
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This feature requires an account, and accounts are not available on this site."
+msgstr "Kipengele hiki hakipatikani kwa sasa."
+
+#: templates/peachjam_subs/_subscription_required.html:41
 #, python-format
 msgid "This feature is available with %(lowest_product)s."
 msgstr "Kipengele hiki kinapatikana kwa kutumia %(lowest_product)s."
 
-#: templates/peachjam_subs/_subscription_required.html:40
+#: templates/peachjam_subs/_subscription_required.html:45
 msgid "Upgrade to"
 msgstr "Boresha hadi"
 
-#: templates/peachjam_subs/_subscription_required.html:48
+#: templates/peachjam_subs/_subscription_required.html:53
 msgid "This feature is not currently available."
 msgstr "Kipengele hiki hakipatikani kwa sasa."
 

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-04 08:35+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -33,25 +33,25 @@ msgstr "%(APP_NAME)s compte sur les dons pour garder notre plateforme gratuite. 
 msgid "Donate"
 msgstr "Faire un don"
 
-#: templates/liiweb/_hero_search.html:8 templates/liiweb/_hero_search.html:9
+#: templates/liiweb/_hero_search.html:13 templates/liiweb/_hero_search.html:14
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Rechercher dans %(APP_NAME)s"
 
-#: templates/liiweb/_hero_search.html:14
+#: templates/liiweb/_hero_search.html:19
 msgid "Search"
 msgstr "Recherche"
 
-#: templates/liiweb/_hero_search.html:17
+#: templates/liiweb/_hero_search.html:24
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
-#: templates/liiweb/home.html:39 templates/peachjam/_header.html:13
+#: templates/liiweb/home.html:39 templates/peachjam/_header.html:15
 msgid "Judgments"
 msgstr "Jugements"
 
 #: templates/liiweb/home.html:42 templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:19
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr "Législation"
 
@@ -150,7 +150,7 @@ msgid "All legislation"
 msgstr "Toutes les lois"
 
 #: templates/liiweb/locality_legislation_list.html:9
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:9
 msgid "Home"
 msgstr "Accueil"
 
@@ -158,7 +158,7 @@ msgstr "Accueil"
 msgid "Pocket Law"
 msgstr "Loi de poche"
 
-#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:25
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr "À propos"
 
@@ -171,7 +171,7 @@ msgstr "Utilisez %(APP_NAME)s hors ligne avec <a href=\"%(pocket_law_url)s\">Poc
 msgid "Site Statistics"
 msgstr "Statistiques du site"
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:29
+#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr "Aide"
 
