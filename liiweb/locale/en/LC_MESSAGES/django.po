@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-04 08:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -34,25 +34,25 @@ msgstr ""
 msgid "Donate"
 msgstr ""
 
-#: templates/liiweb/_hero_search.html:8 templates/liiweb/_hero_search.html:9
+#: templates/liiweb/_hero_search.html:13 templates/liiweb/_hero_search.html:14
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr ""
 
-#: templates/liiweb/_hero_search.html:14
+#: templates/liiweb/_hero_search.html:19
 msgid "Search"
 msgstr ""
 
-#: templates/liiweb/_hero_search.html:17
+#: templates/liiweb/_hero_search.html:24
 msgid "Advanced search"
 msgstr ""
 
-#: templates/liiweb/home.html:39 templates/peachjam/_header.html:13
+#: templates/liiweb/home.html:39 templates/peachjam/_header.html:15
 msgid "Judgments"
 msgstr ""
 
 #: templates/liiweb/home.html:42 templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:19
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr ""
 
@@ -151,7 +151,7 @@ msgid "All legislation"
 msgstr ""
 
 #: templates/liiweb/locality_legislation_list.html:9
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:9
 msgid "Home"
 msgstr ""
 
@@ -159,7 +159,7 @@ msgstr ""
 msgid "Pocket Law"
 msgstr ""
 
-#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:25
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr ""
 
@@ -172,7 +172,7 @@ msgstr ""
 msgid "Site Statistics"
 msgstr ""
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:29
+#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr ""
 

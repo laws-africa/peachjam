@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-04 08:35+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,11 +17,11 @@ msgstr ""
 "X-Crowdin-File: /main/zanzibarlii/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 163\n"
 
-#: settings.py:18
+#: settings.py:20
 msgid "Swahili"
 msgstr "Kiswahili"
 
-#: settings.py:19
+#: settings.py:21
 msgid "English"
 msgstr "Kiingereza"
 
@@ -50,31 +50,31 @@ msgstr "Masharti ya matumizi"
 msgid "Our partners"
 msgstr "Washirika wetu"
 
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:9
 msgid "Home"
 msgstr "Nyumbani"
 
-#: templates/peachjam/_header.html:13
+#: templates/peachjam/_header.html:15
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: templates/peachjam/_header.html:19
+#: templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr "Sheria"
 
-#: templates/peachjam/_header.html:25
+#: templates/peachjam/_header.html:29
 msgid "Licensed Advocates"
 msgstr "Mawakili wenye Leseni"
 
-#: templates/peachjam/_header.html:31
+#: templates/peachjam/_header.html:36
 msgid "Gazettes"
 msgstr "Magazeti ya serikali"
 
-#: templates/peachjam/_header.html:37
+#: templates/peachjam/_header.html:43
 msgid "About"
 msgstr "Kuhusu"
 
-#: templates/peachjam/_header.html:41
+#: templates/peachjam/_header.html:49
 msgid "Help"
 msgstr "Msaada"
 

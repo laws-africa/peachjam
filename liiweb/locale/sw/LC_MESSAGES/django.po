@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-04 08:35+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -33,25 +33,25 @@ msgstr "%(APP_NAME)s hutegemea michango ili kuendelea kutoa huduma katika jukwaa
 msgid "Donate"
 msgstr "Changia"
 
-#: templates/liiweb/_hero_search.html:8 templates/liiweb/_hero_search.html:9
+#: templates/liiweb/_hero_search.html:13 templates/liiweb/_hero_search.html:14
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Tafuta %(APP_NAME)s"
 
-#: templates/liiweb/_hero_search.html:14
+#: templates/liiweb/_hero_search.html:19
 msgid "Search"
 msgstr "Tafuta"
 
-#: templates/liiweb/_hero_search.html:17
+#: templates/liiweb/_hero_search.html:24
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
-#: templates/liiweb/home.html:39 templates/peachjam/_header.html:13
+#: templates/liiweb/home.html:39 templates/peachjam/_header.html:15
 msgid "Judgments"
 msgstr "Hukumu"
 
 #: templates/liiweb/home.html:42 templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:19
+#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr "Sheria"
 
@@ -150,7 +150,7 @@ msgid "All legislation"
 msgstr "Sheria zote"
 
 #: templates/liiweb/locality_legislation_list.html:9
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:9
 msgid "Home"
 msgstr "Nyumbani"
 
@@ -158,7 +158,7 @@ msgstr "Nyumbani"
 msgid "Pocket Law"
 msgstr "Sheria zisizo mtandaoni"
 
-#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:25
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr "Kuhusu"
 
@@ -171,7 +171,7 @@ msgstr "Tumia %(APP_NAME)s nje ya mtandao na <a href=\"%(pocket_law_url)s\">Pock
 msgid "Site Statistics"
 msgstr "Takwimu za Tovuti"
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:29
+#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr "Msaada"
 
