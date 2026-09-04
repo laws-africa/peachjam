@@ -41,6 +41,7 @@ from peachjam.timeline_email_service import (
     EmailAlertSummaryItem,
     TimelineEmailService,
 )
+from peachjam_search.models import SavedSearch
 from peachjam_subs.models import Feature, Subscription
 
 
@@ -485,6 +486,29 @@ class TimelineViewTest(TestCase):
         self.assertLessEqual(len(shortened), 500)
         self.assertTrue(shortened.endswith("…"))
         self.assertFalse(shortened[:-1].endswith(" "))
+
+    def test_saved_search_email_copy_uses_advanced_query(self):
+        saved_search = SavedSearch.objects.create(
+            user=self.user,
+            q=None,
+            a='[{"fields": ["all"], "text": "constitutional rights"}]',
+            filters="",
+        )
+
+        self.assertEqual(
+            "constitutional rights in any field",
+            EmailAlertBuilder.saved_search_text(saved_search),
+        )
+        self.assertEqual(
+            "constitutional rights in any field: 2 new matches",
+            EmailAlertBuilder.saved_search_subject(saved_search, 2),
+        )
+        self.assertEqual(
+            "2 search results for “constitutional rights in any field”",
+            EmailAlertBuilder.saved_search_label(
+                "preheader", 2, saved_search=saved_search
+            ),
+        )
 
     def test_email_subject_prioritises_new_followed_documents(self):
         summary_items = [
