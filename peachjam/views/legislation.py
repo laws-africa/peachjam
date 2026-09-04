@@ -6,7 +6,8 @@ from urllib.parse import urlencode
 
 from django.apps import apps
 from django.contrib import messages
-from django.db.models import CharField, Func, Prefetch, Value
+from django.contrib.contenttypes.models import ContentType
+from django.db.models import CharField, Count, Func, Prefetch, Q, Value
 from django.db.models.functions.text import Substr
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -55,6 +56,21 @@ class LegislationListView(FilteredDocumentListView):
     }
     form_defaults = {"sort": "title"}
     form_class = LegislationFilterForm
+    show_landing_page = False
+    hidden_landing_natures = ["document"]
+
+    def get_model_queryset(self):
+        legislation_content_type = ContentType.objects.get_for_model(
+            self.model, for_concrete_model=False
+        )
+        return (
+            super()
+            .get_model_queryset()
+            .filter(
+                doc_type="legislation",
+                polymorphic_ctype=legislation_content_type,
+            )
+        )
 
     def add_facets(self, context):
         super().add_facets(context)
@@ -91,6 +107,8 @@ class LegislationListView(FilteredDocumentListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        if self.show_landing_page and not self.request.htmx:
+            context.update(self.get_landing_page_context())
         context["subleg_group_row"] = {
             "is_group": True,
             "title": pj_settings().subleg_label,
@@ -104,6 +122,101 @@ class LegislationListView(FilteredDocumentListView):
         )
         context["show_uncommenced_provisions"] = UncommencedProvision.objects.exists()
         return context
+
+    def get_landing_page_context(self):
+        queryset = self.get_landing_page_queryset().order_by()
+        latest_expression_ids = queryset.latest_expression().values("id")
+        latest_expressions = self.model.objects.filter(
+            id__in=latest_expression_ids,
+            published=True,
+        )
+        counts = latest_expressions.aggregate(
+            total=Count("id"),
+            current=Count(
+                "id",
+                filter=Q(repealed=False, principal=True, parent_work=None),
+            ),
+            subsidiary=Count(
+                "id",
+                filter=Q(
+                    parent_work__isnull=False,
+                    repealed=False,
+                    principal=True,
+                ),
+            ),
+            repealed=Count("id", filter=Q(repealed=True)),
+            uncommenced=Count(
+                "id",
+                filter=Q(metadata_json__commenced=False),
+            ),
+        )
+        search_years = list(
+            latest_expressions.annotate(year=Substr("frbr_uri_date", 1, 4))
+            .values_list("year", flat=True)
+            .distinct()
+            .order_by("-year")
+        )
+        search_natures = list(
+            latest_expressions.filter(nature__isnull=False)
+            .exclude(nature__code__in=self.hidden_landing_natures)
+            .values("nature__code", "nature__name")
+            .annotate(count=Count("id"))
+            .order_by("-count", "nature__name")
+        )
+        topics = list(
+            latest_expressions.filter(taxonomies__topic__isnull=False)
+            .values(
+                "taxonomies__topic__name",
+                "taxonomies__topic__slug",
+            )
+            .annotate(count=Count("id", distinct=True))
+            .order_by("-count", "taxonomies__topic__name")[:5]
+        )
+        today = timezone.now().date()
+        recent_since = (today - timedelta(days=365)).isoformat()
+        recent_queryset = latest_expressions.filter(
+            date__lte=today,
+            metadata_json__publication_date__gte=recent_since,
+        )
+        counts["recent"] = recent_queryset.count()
+
+        featured_legislation = (
+            latest_expressions.filter(title__icontains="constitution")
+            .exclude(title__icontains="amendment")
+            .order_by("-work__authority_score", "-work__pagerank", "title")
+            .first()
+        )
+        popular_queryset = latest_expressions
+        if featured_legislation:
+            popular_queryset = popular_queryset.exclude(pk=featured_legislation.pk)
+        popular_legislation = (
+            [featured_legislation] if featured_legislation else []
+        ) + list(
+            popular_queryset.order_by(
+                "-work__authority_score", "-work__pagerank", "title"
+            )[: 10 if featured_legislation is None else 9]
+        )
+        recent_legislation = list(
+            recent_queryset.order_by(
+                "-metadata_json__publication_date",
+                "-frbr_uri_date",
+                "title",
+            )[:10]
+        )
+
+        return {
+            "legislation_counts": counts,
+            "legislation_years": search_years[:5],
+            "legislation_search_years": search_years,
+            "legislation_natures": search_natures[:5],
+            "legislation_search_natures": search_natures,
+            "legislation_topics": topics,
+            "popular_legislation": popular_legislation,
+            "recent_legislation": recent_legislation,
+        }
+
+    def get_landing_page_queryset(self):
+        return self.get_model_queryset()
 
 
 class LegislationSubsidiaryView(LegislationListView):

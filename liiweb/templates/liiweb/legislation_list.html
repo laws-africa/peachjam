@@ -16,7 +16,7 @@
           {% include "peachjam/_help_button.html" %}
         {% endif %}
       {% endblock %}
-      {% if show_more_resources %}
+      {% if show_more_resources or show_glossary %}
         <h5>{% trans "More resources" %}</h5>
         <ul class="list-unstyled">
           {% if show_unconstitutional_provisions %}
@@ -53,7 +53,7 @@
   <nav class="nav nav-tabs mb-3 border-bottom">
     <li class="nav-item">
       <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-         href="{% url 'legislation_list' %}">
+         href="{% url 'legislation_list_current' %}">
         {% block current_tab_title %}
           {% trans 'Current legislation' %}
         {% endblock %}

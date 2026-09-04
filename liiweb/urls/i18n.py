@@ -10,7 +10,16 @@ urlpatterns = [
         "legislation/",
         include(
             [
-                path("", views.LegislationListView.as_view(), name="legislation_list"),
+                path(
+                    "",
+                    views.LegislationListView.as_view(variant="recent"),
+                    name="legislation_list",
+                ),
+                path(
+                    "current",
+                    views.LegislationListView.as_view(landing_page=False),
+                    name="legislation_list_current",
+                ),
                 path(
                     "repealed",
                     views.LegislationListView.as_view(variant="repealed"),
