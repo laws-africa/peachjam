@@ -110,6 +110,7 @@ class LegislationViewsTest(TestCase):
 
         recent_document = response.context["recent_legislation"][0]
         self.assertEqual(publication_date, recent_document.landing_publication_date)
+        self.assertNotIn("metadata_json", recent_document.get_deferred_fields())
 
     def test_current_legislation_has_its_own_listing_page(self):
         response = self.client.get(reverse("legislation_list_current"))
@@ -125,6 +126,43 @@ class LegislationViewsTest(TestCase):
         self.assertTemplateUsed(response, "liiweb/legislation_list.html")
         self.assertContains(response, 'class="nav-link active"')
         self.assertEqual("popular", response.context["form"].cleaned_data["sort"])
+
+    def test_popular_legislation_order_matches_landing_page(self):
+        constitution = Legislation.objects.get(pk=3040)
+        constitution.title = "Constitution of Zambia Act, 1991"
+        constitution.save(update_fields=["title"])
+        constitution.work.authority_score = 0
+        constitution.work.pagerank = 0
+        constitution.work.save(update_fields=["authority_score", "pagerank"])
+
+        highly_ranked = Legislation.objects.create(
+            jurisdiction=constitution.jurisdiction,
+            frbr_uri_doctype="act",
+            frbr_uri_date="2025",
+            frbr_uri_number="999",
+            title="Highly Referenced Act, 2025",
+            date=timezone.now().date(),
+            language=constitution.language,
+            metadata_json={},
+            principal=True,
+        )
+        highly_ranked.work.authority_score = 1
+        highly_ranked.work.pagerank = 1
+        highly_ranked.work.save(update_fields=["authority_score", "pagerank"])
+
+        landing_response = self.client.get(
+            reverse("legislation_list"), {"nocache": "1"}
+        )
+        popular_response = self.client.get(reverse("legislation_list_popular"))
+
+        self.assertEqual(
+            constitution.pk,
+            landing_response.context["popular_legislation"][0].pk,
+        )
+        self.assertEqual(
+            constitution.pk,
+            list(popular_response.context["documents"])[0].pk,
+        )
 
     def test_filtered_legacy_landing_url_uses_the_listing_page(self):
         response = self.client.get(reverse("legislation_list"), {"years": "1979"})

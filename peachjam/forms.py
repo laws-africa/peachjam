@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMultiAlternatives
-from django.db.models import Q
+from django.db.models import Case, IntegerField, Q, Value, When
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
@@ -584,6 +584,20 @@ LEGISLATION_POPULAR_ORDERING = (
 )
 
 
+def order_legislation_by_popularity(queryset):
+    """Pin the main constitution, then order legislation by citation authority."""
+    return queryset.annotate(
+        popular_priority=Case(
+            When(
+                Q(title__icontains="constitution") & ~Q(title__icontains="amendment"),
+                then=Value(0),
+            ),
+            default=Value(1),
+            output_field=IntegerField(),
+        )
+    ).order_by("popular_priority", *LEGISLATION_POPULAR_ORDERING)
+
+
 class LegislationFilterForm(BaseDocumentFilterForm):
     popular_sort = "popular"
 
@@ -608,7 +622,7 @@ class LegislationFilterForm(BaseDocumentFilterForm):
 
     def order_queryset(self, queryset, exclude=None):
         if self.cleaned_data.get("sort") == self.popular_sort:
-            return queryset.order_by(*LEGISLATION_POPULAR_ORDERING)
+            return order_legislation_by_popularity(queryset)
 
         queryset = super().order_queryset(queryset, exclude)
 

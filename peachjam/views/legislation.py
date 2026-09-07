@@ -20,11 +20,11 @@ from django.utils.translation import gettext as _
 from django.views.generic import DetailView
 
 from peachjam.forms import (
-    LEGISLATION_POPULAR_ORDERING,
     LegislationFilterForm,
     UnconstitutionalProvisionFilterForm,
+    order_legislation_by_popularity,
 )
-from peachjam.helpers import add_slash, add_slash_to_frbr_uri
+from peachjam.helpers import add_slash, add_slash_to_frbr_uri, get_language
 from peachjam.models import (
     CoreDocument,
     Glossary,
@@ -58,7 +58,6 @@ class LegislationListView(FilteredDocumentListView):
     form_class = LegislationFilterForm
     show_landing_page = False
     hidden_landing_natures = ["document"]
-    popular_ordering = LEGISLATION_POPULAR_ORDERING
 
     def add_facets(self, context):
         super().add_facets(context)
@@ -168,29 +167,22 @@ class LegislationListView(FilteredDocumentListView):
         )
         counts["recent"] = recent_queryset.count()
 
-        pinned_legislation = (
-            latest_expressions.filter(title__icontains="constitution")
-            .exclude(title__icontains="amendment")
-            .order_by(*self.popular_ordering)
-            .first()
+        popular_legislation = list(
+            order_legislation_by_popularity(latest_expressions)[:10]
         )
-        featured_queryset = latest_expressions
-        if pinned_legislation:
-            featured_queryset = featured_queryset.exclude(pk=pinned_legislation.pk)
-        featured_legislation = (
-            [pinned_legislation] if pinned_legislation else []
-        ) + list(
-            featured_queryset.order_by(*self.popular_ordering)[
-                : 10 if pinned_legislation is None else 9
-            ]
+        recent_queryset = recent_queryset.only(
+            "citation",
+            "date",
+            "expression_frbr_uri",
+            "metadata_json",
+            "polymorphic_ctype",
+            "title",
+        ).order_by(
+            "-metadata_json__publication_date",
+            "-frbr_uri_date",
+            "title",
         )
-        recent_legislation = list(
-            recent_queryset.order_by(
-                "-metadata_json__publication_date",
-                "-frbr_uri_date",
-                "title",
-            )[:10]
-        )
+        recent_legislation = list(recent_queryset[:10])
         for document in recent_legislation:
             publication_date = document.metadata_json.get("publication_date")
             try:
@@ -205,12 +197,12 @@ class LegislationListView(FilteredDocumentListView):
             "legislation_natures": search_natures[:5],
             "legislation_search_natures": search_natures,
             "legislation_topics": topics,
-            "popular_legislation": featured_legislation,
+            "popular_legislation": popular_legislation,
             "recent_legislation": recent_legislation,
         }
 
     def get_landing_page_queryset(self):
-        return self.get_model_queryset()
+        return self.get_model_queryset().preferred_language(get_language(self.request))
 
 
 class LegislationSubsidiaryView(LegislationListView):
