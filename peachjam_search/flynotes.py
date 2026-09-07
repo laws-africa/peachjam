@@ -21,7 +21,6 @@ class FlynoteSearchHit:
 class FlynoteSearchMatcher:
     """Find direct flynote matches, then fill gaps from ranked judgments."""
 
-    direct_match_limit = 2
     result_limit = 3
     top_judgment_limit = 10
     minimum_document_count = 2
@@ -43,25 +42,23 @@ class FlynoteSearchMatcher:
     def match(self, query, search_hits):
         """Return up to three distinct, eligible topic suggestions.
 
-        Direct name matches are preferred because they are explicit. The
-        remaining slots are filled with topics supported by the highest ranked
-        judgment results, which covers queries that use different language to
-        the flynote taxonomy.
+        Direct name matches are preferred because they are explicit. Topics
+        supported by the highest-ranked judgments only fill any remaining
+        card slots, which covers queries that use different language to the
+        flynote taxonomy.
         """
         direct_matches = self.direct_matches(query)
-        selected = self.select_distinct_branches(
-            direct_matches, self.direct_match_limit
-        )
+        selected = self.select_distinct_branches(direct_matches, self.result_limit)
         selected_sources = {flynote.pk: "direct_query" for flynote in selected}
 
-        if not selected:
-            # Direct topic-name matches are the most trustworthy suggestion.
-            # Only fall back to document-supported topics when the taxonomy
-            # has no matching name for the user's wording.
+        if len(selected) < self.result_limit:
+            # Direct topic-name matches are the most trustworthy suggestions.
+            # Document-supported topics can supplement them, but never replace
+            # them or exceed the three-card limit.
             fallback_matches = self.topics_from_search_hits(query, search_hits)
             fallback_selected = self.select_distinct_branches(
                 fallback_matches,
-                self.result_limit,
+                self.result_limit - len(selected),
                 selected,
             )
             selected.extend(fallback_selected)

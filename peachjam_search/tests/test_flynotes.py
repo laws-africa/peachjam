@@ -33,9 +33,9 @@ class FlynoteSearchMatcherTest(TestCase):
         FlynoteDocumentCount.objects.create(flynote=flynote, count=count)
         return flynote
 
-    def test_prefers_direct_matches_without_fallback_cards(self):
+    def test_prefers_direct_matches_and_fills_remaining_cards(self):
         direct = self.create_topic("Criminal law", "Wrongful arrest", 10)
-        supported = self.create_topic("Evidence", "Admissibility", 4)
+        supported = self.create_topic("Criminal procedure", "Arrest procedure", 4)
         first_judgment = self.make_judgment("First supported result")
         second_judgment = self.make_judgment("Second supported result")
         JudgmentFlynote.objects.bulk_create(
@@ -57,8 +57,10 @@ class FlynoteSearchMatcherTest(TestCase):
             ],
         )
 
-        self.assertEqual([direct], [match.flynote for match in matches])
-        self.assertEqual(["direct_query"], [match.source for match in matches])
+        self.assertEqual([direct, supported], [match.flynote for match in matches])
+        self.assertEqual(
+            ["direct_query", "document_support"], [match.source for match in matches]
+        )
         self.assertEqual(["Criminal law", "Wrongful arrest"], matches[0].path_labels)
         html = render_to_string(
             "peachjam_search/_flynote_search_hit_list.html",
