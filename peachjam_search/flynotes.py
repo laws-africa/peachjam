@@ -1,5 +1,6 @@
 """Flynote topic suggestions for document search results."""
 
+import re
 from collections import defaultdict
 from dataclasses import dataclass
 
@@ -24,6 +25,10 @@ class FlynoteSearchMatcher:
     result_limit = 3
     top_judgment_limit = 10
     minimum_document_count = 2
+    minimum_fallback_document_support = 2
+    fallback_stop_words = frozenset(
+        {"a", "an", "and", "for", "in", "of", "on", "the", "to", "under", "with"}
+    )
 
     @staticmethod
     def with_document_counts(queryset):
@@ -47,29 +52,30 @@ class FlynoteSearchMatcher:
         selected = self.select_distinct_branches(
             direct_matches, self.direct_match_limit
         )
+        selected_sources = {flynote.pk: "direct_query" for flynote in selected}
 
-        if len(selected) < self.result_limit:
-            # A textual match alone misses equivalent legal language, so use
-            # the judgments already ranked by Elasticsearch to fill the gaps.
-            fallback_matches = self.topics_from_search_hits(search_hits)
-            selected.extend(
-                self.select_distinct_branches(
-                    fallback_matches,
-                    self.result_limit - len(selected),
-                    selected,
-                )
+        if not selected:
+            # Direct topic-name matches are the most trustworthy suggestion.
+            # Only fall back to document-supported topics when the taxonomy
+            # has no matching name for the user's wording.
+            fallback_matches = self.topics_from_search_hits(query, search_hits)
+            fallback_selected = self.select_distinct_branches(
+                fallback_matches,
+                self.result_limit,
+                selected,
+            )
+            selected.extend(fallback_selected)
+            selected_sources.update(
+                (flynote.pk, "document_support") for flynote in fallback_selected
             )
 
         path_labels = Flynote.get_path_labels(selected)
-        direct_ids = {flynote.pk for flynote in direct_matches}
         return [
             FlynoteSearchHit(
                 flynote=flynote,
                 count=flynote.doc_count,
                 path_labels=path_labels.get(flynote.pk, []),
-                source=(
-                    "direct_query" if flynote.pk in direct_ids else "document_support"
-                ),
+                source=selected_sources[flynote.pk],
             )
             for flynote in selected
         ]
@@ -87,14 +93,26 @@ class FlynoteSearchMatcher:
             .order_by("-doc_count", "-depth", "name")
         )
 
-    def topics_from_search_hits(self, search_hits):
+    def topics_from_search_hits(self, query, search_hits):
         # SearchHit.position is one-based and reflects the result order. Keep
         # it so that a topic supported by earlier judgments ranks more highly.
-        positions = {
-            hit.id: hit.position
-            for hit in search_hits[: self.top_judgment_limit]
-            if getattr(hit, "document", None)
-        }
+        positions = {}
+        document_work_keys = {}
+        work_positions = {}
+        for hit in search_hits[: self.top_judgment_limit]:
+            document = getattr(hit, "document", None)
+            if not document:
+                continue
+
+            positions[hit.id] = hit.position
+            # Search can return multiple expressions of one judgment. They
+            # should count as one supporting judgment, using the earliest
+            # expression's result position for its rank contribution.
+            work_key = document.work_frbr_uri or hit.id
+            document_work_keys[hit.id] = work_key
+            work_positions[work_key] = min(
+                hit.position, work_positions.get(work_key, hit.position)
+            )
         if not positions:
             return []
 
@@ -126,6 +144,7 @@ class FlynoteSearchMatcher:
                     depth__gt=1,
                 )
             ).filter(doc_count__gte=self.minimum_document_count)
+            if self.fallback_topic_matches_query(flynote.name, query)
         }
         supporting_documents = defaultdict(set)
         for link in links:
@@ -135,7 +154,7 @@ class FlynoteSearchMatcher:
                 if path in flynotes_by_path:
                     # A judgment can have several leaf paths below one topic;
                     # it must still provide only one vote for that topic.
-                    supporting_documents[path].add(link.document_id)
+                    supporting_documents[path].add(document_work_keys[link.document_id])
 
         def ranking_key(item):
             path, document_ids = item
@@ -144,7 +163,7 @@ class FlynoteSearchMatcher:
             # result matter more than support from the tenth. The remaining
             # fields provide stable, useful tie-breakers.
             rank_support = sum(
-                1 / positions[document_id] for document_id in document_ids
+                1 / work_positions[work_key] for work_key in document_ids
             )
             return (
                 -rank_support,
@@ -154,18 +173,46 @@ class FlynoteSearchMatcher:
                 flynote.name,
             )
 
+        eligible_candidates = [
+            (path, document_ids)
+            for path, document_ids in supporting_documents.items()
+            if len(document_ids) >= self.minimum_fallback_document_support
+        ]
         return [
             flynotes_by_path[path]
-            for path, _ in sorted(supporting_documents.items(), key=ranking_key)
+            for path, _ in sorted(eligible_candidates, key=ranking_key)
         ]
+
+    def fallback_topic_matches_query(self, topic_name, query):
+        """Require fallback topics to share a meaningful query word.
+
+        Document support alone only tells us that a topic was attached to a
+        relevant judgment. It does not make every topic on that judgment a
+        suitable recommendation. Until flynotes have their own semantic index,
+        this lexical anchor avoids surfacing unrelated procedural topics.
+        """
+        query_words = {
+            word
+            for word in re.findall(r"\w+", (query or "").casefold())
+            if len(word) > 2 and word not in self.fallback_stop_words
+        }
+        topic_words = set(re.findall(r"\w+", topic_name.casefold()))
+        return bool(query_words & topic_words)
 
     @staticmethod
     def select_distinct_branches(candidates, limit, selected=()):
         selected = list(selected)
         selected_ids = {flynote.pk for flynote in selected}
+        selected_names = {flynote.name.casefold() for flynote in selected}
         chosen = []
         for candidate in candidates:
-            if candidate.pk in selected_ids:
+            if (
+                candidate.pk in selected_ids
+                # Topic names from different taxonomy branches are often
+                # duplicates. The breadcrumb is helpful context, but several
+                # cards with the same heading make the result feel repetitive.
+                or candidate.name.casefold() in selected_names
+            ):
                 continue
             # Do not display both a topic and one of its descendants; this is
             # the practical form of the no-duplicate-branch rule for cards.
@@ -177,6 +224,7 @@ class FlynoteSearchMatcher:
                 continue
             selected.append(candidate)
             selected_ids.add(candidate.pk)
+            selected_names.add(candidate.name.casefold())
             chosen.append(candidate)
             if len(chosen) >= limit:
                 break

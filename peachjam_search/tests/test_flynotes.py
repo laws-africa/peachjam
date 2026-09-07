@@ -33,41 +33,20 @@ class FlynoteSearchMatcherTest(TestCase):
         FlynoteDocumentCount.objects.create(flynote=flynote, count=count)
         return flynote
 
-    def test_prefers_direct_matches_and_fills_the_remaining_slot_from_results(self):
+    def test_prefers_direct_matches_without_fallback_cards(self):
         direct = self.create_topic("Criminal law", "Wrongful arrest", 10)
         supported = self.create_topic("Evidence", "Admissibility", 4)
-        judgment = self.make_judgment("Supported result")
-        JudgmentFlynote.objects.create(document=judgment, flynote=supported)
+        first_judgment = self.make_judgment("First supported result")
+        second_judgment = self.make_judgment("Second supported result")
+        JudgmentFlynote.objects.bulk_create(
+            [
+                JudgmentFlynote(document=first_judgment, flynote=supported),
+                JudgmentFlynote(document=second_judgment, flynote=supported),
+            ]
+        )
 
         matches = FlynoteSearchMatcher().match(
             "wrongful arrest",
-            [SimpleNamespace(id=judgment.pk, position=1, document=judgment)],
-        )
-
-        self.assertEqual([direct, supported], [match.flynote for match in matches])
-        self.assertEqual(
-            ["direct_query", "document_support"],
-            [match.source for match in matches],
-        )
-        self.assertEqual(["Criminal law", "Wrongful arrest"], matches[0].path_labels)
-        html = render_to_string(
-            "peachjam_search/_flynote_search_hit_list.html",
-            {"flynote_hits": matches},
-        )
-        self.assertIn("Explore legal topics related to your search", html)
-        self.assertIn("Wrongful arrest", html)
-        self.assertIn('data-flynote-source="direct_query"', html)
-
-    def test_uses_ranked_judgment_topics_when_there_is_no_direct_match(self):
-        first = self.create_topic("Criminal law", "Arson", 10)
-        second = self.create_topic("Civil law", "Damages", 4)
-        first_judgment = self.make_judgment("First result")
-        second_judgment = self.make_judgment("Second result")
-        JudgmentFlynote.objects.create(document=first_judgment, flynote=first)
-        JudgmentFlynote.objects.create(document=second_judgment, flynote=second)
-
-        matches = FlynoteSearchMatcher().match(
-            "setting fire to crops",
             [
                 SimpleNamespace(
                     id=first_judgment.pk, position=1, document=first_judgment
@@ -78,8 +57,89 @@ class FlynoteSearchMatcherTest(TestCase):
             ],
         )
 
+        self.assertEqual([direct], [match.flynote for match in matches])
+        self.assertEqual(["direct_query"], [match.source for match in matches])
+        self.assertEqual(["Criminal law", "Wrongful arrest"], matches[0].path_labels)
+        html = render_to_string(
+            "peachjam_search/_flynote_search_hit_list.html",
+            {"flynote_hits": matches},
+        )
+        self.assertIn("Explore legal topics related to your search", html)
+        self.assertIn("Wrongful arrest", html)
+        self.assertIn('data-flynote-source="direct_query"', html)
+
+    def test_uses_ranked_judgment_topics_when_there_is_no_direct_match(self):
+        first = self.create_topic("Criminal law", "Property offences", 10)
+        second = self.create_topic("Civil law", "Damages", 4)
+        first_judgments = [
+            self.make_judgment("First result"),
+            self.make_judgment("First result support"),
+        ]
+        second_judgments = [
+            self.make_judgment("Second result"),
+            self.make_judgment("Second result support"),
+        ]
+        JudgmentFlynote.objects.bulk_create(
+            [
+                *(
+                    JudgmentFlynote(document=judgment, flynote=first)
+                    for judgment in first_judgments
+                ),
+                *(
+                    JudgmentFlynote(document=judgment, flynote=second)
+                    for judgment in second_judgments
+                ),
+            ]
+        )
+
+        matches = FlynoteSearchMatcher().match(
+            "damages for property",
+            [
+                SimpleNamespace(
+                    id=first_judgments[0].pk,
+                    position=1,
+                    document=first_judgments[0],
+                ),
+                SimpleNamespace(
+                    id=second_judgments[0].pk,
+                    position=2,
+                    document=second_judgments[0],
+                ),
+                SimpleNamespace(
+                    id=first_judgments[1].pk,
+                    position=3,
+                    document=first_judgments[1],
+                ),
+                SimpleNamespace(
+                    id=second_judgments[1].pk,
+                    position=4,
+                    document=second_judgments[1],
+                ),
+            ],
+        )
+
         self.assertEqual([first, second], [match.flynote for match in matches])
         self.assertTrue(all(match.source == "document_support" for match in matches))
+
+    def test_requires_two_results_to_support_a_fallback_topic(self):
+        supported = self.create_topic("Criminal law", "Property offences", 10)
+        judgment = self.make_judgment("Only supporting result")
+        JudgmentFlynote.objects.create(document=judgment, flynote=supported)
+
+        matches = FlynoteSearchMatcher().match(
+            "property damage",
+            [SimpleNamespace(id=judgment.pk, position=1, document=judgment)],
+        )
+
+        self.assertEqual([], matches)
+
+    def test_deduplicates_topics_with_the_same_name(self):
+        most_popular = self.create_topic("Criminal law", "Rape", 10)
+        self.create_topic("Criminal procedure", "rape", 5)
+
+        matches = FlynoteSearchMatcher().match("rape", [])
+
+        self.assertEqual([most_popular], [match.flynote for match in matches])
 
     def test_does_not_show_ancestor_and_descendant_cards_together(self):
         root = Flynote.add_root(name="Criminal law")
