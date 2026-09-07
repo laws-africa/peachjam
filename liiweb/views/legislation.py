@@ -187,7 +187,7 @@ class LegislationListView(BaseLegislationListView):
         )
         context["place_code"] = place_code
 
-        if not self.show_landing_page:
+        if not self.show_landing_page and self.variant != "popular":
             context["documents"] = self.group_documents(context["documents"])
 
         return context
