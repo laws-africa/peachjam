@@ -68,6 +68,10 @@
       </a>
     </li>
     <li class="nav-item">
+      <a class="nav-link {% if view.variant == 'popular' %}active{% endif %}"
+         href="{% url 'legislation_list_popular' %}">{% trans 'Popular legislation' %}</a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
          href="{% url 'legislation_list_subsidiary' %}">
         {% block sublegislation_tab_title %}{{ PEACHJAM_SETTINGS.subleg_label }}{% endblock %}

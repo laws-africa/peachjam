@@ -577,7 +577,23 @@ class JournalArticleFilterForm(BaseDocumentFilterForm):
         return queryset.filter(journal_id__in=journals) if journals else queryset
 
 
+LEGISLATION_POPULAR_ORDERING = (
+    "-work__authority_score",
+    "-work__pagerank",
+    "title",
+)
+
+
 class LegislationFilterForm(BaseDocumentFilterForm):
+    popular_sort = "popular"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["sort"].choices = [
+            *self.fields["sort"].choices,
+            (self.popular_sort, _("Popularity")),
+        ]
+
     def apply_filter_years(self, queryset):
         years = self.cleaned_data.get("years", [])
         return (
@@ -591,6 +607,9 @@ class LegislationFilterForm(BaseDocumentFilterForm):
         )
 
     def order_queryset(self, queryset, exclude=None):
+        if self.cleaned_data.get("sort") == self.popular_sort:
+            return queryset.order_by(*LEGISLATION_POPULAR_ORDERING)
+
         queryset = super().order_queryset(queryset, exclude)
 
         # change ordering so that date uses frbr_uri_date

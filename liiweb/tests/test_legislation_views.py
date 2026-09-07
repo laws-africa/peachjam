@@ -1,5 +1,15 @@
 from django.test import TestCase
 from django.urls.base import reverse
+from django.utils import timezone
+
+from peachjam.models import (
+    DocumentNature,
+    DocumentTopic,
+    Legislation,
+    Locality,
+    PeachJamSettings,
+    Taxonomy,
+)
 
 
 class LegislationViewsTest(TestCase):
@@ -17,19 +27,107 @@ class LegislationViewsTest(TestCase):
         self.assertContains(response, 'name="natures"')
         self.assertContains(response, "Browse by year")
         self.assertContains(response, "Current legislation")
-        self.assertContains(response, "Local legislation")
-        self.assertContains(
-            response, "Browse provincial legislation and municipal by-laws."
-        )
-        self.assertContains(response, "Browse by legal topic")
+        self.assertNotContains(response, "Local legislation")
+        self.assertNotContains(response, "Browse by legal topic")
         self.assertContains(response, "Document nature")
+        self.assertContains(
+            response,
+            f'{reverse("legislation_list_all")}?years='
+            f'{response.context["legislation_years"][0]}',
+        )
         self.assertContains(response, "Legislation by status")
         self.assertContains(response, "Popular legislation")
         self.assertNotContains(response, 'data-component="DocumentList"')
+        self.assertEqual([], list(response.context["documents"]))
+        self.assertIsNone(response.context["paginator"])
         self.assertEqual(1, len(response.context["popular_legislation"]))
+        self.assertEqual(
+            404,
+            self.client.get(reverse("locality_legislation")).status_code,
+        )
+
+    def test_landing_page_shows_local_legislation_when_documents_exist(self):
+        locality = Locality.objects.get(pk=1)
+        site_settings = PeachJamSettings.load()
+        site_settings.default_document_jurisdiction = locality.jurisdiction
+        site_settings.save()
+
+        response = self.client.get(reverse("legislation_list"), {"nocache": "1"})
+
+        self.assertContains(response, "Local legislation")
+        locality_response = self.client.get(reverse("locality_legislation"))
+        self.assertEqual(locality_response.status_code, 200)
+        locality_groups = locality_response.context["locality_groups"]
+        self.assertEqual(
+            [locality], [item for group in locality_groups for item in group]
+        )
+
+    def test_landing_page_hides_empty_configured_localities(self):
+        locality = Locality.objects.get(pk=1)
+        Legislation.objects.filter(locality=locality).delete()
+        site_settings = PeachJamSettings.load()
+        site_settings.default_document_jurisdiction = locality.jurisdiction
+        site_settings.save()
+
+        response = self.client.get(reverse("legislation_list"), {"nocache": "1"})
+
+        self.assertNotContains(response, "Local legislation")
+
+    def test_landing_page_shows_topics_only_when_assigned(self):
+        document = Legislation.objects.get(pk=3040)
+        topic = Taxonomy.add_root(name="Family law")
+        DocumentTopic.objects.create(document=document, topic=topic)
+
+        response = self.client.get(reverse("legislation_list"), {"nocache": "1"})
+
+        self.assertContains(response, "Browse by legal topic")
+        self.assertContains(response, "Family law")
+        self.assertContains(
+            response,
+            f'{reverse("legislation_list_all")}?taxonomies={topic.slug}',
+        )
+
+    def test_landing_page_links_to_document_nature_filter(self):
+        document = Legislation.objects.get(pk=3040)
+        nature = DocumentNature.objects.get(name="Act")
+        document.nature = nature
+        document.save(update_fields=["nature"])
+
+        response = self.client.get(reverse("legislation_list"), {"nocache": "1"})
+
+        self.assertContains(
+            response,
+            f'{reverse("legislation_list_all")}?natures={nature.code}',
+        )
+
+    def test_recent_legislation_displays_its_publication_date(self):
+        document = Legislation.objects.get(pk=3040)
+        publication_date = timezone.now().date()
+        document.metadata_json["publication_date"] = publication_date.isoformat()
+        document.save(update_fields=["metadata_json"])
+
+        response = self.client.get(reverse("legislation_list"), {"nocache": "1"})
+
+        recent_document = response.context["recent_legislation"][0]
+        self.assertEqual(publication_date, recent_document.landing_publication_date)
 
     def test_current_legislation_has_its_own_listing_page(self):
         response = self.client.get(reverse("legislation_list_current"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "liiweb/legislation_list.html")
+        self.assertContains(response, 'data-component="DocumentList"')
+
+    def test_popular_legislation_has_its_own_listing_page(self):
+        response = self.client.get(reverse("legislation_list_popular"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "liiweb/legislation_list.html")
+        self.assertContains(response, 'class="nav-link active"')
+        self.assertEqual("popular", response.context["form"].cleaned_data["sort"])
+
+    def test_filtered_legacy_landing_url_uses_the_listing_page(self):
+        response = self.client.get(reverse("legislation_list"), {"years": "1979"})
 
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "liiweb/legislation_list.html")

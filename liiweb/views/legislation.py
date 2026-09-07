@@ -2,6 +2,7 @@ import datetime
 from collections import defaultdict
 from datetime import timedelta
 
+from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
@@ -11,11 +12,28 @@ from peachjam.helpers import chunks, get_language
 from peachjam.models import (
     Glossary,
     JurisdictionProfile,
+    Legislation,
     Locality,
     get_country_and_locality_or_404,
     pj_settings,
 )
 from peachjam.views import LegislationListView as BaseLegislationListView
+
+
+def get_site_localities():
+    """Return configured site localities that have published legislation."""
+    settings = pj_settings()
+    documents = Legislation.objects.filter(published=True, locality__isnull=False)
+    if settings.default_document_jurisdiction_id:
+        documents = documents.filter(
+            jurisdiction=settings.default_document_jurisdiction_id
+        )
+    else:
+        jurisdiction_ids = settings.document_jurisdictions.values_list("pk", flat=True)
+        documents = documents.filter(jurisdiction_id__in=jurisdiction_ids)
+    return Locality.objects.filter(
+        pk__in=documents.order_by().values_list("locality_id", flat=True).distinct()
+    )
 
 
 class LegislationListView(BaseLegislationListView):
@@ -32,15 +50,24 @@ class LegislationListView(BaseLegislationListView):
             self.landing_page
             and self.national_only
             and self.request.resolver_match.url_name == "legislation_list"
+            and not self.request.htmx
+            and not any(
+                name in self.request.GET for name in self.form_class.base_fields
+            )
         )
+
+    def get_queryset(self):
+        if self.show_landing_page:
+            return self.get_model_queryset().none()
+        return super().get_queryset()
 
     def get_paginate_by(self, queryset):
         if self.show_landing_page:
-            return 15
+            return None
         return super().get_paginate_by(queryset)
 
     def get_template_names(self):
-        if self.show_landing_page and not self.request.htmx:
+        if self.show_landing_page:
             return ["liiweb/legislation_landing.html"]
         return super().get_template_names()
 
@@ -48,7 +75,22 @@ class LegislationListView(BaseLegislationListView):
         self.form_defaults = {"sort": "title"}
         if self.variant in ["recent", "subleg"]:
             self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
+        elif self.variant == "popular":
+            self.form_defaults = {"sort": "popular"}
         return super().get_form()
+
+    def get_model_queryset(self):
+        legislation_content_type = ContentType.objects.get_for_model(
+            self.model, for_concrete_model=False
+        )
+        return (
+            super()
+            .get_model_queryset()
+            .filter(
+                doc_type="legislation",
+                polymorphic_ctype=legislation_content_type,
+            )
+        )
 
     def add_facets(self, context):
         if self.show_landing_page:
@@ -79,6 +121,8 @@ class LegislationListView(BaseLegislationListView):
     def get_variant_queryset(self, qs):
         if self.variant == "all":
             pass
+        elif self.variant == "popular":
+            pass
         elif self.variant == "repealed":
             qs = qs.filter(repealed=True)
         elif self.variant == "current":
@@ -108,6 +152,8 @@ class LegislationListView(BaseLegislationListView):
         context["doc_table_show_court"] = False
         context["doc_table_show_author"] = False
         context["doc_table_show_jurisdiction"] = False
+        if self.show_landing_page:
+            context["show_local_legislation"] = get_site_localities().exists()
         settings = pj_settings()
         country = settings.default_document_jurisdiction
         if country is None and settings.document_jurisdictions.count() == 1:
@@ -202,7 +248,7 @@ class LocalityLegislationView(TemplateView):
         return context
 
     def get_localities(self):
-        return Locality.objects.all()
+        return get_site_localities()
 
 
 class LocalityLegislationListView(LegislationListView):

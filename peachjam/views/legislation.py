@@ -1,12 +1,11 @@
 import string
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from functools import cached_property
 from types import SimpleNamespace
 from urllib.parse import urlencode
 
 from django.apps import apps
 from django.contrib import messages
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import CharField, Count, Func, Prefetch, Q, Value
 from django.db.models.functions.text import Substr
 from django.http import Http404
@@ -21,6 +20,7 @@ from django.utils.translation import gettext as _
 from django.views.generic import DetailView
 
 from peachjam.forms import (
+    LEGISLATION_POPULAR_ORDERING,
     LegislationFilterForm,
     UnconstitutionalProvisionFilterForm,
 )
@@ -58,19 +58,7 @@ class LegislationListView(FilteredDocumentListView):
     form_class = LegislationFilterForm
     show_landing_page = False
     hidden_landing_natures = ["document"]
-
-    def get_model_queryset(self):
-        legislation_content_type = ContentType.objects.get_for_model(
-            self.model, for_concrete_model=False
-        )
-        return (
-            super()
-            .get_model_queryset()
-            .filter(
-                doc_type="legislation",
-                polymorphic_ctype=legislation_content_type,
-            )
-        )
+    popular_ordering = LEGISLATION_POPULAR_ORDERING
 
     def add_facets(self, context):
         super().add_facets(context)
@@ -180,21 +168,21 @@ class LegislationListView(FilteredDocumentListView):
         )
         counts["recent"] = recent_queryset.count()
 
-        featured_legislation = (
+        pinned_legislation = (
             latest_expressions.filter(title__icontains="constitution")
             .exclude(title__icontains="amendment")
-            .order_by("-work__authority_score", "-work__pagerank", "title")
+            .order_by(*self.popular_ordering)
             .first()
         )
-        popular_queryset = latest_expressions
-        if featured_legislation:
-            popular_queryset = popular_queryset.exclude(pk=featured_legislation.pk)
-        popular_legislation = (
-            [featured_legislation] if featured_legislation else []
+        featured_queryset = latest_expressions
+        if pinned_legislation:
+            featured_queryset = featured_queryset.exclude(pk=pinned_legislation.pk)
+        featured_legislation = (
+            [pinned_legislation] if pinned_legislation else []
         ) + list(
-            popular_queryset.order_by(
-                "-work__authority_score", "-work__pagerank", "title"
-            )[: 10 if featured_legislation is None else 9]
+            featured_queryset.order_by(*self.popular_ordering)[
+                : 10 if pinned_legislation is None else 9
+            ]
         )
         recent_legislation = list(
             recent_queryset.order_by(
@@ -203,6 +191,12 @@ class LegislationListView(FilteredDocumentListView):
                 "title",
             )[:10]
         )
+        for document in recent_legislation:
+            publication_date = document.metadata_json.get("publication_date")
+            try:
+                document.landing_publication_date = date.fromisoformat(publication_date)
+            except (TypeError, ValueError):
+                document.landing_publication_date = document.date
 
         return {
             "legislation_counts": counts,
@@ -211,7 +205,7 @@ class LegislationListView(FilteredDocumentListView):
             "legislation_natures": search_natures[:5],
             "legislation_search_natures": search_natures,
             "legislation_topics": topics,
-            "popular_legislation": popular_legislation,
+            "popular_legislation": featured_legislation,
             "recent_legislation": recent_legislation,
         }
 

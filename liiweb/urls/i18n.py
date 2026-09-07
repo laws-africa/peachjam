@@ -12,7 +12,7 @@ urlpatterns = [
             [
                 path(
                     "",
-                    views.LegislationListView.as_view(variant="recent"),
+                    views.LegislationListView.as_view(),
                     name="legislation_list",
                 ),
                 path(
@@ -44,6 +44,11 @@ urlpatterns = [
                     "recent",
                     views.LegislationListView.as_view(variant="recent"),
                     name="legislation_list_recent",
+                ),
+                path(
+                    "popular",
+                    views.LegislationListView.as_view(variant="popular"),
+                    name="legislation_list_popular",
                 ),
                 path(
                     "localities",
