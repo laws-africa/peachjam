@@ -45,11 +45,6 @@ urlpatterns = [
                     name="legislation_list_recent",
                 ),
                 path(
-                    "popular",
-                    views.LegislationListView.as_view(variant="popular"),
-                    name="legislation_list_popular",
-                ),
-                path(
                     "localities",
                     views.LocalityLegislationView.as_view(),
                     name="locality_legislation",

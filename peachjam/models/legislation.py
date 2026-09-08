@@ -62,3 +62,26 @@ class Legislation(CoreDocument):
     def pre_save(self):
         self.doc_type = "legislation"
         return super().pre_save()
+
+
+class PopularLegislation(models.Model):
+    work = models.OneToOneField(
+        Work,
+        limit_choices_to={
+            "documents__doc_type": "legislation",
+            "documents__locality__isnull": True,
+            "documents__published": True,
+        },
+        on_delete=models.CASCADE,
+        related_name="popular_legislation",
+        verbose_name=_("legislation"),
+    )
+    position = models.PositiveIntegerField(_("position"), default=0)
+
+    class Meta:
+        ordering = ("position", "pk")
+        verbose_name = _("popular legislation")
+        verbose_name_plural = _("popular legislation")
+
+    def __str__(self):
+        return self.work.title
