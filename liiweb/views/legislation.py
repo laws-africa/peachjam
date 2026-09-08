@@ -43,6 +43,32 @@ class LegislationListView(BaseLegislationListView):
     form_defaults = None
     national_only = True
     landing_page = True
+    variant_page_content = {
+        "current": (
+            _("Current legislation"),
+            _("Principal legislation currently in force."),
+        ),
+        "recent": (
+            _("Recent legislation"),
+            _("Legislation published in the past year."),
+        ),
+        "subleg": (
+            None,
+            _("Regulations, rules and notices made under principal legislation."),
+        ),
+        "uncommenced": (
+            _("Uncommenced legislation"),
+            _("Legislation that is not yet in force."),
+        ),
+        "repealed": (
+            _("Repealed legislation"),
+            _("Legislation that is no longer in force."),
+        ),
+        "all": (
+            _("All legislation"),
+            _("Browse the complete legislation collection."),
+        ),
+    }
 
     @property
     def show_landing_page(self):
@@ -75,8 +101,6 @@ class LegislationListView(BaseLegislationListView):
         self.form_defaults = {"sort": "title"}
         if self.variant in ["recent", "subleg"]:
             self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
-        elif self.variant == "popular":
-            self.form_defaults = {"sort": "popular"}
         return super().get_form()
 
     def get_model_queryset(self):
@@ -121,8 +145,6 @@ class LegislationListView(BaseLegislationListView):
     def get_variant_queryset(self, qs):
         if self.variant == "all":
             pass
-        elif self.variant == "popular":
-            pass
         elif self.variant == "repealed":
             qs = qs.filter(repealed=True)
         elif self.variant == "current":
@@ -154,40 +176,22 @@ class LegislationListView(BaseLegislationListView):
         context["doc_table_show_jurisdiction"] = False
         if self.show_landing_page:
             context["show_local_legislation"] = get_site_localities().exists()
-        settings = pj_settings()
-        country = settings.default_document_jurisdiction
-        if country is None and settings.document_jurisdictions.count() == 1:
-            country = settings.document_jurisdictions.first()
-        if country is None and self.national_only:
-            countries = set(
-                self.get_landing_page_queryset()
-                .order_by()
-                .values_list("jurisdiction__iso", flat=True)
-                .distinct()
-            )
-            countries.discard(None)
-            if len(countries) == 1:
-                country = countries.pop()
+        elif self.national_only:
+            page_heading, page_description = self.variant_page_content[self.variant]
+            context["page_heading"] = page_heading or pj_settings().subleg_label
+            context["page_description"] = page_description
+        country = pj_settings().default_document_jurisdiction
         if country:
-            place_code = (
-                country.lower() if isinstance(country, str) else country.iso.lower()
-            )
+            place_code = country.iso.lower()
         else:
-            glossary_place_codes = list(
-                Glossary.objects.order_by()
-                .values_list("place_code", flat=True)
-                .distinct()[:2]
-            )
-            place_code = (
-                glossary_place_codes[0] if len(glossary_place_codes) == 1 else None
-            )
+            place_code = None
 
         context["show_glossary"] = bool(
             place_code and Glossary.objects.filter(place_code=place_code).exists()
         )
         context["place_code"] = place_code
 
-        if not self.show_landing_page and self.variant != "popular":
+        if not self.show_landing_page:
             context["documents"] = self.group_documents(context["documents"])
 
         return context
