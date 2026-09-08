@@ -64,11 +64,17 @@ class FlynoteSearchMatcherTest(TestCase):
         self.assertEqual(["Criminal law", "Wrongful arrest"], matches[0].path_labels)
         html = render_to_string(
             "peachjam_search/_flynote_search_hit_list.html",
-            {"flynote_hits": matches},
+            {
+                "flynote_hits": matches,
+                "flynote_search_url": "/topics/?q=wrongful+arrest",
+            },
         )
         self.assertIn("Explore legal topics related to your search", html)
         self.assertIn("Wrongful arrest", html)
         self.assertIn('data-flynote-source="direct_query"', html)
+        self.assertIn('href="/topics/?q=wrongful+arrest"', html)
+        self.assertIn("Explore all related legal topics", html)
+        self.assertNotIn("Explore topic", html)
 
     def test_uses_ranked_judgment_topics_when_there_is_no_direct_match(self):
         first = self.create_topic("Criminal law", "Property offences", 10)
@@ -134,6 +140,37 @@ class FlynoteSearchMatcherTest(TestCase):
         )
 
         self.assertEqual([], matches)
+
+    def test_uses_strong_convergence_without_query_word_overlap(self):
+        arson = self.create_topic("Criminal law", "Arson", 10)
+        judgments = [
+            self.make_judgment("First result"),
+            self.make_judgment("Third result"),
+            self.make_judgment("Fifth result"),
+        ]
+        JudgmentFlynote.objects.bulk_create(
+            [
+                JudgmentFlynote(document=judgment, flynote=arson)
+                for judgment in judgments
+            ]
+        )
+
+        matches = FlynoteSearchMatcher().match(
+            "setting fire to crops",
+            [
+                SimpleNamespace(id=judgments[0].pk, position=1, document=judgments[0]),
+                SimpleNamespace(id=judgments[1].pk, position=3, document=judgments[1]),
+                SimpleNamespace(id=judgments[2].pk, position=5, document=judgments[2]),
+            ],
+        )
+
+        self.assertEqual([arson], [match.flynote for match in matches])
+        self.assertEqual(["document_support"], [match.source for match in matches])
+        html = render_to_string(
+            "peachjam_search/_flynote_search_hit_list.html",
+            {"flynote_hits": matches, "flynote_search_url": None},
+        )
+        self.assertNotIn("Explore all related legal topics", html)
 
     def test_deduplicates_topics_with_the_same_name(self):
         most_popular = self.create_topic("Criminal law", "Rape", 10)

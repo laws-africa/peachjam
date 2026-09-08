@@ -28,6 +28,18 @@ class FlynoteManager(MP_NodeManager):
     def undeprecated(self):
         return self.get_queryset().filter(deprecated=False)
 
+    def matching_names(self, query):
+        """Return active flynotes whose names contain the supplied query.
+
+        This is deliberately only the common textual matching step. Callers
+        decide whether they need to group matches into a browseable tree or
+        rank a small set of search suggestions.
+        """
+        query = (query or "").strip()
+        if not query:
+            return self.none()
+        return self.undeprecated().filter(name__icontains=query)
+
 
 class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
     """Hierarchical flynote tree node using treebeard's materialised path. This is used to represent textual flynotes

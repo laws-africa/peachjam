@@ -25,6 +25,8 @@ class FlynoteSearchMatcher:
     top_judgment_limit = 10
     minimum_document_count = 2
     minimum_fallback_document_support = 2
+    minimum_convergent_document_support = 3
+    minimum_convergent_rank_support = 1.0
     fallback_stop_words = frozenset(
         {"a", "an", "and", "for", "in", "of", "on", "the", "to", "under", "with"}
     )
@@ -83,9 +85,7 @@ class FlynoteSearchMatcher:
             return []
 
         return list(
-            self.with_document_counts(
-                Flynote.objects.undeprecated().filter(name__icontains=query)
-            )
+            self.with_document_counts(Flynote.objects.matching_names(query))
             .filter(doc_count__gte=self.minimum_document_count)
             .order_by("-doc_count", "-depth", "name")
         )
@@ -141,7 +141,6 @@ class FlynoteSearchMatcher:
                     depth__gt=1,
                 )
             ).filter(doc_count__gte=self.minimum_document_count)
-            if self.fallback_topic_matches_query(flynote.name, query)
         }
         supporting_documents = defaultdict(set)
         for link in links:
@@ -170,11 +169,27 @@ class FlynoteSearchMatcher:
                 flynote.name,
             )
 
-        eligible_candidates = [
-            (path, document_ids)
-            for path, document_ids in supporting_documents.items()
-            if len(document_ids) >= self.minimum_fallback_document_support
-        ]
+        eligible_candidates = []
+        for path, document_ids in supporting_documents.items():
+            flynote = flynotes_by_path[path]
+            rank_support = sum(
+                1 / work_positions[work_key] for work_key in document_ids
+            )
+            lexical_match = self.fallback_topic_matches_query(flynote.name, query)
+            normal_support = (
+                lexical_match
+                and len(document_ids) >= self.minimum_fallback_document_support
+            )
+            # Several independent judgments near the top of the results are
+            # strong evidence that a topic is relevant even where its label
+            # uses different wording from the query. This is deliberately
+            # stricter than the ordinary lexical-match path.
+            strong_convergence = (
+                len(document_ids) >= self.minimum_convergent_document_support
+                and rank_support >= self.minimum_convergent_rank_support
+            )
+            if normal_support or strong_convergence:
+                eligible_candidates.append((path, document_ids))
         return [
             flynotes_by_path[path]
             for path, _ in sorted(eligible_candidates, key=ranking_key)

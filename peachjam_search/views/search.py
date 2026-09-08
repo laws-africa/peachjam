@@ -145,6 +145,9 @@ class DocumentSearchView(TemplateView):
         hits = [h for h in hits if h.document]
         entity_hits = self.match_entities(engine)
         flynote_hits = self.match_flynotes(engine, hits)
+        has_direct_flynote_match = any(
+            hit.source == "direct_query" for hit in flynote_hits
+        )
 
         response = {
             "count": es_response.hits.total.value,
@@ -166,6 +169,12 @@ class DocumentSearchView(TemplateView):
                         "SEARCH_JURISDICTION_FILTER"
                     ],
                     "flynote_hits": flynote_hits,
+                    "flynote_search_url": (
+                        f"{reverse('flynote_list')}?"
+                        f"{urlencode({'q': engine.search_query.query})}"
+                        if has_direct_flynote_match
+                        else None
+                    ),
                 },
             ),
             "trace_id": str(trace.id) if trace else None,
