@@ -8,6 +8,7 @@ from peachjam.models import (
     Legislation,
     Locality,
     PeachJamSettings,
+    PopularLegislation,
     Taxonomy,
 )
 
@@ -37,10 +38,12 @@ class LegislationViewsTest(TestCase):
         )
         self.assertContains(response, "Legislation by status")
         self.assertContains(response, "Popular legislation")
+        self.assertNotContains(response, "View all popular legislation")
+        self.assertNotContains(response, "bi-arrow-right")
         self.assertNotContains(response, 'data-component="DocumentList"')
         self.assertEqual([], list(response.context["documents"]))
         self.assertIsNone(response.context["paginator"])
-        self.assertEqual(1, len(response.context["popular_legislation"]))
+        self.assertEqual([], response.context["popular_legislation"])
         self.assertEqual(
             404,
             self.client.get(reverse("locality_legislation")).status_code,
@@ -61,6 +64,11 @@ class LegislationViewsTest(TestCase):
         self.assertEqual(
             [locality], [item for group in locality_groups for item in group]
         )
+
+        listing_response = self.client.get(
+            reverse("locality_legislation_list", args=[locality.place_code()])
+        )
+        self.assertContains(listing_response, 'class="nav nav-tabs')
 
     def test_landing_page_hides_empty_configured_localities(self):
         locality = Locality.objects.get(pk=1)
@@ -118,16 +126,23 @@ class LegislationViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "liiweb/legislation_list.html")
         self.assertContains(response, 'data-component="DocumentList"')
+        self.assertContains(response, "Current legislation")
+        self.assertContains(response, "Principal legislation currently in force.")
+        self.assertNotContains(response, "More resources")
+        self.assertNotContains(response, 'class="nav nav-tabs')
 
-    def test_popular_legislation_has_its_own_listing_page(self):
-        response = self.client.get(reverse("legislation_list_popular"))
+    def test_legislation_listing_page_shows_only_selected_variant(self):
+        response = self.client.get(reverse("legislation_list_recent"))
 
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "liiweb/legislation_list.html")
-        self.assertContains(response, 'class="nav-link active"')
-        self.assertEqual("popular", response.context["form"].cleaned_data["sort"])
+        self.assertContains(response, "Recent legislation")
+        self.assertContains(response, "Legislation published in the past year.")
+        self.assertNotContains(response, "Current legislation")
+        self.assertNotContains(response, "Popular legislation")
+        self.assertNotContains(response, "More resources")
+        self.assertNotContains(response, 'action="/search/"')
 
-    def test_popular_legislation_order_matches_landing_page(self):
+    def test_popular_legislation_section_uses_admin_order(self):
         constitution = Legislation.objects.get(pk=3040)
         constitution.title = "Constitution of Zambia Act, 1991"
         constitution.save(update_fields=["title"])
@@ -150,18 +165,23 @@ class LegislationViewsTest(TestCase):
         highly_ranked.work.pagerank = 1
         highly_ranked.work.save(update_fields=["authority_score", "pagerank"])
 
+        PopularLegislation.objects.create(work=constitution.work, position=2)
+        PopularLegislation.objects.create(work=highly_ranked.work, position=1)
+
         landing_response = self.client.get(
             reverse("legislation_list"), {"nocache": "1"}
         )
-        popular_response = self.client.get(reverse("legislation_list_popular"))
 
         self.assertEqual(
+            [highly_ranked.pk, constitution.pk],
+            [
+                document.pk
+                for document in landing_response.context["popular_legislation"]
+            ],
+        )
+        self.assertNotEqual(
             constitution.pk,
             landing_response.context["popular_legislation"][0].pk,
-        )
-        self.assertEqual(
-            constitution.pk,
-            list(popular_response.context["documents"])[0].pk,
         )
 
     def test_filtered_legacy_landing_url_uses_the_listing_page(self):

@@ -6,7 +6,17 @@ from urllib.parse import urlencode
 
 from django.apps import apps
 from django.contrib import messages
-from django.db.models import CharField, Count, Func, Prefetch, Q, Value
+from django.db.models import (
+    Case,
+    CharField,
+    Count,
+    Func,
+    IntegerField,
+    Prefetch,
+    Q,
+    Value,
+    When,
+)
 from django.db.models.functions.text import Substr
 from django.http import Http404
 from django.shortcuts import get_object_or_404
@@ -22,13 +32,13 @@ from django.views.generic import DetailView
 from peachjam.forms import (
     LegislationFilterForm,
     UnconstitutionalProvisionFilterForm,
-    order_legislation_by_popularity,
 )
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri, get_language
 from peachjam.models import (
     CoreDocument,
     Glossary,
     Legislation,
+    PopularLegislation,
     ProvisionCitation,
     ProvisionCitationCount,
     UncommencedProvision,
@@ -119,18 +129,6 @@ class LegislationListView(FilteredDocumentListView):
         )
         counts = latest_expressions.aggregate(
             total=Count("id"),
-            current=Count(
-                "id",
-                filter=Q(repealed=False, principal=True, parent_work=None),
-            ),
-            subsidiary=Count(
-                "id",
-                filter=Q(
-                    parent_work__isnull=False,
-                    repealed=False,
-                    principal=True,
-                ),
-            ),
             repealed=Count("id", filter=Q(repealed=True)),
             uncommenced=Count(
                 "id",
@@ -165,11 +163,25 @@ class LegislationListView(FilteredDocumentListView):
             date__lte=today,
             metadata_json__publication_date__gte=recent_since,
         )
-        counts["recent"] = recent_queryset.count()
 
-        popular_legislation = list(
-            order_legislation_by_popularity(latest_expressions)[:10]
+        popular_work_ids = list(
+            PopularLegislation.objects.values_list("work_id", flat=True)
         )
+        if popular_work_ids:
+            popular_order = Case(
+                *[
+                    When(work_id=work_id, then=position)
+                    for position, work_id in enumerate(popular_work_ids)
+                ],
+                output_field=IntegerField(),
+            )
+            popular_legislation = list(
+                latest_expressions.filter(work_id__in=popular_work_ids)
+                .annotate(popular_order=popular_order)
+                .order_by("popular_order")[:10]
+            )
+        else:
+            popular_legislation = []
         recent_queryset = recent_queryset.only(
             "citation",
             "date",

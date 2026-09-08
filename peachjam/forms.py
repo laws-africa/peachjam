@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.mail import send_mail
 from django.core.mail.message import EmailMultiAlternatives
-from django.db.models import Case, IntegerField, Q, Value, When
+from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
@@ -577,37 +577,7 @@ class JournalArticleFilterForm(BaseDocumentFilterForm):
         return queryset.filter(journal_id__in=journals) if journals else queryset
 
 
-LEGISLATION_POPULAR_ORDERING = (
-    "-work__authority_score",
-    "-work__pagerank",
-    "title",
-)
-
-
-def order_legislation_by_popularity(queryset):
-    """Pin the main constitution, then order legislation by citation authority."""
-    return queryset.annotate(
-        popular_priority=Case(
-            When(
-                Q(title__icontains="constitution") & ~Q(title__icontains="amendment"),
-                then=Value(0),
-            ),
-            default=Value(1),
-            output_field=IntegerField(),
-        )
-    ).order_by("popular_priority", *LEGISLATION_POPULAR_ORDERING)
-
-
 class LegislationFilterForm(BaseDocumentFilterForm):
-    popular_sort = "popular"
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields["sort"].choices = [
-            *self.fields["sort"].choices,
-            (self.popular_sort, _("Popularity")),
-        ]
-
     def apply_filter_years(self, queryset):
         years = self.cleaned_data.get("years", [])
         return (
@@ -621,9 +591,6 @@ class LegislationFilterForm(BaseDocumentFilterForm):
         )
 
     def order_queryset(self, queryset, exclude=None):
-        if self.cleaned_data.get("sort") == self.popular_sort:
-            return order_legislation_by_popularity(queryset)
-
         queryset = super().order_queryset(queryset, exclude)
 
         # change ordering so that date uses frbr_uri_date
