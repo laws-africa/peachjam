@@ -219,13 +219,10 @@
           <div class="col-12 col-md-6">
             <div class="card card-clickable h-100 position-relative">
               <div class="card-body">
-                <div class="d-flex justify-content-between gap-3 align-items-baseline">
-                  <h3 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="{% url 'legislation_list_uncommenced' %}">{% trans "Uncommenced legislation" %}</a>
-                  </h3>
-                  <small class="text-muted text-nowrap">{{ legislation_counts.uncommenced|intcomma }}</small>
-                </div>
+                <h3 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'legislation_list_uncommenced' %}">{% trans "Uncommenced legislation" %}</a>
+                </h3>
                 <p class="card-text mb-0">
                   {% trans "Legislation that is not yet in force." %}
                 </p>
@@ -235,13 +232,10 @@
           <div class="col-12 col-md-6">
             <div class="card card-clickable h-100 position-relative">
               <div class="card-body">
-                <div class="d-flex justify-content-between gap-3 align-items-baseline">
-                  <h3 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="{% url 'legislation_list_repealed' %}">{% trans "Repealed legislation" %}</a>
-                  </h3>
-                  <small class="text-muted text-nowrap">{{ legislation_counts.repealed|intcomma }}</small>
-                </div>
+                <h3 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'legislation_list_repealed' %}">{% trans "Repealed legislation" %}</a>
+                </h3>
                 <p class="card-text mb-0">
                   {% trans "Legislation that is no longer in force." %}
                 </p>
