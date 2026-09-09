@@ -115,7 +115,7 @@ class DocumentSearchView(TemplateView):
     http_method_names = ["get"]
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
-    config_version = "2026-09-08"
+    config_version = "2026-07-24"
     user_can_debug = False
     # used by the /explain endpoint
     use_explain = False
