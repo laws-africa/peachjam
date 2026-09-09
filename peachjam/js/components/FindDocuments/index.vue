@@ -193,7 +193,7 @@
             </MobileFacetsDrawer>
           </div>
 
-          <div class="col-md-12 col-lg-9 position-relative">
+          <div class="col-md-12 col-lg-9 position-relative" @click="itemClicked">
             <div>
               <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
               <div
@@ -207,7 +207,6 @@
               </div>
               <div
                 v-if="searchInfo.count && searchInfo.flynote_results_html"
-                @click="itemClicked"
                 v-html="searchInfo.flynote_results_html"
               />
               <div
@@ -254,7 +253,6 @@
                 <div id="saved-search-button" class="mb-3" />
                 <div
                   ref="results"
-                  @click="itemClicked"
                   v-html="searchInfo.results_html"
                 />
                 <SearchFeedback :trace-id="searchInfo.trace_id" />
@@ -967,7 +965,6 @@ export default {
     async itemClicked (event) {
       const flynoteResult = event.target.closest('[data-flynote-result-id]');
       if (flynoteResult) {
-        console.log('Flynote result clicked:', flynoteResult);
         const data = new FormData();
         data.set('flynote_result', flynoteResult.getAttribute('data-flynote-result-id'));
         const url = `${this.urlPrefix}/search/api/flynote-click/`;
@@ -1000,6 +997,35 @@ export default {
           console.error(err);
         }
         if (href) window.location.assign(href);
+        return;
+      }
+
+      const entityResult = event.target.closest('[data-entity-result-id]');
+      if (entityResult) {
+        const data = new FormData();
+        data.set('entity_result', entityResult.getAttribute('data-entity-result-id'));
+        const href = entityResult.getAttribute('href');
+        const tracking = (async () => {
+          const response = await fetch(`${this.urlPrefix}/search/api/entity-click/`, {
+            method: 'POST',
+            keepalive: true,
+            headers: await authHeaders(),
+            body: data
+          });
+          if (!response.ok) throw new Error(`Entity click tracking failed with status ${response.status}`);
+        })();
+        try {
+          event.preventDefault();
+          await Promise.race([
+            tracking,
+            new Promise(resolve => setTimeout(resolve, 300))
+          ]);
+        } catch (err) {
+          console.error(err);
+        }
+        if (href) {
+          window.location.assign(href);
+        }
         return;
       }
 

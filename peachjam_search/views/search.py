@@ -59,12 +59,15 @@ from peachjam_search.forms import (
 )
 from peachjam_search.models import (
     SavedSearch,
+    SearchEntityClick,
+    SearchEntityResult,
     SearchFlynoteClick,
     SearchFlynoteResult,
     SearchTrace,
 )
 from peachjam_search.serializers import (
     SearchClickSerializer,
+    SearchEntityClickSerializer,
     SearchFlynoteClickSerializer,
     SearchHit,
 )
@@ -154,7 +157,7 @@ class DocumentSearchView(TemplateView):
         SearchHit.attach_documents(hits)
         # only keep those with documents
         hits = [h for h in hits if h.document]
-        entity_hits = self.match_entities(engine)
+        entity_hits = self.save_entity_results(trace, self.match_entities(engine))
         flynote_hits = self.match_flynotes(engine, hits)
         flynote_hits = self.save_flynote_results(trace, flynote_hits)
         has_direct_flynote_match = any(
@@ -343,6 +346,26 @@ class DocumentSearchView(TemplateView):
             tracked_hits.append(replace(hit, result_id=str(result.pk)))
         return tracked_hits
 
+    def save_entity_results(self, trace, entity_hits):
+        """Persist entity cards so their display and clicks are traceable."""
+        if not trace:
+            return entity_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(entity_hits, start=1):
+            result = SearchEntityResult.objects.create(
+                search_trace=trace,
+                entity_type=hit.entity_type,
+                entity_id=hit.entity_id,
+                entity_label=hit.label,
+                entity_url=hit.url,
+                match_type=hit.match_type,
+                confidence=hit.confidence,
+                position=position,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
+
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
             # useful for debugging and showing django debug panel details
@@ -432,6 +455,24 @@ class SearchFlynoteClickViewSet(
         serializer.is_valid(raise_exception=True)
         click, created = SearchFlynoteClick.objects.get_or_create(
             flynote_result=serializer.validated_data["flynote_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class SearchEntityClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    permission_classes = (AllowAny,)
+    serializer_class = SearchEntityClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchEntityClick.objects.get_or_create(
+            entity_result=serializer.validated_data["entity_result"]
         )
         return Response(
             self.get_serializer(click).data,

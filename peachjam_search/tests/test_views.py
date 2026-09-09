@@ -16,10 +16,20 @@ from rest_framework.test import APIRequestFactory, force_authenticate
 
 from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
-from peachjam_search.models import SearchFlynoteClick, SearchFlynoteResult, SearchTrace
+from peachjam_search.models import (
+    SearchEntityClick,
+    SearchEntityResult,
+    SearchFlynoteClick,
+    SearchFlynoteResult,
+    SearchTrace,
+)
 from peachjam_search.search_pipeline import QueryAnalysis, SearchQuery
 from peachjam_search.views.api import PortionSearchView
-from peachjam_search.views.search import DocumentSearchView, SearchFlynoteClickViewSet
+from peachjam_search.views.search import (
+    DocumentSearchView,
+    SearchEntityClickViewSet,
+    SearchFlynoteClickViewSet,
+)
 
 
 class SearchViewsTest(TestCase):
@@ -76,6 +86,39 @@ class SearchViewsTest(TestCase):
         self.assertIn("Flynote results shown", html)
         self.assertIn("Wrongful arrest", html)
         self.assertIn("Direct query match", html)
+        self.assertIn("Yes", html)
+
+    def test_entity_click_is_idempotent(self):
+        trace = SearchTrace.objects.create(
+            config_version="test",
+            search="ECOWAS court",
+            n_results=1,
+            page=1,
+            filters={},
+        )
+        result = SearchEntityResult.objects.create(
+            search_trace=trace,
+            entity_type="court",
+            entity_id=1,
+            entity_label="ECOWAS Community Court of Justice",
+            entity_url="/court/ecowascj/",
+            match_type="exact",
+            confidence=1.0,
+            position=1,
+        )
+
+        for expected_status in (201, 200):
+            request = APIRequestFactory().post("/", {"entity_result": str(result.pk)})
+            request.id = "test-request"
+            response = SearchEntityClickViewSet.as_view({"post": "create"})(request)
+            self.assertEqual(expected_status, response.status_code)
+        self.assertEqual(1, SearchEntityClick.objects.count())
+
+        html = render_to_string(
+            "peachjam_search/searchtrace_detail.html", {"trace": trace}
+        )
+        self.assertIn("Entity results shown", html)
+        self.assertIn("ECOWAS Community Court of Justice", html)
         self.assertIn("Yes", html)
 
     def test_search_trace_chain_shows_flynote_results_for_each_trace(self):
@@ -540,6 +583,7 @@ class SearchViewsTest(TestCase):
         self.assertIn("ECOWAS Community Court of Justice", html)
         self.assertNotIn("data-position", html)
         self.assertNotIn("data-frbr-uri", html)
+        self.assertIn('data-entity-result-id="None"', html)
 
     def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
