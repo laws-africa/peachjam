@@ -25,6 +25,10 @@ def seed_popular_legislation(apps, schema_editor):
                 jurisdiction_id = jurisdiction_ids[0]
         if jurisdiction_id:
             works = works.filter(documents__jurisdiction_id=jurisdiction_id)
+        else:
+            return
+    else:
+        return
 
     popular_ordering = ("-authority_score", "-pagerank", "title")
     pinned_work_id = (

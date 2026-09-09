@@ -1,3 +1,6 @@
+from io import StringIO
+
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls.base import reverse
 from django.utils import timezone
@@ -182,6 +185,41 @@ class LegislationViewsTest(TestCase):
         self.assertNotEqual(
             constitution.pk,
             landing_response.context["popular_legislation"][0].pk,
+        )
+
+    def test_popular_legislation_suggestions_preserve_admin_choices(self):
+        existing = Legislation.objects.get(pk=3040)
+        site_settings = PeachJamSettings.load()
+        site_settings.default_document_jurisdiction = existing.jurisdiction
+        site_settings.save()
+        suggested = Legislation.objects.create(
+            jurisdiction=existing.jurisdiction,
+            frbr_uri_doctype="act",
+            frbr_uri_date="2025",
+            frbr_uri_number="999",
+            title="Suggested Act, 2025",
+            date=timezone.now().date(),
+            language=existing.language,
+            metadata_json={},
+            principal=True,
+        )
+        suggested.work.authority_score = 1
+        suggested.work.pagerank = 1
+        suggested.work.save(update_fields=["authority_score", "pagerank"])
+        curated = PopularLegislation.objects.create(work=existing.work, position=5)
+
+        call_command("suggest_popular_legislation", limit=2, stdout=StringIO())
+        call_command("suggest_popular_legislation", limit=2, stdout=StringIO())
+
+        curated.refresh_from_db()
+        self.assertEqual(5, curated.position)
+        self.assertEqual(
+            [existing.work_id, suggested.work_id],
+            list(
+                PopularLegislation.objects.order_by("position").values_list(
+                    "work_id", flat=True
+                )
+            ),
         )
 
     def test_filtered_legacy_landing_url_uses_the_listing_page(self):

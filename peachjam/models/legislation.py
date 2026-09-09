@@ -85,3 +85,60 @@ class PopularLegislation(models.Model):
 
     def __str__(self):
         return self.work.title
+
+    @classmethod
+    def add_suggestions(cls, limit=10):
+        """Fill empty positions with ranked national legislation."""
+        from peachjam.models import PeachJamSettings
+
+        existing_work_ids = list(cls.objects.values_list("work_id", flat=True))
+        available_positions = max(0, limit - len(existing_work_ids))
+        if not available_positions:
+            return 0
+
+        site_settings = PeachJamSettings.load()
+        jurisdiction_id = site_settings.default_document_jurisdiction_id
+        if jurisdiction_id is None:
+            jurisdiction_ids = list(
+                site_settings.document_jurisdictions.values_list("pk", flat=True)[:2]
+            )
+            if len(jurisdiction_ids) == 1:
+                jurisdiction_id = jurisdiction_ids[0]
+        if jurisdiction_id is None:
+            return 0
+
+        works = Work.objects.filter(
+            documents__doc_type="legislation",
+            documents__jurisdiction_id=jurisdiction_id,
+            documents__locality__isnull=True,
+            documents__published=True,
+        ).exclude(pk__in=existing_work_ids)
+        popular_ordering = ("-authority_score", "-pagerank", "title")
+        constitution_id = (
+            works.filter(title__icontains="constitution")
+            .exclude(title__icontains="amendment")
+            .order_by(*popular_ordering)
+            .values_list("pk", flat=True)
+            .first()
+        )
+        works = works.annotate(
+            popular_priority=models.Case(
+                models.When(pk=constitution_id, then=models.Value(0)),
+                default=models.Value(1),
+                output_field=models.IntegerField(),
+            )
+        ).order_by("popular_priority", *popular_ordering)
+        work_ids = list(
+            works.values_list("pk", flat=True).distinct()[:available_positions]
+        )
+        next_position = (
+            cls.objects.aggregate(max_position=models.Max("position"))["max_position"]
+            or 0
+        ) + 1
+        cls.objects.bulk_create(
+            [
+                cls(work_id=work_id, position=next_position + offset)
+                for offset, work_id in enumerate(work_ids)
+            ]
+        )
+        return len(work_ids)
