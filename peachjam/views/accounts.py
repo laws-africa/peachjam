@@ -8,6 +8,7 @@ from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
@@ -28,6 +29,7 @@ from peachjam.forms import (
 from peachjam.models import DocumentAccessGroup, UserProfile
 from peachjam.views.mixins import AtomicPostMixin
 from peachjam_subs.models import Subscription
+from peachjam_subs.organisations import organisations_enabled
 
 User = get_user_model()
 
@@ -179,6 +181,29 @@ class AccountView(LoginRequiredMixin, TemplateView):
         context["document_access_groups"] = DocumentAccessGroup.objects.filter(
             group__in=self.request.user.groups.all()
         )
+        if organisations_enabled():
+            from peachjam_subs.models import OrganisationMembership
+
+            membership = (
+                OrganisationMembership.objects.filter(
+                    user=self.request.user,
+                    status=OrganisationMembership.Status.ACTIVE,
+                )
+                .select_related("organisation")
+                .first()
+            )
+            context["organisation_membership"] = membership
+            context["organisation_seat_assignment"] = (
+                membership.seat_assignments.filter(ended_at__isnull=True)
+                .select_related(
+                    "seat__product_offering__product",
+                    "seat__product_offering__pricing_plan",
+                    "subscription",
+                )
+                .first()
+                if membership
+                else None
+            )
         return context
 
 
@@ -243,11 +268,16 @@ class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
             )
             return redirect("delete_account")
         feedback = form.record_account_deletion()
+        try:
+            self.request.user.userprofile.delete_account(
+                deleted_reason=feedback.get_reason_display(),
+                deletion_feedback=feedback,
+            )
+        except ValidationError as exc:
+            feedback.delete()
+            messages.warning(self.request, "; ".join(exc.messages))
+            return redirect("delete_account")
         get_customerio().track_offboarding_feedback(self.request.user, feedback)
-        self.request.user.userprofile.delete_account(
-            deleted_reason=feedback.get_reason_display(),
-            deletion_feedback=feedback,
-        )
         messages.success(self.request, _("Your account has been deleted."))
         return redirect(self.get_success_url())
 

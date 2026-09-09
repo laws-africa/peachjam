@@ -30,6 +30,17 @@
                data-key-link="my_home">{{ MY_LII }}</a>
           </li>
         {% endif %}
+        {% if ORGANISATION_SUBSCRIPTIONS %}
+          {% for organisation_membership in user.organisation_memberships.all %}
+            {% if organisation_membership.status == 'active' and organisation_membership.can_manage %}
+              <li>
+                <a class="dropdown-item"
+                   href="{% url 'organisation_overview' %}"
+                   data-key-link="organisation">{% blocktrans with name=organisation_membership.organisation.name %}Manage {{ name }}{% endblocktrans %}</a>
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
         {% if PEACHJAM_SETTINGS.save_documents_enabled and perms.peachjam.view_folder %}
           <li>
             <a class="dropdown-item"

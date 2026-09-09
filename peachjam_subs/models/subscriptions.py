@@ -440,7 +440,7 @@ class Subscription(models.Model):
         ),
         conditions=[can_activate],
     )
-    def activate(self):
+    def activate(self, allow_trial=True):
         """Activate this subscription. This also closes any other active subscriptions for the user.
 
         If a trial upgrade is applicable to the user, then:
@@ -476,7 +476,7 @@ class Subscription(models.Model):
 
         # set up a trial if applicable
         sub_settings = subscription_settings()
-        trial_offering = sub_settings.get_trial_offering(self)
+        trial_offering = sub_settings.get_trial_offering(self) if allow_trial else None
         if trial_offering:
             trial = Subscription.objects.create(
                 user=self.user,

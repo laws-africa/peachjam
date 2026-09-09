@@ -11,6 +11,10 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from languages_plus.models import Language
 
+from peachjam.account_signals import (
+    user_account_post_delete,
+    user_account_pre_delete,
+)
 from peachjam.customerio import get_customerio
 from peachjam_search.models import SavedSearch
 from peachjam_subs.models import Subscription
@@ -151,6 +155,14 @@ class UserProfile(models.Model):
     def delete_account(self, deleted_reason, deletion_feedback=None):
         original_email = self.user.email or ""
 
+        user_account_pre_delete.send(
+            sender=type(self),
+            instance=self,
+            user=self.user,
+            deleted_reason=deleted_reason,
+            deletion_feedback=deletion_feedback,
+        )
+
         Annotation.objects.filter(user=self.user).delete()
         UserFollowing.objects.filter(user=self.user).delete()
         SavedSearch.objects.filter(user=self.user).delete()
@@ -183,6 +195,14 @@ class UserProfile(models.Model):
         self.user.is_active = False
         self.user.set_unusable_password()
         self.user.save()
+
+        user_account_post_delete.send(
+            sender=type(self),
+            instance=self,
+            user=self.user,
+            deleted_reason=deleted_reason,
+            deletion_feedback=deletion_feedback,
+        )
 
         return self.user
 

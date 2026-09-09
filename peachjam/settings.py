@@ -244,6 +244,8 @@ PEACHJAM = {
     ),
     "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
     "DISABLE_ACCOUNTS": os.environ.get("DISABLE_ACCOUNTS", "false") == "true",
+    # Organisation subscription management is opt-in per site.
+    "ORGANISATION_SUBSCRIPTIONS": False,
     "ALL_USERS_PERMISSION_GROUP": "AllUsers",
 }
 
