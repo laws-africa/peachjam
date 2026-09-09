@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import replace
 from urllib.parse import urlencode, urlparse
 
@@ -33,6 +34,7 @@ from django.views.generic import (
     UpdateView,
 )
 from django_htmx.http import HttpResponseClientRedirect
+from elastic_transport import ConnectionTimeout
 from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
@@ -72,6 +74,8 @@ from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
+
+log = logging.getLogger(__name__)
 
 
 def debug_json(value):
@@ -147,7 +151,26 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        es_response = engine.execute()
+        debug_payload = engine.build_debug_payload()
+        try:
+            es_response = engine.execute_search()
+        except ConnectionTimeout as error:
+            # A timeout has no ES response, but the compiled query is the most
+            # useful evidence for diagnosing it with Elasticsearch support.
+            # It is redacted before persistence, so embedding vectors are not
+            # copied into SearchTrace.
+            try:
+                self.save_search_trace(
+                    engine,
+                    0,
+                    status=SearchTrace.Status.TIMED_OUT,
+                    elasticsearch_query=debug_payload["redacted_query"],
+                    error=error,
+                )
+            except Exception:
+                # Monitoring must never conceal the timeout seen by the user.
+                log.exception("Unable to save a timed-out search trace")
+            raise
         trace = self.save_search_trace(engine, es_response.hits.total.value)
 
         hits = SearchHit.from_es_hits(engine, es_response.hits)
@@ -354,7 +377,15 @@ class DocumentSearchView(TemplateView):
 
         return response
 
-    def save_search_trace(self, engine: SearchEngine, n_results):
+    def save_search_trace(
+        self,
+        engine: SearchEngine,
+        n_results,
+        *,
+        status=SearchTrace.Status.COMPLETED,
+        elasticsearch_query=None,
+        error=None,
+    ):
         def strip_null_bytes(value):
             if isinstance(value, str):
                 return value.replace("\00", " ")
@@ -411,6 +442,10 @@ class DocumentSearchView(TemplateView):
                 ),
                 query_analysis=analysis_data,
                 search_profile=profile_name,
+                status=status,
+                elasticsearch_query=elasticsearch_query,
+                error_type=type(error).__name__ if error else None,
+                error_message=truncate("error_message", str(error)) if error else None,
             )
 
 
