@@ -207,6 +207,7 @@
               </div>
               <div
                 v-if="searchInfo.count && searchInfo.flynote_results_html"
+                @click="itemClicked"
                 v-html="searchInfo.flynote_results_html"
               />
               <div
@@ -966,6 +967,7 @@ export default {
     async itemClicked (event) {
       const flynoteResult = event.target.closest('[data-flynote-result-id]');
       if (flynoteResult) {
+        console.log('Flynote result clicked:', flynoteResult);
         const data = new FormData();
         data.set('flynote_result', flynoteResult.getAttribute('data-flynote-result-id'));
         const url = `${this.urlPrefix}/search/api/flynote-click/`;
