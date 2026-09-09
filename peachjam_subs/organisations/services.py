@@ -545,6 +545,40 @@ class OrganisationService:
         return membership
 
     @transaction.atomic
+    def cancel_scheduled_membership_removal(self, *, membership, actor):
+        """Cancel a future membership removal."""
+        membership = (
+            OrganisationMembership.objects.select_for_update()
+            .select_related("organisation", "user")
+            .get(pk=membership.pk, status=OrganisationMembership.Status.ACTIVE)
+        )
+        self.ensure_can_manage(actor, membership.organisation)
+        previous_end_on = membership.pending_end_on
+        if not previous_end_on:
+            raise ValidationError(_("This membership has no scheduled removal."))
+        membership.pending_end_on = None
+        membership.save(update_fields=["pending_end_on"])
+        OrganisationAuditEvent.objects.create(
+            organisation=membership.organisation,
+            actor=actor,
+            membership=membership,
+            event_type=OrganisationAuditEvent.EventType.MEMBER_REMOVED,
+            message="Cancelled scheduled organisation membership removal.",
+            event_data={
+                "cancelled_effective_on": (
+                    previous_end_on.isoformat() if previous_end_on else None
+                )
+            },
+        )
+        notify_member(
+            membership.user,
+            _("Your organisation membership will continue"),
+            _("Your membership of %(organisation)s is no longer scheduled to end.")
+            % {"organisation": membership.organisation.name},
+        )
+        return membership
+
+    @transaction.atomic
     def change_role(self, *, membership, role, actor):
         """Change an active non-owner membership role."""
         membership = (

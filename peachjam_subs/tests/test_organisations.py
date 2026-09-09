@@ -187,6 +187,25 @@ class OrganisationServiceTests(TestCase):
             Subscription.objects.active_for_user(self.member).first().product_offering,
         )
 
+    def test_cancel_scheduled_membership_removal(self):
+        membership = OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=self.member,
+            role=OrganisationMembership.Role.MEMBER,
+            pending_end_on=timezone.localdate() + timedelta(days=10),
+        )
+
+        organisation_service.cancel_scheduled_membership_removal(
+            membership=membership, actor=self.owner
+        )
+
+        membership.refresh_from_db()
+        self.assertIsNone(membership.pending_end_on)
+        event = membership.audit_events.latest("created_at")
+        self.assertEqual(
+            "Cancelled scheduled organisation membership removal.", event.message
+        )
+
     def test_transfer_ownership_demotes_previous_owner(self):
         new_owner = OrganisationMembership.objects.create(
             organisation=self.organisation,
