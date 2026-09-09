@@ -179,6 +179,14 @@ in your merge commit message so that the workflow skips its jobs.
 See [INGESTORS.md](INGESTORS.md) for the scheduled ingestor lifecycle, adapter
 contracts, and Indigo-specific import behavior.
 
+## Frontend UI conventions
+
+Use Bootstrap's standard components and contextual classes wherever possible. For
+informational notices, prefer `alert-primary` to `alert-info`: Peachjam's primary
+alert uses the product's primary colour on a subtle, faded background and provides
+the intended visual emphasis. Continue to use `alert-success`, `alert-warning`, and
+`alert-danger` when those semantic states apply.
+
 ## Key link analytics
 
 Peachjam can emit a Customer.io event when a user clicks a marked "key link" on an important page. This is intended for feature-usage analysis, for example understanding whether users click documents from the homepage courts block, the document metadata section, or the My LII timeline.

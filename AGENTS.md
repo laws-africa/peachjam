@@ -76,6 +76,7 @@ Examples in this repo:
 * Prefer Bootstrap components and building blocks (buttons, cards, lists, tables, etc.) over rolling your own, unless the layout or instructions really call for it.
 * Use "Sentence case" not "Title Case" for headings, labels and buttons.
 * Prefer default styling for buttons. Don't adjust padding, font weight or custom colours. Use btn-primary for primary buttons or btn-secondary.
+* Prefer `alert-primary` to `alert-info` for informational notices. Use success, warning and danger variants when those semantic states apply.
 * The default heading margins are usually fine, only adjust them if really necessary for spacing.
 
 ## Accessibility requirements
