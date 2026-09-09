@@ -48,10 +48,9 @@ class GraphRanker:
 
     Combination:
     The final Authority Score is calculated as a weighted sum:
-        authority_score = 0.7 * normalized_pagerank + 0.3 * normalized_log_citation_count
+        authority_score = 0.6 * normalized_pagerank + 0.3 * normalized_log_citation_count + 0.1 * recency
 
     - PageRank is weighted more heavily to prioritize influence over popularity.
-    - The recency boost is currently disabled.
     - The weighting can be tuned based on empirical ranking quality.
 
     Purpose:
