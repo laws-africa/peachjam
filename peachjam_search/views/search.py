@@ -171,6 +171,23 @@ class DocumentSearchView(TemplateView):
                     "entity_hits": entity_hits,
                 },
             ),
+            "flynote_results_html": (
+                render_to_string(
+                    "peachjam_search/_flynote_search_hit_list.html",
+                    {
+                        "request": request,
+                        "flynote_hits": flynote_hits,
+                        "flynote_search_url": (
+                            f"{reverse('flynote_list')}?"
+                            f"{urlencode({'q': engine.search_query.query})}"
+                            if has_direct_flynote_match
+                            else None
+                        ),
+                    },
+                )
+                if flynote_hits
+                else ""
+            ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
                 {
@@ -180,13 +197,6 @@ class DocumentSearchView(TemplateView):
                     "show_jurisdiction": settings.PEACHJAM[
                         "SEARCH_JURISDICTION_FILTER"
                     ],
-                    "flynote_hits": flynote_hits,
-                    "flynote_search_url": (
-                        f"{reverse('flynote_list')}?"
-                        f"{urlencode({'q': engine.search_query.query})}"
-                        if has_direct_flynote_match
-                        else None
-                    ),
                 },
             ),
             "trace_id": str(trace.id) if trace else None,

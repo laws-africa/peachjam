@@ -1,30 +1,32 @@
 {% load humanize i18n %}
-<li class="my-4" data-flynote-search-results>
-  <section class="p-3 bg-light rounded">
-    <h2 class="h5 mb-3">{% trans "Explore legal topics related to your search" %}</h2>
-    <div class="row g-3">
-      {% for topic_hit in flynote_hits %}
-        <div class="col-12 col-md-4">
-          <article class="card h-100 bg-white card-clickable"
-                   data-flynote-id="{{ topic_hit.flynote.pk }}"
-                   data-flynote-source="{{ topic_hit.source }}">
-            <div class="card-body d-flex flex-column">
+<section class="my-4 p-3 bg-light rounded"
+         data-flynote-search-results
+         data-key-link-feature="topics">
+  <h2 class="h5 mb-3">{% trans "Explore legal topics related to your search" %}</h2>
+  <div class="row g-3">
+    {% for topic_hit in flynote_hits %}
+      <div class="col-12 col-md-4">
+        <article class="card h-100 bg-white card-clickable position-relative"
+                 data-flynote-id="{{ topic_hit.flynote.pk }}"
+                 data-flynote-source="{{ topic_hit.source }}">
+          <div class="card-body d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-start gap-2">
               <a class="stretched-link text-decoration-none text-h5 mb-2"
                  href="{{ topic_hit.flynote.get_absolute_url }}"
+                 data-key-link="topic"
                  data-flynote-result-id="{{ topic_hit.result_id }}">{{ topic_hit.flynote.name }}</a>
-              <p class="small text-muted mb-3">{{ topic_hit.path_labels|join:" — " }}</p>
-              <small class="mt-auto text-muted">
-                {% blocktranslate count count=topic_hit.count %}{{ count }} judgment{% plural %}{{ count }} judgments{% endblocktranslate %}
-              </small>
+              <span class="badge rounded-pill bg-secondary text-nowrap"
+                    aria-label="{% blocktranslate count count=topic_hit.count %}{{ count }} judgment{% plural %}{{ count }} judgments{% endblocktranslate %}">{{ topic_hit.count|intcomma }}</span>
             </div>
-          </article>
-        </div>
-      {% endfor %}
-    </div>
-    {% if flynote_search_url %}
-      <div class="mt-3 text-end">
-        <a href="{{ flynote_search_url }}">{% trans "Explore all related legal topics" %}</a>
+            <p class="small text-muted mb-0">{{ topic_hit.path_labels|join:" — " }}</p>
+          </div>
+        </article>
       </div>
-    {% endif %}
-  </section>
-</li>
+    {% endfor %}
+  </div>
+  {% if flynote_search_url %}
+    <div class="mt-3 text-end">
+      <a href="{{ flynote_search_url }}">{% trans "Explore all related legal topics" %}</a>
+    </div>
+  {% endif %}
+</section>
