@@ -30,6 +30,11 @@ class Command(BaseCommand):
             help="Start processing from this judgment PK downwards (useful for resuming after a failure).",
         )
         parser.add_argument(
+            "--court-code",
+            default=None,
+            help="Only process judgments from the court with this code.",
+        )
+        parser.add_argument(
             "--skip-counts",
             action="store_true",
             default=False,
@@ -82,6 +87,9 @@ class Command(BaseCommand):
         if options["start_id"]:
             qs = qs.filter(pk__lte=options["start_id"])
 
+        if options["court_code"]:
+            qs = qs.filter(court__code=options["court_code"])
+
         total = qs.count()
 
         if options["limit"]:
@@ -94,6 +102,9 @@ class Command(BaseCommand):
 
         if options["start_id"]:
             self.stdout.write(f"Starting from judgment pk={options['start_id']}")
+
+        if options["court_code"]:
+            self.stdout.write(f"Filtering by court code={options['court_code']}")
 
         if skip_counts:
             self.stdout.write("Skipping flynote count updates.")

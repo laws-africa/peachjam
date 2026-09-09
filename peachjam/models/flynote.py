@@ -28,6 +28,18 @@ class FlynoteManager(MP_NodeManager):
     def undeprecated(self):
         return self.get_queryset().filter(deprecated=False)
 
+    def matching_names(self, query):
+        """Return active flynotes whose names contain the supplied query.
+
+        This is deliberately only the common textual matching step. Callers
+        decide whether they need to group matches into a browseable tree or
+        rank a small set of search suggestions.
+        """
+        query = (query or "").strip()
+        if not query:
+            return self.none()
+        return self.undeprecated().filter(name__icontains=query)
+
 
 class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
     """Hierarchical flynote tree node using treebeard's materialised path. This is used to represent textual flynotes
@@ -82,6 +94,39 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
 
     def get_absolute_url(self):
         return reverse("flynote_detail", kwargs={"pk": self.pk})
+
+    @classmethod
+    def get_path_labels(cls, flynotes):
+        """Return the root-to-node labels for each supplied flynote in bulk."""
+        flynotes = list(flynotes)
+        paths = set()
+        for flynote in flynotes:
+            for end in range(
+                flynote.steplen,
+                len(flynote.path) + 1,
+                flynote.steplen,
+            ):
+                paths.add(flynote.path[:end])
+
+        path_names = {
+            flynote.path: flynote.name
+            for flynote in cls.objects.filter(path__in=paths).only("name", "path")
+        }
+        return {
+            flynote.pk: [
+                path_names[path]
+                for path in (
+                    flynote.path[:end]
+                    for end in range(
+                        flynote.steplen,
+                        len(flynote.path) + 1,
+                        flynote.steplen,
+                    )
+                )
+                if path in path_names
+            ]
+            for flynote in flynotes
+        }
 
     def validate_deprecated_invariant(self):
         """Ensure an active node cannot exist under a deprecated ancestor."""

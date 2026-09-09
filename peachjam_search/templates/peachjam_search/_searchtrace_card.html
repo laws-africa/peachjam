@@ -117,6 +117,66 @@
       </div>
     {% endif %}
   {% endwith %}
+  {% with trace.flynote_results.all as flynote_results %}
+    {% if flynote_results %}
+      <div class="card-body pt-0">
+        <h5>
+          {% trans "Flynote results shown" %}
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>
+                  {% trans "Position" %}
+                </th>
+                <th>
+                  {% trans "Topic" %}
+                </th>
+                <th>
+                  {% trans "Source" %}
+                </th>
+                <th>
+                  {% trans "Selection reason" %}
+                </th>
+                <th>
+                  {% trans "Clicked" %}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in flynote_results %}
+                <tr>
+                  <td>
+                    {{ result.position }}
+                  </td>
+                  <td>
+                    {{ result.flynote_name }}
+                    <div class="small text-muted">
+                      {{ result.flynote_path_labels|join:" — " }}
+                    </div>
+                  </td>
+                  <td>
+                    {{ result.get_source_display }}
+                  </td>
+                  <td>
+                    {{ result.get_selection_reason_display }}
+                  </td>
+                  <td>
+                    {% if result.click %}
+                      {% trans "Yes" %}
+                    {% else %}
+                      {% trans "No" %}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
 </div>
 {% with trace.next_searches.all as next_searches %}
   {% if next_searches %}

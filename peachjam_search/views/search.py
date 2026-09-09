@@ -33,11 +33,13 @@ from django.views.generic import (
     UpdateView,
 )
 from django_htmx.http import HttpResponseClientRedirect
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
+from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
 from peachjam.resources import DownloadDocumentsResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
@@ -45,6 +47,7 @@ from peachjam_api.serializers import LabelSerializer
 from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
+from peachjam_search.flynotes import FlynoteSearchMatcher
 from peachjam_search.forms import (
     DocumentSearchDebugForm,
     PortionSearchDebugForm,
@@ -54,8 +57,17 @@ from peachjam_search.forms import (
     SearchFeedbackCreateForm,
     SearchForm,
 )
-from peachjam_search.models import SavedSearch, SearchTrace
-from peachjam_search.serializers import SearchClickSerializer, SearchHit
+from peachjam_search.models import (
+    SavedSearch,
+    SearchFlynoteClick,
+    SearchFlynoteResult,
+    SearchTrace,
+)
+from peachjam_search.serializers import (
+    SearchClickSerializer,
+    SearchFlynoteClickSerializer,
+    SearchHit,
+)
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
@@ -143,6 +155,11 @@ class DocumentSearchView(TemplateView):
         # only keep those with documents
         hits = [h for h in hits if h.document]
         entity_hits = self.match_entities(engine)
+        flynote_hits = self.match_flynotes(engine, hits)
+        flynote_hits = self.save_flynote_results(trace, flynote_hits)
+        has_direct_flynote_match = any(
+            hit.source == "direct_query" for hit in flynote_hits
+        )
 
         response = {
             "count": es_response.hits.total.value,
@@ -153,6 +170,23 @@ class DocumentSearchView(TemplateView):
                     "request": request,
                     "entity_hits": entity_hits,
                 },
+            ),
+            "flynote_results_html": (
+                render_to_string(
+                    "peachjam_search/_flynote_search_hit_list.html",
+                    {
+                        "request": request,
+                        "flynote_hits": flynote_hits,
+                        "flynote_search_url": (
+                            f"{reverse('flynote_list')}?"
+                            f"{urlencode({'q': engine.search_query.query})}"
+                            if has_direct_flynote_match
+                            else None
+                        ),
+                    },
+                )
+                if flynote_hits
+                else ""
             ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
@@ -272,6 +306,43 @@ class DocumentSearchView(TemplateView):
             return []
         return self.make_entity_matcher().match(engine.search_query.query)
 
+    def match_flynotes(self, engine, hits):
+        """Find supplementary legal-topic cards for a first-page legal-term search."""
+        if (
+            engine.search_query.page != 1
+            or engine.search_query.field_queries
+            or not Judgment.flynote_topics_enabled()
+            or getattr(getattr(engine, "analysis", None), "intent", None)
+            != "legal_term"
+        ):
+            return []
+        return FlynoteSearchMatcher().match(engine.search_query.query, hits)
+
+    def save_flynote_results(self, trace, flynote_hits):
+        """Persist the exact topic cards rendered for a search trace.
+
+        The result model also has surfaces for the legal topics page, so this
+        method deliberately records presentation data rather than card-only
+        analytics.
+        """
+        if not trace:
+            return flynote_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(flynote_hits, start=1):
+            result = SearchFlynoteResult.objects.create(
+                search_trace=trace,
+                flynote=hit.flynote,
+                flynote_name=hit.flynote.name,
+                flynote_path_labels=hit.path_labels,
+                position=position,
+                surface=SearchFlynoteResult.Surface.DOCUMENT_SEARCH_CARD,
+                source=hit.source,
+                selection_reason=hit.selection_reason,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
+
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
             # useful for debugging and showing django debug panel details
@@ -346,6 +417,26 @@ class DocumentSearchView(TemplateView):
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
+
+
+class SearchFlynoteClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    """Record a card click once, without delaying navigation to the topic."""
+
+    permission_classes = (AllowAny,)
+    serializer_class = SearchFlynoteClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchFlynoteClick.objects.get_or_create(
+            flynote_result=serializer.validated_data["flynote_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
 
 class SearchDebugMixin(PermissionRequiredMixin):
