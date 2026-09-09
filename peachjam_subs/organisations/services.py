@@ -416,9 +416,7 @@ class OrganisationService:
         )
         self.ensure_can_manage(actor, membership.organisation)
         if membership.seat_assignments.filter(ended_at__isnull=True).exists():
-            raise ValidationError(
-                _("This member already has an organisation-funded subscription.")
-            )
+            raise ValidationError(_("This member already has an assigned seat."))
         seat = self.find_available_seat(membership.organisation, offering)
         created_seat = seat is None
         if created_seat:

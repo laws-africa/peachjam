@@ -182,7 +182,10 @@ class AccountView(LoginRequiredMixin, TemplateView):
             group__in=self.request.user.groups.all()
         )
         if organisations_enabled():
-            from peachjam_subs.models import OrganisationMembership
+            from peachjam_subs.models import (
+                OrganisationInvitation,
+                OrganisationMembership,
+            )
 
             membership = (
                 OrganisationMembership.objects.filter(
@@ -203,6 +206,19 @@ class AccountView(LoginRequiredMixin, TemplateView):
                 .first()
                 if membership
                 else None
+            )
+            context["organisation_invitations"] = (
+                OrganisationInvitation.objects.filter(
+                    email__iexact=self.request.user.email,
+                    status=OrganisationInvitation.Status.PENDING,
+                    expires_at__gt=timezone.now(),
+                ).select_related(
+                    "organisation",
+                    "requested_product_offering__product",
+                    "requested_product_offering__pricing_plan",
+                )
+                if self.request.user.email
+                else OrganisationInvitation.objects.none()
             )
         return context
 
