@@ -33,8 +33,10 @@ from django.views.generic import (
     UpdateView,
 )
 from django_htmx.http import HttpResponseClientRedirect
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
@@ -55,8 +57,17 @@ from peachjam_search.forms import (
     SearchFeedbackCreateForm,
     SearchForm,
 )
-from peachjam_search.models import SavedSearch, SearchTrace
-from peachjam_search.serializers import SearchClickSerializer, SearchHit
+from peachjam_search.models import (
+    SavedSearch,
+    SearchFlynoteClick,
+    SearchFlynoteResult,
+    SearchTrace,
+)
+from peachjam_search.serializers import (
+    SearchClickSerializer,
+    SearchFlynoteClickSerializer,
+    SearchHit,
+)
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
@@ -104,7 +115,7 @@ class DocumentSearchView(TemplateView):
     http_method_names = ["get"]
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
-    config_version = "2026-07-24"
+    config_version = "2026-09-08"
     user_can_debug = False
     # used by the /explain endpoint
     use_explain = False
@@ -145,6 +156,7 @@ class DocumentSearchView(TemplateView):
         hits = [h for h in hits if h.document]
         entity_hits = self.match_entities(engine)
         flynote_hits = self.match_flynotes(engine, hits)
+        flynote_hits = self.save_flynote_results(trace, flynote_hits)
         has_direct_flynote_match = any(
             hit.source == "direct_query" for hit in flynote_hits
         )
@@ -296,6 +308,31 @@ class DocumentSearchView(TemplateView):
             return []
         return FlynoteSearchMatcher().match(engine.search_query.query, hits)
 
+    def save_flynote_results(self, trace, flynote_hits):
+        """Persist the exact topic cards rendered for a search trace.
+
+        The result model also has surfaces for the legal topics page, so this
+        method deliberately records presentation data rather than card-only
+        analytics.
+        """
+        if not trace:
+            return flynote_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(flynote_hits, start=1):
+            result = SearchFlynoteResult.objects.create(
+                search_trace=trace,
+                flynote=hit.flynote,
+                flynote_name=hit.flynote.name,
+                flynote_path_labels=hit.path_labels,
+                position=position,
+                surface=SearchFlynoteResult.Surface.DOCUMENT_SEARCH_CARD,
+                source=hit.source,
+                selection_reason=hit.selection_reason,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
+
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
             # useful for debugging and showing django debug panel details
@@ -370,6 +407,26 @@ class DocumentSearchView(TemplateView):
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
+
+
+class SearchFlynoteClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    """Record a card click once, without delaying navigation to the topic."""
+
+    permission_classes = (AllowAny,)
+    serializer_class = SearchFlynoteClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchFlynoteClick.objects.get_or_create(
+            flynote_result=serializer.validated_data["flynote_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
 
 class SearchDebugMixin(PermissionRequiredMixin):

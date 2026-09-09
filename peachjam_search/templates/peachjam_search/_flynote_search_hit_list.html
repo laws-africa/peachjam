@@ -10,7 +10,8 @@
                    data-flynote-source="{{ topic_hit.source }}">
             <div class="card-body d-flex flex-column">
               <a class="stretched-link text-decoration-none text-h5 mb-2"
-                 href="{{ topic_hit.flynote.get_absolute_url }}">{{ topic_hit.flynote.name }}</a>
+                 href="{{ topic_hit.flynote.get_absolute_url }}"
+                 data-flynote-result-id="{{ topic_hit.result_id }}">{{ topic_hit.flynote.name }}</a>
               <p class="small text-muted mb-3">{{ topic_hit.path_labels|join:" — " }}</p>
               <small class="mt-auto text-muted">
                 {% blocktranslate count count=topic_hit.count %}{{ count }} judgment{% plural %}{{ count }} judgments{% endblocktranslate %}

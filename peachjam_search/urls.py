@@ -5,6 +5,9 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register("click", views.SearchClickViewSet, basename="search_click")
+router.register(
+    "flynote-click", views.SearchFlynoteClickViewSet, basename="search_flynote_click"
+)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

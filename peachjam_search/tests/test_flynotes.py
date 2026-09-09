@@ -10,6 +10,7 @@ from languages_plus.models import Language
 from peachjam.models import Court, Judgment
 from peachjam.models.flynote import Flynote, FlynoteDocumentCount, JudgmentFlynote
 from peachjam_search.flynotes import FlynoteSearchMatcher
+from peachjam_search.models import SearchFlynoteResult, SearchTrace
 from peachjam_search.search_pipeline import QueryAnalysis, SearchQuery
 from peachjam_search.views.search import DocumentSearchView
 
@@ -57,6 +58,11 @@ class FlynoteSearchMatcherTest(TestCase):
             ],
         )
 
+        trace = SearchTrace.objects.create(
+            config_version="test", search="wrongful arrest", n_results=2, page=1
+        )
+        matches = DocumentSearchView().save_flynote_results(trace, matches)
+
         self.assertEqual([direct, supported], [match.flynote for match in matches])
         self.assertEqual(
             ["direct_query", "document_support"], [match.source for match in matches]
@@ -72,6 +78,7 @@ class FlynoteSearchMatcherTest(TestCase):
         self.assertIn("Explore legal topics related to your search", html)
         self.assertIn("Wrongful arrest", html)
         self.assertIn('data-flynote-source="direct_query"', html)
+        self.assertIn(f'data-flynote-result-id="{matches[0].result_id}"', html)
         self.assertIn('href="/topics/?q=wrongful+arrest"', html)
         self.assertIn("Explore all related legal topics", html)
         self.assertNotIn("Explore topic", html)
@@ -128,6 +135,10 @@ class FlynoteSearchMatcherTest(TestCase):
 
         self.assertEqual([first, second], [match.flynote for match in matches])
         self.assertTrue(all(match.source == "document_support" for match in matches))
+        self.assertEqual(
+            ["lexical_document_support", "lexical_document_support"],
+            [match.selection_reason for match in matches],
+        )
 
     def test_requires_two_results_to_support_a_fallback_topic(self):
         supported = self.create_topic("Criminal law", "Property offences", 10)
@@ -166,11 +177,36 @@ class FlynoteSearchMatcherTest(TestCase):
 
         self.assertEqual([arson], [match.flynote for match in matches])
         self.assertEqual(["document_support"], [match.source for match in matches])
+        self.assertEqual(
+            ["strong_document_convergence"],
+            [match.selection_reason for match in matches],
+        )
         html = render_to_string(
             "peachjam_search/_flynote_search_hit_list.html",
             {"flynote_hits": matches, "flynote_search_url": None},
         )
         self.assertNotIn("Explore all related legal topics", html)
+
+    def test_records_flynote_result_display_metadata(self):
+        direct = self.create_topic("Criminal law", "Wrongful arrest", 10)
+        trace = SearchTrace.objects.create(
+            config_version="test", search="wrongful arrest", n_results=1, page=1
+        )
+        hit = FlynoteSearchMatcher().match("wrongful arrest", [])[0]
+
+        tracked_hit = DocumentSearchView().save_flynote_results(trace, [hit])[0]
+
+        result = SearchFlynoteResult.objects.get(pk=tracked_hit.result_id)
+        self.assertEqual(trace, result.search_trace)
+        self.assertEqual(direct, result.flynote)
+        self.assertEqual("Wrongful arrest", result.flynote_name)
+        self.assertEqual(
+            ["Criminal law", "Wrongful arrest"], result.flynote_path_labels
+        )
+        self.assertEqual(1, result.position)
+        self.assertEqual("document_search_card", result.surface)
+        self.assertEqual("direct_query", result.source)
+        self.assertEqual("direct_name_match", result.selection_reason)
 
     def test_deduplicates_topics_with_the_same_name(self):
         most_popular = self.create_topic("Criminal law", "Rape", 10)

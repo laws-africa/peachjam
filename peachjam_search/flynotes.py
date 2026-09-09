@@ -16,6 +16,14 @@ class FlynoteSearchHit:
     count: int
     path_labels: list[str]
     source: str
+    selection_reason: str
+    result_id: str | None = None
+
+
+@dataclass(frozen=True)
+class FlynoteSearchCandidate:
+    flynote: Flynote
+    selection_reason: str
 
 
 class FlynoteSearchMatcher:
@@ -52,6 +60,7 @@ class FlynoteSearchMatcher:
         direct_matches = self.direct_matches(query)
         selected = self.select_distinct_branches(direct_matches, self.result_limit)
         selected_sources = {flynote.pk: "direct_query" for flynote in selected}
+        selection_reasons = {flynote.pk: "direct_name_match" for flynote in selected}
 
         if len(selected) < self.result_limit:
             # Direct topic-name matches are the most trustworthy suggestions.
@@ -59,13 +68,20 @@ class FlynoteSearchMatcher:
             # them or exceed the three-card limit.
             fallback_matches = self.topics_from_search_hits(query, search_hits)
             fallback_selected = self.select_distinct_branches(
-                fallback_matches,
+                [candidate.flynote for candidate in fallback_matches],
                 self.result_limit - len(selected),
                 selected,
             )
             selected.extend(fallback_selected)
             selected_sources.update(
                 (flynote.pk, "document_support") for flynote in fallback_selected
+            )
+            selection_reasons.update(
+                {
+                    candidate.flynote.pk: candidate.selection_reason
+                    for candidate in fallback_matches
+                    if candidate.flynote in fallback_selected
+                }
             )
 
         path_labels = Flynote.get_path_labels(selected)
@@ -75,6 +91,7 @@ class FlynoteSearchMatcher:
                 count=flynote.doc_count,
                 path_labels=path_labels.get(flynote.pk, []),
                 source=selected_sources[flynote.pk],
+                selection_reason=selection_reasons[flynote.pk],
             )
             for flynote in selected
         ]
@@ -190,10 +207,18 @@ class FlynoteSearchMatcher:
             )
             if normal_support or strong_convergence:
                 eligible_candidates.append((path, document_ids))
-        return [
-            flynotes_by_path[path]
-            for path, _ in sorted(eligible_candidates, key=ranking_key)
-        ]
+        candidates = []
+        for path, document_ids in sorted(eligible_candidates, key=ranking_key):
+            flynote = flynotes_by_path[path]
+            if (
+                self.fallback_topic_matches_query(flynote.name, query)
+                and len(document_ids) >= self.minimum_fallback_document_support
+            ):
+                selection_reason = "lexical_document_support"
+            else:
+                selection_reason = "strong_document_convergence"
+            candidates.append(FlynoteSearchCandidate(flynote, selection_reason))
+        return candidates
 
     def fallback_topic_matches_query(self, topic_name, query):
         """Require fallback topics to share a meaningful query word.

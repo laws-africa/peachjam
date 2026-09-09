@@ -960,6 +960,43 @@ export default {
     },
 
     async itemClicked (event) {
+      const flynoteResult = event.target.closest('[data-flynote-result-id]');
+      if (flynoteResult) {
+        const data = new FormData();
+        data.set('flynote_result', flynoteResult.getAttribute('data-flynote-result-id'));
+        const url = `${this.urlPrefix}/search/api/flynote-click/`;
+        const href = flynoteResult.getAttribute('href');
+
+        // Card clicks navigate away from the results page. Wait briefly for a
+        // CSRF-authenticated request before following an ordinary link, while
+        // keeping a strict bound so tracking never makes navigation feel slow.
+        // sendBeacon cannot include the CSRF header Django requires here.
+        const trackClick = async () => {
+          const response = await fetch(url, {
+            method: 'POST',
+            keepalive: true,
+            headers: await authHeaders(),
+            body: data
+          });
+          if (!response.ok) {
+            throw new Error(`Flynote click tracking failed with status ${response.status}`);
+          }
+        };
+
+        const tracking = trackClick();
+        try {
+          event.preventDefault();
+          await Promise.race([
+            tracking,
+            new Promise(resolve => setTimeout(resolve, 300))
+          ]);
+        } catch (err) {
+          console.error(err);
+        }
+        if (href) window.location.assign(href);
+        return;
+      }
+
       const item = event.target.closest('[data-position]');
       if (item) {
         const params = new URLSearchParams();
