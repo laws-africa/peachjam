@@ -31,4 +31,14 @@ class Migration(migrations.Migration):
                 max_length=20,
             ),
         ),
+        # Django uses the model default while adding the non-null column but
+        # does not retain it in PostgreSQL. Keep a database default as well,
+        # so older application processes can still create a trace during a
+        # rolling deployment.
+        migrations.RunSQL(
+            "ALTER TABLE peachjam_search_searchtrace "
+            "ALTER COLUMN status SET DEFAULT 'completed'",
+            "ALTER TABLE peachjam_search_searchtrace "
+            "ALTER COLUMN status DROP DEFAULT",
+        ),
     ]
