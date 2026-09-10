@@ -10,6 +10,7 @@ from django.core.cache import cache
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from elastic_transport import ConnectionTimeout
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 from rest_framework.test import APIRequestFactory, force_authenticate
@@ -693,6 +694,44 @@ class SearchViewsTest(TestCase):
             long_clean_query.replace("\x00", " "),
             captured["query_analysis"]["clean_query"],
         )
+
+    def test_search_timeout_records_redacted_elasticsearch_query(self):
+        request = RequestFactory().get(
+            reverse("search:search_documents"), {"search": "slow query"}
+        )
+        request.user = self.user
+        request.id = "test-request"
+        engine = SimpleNamespace(
+            search_query=SearchQuery(
+                query="slow query",
+                field_queries={},
+                mode="text",
+                filters={},
+                facets=[],
+                page=1,
+                page_size=10,
+                ordering="-score",
+                explain=False,
+            ),
+            analysis=QueryAnalysis(raw_query="slow query", clean_query="slow query"),
+            plan=SimpleNamespace(mode="text", profile=None),
+            build_debug_payload=lambda: {
+                "redacted_query": {"match": {"text": "slow query"}}
+            },
+            execute_search=Mock(side_effect=ConnectionTimeout("timed out")),
+        )
+        view = DocumentSearchView()
+        view.request = request
+        view.prepare = Mock(return_value=(None, None, engine))
+
+        with self.assertRaises(ConnectionTimeout):
+            view.search(request)
+
+        trace = SearchTrace.objects.get(search="slow query")
+        self.assertEqual(SearchTrace.Status.TIMED_OUT, trace.status)
+        self.assertEqual({"match": {"text": "slow query"}}, trace.elasticsearch_query)
+        self.assertEqual("ConnectionTimeout", trace.error_type)
+        self.assertIn("timed out", trace.error_message)
 
     def test_search_hit_links_open_in_same_tab(self):
         request = RequestFactory().get("/search/?search=test")

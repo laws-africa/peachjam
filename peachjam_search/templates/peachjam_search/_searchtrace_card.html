@@ -47,6 +47,12 @@
       <td>{{ trace.mode }}</td>
     </tr>
     <tr>
+      <th>{% trans "Status" %}</th>
+      <td>{{ trace.get_status_display }}</td>
+      <th>{% trans "Error" %}</th>
+      <td>{{ trace.error_type }} {{ trace.error_message }}</td>
+    </tr>
+    <tr>
       <th>{% trans "Ordering" %}</th>
       <td colspan="3">{{ trace.ordering }}</td>
     </tr>
@@ -59,7 +65,9 @@
     <tr>
       <th>{% trans "Filters" %}</th>
       <td>{{ trace.filters }}</td>
-      <th>{% trans "User" %}</th>
+      <th>
+        {% trans "User" %}
+      </th>
       <td colspan="3">
         {{ trace.ip_address|default_if_none:'?' }}
         <br/>
@@ -74,9 +82,15 @@
       </td>
     </tr>
     <tr>
-      <th>{% trans "Config version" %}</th>
-      <td>{{ trace.config_version }}</td>
-      <th>{% trans "Request ID" %}</th>
+      <th>
+        {% trans "Config version" %}
+      </th>
+      <td>
+        {{ trace.config_version }}
+      </td>
+      <th>
+        {% trans "Request ID" %}
+      </th>
       <td>
         {{ trace.request_id }}
       </td>
@@ -88,6 +102,14 @@
         {% trans "Query analysis" %}
       </h5>
       <pre class="mb-0"><code>{{ trace.get_query_analysis_json }}</code></pre>
+    </div>
+  {% endif %}
+  {% if trace.elasticsearch_query %}
+    <div class="card-body pt-0">
+      <h5>
+        {% trans "Elasticsearch query" %}
+      </h5>
+      <pre class="mb-0"><code>{{ trace.elasticsearch_query|pprint }}</code></pre>
     </div>
   {% endif %}
   {% with trace.clicks.all as clicks %}
