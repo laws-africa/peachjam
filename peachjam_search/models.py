@@ -29,6 +29,10 @@ class SearchTrace(models.Model):
         PORTIONS = "portions", "Portions"
         FLYNOTES = "flynotes", "Legal topics"
 
+    class Status(models.TextChoices):
+        COMPLETED = "completed", "Completed"
+        TIMED_OUT = "timed_out", "Timed out"
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # this is the name of the search configuration, for tracking changes across versions
     config_version = models.CharField(max_length=50, null=False)
@@ -59,6 +63,12 @@ class SearchTrace(models.Model):
     query_classification_confidence = models.FloatField(null=True)
     query_analysis = models.JSONField(null=True)
     search_profile = models.CharField(max_length=100, null=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.COMPLETED
+    )
+    elasticsearch_query = models.JSONField(null=True)
+    error_type = models.CharField(max_length=255, null=True)
+    error_message = models.CharField(max_length=2048, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
