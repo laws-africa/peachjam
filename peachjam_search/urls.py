@@ -8,6 +8,9 @@ router.register("click", views.SearchClickViewSet, basename="search_click")
 router.register(
     "flynote-click", views.SearchFlynoteClickViewSet, basename="search_flynote_click"
 )
+router.register(
+    "entity-click", views.SearchEntityClickViewSet, basename="search_entity_click"
+)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.

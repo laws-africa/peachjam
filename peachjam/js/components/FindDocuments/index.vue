@@ -193,7 +193,7 @@
             </MobileFacetsDrawer>
           </div>
 
-          <div class="col-md-12 col-lg-9 position-relative">
+          <div class="col-md-12 col-lg-9 position-relative" @click="itemClicked">
             <div>
               <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
               <div
@@ -207,7 +207,6 @@
               </div>
               <div
                 v-if="searchInfo.count && searchInfo.flynote_results_html"
-                @click="itemClicked"
                 v-html="searchInfo.flynote_results_html"
               />
               <div
@@ -254,7 +253,6 @@
                 <div id="saved-search-button" class="mb-3" />
                 <div
                   ref="results"
-                  @click="itemClicked"
                   v-html="searchInfo.results_html"
                 />
                 <SearchFeedback :trace-id="searchInfo.trace_id" />
@@ -967,39 +965,23 @@ export default {
     async itemClicked (event) {
       const flynoteResult = event.target.closest('[data-flynote-result-id]');
       if (flynoteResult) {
-        console.log('Flynote result clicked:', flynoteResult);
-        const data = new FormData();
-        data.set('flynote_result', flynoteResult.getAttribute('data-flynote-result-id'));
-        const url = `${this.urlPrefix}/search/api/flynote-click/`;
-        const href = flynoteResult.getAttribute('href');
+        await this.trackResultCardClick(event, flynoteResult, {
+          resultAttribute: 'data-flynote-result-id',
+          resultField: 'flynote_result',
+          endpoint: `${this.urlPrefix}/search/api/flynote-click/`,
+          label: 'Flynote'
+        });
+        return;
+      }
 
-        // Card clicks navigate away from the results page. Wait briefly for a
-        // CSRF-authenticated request before following an ordinary link, while
-        // keeping a strict bound so tracking never makes navigation feel slow.
-        // sendBeacon cannot include the CSRF header Django requires here.
-        const trackClick = async () => {
-          const response = await fetch(url, {
-            method: 'POST',
-            keepalive: true,
-            headers: await authHeaders(),
-            body: data
-          });
-          if (!response.ok) {
-            throw new Error(`Flynote click tracking failed with status ${response.status}`);
-          }
-        };
-
-        const tracking = trackClick();
-        try {
-          event.preventDefault();
-          await Promise.race([
-            tracking,
-            new Promise(resolve => setTimeout(resolve, 300))
-          ]);
-        } catch (err) {
-          console.error(err);
-        }
-        if (href) window.location.assign(href);
+      const entityResult = event.target.closest('[data-entity-result-id]');
+      if (entityResult) {
+        await this.trackResultCardClick(event, entityResult, {
+          resultAttribute: 'data-entity-result-id',
+          resultField: 'entity_result',
+          endpoint: `${this.urlPrefix}/search/api/entity-click/`,
+          label: 'Entity'
+        });
         return;
       }
 
@@ -1032,6 +1014,39 @@ export default {
           throw err;
         }
       }
+    },
+
+    async trackResultCardClick (event, link, { resultAttribute, resultField, endpoint, label }) {
+      const data = new FormData();
+      data.set(resultField, link.getAttribute(resultAttribute));
+      const href = link.getAttribute('href');
+
+      // Card clicks navigate away from the results page. Wait briefly for a
+      // CSRF-authenticated request before following the link, while keeping a
+      // strict bound so tracking never makes navigation feel slow. sendBeacon
+      // cannot include the CSRF header Django requires here.
+      const tracking = (async () => {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          keepalive: true,
+          headers: await authHeaders(),
+          body: data
+        });
+        if (!response.ok) {
+          throw new Error(`${label} click tracking failed with status ${response.status}`);
+        }
+      })();
+
+      try {
+        event.preventDefault();
+        await Promise.race([
+          tracking,
+          new Promise(resolve => setTimeout(resolve, 300))
+        ]);
+      } catch (err) {
+        console.error(err);
+      }
+      if (href) window.location.assign(href);
     },
 
     resetAdvancedFields () {

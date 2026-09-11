@@ -224,6 +224,45 @@ class SearchFlynoteClick(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
 
+class SearchEntityResult(models.Model):
+    """An entity card rendered as part of a tracked document search."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    search_trace = models.ForeignKey(
+        SearchTrace, on_delete=models.CASCADE, related_name="entity_results"
+    )
+    entity_type = models.CharField(max_length=30)
+    entity_id = models.PositiveIntegerField()
+    entity_label = models.CharField(max_length=255)
+    entity_url = models.CharField(max_length=2048)
+    match_type = models.CharField(max_length=30)
+    confidence = models.FloatField()
+    position = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("position",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("search_trace", "position"),
+                name="unique_search_entity_result_position",
+            ),
+            models.UniqueConstraint(
+                fields=("search_trace", "entity_type", "entity_id"),
+                name="unique_search_entity_result_entity",
+            ),
+        ]
+
+
+class SearchEntityClick(models.Model):
+    """The first recorded click on a rendered entity search result."""
+
+    entity_result = models.OneToOneField(
+        SearchEntityResult, on_delete=models.CASCADE, related_name="click"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class SavedSearch(models.Model):
     q = models.CharField(max_length=4098, null=True, blank=True)
     a = models.CharField(max_length=4098, null=True, blank=True)

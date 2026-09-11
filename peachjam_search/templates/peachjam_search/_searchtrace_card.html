@@ -139,6 +139,60 @@
       </div>
     {% endif %}
   {% endwith %}
+  {% with trace.entity_results.all as entity_results %}
+    {% if entity_results %}
+      <div class="card-body pt-0">
+        <h5>
+          {% trans "Entity results shown" %}
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>
+                  {% trans "Position" %}
+                </th>
+                <th>
+                  {% trans "Entity" %}
+                </th>
+                <th>
+                  {% trans "Match" %}
+                </th>
+                <th>
+                  {% trans "Clicked" %}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in entity_results %}
+                <tr>
+                  <td>
+                    {{ result.position }}
+                  </td>
+                  <td>
+                    <a href="{{ result.entity_url }}">{{ result.entity_label }}</a>
+                    <div class="small text-muted">
+                      {{ result.entity_type }}
+                    </div>
+                  </td>
+                  <td>
+                    {{ result.match_type }} ({{ result.confidence|floatformat:2 }})
+                  </td>
+                  <td>
+                    {% if result.click %}
+                      {% trans "Yes" %}
+                    {% else %}
+                      {% trans "No" %}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
   {% with trace.flynote_results.all as flynote_results %}
     {% if flynote_results %}
       <div class="card-body pt-0">
