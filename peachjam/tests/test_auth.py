@@ -43,9 +43,12 @@ class PatchedFinishTests(TestCase):
         proc = self._make_process(state={"email": "newuser@example.com"})
         proc.user = None
 
-        with patch("peachjam.auth._original_finish") as mock_finish, patch(
-            "peachjam.auth.track_account_created_signup_event"
-        ) as mock_track_signup_event:
+        with (
+            patch("peachjam.auth._original_finish") as mock_finish,
+            patch(
+                "peachjam.auth.track_account_created_signup_event"
+            ) as mock_track_signup_event,
+        ):
             mock_finish.return_value = "redirect"
             result = _patched_finish(proc, "/")
 
@@ -67,9 +70,12 @@ class PatchedFinishTests(TestCase):
         proc = self._make_process(state={"email": "existing@example.com"})
         proc.user = None
 
-        with patch("peachjam.auth._original_finish") as mock_finish, patch(
-            "peachjam.auth.track_account_created_signup_event"
-        ) as mock_track_signup_event:
+        with (
+            patch("peachjam.auth._original_finish") as mock_finish,
+            patch(
+                "peachjam.auth.track_account_created_signup_event"
+            ) as mock_track_signup_event,
+        ):
             mock_finish.return_value = "redirect"
             _patched_finish(proc, "/")
 
@@ -718,7 +724,6 @@ class OnboardingViewTests(TestCase):
 
 
 class UserAuthViewTests(TestCase):
-
     fixtures = ["tests/users", "tests/countries", "tests/languages"]
 
     def _make_request(self, method="get", data=None):

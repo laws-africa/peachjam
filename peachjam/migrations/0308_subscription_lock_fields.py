@@ -2,7 +2,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0307_merge_20260626_0745")]
 
     operations = [

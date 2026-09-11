@@ -7,7 +7,6 @@ import peachjam.frbr_uri
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0008_peachjamsettings")]
 
     operations = [

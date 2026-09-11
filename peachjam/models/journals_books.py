@@ -16,7 +16,6 @@ from peachjam.models.lifecycle import on_attribute_changed
 
 
 class Book(CoreDocument):
-
     decorator = BookDecorator()
 
     publisher = models.CharField(max_length=2048)
@@ -64,7 +63,6 @@ class Journal(models.Model):
 
 
 class JournalArticle(CoreDocument):
-
     decorator = JournalArticleDecorator()
 
     publisher = models.CharField(max_length=2048)
@@ -135,7 +133,6 @@ MONTH_NAMES = {
 
 
 class VolumeIssue(models.Model):
-
     title = models.CharField(
         max_length=2048,
         help_text="The volume and issue number, e.g. 'Vol. 3 No.1 1993' or 'Vol. 3 No.1 - 1993'.",

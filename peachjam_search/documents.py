@@ -515,10 +515,10 @@ class SearchableDocument(Document):
     def _prepare_action(self, object_instance, action):
         info = super()._prepare_action(object_instance, action)
         log.info(f"Prepared document #{object_instance.pk} for indexing")
-        info[
-            "_index"
-        ] = MultiLanguageIndexManager.get_instance().get_index_for_language(
-            object_instance.language.iso_639_2T
+        info["_index"] = (
+            MultiLanguageIndexManager.get_instance().get_index_for_language(
+                object_instance.language.iso_639_2T
+            )
         )
         return info
 

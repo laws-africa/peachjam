@@ -14,7 +14,6 @@ def backfill_work_languages(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0040_work_languages"),
     ]

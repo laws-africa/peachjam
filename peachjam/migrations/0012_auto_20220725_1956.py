@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("languages_plus", "0004_auto_20171214_0004"),
         ("countries_plus", "0005_auto_20160224_1804"),

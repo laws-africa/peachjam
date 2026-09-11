@@ -7,7 +7,6 @@ from peachjam.models.author import Author
 
 
 class GenericDocument(CoreDocument):
-
     decorator = GenericDocumentDecorator()
 
     author = models.ManyToManyField(

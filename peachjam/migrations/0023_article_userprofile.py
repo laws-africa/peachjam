@@ -15,7 +15,6 @@ def create_user_profiles(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("peachjam", "0022_judgment_hearing_date"),

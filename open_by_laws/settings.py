@@ -22,9 +22,7 @@ ALLOWED_HOSTS = build_allowed_hosts(  # noqa
     "www.mbizana.openbylaws.org.za",
 )
 
-MIDDLEWARE = [
-    "open_by_laws.middleware.LegacyMicrositeRedirectMiddleware"
-] + MIDDLEWARE  # noqa
+MIDDLEWARE = ["open_by_laws.middleware.LegacyMicrositeRedirectMiddleware"] + MIDDLEWARE  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "Open By-laws"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "Open By-laws"  # noqa

@@ -27,7 +27,6 @@ class IngestorSetting(models.Model):
 
 
 class Ingestor(models.Model):
-
     ONE_MINUTE = (60, "one minute")
     FIVE_MINUTES = (5 * 60, "five minutes")
     THIRTY_MINUTES = (30 * 60, "thirty minutes")

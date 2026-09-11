@@ -22,7 +22,6 @@ def delete_stubs_without_publication_documents(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0106_legislation_timeline_commencements"),
     ]

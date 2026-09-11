@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0274_alter_peachjamsettings_flynote_taxonomy_root"),
     ]

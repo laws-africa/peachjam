@@ -68,7 +68,7 @@ class BookWordConversionTest(SimpleTestCase):
 
     def test_extract_headings_normalises_pandoc_attributes(self):
         headings = extract_headings(
-            "# 1. Title {#title .unnumbered}\n\n" "2. Subtitle\n" "-----------\n"
+            "# 1. Title {#title .unnumbered}\n\n2. Subtitle\n-----------\n"
         )
 
         self.assertEqual(["h1 1. Title", "h2 2. Subtitle"], [h.label for h in headings])

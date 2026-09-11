@@ -13,7 +13,6 @@ def backfill_metadata_json(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         (
             "peachjam",

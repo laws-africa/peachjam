@@ -2,6 +2,22 @@
 requires = ["setuptools", "setuptools_scm[toml]>=6.2", "wheel"]
 build-backend = "setuptools.build_meta"
 
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E111", "E114", "E117", "E203", "W191"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/migrations/**/*.py" = ["E", "F", "W"]
+"**/static/CACHE/**/*.py" = ["E", "F", "W"]
+"docs/**/*.py" = ["E", "F", "W"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 120
+
 [tool.setuptools.packages.find]
 where = ["."]
 

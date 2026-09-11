@@ -23,5 +23,5 @@ class PlaceDetailView(FilteredDocumentListView):
             locality=self.locality,
             place=self.place,
             place_model_name=self.place._meta.model_name,
-            **kwargs
+            **kwargs,
         )

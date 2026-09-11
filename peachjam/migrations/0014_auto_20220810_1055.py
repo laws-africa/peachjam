@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0013_merge_0012_auto_20220725_1956_0012_auto_20220726_1101"),
     ]

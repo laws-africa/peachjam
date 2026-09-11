@@ -90,7 +90,6 @@ def backfill_criminal_tag_m2m(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0288_offencecategory_and_case_tags"),
     ]

@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0302_peachjamsettings_helpscout_beacon_secret_key"),
     ]

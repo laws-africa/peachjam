@@ -22,7 +22,6 @@ class LawReport(models.Model):
 
 
 class LawReportVolume(models.Model):
-
     title = models.CharField(_("title"), max_length=2048)
     slug = models.CharField(max_length=2048)
     year = models.PositiveIntegerField(null=True, blank=True)

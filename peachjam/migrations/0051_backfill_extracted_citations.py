@@ -13,7 +13,6 @@ def update_extracted_citations(
     taken from CitationLink objects(for PDFs) and all <a href="/akn/..."> embedded HTML links.
     """
     for doc in work_obj.documents.all():
-
         work_frbr_uris = set()
 
         if doc.content_html:

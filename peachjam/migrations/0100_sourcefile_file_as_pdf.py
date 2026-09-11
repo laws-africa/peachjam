@@ -6,7 +6,6 @@ import peachjam.models.attachments
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0099_peachjamsettings_pocket_law_repo"),
     ]

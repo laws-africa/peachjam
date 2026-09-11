@@ -9,7 +9,6 @@ def backfill_metadata_json(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0303_provision_topic_enrichment"),
     ]

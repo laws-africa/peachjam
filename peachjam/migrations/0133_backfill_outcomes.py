@@ -35,7 +35,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0132_outcome_es_index"),
     ]

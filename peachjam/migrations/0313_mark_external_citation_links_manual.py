@@ -10,7 +10,6 @@ def mark_external_citation_links_manual(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0312_merge_20260811_1345"),
     ]

@@ -26,7 +26,6 @@ def create_follows_for_saved_searches(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0240_userfollowing_saved_search_and_more"),
     ]

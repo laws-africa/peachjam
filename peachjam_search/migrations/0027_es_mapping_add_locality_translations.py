@@ -32,7 +32,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0310_locality_name_translations"),
         ("peachjam_search", "0026_es_mapping_add_gazette_publication_fields"),

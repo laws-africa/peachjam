@@ -245,7 +245,7 @@ class CauseListCourtRegistryDetailView(RegistryMixin, CauseListCourtDetailView):
     template_name = "peachjam/causelist_court_registry_detail.html"
 
     def base_view_name(self):
-        return f'{super().base_view_name()} {_("Cause Lists")}'
+        return f"{super().base_view_name()} {_('Cause Lists')}"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

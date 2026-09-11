@@ -25,7 +25,6 @@ def update_ingestor_settings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0064_auto_20230403_0448"),
     ]

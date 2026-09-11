@@ -95,9 +95,7 @@ class QualifyLocalRefsTestCase(TestCase):
         self.assertIn('data-href="/akn/za/act/2000/1/eng@2024-01-01#sec_2"', result)
 
     def test_leaves_non_local_links_unchanged(self):
-        html = (
-            '<p><a href="#">Top</a></p>' '<p><a href="/akn/za/act/2000/1">Act</a></p>'
-        )
+        html = '<p><a href="#">Top</a></p><p><a href="/akn/za/act/2000/1">Act</a></p>'
         result = qualify_local_refs(html, "/akn/za/act/2000/1/eng@2024-01-01")
 
         self.assertIn('href="#"', result)

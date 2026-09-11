@@ -169,9 +169,9 @@ class FlynoteDisplayGrouper:
         return cls.compress_tree(
             cls.build_tree(
                 paths,
-                lambda node: getattr(node, "pk", None)
-                or getattr(node, "name", None)
-                or id(node),
+                lambda node: (
+                    getattr(node, "pk", None) or getattr(node, "name", None) or id(node)
+                ),
             ),
             "nodes",
         )
@@ -615,11 +615,9 @@ class FlynoteParser:
         "extra-judicial/confessional": "Extra-judicial confession",
         "extra‑judicial/confessional statements to lay persons": "Extra-judicial confession",
         "extra-judicial/confessional statements to lay persons": "Extra-judicial confession",
-        "extra‑judicial/confessional statements to lay persons": "Extra-judicial confession",
         "extrajudicial": "Extra-judicial confession",
         "fair hearing": "Fair trial",
         "fair trial rights": "Fair trial",
-        "fair-trial rights": "Fair trial",
         "fair trial": "Fair trial",
         "failure to call material witness": "Failure to call material witnesses",
         "drugs": "Drug offences",
@@ -708,7 +706,6 @@ class FlynoteParser:
         "road traffic act": "Road traffic",
         "revision application": "Revision",
         "revisional jurisdiction": "Revision",
-        "revisional powers": "Revision",
         "revision under": "Revision",
         "revision powers": "Revision",
         "revisional power": "Revision",
@@ -724,7 +721,6 @@ class FlynoteParser:
         "search without warrant": "Search and seizure",
         "search and seizure lawfulness": "Search and seizure",
         "search procedure": "Search and seizure",
-        "seizure certificate": "Search and seizure",
         "seizure procedure": "Search and seizure",
         "seizure certificate": "Search and seizure",
         "seizure certificate vs receipt (s.38(3) cpa": "Search and seizure",
