@@ -1,6 +1,8 @@
 {% load i18n %}
 {% if following_limit_reached %}
   <button class="btn btn-outline-primary ms-2"
+          data-key-link="follow"
+          data-key-link-feature="following"
           type="button"
           data-bs-toggle="modal"
           data-bs-target="#followModal">
@@ -41,10 +43,11 @@
     </div>
   </div>
 {% else %}
-  <form hx-post="{% url 'user_following_create' %}?{{ request.GET.urlencode }}">
+  <form hx-post="{% url 'user_following_create' %}?{{ request.GET.urlencode }}"
+        data-key-link-feature="following">
     {% csrf_token %}
     {{ form }}
-    <button class="btn btn-outline-primary" type="submit">
+    <button class="btn btn-outline-primary" type="submit" data-key-link="follow">
       <span><i class="bi bi-bell"></i></span>
       <span>{% trans 'Follow' %}</span>
     </button>

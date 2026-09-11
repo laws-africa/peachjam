@@ -10,16 +10,27 @@ from django.core.cache import cache
 from django.template.loader import render_to_string
 from django.test import RequestFactory, TestCase, override_settings
 from django.urls import reverse
+from elastic_transport import ConnectionTimeout
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 from rest_framework.test import APIRequestFactory, force_authenticate
 
 from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
-from peachjam_search.models import SearchTrace
+from peachjam_search.models import (
+    SearchEntityClick,
+    SearchEntityResult,
+    SearchFlynoteClick,
+    SearchFlynoteResult,
+    SearchTrace,
+)
 from peachjam_search.search_pipeline import QueryAnalysis, SearchQuery
 from peachjam_search.views.api import PortionSearchView
-from peachjam_search.views.search import DocumentSearchView
+from peachjam_search.views.search import (
+    DocumentSearchView,
+    SearchEntityClickViewSet,
+    SearchFlynoteClickViewSet,
+)
 
 
 class SearchViewsTest(TestCase):
@@ -39,6 +50,115 @@ class SearchViewsTest(TestCase):
                 content_type=ContentType.objects.get_for_model(SearchTrace),
             ),
         )
+
+    def test_flynote_click_is_idempotent(self):
+        trace = SearchTrace.objects.create(
+            config_version="test",
+            search="wrongful arrest",
+            n_results=1,
+            page=1,
+            filters={},
+        )
+        result = SearchFlynoteResult.objects.create(
+            search_trace=trace,
+            flynote_name="Wrongful arrest",
+            flynote_path_labels=["Criminal law", "Wrongful arrest"],
+            position=1,
+            surface=SearchFlynoteResult.Surface.DOCUMENT_SEARCH_CARD,
+            source=SearchFlynoteResult.Source.DIRECT_QUERY,
+            selection_reason=SearchFlynoteResult.SelectionReason.DIRECT_NAME_MATCH,
+        )
+
+        request = APIRequestFactory().post("/", {"flynote_result": str(result.pk)})
+        request.id = "test-request"
+        response = SearchFlynoteClickViewSet.as_view({"post": "create"})(request)
+        self.assertEqual(201, response.status_code)
+        self.assertEqual(1, SearchFlynoteClick.objects.count())
+
+        request = APIRequestFactory().post("/", {"flynote_result": str(result.pk)})
+        request.id = "test-request"
+        response = SearchFlynoteClickViewSet.as_view({"post": "create"})(request)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(1, SearchFlynoteClick.objects.count())
+
+        html = render_to_string(
+            "peachjam_search/searchtrace_detail.html", {"trace": trace}
+        )
+        self.assertIn("Flynote results shown", html)
+        self.assertIn("Wrongful arrest", html)
+        self.assertIn("Direct query match", html)
+        self.assertIn("Yes", html)
+
+    def test_entity_click_is_idempotent(self):
+        trace = SearchTrace.objects.create(
+            config_version="test",
+            search="ECOWAS court",
+            n_results=1,
+            page=1,
+            filters={},
+        )
+        result = SearchEntityResult.objects.create(
+            search_trace=trace,
+            entity_type="court",
+            entity_id=1,
+            entity_label="ECOWAS Community Court of Justice",
+            entity_url="/court/ecowascj/",
+            match_type="exact",
+            confidence=1.0,
+            position=1,
+        )
+
+        for expected_status in (201, 200):
+            request = APIRequestFactory().post("/", {"entity_result": str(result.pk)})
+            request.id = "test-request"
+            response = SearchEntityClickViewSet.as_view({"post": "create"})(request)
+            self.assertEqual(expected_status, response.status_code)
+        self.assertEqual(1, SearchEntityClick.objects.count())
+
+        html = render_to_string(
+            "peachjam_search/searchtrace_detail.html", {"trace": trace}
+        )
+        self.assertIn("Entity results shown", html)
+        self.assertIn("ECOWAS Community Court of Justice", html)
+        self.assertIn("Yes", html)
+
+    def test_search_trace_chain_shows_flynote_results_for_each_trace(self):
+        first_trace = SearchTrace.objects.create(
+            config_version="test",
+            search="wrongful arrest",
+            n_results=1,
+            page=1,
+            filters={},
+        )
+        next_trace = SearchTrace.objects.create(
+            config_version="test",
+            search="unlawful detention",
+            n_results=1,
+            page=1,
+            filters={},
+            previous_search=first_trace,
+        )
+        for trace, name in (
+            (first_trace, "Wrongful arrest"),
+            (next_trace, "Unlawful detention"),
+        ):
+            SearchFlynoteResult.objects.create(
+                search_trace=trace,
+                flynote_name=name,
+                flynote_path_labels=["Criminal law", name],
+                position=1,
+                surface=SearchFlynoteResult.Surface.DOCUMENT_SEARCH_CARD,
+                source=SearchFlynoteResult.Source.DIRECT_QUERY,
+                selection_reason=SearchFlynoteResult.SelectionReason.DIRECT_NAME_MATCH,
+            )
+
+        html = render_to_string(
+            "peachjam_search/searchtrace_detail.html", {"trace": first_trace}
+        )
+
+        self.assertEqual(2, html.count("Flynote results shown"))
+        self.assertIn("Wrongful arrest", html)
+        self.assertIn("Unlawful detention", html)
 
     @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_explain(self, mock_search):
@@ -464,6 +584,7 @@ class SearchViewsTest(TestCase):
         self.assertIn("ECOWAS Community Court of Justice", html)
         self.assertNotIn("data-position", html)
         self.assertNotIn("data-frbr-uri", html)
+        self.assertIn('data-entity-result-id="None"', html)
 
     def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
@@ -573,6 +694,44 @@ class SearchViewsTest(TestCase):
             long_clean_query.replace("\x00", " "),
             captured["query_analysis"]["clean_query"],
         )
+
+    def test_search_timeout_records_redacted_elasticsearch_query(self):
+        request = RequestFactory().get(
+            reverse("search:search_documents"), {"search": "slow query"}
+        )
+        request.user = self.user
+        request.id = "test-request"
+        engine = SimpleNamespace(
+            search_query=SearchQuery(
+                query="slow query",
+                field_queries={},
+                mode="text",
+                filters={},
+                facets=[],
+                page=1,
+                page_size=10,
+                ordering="-score",
+                explain=False,
+            ),
+            analysis=QueryAnalysis(raw_query="slow query", clean_query="slow query"),
+            plan=SimpleNamespace(mode="text", profile=None),
+            build_debug_payload=lambda: {
+                "redacted_query": {"match": {"text": "slow query"}}
+            },
+            execute_search=Mock(side_effect=ConnectionTimeout("timed out")),
+        )
+        view = DocumentSearchView()
+        view.request = request
+        view.prepare = Mock(return_value=(None, None, engine))
+
+        with self.assertRaises(ConnectionTimeout):
+            view.search(request)
+
+        trace = SearchTrace.objects.get(search="slow query")
+        self.assertEqual(SearchTrace.Status.TIMED_OUT, trace.status)
+        self.assertEqual({"match": {"text": "slow query"}}, trace.elasticsearch_query)
+        self.assertEqual("ConnectionTimeout", trace.error_type)
+        self.assertIn("timed out", trace.error_message)
 
     def test_search_hit_links_open_in_same_tab(self):
         request = RequestFactory().get("/search/?search=test")

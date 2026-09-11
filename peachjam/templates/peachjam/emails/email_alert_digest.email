@@ -54,7 +54,7 @@
     <div id="saved-searches" class="digest-section">
       <h2 class="digest-section-heading">{% trans "Matches for your saved searches" %}</h2>
       {% for item in email_alert.saved_searches %}
-        <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_search.get_absolute_url %}">“{{ item.saved_search.q }}”</a></h3>
+        <h3 class="digest-item-heading">{{ item.body_label }} <a href="{% absolute_url site item.saved_search.get_absolute_url %}">“{{ item.search_text }}”</a></h3>
         <ul>
           {% for hit in item.hits %}
             {% include "peachjam/emails/_alert_document_list_item.html" with url_path=hit.expression_frbr_uri utm_campaign="email_digest" title=hit.metadata_document.title added_date=hit.metadata_document.created_at document_date=hit.metadata_document.date blurb=hit.document.blurb flynote=hit.document.flynote %}

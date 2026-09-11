@@ -48,6 +48,7 @@ class LegislationListView(FilteredDocumentListView):
     template_name = "peachjam/legislation_list.html"
     navbar_link = "legislation"
     extra_context = {
+        "KEY_LINK_PAGE": "legislation_list",
         "nature": "Act",
         "help_link": "legislation/finding-legislation",
         "doc_table_show_date": False,
@@ -664,6 +665,7 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["KEY_LINK_PAGE"] = "glossary"
         letters = [*string.ascii_lowercase, "0"]
         context["letters"] = letters
         context.update(self.get_subscription_required_context())

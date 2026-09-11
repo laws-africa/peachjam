@@ -11,6 +11,10 @@ def general(request):
     # get current language
     language = getattr(request, "LANGUAGE_CODE", settings.LANGUAGE_CODE)
     pj = pj_settings()
+    resolver_match = request.resolver_match
+    key_link_page = (
+        resolver_match.view_name.replace(":", "_") if resolver_match else None
+    )
 
     return {
         "DEBUG": settings.DEBUG,
@@ -19,6 +23,7 @@ def general(request):
         "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
         "PEACHJAM_SETTINGS": pj,
         "CURRENT_LANGUAGE": language,
+        "KEY_LINK_PAGE": key_link_page,
         "MULTIPLE_JURISDICTIONS": settings.PEACHJAM["MULTIPLE_JURISDICTIONS"],
         "MULTIPLE_LOCALITIES": settings.PEACHJAM["MULTIPLE_LOCALITIES"],
         "SEARCH_SUGGESTIONS": settings.PEACHJAM["SEARCH_SUGGESTIONS"],

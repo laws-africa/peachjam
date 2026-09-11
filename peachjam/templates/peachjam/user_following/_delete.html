@@ -1,8 +1,9 @@
 {% load i18n peachjam_subs %}
 {% change_subscription_url as change_subscription_url %}
-<form hx-post="{% url 'user_following_delete' object.pk %}?{{ request.GET.urlencode }}">
+<form hx-post="{% url 'user_following_delete' object.pk %}?{{ request.GET.urlencode }}"
+      data-key-link-feature="following">
   {% csrf_token %}
-  <button class="btn btn-primary" type="submit">
+  <button class="btn btn-primary" type="submit" data-key-link="unfollow">
     <i class="bi bi-bell-fill"></i>
     {% if object.is_subscription_locked %}
       {% trans 'Following paused' %}

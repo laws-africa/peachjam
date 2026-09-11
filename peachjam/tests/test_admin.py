@@ -218,9 +218,19 @@ class TestJudgmentAdmin(WebTest):
         )
         self.assertEqual("file.docx", judgment.source_file.filename)
 
-    def test_change_form_warns_if_anonymised_judgment_source_file_is_not_marked_anonymised(
-        self,
-    ):
+    def test_change_form_warns_if_judgment_has_no_source_file(self):
+        judgment = self.make_judgment()
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertContains(
+            response,
+            "No source document is available to users. Attach a source file.",
+        )
+
+    def test_change_form_warns_if_anonymised_source_file_is_not_safe(self):
         judgment = self.make_judgment(anonymised=True)
         self.attach_source_file(judgment, file_is_anonymised=False)
 
@@ -228,14 +238,12 @@ class TestJudgmentAdmin(WebTest):
             reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
         )
 
-        self.assertIn(
-            "This judgment is marked as anonymised, but the attached source file is not marked as anonymised.",
-            response.text,
+        self.assertContains(
+            response,
+            "No source document is available to users. Attach a source file and mark it as anonymised.",
         )
 
-    def test_change_form_does_not_warn_when_attached_source_file_is_marked_anonymised(
-        self,
-    ):
+    def test_change_form_does_not_warn_when_source_file_is_marked_anonymised(self):
         judgment = self.make_judgment(anonymised=True)
         self.attach_source_file(judgment, file_is_anonymised=True)
 
@@ -243,9 +251,26 @@ class TestJudgmentAdmin(WebTest):
             reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
         )
 
-        self.assertNotIn(
-            "This judgment is marked as anonymised, but the attached source file is not marked as anonymised.",
-            response.text,
+        self.assertNotContains(
+            response,
+            "No source document is available to users.",
+        )
+
+    def test_change_form_does_not_warn_when_generated_anonymised_pdf_exists(self):
+        judgment = self.make_judgment(anonymised=True)
+        source_file = self.attach_source_file(judgment, file_is_anonymised=False)
+        source_file.anonymised_file_as_pdf = SimpleUploadedFile(
+            "anonymised.pdf", b"anonymised PDF", content_type="application/pdf"
+        )
+        source_file.save()
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertNotContains(
+            response,
+            "No source document is available to users.",
         )
 
     def test_dup_files_check(self):

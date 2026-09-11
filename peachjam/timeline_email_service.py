@@ -50,6 +50,7 @@ class EmailAlertSearchHit:
 @dataclass
 class EmailAlertSavedSearch:
     saved_search: Any
+    search_text: str
     hits: list[EmailAlertSearchHit]
     total_count: int
     update_label: str
@@ -280,12 +281,18 @@ class EmailAlertBuilder:
         )
 
     @classmethod
+    def saved_search_text(cls, saved_search):
+        if getattr(saved_search, "a", None):
+            return saved_search.pretty_query()
+        return getattr(saved_search, "q", None) or _("Saved search")
+
+    @classmethod
     def saved_search_label(cls, presentation, count, saved_search=None):
         return cls.format_label(
             cls.SAVED_SEARCH_LABEL_COPY,
             presentation,
             count,
-            search=saved_search.q if saved_search else None,
+            search=cls.saved_search_text(saved_search) if saved_search else None,
         )
 
     @classmethod
@@ -350,7 +357,10 @@ class EmailAlertBuilder:
             "%(search)s: %(count)d new match",
             "%(search)s: %(count)d new matches",
             count,
-        ) % {"search": cls.shorten_subject_entity(saved_search.q), "count": count}
+        ) % {
+            "search": cls.shorten_subject_entity(cls.saved_search_text(saved_search)),
+            "count": count,
+        }
 
     @classmethod
     def citation_subject(cls, document, count):
@@ -481,9 +491,11 @@ class EmailAlertBuilder:
                     )
                     count += 1
             if hits:
+                saved_search = event.user_following.saved_search
                 searches.append(
                     EmailAlertSavedSearch(
-                        saved_search=event.user_following.saved_search,
+                        saved_search=saved_search,
+                        search_text=cls.saved_search_text(saved_search),
                         hits=hits,
                         total_count=len(all_hits),
                         update_label=cls.saved_search_label("update", len(all_hits)),
@@ -491,11 +503,9 @@ class EmailAlertBuilder:
                         preheader_label=cls.saved_search_label(
                             "preheader",
                             len(all_hits),
-                            saved_search=event.user_following.saved_search,
+                            saved_search=saved_search,
                         ),
-                        subject=cls.saved_search_subject(
-                            event.user_following.saved_search, len(all_hits)
-                        ),
+                        subject=cls.saved_search_subject(saved_search, len(all_hits)),
                     )
                 )
         return searches, sum(item.total_count for item in searches)
@@ -651,7 +661,7 @@ class EmailAlertBuilder:
             EmailAlertSummaryItem(
                 label=_("“%(search)s” – %(update_label)s")
                 % {
-                    "search": item.saved_search.q,
+                    "search": item.search_text,
                     "update_label": item.update_label,
                 },
                 subject=item.subject,

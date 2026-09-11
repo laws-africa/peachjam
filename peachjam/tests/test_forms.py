@@ -402,6 +402,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
             },
             request=request,
         )
+        self.assertIn('data-key-link="help"', help_html)
         entity_profile_html = render_to_string(
             "peachjam/_entity_profile.html",
             {

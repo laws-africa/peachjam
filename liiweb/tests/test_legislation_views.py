@@ -8,6 +8,7 @@ class LegislationViewsTest(TestCase):
     def test_legislation_listing_national_only(self):
         response = self.client.get(reverse("legislation_list_all"))
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "legislation_list")
 
         self.assertEqual(
             ["D", "Divorce Act, 1979"],

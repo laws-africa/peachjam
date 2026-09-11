@@ -41,6 +41,7 @@ from peachjam.timeline_email_service import (
     EmailAlertSummaryItem,
     TimelineEmailService,
 )
+from peachjam_search.models import SavedSearch
 from peachjam_subs.models import Feature, Subscription
 
 
@@ -276,6 +277,10 @@ class TimelineViewTest(TestCase):
         )
         self.assertContains(response, reverse("email_alerts"))
         self.assertContains(response, "Unfollow")
+        self.assertContains(response, 'data-key-link-feature="following"')
+        self.assertContains(response, 'data-key-link="unfollow_dropdown"')
+        self.assertContains(response, 'data-key-link="unfollow"')
+        self.assertContains(response, 'data-key-link="manage_email_updates"')
 
     def test_follow_button_explains_when_email_updates_are_disabled(self):
         self.user.user_permissions.add(
@@ -306,6 +311,8 @@ class TimelineViewTest(TestCase):
 
         self.assertContains(response, "dropdown-toggle")
         self.assertContains(response, "Follow this court to receive updates")
+        self.assertContains(response, 'data-key-link="follow_dropdown"')
+        self.assertContains(response, 'data-key-link="follow"')
 
     def test_anonymous_user_can_open_follow_account_modal_from_dropdown(self):
         self.client.logout()
@@ -479,6 +486,29 @@ class TimelineViewTest(TestCase):
         self.assertLessEqual(len(shortened), 500)
         self.assertTrue(shortened.endswith("…"))
         self.assertFalse(shortened[:-1].endswith(" "))
+
+    def test_saved_search_email_copy_uses_advanced_query(self):
+        saved_search = SavedSearch.objects.create(
+            user=self.user,
+            q=None,
+            a='[{"fields": ["all"], "text": "constitutional rights"}]',
+            filters="",
+        )
+
+        self.assertEqual(
+            "constitutional rights in any field",
+            EmailAlertBuilder.saved_search_text(saved_search),
+        )
+        self.assertEqual(
+            "constitutional rights in any field: 2 new matches",
+            EmailAlertBuilder.saved_search_subject(saved_search, 2),
+        )
+        self.assertEqual(
+            "2 search results for “constitutional rights in any field”",
+            EmailAlertBuilder.saved_search_label(
+                "preheader", 2, saved_search=saved_search
+            ),
+        )
 
     def test_email_subject_prioritises_new_followed_documents(self):
         summary_items = [

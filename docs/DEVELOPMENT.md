@@ -185,12 +185,13 @@ Peachjam can emit a Customer.io event when a user clicks a marked "key link" on 
 
 ### How it works
 
-Tracking only runs when the page `<body>` has `data-key-link-page`. The shared base layout adds this automatically when the template context includes `KEY_LINK_PAGE`.
+Tracking only runs when the page `<body>` has `data-key-link-page`. The shared base layout adds this automatically from `KEY_LINK_PAGE`. The general context processor defaults it to the resolved URL view name, with namespace separators normalized to underscores. Views may override the default when several URLs represent one logical page or when a more stable product name is useful.
 
-Marked links use:
+Marked links and other clickable controls use:
 
 ```html
 <a href="..." data-key-link="document">...</a>
+<button type="submit" data-key-link="follow">...</button>
 ```
 
 The frontend sends a `Key link clicked` event with:
@@ -202,13 +203,13 @@ The frontend sends a `Key link clicked` event with:
 
 ### When to add `KEY_LINK_PAGE`
 
-Set `KEY_LINK_PAGE` for pages where key-link usage is important enough to analyse at a page level. Current examples include:
+Override `KEY_LINK_PAGE` where the resolved URL name is not the best logical page name. Current examples include:
 
 - `homepage`
 - `document_detail`
 - `my_lii`
 
-As a rule, add it when the page contains important discovery or conversion features and you want to distinguish its clicks from the same link types elsewhere in the product.
+As a rule, override it when several routes should be grouped into one page category, or when you want to distinguish the page from another route with the same effective role.
 
 ### When to add `data-key-link-feature`
 
@@ -228,7 +229,7 @@ card link, rather than a separate feature wrapper around each card.
 
 ### When to add `data-key-link`
 
-Add `data-key-link` to the actual links you care about, using a short human-friendly label such as:
+Add `data-key-link` to the actual links or controls you care about, using a short human-friendly label such as:
 
 - `document`
 - `court`

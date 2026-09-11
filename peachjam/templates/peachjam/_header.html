@@ -28,7 +28,9 @@
       <div class="collapse navbar-collapse" id="secondary-nav-content">
         <form method="get"
               action="{% url 'search:search' %}"
-              class="my-2 my-lg-0 ms-auto">
+              class="my-2 my-lg-0 ms-auto"
+              data-key-link-feature="navbar_search"
+              data-key-link="search">
           <input type="hidden" name="suggestion"/>
           {% block search-form %}
             <div class="input-group">
@@ -50,7 +52,9 @@
       </div>
     </div>
   </nav>
-  <nav id="main-nav" class="navbar navbar-expand-lg shadow-sm pt-0">
+  <nav id="main-nav"
+       class="navbar navbar-expand-lg shadow-sm pt-0"
+       data-key-link-feature="navbar">
     <div class="container">
       <div class="collapse navbar-collapse" id="main-nav-content">
         <ul class="navbar-nav w-100 mb-2 mb-lg-0">

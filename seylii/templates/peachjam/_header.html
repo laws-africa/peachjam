@@ -2,24 +2,28 @@
 {% load static i18n %}
 {% block nav-items %}
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'home' %}active{% endif %}"
+    <a data-key-link="home_page"
+       class="nav-link {% if view.navbar_link == 'home' %}active{% endif %}"
        href="{% url 'home_page' %}">
     {% trans 'Home' %}</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"
+    <a data-key-link="judgment_list"
+       class="nav-link {% if view.navbar_link == 'judgments' %}active{% endif %}"
        href="{% url 'judgment_list' %}">
       {% trans 'Judgments' %}
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'legislation' %}active{% endif %}"
+    <a data-key-link="legislation_list"
+       class="nav-link {% if view.navbar_link == 'legislation' %}active{% endif %}"
        href="{% url 'legislation_list' %}">
       {% trans 'Legislation' %}
     </a>
   </li>
   <li class="nav-item dropdown main-nav">
-    <a class="nav-link dropdown-toggle"
+    <a data-key-link="collections_dropdown"
+       class="nav-link dropdown-toggle"
        href="#"
        role="button"
        data-bs-toggle="dropdown"
@@ -28,20 +32,23 @@
     </a>
     <ul class="dropdown-menu">
       <li class="dropdown-item">
-        <a class="nav-link px-0"
+        <a data-key-link="finding_aids"
+           class="nav-link px-0"
            href="{% url 'first_level_taxonomy_list' "finding-aids" %}">
           {% trans 'Finding aids' %}
           <div class="dropdown-summary text-muted">{% trans 'Finding aids' %}</div>
         </a>
       </li>
       <li class="dropdown-item">
-        <a class="nav-link px-0"
+        <a data-key-link="academic_papers"
+           class="nav-link px-0"
            href="{% url 'first_level_taxonomy_list' "academic-papers" %}">{% trans 'Academic papers' %}
           <div class="dropdown-summary text-muted">{% trans 'Academic papers' %}</div>
         </a>
       </li>
       <li class="dropdown-item">
-        <a class="nav-link px-0"
+        <a data-key-link="speeches_and_presentations"
+           class="nav-link px-0"
            href="{% url 'first_level_taxonomy_list' "speeches-and-presentations" %}">{% trans 'Speeches and presentations' %}
           <div class="dropdown-summary text-muted">{% trans 'Speeches and presentations' %}</div>
         </a>
@@ -49,18 +56,22 @@
     </ul>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
+    <a data-key-link="gazettes"
+       class="nav-link {% if view.navbar_link == 'gazettes' %}active{% endif %}"
        href="{% url 'gazettes' %}">
       {% trans 'Gazettes' %}
     </a>
   </li>
   <li class="nav-item">
-    <a class="nav-link {% if view.navbar_link == 'about' %}active{% endif %}"
+    <a data-key-link="about"
+       class="nav-link {% if view.navbar_link == 'about' %}active{% endif %}"
        href="{% url 'about' %}">
       {% trans 'About' %}
     </a>
   </li>
   <li class="nav-item ms-auto">
-    <a class="nav-link" href="{{ PEACHJAM_SETTINGS.user_help_link }}">{% trans 'Help' %}</a>
+    <a data-key-link="help"
+       class="nav-link"
+       href="{{ PEACHJAM_SETTINGS.user_help_link }}">{% trans 'Help' %}</a>
   </li>
 {% endblock %}
