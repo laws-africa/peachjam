@@ -38,8 +38,66 @@ class SeatChangePreview:
     effective_on: object
 
 
+@dataclass(frozen=True)
+class OrganisationSubscriptionState:
+    """Describe whether an organisation controls a user's subscription."""
+
+    membership: OrganisationMembership | None
+    assignment: OrganisationSeatAssignment | None
+    status: str
+
+    @property
+    def is_pending(self):
+        """Return whether an assigned seat is awaiting organisation activation."""
+        return self.status == "pending"
+
+    @property
+    def is_managed(self):
+        """Return whether the organisation currently controls the subscription."""
+        return self.status == "managed"
+
+
 class OrganisationService:
     """Coordinate organisation membership and entitlement workflows."""
+
+    def subscription_state_for_user(self, user):
+        """Return the user's current organisation subscription-management state."""
+        membership = (
+            OrganisationMembership.objects.filter(
+                user=user,
+                status=OrganisationMembership.Status.ACTIVE,
+            )
+            .select_related("organisation")
+            .first()
+        )
+        assignment = None
+        status = "none"
+        if membership:
+            assignment = (
+                membership.seat_assignments.filter(ended_at__isnull=True)
+                .select_related(
+                    "seat__organisation",
+                    "seat__product_offering__product",
+                    "seat__product_offering__pricing_plan",
+                    "seat__pending_product_offering__product",
+                    "seat__pending_product_offering__pricing_plan",
+                    "subscription",
+                )
+                .first()
+            )
+        if assignment:
+            if assignment.seat.status == OrganisationSeat.Status.PROVISIONAL:
+                status = "pending"
+            elif assignment.seat.status in {
+                OrganisationSeat.Status.ACTIVE,
+                OrganisationSeat.Status.SUSPENDED,
+            }:
+                status = "managed"
+        return OrganisationSubscriptionState(
+            membership=membership,
+            assignment=assignment,
+            status=status,
+        )
 
     def ensure_can_manage(self, actor, organisation):
         """Raise when the actor may not manage the organisation."""
@@ -982,61 +1040,26 @@ class OrganisationService:
         return count
 
     @transaction.atomic
-    def schedule_privacy_mode_change(
-        self, *, organisation, privacy_mode, effective_on, actor
-    ):
-        """Schedule a staff-authorized privacy mode change."""
+    def change_privacy_mode(self, *, organisation, privacy_mode, actor):
+        """Immediately apply a staff-authorized organisation privacy change."""
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
         if not actor or not actor.is_staff:
             raise PermissionDenied
+        if privacy_mode not in Organisation.PrivacyMode.values:
+            raise ValidationError(_("Choose a valid organisation privacy mode."))
         if privacy_mode == organisation.privacy_mode:
             return organisation
-        organisation.pending_privacy_mode = privacy_mode
-        organisation.privacy_change_on = effective_on
-        organisation.save(update_fields=["pending_privacy_mode", "privacy_change_on"])
-        for membership in organisation.memberships.filter(
-            status=OrganisationMembership.Status.ACTIVE
-        ).select_related("user"):
-            notify_member(
-                membership.user,
-                _("Your organisation privacy setting is changing"),
-                _(
-                    "On %(date)s, %(organisation)s will change to %(privacy)s. "
-                    "Research content and history are never visible to organisation administrators."
-                )
-                % {
-                    "date": effective_on,
-                    "organisation": organisation.name,
-                    "privacy": organisation.get_pending_privacy_mode_display(),
-                },
-            )
+        previous = organisation.privacy_mode
+        organisation.privacy_mode = privacy_mode
+        organisation.save(update_fields=["privacy_mode"])
+        OrganisationAuditEvent.objects.create(
+            organisation=organisation,
+            actor=actor,
+            event_type=OrganisationAuditEvent.EventType.PRIVACY_CHANGED,
+            message="Changed organisation privacy mode.",
+            event_data={"before": previous, "after": privacy_mode},
+        )
         return organisation
-
-    @transaction.atomic
-    def apply_scheduled_privacy_changes(self, today=None):
-        """Apply organisation privacy mode changes that are due."""
-        today = today or timezone.localdate()
-        for organisation in Organisation.objects.select_for_update().filter(
-            pending_privacy_mode__isnull=False,
-            privacy_change_on__lte=today,
-        ):
-            previous = organisation.privacy_mode
-            organisation.privacy_mode = organisation.pending_privacy_mode
-            organisation.pending_privacy_mode = None
-            organisation.privacy_change_on = None
-            organisation.save(
-                update_fields=[
-                    "privacy_mode",
-                    "pending_privacy_mode",
-                    "privacy_change_on",
-                ]
-            )
-            OrganisationAuditEvent.objects.create(
-                organisation=organisation,
-                event_type=OrganisationAuditEvent.EventType.PRIVACY_CHANGED,
-                message="Changed organisation privacy mode.",
-                event_data={"before": previous, "after": organisation.privacy_mode},
-            )
 
     def member_usage_summary(self, membership):
         """Return the usage fields permitted by the organisation's privacy mode."""

@@ -2,6 +2,7 @@ from datetime import timedelta
 
 from allauth.account.models import EmailAddress
 from django.contrib.auth.models import User
+from django.core import mail
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import IntegrityError, transaction
 from django.test import TestCase
@@ -11,6 +12,7 @@ from django.utils import timezone
 from peachjam_subs.models import (
     OffboardingFeedback,
     Organisation,
+    OrganisationAuditEvent,
     OrganisationMembership,
     OrganisationSeat,
     PricingPlan,
@@ -80,6 +82,39 @@ class OrganisationServiceTests(TestCase):
             self.organisation.administrator_emails(),
         )
 
+    def test_staff_changes_privacy_mode_immediately_without_notifying_members(self):
+        organisation_service.change_privacy_mode(
+            organisation=self.organisation,
+            privacy_mode=Organisation.PrivacyMode.MANAGED_USAGE,
+            actor=self.staff,
+        )
+
+        self.organisation.refresh_from_db()
+        self.assertEqual(
+            Organisation.PrivacyMode.MANAGED_USAGE, self.organisation.privacy_mode
+        )
+        event = self.organisation.audit_events.latest("created_at")
+        self.assertEqual(
+            OrganisationAuditEvent.EventType.PRIVACY_CHANGED, event.event_type
+        )
+        self.assertEqual(self.staff, event.actor)
+        self.assertEqual(
+            {
+                "before": Organisation.PrivacyMode.BILLING_ONLY,
+                "after": Organisation.PrivacyMode.MANAGED_USAGE,
+            },
+            event.event_data,
+        )
+        self.assertEqual([], mail.outbox)
+
+    def test_organisation_admin_cannot_change_privacy_mode(self):
+        with self.assertRaises(PermissionDenied):
+            organisation_service.change_privacy_mode(
+                organisation=self.organisation,
+                privacy_mode=Organisation.PrivacyMode.MANAGED_USAGE,
+                actor=self.owner,
+            )
+
     def test_accept_invitation_creates_provisional_assignment_without_trial(self):
         invitation = organisation_service.send_invitation(
             organisation=self.organisation,
@@ -103,6 +138,39 @@ class OrganisationServiceTests(TestCase):
         assignment.refresh_from_db()
         self.assertEqual(Subscription.Status.ACTIVE, assignment.subscription.status)
         self.assertFalse(assignment.subscription.is_trial)
+
+    def test_subscription_state_distinguishes_pending_managed_and_suspended(self):
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            requested_product_offering=self.offering,
+            actor=self.owner,
+        )
+        membership = organisation_service.accept_invitation(
+            token=invitation.token, user=self.member
+        )
+
+        state = organisation_service.subscription_state_for_user(self.member)
+        self.assertEqual(membership, state.membership)
+        self.assertTrue(state.is_pending)
+        self.assertFalse(state.is_managed)
+
+        organisation_service.activate_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+        state = organisation_service.subscription_state_for_user(self.member)
+        self.assertFalse(state.is_pending)
+        self.assertTrue(state.is_managed)
+
+        assignment = membership.seat_assignments.get(ended_at__isnull=True)
+        assignment.seat.status = OrganisationSeat.Status.SUSPENDED
+        assignment.seat.save(update_fields=["status"])
+        assignment.subscription.status = Subscription.Status.CLOSED
+        assignment.subscription.save(update_fields=["status"])
+
+        state = organisation_service.subscription_state_for_user(self.member)
+        self.assertTrue(state.is_managed)
 
     def test_accept_invitation_is_idempotent_for_same_user(self):
         invitation = organisation_service.send_invitation(

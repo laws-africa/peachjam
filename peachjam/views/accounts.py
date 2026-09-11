@@ -182,31 +182,15 @@ class AccountView(LoginRequiredMixin, TemplateView):
             group__in=self.request.user.groups.all()
         )
         if organisations_enabled():
-            from peachjam_subs.models import (
-                OrganisationInvitation,
-                OrganisationMembership,
-            )
+            from peachjam_subs.models import OrganisationInvitation
+            from peachjam_subs.organisations.services import organisation_service
 
-            membership = (
-                OrganisationMembership.objects.filter(
-                    user=self.request.user,
-                    status=OrganisationMembership.Status.ACTIVE,
-                )
-                .select_related("organisation")
-                .first()
+            subscription_state = organisation_service.subscription_state_for_user(
+                self.request.user
             )
-            context["organisation_membership"] = membership
-            context["organisation_seat_assignment"] = (
-                membership.seat_assignments.filter(ended_at__isnull=True)
-                .select_related(
-                    "seat__product_offering__product",
-                    "seat__product_offering__pricing_plan",
-                    "subscription",
-                )
-                .first()
-                if membership
-                else None
-            )
+            context["organisation_subscription_state"] = subscription_state
+            context["organisation_membership"] = subscription_state.membership
+            context["organisation_seat_assignment"] = subscription_state.assignment
             context["organisation_invitations"] = (
                 OrganisationInvitation.objects.filter(
                     email__iexact=self.request.user.email,

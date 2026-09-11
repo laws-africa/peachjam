@@ -10,7 +10,6 @@ from peachjam_subs.organisations.services import organisation_service
 def update_subscriptions():
     organisation_service.expire_invitations()
     organisation_service.send_invitation_reminders()
-    organisation_service.apply_scheduled_privacy_changes()
     organisation_service.apply_scheduled_organisation_changes()
     Subscription.update_subscriptions()
 

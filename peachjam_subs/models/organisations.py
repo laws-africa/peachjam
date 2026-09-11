@@ -39,13 +39,6 @@ class Organisation(models.Model):
         choices=PrivacyMode.choices,
         default=PrivacyMode.BILLING_ONLY,
     )
-    pending_privacy_mode = models.CharField(
-        max_length=20,
-        choices=PrivacyMode.choices,
-        null=True,
-        blank=True,
-    )
-    privacy_change_on = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     activated_at = models.DateTimeField(null=True, blank=True)
     closing_at = models.DateTimeField(null=True, blank=True)
