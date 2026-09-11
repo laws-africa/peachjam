@@ -1,4 +1,5 @@
 from datetime import timedelta
+from unittest.mock import patch
 
 from allauth.account.models import EmailAddress
 from django.contrib.auth.models import User
@@ -8,6 +9,7 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from templated_email import get_templated_mail
 
 from peachjam_subs.models import (
     OffboardingFeedback,
@@ -81,6 +83,55 @@ class OrganisationServiceTests(TestCase):
             [self.owner.email, administrator.email],
             self.organisation.administrator_emails(),
         )
+
+    @patch("peachjam_subs.organisations.notifications.send_templated_mail")
+    def test_invitation_uses_templated_email_backend(self, send_templated_mail):
+        with self.captureOnCommitCallbacks(execute=True):
+            invitation = organisation_service.send_invitation(
+                organisation=self.organisation,
+                email=self.member.email,
+                role=OrganisationMembership.Role.MEMBER,
+                actor=self.owner,
+            )
+
+        send_templated_mail.assert_called_once()
+        kwargs = send_templated_mail.call_args.kwargs
+        self.assertEqual("organisation/invitation", kwargs["template_name"])
+        self.assertEqual([self.member.email], kwargs["recipient_list"])
+        self.assertEqual(self.organisation.name, kwargs["context"]["organisation"])
+        self.assertIn(str(invitation.token), kwargs["context"]["invitation_url"])
+
+    @patch("peachjam_subs.organisations.notifications.send_templated_mail")
+    def test_administrator_email_uses_shared_notification_template(
+        self, send_templated_mail
+    ):
+        with self.captureOnCommitCallbacks(execute=True):
+            self.organisation.notify_administrators("Subject", "Message")
+
+        send_templated_mail.assert_called_once_with(
+            template_name="organisation/notification",
+            from_email=send_templated_mail.call_args.kwargs["from_email"],
+            recipient_list=[self.owner.email],
+            context={"subject": "Subject", "body": "Message"},
+        )
+
+    def test_organisation_invitation_template_uses_shared_email_layout(self):
+        message = get_templated_mail(
+            template_name="organisation/invitation",
+            from_email="sender@example.com",
+            to=[self.member.email],
+            context={
+                "organisation": self.organisation.name,
+                "expiry": timezone.localdate() + timedelta(days=14),
+                "invitation_url": "https://example.com/invitation/abc/",
+            },
+        )
+        html = message.alternatives[0][0]
+
+        self.assertIn("You have been invited", message.subject)
+        self.assertIn(self.organisation.name, html)
+        self.assertIn('href="https://example.com/invitation/abc/"', html)
+        self.assertIn("Accept invitation", html)
 
     def test_staff_changes_privacy_mode_immediately_without_notifying_members(self):
         organisation_service.change_privacy_mode(

@@ -1,44 +1,56 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
-from django.core.mail import send_mail
 from django.db import transaction
 from django.urls import reverse
-from django.utils.translation import gettext as _
+from templated_email import send_templated_mail
 
 
-def send_email(subject, body, recipients):
-    """Send an email after the current database transaction commits."""
+def send_templated_email(template_name, recipients, context):
+    """Send a templated email after the current database transaction commits."""
     recipients = sorted({email for email in recipients if email})
     if recipients:
         transaction.on_commit(
-            lambda: send_mail(subject, body, settings.DEFAULT_FROM_EMAIL, recipients)
+            lambda: send_templated_mail(
+                template_name=template_name,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=recipients,
+                context=context,
+            )
         )
 
 
+def send_email(subject, body, recipients):
+    """Send a standard organisation notification using the shared email layout."""
+    send_templated_email(
+        "organisation/notification",
+        recipients,
+        {"subject": subject, "body": body},
+    )
+
+
 def notify_invitation(invitation):
+    """Send an organisation invitation using the shared email template backend."""
     try:
         path = reverse("organisation_invitation", args=[invitation.token])
         url = f"https://{Site.objects.get_current().domain}{path}"
     except Exception:
         url = str(invitation.token)
-    send_email(
-        _("You have been invited to My LawLibrary"),
-        _(
-            "You have been invited to join %(organisation)s. The invitation "
-            "expires on %(expiry)s. Accept it here: %(url)s"
-        )
-        % {
+    send_templated_email(
+        "organisation/invitation",
+        [invitation.email],
+        {
             "organisation": invitation.organisation.name,
             "expiry": invitation.expires_at.date(),
-            "url": url,
+            "invitation_url": url,
         },
-        [invitation.email],
     )
 
 
 def notify_member(user, subject, body):
+    """Send a standard organisation notification to a member."""
     send_email(subject, body, [user.email])
 
 
 def notify_email(email, subject, body):
+    """Send a standard organisation notification to an email address."""
     send_email(subject, body, [email])
