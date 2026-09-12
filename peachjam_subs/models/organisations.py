@@ -18,6 +18,8 @@ def organisation_invitation_expiry():
 class Organisation(models.Model):
     """A customer organisation that can sponsor subscriptions for its members."""
 
+    MAX_DUNNING_RECIPIENTS = 15
+
     class Status(models.TextChoices):
         PROVISIONAL = "provisional", _("Provisional")
         ACTIVE = "active", _("Active")
@@ -75,6 +77,48 @@ class Organisation(models.Model):
                 emails.append(details.email)
                 emails.extend(details.billing_contacts or [])
         return emails
+
+    def dunning_recipient_emails(self, billing_email=None, billing_contacts=None):
+        """Return normalized owner, administrator, and billing contact emails."""
+        emails = self.administrator_emails()
+        if billing_email is None and billing_contacts is None:
+            try:
+                details = self.billing_details
+            except (AttributeError, ObjectDoesNotExist):
+                details = None
+            if details:
+                billing_email = details.email
+                billing_contacts = details.billing_contacts
+        emails.extend([billing_email, *(billing_contacts or [])])
+        recipients = {}
+        for email in emails:
+            if email:
+                normalized = email.strip().lower()
+                recipients.setdefault(normalized.casefold(), normalized)
+        return list(recipients.values())
+
+    def validate_dunning_recipient_limit(
+        self, billing_email=None, billing_contacts=None, additional_emails=None
+    ):
+        """Raise when Customer.io cannot address all billing recipients."""
+        recipients = self.dunning_recipient_emails(
+            billing_email=billing_email,
+            billing_contacts=billing_contacts,
+        )
+        existing = {email.casefold() for email in recipients}
+        for email in additional_emails or []:
+            if email and email.strip().casefold() not in existing:
+                recipients.append(email.strip().lower())
+                existing.add(email.strip().casefold())
+        if len(recipients) > self.MAX_DUNNING_RECIPIENTS:
+            raise ValidationError(
+                _(
+                    "An organisation can have at most %(limit)s owners, "
+                    "administrators, and billing contacts in total."
+                )
+                % {"limit": self.MAX_DUNNING_RECIPIENTS}
+            )
+        return recipients
 
     def notify_administrators(self, subject, body, include_billing_contacts=False):
         """Email active administrators and, optionally, billing contacts."""

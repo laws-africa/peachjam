@@ -9,6 +9,7 @@ from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
+from guardian.shortcuts import assign_perm
 from templated_email import get_templated_mail
 
 from peachjam_subs.models import (
@@ -45,12 +46,48 @@ class OrganisationServiceTests(TestCase):
             user=self.member, email=self.member.email, verified=True, primary=True
         )
         self.offering = ProductOffering.objects.get(pk=1)
+        assign_perm("peachjam_subs.can_subscribe", self.owner, self.offering)
         self.organisation = organisation_service.create_organisation(
             name="Example Chambers",
             billing_period=PricingPlan.Period.MONTHLY,
             privacy_mode=Organisation.PrivacyMode.BILLING_ONLY,
             actor=self.staff,
             owner=self.owner,
+        )
+
+    def test_private_free_offering_is_available_through_owner_permission(self):
+        self.organisation.billing_period = PricingPlan.Period.ANNUALLY
+        self.organisation.save(update_fields=["billing_period"])
+        staff_offering = ProductOffering.objects.get(pk=2)
+
+        self.assertNotIn(
+            staff_offering,
+            organisation_service.offerings_available_to_organisation(self.organisation),
+        )
+
+        assign_perm("peachjam_subs.can_subscribe", self.owner, staff_offering)
+
+        self.assertIn(
+            staff_offering,
+            organisation_service.offerings_available_to_organisation(self.organisation),
+        )
+
+    def test_ownership_transfer_copies_private_offering_permissions(self):
+        new_owner_membership = OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=self.member,
+            role=OrganisationMembership.Role.ADMIN,
+        )
+
+        organisation_service.transfer_ownership(
+            organisation=self.organisation,
+            new_owner_membership=new_owner_membership,
+            actor=self.owner,
+        )
+
+        self.assertIn(
+            self.offering,
+            organisation_service.offerings_available_to_organisation(self.organisation),
         )
 
     def test_one_active_organisation_per_user(self):
@@ -83,6 +120,49 @@ class OrganisationServiceTests(TestCase):
             [self.owner.email, administrator.email],
             self.organisation.administrator_emails(),
         )
+
+    def test_dunning_recipients_are_normalized_and_deduplicated(self):
+        administrator = User.objects.create_user(
+            username="Admin@Example.com", email="Admin@Example.com"
+        )
+        OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=administrator,
+            role=OrganisationMembership.Role.ADMIN,
+        )
+
+        recipients = self.organisation.dunning_recipient_emails(
+            billing_email="OWNER@example.com",
+            billing_contacts=[" finance@example.com ", "ADMIN@example.com"],
+        )
+
+        self.assertEqual(
+            ["owner@example.com", "admin@example.com", "finance@example.com"],
+            recipients,
+        )
+
+    def test_sixteenth_dunning_recipient_is_rejected(self):
+        for index in range(14):
+            user = User.objects.create_user(
+                username=f"admin-{index}@example.com",
+                email=f"admin-{index}@example.com",
+            )
+            OrganisationMembership.objects.create(
+                organisation=self.organisation,
+                user=user,
+                role=OrganisationMembership.Role.ADMIN,
+            )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "at most 15 owners, administrators, and billing contacts",
+        ):
+            organisation_service.send_invitation(
+                organisation=self.organisation,
+                email="sixteenth@example.com",
+                role=OrganisationMembership.Role.ADMIN,
+                actor=self.owner,
+            )
 
     @patch("peachjam_subs.organisations.notifications.send_templated_mail")
     def test_invitation_uses_templated_email_backend(self, send_templated_mail):
@@ -342,6 +422,33 @@ class OrganisationServiceTests(TestCase):
         previous = OrganisationMembership.objects.get(user=self.owner)
         self.assertEqual(OrganisationMembership.Role.OWNER, new_owner.role)
         self.assertEqual(OrganisationMembership.Role.ADMIN, previous.role)
+
+    def test_transfer_ownership_cannot_exceed_dunning_recipient_limit(self):
+        new_owner = OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=self.member,
+            role=OrganisationMembership.Role.MEMBER,
+        )
+        for index in range(14):
+            user = User.objects.create_user(
+                username=f"transfer-admin-{index}@example.com",
+                email=f"transfer-admin-{index}@example.com",
+            )
+            OrganisationMembership.objects.create(
+                organisation=self.organisation,
+                user=user,
+                role=OrganisationMembership.Role.ADMIN,
+            )
+
+        with self.assertRaisesMessage(
+            ValidationError,
+            "at most 15 owners, administrators, and billing contacts",
+        ):
+            organisation_service.transfer_ownership(
+                organisation=self.organisation,
+                new_owner_membership=new_owner,
+                actor=self.owner,
+            )
 
     def test_billing_period_is_immutable_after_activation(self):
         self.organisation.status = Organisation.Status.ACTIVE

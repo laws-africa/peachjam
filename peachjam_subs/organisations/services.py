@@ -3,9 +3,10 @@ from dataclasses import dataclass
 from allauth.account.models import EmailAddress
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef, Q
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
+from guardian.shortcuts import assign_perm, get_objects_for_user
 
 from peachjam_subs.models import (
     Organisation,
@@ -16,6 +17,7 @@ from peachjam_subs.models import (
     OrganisationSeatAssignment,
     ProductOffering,
     Subscription,
+    subscription_settings,
 )
 from peachjam_subs.organisations.notifications import (
     notify_email,
@@ -23,7 +25,9 @@ from peachjam_subs.organisations.notifications import (
     notify_member,
 )
 from peachjam_subs.organisations.signals import (
+    organisation_billing_recipients_changed,
     organisation_invitation_accepted,
+    organisation_ownership_transferred,
     organisation_seat_assigned,
     organisation_seat_plan_changed,
     organisation_seat_released,
@@ -59,6 +63,49 @@ class OrganisationSubscriptionState:
 
 class OrganisationService:
     """Coordinate organisation membership and entitlement workflows."""
+
+    def public_offerings(self):
+        """Return paid offerings configured for the public product catalogue."""
+        return ProductOffering.objects.filter(
+            selectable_for_products__in=subscription_settings().key_products.all(),
+            pricing_plan__price__gt=0,
+        )
+
+    def offerings_available_to_organisation(self, organisation=None, actor=None):
+        """Return public and permitted private offerings for an organisation.
+
+        The organisation owner's object permissions are authoritative after an
+        owner exists. ``actor`` supports staff-assisted setup before that point.
+        """
+        eligible_user = organisation.owner if organisation else None
+        if eligible_user is None:
+            eligible_user = actor
+        permitted_ids = ProductOffering.objects.none().values("pk")
+        if eligible_user and eligible_user.is_authenticated:
+            permitted_ids = get_objects_for_user(
+                eligible_user,
+                "peachjam_subs.can_subscribe",
+                klass=ProductOffering,
+            ).values("pk")
+        queryset = ProductOffering.objects.filter(
+            Q(pk__in=self.public_offerings().values("pk")) | Q(pk__in=permitted_ids)
+        )
+        if organisation:
+            queryset = queryset.filter(pricing_plan__period=organisation.billing_period)
+        return (
+            queryset.select_related("product", "pricing_plan")
+            .distinct()
+            .order_by("product__tier", "pricing_plan__price")
+        )
+
+    def ensure_offering_available(self, organisation, offering, actor=None):
+        """Raise unless an offering may be newly selected for an organisation."""
+        if (
+            not self.offerings_available_to_organisation(organisation, actor=actor)
+            .filter(pk=offering.pk)
+            .exists()
+        ):
+            raise ValidationError(_("This plan is not available to this organisation."))
 
     def subscription_state_for_user(self, user):
         """Return the user's current organisation subscription-management state."""
@@ -151,10 +198,16 @@ class OrganisationService:
         """Create and send an organisation invitation."""
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
         self.ensure_can_manage(actor, organisation)
+        if requested_product_offering:
+            self.ensure_offering_available(
+                organisation, requested_product_offering, actor=actor
+            )
         if role == OrganisationMembership.Role.OWNER and organisation.owner:
             raise ValidationError(
                 _("Transfer ownership instead of inviting another owner.")
             )
+        if role == OrganisationMembership.Role.ADMIN:
+            organisation.validate_dunning_recipient_limit(additional_emails=[email])
         invitation = OrganisationInvitation(
             organisation=organisation,
             email=email,
@@ -277,6 +330,30 @@ class OrganisationService:
             raise ValidationError(_("This account already belongs to an organisation."))
         if invitation.role == OrganisationMembership.Role.OWNER and organisation.owner:
             raise ValidationError(_("This organisation already has an owner."))
+        if invitation.role == OrganisationMembership.Role.ADMIN:
+            organisation.validate_dunning_recipient_limit(
+                additional_emails=[user.email]
+            )
+
+        if (
+            invitation.role == OrganisationMembership.Role.OWNER
+            and not organisation.owner
+            and invitation.requested_product_offering
+            and not self.public_offerings()
+            .filter(pk=invitation.requested_product_offering_id)
+            .exists()
+        ):
+            # A staff-authorised private offering selected during setup becomes
+            # the owner's permission when they accept the invitation.
+            assign_perm(
+                "peachjam_subs.can_subscribe",
+                user,
+                invitation.requested_product_offering,
+            )
+        if invitation.requested_product_offering:
+            self.ensure_offering_available(
+                organisation, invitation.requested_product_offering
+            )
 
         membership = OrganisationMembership.objects.create(
             organisation=organisation, user=user, role=invitation.role
@@ -329,6 +406,14 @@ class OrganisationService:
             membership=membership,
             assignment=assignment,
         )
+        if membership.role in {
+            OrganisationMembership.Role.OWNER,
+            OrganisationMembership.Role.ADMIN,
+        }:
+            organisation_billing_recipients_changed.send(
+                sender=OrganisationMembership,
+                organisation=organisation,
+            )
         organisation.notify_administrators(
             _("A member joined %(organisation)s") % {"organisation": organisation.name},
             _("%(email)s accepted their organisation invitation.")
@@ -473,6 +558,7 @@ class OrganisationService:
             .get(pk=membership.pk, status=OrganisationMembership.Status.ACTIVE)
         )
         self.ensure_can_manage(actor, membership.organisation)
+        self.ensure_offering_available(membership.organisation, offering, actor=actor)
         if membership.seat_assignments.filter(ended_at__isnull=True).exists():
             raise ValidationError(_("This member already has an assigned seat."))
         seat = self.find_available_seat(membership.organisation, offering)
@@ -540,6 +626,11 @@ class OrganisationService:
         membership.status = OrganisationMembership.Status.ENDED
         membership.ended_at = timezone.now()
         membership.save(update_fields=["status", "ended_at"])
+        if membership.role == OrganisationMembership.Role.ADMIN:
+            organisation_billing_recipients_changed.send(
+                sender=OrganisationMembership,
+                organisation=membership.organisation,
+            )
         OrganisationAuditEvent.objects.create(
             organisation=membership.organisation,
             actor=actor,
@@ -651,8 +742,16 @@ class OrganisationService:
         ):
             raise ValidationError(_("Use ownership transfer to change the owner."))
         previous = membership.role
+        if role == OrganisationMembership.Role.ADMIN:
+            membership.organisation.validate_dunning_recipient_limit(
+                additional_emails=[membership.user.email]
+            )
         membership.role = role
         membership.save(update_fields=["role"])
+        organisation_billing_recipients_changed.send(
+            sender=OrganisationMembership,
+            organisation=membership.organisation,
+        )
         OrganisationAuditEvent.objects.create(
             organisation=membership.organisation,
             actor=actor,
@@ -688,10 +787,26 @@ class OrganisationService:
         )
         if current.pk == new_owner.pk:
             return new_owner
+        private_offerings = get_objects_for_user(
+            current.user,
+            "peachjam_subs.can_subscribe",
+            klass=ProductOffering,
+        ).exclude(pk__in=self.public_offerings().values("pk"))
+        for offering in private_offerings:
+            assign_perm("peachjam_subs.can_subscribe", new_owner.user, offering)
+        organisation.validate_dunning_recipient_limit(
+            additional_emails=[new_owner.user.email]
+        )
         current.role = OrganisationMembership.Role.ADMIN
         current.save(update_fields=["role"])
         new_owner.role = OrganisationMembership.Role.OWNER
         new_owner.save(update_fields=["role"])
+        organisation_ownership_transferred.send(
+            sender=Organisation,
+            organisation=organisation,
+            previous_owner=current.user,
+            new_owner=new_owner.user,
+        )
         OrganisationAuditEvent.objects.create(
             organisation=organisation,
             actor=actor,
@@ -719,6 +834,7 @@ class OrganisationService:
 
     def preview_seat_change(self, seat, offering, effective_on=None):
         """Validate and describe a requested seat plan change."""
+        self.ensure_offering_available(seat.organisation, offering)
         if offering.pricing_plan.period != seat.organisation.billing_period:
             raise ValidationError(
                 _("The plan must use the organisation's billing period.")
