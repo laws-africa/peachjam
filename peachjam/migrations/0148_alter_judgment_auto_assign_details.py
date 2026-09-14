@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0147_rename_auto_assign_title_judgment_auto_assign_details"),
     ]

@@ -19,7 +19,6 @@ def backfill_saveddocument_folder(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0218_saveddocument_folders_saveddocument_updated_at")]
 
     operations = [
