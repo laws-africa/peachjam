@@ -42,7 +42,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
-from peachjam.resources import DownloadDocumentsResource
+from peachjam.resources import SearchResultsDownloadResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
@@ -286,23 +286,30 @@ class DocumentSearchView(TemplateView):
             # the download is allowed, do a full redirect to start it
             return HttpResponseClientRedirect(request.get_full_path())
 
-        # only need the ids
+        # Only request fields needed by the download. In a federated search, Elasticsearch
+        # ids belong to the remote site's database and cannot be used as local primary keys.
         engine.set_search_query(
             replace(
                 engine.search_query,
-                source=["_id"],
+                source=SearchResultsDownloadResource.search_source_fields,
                 explain=False,
                 page=1,
                 page_size=1000,
             )
         )
         response = engine.execute()
-        pks = [int(hit.meta.id) for hit in response.hits]
-
-        dataset = DownloadDocumentsResource().export(
-            DownloadDocumentsResource.get_objects_for_download(pks)
+        hits = SearchHit.from_es_hits(engine, response.hits)
+        local_documents = (
+            SearchResultsDownloadResource.get_objects_for_download_by_frbr_uris(
+                [hit.expression_frbr_uri for hit in hits]
+            )
         )
-        fmt = DownloadDocumentsResource.download_formats[
+        SearchHit.attach_documents(hits, documents=local_documents)
+
+        dataset = SearchResultsDownloadResource().export(
+            [hit.document for hit in hits if hit.document]
+        )
+        fmt = SearchResultsDownloadResource.download_formats[
             form.cleaned_data.get("format") or "xlsx"
         ]()
         data = fmt.export_data(dataset)
