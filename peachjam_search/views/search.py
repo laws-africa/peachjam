@@ -1,4 +1,5 @@
 import json
+import logging
 from dataclasses import replace
 from urllib.parse import urlencode, urlparse
 
@@ -33,11 +34,14 @@ from django.views.generic import (
     UpdateView,
 )
 from django_htmx.http import HttpResponseClientRedirect
+from elastic_transport import ConnectionTimeout
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
+from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
 from peachjam.resources import DownloadDocumentsResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
@@ -45,6 +49,7 @@ from peachjam_api.serializers import LabelSerializer
 from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.engine import SearchEngine
 from peachjam_search.entity_matcher import EntityMatcher
+from peachjam_search.flynotes import FlynoteSearchMatcher
 from peachjam_search.forms import (
     DocumentSearchDebugForm,
     PortionSearchDebugForm,
@@ -54,12 +59,26 @@ from peachjam_search.forms import (
     SearchFeedbackCreateForm,
     SearchForm,
 )
-from peachjam_search.models import SavedSearch, SearchTrace
-from peachjam_search.serializers import SearchClickSerializer, SearchHit
+from peachjam_search.models import (
+    SavedSearch,
+    SearchEntityClick,
+    SearchEntityResult,
+    SearchFlynoteClick,
+    SearchFlynoteResult,
+    SearchTrace,
+)
+from peachjam_search.serializers import (
+    SearchClickSerializer,
+    SearchEntityClickSerializer,
+    SearchFlynoteClickSerializer,
+    SearchHit,
+)
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
+
+log = logging.getLogger(__name__)
 
 
 def debug_json(value):
@@ -135,14 +154,38 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        es_response = engine.execute()
+        debug_payload = engine.build_debug_payload()
+        try:
+            es_response = engine.execute_search()
+        except ConnectionTimeout as error:
+            # A timeout has no ES response, but the compiled query is the most
+            # useful evidence for diagnosing it with Elasticsearch support.
+            # It is redacted before persistence, so embedding vectors are not
+            # copied into SearchTrace.
+            try:
+                self.save_search_trace(
+                    engine,
+                    0,
+                    status=SearchTrace.Status.TIMED_OUT,
+                    elasticsearch_query=debug_payload["redacted_query"],
+                    error=error,
+                )
+            except Exception:
+                # Monitoring must never conceal the timeout seen by the user.
+                log.exception("Unable to save a timed-out search trace")
+            raise
         trace = self.save_search_trace(engine, es_response.hits.total.value)
 
         hits = SearchHit.from_es_hits(engine, es_response.hits)
         SearchHit.attach_documents(hits)
         # only keep those with documents
         hits = [h for h in hits if h.document]
-        entity_hits = self.match_entities(engine)
+        entity_hits = self.save_entity_results(trace, self.match_entities(engine))
+        flynote_hits = self.match_flynotes(engine, hits)
+        flynote_hits = self.save_flynote_results(trace, flynote_hits)
+        has_direct_flynote_match = any(
+            hit.source == "direct_query" for hit in flynote_hits
+        )
 
         response = {
             "count": es_response.hits.total.value,
@@ -153,6 +196,23 @@ class DocumentSearchView(TemplateView):
                     "request": request,
                     "entity_hits": entity_hits,
                 },
+            ),
+            "flynote_results_html": (
+                render_to_string(
+                    "peachjam_search/_flynote_search_hit_list.html",
+                    {
+                        "request": request,
+                        "flynote_hits": flynote_hits,
+                        "flynote_search_url": (
+                            f"{reverse('flynote_list')}?"
+                            f"{urlencode({'q': engine.search_query.query})}"
+                            if has_direct_flynote_match
+                            else None
+                        ),
+                    },
+                )
+                if flynote_hits
+                else ""
             ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
@@ -272,6 +332,63 @@ class DocumentSearchView(TemplateView):
             return []
         return self.make_entity_matcher().match(engine.search_query.query)
 
+    def match_flynotes(self, engine, hits):
+        """Find supplementary legal-topic cards for a first-page legal-term search."""
+        if (
+            engine.search_query.page != 1
+            or engine.search_query.field_queries
+            or not Judgment.flynote_topics_enabled()
+            or getattr(getattr(engine, "analysis", None), "intent", None)
+            != "legal_term"
+        ):
+            return []
+        return FlynoteSearchMatcher().match(engine.search_query.query, hits)
+
+    def save_flynote_results(self, trace, flynote_hits):
+        """Persist the exact topic cards rendered for a search trace.
+
+        The result model also has surfaces for the legal topics page, so this
+        method deliberately records presentation data rather than card-only
+        analytics.
+        """
+        if not trace:
+            return flynote_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(flynote_hits, start=1):
+            result = SearchFlynoteResult.objects.create(
+                search_trace=trace,
+                flynote=hit.flynote,
+                flynote_name=hit.flynote.name,
+                flynote_path_labels=hit.path_labels,
+                position=position,
+                surface=SearchFlynoteResult.Surface.DOCUMENT_SEARCH_CARD,
+                source=hit.source,
+                selection_reason=hit.selection_reason,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
+
+    def save_entity_results(self, trace, entity_hits):
+        """Persist entity cards so their display and clicks are traceable."""
+        if not trace:
+            return entity_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(entity_hits, start=1):
+            result = SearchEntityResult.objects.create(
+                search_trace=trace,
+                entity_type=hit.entity_type,
+                entity_id=hit.entity_id,
+                entity_label=hit.label,
+                entity_url=hit.url,
+                match_type=hit.match_type,
+                confidence=hit.confidence,
+                position=position,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
+
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
             # useful for debugging and showing django debug panel details
@@ -283,7 +400,15 @@ class DocumentSearchView(TemplateView):
 
         return response
 
-    def save_search_trace(self, engine: SearchEngine, n_results):
+    def save_search_trace(
+        self,
+        engine: SearchEngine,
+        n_results,
+        *,
+        status=SearchTrace.Status.COMPLETED,
+        elasticsearch_query=None,
+        error=None,
+    ):
         def strip_null_bytes(value):
             if isinstance(value, str):
                 return value.replace("\00", " ")
@@ -340,12 +465,54 @@ class DocumentSearchView(TemplateView):
                 ),
                 query_analysis=analysis_data,
                 search_profile=profile_name,
+                status=status,
+                elasticsearch_query=elasticsearch_query,
+                error_type=type(error).__name__ if error else None,
+                error_message=truncate("error_message", str(error)) if error else None,
             )
 
 
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
+
+
+class SearchFlynoteClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    """Record a card click once, without delaying navigation to the topic."""
+
+    permission_classes = (AllowAny,)
+    serializer_class = SearchFlynoteClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchFlynoteClick.objects.get_or_create(
+            flynote_result=serializer.validated_data["flynote_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class SearchEntityClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    permission_classes = (AllowAny,)
+    serializer_class = SearchEntityClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchEntityClick.objects.get_or_create(
+            entity_result=serializer.validated_data["entity_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
 
 class SearchDebugMixin(PermissionRequiredMixin):

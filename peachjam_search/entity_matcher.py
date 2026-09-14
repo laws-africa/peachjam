@@ -21,6 +21,7 @@ class EntitySearchHit:
     url: str
     match_type: str
     confidence: float
+    result_id: str | None = None
 
 
 @dataclass(frozen=True)

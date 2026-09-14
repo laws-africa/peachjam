@@ -10,7 +10,7 @@ from rest_framework import serializers
 from peachjam.models import CoreDocument
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.engine import PortionSearchFilters
-from peachjam_search.models import SearchClick
+from peachjam_search.models import SearchClick, SearchEntityResult, SearchFlynoteResult
 
 
 @dataclasses.dataclass
@@ -258,6 +258,18 @@ class SearchClickSerializer(serializers.ModelSerializer):
     class Meta:
         model = SearchClick
         fields = ("frbr_uri", "search_trace", "portion", "position")
+
+
+class SearchFlynoteClickSerializer(serializers.Serializer):
+    flynote_result = serializers.PrimaryKeyRelatedField(
+        queryset=SearchFlynoteResult.objects.all()
+    )
+
+
+class SearchEntityClickSerializer(serializers.Serializer):
+    entity_result = serializers.PrimaryKeyRelatedField(
+        queryset=SearchEntityResult.objects.all()
+    )
 
 
 class PydanticModelField(serializers.Field):

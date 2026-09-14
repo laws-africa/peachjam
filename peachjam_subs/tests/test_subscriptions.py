@@ -5,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import ValidationError
+from django.core.management import call_command
 from django.http import HttpResponse
 from django.test import RequestFactory, TestCase
 from django.test.utils import override_settings
@@ -17,6 +18,7 @@ from peachjam.models import Court, Glossary
 from peachjam_subs.forms import OffboardingFeedbackForm
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import (
+    Feature,
     OffboardingFeedback,
     PricingPlan,
     Product,
@@ -26,6 +28,21 @@ from peachjam_subs.models import (
     validate_selectable_offering_catalog,
 )
 from peachjam_subs.templatetags.peachjam_subs import change_subscription_url
+
+
+class AddDefaultProductCommandTests(TestCase):
+    def test_search_download_permission_is_added_to_default_product(self):
+        call_command("add_default_product", verbosity=0)
+
+        permission = Permission.objects.get(
+            content_type__app_label="peachjam_search",
+            codename="can_download_search",
+        )
+        feature = Feature.objects.get(name="Download search results")
+        product = subscription_settings().default_product_offering.product
+
+        self.assertIn(permission, feature.permissions.all())
+        self.assertIn(permission, product.group.permissions.all())
 
 
 class SubscriptionTemplateTagTests(TestCase):
