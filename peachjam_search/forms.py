@@ -3,9 +3,9 @@ import json
 
 from django import forms
 
-from peachjam.resources import DownloadDocumentsResource
 from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.models import SavedSearch, SearchFeedback
+from peachjam_search.resources import SearchResultsDownloadResource
 from peachjam_search.search_pipeline import SearchQuery
 from peachjam_search.serializers import PortionSearchRequestSerializer
 
@@ -24,7 +24,7 @@ class SearchForm(forms.Form):
     facets = forms.BooleanField(required=False)
     format = forms.ChoiceField(
         required=False,
-        choices=[(x, x) for x in DownloadDocumentsResource.download_formats.keys()],
+        choices=[(x, x) for x in SearchResultsDownloadResource.download_formats.keys()],
     )
 
     def clean_date(self):

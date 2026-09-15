@@ -42,7 +42,6 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
-from peachjam.resources import SearchResultsDownloadResource
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
@@ -67,6 +66,7 @@ from peachjam_search.models import (
     SearchFlynoteResult,
     SearchTrace,
 )
+from peachjam_search.resources import SearchResultsDownloadResource
 from peachjam_search.serializers import (
     SearchClickSerializer,
     SearchEntityClickSerializer,
