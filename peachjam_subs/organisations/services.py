@@ -395,7 +395,9 @@ class OrganisationService:
             )
         if invitation.requested_product_offering:
             self.ensure_offering_available(
-                organisation, invitation.requested_product_offering
+                organisation,
+                invitation.requested_product_offering,
+                actor=user,
             )
 
         membership = OrganisationMembership.objects.create(

@@ -74,6 +74,38 @@ class OrganisationServiceTests(TestCase):
             organisation_service.offerings_available_to_organisation(self.organisation),
         )
 
+    def test_invited_owner_can_accept_private_free_offering(self):
+        staff_offering = ProductOffering.objects.get(pk=2)
+        organisation = organisation_service.create_organisation(
+            name="Staff Organisation",
+            billing_period=PricingPlan.Period.ANNUALLY,
+            privacy_mode=Organisation.PrivacyMode.MANAGED_USAGE,
+            actor=self.staff,
+        )
+        invitation = organisation_service.send_invitation(
+            organisation=organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.OWNER,
+            requested_product_offering=staff_offering,
+            actor=self.staff,
+        )
+
+        membership = organisation_service.accept_invitation(
+            token=invitation.token,
+            user=self.member,
+        )
+
+        self.assertEqual(OrganisationMembership.Role.OWNER, membership.role)
+        self.assertEqual(self.member, organisation.owner)
+        self.assertEqual(
+            staff_offering,
+            membership.seat_assignments.get().seat.product_offering,
+        )
+        self.assertIn(
+            staff_offering,
+            organisation_service.offerings_available_to_organisation(organisation),
+        )
+
     def test_ownership_transfer_copies_private_offering_permissions(self):
         new_owner_membership = OrganisationMembership.objects.create(
             organisation=self.organisation,
