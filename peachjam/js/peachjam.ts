@@ -27,6 +27,7 @@ export interface PeachJamConfig {
   userHelpLink: string;
   urlLangPrefix: string;
   documentEmbeddings: boolean;
+  savedDocumentsEnabled: boolean;
   language: string;
   languages: string[];
   helpscoutBeaconId: string | null;
@@ -52,6 +53,7 @@ class PeachJam {
     languages: ['en'],
     urlLangPrefix: '',
     documentEmbeddings: false,
+    savedDocumentsEnabled: false,
     helpscoutBeaconId: null,
     chat: {
       enabled: false,
