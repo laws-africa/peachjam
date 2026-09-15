@@ -1704,6 +1704,10 @@ msgstr ""
 msgid "legislation"
 msgstr ""
 
+#: models/legislation.py:82 models/legislation.py:83
+msgid "popular legislation"
+msgstr ""
+
 #: models/partner.py:22
 msgid "document blurb"
 msgstr ""

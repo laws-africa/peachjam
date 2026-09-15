@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-08 19:03+0300\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -33,25 +33,28 @@ msgstr "%(APP_NAME)s hutegemea michango ili kuendelea kutoa huduma katika jukwaa
 msgid "Donate"
 msgstr "Changia"
 
-#: templates/liiweb/_hero_search.html:8 templates/liiweb/_hero_search.html:9
+#: templates/liiweb/_hero_search.html:13 templates/liiweb/_hero_search.html:14
 #, python-format
 msgid "Search %(APP_NAME)s"
 msgstr "Tafuta %(APP_NAME)s"
 
-#: templates/liiweb/_hero_search.html:14
+#: templates/liiweb/_hero_search.html:19
+#: templates/liiweb/legislation_landing.html:66
 msgid "Search"
 msgstr "Tafuta"
 
-#: templates/liiweb/_hero_search.html:17
+#: templates/liiweb/_hero_search.html:24
+#: templates/liiweb/legislation_landing.html:75
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
-#: templates/liiweb/home.html:39 templates/peachjam/_header.html:13
+#: templates/liiweb/home.html:39 templates/peachjam/_header.html:15
 msgid "Judgments"
 msgstr "Hukumu"
 
-#: templates/liiweb/home.html:42 templates/liiweb/legislation_list.html:4
-#: templates/liiweb/legislation_list.html:8 templates/peachjam/_header.html:19
+#: templates/liiweb/home.html:42 templates/liiweb/legislation_landing.html:4
+#: templates/liiweb/legislation_landing.html:15
+#: templates/peachjam/_header.html:22
 msgid "Legislation"
 msgstr "Sheria"
 
@@ -105,60 +108,263 @@ msgstr "Makala za Hivi Karibuni"
 msgid "View more articles"
 msgstr "Tazama makala zaidi"
 
-#: templates/liiweb/legislation_list.html:20
-msgid "More resources"
-msgstr "Rasilimali zaidi"
+#: templates/liiweb/legislation_landing.html:17
+#, python-format
+msgid "Explore %(formatted_count)s published legislation document."
+msgid_plural "Explore %(formatted_count)s published legislation documents."
+msgstr[0] ""
+msgstr[1] ""
 
-#: templates/liiweb/legislation_list.html:24
-msgid "Unconstitutional provisions"
-msgstr "Masharti kinyume na katiba"
+#: templates/liiweb/legislation_landing.html:27
+#, fuzzy
+#| msgid "All legislation"
+msgid "Find legislation"
+msgstr "Sheria zote"
 
-#: templates/liiweb/legislation_list.html:29
-msgid "Uncommenced provisions"
-msgstr "Masharti ambayo hayajaanza"
+#: templates/liiweb/legislation_landing.html:31
+#, fuzzy
+#| msgid "View more legislation"
+msgid "Title or citation"
+msgstr "Tazama sheria zaidi"
 
-#: templates/liiweb/legislation_list.html:34
-msgid "Glossary of defined terms"
-msgstr "Kamusi ya maneno yaliyofafanuliwa"
+#: templates/liiweb/legislation_landing.html:36
+msgid "For example, Income Tax Act"
+msgstr ""
 
-#: templates/liiweb/legislation_list.html:49
-msgid "You are viewing repealed legislation which is no longer in force."
-msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
+#: templates/liiweb/legislation_landing.html:39
+msgid "Year"
+msgstr ""
 
-#: templates/liiweb/legislation_list.html:58
-#: templates/liiweb/locality_legislation_list.html:27
+#: templates/liiweb/legislation_landing.html:42
+msgid "Any year"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:52
+#: templates/liiweb/legislation_landing.html:187
+msgid "Document nature"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:55
+msgid "Any nature"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:68
+#, fuzzy
+#| msgid "Recent legislation"
+msgid "Search legislation"
+msgstr "Sheria ya hivi karibuni"
+
+#: templates/liiweb/legislation_landing.html:78
+#, fuzzy
+#| msgid "Legislation"
+msgid "Legislation collections"
+msgstr "Sheria"
+
+#: templates/liiweb/legislation_landing.html:84
+#: templates/liiweb/locality_legislation_list.html:27 views/legislation.py:48
 msgid "Current legislation"
 msgstr "Sheria za sasa"
 
-#: templates/liiweb/legislation_list.html:66
+#: templates/liiweb/legislation_landing.html:86
+msgid "Principal legislation in force."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:95
+#: templates/liiweb/legislation_landing.html:344 views/legislation.py:52
 msgid "Recent legislation"
 msgstr "Sheria ya hivi karibuni"
 
-#: templates/liiweb/legislation_list.html:80
+#: templates/liiweb/legislation_landing.html:97
+msgid "Published in the past year."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:108
+msgid "Regulations, rules and notices."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:118
+#, fuzzy
+#| msgid "All legislation"
+msgid "Local legislation"
+msgstr "Sheria zote"
+
+#: templates/liiweb/legislation_landing.html:120
+msgid "Browse provincial legislation and municipal by-laws."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:131
+#, fuzzy
+#| msgid "Current legislation"
+msgid "Browse legislation"
+msgstr "Sheria za sasa"
+
+#: templates/liiweb/legislation_landing.html:134
+msgid "Start with a legal topic, year or document nature."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:136
+msgid "Start with a year or document nature."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:145
+msgid "Browse by legal topic"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:146
+msgid "Find legislation by its area of law."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:153
+#: templates/liiweb/legislation_landing.html:198
+#, python-format
+msgid "%(formatted_count)s document"
+msgid_plural "%(formatted_count)s documents"
+msgstr[0] ""
+msgstr[1] ""
+
+#: templates/liiweb/legislation_landing.html:159
+msgid "Browse legislation across all topics"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:168
+msgid "Browse by year"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:169
+msgid "Find legislation by the year it was enacted."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:178
+msgid "Browse legislation from all years"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:190
+msgid "Choose the nature of the legislation you need."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:204
+msgid "Browse legislation of all natures"
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:212
+#, fuzzy
+#| msgid "Legislation"
+msgid "Legislation by status"
+msgstr "Sheria"
+
+#: templates/liiweb/legislation_landing.html:215
+#, fuzzy
+#| msgid "You are viewing repealed legislation which is no longer in force."
+msgid "Find legislation that is not currently in force."
+msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
+
+#: templates/liiweb/legislation_landing.html:225
 #: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:5
+#: views/legislation.py:60
 msgid "Uncommenced legislation"
 msgstr "Sheria ambayo haijaanza kutumika"
 
-#: templates/liiweb/legislation_list.html:88
-#: templates/liiweb/locality_legislation_list.html:33
+#: templates/liiweb/legislation_landing.html:230 views/legislation.py:61
+msgid "Legislation that is not yet in force."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:241
+#: templates/liiweb/locality_legislation_list.html:33 views/legislation.py:64
 msgid "Repealed legislation"
 msgstr "Sheria iliyofutwa"
 
-#: templates/liiweb/legislation_list.html:95
-#: templates/liiweb/locality_legislation_list.html:43
-msgid "All legislation"
+#: templates/liiweb/legislation_landing.html:246 views/legislation.py:65
+#, fuzzy
+#| msgid "You are viewing repealed legislation which is no longer in force."
+msgid "Legislation that is no longer in force."
+msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
+
+#: templates/liiweb/legislation_landing.html:257
+#: templates/liiweb/locality_legislation_list.html:65
+msgid "More resources"
+msgstr "Rasilimali zaidi"
+
+#: templates/liiweb/legislation_landing.html:260
+msgid "Check individual provisions and look up defined legal terms."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:270
+#: templates/liiweb/locality_legislation_list.html:69
+msgid "Unconstitutional provisions"
+msgstr "Masharti kinyume na katiba"
+
+#: templates/liiweb/legislation_landing.html:273
+msgid "See provisions affected by constitutional decisions."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:285
+#: templates/liiweb/locality_legislation_list.html:74
+msgid "Uncommenced provisions"
+msgstr "Masharti ambayo hayajaanza"
+
+#: templates/liiweb/legislation_landing.html:288
+msgid "See individual sections that are not yet in force."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:300
+#: templates/liiweb/locality_legislation_list.html:79
+msgid "Glossary of defined terms"
+msgstr "Kamusi ya maneno yaliyofafanuliwa"
+
+#: templates/liiweb/legislation_landing.html:303
+msgid "Look up terms defined across legislation."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:318
+#, fuzzy
+#| msgid "Legislation"
+msgid "Legislation highlights"
+msgstr "Sheria"
+
+#: templates/liiweb/legislation_landing.html:321
+msgid "Frequently referenced legislation and the latest publications."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:327
+#, fuzzy
+#| msgid "All legislation"
+msgid "Popular legislation"
 msgstr "Sheria zote"
 
+#: templates/liiweb/legislation_landing.html:337
+msgid "No legislation is available."
+msgstr ""
+
+#: templates/liiweb/legislation_landing.html:357
+#, fuzzy
+#| msgid "Recent legislation"
+msgid "No recent legislation is available."
+msgstr "Sheria ya hivi karibuni"
+
+#: templates/liiweb/legislation_landing.html:362
+#, fuzzy
+#| msgid "View more legislation"
+msgid "View all recent legislation"
+msgstr "Tazama sheria zaidi"
+
+#: templates/liiweb/legislation_list.html:15
+msgid "You are viewing repealed legislation which is no longer in force."
+msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
+
 #: templates/liiweb/locality_legislation_list.html:9
-#: templates/peachjam/_header.html:8
+#: templates/peachjam/_header.html:9
 msgid "Home"
 msgstr "Nyumbani"
+
+#: templates/liiweb/locality_legislation_list.html:43 views/legislation.py:68
+msgid "All legislation"
+msgstr "Sheria zote"
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
 msgstr "Sheria zisizo mtandaoni"
 
-#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:25
+#: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr "Kuhusu"
 
@@ -171,7 +377,7 @@ msgstr "Tumia %(APP_NAME)s nje ya mtandao na <a href=\"%(pocket_law_url)s\">Pock
 msgid "Site Statistics"
 msgstr "Takwimu za Tovuti"
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:29
+#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr "Msaada"
 
@@ -195,8 +401,25 @@ msgstr "Washirika wetu"
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
-#: views/legislation.py:180
+#: views/legislation.py:49
+#, fuzzy
+#| msgid "You are viewing repealed legislation which is no longer in force."
+msgid "Principal legislation currently in force."
+msgstr "Unatazama sheria iliyobatilishwa ambayo haitumiki tena."
+
+#: views/legislation.py:53
+msgid "Legislation published in the past year."
+msgstr ""
+
+#: views/legislation.py:57
+msgid "Regulations, rules and notices made under principal legislation."
+msgstr ""
+
+#: views/legislation.py:69
+msgid "Browse the complete legislation collection."
+msgstr ""
+
+#: views/legislation.py:291
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
-

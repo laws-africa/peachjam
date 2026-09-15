@@ -118,6 +118,7 @@ from peachjam.models import (
     Partner,
     PartnerLogo,
     PeachJamSettings,
+    PopularLegislation,
     PracticeType,
     Predicate,
     ProvisionEnrichment,
@@ -1441,6 +1442,14 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work", "commencements_json", "timeline_json"] + list(
         DocumentAdmin.readonly_fields
     )
+
+
+@admin.register(PopularLegislation)
+class PopularLegislationAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("work",)
+    list_display = ("work", "position")
+    list_editable = ("position",)
+    ordering = ("position", "pk")
 
 
 @admin.register(Bill)

@@ -2,6 +2,7 @@ import datetime
 from collections import defaultdict
 from datetime import timedelta
 
+from django.contrib.contenttypes.models import ContentType
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.utils.translation import gettext_lazy as _
@@ -11,11 +12,28 @@ from peachjam.helpers import chunks, get_language
 from peachjam.models import (
     Glossary,
     JurisdictionProfile,
+    Legislation,
     Locality,
     get_country_and_locality_or_404,
     pj_settings,
 )
 from peachjam.views import LegislationListView as BaseLegislationListView
+
+
+def get_site_localities():
+    """Return configured site localities that have published legislation."""
+    settings = pj_settings()
+    documents = Legislation.objects.filter(published=True, locality__isnull=False)
+    if settings.default_document_jurisdiction_id:
+        documents = documents.filter(
+            jurisdiction=settings.default_document_jurisdiction_id
+        )
+    else:
+        jurisdiction_ids = settings.document_jurisdictions.values_list("pk", flat=True)
+        documents = documents.filter(jurisdiction_id__in=jurisdiction_ids)
+    return Locality.objects.filter(
+        pk__in=documents.order_by().values_list("locality_id", flat=True).distinct()
+    )
 
 
 class LegislationListView(BaseLegislationListView):
@@ -24,12 +42,85 @@ class LegislationListView(BaseLegislationListView):
     latest_expression_only = True
     form_defaults = None
     national_only = True
+    landing_page = True
+    variant_page_content = {
+        "current": (
+            _("Current legislation"),
+            _("Principal legislation currently in force."),
+        ),
+        "recent": (
+            _("Recent legislation"),
+            _("Legislation published in the past year."),
+        ),
+        "subleg": (
+            None,
+            _("Regulations, rules and notices made under principal legislation."),
+        ),
+        "uncommenced": (
+            _("Uncommenced legislation"),
+            _("Legislation that is not yet in force."),
+        ),
+        "repealed": (
+            _("Repealed legislation"),
+            _("Legislation that is no longer in force."),
+        ),
+        "all": (
+            _("All legislation"),
+            _("Browse the complete legislation collection."),
+        ),
+    }
+
+    @property
+    def show_landing_page(self):
+        return (
+            self.landing_page
+            and self.national_only
+            and self.request.resolver_match.url_name == "legislation_list"
+            and not self.request.htmx
+            and not any(
+                name in self.request.GET for name in self.form_class.base_fields
+            )
+        )
+
+    def get_queryset(self):
+        if self.show_landing_page:
+            return self.get_model_queryset().none()
+        return super().get_queryset()
+
+    def get_paginate_by(self, queryset):
+        if self.show_landing_page:
+            return None
+        return super().get_paginate_by(queryset)
+
+    def get_template_names(self):
+        if self.show_landing_page:
+            return ["liiweb/legislation_landing.html"]
+        return super().get_template_names()
 
     def get_form(self):
         self.form_defaults = {"sort": "title"}
         if self.variant in ["recent", "subleg"]:
             self.form_defaults = {"sort": "-date", "secondary_sort": "-frbr_uri_number"}
         return super().get_form()
+
+    def get_model_queryset(self):
+        legislation_content_type = ContentType.objects.get_for_model(
+            self.model, for_concrete_model=False
+        )
+        return (
+            super()
+            .get_model_queryset()
+            .filter(
+                doc_type="legislation",
+                polymorphic_ctype=legislation_content_type,
+            )
+        )
+
+    def add_facets(self, context):
+        if self.show_landing_page:
+            context["facet_data"] = {}
+        else:
+            super().add_facets(context)
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
@@ -40,6 +131,15 @@ class LegislationListView(BaseLegislationListView):
             if country:
                 qs = qs.filter(jurisdiction=country)
         qs = self.get_variant_queryset(qs)
+        return qs
+
+    def get_landing_page_queryset(self):
+        qs = super().get_landing_page_queryset()
+        if self.national_only:
+            qs = qs.filter(locality=None)
+            country = pj_settings().default_document_jurisdiction
+            if country:
+                qs = qs.filter(jurisdiction=country)
         return qs
 
     def get_variant_queryset(self, qs):
@@ -55,15 +155,17 @@ class LegislationListView(BaseLegislationListView):
             qs = qs.filter(metadata_json__commenced=False)
         elif self.variant == "recent":
             qs = qs.filter(
+                date__lte=datetime.date.today(),
                 metadata_json__publication_date__gte=(
                     datetime.date.today() - timedelta(days=365)
-                ).isoformat()
+                ).isoformat(),
             )
         return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        self.add_children(context["documents"])
+        if not self.show_landing_page:
+            self.add_children(context["documents"])
 
         context["doc_table_toggle"] = True
         context["doc_table_toggle_title"] = pj_settings().subleg_label
@@ -72,16 +174,25 @@ class LegislationListView(BaseLegislationListView):
         context["doc_table_show_court"] = False
         context["doc_table_show_author"] = False
         context["doc_table_show_jurisdiction"] = False
+        if self.show_landing_page:
+            context["show_local_legislation"] = get_site_localities().exists()
+        elif self.national_only:
+            page_heading, page_description = self.variant_page_content[self.variant]
+            context["page_heading"] = page_heading or pj_settings().subleg_label
+            context["page_description"] = page_description
         country = pj_settings().default_document_jurisdiction
         if country:
-            context["show_glossary"] = Glossary.objects.filter(
-                place_code=country.iso.lower()
-            ).exists()
-            context["place_code"] = country.iso.lower()
+            place_code = country.iso.lower()
         else:
-            context["show_glossary"] = False
+            place_code = None
 
-        context["documents"] = self.group_documents(context["documents"])
+        context["show_glossary"] = bool(
+            place_code and Glossary.objects.filter(place_code=place_code).exists()
+        )
+        context["place_code"] = place_code
+
+        if not self.show_landing_page:
+            context["documents"] = self.group_documents(context["documents"])
 
         return context
 
@@ -141,7 +252,7 @@ class LocalityLegislationView(TemplateView):
         return context
 
     def get_localities(self):
-        return Locality.objects.all()
+        return get_site_localities()
 
 
 class LocalityLegislationListView(LegislationListView):
