@@ -528,6 +528,7 @@ class SearchViewsTest(TestCase):
         self.assertEqual(remote_uri, dataset.dict[0]["expression_frbr_uri"])
         self.assertEqual("Featured", dataset.dict[0]["labels"])
         self.assertEqual("Remote author", dataset.dict[0]["author"])
+        self.assertIsNone(dataset.dict[0]["source_url"])
 
     @override_settings(
         PEACHJAM={

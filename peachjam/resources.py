@@ -1048,6 +1048,11 @@ class SearchResultsDownloadResource(DownloadDocumentsResource):
     def dehydrate_date(self, obj):
         return getattr(obj, "date", None)
 
+    def dehydrate_source_url(self, obj):
+        if not isinstance(obj, CoreDocument):
+            return ""
+        return super().dehydrate_source_url(obj)
+
     def dehydrate_court(self, obj):
         return self.render_related_value(getattr(obj, "court", None))
 
