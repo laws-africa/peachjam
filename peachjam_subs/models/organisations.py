@@ -395,6 +395,50 @@ class OrganisationSeatAssignment(models.Model):
             ),
         ]
 
+    def clean(self):
+        errors = {}
+        if (
+            self.seat_id
+            and self.membership_id
+            and self.seat.organisation_id != self.membership.organisation_id
+        ):
+            errors.setdefault("membership", []).append(
+                _("The seat and membership must belong to the same organisation.")
+            )
+        if (
+            self.subscription_id
+            and self.membership_id
+            and self.subscription.user_id != self.membership.user_id
+        ):
+            errors.setdefault("subscription", []).append(
+                _("The subscription must belong to the assigned member.")
+            )
+        if self.ended_at is None and self.membership_id:
+            if self.membership.status != OrganisationMembership.Status.ACTIVE:
+                errors.setdefault("membership", []).append(
+                    _("An active assignment requires an active membership.")
+                )
+        if self.ended_at is None and self.seat_id:
+            if self.seat.status == OrganisationSeat.Status.ENDED:
+                errors.setdefault("seat", []).append(
+                    _("An ended seat cannot have an active assignment.")
+                )
+        if (
+            self.ended_at is None
+            and self.subscription_id
+            and self.seat_id
+            and self.subscription.product_offering_id != self.seat.product_offering_id
+        ):
+            errors.setdefault("subscription", []).append(
+                _("The subscription plan must match the assigned seat.")
+            )
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        return super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.seat} assigned to {self.membership.user}"
 
@@ -465,6 +509,18 @@ class OrganisationAuditEvent(models.Model):
     def save(self, *args, **kwargs):
         if self.pk:
             raise ValidationError(_("Organisation audit events are append-only."))
+        related_objects = {
+            "membership": self.membership if self.membership_id else None,
+            "invitation": self.invitation if self.invitation_id else None,
+            "seat": self.seat if self.seat_id else None,
+        }
+        errors = {
+            field: _("This object must belong to the audit event's organisation.")
+            for field, related_object in related_objects.items()
+            if related_object and related_object.organisation_id != self.organisation_id
+        }
+        if errors:
+            raise ValidationError(errors)
         return super().save(*args, **kwargs)
 
     def __str__(self):

@@ -16,8 +16,10 @@ from peachjam_subs.models import (
     OffboardingFeedback,
     Organisation,
     OrganisationAuditEvent,
+    OrganisationInvitation,
     OrganisationMembership,
     OrganisationSeat,
+    OrganisationSeatAssignment,
     PricingPlan,
     ProductOffering,
     Subscription,
@@ -336,6 +338,129 @@ class OrganisationServiceTests(TestCase):
                 token=invitation.token, user=self.member
             )
 
+        invitation.refresh_from_db()
+        self.assertEqual(OrganisationInvitation.Status.EXPIRED, invitation.status)
+        self.assertEqual(
+            1,
+            invitation.audit_events.filter(
+                event_type=OrganisationAuditEvent.EventType.INVITATION_EXPIRED
+            ).count(),
+        )
+
+    def test_closed_organisation_rejects_pending_invitation(self):
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+        self.organisation.status = Organisation.Status.CLOSED
+        self.organisation.save(update_fields=["status"])
+
+        with self.assertRaisesMessage(ValidationError, "no longer accepting"):
+            organisation_service.accept_invitation(
+                token=invitation.token, user=self.member
+            )
+
+        self.assertFalse(
+            OrganisationMembership.objects.filter(user=self.member).exists()
+        )
+
+    def test_assignment_must_remain_within_one_organisation(self):
+        other = Organisation.objects.create(
+            name="Other Chambers", billing_period=PricingPlan.Period.MONTHLY
+        )
+        other_membership = OrganisationMembership.objects.create(
+            organisation=other,
+            user=self.member,
+            role=OrganisationMembership.Role.MEMBER,
+        )
+        seat = OrganisationSeat.objects.create(
+            organisation=self.organisation,
+            product_offering=self.offering,
+        )
+        assignment = OrganisationSeatAssignment(seat=seat, membership=other_membership)
+
+        with self.assertRaisesMessage(ValidationError, "same organisation"):
+            assignment.save()
+
+        OrganisationSeatAssignment.objects.bulk_create([assignment])
+        self.organisation.status = Organisation.Status.ACTIVE
+        self.organisation.save(update_fields=["status"])
+        seat.status = OrganisationSeat.Status.ACTIVE
+        seat.save(update_fields=["status"])
+        with self.assertRaisesMessage(ValidationError, "same organisation"):
+            organisation_service.activate_assignment(assignment)
+
+    def test_assignment_subscription_must_belong_to_member(self):
+        membership = OrganisationMembership.objects.get(
+            organisation=self.organisation, user=self.owner
+        )
+        seat = OrganisationSeat.objects.create(
+            organisation=self.organisation,
+            product_offering=self.offering,
+        )
+        member_subscription = Subscription.objects.active_for_user(self.member).get()
+
+        with self.assertRaisesMessage(ValidationError, "assigned member"):
+            OrganisationSeatAssignment.objects.create(
+                seat=seat,
+                membership=membership,
+                subscription=member_subscription,
+            )
+
+    def test_audit_event_relations_must_belong_to_organisation(self):
+        other = Organisation.objects.create(
+            name="Other Chambers", billing_period=PricingPlan.Period.MONTHLY
+        )
+        other_membership = OrganisationMembership.objects.create(
+            organisation=other,
+            user=self.member,
+            role=OrganisationMembership.Role.MEMBER,
+        )
+
+        with self.assertRaisesMessage(ValidationError, "audit event's organisation"):
+            OrganisationAuditEvent.objects.create(
+                organisation=self.organisation,
+                membership=other_membership,
+                event_type=OrganisationAuditEvent.EventType.MEMBER_REMOVED,
+                message="Invalid event.",
+            )
+
+    def test_suspended_seat_upgrade_does_not_restore_access(self):
+        upgraded_offering = ProductOffering.objects.get(pk=3)
+        assign_perm("peachjam_subs.can_subscribe", self.owner, upgraded_offering)
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            requested_product_offering=self.offering,
+            actor=self.owner,
+        )
+        membership = organisation_service.accept_invitation(
+            token=invitation.token, user=self.member
+        )
+        organisation_service.activate_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+        organisation_service.suspend_organisation_entitlements(
+            organisation=self.organisation, actor=self.staff
+        )
+        assignment = membership.seat_assignments.get(ended_at__isnull=True)
+
+        organisation_service.change_seat_plan(
+            seat=assignment.seat,
+            offering=upgraded_offering,
+            renewal_on=timezone.localdate() + timedelta(days=30),
+            actor=self.owner,
+        )
+
+        assignment.refresh_from_db()
+        assignment.seat.refresh_from_db()
+        self.assertEqual(OrganisationSeat.Status.SUSPENDED, assignment.seat.status)
+        self.assertEqual(upgraded_offering, assignment.seat.product_offering)
+        self.assertIsNone(assignment.subscription)
+
     def test_available_exact_plan_seat_is_reused(self):
         self.organisation.status = Organisation.Status.ACTIVE
         self.organisation.save(update_fields=["status"])
@@ -551,6 +676,12 @@ class OrganisationServiceTests(TestCase):
         self.assertTrue(self.owner.is_active)
 
     def test_closing_organisation_ends_memberships(self):
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email="invitee@example.com",
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
         organisation_service.close_organisation(
             organisation=self.organisation, actor=self.staff
         )
@@ -561,3 +692,61 @@ class OrganisationServiceTests(TestCase):
         )
         self.assertEqual(Organisation.Status.CLOSED, self.organisation.status)
         self.assertEqual(OrganisationMembership.Status.ENDED, membership.status)
+        invitation.refresh_from_db()
+        self.assertEqual(OrganisationInvitation.Status.CANCELLED, invitation.status)
+        self.assertIsNotNone(invitation.cancelled_at)
+        self.assertTrue(
+            invitation.audit_events.filter(
+                event_type=OrganisationAuditEvent.EventType.INVITATION_CANCELLED
+            ).exists()
+        )
+        self.assertTrue(
+            membership.audit_events.filter(
+                message="Ended organisation membership during organisation closure."
+            ).exists()
+        )
+
+    def test_closing_organisation_is_idempotent(self):
+        organisation_service.close_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+        audit_count = self.organisation.audit_events.count()
+
+        organisation_service.close_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+
+        self.assertEqual(audit_count, self.organisation.audit_events.count())
+
+    def test_closed_organisation_rejects_new_and_resent_invitations(self):
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+        organisation_service.close_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+
+        with self.assertRaisesMessage(ValidationError, "no longer accepting"):
+            organisation_service.send_invitation(
+                organisation=self.organisation,
+                email="another@example.com",
+                role=OrganisationMembership.Role.MEMBER,
+                actor=self.staff,
+            )
+        with self.assertRaisesMessage(ValidationError, "no longer accepting"):
+            organisation_service.resend_invitation(
+                invitation=invitation, actor=self.staff
+            )
+
+    def test_closed_organisation_cannot_be_reactivated(self):
+        organisation_service.close_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+
+        with self.assertRaisesMessage(ValidationError, "cannot be activated"):
+            organisation_service.activate_organisation(
+                organisation=self.organisation, actor=self.staff
+            )

@@ -164,6 +164,16 @@ class OrganisationService:
         if not membership:
             raise PermissionDenied
 
+    def ensure_organisation_accepts_invitations(self, organisation):
+        """Raise unless memberships may still be invited into the organisation."""
+        if organisation.status not in {
+            Organisation.Status.PROVISIONAL,
+            Organisation.Status.ACTIVE,
+        }:
+            raise ValidationError(
+                _("This organisation is no longer accepting invitations.")
+            )
+
     @transaction.atomic
     def create_organisation(
         self, *, name, billing_period, privacy_mode, actor, owner=None
@@ -198,6 +208,7 @@ class OrganisationService:
         """Create and send an organisation invitation."""
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
         self.ensure_can_manage(actor, organisation)
+        self.ensure_organisation_accepts_invitations(organisation)
         if requested_product_offering:
             self.ensure_offering_available(
                 organisation, requested_product_offering, actor=actor
@@ -276,11 +287,18 @@ class OrganisationService:
             )
             .get(pk=assignment.pk)
         )
-        if (
-            assignment.ended_at
-            or assignment.seat.organisation.status != Organisation.Status.ACTIVE
-        ):
+        if assignment.ended_at:
             return assignment
+        assignment.clean()
+        if (
+            assignment.membership.status != OrganisationMembership.Status.ACTIVE
+            or assignment.seat.organisation_id != assignment.membership.organisation_id
+            or assignment.seat.organisation.status != Organisation.Status.ACTIVE
+            or assignment.seat.status != OrganisationSeat.Status.ACTIVE
+        ):
+            raise ValidationError(
+                _("This seat assignment cannot provide an active subscription.")
+            )
         if assignment.subscription and assignment.subscription.is_active:
             return assignment
         subscription = Subscription.objects.create(
@@ -294,32 +312,57 @@ class OrganisationService:
         return assignment
 
     @transaction.atomic
+    def expire_invitation(self, *, token):
+        """Persist expiry for a pending invitation and return whether it expired."""
+        organisation_id = OrganisationInvitation.objects.values_list(
+            "organisation_id", flat=True
+        ).get(token=token)
+        Organisation.objects.select_for_update().get(pk=organisation_id)
+        invitation = (
+            OrganisationInvitation.objects.select_for_update(of=("self",))
+            .select_related("organisation")
+            .get(token=token)
+        )
+        if not invitation.is_expired:
+            return False
+        invitation.status = OrganisationInvitation.Status.EXPIRED
+        invitation.save(update_fields=["status"])
+        OrganisationAuditEvent.objects.create(
+            organisation=invitation.organisation,
+            invitation=invitation,
+            event_type=OrganisationAuditEvent.EventType.INVITATION_EXPIRED,
+            message="Organisation invitation expired.",
+        )
+        return True
+
     def accept_invitation(self, *, token, user):
         """Accept an invitation and create its membership and optional assignment."""
+        if self.expire_invitation(token=token):
+            raise ValidationError(_("This invitation has expired."))
+        return self.accept_pending_invitation(token=token, user=user)
+
+    @transaction.atomic
+    def accept_pending_invitation(self, *, token, user):
+        """Accept a locked, unexpired invitation."""
+        organisation_id = OrganisationInvitation.objects.values_list(
+            "organisation_id", flat=True
+        ).get(token=token)
+        organisation = Organisation.objects.select_for_update().get(pk=organisation_id)
         invitation = (
             OrganisationInvitation.objects.select_for_update(of=("self",))
             .select_related("organisation", "requested_product_offering")
             .get(token=token)
         )
-        organisation = Organisation.objects.select_for_update().get(
-            pk=invitation.organisation_id
-        )
         if invitation.status == OrganisationInvitation.Status.ACCEPTED:
-            if invitation.accepted_membership.user_id != user.pk:
+            if (
+                not invitation.accepted_membership
+                or invitation.accepted_membership.user_id != user.pk
+            ):
                 raise ValidationError(_("This invitation has already been accepted."))
             return invitation.accepted_membership
-        if invitation.is_expired:
-            invitation.status = OrganisationInvitation.Status.EXPIRED
-            invitation.save(update_fields=["status"])
-            OrganisationAuditEvent.objects.create(
-                organisation=organisation,
-                invitation=invitation,
-                event_type=OrganisationAuditEvent.EventType.INVITATION_EXPIRED,
-                message="Organisation invitation expired.",
-            )
-            raise ValidationError(_("This invitation has expired."))
         if invitation.status != OrganisationInvitation.Status.PENDING:
             raise ValidationError(_("This invitation is no longer available."))
+        self.ensure_organisation_accepts_invitations(organisation)
         if not self.verified_invitation_email(user, invitation):
             raise ValidationError(
                 _("Sign in with the verified email address that was invited.")
@@ -466,6 +509,7 @@ class OrganisationService:
             .get(pk=invitation.pk)
         )
         self.ensure_can_manage(actor, invitation.organisation)
+        self.ensure_organisation_accepts_invitations(invitation.organisation)
         if invitation.status != OrganisationInvitation.Status.PENDING:
             raise ValidationError(_("Only pending invitations can be resent."))
         invitation.expires_at = timezone.now() + timezone.timedelta(days=14)
@@ -480,6 +524,8 @@ class OrganisationService:
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
         if organisation.status == Organisation.Status.ACTIVE:
             return organisation
+        if organisation.status != Organisation.Status.PROVISIONAL:
+            raise ValidationError(_("This organisation cannot be activated."))
         if not organisation.owner:
             raise ValidationError(
                 _("An organisation must have an owner before activation.")
@@ -558,6 +604,7 @@ class OrganisationService:
             .get(pk=membership.pk, status=OrganisationMembership.Status.ACTIVE)
         )
         self.ensure_can_manage(actor, membership.organisation)
+        self.ensure_organisation_accepts_invitations(membership.organisation)
         self.ensure_offering_available(membership.organisation, offering, actor=actor)
         if membership.seat_assignments.filter(ended_at__isnull=True).exists():
             raise ValidationError(_("This member already has an assigned seat."))
@@ -881,7 +928,8 @@ class OrganisationService:
                     assignment.subscription.close()
                 assignment.subscription = None
                 assignment.save(update_fields=["subscription"])
-                self.activate_assignment(assignment)
+                if seat.status == OrganisationSeat.Status.ACTIVE:
+                    self.activate_assignment(assignment)
         else:
             seat.pending_product_offering = offering
             seat.pending_change_on = renewal_on
@@ -1029,9 +1077,16 @@ class OrganisationService:
     def suspend_organisation_entitlements(self, *, organisation, actor=None):
         """Suspend all organisation-funded entitlements."""
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
-        for seat in organisation.seats.select_for_update().filter(
-            status=OrganisationSeat.Status.ACTIVE
-        ):
+        if organisation.status != Organisation.Status.ACTIVE:
+            raise ValidationError(_("This organisation's access cannot be suspended."))
+        seats = list(
+            organisation.seats.select_for_update().filter(
+                status=OrganisationSeat.Status.ACTIVE
+            )
+        )
+        if not seats:
+            return organisation
+        for seat in seats:
             assignment = seat.active_assignment
             if (
                 assignment
@@ -1054,9 +1109,16 @@ class OrganisationService:
     def restore_organisation_entitlements(self, *, organisation, actor=None):
         """Restore all suspended organisation-funded entitlements."""
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
-        for seat in organisation.seats.select_for_update().filter(
-            status=OrganisationSeat.Status.SUSPENDED
-        ):
+        if organisation.status != Organisation.Status.ACTIVE:
+            raise ValidationError(_("This organisation's access cannot be restored."))
+        seats = list(
+            organisation.seats.select_for_update().filter(
+                status=OrganisationSeat.Status.SUSPENDED
+            )
+        )
+        if not seats:
+            return organisation
+        for seat in seats:
             seat.status = OrganisationSeat.Status.ACTIVE
             seat.save(update_fields=["status"])
             assignment = seat.active_assignment
@@ -1076,6 +1138,10 @@ class OrganisationService:
     def close_organisation(self, *, organisation, actor=None):
         """Close an organisation and end its memberships and funded access."""
         organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
+        if organisation.status == Organisation.Status.CLOSED:
+            return organisation
+        now = timezone.now()
+        today = timezone.localdate()
         organisation.notify_administrators(
             _("Your LawLibrary organisation is closing"),
             _(
@@ -1085,23 +1151,55 @@ class OrganisationService:
             % {"organisation": organisation.name},
             include_billing_contacts=True,
         )
-        self.suspend_organisation_entitlements(organisation=organisation, actor=actor)
+        if organisation.status == Organisation.Status.ACTIVE:
+            self.suspend_organisation_entitlements(
+                organisation=organisation, actor=actor
+            )
+        for invitation in organisation.invitations.select_for_update().filter(
+            status=OrganisationInvitation.Status.PENDING
+        ):
+            invitation.status = OrganisationInvitation.Status.CANCELLED
+            invitation.cancelled_at = now
+            invitation.save(update_fields=["status", "cancelled_at"])
+            OrganisationAuditEvent.objects.create(
+                organisation=organisation,
+                actor=actor,
+                invitation=invitation,
+                event_type=OrganisationAuditEvent.EventType.INVITATION_CANCELLED,
+                message="Cancelled invitation during organisation closure.",
+            )
+            notify_email(
+                invitation.email,
+                _("Your organisation invitation was cancelled"),
+                _("Your invitation to %(organisation)s is no longer available.")
+                % {"organisation": organisation.name},
+            )
         for assignment in OrganisationSeatAssignment.objects.select_for_update().filter(
             seat__organisation=organisation, ended_at__isnull=True
         ):
             self.release_assignment(assignment=assignment, actor=actor)
         organisation.seats.select_for_update().exclude(
             status=OrganisationSeat.Status.ENDED
-        ).update(status=OrganisationSeat.Status.ENDED, ends_on=timezone.localdate())
-        organisation.memberships.select_for_update().filter(
-            status=OrganisationMembership.Status.ACTIVE
-        ).update(
-            status=OrganisationMembership.Status.ENDED,
-            pending_end_on=None,
-            ended_at=timezone.now(),
+        ).update(status=OrganisationSeat.Status.ENDED, ends_on=today)
+        memberships = list(
+            organisation.memberships.select_for_update().filter(
+                status=OrganisationMembership.Status.ACTIVE
+            )
         )
+        for membership in memberships:
+            membership.status = OrganisationMembership.Status.ENDED
+            membership.pending_end_on = None
+            membership.ended_at = now
+            membership.save(update_fields=["status", "pending_end_on", "ended_at"])
+            OrganisationAuditEvent.objects.create(
+                organisation=organisation,
+                actor=actor,
+                membership=membership,
+                event_type=OrganisationAuditEvent.EventType.MEMBER_REMOVED,
+                message="Ended organisation membership during organisation closure.",
+            )
         organisation.status = Organisation.Status.CLOSED
-        organisation.closed_at = timezone.now()
+        organisation.closed_at = now
         organisation.save(update_fields=["status", "closed_at"])
         OrganisationAuditEvent.objects.create(
             organisation=organisation,
@@ -1146,6 +1244,10 @@ class OrganisationService:
             reminder_sent_at__isnull=True,
             expires_at__gt=now,
             expires_at__lte=now + timezone.timedelta(days=7),
+            organisation__status__in=[
+                Organisation.Status.PROVISIONAL,
+                Organisation.Status.ACTIVE,
+            ],
         )
         count = 0
         for invitation in invitations:
