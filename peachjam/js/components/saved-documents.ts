@@ -26,6 +26,8 @@ export class SavedDocumentModal {
  * Loads and injects HTML fragments for saved documents for the page (or the provided root element).
  */
 export function loadSavedDocuments (root: HTMLElement | null = null) {
+  if (!peachjam.config.savedDocumentsEnabled) return;
+
   root = root || document.documentElement;
 
   // get document ids

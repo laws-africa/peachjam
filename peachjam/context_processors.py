@@ -41,6 +41,7 @@ def general(request):
             "languages": [x[0] for x in settings.LANGUAGES],
             "urlLangPrefix": f"/{language}" if len(settings.LANGUAGES) > 1 else "",
             "documentEmbeddings": settings.PEACHJAM["DOCUMENT_EMBEDDINGS"],
+            "savedDocumentsEnabled": pj.save_documents_enabled,
             "chat": {
                 "enabled": settings.PEACHJAM["CHAT_ENABLED"],
                 "assistantName": settings.PEACHJAM["CHAT_ASSISTANT_NAME"],
