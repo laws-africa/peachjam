@@ -14,6 +14,7 @@ from elastic_transport import ConnectionTimeout
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.response import Response
 from rest_framework.test import APIRequestFactory, force_authenticate
+from tablib import Dataset
 
 from peachjam.models import CoreDocument, Label
 from peachjam_search.entity_matcher import EntitySearchHit
@@ -415,6 +416,11 @@ class SearchViewsTest(TestCase):
                         "hits": [
                             {
                                 "_id": str(doc.pk),
+                                "_index": "test_eng",
+                                "_score": 1.0,
+                                "_source": {
+                                    "expression_frbr_uri": doc.expression_frbr_uri,
+                                },
                             }
                         ],
                     },
@@ -434,6 +440,95 @@ class SearchViewsTest(TestCase):
             response.headers["Content-Type"],
         )
         self.assertIn("no-cache", response.headers["Cache-Control"])
+
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
+    def test_download_resolves_federated_results_by_frbr_uri(self, mock_search):
+        search_document = CoreDocument.objects.first()
+        colliding_document = CoreDocument.objects.exclude(
+            title=search_document.title
+        ).first()
+
+        def resp(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": 1},
+                        "hits": [
+                            {
+                                "_id": str(colliding_document.pk),
+                                "_index": "remote_eng",
+                                "_score": 1.0,
+                                "_source": {
+                                    "expression_frbr_uri": search_document.expression_frbr_uri,
+                                },
+                            }
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = resp
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("search:search_download") + "?search=test")
+
+        self.assertEqual(200, response.status_code)
+        dataset = Dataset().load(response.content, format="xlsx")
+        self.assertEqual(search_document.title, dataset.dict[0]["title"])
+        self.assertNotEqual(colliding_document.title, dataset.dict[0]["title"])
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SEARCH_FAKE_DOCUMENTS": True,
+        }
+    )
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
+    def test_download_includes_remote_only_documents(self, mock_search):
+        remote_uri = "/akn/xx/act/2026/1/eng@2026-01-01"
+
+        def resp(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": 1},
+                        "hits": [
+                            {
+                                "_id": "123",
+                                "_index": "remote_eng",
+                                "_score": 1.0,
+                                "_source": {
+                                    "expression_frbr_uri": remote_uri,
+                                    "title": "Remote Act",
+                                    "nature": "Act",
+                                    "date": "2026-01-01",
+                                    "language": "English",
+                                    "jurisdiction": "Remote jurisdiction",
+                                    "labels": ["Featured"],
+                                    "authors": ["Remote author"],
+                                },
+                            }
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = resp
+        self.client.force_login(self.user)
+
+        response = self.client.get(reverse("search:search_download") + "?search=test")
+
+        self.assertEqual(200, response.status_code)
+        dataset = Dataset().load(response.content, format="xlsx")
+        self.assertEqual("Remote Act", dataset.dict[0]["title"])
+        self.assertEqual(remote_uri, dataset.dict[0]["expression_frbr_uri"])
+        self.assertEqual("Featured", dataset.dict[0]["labels"])
+        self.assertEqual("Remote author", dataset.dict[0]["author"])
+        self.assertIsNone(dataset.dict[0]["source_url"])
 
     @override_settings(
         PEACHJAM={
@@ -468,6 +563,11 @@ class SearchViewsTest(TestCase):
                         "hits": [
                             {
                                 "_id": str(doc.pk),
+                                "_index": "test_eng",
+                                "_score": 1.0,
+                                "_source": {
+                                    "expression_frbr_uri": doc.expression_frbr_uri,
+                                },
                             }
                         ],
                     },
