@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-15 12:11+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,113 +18,545 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: admin.py:42
+#: admin.py:115
 msgid "Save the product first, then configure selectable offerings."
 msgstr ""
 
-#: admin.py:50
+#: admin.py:123
 #, python-format
 msgid "Selectable offerings for '%(product)s' must belong to that product."
 msgstr ""
 
-#: admin.py:89
+#: admin.py:162
 #, python-format
 msgid "Key products must have at least one selectable offering configured: %(products)s"
 msgstr ""
 
-#: admin.py:164
+#: admin.py:237
 msgid "Subscription activated."
 msgstr ""
 
-#: admin.py:166
+#: admin.py:239
 msgid "Subscription cannot be activated."
 msgstr ""
 
-#: admin.py:176
+#: admin.py:249
 msgid "Subscription cancelled."
 msgstr ""
 
-#: admin.py:178
+#: admin.py:251
 msgid "Subscription cannot be cancelled."
 msgstr ""
 
-#: admin.py:257
+#: admin.py:358
 msgid "View"
 msgstr ""
 
-#: models.py:30
+#: forms.py:12
+msgid "What is the main reason for this change?"
+msgstr ""
+
+#: forms.py:17
+msgid "Tell us more (optional)"
+msgstr ""
+
+#: forms.py:33
+msgid "Please tell us briefly why."
+msgstr ""
+
+#: models/organisations.py:24 models/organisations.py:295
+msgid "Provisional"
+msgstr ""
+
+#: models/organisations.py:25 models/organisations.py:162
+#: models/organisations.py:296 models/subscriptions.py:377
+msgid "Active"
+msgstr ""
+
+#: models/organisations.py:26
+msgid "Closing"
+msgstr ""
+
+#: models/organisations.py:27 models/organisations.py:467
+#: models/subscriptions.py:378
+msgid "Closed"
+msgstr ""
+
+#: models/organisations.py:30
+msgid "Managed usage"
+msgstr ""
+
+#: models/organisations.py:31
+msgid "Private / billing only"
+msgstr ""
+
+#: models/organisations.py:116
+#, python-format
+msgid "An organisation can have at most %(limit)s owners, administrators, and billing contacts in total."
+msgstr ""
+
+#: models/organisations.py:142
+msgid "Billing period can only change at renewal."
+msgstr ""
+
+#: models/organisations.py:157
+msgid "Owner"
+msgstr ""
+
+#: models/organisations.py:158
+msgid "Administrator"
+msgstr ""
+
+#: models/organisations.py:159
+msgid "Member"
+msgstr ""
+
+#: models/organisations.py:163 models/organisations.py:298
+msgid "Ended"
+msgstr ""
+
+#: models/organisations.py:209 models/subscriptions.py:376
+msgid "Pending"
+msgstr ""
+
+#: models/organisations.py:210
+msgid "Accepted"
+msgstr ""
+
+#: models/organisations.py:211
+msgid "Expired"
+msgstr ""
+
+#: models/organisations.py:212
+msgid "Cancelled"
+msgstr ""
+
+#: models/organisations.py:278 models/organisations.py:336
+#: organisations/services.py:889
+msgid "The plan must use the organisation's billing period."
+msgstr ""
+
+#: models/organisations.py:297 models/organisations.py:464
+msgid "Suspended"
+msgstr ""
+
+#: models/organisations.py:349
+msgid "The pending plan must use the organisation's billing period."
+msgstr ""
+
+#: models/organisations.py:406
+msgid "The seat and membership must belong to the same organisation."
+msgstr ""
+
+#: models/organisations.py:414
+msgid "The subscription must belong to the assigned member."
+msgstr ""
+
+#: models/organisations.py:419
+msgid "An active assignment requires an active membership."
+msgstr ""
+
+#: models/organisations.py:424
+msgid "An ended seat cannot have an active assignment."
+msgstr ""
+
+#: models/organisations.py:433
+msgid "The subscription plan must match the assigned seat."
+msgstr ""
+
+#: models/organisations.py:450
+msgid "Created"
+msgstr ""
+
+#: models/organisations.py:451
+msgid "Activated"
+msgstr ""
+
+#: models/organisations.py:452
+msgid "Invitation sent"
+msgstr ""
+
+#: models/organisations.py:453
+msgid "Invitation accepted"
+msgstr ""
+
+#: models/organisations.py:454
+msgid "Invitation cancelled"
+msgstr ""
+
+#: models/organisations.py:455
+msgid "Invitation expired"
+msgstr ""
+
+#: models/organisations.py:456
+msgid "Role changed"
+msgstr ""
+
+#: models/organisations.py:457
+msgid "Ownership transferred"
+msgstr ""
+
+#: models/organisations.py:458
+msgid "Subscription assigned"
+msgstr ""
+
+#: models/organisations.py:459
+msgid "Subscription released"
+msgstr ""
+
+#: models/organisations.py:460
+msgid "Plan changed"
+msgstr ""
+
+#: models/organisations.py:461
+msgid "Member removed"
+msgstr ""
+
+#: models/organisations.py:462
+msgid "Member left"
+msgstr ""
+
+#: models/organisations.py:463
+msgid "Privacy changed"
+msgstr ""
+
+#: models/organisations.py:465
+msgid "Restored"
+msgstr ""
+
+#: models/organisations.py:466
+msgid "Closure requested"
+msgstr ""
+
+#: models/organisations.py:511
+msgid "Organisation audit events are append-only."
+msgstr ""
+
+#: models/organisations.py:518
+msgid "This object must belong to the audit event's organisation."
+msgstr ""
+
+#: models/subscriptions.py:30
 #, python-format
 msgid "Product '%(product)s' has more than one selectable %(period)s offering."
 msgstr ""
 
-#: models.py:46
+#: models/subscriptions.py:46
 #, python-format
 msgid "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly (%(monthly)s)."
 msgstr ""
 
-#: models.py:76
+#: models/subscriptions.py:76
 #, python-format
 msgid "Selectable %(period)s pricing must increase with tier: '%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
 msgstr ""
 
-#: models.py:118
+#: models/subscriptions.py:118
 msgid "Offerings explicitly available to users for this product (for example monthly and annual)."
 msgstr ""
 
-#: models.py:257
+#: models/subscriptions.py:257
 msgid "Annually"
 msgstr ""
 
-#: models.py:258
+#: models/subscriptions.py:258
 msgid "Monthly"
 msgstr ""
 
-#: models.py:268
+#: models/subscriptions.py:268
 msgid "month"
 msgstr ""
 
-#: models.py:269
+#: models/subscriptions.py:269
 msgid "year"
 msgstr ""
 
-#: models.py:289 models.py:303
+#: models/subscriptions.py:289 models/subscriptions.py:303
 msgid "FREE"
 msgstr ""
 
-#: models.py:376
-msgid "Pending"
+#: models/subscriptions.py:695
+msgid "Subscription downgrade"
 msgstr ""
 
-#: models.py:377
-msgid "Active"
+#: models/subscriptions.py:696
+msgid "Account deletion"
 msgstr ""
 
-#: models.py:378
-msgid "Closed"
+#: models/subscriptions.py:699
+msgid "Too expensive"
 msgstr ""
 
-#: models.py:655
+#: models/subscriptions.py:700
+msgid "Not using it enough"
+msgstr ""
+
+#: models/subscriptions.py:701
+msgid "Missing a feature"
+msgstr ""
+
+#: models/subscriptions.py:702
+msgid "Technical issue"
+msgstr ""
+
+#: models/subscriptions.py:704
+msgid "Switching to an alternative"
+msgstr ""
+
+#: models/subscriptions.py:706
+msgid "Temporary need"
+msgstr ""
+
+#: models/subscriptions.py:707
+msgid "Other"
+msgstr ""
+
+#: models/subscriptions.py:786
 msgid "Default product offering"
 msgstr ""
 
-#: models.py:660
+#: models/subscriptions.py:791
 msgid "These products are highlighted in the product listing."
 msgstr ""
 
-#: models.py:668
+#: models/subscriptions.py:799
 msgid "Trial product offering"
 msgstr ""
 
-#: models.py:669
+#: models/subscriptions.py:800
 msgid "If set, this product offering is used for trials."
 msgstr ""
 
-#: models.py:673
+#: models/subscriptions.py:804
 msgid "Trial duration (days)"
 msgstr ""
 
-#: models.py:674
+#: models/subscriptions.py:805
 msgid "Number of days for the trial period."
+msgstr ""
+
+#: organisations/services.py:108
+msgid "This plan is not available to this organisation."
+msgstr ""
+
+#: organisations/services.py:174
+msgid "This organisation is no longer accepting invitations."
+msgstr ""
+
+#: organisations/services.py:218
+msgid "Transfer ownership instead of inviting another owner."
+msgstr ""
+
+#: organisations/services.py:300
+msgid "This seat assignment cannot provide an active subscription."
+msgstr ""
+
+#: organisations/services.py:341
+msgid "This invitation has expired."
+msgstr ""
+
+#: organisations/services.py:361
+msgid "This invitation has already been accepted."
+msgstr ""
+
+#: organisations/services.py:364
+msgid "This invitation is no longer available."
+msgstr ""
+
+#: organisations/services.py:368
+msgid "Sign in with the verified email address that was invited."
+msgstr ""
+
+#: organisations/services.py:373
+msgid "This account already belongs to an organisation."
+msgstr ""
+
+#: organisations/services.py:375
+msgid "This organisation already has an owner."
+msgstr ""
+
+#: organisations/services.py:463
+#, python-format
+msgid "A member joined %(organisation)s"
+msgstr ""
+
+#: organisations/services.py:464
+#, python-format
+msgid "%(email)s accepted their organisation invitation."
+msgstr ""
+
+#: organisations/services.py:486
+msgid "Only pending invitations can be cancelled."
+msgstr ""
+
+#: organisations/services.py:499 organisations/services.py:1175
+msgid "Your organisation invitation was cancelled"
+msgstr ""
+
+#: organisations/services.py:500 organisations/services.py:1176
+#, python-format
+msgid "Your invitation to %(organisation)s is no longer available."
+msgstr ""
+
+#: organisations/services.py:516
+msgid "Only pending invitations can be resent."
+msgstr ""
+
+#: organisations/services.py:530
+msgid "This organisation cannot be activated."
+msgstr ""
+
+#: organisations/services.py:533
+msgid "An organisation must have an owner before activation."
+msgstr ""
+
+#: organisations/services.py:591
+msgid "Your organisation-funded subscription ended"
+msgstr ""
+
+#: organisations/services.py:593
+#, python-format
+msgid "Your %(organisation)s-funded subscription has ended. Your account and private research have been preserved."
+msgstr ""
+
+#: organisations/services.py:612
+msgid "This member already has an assigned seat."
+msgstr ""
+
+#: organisations/services.py:651
+msgid "Your organisation-funded subscription is ready"
+msgstr ""
+
+#: organisations/services.py:652
+#, python-format
+msgid "%(organisation)s assigned you a %(plan)s subscription."
+msgstr ""
+
+#: organisations/services.py:671 organisations/services.py:726
+msgid "Transfer ownership before removing the owner."
+msgstr ""
+
+#: organisations/services.py:696
+msgid "Your organisation membership ended"
+msgstr ""
+
+#: organisations/services.py:698
+#, python-format
+msgid "Your membership of %(organisation)s has ended. Your account and private research have been preserved."
+msgstr ""
+
+#: organisations/services.py:704
+msgid "Organisation member left"
+msgstr ""
+
+#: organisations/services.py:706
+msgid "Organisation member removed"
+msgstr ""
+
+#: organisations/services.py:708
+#, python-format
+msgid "%(email)s is no longer a member of %(organisation)s."
+msgstr ""
+
+#: organisations/services.py:739
+msgid "Your organisation membership is scheduled to end"
+msgstr ""
+
+#: organisations/services.py:740
+#, python-format
+msgid "Your membership of %(organisation)s is scheduled to end on %(date)s."
+msgstr ""
+
+#: organisations/services.py:756
+msgid "This membership has no scheduled removal."
+msgstr ""
+
+#: organisations/services.py:773
+msgid "Your organisation membership will continue"
+msgstr ""
+
+#: organisations/services.py:774
+#, python-format
+msgid "Your membership of %(organisation)s is no longer scheduled to end."
+msgstr ""
+
+#: organisations/services.py:792
+msgid "Use ownership transfer to change the owner."
+msgstr ""
+
+#: organisations/services.py:814
+msgid "Your organisation role changed"
+msgstr ""
+
+#: organisations/services.py:815
+#, python-format
+msgid "Your role in %(organisation)s is now %(role)s."
+msgstr ""
+
+#: organisations/services.py:872
+msgid "You are now the organisation owner"
+msgstr ""
+
+#: organisations/services.py:873
+#, python-format
+msgid "You are now the owner of %(organisation)s."
+msgstr ""
+
+#: organisations/services.py:878
+msgid "Organisation ownership transferred"
+msgstr ""
+
+#: organisations/services.py:879
+#, python-format
+msgid "You transferred ownership of %(organisation)s to %(email)s."
+msgstr ""
+
+#: organisations/services.py:963
+msgid "Your organisation-funded subscription is changing"
+msgstr ""
+
+#: organisations/services.py:965
+#, python-format
+msgid "Your %(organisation)s-funded subscription changes to %(plan)s on %(date)s."
+msgstr ""
+
+#: organisations/services.py:1002
+msgid "Your organisation-funded subscription is scheduled to end"
+msgstr ""
+
+#: organisations/services.py:1004
+#, python-format
+msgid "Your %(organisation)s-funded subscription is scheduled to end on %(date)s."
+msgstr ""
+
+#: organisations/services.py:1083
+msgid "This organisation's access cannot be suspended."
+msgstr ""
+
+#: organisations/services.py:1115
+msgid "This organisation's access cannot be restored."
+msgstr ""
+
+#: organisations/services.py:1148
+msgid "Your LawLibrary organisation is closing"
+msgstr ""
+
+#: organisations/services.py:1150
+#, python-format
+msgid "Organisation-funded access for %(organisation)s has ended. Member accounts and private research have been preserved."
+msgstr ""
+
+#: organisations/services.py:1233
+msgid "Organisation invitation expired"
+msgstr ""
+
+#: organisations/services.py:1234
+#, python-format
+msgid "The invitation for %(email)s has expired."
+msgstr ""
+
+#: organisations/services.py:1269
+msgid "Choose a valid organisation privacy mode."
 msgstr ""
 
 #: templates/admin/peachjam_subs/subscription/change_form.html:10
@@ -143,66 +575,74 @@ msgstr ""
 msgid "Trial"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_card.html:15
+#: templates/peachjam_subs/_subscription_card.html:16
 msgid "Next payment due on"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_card.html:22
+#: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_card.html:25
+#: templates/peachjam_subs/_subscription_card.html:27
 msgid "Ends on"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_card.html:34
+#: templates/peachjam_subs/_subscription_card.html:36
 msgid "Are you sure?"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_card.html:35
+#: templates/peachjam_subs/_subscription_card.html:37
 msgid "Cancel change"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_card.html:42
+#: templates/peachjam_subs/_subscription_card.html:44
 msgid "Active since"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:12
-#: templates/peachjam_subs/_subscription_required.html:20
+#: templates/peachjam_subs/_subscription_required.html:13
+#: templates/peachjam_subs/_subscription_required.html:21
 msgid "Create a free account"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:14
-#: templates/peachjam_subs/_subscription_required.html:34
+#: templates/peachjam_subs/_subscription_required.html:15
+#: templates/peachjam_subs/_subscription_required.html:39
 msgid "Unlock this feature"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:17
+#: templates/peachjam_subs/_subscription_required.html:18
 msgid "Sign up to save documents, read summaries and access more features."
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:22
+#: templates/peachjam_subs/_subscription_required.html:23
 msgid "Start"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:27
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "Already have an account?"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:28
+#: templates/peachjam_subs/_subscription_required.html:29
 msgid "Log in"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:36
+#: templates/peachjam_subs/_subscription_required.html:34
+msgid "Accounts unavailable"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:35
+msgid "This feature requires an account, and accounts are not available on this site."
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:41
 #, python-format
 msgid "This feature is available with %(lowest_product)s."
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:40
+#: templates/peachjam_subs/_subscription_required.html:45
 msgid "Upgrade to"
 msgstr ""
 
-#: templates/peachjam_subs/_subscription_required.html:48
+#: templates/peachjam_subs/_subscription_required.html:53
 msgid "This feature is not currently available."
 msgstr ""
 
