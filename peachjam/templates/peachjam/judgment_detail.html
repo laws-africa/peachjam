@@ -95,6 +95,7 @@
 {% endblock %}
 {% block extra-metadata %}
   {{ block.super }}
+  {% include 'peachjam/judgment/_leading_authorities.html' with leading_authorities=document.published_leading_authorities %}
   {% if document.case_summary %}
     <dl class="document-metadata-list d-md-flex">
       <dt>
