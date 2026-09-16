@@ -657,6 +657,51 @@ class JudgmentTestCase(TestCase):
         self.assertIn("— PIE Act", normalized_html)
         self.assertEqual(2, html.count("<ul"))
 
+    def test_document_table_row_highlights_leading_authority(self):
+        class EmptyRelatedManager:
+            def all(self):
+                return []
+
+        authority = SimpleNamespace(subject=SimpleNamespace(name="Plascon-Evans rule"))
+        document = SimpleNamespace(
+            children=[],
+            pk=1,
+            is_group=False,
+            title="Example judgment",
+            get_absolute_url="/judgments/example/",
+            work=SimpleNamespace(languages=[]),
+            labels=EmptyRelatedManager(),
+            treatments=EmptyRelatedManager(),
+            doc_type="judgment",
+            published_leading_authorities=[authority],
+            blurb=None,
+            flynote=None,
+            flynote_lines=[],
+            linked_flynotes=[],
+        )
+
+        html = render_to_string(
+            "peachjam/_document_table_row.html",
+            {
+                "document": document,
+                "doc_table_toggle": False,
+                "doc_table_full_title_width": False,
+                "doc_table_show_treatments": False,
+                "doc_table_show_citations": False,
+                "doc_table_show_jurisdiction": False,
+                "doc_table_show_author": False,
+                "doc_table_show_court": False,
+                "doc_table_show_sub_publication": False,
+                "doc_table_show_frbr_uri_number": False,
+                "doc_table_show_doc_type": False,
+                "doc_table_show_date": False,
+            },
+        )
+
+        self.assertIn('class="document-row leading-authority-row"', html)
+        self.assertIn("Leading authority", html)
+        self.assertIn("for the Plascon-Evans rule", html)
+
     def test_grouped_linked_flynotes_indents_children_under_compressed_topic(self):
         def node(name):
             slug = name.lower().replace(" ", "-")

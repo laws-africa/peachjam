@@ -3,11 +3,12 @@ from enum import Enum
 from typing import List, Optional, Type
 
 from django.conf import settings
+from django.db.models import prefetch_related_objects
 from django.utils.html import escape
 from pydantic import BaseModel, ValidationError
 from rest_framework import serializers
 
-from peachjam.models import CoreDocument
+from peachjam.models import CoreDocument, Judgment, LeadingAuthority
 from peachjam_ml.embeddings import TEXT_INJECTION_SEPARATOR
 from peachjam_search.engine import PortionSearchFilters
 from peachjam_search.models import SearchClick, SearchEntityResult, SearchFlynoteResult
@@ -85,12 +86,16 @@ class SearchHit:
             fake_documents = settings.PEACHJAM["SEARCH_FAKE_DOCUMENTS"]
 
         if documents is None:
-            documents = (
+            documents = list(
                 CoreDocument.objects.for_document_table()
                 .filter(
                     expression_frbr_uri__in=[hit.expression_frbr_uri for hit in hits]
                 )
                 .prefetch_related("alternative_names")
+            )
+            prefetch_related_objects(
+                [document for document in documents if isinstance(document, Judgment)],
+                LeadingAuthority.published_prefetch(),
             )
 
         documents = {d.expression_frbr_uri: d for d in documents}
