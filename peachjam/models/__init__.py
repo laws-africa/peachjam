@@ -19,6 +19,7 @@ from .ingestors import *
 from .journals_books import *
 from .judgment import *
 from .law_reports import *
+from .leading_authority import *
 from .legislation import *
 from .lifecycle import *
 from .partner import *

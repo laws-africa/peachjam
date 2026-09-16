@@ -23,12 +23,15 @@ from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.models import (
     CoreDocument,
+    CoreDocumentManager,
+    CoreDocumentQuerySet,
     DocumentContent,
     Locality,
     SourceFile,
     on_attribute_changed,
 )
 from peachjam.models.flynote import Flynote, JudgmentFlynote
+from peachjam.models.leading_authority import LeadingAuthority
 from peachjam.tasks import (
     create_anonymised_source_file_pdf,
     generate_judgment_summary,
@@ -36,6 +39,14 @@ from peachjam.tasks import (
 )
 
 log = logging.getLogger(__name__)
+
+
+class JudgmentQuerySet(CoreDocumentQuerySet):
+    def with_published_leading_authorities(self):
+        return self.prefetch_related(LeadingAuthority.published_prefetch())
+
+    def for_document_table(self):
+        return super().for_document_table().with_published_leading_authorities()
 
 
 def default_summary_language():
@@ -520,6 +531,8 @@ class LowerBench(models.Model):
 class Judgment(CoreDocument):
     decorator = JudgmentDecorator()
 
+    objects = CoreDocumentManager.from_queryset(JudgmentQuerySet)()
+
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=False, verbose_name=_("court")
     )
@@ -685,6 +698,16 @@ class Judgment(CoreDocument):
 
     def __str__(self):
         return self.title
+
+    @cached_property
+    def published_leading_authorities(self):
+        if hasattr(self, "_published_leading_authorities"):
+            return self._published_leading_authorities
+        return list(
+            self.leading_authorities.filter(published=True)
+            .select_related("subject")
+            .prefetch_related("sources")
+        )
 
     @staticmethod
     def flynote_tree_enabled():
