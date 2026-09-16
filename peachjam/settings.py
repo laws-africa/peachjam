@@ -268,8 +268,6 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
-# email addresses are required for new accounts
-ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
@@ -279,15 +277,13 @@ LOGIN_REDIRECT_URL = "home_page"
 LOGOUT_REDIRECT_URL = "account_logged_out"
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "my_account"
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_FORMS = {
     "signup": "peachjam.forms.PeachjamSignupForm",
     "login": "peachjam.forms.PeachjamLoginForm",
 }
 ACCOUNT_USER_DISPLAY = "peachjam.auth.user_display"
-ACCOUNT_USERNAME_REQUIRED = False
-
 ACCOUNT_LOGIN_BY_CODE_ENABLED = PEACHJAM["AUTH_OTP"]
 if PEACHJAM["AUTH_OTP"]:
     ACCOUNT_LOGIN_BY_CODE_TIMEOUT = 600
