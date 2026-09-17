@@ -4,6 +4,7 @@
   "description": "Project Peach Jam",
   "main": "",
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
