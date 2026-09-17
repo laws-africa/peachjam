@@ -6,7 +6,6 @@ import peachjam.models.attachments
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0029_merge_20221012_0857"),
     ]

@@ -33,7 +33,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0151_folder_peachjamsettings_allow_save_documents_and_more"),
     ]

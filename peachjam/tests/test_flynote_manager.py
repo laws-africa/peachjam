@@ -94,7 +94,7 @@ class FlynoteManagerViewTest(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(
             response.url,
-            f'{reverse("flynote-manager")}?flynote={self.sentencing.pk}',
+            f"{reverse('flynote-manager')}?flynote={self.sentencing.pk}",
         )
 
     def test_tree_endpoint_returns_active_root_nodes_by_default(self):
@@ -399,7 +399,7 @@ class FlynoteManagerViewTest(TestCase):
         self.assertFalse(Flynote.objects.filter(pk=child_pk).exists())
         self.assertEqual(
             response.headers["HX-Redirect"],
-            f'{reverse("flynote-manager")}?flynote={self.criminal.pk}',
+            f"{reverse('flynote-manager')}?flynote={self.criminal.pk}",
         )
 
     def test_workspace_detail_delete_root_redirects_to_manager(self):
@@ -490,7 +490,7 @@ class FlynoteManagerViewTest(TestCase):
         error = str(raised.exception.message_dict["name"][0])
         self.assertIn(
             (
-                f'{reverse("flynote-manager")}?flynote={self.bail.pk}&amp;tab=merge'
+                f"{reverse('flynote-manager')}?flynote={self.bail.pk}&amp;tab=merge"
                 f"&amp;selected={self.sentencing.pk}"
             ),
             error,

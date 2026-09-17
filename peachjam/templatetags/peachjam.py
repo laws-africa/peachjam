@@ -282,9 +282,7 @@ def user_avatar(user, size=40):
     """
 
     # Try to get social image (customize this depending on your user model)
-    avatar_url = (
-        user.userprofile.avatar_url()
-    )  # or "https://lh3.googleusercontent.com/a/ACg8ocLLVn6MqHHeblDXalODEv4YFmQBQO6gBtAIqb9RIrJ9pYwX7w=s96-c"
+    avatar_url = user.userprofile.avatar_url()
     if avatar_url:
         return format_html(
             '<img src="{}" alt="{}" class="user-avatar" style="width:{}px;height:{}px">',

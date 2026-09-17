@@ -12,7 +12,6 @@ def add_nature_codes(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0031_documentnature_code"),
     ]

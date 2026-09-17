@@ -13,7 +13,6 @@ def create_uuid(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0205_alter_ratification_source_url"),
     ]

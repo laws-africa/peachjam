@@ -12,7 +12,6 @@ def backfill_size(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0015_alter_documenttopic_document"),
     ]
