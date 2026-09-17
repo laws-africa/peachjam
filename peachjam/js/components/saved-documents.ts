@@ -1,3 +1,4 @@
+import peachJam from '../peachjam';
 import { htmxAjax } from '../utils/function';
 
 export class SavedDocumentModal {
@@ -26,7 +27,7 @@ export class SavedDocumentModal {
  * Loads and injects HTML fragments for saved documents for the page (or the provided root element).
  */
 export function loadSavedDocuments (root: HTMLElement | null = null) {
-  if (!peachjam.config.savedDocumentsEnabled) return;
+  if (!peachJam.config.savedDocumentsEnabled) return;
 
   root = root || document.documentElement;
 
@@ -45,7 +46,6 @@ export function loadSavedDocuments (root: HTMLElement | null = null) {
 
     searchParams.set('doc_ids', Array.from(ids).join(','));
 
-    // @ts-ignore
-    htmxAjax('get', `${peachjam.config.urlLangPrefix}/user/saved-documents/fragments?${searchParams.toString()}`);
+    htmxAjax('get', `${peachJam.config.urlLangPrefix}/user/saved-documents/fragments?${searchParams.toString()}`);
   }
 }
