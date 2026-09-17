@@ -2,6 +2,7 @@ from django.conf import settings
 from django.templatetags.static import static
 
 from peachjam.models.settings import pj_settings
+from peachjam_subs.organisations import organisations_enabled
 
 
 def general(request):
@@ -32,6 +33,7 @@ def general(request):
         "CUSTOMERIO_JS_KEY": settings.PEACHJAM["CUSTOMERIO_JS_KEY"],
         "CUSTOMERIO_JOURNEYS_SITE_ID": settings.PEACHJAM["CUSTOMERIO_JOURNEYS_SITE_ID"],
         "AUTH_OTP": settings.PEACHJAM["AUTH_OTP"],
+        "ORGANISATION_SUBSCRIPTIONS": organisations_enabled(),
         # this object will be injected into Javascript to provide configuration settings to the Javascript app
         "PEACHJAM_JS_CONFIG": {
             "appName": settings.PEACHJAM["APP_NAME"],
@@ -41,6 +43,7 @@ def general(request):
             "languages": [x[0] for x in settings.LANGUAGES],
             "urlLangPrefix": f"/{language}" if len(settings.LANGUAGES) > 1 else "",
             "documentEmbeddings": settings.PEACHJAM["DOCUMENT_EMBEDDINGS"],
+            "savedDocumentsEnabled": pj.save_documents_enabled,
             "chat": {
                 "enabled": settings.PEACHJAM["CHAT_ENABLED"],
                 "assistantName": settings.PEACHJAM["CHAT_ASSISTANT_NAME"],

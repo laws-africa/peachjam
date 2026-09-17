@@ -11,7 +11,7 @@
     </button>
     <ul class="dropdown-menu">
       <li>
-        <button class="dropdown-item"
+        <button class="dropdown-item text-wrap"
                 data-key-link="follow"
                 type="button"
                 data-bs-toggle="modal"
@@ -88,7 +88,9 @@
                 hx-target="closest .follow-control"
                 hx-swap="outerHTML">
             {% csrf_token %}
-            <button class="dropdown-item" type="submit" data-key-link="unfollow">
+            <button class="dropdown-item text-wrap"
+                    type="submit"
+                    data-key-link="unfollow">
               <strong>
                 <i class="bi bi-bell-slash"></i>
               {% trans "Unfollow" %}</strong>
@@ -103,7 +105,7 @@
                 hx-swap="outerHTML">
             {% csrf_token %}
             {{ form }}
-            <button class="dropdown-item" type="submit" data-key-link="follow">
+            <button class="dropdown-item text-wrap" type="submit" data-key-link="follow">
               <strong>
                 <i class="bi bi-bell"></i>
               {% trans "Follow" %}</strong>

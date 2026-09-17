@@ -32,6 +32,8 @@ class SearchHit:
             self.d = d
 
         def __getattr__(self, item):
+            if item == "author":
+                item = "authors"
             return self.d.get(item, None)
 
         def get_absolute_url(self):
@@ -77,17 +79,21 @@ class SearchHit:
         )
 
     @classmethod
-    def attach_documents(cls, hits, fake_documents=None):
+    def attach_documents(cls, hits, fake_documents=None, documents=None):
+        """Attach documents by FRBR URI, optionally using preloaded documents."""
         if fake_documents is None:
             fake_documents = settings.PEACHJAM["SEARCH_FAKE_DOCUMENTS"]
 
-        qs = (
-            CoreDocument.objects.for_document_table()
-            .filter(expression_frbr_uri__in=[hit.expression_frbr_uri for hit in hits])
-            .prefetch_related("alternative_names")
-        )
+        if documents is None:
+            documents = (
+                CoreDocument.objects.for_document_table()
+                .filter(
+                    expression_frbr_uri__in=[hit.expression_frbr_uri for hit in hits]
+                )
+                .prefetch_related("alternative_names")
+            )
 
-        documents = {d.expression_frbr_uri: d for d in qs}
+        documents = {d.expression_frbr_uri: d for d in documents}
         for hit in hits:
             hit.document = documents.get(hit.expression_frbr_uri)
 

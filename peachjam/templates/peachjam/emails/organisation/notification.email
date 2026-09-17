@@ -1,0 +1,7 @@
+{% extends "peachjam/emails/layouts/base.html" %}
+{% load i18n %}
+{% block subject %}{{ subject }}{% endblock %}
+{% block body %}
+  <p>{{ body }}</p>
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+{% endblock %}

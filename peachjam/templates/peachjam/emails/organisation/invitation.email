@@ -1,0 +1,15 @@
+{% extends "peachjam/emails/layouts/base.html" %}
+{% load i18n %}
+{% block subject %}{% blocktrans trimmed %}You have been invited to {{ APP_NAME }}{% endblocktrans %}{% endblock %}
+{% block body %}
+  <p>
+    {% blocktrans trimmed %}You have been invited to join {{ organisation }}'s team on {{ APP_NAME }}.{% endblocktrans %}
+  </p>
+  <p>
+    {% blocktrans trimmed %}This invitation expires on {{ expiry }}.{% endblocktrans %}
+  </p>
+  {% translate "Accept invitation" as accept_invitation_text %}
+  {% include "peachjam/emails/layouts/_button.html" with href=invitation_url text=accept_invitation_text %}
+  <p>{% blocktrans trimmed %}If you were not expecting this invitation, you can safely ignore this email.{% endblocktrans %}</p>
+  <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
+{% endblock %}
