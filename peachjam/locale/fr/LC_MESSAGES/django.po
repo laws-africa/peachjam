@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 09:23+0000\n"
+"POT-Creation-Date: 2026-09-18 07:58+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -3157,7 +3157,7 @@ msgid "Search by alias or judge person"
 msgstr ""
 
 #: templates/admin/peachjam/judge_identity/workflow_change_form.html:66
-#: templates/peachjam/_document_table_form.html:94
+#: templates/peachjam/_document_table_form.html:101
 msgid "Filter"
 msgstr "Filtre"
 
@@ -3547,6 +3547,14 @@ msgstr "Signaler un problème"
 msgid "Share"
 msgstr "Partager"
 
+#: templates/peachjam/_document_filter_button.html:8
+#: templates/peachjam/_document_filter_button.html:9
+#: templates/peachjam/_document_table_form.html:38
+#: templates/peachjam/judge/_filters.html:12
+#: templates/peachjam/judge/_filters.html:27
+msgid "Filters"
+msgstr "Filtres"
+
 #: templates/peachjam/_document_floating_header.html:9
 msgid "Navigate document"
 msgstr "Naviguer dans le document"
@@ -3622,14 +3630,7 @@ msgstr "Juridiction"
 msgid "Citing judgments"
 msgstr "jugements"
 
-#: templates/peachjam/_document_table_form.html:13
-#: templates/peachjam/_document_table_form.html:44
-#: templates/peachjam/judge/_filters.html:12
-#: templates/peachjam/judge/_filters.html:27
-msgid "Filters"
-msgstr "Filtres"
-
-#: templates/peachjam/_document_table_form.html:24
+#: templates/peachjam/_document_table_form.html:18
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:15
 #: templates/peachjam/provision_enrichment/_unconstitutional_modals.html:22
 #: templates/peachjam/saved_document/_anon_modal.html:8
@@ -3646,21 +3647,22 @@ msgstr "Filtres"
 msgid "Close"
 msgstr "Fermer"
 
-#: templates/peachjam/_document_table_form.html:37
+#: templates/peachjam/_document_table_form.html:31
 msgid "Skip to results"
 msgstr "Passer aux résultats"
 
-#: templates/peachjam/_document_table_form.html:51
+#: templates/peachjam/_document_table_form.html:45
 #: templates/peachjam/judge/_filters.html:32
 msgid "Clear all"
 msgstr "Effacer tout"
 
+#: templates/peachjam/_document_table_form.html:64
 #: templates/peachjam/_document_table_form.html:67
-#: templates/peachjam/_document_table_form.html:72
+#: templates/peachjam/_document_table_form.html:71
 msgid "Filter documents by title"
 msgstr "Filtrer les documents par titre"
 
-#: templates/peachjam/_document_table_form.html:80
+#: templates/peachjam/_document_table_form.html:85
 msgid "Sort documents by"
 msgstr "Trier les documents par"
 
