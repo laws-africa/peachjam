@@ -11,7 +11,6 @@ import peachjam_subs.models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("peachjam_subs", "0019_offboardingfeedback_confirmation_token"),

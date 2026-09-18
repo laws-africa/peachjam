@@ -26,7 +26,6 @@ def remove_duplicate_images(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0161_publicationfile")]
 
     operations = [

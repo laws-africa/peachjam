@@ -69,7 +69,7 @@ urlpatterns = [
 )
 
 
-class FacetOrderingTestCase(SimpleTestCase):
+class FilteredDocumentListViewTestCase(SimpleTestCase):
     def test_radio_options_keep_stable_order(self):
         options = [
             ("act", "Act"),
@@ -89,6 +89,20 @@ class FacetOrderingTestCase(SimpleTestCase):
         FilteredDocumentListView().order_facet_options(context)
 
         self.assertEqual(options, context["facet_data"]["natures"]["options"])
+
+    def test_selected_facet_count_counts_each_selected_value(self):
+        context = {
+            "facet_data": {
+                "natures": {"values": ["act", "bill"]},
+                "alphabet": {"values": "a"},
+                "years": {"values": []},
+            }
+        }
+
+        FilteredDocumentListView().show_facet_clear_all(context)
+
+        self.assertEqual(3, context["selected_facets_count"])
+        self.assertTrue(context["show_clear_all"])
 
 
 class PeachjamViewsTest(TestCase):

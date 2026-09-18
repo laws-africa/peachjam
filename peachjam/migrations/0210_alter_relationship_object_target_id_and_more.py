@@ -35,7 +35,6 @@ def remove_duplicate_relationships(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0209_caseaction_judgment_division_and_more"),
     ]

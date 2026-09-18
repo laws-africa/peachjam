@@ -82,7 +82,6 @@ def reindex_journal_articles(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0264_rename_journal_journalarticle_and_more"),
     ]

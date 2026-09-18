@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-05-13 14:19+0200\n"
+"POT-Creation-Date: 2026-09-17 09:23+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,114 +17,574 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_subs/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 267\n"
 
-#: admin.py:42
+#: admin.py:115
 msgid "Save the product first, then configure selectable offerings."
 msgstr "Hifadhi bidhaa kwanza, kisha usanidi matoleo yanayoweza kuchaguliwa."
 
-#: admin.py:50
+#: admin.py:123
 #, python-format
 msgid "Selectable offerings for '%(product)s' must belong to that product."
 msgstr "Matoleo yanayoweza kuchaguliwa kwa '%(product)s' lazima yawe ya bidhaa hiyo."
 
-#: admin.py:89
+#: admin.py:162
 #, python-format
 msgid "Key products must have at least one selectable offering configured: %(products)s"
 msgstr "Bidhaa muhimu lazima ziwe na angalau toleo moja linaloweza kuchaguliwa lililosanidiwa: %(products)s"
 
-#: admin.py:164
+#: admin.py:237
 msgid "Subscription activated."
 msgstr "Usajili umewezeshwa."
 
-#: admin.py:166
+#: admin.py:239
 msgid "Subscription cannot be activated."
 msgstr "Usajili hauwezi kuwezeshwa."
 
-#: admin.py:176
+#: admin.py:249
 msgid "Subscription cancelled."
 msgstr "Usajili umeghairiwa."
 
-#: admin.py:178
+#: admin.py:251
 msgid "Subscription cannot be cancelled."
 msgstr "Usajili hauwezi kughairiwa."
 
-#: admin.py:257
+#: admin.py:358
 msgid "View"
 msgstr "Tazama"
 
-#: models.py:30
+#: forms.py:12
+msgid "What is the main reason for this change?"
+msgstr ""
+
+#: forms.py:17
+msgid "Tell us more (optional)"
+msgstr ""
+
+#: forms.py:33
+msgid "Please tell us briefly why."
+msgstr ""
+
+#: models/organisations.py:24 models/organisations.py:295
+msgid "Provisional"
+msgstr ""
+
+#: models/organisations.py:25 models/organisations.py:162
+#: models/organisations.py:296 models/subscriptions.py:377
+msgid "Active"
+msgstr "Inayotumika"
+
+#: models/organisations.py:26
+#, fuzzy
+#| msgid "Closed"
+msgid "Closing"
+msgstr "Imefungwa"
+
+#: models/organisations.py:27 models/organisations.py:467
+#: models/subscriptions.py:378
+msgid "Closed"
+msgstr "Imefungwa"
+
+#: models/organisations.py:30
+msgid "Managed usage"
+msgstr ""
+
+#: models/organisations.py:31
+msgid "Private / billing only"
+msgstr ""
+
+#: models/organisations.py:116
+#, python-format
+msgid "An organisation can have at most %(limit)s owners, administrators, and billing contacts in total."
+msgstr ""
+
+#: models/organisations.py:142
+msgid "Billing period can only change at renewal."
+msgstr ""
+
+#: models/organisations.py:157
+msgid "Owner"
+msgstr ""
+
+#: models/organisations.py:158
+msgid "Administrator"
+msgstr ""
+
+#: models/organisations.py:159
+msgid "Member"
+msgstr ""
+
+#: models/organisations.py:163 models/organisations.py:298
+msgid "Ended"
+msgstr ""
+
+#: models/organisations.py:209 models/subscriptions.py:376
+msgid "Pending"
+msgstr "Inasubiri"
+
+#: models/organisations.py:210
+msgid "Accepted"
+msgstr ""
+
+#: models/organisations.py:211
+msgid "Expired"
+msgstr ""
+
+#: models/organisations.py:212
+#, fuzzy
+#| msgid "Cancel change"
+msgid "Cancelled"
+msgstr "Ghairi mabadiliko"
+
+#: models/organisations.py:278 models/organisations.py:336
+#: organisations/services.py:889
+msgid "The plan must use the organisation's billing period."
+msgstr ""
+
+#: models/organisations.py:297 models/organisations.py:464
+msgid "Suspended"
+msgstr ""
+
+#: models/organisations.py:349
+msgid "The pending plan must use the organisation's billing period."
+msgstr ""
+
+#: models/organisations.py:406
+msgid "The seat and membership must belong to the same organisation."
+msgstr ""
+
+#: models/organisations.py:414
+msgid "The subscription must belong to the assigned member."
+msgstr ""
+
+#: models/organisations.py:419
+msgid "An active assignment requires an active membership."
+msgstr ""
+
+#: models/organisations.py:424
+msgid "An ended seat cannot have an active assignment."
+msgstr ""
+
+#: models/organisations.py:433
+msgid "The subscription plan must match the assigned seat."
+msgstr ""
+
+#: models/organisations.py:450
+msgid "Created"
+msgstr ""
+
+#: models/organisations.py:451
+#, fuzzy
+#| msgid "Active"
+msgid "Activated"
+msgstr "Inayotumika"
+
+#: models/organisations.py:452
+msgid "Invitation sent"
+msgstr ""
+
+#: models/organisations.py:453
+msgid "Invitation accepted"
+msgstr ""
+
+#: models/organisations.py:454
+#, fuzzy
+#| msgid "Subscription cancelled."
+msgid "Invitation cancelled"
+msgstr "Usajili umeghairiwa."
+
+#: models/organisations.py:455
+msgid "Invitation expired"
+msgstr ""
+
+#: models/organisations.py:456
+#, fuzzy
+#| msgid "Cancel change"
+msgid "Role changed"
+msgstr "Ghairi mabadiliko"
+
+#: models/organisations.py:457
+msgid "Ownership transferred"
+msgstr ""
+
+#: models/organisations.py:458
+#, fuzzy
+#| msgid "Subscription activated."
+msgid "Subscription assigned"
+msgstr "Usajili umewezeshwa."
+
+#: models/organisations.py:459
+#, fuzzy
+#| msgid "Subscription cancelled."
+msgid "Subscription released"
+msgstr "Usajili umeghairiwa."
+
+#: models/organisations.py:460
+#, fuzzy
+#| msgid "Cancel change"
+msgid "Plan changed"
+msgstr "Ghairi mabadiliko"
+
+#: models/organisations.py:461
+msgid "Member removed"
+msgstr ""
+
+#: models/organisations.py:462
+msgid "Member left"
+msgstr ""
+
+#: models/organisations.py:463
+#, fuzzy
+#| msgid "Cancel change"
+msgid "Privacy changed"
+msgstr "Ghairi mabadiliko"
+
+#: models/organisations.py:465
+msgid "Restored"
+msgstr ""
+
+#: models/organisations.py:466
+msgid "Closure requested"
+msgstr ""
+
+#: models/organisations.py:511
+msgid "Organisation audit events are append-only."
+msgstr ""
+
+#: models/organisations.py:518
+msgid "This object must belong to the audit event's organisation."
+msgstr ""
+
+#: models/subscriptions.py:30
 #, python-format
 msgid "Product '%(product)s' has more than one selectable %(period)s offering."
 msgstr "Bidhaa '%(product)s' ina zaidi ya ofa moja ya %(period)s inayoweza kuchaguliwa."
 
-#: models.py:46
+#: models/subscriptions.py:46
 #, python-format
 msgid "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly (%(monthly)s)."
 msgstr "Bidhaa '%(product)s' bei inayoweza kuchaguliwa kwa mwaka (%(annual)s) lazima iwe juu kuliko kila mwezi (%(monthly)s)."
 
-#: models.py:76
+#: models/subscriptions.py:76
 #, python-format
 msgid "Selectable %(period)s pricing must increase with tier: '%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
 msgstr "Bei inayoweza kuchaguliwa %(period)s lazima iongezeke kulingana na kiwango: '%(product)s' (%(price)s) si kubwa kuliko '%(prev_product)s' (%(prev_price)s)."
 
-#: models.py:118
+#: models/subscriptions.py:118
 msgid "Offerings explicitly available to users for this product (for example monthly and annual)."
 msgstr "Matoleo yanapatikana wazi kwa watumiaji kwa bidhaa hii (kwa mfano kila mwezi na kila mwaka)."
 
-#: models.py:257
+#: models/subscriptions.py:257
 msgid "Annually"
 msgstr "Kila mwaka"
 
-#: models.py:258
+#: models/subscriptions.py:258
 msgid "Monthly"
 msgstr "Kila mwezi"
 
-#: models.py:268
+#: models/subscriptions.py:268
 msgid "month"
 msgstr "mwezi"
 
-#: models.py:269
+#: models/subscriptions.py:269
 msgid "year"
 msgstr "mwaka"
 
-#: models.py:289 models.py:303
+#: models/subscriptions.py:289 models/subscriptions.py:303
 msgid "FREE"
 msgstr "BILA MALIPO"
 
-#: models.py:376
-msgid "Pending"
-msgstr "Inasubiri"
+#: models/subscriptions.py:695
+#, fuzzy
+#| msgid "Subscription"
+msgid "Subscription downgrade"
+msgstr "Usajili"
 
-#: models.py:377
-msgid "Active"
-msgstr "Inayotumika"
+#: models/subscriptions.py:696
+msgid "Account deletion"
+msgstr ""
 
-#: models.py:378
-msgid "Closed"
-msgstr "Imefungwa"
+#: models/subscriptions.py:699
+msgid "Too expensive"
+msgstr ""
 
-#: models.py:655
+#: models/subscriptions.py:700
+msgid "Not using it enough"
+msgstr ""
+
+#: models/subscriptions.py:701
+msgid "Missing a feature"
+msgstr ""
+
+#: models/subscriptions.py:702
+msgid "Technical issue"
+msgstr ""
+
+#: models/subscriptions.py:705
+msgid "Switching to an alternative"
+msgstr ""
+
+#: models/subscriptions.py:707
+msgid "Temporary need"
+msgstr ""
+
+#: models/subscriptions.py:708
+msgid "Other"
+msgstr ""
+
+#: models/subscriptions.py:787
 msgid "Default product offering"
 msgstr "Utoaji wa bidhaa chaguomsingi"
 
-#: models.py:660
+#: models/subscriptions.py:792
 msgid "These products are highlighted in the product listing."
 msgstr "Bidhaa hizi zimeangaziwa kwenye orodha ya bidhaa."
 
-#: models.py:668
+#: models/subscriptions.py:800
 msgid "Trial product offering"
 msgstr "Sadaka ya bidhaa ya majaribio"
 
-#: models.py:669
+#: models/subscriptions.py:801
 msgid "If set, this product offering is used for trials."
 msgstr "Ikiwa imewekwa, toleo la bidhaa hii linatumika kwa majaribio."
 
-#: models.py:673
+#: models/subscriptions.py:805
 msgid "Trial duration (days)"
 msgstr "Muda wa majaribio (siku)"
 
-#: models.py:674
+#: models/subscriptions.py:806
 msgid "Number of days for the trial period."
 msgstr "Idadi ya siku kwa kipindi cha majaribio."
+
+#: organisations/services.py:108
+msgid "This plan is not available to this organisation."
+msgstr ""
+
+#: organisations/services.py:174
+msgid "This organisation is no longer accepting invitations."
+msgstr ""
+
+#: organisations/services.py:218
+msgid "Transfer ownership instead of inviting another owner."
+msgstr ""
+
+#: organisations/services.py:300
+msgid "This seat assignment cannot provide an active subscription."
+msgstr ""
+
+#: organisations/services.py:341
+msgid "This invitation has expired."
+msgstr ""
+
+#: organisations/services.py:361
+msgid "This invitation has already been accepted."
+msgstr ""
+
+#: organisations/services.py:364
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This invitation is no longer available."
+msgstr "Kipengele hiki hakipatikani kwa sasa."
+
+#: organisations/services.py:368
+#, fuzzy
+#| msgid "Sign up with your email address."
+msgid "Sign in with the verified email address that was invited."
+msgstr "Jisajili na barua pepe yako."
+
+#: organisations/services.py:373
+msgid "This account already belongs to an organisation."
+msgstr ""
+
+#: organisations/services.py:375
+msgid "This organisation already has an owner."
+msgstr ""
+
+#: organisations/services.py:463
+#, python-format
+msgid "A member joined %(organisation)s"
+msgstr ""
+
+#: organisations/services.py:464
+#, python-format
+msgid "%(email)s accepted their organisation invitation."
+msgstr ""
+
+#: organisations/services.py:486
+#, fuzzy
+#| msgid "Your pending subscription change has been cancelled."
+msgid "Only pending invitations can be cancelled."
+msgstr "Mabadiliko ya usajili unaosubiri kutekelezwa yameghairiwa."
+
+#: organisations/services.py:499 organisations/services.py:1175
+msgid "Your organisation invitation was cancelled"
+msgstr ""
+
+#: organisations/services.py:500 organisations/services.py:1176
+#, python-format
+msgid "Your invitation to %(organisation)s is no longer available."
+msgstr ""
+
+#: organisations/services.py:516
+msgid "Only pending invitations can be resent."
+msgstr ""
+
+#: organisations/services.py:530
+#, fuzzy
+#| msgid "Subscription cannot be activated."
+msgid "This organisation cannot be activated."
+msgstr "Usajili hauwezi kuwezeshwa."
+
+#: organisations/services.py:533
+msgid "An organisation must have an owner before activation."
+msgstr ""
+
+#: organisations/services.py:591
+msgid "Your organisation-funded subscription ended"
+msgstr ""
+
+#: organisations/services.py:593
+#, python-format
+msgid "Your %(organisation)s-funded subscription has ended. Your account and private research have been preserved."
+msgstr ""
+
+#: organisations/services.py:612
+msgid "This member already has an assigned seat."
+msgstr ""
+
+#: organisations/services.py:651
+msgid "Your organisation-funded subscription is ready"
+msgstr ""
+
+#: organisations/services.py:652
+#, python-format
+msgid "%(organisation)s assigned you a %(plan)s subscription."
+msgstr ""
+
+#: organisations/services.py:671 organisations/services.py:726
+msgid "Transfer ownership before removing the owner."
+msgstr ""
+
+#: organisations/services.py:696
+msgid "Your organisation membership ended"
+msgstr ""
+
+#: organisations/services.py:698
+#, python-format
+msgid "Your membership of %(organisation)s has ended. Your account and private research have been preserved."
+msgstr ""
+
+#: organisations/services.py:704
+msgid "Organisation member left"
+msgstr ""
+
+#: organisations/services.py:706
+msgid "Organisation member removed"
+msgstr ""
+
+#: organisations/services.py:708
+#, python-format
+msgid "%(email)s is no longer a member of %(organisation)s."
+msgstr ""
+
+#: organisations/services.py:739
+msgid "Your organisation membership is scheduled to end"
+msgstr ""
+
+#: organisations/services.py:740
+#, python-format
+msgid "Your membership of %(organisation)s is scheduled to end on %(date)s."
+msgstr ""
+
+#: organisations/services.py:756
+msgid "This membership has no scheduled removal."
+msgstr ""
+
+#: organisations/services.py:773
+msgid "Your organisation membership will continue"
+msgstr ""
+
+#: organisations/services.py:774
+#, python-format
+msgid "Your membership of %(organisation)s is no longer scheduled to end."
+msgstr ""
+
+#: organisations/services.py:792
+msgid "Use ownership transfer to change the owner."
+msgstr ""
+
+#: organisations/services.py:814
+msgid "Your organisation role changed"
+msgstr ""
+
+#: organisations/services.py:815
+#, python-format
+msgid "Your role in %(organisation)s is now %(role)s."
+msgstr ""
+
+#: organisations/services.py:872
+msgid "You are now the organisation owner"
+msgstr ""
+
+#: organisations/services.py:873
+#, python-format
+msgid "You are now the owner of %(organisation)s."
+msgstr ""
+
+#: organisations/services.py:878
+msgid "Organisation ownership transferred"
+msgstr ""
+
+#: organisations/services.py:879
+#, python-format
+msgid "You transferred ownership of %(organisation)s to %(email)s."
+msgstr ""
+
+#: organisations/services.py:963
+msgid "Your organisation-funded subscription is changing"
+msgstr ""
+
+#: organisations/services.py:965
+#, python-format
+msgid "Your %(organisation)s-funded subscription changes to %(plan)s on %(date)s."
+msgstr ""
+
+#: organisations/services.py:1002
+msgid "Your organisation-funded subscription is scheduled to end"
+msgstr ""
+
+#: organisations/services.py:1004
+#, python-format
+msgid "Your %(organisation)s-funded subscription is scheduled to end on %(date)s."
+msgstr ""
+
+#: organisations/services.py:1083
+msgid "This organisation's access cannot be suspended."
+msgstr ""
+
+#: organisations/services.py:1115
+msgid "This organisation's access cannot be restored."
+msgstr ""
+
+#: organisations/services.py:1148
+msgid "Your LawLibrary organisation is closing"
+msgstr ""
+
+#: organisations/services.py:1150
+#, python-format
+msgid "Organisation-funded access for %(organisation)s has ended. Member accounts and private research have been preserved."
+msgstr ""
+
+#: organisations/services.py:1233
+msgid "Organisation invitation expired"
+msgstr ""
+
+#: organisations/services.py:1234
+#, python-format
+msgid "The invitation for %(email)s has expired."
+msgstr ""
+
+#: organisations/services.py:1269
+msgid "Choose a valid organisation privacy mode."
+msgstr ""
 
 #: templates/admin/peachjam_subs/subscription/change_form.html:10
 msgid "Activate subscription"
@@ -142,66 +602,76 @@ msgstr "Mabadiliko yajayo"
 msgid "Trial"
 msgstr "Jaribio"
 
-#: templates/peachjam_subs/_subscription_card.html:15
+#: templates/peachjam_subs/_subscription_card.html:16
 msgid "Next payment due on"
 msgstr "Malipo yanayofuata yatalipwa"
 
-#: templates/peachjam_subs/_subscription_card.html:22
+#: templates/peachjam_subs/_subscription_card.html:24
 msgid "Begins on"
 msgstr "Huanza"
 
-#: templates/peachjam_subs/_subscription_card.html:25
+#: templates/peachjam_subs/_subscription_card.html:27
 msgid "Ends on"
 msgstr "Inaisha"
 
-#: templates/peachjam_subs/_subscription_card.html:34
+#: templates/peachjam_subs/_subscription_card.html:36
 msgid "Are you sure?"
 msgstr "Je, una uhakika?"
 
-#: templates/peachjam_subs/_subscription_card.html:35
+#: templates/peachjam_subs/_subscription_card.html:37
 msgid "Cancel change"
 msgstr "Ghairi mabadiliko"
 
-#: templates/peachjam_subs/_subscription_card.html:42
+#: templates/peachjam_subs/_subscription_card.html:44
 msgid "Active since"
 msgstr "Imetumika tangu"
 
-#: templates/peachjam_subs/_subscription_required.html:12
-#: templates/peachjam_subs/_subscription_required.html:20
+#: templates/peachjam_subs/_subscription_required.html:13
+#: templates/peachjam_subs/_subscription_required.html:21
 msgid "Create a free account"
 msgstr "Fungua akaunti ya bure"
 
-#: templates/peachjam_subs/_subscription_required.html:14
-#: templates/peachjam_subs/_subscription_required.html:34
+#: templates/peachjam_subs/_subscription_required.html:15
+#: templates/peachjam_subs/_subscription_required.html:39
 msgid "Unlock this feature"
 msgstr "Fungua kipengele hiki"
 
-#: templates/peachjam_subs/_subscription_required.html:17
+#: templates/peachjam_subs/_subscription_required.html:18
 msgid "Sign up to save documents, read summaries and access more features."
 msgstr "Jisajili ili kuhifadhi hati, kusoma muhtasari na kufikia vipengele zaidi."
 
-#: templates/peachjam_subs/_subscription_required.html:22
+#: templates/peachjam_subs/_subscription_required.html:23
 msgid "Start"
 msgstr "Anza"
 
-#: templates/peachjam_subs/_subscription_required.html:27
+#: templates/peachjam_subs/_subscription_required.html:28
 msgid "Already have an account?"
 msgstr "Je, tayari una akaunti?"
 
-#: templates/peachjam_subs/_subscription_required.html:28
+#: templates/peachjam_subs/_subscription_required.html:29
 msgid "Log in"
 msgstr "Ingia"
 
-#: templates/peachjam_subs/_subscription_required.html:36
+#: templates/peachjam_subs/_subscription_required.html:34
+msgid "Accounts unavailable"
+msgstr ""
+
+#: templates/peachjam_subs/_subscription_required.html:35
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This feature requires an account, and accounts are not available on this site."
+msgstr "Kipengele hiki hakipatikani kwa sasa."
+
+#: templates/peachjam_subs/_subscription_required.html:41
 #, python-format
 msgid "This feature is available with %(lowest_product)s."
 msgstr "Kipengele hiki kinapatikana kwa kutumia %(lowest_product)s."
 
-#: templates/peachjam_subs/_subscription_required.html:40
+#: templates/peachjam_subs/_subscription_required.html:45
 msgid "Upgrade to"
 msgstr "Boresha hadi"
 
-#: templates/peachjam_subs/_subscription_required.html:48
+#: templates/peachjam_subs/_subscription_required.html:53
 msgid "This feature is not currently available."
 msgstr "Kipengele hiki hakipatikani kwa sasa."
 

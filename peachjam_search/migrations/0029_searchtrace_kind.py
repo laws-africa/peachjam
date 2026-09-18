@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_search", "0028_searchtrace_query_analysis_and_profile"),
     ]

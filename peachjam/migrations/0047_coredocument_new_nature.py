@@ -14,7 +14,6 @@ def move_doc_nature(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0046_alter_coredocument_date"),
     ]

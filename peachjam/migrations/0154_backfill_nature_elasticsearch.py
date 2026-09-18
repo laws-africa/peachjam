@@ -58,7 +58,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0153_alter_coredocument_nature"),
     ]

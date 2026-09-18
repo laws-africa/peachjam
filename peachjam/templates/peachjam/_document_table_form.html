@@ -6,12 +6,6 @@
       hx-indicator=".htmx-progress"
       hx-target="#{{ doc_table_form_id }}"
       hx-swap="outerHTML">
-  <div class="d-block d-md-none my-2">
-    <a class="btn btn-primary"
-       href="#{{ doc_table_offcanvas_id }}"
-       data-bs-toggle="offcanvas"
-       aria-controls="{{ doc_table_offcanvas_id }}">{% trans 'Filters' %}</a>
-  </div>
   <div class="offcanvas offcanvas-start"
        tabindex="-1"
        id="{{ doc_table_offcanvas_id }}"
@@ -52,6 +46,7 @@
               </div>
             {% endif %}
           </li>
+          <li class="list-group-item d-lg-none" data-mobile-filter-controls></li>
           {% include "peachjam/_facet_groups.html" with filter_form_id=doc_table_form_id disable_push_url=doc_table_disable_push_url %}
         </ul>
       </div>
@@ -60,12 +55,16 @@
       <div class="position-relative">
         {% block content %}
           {% block filter-documents %}
-            <div class="mb-2 d-flex flex-column flex-md-row pocketlaw-hidden"
+            <div class="mb-2 d-flex pocketlaw-hidden"
                  hx-target="#{{ doc_table_id }}"
                  {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
-              <div class="flex-grow-1 me-md-2 mb-2 mb-md-0">
-                <label class="form-label" for="{{ doc_table_filter_input_id }}">{% trans "Filter documents by title" %}</label>
+              <div class="flex-grow-1">
+                <label class="form-label d-none d-lg-block"
+                       for="{{ doc_table_filter_input_id }}">
+                  {% trans "Filter documents by title" %}
+                </label>
                 <input id="{{ doc_table_filter_input_id }}"
+                       aria-label="{% trans "Filter documents by title" %}"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
                        hx-sync="this:replace"
@@ -75,18 +74,26 @@
                        value="{{ form.q.value|default_if_none:'' }}"
                        name="q"/>
               </div>
-              {% with doc_table_sort_select_id=doc_table_form_id|add:"-sort" %}
-                <div class="me-md-2 mb-2 mb-md-0">
-                  <label class="form-label" for="{{ doc_table_sort_select_id }}">{% trans "Sort documents by" %}</label>
-                  <select id="{{ doc_table_sort_select_id }}"
-                          class="form-control"
-                          hx-get="{{ request.path }}"
-                          name="sort">
-                    {% for opt in form.sort %}{{ opt }}{% endfor %}
-                  </select>
-                </div>
-              {% endwith %}
-              <div class="d-none d-md-block align-self-md-end">
+              {% include "peachjam/_document_filter_button.html" with button_classes="ms-2" %}
+              <div class="d-none d-lg-block ms-2" data-desktop-filter-controls>
+                {% with doc_table_sort_select_id=doc_table_form_id|add:"-sort" %}
+                  <div class="document-list-sort d-flex align-items-center d-lg-block w-100"
+                       hx-target="#{{ doc_table_id }}"
+                       {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
+                    <label class="form-label mb-0 mb-lg-2 me-2 me-lg-0 text-nowrap"
+                           for="{{ doc_table_sort_select_id }}">
+                      {% trans "Sort documents by" %}
+                    </label>
+                    <select id="{{ doc_table_sort_select_id }}"
+                            class="form-select ms-auto"
+                            hx-get="{{ request.path }}"
+                            name="sort">
+                      {% for opt in form.sort %}{{ opt }}{% endfor %}
+                    </select>
+                  </div>
+                {% endwith %}
+              </div>
+              <div class="d-none d-lg-block ms-2 align-self-lg-end">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
                         hx-sync="#{{ doc_table_filter_input_id }}:replace"

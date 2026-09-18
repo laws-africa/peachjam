@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_subs", "0007_subscription_end_date_subscription_start_date"),
     ]

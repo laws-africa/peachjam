@@ -43,8 +43,13 @@ export default class DocumentFilterForm {
     if (!this.offCanvasUsed) {
       const offcanvas = this.root.querySelector('.offcanvas-body');
       const content = this.root.querySelector('.document-list-facets');
+      const mobileFilterControls = this.root.querySelector('[data-mobile-filter-controls]');
+      const sort = this.root.querySelector('.document-list-sort');
       if (offcanvas && content) {
         requestAnimationFrame(() => {
+          if (mobileFilterControls && sort) {
+            mobileFilterControls.appendChild(sort);
+          }
           offcanvas.appendChild(content);
           this.offCanvasUsed = true;
         });
@@ -56,9 +61,14 @@ export default class DocumentFilterForm {
     if (this.offCanvasUsed) {
       const wrapper = this.root.querySelector('.document-list-facets-wrapper');
       const content = this.root.querySelector('.document-list-facets');
+      const desktopFilterControls = this.root.querySelector('[data-desktop-filter-controls]');
+      const sort = this.root.querySelector('.document-list-sort');
       if (wrapper && content) {
         requestAnimationFrame(() => {
           wrapper.appendChild(content);
+          if (desktopFilterControls && sort) {
+            desktopFilterControls.appendChild(sort);
+          }
           this.offCanvasUsed = false;
         });
       }

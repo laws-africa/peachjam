@@ -288,7 +288,7 @@ class FilteredDocumentListView(DocumentListView):
                 rendered_facets[index + 1] if index + 1 < len(rendered_facets) else None
             )
             item["next_target_id"] = (
-                f'{context["doc_table_form_id"]}-group-{next_item["name"]}'
+                f"{context['doc_table_form_id']}-group-{next_item['name']}"
                 if next_item
                 else context["doc_table_id"]
             )
@@ -437,9 +437,12 @@ class FilteredDocumentListView(DocumentListView):
         self.add_alphabet_facet(context)
 
     def show_facet_clear_all(self, context):
-        context["show_clear_all"] = any(
-            [f["values"] for f in context["facet_data"].values()]
+        selected_facets_count = sum(
+            len(self.facet_selected_values(facet))
+            for facet in context["facet_data"].values()
         )
+        context["selected_facets_count"] = selected_facets_count
+        context["show_clear_all"] = bool(selected_facets_count)
 
     def group_documents(self, documents, group_by=None):
         # determine what to group by
