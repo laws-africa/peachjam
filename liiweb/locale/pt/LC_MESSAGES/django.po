@@ -1,112 +1,113 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-08 19:03+0300\n"
-"PO-Revision-Date: 2026-05-25 09:32\n"
-"Last-Translator: \n"
-"Language-Team: Portuguese\n"
-"Language: pt_PT\n"
+"POT-Creation-Date: 2026-09-18 09:51+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
-"X-Crowdin-Project-ID: 4\n"
-"X-Crowdin-Language: pt\n"
-"X-Crowdin-File: /main/liiweb/locale/en/LC_MESSAGES/django.po\n"
-"X-Crowdin-File-ID: 103\n"
 
 #: templates/liiweb/_donate_call_to_action.html:6
 #: templates/liiweb/donate.html:8
 #, python-format
 msgid "Donate to %(APP_NAME)s"
-msgstr "Doe para %(APP_NAME)s"
+msgstr ""
 
 #: templates/liiweb/_donate_call_to_action.html:8
 #, python-format
 msgid "%(APP_NAME)s relies on donations to keep our platform free. Help us maintain and expand our resources. Donate today and support."
-msgstr "%(APP_NAME)s depende de doações para manter nossa plataforma gratuita. Ajude-nos a manter e expandir nossos recursos. Doe hoje e apoie."
+msgstr ""
 
 #: templates/liiweb/_donate_call_to_action.html:14
 #: templates/liiweb/donate.html:4
 msgid "Donate"
-msgstr "Doar"
+msgstr ""
 
 #: templates/liiweb/_hero_search.html:13 templates/liiweb/_hero_search.html:14
 #, python-format
 msgid "Search %(APP_NAME)s"
-msgstr "Pesquisar %(APP_NAME)s"
+msgstr ""
 
 #: templates/liiweb/_hero_search.html:19
 #: templates/liiweb/legislation_landing.html:66
 msgid "Search"
-msgstr "Pesquisa"
+msgstr ""
 
 #: templates/liiweb/_hero_search.html:24
 #: templates/liiweb/legislation_landing.html:75
 msgid "Advanced search"
-msgstr "Pesquisa avançada"
+msgstr ""
 
 #: templates/liiweb/home.html:39 templates/peachjam/_header.html:15
 msgid "Judgments"
-msgstr "Julgamentos"
+msgstr ""
 
 #: templates/liiweb/home.html:42 templates/liiweb/legislation_landing.html:4
 #: templates/liiweb/legislation_landing.html:15
 #: templates/peachjam/_header.html:22
 msgid "Legislation"
-msgstr "Legislação"
+msgstr ""
 
 #: templates/liiweb/home.html:87
 msgid "Recent Judgments"
-msgstr "Julgamentos Recentes"
+msgstr ""
 
 #: templates/liiweb/home.html:88
 msgid "View more judgments"
-msgstr "Ver mais julgamentos"
+msgstr ""
 
 #: templates/liiweb/home.html:94
 msgid "Recent Legislation"
-msgstr "Legislação recente"
+msgstr ""
 
 #: templates/liiweb/home.html:95
 msgid "View more legislation"
-msgstr "Ver mais legislação"
+msgstr ""
 
 #: templates/liiweb/home.html:102
 msgid "Recent Gazettes"
-msgstr "Diários recentes"
+msgstr ""
 
 #: templates/liiweb/home.html:103
 msgid "View more gazettes"
-msgstr "Veja mais jornais"
+msgstr ""
 
 #: templates/liiweb/home.html:115
 msgid "Courts"
-msgstr "Tribunais"
+msgstr ""
 
 #: templates/liiweb/home.html:123
 msgid "Collections"
-msgstr "Coleções"
+msgstr ""
 
 #: templates/liiweb/home.html:139
 #, python-format
 msgid "Use %(APP_NAME)s when you're offline"
-msgstr "Use %(APP_NAME)s quando estiver off-line"
+msgstr ""
 
 #: templates/liiweb/home.html:141
 #, python-format
 msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
-msgstr "Pocket Law é uma cópia offline da jurisprudência, legislação e outros materiais jurídicos de %(APP_NAME)s."
+msgstr ""
 
 #: templates/liiweb/home.html:156
 msgid "Latest Articles"
-msgstr "Artigos mais Recentes"
+msgstr ""
 
 #: templates/liiweb/home.html:158
 msgid "View more articles"
-msgstr "Ver mais artigos"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:17
 #, python-format
@@ -116,16 +117,12 @@ msgstr[0] ""
 msgstr[1] ""
 
 #: templates/liiweb/legislation_landing.html:27
-#, fuzzy
-#| msgid "All legislation"
 msgid "Find legislation"
-msgstr "Toda a legislação"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:31
-#, fuzzy
-#| msgid "View more legislation"
 msgid "Title or citation"
-msgstr "Ver mais legislação"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:36
 msgid "For example, Income Tax Act"
@@ -149,30 +146,26 @@ msgid "Any nature"
 msgstr ""
 
 #: templates/liiweb/legislation_landing.html:68
-#, fuzzy
-#| msgid "Recent legislation"
 msgid "Search legislation"
-msgstr "Legislação recente"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:78
-#, fuzzy
-#| msgid "Legislation"
 msgid "Legislation collections"
-msgstr "Legislação"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:84
 #: templates/liiweb/locality_legislation_list.html:27 views/legislation.py:48
 msgid "Current legislation"
-msgstr "Legislação atual"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:86
 msgid "Principal legislation in force."
 msgstr ""
 
 #: templates/liiweb/legislation_landing.html:95
-#: templates/liiweb/legislation_landing.html:344 views/legislation.py:52
+#: templates/liiweb/legislation_landing.html:338 views/legislation.py:52
 msgid "Recent legislation"
-msgstr "Legislação recente"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:97
 msgid "Published in the past year."
@@ -183,20 +176,16 @@ msgid "Regulations, rules and notices."
 msgstr ""
 
 #: templates/liiweb/legislation_landing.html:118
-#, fuzzy
-#| msgid "All legislation"
 msgid "Local legislation"
-msgstr "Toda a legislação"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:120
 msgid "Browse provincial legislation and municipal by-laws."
 msgstr ""
 
 #: templates/liiweb/legislation_landing.html:131
-#, fuzzy
-#| msgid "Current legislation"
 msgid "Browse legislation"
-msgstr "Legislação atual"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:134
 msgid "Start with a legal topic, year or document nature."
@@ -247,165 +236,149 @@ msgid "Browse legislation of all natures"
 msgstr ""
 
 #: templates/liiweb/legislation_landing.html:212
-#, fuzzy
-#| msgid "Legislation"
 msgid "Legislation by status"
-msgstr "Legislação"
+msgstr ""
 
 #: templates/liiweb/legislation_landing.html:215
-#, fuzzy
-#| msgid "You are viewing repealed legislation which is no longer in force."
 msgid "Find legislation that is not currently in force."
-msgstr "Estão a ver legislação revogada, que já não está em vigor."
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:225
+#: templates/liiweb/legislation_landing.html:224
 #: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:5
 #: views/legislation.py:60
 msgid "Uncommenced legislation"
-msgstr "Legislação não iniciada"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:230 views/legislation.py:61
+#: templates/liiweb/legislation_landing.html:227 views/legislation.py:61
 msgid "Legislation that is not yet in force."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:241
+#: templates/liiweb/legislation_landing.html:237
 #: templates/liiweb/locality_legislation_list.html:33 views/legislation.py:64
 msgid "Repealed legislation"
-msgstr "Legislação repetida"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:246 views/legislation.py:65
-#, fuzzy
-#| msgid "You are viewing repealed legislation which is no longer in force."
+#: templates/liiweb/legislation_landing.html:240 views/legislation.py:65
 msgid "Legislation that is no longer in force."
-msgstr "Estão a ver legislação revogada, que já não está em vigor."
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:257
+#: templates/liiweb/legislation_landing.html:251
 #: templates/liiweb/locality_legislation_list.html:65
 msgid "More resources"
-msgstr "Mais recursos"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:260
+#: templates/liiweb/legislation_landing.html:254
 msgid "Check individual provisions and look up defined legal terms."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:270
+#: templates/liiweb/legislation_landing.html:264
 #: templates/liiweb/locality_legislation_list.html:69
 msgid "Unconstitutional provisions"
-msgstr "Disposições inconstitucionais"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:273
+#: templates/liiweb/legislation_landing.html:267
 msgid "See provisions affected by constitutional decisions."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:285
+#: templates/liiweb/legislation_landing.html:279
 #: templates/liiweb/locality_legislation_list.html:74
 msgid "Uncommenced provisions"
-msgstr "Disposições não iniciadas"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:288
+#: templates/liiweb/legislation_landing.html:282
 msgid "See individual sections that are not yet in force."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:300
+#: templates/liiweb/legislation_landing.html:294
 #: templates/liiweb/locality_legislation_list.html:79
 msgid "Glossary of defined terms"
-msgstr "Glossário de termos definidos"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:303
+#: templates/liiweb/legislation_landing.html:297
 msgid "Look up terms defined across legislation."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:318
-#, fuzzy
-#| msgid "Legislation"
+#: templates/liiweb/legislation_landing.html:312
 msgid "Legislation highlights"
-msgstr "Legislação"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:321
+#: templates/liiweb/legislation_landing.html:315
 msgid "Frequently referenced legislation and the latest publications."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:327
-#, fuzzy
-#| msgid "All legislation"
+#: templates/liiweb/legislation_landing.html:321
 msgid "Popular legislation"
-msgstr "Toda a legislação"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:337
+#: templates/liiweb/legislation_landing.html:331
 msgid "No legislation is available."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:357
-#, fuzzy
-#| msgid "Recent legislation"
+#: templates/liiweb/legislation_landing.html:351
 msgid "No recent legislation is available."
-msgstr "Legislação recente"
+msgstr ""
 
-#: templates/liiweb/legislation_landing.html:362
-#, fuzzy
-#| msgid "View more legislation"
+#: templates/liiweb/legislation_landing.html:356
 msgid "View all recent legislation"
-msgstr "Ver mais legislação"
+msgstr ""
 
 #: templates/liiweb/legislation_list.html:15
 msgid "You are viewing repealed legislation which is no longer in force."
-msgstr "Estão a ver legislação revogada, que já não está em vigor."
+msgstr ""
 
 #: templates/liiweb/locality_legislation_list.html:9
 #: templates/peachjam/_header.html:9
 msgid "Home"
-msgstr "Página inicial"
+msgstr ""
 
 #: templates/liiweb/locality_legislation_list.html:43 views/legislation.py:68
 msgid "All legislation"
-msgstr "Toda a legislação"
+msgstr ""
 
 #: templates/liiweb/pocketlaw.html:7
 msgid "Pocket Law"
-msgstr "Lei de Bolso"
+msgstr ""
 
 #: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
-msgstr "Sobre"
+msgstr ""
 
 #: templates/peachjam/_footer.html:12
 #, python-format
 msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-msgstr "Use %(APP_NAME)s offline com <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
+msgstr ""
 
 #: templates/peachjam/_footer.html:20
 msgid "Site Statistics"
-msgstr "Estatísticas do site"
+msgstr ""
 
 #: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
 msgid "Help"
-msgstr "Socorro"
+msgstr ""
 
 #: templates/peachjam/_footer.html:28
 msgid "About us"
-msgstr "Sobre nós"
+msgstr ""
 
 #: templates/peachjam/_footer.html:31
 msgid "Contact us"
-msgstr "Contate-nos"
+msgstr ""
 
 #: templates/peachjam/_footer.html:34
 msgid "Terms of Use"
-msgstr "Termos de Utilização"
+msgstr ""
 
 #: templates/peachjam/_footer.html:40
 msgid "Our partners"
-msgstr "Nossos parceiros"
+msgstr ""
 
 #: templates/peachjam/_footer.html:53
 msgid "Other African Legal Information Institutions"
-msgstr "Outras Instituições Jurídicas Africanas"
+msgstr ""
 
 #: views/legislation.py:49
-#, fuzzy
-#| msgid "You are viewing repealed legislation which is no longer in force."
 msgid "Principal legislation currently in force."
-msgstr "Estão a ver legislação revogada, que já não está em vigor."
+msgstr ""
 
 #: views/legislation.py:53
 msgid "Legislation published in the past year."
@@ -422,4 +395,4 @@ msgstr ""
 #: views/legislation.py:291
 #, python-format
 msgid "%(locality)s Legislation"
-msgstr "%(locality)s Legislação"
+msgstr ""

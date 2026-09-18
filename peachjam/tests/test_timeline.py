@@ -311,6 +311,7 @@ class TimelineViewTest(TestCase):
 
         self.assertContains(response, "dropdown-toggle")
         self.assertContains(response, "Follow this court to receive updates")
+        self.assertContains(response, 'class="dropdown-item text-wrap"')
         self.assertContains(response, 'data-key-link="follow_dropdown"')
         self.assertContains(response, 'data-key-link="follow"')
 
@@ -323,6 +324,7 @@ class TimelineViewTest(TestCase):
 
         self.assertContains(response, "dropdown-toggle")
         self.assertContains(response, "Follow this court to receive updates")
+        self.assertContains(response, 'class="dropdown-item text-wrap"')
         self.assertContains(response, 'data-bs-target="#followModal"')
 
     def test_follow_actions_return_the_updated_button(self):

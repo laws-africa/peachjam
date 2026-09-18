@@ -23,11 +23,11 @@ Reusable scripts (data imports, translation extraction) live in `scripts/`.
 - You don't need to compile javascript or SCSS before committing, CI handles that.
 
 ## Coding Style & Naming Conventions
-Python code is formatted by Black and ordered with isort (Black profile) while Flake8 enforces a 120-character limit and ignores E203. Use 4-space indentation, descriptive module names, and keep Django apps cohesive.
+Python code is formatted and linted by Ruff, including import ordering. Ruff formats at 88 characters and enforces a 120-character maximum. Use 4-space indentation, descriptive module names, and keep Django apps cohesive.
 
 - Do not use a leading underscore for protected or private method names on classes.
 - Provide short docstrings for complex classes or methods.
-- Let `black` and `isort --profile black` format code via pre-commit instead of manual shuffling.
+- Let `ruff check --fix` and `ruff format` clean up code via pre-commit instead of manual shuffling.
 - Use `snake_case` for functions, `PascalCase` for classes, and align template names with their views (eg. `subscription_detail.html`).
 - Document FSM transitions and payload contracts inline whenever Payfast or Xero logic changes.
 - Templates must pass djLint and remain free of user-specific content when cached.
@@ -76,6 +76,7 @@ Examples in this repo:
 * Prefer Bootstrap components and building blocks (buttons, cards, lists, tables, etc.) over rolling your own, unless the layout or instructions really call for it.
 * Use "Sentence case" not "Title Case" for headings, labels and buttons.
 * Prefer default styling for buttons. Don't adjust padding, font weight or custom colours. Use btn-primary for primary buttons or btn-secondary.
+* Prefer `alert-primary` to `alert-info` for informational notices. Use success, warning and danger variants when those semantic states apply.
 * The default heading margins are usually fine, only adjust them if really necessary for spacing.
 
 ## Accessibility requirements

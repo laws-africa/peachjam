@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("countries_plus", "0005_auto_20160224_1804"),
         ("peachjam", "0268_alter_volumeissue_unique_together"),

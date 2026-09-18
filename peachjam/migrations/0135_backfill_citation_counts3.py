@@ -41,7 +41,6 @@ def backfill_citation_counts(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0134_backfill_citation_counts2"),
     ]

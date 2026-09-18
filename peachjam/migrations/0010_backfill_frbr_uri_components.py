@@ -16,7 +16,6 @@ def backfill_components(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0009_frbr_uri_components")]
 
     operations = [

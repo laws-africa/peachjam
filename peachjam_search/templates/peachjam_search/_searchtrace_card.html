@@ -47,6 +47,12 @@
       <td>{{ trace.mode }}</td>
     </tr>
     <tr>
+      <th>{% trans "Status" %}</th>
+      <td>{{ trace.get_status_display }}</td>
+      <th>{% trans "Error" %}</th>
+      <td>{{ trace.error_type }} {{ trace.error_message }}</td>
+    </tr>
+    <tr>
       <th>{% trans "Ordering" %}</th>
       <td colspan="3">{{ trace.ordering }}</td>
     </tr>
@@ -59,7 +65,9 @@
     <tr>
       <th>{% trans "Filters" %}</th>
       <td>{{ trace.filters }}</td>
-      <th>{% trans "User" %}</th>
+      <th>
+        {% trans "User" %}
+      </th>
       <td colspan="3">
         {{ trace.ip_address|default_if_none:'?' }}
         <br/>
@@ -74,9 +82,15 @@
       </td>
     </tr>
     <tr>
-      <th>{% trans "Config version" %}</th>
-      <td>{{ trace.config_version }}</td>
-      <th>{% trans "Request ID" %}</th>
+      <th>
+        {% trans "Config version" %}
+      </th>
+      <td>
+        {{ trace.config_version }}
+      </td>
+      <th>
+        {% trans "Request ID" %}
+      </th>
       <td>
         {{ trace.request_id }}
       </td>
@@ -88,6 +102,14 @@
         {% trans "Query analysis" %}
       </h5>
       <pre class="mb-0"><code>{{ trace.get_query_analysis_json }}</code></pre>
+    </div>
+  {% endif %}
+  {% if trace.elasticsearch_query %}
+    <div class="card-body pt-0">
+      <h5>
+        {% trans "Elasticsearch query" %}
+      </h5>
+      <pre class="mb-0"><code>{{ trace.elasticsearch_query|pprint }}</code></pre>
     </div>
   {% endif %}
   {% with trace.clicks.all as clicks %}
@@ -114,6 +136,120 @@
             </tr>
           {% endfor %}
         </table>
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% with trace.entity_results.all as entity_results %}
+    {% if entity_results %}
+      <div class="card-body pt-0">
+        <h5>
+          {% trans "Entity results shown" %}
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>
+                  {% trans "Position" %}
+                </th>
+                <th>
+                  {% trans "Entity" %}
+                </th>
+                <th>
+                  {% trans "Match" %}
+                </th>
+                <th>
+                  {% trans "Clicked" %}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in entity_results %}
+                <tr>
+                  <td>
+                    {{ result.position }}
+                  </td>
+                  <td>
+                    <a href="{{ result.entity_url }}">{{ result.entity_label }}</a>
+                    <div class="small text-muted">
+                      {{ result.entity_type }}
+                    </div>
+                  </td>
+                  <td>
+                    {{ result.match_type }} ({{ result.confidence|floatformat:2 }})
+                  </td>
+                  <td>
+                    {% if result.click %}
+                      {% trans "Yes" %}
+                    {% else %}
+                      {% trans "No" %}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% with trace.flynote_results.all as flynote_results %}
+    {% if flynote_results %}
+      <div class="card-body pt-0">
+        <h5>
+          {% trans "Flynote results shown" %}
+        </h5>
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead>
+              <tr>
+                <th>
+                  {% trans "Position" %}
+                </th>
+                <th>
+                  {% trans "Topic" %}
+                </th>
+                <th>
+                  {% trans "Source" %}
+                </th>
+                <th>
+                  {% trans "Selection reason" %}
+                </th>
+                <th>
+                  {% trans "Clicked" %}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in flynote_results %}
+                <tr>
+                  <td>
+                    {{ result.position }}
+                  </td>
+                  <td>
+                    {{ result.flynote_name }}
+                    <div class="small text-muted">
+                      {{ result.flynote_path_labels|join:" — " }}
+                    </div>
+                  </td>
+                  <td>
+                    {{ result.get_source_display }}
+                  </td>
+                  <td>
+                    {{ result.get_selection_reason_display }}
+                  </td>
+                  <td>
+                    {% if result.click %}
+                      {% trans "Yes" %}
+                    {% else %}
+                      {% trans "No" %}
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
     {% endif %}
   {% endwith %}

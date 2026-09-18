@@ -440,7 +440,7 @@ class Subscription(models.Model):
         ),
         conditions=[can_activate],
     )
-    def activate(self):
+    def activate(self, allow_trial=True):
         """Activate this subscription. This also closes any other active subscriptions for the user.
 
         If a trial upgrade is applicable to the user, then:
@@ -476,7 +476,7 @@ class Subscription(models.Model):
 
         # set up a trial if applicable
         sub_settings = subscription_settings()
-        trial_offering = sub_settings.get_trial_offering(self)
+        trial_offering = sub_settings.get_trial_offering(self) if allow_trial else None
         if trial_offering:
             trial = Subscription.objects.create(
                 user=self.user,
@@ -700,8 +700,9 @@ class OffboardingFeedback(models.Model):
         NOT_USING_ENOUGH = "not-using-enough", _("Not using it enough")
         MISSING_FEATURE = "missing-feature", _("Missing a feature")
         TECHNICAL_ISSUE = "technical-issue", _("Technical issue")
-        SWITCHING_ALTERNATIVE = "switching-alternative", _(
-            "Switching to an alternative"
+        SWITCHING_ALTERNATIVE = (
+            "switching-alternative",
+            _("Switching to an alternative"),
         )
         TEMPORARY_NEED = "temporary-need", _("Temporary need")
         OTHER = "other", _("Other")

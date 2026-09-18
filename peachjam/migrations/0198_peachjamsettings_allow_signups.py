@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0197_treatment_name_en_treatment_name_fr_and_more"),
     ]

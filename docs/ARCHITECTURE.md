@@ -185,7 +185,8 @@ Important model concepts:
 
 Important modules:
 
-- `models.py`: catalog and subscription state
+- `models/`: catalog, subscription, organisation membership, and entitlement state
+- `organisations/`: organisation service object, notifications, and domain signals
 - `views.py`: subscribe/check/cancel flows
 - `tasks.py`: scheduled subscription updates
 - `mixins.py`: subscription-aware view helpers
@@ -282,6 +283,21 @@ Key frontend patterns:
 
 ## Cross-cutting platform concerns
 
+### Domain logic and services
+
+Prefer class- and object-based domain code over collections of unrelated module-level functions. Put a small number of
+supporting operations on the model they naturally describe, as instance or class methods. This keeps behavior close to
+the state and terminology it governs.
+
+Use a cohesive service class when a substantial workflow coordinates several models, external systems, transactions,
+or lifecycle steps. A service prevents any one model becoming too large while avoiding related business logic being
+spread across models, views, tasks, and utility functions. Stateless services may expose a shared service instance;
+stateful services should receive their dependencies and context when constructed.
+
+Service methods must have docstrings that state their business purpose or outcome. Add further detail when a method has
+important preconditions, transactional guarantees, side effects, or non-obvious return behavior. Views, signals, and
+background tasks should remain thin callers of model or service methods.
+
 ### Caching
 
 Caching is a first-class concern. The middleware stack includes:
@@ -299,10 +315,10 @@ Background work is handled through `django-background-tasks-updated`.
 Tasks are defined in `tasks.py` modules across the platform and supporting apps. They are queued on demand and sometimes
 also scheduled to run at intervals.
 
-Treat `tasks.py` as an entrypoint for background work. The task code short be short and focused on loading the state
+Treat `tasks.py` as an entrypoint for background work. The task code should be short and focused on loading the state
 necessary to run the task by delegating to business logic code elsewhere in the codebase. In particular, when running
 a task related to a specific django object, the task should load the object by ID (handling the fact it may no longer
-exist), and then delegate to a method on the object or a related service function.
+exist), and then delegate to a method on the object or a related service object.
 
 Scheduled on app startup in non-debug mode:
 
@@ -345,7 +361,7 @@ For common task types, start here:
 - New page or view behavior: `peachjam/views`, then matching `peachjam/urls/*`, templates under `peachjam/templates` or site app templates
 - Search changes: `peachjam_search/engine.py`, `peachjam_search/views/*`, `peachjam_search/documents.py`
 - API changes: `peachjam_api/views.py`, `peachjam_api/public_views.py`, `peachjam_api/serializers.py`, `peachjam_api/urls*.py`
-- Subscription/access changes: `peachjam_subs/models.py`, `peachjam_subs/views.py`, `peachjam_subs/mixins.py`
+- Subscription/access changes: `peachjam_subs/models/`, `peachjam_subs/organisations/`, `peachjam_subs/views.py`, `peachjam_subs/mixins.py`
 - Site-specific UI or routing: the active site app’s `settings.py`, `urls.py` or `urls/`, templates, and static files
 - Interactive frontend changes: `peachjam/js/app.ts`, `peachjam/js/peachjam.ts`, `peachjam/js/components/index.ts`, then the specific component
 - Data model changes: `peachjam/models/*` or the relevant supporting app’s models/migrations

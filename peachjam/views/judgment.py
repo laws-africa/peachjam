@@ -403,9 +403,8 @@ class FlynoteViewMixin:
         """Filter direct children by matching descendants and collect the matching paths."""
         matching_flynotes = list(
             self.annotate_with_counts(
-                Flynote.objects.undeprecated().filter(
+                Flynote.objects.matching_names(query).filter(
                     path__startswith=parent_path,
-                    name__icontains=query,
                 )
             )
             .exclude(path=parent_path)

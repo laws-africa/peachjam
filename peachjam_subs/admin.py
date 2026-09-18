@@ -15,6 +15,12 @@ from peachjam.admin import UserAdminCustom
 from .models import (
     Feature,
     OffboardingFeedback,
+    Organisation,
+    OrganisationAuditEvent,
+    OrganisationInvitation,
+    OrganisationMembership,
+    OrganisationSeat,
+    OrganisationSeatAssignment,
     PricingPlan,
     Product,
     ProductOffering,
@@ -23,6 +29,72 @@ from .models import (
     subscription_settings,
     validate_selectable_offering_catalog,
 )
+
+
+class OrganisationMembershipInline(admin.TabularInline):
+    model = OrganisationMembership
+    extra = 0
+    autocomplete_fields = ("user",)
+
+
+class OrganisationSeatInline(admin.TabularInline):
+    model = OrganisationSeat
+    extra = 0
+    autocomplete_fields = ("product_offering", "pending_product_offering")
+
+
+@admin.register(Organisation)
+class OrganisationAdmin(admin.ModelAdmin):
+    list_display = ("name", "status", "billing_period", "privacy_mode", "owner")
+    list_filter = ("status", "billing_period", "privacy_mode")
+    search_fields = ("name", "memberships__user__email")
+    readonly_fields = (
+        "public_id",
+        "created_at",
+        "activated_at",
+        "closing_at",
+        "closed_at",
+    )
+    inlines = (OrganisationMembershipInline, OrganisationSeatInline)
+
+
+@admin.register(OrganisationInvitation)
+class OrganisationInvitationAdmin(admin.ModelAdmin):
+    list_display = ("email", "organisation", "role", "status", "expires_at")
+    list_filter = ("status", "role")
+    search_fields = ("email", "organisation__name")
+    readonly_fields = ("token", "created_at", "accepted_at", "cancelled_at")
+
+
+@admin.register(OrganisationSeatAssignment)
+class OrganisationSeatAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("seat", "membership", "started_at", "ended_at")
+    search_fields = ("membership__user__email", "seat__organisation__name")
+    readonly_fields = ("started_at", "ended_at")
+
+
+@admin.register(OrganisationAuditEvent)
+class OrganisationAuditEventAdmin(admin.ModelAdmin):
+    list_display = ("organisation", "event_type", "actor", "created_at")
+    list_filter = ("event_type", "created_at")
+    search_fields = ("organisation__name", "message")
+    readonly_fields = (
+        "organisation",
+        "actor",
+        "membership",
+        "invitation",
+        "seat",
+        "event_type",
+        "message",
+        "event_data",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 
 class ProductAdminForm(forms.ModelForm):

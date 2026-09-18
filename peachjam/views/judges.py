@@ -333,7 +333,7 @@ class JudgePersonListView(JudgePublicPageMixin, ListView):
                 else None
             )
             item["next_target_id"] = (
-                f'judge-list-search-form-group-{next_item["name"]}'
+                f"judge-list-search-form-group-{next_item['name']}"
                 if next_item
                 else "judge-list-results"
             )
@@ -576,8 +576,8 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             latest_title["matched_alias__title__abbreviation"] if latest_title else None
         )
         context["judge_latest_title_label"] = (
-            f'{latest_title["matched_alias__title__name"]} '
-            f'({latest_title["matched_alias__title__abbreviation"]})'
+            f"{latest_title['matched_alias__title__name']} "
+            f"({latest_title['matched_alias__title__abbreviation']})"
             if latest_title
             else None
         )

@@ -3,10 +3,37 @@ from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
 from django_fsm import post_transition
 
+from peachjam.account_signals import user_account_pre_delete
 from peachjam.customerio import get_customerio
 from peachjam.models import UserProfile
 
-from .models import Feature, Product, Subscription
+from .models import (
+    Feature,
+    OrganisationMembership,
+    Product,
+    Subscription,
+)
+from .organisations.services import organisation_service
+
+
+@receiver(
+    user_account_pre_delete,
+    sender=UserProfile,
+    dispatch_uid="peachjam_subs.end_membership_before_account_deletion",
+)
+def end_membership_before_account_deletion(sender, user, **kwargs):
+    membership = (
+        OrganisationMembership.objects.filter(
+            user=user,
+            status=OrganisationMembership.Status.ACTIVE,
+        )
+        .select_related("organisation")
+        .first()
+    )
+    if membership:
+        organisation_service.remove_membership(
+            membership=membership, actor=user, member_left=True
+        )
 
 
 @receiver(post_delete, sender=Subscription)

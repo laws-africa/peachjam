@@ -96,34 +96,7 @@ class FlynoteManagerMixin(FlynoteViewMixin):
         }
 
     def get_flynote_path_labels(self, flynotes):
-        paths = set()
-        for flynote in flynotes:
-            for end in range(
-                flynote.steplen,
-                len(flynote.path) + 1,
-                flynote.steplen,
-            ):
-                paths.add(flynote.path[:end])
-
-        path_names = {
-            flynote.path: flynote.name
-            for flynote in Flynote.objects.filter(path__in=paths).only("name", "path")
-        }
-        return {
-            flynote.pk: [
-                path_names[path]
-                for path in [
-                    flynote.path[:end]
-                    for end in range(
-                        flynote.steplen,
-                        len(flynote.path) + 1,
-                        flynote.steplen,
-                    )
-                ]
-                if path in path_names
-            ]
-            for flynote in flynotes
-        }
+        return Flynote.get_path_labels(flynotes)
 
     def get_merge_selected_ids(self, params):
         selected_ids = []

@@ -16,6 +16,10 @@ from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import include, path, reverse
 from languages_plus.models import Language
 
+from peachjam.account_signals import (
+    user_account_post_delete,
+    user_account_pre_delete,
+)
 from peachjam.models import (
     Annotation,
     CaseHistory,
@@ -747,6 +751,33 @@ class PeachjamViewsTest(TestCase):
 
         sub.refresh_from_db()
         self.assertEqual(sub.status, Subscription.Status.CLOSED)
+
+    def test_delete_account_emits_lifecycle_signals(self):
+        user = User.objects.first()
+        events = []
+
+        def record_pre(sender, instance, user, deleted_reason, **kwargs):
+            events.append(("pre", user.is_active, user.email, instance.deleted_at))
+
+        def record_post(sender, instance, user, deleted_reason, **kwargs):
+            events.append(("post", user.is_active, user.email, instance.deleted_at))
+
+        user_account_pre_delete.connect(record_pre)
+        user_account_post_delete.connect(record_post)
+        try:
+            user.userprofile.delete_account("No longer needed")
+        finally:
+            user_account_pre_delete.disconnect(record_pre)
+            user_account_post_delete.disconnect(record_post)
+
+        self.assertEqual("pre", events[0][0])
+        self.assertTrue(events[0][1])
+        self.assertTrue(events[0][2])
+        self.assertIsNone(events[0][3])
+        self.assertEqual("post", events[1][0])
+        self.assertFalse(events[1][1])
+        self.assertEqual("", events[1][2])
+        self.assertIsNotNone(events[1][3])
 
     @patch("peachjam.customerio.CustomerIO.enabled", return_value=True)
     @patch("peachjam.customerio.analytics.identify")

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-08 19:03+0300\n"
+"POT-Creation-Date: 2026-09-18 09:51+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -163,7 +163,7 @@ msgid "Principal legislation in force."
 msgstr ""
 
 #: templates/liiweb/legislation_landing.html:95
-#: templates/liiweb/legislation_landing.html:344 views/legislation.py:52
+#: templates/liiweb/legislation_landing.html:338 views/legislation.py:52
 msgid "Recent legislation"
 msgstr ""
 
@@ -243,82 +243,82 @@ msgstr ""
 msgid "Find legislation that is not currently in force."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:225
+#: templates/liiweb/legislation_landing.html:224
 #: templates/peachjam/provision_enrichment/uncommenced_provision_list.html:5
 #: views/legislation.py:60
 msgid "Uncommenced legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:230 views/legislation.py:61
+#: templates/liiweb/legislation_landing.html:227 views/legislation.py:61
 msgid "Legislation that is not yet in force."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:241
+#: templates/liiweb/legislation_landing.html:237
 #: templates/liiweb/locality_legislation_list.html:33 views/legislation.py:64
 msgid "Repealed legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:246 views/legislation.py:65
+#: templates/liiweb/legislation_landing.html:240 views/legislation.py:65
 msgid "Legislation that is no longer in force."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:257
+#: templates/liiweb/legislation_landing.html:251
 #: templates/liiweb/locality_legislation_list.html:65
 msgid "More resources"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:260
+#: templates/liiweb/legislation_landing.html:254
 msgid "Check individual provisions and look up defined legal terms."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:270
+#: templates/liiweb/legislation_landing.html:264
 #: templates/liiweb/locality_legislation_list.html:69
 msgid "Unconstitutional provisions"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:273
+#: templates/liiweb/legislation_landing.html:267
 msgid "See provisions affected by constitutional decisions."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:285
+#: templates/liiweb/legislation_landing.html:279
 #: templates/liiweb/locality_legislation_list.html:74
 msgid "Uncommenced provisions"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:288
+#: templates/liiweb/legislation_landing.html:282
 msgid "See individual sections that are not yet in force."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:300
+#: templates/liiweb/legislation_landing.html:294
 #: templates/liiweb/locality_legislation_list.html:79
 msgid "Glossary of defined terms"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:303
+#: templates/liiweb/legislation_landing.html:297
 msgid "Look up terms defined across legislation."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:318
+#: templates/liiweb/legislation_landing.html:312
 msgid "Legislation highlights"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:321
+#: templates/liiweb/legislation_landing.html:315
 msgid "Frequently referenced legislation and the latest publications."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:327
+#: templates/liiweb/legislation_landing.html:321
 msgid "Popular legislation"
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:337
+#: templates/liiweb/legislation_landing.html:331
 msgid "No legislation is available."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:357
+#: templates/liiweb/legislation_landing.html:351
 msgid "No recent legislation is available."
 msgstr ""
 
-#: templates/liiweb/legislation_landing.html:362
+#: templates/liiweb/legislation_landing.html:356
 msgid "View all recent legislation"
 msgstr ""
 

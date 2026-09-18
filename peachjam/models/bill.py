@@ -6,7 +6,6 @@ from peachjam.models import CoreDocument
 
 
 class Bill(CoreDocument):
-
     decorator = BillDecorator()
 
     frbr_uri_doctypes = ["bill"]
