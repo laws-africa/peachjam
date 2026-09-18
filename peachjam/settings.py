@@ -401,6 +401,10 @@ LANGUAGES = [
     ("sw", _("Swahili")),
 ]
 
+# Keep the translated model schema stable when a downstream site exposes only
+# a subset of the supported interface languages.
+MODELTRANSLATION_LANGUAGES = ("en", "fr", "pt", "sw")
+
 TIME_ZONE = "UTC"
 
 USE_I18N = True
