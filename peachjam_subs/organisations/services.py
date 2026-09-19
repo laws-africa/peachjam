@@ -450,6 +450,13 @@ class OrganisationService:
             return change
         if change.status != OrganisationSeatChange.Status.AWAITING_SETTLEMENT:
             raise ValidationError(_("This seat change can no longer be applied."))
+        if change.organisation.status in {
+            Organisation.Status.CLOSING,
+            Organisation.Status.CLOSED,
+        }:
+            raise ValidationError(
+                _("Seat changes cannot be applied to a closing or closed organisation.")
+            )
         for item in change.items.select_related(
             "seat__product_offering",
             "requested_offering",
@@ -492,8 +499,17 @@ class OrganisationService:
                         self.activate_assignment(assignment)
             elif item.action == OrganisationSeatChangeItem.Action.REASSIGN:
                 assignment = seat.active_assignment
-                if assignment:
-                    self.release_assignment(assignment=assignment, actor=actor)
+                if (
+                    not assignment
+                    or assignment.membership_id != item.previous_membership_id
+                ):
+                    raise ValidationError(
+                        _(
+                            "The seat assignment changed while this change was "
+                            "awaiting settlement."
+                        )
+                    )
+                self.release_assignment(assignment=assignment, actor=actor)
                 replacement = OrganisationSeatAssignment.objects.create(
                     seat=seat, membership=item.requested_membership
                 )
@@ -1511,6 +1527,10 @@ class OrganisationService:
             self.suspend_organisation_entitlements(
                 organisation=organisation, actor=actor
             )
+        for change in organisation.seat_changes.select_for_update().filter(
+            status=OrganisationSeatChange.Status.AWAITING_SETTLEMENT
+        ):
+            self.cancel_seat_change(change=change, actor=actor)
         for invitation in organisation.invitations.select_for_update().filter(
             status=OrganisationInvitation.Status.PENDING
         ):

@@ -619,6 +619,68 @@ class OrganisationServiceTests(TestCase):
             ).exists()
         )
 
+    def test_stale_reassignment_does_not_replace_the_current_seat_holder(self):
+        self.organisation.status = Organisation.Status.ACTIVE
+        self.organisation.save(update_fields=["status"])
+        previous_member = OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=self.member,
+            role=OrganisationMembership.Role.MEMBER,
+        )
+        replacement_user = User.objects.create_user(
+            username="replacement@example.com", email="replacement@example.com"
+        )
+        replacement_member = OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=replacement_user,
+            role=OrganisationMembership.Role.MEMBER,
+        )
+        current_user = User.objects.create_user(
+            username="current@example.com", email="current@example.com"
+        )
+        current_member = OrganisationMembership.objects.create(
+            organisation=self.organisation,
+            user=current_user,
+            role=OrganisationMembership.Role.MEMBER,
+        )
+        seat = OrganisationSeat.objects.create(
+            organisation=self.organisation,
+            product_offering=self.offering,
+            status=OrganisationSeat.Status.ACTIVE,
+            starts_on=timezone.localdate(),
+        )
+        previous_assignment = OrganisationSeatAssignment.objects.create(
+            seat=seat, membership=previous_member
+        )
+        organisation_service.activate_assignment(previous_assignment)
+        change = organisation_service.stage_seat_reassignment(
+            seat=seat, membership=replacement_member, actor=self.owner
+        )
+        organisation_service.release_assignment(
+            assignment=previous_assignment, actor=self.owner
+        )
+        current_assignment = organisation_service.assign_subscription(
+            membership=current_member, offering=self.offering, actor=self.owner
+        )
+        current_assignment.refresh_from_db()
+        current_subscription_id = current_assignment.subscription_id
+
+        with self.assertRaisesMessage(
+            ValidationError, "seat assignment changed while this change"
+        ):
+            organisation_service.apply_seat_change(change=change, actor=self.owner)
+
+        current_assignment.refresh_from_db()
+        change.refresh_from_db()
+        self.assertIsNone(current_assignment.ended_at)
+        self.assertEqual(current_subscription_id, current_assignment.subscription_id)
+        self.assertEqual(
+            OrganisationSeatChange.Status.AWAITING_SETTLEMENT, change.status
+        )
+        self.assertFalse(
+            replacement_member.seat_assignments.filter(ended_at__isnull=True).exists()
+        )
+
     def test_assign_subscription_requires_unused_exact_plan_seat(self):
         self.organisation.status = Organisation.Status.ACTIVE
         self.organisation.save(update_fields=["status"])
@@ -939,6 +1001,36 @@ class OrganisationServiceTests(TestCase):
                 message="Ended organisation membership during organisation closure."
             ).exists()
         )
+
+    def test_closing_organisation_cancels_unsettled_seat_addition(self):
+        self.organisation.status = Organisation.Status.ACTIVE
+        self.organisation.save(update_fields=["status"])
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            requested_product_offering=self.offering,
+            actor=self.owner,
+        )
+        seat = invitation.reserved_seat
+        change = self.organisation.seat_changes.get(
+            status=OrganisationSeatChange.Status.AWAITING_SETTLEMENT
+        )
+
+        organisation_service.close_organisation(
+            organisation=self.organisation, actor=self.staff
+        )
+
+        invitation.refresh_from_db()
+        seat.refresh_from_db()
+        change.refresh_from_db()
+        self.assertEqual(OrganisationInvitation.Status.CANCELLED, invitation.status)
+        self.assertEqual(OrganisationSeat.Status.ENDED, seat.status)
+        self.assertEqual(OrganisationSeatChange.Status.CANCELLED, change.status)
+        with self.assertRaisesMessage(ValidationError, "can no longer be applied"):
+            organisation_service.apply_seat_change(change=change, actor=self.staff)
+        seat.refresh_from_db()
+        self.assertEqual(OrganisationSeat.Status.ENDED, seat.status)
 
     def test_closing_organisation_is_idempotent(self):
         organisation_service.close_organisation(
