@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 09:23+0000\n"
+"POT-Creation-Date: 2026-09-19 09:43+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -63,12 +63,12 @@ msgstr ""
 msgid "Please tell us briefly why."
 msgstr ""
 
-#: models/organisations.py:24 models/organisations.py:295
+#: models/organisations.py:24 models/organisations.py:352
 msgid "Provisional"
 msgstr ""
 
 #: models/organisations.py:25 models/organisations.py:162
-#: models/organisations.py:296 models/subscriptions.py:377
+#: models/organisations.py:353 models/subscriptions.py:377
 msgid "Active"
 msgstr "Ativo"
 
@@ -78,7 +78,7 @@ msgstr "Ativo"
 msgid "Closing"
 msgstr "Fechado"
 
-#: models/organisations.py:27 models/organisations.py:467
+#: models/organisations.py:27 models/organisations.py:664
 #: models/subscriptions.py:378
 msgid "Closed"
 msgstr "Fechado"
@@ -112,144 +112,208 @@ msgstr ""
 msgid "Member"
 msgstr ""
 
-#: models/organisations.py:163 models/organisations.py:298
+#: models/organisations.py:163 models/organisations.py:355
 msgid "Ended"
 msgstr ""
 
-#: models/organisations.py:209 models/subscriptions.py:376
+#: models/organisations.py:209
+msgid "Awaiting payment"
+msgstr ""
+
+#: models/organisations.py:210 models/subscriptions.py:376
 msgid "Pending"
 msgstr "Pendente"
 
-#: models/organisations.py:210
+#: models/organisations.py:211
 msgid "Accepted"
 msgstr ""
 
-#: models/organisations.py:211
+#: models/organisations.py:212
 msgid "Expired"
 msgstr ""
 
-#: models/organisations.py:212
+#: models/organisations.py:213 models/organisations.py:510
 #, fuzzy
 #| msgid "Cancel change"
 msgid "Cancelled"
 msgstr "Cancelar alteração"
 
-#: models/organisations.py:278 models/organisations.py:336
-#: organisations/services.py:889
+#: models/organisations.py:335 models/organisations.py:393
+#: organisations/services.py:1235
 msgid "The plan must use the organisation's billing period."
 msgstr ""
 
-#: models/organisations.py:297 models/organisations.py:464
+#: models/organisations.py:354 models/organisations.py:661
 msgid "Suspended"
 msgstr ""
 
-#: models/organisations.py:349
+#: models/organisations.py:406
 msgid "The pending plan must use the organisation's billing period."
 msgstr ""
 
-#: models/organisations.py:406
+#: models/organisations.py:463
 msgid "The seat and membership must belong to the same organisation."
 msgstr ""
 
-#: models/organisations.py:414
+#: models/organisations.py:471
 msgid "The subscription must belong to the assigned member."
 msgstr ""
 
-#: models/organisations.py:419
+#: models/organisations.py:476
 msgid "An active assignment requires an active membership."
 msgstr ""
 
-#: models/organisations.py:424
+#: models/organisations.py:481
 msgid "An ended seat cannot have an active assignment."
 msgstr ""
 
-#: models/organisations.py:433
+#: models/organisations.py:490
 msgid "The subscription plan must match the assigned seat."
 msgstr ""
 
-#: models/organisations.py:450
+#: models/organisations.py:508
+msgid "Awaiting settlement"
+msgstr ""
+
+#: models/organisations.py:509
+msgid "Applied"
+msgstr ""
+
+#: models/organisations.py:547
+msgid "Add seat"
+msgstr ""
+
+#: models/organisations.py:548
+#, fuzzy
+#| msgid "Upgrade to"
+msgid "Upgrade seat"
+msgstr "Atualize para"
+
+#: models/organisations.py:549
+msgid "Reassign seat"
+msgstr ""
+
+#: models/organisations.py:597
+msgid "The seat must belong to the change's organisation."
+msgstr ""
+
+#: models/organisations.py:605
+msgid "The requested plan must use the organisation's billing period."
+msgstr ""
+
+#: models/organisations.py:616
+msgid "The member must belong to the change's organisation."
+msgstr ""
+
+#: models/organisations.py:620
+msgid "An upgrade must record the current plan."
+msgstr ""
+
+#: models/organisations.py:625
+msgid "A reassignment must record the current member."
+msgstr ""
+
+#: models/organisations.py:629
+msgid "A reassignment must identify the replacement member."
+msgstr ""
+
+#: models/organisations.py:644
 msgid "Created"
 msgstr ""
 
-#: models/organisations.py:451
+#: models/organisations.py:645
 #, fuzzy
 #| msgid "Active"
 msgid "Activated"
 msgstr "Ativo"
 
-#: models/organisations.py:452
+#: models/organisations.py:646
 msgid "Invitation sent"
 msgstr ""
 
-#: models/organisations.py:453
+#: models/organisations.py:647
 msgid "Invitation accepted"
 msgstr ""
 
-#: models/organisations.py:454
+#: models/organisations.py:648
 #, fuzzy
 #| msgid "Subscription cancelled."
 msgid "Invitation cancelled"
 msgstr "Subscrição cancelada."
 
-#: models/organisations.py:455
+#: models/organisations.py:649
 msgid "Invitation expired"
 msgstr ""
 
-#: models/organisations.py:456
+#: models/organisations.py:650
 #, fuzzy
 #| msgid "Cancel change"
 msgid "Role changed"
 msgstr "Cancelar alteração"
 
-#: models/organisations.py:457
+#: models/organisations.py:651
 msgid "Ownership transferred"
 msgstr ""
 
-#: models/organisations.py:458
+#: models/organisations.py:652
 #, fuzzy
 #| msgid "Subscription activated."
 msgid "Subscription assigned"
 msgstr "Assinatura ativada."
 
-#: models/organisations.py:459
+#: models/organisations.py:653
 #, fuzzy
 #| msgid "Subscription cancelled."
 msgid "Subscription released"
 msgstr "Subscrição cancelada."
 
-#: models/organisations.py:460
+#: models/organisations.py:654
 #, fuzzy
 #| msgid "Cancel change"
 msgid "Plan changed"
 msgstr "Cancelar alteração"
 
-#: models/organisations.py:461
+#: models/organisations.py:655
+msgid "Seat change requested"
+msgstr ""
+
+#: models/organisations.py:656
+msgid "Seat change applied"
+msgstr ""
+
+#: models/organisations.py:657
+#, fuzzy
+#| msgid "Subscription cancelled."
+msgid "Seat change cancelled"
+msgstr "Subscrição cancelada."
+
+#: models/organisations.py:658
 msgid "Member removed"
 msgstr ""
 
-#: models/organisations.py:462
+#: models/organisations.py:659
 msgid "Member left"
 msgstr ""
 
-#: models/organisations.py:463
+#: models/organisations.py:660
 #, fuzzy
 #| msgid "Cancel change"
 msgid "Privacy changed"
 msgstr "Cancelar alteração"
 
-#: models/organisations.py:465
+#: models/organisations.py:662
 msgid "Restored"
 msgstr ""
 
-#: models/organisations.py:466
+#: models/organisations.py:663
 msgid "Closure requested"
 msgstr ""
 
-#: models/organisations.py:511
+#: models/organisations.py:708
 msgid "Organisation audit events are append-only."
 msgstr ""
 
-#: models/organisations.py:518
+#: models/organisations.py:715
 msgid "This object must belong to the audit event's organisation."
 msgstr ""
 
@@ -354,235 +418,327 @@ msgstr "Duração do teste (dias)"
 msgid "Number of days for the trial period."
 msgstr "Número de dias para o período de teste."
 
-#: organisations/services.py:108
+#: organisations/services.py:110
 msgid "This plan is not available to this organisation."
 msgstr ""
 
-#: organisations/services.py:174
+#: organisations/services.py:176
 msgid "This organisation is no longer accepting invitations."
 msgstr ""
 
-#: organisations/services.py:218
+#: organisations/services.py:191
+msgid "This person already has an open invitation to this organisation."
+msgstr ""
+
+#: organisations/services.py:204
+msgid "This person is already a member of this organisation. Manage their seat from the members list."
+msgstr ""
+
+#: organisations/services.py:211
+msgid "This account already belongs to an organisation and cannot accept this invitation."
+msgstr ""
+
+#: organisations/services.py:258
 msgid "Transfer ownership instead of inviting another owner."
 msgstr ""
 
-#: organisations/services.py:300
+#: organisations/services.py:359
+msgid "Complete or cancel the existing seat change before starting another."
+msgstr ""
+
+#: organisations/services.py:395
+msgid "Only upgrades require settlement before applying."
+msgstr ""
+
+#: organisations/services.py:425
+msgid "The replacement member already has a seat."
+msgstr ""
+
+#: organisations/services.py:428
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This seat is not currently assigned."
+msgstr "Esta funcionalidade não está disponível de momento."
+
+#: organisations/services.py:452
+#, fuzzy
+#| msgid "Subscription cannot be activated."
+msgid "This seat change can no longer be applied."
+msgstr "A subscrição não pode ser ativada."
+
+#: organisations/services.py:458
+msgid "Seat changes cannot be applied to a closing or closed organisation."
+msgstr ""
+
+#: organisations/services.py:508
+msgid "The seat assignment changed while this change was awaiting settlement."
+msgstr ""
+
+#: organisations/services.py:536
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This seat change can no longer be cancelled."
+msgstr "Esta funcionalidade não está disponível de momento."
+
+#: organisations/services.py:628
 msgid "This seat assignment cannot provide an active subscription."
 msgstr ""
 
-#: organisations/services.py:341
+#: organisations/services.py:668
 msgid "This invitation has expired."
 msgstr ""
 
-#: organisations/services.py:361
+#: organisations/services.py:690
 msgid "This invitation has already been accepted."
 msgstr ""
 
-#: organisations/services.py:364
+#: organisations/services.py:693
 #, fuzzy
 #| msgid "This feature is not currently available."
 msgid "This invitation is no longer available."
 msgstr "Esta funcionalidade não está disponível de momento."
 
-#: organisations/services.py:368
+#: organisations/services.py:697
 #, fuzzy
 #| msgid "Sign up with your email address."
 msgid "Sign in with the verified email address that was invited."
 msgstr "Registe-se com o seu endereço de e-mail."
 
-#: organisations/services.py:373
+#: organisations/services.py:702
 msgid "This account already belongs to an organisation."
 msgstr ""
 
-#: organisations/services.py:375
+#: organisations/services.py:704
 msgid "This organisation already has an owner."
 msgstr ""
 
-#: organisations/services.py:463
+#: organisations/services.py:741
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "The reserved seat is no longer available."
+msgstr "Esta funcionalidade não está disponível de momento."
+
+#: organisations/services.py:749
+#, fuzzy
+#| msgid "This feature is not currently available."
+msgid "This invitation no longer has a reserved seat."
+msgstr "Esta funcionalidade não está disponível de momento."
+
+#: organisations/services.py:797
 #, python-format
 msgid "A member joined %(organisation)s"
 msgstr ""
 
-#: organisations/services.py:464
+#: organisations/services.py:798
 #, python-format
 msgid "%(email)s accepted their organisation invitation."
 msgstr ""
 
-#: organisations/services.py:486
+#: organisations/services.py:824
 #, fuzzy
 #| msgid "Your pending subscription change has been cancelled."
-msgid "Only pending invitations can be cancelled."
+msgid "Only open invitations can be cancelled."
 msgstr "A sua alteração de subscrição pendente foi cancelada."
 
-#: organisations/services.py:499 organisations/services.py:1175
+#: organisations/services.py:858 organisations/services.py:1547
 msgid "Your organisation invitation was cancelled"
 msgstr ""
 
-#: organisations/services.py:500 organisations/services.py:1176
+#: organisations/services.py:859 organisations/services.py:1548
 #, python-format
 msgid "Your invitation to %(organisation)s is no longer available."
 msgstr ""
 
-#: organisations/services.py:516
+#: organisations/services.py:876
 msgid "Only pending invitations can be resent."
 msgstr ""
 
-#: organisations/services.py:530
+#: organisations/services.py:888
 #, fuzzy
 #| msgid "Subscription cannot be activated."
 msgid "This organisation cannot be activated."
 msgstr "A subscrição não pode ser ativada."
 
-#: organisations/services.py:533
+#: organisations/services.py:891
 msgid "An organisation must have an owner before activation."
 msgstr ""
 
-#: organisations/services.py:591
+#: organisations/services.py:949
 msgid "Your organisation-funded subscription ended"
 msgstr ""
 
-#: organisations/services.py:593
+#: organisations/services.py:951
 #, python-format
 msgid "Your %(organisation)s-funded subscription has ended. Your account and private research have been preserved."
 msgstr ""
 
-#: organisations/services.py:612
+#: organisations/services.py:970
 msgid "This member already has an assigned seat."
 msgstr ""
 
-#: organisations/services.py:651
+#: organisations/services.py:974
+msgid "There is no unused seat on this plan. Add a seat first."
+msgstr ""
+
+#: organisations/services.py:997
 msgid "Your organisation-funded subscription is ready"
 msgstr ""
 
-#: organisations/services.py:652
+#: organisations/services.py:998
 #, python-format
 msgid "%(organisation)s assigned you a %(plan)s subscription."
 msgstr ""
 
-#: organisations/services.py:671 organisations/services.py:726
+#: organisations/services.py:1017 organisations/services.py:1072
 msgid "Transfer ownership before removing the owner."
 msgstr ""
 
-#: organisations/services.py:696
+#: organisations/services.py:1042
 msgid "Your organisation membership ended"
 msgstr ""
 
-#: organisations/services.py:698
+#: organisations/services.py:1044
 #, python-format
 msgid "Your membership of %(organisation)s has ended. Your account and private research have been preserved."
 msgstr ""
 
-#: organisations/services.py:704
+#: organisations/services.py:1050
 msgid "Organisation member left"
 msgstr ""
 
-#: organisations/services.py:706
+#: organisations/services.py:1052
 msgid "Organisation member removed"
 msgstr ""
 
-#: organisations/services.py:708
+#: organisations/services.py:1054
 #, python-format
 msgid "%(email)s is no longer a member of %(organisation)s."
 msgstr ""
 
-#: organisations/services.py:739
+#: organisations/services.py:1085
 msgid "Your organisation membership is scheduled to end"
 msgstr ""
 
-#: organisations/services.py:740
+#: organisations/services.py:1086
 #, python-format
 msgid "Your membership of %(organisation)s is scheduled to end on %(date)s."
 msgstr ""
 
-#: organisations/services.py:756
+#: organisations/services.py:1102
 msgid "This membership has no scheduled removal."
 msgstr ""
 
-#: organisations/services.py:773
+#: organisations/services.py:1119
 msgid "Your organisation membership will continue"
 msgstr ""
 
-#: organisations/services.py:774
+#: organisations/services.py:1120
 #, python-format
 msgid "Your membership of %(organisation)s is no longer scheduled to end."
 msgstr ""
 
-#: organisations/services.py:792
+#: organisations/services.py:1138
 msgid "Use ownership transfer to change the owner."
 msgstr ""
 
-#: organisations/services.py:814
+#: organisations/services.py:1160
 msgid "Your organisation role changed"
 msgstr ""
 
-#: organisations/services.py:815
+#: organisations/services.py:1161
 #, python-format
 msgid "Your role in %(organisation)s is now %(role)s."
 msgstr ""
 
-#: organisations/services.py:872
+#: organisations/services.py:1218
 msgid "You are now the organisation owner"
 msgstr ""
 
-#: organisations/services.py:873
+#: organisations/services.py:1219
 #, python-format
 msgid "You are now the owner of %(organisation)s."
 msgstr ""
 
-#: organisations/services.py:878
+#: organisations/services.py:1224
 msgid "Organisation ownership transferred"
 msgstr ""
 
-#: organisations/services.py:879
+#: organisations/services.py:1225
 #, python-format
 msgid "You transferred ownership of %(organisation)s to %(email)s."
 msgstr ""
 
-#: organisations/services.py:963
+#: organisations/services.py:1264
+msgid "Upgrades must be staged until their charge has settled."
+msgstr ""
+
+#: organisations/services.py:1294
 msgid "Your organisation-funded subscription is changing"
 msgstr ""
 
-#: organisations/services.py:965
+#: organisations/services.py:1296
 #, python-format
 msgid "Your %(organisation)s-funded subscription changes to %(plan)s on %(date)s."
 msgstr ""
 
-#: organisations/services.py:1002
+#: organisations/services.py:1333
 msgid "Your organisation-funded subscription is scheduled to end"
 msgstr ""
 
-#: organisations/services.py:1004
+#: organisations/services.py:1335
 #, python-format
 msgid "Your %(organisation)s-funded subscription is scheduled to end on %(date)s."
 msgstr ""
 
-#: organisations/services.py:1083
+#: organisations/services.py:1351
+#, fuzzy
+#| msgid "Your pending subscription change has been cancelled."
+msgid "Only an active seat can be ended."
+msgstr "A sua alteração de subscrição pendente foi cancelada."
+
+#: organisations/services.py:1353
+msgid "Paid seats can only end at renewal."
+msgstr ""
+
+#: organisations/services.py:1355
+msgid "Unassign the member before removing this seat."
+msgstr ""
+
+#: organisations/services.py:1363
+msgid "Cancel the invitation before removing this seat."
+msgstr ""
+
+#: organisations/services.py:1365
+msgid "Cancel the pending plan change first."
+msgstr ""
+
+#: organisations/services.py:1453
 msgid "This organisation's access cannot be suspended."
 msgstr ""
 
-#: organisations/services.py:1115
+#: organisations/services.py:1485
 msgid "This organisation's access cannot be restored."
 msgstr ""
 
-#: organisations/services.py:1148
+#: organisations/services.py:1518
 msgid "Your LawLibrary organisation is closing"
 msgstr ""
 
-#: organisations/services.py:1150
+#: organisations/services.py:1520
 #, python-format
 msgid "Organisation-funded access for %(organisation)s has ended. Member accounts and private research have been preserved."
 msgstr ""
 
-#: organisations/services.py:1233
+#: organisations/services.py:1604
 msgid "Organisation invitation expired"
 msgstr ""
 
-#: organisations/services.py:1234
+#: organisations/services.py:1605
 #, python-format
 msgid "The invitation for %(email)s has expired."
 msgstr ""
 
-#: organisations/services.py:1269
+#: organisations/services.py:1639
 msgid "Choose a valid organisation privacy mode."
 msgstr ""
 
