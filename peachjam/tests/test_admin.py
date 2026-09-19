@@ -19,6 +19,8 @@ from peachjam.models import (
     JournalArticle,
     Judgment,
     Language,
+    LeadingAuthority,
+    LegalSubject,
     SourceFile,
     VolumeIssue,
 )
@@ -81,6 +83,28 @@ class TestJudgmentAdmin(WebTest):
         self.assertNotIn("summary_generated_at", form.fields)
         self.assertNotIn("summary_language", form.fields)
         self.assertNotIn("summary_trace_id", form.fields)
+
+    def test_leading_authority_admin_manages_sources_inline(self):
+        authority = LeadingAuthority.objects.create(
+            judgment=self.make_judgment(),
+            subject=LegalSubject.objects.create(
+                name="Plascon-Evans rule",
+                subject_type=LegalSubject.DOCTRINE,
+            ),
+            editorial_note="The leading formulation of the rule.",
+            as_at_date=date(2026, 8, 1),
+        )
+
+        response = self.app.get(
+            reverse(
+                "admin:peachjam_leadingauthority_change",
+                kwargs={"object_id": authority.pk},
+            )
+        )
+        form = response.forms["leadingauthority_form"]
+
+        self.assertIn("sources-0-citation", form.fields)
+        self.assertIn("sources-0-url", form.fields)
 
     def test_add_judgment_docx_swap_pdf(self):
         # add judgment
