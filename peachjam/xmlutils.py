@@ -71,7 +71,7 @@ def get_preceding_text(
 
         # get the text at the start of the parent
         parent = current.getparent()
-        if parent and parent.text:
+        if parent is not None and parent.text:
             collect(parent.text)
 
         # include text at the end of the current node
