@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 07:58+0000\n"
+"POT-Creation-Date: 2026-09-19 09:43+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -2590,19 +2590,19 @@ msgstr "wasifu wa mtumiaji"
 msgid "user profiles"
 msgstr "wasifu wa mtumiaji"
 
-#: settings.py:402
+#: settings.py:398
 msgid "English"
 msgstr "Kiingereza"
 
-#: settings.py:403
+#: settings.py:399
 msgid "French"
 msgstr "Kifaransa"
 
-#: settings.py:404
+#: settings.py:400
 msgid "Portuguese"
 msgstr "Kireno"
 
-#: settings.py:405
+#: settings.py:401
 msgid "Swahili"
 msgstr "Kiswahili"
 
