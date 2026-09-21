@@ -58,6 +58,7 @@ class LegislationListView(FilteredDocumentListView):
 
     def add_facets(self, context):
         super().add_facets(context)
+        self.add_languages_facet(context)
         # move the alphabet facet first, it's highly used on the legislation page for some LIIs
         if "alphabet" in context["facet_data"]:
             facets = {"alphabet": context["facet_data"].pop("alphabet")}

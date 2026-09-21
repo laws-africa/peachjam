@@ -21,6 +21,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import gettext_lazy as _
 from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, TemplateView, View
+from languages_plus.models import Language
 from lxml import html
 
 from peachjam.auth import user_display
@@ -243,7 +244,11 @@ class FilteredDocumentListView(DocumentListView):
         return self.form_class(self.form_defaults, self.request.GET)
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = (
+            self.get_base_queryset()
+            if self.form.cleaned_data.get("languages")
+            else super().get_queryset()
+        )
         # filter the queryset, including filtering on the form's query string
         filtered_qs = self.filter_queryset(qs, filter_q=True)
 
@@ -426,6 +431,26 @@ class FilteredDocumentListView(DocumentListView):
                     # these are (value, label) tuples
                     "options": [(str(y), y) for y in sorted(years, reverse=True)],
                     "values": self.request.GET.getlist("years"),
+                }
+
+    def add_languages_facet(self, context):
+        if "languages" not in self.exclude_facets:
+            language_ids = (
+                self.form.filter_queryset(self.get_base_queryset(), exclude="languages")
+                .order_by()
+                .values_list("language_id", flat=True)
+                .distinct()
+            )
+            languages = Language.objects.filter(pk__in=language_ids)
+            if languages:
+                context["facet_data"]["languages"] = {
+                    "label": _("Languages"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(language.pk, language.name_en) for language in languages],
+                        key=lambda option: option[1],
+                    ),
+                    "values": self.request.GET.getlist("languages"),
                 }
 
     def add_facets(self, context):

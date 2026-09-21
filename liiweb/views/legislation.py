@@ -108,16 +108,17 @@ class LegislationListView(BaseLegislationListView):
             )
 
             children = defaultdict(list)
-            children_qs = (
-                self.get_model_queryset()
-                .filter(
-                    parent_work_id__in=parents,
-                    repealed=False,
-                    metadata_json__principal=True,
-                )
-                .latest_expression()
+            children_qs = self.get_model_queryset().filter(
+                parent_work_id__in=parents,
+                repealed=False,
+                metadata_json__principal=True,
             )
-            children_qs = children_qs.preferred_language(get_language(self.request))
+            languages = self.form.cleaned_data.get("languages", [])
+            if languages:
+                children_qs = self.form.apply_filter_languages(children_qs)
+            children_qs = children_qs.latest_expression()
+            if not languages:
+                children_qs = children_qs.preferred_language(get_language(self.request))
             # group children by parent
             for child in children_qs:
                 children[child.parent_work_id].append(child)
