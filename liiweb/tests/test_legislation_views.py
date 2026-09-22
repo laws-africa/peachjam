@@ -36,8 +36,8 @@ class LegislationViewsTest(TestCase):
         self.assertContains(response, "Document nature")
         self.assertContains(
             response,
-            f'{reverse("legislation_list_all")}?years='
-            f'{response.context["legislation_years"][0]}',
+            f"{reverse('legislation_list_all')}?years="
+            f"{response.context['legislation_years'][0]}",
         )
         self.assertContains(response, "Legislation by status")
         self.assertContains(response, "Popular legislation")
@@ -95,7 +95,7 @@ class LegislationViewsTest(TestCase):
         self.assertContains(response, "Family law")
         self.assertContains(
             response,
-            f'{reverse("legislation_list_all")}?taxonomies={topic.slug}',
+            f"{reverse('legislation_list_all')}?taxonomies={topic.slug}",
         )
 
     def test_landing_page_links_to_document_nature_filter(self):
@@ -108,7 +108,7 @@ class LegislationViewsTest(TestCase):
 
         self.assertContains(
             response,
-            f'{reverse("legislation_list_all")}?natures={nature.code}',
+            f"{reverse('legislation_list_all')}?natures={nature.code}",
         )
 
     def test_recent_legislation_displays_its_publication_date(self):
