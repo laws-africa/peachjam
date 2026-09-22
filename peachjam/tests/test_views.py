@@ -508,6 +508,11 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "The leading formulation of the rule.")
         self.assertContains(response, "Example source")
         self.assertNotContains(response, "Unpublished editorial note.")
+        content = response.content.decode()
+        self.assertLess(
+            content.index("The leading formulation of the rule."),
+            content.index('id="document-tab-list"'),
+        )
 
     def test_judgment_listing_shows_published_leading_authorities(self):
         judgment = Judgment.objects.get(
