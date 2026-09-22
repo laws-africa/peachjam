@@ -56,6 +56,10 @@ def mock_email_alert_sender():
             },
             TEMPLATED_EMAIL_BACKEND="peachjam.emails.CustomerIOTemplateBackend",
         ),
+        patch(
+            "peachjam.timeline_email_service.timezone.localdate",
+            return_value=date(2026, 8, 14),
+        ),
         patch("peachjam.emails.APIClient.send_email") as mailer,
     ):
         yield mailer

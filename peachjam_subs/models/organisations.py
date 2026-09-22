@@ -206,6 +206,7 @@ class OrganisationInvitation(models.Model):
     """A time-limited invitation to join an organisation."""
 
     class Status(models.TextChoices):
+        AWAITING_PAYMENT = "awaiting-payment", _("Awaiting payment")
         PENDING = "pending", _("Pending")
         ACCEPTED = "accepted", _("Accepted")
         EXPIRED = "expired", _("Expired")
@@ -250,13 +251,21 @@ class OrganisationInvitation(models.Model):
         null=True,
         blank=True,
     )
+    reserved_seat = models.OneToOneField(
+        "OrganisationSeat",
+        on_delete=models.SET_NULL,
+        related_name="reserved_invitation",
+        null=True,
+        blank=True,
+    )
+    sent_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
         constraints = [
             models.UniqueConstraint(
                 fields=("organisation", "email"),
-                condition=Q(status="pending"),
+                condition=Q(status__in=["awaiting-payment", "pending"]),
                 name="one_pending_invitation_per_org_email",
             )
         ]
@@ -264,6 +273,54 @@ class OrganisationInvitation(models.Model):
     @property
     def is_expired(self):
         return self.status == self.Status.PENDING and timezone.now() >= self.expires_at
+
+    def mark_sent(self, now=None):
+        """Mark a paid-seat invitation as sent and start its expiry period."""
+        now = now or timezone.now()
+        self.status = self.Status.PENDING
+        self.sent_at = now
+        self.expires_at = now + timezone.timedelta(days=14)
+        self.save(update_fields=["status", "sent_at", "expires_at"])
+
+    def accept(self, membership, now=None):
+        """Mark this invitation as accepted by the supplied membership."""
+        self.status = self.Status.ACCEPTED
+        self.accepted_at = now or timezone.now()
+        self.accepted_membership = membership
+        self.reserved_seat = None
+        self.save(
+            update_fields=[
+                "status",
+                "accepted_at",
+                "accepted_membership",
+                "reserved_seat",
+            ]
+        )
+
+    def expire(self):
+        """Mark this invitation as expired and release its reserved seat."""
+        self.status = self.Status.EXPIRED
+        self.reserved_seat = None
+        self.save(update_fields=["status", "reserved_seat"])
+
+    def cancel(self, now=None):
+        """Mark this invitation as cancelled and release its reserved seat."""
+        self.status = self.Status.CANCELLED
+        self.cancelled_at = now or timezone.now()
+        self.reserved_seat = None
+        self.save(update_fields=["status", "cancelled_at", "reserved_seat"])
+
+    def resend(self, now=None):
+        """Restart this invitation's expiry period after resending it."""
+        now = now or timezone.now()
+        self.expires_at = now + timezone.timedelta(days=14)
+        self.reminder_sent_at = now
+        self.save(update_fields=["expires_at", "reminder_sent_at"])
+
+    def mark_reminder_sent(self, now=None):
+        """Record that this invitation's expiry reminder has been sent."""
+        self.reminder_sent_at = now or timezone.now()
+        self.save(update_fields=["reminder_sent_at"])
 
     def clean(self):
         self.email = self.email.strip().lower()
@@ -443,6 +500,143 @@ class OrganisationSeatAssignment(models.Model):
         return f"{self.seat} assigned to {self.membership.user}"
 
 
+class OrganisationSeatChange(models.Model):
+    """A change to the seats for an organisation. Changes that require payment must be settled before the change is
+    applied and the seats are allocated."""
+
+    class Status(models.TextChoices):
+        AWAITING_SETTLEMENT = "awaiting-settlement", _("Awaiting settlement")
+        APPLIED = "applied", _("Applied")
+        CANCELLED = "cancelled", _("Cancelled")
+
+    organisation = models.ForeignKey(
+        Organisation, on_delete=models.CASCADE, related_name="seat_changes"
+    )
+    requested_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        related_name="requested_organisation_seat_changes",
+        null=True,
+        blank=True,
+    )
+    status = models.CharField(
+        max_length=24, choices=Status.choices, default=Status.AWAITING_SETTLEMENT
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    applied_at = models.DateTimeField(null=True, blank=True)
+    cancelled_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-created_at", "-pk")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("organisation",),
+                condition=Q(status="awaiting-settlement"),
+                name="one_awaiting_org_seat_change",
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.organisation}: {self.get_status_display()}"
+
+
+class OrganisationSeatChangeItem(models.Model):
+    """A single change to organisation seats as part of a seat change request."""
+
+    class Action(models.TextChoices):
+        ADD = "add", _("Add seat")
+        UPGRADE = "upgrade", _("Upgrade seat")
+        REASSIGN = "reassign", _("Reassign seat")
+
+    change = models.ForeignKey(
+        OrganisationSeatChange, on_delete=models.CASCADE, related_name="items"
+    )
+    action = models.CharField(max_length=16, choices=Action.choices)
+    seat = models.ForeignKey(
+        OrganisationSeat, on_delete=models.PROTECT, related_name="pending_change_items"
+    )
+    previous_offering = models.ForeignKey(
+        ProductOffering,
+        on_delete=models.PROTECT,
+        related_name="previous_organisation_seat_change_items",
+        null=True,
+        blank=True,
+    )
+    requested_offering = models.ForeignKey(
+        ProductOffering,
+        on_delete=models.PROTECT,
+        related_name="requested_organisation_seat_change_items",
+    )
+    previous_membership = models.ForeignKey(
+        OrganisationMembership,
+        on_delete=models.PROTECT,
+        related_name="outgoing_organisation_seat_change_items",
+        null=True,
+        blank=True,
+    )
+    requested_membership = models.ForeignKey(
+        OrganisationMembership,
+        on_delete=models.PROTECT,
+        related_name="incoming_organisation_seat_change_items",
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        ordering = ("pk",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("change", "seat"), name="one_item_per_seat_change"
+            )
+        ]
+
+    def clean(self):
+        errors = {}
+        if self.seat_id and self.change_id:
+            if self.seat.organisation_id != self.change.organisation_id:
+                errors["seat"] = _("The seat must belong to the change's organisation.")
+
+        if self.requested_offering_id and self.change_id:
+            if (
+                self.requested_offering.pricing_plan.period
+                != self.change.organisation.billing_period
+            ):
+                errors["requested_offering"] = _(
+                    "The requested plan must use the organisation's billing period."
+                )
+
+        for field_name in ("previous_membership", "requested_membership"):
+            membership = getattr(self, field_name, None)
+            if (
+                membership
+                and self.change_id
+                and membership.organisation_id != self.change.organisation_id
+            ):
+                errors[field_name] = _(
+                    "The member must belong to the change's organisation."
+                )
+
+        if self.action == self.Action.UPGRADE and not self.previous_offering_id:
+            errors["previous_offering"] = _("An upgrade must record the current plan.")
+
+        if self.action == self.Action.REASSIGN:
+            if not self.previous_membership_id:
+                errors["previous_membership"] = _(
+                    "A reassignment must record the current member."
+                )
+            if not self.requested_membership_id:
+                errors["requested_membership"] = _(
+                    "A reassignment must identify the replacement member."
+                )
+
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        return super().save(*args, **kwargs)
+
+
 class OrganisationAuditEvent(models.Model):
     """Append-only record of an organisation lifecycle decision."""
 
@@ -458,6 +652,9 @@ class OrganisationAuditEvent(models.Model):
         SEAT_ASSIGNED = "seat-assigned", _("Subscription assigned")
         SEAT_RELEASED = "seat-released", _("Subscription released")
         PLAN_CHANGED = "plan-changed", _("Plan changed")
+        SEAT_CHANGE_REQUESTED = "seat-change-requested", _("Seat change requested")
+        SEAT_CHANGE_APPLIED = "seat-change-applied", _("Seat change applied")
+        SEAT_CHANGE_CANCELLED = "seat-change-cancelled", _("Seat change cancelled")
         MEMBER_REMOVED = "member-removed", _("Member removed")
         MEMBER_LEFT = "member-left", _("Member left")
         PRIVACY_CHANGED = "privacy-changed", _("Privacy changed")

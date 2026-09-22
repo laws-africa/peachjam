@@ -70,6 +70,7 @@ class BaseDocumentFilterFormTestCase(TestCase):
                 "taxonomy_tree": [],
                 "is_leaf_node": False,
                 "show_clear_all": False,
+                "selected_facets_count": 0,
                 "facet_data": {
                     "judges": {
                         "label": "Judges",
@@ -128,6 +129,10 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn("No documents found.", html)
         self.assertIn('id="doc-table-form-test-filters-section"', html)
         self.assertIn('aria-labelledby="doc-table-form-test-filters-heading"', html)
+        self.assertIn("data-mobile-filter-controls", html)
+        self.assertIn("data-desktop-filter-controls", html)
+        self.assertEqual(html.count("document-list-sort"), 1)
+        self.assertIn('data-bs-target="#doc-table-filters-offcanvas-test"', html)
 
     def test_document_table_form_skips_hidden_facets_when_building_next_links(self):
         request = RequestFactory().get("/documents/")
@@ -200,6 +205,36 @@ class BaseDocumentFilterFormTestCase(TestCase):
 
         self.assertIn('href="#doc-table-form-test-group-alphabet"', html)
         self.assertNotIn('href="#doc-table-form-test-group-years"', html)
+
+    def test_document_table_form_override_keeps_mobile_filters_button(self):
+        request = RequestFactory().get("/documents/")
+        html = render_to_string(
+            "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html",
+            {
+                "request": request,
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+                "doc_table_offcanvas_id": "doc-table-filters-offcanvas-test",
+                "doc_table_filter_input_id": "doc-table-form-test-filter-input",
+                "taxonomy_tree": [],
+                "is_leaf_node": False,
+                "show_clear_all": True,
+                "selected_facets_count": 1,
+                "rendered_facets": [],
+                "form": BaseDocumentFilterForm({}, {}),
+                "documents": [],
+                "doc_count": 0,
+                "doc_count_noun": "document",
+                "doc_count_noun_plural": "documents",
+                "doc_table_show_counts": True,
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('data-bs-target="#doc-table-filters-offcanvas-test"', html)
+        self.assertIn('<span class="badge bg-light text-dark">1</span>', html)
 
     def test_custom_filtered_tables_render_results_target(self):
         request = RequestFactory().get("/documents/")
