@@ -205,6 +205,15 @@ def search_flynotes(keywords: list[str], parent_id: int) -> str:
         connection.close()
 
 
+def summary_language_for(language):
+    """The language a judgment in `language` is summarised in on this site: its own when
+    SUMMARISE_IN_DOCUMENT_LANGUAGE is on, else SUMMARISER_LANGUAGE."""
+    if settings.PEACHJAM["SUMMARISE_IN_DOCUMENT_LANGUAGE"] and language is not None:
+        # some names list synonyms, e.g. "Spanish; Castilian"
+        return language.name_en.split(";")[0].strip()
+    return settings.PEACHJAM["SUMMARISER_LANGUAGE"]
+
+
 class JudgmentSummariser:
     default_llm_model = "gpt-5.6-luna"
     llm_model = None

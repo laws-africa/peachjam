@@ -19,7 +19,7 @@ from django.utils.translation import override as lang_override
 from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
 from peachjam.analysis.judges import judge_identity_service
-from peachjam.analysis.summariser import JudgmentSummariser
+from peachjam.analysis.summariser import JudgmentSummariser, summary_language_for
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
 from peachjam.models import (
     CoreDocument,
@@ -960,6 +960,7 @@ class Judgment(CoreDocument):
             return
 
         summariser = JudgmentSummariser()
+        summariser.summary_language = summary_language_for(self.language)
         if not summariser.enabled():
             log.warning(
                 "Summariser service is not enabled, skipping AI summary generation."

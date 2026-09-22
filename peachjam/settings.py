@@ -202,6 +202,8 @@ PEACHJAM = {
     "CANONICAL_JUDGE_IDENTITY": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
+    # write each judgment's AI summary in the judgment's own language, not SUMMARISER_LANGUAGE
+    "SUMMARISE_IN_DOCUMENT_LANGUAGE": False,
     "EXTRA_SEARCH_INDEXES": [],
     "SEARCH_JURISDICTION_FILTER": False,
     "SEARCH_SUGGESTIONS": os.environ.get("SEARCH_SUGGESTIONS", "false") == "true",

@@ -25,7 +25,7 @@ from django_recaptcha.widgets import ReCaptchaV2Invisible
 from languages_plus.models import Language
 
 from peachjam.analysis.judges import judge_identity_service
-from peachjam.analysis.summariser import JudgmentSummariser
+from peachjam.analysis.summariser import JudgmentSummariser, summary_language_for
 from peachjam.models import (
     Annotation,
     AttachedFiles,
@@ -750,7 +750,9 @@ class DocumentSummaryForm(forms.Form):
     )
 
     @classmethod
-    def build(cls, data=None):
+    def build(cls, data=None, document=None):
+        """The form with this site's defaults; the language is the document's own when the
+        site summarises in document language."""
         summariser = JudgmentSummariser()
         try:
             summary_prompt_str = summariser.get_summary_prompt_str()
@@ -760,7 +762,7 @@ class DocumentSummaryForm(forms.Form):
         initial = {
             "summary_prompt_str": summary_prompt_str,
             "llm_model": summariser.llm_model or summariser.default_llm_model,
-            "language": summariser.summary_language,
+            "language": summary_language_for(getattr(document, "language", None)),
         }
         return cls(data=data, initial=initial)
 

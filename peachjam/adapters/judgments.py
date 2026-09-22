@@ -7,13 +7,13 @@ import magic
 import requests
 from cobalt.uri import FrbrUri
 from countries_plus.models import Country
-from django.conf import settings
 from django.core.files import File
 from django.utils import timezone
 from django.utils.text import slugify
 from languages_plus.models import Language
 
 from peachjam.adapters.base import RequestsAdapter
+from peachjam.analysis.summariser import summary_language_for
 from peachjam.models import (
     CaseNumber,
     Court,
@@ -152,7 +152,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         elif "flynote" in doc:
             data["flynote_raw"] = doc["flynote"]
 
-        import_summary = self.should_import_summary(doc)
+        import_summary = self.should_import_summary(doc, language)
         for field in (
             "case_summary",
             "case_summary_public",
@@ -178,7 +178,7 @@ class JudgmentAdapter(BaseJudgmentAdapter):
                     "order": None,
                     "summary_ai_generated": False,
                     "summary_generated_at": None,
-                    "summary_language": settings.PEACHJAM["SUMMARISER_LANGUAGE"],
+                    "summary_language": summary_language_for(language),
                     "summary_trace_id": None,
                 }
             )
@@ -215,12 +215,12 @@ class JudgmentAdapter(BaseJudgmentAdapter):
         log.info(f"Updated judgment {created_doc}")
         log.info(f"New {new}")
 
-    def should_import_summary(self, doc):
+    def should_import_summary(self, doc, language=None):
         if not doc.get("case_summary"):
             return False
         if doc.get("summary_ai_generated") is not True:
             return True
-        return doc.get("summary_language") == settings.PEACHJAM["SUMMARISER_LANGUAGE"]
+        return doc.get("summary_language") == summary_language_for(language)
 
     def get_registry(self, doc, court):
         if doc.get("registry"):

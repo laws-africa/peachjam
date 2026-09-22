@@ -4,14 +4,16 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import IntegrityError
 from django.template.loader import render_to_string
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from languages_plus.models import Language
 
-from peachjam.analysis.summariser import JudgmentSummary
+from peachjam.analysis.summariser import JudgmentSummary, summary_language_for
+from peachjam.forms import DocumentSummaryForm
 from peachjam.models import (
     CaseNumber,
     Court,
@@ -1079,6 +1081,77 @@ class JudgmentTestCase(TestCase):
         self.assertEqual("English", judgment.summary_language)
         self.assertIsNotNone(judgment.summary_generated_at)
         summariser.summarise_judgment.assert_called_once_with(judgment)
+
+    def summarise_french_judgment(self, summariser_cls):
+        summariser = MagicMock()
+        summariser.enabled.return_value = True
+        summariser.summarise_judgment.return_value = JudgmentSummary(
+            issues=[], held=[], order="", summary="Résumé.", flynote="", blurb="Rejet."
+        )
+        summariser_cls.return_value = summariser
+
+        judgment = Judgment(
+            language=Language.objects.get(pk="fr"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo c/ Bar",
+        )
+        judgment.save()
+        doc_content = judgment.get_or_create_document_content(True)
+        doc_content.set_source_html("<p>Le texte de la décision.</p>")
+        doc_content.save()
+
+        judgment.track_changes()
+        judgment.generate_summary()
+        judgment.refresh_from_db()
+        return summariser, judgment
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_IN_DOCUMENT_LANGUAGE": True}
+    )
+    @patch("peachjam.models.judgment.JudgmentSummariser")
+    def test_generate_summary_in_the_judgments_language(self, summariser_cls):
+        summariser, judgment = self.summarise_french_judgment(summariser_cls)
+        self.assertEqual("French", summariser.summary_language)
+        self.assertEqual("French", judgment.summary_language)
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_IN_DOCUMENT_LANGUAGE": False,
+            "SUMMARISER_LANGUAGE": "English",
+        }
+    )
+    @patch("peachjam.models.judgment.JudgmentSummariser")
+    def test_generate_summary_in_the_site_language_by_default(self, summariser_cls):
+        summariser, judgment = self.summarise_french_judgment(summariser_cls)
+        self.assertEqual("English", summariser.summary_language)
+        self.assertEqual("English", judgment.summary_language)
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_IN_DOCUMENT_LANGUAGE": True}
+    )
+    def test_summary_language_uses_the_first_name_of_a_language(self):
+        self.assertEqual(
+            "Spanish", summary_language_for(Language(name_en="Spanish; Castilian"))
+        )
+        self.assertEqual(
+            settings.PEACHJAM["SUMMARISER_LANGUAGE"], summary_language_for(None)
+        )
+
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_IN_DOCUMENT_LANGUAGE": True}
+    )
+    @patch("peachjam.forms.JudgmentSummariser")
+    def test_summary_preview_defaults_to_the_judgments_language(self, summariser_cls):
+        summariser_cls.return_value.get_summary_prompt_str.return_value = ""
+        summariser_cls.return_value.llm_model = None
+        judgment = Judgment(language=Language.objects.get(pk="fr"))
+
+        form = DocumentSummaryForm.build(document=judgment)
+
+        self.assertEqual("French", form.initial["language"])
 
     @patch("peachjam.models.judgment.generate_judgment_summary")
     def test_content_text_change_triggers_summary_generation(

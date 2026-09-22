@@ -17,7 +17,11 @@ from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
 
-from peachjam.analysis.summariser import JudgmentSummariser, SummariserError
+from peachjam.analysis.summariser import (
+    JudgmentSummariser,
+    SummariserError,
+    summary_language_for,
+)
 from peachjam.forms import DocumentSummaryForm
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
@@ -449,7 +453,7 @@ class DocumentDebugView(DocumentDebugViewBase):
         context = super().get_context_data(**kwargs)
         context["external_debug_links"] = self.get_external_debug_links()
         if self.object.doc_type == "judgment":
-            context["summary_form"] = DocumentSummaryForm.build()
+            context["summary_form"] = DocumentSummaryForm.build(document=self.object)
         return context
 
     def get_external_debug_links(self):
@@ -498,7 +502,7 @@ class DocumentSummaryView(DocumentDebugViewBase):
 
         summariser = JudgmentSummariser()
         data = self.request.POST if self.request.method == "POST" else None
-        form = DocumentSummaryForm.build(data)
+        form = DocumentSummaryForm.build(data, document=self.object)
         context["form"] = form
 
         if not form.is_bound or not form.is_valid():
@@ -506,9 +510,9 @@ class DocumentSummaryView(DocumentDebugViewBase):
 
         summariser.summary_prompt_str = form.cleaned_data["summary_prompt_str"] or None
         summariser.llm_model = form.cleaned_data["llm_model"] or None
-        summariser.summary_language = (
-            form.cleaned_data["language"] or summariser.summary_language
-        )
+        summariser.summary_language = form.cleaned_data[
+            "language"
+        ] or summary_language_for(self.object.language)
 
         try:
             context["summary"] = summariser.summarise_judgment(self.object)

@@ -856,6 +856,33 @@ class JudgmentAdapterTest(TestCase):
             any(call.args == (judgment.pk,) for call in generate_summary.call_args_list)
         )
 
+    @override_settings(
+        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_IN_DOCUMENT_LANGUAGE": True}
+    )
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_update_document_imports_ai_summary_in_the_judgments_language(
+        self, generate_summary
+    ):
+        doc = self.remote_judgment_doc(
+            language="fr",
+            expression_frbr_uri="/akn/za/judgment/eacj/2024/1/fra@2024-01-01",
+            case_summary="<p>Résumé</p>",
+            summary_language="French",
+        )
+
+        self.adapter.client_get = lambda url: SimpleNamespace(json=lambda: doc)  # noqa: E731
+        self.adapter.get_content_html = lambda doc: "<p>Contenu</p>"  # noqa: E731
+        self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
+
+        self.adapter.update_document(
+            "http://example.com/judgments/akn/za/judgment/eacj/2024/1/fra@2024-01-01"
+        )
+
+        judgment = Judgment.objects.get(expression_frbr_uri=doc["expression_frbr_uri"])
+        self.assertEqual("<p>Résumé</p>", judgment.case_summary)
+        self.assertEqual("French", judgment.summary_language)
+        generate_summary.assert_not_called()
+
 
 class HtmlServer:
     """Tiny HTTP server that serves UTF-8 HTML, optionally declaring a charset."""
