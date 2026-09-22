@@ -126,7 +126,7 @@ class LegislationListView(FilteredDocumentListView):
         latest_expressions = self.model.objects.filter(
             id__in=latest_expression_ids,
             published=True,
-        )
+        ).for_document_table()
         counts = latest_expressions.aggregate(
             total=Count("id"),
             repealed=Count("id", filter=Q(repealed=True)),
@@ -182,14 +182,7 @@ class LegislationListView(FilteredDocumentListView):
             )
         else:
             popular_legislation = []
-        recent_queryset = recent_queryset.only(
-            "citation",
-            "date",
-            "expression_frbr_uri",
-            "metadata_json",
-            "polymorphic_ctype",
-            "title",
-        ).order_by(
+        recent_queryset = recent_queryset.order_by(
             "-metadata_json__publication_date",
             "-frbr_uri_date",
             "title",
