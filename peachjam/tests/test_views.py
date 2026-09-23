@@ -117,6 +117,13 @@ class PeachjamViewsTest(TestCase):
     ]
 
     @override_settings(ROOT_URLCONF="peachjam.urls")
+    def test_legislation_listing_hides_language_facet_for_single_language(self):
+        response = self.client.get(reverse("legislation_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("languages", response.context["facet_data"])
+
+    @override_settings(ROOT_URLCONF="peachjam.urls")
     def test_legislation_listing_filters_by_document_language(self):
         english_document = Legislation.objects.get(
             expression_frbr_uri="/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17"

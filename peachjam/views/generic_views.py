@@ -441,8 +441,8 @@ class FilteredDocumentListView(DocumentListView):
                 .values_list("language_id", flat=True)
                 .distinct()
             )
-            languages = Language.objects.filter(pk__in=language_ids)
-            if languages:
+            languages = list(Language.objects.filter(pk__in=language_ids))
+            if len(languages) > 1:
                 context["facet_data"]["languages"] = {
                     "label": _("Languages"),
                     "type": "checkbox",
