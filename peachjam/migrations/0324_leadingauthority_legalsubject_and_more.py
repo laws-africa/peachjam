@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0321_alter_peachjamsettings_allow_signups"),
+        ("peachjam", "0323_backfill_locality_name_en"),
     ]
 
     operations = [
