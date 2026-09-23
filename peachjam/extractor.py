@@ -32,14 +32,39 @@ class ExtractorService:
     def enabled(self):
         return self.api_token and self.api_url
 
+    def validated_names(self, objects, label):
+        values = []
+        invalid = []
+
+        for obj in objects:
+            value = obj.name
+            if not (value or "").strip():
+                invalid.append(obj)
+            else:
+                values.append(value)
+
+        if invalid:
+            records = ", ".join(
+                f"{getattr(obj, 'code', None) or obj.pk} (id={obj.pk})"
+                for obj in invalid
+            )
+            raise ExtractorError(
+                f"Cannot call the extractor because these {label} have blank "
+                f"names: {records}"
+            )
+
+        return values
+
     def extract_judgment_details(self, jurisdiction, file):
         if not self.enabled():
             raise ExtractorError("Extractor service not configured")
 
         data = {
             "country": jurisdiction.pk,
-            "court_names": [c.name for c in Court.objects.all()],
-            "matter_types": [m.name for m in MatterType.objects.all()],
+            "court_names": self.validated_names(Court.objects.all(), "courts"),
+            "matter_types": self.validated_names(
+                MatterType.objects.all(), "matter types"
+            ),
         }
         headers = self.get_headers()
         resp = requests.post(

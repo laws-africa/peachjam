@@ -110,3 +110,44 @@ class LocalityNameMigrationTests(MigrationTestCase):
         self.assertEqual(
             "Mombasa County", Locality.objects.get(pk=translated.pk).name_en
         )
+
+
+class EnglishTranslationsMigrationTests(MigrationTestCase):
+    migrate_from = ("peachjam", "0323_backfill_locality_name_en")
+    migrate_to = ("peachjam", "0324_backfill_english_translations")
+
+    def test_backfills_missing_translations_without_overwriting_existing_ones(self):
+        Court = self.old_apps.get_model("peachjam", "Court")
+        Predicate = self.old_apps.get_model("peachjam", "Predicate")
+
+        blank_court = Court.objects.create(
+            name="High Court",
+            name_en="",
+            code="high-court",
+        )
+        translated_court = Court.objects.create(
+            name="Court of Appeal",
+            name_en="Existing English name",
+            code="court-of-appeal",
+        )
+        predicate = Predicate.objects.create(
+            name="cites",
+            slug="cites",
+            verb="cites",
+            verb_en=None,
+            reverse_verb="is cited by",
+            reverse_verb_en="",
+        )
+
+        apps = self.migrate()
+        Court = apps.get_model("peachjam", "Court")
+        Predicate = apps.get_model("peachjam", "Predicate")
+
+        self.assertEqual("High Court", Court.objects.get(pk=blank_court.pk).name_en)
+        self.assertEqual(
+            "Existing English name",
+            Court.objects.get(pk=translated_court.pk).name_en,
+        )
+        predicate = Predicate.objects.get(pk=predicate.pk)
+        self.assertEqual("cites", predicate.verb_en)
+        self.assertEqual("is cited by", predicate.reverse_verb_en)
