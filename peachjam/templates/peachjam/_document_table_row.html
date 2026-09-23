@@ -1,5 +1,5 @@
 {% load i18n peachjam %}
-<tr class="{% if document.children %}has-children{% endif %}"
+<tr class="document-row{% if document.children %} has-children{% endif %}{% if document.published_leading_authorities %} leading-authority-row{% endif %}"
     {% if document.pk %}data-document-id="{{ document.pk }}"{% endif %}>
   {% if doc_table_toggle %}
     <td class="cell-toggle">
@@ -39,6 +39,7 @@
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
       {% if document.doc_type == "judgment" %}
+        {% include 'peachjam/judgment/_leading_authority_list.html' with leading_authorities=document.published_leading_authorities %}
         {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document %}
       {% elif document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">

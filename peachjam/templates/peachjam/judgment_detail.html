@@ -139,6 +139,9 @@
     {% endif %}
   {% endwith %}
 {% endblock %}
+{% block pre-document-tabs %}
+  {% include 'peachjam/judgment/_leading_authorities.html' with leading_authorities=document.published_leading_authorities %}
+{% endblock %}
 {% block document-tabs %}
   {{ block.super }}
   <div hx-trigger="load"

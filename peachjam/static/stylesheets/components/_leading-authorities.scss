@@ -1,0 +1,84 @@
+$leading-authority-background: #fbf8f0;
+$leading-authority-footer-background: #f6f2e8;
+$leading-authority-border: #e4d9bd;
+$leading-authority-accent: #b79b5b;
+$leading-authority-text: #6b5426;
+$leading-authority-muted: #756b58;
+
+.leading-authority-banner {
+  --bs-border-color: #{$leading-authority-border};
+
+  color: $leading-authority-text;
+  background-color: $leading-authority-background;
+  border-color: $leading-authority-border;
+  border-left: 5px solid $leading-authority-accent;
+
+  > .card-body {
+    background-color: $leading-authority-background;
+  }
+
+  &__icon {
+    flex: 0 0 auto;
+    line-height: 1;
+  }
+
+  .text-muted {
+    color: $leading-authority-muted !important;
+  }
+}
+
+.leading-authority-card {
+  background-color: $leading-authority-background;
+  border-color: $leading-authority-border;
+  border-left: 5px solid $leading-authority-accent;
+
+  > .card-body {
+    background-color: $leading-authority-background;
+  }
+
+  > .card-footer {
+    background-color: $leading-authority-footer-background;
+    border-top-color: $leading-authority-border;
+  }
+}
+
+.leading-authority-listing {
+  border-top: 1px solid $leading-authority-border;
+  color: $leading-authority-text;
+
+  &__icon {
+    flex: 0 0 auto;
+    font-size: 1.2rem;
+    line-height: 1;
+  }
+
+  &__subject {
+    color: $leading-authority-muted;
+  }
+}
+
+table.doc-table tr.leading-authority-row {
+  > td {
+    background-color: $leading-authority-background;
+  }
+
+  > td:first-child {
+    border-left: 5px solid $leading-authority-accent;
+    padding-left: $spacer;
+  }
+
+  @include media-breakpoint-down(md) {
+    background-color: $leading-authority-background;
+    border-left: 5px solid $leading-authority-accent;
+    padding-left: $spacer;
+
+    > td {
+      background-color: transparent;
+    }
+
+    > td:first-child {
+      border-left: 0;
+      padding-left: 0;
+    }
+  }
+}
