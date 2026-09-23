@@ -7,6 +7,8 @@ from .organisations import (
     OrganisationMembership,
     OrganisationSeat,
     OrganisationSeatAssignment,
+    OrganisationSeatChange,
+    OrganisationSeatChangeItem,
     organisation_invitation_expiry,
 )
 from .subscriptions import (
@@ -31,6 +33,8 @@ __all__ = [
     "OrganisationMembership",
     "OrganisationSeat",
     "OrganisationSeatAssignment",
+    "OrganisationSeatChange",
+    "OrganisationSeatChangeItem",
     "PricingPlan",
     "Product",
     "ProductOffering",

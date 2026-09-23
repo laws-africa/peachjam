@@ -13,7 +13,6 @@ def backfill_summary_language(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam", "0304_default_core_document_metadata_json")]
 
     operations = [

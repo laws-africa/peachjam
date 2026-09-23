@@ -22,7 +22,6 @@ def migrate_settings(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0170_ratification_updated_at_alter_ratification_table_and_more"),
     ]

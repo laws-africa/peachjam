@@ -3,13 +3,47 @@
 from django.db import migrations, models
 
 
-class Migration(migrations.Migration):
+def remove_duplicate_relationships(apps, schema_editor):
+    Relationship = apps.get_model("peachjam", "Relationship")
+    table = schema_editor.quote_name(Relationship._meta.db_table)
 
+    # NULL target IDs are converted to empty strings below. PostgreSQL permits
+    # duplicate NULL values in the existing unique constraint, but those rows
+    # would conflict once the values become empty strings. Retain the oldest
+    # relationship in each group that will become identical.
+    schema_editor.execute(f"""
+        DELETE FROM {table}
+        WHERE id IN (
+            SELECT id
+            FROM (
+                SELECT
+                    id,
+                    row_number() OVER (
+                        PARTITION BY
+                            subject_work_id,
+                            COALESCE(subject_target_id, ''),
+                            object_work_id,
+                            COALESCE(object_target_id, ''),
+                            predicate_id
+                        ORDER BY id
+                    ) AS duplicate_number
+                FROM {table}
+            ) duplicates
+            WHERE duplicate_number > 1
+        )
+        """)
+
+
+class Migration(migrations.Migration):
     dependencies = [
         ("peachjam", "0209_caseaction_judgment_division_and_more"),
     ]
 
     operations = [
+        migrations.RunPython(
+            remove_duplicate_relationships,
+            reverse_code=migrations.RunPython.noop,
+        ),
         migrations.AlterField(
             model_name="relationship",
             name="object_target_id",
