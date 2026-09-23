@@ -1,5 +1,5 @@
-import json
 import datetime
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -25,10 +25,9 @@ from peachjam.models import (
     Judge,
     Judgment,
     Label,
-    Locality,
-    Judgment,
     LeadingAuthority,
     LegalSubject,
+    Locality,
 )
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import (
