@@ -504,6 +504,7 @@ class PeachjamViewsTest(TestCase):
         )
 
         self.assertContains(response, "Leading authority")
+        self.assertContains(response, 'class="leading-authority-banner__icon')
         self.assertContains(response, "Plascon-Evans rule")
         self.assertContains(response, "The leading formulation of the rule.")
         self.assertContains(response, "Example source")
