@@ -1,0 +1,49 @@
+{% load i18n peachjam %}
+{% if page_obj.has_previous %}
+  <li class="page-item">
+    <a class="page-link"
+       href="?{% query_string request.GET page=page_obj.previous_page_number %}"
+       aria-label="{% blocktrans with page_number=page_obj.previous_page_number %}Go to page {{ page_number }}{% endblocktrans %}">
+      {% if mobile %}
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+      {% else %}
+        {% trans 'Previous' %}
+      {% endif %}
+    </a>
+  </li>
+{% endif %}
+{% for num in page_range %}
+  {% if num == paginator.ELLIPSIS %}
+    <li class="page-item">
+      <span class="page-link" aria-hidden="true">{{ paginator.ELLIPSIS }}</span>
+    </li>
+  {% elif page_obj.number == num %}
+    <li class="page-item active" aria-current="page">
+      <span class="page-link">
+        {{ num }}
+        <span class="visually-hidden">
+          {% blocktrans with page_number=num %}Current page, page {{ page_number }}{% endblocktrans %}
+        </span>
+      </span>
+    </li>
+  {% else %}
+    <li class="page-item">
+      <a class="page-link"
+         href="?{% query_string request.GET page=num %}"
+         aria-label="{% blocktrans with page_number=num %}Go to page {{ page_number }}{% endblocktrans %}">{{ num }}</a>
+    </li>
+  {% endif %}
+{% endfor %}
+{% if page_obj.has_next %}
+  <li class="page-item">
+    <a class="page-link"
+       href="?{% query_string request.GET page=page_obj.next_page_number %}"
+       aria-label="{% blocktrans with page_number=page_obj.next_page_number %}Go to page {{ page_number }}{% endblocktrans %}">
+      {% if mobile %}
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      {% else %}
+        {% trans 'Next' %}
+      {% endif %}
+    </a>
+  </li>
+{% endif %}
