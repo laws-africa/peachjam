@@ -3,6 +3,7 @@ import json
 import logging
 from datetime import date
 
+import sentry_sdk
 from allauth.socialaccount.models import SocialAccount
 from background_task.models import Task
 from ckeditor.widgets import CKEditorWidget
@@ -1995,6 +1996,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                     ],
                 }
             else:
+                sentry_sdk.capture_exception(e)
                 error = e
 
         # turn references into Django objects
