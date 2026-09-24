@@ -12,6 +12,7 @@ from languages_plus.models import Language
 
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.models import AlternativeName, GenericDocument
+from peachjam.templatetags.peachjam import get_mobile_elided_page_range
 
 
 class BaseDocumentFilterFormTestCase(TestCase):
@@ -340,6 +341,37 @@ class BaseDocumentFilterFormTestCase(TestCase):
         self.assertIn('aria-label="Go to page 3"', html)
         self.assertIn('aria-current="page"', html)
         self.assertIn("Current page, page 2", html)
+
+    def test_pagination_uses_moving_page_range_on_mobile(self):
+        request = RequestFactory().get("/documents/")
+        paginator = Paginator(list(range(500)), 50)
+        expected_ranges = {
+            1: [1, 2, 3, paginator.ELLIPSIS, 10],
+            3: [2, 3, 4, paginator.ELLIPSIS, 10],
+            9: [8, 9, 10],
+        }
+
+        for page_number, expected_range in expected_ranges.items():
+            with self.subTest(page_number=page_number):
+                self.assertEqual(
+                    expected_range,
+                    list(get_mobile_elided_page_range(paginator, page_number)),
+                )
+
+        html = render_to_string(
+            "peachjam/_pagination.html",
+            {
+                "request": request,
+                "paginator": paginator,
+                "page_obj": paginator.page(3),
+            },
+            request=request,
+        )
+        mobile_html = html.split('<ul class="pagination flex-nowrap d-sm-none">')[
+            1
+        ].split("</ul>")[0]
+        self.assertIn("‹", mobile_html)
+        self.assertIn("›", mobile_html)
 
     def test_messages_partial_hides_empty_container_only(self):
         request = RequestFactory().get("/documents/")
