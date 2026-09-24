@@ -32,6 +32,7 @@ $saved-star-color: #ffc107 !default;
   --anntn-highlight-color: #{$anntn-highlight-color};
   --diff-green-color: #{$diff-green-color};
   --diff-red-color: #{$diff-red-color};
+  --bg-brand-pale: #{transparentize($primary, 0.90)};
 }
 
 $breadcrumb-margin-bottom: 1rem !default;
