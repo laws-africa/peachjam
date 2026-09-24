@@ -1,11 +1,24 @@
+import re
 from types import SimpleNamespace
+from unittest.mock import patch
 
+from bs4 import BeautifulSoup
 from django.template import Context, Template
 from django.template.loader import render_to_string
 from django.test import SimpleTestCase
 from templated_email import get_templated_mail
 
+from peachjam.emails import TemplateBackend
 from peachjam.timeline_email_service import EmailAlert, EmailAlertSummaryItem
+
+
+class EmailUser:
+    first_name = ""
+    email = "test@example.org"
+    username = "test"
+
+    def get_full_name(self):
+        return "Test User"
 
 
 class EmailTemplateUrlTestCase(SimpleTestCase):
@@ -14,11 +27,101 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
     def base_context(self, domain):
         return {
             "site": SimpleNamespace(domain=domain),
-            "user": SimpleNamespace(get_full_name="Test User"),
+            "user": EmailUser(),
             "APP_NAME": "Peach Jam",
             "MY_LII": "My Peach Jam",
             "PRIMARY_COLOUR": "#123456",
         }
+
+    def get_branded_mail(self, template_name, context):
+        backend = TemplateBackend()
+        with patch.object(backend, "supplement_context"):
+            return backend.get_email_message(
+                template_name,
+                context,
+                from_email="test@example.org",
+                to=["user@example.org"],
+            )
+
+    def test_branded_email_styles_are_safe_for_email_clients(self):
+        context = self.base_context("example.org")
+        context["activate_url"] = "https://example.org/accounts/confirm-email/"
+
+        message = self.get_branded_mail(
+            "account/email/email_confirmation_signup", context
+        )
+        html = message.alternatives[0][0]
+        soup = BeautifulSoup(html, "html.parser")
+
+        button = soup.find("a", string=re.compile("Confirm your email address"))
+        self.assertIn("color: #fefefe", button["style"])
+        self.assertIn("padding: 8px 16px", button["style"])
+        self.assertIn("background: #123456", button.find_parent("td")["style"])
+        self.assertIn(
+            "border: 1px solid #dee2e6",
+            soup.find("table", class_="inner-container")["style"],
+        )
+        self.assertIn(
+            "background-color: #f8f9fa",
+            soup.find("table", class_="body")["style"],
+        )
+
+        style_blocks = [style.get_text() for style in soup.find_all("style")]
+        self.assertTrue(any("@media" in style for style in style_blocks))
+        self.assertTrue(all(len(style.encode()) < 8192 for style in style_blocks))
+
+    def test_account_and_organisation_templates_render_html_and_plain_text(self):
+        template_contexts = {
+            "account/email/account_already_exists": {
+                "email": "test@example.org",
+                "password_reset_url": "https://example.org/reset/",
+            },
+            "account/email/email_changed": {
+                "from_email": "old@example.org",
+                "to_email": "new@example.org",
+            },
+            "account/email/email_confirm": {},
+            "account/email/email_confirmation": {
+                "activate_url": "https://example.org/activate/"
+            },
+            "account/email/email_confirmation_signup": {
+                "activate_url": "https://example.org/activate/"
+            },
+            "account/email/email_deleted": {"deleted_email": "old@example.org"},
+            "account/email/login_code": {"code": "123456"},
+            "account/email/password_changed": {},
+            "account/email/password_reset": {},
+            "account/email/password_reset_key": {
+                "password_reset_url": "https://example.org/reset/",
+                "username": "test",
+            },
+            "account/email/password_set": {},
+            "account/email/unknown_account": {
+                "email": "test@example.org",
+                "signup_url": "https://example.org/signup/",
+            },
+            "organisation/invitation": {
+                "organisation": "Example Organisation",
+                "expiry": "7 October 2026",
+                "invitation_url": "https://example.org/invitation/",
+            },
+            "organisation/notification": {
+                "subject": "Example notification",
+                "body": "An example notification body.",
+            },
+        }
+
+        for template_name, extra_context in template_contexts.items():
+            with self.subTest(template_name=template_name):
+                context = self.base_context("example.org")
+                context.update(extra_context)
+                message = self.get_branded_mail(template_name, context)
+                html = message.alternatives[0][0]
+
+                self.assertTrue(message.subject)
+                self.assertTrue(message.body.strip())
+                self.assertIn("Peach Jam", html)
+                self.assertIn("style=", html)
 
     def assert_alert_document_item_spacing(self, html):
         self.assertIn('<li class="alert-document-list-item">', html)
@@ -78,19 +181,19 @@ class EmailTemplateUrlTestCase(SimpleTestCase):
         )
         context.update(email_alert.template_context())
 
-        message = get_templated_mail(
-            template_name="email_alert_digest",
-            from_email="test@example.org",
-            to=["user@example.org"],
-            context=context,
-        )
+        message = self.get_branded_mail("email_alert_digest", context)
         html = message.alternatives[0][0] if message.alternatives else message.body
+        summary = BeautifulSoup(html, "html.parser").find(
+            "div", class_="digest-summary"
+        )
 
         self.assertEqual("High Court of Tanzania: 1 new judgment", message.subject)
         self.assertIn("Hi there,", html)
         self.assertIn("Here is your daily My Peach Jam update.", html)
         self.assertIn("You have 1 update since 25 August 2026.", html)
         self.assertIn("High Court of Tanzania – 1 new judgment", html)
+        self.assertIn("background-color: #f8f9fa", summary["style"])
+        self.assertIn("border-left: 3px solid #123456", summary["style"])
 
     def test_alert_email_templates_render_absolute_links(self):
         context = self.base_context("example.org")
