@@ -32,6 +32,7 @@ from peachjam.models import (
     GenericDocument,
     Judgment,
     LawReport,
+    Legislation,
     Locality,
     Outcome,
     PeachJamSettings,
@@ -108,11 +109,75 @@ class FilteredDocumentListViewTestCase(SimpleTestCase):
 class PeachjamViewsTest(TestCase):
     fixtures = [
         "tests/countries",
+        "tests/languages",
         "documents/sample_documents",
         "tests/users",
         "tests/journal_article",
         "tests/products",
     ]
+
+    @override_settings(ROOT_URLCONF="peachjam.urls")
+    def test_legislation_listing_hides_language_facet_for_single_language(self):
+        response = self.client.get(reverse("legislation_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("languages", response.context["facet_data"])
+
+    @override_settings(ROOT_URLCONF="peachjam.urls")
+    def test_legislation_listing_filters_by_document_language(self):
+        english_document = Legislation.objects.get(
+            expression_frbr_uri="/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17"
+        )
+        french_document = Legislation.objects.create(
+            jurisdiction=english_document.jurisdiction,
+            locality=english_document.locality,
+            frbr_uri_doctype=english_document.frbr_uri_doctype,
+            frbr_uri_date=english_document.frbr_uri_date,
+            frbr_uri_number=english_document.frbr_uri_number,
+            title=english_document.title,
+            date=english_document.date,
+            language=Language.objects.get(pk="fr"),
+            published=True,
+        )
+        self.assertEqual(english_document.work_id, french_document.work_id)
+
+        response = self.client.get(reverse("legislation_list"), {"languages": "fr"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(french_document, response.context["paginator"].object_list)
+        self.assertNotIn(english_document, response.context["paginator"].object_list)
+        self.assertTrue(
+            all(
+                doc.language_id == "fr"
+                for doc in response.context["paginator"].object_list
+            )
+        )
+        self.assertIn(
+            ("fr", "French"), response.context["facet_data"]["languages"]["options"]
+        )
+        self.assertEqual(["fr"], response.context["facet_data"]["languages"]["values"])
+
+    def test_judgment_listing_filters_by_document_language(self):
+        document = Judgment.objects.filter(published=True).first()
+        document.language = Language.objects.get(pk="fr")
+        document.save(update_fields=["language"])
+
+        response = self.client.get(
+            reverse("court", kwargs={"code": "all"}), {"languages": "fr"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(document, response.context["documents"])
+        self.assertTrue(
+            all(
+                doc.language_id == "fr"
+                for doc in response.context["paginator"].object_list
+            )
+        )
+        self.assertIn(
+            ("fr", "French"), response.context["facet_data"]["languages"]["options"]
+        )
+        self.assertEqual(["fr"], response.context["facet_data"]["languages"]["values"])
 
     @staticmethod
     def pdf_fixture_content():
