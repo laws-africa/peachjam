@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-18 07:58+0000\n"
+"POT-Creation-Date: 2026-09-24 08:33+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -17,347 +17,347 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 99\n"
 
-#: admin.py:194
+#: admin.py:195
 msgid "Import"
 msgstr "Importer"
 
-#: admin.py:558
+#: admin.py:559
 #, fuzzy
 #| msgid "Load document"
 msgid "Word document"
 msgstr "Charger le document"
 
-#: admin.py:563
+#: admin.py:564
 msgid "Only .docx files are supported."
 msgstr ""
 
-#: admin.py:579
+#: admin.py:580
 msgid "Background tasks"
 msgstr "Tâches de fond"
 
-#: admin.py:679
+#: admin.py:680
 msgid "Access groups updated."
 msgstr "Groupes d'accès mis à jour."
 
-#: admin.py:694
+#: admin.py:695
 msgid "Manage restricted access groups"
 msgstr "Gérer les groupes d'accès restreint"
 
-#: admin.py:698
+#: admin.py:699
 msgid "Restricted access groups"
 msgstr "Groupes d'accès restreint"
 
-#: admin.py:751
+#: admin.py:752
 msgid "Key details"
 msgstr "Détails essentiels"
 
-#: admin.py:765
+#: admin.py:766
 msgid "Additional details"
 msgstr "Détails supplémentaires"
 
-#: admin.py:778 admin.py:1934
+#: admin.py:779 admin.py:1935
 msgid "Work identification"
 msgstr "Identification de travail"
 
-#: admin.py:791
+#: admin.py:792
 msgid "Content"
 msgstr "Contenus"
 
-#: admin.py:800 admin.py:1933
+#: admin.py:801 admin.py:1934
 msgid "Advanced"
 msgstr "Avancé"
 
-#: admin.py:815
+#: admin.py:816
 msgid "Taxonomies"
 msgstr "Taxonomies"
 
-#: admin.py:852 models/core_document.py:904
+#: admin.py:853 models/core_document.py:904
 msgid "TOC JSON"
 msgstr "JSON TOC"
 
-#: admin.py:859 models/core_document.py:901
+#: admin.py:860 models/core_document.py:901
 msgid "content HTML is AKN"
 msgstr "le contenu HTML est AKN"
 
-#: admin.py:866 templates/admin/peachjam/book/import_word.html:127
+#: admin.py:867 templates/admin/peachjam/book/import_word.html:127
 msgid "Images"
 msgstr "Images"
 
-#: admin.py:924
+#: admin.py:925
 #, python-format
 msgid "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
 msgstr "Des erreurs de validation ont été détectées dans : %(fields)s. Vérifiez également les sections en ligne et les erreurs hors champ."
 
-#: admin.py:981
+#: admin.py:982
 msgid "main form (non-field)"
 msgstr "formulaire principal (hors champ)"
 
-#: admin.py:1092
+#: admin.py:1093
 msgid "Work"
 msgstr "Travail"
 
-#: admin.py:1104
+#: admin.py:1105
 #, python-format
 msgid "Queued tasks to extract citations from %(count)d documents."
 msgstr "Tâches en file d'attente pour extraire les citations de %(count)d documents."
 
-#: admin.py:1108
+#: admin.py:1109
 msgid "Extract citations (background)"
 msgstr "Extrait des citations (contexte)"
 
-#: admin.py:1121
+#: admin.py:1122
 #, python-format
 msgid "Re-imported content from %(count)d documents."
 msgstr "Contenu réimporté à partir de %(count)d documents."
 
-#: admin.py:1125
+#: admin.py:1126
 msgid "Re-extract content from DOCX files"
 msgstr "Réextraire le contenu des fichiers DOCX"
 
-#: admin.py:1135
+#: admin.py:1136
 #, python-format
 msgid "Queued tasks to re-index for %(count)d documents."
 msgstr "Tâches en file d'attente à réindexer pour %(count)d documents."
 
-#: admin.py:1139
+#: admin.py:1140
 msgid "Re-index for search (background)"
 msgstr "Réindexation pour la recherche (arrière-plan)"
 
-#: admin.py:1149
+#: admin.py:1150
 #, python-format
 msgid "Applying labels for %(count)d documents."
 msgstr "Application d'étiquettes pour %(count)d documents."
 
-#: admin.py:1152
+#: admin.py:1153
 msgid "Apply labels"
 msgstr "Appliquer des étiquettes"
 
-#: admin.py:1161
+#: admin.py:1162
 #, python-format
 msgid "Ensuring PDF for %(count)d documents."
 msgstr "Assurer le format PDF pour %(count)d documents."
 
-#: admin.py:1165
+#: admin.py:1166
 msgid "Ensure PDF for source file (background)"
 msgstr "Assurez-vous que le fichier source est PDF (arrière-plan)"
 
-#: admin.py:1187
+#: admin.py:1188
 msgid "Documents published."
 msgstr "Documents publiés."
 
-#: admin.py:1189
+#: admin.py:1190
 msgid "Publish selected documents"
 msgstr "Publier les documents sélectionnés"
 
-#: admin.py:1194
+#: admin.py:1195
 msgid "Documents unpublished."
 msgstr "Documents inédits."
 
-#: admin.py:1196
+#: admin.py:1197
 msgid "Unpublish selected documents"
 msgstr "Annuler la publication des documents sélectionnés"
 
-#: admin.py:1231
+#: admin.py:1232
 #, python-format
 msgid "Taxonomy with slug \"%(value)s\" already exists."
 msgstr "La taxonomie avec le slug \"%(value)s\" existe déjà."
 
-#: admin.py:1323
+#: admin.py:1324
 msgid "Refresh selected flynote roots now"
 msgstr "Actualisez dès maintenant les racines Flynote sélectionnées"
 
-#: admin.py:1333
+#: admin.py:1334
 #, python-format
 msgid "Refreshed %(count)s flynote roots."
 msgstr "Racines de Flynote rafraîchies %(count)s."
 
-#: admin.py:1337
+#: admin.py:1338
 msgid "Mark selected flynotes as deprecated"
 msgstr "Marquer les notes de vol sélectionnées comme obsolètes"
 
-#: admin.py:1349
+#: admin.py:1350
 #, python-format
 msgid "Deprecated %(count)s flynote branches."
 msgstr "Branches Flynote obsolètes %(count)s."
 
-#: admin.py:1353
+#: admin.py:1354
 msgid "Mark selected flynotes as active"
 msgstr "Marquer les notes de vol sélectionnées comme actives"
 
-#: admin.py:1365
+#: admin.py:1366
 #, python-format
 msgid "Reactivated %(count)s flynote branches."
 msgstr "Réactivation des branches flynote %(count)s."
 
-#: admin.py:1369 templates/peachjam/layouts/document_list.html:4
+#: admin.py:1370 templates/peachjam/layouts/document_list.html:4
 #: templates/peachjam/layouts/document_list.html:20
 msgid "Documents"
 msgstr "Documents"
 
-#: admin.py:1374
+#: admin.py:1375
 msgid "Ancestors"
 msgstr "Ancêtres"
 
-#: admin.py:1392
+#: admin.py:1393
 msgid "Children"
 msgstr "Enfants"
 
-#: admin.py:1456 models/judgment.py:1037 models/judgment.py:1073
+#: admin.py:1457 models/judgment.py:1037 models/judgment.py:1073
 msgid "case number"
 msgstr "numéro de dossier"
 
-#: admin.py:1457 models/judgment.py:1038
+#: admin.py:1458 models/judgment.py:1038
 msgid "case numbers"
 msgstr "numéros de dossier"
 
-#: admin.py:1573
+#: admin.py:1574
 msgid "Selected canonical judge does not own the chosen alias."
 msgstr ""
 
-#: admin.py:1629
+#: admin.py:1630
 #, fuzzy
 #| msgid "Extracted:"
 msgid "Extracted name"
 msgstr "Extrait:"
 
-#: admin.py:1630
+#: admin.py:1631
 #, fuzzy
 #| msgid "Judgment date"
 msgid "Judge title"
 msgstr "Date du jugement"
 
-#: admin.py:1631 models/judgment.py:61 models/judgment.py:83
+#: admin.py:1632 models/judgment.py:61 models/judgment.py:83
 #: models/judgment.py:170 templates/peachjam/judge/list.html:83
 msgid "Judge"
 msgstr "Juge"
 
-#: admin.py:1635
+#: admin.py:1636
 msgid "Exact judge name as it appeared in the uploaded judgment."
 msgstr ""
 
-#: admin.py:1638
+#: admin.py:1639
 msgid "Judge alias or display title to use for this judgment."
 msgstr ""
 
-#: admin.py:1641
+#: admin.py:1642
 msgid "Canonical judge identity used for aggregation and future judge pages."
 msgstr ""
 
-#: admin.py:1657 admin.py:1682 models/judgment.py:100 models/judgment.py:469
+#: admin.py:1658 admin.py:1683 models/judgment.py:100 models/judgment.py:469
 #: models/judgment.py:476
 msgid "judge"
 msgstr "juge"
 
-#: admin.py:1658 admin.py:1683 models/judgment.py:101 models/judgment.py:550
+#: admin.py:1659 admin.py:1684 models/judgment.py:101 models/judgment.py:550
 #: models/judgment.py:1090 models/judgment.py:1135
 msgid "judges"
 msgstr "juges"
 
-#: admin.py:1697
+#: admin.py:1698
 msgid "lower court judge"
 msgstr "juge du tribunal inférieur"
 
-#: admin.py:1698 models/judgment.py:556
+#: admin.py:1699 models/judgment.py:556
 msgid "lower court judges"
 msgstr "juges des tribunaux inférieurs"
 
-#: admin.py:1712
+#: admin.py:1713
 msgid "Related judgment"
 msgstr "Jugement connexe"
 
-#: admin.py:1713
+#: admin.py:1714
 msgid "Related judgments"
 msgstr "Jugements connexes"
 
-#: admin.py:1735 models/judgment.py:1098
+#: admin.py:1736 models/judgment.py:1098
 msgid "case history"
 msgstr "histoire de cas"
 
-#: admin.py:1765
+#: admin.py:1766
 msgid "Enter one flynote per line."
 msgstr "Saisissez une note de mouche par ligne."
 
-#: admin.py:1866 templates/peachjam/_document_content_sidebar.html:22
+#: admin.py:1867 templates/peachjam/_document_content_sidebar.html:22
 #: templates/peachjam/judgment_detail.html:101
 msgid "Summary"
 msgstr "Résumé"
 
-#: admin.py:2086 admin.py:2106
+#: admin.py:2088 admin.py:2108
 msgid "You do not have permission to generate judgment summaries."
 msgstr "Vous n'avez pas la permission de générer des résumés de jugement."
 
-#: admin.py:2095
+#: admin.py:2097
 #, python-format
 msgid "Generating summaries for %(count)d judgments."
 msgstr "Génération de résumés pour %(count)d jugements."
 
-#: admin.py:2100
+#: admin.py:2102
 msgid "Generating summary for judgment with ID: {}"
 msgstr "Génération d'un résumé pour le jugement avec l'ID : {}"
 
-#: admin.py:2117
+#: admin.py:2119
 msgid "Generate summaries (background)"
 msgstr "Générer des résumés (arrière-plan)"
 
-#: admin.py:2199
+#: admin.py:2201
 msgid "Refreshing all content for selected ingestors in the background."
 msgstr "Actualisation de tout le contenu des ingérateurs sélectionnés en arrière-plan."
 
-#: admin.py:2203
+#: admin.py:2205
 msgid "Refresh all content for selected ingestors - Full update"
 msgstr "Actualiser tout le contenu pour les ingérants sélectionnés - Mise à jour complète"
 
-#: admin.py:2210
+#: admin.py:2212
 msgid "Getting content since last update in background."
 msgstr "Récupération du contenu depuis la dernière mise à jour en arrière-plan."
 
-#: admin.py:2214
+#: admin.py:2216
 msgid "Update content for selected ingestors - Latest updates"
 msgstr "Mise à jour du contenu pour les ingérants sélectionnés - Dernières mises à jour"
 
-#: admin.py:2296
+#: admin.py:2298
 msgid "Articles published."
 msgstr "Articles publiés."
 
-#: admin.py:2298
+#: admin.py:2300
 msgid "Publish selected articles"
 msgstr "Publier les articles sélectionnés"
 
-#: admin.py:2303
+#: admin.py:2305
 msgid "Articles unpublished."
 msgstr "Articles inédits."
 
-#: admin.py:2305
+#: admin.py:2307
 msgid "Unpublish selected articles"
 msgstr "Annuler la publication des articles sélectionnés"
 
-#: admin.py:2338 models/user_profile.py:51 models/user_profile.py:103
+#: admin.py:2340 models/user_profile.py:51 models/user_profile.py:103
 msgid "onboarding intents"
 msgstr ""
 
-#: admin.py:2423
+#: admin.py:2425
 #, python-format
 msgid "Queued tasks to update extracted citations for %(count)d works."
 msgstr "Tâches en file d'attente pour mettre à jour les citations extraites pour %(count)d œuvres."
 
-#: admin.py:2428
+#: admin.py:2430
 msgid "Update extracted citations (background)"
 msgstr "Mettre à jour les citations extraites (arrière-plan)"
 
-#: admin.py:2437
+#: admin.py:2439
 #, python-format
 msgid "Updated languages for %(count)d works."
 msgstr "Langues mises à jour pour %(count)d œuvres."
 
-#: admin.py:2440
+#: admin.py:2442
 msgid "Update languages"
 msgstr "Mettre à jour les langues"
 
-#: admin.py:2498
+#: admin.py:2500
 msgid "Gazette number"
 msgstr "Numéro de la Gazette"
 
-#: admin.py:2562 templates/admin/peachjam/book/change_form.html:11
+#: admin.py:2564 templates/admin/peachjam/book/change_form.html:11
 #: templates/admin/peachjam/book/import_word.html:60
 #: templates/admin/peachjam/book/import_word.html:65
 #, fuzzy
@@ -365,38 +365,38 @@ msgstr "Numéro de la Gazette"
 msgid "Import Word version"
 msgstr "division judiciaire"
 
-#: admin.py:2594
+#: admin.py:2596
 #, fuzzy, python-format
 #| msgid "Show uncommenced provisions for %(title)s"
 msgid "Imported Word version for %(title)s."
 msgstr "Afficher les dispositions non commencées pour %(title)s"
 
-#: admin.py:2638
+#: admin.py:2640
 msgid "Some protected law widget markers were not restored. The import cannot be confirmed."
 msgstr ""
 
-#: admin.py:2644
+#: admin.py:2646
 msgid "Images are not supported in this Word import. Remove images from the DOCX and upload again."
 msgstr ""
 
-#: admin.py:2799
+#: admin.py:2801
 msgid "UID"
 msgstr ""
 
-#: admin.py:2813
+#: admin.py:2815
 #, python-format
 msgid "Set 'accepted terms of use' to False for %(count)d users."
 msgstr "Définir « conditions d'utilisation acceptées » sur False pour les utilisateurs %(count)d ."
 
-#: admin.py:2818
+#: admin.py:2820
 msgid "Require selected users to accept terms of use"
 msgstr "Exiger que les utilisateurs sélectionnés acceptent les conditions d'utilisation"
 
-#: admin.py:3016 admin.py:3051
+#: admin.py:3018 admin.py:3053
 msgid "Document"
 msgstr "Document"
 
-#: admin.py:3024
+#: admin.py:3026
 msgid "Messages JSON"
 msgstr "Messages JSON"
 
@@ -581,122 +581,122 @@ msgstr ""
 msgid "Select at least one judge person to delete."
 msgstr ""
 
-#: forms.py:371 forms.py:372 models/entity_profile.py:13
-#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:274
+#: forms.py:372 forms.py:373 models/entity_profile.py:13
+#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:279
 msgid "Title"
 msgstr "Titre"
 
-#: forms.py:373 forms.py:374 templates/peachjam/causelist_detail.html:35
+#: forms.py:374 forms.py:375 templates/peachjam/causelist_detail.html:35
 #: templates/peachjam/layouts/document_detail.html:315
-#: views/generic_views.py:275
+#: views/generic_views.py:280
 msgid "Date"
 msgstr "Date"
 
-#: forms.py:373
+#: forms.py:374
 msgid "(Newest first)"
 msgstr "(Le plus récent d'abord)"
 
-#: forms.py:374
+#: forms.py:375
 msgid "(Oldest first)"
 msgstr "(le plus ancien en premier)"
 
-#: forms.py:561
+#: forms.py:567
 msgid "Most cited"
 msgstr ""
 
-#: forms.py:719
+#: forms.py:725
 msgid "Summary prompt"
 msgstr "Résumé"
 
-#: forms.py:727
+#: forms.py:733
 msgid "Optional. Overrides the default summary prompt."
 msgstr "Facultatif. Remplace le message de résumé par défaut."
 
-#: forms.py:730
+#: forms.py:736
 msgid "Model"
 msgstr "Modèle"
 
-#: forms.py:737
+#: forms.py:743
 msgid "Optional. Overrides the configured model."
 msgstr "Facultatif. Remplace le modèle configuré."
 
-#: forms.py:740
+#: forms.py:746
 msgid "Translation language"
 msgstr "Langue de traduction"
 
-#: forms.py:748
+#: forms.py:754
 msgid "Optional. Translates the summary when set to a non-English language."
 msgstr "Optionnel. Traduit le résumé lorsqu'il est défini sur une langue autre que l'anglais."
 
-#: forms.py:796
+#: forms.py:802
 msgid "Document problem reported"
 msgstr "Problème de document signalé"
 
-#: forms.py:844
+#: forms.py:850
 msgid "Contact us message"
 msgstr "Contactez-nous message"
 
-#: forms.py:862
+#: forms.py:868
 msgid "Folders"
 msgstr "Dossiers"
 
-#: forms.py:919
+#: forms.py:925
 msgid "Please provide a valid name"
 msgstr "Veuillez fournir un nom valide"
 
-#: forms.py:925 forms.py:954
+#: forms.py:931 forms.py:960
 msgid "First name"
 msgstr "Prénom"
 
-#: forms.py:928 forms.py:960
+#: forms.py:934 forms.py:966
 msgid "Last name"
 msgstr "Nom de famille"
 
-#: forms.py:937 templates/account/login.html:89
+#: forms.py:943 templates/account/login.html:89
 #: templates/account/signup.html:47 templates/account/user_auth.html:103
 #: templates/account/user_auth.html:145 templates/user_account/home.html:26
 msgid "Password"
 msgstr "Mot de passe"
 
-#: forms.py:938 templates/account/signup.html:61
+#: forms.py:944 templates/account/signup.html:61
 msgid "Password (again)"
 msgstr "Mot de passe (encore)"
 
-#: forms.py:966
+#: forms.py:972
 msgid "What are you hoping to do today?"
 msgstr ""
 
-#: forms.py:972
+#: forms.py:978
 msgid "What best describes your role or organisation?"
 msgstr ""
 
-#: forms.py:1011
+#: forms.py:1017
 msgid "Choose at least one option or select Not now."
 msgstr ""
 
-#: forms.py:1074
+#: forms.py:1080
 msgid "Email alert frequency"
 msgstr ""
 
-#: forms.py:1096
+#: forms.py:1102
 msgid "I understand this action cannot be undone"
 msgstr "Je comprends que cette action est irréversible."
 
-#: forms.py:1098
+#: forms.py:1104
 msgid "Please confirm account deletion."
 msgstr "Veuillez confirmer la suppression du compte."
 
-#: forms.py:1104
+#: forms.py:1110
 #, fuzzy
 #| msgid "Please tell us briefly why you are deleting your account."
 msgid "What is the main reason you are deleting your account?"
 msgstr "Veuillez nous indiquer brièvement la raison pour laquelle vous supprimez votre compte."
 
-#: forms.py:1110
+#: forms.py:1116
 msgid "I agree to the Terms of Use"
 msgstr "J'accepte les conditions d'utilisation"
 
-#: forms.py:1113
+#: forms.py:1119
 msgid "You must accept the terms to continue."
 msgstr "Vous devez accepter les conditions pour continuer."
 
@@ -712,7 +712,7 @@ msgstr ""
 #: models/core_document.py:899 models/judgment.py:1032 models/taxonomies.py:287
 #: templates/peachjam/_document_count.html:8
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:4
-#: timeline_email_service.py:259 views/generic_views.py:152
+#: timeline_email_service.py:259 views/generic_views.py:153
 #, fuzzy
 #| msgid "document"
 msgid "document"
@@ -2590,19 +2590,19 @@ msgstr "profil de l'utilisateur"
 msgid "user profiles"
 msgstr "profils des utilisateurs"
 
-#: settings.py:402
+#: settings.py:398
 msgid "English"
 msgstr "Anglais"
 
-#: settings.py:403
+#: settings.py:399
 msgid "French"
 msgstr "Français"
 
-#: settings.py:404
+#: settings.py:400
 msgid "Portuguese"
 msgstr "Portugais"
 
-#: settings.py:405
+#: settings.py:401
 msgid "Swahili"
 msgstr "Swahili"
 
@@ -3445,8 +3445,8 @@ msgid "Browse by month"
 msgstr "Parcourir par mois"
 
 #: templates/peachjam/_court_years_list.html:4
-#: templates/peachjam/_years_list.html:4 views/generic_views.py:424
-#: views/legislation.py:79
+#: templates/peachjam/_years_list.html:4 views/generic_views.py:429
+#: views/legislation.py:80
 msgid "Years"
 msgstr "Années"
 
@@ -3516,7 +3516,7 @@ msgstr "Pages"
 
 #: templates/peachjam/_document_count.html:14
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:5
-#: views/generic_views.py:153
+#: views/generic_views.py:154
 msgid "documents"
 msgstr "documents"
 
@@ -3724,22 +3724,23 @@ msgstr "ouvre dans un nouvel onglet"
 msgid "Pagination"
 msgstr "Pagination"
 
-#: templates/peachjam/_pagination.html:8 templates/peachjam/_pagination.html:30
-#: templates/peachjam/_pagination.html:38
+#: templates/peachjam/_pagination_items.html:6
+#: templates/peachjam/_pagination_items.html:35
+#: templates/peachjam/_pagination_items.html:43
 #, python-format
 msgid "Go to page %(page_number)s"
 msgstr "Aller à la page %(page_number)s"
 
-#: templates/peachjam/_pagination.html:8
+#: templates/peachjam/_pagination_items.html:10
 msgid "Previous"
 msgstr "Précédent"
 
-#: templates/peachjam/_pagination.html:22
+#: templates/peachjam/_pagination_items.html:27
 #, python-format
 msgid "Current page, page %(page_number)s"
 msgstr "Page actuelle, page %(page_number)s"
 
-#: templates/peachjam/_pagination.html:38
+#: templates/peachjam/_pagination_items.html:47
 msgid "Next"
 msgstr "Suivant"
 
@@ -4350,12 +4351,12 @@ msgid "All unconstitutional provisions"
 msgstr "Toutes les dispositions inconstitutionnelles"
 
 #: templates/peachjam/document/provision_detail.html:34
-#: templates/peachjam/layouts/document_detail.html:195 views/legislation.py:833
+#: templates/peachjam/layouts/document_detail.html:195 views/legislation.py:834
 msgid "Citations"
 msgstr "Citation"
 
 #: templates/peachjam/document/provision_detail.html:41
-#: views/legislation.py:948
+#: views/legislation.py:949
 msgid "Similar provisions"
 msgstr "Dispositions similaires"
 
@@ -4514,7 +4515,7 @@ msgid "Browse judgments organised by legal topic. Select a topic to explore more
 msgstr ""
 
 #: templates/peachjam/flynote/list.html:24 views/causelist.py:170
-#: views/generic_views.py:336
+#: views/generic_views.py:341
 msgid "Topics"
 msgstr "Sujets"
 
@@ -5307,12 +5308,12 @@ msgid "Show uncommenced provisions for %(title)s"
 msgstr "Afficher les dispositions non commencées pour %(title)s"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:22
-#: views/legislation.py:595 views/legislation.py:599
+#: views/legislation.py:596 views/legislation.py:600
 msgid "Resolved"
 msgstr "Résolu"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:24
-#: views/legislation.py:600
+#: views/legislation.py:601
 msgid "Unresolved"
 msgstr "Non résolu"
 
@@ -5943,7 +5944,7 @@ msgstr "listes de causes"
 msgid "CauseList"
 msgstr "Liste des causes"
 
-#: views/causelist.py:115 views/generic_views.py:366
+#: views/causelist.py:115 views/generic_views.py:371
 msgid "Document nature"
 msgstr "Type de document"
 
@@ -5951,7 +5952,7 @@ msgstr "Type de document"
 msgid "Court divisions"
 msgstr "Divisions judiciaires"
 
-#: views/causelist.py:180 views/generic_views.py:347
+#: views/causelist.py:180 views/generic_views.py:352
 msgid "Alphabet"
 msgstr "Alphabet"
 
@@ -5974,6 +5975,12 @@ msgstr "Problème"
 #: views/gazette.py:208 views/gazette.py:210
 msgid "Supplement"
 msgstr "Supplément"
+
+#: views/generic_views.py:447
+#, fuzzy
+#| msgid "Language"
+msgid "Languages"
+msgstr "Langue"
 
 #: views/journals.py:101
 msgid "Journal article"
@@ -6067,7 +6074,7 @@ msgstr "Résultats"
 msgid "Case actions"
 msgstr "Décisions sur l’affaire"
 
-#: views/judgment.py:696
+#: views/judgment.py:697
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr "Ce jugement a été anonymisé afin de protéger les informations personnelles conformément à la loi."
 
@@ -6090,74 +6097,74 @@ msgid_plural "Cited by %(count)s judgments"
 msgstr[0] "Cité par le jugement %(count)s"
 msgstr[1] "Cité par les jugements %(count)s"
 
-#: views/legislation.py:218
+#: views/legislation.py:219
 #, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr "Ce %(friendly_type)s était %(verb)s le %(date)s par <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
-#: views/legislation.py:230
+#: views/legislation.py:231
 #, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
 msgstr "Ce %(friendly_type)s %(verb)s sur %(date)s."
 
-#: views/legislation.py:243
+#: views/legislation.py:244
 #, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr "Ce %(friendly_type)s entrera en vigueur le %(date)s."
 
-#: views/legislation.py:258
+#: views/legislation.py:259
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
 msgstr "Cette %(friendly_type)s n'est pas encore pleinement entrée en vigueur. Consultez l'onglet « Dispositions non encore entrées en vigueur » pour plus d'informations."
 
-#: views/legislation.py:269
+#: views/legislation.py:270
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force."
 msgstr "Ce %(friendly_type)s n’est pas encore entré en vigueur."
 
-#: views/legislation.py:299
+#: views/legislation.py:300
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
 msgstr "Il s'agit de la version de ce %(friendly_type)s telle qu'elle était lorsqu'elle était %(verb)s."
 
-#: views/legislation.py:312
+#: views/legislation.py:313
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
 msgstr "Il s'agit de la version de ce %(friendly_type)s telle qu'elle était lorsqu'il était %(verb)s."
 
-#: views/legislation.py:330
+#: views/legislation.py:331
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Il s'agit de la dernière version de ce %(friendly_type)s."
 
-#: views/legislation.py:346
+#: views/legislation.py:347
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
 msgstr "Ceci est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lisez la version telle qu'elle était lorsqu'elle était %(verb)s</a>."
 
-#: views/legislation.py:351
+#: views/legislation.py:352
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
 msgstr "Ceci est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lisez la version telle qu'elle était lorsqu'elle %(verb)s</a>."
 
-#: views/legislation.py:356
+#: views/legislation.py:357
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr "C'est la version de ce %(friendly_type)s telle qu'elle était de %(date_from)s à %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Lisez la dernière version disponible</a>."
 
-#: views/legislation.py:380
+#: views/legislation.py:381
 msgid "This version is at a future date."
 msgstr "Cette version est à une date ultérieure."
 
-#: views/legislation.py:438
+#: views/legislation.py:439
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Il existe des amendements en suspens qui n’ont pas encore été appliqués. Voir l'onglet Historique pour plus d'informations."
 
-#: views/legislation.py:946
+#: views/legislation.py:947
 msgid "document with similar provisions"
 msgstr "document contenant des dispositions similaires"
 
-#: views/legislation.py:947
+#: views/legislation.py:948
 msgid "documents with similar provisions"
 msgstr "documents comportant des dispositions similaires"
 
