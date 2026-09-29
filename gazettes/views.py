@@ -19,6 +19,11 @@ class ArchiveView(RedirectView):
         return f"https://archive.gazettes.africa/archive/{path}"
 
 
+def global_year_not_found(request, year):
+    """Disable unscoped year pages on Gazettes.Africa."""
+    raise Http404()
+
+
 class JurisdictionListView(TemplateView):
     template_name = "gazettes/home.html"
 
