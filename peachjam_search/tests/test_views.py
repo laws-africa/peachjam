@@ -709,6 +709,9 @@ class SearchViewsTest(TestCase):
         self.assertEqual(document.pk, hit.document.pk)
         self.assertIn("Selected document", html)
         self.assertIn(document.title, html)
+        self.assertIn("card-clickable", html)
+        self.assertIn(str(document.nature), html)
+        self.assertNotIn("search-result-list", html)
 
     def test_selected_document_does_not_resolve_another_index_numeric_id(self):
         document = CoreDocument.objects.filter(published=True).first()

@@ -1,7 +1,21 @@
 {% load i18n %}
-<section class="my-4 p-3 bg-light rounded">
+<section class="p-3 bg-light rounded mb-3">
   <h2 class="h5 mb-3">{% trans "Selected document" %}</h2>
-  <ul class="list-unstyled search-result-list mb-0">
-    {% include "peachjam_search/_search_hit.html" %}
-  </ul>
+  <div class="row g-3">
+    <div class="col-12 col-md-4">
+      <article class="card h-100 bg-white card-clickable">
+        <div class="card-body d-flex flex-column gap-2">
+          <div class="d-flex align-items-start gap-2">
+            <a class="flex-grow-1 stretched-link text-decoration-none text-h5"
+               href="{{ hit.document.get_absolute_url }}"
+               {% if hit.index %}data-frbr-uri="{{ hit.expression_frbr_uri }}" data-position="{{ hit.position }}"{% endif %}>{{ hit.document.title }}</a>
+            <span class="badge text-bg-secondary ms-auto">{{ hit.document.nature }}</span>
+          </div>
+          {% if hit.document.citation and hit.document.citation != hit.document.title %}
+            <p class="small text-muted mb-0">{{ hit.document.citation }}</p>
+          {% endif %}
+        </div>
+      </article>
+    </div>
+  </div>
 </section>

@@ -206,7 +206,7 @@
                 <div id="saved-search-modal-dialog" class="modal-dialog" />
               </div>
               <div
-                v-if="searchInfo.count && searchInfo.flynote_results_html"
+                v-if="searchInfo.flynote_results_html"
                 v-html="searchInfo.flynote_results_html"
               />
               <div
