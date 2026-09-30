@@ -107,6 +107,31 @@ class FlynoteSearchMatcher:
             .order_by("-doc_count", "-depth", "name")
         )
 
+    def match_selected(self, query, flynote_id=None):
+        """Resolve a selected typeahead topic without relying on query intent."""
+        query = (query or "").strip()
+        if not query:
+            return []
+
+        candidates = self.with_document_counts(
+            Flynote.objects.prefix_matching_names(query)
+        ).filter(search_name=query.upper(), doc_count__gt=0)
+        if flynote_id:
+            candidates = candidates.filter(pk=flynote_id)
+        candidates = list(candidates.order_by("-doc_count", "-depth", "name"))
+        selected = self.select_distinct_branches(candidates, self.result_limit)
+        path_labels = Flynote.get_path_labels(selected)
+        return [
+            FlynoteSearchHit(
+                flynote=flynote,
+                count=flynote.doc_count,
+                path_labels=path_labels.get(flynote.pk, []),
+                source="direct_query",
+                selection_reason="selected_suggestion",
+            )
+            for flynote in selected
+        ]
+
     def topics_from_search_hits(self, query, search_hits):
         # SearchHit.position is one-based and reflects the result order. Keep
         # it so that a topic supported by earlier judgments ranks more highly.

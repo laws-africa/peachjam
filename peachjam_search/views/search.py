@@ -1,6 +1,7 @@
 import json
 import logging
 from dataclasses import replace
+from types import SimpleNamespace
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -41,7 +42,15 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
+from peachjam.models import (
+    Author,
+    CoreDocument,
+    CourtRegistry,
+    Judge,
+    Judgment,
+    Label,
+    pj_settings,
+)
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
@@ -73,12 +82,23 @@ from peachjam_search.serializers import (
     SearchFlynoteClickSerializer,
     SearchHit,
 )
+from peachjam_search.suggestions import SearchSuggestionService
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
 
 log = logging.getLogger(__name__)
+
+
+def strip_null_bytes(value):
+    if isinstance(value, str):
+        return value.replace("\00", " ")
+    if isinstance(value, dict):
+        return {key: strip_null_bytes(child) for key, child in value.items()}
+    if isinstance(value, list):
+        return [strip_null_bytes(child) for child in value]
+    return value
 
 
 def debug_json(value):
@@ -186,6 +206,12 @@ class DocumentSearchView(TemplateView):
         has_direct_flynote_match = any(
             hit.source == "direct_query" for hit in flynote_hits
         )
+        selected_document_hit = self.match_selected_document(hits)
+        result_hits = [
+            hit
+            for hit in hits
+            if not selected_document_hit or hit.id != selected_document_hit.id
+        ]
 
         response = {
             "count": es_response.hits.total.value,
@@ -214,11 +240,25 @@ class DocumentSearchView(TemplateView):
                 if flynote_hits
                 else ""
             ),
+            "selected_document_result_html": (
+                render_to_string(
+                    "peachjam_search/_selected_document_search_hit.html",
+                    {
+                        "request": request,
+                        "hit": selected_document_hit,
+                        "show_jurisdiction": settings.PEACHJAM[
+                            "SEARCH_JURISDICTION_FILTER"
+                        ],
+                    },
+                )
+                if selected_document_hit
+                else ""
+            ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
                 {
                     "request": request,
-                    "hits": hits,
+                    "hits": result_hits,
                     "can_debug": self.use_explain,
                     "show_jurisdiction": settings.PEACHJAM[
                         "SEARCH_JURISDICTION_FILTER"
@@ -239,14 +279,13 @@ class DocumentSearchView(TemplateView):
         self.use_explain = True
         return self.search(request, *args, **kwargs)
 
+    @method_decorator(never_cache)
     @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
-        q = request.GET.get("q")
         suggestions = []
 
-        if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            suggestions = ElasticsearchSearchCompiler().suggest(q).suggest.to_dict()
-            suggestions["prefix"] = suggestions["prefix"][0]
+        if settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
+            suggestions = SearchSuggestionService().suggest(request.GET.get("q", ""))
 
         response = {"suggestions": suggestions}
         return self.render(response)
@@ -337,19 +376,87 @@ class DocumentSearchView(TemplateView):
     def match_entities(self, engine):
         if engine.search_query.page != 1 or engine.search_query.field_queries:
             return []
-        return self.make_entity_matcher().match(engine.search_query.query)
+        matcher = self.make_entity_matcher()
+        suggestion_type = strip_null_bytes(
+            self.request.GET.get("suggestion", "")
+        ).strip()
+        if suggestion_type in {"court", "judge", "locality"}:
+            return matcher.match_selected(
+                engine.search_query.query,
+                suggestion_type,
+                strip_null_bytes(self.request.GET.get("suggestion_id", "")) or None,
+            )
+        return matcher.match(engine.search_query.query)
 
     def match_flynotes(self, engine, hits):
         """Find supplementary legal-topic cards for a first-page legal-term search."""
+        selected_flynote = (
+            strip_null_bytes(self.request.GET.get("suggestion", "")).strip()
+            == "flynote"
+        )
         if (
             engine.search_query.page != 1
             or engine.search_query.field_queries
-            or not Judgment.flynote_topics_enabled()
-            or getattr(getattr(engine, "analysis", None), "intent", None)
-            != "legal_term"
+            or not Judgment.flynote_tree_enabled()
+            or (not selected_flynote and not Judgment.flynote_topics_enabled())
         ):
             return []
-        return FlynoteSearchMatcher().match(engine.search_query.query, hits)
+        matcher = FlynoteSearchMatcher()
+        if selected_flynote:
+            return matcher.match_selected(
+                engine.search_query.query,
+                strip_null_bytes(self.request.GET.get("suggestion_id", "")) or None,
+            )
+        if getattr(getattr(engine, "analysis", None), "intent", None) != "legal_term":
+            return []
+        return matcher.match(engine.search_query.query, hits)
+
+    def match_selected_document(self, hits):
+        """Return the document explicitly chosen from typeahead suggestions."""
+        suggestion_type = strip_null_bytes(
+            self.request.GET.get("suggestion", "")
+        ).strip()
+        if suggestion_type != "document":
+            return None
+
+        suggestion_id = strip_null_bytes(
+            self.request.GET.get("suggestion_id", "")
+        ).strip()
+        if suggestion_id:
+            for hit in hits:
+                if str(hit.id) == suggestion_id:
+                    return hit
+
+            try:
+                document_id = int(suggestion_id)
+            except (TypeError, ValueError):
+                return None
+            document = (
+                CoreDocument.objects.for_document_table()
+                .filter(pk=document_id, published=True)
+                .prefetch_related("alternative_names")
+                .first()
+            )
+            if document:
+                return SearchHit(
+                    es_hit=SimpleNamespace(meta=SimpleNamespace()),
+                    id=document.pk,
+                    index="",
+                    score=0,
+                    position=1,
+                    expression_frbr_uri=document.expression_frbr_uri,
+                    document=document,
+                )
+
+        selected_value = strip_null_bytes(self.request.GET.get("search", "")).strip()
+        selected_value = selected_value.casefold()
+        for hit in hits:
+            document = hit.document
+            values = [document.title, document.citation]
+            values.extend(name.title for name in document.alternative_names.all())
+            if selected_value in {(value or "").strip().casefold() for value in values}:
+                return hit
+        return None
 
     def save_flynote_results(self, trace, flynote_hits):
         """Persist the exact topic cards rendered for a search trace.
@@ -416,15 +523,6 @@ class DocumentSearchView(TemplateView):
         elasticsearch_query=None,
         error=None,
     ):
-        def strip_null_bytes(value):
-            if isinstance(value, str):
-                return value.replace("\00", " ")
-            if isinstance(value, dict):
-                return {key: strip_null_bytes(child) for key, child in value.items()}
-            if isinstance(value, list):
-                return [strip_null_bytes(child) for child in value]
-            return value
-
         filters_string = "; ".join(
             f"{k}={v}" for k, v in engine.search_query.filters.items()
         )

@@ -173,14 +173,14 @@ class ElasticsearchSearchCompiler:
         """Return the advanced form fields accepted by the default compiler."""
         return list(cls.build_advanced_search_fields(SearchProfile.default()))
 
-    def suggest(self, query: str) -> Any:
+    def suggest(self, query: str, size: int = 5) -> Any:
         search = Search(using=self.client, index=self.index)
-        search = search.source(["_id"]).suggest(
+        search = search.source(["nature"]).suggest(
             "prefix",
             query,
             completion={
                 "field": "suggest",
-                "size": 5,
+                "size": size,
                 "skip_duplicates": True,
             },
         )

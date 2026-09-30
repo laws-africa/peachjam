@@ -686,6 +686,30 @@ class SearchViewsTest(TestCase):
         self.assertNotIn("data-frbr-uri", html)
         self.assertIn('data-entity-result-id="None"', html)
 
+    def test_selected_document_is_rendered_as_a_card(self):
+        document = CoreDocument.objects.filter(published=True).first()
+        request = RequestFactory().get(
+            "/search/api/documents/",
+            {
+                "search": document.title,
+                "suggestion": "document",
+                "suggestion_id": document.pk,
+            },
+        )
+        view = DocumentSearchView()
+        view.request = request
+
+        hit = view.match_selected_document([])
+        html = render_to_string(
+            "peachjam_search/_selected_document_search_hit.html",
+            {"request": request, "hit": hit, "show_jurisdiction": False},
+            request=request,
+        )
+
+        self.assertEqual(document.pk, hit.document.pk)
+        self.assertIn("Selected document", html)
+        self.assertIn(document.title, html)
+
     def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
 
