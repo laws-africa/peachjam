@@ -30,7 +30,10 @@ class DocumentSuggestionProviderTest(TestCase):
                                     "_id": "42",
                                     "text": "Judicial Service Act",
                                     "_score": 4,
-                                    "_source": {"nature": "Legislation"},
+                                    "_source": {
+                                        "nature": "Legislation",
+                                        "expression_frbr_uri": "/akn/za/act/2020/1/eng@2020-01-01",
+                                    },
                                 }
                             )
                         ]
@@ -44,7 +47,7 @@ class DocumentSuggestionProviderTest(TestCase):
         self.assertEqual("Judicial Service Act", suggestions[0].value)
         self.assertEqual("document", suggestions[0].type)
         self.assertEqual("Legislation", suggestions[0].type_label)
-        self.assertEqual("42", suggestions[0].target_id)
+        self.assertEqual("/akn/za/act/2020/1/eng@2020-01-01", suggestions[0].target_id)
         compiler_class.return_value.suggest.assert_called_once_with("jud", size=5)
 
     @patch("peachjam_search.suggestions.ElasticsearchSearchCompiler")
@@ -183,3 +186,30 @@ class SearchSuggestionViewTest(TestCase):
         suggest.assert_called_once_with("supreme")
         self.assertIn("no-cache", first.headers["Cache-Control"])
         self.assertIn("private", first.headers["Cache-Control"])
+
+    @patch("peachjam_search.views.search.SearchSuggestionService.suggest")
+    def test_changing_flynote_setting_uses_a_fresh_server_cache_entry(self, suggest):
+        suggest.side_effect = [
+            [{"value": "Wrongful arrest", "type": "flynote"}],
+            [{"value": "Wrongful arrest", "type": "document"}],
+        ]
+        url = (
+            reverse("search:search_documents").replace(
+                "api/documents/", "api/documents/suggest/"
+            )
+            + "?q=wrongful"
+        )
+        base_settings = settings.PEACHJAM
+
+        with override_settings(
+            PEACHJAM={**base_settings, "SUMMARISE_USE_FLYNOTE_TREE": True}
+        ):
+            enabled = self.client.get(url)
+        with override_settings(
+            PEACHJAM={**base_settings, "SUMMARISE_USE_FLYNOTE_TREE": False}
+        ):
+            disabled = self.client.get(url)
+
+        self.assertEqual("flynote", enabled.json()["suggestions"][0]["type"])
+        self.assertEqual("document", disabled.json()["suggestions"][0]["type"])
+        self.assertEqual(2, suggest.call_count)

@@ -59,7 +59,7 @@ class DocumentSuggestionProvider:
                     value=value,
                     type=self.suggestion_type,
                     type_label=str(type_label),
-                    target_id=str(option_data.get("_id") or "") or None,
+                    target_id=source.get("expression_frbr_uri") or None,
                     match_rank=0 if normalize(value) == normalize(query) else 1,
                     source_rank=source_rank,
                 )

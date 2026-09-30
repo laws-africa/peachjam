@@ -1,12 +1,14 @@
 import json
 import logging
 from dataclasses import replace
+from hashlib import sha256
 from types import SimpleNamespace
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -23,6 +25,7 @@ from django.template.loader import render_to_string
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.cache import cache_page, never_cache
@@ -280,12 +283,30 @@ class DocumentSearchView(TemplateView):
         return self.search(request, *args, **kwargs)
 
     @method_decorator(never_cache)
-    @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
-        suggestions = []
-
-        if settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            suggestions = SearchSuggestionService().suggest(request.GET.get("q", ""))
+        query = request.GET.get("q", "")
+        # Include feature settings in the key so changing a site's flynote
+        # configuration cannot serve an old six-hour suggestion response.
+        cache_input = (
+            request.get_host(),
+            get_language(),
+            settings.PEACHJAM["SEARCH_SUGGESTIONS"],
+            Judgment.flynote_tree_enabled(),
+            query,
+        )
+        cache_key = (
+            "search-suggestions:v2:"
+            + sha256(repr(cache_input).encode("utf-8")).hexdigest()
+        )
+        suggestions = cache.get_or_set(
+            cache_key,
+            lambda: (
+                SearchSuggestionService().suggest(query)
+                if settings.PEACHJAM["SEARCH_SUGGESTIONS"]
+                else []
+            ),
+            SUGGESTIONS_CACHE_SECS,
+        )
 
         response = {"suggestions": suggestions}
         return self.render(response)
@@ -419,21 +440,17 @@ class DocumentSearchView(TemplateView):
         if suggestion_type != "document":
             return None
 
-        suggestion_id = strip_null_bytes(
+        suggestion_uri = strip_null_bytes(
             self.request.GET.get("suggestion_id", "")
         ).strip()
-        if suggestion_id:
+        if suggestion_uri:
             for hit in hits:
-                if str(hit.id) == suggestion_id:
+                if hit.expression_frbr_uri == suggestion_uri:
                     return hit
 
-            try:
-                document_id = int(suggestion_id)
-            except (TypeError, ValueError):
-                return None
             document = (
                 CoreDocument.objects.for_document_table()
-                .filter(pk=document_id, published=True)
+                .filter(expression_frbr_uri=suggestion_uri, published=True)
                 .prefetch_related("alternative_names")
                 .first()
             )
@@ -447,6 +464,7 @@ class DocumentSearchView(TemplateView):
                     expression_frbr_uri=document.expression_frbr_uri,
                     document=document,
                 )
+            return None
 
         selected_value = strip_null_bytes(self.request.GET.get("search", "")).strip()
         selected_value = selected_value.casefold()

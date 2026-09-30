@@ -693,7 +693,7 @@ class SearchViewsTest(TestCase):
             {
                 "search": document.title,
                 "suggestion": "document",
-                "suggestion_id": document.pk,
+                "suggestion_id": document.expression_frbr_uri,
             },
         )
         view = DocumentSearchView()
@@ -709,6 +709,37 @@ class SearchViewsTest(TestCase):
         self.assertEqual(document.pk, hit.document.pk)
         self.assertIn("Selected document", html)
         self.assertIn(document.title, html)
+
+    def test_selected_document_does_not_resolve_another_index_numeric_id(self):
+        document = CoreDocument.objects.filter(published=True).first()
+        request = RequestFactory().get(
+            "/search/api/documents/",
+            {
+                "search": document.title,
+                "suggestion": "document",
+                "suggestion_id": document.pk,
+            },
+        )
+        view = DocumentSearchView()
+        view.request = request
+
+        self.assertIsNone(view.match_selected_document([]))
+
+    def test_selected_document_matches_uri_when_search_hit_id_differs(self):
+        document = CoreDocument.objects.filter(published=True).first()
+        request = RequestFactory().get(
+            "/search/api/documents/",
+            {
+                "search": document.title,
+                "suggestion": "document",
+                "suggestion_id": document.expression_frbr_uri,
+            },
+        )
+        view = DocumentSearchView()
+        view.request = request
+        hit = SimpleNamespace(id=-1, expression_frbr_uri=document.expression_frbr_uri)
+
+        self.assertIs(hit, view.match_selected_document([hit]))
 
     def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
