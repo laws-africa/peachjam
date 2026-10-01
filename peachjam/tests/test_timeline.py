@@ -9,6 +9,7 @@ from django.contrib.auth.models import Permission, User
 from django.contrib.messages import get_messages
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -103,27 +104,26 @@ class TimelineViewTest(TestCase):
     def test_timeline_create_and_update(self):
         # Initially, no timeline events
         self.assertEqual(0, TimelineEvent.objects.count())
-        date = datetime(2025, 10, 1)
+        recent_date = timezone.now()
         Judgment.objects.create(
             case_name="New Case",
             court=self.court,
-            date=date,
+            date=recent_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
         Judgment.objects.create(
             case_name="New Case 2",
             court=self.court,
-            date=date,
+            date=recent_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
-        date = datetime(2000, 10, 1)
         # An old judgment that should not be included
         Judgment.objects.create(
             case_name="Old Case",
             court=self.court,
-            date=date,
+            date=datetime(2000, 10, 1),
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -140,11 +140,10 @@ class TimelineViewTest(TestCase):
 
         # Create a new judgment and update timeline
         # → should NOT create a new event, but subject doc count should increase
-        date = datetime(2025, 10, 1)
         j = Judgment.objects.create(
             case_name="New Case 3",
             court=self.court,
-            date=date,
+            date=recent_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -158,11 +157,11 @@ class TimelineViewTest(TestCase):
 
         # Send timeline emails, then create another doc and update timeline
         # → should create a NEW timeline event, subject doc count should increase
-        TimelineEvent.objects.all().update(email_alert_sent_at=date)
+        TimelineEvent.objects.all().update(email_alert_sent_at=recent_date)
         j = Judgment.objects.create(
             case_name="Another Case",
             court=self.court,
-            date=date,
+            date=recent_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -183,7 +182,7 @@ class TimelineViewTest(TestCase):
         Judgment.objects.create(
             case_name="Locked Follow Case",
             court=self.court,
-            date=datetime(2025, 10, 1),
+            date=timezone.now(),
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -394,7 +393,7 @@ class TimelineViewTest(TestCase):
             title="Fresh journal article",
             journal=journal,
             publisher="Publisher",
-            date=datetime(2025, 10, 1),
+            date=timezone.now(),
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -422,7 +421,7 @@ class TimelineViewTest(TestCase):
         judgment = Judgment.objects.create(
             case_name="Reported case",
             court=self.court,
-            date=datetime(2025, 10, 1),
+            date=timezone.now(),
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -443,7 +442,7 @@ class TimelineViewTest(TestCase):
         judgment = Judgment.objects.create(
             case_name="Administrative decision case",
             court=self.court,
-            date=datetime(2025, 10, 1),
+            date=timezone.now(),
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
