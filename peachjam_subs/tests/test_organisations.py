@@ -344,6 +344,109 @@ class OrganisationServiceTests(TestCase):
         self.assertEqual(Subscription.Status.ACTIVE, assignment.subscription.status)
         self.assertFalse(assignment.subscription.is_trial)
 
+    def test_invited_user_can_accept_without_email_address_record(self):
+        EmailAddress.objects.filter(user=self.member).delete()
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+
+        membership = organisation_service.accept_invitation(
+            token=invitation.token, user=self.member
+        )
+
+        self.assertEqual(self.member, membership.user)
+        address = EmailAddress.objects.get(user=self.member, email=self.member.email)
+        self.assertTrue(address.verified)
+        self.assertTrue(address.primary)
+
+    def test_invited_user_can_accept_with_unverified_email(self):
+        EmailAddress.objects.filter(user=self.member).update(verified=False)
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+
+        membership = organisation_service.accept_invitation(
+            token=invitation.token, user=self.member
+        )
+
+        self.assertEqual(self.member, membership.user)
+        self.assertTrue(
+            EmailAddress.objects.get(user=self.member, email=self.member.email).verified
+        )
+
+    def test_invited_secondary_email_is_verified_without_changing_primary(self):
+        secondary_email = "secondary@example.com"
+        EmailAddress.objects.create(
+            user=self.member, email=secondary_email, verified=False
+        )
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=secondary_email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+
+        organisation_service.accept_invitation(token=invitation.token, user=self.member)
+
+        self.assertTrue(
+            EmailAddress.objects.get(user=self.member, email=secondary_email).verified
+        )
+        self.assertTrue(
+            EmailAddress.objects.get(user=self.member, email=self.member.email).primary
+        )
+
+    def test_invitation_cannot_verify_email_owned_by_another_account(self):
+        EmailAddress.objects.filter(user=self.member).update(verified=False)
+        other_user = User.objects.create_user(
+            username="other@example.com", email=self.member.email
+        )
+        EmailAddress.objects.create(
+            user=other_user, email=self.member.email, verified=True, primary=True
+        )
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+
+        with self.assertRaisesMessage(ValidationError, "verified for another account"):
+            organisation_service.accept_invitation(
+                token=invitation.token, user=self.member
+            )
+
+        invitation.refresh_from_db()
+        self.assertEqual(OrganisationInvitation.Status.PENDING, invitation.status)
+        self.assertFalse(
+            OrganisationMembership.objects.filter(user=self.member).exists()
+        )
+
+    def test_account_with_different_email_cannot_accept_invitation(self):
+        invitation = organisation_service.send_invitation(
+            organisation=self.organisation,
+            email=self.member.email,
+            role=OrganisationMembership.Role.MEMBER,
+            actor=self.owner,
+        )
+        other_user = User.objects.create_user(
+            username="other@example.com", email="other@example.com"
+        )
+
+        with self.assertRaisesMessage(ValidationError, "invited email address"):
+            organisation_service.accept_invitation(
+                token=invitation.token, user=other_user
+            )
+
+        self.assertFalse(
+            OrganisationMembership.objects.filter(user=other_user).exists()
+        )
+
     def test_subscription_state_distinguishes_pending_managed_and_suspended(self):
         invitation = organisation_service.send_invitation(
             organisation=self.organisation,
