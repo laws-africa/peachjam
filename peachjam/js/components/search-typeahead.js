@@ -24,9 +24,10 @@ export default class SearchTypeahead {
     this.input = input;
     // searches without suggestions; if the input has one of these as a prefix, we know we don't want to
     // call the server again
-    this.noSuggestions = new Set();
+    this.noSuggestions = new Map();
+    this.noSuggestionsTtlMs = 30 * 60 * 1000;
     // don't call the server if the value is longer than this
-    this.maxValueLength = 20;
+    this.maxValueLength = 100;
 
     this.autocomplete = CustomAutocomplete.getOrCreateInstance(this.input, {
       liveServer: true,
@@ -40,24 +41,31 @@ export default class SearchTypeahead {
       suggestionsThreshold: 3,
       noCache: false,
       autoselectFirst: false,
-      highlightTyped: true,
+      highlightTyped: false,
       shouldLoadFromServer: this.shouldLoadFromServer.bind(this),
-      onServerError: (error, signal) => {
+      onServerError: (_ignored, signal) => {
         // do nothing to avoid noisey errors
       },
       onServerResponse: async (response) => {
         const data = await response.json();
-        const suggestions = data.suggestions.prefix.options.map((option) => {
+        const suggestions = data.suggestions.map((suggestion) => {
           return {
-            value: option.text,
-            label: option.text,
-            type: 'prefix'
+            value: suggestion.value,
+            label: suggestion.value,
+            type: suggestion.type,
+            typeLabel: suggestion.type_label,
+            targetId: suggestion.target_id
           };
         });
         if (!suggestions.length) {
-          this.noSuggestions.add(this.input.value.toLowerCase());
+          this.noSuggestions.set(this.input.value.toLowerCase(), Date.now() + this.noSuggestionsTtlMs);
         }
         return suggestions;
+      },
+      onRenderItem: (item) => {
+        const label = this.highlightLabel(item.label);
+        const typeLabel = this.escapeHtml(item.typeLabel);
+        return `${label} <span class="badge text-bg-secondary float-end ms-2">${typeLabel}</span>`;
       },
       onSelectItem: (item) => {
         if (this.forVue) {
@@ -66,6 +74,9 @@ export default class SearchTypeahead {
           if (this.input.form.suggestion) {
             // record the type of suggestion
             this.input.form.suggestion.value = item.type;
+          }
+          if (this.input.form.suggestion_id) {
+            this.input.form.suggestion_id.value = item.targetId || '';
           }
           this.input.form.submit();
         }
@@ -81,12 +92,33 @@ export default class SearchTypeahead {
     }
 
     if (value.length) {
-      for (const prefix of this.noSuggestions) {
+      for (const [prefix, expiresAt] of this.noSuggestions) {
+        if (expiresAt <= Date.now()) {
+          this.noSuggestions.delete(prefix);
+          continue;
+        }
         if (value.startsWith(prefix) || value === prefix) {
           return false;
         }
       }
     }
     return true;
+  }
+
+  escapeHtml (value) {
+    const element = document.createElement('span');
+    element.textContent = value;
+    return element.innerHTML;
+  }
+
+  highlightLabel (label) {
+    const query = this.input.value.toLowerCase();
+    const matchAt = label.toLowerCase().indexOf(query);
+    if (matchAt < 0) return this.escapeHtml(label);
+
+    const before = this.escapeHtml(label.substring(0, matchAt));
+    const match = this.escapeHtml(label.substring(matchAt, matchAt + query.length));
+    const after = this.escapeHtml(label.substring(matchAt + query.length));
+    return `${before}<mark>${match}</mark>${after}`;
   }
 }

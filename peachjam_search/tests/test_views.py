@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -685,6 +686,66 @@ class SearchViewsTest(TestCase):
         self.assertNotIn("data-position", html)
         self.assertNotIn("data-frbr-uri", html)
         self.assertIn('data-entity-result-id="None"', html)
+
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
+    def test_document_suggestion_keeps_ranked_results(self, mock_search):
+        selected = CoreDocument.objects.filter(published=True).first()
+        other = (
+            CoreDocument.objects.filter(published=True)
+            .exclude(title=selected.title)
+            .first()
+        )
+
+        def response(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": 2},
+                        "hits": [
+                            {
+                                "_id": str(selected.pk),
+                                "_index": search.index,
+                                "_score": 10.0,
+                                "_source": {
+                                    "expression_frbr_uri": selected.expression_frbr_uri
+                                },
+                            },
+                            {
+                                "_id": str(other.pk),
+                                "_index": search.index,
+                                "_score": 9.0,
+                                "_source": {
+                                    "expression_frbr_uri": other.expression_frbr_uri
+                                },
+                            },
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = response
+        request = RequestFactory().get(
+            reverse("search:search_documents"),
+            {
+                "search": selected.title,
+                "suggestion": "document",
+            },
+        )
+        request.user = self.user
+        request.id = "test-request"
+        result = DocumentSearchView.as_view()(request)
+
+        self.assertEqual(200, result.status_code)
+        data = json.loads(result.content)
+        self.assertNotIn("selected_document_result_html", data)
+        self.assertIn(selected.title, data["results_html"])
+        self.assertIn(other.title, data["results_html"])
+        self.assertLess(
+            data["results_html"].index(selected.title),
+            data["results_html"].index(other.title),
+        )
 
     def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}

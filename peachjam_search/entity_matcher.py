@@ -58,6 +58,20 @@ class EntityProvider:
     def match(self, query: str, normalized_query: str) -> list[CandidateMatch]:
         raise NotImplementedError()
 
+    def suggestion_values(self, entity) -> list[str]:
+        """Return normalized values which may trigger a typeahead suggestion."""
+        return [normalize(self.get_label(entity))]
+
+    def suggest(self, normalized_query: str) -> list[CandidateMatch]:
+        matches = []
+        for entity in self.get_entities():
+            values = self.suggestion_values(entity)
+            if normalized_query in values:
+                matches.append(CandidateMatch(entity, "exact", 1.0))
+            elif any(value.startswith(normalized_query) for value in values):
+                matches.append(CandidateMatch(entity, "prefix", 0.8))
+        return matches
+
     def build_hit(self, match: CandidateMatch) -> EntitySearchHit:
         entity = match.entity
         return EntitySearchHit(
@@ -76,6 +90,9 @@ class CourtEntityProvider(EntityProvider):
     type_label = _("Court")
     model = Court
     fields = ("id", "name", "code")
+
+    def suggestion_values(self, court) -> list[str]:
+        return [normalize(court.name), normalize(court.code)]
 
     def match(self, query: str, normalized_query: str) -> list[CandidateMatch]:
         matches = []
@@ -98,6 +115,10 @@ class JudgeEntityProvider(EntityProvider):
     entity_type = "judge"
     type_label = _("Judge")
     model = Judge
+
+    def suggestion_values(self, judge) -> list[str]:
+        normalized_name = normalize(judge.name)
+        return [normalized_name, *normalized_name.split()]
 
     def match(self, query: str, normalized_query: str) -> list[CandidateMatch]:
         matches = []
@@ -156,6 +177,13 @@ class LocalityEntityProvider(EntityProvider):
             # Some site URL configs don't have a locality legislation route.
             return f"{reverse('legislation_list')}?{urlencode({'localities': entity.name})}"
 
+    def suggestion_values(self, locality) -> list[str]:
+        return [
+            normalize(locality.name),
+            normalize(re.sub(r"\s*\([^)]*\)", "", locality.name)),
+            normalize(locality.place_code()),
+        ]
+
     def match(self, query: str, normalized_query: str) -> list[CandidateMatch]:
         matches = []
 
@@ -183,6 +211,7 @@ class EntityMatcher:
         LocalityEntityProvider,
     ]
     max_query_length = 50
+    max_suggestion_query_length = 100
     _instance = None
 
     def __init__(self, providers: Iterable[EntityProvider] | None = None):
@@ -215,6 +244,53 @@ class EntityMatcher:
             )
 
         return sorted(matches, key=lambda hit: hit.confidence, reverse=True)
+
+    def suggest(self, query: str, limit_per_type: int = 3) -> list[EntitySearchHit]:
+        """Return prefix matches without weakening full-search entity matching."""
+        query = (query or "").strip()
+        if len(query) > self.max_suggestion_query_length:
+            return []
+
+        normalized_query = normalize(query)
+        if not normalized_query:
+            return []
+
+        hits = []
+        for provider in self.providers:
+            provider_hits = [
+                provider.build_hit(match)
+                for match in provider.suggest(normalized_query)
+            ]
+            provider_hits.sort(
+                key=lambda hit: (-hit.confidence, hit.label.casefold(), hit.entity_id)
+            )
+            hits.extend(provider_hits[:limit_per_type])
+        return hits
+
+    def match_selected(
+        self,
+        query: str,
+        entity_type: str,
+        entity_id: str | None = None,
+        limit: int = 3,
+    ) -> list[EntitySearchHit]:
+        """Resolve an explicitly selected suggestion to its existing entity card."""
+        normalized_query = normalize((query or "").strip())
+        if not normalized_query:
+            return []
+
+        for provider in self.providers:
+            if provider.entity_type != entity_type:
+                continue
+            matches = [
+                CandidateMatch(entity, "selected suggestion", 1.0)
+                for entity in provider.get_entities()
+                if normalize(provider.get_label(entity)) == normalized_query
+                and (entity_id is None or str(entity.pk) == str(entity_id))
+            ]
+            matches.sort(key=lambda match: match.entity.pk)
+            return [provider.build_hit(match) for match in matches[:limit]]
+        return []
 
 
 def normalize(value: str) -> str:

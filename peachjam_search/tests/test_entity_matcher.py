@@ -37,6 +37,18 @@ class EntityMatcherTest(TestCase):
         self.assertEqual(Court.objects.get(code="EACJ").pk, hits[0].entity_id)
         self.assertEqual("code exact", hits[0].match_type)
 
+    def test_resolves_an_explicitly_selected_entity_type(self):
+        hits = EntityMatcher().match_selected("East African Court of Justice", "court")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("court", hits[0].entity_type)
+        self.assertEqual("selected suggestion", hits[0].match_type)
+
+    def test_selected_entity_does_not_match_a_different_type(self):
+        hits = EntityMatcher().match_selected("East African Court of Justice", "judge")
+
+        self.assertEqual([], hits)
+
     def test_matches_locality_name_exactly(self):
         locality = Locality.objects.get(name="African Union (AU)")
 
@@ -113,6 +125,36 @@ class EntityMatcherTest(TestCase):
 
         self.assertEqual([], hits)
 
+    def test_suggests_courts_by_name_prefix(self):
+        hits = EntityMatcher().suggest("east afr")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("court", hits[0].entity_type)
+        self.assertEqual("East African Court of Justice", hits[0].label)
+        self.assertEqual("prefix", hits[0].match_type)
+
+    def test_suggests_courts_by_code_prefix(self):
+        hits = EntityMatcher().suggest("eac")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("East African Court of Justice", hits[0].label)
+
+    def test_suggestions_are_limited_per_entity_type(self):
+        for number in range(5):
+            Judge.objects.create(name=f"Justice Example {number}")
+
+        hits = EntityMatcher().suggest("justice example", limit_per_type=3)
+
+        self.assertEqual(3, len([hit for hit in hits if hit.entity_type == "judge"]))
+
+    def test_suggests_judges_by_name_token_prefix(self):
+        Judge.objects.create(name="Justice Jane Mwangi")
+
+        hits = EntityMatcher().suggest("mwan")
+
+        self.assertEqual(1, len(hits))
+        self.assertEqual("Justice Jane Mwangi", hits[0].label)
+
     def test_ignores_long_queries_before_checking_providers(self):
         class Provider:
             called = False
@@ -124,6 +166,26 @@ class EntityMatcherTest(TestCase):
         provider = Provider()
 
         hits = EntityMatcher(providers=[provider]).match("x" * 51)
+
+        self.assertEqual([], hits)
+        self.assertFalse(provider.called)
+
+    def test_suggestions_have_their_own_query_length_limit(self):
+        class Provider:
+            called = False
+
+            def suggest(self, normalized_query):
+                self.called = True
+                return []
+
+        provider = Provider()
+
+        EntityMatcher(providers=[provider]).suggest("x" * 51)
+
+        self.assertTrue(provider.called)
+
+        provider.called = False
+        hits = EntityMatcher(providers=[provider]).suggest("x" * 101)
 
         self.assertEqual([], hits)
         self.assertFalse(provider.called)

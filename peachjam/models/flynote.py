@@ -1,10 +1,12 @@
 import logging
 
 from django.conf import settings
+from django.contrib.postgres.indexes import OpClass
 from django.core.exceptions import ValidationError
 from django.db import connection, models, transaction
 from django.db.models import Exists, OuterRef
 from django.db.models.deletion import ProtectedError
+from django.db.models.functions import Upper
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import format_html
@@ -39,6 +41,17 @@ class FlynoteManager(MP_NodeManager):
         if not query:
             return self.none()
         return self.undeprecated().filter(name__icontains=query)
+
+    def prefix_matching_names(self, query):
+        """Return active flynotes whose names start with the supplied query."""
+        query = (query or "").strip()
+        if not query:
+            return self.none()
+        return (
+            self.undeprecated()
+            .annotate(search_name=Upper("name"))
+            .filter(search_name__startswith=query.upper())
+        )
 
 
 class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
@@ -85,6 +98,13 @@ class Flynote(SuppressableHooksLifecycleMixin, MP_Node):
     class Meta:
         verbose_name = _("flynote")
         verbose_name_plural = _("flynotes")
+        indexes = [
+            models.Index(
+                OpClass(Upper("name"), name="text_pattern_ops"),
+                condition=models.Q(deprecated=False),
+                name="pj_flynote_name_prefix_idx",
+            )
+        ]
         permissions = [
             ("view_linked_judgments", _("Can view linked judgments")),
         ]
