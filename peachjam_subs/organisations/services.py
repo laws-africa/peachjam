@@ -567,11 +567,28 @@ class OrganisationService:
         notify_invitation(invitation)
         return invitation
 
-    def verified_invitation_email(self, user, invitation):
-        """Return whether the user has verified the invitation email address."""
-        return EmailAddress.objects.filter(
-            user=user, email__iexact=invitation.email, verified=True
-        ).exists()
+    def invitation_email_matches_user(self, user, invitation):
+        """Match the invited address to the account presenting its emailed token."""
+        return user.email.casefold() == invitation.email.casefold() or (
+            EmailAddress.objects.filter(
+                user=user, email__iexact=invitation.email
+            ).exists()
+        )
+
+    def verify_invitation_email(self, user, invitation):
+        """Treat acceptance of the emailed invitation as address verification."""
+        address = EmailAddress.objects.filter(
+            user=user, email__iexact=invitation.email
+        ).first()
+        if address is None:
+            address = EmailAddress.objects.create(
+                user=user, email=invitation.email.lower()
+            )
+        if not address.set_verified():
+            raise ValidationError(
+                _("This email address is already verified for another account.")
+            )
+        address.set_as_primary(conditional=True)
 
     def find_available_seat(self, organisation, offering):
         """Return an unassigned active seat for the exact offering."""
@@ -692,9 +709,9 @@ class OrganisationService:
         if invitation.status != OrganisationInvitation.Status.PENDING:
             raise ValidationError(_("This invitation is no longer available."))
         self.ensure_organisation_accepts_invitations(organisation)
-        if not self.verified_invitation_email(user, invitation):
+        if not self.invitation_email_matches_user(user, invitation):
             raise ValidationError(
-                _("Sign in with the verified email address that was invited.")
+                _("Sign in with an account using the invited email address.")
             )
         if OrganisationMembership.objects.filter(
             user=user, status=OrganisationMembership.Status.ACTIVE
@@ -770,6 +787,7 @@ class OrganisationService:
                 self.activate_assignment(assignment)
 
         invitation.accept(membership)
+        self.verify_invitation_email(user, invitation)
         OrganisationAuditEvent.objects.create(
             organisation=organisation,
             actor=user,

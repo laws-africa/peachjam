@@ -100,6 +100,7 @@ class TimelineViewTest(TestCase):
             court=self.court, created_at__gte=self.last_alerted_at
         ).count()
         self.follow.save()
+        self.recent_document_date = timezone.now()
 
     def test_timeline_create_and_update(self):
         # Initially, no timeline events
@@ -413,7 +414,7 @@ class TimelineViewTest(TestCase):
             title="Volume 1",
             slug="volume-1",
             law_report=law_report,
-            year=2025,
+            year=self.recent_document_date.year,
         )
         follow = UserFollowing.objects.create(user=self.user, law_report=law_report)
         follow.last_alerted_at = self.last_alerted_at
