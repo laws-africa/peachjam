@@ -9,6 +9,7 @@ from django.contrib.auth.models import Permission, User
 from django.contrib.messages import get_messages
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -99,11 +100,12 @@ class TimelineViewTest(TestCase):
             court=self.court, created_at__gte=self.last_alerted_at
         ).count()
         self.follow.save()
+        self.recent_document_date = timezone.now()
 
     def test_timeline_create_and_update(self):
         # Initially, no timeline events
         self.assertEqual(0, TimelineEvent.objects.count())
-        date = datetime(2025, 10, 1)
+        date = self.recent_document_date
         Judgment.objects.create(
             case_name="New Case",
             court=self.court,
@@ -140,7 +142,7 @@ class TimelineViewTest(TestCase):
 
         # Create a new judgment and update timeline
         # → should NOT create a new event, but subject doc count should increase
-        date = datetime(2025, 10, 1)
+        date = self.recent_document_date
         j = Judgment.objects.create(
             case_name="New Case 3",
             court=self.court,
@@ -183,7 +185,7 @@ class TimelineViewTest(TestCase):
         Judgment.objects.create(
             case_name="Locked Follow Case",
             court=self.court,
-            date=datetime(2025, 10, 1),
+            date=self.recent_document_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -394,7 +396,7 @@ class TimelineViewTest(TestCase):
             title="Fresh journal article",
             journal=journal,
             publisher="Publisher",
-            date=datetime(2025, 10, 1),
+            date=self.recent_document_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -414,7 +416,7 @@ class TimelineViewTest(TestCase):
             title="Volume 1",
             slug="volume-1",
             law_report=law_report,
-            year=2025,
+            year=self.recent_document_date.year,
         )
         follow = UserFollowing.objects.create(user=self.user, law_report=law_report)
         follow.last_alerted_at = self.last_alerted_at
@@ -422,7 +424,7 @@ class TimelineViewTest(TestCase):
         judgment = Judgment.objects.create(
             case_name="Reported case",
             court=self.court,
-            date=datetime(2025, 10, 1),
+            date=self.recent_document_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )
@@ -443,7 +445,7 @@ class TimelineViewTest(TestCase):
         judgment = Judgment.objects.create(
             case_name="Administrative decision case",
             court=self.court,
-            date=datetime(2025, 10, 1),
+            date=self.recent_document_date,
             language=Language.objects.get(pk="en"),
             jurisdiction=Country.objects.get(pk="ZA"),
         )

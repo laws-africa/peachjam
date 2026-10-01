@@ -364,7 +364,11 @@ msgid "This invitation is no longer available."
 msgstr ""
 
 #: organisations/services.py:368
-msgid "Sign in with the verified email address that was invited."
+msgid "Sign in with an account using the invited email address."
+msgstr ""
+
+#: organisations/services.py:587
+msgid "This email address is already verified for another account."
 msgstr ""
 
 #: organisations/services.py:373
