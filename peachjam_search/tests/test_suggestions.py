@@ -47,7 +47,7 @@ class DocumentSuggestionProviderTest(TestCase):
         self.assertEqual("Judicial Service Act", suggestions[0].value)
         self.assertEqual("document", suggestions[0].type)
         self.assertEqual("Legislation", suggestions[0].type_label)
-        self.assertEqual("/akn/za/act/2020/1/eng@2020-01-01", suggestions[0].target_id)
+        self.assertIsNone(suggestions[0].target_id)
         compiler_class.return_value.suggest.assert_called_once_with("jud", size=5)
 
     @patch("peachjam_search.suggestions.ElasticsearchSearchCompiler")
@@ -58,7 +58,9 @@ class DocumentSuggestionProviderTest(TestCase):
             "unavailable"
         )
 
-        self.assertEqual([], DocumentSuggestionProvider().suggest("jud"))
+        provider = DocumentSuggestionProvider()
+        self.assertEqual([], provider.suggest("jud"))
+        self.assertTrue(provider.degraded)
 
 
 class FlynoteSuggestionProviderTest(TestCase):
@@ -138,6 +140,19 @@ class SearchSuggestionServiceTest(TestCase):
 
         self.assertEqual("court", suggestions[0]["type"])
 
+    def test_reports_when_a_provider_is_unavailable(self):
+        class UnavailableProvider:
+            degraded = True
+
+            def suggest(self, query):
+                return []
+
+        service = SearchSuggestionService()
+        service.providers = (UnavailableProvider,)
+
+        self.assertEqual([], service.suggest("sup"))
+        self.assertTrue(service.degraded)
+
 
 @override_settings(
     PEACHJAM={**settings.PEACHJAM, "SEARCH_SUGGESTIONS": True},
@@ -153,7 +168,7 @@ class SearchSuggestionViewTest(TestCase):
         cache.clear()
 
     @patch("peachjam_search.views.search.SearchSuggestionService.suggest")
-    def test_uses_server_cache_without_allowing_browser_cache(self, suggest):
+    def test_uses_server_cache_and_allows_short_client_cache(self, suggest):
         suggest.return_value = [
             {
                 "value": "Supreme Court",
@@ -184,8 +199,10 @@ class SearchSuggestionViewTest(TestCase):
             first.json(),
         )
         suggest.assert_called_once_with("supreme")
-        self.assertIn("no-cache", first.headers["Cache-Control"])
         self.assertIn("private", first.headers["Cache-Control"])
+        self.assertNotIn("public", first.headers["Cache-Control"])
+        self.assertIn("max-age=1800", first.headers["Cache-Control"])
+        self.assertIn("Accept-Language", first.headers["Vary"])
 
     @patch("peachjam_search.views.search.SearchSuggestionService.suggest")
     def test_changing_flynote_setting_uses_a_fresh_server_cache_entry(self, suggest):
@@ -213,3 +230,21 @@ class SearchSuggestionViewTest(TestCase):
         self.assertEqual("flynote", enabled.json()["suggestions"][0]["type"])
         self.assertEqual("document", disabled.json()["suggestions"][0]["type"])
         self.assertEqual(2, suggest.call_count)
+
+    @patch("peachjam_search.views.search.SearchSuggestionService")
+    def test_degraded_suggestions_have_a_short_cache_lifetime(self, service_class):
+        service = service_class.return_value
+        service.suggest.return_value = [{"value": "Supreme Court", "type": "court"}]
+        service.degraded = True
+        url = reverse("search:search_documents").replace(
+            "api/documents/", "api/documents/suggest/"
+        )
+
+        with patch(
+            "peachjam_search.views.search.cache.set", wraps=cache.set
+        ) as set_cache:
+            response = self.client.get(url + "?q=supreme")
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(30, set_cache.call_args.args[2])
+        self.assertIn("max-age=30", response.headers["Cache-Control"])

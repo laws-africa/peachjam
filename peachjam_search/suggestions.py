@@ -37,14 +37,17 @@ class SearchSuggestion:
 class DocumentSuggestionProvider:
     suggestion_type = "document"
     limit = 5
+    degraded = False
 
     def suggest(self, query: str) -> list[SearchSuggestion]:
+        self.degraded = False
         try:
             response = ElasticsearchSearchCompiler().suggest(query, size=self.limit)
         except (ElasticsearchConnectionError, ConnectionTimeout):
             # Suggestions are an enhancement. If Elasticsearch is temporarily
             # unavailable, keep serving suggestions from PostgreSQL instead of
             # failing the complete typeahead request.
+            self.degraded = True
             log.warning("Unable to load document search suggestions", exc_info=True)
             return []
         options = response.suggest.prefix[0].options
@@ -59,7 +62,6 @@ class DocumentSuggestionProvider:
                     value=value,
                     type=self.suggestion_type,
                     type_label=str(type_label),
-                    target_id=source.get("expression_frbr_uri") or None,
                     match_rank=0 if normalize(value) == normalize(query) else 1,
                     source_rank=source_rank,
                 )
@@ -145,15 +147,19 @@ class SearchSuggestionService:
         FlynoteSuggestionProvider,
         EntitySuggestionProvider,
     )
+    degraded = False
 
     def suggest(self, query: str) -> list[dict]:
+        self.degraded = False
         query = (query or "").replace("\x00", " ").strip()
         if not self.min_query_length <= len(query) <= self.max_query_length:
             return []
 
         candidates = []
         for provider_class in self.providers:
-            candidates.extend(provider_class().suggest(query))
+            provider = provider_class()
+            candidates.extend(provider.suggest(query))
+            self.degraded |= getattr(provider, "degraded", False)
 
         candidates.sort(
             key=lambda suggestion: (

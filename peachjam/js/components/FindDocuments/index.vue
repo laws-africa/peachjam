@@ -213,10 +213,6 @@
                 v-if="searchInfo.entity_results_html"
                 v-html="searchInfo.entity_results_html"
               />
-              <div
-                v-if="searchInfo.selected_document_result_html"
-                v-html="searchInfo.selected_document_result_html"
-              />
               <div v-if="searchInfo.count">
                 <div class="my-3 d-flex">
                   <div class="me-2">

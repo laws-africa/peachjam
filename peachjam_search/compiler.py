@@ -175,7 +175,7 @@ class ElasticsearchSearchCompiler:
 
     def suggest(self, query: str, size: int = 5) -> Any:
         search = Search(using=self.client, index=self.index)
-        search = search.source(["nature", "expression_frbr_uri"]).suggest(
+        search = search.source(["nature"]).suggest(
             "prefix",
             query,
             completion={

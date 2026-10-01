@@ -24,7 +24,8 @@ export default class SearchTypeahead {
     this.input = input;
     // searches without suggestions; if the input has one of these as a prefix, we know we don't want to
     // call the server again
-    this.noSuggestions = new Set();
+    this.noSuggestions = new Map();
+    this.noSuggestionsTtlMs = 30 * 60 * 1000;
     // don't call the server if the value is longer than this
     this.maxValueLength = 100;
 
@@ -39,9 +40,6 @@ export default class SearchTypeahead {
       // 3 chars before suggestions are shown
       suggestionsThreshold: 3,
       noCache: false,
-      // Django caches this endpoint on the server. Do not let the browser keep
-      // an older response after suggestion sources or feature flags change.
-      fetchOptions: { cache: 'no-store' },
       autoselectFirst: false,
       highlightTyped: false,
       shouldLoadFromServer: this.shouldLoadFromServer.bind(this),
@@ -60,7 +58,7 @@ export default class SearchTypeahead {
           };
         });
         if (!suggestions.length) {
-          this.noSuggestions.add(this.input.value.toLowerCase());
+          this.noSuggestions.set(this.input.value.toLowerCase(), Date.now() + this.noSuggestionsTtlMs);
         }
         return suggestions;
       },
@@ -94,7 +92,11 @@ export default class SearchTypeahead {
     }
 
     if (value.length) {
-      for (const prefix of this.noSuggestions) {
+      for (const [prefix, expiresAt] of this.noSuggestions) {
+        if (expiresAt <= Date.now()) {
+          this.noSuggestions.delete(prefix);
+          continue;
+        }
         if (value.startsWith(prefix) || value === prefix) {
           return false;
         }

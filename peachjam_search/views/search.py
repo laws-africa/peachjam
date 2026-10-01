@@ -2,7 +2,6 @@ import json
 import logging
 from dataclasses import replace
 from hashlib import sha256
-from types import SimpleNamespace
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -22,7 +21,11 @@ from django.http.response import (
 )
 from django.shortcuts import redirect, reverse
 from django.template.loader import render_to_string
-from django.utils.cache import add_never_cache_headers
+from django.utils.cache import (
+    add_never_cache_headers,
+    patch_cache_control,
+    patch_vary_headers,
+)
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils.translation import get_language
@@ -47,7 +50,6 @@ from rest_framework.viewsets import GenericViewSet
 
 from peachjam.models import (
     Author,
-    CoreDocument,
     CourtRegistry,
     Judge,
     Judgment,
@@ -90,6 +92,8 @@ from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
+DEGRADED_SUGGESTIONS_CACHE_SECS = 30
+CLIENT_SUGGESTIONS_CACHE_SECS = 30 * 60
 
 log = logging.getLogger(__name__)
 
@@ -209,13 +213,6 @@ class DocumentSearchView(TemplateView):
         has_direct_flynote_match = any(
             hit.source == "direct_query" for hit in flynote_hits
         )
-        selected_document_hit = self.match_selected_document(hits)
-        result_hits = [
-            hit
-            for hit in hits
-            if not selected_document_hit or hit.id != selected_document_hit.id
-        ]
-
         response = {
             "count": es_response.hits.total.value,
             "facets": es_response.aggregations.to_dict(),
@@ -243,25 +240,11 @@ class DocumentSearchView(TemplateView):
                 if flynote_hits
                 else ""
             ),
-            "selected_document_result_html": (
-                render_to_string(
-                    "peachjam_search/_selected_document_search_hit.html",
-                    {
-                        "request": request,
-                        "hit": selected_document_hit,
-                        "show_jurisdiction": settings.PEACHJAM[
-                            "SEARCH_JURISDICTION_FILTER"
-                        ],
-                    },
-                )
-                if selected_document_hit
-                else ""
-            ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
                 {
                     "request": request,
-                    "hits": result_hits,
+                    "hits": hits,
                     "can_debug": self.use_explain,
                     "show_jurisdiction": settings.PEACHJAM[
                         "SEARCH_JURISDICTION_FILTER"
@@ -282,7 +265,6 @@ class DocumentSearchView(TemplateView):
         self.use_explain = True
         return self.search(request, *args, **kwargs)
 
-    @method_decorator(never_cache)
     def suggest(self, request, *args, **kwargs):
         query = request.GET.get("q", "")
         # Include feature settings in the key so changing a site's flynote
@@ -295,21 +277,40 @@ class DocumentSearchView(TemplateView):
             query,
         )
         cache_key = (
-            "search-suggestions:v2:"
+            "search-suggestions:v3:"
             + sha256(repr(cache_input).encode("utf-8")).hexdigest()
         )
-        suggestions = cache.get_or_set(
-            cache_key,
-            lambda: (
-                SearchSuggestionService().suggest(query)
+        cached = cache.get(cache_key)
+        if cached is None:
+            service = SearchSuggestionService()
+            suggestions = (
+                service.suggest(query)
                 if settings.PEACHJAM["SEARCH_SUGGESTIONS"]
                 else []
-            ),
-            SUGGESTIONS_CACHE_SECS,
-        )
+            )
+            timeout = (
+                DEGRADED_SUGGESTIONS_CACHE_SECS
+                if service.degraded
+                else SUGGESTIONS_CACHE_SECS
+            )
+            cached = {"suggestions": suggestions, "degraded": service.degraded}
+            cache.set(cache_key, cached, timeout)
 
-        response = {"suggestions": suggestions}
-        return self.render(response)
+        response = self.render({"suggestions": cached["suggestions"]})
+        # Let browsers reuse responses while typing, but avoid shared HTTP
+        # caches: the URL alone does not reflect site flynote feature settings.
+        # Django's setting-aware cache key above can still refresh immediately.
+        patch_cache_control(
+            response,
+            private=True,
+            max_age=(
+                DEGRADED_SUGGESTIONS_CACHE_SECS
+                if cached["degraded"]
+                else CLIENT_SUGGESTIONS_CACHE_SECS
+            ),
+        )
+        patch_vary_headers(response, ["Accept-Language"])
+        return response
 
     @method_decorator(cache_page(CACHE_SECS))
     def facets(self, request, *args, **kwargs):
@@ -431,50 +432,6 @@ class DocumentSearchView(TemplateView):
         if getattr(getattr(engine, "analysis", None), "intent", None) != "legal_term":
             return []
         return matcher.match(engine.search_query.query, hits)
-
-    def match_selected_document(self, hits):
-        """Return the document explicitly chosen from typeahead suggestions."""
-        suggestion_type = strip_null_bytes(
-            self.request.GET.get("suggestion", "")
-        ).strip()
-        if suggestion_type != "document":
-            return None
-
-        suggestion_uri = strip_null_bytes(
-            self.request.GET.get("suggestion_id", "")
-        ).strip()
-        if suggestion_uri:
-            for hit in hits:
-                if hit.expression_frbr_uri == suggestion_uri:
-                    return hit
-
-            document = (
-                CoreDocument.objects.for_document_table()
-                .filter(expression_frbr_uri=suggestion_uri, published=True)
-                .prefetch_related("alternative_names")
-                .first()
-            )
-            if document:
-                return SearchHit(
-                    es_hit=SimpleNamespace(meta=SimpleNamespace()),
-                    id=document.pk,
-                    index="",
-                    score=0,
-                    position=1,
-                    expression_frbr_uri=document.expression_frbr_uri,
-                    document=document,
-                )
-            return None
-
-        selected_value = strip_null_bytes(self.request.GET.get("search", "")).strip()
-        selected_value = selected_value.casefold()
-        for hit in hits:
-            document = hit.document
-            values = [document.title, document.citation]
-            values.extend(name.title for name in document.alternative_names.all())
-            if selected_value in {(value or "").strip().casefold() for value in values}:
-                return hit
-        return None
 
     def save_flynote_results(self, trace, flynote_hits):
         """Persist the exact topic cards rendered for a search trace.

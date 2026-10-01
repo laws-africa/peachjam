@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -686,63 +687,65 @@ class SearchViewsTest(TestCase):
         self.assertNotIn("data-frbr-uri", html)
         self.assertIn('data-entity-result-id="None"', html)
 
-    def test_selected_document_is_rendered_as_a_card(self):
-        document = CoreDocument.objects.filter(published=True).first()
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
+    def test_document_suggestion_keeps_ranked_results(self, mock_search):
+        selected = CoreDocument.objects.filter(published=True).first()
+        other = (
+            CoreDocument.objects.filter(published=True)
+            .exclude(title=selected.title)
+            .first()
+        )
+
+        def response(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": 2},
+                        "hits": [
+                            {
+                                "_id": str(selected.pk),
+                                "_index": search.index,
+                                "_score": 10.0,
+                                "_source": {
+                                    "expression_frbr_uri": selected.expression_frbr_uri
+                                },
+                            },
+                            {
+                                "_id": str(other.pk),
+                                "_index": search.index,
+                                "_score": 9.0,
+                                "_source": {
+                                    "expression_frbr_uri": other.expression_frbr_uri
+                                },
+                            },
+                        ],
+                    },
+                },
+            )
+
+        mock_search.side_effect = response
         request = RequestFactory().get(
-            "/search/api/documents/",
+            reverse("search:search_documents"),
             {
-                "search": document.title,
+                "search": selected.title,
                 "suggestion": "document",
-                "suggestion_id": document.expression_frbr_uri,
             },
         )
-        view = DocumentSearchView()
-        view.request = request
+        request.user = self.user
+        request.id = "test-request"
+        result = DocumentSearchView.as_view()(request)
 
-        hit = view.match_selected_document([])
-        html = render_to_string(
-            "peachjam_search/_selected_document_search_hit.html",
-            {"request": request, "hit": hit, "show_jurisdiction": False},
-            request=request,
+        self.assertEqual(200, result.status_code)
+        data = json.loads(result.content)
+        self.assertNotIn("selected_document_result_html", data)
+        self.assertIn(selected.title, data["results_html"])
+        self.assertIn(other.title, data["results_html"])
+        self.assertLess(
+            data["results_html"].index(selected.title),
+            data["results_html"].index(other.title),
         )
-
-        self.assertEqual(document.pk, hit.document.pk)
-        self.assertIn("Selected document", html)
-        self.assertIn(document.title, html)
-        self.assertIn("card-clickable", html)
-        self.assertIn(str(document.nature), html)
-        self.assertNotIn("search-result-list", html)
-
-    def test_selected_document_does_not_resolve_another_index_numeric_id(self):
-        document = CoreDocument.objects.filter(published=True).first()
-        request = RequestFactory().get(
-            "/search/api/documents/",
-            {
-                "search": document.title,
-                "suggestion": "document",
-                "suggestion_id": document.pk,
-            },
-        )
-        view = DocumentSearchView()
-        view.request = request
-
-        self.assertIsNone(view.match_selected_document([]))
-
-    def test_selected_document_matches_uri_when_search_hit_id_differs(self):
-        document = CoreDocument.objects.filter(published=True).first()
-        request = RequestFactory().get(
-            "/search/api/documents/",
-            {
-                "search": document.title,
-                "suggestion": "document",
-                "suggestion_id": document.expression_frbr_uri,
-            },
-        )
-        view = DocumentSearchView()
-        view.request = request
-        hit = SimpleNamespace(id=-1, expression_frbr_uri=document.expression_frbr_uri)
-
-        self.assertIs(hit, view.match_selected_document([hit]))
 
     def test_search_trace_without_analysis_keeps_analysis_fields_null(self):
         captured = {}
