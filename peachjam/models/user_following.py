@@ -410,8 +410,17 @@ class UserFollowing(models.Model):
             )
             return
 
+        citing_expr = citation.citing_work.documents.latest_expression().first()
+        if citing_expr is None:
+            log.info(
+                "Citing work %s has no document expressions for user %s; skipping citation alert.",
+                citation.citing_work,
+                self.user,
+            )
+            return
+
         if (
-            citation.citing_work.documents.latest_expression().first().date
+            citing_expr.date
             < self.cutoff_date
         ):
             log.info(
@@ -463,7 +472,16 @@ class UserFollowing(models.Model):
             subject_works=event_work,
         ).exists()
 
-        if event_work.documents.latest_expression().first().date < self.cutoff_date:
+        latest_expr = event_work.documents.latest_expression().first()
+        if latest_expr is None:
+            log.info(
+                "Event work %s has no document expressions for user %s; skipping relationship alert.",
+                event_work,
+                self.user,
+            )
+            return
+
+        if latest_expr.date < self.cutoff_date:
             log.info(
                 "relationship work %s is older than cutoff date %s for user %s",
                 event_work,
