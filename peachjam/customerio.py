@@ -5,6 +5,8 @@ from django.utils.module_loading import import_string
 analytics.write_key = settings.PEACHJAM["CUSTOMERIO_PYTHON_KEY"]
 analytics.host = "https://cdp-eu.customer.io"
 
+SIGNUP_COMPLETED_SESSION_KEY = "signup_completed_user_id"
+
 
 class CustomerIO:
     def enabled(self):
@@ -252,6 +254,8 @@ def get_customerio():
     return _customerio
 
 
-def track_account_created_signup_event(user):
-    """Track the Customer.io Signed up event for explicit account creation flows."""
+def track_account_created_signup_event(user, *, request=None):
+    """Track account creation and queue browser analytics for public signups."""
     get_customerio().track_user_signed_up(user)
+    if request is not None:
+        request.session[SIGNUP_COMPLETED_SESSION_KEY] = user.pk

@@ -25,8 +25,9 @@ from peachjam.auth import (
     create_all_users_permission_group_after_migrate,
     get_or_create_all_users_permission_group,
 )
-from peachjam.customerio import CustomerIO
+from peachjam.customerio import SIGNUP_COMPLETED_SESSION_KEY, CustomerIO
 from peachjam.models import OnboardingIntent, PracticeType
+from peachjam.signals import user_signed_up_update_customerio
 
 
 class PatchedFinishTests(TestCase):
@@ -37,6 +38,7 @@ class PatchedFinishTests(TestCase):
         proc.state = state or {}
         proc.user = user
         proc._user = user
+        proc.request = SimpleNamespace(session={})
         return proc
 
     def test_creates_user_for_new_email(self):
@@ -45,9 +47,7 @@ class PatchedFinishTests(TestCase):
 
         with (
             patch("peachjam.auth._original_finish") as mock_finish,
-            patch(
-                "peachjam.auth.track_account_created_signup_event"
-            ) as mock_track_signup_event,
+            patch("peachjam.customerio.get_customerio") as mock_get_customerio,
         ):
             mock_finish.return_value = "redirect"
             result = _patched_finish(proc, "/")
@@ -58,7 +58,10 @@ class PatchedFinishTests(TestCase):
         self.assertEqual(proc.state["user_id"], str(user.pk))
         self.assertEqual(proc._user, user)
         mock_finish.assert_called_once_with(proc, "/")
-        mock_track_signup_event.assert_called_once_with(user)
+        mock_get_customerio.return_value.track_user_signed_up.assert_called_once_with(
+            user
+        )
+        self.assertEqual(proc.request.session[SIGNUP_COMPLETED_SESSION_KEY], user.pk)
         self.assertEqual(result, "redirect")
 
     def test_existing_user_not_duplicated(self):
@@ -84,6 +87,7 @@ class PatchedFinishTests(TestCase):
         existing.refresh_from_db()
         self.assertTrue(existing.has_usable_password())
         mock_track_signup_event.assert_not_called()
+        self.assertNotIn(SIGNUP_COMPLETED_SESSION_KEY, proc.request.session)
 
     def test_no_email_in_state(self):
         proc = self._make_process(state={})
@@ -111,6 +115,71 @@ class PatchedFinishTests(TestCase):
 
         self.assertEqual(User.objects.filter(email="withuser@example.com").count(), 1)
         mock_finish.assert_called_once_with(proc, "/done")
+
+
+class SignupAnalyticsTests(TestCase):
+    fixtures = ["tests/languages"]
+
+    def test_allauth_signup_marks_the_new_user(self):
+        user = User.objects.create_user(
+            username="new@example.com", email="new@example.com"
+        )
+        request = RequestFactory().post(reverse("account_signup"))
+        request.session = {}
+
+        with patch("peachjam.customerio.get_customerio"):
+            user_signed_up_update_customerio(User, request, user)
+
+        self.assertEqual(request.session[SIGNUP_COMPLETED_SESSION_KEY], user.pk)
+
+    def test_loaded_sends_event_once_for_matching_authenticated_user(self):
+        user = User.objects.create_user(
+            username="new@example.com", email="new@example.com"
+        )
+        session = self.client.session
+        session[SIGNUP_COMPLETED_SESSION_KEY] = user.pk
+        session.save()
+        self.client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
+
+        self.assertNotContains(self.client.get(reverse("loaded")), "Signup completed")
+        self.assertEqual(self.client.session[SIGNUP_COMPLETED_SESSION_KEY], user.pk)
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("loaded"))
+        self.assertContains(
+            response,
+            "peachjam.analytics.trackEvent('Account', 'Signup completed')",
+        )
+        self.assertLess(
+            response.content.index(b"peachjam.userLoaded()"),
+            response.content.index(b"Signup completed"),
+        )
+        self.assertNotIn(SIGNUP_COMPLETED_SESSION_KEY, self.client.session)
+        self.assertNotContains(self.client.get(reverse("loaded")), "Signup completed")
+
+    def test_loaded_does_not_consume_another_users_flag(self):
+        new_user = User.objects.create_user(
+            username="new@example.com", email="new@example.com"
+        )
+        existing_user = User.objects.create_user(
+            username="existing@example.com", email="existing@example.com"
+        )
+        self.client.force_login(existing_user)
+        session = self.client.session
+        session[SIGNUP_COMPLETED_SESSION_KEY] = new_user.pk
+        session.save()
+        self.client.cookies[settings.SESSION_COOKIE_NAME] = session.session_key
+
+        self.assertNotContains(self.client.get(reverse("loaded")), "Signup completed")
+        self.assertEqual(self.client.session[SIGNUP_COMPLETED_SESSION_KEY], new_user.pk)
+
+    def test_ordinary_login_has_no_signup_event(self):
+        user = User.objects.create_user(
+            username="existing@example.com", email="existing@example.com"
+        )
+        self.client.force_login(user)
+
+        self.assertNotContains(self.client.get(reverse("loaded")), "Signup completed")
 
 
 @override_settings(

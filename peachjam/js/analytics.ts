@@ -208,6 +208,10 @@ export class CustomerIO implements AnalyticsProvider {
   }
 
   trackEvent (category: string, action: string, name?: string, value?: number) {
+    if (category === 'Account' && action === 'Signup completed') {
+      // The server already sends the signed-up event to Customer.io.
+      return;
+    }
     const props = {
       ...this.pageProperties,
       ...this.commonProperties,

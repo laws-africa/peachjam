@@ -25,7 +25,7 @@ from languages_plus.models import Language
 from lxml import html
 
 from peachjam.auth import user_display
-from peachjam.customerio import get_customerio
+from peachjam.customerio import SIGNUP_COMPLETED_SESSION_KEY, get_customerio
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
@@ -803,8 +803,15 @@ class PageLoadedView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["sentry_enabled"] = bool(settings.PEACHJAM["SENTRY_DSN_KEY"])
+        context["signup_completed"] = False
 
         if self.request.user.is_authenticated:
+            if (
+                self.request.session.get(SIGNUP_COMPLETED_SESSION_KEY)
+                == self.request.user.pk
+            ):
+                self.request.session.pop(SIGNUP_COMPLETED_SESSION_KEY)
+                context["signup_completed"] = True
             beacon_secret = pj_settings().helpscout_beacon_secret_key
             sub = Subscription.objects.active_for_user(self.request.user).first()
             context["user_json"] = json.dumps(
