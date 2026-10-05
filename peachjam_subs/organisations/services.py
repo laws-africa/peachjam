@@ -25,6 +25,7 @@ from peachjam_subs.organisations.notifications import (
     notify_email,
     notify_invitation,
     notify_member,
+    notify_owner_added,
 )
 from peachjam_subs.organisations.signals import (
     organisation_billing_recipients_changed,
@@ -239,6 +240,57 @@ class OrganisationService:
             event_data={"billing_period": billing_period, "privacy_mode": privacy_mode},
         )
         return organisation
+
+    @transaction.atomic
+    def add_existing_owner(self, *, organisation, user, offering, actor):
+        """Add an existing account as owner and assign a committed seat."""
+        organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
+        self.ensure_can_manage(actor, organisation)
+        self.ensure_organisation_accepts_invitations(organisation)
+        if organisation.owner:
+            raise ValidationError(_("This organisation already has an owner."))
+        if OrganisationMembership.objects.filter(
+            user=user, status=OrganisationMembership.Status.ACTIVE
+        ).exists():
+            raise ValidationError(_("This account already belongs to an organisation."))
+        self.ensure_offering_available(organisation, offering, actor=actor)
+        if not self.public_offerings().filter(pk=offering.pk).exists():
+            assign_perm("peachjam_subs.can_subscribe", user, offering)
+        seat = self.find_available_seat(organisation, offering)
+        if not seat:
+            raise ValidationError(
+                _("There is no committed seat available for the owner.")
+            )
+
+        membership = OrganisationMembership.objects.create(
+            organisation=organisation,
+            user=user,
+            role=OrganisationMembership.Role.OWNER,
+        )
+        assignment = OrganisationSeatAssignment.objects.create(
+            seat=seat, membership=membership
+        )
+        OrganisationAuditEvent.objects.create(
+            organisation=organisation,
+            actor=actor,
+            membership=membership,
+            seat=seat,
+            event_type=OrganisationAuditEvent.EventType.MEMBER_ADDED,
+            message="Added an existing account as organisation owner.",
+            event_data={"user_id": user.pk, "email": user.email},
+        )
+        organisation_billing_recipients_changed.send(
+            sender=OrganisationMembership,
+            organisation=organisation,
+        )
+        organisation_seat_assigned.send(
+            sender=OrganisationSeatAssignment,
+            assignment=assignment,
+            created_seat=False,
+            opening=False,
+        )
+        notify_owner_added(user, organisation)
+        return membership
 
     @transaction.atomic
     def send_invitation(

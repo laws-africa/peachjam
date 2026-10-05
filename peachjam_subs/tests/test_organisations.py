@@ -107,6 +107,59 @@ class OrganisationServiceTests(TestCase):
             organisation_service.offerings_available_to_organisation(organisation),
         )
 
+    def test_staff_can_add_existing_account_as_owner(self):
+        organisation = organisation_service.create_organisation(
+            name="Direct Owner Chambers",
+            billing_period=self.offering.pricing_plan.period,
+            privacy_mode=Organisation.PrivacyMode.BILLING_ONLY,
+            actor=self.staff,
+        )
+        seat = OrganisationSeat.objects.create(
+            organisation=organisation,
+            product_offering=self.offering,
+        )
+
+        with self.captureOnCommitCallbacks(execute=True):
+            membership = organisation_service.add_existing_owner(
+                organisation=organisation,
+                user=self.member,
+                offering=self.offering,
+                actor=self.staff,
+            )
+
+        self.assertEqual(OrganisationMembership.Role.OWNER, membership.role)
+        self.assertEqual(self.member, organisation.owner)
+        self.assertEqual(seat, membership.seat_assignments.get().seat)
+        self.assertFalse(organisation.invitations.exists())
+        event = organisation.audit_events.get(
+            event_type=OrganisationAuditEvent.EventType.MEMBER_ADDED
+        )
+        self.assertEqual(self.staff, event.actor)
+        self.assertEqual(self.member.pk, event.event_data["user_id"])
+        self.assertEqual(1, len(mail.outbox))
+
+    def test_existing_owner_cannot_be_added_to_another_organisation(self):
+        organisation = organisation_service.create_organisation(
+            name="Other Chambers",
+            billing_period=self.offering.pricing_plan.period,
+            privacy_mode=Organisation.PrivacyMode.BILLING_ONLY,
+            actor=self.staff,
+        )
+        OrganisationSeat.objects.create(
+            organisation=organisation,
+            product_offering=self.offering,
+        )
+
+        with self.assertRaisesMessage(
+            ValidationError, "already belongs to an organisation"
+        ):
+            organisation_service.add_existing_owner(
+                organisation=organisation,
+                user=self.owner,
+                offering=self.offering,
+                actor=self.staff,
+            )
+
     def test_duplicate_open_invitation_is_rejected(self):
         organisation_service.send_invitation(
             organisation=self.organisation,
