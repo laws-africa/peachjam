@@ -1,4 +1,7 @@
 {% include 'peachjam/user/_messages.html' %}
 {% include 'peachjam/user/_menu.html' %}
 <script type="text/javascript">peachjam.user = {{ user_json|safe }}; peachjam.userLoaded();</script>
+{% if signup_completed %}
+  <script type="text/javascript">peachjam.analytics.trackEvent('Account', 'Signup completed');</script>
+{% endif %}
 {% block user-loaded-system-messages %}{% endblock %}
