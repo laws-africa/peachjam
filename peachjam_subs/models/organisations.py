@@ -647,6 +647,7 @@ class OrganisationAuditEvent(models.Model):
         INVITATION_ACCEPTED = "invitation-accepted", _("Invitation accepted")
         INVITATION_CANCELLED = "invitation-cancelled", _("Invitation cancelled")
         INVITATION_EXPIRED = "invitation-expired", _("Invitation expired")
+        MEMBER_ADDED = "member-added", _("Member added")
         ROLE_CHANGED = "role-changed", _("Role changed")
         OWNERSHIP_TRANSFERRED = "ownership-transferred", _("Ownership transferred")
         SEAT_ASSIGNED = "seat-assigned", _("Subscription assigned")

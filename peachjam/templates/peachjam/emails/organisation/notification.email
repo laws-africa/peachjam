@@ -3,5 +3,8 @@
 {% block subject %}{{ subject }}{% endblock %}
 {% block body %}
   <p>{{ body }}</p>
+  {% if action_url %}
+    {% include "peachjam/emails/layouts/_button.html" with href=action_url text=action_text %}
+  {% endif %}
   <p>{% blocktrans trimmed %}The {{ APP_NAME }} Team{% endblocktrans %}</p>
 {% endblock %}

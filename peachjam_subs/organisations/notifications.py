@@ -51,6 +51,25 @@ def notify_member(user, subject, body):
     send_email(subject, body, [user.email])
 
 
+def notify_owner_added(user, organisation):
+    """Tell an existing account that staff added it as an organisation owner."""
+    try:
+        path = reverse("organisation_overview")
+        url = f"https://{Site.objects.get_current().domain}{path}"
+    except Exception:
+        url = None
+    send_templated_email(
+        "organisation/notification",
+        [user.email],
+        {
+            "subject": f"You are now the owner of {organisation.name}",
+            "body": f"Your account was added as the owner of {organisation.name}.",
+            "action_url": url,
+            "action_text": "View organisation",
+        },
+    )
+
+
 def notify_email(email, subject, body):
     """Send a standard organisation notification to an email address."""
     send_email(subject, body, [email])
