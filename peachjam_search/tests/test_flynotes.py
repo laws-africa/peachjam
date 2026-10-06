@@ -1,10 +1,11 @@
 import datetime
+from dataclasses import replace
 from types import SimpleNamespace
 
 from countries_plus.models import Country
 from django.conf import settings
 from django.template.loader import render_to_string
-from django.test import TestCase, override_settings
+from django.test import RequestFactory, TestCase, override_settings
 from languages_plus.models import Language
 
 from peachjam.models import Court, Judgment
@@ -234,14 +235,51 @@ class FlynoteSearchMatcherTest(TestCase):
 
         matches = FlynoteSearchMatcher().match("arrest", [])
 
-        self.assertEqual([child], [match.flynote for match in matches])
+        self.assertEqual([parent], [match.flynote for match in matches])
 
-    def test_excludes_topics_with_only_one_linked_judgment(self):
+    def test_excludes_partial_matches_with_only_one_linked_judgment(self):
         self.create_topic("Criminal law", "Wrongful arrest", 1)
+
+        matches = FlynoteSearchMatcher().match("wrongful", [])
+
+        self.assertEqual([], matches)
+
+    def test_exact_topic_is_resolved_even_with_one_linked_judgment(self):
+        topic = self.create_topic("Criminal law", "Wrongful arrest", 1)
+
+        matches = FlynoteSearchMatcher().match("Wrongful arrest", [])
+
+        self.assertEqual([topic], [match.flynote for match in matches])
+        self.assertEqual("direct_name_match", matches[0].selection_reason)
+
+    def test_exact_topic_takes_priority_over_popular_descendants(self):
+        topic = self.create_topic("Criminal law", "Wrongful arrest", 1)
+        child = topic.add_child(name="Wrongful arrest procedure")
+        FlynoteDocumentCount.objects.create(flynote=child, count=20)
 
         matches = FlynoteSearchMatcher().match("wrongful arrest", [])
 
-        self.assertEqual([], matches)
+        self.assertEqual([topic], [match.flynote for match in matches])
+
+    def test_exact_only_matching_excludes_partial_and_inferred_topics(self):
+        topic = self.create_topic("Criminal law", "Arrest procedure", 4)
+        judgments = [self.make_judgment(f"Case {number}") for number in range(2)]
+        JudgmentFlynote.objects.bulk_create(
+            [
+                JudgmentFlynote(document=judgment, flynote=topic)
+                for judgment in judgments
+            ]
+        )
+        hits = [
+            SimpleNamespace(id=judgment.pk, position=position, document=judgment)
+            for position, judgment in enumerate(judgments, start=1)
+        ]
+
+        matcher = FlynoteSearchMatcher()
+        self.assertEqual(
+            [topic], [hit.flynote for hit in matcher.match("arrest", hits)]
+        )
+        self.assertEqual([], matcher.match("arrest", hits, exact_only=True))
 
     @override_settings(
         PEACHJAM={
@@ -250,9 +288,10 @@ class FlynoteSearchMatcherTest(TestCase):
             "SHOW_FLYNOTE_TOPICS": True,
         }
     )
-    def test_view_only_shows_topics_for_first_page_legal_term_searches(self):
+    def test_view_matches_topic_names_independently_of_intent_or_suggestion(self):
         topic = self.create_topic("Criminal law", "Wrongful arrest", 10)
         view = DocumentSearchView()
+        view.request = RequestFactory().get("/search/")
         engine = SimpleNamespace(
             search_query=SearchQuery(
                 query="wrongful arrest",
@@ -272,4 +311,45 @@ class FlynoteSearchMatcherTest(TestCase):
 
         self.assertEqual([topic], [match.flynote for match in matches])
         engine.analysis = QueryAnalysis(raw_query="wrongful arrest", intent="case_name")
+        self.assertEqual(matches, view.match_flynotes(engine, []))
+
+        # Suggestion metadata must not bypass intent checks for partial matches.
+        exact_query = engine.search_query
+        engine.search_query = replace(exact_query, query="wrongful")
         self.assertEqual([], view.match_flynotes(engine, []))
+        engine.analysis = QueryAnalysis(raw_query="wrongful", intent="legal_term")
+        self.assertEqual(matches, view.match_flynotes(engine, []))
+        engine.search_query = exact_query
+
+        view.request = RequestFactory().get("/search/", {"suggestion": "flynote"})
+        self.assertEqual(matches, view.match_flynotes(engine, []))
+
+        # Even a stale or incorrect suggestion ID cannot change the cards.
+        view.request = RequestFactory().get(
+            "/search/", {"suggestion": "flynote", "suggestion_id": "999999"}
+        )
+        self.assertEqual(matches, view.match_flynotes(engine, []))
+
+        for overrides in ({"page": 2}, {"field_queries": {"title": "arrest"}}):
+            with self.subTest(overrides=overrides):
+                query = engine.search_query
+                engine.search_query = replace(query, **overrides)
+                self.assertEqual([], view.match_flynotes(engine, []))
+                engine.search_query = query
+
+        with self.settings(
+            PEACHJAM={
+                **settings.PEACHJAM,
+                "SUMMARISE_USE_FLYNOTE_TREE": False,
+                "SHOW_FLYNOTE_TOPICS": False,
+            }
+        ):
+            self.assertEqual([], view.match_flynotes(engine, []))
+        with self.settings(
+            PEACHJAM={
+                **settings.PEACHJAM,
+                "SUMMARISE_USE_FLYNOTE_TREE": True,
+                "SHOW_FLYNOTE_TOPICS": False,
+            }
+        ):
+            self.assertEqual([], view.match_flynotes(engine, []))

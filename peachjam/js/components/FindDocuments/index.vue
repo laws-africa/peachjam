@@ -206,7 +206,7 @@
                 <div id="saved-search-modal-dialog" class="modal-dialog" />
               </div>
               <div
-                v-if="searchInfo.count && searchInfo.flynote_results_html"
+                v-if="searchInfo.flynote_results_html"
                 v-html="searchInfo.flynote_results_html"
               />
               <div
@@ -624,6 +624,9 @@ export default {
       if (this.mode !== 'text') {
         params.set('mode', this.mode);
       }
+      if (this.suggestion) {
+        params.set('suggestion', this.suggestion.type);
+      }
 
       this.facets.forEach((facet) => {
         facet.value.forEach((value) => {
@@ -666,7 +669,11 @@ export default {
       this.ordering = params.get('ordering') || this.ordering;
       this.mode = params.get('mode') || this.mode;
 
-      if (params.has('suggestion')) this.suggestion = { type: params.get('suggestion') };
+      if (params.has('suggestion')) {
+        this.suggestion = {
+          type: params.get('suggestion')
+        };
+      }
 
       this.facets.forEach((facet) => {
         if (params.has(facet.name)) {
