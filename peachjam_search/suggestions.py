@@ -2,8 +2,12 @@
 
 import logging
 from dataclasses import dataclass
+from hashlib import sha256
 
+from django.conf import settings
+from django.core.cache import cache
 from django.db.models import Case, IntegerField, Value, When
+from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from elastic_transport import ConnectionError as ElasticsearchConnectionError
 from elastic_transport import ConnectionTimeout
@@ -21,7 +25,6 @@ class SearchSuggestion:
     value: str
     type: str
     type_label: str
-    target_id: str | None = None
     match_rank: int = 1
     source_rank: int = 0
 
@@ -30,7 +33,6 @@ class SearchSuggestion:
             "value": self.value,
             "type": self.type,
             "type_label": self.type_label,
-            "target_id": self.target_id,
         }
 
 
@@ -74,7 +76,7 @@ class FlynoteSuggestionProvider:
     limit = 5
 
     def suggest(self, query: str) -> list[SearchSuggestion]:
-        if not Judgment.flynote_tree_enabled():
+        if not Judgment.flynote_topics_enabled():
             return []
         normalized_query = query.upper()
         flynotes = (
@@ -96,7 +98,6 @@ class FlynoteSuggestionProvider:
                 value=flynote.name,
                 type=self.suggestion_type,
                 type_label=str(_("Legal topic")),
-                target_id=str(flynote.pk),
                 match_rank=flynote.exact_match,
                 source_rank=source_rank,
             )
@@ -119,7 +120,6 @@ class EntitySuggestionProvider:
                     value=hit.label,
                     type=hit.entity_type,
                     type_label=str(hit.type_label),
-                    target_id=str(hit.entity_id),
                     match_rank=0 if hit.match_type == "exact" else 1,
                     source_rank=source_rank,
                 )
@@ -148,13 +148,37 @@ class SearchSuggestionService:
         EntitySuggestionProvider,
     )
     degraded = False
+    cache_timeout = 60 * 60 * 6
+    degraded_cache_timeout = 30
 
     def suggest(self, query: str) -> list[dict]:
+        """Return enabled suggestions, reusing cached results across requests."""
         self.degraded = False
+        if not settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
+            return []
         query = (query or "").replace("\x00", " ").strip()
         if not self.min_query_length <= len(query) <= self.max_query_length:
             return []
 
+        cache_input = (get_language(), Judgment.flynote_topics_enabled(), query)
+        cache_key = (
+            "search-suggestions:v4:"
+            + sha256(repr(cache_input).encode("utf-8")).hexdigest()
+        )
+        cached = cache.get(cache_key)
+        if cached is None:
+            suggestions = self.collect_suggestions(query)
+            cached = {"suggestions": suggestions, "degraded": self.degraded}
+            cache.set(
+                cache_key,
+                cached,
+                self.degraded_cache_timeout if self.degraded else self.cache_timeout,
+            )
+        self.degraded = cached["degraded"]
+        return cached["suggestions"]
+
+    def collect_suggestions(self, query: str) -> list[dict]:
+        """Gather and rank suggestions while reporting unavailable providers."""
         candidates = []
         for provider_class in self.providers:
             provider = provider_class()

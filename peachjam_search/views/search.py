@@ -1,13 +1,11 @@
 import json
 import logging
 from dataclasses import replace
-from hashlib import sha256
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.db.models import Q
@@ -28,7 +26,6 @@ from django.utils.cache import (
 )
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
-from django.utils.translation import get_language
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.decorators.cache import cache_page, never_cache
@@ -91,7 +88,6 @@ from peachjam_search.suggestions import SearchSuggestionService
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
-SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
 DEGRADED_SUGGESTIONS_CACHE_SECS = 30
 CLIENT_SUGGESTIONS_CACHE_SECS = 30 * 60
 
@@ -266,46 +262,18 @@ class DocumentSearchView(TemplateView):
         return self.search(request, *args, **kwargs)
 
     def suggest(self, request, *args, **kwargs):
-        query = request.GET.get("q", "")
-        # Include feature settings in the key so changing a site's flynote
-        # configuration cannot serve an old six-hour suggestion response.
-        cache_input = (
-            request.get_host(),
-            get_language(),
-            settings.PEACHJAM["SEARCH_SUGGESTIONS"],
-            Judgment.flynote_tree_enabled(),
-            query,
+        service = SearchSuggestionService()
+        response = self.render(
+            {"suggestions": service.suggest(request.GET.get("q", ""))}
         )
-        cache_key = (
-            "search-suggestions:v3:"
-            + sha256(repr(cache_input).encode("utf-8")).hexdigest()
-        )
-        cached = cache.get(cache_key)
-        if cached is None:
-            service = SearchSuggestionService()
-            suggestions = (
-                service.suggest(query)
-                if settings.PEACHJAM["SEARCH_SUGGESTIONS"]
-                else []
-            )
-            timeout = (
-                DEGRADED_SUGGESTIONS_CACHE_SECS
-                if service.degraded
-                else SUGGESTIONS_CACHE_SECS
-            )
-            cached = {"suggestions": suggestions, "degraded": service.degraded}
-            cache.set(cache_key, cached, timeout)
-
-        response = self.render({"suggestions": cached["suggestions"]})
-        # Let browsers reuse responses while typing, but avoid shared HTTP
-        # caches: the URL alone does not reflect site flynote feature settings.
-        # Django's setting-aware cache key above can still refresh immediately.
+        # Suggestions are public. Browsers and shared caches may reuse them;
+        # degraded responses expire quickly so recovered providers can retry.
         patch_cache_control(
             response,
-            private=True,
+            public=True,
             max_age=(
                 DEGRADED_SUGGESTIONS_CACHE_SECS
-                if cached["degraded"]
+                if service.degraded
                 else CLIENT_SUGGESTIONS_CACHE_SECS
             ),
         )
@@ -398,40 +366,23 @@ class DocumentSearchView(TemplateView):
     def match_entities(self, engine):
         if engine.search_query.page != 1 or engine.search_query.field_queries:
             return []
-        matcher = self.make_entity_matcher()
-        suggestion_type = strip_null_bytes(
-            self.request.GET.get("suggestion", "")
-        ).strip()
-        if suggestion_type in {"court", "judge", "locality"}:
-            return matcher.match_selected(
-                engine.search_query.query,
-                suggestion_type,
-                strip_null_bytes(self.request.GET.get("suggestion_id", "")) or None,
-            )
-        return matcher.match(engine.search_query.query)
+        return self.make_entity_matcher().match(engine.search_query.query)
 
     def match_flynotes(self, engine, hits):
-        """Find supplementary legal-topic cards for a first-page legal-term search."""
-        selected_flynote = (
-            strip_null_bytes(self.request.GET.get("suggestion", "")).strip()
-            == "flynote"
-        )
+        """Match exact topic names for every query; expand legal-term searches."""
         if (
             engine.search_query.page != 1
             or engine.search_query.field_queries
-            or not Judgment.flynote_tree_enabled()
-            or (not selected_flynote and not Judgment.flynote_topics_enabled())
+            or not Judgment.flynote_topics_enabled()
         ):
             return []
         matcher = FlynoteSearchMatcher()
-        if selected_flynote:
-            return matcher.match_selected(
-                engine.search_query.query,
-                strip_null_bytes(self.request.GET.get("suggestion_id", "")) or None,
-            )
-        if getattr(getattr(engine, "analysis", None), "intent", None) != "legal_term":
-            return []
-        return matcher.match(engine.search_query.query, hits)
+        return matcher.match(
+            engine.search_query.query,
+            hits,
+            exact_only=getattr(getattr(engine, "analysis", None), "intent", None)
+            != "legal_term",
+        )
 
     def save_flynote_results(self, trace, flynote_hits):
         """Persist the exact topic cards rendered for a search trace.

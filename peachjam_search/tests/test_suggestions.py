@@ -1,10 +1,12 @@
+import time
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from django.conf import settings
 from django.core.cache import cache
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.translation import override
 from elastic_transport import ConnectionError as ElasticsearchConnectionError
 from elasticsearch_dsl.utils import AttrDict
 
@@ -47,7 +49,7 @@ class DocumentSuggestionProviderTest(TestCase):
         self.assertEqual("Judicial Service Act", suggestions[0].value)
         self.assertEqual("document", suggestions[0].type)
         self.assertEqual("Legislation", suggestions[0].type_label)
-        self.assertIsNone(suggestions[0].target_id)
+        self.assertNotIn("target_id", suggestions[0].as_dict())
         compiler_class.return_value.suggest.assert_called_once_with("jud", size=5)
 
     @patch("peachjam_search.suggestions.ElasticsearchSearchCompiler")
@@ -70,7 +72,11 @@ class FlynoteSuggestionProviderTest(TestCase):
         return flynote
 
     @override_settings(
-        PEACHJAM={**settings.PEACHJAM, "SUMMARISE_USE_FLYNOTE_TREE": True}
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": True,
+        }
     )
     def test_returns_active_prefix_matches_with_documents(self):
         exact = self.create_flynote("Wrongful arrest", 2)
@@ -93,8 +99,32 @@ class FlynoteSuggestionProviderTest(TestCase):
 
         self.assertEqual([], FlynoteSuggestionProvider().suggest("wrongful"))
 
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": False,
+        }
+    )
+    def test_returns_nothing_when_topic_browsing_is_disabled(self):
+        self.create_flynote("Wrongful arrest", 2)
 
+        self.assertEqual([], FlynoteSuggestionProvider().suggest("wrongful"))
+
+
+@override_settings(
+    PEACHJAM={**settings.PEACHJAM, "SEARCH_SUGGESTIONS": True},
+    CACHES={
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "search-suggestion-service-tests",
+        }
+    },
+)
 class SearchSuggestionServiceTest(TestCase):
+    def setUp(self):
+        cache.clear()
+
     def test_validates_query_length(self):
         self.assertEqual([], SearchSuggestionService().suggest("ab"))
         self.assertEqual([], SearchSuggestionService().suggest("a" * 101))
@@ -153,6 +183,99 @@ class SearchSuggestionServiceTest(TestCase):
         self.assertEqual([], service.suggest("sup"))
         self.assertTrue(service.degraded)
 
+    def test_disabled_service_does_not_read_cache_or_run_providers(self):
+        service = SearchSuggestionService()
+        service.collect_suggestions = Mock()
+        with self.settings(PEACHJAM={**settings.PEACHJAM, "SEARCH_SUGGESTIONS": False}):
+            with patch("peachjam_search.suggestions.cache.get") as get_cache:
+                self.assertEqual([], service.suggest("sup"))
+        get_cache.assert_not_called()
+        service.collect_suggestions.assert_not_called()
+
+    def test_reuses_normalized_queries_across_service_instances(self):
+        with patch.object(
+            SearchSuggestionService, "collect_suggestions", return_value=[]
+        ) as collect:
+            self.assertEqual([], SearchSuggestionService().suggest(" supreme "))
+            self.assertEqual([], SearchSuggestionService().suggest("supreme"))
+        collect.assert_called_once_with("supreme")
+
+    def test_varies_server_cache_by_language(self):
+        with patch.object(
+            SearchSuggestionService, "collect_suggestions", return_value=[]
+        ) as collect:
+            for language in ("en", "fr", "en"):
+                with override(language):
+                    SearchSuggestionService().suggest("supreme")
+        self.assertEqual(2, collect.call_count)
+
+    def test_normal_cache_expires_after_six_hours(self):
+        started = time.time()
+        with patch.object(
+            SearchSuggestionService, "collect_suggestions", return_value=[]
+        ) as collect:
+            SearchSuggestionService().suggest("supreme")
+            with patch(
+                "django.core.cache.backends.base.time.time", return_value=started + 60
+            ):
+                SearchSuggestionService().suggest("supreme")
+            self.assertEqual(1, collect.call_count)
+            with patch(
+                "django.core.cache.backends.base.time.time",
+                return_value=started + 6 * 3600 + 1,
+            ):
+                SearchSuggestionService().suggest("supreme")
+            self.assertEqual(2, collect.call_count)
+
+    def test_degraded_cache_expires_and_provider_recovery_is_reported(self):
+        started = time.time()
+        provider = Mock()
+        provider.degraded = True
+        provider.suggest.return_value = []
+        with patch.object(
+            SearchSuggestionService, "providers", (Mock(return_value=provider),)
+        ):
+            service = SearchSuggestionService()
+            service.suggest("supreme")
+            self.assertTrue(service.degraded)
+            cached_service = SearchSuggestionService()
+            cached_service.suggest("supreme")
+            self.assertTrue(cached_service.degraded)
+            provider.suggest.assert_called_once()
+
+            provider.degraded = False
+            with patch(
+                "django.core.cache.backends.base.time.time", return_value=started + 31
+            ):
+                recovered_service = SearchSuggestionService()
+                recovered_service.suggest("supreme")
+            self.assertFalse(recovered_service.degraded)
+            self.assertEqual(2, provider.suggest.call_count)
+
+    @patch("peachjam_search.suggestions.SearchSuggestionService.collect_suggestions")
+    def test_changing_flynote_flags_uses_a_fresh_service_cache_entry(self, collect):
+        collect.side_effect = [
+            [{"value": "Wrongful arrest", "type": "flynote"}],
+            [{"value": "Wrongful arrest", "type": "document"}],
+        ]
+        for tree_enabled, topics_enabled, expected_type in (
+            (True, True, "flynote"),
+            (True, False, "document"),
+            (False, True, "document"),
+            (True, True, "flynote"),
+        ):
+            with self.subTest(tree=tree_enabled, topics=topics_enabled):
+                with self.settings(
+                    PEACHJAM={
+                        **settings.PEACHJAM,
+                        "SUMMARISE_USE_FLYNOTE_TREE": tree_enabled,
+                        "SHOW_FLYNOTE_TOPICS": topics_enabled,
+                    }
+                ):
+                    suggestions = SearchSuggestionService().suggest("wrongful")
+                self.assertEqual(expected_type, suggestions[0]["type"])
+        self.assertEqual(2, collect.call_count)
+
 
 @override_settings(
     PEACHJAM={**settings.PEACHJAM, "SEARCH_SUGGESTIONS": True},
@@ -167,7 +290,7 @@ class SearchSuggestionViewTest(TestCase):
     def setUp(self):
         cache.clear()
 
-    @patch("peachjam_search.views.search.SearchSuggestionService.suggest")
+    @patch("peachjam_search.suggestions.SearchSuggestionService.collect_suggestions")
     def test_uses_server_cache_and_allows_short_client_cache(self, suggest):
         suggest.return_value = [
             {
@@ -199,37 +322,25 @@ class SearchSuggestionViewTest(TestCase):
             first.json(),
         )
         suggest.assert_called_once_with("supreme")
-        self.assertIn("private", first.headers["Cache-Control"])
-        self.assertNotIn("public", first.headers["Cache-Control"])
+        self.assertIn("public", first.headers["Cache-Control"])
+        self.assertNotIn("private", first.headers["Cache-Control"])
+        self.assertNotIn("no-store", first.headers["Cache-Control"])
+        self.assertNotIn("Set-Cookie", first.headers)
         self.assertIn("max-age=1800", first.headers["Cache-Control"])
         self.assertIn("Accept-Language", first.headers["Vary"])
 
-    @patch("peachjam_search.views.search.SearchSuggestionService.suggest")
-    def test_changing_flynote_setting_uses_a_fresh_server_cache_entry(self, suggest):
-        suggest.side_effect = [
-            [{"value": "Wrongful arrest", "type": "flynote"}],
-            [{"value": "Wrongful arrest", "type": "document"}],
-        ]
-        url = (
-            reverse("search:search_documents").replace(
-                "api/documents/", "api/documents/suggest/"
-            )
-            + "?q=wrongful"
+    @patch(
+        "peachjam_search.suggestions.SearchSuggestionService.collect_suggestions",
+        return_value=[],
+    )
+    def test_different_hosts_reuse_the_service_cache(self, collect):
+        url = reverse("search:search_documents").replace(
+            "api/documents/", "api/documents/suggest/"
         )
-        base_settings = settings.PEACHJAM
-
-        with override_settings(
-            PEACHJAM={**base_settings, "SUMMARISE_USE_FLYNOTE_TREE": True}
-        ):
-            enabled = self.client.get(url)
-        with override_settings(
-            PEACHJAM={**base_settings, "SUMMARISE_USE_FLYNOTE_TREE": False}
-        ):
-            disabled = self.client.get(url)
-
-        self.assertEqual("flynote", enabled.json()["suggestions"][0]["type"])
-        self.assertEqual("document", disabled.json()["suggestions"][0]["type"])
-        self.assertEqual(2, suggest.call_count)
+        for host in ("testserver", "localhost"):
+            response = self.client.get(url, {"q": "supreme"}, HTTP_HOST=host)
+            self.assertEqual(200, response.status_code)
+        collect.assert_called_once_with("supreme")
 
     @patch("peachjam_search.views.search.SearchSuggestionService")
     def test_degraded_suggestions_have_a_short_cache_lifetime(self, service_class):
@@ -240,11 +351,8 @@ class SearchSuggestionViewTest(TestCase):
             "api/documents/", "api/documents/suggest/"
         )
 
-        with patch(
-            "peachjam_search.views.search.cache.set", wraps=cache.set
-        ) as set_cache:
-            response = self.client.get(url + "?q=supreme")
+        response = self.client.get(url + "?q=supreme")
 
         self.assertEqual(200, response.status_code)
-        self.assertEqual(30, set_cache.call_args.args[2])
         self.assertIn("max-age=30", response.headers["Cache-Control"])
+        self.assertIn("public", response.headers["Cache-Control"])

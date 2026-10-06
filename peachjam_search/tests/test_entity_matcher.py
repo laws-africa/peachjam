@@ -37,18 +37,6 @@ class EntityMatcherTest(TestCase):
         self.assertEqual(Court.objects.get(code="EACJ").pk, hits[0].entity_id)
         self.assertEqual("code exact", hits[0].match_type)
 
-    def test_resolves_an_explicitly_selected_entity_type(self):
-        hits = EntityMatcher().match_selected("East African Court of Justice", "court")
-
-        self.assertEqual(1, len(hits))
-        self.assertEqual("court", hits[0].entity_type)
-        self.assertEqual("selected suggestion", hits[0].match_type)
-
-    def test_selected_entity_does_not_match_a_different_type(self):
-        hits = EntityMatcher().match_selected("East African Court of Justice", "judge")
-
-        self.assertEqual([], hits)
-
     def test_matches_locality_name_exactly(self):
         locality = Locality.objects.get(name="African Union (AU)")
 

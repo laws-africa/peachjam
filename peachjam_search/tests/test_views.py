@@ -17,7 +17,14 @@ from elasticsearch_dsl.response import Response
 from rest_framework.test import APIRequestFactory, force_authenticate
 from tablib import Dataset
 
-from peachjam.models import CoreDocument, Label
+from peachjam.models import (
+    CoreDocument,
+    Flynote,
+    FlynoteDocumentCount,
+    Judge,
+    Label,
+    Locality,
+)
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import (
     SearchEntityClick,
@@ -686,6 +693,101 @@ class SearchViewsTest(TestCase):
         self.assertNotIn("data-position", html)
         self.assertNotIn("data-frbr-uri", html)
         self.assertIn('data-entity-result-id="None"', html)
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": True,
+        }
+    )
+    @patch(
+        "peachjam_search.views.search.DocumentSearchView.save_search_trace",
+        return_value=None,
+    )
+    @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
+    def test_suggestion_metadata_does_not_change_search_results(
+        self, execute, save_trace
+    ):
+        topic = Flynote.add_root(name="Criminal law")
+        FlynoteDocumentCount.objects.create(flynote=topic, count=1)
+        judge = Judge.objects.create(name="Justice Jane Mwangi")
+        locality = Locality.objects.first()
+        documents = list(CoreDocument.objects.filter(published=True)[:2])
+        compiled_queries = []
+
+        def response(search):
+            compiled_queries.append(search.to_dict())
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {
+                        "total": {"value": len(documents)},
+                        "hits": [
+                            {
+                                "_id": str(document.pk),
+                                "_index": search.index,
+                                "_score": 10.0 - position,
+                                "_source": {
+                                    "expression_frbr_uri": document.expression_frbr_uri
+                                },
+                            }
+                            for position, document in enumerate(documents)
+                        ],
+                    },
+                },
+            )
+
+        execute.side_effect = response
+        examples = (
+            (
+                "Criminal law",
+                "flynote",
+                str(topic.pk),
+                "flynote_results_html",
+                "Criminal law",
+            ),
+            (
+                "ECOWAS Community Court of Justice",
+                "court",
+                "",
+                "entity_results_html",
+                "ECOWAS Community Court of Justice",
+            ),
+            (judge.name, "judge", str(judge.pk), "entity_results_html", judge.name),
+            (
+                locality.name,
+                "locality",
+                str(locality.pk),
+                "entity_results_html",
+                locality.name,
+            ),
+            (documents[0].title, "document", "", "results_html", documents[0].title),
+        )
+        for query, suggestion_type, target_id, card_field, label in examples:
+            with self.subTest(query=query):
+                results = []
+                compiled_queries.clear()
+                for metadata in (
+                    {},
+                    {"suggestion": suggestion_type, "suggestion_id": target_id},
+                    {"suggestion": "flynote", "suggestion_id": "999999"},
+                ):
+                    request = RequestFactory().get(
+                        reverse("search:search_documents"),
+                        {"search": query, **metadata},
+                    )
+                    request.user = self.user
+                    request.id = "test-request"
+                    result = DocumentSearchView.as_view()(request)
+                    self.assertEqual(200, result.status_code)
+                    results.append(json.loads(result.content))
+                self.assertIn(label, results[0][card_field])
+                self.assertEqual(results[0], results[1])
+                self.assertEqual(results[0], results[2])
+                self.assertEqual(compiled_queries[0], compiled_queries[1])
+                self.assertEqual(compiled_queries[0], compiled_queries[2])
 
     @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_document_suggestion_keeps_ranked_results(self, mock_search):

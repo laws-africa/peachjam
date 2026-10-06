@@ -4,7 +4,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 
-from django.db.models import F, IntegerField, Value
+from django.db.models import Case, F, IntegerField, Q, Value, When
 from django.db.models.functions import Coalesce
 
 from peachjam.models.flynote import Flynote, JudgmentFlynote
@@ -49,20 +49,21 @@ class FlynoteSearchMatcher:
             )
         )
 
-    def match(self, query, search_hits):
+    def match(self, query, search_hits, *, exact_only=False):
         """Return up to three distinct, eligible topic suggestions.
 
         Direct name matches are preferred because they are explicit. Topics
         supported by the highest-ranked judgments only fill any remaining
         card slots, which covers queries that use different language to the
         flynote taxonomy.
+        Non-legal queries can restrict matching to explicit topic names.
         """
-        direct_matches = self.direct_matches(query)
+        direct_matches = self.direct_matches(query, exact_only=exact_only)
         selected = self.select_distinct_branches(direct_matches, self.result_limit)
         selected_sources = {flynote.pk: "direct_query" for flynote in selected}
         selection_reasons = {flynote.pk: "direct_name_match" for flynote in selected}
 
-        if len(selected) < self.result_limit:
+        if not exact_only and len(selected) < self.result_limit:
             # Direct topic-name matches are the most trustworthy suggestions.
             # Document-supported topics can supplement them, but never replace
             # them or exceed the three-card limit.
@@ -96,41 +97,29 @@ class FlynoteSearchMatcher:
             for flynote in selected
         ]
 
-    def direct_matches(self, query):
+    def direct_matches(self, query, *, exact_only=False):
         query = (query or "").strip()
         if not query:
             return []
 
+        candidates = Flynote.objects.matching_names(query)
+        if exact_only:
+            candidates = candidates.filter(name__iexact=query)
         return list(
-            self.with_document_counts(Flynote.objects.matching_names(query))
-            .filter(doc_count__gte=self.minimum_document_count)
-            .order_by("-doc_count", "-depth", "name")
-        )
-
-    def match_selected(self, query, flynote_id=None):
-        """Resolve a selected typeahead topic without relying on query intent."""
-        query = (query or "").strip()
-        if not query:
-            return []
-
-        candidates = self.with_document_counts(
-            Flynote.objects.prefix_matching_names(query)
-        ).filter(search_name=query.upper(), doc_count__gt=0)
-        if flynote_id:
-            candidates = candidates.filter(pk=flynote_id)
-        candidates = list(candidates.order_by("-doc_count", "-depth", "name"))
-        selected = self.select_distinct_branches(candidates, self.result_limit)
-        path_labels = Flynote.get_path_labels(selected)
-        return [
-            FlynoteSearchHit(
-                flynote=flynote,
-                count=flynote.doc_count,
-                path_labels=path_labels.get(flynote.pk, []),
-                source="direct_query",
-                selection_reason="selected_suggestion",
+            self.with_document_counts(candidates)
+            .filter(
+                Q(doc_count__gte=self.minimum_document_count)
+                | Q(name__iexact=query, doc_count__gt=0)
             )
-            for flynote in selected
-        ]
+            .annotate(
+                exact_match=Case(
+                    When(name__iexact=query, then=Value(0)),
+                    default=Value(1),
+                    output_field=IntegerField(),
+                )
+            )
+            .order_by("exact_match", "-doc_count", "-depth", "name")
+        )
 
     def topics_from_search_hits(self, query, search_hits):
         # SearchHit.position is one-based and reflects the result order. Keep

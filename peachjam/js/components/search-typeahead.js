@@ -43,8 +43,10 @@ export default class SearchTypeahead {
       autoselectFirst: false,
       highlightTyped: false,
       shouldLoadFromServer: this.shouldLoadFromServer.bind(this),
-      onServerError: (_ignored, signal) => {
-        // do nothing to avoid noisey errors
+      onServerError: (error, signal) => {
+        if (error.name !== 'AbortError' && !signal.aborted) {
+          console.warn('Unable to load search suggestions', error);
+        }
       },
       onServerResponse: async (response) => {
         const data = await response.json();
@@ -53,12 +55,15 @@ export default class SearchTypeahead {
             value: suggestion.value,
             label: suggestion.value,
             type: suggestion.type,
-            typeLabel: suggestion.type_label,
-            targetId: suggestion.target_id
+            typeLabel: suggestion.type_label
           };
         });
         if (!suggestions.length) {
-          this.noSuggestions.set(this.input.value.toLowerCase(), Date.now() + this.noSuggestionsTtlMs);
+          // An incomplete response must expire as quickly as its HTTP cache.
+          const maxAge = (response.headers.get('Cache-Control') || '').match(/(?:^|,)\s*max-age=(\d+)/i);
+          const ttlMs = maxAge ? Number(maxAge[1]) * 1000 : this.noSuggestionsTtlMs;
+          const query = new URL(response.url).searchParams.get('q');
+          if (query) this.noSuggestions.set(query.toLowerCase(), Date.now() + ttlMs);
         }
         return suggestions;
       },
@@ -74,9 +79,6 @@ export default class SearchTypeahead {
           if (this.input.form.suggestion) {
             // record the type of suggestion
             this.input.form.suggestion.value = item.type;
-          }
-          if (this.input.form.suggestion_id) {
-            this.input.form.suggestion_id.value = item.targetId || '';
           }
           this.input.form.submit();
         }

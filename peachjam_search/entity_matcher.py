@@ -267,31 +267,6 @@ class EntityMatcher:
             hits.extend(provider_hits[:limit_per_type])
         return hits
 
-    def match_selected(
-        self,
-        query: str,
-        entity_type: str,
-        entity_id: str | None = None,
-        limit: int = 3,
-    ) -> list[EntitySearchHit]:
-        """Resolve an explicitly selected suggestion to its existing entity card."""
-        normalized_query = normalize((query or "").strip())
-        if not normalized_query:
-            return []
-
-        for provider in self.providers:
-            if provider.entity_type != entity_type:
-                continue
-            matches = [
-                CandidateMatch(entity, "selected suggestion", 1.0)
-                for entity in provider.get_entities()
-                if normalize(provider.get_label(entity)) == normalized_query
-                and (entity_id is None or str(entity.pk) == str(entity_id))
-            ]
-            matches.sort(key=lambda match: match.entity.pk)
-            return [provider.build_hit(match) for match in matches[:limit]]
-        return []
-
 
 def normalize(value: str) -> str:
     # Canonicalize names and queries so exact matching is case- and punctuation-insensitive.

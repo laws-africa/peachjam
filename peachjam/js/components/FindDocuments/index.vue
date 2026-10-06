@@ -626,7 +626,6 @@ export default {
       }
       if (this.suggestion) {
         params.set('suggestion', this.suggestion.type);
-        if (this.suggestion.targetId) params.set('suggestion_id', this.suggestion.targetId);
       }
 
       this.facets.forEach((facet) => {
@@ -672,8 +671,7 @@ export default {
 
       if (params.has('suggestion')) {
         this.suggestion = {
-          type: params.get('suggestion'),
-          targetId: params.get('suggestion_id')
+          type: params.get('suggestion')
         };
       }
 
@@ -785,7 +783,6 @@ export default {
       // record suggestion details for statistics
       if (this.suggestion) {
         params.append('suggestion', this.suggestion.type);
-        if (this.suggestion.targetId) params.append('suggestion_id', this.suggestion.targetId);
       }
 
       if (this.mode !== 'text') {
