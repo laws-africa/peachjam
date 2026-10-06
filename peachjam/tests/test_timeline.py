@@ -839,6 +839,57 @@ class TimelineRelationshipTests(TestCase):
             ).exists()
         )
 
+    def test_update_new_citation_skips_if_expression_disappears(self):
+        citation = ExtractedCitation.objects.create(
+            target_work=self.followed_work,
+            citing_work=self.amending_work,
+        )
+        # Keep the followed document available while the citing expression disappears.
+        self.follow_followed.saved_document.document = self.saved_followed.document
+
+        with patch(
+            "peachjam.models.core_document.CoreDocumentQuerySet.latest_expression"
+        ) as latest_expression:
+            expressions = latest_expression.return_value
+            expressions.exists.return_value = True
+            expressions.first.return_value = None
+
+            self.follow_followed._update_new_citation(citation)
+
+            expressions.exists.assert_called_once_with()
+            expressions.first.assert_called_once_with()
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(user_following=self.follow_followed).exists()
+        )
+
+    def test_update_new_relationship_skips_if_expression_disappears(self):
+        amendment = Relationship.objects.create(
+            subject_work=self.followed_work,
+            object_work=self.amending_work,
+            predicate=self.amended_predicate,
+        )
+        self.follow_followed.saved_document.document = self.saved_followed.document
+        relationship_event = TimelineEvent.RELATIONSHIP_EVENT_MAP[
+            self.amended_predicate.slug
+        ]
+
+        with patch(
+            "peachjam.models.core_document.CoreDocumentQuerySet.latest_expression"
+        ) as latest_expression:
+            expressions = latest_expression.return_value
+            expressions.exists.return_value = True
+            expressions.first.return_value = None
+
+            self.follow_followed._update_new_relationship(amendment, relationship_event)
+
+            expressions.exists.assert_called_once_with()
+            expressions.first.assert_called_once_with()
+
+        self.assertFalse(
+            TimelineEvent.objects.filter(user_following=self.follow_followed).exists()
+        )
+
     def test_update_new_citation_creates_event_when_citing_work_after_cutoff(self):
         citing_doc = self.amending_work.documents.latest_expression().first()
         citing_doc.date = self.follow_followed.cutoff_date + timedelta(days=1)

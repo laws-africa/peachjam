@@ -419,10 +419,7 @@ class UserFollowing(models.Model):
             )
             return
 
-        if (
-            citing_expr.date
-            < self.cutoff_date
-        ):
+        if citing_expr.date < self.cutoff_date:
             log.info(
                 "Citation from work %s is older than cutoff date %s for user %s",
                 citation.citing_work,
