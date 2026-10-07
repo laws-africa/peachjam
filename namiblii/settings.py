@@ -8,6 +8,7 @@ INSTALLED_APPS = ["namiblii.apps.NamibLIIConfig"] + INSTALLED_APPS  # noqa
 
 PEACHJAM["CHAT_ENABLED"] = True  # noqa
 PEACHJAM["CHAT_PUBLIC"] = True  # noqa
+PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"] = True  # noqa
 ALLOWED_HOSTS = build_allowed_hosts("namiblii.org", "www.namiblii.org")  # noqa
 
 
