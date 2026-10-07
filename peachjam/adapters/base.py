@@ -95,6 +95,10 @@ class RequestsAdapter(Adapter):
         logger.debug(f"{method.upper()} {url} kwargs={kwargs}")
         r = getattr(self.client, method)(url, **kwargs)
         r.raise_for_status()
+        # requests falls back to ISO-8859-1 for text/* responses that don't declare a charset,
+        # which mangles UTF-8 content into mojibake when read via r.text
+        if "charset" not in r.headers.get("content-type", "").lower():
+            r.encoding = "utf-8"
         return r
 
     def client_get(self, url, **kwargs):

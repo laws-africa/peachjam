@@ -8,7 +8,7 @@
        data-case-name="{{ document.case_name }}"
        data-document-id="{{ document.pk }}">
   </div>
-  <div class="d-none" id="document-content">{{ document.content_html|safe }}</div>
+  <div class="d-none" id="document-content">{{ document.document_content.content_html|safe }}</div>
   {{ replacements|json_script:"replacements" }}
   <div id="comments-wrapper">
     <div id="comments-list">{% include 'admin/_comments_list.html' with object=document %}</div>

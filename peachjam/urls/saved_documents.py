@@ -5,6 +5,7 @@ from peachjam.views import (
     SavedDocumentDeleteView,
     SavedDocumentFragmentsView,
     SavedDocumentModalView,
+    SavedDocumentRemoveFromFolderView,
     SavedDocumentUpdateView,
 )
 
@@ -28,6 +29,11 @@ urlpatterns = [
         "<int:pk>/delete",
         SavedDocumentDeleteView.as_view(),
         name="saved_document_delete",
+    ),
+    path(
+        "<int:pk>/folders/<int:folder_pk>/remove",
+        SavedDocumentRemoveFromFolderView.as_view(),
+        name="saved_document_remove_from_folder",
     ),
     path(
         "<int:pk>/modal",

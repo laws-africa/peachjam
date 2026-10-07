@@ -16,7 +16,6 @@ def backfill_status(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_subs", "0003_alter_feature_options_feature_ordering"),
     ]

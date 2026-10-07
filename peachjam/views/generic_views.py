@@ -1,28 +1,36 @@
+import hashlib
+import hmac
 import itertools
 import json
 
+from django.conf import settings
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.core.cache import cache
 from django.core.paginator import Paginator
 from django.dispatch import Signal
-from django.http import Http404
+from django.http import Http404, HttpResponseBadRequest
 from django.http.response import HttpResponse
 from django.middleware.csrf import get_token
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect
 from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
 from django.utils.functional import cached_property
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import gettext_lazy as _
+from django.utils.text import slugify
 from django.views.generic import DetailView, ListView, TemplateView, View
+from languages_plus.models import Language
 from lxml import html
 
 from peachjam.auth import user_display
-from peachjam.customerio import get_customerio
+from peachjam.customerio import SIGNUP_COMPLETED_SESSION_KEY, get_customerio
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.helpers import add_slash, get_language, lowercase_alphabet
 from peachjam.models import (
     Author,
+    CitationLink,
     CoreDocument,
     DocumentNature,
     ProvisionCitationCount,
@@ -33,12 +41,14 @@ from peachjam.models import (
     UnconstitutionalProvision,
     pj_settings,
 )
+from peachjam.sentry import SENTRY_SAMPLING_MODES, issue_sentry_sampling_cookie
 from peachjam_api.serializers import (
+    CitationLinkSerializer,
     RelationshipSerializer,
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
 )
-from peachjam_subs.models import Product
+from peachjam_subs.models import Product, Subscription
 
 
 class ClampedPaginator(Paginator):
@@ -78,6 +88,8 @@ class DocumentListView(ListView):
     paginate_by = 50
     paginator_class = ClampedPaginator
     model = CoreDocument
+    document_table_template_name = "peachjam/_document_table.html"
+    document_table_form_template_name = "peachjam/_document_table_form.html"
 
     # when grouping by date, group by year, or month and year? ("year" and "month-year" are the only options)
     group_by_date = "year"
@@ -96,6 +108,32 @@ class DocumentListView(ListView):
 
     def cache_key_prefix(self):
         return self.request.get_full_path()
+
+    def get_document_table_scope(self):
+        path = self.request.path.strip("/")
+        scope = slugify(path)
+        if scope:
+            return scope
+        view_name = getattr(self.request.resolver_match, "view_name", "")
+        scope = slugify(view_name)
+        if scope:
+            return scope
+        return slugify(self.__class__.__name__) or "documents"
+
+    def get_document_table_id(self):
+        return f"doc-table-{self.get_document_table_scope()}"
+
+    def get_document_table_form_id(self):
+        return f"doc-table-form-{self.get_document_table_scope()}"
+
+    def get_document_table_offcanvas_id(self):
+        return f"doc-table-filters-offcanvas-{self.get_document_table_scope()}"
+
+    def get_document_table_offcanvas_title_id(self):
+        return f"{self.get_document_table_offcanvas_id()}-title"
+
+    def get_document_table_filter_input_id(self):
+        return f"{self.get_document_table_form_id()}-filter-input"
 
     def get_model_queryset(self):
         qs = self.queryset if self.queryset is not None else self.model.objects
@@ -117,6 +155,13 @@ class DocumentListView(ListView):
             *args,
             **kwargs,
         )
+        context["doc_table_id"] = self.get_document_table_id()
+        context["doc_table_form_id"] = self.get_document_table_form_id()
+        context["doc_table_offcanvas_id"] = self.get_document_table_offcanvas_id()
+        context["doc_table_offcanvas_title_id"] = (
+            self.get_document_table_offcanvas_title_id()
+        )
+        context["doc_table_filter_input_id"] = self.get_document_table_filter_input_id()
         self.add_doc_count(context)
         self.add_entity_profile(context)
         return context
@@ -172,9 +217,9 @@ class DocumentListView(ListView):
 
     def get_template_names(self):
         if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/_document_table.html"]
-            return ["peachjam/_document_table_form.html"]
+            if self.request.htmx.target == self.get_document_table_id():
+                return [self.document_table_template_name]
+            return [self.document_table_form_template_name]
         return super().get_template_names()
 
 
@@ -199,7 +244,11 @@ class FilteredDocumentListView(DocumentListView):
         return self.form_class(self.form_defaults, self.request.GET)
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = (
+            self.get_base_queryset()
+            if self.form.cleaned_data.get("languages")
+            else super().get_queryset()
+        )
         # filter the queryset, including filtering on the form's query string
         filtered_qs = self.filter_queryset(qs, filter_q=True)
 
@@ -224,12 +273,57 @@ class FilteredDocumentListView(DocumentListView):
         context = super().get_context_data(form=self.form, **kwargs)
 
         self.add_facets(context)
+        self.order_facet_options(context)
+        self.set_rendered_facets(context)
         self.show_facet_clear_all(context)
         context["doc_table_title_label"] = _("Title")
         context["doc_table_date_label"] = _("Date")
         context["doc_table_show_counts"] = True
 
         return context
+
+    def set_rendered_facets(self, context):
+        rendered_facets = [
+            {"name": facet_name, "facet": facet}
+            for facet_name, facet in context.get("facet_data", {}).items()
+            if facet.get("options")
+        ]
+        for index, item in enumerate(rendered_facets):
+            next_item = (
+                rendered_facets[index + 1] if index + 1 < len(rendered_facets) else None
+            )
+            item["next_target_id"] = (
+                f"{context['doc_table_form_id']}-group-{next_item['name']}"
+                if next_item
+                else context["doc_table_id"]
+            )
+        context["rendered_facets"] = rendered_facets
+
+    def order_facet_options(self, context):
+        for facet in context.get("facet_data", {}).values():
+            options = facet.get("options")
+            if not options or facet.get("type") == "radio":
+                continue
+
+            selected_values = self.facet_selected_values(facet)
+            if not selected_values:
+                continue
+
+            def option_key(option):
+                option_value = (
+                    option[0] if isinstance(option, (list, tuple)) else option
+                )
+                return 0 if str(option_value) in selected_values else 1
+
+            facet["options"] = sorted(list(options), key=option_key)
+
+    def facet_selected_values(self, facet):
+        values = facet.get("values")
+        if isinstance(values, (list, tuple, set)):
+            return {str(v) for v in values}
+        if values in [None, "", False]:
+            return set()
+        return {str(values)}
 
     def add_taxonomies_facet(self, context):
         if "taxonomies" not in self.exclude_facets:
@@ -298,18 +392,29 @@ class FilteredDocumentListView(DocumentListView):
                     .distinct()
                     if a
                 )
-                context["doc_table_show_author"] = bool(authors)
-                # customise the authors label?
-                if authors:
-                    authors_label = getattr(
-                        self.model, "author_label_plural", authors_label
+            elif hasattr(self.model, "authors"):
+                authors = list(
+                    a
+                    for a in self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="authors"
                     )
-                    context["facet_data"]["authors"] = {
-                        "label": authors_label,
-                        "type": "checkbox",
-                        "options": sorted([(a, a) for a in authors]),
-                        "values": self.request.GET.getlist("authors"),
-                    }
+                    .order_by()
+                    .values_list("authors__name", flat=True)
+                    .distinct()
+                    if a
+                )
+            context["doc_table_show_author"] = bool(authors)
+            # customise the authors label?
+            if authors:
+                authors_label = getattr(
+                    self.model, "author_label_plural", authors_label
+                )
+                context["facet_data"]["authors"] = {
+                    "label": authors_label,
+                    "type": "checkbox",
+                    "options": sorted([(a, a) for a in authors]),
+                    "values": self.request.GET.getlist("authors"),
+                }
 
     def add_years_facet(self, context):
         if "years" not in self.exclude_facets:
@@ -328,18 +433,41 @@ class FilteredDocumentListView(DocumentListView):
                     "values": self.request.GET.getlist("years"),
                 }
 
+    def add_languages_facet(self, context):
+        if "languages" not in self.exclude_facets:
+            language_ids = (
+                self.form.filter_queryset(self.get_base_queryset(), exclude="languages")
+                .order_by()
+                .values_list("language_id", flat=True)
+                .distinct()
+            )
+            languages = list(Language.objects.filter(pk__in=language_ids))
+            if len(languages) > 1:
+                context["facet_data"]["languages"] = {
+                    "label": _("Languages"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(language.pk, language.name_en) for language in languages],
+                        key=lambda option: option[1],
+                    ),
+                    "values": self.request.GET.getlist("languages"),
+                }
+
     def add_facets(self, context):
         context["facet_data"] = {}
+        self.add_natures_facet(context)
         self.add_years_facet(context)
         self.add_authors_facet(context)
-        self.add_natures_facet(context)
         self.add_taxonomies_facet(context)
         self.add_alphabet_facet(context)
 
     def show_facet_clear_all(self, context):
-        context["show_clear_all"] = any(
-            [f["values"] for f in context["facet_data"].values()]
+        selected_facets_count = sum(
+            len(self.facet_selected_values(facet))
+            for facet in context["facet_data"].values()
         )
+        context["selected_facets_count"] = selected_facets_count
+        context["show_clear_all"] = bool(selected_facets_count)
 
     def group_documents(self, documents, group_by=None):
         # determine what to group by
@@ -382,7 +510,7 @@ class BaseDocumentDetailView(DetailView):
         )
 
     def show_save_doc_button(self):
-        return pj_settings().allow_save_documents and (
+        return pj_settings().save_documents_enabled and (
             not self.request.user.is_authenticated
             or self.request.user.has_perm("peachjam.add_saveddocument")
         )
@@ -391,12 +519,22 @@ class BaseDocumentDetailView(DetailView):
         # override in subclass to add subscription-related context
         return context
 
+    def get_document_table_id(self, scope):
+        return f"doc-table-{scope}-{self.object.pk}"
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(
             document_diffs_url=self.document_diffs_url, **kwargs
         )
 
         doc = self.object
+
+        # citation links for a document
+        citation_links = CitationLink.objects.filter(document=doc)
+        context["citation_links"] = CitationLinkSerializer(
+            citation_links, many=True
+        ).data
+
         # get all versions that match current document work_frbr_uri
         all_versions = CoreDocument.objects.filter(
             work_frbr_uri=self.object.work_frbr_uri
@@ -413,9 +551,10 @@ class BaseDocumentDetailView(DetailView):
         self.add_provision_relationships(context)
         self.add_provision_enrichments(context)
 
-        if context["document"].content_html:
+        doc_content = context["document"].get_or_create_document_content()
+        if doc_content and doc_content.content_html:
             context["display_type"] = (
-                "akn" if context["document"].content_html_is_akn else "html"
+                "akn" if doc_content.content_html_is_akn else "html"
             )
             self.prefix_images(context["document"])
         elif hasattr(context["document"], "source_file"):
@@ -425,9 +564,7 @@ class BaseDocumentDetailView(DetailView):
 
         context["notices"] = self.get_notices()
         context["taxonomies"] = Taxonomy.get_tree_for_items(
-            Taxonomy.objects.filter(
-                pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
-            )
+            self.get_taxonomy_queryset()
         )
         context["labels"] = doc.labels.all()
 
@@ -445,6 +582,9 @@ class BaseDocumentDetailView(DetailView):
         ]
 
         context["download_options"] = self.get_download_options()
+        context["KEY_LINK_PAGE"] = "document_detail"
+        context["related_documents_table_id"] = self.get_document_table_id("related")
+        context["similar_documents_table_id"] = self.get_document_table_id("similar")
 
         # provide extra context for analytics
         self.get_subscription_permissions_context(context)
@@ -558,33 +698,50 @@ class BaseDocumentDetailView(DetailView):
             unconstitutional_provisions_json + uncommenced_provisions_json
         )
 
+    def get_taxonomy_queryset(self):
+        doc = self.object
+        return Taxonomy.objects.filter(
+            pk__in=doc.taxonomies.values_list("topic__pk", flat=True)
+        )
+
     def get_notices(self):
         return []
 
     def prefix_images(self, document):
         """Rewrite image URLs so that we can serve them correctly."""
-        root = document.content_html_tree
+        doc_content = document.get_or_create_document_content()
+
+        if not doc_content.content_html:
+            return
+
+        root = doc_content.content_html_tree
 
         for img in root.xpath(".//img[@src]"):
+            # images should load lazily, otherwise they block page load
+            if "loading" not in img.attrib:
+                img.attrib["loading"] = "lazy"
+
             src = img.attrib["src"]
             if not src.startswith("/") and not src.startswith("data:"):
                 if not src.startswith("media/"):
                     src = "media/" + src
                 img.attrib["src"] = document.expression_frbr_uri + "/" + src
 
-        document.content_html = html.tostring(root, encoding="unicode")
+        doc_content.content_html = html.tostring(root, encoding="unicode")
 
     def add_track_page_properties(self, context):
-        context[
-            "track_page_properties"
-        ] = get_customerio().get_document_track_properties(context["document"])
+        context["track_page_properties"] = (
+            get_customerio().get_document_track_properties(context["document"])
+        )
 
     def check_annotation_permission(self, context):
+        if not pj_settings().annotations_enabled:
+            return
         if not self.request.user.has_perm("peachjam.add_annotation"):
             context["annotation_subscription_required"] = True
-            context[
-                "annotation_subscription_product"
-            ] = Product.get_lowest_product_for_permission("peachjam.add_annotation")
+            context["annotation_subscription_product"] = (
+                Product.get_lowest_product_for_permission("peachjam.add_annotation")
+            )
 
     def get_download_options(self):
         """Get the various formats that should be shown in the download menu. The first one will be the default."""
@@ -641,12 +798,22 @@ class PageLoadedView(TemplateView):
     - user menu bar
     """
 
-    template_name = "peachjam/_loaded.html"
+    template_name = "peachjam/user/_loaded.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["sentry_enabled"] = bool(settings.PEACHJAM["SENTRY_DSN_KEY"])
+        context["signup_completed"] = False
 
         if self.request.user.is_authenticated:
+            if (
+                self.request.session.get(SIGNUP_COMPLETED_SESSION_KEY)
+                == self.request.user.pk
+            ):
+                self.request.session.pop(SIGNUP_COMPLETED_SESSION_KEY)
+                context["signup_completed"] = True
+            beacon_secret = pj_settings().helpscout_beacon_secret_key
+            sub = Subscription.objects.active_for_user(self.request.user).first()
             context["user_json"] = json.dumps(
                 {
                     "id": self.request.user.id,
@@ -659,12 +826,49 @@ class PageLoadedView(TemplateView):
                         for perm in self.request.user.get_all_permissions()
                         if perm.startswith("peachjam")
                     ],
+                    "subscription_product": (
+                        sub.product_offering.product.name if sub else None
+                    ),
+                    # helpscout signature for beacon('identify')
+                    # ref: https://developer.helpscout.com/beacon-2/web/secure-mode/
+                    "helpscout_beacon_sig": (
+                        hmac.new(
+                            bytes(beacon_secret, "utf-8"),
+                            bytes(self.request.user.email or "", "utf-8"),
+                            digestmod=hashlib.sha256,
+                        ).hexdigest()
+                        if beacon_secret
+                        else None
+                    ),
                 }
             )
         else:
             context["user_json"] = json.dumps({"perms": []})
 
         return context
+
+
+class SentrySamplingView(UserPassesTestMixin, View):
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get(self, request, mode, *args, **kwargs):
+        if mode not in SENTRY_SAMPLING_MODES:
+            return HttpResponseBadRequest("Unknown Sentry sampling mode")
+
+        response = redirect(self.get_next_url())
+        issue_sentry_sampling_cookie(response, mode)
+        return response
+
+    def get_next_url(self):
+        next_url = self.request.GET.get("next")
+        if next_url and url_has_allowed_host_and_scheme(
+            next_url,
+            allowed_hosts={self.request.get_host()},
+            require_https=self.request.is_secure(),
+        ):
+            return next_url
+        return reverse("home_page")
 
 
 class YearMixin:

@@ -1,0 +1,11 @@
+{% load i18n %}
+<button class="btn btn-secondary {{ button_classes }} d-lg-none text-nowrap"
+        type="button"
+        data-bs-toggle="offcanvas"
+        data-bs-target="#{{ doc_table_offcanvas_id }}"
+        aria-controls="{{ doc_table_offcanvas_id }}">
+  <i class="bi bi-filter" aria-hidden="true"></i>
+  <span class="d-none d-md-inline">{% trans 'Filters' %}</span>
+  <span class="visually-hidden d-md-none">{% trans 'Filters' %}</span>
+  {% if selected_facets_count %}<span class="badge bg-light text-dark">{{ selected_facets_count }}</span>{% endif %}
+</button>

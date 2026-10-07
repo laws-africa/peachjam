@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0020_rename_mime_type_judgmentmediasummaryfile_mimetype"),
     ]

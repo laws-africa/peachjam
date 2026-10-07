@@ -1,12 +1,26 @@
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.sitemaps import views as sitemap_views
 from django.urls import include, path
 
+from peachjam.sitemaps import sitemaps
 from peachjam.views import RobotsView
 from peachjam.views.generic_views import CSRFTokenView
 
 # these urls do NOT get i18n language prefixes
 urlpatterns = [
+    path(
+        "sitemap.xml",
+        sitemap_views.index,
+        {"sitemaps": sitemaps},
+        name="sitemap_index",
+    ),
+    path(
+        "sitemaps/<section>.xml",
+        sitemap_views.sitemap,
+        {"sitemaps": sitemaps},
+        name="django.contrib.sitemaps.views.sitemap",
+    ),
     path("", include("peachjam.urls.offline")),
     path("feeds/", include("peachjam.urls.feeds")),
     path("api/", include("peachjam_api.urls")),

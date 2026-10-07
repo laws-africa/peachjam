@@ -8,13 +8,16 @@ import re
 import magic
 from django.contrib.staticfiles.finders import find as find_static
 from django.core.files import File
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 from docpipe.soffice import soffice_convert
 
 from peachjam.helpers import html_to_png
+from peachjam.models.lifecycle import AttributeHooksMixin, on_attribute_changed
 from peachjam.storage import DynamicStorageFileField
 
 log = logging.getLogger(__name__)
@@ -91,7 +94,14 @@ class Image(AttachmentAbstractModel):
         )
 
 
-class SourceFile(AttachmentAbstractModel):
+class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
+    """A file that was uploaded as the source file for a document. This is typically the original Word or PDF file.
+
+    The file field is a DynamicStorageFileField and so its state during __init__ differs to just after __init__,
+    so we can't rely on LifecycleModelMixin to automatically track changes. Instead, we use AttributeHooksMixin and
+    must explicitly start change tracking with track_changes().
+    """
+
     SAVE_FOLDER = "source_file"
 
     document = models.OneToOneField(
@@ -105,6 +115,13 @@ class SourceFile(AttachmentAbstractModel):
     )
     source_url = models.URLField(
         _("source URL"), max_length=2048, null=True, blank=True
+    )
+    start_page = models.PositiveIntegerField(
+        _("start page"),
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
+        help_text=_("The page in the source PDF where this document starts."),
     )
     file_as_pdf = models.FileField(
         _("file as pdf"),
@@ -162,12 +179,13 @@ class SourceFile(AttachmentAbstractModel):
 
     def set_download_filename(self):
         """For S3-backed storages, set the content-disposition header to a filename suitable for download. This is
-        only when serving the file from S3 or some other CDN backed by S3 (including CloudFront and CloudFlare)."""
+        only when serving the file from S3 or some other CDN backed by S3 (including CloudFront and CloudFlare).
+        """
         if not self.source_url and getattr(self.file.storage, "bucket_name", None):
             metadata = self.file.storage.get_object_parameters(self.file.name)
-            metadata[
-                "ContentDisposition"
-            ] = f'attachment; filename="{self.filename_for_download()}"'
+            metadata["ContentDisposition"] = (
+                f'attachment; filename="{self.filename_for_download()}"'
+            )
             src = {"Bucket": self.file.storage.bucket_name, "Key": self.file.name}
             self.file.storage.connection.meta.client.copy_object(
                 CopySource=src, MetadataDirective="REPLACE", **src, **metadata
@@ -186,6 +204,40 @@ class SourceFile(AttachmentAbstractModel):
         if not pk:
             # first save, set the download filename
             self.set_download_filename()
+
+    @on_attribute_changed(BEFORE_SAVE, ["file"], ["file_as_pdf"])
+    def clear_stale_pdf_on_file_change(self):
+        if self.file_as_pdf:
+            try:
+                self.file_as_pdf.delete(False)
+            except Exception as e:
+                log.warning("Ignoring error when deleting file as pdf: %s", e)
+            self.file_as_pdf = None
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["file"],
+        ["file_as_pdf", "DocumentContent.source_html", "DocumentContent.content_text"],
+    )
+    def file_changed(self):
+        self.ensure_file_as_pdf()
+        doc_content = self.document.get_or_create_document_content(True)
+        doc_content.extract_content_from_source_file()
+        doc_content.save()
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["file", "file_is_anonymised"],
+        ["SourceFile.anonymised_file_as_pdf"],
+    )
+    def update_anonymised_source_file(self):
+        """Regenerate a judgment's derived PDF after its source-file safety changes."""
+        from peachjam.models import Judgment
+
+        if self.document_id:
+            judgment = Judgment.objects.filter(pk=self.document_id).first()
+            if judgment:
+                judgment.ensure_anonymised_source_file()
 
     def get_duplicate_documents(self):
         """Return a list of documents that have the same SHA256 hash as this source file."""

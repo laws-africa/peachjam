@@ -1,6 +1,7 @@
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
 
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam_subs.models import Subscription
@@ -30,6 +31,7 @@ class SavedDocumentViewsTest(TestCase):
         self.user.user_permissions.add(
             Permission.objects.get(codename="delete_saveddocument")
         )
+        self.user.user_permissions.add(Permission.objects.get(codename="delete_folder"))
         self.folder = Folder.objects.create(user=self.user, name="test")
 
         Subscription.get_or_create_active_for_user(self.user)
@@ -125,17 +127,45 @@ class SavedDocumentViewsTest(TestCase):
 
         self.assertContains(response, "Saved")
 
-        self.assertContains(response, "saved-document-star--5389", 1)
+        self.assertContains(
+            response, 'class="saved-document-star saved-document-star--5389"', 1
+        )
+        self.assertContains(
+            response, 'hx-swap-oob="outerHTML:.saved-document-star--5389"', 1
+        )
         self.assertContains(
             response, "save-document-button save-document-button--5389", 1
         )
-        self.assertContains(response, "saved-document-table-detail--5389", 1)
+        self.assertContains(
+            response,
+            'class="saved-document-table-detail saved-document-table-detail--5389"',
+            1,
+        )
+        self.assertContains(
+            response,
+            'hx-swap-oob="outerHTML:.saved-document-table-detail--5389"',
+            1,
+        )
 
-        self.assertContains(response, "saved-document-star--3407", 1)
+        self.assertContains(
+            response, 'class="saved-document-star saved-document-star--3407"', 1
+        )
+        self.assertContains(
+            response, 'hx-swap-oob="outerHTML:.saved-document-star--3407"', 1
+        )
         self.assertContains(
             response, "save-document-button save-document-button--3407", 1
         )
-        self.assertContains(response, "saved-document-table-detail--3407", 1)
+        self.assertContains(
+            response,
+            'class="saved-document-table-detail saved-document-table-detail--3407"',
+            1,
+        )
+        self.assertContains(
+            response,
+            'hx-swap-oob="outerHTML:.saved-document-table-detail--3407"',
+            1,
+        )
 
         self.assert_no_recursive(response)
 
@@ -165,6 +195,49 @@ class SavedDocumentViewsTest(TestCase):
         self.assertContains(response, "modal-content")
         self.assert_no_recursive(response)
 
+    def test_locked_fragment_keeps_detail_button_and_my_lii_card(self):
+        sd = SavedDocument.objects.create(
+            user=self.user,
+            work=CoreDocument.objects.get(pk=4124).work,
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=timezone.now() + timezone.timedelta(days=60),
+        )
+        sd.folders.set([self.folder])
+
+        response = self.client.get(reverse("saved_document_fragments") + "?doc_id=4124")
+
+        self.assertContains(
+            response,
+            'class="btn btn-primary btn-shrink-sm save-document-button save-document-button--4124"',
+        )
+        self.assertContains(response, 'data-bs-target="#saved-document-modal"')
+        self.assertContains(response, reverse("saved_document_modal", args=[sd.pk]))
+        self.assertContains(response, 'class="card-title"')
+        self.assertContains(response, "Saved beyond your subscription limit")
+        self.assertNotContains(response, 'name="folders"')
+        self.assertNotContains(response, 'name="note"')
+        self.assert_no_recursive(response)
+
+    def test_locked_modal_allows_unsave_only(self):
+        sd = SavedDocument.objects.create(
+            user=self.user,
+            work=CoreDocument.objects.get(pk=4124).work,
+            subscription_locked_at=timezone.now(),
+            subscription_lock_expires_at=timezone.now() + timezone.timedelta(days=60),
+        )
+
+        response = self.client.get(
+            reverse("saved_document_modal", kwargs={"pk": sd.pk})
+        )
+
+        self.assertContains(response, "modal-content")
+        self.assertContains(response, "Saved beyond your subscription limit")
+        self.assertContains(response, "Unsave")
+        self.assertNotContains(response, 'name="folders"')
+        self.assertNotContains(response, 'name="note"')
+        self.assertNotContains(response, 'type="submit"')
+        self.assert_no_recursive(response)
+
     def test_update(self):
         sd = SavedDocument.objects.create(
             user=self.user, work=CoreDocument.objects.get(pk=4124).work
@@ -188,3 +261,59 @@ class SavedDocumentViewsTest(TestCase):
         self.assertRedirects(
             response, reverse("saved_document_fragments") + "?doc_id=4124"
         )
+
+    def test_remove_from_folder_keeps_saved_document_in_other_folders(self):
+        extra_folder = Folder.objects.create(user=self.user, name="extra")
+        sd = SavedDocument.objects.create(
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
+        )
+        sd.folders.set([self.folder, extra_folder])
+
+        response = self.client.post(
+            reverse(
+                "saved_document_remove_from_folder",
+                kwargs={"pk": sd.pk, "folder_pk": self.folder.pk},
+            )
+        )
+
+        self.assertRedirects(
+            response, reverse("folder_list"), fetch_redirect_response=False
+        )
+        sd.refresh_from_db()
+        self.assertEqual(list(sd.folders.all()), [extra_folder])
+
+    def test_remove_from_last_folder_deletes_saved_document(self):
+        sd = SavedDocument.objects.create(
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
+        )
+        sd.folders.set([self.folder])
+
+        response = self.client.post(
+            reverse(
+                "saved_document_remove_from_folder",
+                kwargs={"pk": sd.pk, "folder_pk": self.folder.pk},
+            )
+        )
+
+        self.assertRedirects(
+            response, reverse("folder_list"), fetch_redirect_response=False
+        )
+        self.assertFalse(SavedDocument.objects.filter(pk=sd.pk).exists())
+
+    def test_delete_folder_keeps_saved_documents_in_other_folders(self):
+        extra_folder = Folder.objects.create(user=self.user, name="extra")
+        sd = SavedDocument.objects.create(
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
+        )
+        sd.folders.set([self.folder, extra_folder])
+
+        response = self.client.post(
+            reverse("folder_delete", kwargs={"pk": self.folder.pk})
+        )
+
+        self.assertRedirects(
+            response, reverse("folder_list"), fetch_redirect_response=False
+        )
+        self.assertFalse(Folder.objects.filter(pk=self.folder.pk).exists())
+        sd.refresh_from_db()
+        self.assertEqual(list(sd.folders.all()), [extra_folder])

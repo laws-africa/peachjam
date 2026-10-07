@@ -1,0 +1,16 @@
+{% extends 'peachjam/layouts/main.html' %}
+{% block title %}Flynote Manager{% endblock %}
+{% block body-class %}full-page{% endblock %}
+{% block body-content %}
+  <main id="top"
+        tabindex="-1"
+        aria-labelledby="main-page-heading"
+        data-vue-component="FlynoteManager"
+        data-tree-url="{% url 'flynote-manager-tree' %}"
+        data-child-url="{% url 'flynote-manager-tree-children' 0 %}"
+        data-path-url="{% url 'flynote-manager-tree-path' 0 %}"
+        data-search-url="{% url 'flynote-manager-search' %}"
+        data-detail-url="{% url 'flynote-manager-detail' 0 %}">
+  </main>
+{% endblock %}
+{% block footer %}{% endblock %}

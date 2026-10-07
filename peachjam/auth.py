@@ -1,17 +1,119 @@
-from allauth.account.adapter import DefaultAccountAdapter
-from allauth.account.utils import perform_login
+import logging
+from urllib.parse import urlencode, urlsplit
+
+from allauth.account.adapter import DefaultAccountAdapter, get_adapter
+from allauth.account.internal.flows.code_verification import user_id_to_str
+from allauth.account.internal.flows.login_by_code import LoginCodeVerificationProcess
+from allauth.account.utils import get_login_redirect_url, perform_login
 from allauth.core.exceptions import ImmediateHttpResponse
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from allauth.socialaccount.models import SocialAccount
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth.models import User
+from django.contrib.auth.backends import BaseBackend
+from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import redirect_to_login
+from django.db import IntegrityError, OperationalError, ProgrammingError
+from django.urls import reverse
 from django.utils import translation
 from templated_email import send_templated_mail
 
-from peachjam.models import pj_settings
+from peachjam.customerio import track_account_created_signup_event
+from peachjam.models import UserProfile, pj_settings
 from peachjam.signals import password_reset_started
+
+logger = logging.getLogger(__name__)
+
+_original_send_by_email = LoginCodeVerificationProcess.send_by_email
+_original_finish = LoginCodeVerificationProcess.finish
+
+
+def _patched_send_by_email(self, email, **kwargs):
+    adapter = get_adapter()
+    code = adapter.generate_login_code()
+    context = {
+        "request": self.request,
+        "code": code,
+    }
+    adapter.send_mail("account/email/login_code", email, context)
+    self.state["code"] = code
+    self.add_sent_message({"email": email, "recipient": email})
+
+
+def _patched_finish(self, redirect_url):
+    if not self.user:
+        email = self.state.get("email")
+        if email:
+            user, created = User.objects.get_or_create(
+                email=email,
+                defaults={"username": email},
+            )
+            if created:
+                user.set_unusable_password()
+                user.save()
+                track_account_created_signup_event(user, request=self.request)
+            self.state["user_id"] = user_id_to_str(user)
+            self._user = user
+    return _original_finish(self, redirect_url)
+
+
+LoginCodeVerificationProcess.send_by_email = _patched_send_by_email
+LoginCodeVerificationProcess.finish = _patched_finish
+
+
+def get_all_users_permission_group_name():
+    return settings.PEACHJAM.get("ALL_USERS_PERMISSION_GROUP", "All users")
+
+
+def get_or_create_all_users_permission_group():
+    group_name = get_all_users_permission_group_name()
+    if not group_name:
+        return None
+
+    try:
+        return Group.objects.get_or_create(name=group_name)[0]
+    except IntegrityError:
+        return Group.objects.get(name=group_name)
+    except (OperationalError, ProgrammingError):
+        logger.debug("Could not create all-users permission group", exc_info=True)
+        return None
+
+
+def create_all_users_permission_group_after_migrate(**kwargs):
+    """Create the group only after the auth tables have been migrated."""
+    get_or_create_all_users_permission_group()
+
+
+class AllUsersPermissionBackend(BaseBackend):
+    """Grant a configured baseline group of permissions to every user."""
+
+    def get_group_permissions(self, user_obj, obj=None):
+        if obj is not None:
+            return set()
+
+        if not hasattr(user_obj, "_all_users_perm_cache"):
+            group = get_or_create_all_users_permission_group()
+            if group:
+                perms = group.permissions.select_related("content_type")
+                user_obj._all_users_perm_cache = {
+                    f"{perm.content_type.app_label}.{perm.codename}" for perm in perms
+                }
+            else:
+                user_obj._all_users_perm_cache = set()
+
+        return user_obj._all_users_perm_cache
+
+    def get_all_permissions(self, user_obj, obj=None):
+        return self.get_group_permissions(user_obj, obj=obj)
+
+    def has_perm(self, user_obj, perm, obj=None):
+        return perm in self.get_all_permissions(user_obj, obj=obj)
+
+    def has_module_perms(self, user_obj, app_label):
+        return any(
+            permission.startswith(f"{app_label}.")
+            for permission in self.get_all_permissions(user_obj)
+        )
 
 
 def user_display(user):
@@ -21,7 +123,41 @@ def user_display(user):
 
 class AccountAdapter(DefaultAccountAdapter):
     def is_open_for_signup(self, request):
-        return pj_settings().allow_signups
+        return pj_settings().accounts_enabled
+
+    def post_login(
+        self,
+        request,
+        user,
+        *,
+        email_verification,
+        signal_kwargs,
+        email,
+        signup,
+        redirect_url,
+    ):
+        """Apply onboarding to every allauth login flow, including social login."""
+        destination = get_login_redirect_url(
+            request,
+            redirect_url,
+            signup=signup,
+        )
+        profile, _ = UserProfile.objects.get_or_create(user=user)
+
+        if pj_settings().accounts_enabled and profile.requires_onboarding():
+            onboard_url = reverse("account_onboard")
+            if urlsplit(destination).path != onboard_url:
+                destination = f"{onboard_url}?{urlencode({'next': destination})}"
+
+        return super().post_login(
+            request,
+            user,
+            email_verification=email_verification,
+            signal_kwargs=signal_kwargs,
+            email=email,
+            signup=signup,
+            redirect_url=destination,
+        )
 
     def send_mail(self, template_prefix, email, context):
         # injection point for hooking into password reset initiation
@@ -56,6 +192,17 @@ class AccountAdapter(DefaultAccountAdapter):
                 send_templated_mail(**mail_kwargs)
         else:
             send_templated_mail(**mail_kwargs)
+
+    def generate_login_code(self):
+        code = super().generate_login_code()
+        if settings.DEBUG:
+            logger.info(
+                "\n"
+                "╔══════════════════════════════════════╗\n"
+                "║       LOGIN CODE: %-18s ║\n"
+                "╚══════════════════════════════════════╝" % code
+            )
+        return code
 
 
 class SocialAccountAdapter(DefaultSocialAccountAdapter):

@@ -33,7 +33,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [("peachjam_search", "0020_es_mapping_add_frbr_uri_fields")]
 
     operations = [

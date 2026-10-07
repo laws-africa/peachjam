@@ -6,7 +6,6 @@ from peachjam.models import CoreDocument
 
 
 class Bill(CoreDocument):
-
     decorator = BillDecorator()
 
     frbr_uri_doctypes = ["bill"]
@@ -26,7 +25,7 @@ class Bill(CoreDocument):
         return [self.author] if self.author else []
 
     def prepare_and_set_expression_frbr_uri(self):
-        self.frbr_uri_actor = self.author.code if self.author else None
+        self.frbr_uri_actor = self.author.code.lower() if self.author else None
         super().prepare_and_set_expression_frbr_uri()
 
     def pre_save(self):

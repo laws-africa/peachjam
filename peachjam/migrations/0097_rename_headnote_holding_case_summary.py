@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0096_auto_20230814_1557"),
     ]

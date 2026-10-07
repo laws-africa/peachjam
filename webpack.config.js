@@ -59,7 +59,8 @@ module.exports = (env, argv) => {
         authToken: process.env.SENTRY_AUTH_TOKEN,
         org: 'lawsafrica',
         project: 'lii',
-        telemetry: false
+        telemetry: false,
+        applicationKey: 'peachjam-frontend'
       })
     ]
   }];

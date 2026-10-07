@@ -1,27 +1,11 @@
 {% load i18n peachjam %}
-<ul class="pagination flex-wrap">
-  {% if page_obj.has_previous %}
-    <li class="page-item">
-      <a class="page-link"
-         href="?{% query_string request.GET page=page_obj.previous_page_number %}">{% trans 'Previous' %}</a>
-    </li>
-  {% endif %}
-  {% get_proper_elided_page_range paginator page_obj.number as page_range %}
-  {% for num in page_range %}
-    {% if num == paginator.ELLIPSIS %}
-      <li class="page-item">
-        <span class="page-link">{{ paginator.ELLIPSIS }}</span>
-      </li>
-    {% else %}
-      <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-        <a class="page-link" href="?{% query_string request.GET page=num %}">{{ num }}</a>
-      </li>
-    {% endif %}
-  {% endfor %}
-  {% if page_obj.has_next %}
-    <li class="page-item">
-      <a class="page-link"
-         href="?{% query_string request.GET page=page_obj.next_page_number %}">{% trans 'Next' %}</a>
-    </li>
-  {% endif %}
-</ul>
+<nav aria-label="{% trans 'Pagination' %}">
+  {% get_mobile_elided_page_range paginator page_obj.number as mobile_page_range %}
+  <ul class="pagination flex-nowrap d-sm-none">
+    {% include 'peachjam/_pagination_items.html' with page_range=mobile_page_range mobile=True %}
+  </ul>
+  {% get_proper_elided_page_range paginator page_obj.number as desktop_page_range %}
+  <ul class="pagination flex-wrap d-none d-sm-flex">
+    {% include 'peachjam/_pagination_items.html' with page_range=desktop_page_range mobile=False %}
+  </ul>
+</nav>

@@ -18,17 +18,23 @@ import htmx from 'htmx.org';
 import { csrfToken } from './api';
 import analytics, { Analytics } from './analytics';
 import { User } from './user';
+import * as Sentry from '@sentry/browser';
+import type { StackFrame } from '@sentry/browser';
 
 export interface PeachJamConfig {
   appName: string;
   pdfWorker: string;
   userHelpLink: string;
   urlLangPrefix: string;
+  documentEmbeddings: boolean;
+  savedDocumentsEnabled: boolean;
   language: string;
   languages: string[];
+  helpscoutBeaconId: string | null;
   chat: {
     enabled: boolean;
     assistantName: string;
+    public: boolean;
   }
   sentry: {
     dsn: string | null;
@@ -46,9 +52,13 @@ class PeachJam {
     language: 'en',
     languages: ['en'],
     urlLangPrefix: '',
+    documentEmbeddings: false,
+    savedDocumentsEnabled: false,
+    helpscoutBeaconId: null,
     chat: {
       enabled: false,
-      assistantName: 'AI'
+      assistantName: 'AI',
+      public: false
     },
     sentry: {
       dsn: null,
@@ -62,7 +72,9 @@ class PeachJam {
     email: '',
     is_staff: false,
     perms: [],
-    tracking_id: null
+    tracking_id: null,
+    subscription_product: null,
+    helpscout_beacon_sig: null
   };
 
   constructor () {
@@ -73,11 +85,11 @@ class PeachJam {
   setup () {
     window.dispatchEvent(new Event('peachjam.before-setup'));
     this.setupConfig();
+    this.setupSentry();
     // add the current user agent to the root HTML element for use with pocketlaw
     document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
     this.setupAnalytics();
     this.setupHtmx();
-    this.setupSentry();
     this.createComponents(document.body);
     this.createVueComponents(document.body);
     this.setupTooltips();
@@ -89,8 +101,13 @@ class PeachJam {
     this.setupProvisionClick();
     this.setupFormCSRF();
     this.loaded();
+    this.setupHelpScoutBeacon();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
+  }
+
+  triggerSentryTest () {
+    throw new Error('[Peachjam] Sentry sanity check — first-party error trigger');
   }
 
   setupConfig () {
@@ -188,44 +205,37 @@ class PeachJam {
   }
 
   setupSentry () {
-    // @ts-ignore
-    if (this.config.sentry && window.Sentry) {
-      // @ts-ignore
-      window.Sentry.init({
-        dsn: this.config.sentry.dsn,
-        environment: this.config.sentry.environment,
-        allowUrls: [
-          new RegExp(window.location.host.replace('.', '\\.') + '/static/')
-        ],
-        denyUrls: [
-          new RegExp(window.location.host.replace('.', '\\.') + '/static/lib/pdfjs/')
-        ],
-        beforeSend (event: any) {
-          try {
-            // if there is no stacktrace, ignore it
-            if (!event.exception || !event.exception.values || !event.exception.values[0] || !event.exception.values[0].stacktrace) {
-              return null;
-            }
+    if (!this.config.sentry?.dsn) return;
+    Sentry.init({
+      dsn: this.config.sentry.dsn,
+      environment: this.config.sentry.environment ?? undefined,
+      integrations: [
+        Sentry.thirdPartyErrorFilterIntegration({
+          filterKeys: ['peachjam-frontend'],
+          behaviour: 'drop-error-if-exclusively-contains-third-party-frames'
+        })
+      ],
+      allowUrls: [
+        new RegExp(window.location.host.replace(/\./g, '\\.') + '/static/')
+      ],
+      denyUrls: [
+        new RegExp(window.location.host.replace(/\./g, '\\.') + '/static/lib/pdfjs/')
+      ],
+      beforeSend (event) {
+        try {
+          const frames = event.exception?.values?.[0]?.stacktrace?.frames;
 
-            const frames = event.exception.values[0].stacktrace.frames;
+          if (!frames?.length) return null;
 
-            // if first frame is anonymous, don't send this event
-            // see https://github.com/getsentry/sentry-javascript/issues/3147
-            if (frames && frames.length > 0) {
-              const firstFrame = frames[0];
-              if (!firstFrame.filename || firstFrame.filename === '<anonymous>') {
-                return null;
-              }
-            }
-          } catch (e) {
-            // ignore error, send event
-            console.log(e);
-          }
-
-          return event;
+          return frames.some((frame) => isPeachJamFrame(frame, window.location.host)) ? event : null;
+        } catch (err) {
+          // ignore error, send event
+          console.log(err);
         }
-      });
-    }
+
+        return event;
+      }
+    });
   }
 
   setupTooltips () {
@@ -385,6 +395,41 @@ class PeachJam {
     });
   }
 
+  setupHelpScoutBeacon () {
+    const triggers = document.querySelectorAll('[data-contact-us-beacon]');
+    if (!triggers.length) return;
+
+    triggers.forEach((el) => {
+      el.addEventListener('click', (e) => {
+        const beaconId = this.config.helpscoutBeaconId;
+        // If no beacon configured, allow normal link behaviour (mailto fallback)
+        if (!beaconId) return;
+        // @ts-ignore
+        const beacon = window.Beacon;
+        if (typeof beacon !== 'function') return;
+        // @ts-ignore
+        if (Array.isArray(beacon.readyQueue)) return;
+
+        e.preventDefault();
+        if (this.user.id > -1) {
+          const info = {
+            name: this.user.name,
+            email: this.user.email,
+            subscription_product: this.user.subscription_product,
+            admin_url: `https://${location.hostname}/admin/auth/user/${this.user.id}/change`
+          };
+          if (this.user.helpscout_beacon_sig) {
+            // @ts-ignore
+            info.signature = this.user.helpscout_beacon_sig;
+          }
+          beacon('identify', info);
+        }
+        // @ts-ignore
+        beacon('open');
+      });
+    });
+  }
+
   loaded () {
     // use htmx to populate user-specific content islands when the page loads.
     // @ts-ignore
@@ -408,6 +453,19 @@ class PeachJam {
       }
     });
   }
+}
+
+function isPeachJamFrame (frame: StackFrame, host: string): boolean {
+  const filename = frame.filename;
+
+  if (!filename || filename === '<anonymous>') return false;
+  if (filename.indexOf('/node_modules/@sentry/') !== -1) return false;
+  if (filename.indexOf('/static/lib/pdfjs/') !== -1) return false;
+
+  if (filename.indexOf(`${host}/static/`) !== -1) return true;
+
+  return filename.indexOf('/peachjam/js/') !== -1 ||
+    filename.indexOf('peach-jam/./peachjam/js/') !== -1;
 }
 
 const peachJam = new PeachJam();

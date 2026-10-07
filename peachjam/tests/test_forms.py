@@ -1,5 +1,18 @@
+import datetime
+from types import SimpleNamespace
+
+from countries_plus.models import Country
+from django.contrib.messages.storage.base import Message
+from django.core.paginator import Paginator
+from django.template.loader import render_to_string
 from django.test import TestCase
+from django.test.client import RequestFactory
 from django.urls import reverse
+from languages_plus.models import Language
+
+from peachjam.forms import BaseDocumentFilterForm
+from peachjam.models import AlternativeName, GenericDocument
+from peachjam.templatetags.peachjam import get_mobile_elided_page_range
 
 
 class BaseDocumentFilterFormTestCase(TestCase):
@@ -22,3 +35,460 @@ class BaseDocumentFilterFormTestCase(TestCase):
         documents = response.context.get("documents")
         for title in [doc.title for doc in documents]:
             self.assertTrue(title.startswith("A"))
+
+    def test_q_filter_deduplicates_documents_with_multiple_matching_alternative_names(
+        self,
+    ):
+        document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Document with alternative names",
+        )
+        AlternativeName.objects.create(document=document, title="Unique marker one")
+        AlternativeName.objects.create(document=document, title="Unique marker two")
+
+        form = BaseDocumentFilterForm({}, {"q": "marker"})
+        self.assertTrue(form.is_valid())
+
+        documents = form.filter_queryset(GenericDocument.objects.all(), filter_q=True)
+
+        self.assertEqual([document.pk], list(documents.values_list("pk", flat=True)))
+
+    def test_document_table_form_renders_accessibility_hooks_for_long_facets(self):
+        request = RequestFactory().get("/documents/")
+        form = BaseDocumentFilterForm({}, {})
+        html = render_to_string(
+            "peachjam/_document_table_form.html",
+            {
+                "request": request,
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+                "doc_table_offcanvas_id": "doc-table-filters-offcanvas-test",
+                "doc_table_offcanvas_title_id": "doc-table-filters-offcanvas-test-title",
+                "doc_table_filter_input_id": "doc-table-form-test-filter-input",
+                "taxonomy_tree": [],
+                "is_leaf_node": False,
+                "show_clear_all": False,
+                "selected_facets_count": 0,
+                "facet_data": {
+                    "judges": {
+                        "label": "Judges",
+                        "options": [(f"judge-{i}", f"Judge {i}") for i in range(9)],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                    "years": {
+                        "label": "Years",
+                        "options": [("2024", "2024")],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                },
+                "rendered_facets": [
+                    {
+                        "name": "judges",
+                        "facet": {
+                            "label": "Judges",
+                            "options": [(f"judge-{i}", f"Judge {i}") for i in range(9)],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-form-test-group-years",
+                    },
+                    {
+                        "name": "years",
+                        "facet": {
+                            "label": "Years",
+                            "options": [("2024", "2024")],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-test",
+                    },
+                ],
+                "form": form,
+                "documents": [],
+                "doc_count": 0,
+                "doc_count_noun": "document",
+                "doc_count_noun_plural": "documents",
+                "doc_table_show_counts": True,
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('href="#doc-table-test"', html)
+        self.assertIn('id="doc-table-form-test-group-judges"', html)
+        self.assertIn('<fieldset id="doc-table-form-test-group-judges"', html)
+        self.assertIn('<legend id="doc-table-form-test-group-heading-0"', html)
+        self.assertEqual(html.count("data-close-offcanvas"), 1)
+        self.assertIn('href="#doc-table-form-test-group-years"', html)
+        self.assertIn('aria-live="polite"', html)
+        self.assertIn("No documents found.", html)
+        self.assertIn('id="doc-table-form-test-filters-section"', html)
+        self.assertIn('aria-labelledby="doc-table-form-test-filters-heading"', html)
+        self.assertIn("data-mobile-filter-controls", html)
+        self.assertIn("data-desktop-filter-controls", html)
+        self.assertEqual(html.count("document-list-sort"), 1)
+        self.assertIn('data-bs-target="#doc-table-filters-offcanvas-test"', html)
+
+    def test_document_table_form_skips_hidden_facets_when_building_next_links(self):
+        request = RequestFactory().get("/documents/")
+        form = BaseDocumentFilterForm({}, {})
+        html = render_to_string(
+            "peachjam/_document_table_form.html",
+            {
+                "request": request,
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+                "doc_table_offcanvas_id": "doc-table-filters-offcanvas-test",
+                "doc_table_offcanvas_title_id": "doc-table-filters-offcanvas-test-title",
+                "doc_table_filter_input_id": "doc-table-form-test-filter-input",
+                "taxonomy_tree": [],
+                "is_leaf_node": False,
+                "show_clear_all": False,
+                "facet_data": {
+                    "judges": {
+                        "label": "Judges",
+                        "options": [("judge-1", "Judge 1")],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                    "years": {
+                        "label": "Years",
+                        "options": [],
+                        "values": [],
+                        "type": "checkbox",
+                    },
+                    "alphabet": {
+                        "label": "Alphabet",
+                        "options": [("a", "A")],
+                        "values": "",
+                        "type": "radio",
+                    },
+                },
+                "rendered_facets": [
+                    {
+                        "name": "judges",
+                        "facet": {
+                            "label": "Judges",
+                            "options": [("judge-1", "Judge 1")],
+                            "values": [],
+                            "type": "checkbox",
+                        },
+                        "next_target_id": "doc-table-form-test-group-alphabet",
+                    },
+                    {
+                        "name": "alphabet",
+                        "facet": {
+                            "label": "Alphabet",
+                            "options": [("a", "A")],
+                            "values": "",
+                            "type": "radio",
+                        },
+                        "next_target_id": "doc-table-test",
+                    },
+                ],
+                "form": form,
+                "documents": [],
+                "doc_count": 0,
+                "doc_count_noun": "document",
+                "doc_count_noun_plural": "documents",
+                "doc_table_show_counts": True,
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('href="#doc-table-form-test-group-alphabet"', html)
+        self.assertNotIn('href="#doc-table-form-test-group-years"', html)
+
+    def test_document_table_form_override_keeps_mobile_filters_button(self):
+        request = RequestFactory().get("/documents/")
+        html = render_to_string(
+            "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html",
+            {
+                "request": request,
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+                "doc_table_offcanvas_id": "doc-table-filters-offcanvas-test",
+                "doc_table_filter_input_id": "doc-table-form-test-filter-input",
+                "taxonomy_tree": [],
+                "is_leaf_node": False,
+                "show_clear_all": True,
+                "selected_facets_count": 1,
+                "rendered_facets": [],
+                "form": BaseDocumentFilterForm({}, {}),
+                "documents": [],
+                "doc_count": 0,
+                "doc_count_noun": "document",
+                "doc_count_noun_plural": "documents",
+                "doc_table_show_counts": True,
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('data-bs-target="#doc-table-filters-offcanvas-test"', html)
+        self.assertIn('<span class="badge bg-light text-dark">1</span>', html)
+
+    def test_custom_filtered_tables_render_results_target(self):
+        request = RequestFactory().get("/documents/")
+        html = render_to_string(
+            "peachjam/provision_enrichment/_unconstitutional_table.html",
+            {
+                "request": request,
+                "doc_table_id": "doc-table-unconstitutional-provisions",
+                "documents": [],
+                "hide_pagination": True,
+                "paginator": None,
+            },
+            request=request,
+        )
+
+        self.assertIn('id="doc-table-unconstitutional-provisions"', html)
+        self.assertIn('aria-label="Results"', html)
+        self.assertIn('aria-live="polite"', html)
+
+    def test_long_sidebar_lists_render_bypass_navigation(self):
+        request = RequestFactory().get("/judgments/ecowascj/")
+        registries = [
+            SimpleNamespace(
+                code=f"registry-{i}",
+                name=f"Registry {i}",
+                get_absolute_url=f"/registry/{i}/",
+            )
+            for i in range(9)
+        ]
+        years = [
+            SimpleNamespace(year=2000 + i, url=f"/years/{2000 + i}/") for i in range(9)
+        ]
+
+        registries_html = render_to_string(
+            "peachjam/_registries.html",
+            {
+                "request": request,
+                "registries": registries,
+                "years": years,
+                "months": [],
+                "year": None,
+                "doc_table_id": "doc-table-test",
+                "registry_groups": [registries[:5], registries[5:]],
+                "registry": SimpleNamespace(code=""),
+                "registry_label_plural": "Registries",
+            },
+            request=request,
+        )
+        years_html = render_to_string(
+            "peachjam/_years_list.html",
+            {
+                "request": request,
+                "years": years,
+                "year": None,
+                "all_years_url": "/years/",
+                "years_skip_target_id": "article-list-heading",
+            },
+            request=request,
+        )
+        months_html = render_to_string(
+            "peachjam/_court_months_list.html",
+            {
+                "request": request,
+                "months": [datetime.date(2024, month, 1) for month in range(1, 13)],
+                "years": years,
+                "year": 2024,
+                "month": None,
+                "all_months_url": "/months/",
+                "court": SimpleNamespace(code="ECOWASCJ"),
+                "doc_table_form_id": "doc-table-form-test",
+                "doc_table_id": "doc-table-test",
+            },
+            request=request,
+        )
+
+        self.assertIn("Skip past Registries", registries_html)
+        self.assertIn('aria-labelledby="registries-heading"', registries_html)
+        self.assertIn('href="#years-heading"', registries_html)
+        self.assertIn("Skip past years", years_html)
+        self.assertIn('aria-labelledby="years-heading"', years_html)
+        self.assertIn('href="#article-list-heading"', years_html)
+        self.assertIn("Skip past months", months_html)
+        self.assertIn('id="months-section"', months_html)
+        self.assertIn('href="#doc-table-form-test-filters-section"', months_html)
+
+    def test_pagination_renders_navigation_labels(self):
+        request = RequestFactory().get("/documents/?sort=-date")
+        paginator = Paginator(list(range(120)), 10)
+        page_obj = paginator.page(2)
+
+        html = render_to_string(
+            "peachjam/_pagination.html",
+            {
+                "request": request,
+                "paginator": paginator,
+                "page_obj": page_obj,
+            },
+            request=request,
+        )
+
+        self.assertIn('aria-label="Pagination"', html)
+        self.assertIn('aria-label="Go to page 1"', html)
+        self.assertIn('aria-label="Go to page 3"', html)
+        self.assertIn('aria-current="page"', html)
+        self.assertIn("Current page, page 2", html)
+
+    def test_pagination_uses_moving_page_range_on_mobile(self):
+        request = RequestFactory().get("/documents/")
+        paginator = Paginator(list(range(500)), 50)
+        expected_ranges = {
+            1: [1, 2, 3, paginator.ELLIPSIS, 10],
+            3: [2, 3, 4, paginator.ELLIPSIS, 10],
+            9: [8, 9, 10],
+        }
+
+        for page_number, expected_range in expected_ranges.items():
+            with self.subTest(page_number=page_number):
+                self.assertEqual(
+                    expected_range,
+                    list(get_mobile_elided_page_range(paginator, page_number)),
+                )
+
+        html = render_to_string(
+            "peachjam/_pagination.html",
+            {
+                "request": request,
+                "paginator": paginator,
+                "page_obj": paginator.page(3),
+            },
+            request=request,
+        )
+        mobile_html = html.split('<ul class="pagination flex-nowrap d-sm-none">')[
+            1
+        ].split("</ul>")[0]
+        self.assertIn("‹", mobile_html)
+        self.assertIn("›", mobile_html)
+
+    def test_messages_partial_hides_empty_container_only(self):
+        request = RequestFactory().get("/documents/")
+
+        empty_html = render_to_string(
+            "peachjam/user/_messages.html",
+            {"messages": []},
+            request=request,
+        )
+        populated_html = render_to_string(
+            "peachjam/user/_messages.html",
+            {"messages": [Message(level=20, message="Saved", extra_tags="primary")]},
+            request=request,
+        )
+
+        self.assertIn('id="messages"', empty_html)
+        self.assertIn('aria-hidden="true"', empty_html)
+        self.assertIn('id="messages"', populated_html)
+        self.assertNotIn('aria-hidden="true"', populated_html)
+
+    def test_provision_enrichment_toggles_have_accessible_names(self):
+        request = RequestFactory().get("/documents/")
+
+        uncommenced_table_html = render_to_string(
+            "peachjam/provision_enrichment/_uncommenced_table.html",
+            {
+                "request": request,
+                "documents": [
+                    SimpleNamespace(
+                        pk=1,
+                        title="Example Act",
+                        get_absolute_url="/documents/example-act/",
+                    )
+                ],
+                "doc_table_id": "doc-table-test",
+                "hide_pagination": True,
+                "paginator": None,
+                "doc_table_show_counts": False,
+            },
+            request=request,
+        )
+        unconstitutional_detail_html = render_to_string(
+            "peachjam/provision_enrichment/_unconstitutional_provision_detail.html",
+            {
+                "request": request,
+                "expanded": False,
+                "enrichment": SimpleNamespace(
+                    pk=1,
+                    whole_work=False,
+                    provision_title="Section 1",
+                    resolved=False,
+                ),
+            },
+            request=request,
+        )
+        uncommenced_detail_html = render_to_string(
+            "peachjam/provision_enrichment/_uncommenced_provision_detail.html",
+            {
+                "request": request,
+                "expanded": False,
+                "document": SimpleNamespace(get_absolute_url="/documents/example-act/"),
+                "enrichment": SimpleNamespace(
+                    pk=2,
+                    provision_title="Section 2",
+                    provision_eid="sec_2",
+                    and_all_descendants=True,
+                ),
+            },
+            request=request,
+        )
+
+        self.assertIn(
+            'aria-label="Show uncommenced provisions for Example Act"',
+            uncommenced_table_html,
+        )
+        self.assertIn(
+            'aria-label="Show provision details"', unconstitutional_detail_html
+        )
+        self.assertIn('aria-label="Show provision details"', uncommenced_detail_html)
+        self.assertIn('aria-hidden="true"', uncommenced_table_html)
+
+    def test_external_links_announce_new_tab_and_search_result_links_do_not_force_it(
+        self,
+    ):
+        request = RequestFactory().get("/documents/")
+
+        help_html = render_to_string(
+            "peachjam/_help_button.html",
+            {
+                "request": request,
+                "PEACHJAM_SETTINGS": SimpleNamespace(
+                    user_help_link="https://docs.example.com/"
+                ),
+                "help_link": "guide",
+            },
+            request=request,
+        )
+        self.assertIn('data-key-link="help"', help_html)
+        entity_profile_html = render_to_string(
+            "peachjam/_entity_profile.html",
+            {
+                "request": request,
+                "entity_profile": SimpleNamespace(
+                    background_photo=None,
+                    profile_photo=None,
+                    title="Example profile",
+                    about_html="",
+                    address="",
+                    website_url="https://example.com",
+                    content_object=SimpleNamespace(),
+                ),
+                "entity_profile_title": "Example profile",
+                "hide_follow_button": True,
+            },
+            request=request,
+        )
+
+        self.assertIn("opens in new tab", help_html)
+        self.assertIn('target="_blank"', entity_profile_html)
+        self.assertIn("opens in new tab", entity_profile_html)

@@ -5,6 +5,12 @@ from . import views
 
 router = routers.DefaultRouter()
 router.register("click", views.SearchClickViewSet, basename="search_click")
+router.register(
+    "flynote-click", views.SearchFlynoteClickViewSet, basename="search_flynote_click"
+)
+router.register(
+    "entity-click", views.SearchEntityClickViewSet, basename="search_entity_click"
+)
 
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
@@ -24,6 +30,29 @@ urlpatterns = [
     path("api/documents/suggest/", views.DocumentSearchView.as_view(action="suggest")),
     path("api/link-traces", views.LinkTracesView.as_view()),
     path("api/", include(router.urls)),
+    path(
+        "debug/",
+        include(
+            [
+                path("", views.SearchDebugView.as_view(), name="search_debug"),
+                path(
+                    "documents",
+                    views.DocumentSearchDebugView.as_view(),
+                    name="search_debug_documents",
+                ),
+                path(
+                    "portions",
+                    views.PortionSearchDebugView.as_view(),
+                    name="search_debug_portions",
+                ),
+                path(
+                    "raw",
+                    views.RawSearchDebugView.as_view(),
+                    name="search_debug_raw",
+                ),
+            ]
+        ),
+    ),
     path(
         "saved-searches/button",
         views.SavedSearchButtonView.as_view(),

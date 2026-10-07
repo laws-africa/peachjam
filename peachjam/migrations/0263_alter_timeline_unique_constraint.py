@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0262_unique_timeline_event_email_alert"),
     ]

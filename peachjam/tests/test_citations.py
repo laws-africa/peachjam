@@ -1,13 +1,18 @@
 import os
 from datetime import datetime
+from types import SimpleNamespace
+from unittest.mock import patch
 
 from countries_plus.models import Country
 from django.core.files.base import File
 from django.test import TestCase
+from docpipe.citations import ActNoOfYearMatcher
 from languages_plus.models import Language
 
+from peachjam.admin import DocumentAdmin
 from peachjam.analysis.citations import citation_analyser
 from peachjam.models import (
+    CitationLink,
     CoreDocument,
     DocumentNature,
     ProvisionCitation,
@@ -15,11 +20,39 @@ from peachjam.models import (
     SourceFile,
     Work,
 )
+from peachjam_api.serializers import CitationLinkSerializer
+from peachjam_api.views import CitationLinkViewSet
 
 
 class CitationAnalyserTestCase(TestCase):
     fixtures = ["tests/countries", "tests/languages"]
     maxDiff = None
+
+    def test_html_extraction_persists_content_html_after_reload(self):
+        doc = CoreDocument.objects.create(
+            title="test",
+            frbr_uri_doctype="doc",
+            frbr_uri_number="test",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            language=Language.objects.get(pk="en"),
+            date=datetime(2023, 1, 1),
+        )
+
+        doc_content = doc.get_or_create_document_content()
+        doc_content.source_html = "<p>consider Act 5 of 2009</p>"
+        doc_content.save()
+
+        with patch.object(citation_analyser, "matchers", [ActNoOfYearMatcher]):
+            doc.extract_citations()
+
+        doc.refresh_from_db()
+        doc_content = doc.get_or_create_document_content()
+        doc_content.refresh_from_db()
+
+        self.assertEqual(
+            '<p>consider <a href="/akn/za/act/2009/5">Act 5 of 2009</a></p>',
+            doc_content.content_html,
+        )
 
     def test_pdf_extractions(self):
         # only some installations have matchers set up
@@ -48,7 +81,7 @@ class CitationAnalyserTestCase(TestCase):
             doc.source_file.save()
             citation_analyser.extract_citations_from_source_file(doc)
 
-        self.assertEquals(
+        self.assertEqual(
             [
                 {
                     "target_id": "page-1",
@@ -104,36 +137,115 @@ class CitationAnalyserTestCase(TestCase):
             ],
         )
 
-    def test_delete_citations(self):
-        doc = CoreDocument(
-            content_html_is_akn=False,
-            content_html="""
-<div>
-<p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
-<p>Some text <a href="https://example.com">Example</a></p>
-</div>
-""",
+    def test_extracted_citation_links_are_automatic(self):
+        citation = SimpleNamespace(
+            text="Act 5 of 2009",
+            href="/akn/za/act/2009/5",
+            target_id=0,
+            start=0,
+            end=13,
+            prefix="",
+            suffix="",
         )
+
+        link = CitationLink.from_extracted_citation(citation)
+
+        self.assertEqual(CitationLink.Origin.AUTOMATIC, link.origin)
+
+    def test_delete_citations_preserves_manually_created_links(self):
+        doc = CoreDocument.objects.create(
+            title="test",
+            frbr_uri_doctype="doc",
+            frbr_uri_number="test",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            language=Language.objects.get(pk="en"),
+            date=datetime(2023, 1, 1),
+        )
+        automatic_link = CitationLink.objects.create(
+            document=doc,
+            text="Automatic citation",
+            url="/akn/za/act/2009/5",
+            target_id="page-1",
+            target_selectors=[],
+        )
+        manual_link = CitationLink.objects.create(
+            document=doc,
+            text="Manual citation",
+            url="https://example.com",
+            target_id="page-1",
+            target_selectors=[],
+            origin=CitationLink.Origin.MANUAL,
+        )
+
         doc.delete_citations()
-        self.assertEqual(
-            """<div>
-<p>Some text Act 1 of 2010</p>
-<p>Some text <a href="https://example.com">Example</a></p>
-</div>
-""",
-            doc.content_html,
+
+        self.assertFalse(CitationLink.objects.filter(pk=automatic_link.pk).exists())
+        self.assertTrue(CitationLink.objects.filter(pk=manual_link.pk).exists())
+
+    def test_citation_link_api_marks_created_and_edited_links_as_manual(self):
+        doc = CoreDocument.objects.create(
+            title="test",
+            frbr_uri_doctype="doc",
+            frbr_uri_number="test",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            language=Language.objects.get(pk="en"),
+            date=datetime(2023, 1, 1),
+        )
+        data = {
+            "document": doc.pk,
+            "text": "Manual citation",
+            "url": "https://example.com",
+            "target_id": "page-1",
+            "target_selectors": [],
+        }
+        viewset = CitationLinkViewSet()
+        serializer = CitationLinkSerializer(data=data)
+        serializer.is_valid(raise_exception=True)
+
+        viewset.perform_create(serializer)
+
+        link = CitationLink.objects.get()
+        self.assertEqual(CitationLink.Origin.MANUAL, link.origin)
+
+        link.origin = CitationLink.Origin.AUTOMATIC
+        link.save(update_fields=["origin"])
+        data["text"] = "Edited citation"
+        serializer = CitationLinkSerializer(link, data=data)
+        serializer.is_valid(raise_exception=True)
+
+        viewset.perform_update(serializer)
+
+        link.refresh_from_db()
+        self.assertEqual(CitationLink.Origin.MANUAL, link.origin)
+
+    def test_document_admin_reextracts_citations_for_citation_fields(self):
+        admin = DocumentAdmin(CoreDocument, None)
+
+        for field in ("date", "title", "citation"):
+            form = SimpleNamespace(changed_data=[field])
+            self.assertTrue(
+                admin.should_queue_re_extract_citations(
+                    form, alternative_names_has_changed=False, change=True
+                )
+            )
+
+        form = SimpleNamespace(changed_data=["summary"])
+        self.assertFalse(
+            admin.should_queue_re_extract_citations(
+                form, alternative_names_has_changed=False, change=True
+            )
         )
 
     def test_delete_citations_should_not_change_akn(self):
-        doc = CoreDocument(
-            content_html_is_akn=True,
-            content_html="""
+        doc = CoreDocument()
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html("""
 <div>
 <p>Some text <a href="/akn/ke/act/2010/1">Act 1 of 2010</a></p>
 <p>Some text <a href="https://example.com">Example</a></p>
 </div>
-""",
-        )
+""")
         doc.delete_citations()
         self.assertEqual(
             """
@@ -142,7 +254,7 @@ class CitationAnalyserTestCase(TestCase):
 <p>Some text <a href="https://example.com">Example</a></p>
 </div>
 """,
-            doc.content_html,
+            doc_content.content_html,
         )
 
 

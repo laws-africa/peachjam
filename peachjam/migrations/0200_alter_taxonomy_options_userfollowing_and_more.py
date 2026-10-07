@@ -6,7 +6,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("countries_plus", "0005_auto_20160224_1804"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),

@@ -3,9 +3,37 @@ from django.db.models.signals import m2m_changed, post_delete, post_save
 from django.dispatch import receiver
 from django_fsm import post_transition
 
+from peachjam.account_signals import user_account_pre_delete
 from peachjam.customerio import get_customerio
+from peachjam.models import UserProfile
 
-from .models import Feature, Product, Subscription
+from .models import (
+    Feature,
+    OrganisationMembership,
+    Product,
+    Subscription,
+)
+from .organisations.services import organisation_service
+
+
+@receiver(
+    user_account_pre_delete,
+    sender=UserProfile,
+    dispatch_uid="peachjam_subs.end_membership_before_account_deletion",
+)
+def end_membership_before_account_deletion(sender, user, **kwargs):
+    membership = (
+        OrganisationMembership.objects.filter(
+            user=user,
+            status=OrganisationMembership.Status.ACTIVE,
+        )
+        .select_related("organisation")
+        .first()
+    )
+    if membership:
+        organisation_service.remove_membership(
+            membership=membership, actor=user, member_left=True
+        )
 
 
 @receiver(post_delete, sender=Subscription)
@@ -37,11 +65,10 @@ def feature_saved(sender, instance, **kwargs):
 @receiver(post_transition, sender=Subscription)
 def subscription_changed(sender, instance, target, field, **kwargs):
     if field.name == "status":
-        cio = get_customerio()
         if target == Subscription.Status.ACTIVE:
-            cio.track_subscription_activated(instance)
-        elif target == Subscription.Status.CLOSED:
-            cio.track_subscription_closed(instance)
+            get_customerio().track_subscription_activated(instance)
+        elif target == Subscription.Status.CLOSED and instance.active_at:
+            get_customerio().track_subscription_closed(instance)
 
 
 User = get_user_model()
@@ -50,4 +77,6 @@ User = get_user_model()
 @receiver(post_save, sender=User)
 def create_default_subscription(sender, instance, created, **kwargs):
     if created:
+        # there is a signal handler for this on User.post_save, but sometimes this runs before it does
+        UserProfile.objects.get_or_create(user=instance)
         Subscription.get_or_create_active_for_user(instance)

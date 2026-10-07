@@ -1,5 +1,8 @@
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+from .email_alerts import EmailAlertFrequency
 
 
 class SingletonModel(models.Model):
@@ -72,14 +75,17 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow signups via social accounts"),
     )
-    allow_signups = models.BooleanField(
-        verbose_name=_("allow signups"),
-        default=True,
-        help_text=_("Allow users to create accounts"),
-    )
-
     metabase_dashboard_link = models.URLField(
         verbose_name=_("metabase dashboard link"), null=True, blank=True
+    )
+    document_debug_external_links = models.TextField(
+        verbose_name=_("document debug external links"),
+        blank=True,
+        default="",
+        help_text=_(
+            "One link per line in the format: label | URL. "
+            "Allowed placeholders in URLs: {id}, {expression_frbr_uri}, {work_frbr_uri}, {title}."
+        ),
     )
 
     mailchimp_form_url = models.URLField(
@@ -159,19 +165,64 @@ class PeachJamSettings(SingletonModel):
         default=False,
         help_text=_("Allow searches to be saved."),
     )
+    allow_signups = models.BooleanField(
+        verbose_name=_("allow signups"),
+        default=True,
+        help_text=_(
+            "Deprecated compatibility field. Use the global accounts switch instead."
+        ),
+    )
+    allow_follows = models.BooleanField(
+        verbose_name=_("allow follows"),
+        default=True,
+        help_text=_(
+            "Allow courts, authors, topics, and other entities to be followed."
+        ),
+    )
+    allow_annotations = models.BooleanField(
+        verbose_name=_("allow annotations"),
+        default=True,
+        help_text=_("Allow private document annotations."),
+    )
     show_contact_form = models.BooleanField(
         verbose_name=_("show contact form"),
         default=False,
         help_text=_("Show the contact form."),
     )
     robots_txt = models.TextField(
-        null=True, blank=True, help_text=_("Additional robots.txt rules.")
+        null=True,
+        blank=True,
+        help_text=_("Additional robots.txt rules."),
     )
     google_search_engine_id = models.CharField(
         max_length=100,
         null=True,
         blank=True,
         help_text=_("ID of a Google custom search engine."),
+    )
+    helpscout_beacon_id = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("ID of a helpscout contact us beacon."),
+    )
+    helpscout_beacon_secret_key = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text=_("Secret key for helpscout signature."),
+    )
+    allow_criminal_data_extraction = models.BooleanField(
+        verbose_name=_("allow criminal data extraction"),
+        default=False,
+        help_text=_("Allow AI-based criminal data extraction for judgments."),
+    )
+    email_alert_default_frequency = models.CharField(
+        verbose_name=_("default email alert frequency"),
+        max_length=16,
+        choices=EmailAlertFrequency.choices,
+        default="daily",
+        help_text=_("Default frequency for new users' email alert digests."),
     )
 
     class Meta:
@@ -182,6 +233,26 @@ class PeachJamSettings(SingletonModel):
         if self.twitter_link:
             # https://foo.com/bar -> bar
             return "@" + self.twitter_link.split("/", 4)[-1]
+
+    @property
+    def accounts_enabled(self):
+        return not settings.PEACHJAM["DISABLE_ACCOUNTS"]
+
+    @property
+    def save_documents_enabled(self):
+        return self.accounts_enabled and self.allow_save_documents
+
+    @property
+    def save_searches_enabled(self):
+        return self.accounts_enabled and self.allow_save_searches
+
+    @property
+    def follows_enabled(self):
+        return self.accounts_enabled and self.allow_follows
+
+    @property
+    def annotations_enabled(self):
+        return self.accounts_enabled and self.allow_annotations
 
     def __str__(self):
         return "Settings"

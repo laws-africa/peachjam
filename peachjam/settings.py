@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import base64
 import logging
 import os
+import socket
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -25,15 +26,59 @@ from import_export.formats import base_formats
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
+from peachjam.logging import LoggingContextFilter
+from peachjam.sentry import sentry_profiles_sampler, sentry_traces_sampler
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DJANGO_DEBUG", "true") == "true"
+
+
+LOCALHOST_ALLOWED_HOSTS = ["localhost", "127.0.0.1", "[::1]"]
+
+
+def get_local_ip_allowed_hosts():
+    allowed_hosts = set()
+
+    try:
+        allowed_hosts.update(socket.gethostbyname_ex(socket.gethostname())[2])
+    except OSError:
+        pass
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("10.255.255.255", 1))
+            allowed_hosts.add(sock.getsockname()[0])
+    except OSError:
+        pass
+
+    return allowed_hosts
+
+
+def build_allowed_hosts(*default_hosts):
+    allowed_hosts = list(default_hosts)
+    allowed_hosts.extend(
+        host.strip()
+        for host in os.environ.get("DJANGO_ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    )
+    allowed_hosts.extend(
+        host.strip()
+        for host in os.environ.get("ALLOWED_HOSTS", "").split(",")
+        if host.strip()
+    )
+    allowed_hosts.extend(get_local_ip_allowed_hosts())
+
+    if DEBUG:
+        allowed_hosts.extend(LOCALHOST_ALLOWED_HOSTS)
+
+    return list(set(allowed_hosts))
+
 
 # SECURITY WARNING: keep the secret key used in production secret!
 if DEBUG:
@@ -42,7 +87,7 @@ else:
     SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = build_allowed_hosts()
 
 
 INSTALLED_APPS = [
@@ -70,6 +115,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.humanize",
     "django.contrib.messages",
+    "django.contrib.sitemaps",
     "django.contrib.sites",
     "django.contrib.staticfiles",
     "sass_processor",
@@ -93,6 +139,7 @@ MIDDLEWARE = [
     "peachjam.middleware.GeneralUpdateCacheMiddleware",
     "peachjam.middleware.VaryOnHxHeadersMiddleware",
     "log_request_id.middleware.RequestIDMiddleware",
+    "peachjam.middleware.LogContextMiddleware",
     "peachjam.middleware.RedirectWWWMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
@@ -102,6 +149,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "peachjam.middleware.SentrySamplingMiddleware",
     "peachjam.middleware.TermsAcceptanceMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -144,6 +192,14 @@ PEACHJAM = {
     "EXTRACTOR_API": os.environ.get(
         "EXTRACTOR_API", "https://api.laws.africa/extractor/v1/"
     ),
+    "SUMMARISE_JUDGMENTS": True,
+    # should we use the flynote tree and match flynotes to our database of known flynotes?
+    "SUMMARISE_USE_FLYNOTE_TREE": False,
+    # should flynote topic navigation and linked flynote UI be shown when the flynote tree is enabled?
+    "SHOW_FLYNOTE_TOPICS": False,
+    # Canonical judge identity rollout flag. Keep disabled by default so
+    # individual LIIs can opt in safely.
+    "CANONICAL_JUDGE_IDENTITY": False,
     # TODO: this is a short-term hack to allow us to set the language for the summariser - full language name
     "SUMMARISER_LANGUAGE": "English",
     "EXTRA_SEARCH_INDEXES": [],
@@ -155,6 +211,15 @@ PEACHJAM = {
     "SEARCH_FAKE_DOCUMENTS": False,
     "MULTIPLE_JURISDICTIONS": False,
     "MULTIPLE_LOCALITIES": False,
+    # Curated public landing pages in /sitemaps/pages.xml. Add a URL name here only
+    # when a new route is a canonical, indexable marketing or information page;
+    # document and article URLs are maintained by their dedicated sitemaps.
+    "SITEMAP_STATIC_URL_NAMES": [
+        "home_page",
+        "about",
+        "article_list",
+        "terms_of_use",
+    ],
     "PDFJS_TO_TEXT": "bin/pdfjs-to-text" if DEBUG else "pdfjs-to-text",
     "HTML_TO_PNG": "bin/html-to-png" if DEBUG else "html-to-png",
     # Customer.io
@@ -162,17 +227,32 @@ PEACHJAM = {
     "CUSTOMERIO_PYTHON_KEY": os.environ.get("CUSTOMERIO_PYTHON_KEY"),
     "CUSTOMERIO_EMAIL_API_KEY": os.environ.get("CUSTOMERIO_EMAIL_API_KEY"),
     "CUSTOMERIO_JOURNEYS_SITE_ID": os.environ.get("CUSTOMERIO_JOURNEYS_SITE_ID"),
+    "CUSTOMERIO_CLASS": "peachjam_subs.customerio.CustomerIO",
     # GitHub ingestor webhook secret (optional)
     "GITHUB_WEBHOOK_SECRET": os.environ.get("GITHUB_WEBHOOK_SECRET", ""),
     # Chat settings
-    "CHAT_ENABLED": os.environ.get("CHAT_ENABLED", "false") == "true",
-    "CHAT_ASSISTANT_NAME": os.environ.get("CHAT_ASSISTANT_NAME", "AI"),
+    "CHAT_ENABLED": False,
+    "CHAT_ASSISTANT_NAME": "AI",
+    # show the document chat button to all users, or only users with permissions?
+    "CHAT_PUBLIC": False,
     # Email alerts
     "EMAIL_ALERTS_ENABLED": os.environ.get("EMAIL_ALERTS_ENABLED", "false") == "true",
+    # Used only by migrations to seed the admin-managed site setting. Runtime code
+    # reads PeachJamSettings.email_alert_default_frequency instead.
+    "EMAIL_ALERT_DEFAULT_FREQUENCY": os.environ.get(
+        "EMAIL_ALERT_DEFAULT_FREQUENCY", "daily"
+    ),
+    "AUTH_OTP": os.environ.get("AUTH_OTP", "false") == "true",
+    "DISABLE_ACCOUNTS": os.environ.get("DISABLE_ACCOUNTS", "false") == "true",
+    # Organisation subscription management is opt-in per site.
+    "ORGANISATION_SUBSCRIPTIONS": False,
+    "ALL_USERS_PERMISSION_GROUP": "AllUsers",
 }
 
 PEACHJAM["ES_INDEX"] = os.environ.get("ES_INDEX", slugify(PEACHJAM["APP_NAME"]))
 PEACHJAM["MY_LII"] = f"My {PEACHJAM['APP_NAME']}"
+# tie document embeddings to semantic search, although embeddings can be enabled separately
+PEACHJAM["DOCUMENT_EMBEDDINGS"] = PEACHJAM["SEARCH_SEMANTIC"]
 
 WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
@@ -184,11 +264,10 @@ SERVER_EMAIL = DEFAULT_FROM_EMAIL = (
 # Django all-auth
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
+    "peachjam.auth.AllUsersPermissionBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
     "guardian.backends.ObjectPermissionBackend",
 ]
-# email addresses are required for new accounts
-ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_PRESERVE_USERNAME_CASING = False
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_EMAIL_SUBJECT_PREFIX = EMAIL_SUBJECT_PREFIX
@@ -198,14 +277,20 @@ LOGIN_REDIRECT_URL = "home_page"
 LOGOUT_REDIRECT_URL = "account_logged_out"
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "my_account"
-ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
 ACCOUNT_FORMS = {
     "signup": "peachjam.forms.PeachjamSignupForm",
     "login": "peachjam.forms.PeachjamLoginForm",
 }
 ACCOUNT_USER_DISPLAY = "peachjam.auth.user_display"
-ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_LOGIN_BY_CODE_ENABLED = PEACHJAM["AUTH_OTP"]
+if PEACHJAM["AUTH_OTP"]:
+    ACCOUNT_LOGIN_BY_CODE_TIMEOUT = 600
+    ACCOUNT_LOGIN_BY_CODE_MAX_ATTEMPTS = 5
+    ACCOUNT_SIGNUP_FIELDS = ["email*"]
+else:
+    ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*", "password2*"]
 
 # social logins
 SOCIALACCOUNT_PROVIDERS = {
@@ -224,6 +309,9 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 SOCIALACCOUNT_ADAPTER = "peachjam.auth.SocialAccountAdapter"
 ACCOUNT_ADAPTER = "peachjam.auth.AccountAdapter"
+# When frontend account URLs are disabled, retain the direct Google sign-in
+# endpoint used by staff instead of rendering allauth's confirmation page.
+SOCIALACCOUNT_LOGIN_ON_GET = PEACHJAM["DISABLE_ACCOUNTS"]
 
 # Recaptcha
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY", "")
@@ -235,7 +323,6 @@ if DEBUG:
 if DEBUG:
     INSTALLED_APPS.append("debug_toolbar")
     INSTALLED_APPS.append("django_extensions")
-    INSTALLED_APPS.append("elastic_panel")
     MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
     INTERNAL_IPS = ["127.0.0.1"]
     import peachjam.debugging  # noqa
@@ -314,6 +401,10 @@ LANGUAGES = [
     ("sw", _("Swahili")),
 ]
 
+# Keep the translated model schema stable when a downstream site exposes only
+# a subset of the supported interface languages.
+MODELTRANSLATION_LANGUAGES = ("en", "fr", "pt", "sw")
+
 TIME_ZONE = "UTC"
 
 USE_I18N = True
@@ -380,7 +471,7 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": f'{PEACHJAM["APP_NAME"]} API',
+    "TITLE": f"{PEACHJAM['APP_NAME']} API",
     "DESCRIPTION": "Read-only API for this website.",
     "VERSION": "v1",
     "SCHEMA_PATH_PREFIX_INSERT": "/api",
@@ -411,8 +502,8 @@ if not DEBUG:
         before_send=before_send,
         before_send_transaction=before_send,
         send_default_pii=True,
-        # sample x% of requests for performance metrics
-        traces_sample_rate=float(os.environ.get("SENTRY_SAMPLE_RATE", "0.1")),
+        traces_sampler=sentry_traces_sampler,
+        profiles_sampler=sentry_profiles_sampler,
     )
 
 DEBUG_TOOLBAR_CONFIG = {"INTERCEPT_REDIRECTS": False}
@@ -431,8 +522,6 @@ DEBUG_TOOLBAR_PANELS = (
     "debug_toolbar.panels.signals.SignalsPanel",
     "debug_toolbar.panels.logging.LoggingPanel",
     "debug_toolbar.panels.redirects.RedirectsPanel",
-    # Additional
-    "elastic_panel.panel.ElasticDebugPanel",
 )
 
 SASS_PROCESSOR_INCLUDE_DIRS = [
@@ -471,6 +560,7 @@ IMPORT_EXPORT_FORMATS = [
 ]
 IMPORT_EXPORT_IMPORT_FORMATS = IMPORT_EXPORT_FORMATS
 IMPORT_EXPORT_EXPORT_FORMATS = IMPORT_EXPORT_FORMATS
+IMPORT_EXPORT_ESCAPE_ILLEGAL_CHARS_ON_EXPORT = True
 
 GOOGLE_SERVICE_ACCOUNT_CREDENTIALS = {
     "type": "service_account",
@@ -558,22 +648,30 @@ JAZZMIN_UI_TWEAKS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": True,
+    "filters": {
+        "request_id": {"()": "log_request_id.filters.RequestIDFilter"},
+        "context": {"()": "peachjam.logging.LoggingContextFilter"},
+    },
     "handlers": {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "simple",
+            "filters": ["request_id", "context"],
         },
     },
     "formatters": {
         "simple": {
-            "format": "%(asctime)s %(levelname)s %(module)s %(process)d %(thread)d %(message)s",
+            "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s "
+            "%(frbr_uri)s %(process)d %(thread)d %(message)s",
             "datefmt": "%Y-%m-%d %H:%M:%S",
         }
     },
     "loggers": {
         "": {"handlers": ["console"], "level": "ERROR"},
         "django": {"level": "INFO"},
+        # 5xx is logged as ERROR, 4xx as WARNING which we don't need because nginx has better logs
+        "django.request": {"level": "ERROR"},
         "peachjam": {"level": "DEBUG" if DEBUG else "INFO"},
         "peachjam_search": {"level": "DEBUG" if DEBUG else "INFO"},
         "peachjam_api": {"level": "DEBUG" if DEBUG else "INFO"},
@@ -583,6 +681,21 @@ LOGGING = {
         "import_export": {"level": "DEBUG"},
     },
 }
+
+if not DEBUG:
+    # in production, use json logging
+    LOGGING["formatters"]["json"] = {
+        "()": "pythonjsonlogger.json.JsonFormatter",
+        "format": "%(asctime)s %(levelname)s %(name)s %(correlation_id)s %(task_name)s %(frbr_uri)s %(process)d "
+        "%(thread)d %(message)s",
+        "rename_fields": {
+            "asctime": "ts",
+            "levelname": "level",
+            "name": "logger",
+        },
+    }
+    LOGGING["handlers"]["console"]["formatter"] = "json"
+    LoggingContextFilter.empty = ""
 
 
 CKEDITOR_CONFIGS = {
@@ -684,11 +797,6 @@ X_FRAME_OPTIONS = "SAMEORIGIN"
 # Setup request id logging
 LOG_REQUEST_ID_HEADER = "HTTP_X_REQUEST_ID"
 REQUEST_ID_RESPONSE_HEADER = "X-Request-Id"
-LOGGING["filters"] = {"request_id": {"()": "log_request_id.filters.RequestIDFilter"}}
-LOGGING["formatters"]["simple"][
-    "format"
-] = "%(asctime)s %(levelname)s %(module)s %(request_id)s %(process)d %(thread)d %(message)s"
-LOGGING["handlers"]["console"]["filters"] = ["request_id"]
 
 
 # E-mail configuration
@@ -747,7 +855,8 @@ CORS_URLS_REGEX = r"^$"
 
 MESSAGE_TAGS = {
     messages.ERROR: "danger",
-    messages.SUCCESS: "info",
+    messages.SUCCESS: "primary",
+    messages.INFO: "primary",
 }
 
 

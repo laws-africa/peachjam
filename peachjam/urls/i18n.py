@@ -6,7 +6,8 @@ from peachjam.views import (
     AuthorDetailView,
     BookListView,
     HomePageView,
-    JournalListView,
+    JudgePersonDetailView,
+    JudgePersonListView,
     PlaceDetailView,
     PocketLawResources,
     TermsOfUsePageView,
@@ -25,15 +26,19 @@ urlpatterns = [
     path("causelists/", include("peachjam.urls.causelists")),
     path("doc/", include("peachjam.urls.generic_documents")),
     path("gazettes/", include("peachjam.urls.gazettes")),
-    path("journals/", JournalListView.as_view(), name="journal_list"),
+    path("journals/", include("peachjam.urls.journals")),
+    path("law-reports/", include("peachjam.urls.law_reports")),
     path("judgments/", include("peachjam.urls.judgments")),
     path("taxonomy/", include("peachjam.urls.taxonomies")),
     # detail views
     path("authors/<slug:code>/", AuthorDetailView.as_view(), name="author"),
+    path("judges/", JudgePersonListView.as_view(), name="judges"),
+    path("judges/<slug:slug>/", JudgePersonDetailView.as_view(), name="judge"),
     path("place/<str:code>", PlaceDetailView.as_view(), name="place"),
     # documents
     path("", include("peachjam.urls.legislation")),
     path("", include("peachjam.urls.documents")),
+    path("", include("peachjam.urls.chat")),
     # general
     path("about/", AboutPageView.as_view(), name="about"),
     path(

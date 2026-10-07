@@ -1,0 +1,14 @@
+{% load i18n %}
+{% if court_classes or other_courts %}
+  <div class="row g-4">
+    {% for court_class in court_classes %}
+      {% include "peachjam/_court_index_card.html" with title=court_class.name courts=court_class.courts.all only %}
+    {% endfor %}
+    {% if other_courts %}
+      {% trans "Other courts" as other_courts_title %}
+      {% include "peachjam/_court_index_card.html" with title=other_courts_title courts=other_courts only %}
+    {% endif %}
+  </div>
+{% else %}
+  <p>{% trans "No courts found." %}</p>
+{% endif %}

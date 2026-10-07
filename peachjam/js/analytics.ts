@@ -7,6 +7,7 @@ export interface AnalyticsProvider {
   trackPageLoad: () => void;
   trackPageView: () => void;
   trackEvent: (category: string, action: string, name?: string, value?: number) => void;
+  trackKeyLink: (link: string, href: string, page: string, feature: string) => void;
   trackSiteSearch: (keyword: string, category: string, searchCount: number) => void;
   identifyUser: (trackingId: string) => void;
 }
@@ -16,6 +17,7 @@ export class Analytics {
 
   start () {
     this.setupButtonEvents();
+    this.setupKeyLinkEvents();
     this.trackPageLoad();
   }
 
@@ -43,6 +45,12 @@ export class Analytics {
     }
   }
 
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+    for (const provider of this.providers) {
+      provider.trackKeyLink(link, href, page, feature);
+    }
+  }
+
   /**
    * Submit analytics events for clickable elements with data-track-event="Cat | Action | Name" attributes.
    */
@@ -59,6 +67,46 @@ export class Analytics {
           }
         }
       }
+    });
+  }
+
+  setupKeyLinkEvents () {
+    const page = document.body.dataset.keyLinkPage;
+    if (!page) return;
+
+    const trackElement = (element: HTMLElement) => {
+      if (!element.dataset.keyLink?.trim()) return;
+
+      const featureRoot = element.closest('[data-key-link-feature]');
+      let href = window.location.href;
+      if (element instanceof HTMLAnchorElement) {
+        href = element.href;
+      } else {
+        const form = element.closest('form');
+        if (form) {
+          const formTarget = form.getAttribute('hx-post') || form.getAttribute('action');
+          if (formTarget) href = new URL(formTarget, document.baseURI).href;
+        }
+      }
+      this.trackKeyLink(
+        element.dataset.keyLink.trim(),
+        href,
+        page,
+        featureRoot?.getAttribute('data-key-link-feature') || 'none'
+      );
+    };
+
+    document.addEventListener('click', (e) => {
+      if (!(e.target instanceof Element)) return;
+
+      const element = e.target.closest('[data-key-link]');
+      if (!(element instanceof HTMLElement) || element instanceof HTMLFormElement) return;
+      trackElement(element);
+    });
+
+    document.addEventListener('submit', (e) => {
+      if (!(e.target instanceof HTMLFormElement) || !e.target.matches('[data-key-link]')) return;
+      trackElement(e.target);
     });
   }
 
@@ -86,6 +134,11 @@ export class GA4 implements AnalyticsProvider {
     window.gtag('event', action, { event_category: category, event_name: name, value });
   }
 
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+    // @ts-ignore
+    window.gtag('event', 'key_link_clicked', { link, href, page, feature });
+  }
+
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
     // @ts-ignore
     window.gtag('event', 'site_search', { keyword, category, searchCount });
@@ -108,6 +161,12 @@ export class Matomo implements AnalyticsProvider {
   trackEvent (category: string, action: string, name?: string, value?: number) {
     // @ts-ignore
     window._paq.push(['trackEvent', category, action, name, value]);
+  }
+
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+    // Matomo associates the event with its source Event URL automatically.
+    // @ts-ignore
+    window._paq.push(['trackEvent', page, feature, link]);
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {
@@ -149,6 +208,10 @@ export class CustomerIO implements AnalyticsProvider {
   }
 
   trackEvent (category: string, action: string, name?: string, value?: number) {
+    if (category === 'Account' && action === 'Signup completed') {
+      // The server already sends the signed-up event to Customer.io.
+      return;
+    }
     const props = {
       ...this.pageProperties,
       ...this.commonProperties,
@@ -159,6 +222,19 @@ export class CustomerIO implements AnalyticsProvider {
     };
     // @ts-ignore
     window.cioanalytics.track(`${category} ${action}`, props);
+  }
+
+  trackKeyLink (link: string, href: string, page: string, feature: string) {
+    // Keep the key-link event flat and explicit so it is easy to query in Customer.io.
+    // @ts-ignore
+    window.cioanalytics.track('Key link clicked', {
+      ...this.pageProperties,
+      ...this.commonProperties,
+      link,
+      href,
+      page,
+      feature
+    });
   }
 
   trackSiteSearch (keyword: string, category: string, searchCount: number) {

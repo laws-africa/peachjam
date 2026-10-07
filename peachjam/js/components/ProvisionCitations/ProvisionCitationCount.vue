@@ -4,8 +4,8 @@
       <span class="align-middle text-muted me-1 fs-5"><i class="bi bi-quote" /></span>
       <span class="badge rounded-pill bg-secondary">{{ citations }}</span>
       <span class="gutter-item-link ms-2 border p-2 rounded bg-white d-inline-flex justify-content-around">
-        <a :href="`${expressionFrbrUri}/provision/${provision_eid}`">
-          {{ $t('Cited {count} times', {count: citations}) }}
+        <a :href="`${expressionFrbrUri}/provision/${provision_eid}/citations`">
+          {{ $t('Cited {count} time', {count: citations}) }}
         </a>
        <button
           type="button"

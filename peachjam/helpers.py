@@ -168,3 +168,7 @@ def html_to_png(html_str, clip):
 
             subprocess.run(cmd, check=True)
             return outf.read()
+
+
+def current_year():
+    return date.today().year

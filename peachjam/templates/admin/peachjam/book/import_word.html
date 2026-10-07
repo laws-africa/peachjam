@@ -1,0 +1,167 @@
+{% extends "admin/base_site.html" %}
+{% load admin_urls i18n %}
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    .heading-diff table.diff {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .heading-diff table.diff td,
+    .heading-diff table.diff th {
+      border: 1px solid #dee2e6;
+      padding: 0.25rem 0.4rem;
+      vertical-align: top;
+    }
+
+    .heading-diff .diff_header {
+      background: #f8f9fa;
+      color: #495057;
+      text-align: right;
+      width: 1%;
+    }
+
+    .heading-diff .diff_next {
+      display: none;
+    }
+
+    .heading-diff .diff_add {
+      background: #a6f3a6;
+    }
+
+    .heading-diff .diff_chg {
+      background: #fff3cd;
+    }
+
+    .heading-diff .diff_sub {
+      background: #f8cbcb;
+    }
+
+    .heading-diff td[nowrap] {
+      white-space: normal;
+    }
+  </style>
+{% endblock %}
+{% block breadcrumbs %}
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:index' %}">{% trans "Home" %}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:peachjam_book_changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a href="{% url 'admin:peachjam_book_change' original.pk|admin_urlquote %}">{{ original }}</a>
+    </li>
+    <li class="breadcrumb-item active">{% trans "Import Word version" %}</li>
+  </ol>
+{% endblock %}
+{% block content %}
+  <div id="content-main" class="col-12">
+    <h1>{% trans "Import Word version" %}</h1>
+    <p>
+      {% blocktrans trimmed with title=original.title %}
+        Upload a clean DOCX file to replace the markdown source for "{{ title }}".
+      {% endblocktrans %}
+    </p>
+    <form id="book-word-upload-form"
+          method="post"
+          enctype="multipart/form-data"
+          class="mb-4">
+      {% csrf_token %}
+      {{ upload_form.non_field_errors }}
+      <div class="form-group">
+        {{ upload_form.word_file.label_tag }}
+        {{ upload_form.word_file }}
+        {{ upload_form.word_file.errors }}
+      </div>
+      <button type="submit" class="btn btn-primary">{% trans "Preview import" %}</button>
+      <a class="btn btn-secondary"
+         href="{% url 'admin:peachjam_book_change' original.pk|admin_urlquote %}">
+        {% trans "Cancel" %}
+      </a>
+    </form>
+    {% if preview_markdown %}
+      <h2>{% trans "Preview" %}</h2>
+      {% if preview_errors %}
+        <div class="alert alert-danger">
+          <ul class="mb-0">
+            {% for error in preview_errors %}<li>{{ error }}</li>{% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+      <table class="table table-sm table-bordered">
+        <thead>
+          <tr>
+            <th>{% trans "Metric" %}</th>
+            <th>{% trans "Current" %}</th>
+            <th>{% trans "Imported" %}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th>{% trans "Characters" %}</th>
+            <td>{{ old_analysis.character_count }}</td>
+            <td>{{ new_analysis.character_count }}</td>
+          </tr>
+          <tr>
+            <th>{% trans "Headings" %}</th>
+            <td>{{ old_analysis.heading_count }}</td>
+            <td>{{ new_analysis.heading_count }}</td>
+          </tr>
+          <tr>
+            <th>{% trans "Law widgets" %}</th>
+            <td>{{ old_analysis.law_widget_count }}</td>
+            <td>{{ new_analysis.law_widget_count }}</td>
+          </tr>
+          <tr>
+            <th>{% trans "Unrestored widget markers" %}</th>
+            <td>{{ old_analysis.protected_law_widget_count }}</td>
+            <td>{{ new_analysis.protected_law_widget_count }}</td>
+          </tr>
+          <tr>
+            <th>{% trans "Images" %}</th>
+            <td>
+              {{ old_analysis.image_count }}
+            </td>
+            <td>
+              {{ new_analysis.image_count }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>
+        {% trans "Heading changes" %}
+      </h3>
+      {% if heading_diff_html %}
+        <div class="heading-diff">
+          {{ heading_diff_html|safe }}
+        </div>
+      {% else %}
+        <p>
+          {% trans "No heading changes detected." %}
+        </p>
+      {% endif %}
+      <div class="form-group">
+        <label for="book-word-preview">
+          {% trans "Imported markdown" %}
+        </label>
+        <textarea id="book-word-preview" class="form-control" rows="20" readonly>{{ preview_markdown }}</textarea>
+      </div>
+      {% if not preview_errors %}
+        <form id="book-word-confirm-form" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="confirm" value="1" />
+          {{ confirm_form.content_markdown }}
+          <button type="submit" class="btn btn-primary">
+            {% trans "Confirm import" %}
+          </button>
+        </form>
+      {% endif %}
+    {% endif %}
+  </div>
+{% endblock %}

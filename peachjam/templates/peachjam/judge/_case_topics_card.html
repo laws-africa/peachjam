@@ -1,0 +1,35 @@
+{% load i18n humanize %}
+<section class="card shadow-sm flex-grow-1"
+         aria-labelledby="judge-topics-heading">
+  <div class="card-body d-flex flex-column">
+    <h2 class="h4" id="judge-topics-heading">{% trans "Judgment topics" %}</h2>
+    {% if judge_case_topics %}
+      <div class="judge-horizontal-chart__scroll judge-horizontal-chart__scroll--topics flex-grow-1 pe-2"
+           role="region"
+           aria-labelledby="judge-topics-heading">
+        <ul class="list-group list-group-flush">
+          {% for row in judge_case_topics %}
+            <li class="list-group-item border-0 px-0 py-3">
+              <div class="judge-horizontal-chart__row">
+                <div class="judge-horizontal-chart__label">
+                  <a href="{{ request.path }}?topics={{ row.id }}#judge-judgments-heading">{{ row.name }}</a>
+                </div>
+                <div class="judge-horizontal-chart__plot">
+                  <a class="judge-horizontal-chart__bar"
+                     href="{{ request.path }}?topics={{ row.id }}#judge-judgments-heading"
+                     style="width: {% widthratio row.judgment_count judge_case_topic_max 100 %}%"
+                     aria-label="{% blocktrans count count=row.judgment_count with topic=row.name %}{{ count }} judgment for {{ topic }}{% plural %}{{ count }} judgments for {{ topic }}{% endblocktrans %}">
+                    <span class="visually-hidden">{{ row.name }}: {{ row.judgment_count|intcomma }}</span>
+                  </a>
+                  <span class="judge-horizontal-chart__value">{{ row.judgment_count|intcomma }}</span>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% else %}
+      <p class="text-muted mb-0">{% trans "No judgment topics are available." %}</p>
+    {% endif %}
+  </div>
+</section>

@@ -7,7 +7,6 @@ import peachjam.models.partner
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0175_peachjamsettings_google_search_engine_id"),
     ]

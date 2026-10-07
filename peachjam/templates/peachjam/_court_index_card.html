@@ -1,0 +1,20 @@
+{% load i18n %}
+<section class="col-md-6 col-xl-4">
+  <div class="card h-100">
+    <div class="card-header d-flex justify-content-between align-items-baseline">
+      <h2 class="h4 mb-0">{{ title }}</h2>
+      <span class="text-muted small">
+        {% blocktrans count count=courts|length %}{{ count }} court{% plural %}{{ count }} courts{% endblocktrans %}
+      </span>
+    </div>
+    <div class="card-body">
+      <ul class="list-unstyled mb-0">
+        {% for court in courts %}
+          <li class="mb-2">
+            <a href="{{ court.get_absolute_url }}" data-key-link="court">{{ court.name }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</section>

@@ -1,23 +1,16 @@
 {% load i18n %}
 <form method="get"
-      id="filter-form"
+      id="{{ doc_table_form_id }}"
       data-component="DocumentFilterForm"
-      hx-include="#filter-form"
+      hx-include="#{{ doc_table_form_id }}"
       hx-indicator=".htmx-progress"
-      hx-target="#filter-form"
+      hx-target="#{{ doc_table_form_id }}"
       hx-swap="outerHTML">
-  <div class="d-block d-md-none my-2">
-    <a class="btn btn-primary"
-       href="#document-list-filters-offcanvas"
-       data-bs-toggle="offcanvas"
-       aria-controls="document-list-filters-offcanvas">
-      {% trans 'Filters' %}
-    </a>
-  </div>
   <div class="offcanvas offcanvas-start"
        tabindex="-1"
-       id="document-list-filters-offcanvas"
-       aria-labelledby="document-list-filters-offcanvas-title">
+       id="{{ doc_table_offcanvas_id }}"
+       data-document-table-offcanvas
+       aria-labelledby="{{ doc_table_form_id }}-filters-heading">
     <div class="offcanvas-header">
       <button type="button"
               class="btn-close ms-auto"
@@ -27,115 +20,83 @@
     <div class="offcanvas-body"></div>
   </div>
   <div class="row">
-    <div class="col-lg-3 d-none d-lg-block document-list-facets-wrapper {% if not taxonomy_tree or is_leaf_node %}pocketlaw-hidden{% endif %}">
+    <section id="{{ doc_table_form_id }}-filters-section"
+             class="col-lg-3 d-none d-lg-block document-list-facets-wrapper {% if not taxonomy_tree or is_leaf_node %}pocketlaw-hidden{% endif %}"
+             aria-labelledby="{{ doc_table_form_id }}-filters-heading"
+             tabindex="-1">
       <div class="document-list-facets">
+        <a class="visually-hidden-focusable d-inline-block mb-2"
+           href="#{{ doc_table_id }}"
+           data-skip-link
+           data-close-offcanvas>{% trans 'Skip to results' %}</a>
         {% if taxonomy_tree|length > 0 and not is_leaf_node %}
           {% include "peachjam/_taxonomy_tree_facet.html" %}
         {% endif %}
         <ul class="list-group {% if taxonomy_tree|length > 0 and not is_leaf_node %}pocketlaw-hidden{% endif %}">
           <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
-            <strong id="document-list-filters-offcanvas-title">{% trans 'Filters' %}</strong>
+            <h2 id="{{ doc_table_form_id }}-filters-heading"
+                class="h6 mb-0 skip-link-target">{% trans 'Filters' %}</h2>
             {% if show_clear_all %}
               <div class="d-flex align-items-center">
                 <a href="{{ request.path }}"
                    data-track-event="Listing | Clear filter | all"
                    hx-get="{{ request.path }}"
                    hx-params="none"
-                   hx-push-url="true">{% trans 'Clear all' %}</a>
+                   {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>{% trans 'Clear all' %}</a>
               </div>
             {% endif %}
           </li>
-          {% for facet_name, facet in facet_data.items %}
-            {% if facet.options %}
-              <li class="list-group-item">
-                <div class="d-flex justify-content-between mb-2">
-                  <strong>{{ facet.label }}</strong>
-                  {% if facet.values %}
-                    <div class="d-flex align-items-center">
-                      <a href="{{ request.path }}"
-                         data-track-event="Listing | Clear filter | {{ facet_name }}"
-                         hx-get="{{ request.path }}"
-                         hx-params="not {{ facet_name }}"
-                         hx-push-url="true">{% trans 'Clear' %}</a>
-                    </div>
-                  {% endif %}
-                </div>
-                {% if facet_name == "alphabet" %}
-                  <div>
-                    <div class="letter-radiobox-container">
-                      {% for value, label in facet.options %}
-                        <label class="letter-radiobox" for="{{ facet_name }}_{{ forloop.counter0 }}">
-                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                                 name="{{ facet_name }}"
-                                 type="{{ facet.type }}"
-                                 hx-get="{{ request.path }}"
-                                 hx-push-url="true"
-                                 {% if value == facet.values %}checked{% endif %}
-                                 hx-include="#filter-form"
-                                 value="{{ value }}"/>
-                          <span class="letter-radiobox__text"
-                                data-track-event="Listing | Filter | Alphabet">{{ label }}</span>
-                        </label>
-                      {% endfor %}
-                    </div>
-                  </div>
-                {% else %}
-                  <div class="facets-scrollable">
-                    {% for value, label in facet.options %}
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div class="form-check flex-grow-1"
-                             data-track-event="Listing | Filter | {{ facet_name }}">
-                          <input id="{{ facet_name }}_{{ forloop.counter0 }}"
-                                 class="form-check-input"
-                                 name="{{ facet_name }}"
-                                 type="{{ facet.type }}"
-                                 hx-get="{{ request.path }}"
-                                 hx-push-url="true"
-                                 {% if value in facet.values %}checked{% endif %}
-                                 hx-include="#filter-form"
-                                 value="{{ value }}"/>
-                          <label class="form-check-label"
-                                 for="{{ facet_name }}_{{ forloop.counter0 }}">{{ label }}</label>
-                        </div>
-                      </div>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              </li>
-            {% endif %}
-          {% endfor %}
+          <li class="list-group-item d-lg-none" data-mobile-filter-controls></li>
+          {% include "peachjam/_facet_groups.html" with filter_form_id=doc_table_form_id disable_push_url=doc_table_disable_push_url %}
         </ul>
       </div>
-    </div>
+    </section>
     <div class="col">
       <div class="position-relative">
         {% block content %}
           {% block filter-documents %}
             <div class="mb-2 d-flex pocketlaw-hidden"
-                 hx-target="#doc-table"
-                 hx-push-url="true">
-              <div class="flex-grow-1 me-2">
-                <input id="filter-input"
+                 hx-target="#{{ doc_table_id }}"
+                 {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
+              <div class="flex-grow-1">
+                <label class="form-label d-none d-lg-block"
+                       for="{{ doc_table_filter_input_id }}">
+                  {% trans "Filter documents by title" %}
+                </label>
+                <input id="{{ doc_table_filter_input_id }}"
+                       aria-label="{% trans "Filter documents by title" %}"
                        hx-get="{{ request.path }}"
                        hx-trigger="keyup changed delay:300ms"
                        hx-sync="this:replace"
-                       aria-label="{% trans "Filter documents" %}"
-                       placeholder="{% trans "Filter documents" %}"
+                       placeholder="{% trans "Filter documents by title" %}"
                        class="form-control"
                        type="text"
                        value="{{ form.q.value|default_if_none:'' }}"
                        name="q"/>
               </div>
-              <div class="d-flex align-items-center">
-                <div class="d-none d-md-block ms-3 me-2 text-nowrap">{% trans "Sort by" %}:</div>
-                <select class="form-control" hx-get="{{ request.path }}" name="sort">
-                  {% for opt in form.sort %}{{ opt }}{% endfor %}
-                </select>
+              {% include "peachjam/_document_filter_button.html" with button_classes="ms-2" %}
+              <div class="d-none d-lg-block ms-2" data-desktop-filter-controls>
+                {% with doc_table_sort_select_id=doc_table_form_id|add:"-sort" %}
+                  <div class="document-list-sort d-flex align-items-center d-lg-block w-100"
+                       hx-target="#{{ doc_table_id }}"
+                       {% if not doc_table_disable_push_url %}hx-push-url="true"{% endif %}>
+                    <label class="form-label mb-0 mb-lg-2 me-2 me-lg-0 text-nowrap"
+                           for="{{ doc_table_sort_select_id }}">
+                      {% trans "Sort documents by" %}
+                    </label>
+                    <select id="{{ doc_table_sort_select_id }}"
+                            class="form-select ms-auto"
+                            hx-get="{{ request.path }}"
+                            name="sort">
+                      {% for opt in form.sort %}{{ opt }}{% endfor %}
+                    </select>
+                  </div>
+                {% endwith %}
               </div>
-              <div class="d-none d-md-block ms-2">
+              <div class="d-none d-lg-block ms-2 align-self-lg-end">
                 <button class="btn btn-primary"
                         hx-get="{{ request.path }}"
-                        hx-sync="#filter-input:replace"
+                        hx-sync="#{{ doc_table_filter_input_id }}:replace"
                         type="submit">
                   {% trans "Filter" %}
                 </button>

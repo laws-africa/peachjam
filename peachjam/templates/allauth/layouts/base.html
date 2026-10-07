@@ -14,14 +14,17 @@
     {% endblock %}
     <h1 class="mt-3 mb-4">{{ APP_NAME }}</h1>
   </div>
-  <div class="card allauth-box">
-    <div class="card-body m-3">
-      {% block content %}{% endblock %}
-    </div>
-    {% if SUPPORT_EMAIL %}
-      <div class="card-footer">
-        {% trans 'Need help? Please email' %} <a href="mailto:{{ SUPPORT_EMAIL }}">{{ SUPPORT_EMAIL }}</a>.
+  <div class="card mb-2">
+    <div class="card-body my-3 d-flex justify-content-center">
+      <div class="allauth-box">
+        {% block content %}{% endblock %}
       </div>
+    </div>
+  </div>
+  <div class="text-end">
+    {% if SUPPORT_EMAIL %}
+      <a class="me-3" href="mailto:{{ SUPPORT_EMAIL }}">{% trans "Contact us" %}</a>
     {% endif %}
+    <a href="{{ PEACHJAM_SETTINGS.user_help_link }}">{% trans 'Help' %}</a>
   </div>
 {% endblock %}

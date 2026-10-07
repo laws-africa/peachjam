@@ -1,17 +1,22 @@
 import logging
+from uuid import uuid4
 
 import sentry_sdk
 from background_task import background
 from background_task.signals import task_error
-from background_task.tasks import DBTaskRunner, Task, logger, tasks
+from background_task.tasks import DBTaskRunner, Task, TaskSchedule, logger, tasks
+from django.conf import settings
 from django.db import transaction
 from django.db.utils import OperationalError
 from django.dispatch import receiver
-from sentry_sdk.tracing import TRANSACTION_SOURCE_TASK
+from sentry_sdk.tracing import TransactionSource
 
+from peachjam.logging import clear_log_context, log_context
 from peachjam.models import CoreDocument, Work, citations_processor
 
 log = logging.getLogger(__name__)
+
+FLYNOTE_REFRESH_DELAY = 12 * 60 * 60
 
 
 class PatchedDBTaskRunner(DBTaskRunner):
@@ -35,16 +40,37 @@ class PatchedDBTaskRunner(DBTaskRunner):
             logger.warning("Failed to retrieve tasks. Database unreachable.")
 
     def run_task(self, tasks, task):
-        # wrap the task in a sentry transaction
-        with sentry_sdk.start_transaction(
-            op="queue.task", source=TRANSACTION_SOURCE_TASK, name=task.task_name
-        ) as tx:
-            tx.set_status("ok")
-            super().run_task(tasks, task)
+        clear_log_context()
+        try:
+            # wrap the task in a sentry transaction
+            with sentry_sdk.start_transaction(
+                op="queue.task", source=TransactionSource.TASK, name=task.task_name
+            ) as tx:
+                tx.set_status("ok")
+                with log_context(
+                    task_run_id=task_run_id(task), task_name=task.task_name
+                ):
+                    super().run_task(tasks, task)
+        finally:
+            clear_log_context()
 
 
 # use the patched runner
 tasks._runner = PatchedDBTaskRunner()
+
+
+def _task_str(self):
+    return f"Task<#{self.pk} {self.task_name} params={self.task_params}>"
+
+
+# override Task.__str__ so it's more description
+Task.__str__ = _task_str
+
+
+# this is a logging fingerprint for a task run
+def task_run_id(task):
+    nonce = uuid4().hex[:6]
+    return f"task:{settings.PEACHJAM['APP_NAME'].lower()}:{task.pk}:{task.task_name}:{nonce}"
 
 
 @receiver(task_error)
@@ -56,6 +82,28 @@ def on_task_error(*args, **kwargs):
     # now mark the current transaction as handled, otherwise it'll be reported twice
     if hub.scope and hub.scope.transaction:
         hub.scope.transaction.timestamp = -1
+
+
+@background(
+    queue="peachjam",
+    remove_existing_tasks=True,
+    schedule={"priority": -1, "run_at": 30},
+)
+@transaction.atomic
+def serialise_judgment_flynote_tree(judgment_id):
+    from peachjam.models import Judgment
+
+    judgment = Judgment.objects.filter(pk=judgment_id).first()
+    if not judgment:
+        log.info("No judgment with id %s exists, ignoring.", judgment_id)
+        return
+
+    with log_context(frbr_uri=judgment.expression_frbr_uri):
+        log.info("Serialising flynote tree for judgment %s", judgment_id)
+        # NB: we deliberately do not track changes to prevent circular updates when flynote_raw changes
+        judgment.serialise_flynote_tree()
+        judgment.save(update_fields=["flynote", "flynote_raw"])
+        log.info("Done serialising flynote tree for judgment %s", judgment_id)
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -87,24 +135,27 @@ def update_document(ingestor_id, document_id):
 def delete_document(ingestor_id, expression_frbr_uri):
     from peachjam.models import Ingestor
 
-    ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
+    with log_context(frbr_uri=expression_frbr_uri):
+        ingestor = Ingestor.objects.filter(pk=ingestor_id).first()
 
-    if not ingestor:
-        log.info(f"No ingestor with id {ingestor_id} ")
-        return
-    if ingestor.enabled:
-        log.info(f"Deleting document {expression_frbr_uri} with ingestor {ingestor}")
+        if not ingestor:
+            log.info(f"No ingestor with id {ingestor_id} ")
+            return
+        if ingestor.enabled:
+            log.info(
+                f"Deleting document {expression_frbr_uri} with ingestor {ingestor}"
+            )
 
-        try:
-            ingestor.delete_document(expression_frbr_uri)
-        except Exception as e:
-            log.error("Error deleting document", exc_info=e)
-            raise
+            try:
+                ingestor.delete_document(expression_frbr_uri)
+            except Exception as e:
+                log.error("Error deleting document", exc_info=e)
+                raise
 
-        log.info("Document deleted")
-        return
+            log.info("Document deleted")
+            return
 
-    log.info("Ingestor is disabled, ignoring.")
+        log.info("Ingestor is disabled, ignoring.")
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -140,17 +191,16 @@ def extract_citations(document_id):
         log.info(f"No document with id {document_id} exists, ignoring.")
         return
 
-    try:
-        if doc.extract_citations():
-            doc.save()
+    with log_context(frbr_uri=doc.expression_frbr_uri):
+        try:
+            if doc.extract_citations():
+                if doc.is_most_recent():
+                    doc.extract_provision_citations()
+        except Exception as e:
+            log.error(f"Error extracting citations for {doc}", exc_info=e)
+            raise
 
-            if doc.is_most_recent():
-                doc.extract_provision_citations()
-    except Exception as e:
-        log.error(f"Error extracting citations for {doc}", exc_info=e)
-        raise
-
-    log.info("Citations extracted")
+        log.info("Citations extracted")
 
 
 @background(queue="peachjam", schedule=60, remove_existing_tasks=True)
@@ -163,15 +213,16 @@ def update_extracted_citations_for_a_work(work_id):
         log.info(f"No work with id {work_id} exists, ignoring.")
         return
 
-    log.info(f"Updating extracted citations for work {work_id}")
+    with log_context(frbr_uri=work.frbr_uri):
+        log.info(f"Updating extracted citations for work {work_id}")
 
-    try:
-        work.update_extracted_citations()
-        log.info(f"Citations for work {work_id} updated")
+        try:
+            work.update_extracted_citations()
+            log.info(f"Citations for work {work_id} updated")
 
-    except Exception as e:
-        log.error(f"Error updating citations for {work_id}", exc_info=e)
-        raise e
+        except Exception as e:
+            log.error(f"Error updating citations for {work_id}", exc_info=e)
+            raise e
 
 
 @background(queue="peachjam", schedule=60 * 60, remove_existing_tasks=True)
@@ -191,16 +242,19 @@ def convert_source_file_to_pdf(source_file_id):
         log.info(f"No source file with id {source_file_id} exists, ignoring.")
         return
 
-    log.info(f"Converting source file {source_file_id} to PDF")
+    with log_context(frbr_uri=source_file.document.expression_frbr_uri):
+        log.info(f"Converting source file {source_file_id} to PDF")
 
-    try:
-        source_file.convert_to_pdf()
+        try:
+            source_file.convert_to_pdf()
 
-    except Exception as e:
-        log.error(f"Error converting source file {source_file_id} to PDF", exc_info=e)
-        raise e
+        except Exception as e:
+            log.error(
+                f"Error converting source file {source_file_id} to PDF", exc_info=e
+            )
+            raise e
 
-    log.info("Conversion to PDF done")
+        log.info("Conversion to PDF done")
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -213,8 +267,10 @@ def create_anonymised_source_file_pdf(doc_id):
     if not doc:
         logger.warning("Judgment not found")
         return
-    doc.create_anonymised_source_file_pdf()
-    logger.info("Done")
+
+    with log_context(frbr_uri=doc.expression_frbr_uri):
+        doc.create_anonymised_source_file_pdf()
+        logger.info("Done")
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -274,7 +330,7 @@ def send_timeline_email_alerts():
 
 @background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
 @transaction.atomic
-def send_new_document_email_alert(user_id):
+def send_timeline_digest_email_alert(user_id):
     from django.contrib.auth import get_user_model
 
     from peachjam.timeline_email_service import TimelineEmailService
@@ -284,45 +340,18 @@ def send_new_document_email_alert(user_id):
         log.info(f"No user with id {user_id} exists, ignoring.")
         return
 
-    log.info(f"Sending new document email alerts for user {user_id}")
-    TimelineEmailService.send_new_documents_email(user)
-    log.info("New document email alerts sent")
+    log.info(f"Sending timeline email alert for user {user_id}")
+    if TimelineEmailService.send_email_alert(user):
+        log.info("Timeline email alert sent")
+    else:
+        log.info("Timeline email alert was not sent")
 
 
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
-@transaction.atomic
-def send_saved_search_email_alert(user_id):
-    from django.contrib.auth import get_user_model
-
-    from peachjam.timeline_email_service import TimelineEmailService
-
-    user = get_user_model().objects.filter(pk=user_id).first()
-    if not user:
-        log.info(f"No user with id {user_id} exists, ignoring.")
-        return
-
-    log.info(f"Sending saved search email alerts for user {user_id}")
-    TimelineEmailService.send_saved_search_email(user)
-    log.info("Saved search email alerts sent")
-
-
-@background(queue="peachjam", remove_existing_tasks=True, schedule={"priority": -1})
-@transaction.atomic
-def send_new_citation_email_alert(user_id):
-    from django.contrib.auth import get_user_model
-
-    from peachjam.timeline_email_service import TimelineEmailService
-
-    user = get_user_model().objects.filter(pk=user_id).first()
-    if not user:
-        log.info(f"No user with id {user_id} exists, ignoring.")
-        return
-    log.info(f"Sending new citation email alerts for user {user_id}")
-    TimelineEmailService.send_new_citation_email(user)
-    log.info("New citation email alerts sent")
-
-
-@background(queue="peachjam", schedule=5 * 60, remove_existing_tasks=True)
+@background(
+    queue="peachjam",
+    remove_existing_tasks=True,
+    schedule={"run_at": 5 * 60, "priority": -1},
+)
 @transaction.atomic
 def generate_judgment_summary(doc_id):
     from peachjam.models import Judgment
@@ -331,9 +360,11 @@ def generate_judgment_summary(doc_id):
     if not doc:
         log.info(f"No judgment with id {doc_id} exists, ignoring.")
         return
-    log.info(f"Summarizing judgment {doc_id}")
-    doc.track_changes()
-    doc.generate_summary()
+
+    with log_context(frbr_uri=doc.expression_frbr_uri):
+        log.info(f"Summarizing judgment {doc_id}")
+        doc.track_changes()
+        doc.generate_summary()
 
 
 @background(queue="peachjam", remove_existing_tasks=True)
@@ -347,3 +378,60 @@ def update_users_new_citation(citation_id):
         return
     log.info(f"Updating users for new citation {citation_id}")
     UserFollowing.update_new_citation_follows(citation)
+
+
+@background(
+    queue="peachjam",
+    remove_existing_tasks=True,
+    schedule={"priority": -1, "run_at": 30},
+)
+@transaction.atomic
+def update_flynote_taxonomy(judgment_id):
+    from peachjam.analysis.flynotes import FlynoteUpdater
+    from peachjam.models import Judgment
+
+    judgment = Judgment.objects.filter(pk=judgment_id).first()
+    if not judgment:
+        log.info(f"No judgment with id {judgment_id} exists, ignoring.")
+        return
+
+    with log_context(frbr_uri=judgment.expression_frbr_uri):
+        log.info(f"Updating flynotes for judgment {judgment_id}")
+        affected_root_ids = FlynoteUpdater().update_for_judgment(judgment)
+        for root_id in affected_root_ids:
+            refresh_flynote_document_count(
+                root_id,
+            )
+
+
+@background(
+    queue="peachjam",
+    schedule={
+        "priority": -1,
+        "run_at": FLYNOTE_REFRESH_DELAY,
+        "action": TaskSchedule.CHECK_EXISTING,
+    },
+)
+def refresh_flynote_document_count(root_id):
+    from peachjam.models.flynote import Flynote, FlynoteDocumentCount
+
+    root = Flynote.get_root_nodes().filter(pk=root_id).first()
+    if not root:
+        log.info("No flynote root with id %s exists, ignoring.", root_id)
+        return
+
+    log.info("Refreshing flynote counts for root %s", root.pk)
+    FlynoteDocumentCount.refresh_for_flynote(root)
+
+
+@background(queue="peachjam", remove_existing_tasks=True)
+def update_users_new_relationship(relationship_id):
+    # update users when a new relationship is created: amendment, repeal, commencement.
+    from peachjam.models import Relationship, UserFollowing
+
+    relationship = Relationship.objects.filter(id=relationship_id).first()
+    if not relationship:
+        log.info(f"No relationship with id {relationship_id} exists, ignoring.")
+        return
+    log.info(f"Updating users for new citation {relationship_id}")
+    UserFollowing.update_new_relationship_follows(relationship)

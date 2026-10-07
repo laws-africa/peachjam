@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.generic.base import TemplateView
 from django.views.generic.edit import DeleteView
 
@@ -31,10 +32,20 @@ class CancelSubscriptionView(AtomicPostMixin, LoginRequiredMixin, DeleteView):
         return redirect(self.get_success_url())
 
 
+class CheckSubscriptionView(LoginRequiredMixin, View):
+    """Check that the user has a subscription. In the vanilla peachjam_subs case, if a user has an account they
+    have a subscription. Just redirect to the next url (or the homepage).
+    """
+
+    def get(self, request, *args, **kwargs):
+        next_url = request.GET.get("next") or "home_page"
+        return redirect(next_url)
+
+
 class SubscribeView(TemplateView):
     template_name = "peachjam_subs/subscribe.html"
 
     def get(self, request, *args, **kwargs):
-        if not pj_settings().allow_signups:
+        if not pj_settings().accounts_enabled:
             return redirect("home_page")
         return super().get(request, *args, **kwargs)

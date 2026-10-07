@@ -14,7 +14,6 @@ def backfill_default_document_jurisdiction(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0102_change_judgment_admin_labels"),
     ]

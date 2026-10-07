@@ -5,10 +5,29 @@ export default class DocumentFilterForm {
   constructor (root: HTMLElement) {
     this.root = root;
 
+    // ensure the bootstrap offcanvas element is closed before htmx swaps the content, otherwise it can end up in a
+    // broken state
+    this.root.addEventListener('htmx:beforeSwap', (event) => this.prepareForSwap(event));
+
     // setup a resize observer to move the filters when the window is resized
     const observer = new ResizeObserver(() => this.moveFilters());
     observer.observe(this.root);
     this.moveFilters();
+    this.setupFacetSearch();
+    this.setupSkipLinks();
+  }
+
+  prepareForSwap (event: Event) {
+    this.cleanupOffcanvas();
+    if (!(event as CustomEvent).detail.shouldSwap) {
+      return;
+    }
+
+    // outerHTML inserts the new form before removing this one, so ensure the
+    // outgoing radio group cannot override the new state.
+    this.root.querySelectorAll<HTMLInputElement>('input[type="radio"]:checked').forEach((radio) => {
+      radio.checked = false;
+    });
   }
 
   moveFilters () {
@@ -24,8 +43,13 @@ export default class DocumentFilterForm {
     if (!this.offCanvasUsed) {
       const offcanvas = this.root.querySelector('.offcanvas-body');
       const content = this.root.querySelector('.document-list-facets');
+      const mobileFilterControls = this.root.querySelector('[data-mobile-filter-controls]');
+      const sort = this.root.querySelector('.document-list-sort');
       if (offcanvas && content) {
         requestAnimationFrame(() => {
+          if (mobileFilterControls && sort) {
+            mobileFilterControls.appendChild(sort);
+          }
           offcanvas.appendChild(content);
           this.offCanvasUsed = true;
         });
@@ -37,12 +61,86 @@ export default class DocumentFilterForm {
     if (this.offCanvasUsed) {
       const wrapper = this.root.querySelector('.document-list-facets-wrapper');
       const content = this.root.querySelector('.document-list-facets');
+      const desktopFilterControls = this.root.querySelector('[data-desktop-filter-controls]');
+      const sort = this.root.querySelector('.document-list-sort');
       if (wrapper && content) {
         requestAnimationFrame(() => {
           wrapper.appendChild(content);
+          if (desktopFilterControls && sort) {
+            desktopFilterControls.appendChild(sort);
+          }
           this.offCanvasUsed = false;
         });
       }
     }
+  }
+
+  cleanupOffcanvas () {
+    const offcanvasElement = this.root.querySelector('[data-document-table-offcanvas]') as HTMLElement | null;
+    if (!offcanvasElement) {
+      return;
+    }
+
+    const offcanvas = window.bootstrap?.Offcanvas?.getInstance(offcanvasElement);
+    offcanvas?.hide();
+  }
+
+  setupFacetSearch () {
+    this.root.querySelectorAll('[data-facet-search]').forEach((facet) => {
+      const facetEl = facet as HTMLElement;
+      const input = facetEl.querySelector('[data-facet-search-input]') as HTMLInputElement | null;
+      if (!input) {
+        return;
+      }
+
+      const filterOptions = () => {
+        this.filterFacetOptions(facetEl, input.value);
+      };
+
+      input.addEventListener('input', filterOptions);
+      filterOptions();
+    });
+  }
+
+  filterFacetOptions (facet: HTMLElement, term: string) {
+    const searchTerm = term.trim().toLowerCase();
+    facet.querySelectorAll('[data-facet-option]').forEach((option) => {
+      const optionEl = option as HTMLElement;
+      const labelText = optionEl.querySelector('[data-facet-option-label]')?.textContent?.toLowerCase() || '';
+      const isVisible = !searchTerm || labelText.includes(searchTerm);
+
+      optionEl.classList.toggle('d-none', !isVisible);
+      optionEl.hidden = !isVisible;
+      optionEl.setAttribute('aria-hidden', String(!isVisible));
+    });
+  }
+
+  setupSkipLinks () {
+    this.root.querySelectorAll('[data-skip-link]').forEach((link) => {
+      link.addEventListener('click', (event: Event) => {
+        const currentTarget = event.currentTarget as HTMLAnchorElement | null;
+        const href = currentTarget?.getAttribute('href') || '';
+        if (!href.startsWith('#')) {
+          return;
+        }
+
+        const target = document.querySelector(href) as HTMLElement | null;
+        if (!target) {
+          return;
+        }
+
+        event.preventDefault();
+        if (currentTarget?.hasAttribute('data-close-offcanvas')) {
+          this.cleanupOffcanvas();
+        }
+        window.history.replaceState(null, '', href);
+        requestAnimationFrame(() => this.focusTarget(target));
+      });
+    });
+  }
+
+  focusTarget (target: HTMLElement) {
+    target.focus({ preventScroll: true });
+    target.scrollIntoView({ block: 'start' });
   }
 }

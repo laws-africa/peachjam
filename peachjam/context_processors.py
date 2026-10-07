@@ -2,6 +2,7 @@ from django.conf import settings
 from django.templatetags.static import static
 
 from peachjam.models.settings import pj_settings
+from peachjam_subs.organisations import organisations_enabled
 
 
 def general(request):
@@ -10,35 +11,48 @@ def general(request):
     """
     # get current language
     language = getattr(request, "LANGUAGE_CODE", settings.LANGUAGE_CODE)
+    pj = pj_settings()
+    resolver_match = request.resolver_match
+    key_link_page = (
+        resolver_match.view_name.replace(":", "_") if resolver_match else None
+    )
 
     return {
         "DEBUG": settings.DEBUG,
         "APP_NAME": settings.PEACHJAM["APP_NAME"],
         "MY_LII": settings.PEACHJAM["MY_LII"],
         "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
-        "PEACHJAM_SETTINGS": pj_settings(),
+        "PEACHJAM_SETTINGS": pj,
         "CURRENT_LANGUAGE": language,
+        "KEY_LINK_PAGE": key_link_page,
         "MULTIPLE_JURISDICTIONS": settings.PEACHJAM["MULTIPLE_JURISDICTIONS"],
         "MULTIPLE_LOCALITIES": settings.PEACHJAM["MULTIPLE_LOCALITIES"],
         "SEARCH_SUGGESTIONS": settings.PEACHJAM["SEARCH_SUGGESTIONS"],
         "SEARCH_SEMANTIC": settings.PEACHJAM["SEARCH_SEMANTIC"],
+        "DOCUMENT_EMBEDDINGS": settings.PEACHJAM["DOCUMENT_EMBEDDINGS"],
         "CUSTOMERIO_JS_KEY": settings.PEACHJAM["CUSTOMERIO_JS_KEY"],
         "CUSTOMERIO_JOURNEYS_SITE_ID": settings.PEACHJAM["CUSTOMERIO_JOURNEYS_SITE_ID"],
+        "AUTH_OTP": settings.PEACHJAM["AUTH_OTP"],
+        "ORGANISATION_SUBSCRIPTIONS": organisations_enabled(),
         # this object will be injected into Javascript to provide configuration settings to the Javascript app
         "PEACHJAM_JS_CONFIG": {
             "appName": settings.PEACHJAM["APP_NAME"],
             "pdfWorker": static("js/pdf.worker-prod.js"),
-            "userHelpLink": pj_settings().user_help_link,
+            "userHelpLink": pj.user_help_link,
             "language": language,
             "languages": [x[0] for x in settings.LANGUAGES],
             "urlLangPrefix": f"/{language}" if len(settings.LANGUAGES) > 1 else "",
+            "documentEmbeddings": settings.PEACHJAM["DOCUMENT_EMBEDDINGS"],
+            "savedDocumentsEnabled": pj.save_documents_enabled,
             "chat": {
                 "enabled": settings.PEACHJAM["CHAT_ENABLED"],
                 "assistantName": settings.PEACHJAM["CHAT_ASSISTANT_NAME"],
+                "public": settings.PEACHJAM["CHAT_PUBLIC"],
             },
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
             },
+            "helpscoutBeaconId": pj.helpscout_beacon_id,
         },
     }

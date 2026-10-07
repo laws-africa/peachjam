@@ -1,19 +1,24 @@
 import itertools
 import re
+from urllib.parse import quote
 
 from cobalt import FrbrUri
 from django.conf import settings
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.db.models import Count
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.http.response import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
+from django.template.loader import render_to_string
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
+from django.utils.http import content_disposition_header
 from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
 
-from peachjam.analysis.summariser import SummariserError, SummariserService
+from peachjam.analysis.summariser import JudgmentSummariser, SummariserError
+from peachjam.forms import DocumentSummaryForm
 from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.helpers import get_language as get_language_from_request
 from peachjam.models import (
@@ -21,12 +26,13 @@ from peachjam.models import (
     DocumentNature,
     DocumentSocialImage,
     ExtractedCitation,
+    pj_settings,
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.storage import clean_filename
 from peachjam.views import BaseDocumentDetailView
-from peachjam_api.serializers import CitationLink, CitationLinkSerializer
+from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
@@ -120,7 +126,8 @@ class DocumentSourceView(DocumentDetailView):
             source_file = self.object.source_file
             anonymised = getattr(self.object, "anonymised", False)
 
-            # redirect to the PDF view if necessary
+            # The PDF endpoint chooses the safe derived PDF for anonymised judgments. Do not serve the original
+            # non-PDF source file when that derived PDF is available.
             if (
                 source_file.file
                 and source_file.mimetype == "application/pdf"
@@ -134,11 +141,18 @@ class DocumentSourceView(DocumentDetailView):
                     )
                 )
 
+            # An anonymised judgment may expose its attached source only when editors have explicitly confirmed
+            # that attachment is anonymised. Otherwise it must remain private and the derived PDF is used instead.
             if source_file.file and (not anonymised or source_file.file_is_anonymised):
-                if source_file.source_url:
+                # Redirects expose the storage or remote URL, which can include the uploaded filename. Stream
+                # anonymised files through this view so we control the safe Content-Disposition filename.
+                if source_file.source_url and not anonymised:
                     return redirect(source_file.source_url)
 
-                if getattr(source_file.file.storage, "custom_domain", None):
+                if (
+                    getattr(source_file.file.storage, "custom_domain", None)
+                    and not anonymised
+                ):
                     # use the storage's custom domain to serve the file
                     return redirect(source_file.file.url)
 
@@ -153,7 +167,7 @@ class DocumentSourceView(DocumentDetailView):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"attachment; filename={fname}"
+        response["Content-Disposition"] = content_disposition_header(True, fname)
         response["Content-Length"] = str(len(file_bytes))
         return response
 
@@ -165,23 +179,26 @@ class DocumentSourcePDFView(DocumentSourceView):
     def render_to_response(self, context, **response_kwargs):
         if hasattr(self.object, "source_file"):
             source_file = self.object.source_file
-
-            # if the source file is remote and a pdf, just redirect there
-            if source_file.source_url and source_file.mimetype == "application/pdf":
-                return redirect(source_file.source_url)
+            anonymised = getattr(self.object, "anonymised", False)
 
             pdf = source_file.as_pdf()
 
             # special case for anonymised judgments: use the anonymised file if available
-            if (
-                getattr(self.object, "anonymised", False)
-                and not source_file.file_is_anonymised
-            ):
+            if anonymised and not source_file.file_is_anonymised:
                 # this may be None
                 pdf = source_file.anonymised_file_as_pdf
 
             if pdf:
-                if getattr(pdf.storage, "custom_domain", None):
+                # Anonymised files must be served through Peachjam. A storage redirect can reveal the original
+                # uploaded filename in its URL, even when the download header has a safe filename.
+                if (
+                    source_file.source_url
+                    and source_file.mimetype == "application/pdf"
+                    and not anonymised
+                ):
+                    return redirect(source_file.source_url)
+
+                if getattr(pdf.storage, "custom_domain", None) and not anonymised:
                     # use the storage's custom domain to serve the file
                     return redirect(pdf.url)
                 else:
@@ -251,7 +268,7 @@ class DocumentAttachmentView(DocumentDetailView):
             file_bytes = file.file.open().read()
             response = HttpResponse(file_bytes, content_type=file.mimetype)
             filename = re.sub(r"[^A-Za-z0-9._-]", "", file.filename)
-            response["Content-Disposition"] = f"attachment; filename={filename}"
+            response["Content-Disposition"] = content_disposition_header(True, filename)
             response["Content-Length"] = str(len(file_bytes))
             return response
         raise Http404
@@ -317,12 +334,6 @@ class DocumentCitationsTabView(DocumentDetailView):
         context = super().get_context_data(**kwargs)
 
         doc = self.object
-
-        # citation links for a document
-        citation_links = CitationLink.objects.filter(document=doc)
-        context["citation_links"] = CitationLinkSerializer(
-            citation_links, many=True
-        ).data
 
         # This only runs when HTMX hits this specific endpoint
         # Citations
@@ -421,7 +432,7 @@ class DocumentSocialImageView(DocumentDetailView):
 
 @method_decorator(never_cache, name="dispatch")
 class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
-    permission_required = "peachjam.change_coredocument"
+    permission_required = "peachjam.can_debug_document"
     model = CoreDocument
     queryset = CoreDocument.objects.filter(published=True)
     context_object_name = "document"
@@ -431,18 +442,76 @@ class DocumentDebugViewBase(PermissionRequiredMixin, DetailView):
 
 
 class DocumentDebugView(DocumentDebugViewBase):
+    permission_required = "peachjam.change_coredocument"
     template_name = "peachjam/document/_debug.html"
-
-
-class DocumentSummaryView(DocumentDebugViewBase):
-    template_name = "peachjam/document/_summary.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["external_debug_links"] = self.get_external_debug_links()
+        if self.object.doc_type == "judgment":
+            context["summary_form"] = DocumentSummaryForm.build()
+        return context
 
-        summariser = SummariserService()
+    def get_external_debug_links(self):
+        links = []
+        replacements = self.get_external_debug_link_replacements()
+
+        for line in pj_settings().document_debug_external_links.splitlines():
+            if not line.strip() or "|" not in line:
+                continue
+
+            label, url = [part.strip() for part in line.split("|", 1)]
+            if not label or not url:
+                continue
+
+            for key, value in replacements.items():
+                url = url.replace("{" + key + "}", value)
+
+            links.append({"label": label, "url": url})
+
+        return links
+
+    def get_external_debug_link_replacements(self):
+        document = self.object
+        return {
+            "id": quote(str(document.id), safe=""),
+            "expression_frbr_uri": quote(document.expression_frbr_uri, safe=""),
+            "work_frbr_uri": quote(document.work_frbr_uri, safe=""),
+            "title": quote(document.title, safe=""),
+        }
+
+
+class DocumentSummaryView(DocumentDebugViewBase):
+    permission_required = "peachjam.can_generate_judgment_summary"
+    template_name = "peachjam/document/_summary.html"
+    http_method_names = ["get", "post"]
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        context = self.get_context_data()
+        return self.render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.object.doc_type != "judgment":
+            raise Http404()
+
+        summariser = JudgmentSummariser()
+        data = self.request.POST if self.request.method == "POST" else None
+        form = DocumentSummaryForm.build(data)
+        context["form"] = form
+
+        if not form.is_bound or not form.is_valid():
+            return context
+
+        summariser.summary_prompt_str = form.cleaned_data["summary_prompt_str"] or None
+        summariser.llm_model = form.cleaned_data["llm_model"] or None
+        summariser.summary_language = (
+            form.cleaned_data["language"] or summariser.summary_language
+        )
+
         try:
-            context["summary"] = summariser.summarise_judgment(self.object)["summary"]
+            context["summary"] = summariser.summarise_judgment(self.object)
         except SummariserError as e:
             context["error"] = e
 
@@ -455,5 +524,91 @@ class DocumentTextContentView(DocumentDebugViewBase):
         text = self.object.get_content_as_text()
         filename = clean_filename(self.object.title) + ".txt"
         response = FileResponse(text, as_attachment=True, content_type="text/plain")
-        response["Content-Disposition"] = f"attachment; filename={filename}"
+        response["Content-Disposition"] = content_disposition_header(True, filename)
+        return response
+
+
+class DocumentCapabilitiesView(SubscriptionRequiredMixin, DetailView):
+    """Returns JSON capabilities for document-level client actions."""
+
+    model = CoreDocument
+    queryset = CoreDocument.objects.filter(published=True)
+    slug_field = "pk"
+    slug_url_kwarg = "pk"
+    http_method_names = ["get"]
+    permission_required = ""
+    action_permissions = {
+        "add_annotation": "peachjam.add_annotation",
+        "view_provision_diffs": "peachjam.can_view_provision_changes",
+    }
+
+    def has_permission(self):
+        # Capability permissions are checked per action in get_capability().
+        return True
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.restricted:
+            perm = f"{obj._meta.app_label}.view_{obj._meta.model_name}"
+            if not self.request.user.has_perm(perm, obj):
+                raise Http404()
+        return obj
+
+    def get_requested_actions(self):
+        actions_param = (self.request.GET.get("actions") or "").strip()
+        if not actions_param:
+            return list(self.action_permissions.keys()), []
+
+        actions = [
+            action.strip() for action in actions_param.split(",") if action.strip()
+        ]
+        actions = list(dict.fromkeys(actions))
+        invalid_actions = [
+            action for action in actions if action not in self.action_permissions
+        ]
+        return actions, invalid_actions
+
+    def render_subscription_required_html(self, permission):
+        old_permission_required = self.permission_required
+        self.permission_required = permission
+        try:
+            context = self.build_subscription_required_context()
+            return render_to_string(
+                self.get_subscription_required_template(),
+                context,
+                request=self.request,
+            )
+        finally:
+            self.permission_required = old_permission_required
+
+    def get_capability(self, permission):
+        if self.request.user.has_perm(permission):
+            return {"allowed": True}
+
+        return {
+            "allowed": False,
+            "message_html": self.render_subscription_required_html(permission),
+        }
+
+    def get(self, request, *args, **kwargs):
+        self.get_object()
+        actions, invalid_actions = self.get_requested_actions()
+        if invalid_actions:
+            response = JsonResponse(
+                {
+                    "error": "Unknown capability action(s).",
+                    "invalid_actions": invalid_actions,
+                },
+                status=400,
+            )
+            add_never_cache_headers(response)
+            return response
+
+        data = {
+            action: self.get_capability(self.action_permissions[action])
+            for action in actions
+        }
+
+        response = JsonResponse(data, status=200)
+        add_never_cache_headers(response)
         return response

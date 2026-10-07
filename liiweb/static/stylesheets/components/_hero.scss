@@ -23,6 +23,19 @@
   background-color: transparentize($primary, 0.90);
 }
 
+.hero-search a:not(.btn) {
+  color: mix($visited-link, $link-color, 45%);
+
+  &:visited {
+    color: $visited-link;
+  }
+
+  &:hover,
+  &:focus {
+    color: mix($visited-link, $link-color, 65%);
+  }
+}
+
 .hero-logos {
   img {
     @include make-col-auto();

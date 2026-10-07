@@ -1,16 +1,59 @@
 import datetime
 import hashlib
 import json
+import re
+from urllib.parse import urljoin
 
 from django import template
+from django.db.models import F, Window
+from django.db.models.functions import RowNumber
 from django.http import QueryDict
+from django.templatetags.static import static
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils import formats
+from django.utils.dateparse import parse_date
+from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
 
+from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.auth import user_display
+from peachjam.models import DocumentChatThread
+from peachjam.xmlutils import qualify_local_refs as qualify_local_refs_html
 
 register = template.Library()
+
+
+@register.simple_tag
+def legislation_publication_detail(document):
+    metadata = document.metadata_json
+    publication_name = metadata.get("publication_name")
+    publication_number = metadata.get("publication_number")
+    if not publication_name or not publication_number:
+        return None
+
+    publication = f"{publication_name} {publication_number}"
+    try:
+        publication_date = parse_date(metadata.get("publication_date") or "")
+    except (TypeError, ValueError):
+        publication_date = None
+    if publication_date:
+        return _("%(publication)s on %(publication_date)s") % {
+            "publication": publication,
+            "publication_date": formats.date_format(publication_date, "DATE_FORMAT"),
+        }
+    return publication
+
+
+def normalize_base_url(value, protocol="https"):
+    value = str(value or "").strip()
+    if not value:
+        return ""
+
+    if "://" not in value:
+        value = f"{protocol}://{value.lstrip('/')}"
+
+    return value.rstrip("/") + "/"
 
 
 @register.filter
@@ -33,6 +76,8 @@ def strip_first_character(value):
 
 @register.filter
 def parse_string_date(date):
+    if not isinstance(date, str):
+        return date
     return datetime.datetime.strptime(date, "%Y-%m-%d")
 
 
@@ -46,6 +91,24 @@ def get_proper_elided_page_range(paginator, number, on_each_side=3, on_ends=2):
     return paginator.get_elided_page_range(
         number=number, on_each_side=on_each_side, on_ends=on_ends
     )
+
+
+@register.simple_tag
+def get_mobile_elided_page_range(paginator, number):
+    """Return a compact page range that moves with the current mobile page."""
+    page_count = paginator.num_pages
+    if page_count <= 5:
+        return list(range(1, page_count + 1))
+
+    if number <= 2:
+        return [1, 2, 3, paginator.ELLIPSIS, page_count]
+
+    pages = list(range(number - 1, min(number + 1, page_count) + 1))
+    if pages[-1] < page_count - 1:
+        pages.extend([paginator.ELLIPSIS, page_count])
+    elif pages[-1] == page_count - 1:
+        pages.append(page_count)
+    return pages
 
 
 @register.simple_tag
@@ -92,11 +155,35 @@ def user_name(user):
 @register.simple_tag
 def build_taxonomy_url(item, prefix="taxonomy"):
     items = []
-    root = item.root if hasattr(item, "root") else item.get_root()
-    if root != item:
-        items.append(root.slug)
+    root_slug = getattr(item, "root_slug", None)
+    if root_slug is None:
+        root = getattr(item, "root", None)
+        if root is not None:
+            root_slug = root.slug
+        elif hasattr(item, "is_root") and item.is_root():
+            root_slug = item.slug
+        else:
+            root_slug = item.get_root().slug
+    if root_slug != item.slug:
+        items.append(root_slug)
     items.append(item.slug)
     return f"/{prefix}/" + "/".join(items)
+
+
+@register.simple_tag
+def absolute_url(site_or_domain, path="", protocol="https"):
+    domain = getattr(site_or_domain, "domain", site_or_domain)
+    base_url = normalize_base_url(domain, protocol)
+    if not base_url:
+        return ""
+
+    path = "" if path is None else str(path)
+    return urljoin(base_url, path.lstrip("/"))
+
+
+@register.simple_tag
+def absolute_static_url(site_or_domain, path, protocol="https"):
+    return absolute_url(site_or_domain, static(path), protocol)
 
 
 @register.simple_tag
@@ -116,9 +203,51 @@ def split(value, sep=None):
 
 
 @register.filter
+def group_flynote_lines(lines):
+    return FlynoteDisplayGrouper(lines).group()
+
+
+@register.filter
+def group_linked_flynotes(linked_flynotes):
+    return FlynoteDisplayGrouper.group_linked_flynotes(linked_flynotes)
+
+
+@register.filter
+def highlight_matches(value, query):
+    """Wrap case-insensitive occurrences of a search query in ``<mark>`` tags."""
+    value = str(value or "")
+    query = str(query or "").strip()
+    if not query:
+        return value
+
+    parts = re.split(f"({re.escape(query)})", value, flags=re.IGNORECASE)
+    return mark_safe(
+        "".join(
+            (
+                str(format_html("<mark>{}</mark>", part))
+                if index % 2
+                else str(conditional_escape(part))
+            )
+            for index, part in enumerate(parts)
+        )
+    )
+
+
+@register.filter
+def qualify_local_refs(value, frbr_uri):
+    return qualify_local_refs_html(value, frbr_uri)
+
+
+@register.filter
 def get_follow_params(obj):
     # this would be better as a model method
-    return f"{obj._meta.model_name}={obj.pk}"
+    field_map = {
+        "courtclass": "court_class",
+        "courtregistry": "court_registry",
+        "lawreport": "law_report",
+    }
+    field_name = field_map.get(obj._meta.model_name, obj._meta.model_name)
+    return f"{field_name}={obj.pk}"
 
 
 @register.simple_tag
@@ -171,9 +300,7 @@ def user_avatar(user, size=40):
     """
 
     # Try to get social image (customize this depending on your user model)
-    avatar_url = (
-        user.userprofile.avatar_url()
-    )  # or "https://lh3.googleusercontent.com/a/ACg8ocLLVn6MqHHeblDXalODEv4YFmQBQO6gBtAIqb9RIrJ9pYwX7w=s96-c"
+    avatar_url = user.userprofile.avatar_url()
     if avatar_url:
         return format_html(
             '<img src="{}" alt="{}" class="user-avatar" style="width:{}px;height:{}px">',
@@ -205,3 +332,24 @@ def color_for_user(user):
     h = hashlib.md5(user.username.encode("utf-8")).hexdigest()
     hue = int(h[:2], 16) % 360
     return f"hsl({hue}, 60%, 50%)"
+
+
+@register.simple_tag
+def recent_chats(user):
+    """Return the 10 most recent chat threads, one per document, for the supplied user."""
+    if not user or not getattr(user, "is_authenticated", False):
+        return DocumentChatThread.objects.none()
+
+    return (
+        DocumentChatThread.objects.filter(user=user)
+        .annotate(
+            document_rank=Window(
+                expression=RowNumber(),
+                partition_by=[F("core_document_id")],
+                order_by=F("updated_at").desc(),
+            )
+        )
+        .filter(document_rank=1)
+        .select_related("core_document")
+        .order_by("-updated_at")[:10]
+    )

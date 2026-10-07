@@ -1,4 +1,5 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div hx-swap-oob="true"
      id="saved-search-modal-dialog"
      class="modal-dialog">
@@ -12,7 +13,21 @@
     </div>
     <div class="modal-body">
       {% if request.user.is_authenticated %}
-        {% if saved_search.pk %}
+        {% if saved_search.is_subscription_locked %}
+          <div class="mb-3">{{ saved_search.pretty_query }}</div>
+          <div class="mb-3">{{ saved_search.pretty_filters }}</div>
+          <div class="alert alert-warning">
+            <div class="fw-bold">
+              <i class="bi bi-lock-fill"></i>
+              {% trans 'Paused by your subscription limit' %}
+            </div>
+            <div>
+              {% blocktrans trimmed with expires=saved_search.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+                We'll keep this search alert until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to resume alerts.
+              {% endblocktrans %}
+            </div>
+          </div>
+        {% elif saved_search.pk %}
           <p class="alert alert-primary">{% trans "We'll email you when new documents are found for this search." %}</p>
           <form id="saved-search-form"
                 hx-target="#saved-search-button"
@@ -50,9 +65,13 @@
           <a href="{% url 'search:saved_search_list' %}">{% trans "All search alerts" %}</a>
         </div>
       {% else %}
-        {% blocktrans trimmed %}
-          You are not logged in. Please log in to receive alerts when we find new matches for your search.
-        {% endblocktrans %}
+        {% if PEACHJAM_SETTINGS.accounts_enabled %}
+          {% blocktrans trimmed %}
+            You are not logged in. Please log in to receive alerts when we find new matches for your search.
+          {% endblocktrans %}
+        {% else %}
+          {% trans "Search alerts require an account, and accounts are not available on this site." %}
+        {% endif %}
       {% endif %}
     </div>
     <div class="modal-footer {% if saved_search.pk %}d-flex justify-content-between{% endif %}">
@@ -69,7 +88,7 @@
       <div>
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
         {% if request.user.is_authenticated %}
-          {% if saved_search.pk %}
+          {% if saved_search.pk and not saved_search.is_subscription_locked %}
             <button type="submit"
                     form="saved-search-form"
                     class="btn btn-primary"
@@ -78,8 +97,10 @@
             </button>
           {% endif %}
         {% else %}
-          <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}"
-             class="btn btn-primary">{% trans 'Login' %}</a>
+          {% if PEACHJAM_SETTINGS.accounts_enabled %}
+            <a href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}"
+               class="btn btn-primary">{% trans 'Login' %}</a>
+          {% endif %}
         {% endif %}
       </div>
     </div>

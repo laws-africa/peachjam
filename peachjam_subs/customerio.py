@@ -1,0 +1,149 @@
+from datetime import datetime, time
+
+from peachjam.customerio import CustomerIO as PeachjamCustomerIO
+from peachjam.customerio import analytics
+from peachjam_subs.models import Subscription
+
+
+def date_to_timestamp(date):
+    return int(datetime.combine(date, time(0)).timestamp())
+
+
+def datetime_to_timestamp(value):
+    return int(value.timestamp())
+
+
+class CustomerIO(PeachjamCustomerIO):
+    def get_user_details(self, user):
+        details = super().get_user_details(user)
+
+        sub = Subscription.objects.active_for_user(user).first()
+        if sub:
+            details.update(
+                {
+                    "is_paid": sub.product_offering.pricing_plan.price > 0,
+                    "subscription_product": sub.product_offering.product.name,
+                    "subscription_billing_period": sub.product_offering.pricing_plan.period,
+                    "subscription_is_trial": sub.is_trial,
+                    "subscription_ends_on": (
+                        date_to_timestamp(sub.ends_on) if sub.ends_on else None
+                    ),
+                    "subscription_pricing_plan": str(sub.product_offering.pricing_plan),
+                    "subscription_trial_replaces": (
+                        sub.trial_replaces.product_offering.product.name
+                        if sub.trial_replaces
+                        else None
+                    ),
+                }
+            )
+        else:
+            details.update(
+                {
+                    "is_paid": False,
+                    "subscription_product": None,
+                    "subscription_billing_period": None,
+                    "subscription_is_trial": False,
+                    "subscription_ends_on": None,
+                    "subscription_pricing_plan": None,
+                    "subscription_trial_replaces": None,
+                }
+            )
+
+        return details
+
+    def get_subscription_details(self, subscription):
+        details = self.get_common_details()
+        details.update(
+            {
+                "product": subscription.product_offering.product.name,
+                "billing_period": subscription.product_offering.pricing_plan.period,
+                "pricing_plan": str(subscription.product_offering.pricing_plan),
+                "is_trial": subscription.is_trial,
+                "ends_on": (
+                    date_to_timestamp(subscription.ends_on)
+                    if subscription.ends_on
+                    else None
+                ),
+                "trial_replaces": (
+                    subscription.trial_replaces.product_offering.product.name
+                    if subscription.trial_replaces
+                    else None
+                ),
+            }
+        )
+        return details
+
+    def get_user_deleted_details(self, user, feedback=None):
+        details = super().get_user_deleted_details(user, feedback=feedback)
+        sub = Subscription.objects.active_for_user(user).first()
+        details.update(
+            {
+                "is_paid": bool(sub and sub.product_offering.pricing_plan.price > 0),
+                "subscription_product": (
+                    sub.product_offering.product.name if sub else None
+                ),
+                "subscription_billing_period": (
+                    sub.product_offering.pricing_plan.period if sub else None
+                ),
+                "subscription_pricing_plan": (
+                    str(sub.product_offering.pricing_plan) if sub else None
+                ),
+            }
+        )
+        return details
+
+    def track_subscription_activated(self, subscription):
+        if self.enabled():
+            self.update_user_details(subscription.user)
+            analytics.track(
+                subscription.user.userprofile.tracking_id_str,
+                "Subscription activated",
+                self.get_subscription_details(subscription),
+            )
+
+    def track_subscription_closed(self, subscription):
+        if self.enabled():
+            self.update_user_details(subscription.user)
+            analytics.track(
+                subscription.user.userprofile.tracking_id_str,
+                "Subscription closed",
+                self.get_subscription_details(subscription),
+            )
+
+    def track_subscription_limited_data_locked(
+        self, user, subscription, feature, locked_count, active_count, limit, expires_at
+    ):
+        if self.enabled():
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Subscription limited data locked",
+                {
+                    **self.get_subscription_details(subscription),
+                    "feature": feature,
+                    "locked_count": locked_count,
+                    "active_count": active_count,
+                    "limit": limit,
+                    "expires_at": datetime_to_timestamp(expires_at),
+                },
+            )
+
+    def track_offboarding_feedback(self, user, feedback):
+        if self.enabled():
+            details = {
+                "event_type": feedback.event_type,
+                "reason": feedback.reason,
+                "comment": feedback.comment,
+            }
+            if feedback.current_product_offering:
+                details["current_product"] = (
+                    feedback.current_product_offering.product.name
+                )
+            if feedback.requested_product_offering:
+                details["requested_product"] = (
+                    feedback.requested_product_offering.product.name
+                )
+            analytics.track(
+                user.userprofile.tracking_id_str,
+                "Subscription offboarding feedback",
+                details,
+            )

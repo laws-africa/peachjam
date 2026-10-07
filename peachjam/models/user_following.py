@@ -16,7 +16,6 @@ log = logging.getLogger(__name__)
 
 
 class UserFollowing(models.Model):
-
     user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
@@ -81,6 +80,30 @@ class UserFollowing(models.Model):
         related_name="followers",
         verbose_name=_("taxonomy"),
     )
+    flynote = models.ForeignKey(
+        "peachjam.Flynote",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("flynote"),
+    )
+    journal = models.ForeignKey(
+        "peachjam.Journal",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("journal"),
+    )
+    law_report = models.ForeignKey(
+        "peachjam.LawReport",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+        related_name="followers",
+        verbose_name=_("law report"),
+    )
     saved_search = models.ForeignKey(
         SavedSearch,
         null=True,
@@ -102,21 +125,27 @@ class UserFollowing(models.Model):
         _("last alerted at"), null=True, blank=True, auto_now_add=True
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    subscription_locked_at = models.DateTimeField(
+        _("subscription locked at"), null=True, blank=True
+    )
+    subscription_lock_expires_at = models.DateTimeField(
+        _("subscription lock expires at"), null=True, blank=True
+    )
 
-    # fields that can be followed
-    EVENT_FIELD_MAP = {
-        "court": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "author": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "court_class": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "court_registry": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "country": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "locality": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "taxonomy": TimelineEvent.EventTypes.NEW_DOCUMENTS,
-        "saved_search": TimelineEvent.EventTypes.SAVED_SEARCH,
-        "saved_document": TimelineEvent.EventTypes.NEW_CITATION,
-    }
-
-    follow_fields = list(EVENT_FIELD_MAP.keys())
+    follow_fields = [
+        "court",
+        "author",
+        "court_class",
+        "court_registry",
+        "country",
+        "locality",
+        "taxonomy",
+        "flynote",
+        "journal",
+        "law_report",
+        "saved_search",
+        "saved_document",
+    ]
 
     class Meta:
         constraints = [
@@ -156,6 +185,21 @@ class UserFollowing(models.Model):
                 name="unique_user_taxonomy",
             ),
             models.UniqueConstraint(
+                fields=["user", "flynote"],
+                condition=models.Q(flynote__isnull=False),
+                name="unique_user_flynote",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "journal"],
+                condition=models.Q(journal__isnull=False),
+                name="unique_user_journal",
+            ),
+            models.UniqueConstraint(
+                fields=["user", "law_report"],
+                condition=models.Q(law_report__isnull=False),
+                name="unique_user_law_report",
+            ),
+            models.UniqueConstraint(
                 fields=["user", "saved_search"],
                 condition=models.Q(saved_search__isnull=False),
                 name="unique_user_saved_search",
@@ -168,18 +212,9 @@ class UserFollowing(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user} follows {self.followed_field} {self.followed_object}"
+        return f"{self.user} follows {self.followed_field} {self.followed_object_name}"
 
     # --- simple helpers ---
-
-    @property
-    def description_text(self):
-        if self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH:
-            return _("New matches for search alert")
-        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS:
-            return _("New documents added for")
-        elif self.get_event_type() == TimelineEvent.EventTypes.NEW_CITATION:
-            return _("New citations of")
 
     @property
     def followed_field(self):
@@ -192,17 +227,36 @@ class UserFollowing(models.Model):
         field = self.followed_field
         return getattr(self, field) if field else None
 
-    def get_event_type(self):
-        field = self.followed_field
-        return self.EVENT_FIELD_MAP.get(field)
+    @property
+    def followed_object_name(self):
+        if self.flynote:
+            return self.flynote.name
+        if self.followed_object:
+            return str(self.followed_object)
+        return ""
 
     @property
     def is_new_docs(self):
-        return self.get_event_type() == TimelineEvent.EventTypes.NEW_DOCUMENTS
+        return self.followed_field in [
+            "court",
+            "author",
+            "court_class",
+            "court_registry",
+            "country",
+            "locality",
+            "taxonomy",
+            "flynote",
+            "journal",
+            "law_report",
+        ]
 
     @property
     def is_saved_search(self):
-        return self.get_event_type() == TimelineEvent.EventTypes.SAVED_SEARCH
+        return self.followed_field == "saved_search"
+
+    @property
+    def is_subscription_locked(self):
+        return self.subscription_locked_at is not None
 
     @property
     def cutoff_date(self):
@@ -239,10 +293,6 @@ class UserFollowing(models.Model):
                 f"Only one of: {' '.join(self.follow_fields)} can be set."
             )
 
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
-
     def documents_for_followed_topic(self):
         qs = CoreDocument.objects
 
@@ -268,12 +318,32 @@ class UserFollowing(models.Model):
             topics = [self.taxonomy] + list(self.taxonomy.get_descendants())
             return qs.filter(taxonomies__topic__in=topics)
 
+        if self.flynote:
+            return qs.filter(
+                judgment__flynotes__flynote__path__startswith=self.flynote.path
+            ).distinct()
+
+        if self.journal:
+            return qs.filter(journalarticle__journal=self.journal)
+
+        if self.law_report:
+            return qs.filter(
+                judgment__law_report_entries__law_report_volume__law_report=self.law_report
+            ).distinct()
+
         return qs.none()
 
     def documents_for_followed_search(self):
         return self.saved_search.find_new_hits()
 
     def update_follow(self):
+        if self.is_subscription_locked:
+            return False
+        if self.saved_search and self.saved_search.is_subscription_locked:
+            return False
+        if self.saved_document and self.saved_document.is_subscription_locked:
+            return False
+
         if self.is_new_docs:
             return self._update_new_docs()
 
@@ -324,7 +394,22 @@ class UserFollowing(models.Model):
         # check that we are passing a citation to the saved document
         assert citation.target_work == self.saved_document.work
 
-        # avoid alerts for citations from documents older than cutoff
+        if not self.saved_document.document:
+            log.info(
+                "Saved document %s for user %s has no document expressions.",
+                self.saved_document,
+                self.user,
+            )
+            return
+
+        if not citation.citing_work.documents.latest_expression().exists():
+            log.info(
+                "Citing work %s has no document expressions for user %s; skipping citation alert.",
+                citation.citing_work,
+                self.user,
+            )
+            return
+
         if (
             citation.citing_work.documents.latest_expression().first().date
             < self.cutoff_date
@@ -352,9 +437,59 @@ class UserFollowing(models.Model):
             return
         TimelineEvent.add_new_citation_events(self, citation.citing_work)
 
+    def _update_new_relationship(self, relationship, relationship_event):
+        event_work = relationship_event.event_work(relationship)
+        event_type = relationship_event.event_type
+
+        if not self.saved_document.document:
+            log.info(
+                "Saved document %s for user %s has no document expressions.",
+                self.saved_document,
+                self.user,
+            )
+            return
+
+        if not event_work.documents.latest_expression().exists():
+            log.info(
+                "Event work %s has no document expressions for user %s; skipping citation alert.",
+                event_work,
+                self.user,
+            )
+            return
+
+        already_alerted = TimelineEvent.objects.filter(
+            user_following=self,
+            event_type=event_type,
+            subject_works=event_work,
+        ).exists()
+
+        if event_work.documents.latest_expression().first().date < self.cutoff_date:
+            log.info(
+                "relationship work %s is older than cutoff date %s for user %s",
+                event_work,
+                self.cutoff_date,
+                self.user,
+            )
+            return
+
+        if already_alerted:
+            log.info(
+                "User %s has already been alerted about relationship to work %s",
+                self.user,
+                event_work,
+            )
+            return
+
+        TimelineEvent.add_new_relationship_event(self, relationship, event_work)
+
     @classmethod
     def update_follows_for_user(cls, user):
-        follows = user.following.all()
+        follows = user.following.filter(subscription_locked_at__isnull=True).filter(
+            models.Q(saved_search__isnull=True)
+            | models.Q(saved_search__subscription_locked_at__isnull=True),
+            models.Q(saved_document__isnull=True)
+            | models.Q(saved_document__subscription_locked_at__isnull=True),
+        )
         for follow in follows:
             follow.update_follow()
 
@@ -362,7 +497,31 @@ class UserFollowing(models.Model):
     def update_new_citation_follows(cls, citation):
         follows = cls.objects.filter(
             saved_document__work=citation.target_work,
+            subscription_locked_at__isnull=True,
+            saved_document__subscription_locked_at__isnull=True,
         )
         log.info("Found %d follows for new citation update", follows.count())
         for follow in follows:
             follow._update_new_citation(citation)
+
+    @classmethod
+    def update_new_relationship_follows(cls, relationship):
+        relationship_event = TimelineEvent.RELATIONSHIP_EVENT_MAP.get(
+            relationship.predicate.slug
+        )
+        if not relationship_event:
+            log.info("No relationship event mapping found for %s", relationship)
+            return
+
+        follows = cls.objects.filter(
+            saved_document__work=relationship_event.followed_work(relationship),
+            subscription_locked_at__isnull=True,
+            saved_document__subscription_locked_at__isnull=True,
+        )
+        log.info("Found %d follows for new relationship update", follows.count())
+
+        for follow in follows:
+            follow._update_new_relationship(
+                relationship,
+                relationship_event,
+            )

@@ -1,7 +1,8 @@
 from dal import autocomplete
 from django.db.models import Q
 
-from peachjam.models import Judge, Work
+from peachjam.analysis.judges import judge_identity_service
+from peachjam.models import Judge, JudgeAlias, JudgePerson, VolumeIssue, Work
 
 
 class WorkAutocomplete(autocomplete.Select2QuerySetView):
@@ -36,4 +37,54 @@ class JudgesAutocomplete(autocomplete.Select2QuerySetView):
         qs = Judge.objects.all()
         if self.q:
             qs = qs.filter(Q(name__icontains=self.q))
+        return qs
+
+
+class JudgePeopleAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if (
+            not JudgePerson.canonical_identity_enabled()
+            or not self.request.user.is_staff
+        ):
+            return JudgePerson.objects.none()
+
+        qs = JudgePerson.objects.all()
+        if self.q:
+            qs = judge_identity_service.filter_judge_people_by_name(qs, self.q)
+        return qs
+
+
+class JudgeAliasesAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if (
+            not JudgePerson.canonical_identity_enabled()
+            or not self.request.user.is_staff
+        ):
+            return JudgeAlias.objects.none()
+
+        qs = JudgeAlias.objects.select_related("judge_person", "title")
+        if self.q:
+            qs = qs.filter(
+                Q(name__icontains=self.q)
+                | Q(title__abbreviation__icontains=self.q)
+                | Q(title__name__icontains=self.q)
+                | Q(judge_person__first_name__icontains=self.q)
+                | Q(judge_person__last_name__icontains=self.q)
+            ).distinct()
+        return qs
+
+
+class VolumeIssueAutocomplete(autocomplete.Select2QuerySetView):
+    def get_queryset(self):
+        if not self.request.user.is_staff:
+            return VolumeIssue.objects.none()
+
+        qs = VolumeIssue.objects.select_related("journal")
+        journal_id = self.forwarded.get("journal")
+        if journal_id:
+            qs = qs.filter(journal_id=journal_id)
+        else:
+            qs = qs.none()
+        if self.q:
+            qs = qs.filter(Q(title__icontains=self.q))
         return qs

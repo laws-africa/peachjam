@@ -22,6 +22,12 @@ class Folder(models.Model):
         related_name="folders",
     )
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
+    subscription_locked_at = models.DateTimeField(
+        _("subscription locked at"), null=True, blank=True
+    )
+    subscription_lock_expires_at = models.DateTimeField(
+        _("subscription lock expires at"), null=True, blank=True
+    )
 
     class Meta:
         ordering = ("name",)
@@ -31,6 +37,10 @@ class Folder(models.Model):
 
     def __str__(self):
         return f"{self.name}"
+
+    @property
+    def is_subscription_locked(self):
+        return self.subscription_locked_at is not None
 
     def can_save_more_folders(self):
         sub = Subscription.objects.active_for_user(self.user).first()
@@ -99,11 +109,21 @@ class SavedDocument(models.Model):
     note = models.TextField(_("note"), null=True, blank=True, max_length=2048)
     created_at = models.DateTimeField(_("created at"), auto_now_add=True)
     updated_at = models.DateTimeField(_("updated at"), auto_now=True)
+    subscription_locked_at = models.DateTimeField(
+        _("subscription locked at"), null=True, blank=True
+    )
+    subscription_lock_expires_at = models.DateTimeField(
+        _("subscription lock expires at"), null=True, blank=True
+    )
 
     objects = SavedDocumentManager()
 
     def __str__(self):
         return self.work.title
+
+    @property
+    def is_subscription_locked(self):
+        return self.subscription_locked_at is not None
 
     def get_absolute_url(self):
         return self.work.get_absolute_url()

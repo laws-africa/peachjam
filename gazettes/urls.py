@@ -8,6 +8,8 @@ urlpatterns = [
     path("", views.JurisdictionListView.as_view(), name="home"),
     path("archive/<path:path>", views.ArchiveView.as_view(), name="archive"),
     path("gazettes", RedirectView.as_view(pattern_name="home")),
+    path("gazettes/", RedirectView.as_view(pattern_name="home")),
+    path("gazettes/<int:year>", views.global_year_not_found),
     path("gazettes/<str:code>/", views.JurisdictionView.as_view(), name="jurisdiction"),
     path("gazettes/<str:code>/<int:year>", views.YearView.as_view(), name="year"),
     re_path(

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0047_coredocument_new_nature"),
     ]

@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("liiweb", "0002_alter_courtclass_options"),
         ("peachjam", "0024_court_model"),

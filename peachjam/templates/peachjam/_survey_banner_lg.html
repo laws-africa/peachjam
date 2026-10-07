@@ -15,10 +15,12 @@
         </div>
       </div>
       <div class=" col-xl-6 col-lg-6 col-md-12 text-lg-center pt-6">
-        <a target="_blank"
-           href="{{ PEACHJAM_SETTINGS.survey_link }}"
-           class="text-white btn btn-lg btn-danger"><span class="fw-bold">{% trans 'Take the survey' %}</span></a>
-      </div>
-    </div>
+      <a target="_blank"
+         href="{{ PEACHJAM_SETTINGS.survey_link }}"
+         class="text-white btn btn-lg btn-danger"><span class="fw-bold">{% trans 'Take the survey' %}</span>
+      {% include 'peachjam/_opens_in_new_tab.html' %}
+    </a>
   </div>
+</div>
+</div>
 </div>

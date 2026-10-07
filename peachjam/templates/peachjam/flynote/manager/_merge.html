@@ -1,0 +1,5 @@
+<div>
+  {% if merge_success %}<div class="alert alert-success" role="status">{{ merge_success }}</div>{% endif %}
+  {% if merge_error %}<div class="alert alert-danger" role="alert">{{ merge_error }}</div>{% endif %}
+  {% include "peachjam/flynote/manager/_merge_picker.html" %}
+</div>

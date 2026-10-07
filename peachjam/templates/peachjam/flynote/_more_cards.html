@@ -1,0 +1,14 @@
+{% include 'peachjam/flynote/_cards.html' with append_cards=True %}
+{% if subtopic_query %}
+  {% if has_more_topics %}
+    <div id="flynote-more-subtopics"
+         class="col d-flex align-items-center justify-content-center"
+         hx-swap-oob="beforeend:#flynote-subtopic-cards">
+      {% include 'peachjam/flynote/_more_cards_button.html' %}
+    </div>
+  {% endif %}
+{% else %}
+  <div id="flynote-more-subtopics" class="mt-3 text-center">
+    {% include 'peachjam/flynote/_more_cards_button.html' %}
+  </div>
+{% endif %}

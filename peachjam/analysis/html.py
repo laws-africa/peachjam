@@ -45,7 +45,8 @@ def generate_toc_json_from_html(root):
 
 def wrap_toc_entries_in_divs(root, toc):
     """Ensure the HTML covered by these TOC items are wrapped in nested divs. This may be run multiple times as a
-    document gets edited, and so we want to handle the case where the divs are already present."""
+    document gets edited, and so we want to handle the case where the divs are already present.
+    """
 
     def wrap_items(items):
         for i, item in enumerate(items):

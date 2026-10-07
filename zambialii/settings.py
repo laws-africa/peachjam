@@ -2,9 +2,14 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "Africa/Lusaka"
+
 INSTALLED_APPS = ["zambialii.apps.ZambiaLIIConfig"] + INSTALLED_APPS  # noqa
 
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+
 ROOT_URLCONF = "zambialii.urls"
+ALLOWED_HOSTS = build_allowed_hosts("zambialii.org", "www.zambialii.org")  # noqa
 
 JAZZMIN_SETTINGS["site_title"] = "ZambiaLII"  # noqa
 JAZZMIN_SETTINGS["site_header"] = "ZambiaLII"  # noqa
@@ -28,5 +33,5 @@ LANGUAGES = [
 if not DEBUG:  # noqa
     # zambialii media files are stored on S3 and served via a Cloudflare CDN (via copying to R2).
     # We can therefore set long-lived cache headers and serve them from a custom domain.
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400*5}"}
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400 * 5}"}
     AWS_S3_CUSTOM_DOMAIN = "media.zambialii.org"

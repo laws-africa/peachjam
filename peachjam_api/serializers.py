@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from rest_framework import serializers
 
 from peachjam.auth import user_display
@@ -140,10 +142,23 @@ class TargetSelectorField(serializers.JSONField):
 
 class CitationLinkSerializer(serializers.ModelSerializer):
     target_selectors = TargetSelectorField()
+    is_external = serializers.SerializerMethodField("get_is_external")
 
     class Meta:
         model = CitationLink
-        fields = ("id", "document", "text", "url", "target_id", "target_selectors")
+        fields = (
+            "id",
+            "document",
+            "text",
+            "url",
+            "target_id",
+            "target_selectors",
+            "is_external",
+        )
+
+    def get_is_external(self, instance):
+        parsed = urlparse(instance.url)
+        return bool(parsed.scheme or parsed.netloc)
 
 
 class LabelSerializer(serializers.ModelSerializer):
@@ -254,6 +269,7 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
     case_numbers = CaseNumbersSerializer(many=True, read_only=True)
     locality = LocalitySerializer(read_only=True)
     topics = serializers.SerializerMethodField()
+    content_html_is_akn = serializers.SerializerMethodField()
 
     class Meta:
         model = Judgment
@@ -275,8 +291,16 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "serial_number_override",
             "content_html_is_akn",
             "allow_robots",
+            "blurb",
             "flynote",
             "case_summary",
+            "case_summary_public",
+            "issues",
+            "held",
+            "order",
+            "summary_ai_generated",
+            "summary_generated_at",
+            "summary_language",
             "published",
             "id",
             "title",
@@ -291,6 +315,9 @@ class JudgmentSerializer(BaseSerializerMixin, serializers.ModelSerializer):
 
     def get_topics(self, instance):
         return [t.topic.slug for t in instance.taxonomies.all()]
+
+    def get_content_html_is_akn(self, instance):
+        return instance.get_or_create_document_content().content_html_is_akn
 
 
 class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):

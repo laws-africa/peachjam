@@ -1,14 +1,20 @@
+from django.http import Http404
 from django.urls import reverse
 from django.views.generic import DeleteView, DetailView, ListView, UpdateView
 
 from peachjam.forms import AnnotationForm
-from peachjam.models import Annotation
+from peachjam.models import Annotation, pj_settings
 from peachjam.views import AtomicPostMixin
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
 class BaseAnnotationView(SubscriptionRequiredMixin):
     model = Annotation
+
+    def dispatch(self, *args, **kwargs):
+        if not pj_settings().annotations_enabled:
+            raise Http404("Annotations are not allowed.")
+        return super().dispatch(*args, **kwargs)
 
     def get_queryset(self):
         return Annotation.objects.filter(

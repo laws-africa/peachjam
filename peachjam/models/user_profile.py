@@ -1,0 +1,216 @@
+import hashlib
+import os
+import uuid
+from datetime import timedelta
+
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount, SocialToken
+from django.contrib.auth import get_user_model
+from django.db import models, transaction
+from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
+from languages_plus.models import Language
+
+from peachjam.account_signals import (
+    user_account_post_delete,
+    user_account_pre_delete,
+)
+from peachjam.customerio import get_customerio
+from peachjam_search.models import SavedSearch
+from peachjam_subs.models import Subscription
+
+from .annotation import Annotation
+from .chat import DocumentChatThread
+from .email_alerts import EmailAlertFrequency
+from .save_document import Folder, SavedDocument
+from .settings import pj_settings
+from .user_following import UserFollowing
+
+
+def file_location(instance, filename):
+    filename = os.path.basename(filename)
+    return f"{instance.SAVE_FOLDER}/{instance.pk}/{filename}"
+
+
+class OnboardingOption(models.Model):
+    label = models.CharField(_("label"), max_length=100)
+    order = models.PositiveIntegerField(_("order"), default=0)
+    active = models.BooleanField(_("active"), default=True)
+
+    class Meta:
+        abstract = True
+        ordering = ["order", "label"]
+
+    def __str__(self):
+        return self.label
+
+
+class OnboardingIntent(OnboardingOption):
+    class Meta(OnboardingOption.Meta):
+        verbose_name = _("onboarding intent")
+        verbose_name_plural = _("onboarding intents")
+
+
+class PracticeType(OnboardingOption):
+    class Meta(OnboardingOption.Meta):
+        verbose_name = _("practice type")
+        verbose_name_plural = _("practice types")
+
+
+def default_email_alert_frequency():
+    return pj_settings().email_alert_default_frequency
+
+
+class UserProfile(models.Model):
+    SAVE_FOLDER = "user_profiles"
+    EmailAlertFrequency = EmailAlertFrequency
+
+    user = models.OneToOneField(
+        get_user_model(), on_delete=models.CASCADE, verbose_name=_("user")
+    )
+    photo = models.ImageField(
+        _("photo"), upload_to=file_location, blank=True, null=True
+    )
+    profile_description = models.TextField(_("profile description"))
+    tracking_id = models.UUIDField(_("tracking id"), default=uuid.uuid4, editable=False)
+
+    preferred_language = models.ForeignKey(
+        Language,
+        on_delete=models.PROTECT,
+        default="en",
+        related_name="+",
+        verbose_name=_("preferred language"),
+    )
+    accepted_terms_at = models.DateTimeField(
+        _("accepted terms at"),
+        default=timezone.now,
+        help_text=_("When the user accepted the terms of service."),
+        null=True,
+        blank=True,
+    )
+    deleted_at = models.DateTimeField(_("deleted at"), null=True, blank=True)
+    deleted_reason = models.TextField(_("deleted reason"), null=True, blank=True)
+    email_hash = models.CharField(_("email hash"), max_length=64, null=True, blank=True)
+    email_alert_frequency = models.CharField(
+        _("email alert frequency"),
+        max_length=16,
+        choices=EmailAlertFrequency.choices,
+        default=default_email_alert_frequency,
+        help_text=_("How often to receive email notification digests."),
+    )
+    onboarding_intents = models.ManyToManyField(
+        OnboardingIntent,
+        verbose_name=_("onboarding intents"),
+        blank=True,
+    )
+    practice_type = models.ForeignKey(
+        PracticeType,
+        verbose_name=_("practice type"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    onboarding_completed_at = models.DateTimeField(
+        _("onboarding completed at"),
+        null=True,
+        blank=True,
+    )
+    onboarding_skipped_at = models.DateTimeField(
+        _("onboarding skipped at"),
+        null=True,
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = _("user profile")
+        verbose_name_plural = _("user profiles")
+
+    @property
+    def tracking_id_str(self):
+        return str(self.tracking_id)
+
+    def should_show_onboarding(self):
+        if self.onboarding_completed_at:
+            return False
+        if not self.onboarding_skipped_at:
+            return True
+        return self.onboarding_skipped_at <= timezone.now() - timedelta(days=7)
+
+    def requires_name_onboarding(self):
+        return not self.user.first_name or not self.user.last_name
+
+    def requires_onboarding(self):
+        return self.requires_name_onboarding() or self.should_show_onboarding()
+
+    def is_primary_email_verified(self):
+        return self.user.emailaddress_set.filter(
+            verified=True, email=self.user.email
+        ).exists()
+
+    @staticmethod
+    def hashed_email(email):
+        return hashlib.sha256(email.strip().lower().encode("utf-8")).hexdigest()
+
+    @transaction.atomic
+    def delete_account(self, deleted_reason, deletion_feedback=None):
+        original_email = self.user.email or ""
+
+        user_account_pre_delete.send(
+            sender=type(self),
+            instance=self,
+            user=self.user,
+            deleted_reason=deleted_reason,
+            deletion_feedback=deletion_feedback,
+        )
+
+        Annotation.objects.filter(user=self.user).delete()
+        UserFollowing.objects.filter(user=self.user).delete()
+        SavedSearch.objects.filter(user=self.user).delete()
+        SavedDocument.objects.filter(user=self.user).delete()
+        Folder.objects.filter(user=self.user).delete()
+        DocumentChatThread.objects.filter(user=self.user).delete()
+
+        sub = Subscription.get_or_create_active_for_user(self.user)
+        if sub:
+            sub.close()
+
+        get_customerio().track_user_deleted(self.user, feedback=deletion_feedback)
+
+        self.deleted_at = timezone.now()
+        self.deleted_reason = deleted_reason
+        self.email_hash = self.hashed_email(original_email) if original_email else None
+        self.photo.delete(save=False)
+        self.photo = None
+        self.profile_description = ""
+        self.save()
+
+        EmailAddress.objects.filter(user=self.user).delete()
+        SocialToken.objects.filter(account__user=self.user).delete()
+        SocialAccount.objects.filter(user=self.user).delete()
+
+        self.user.username = f"deleted-{self.user.pk}"
+        self.user.first_name = ""
+        self.user.last_name = ""
+        self.user.email = ""
+        self.user.is_active = False
+        self.user.set_unusable_password()
+        self.user.save()
+
+        user_account_post_delete.send(
+            sender=type(self),
+            instance=self,
+            user=self.user,
+            deleted_reason=deleted_reason,
+            deletion_feedback=deletion_feedback,
+        )
+
+        return self.user
+
+    def avatar_url(self):
+        """Returns the URL of the first social account avatar, if any."""
+        for social_account in self.user.socialaccount_set.all():
+            if social_account.extra_data.get("picture"):
+                return social_account.extra_data.get("picture")
+
+    def __str__(self):
+        return f"{self.user.username}"

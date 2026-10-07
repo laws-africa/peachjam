@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("countries_plus", "0005_auto_20160224_1804"),
         ("peachjam", "0104_rename_help_link_peachjamsettings_editor_help_link"),

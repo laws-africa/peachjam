@@ -67,6 +67,13 @@ class CitationLinkViewSet(AtomicWriteViewSetMixin, viewsets.ModelViewSet):
     queryset = CitationLink.objects.all()
     serializer_class = CitationLinkSerializer
 
+    def perform_create(self, serializer):
+        serializer.save(origin=CitationLink.Origin.MANUAL)
+
+    def perform_update(self, serializer):
+        """Pin staff-edited citation links so future extraction preserves them."""
+        serializer.save(origin=CitationLink.Origin.MANUAL)
+
 
 class IngestorWebhookView(APIView):
     permission_classes = []

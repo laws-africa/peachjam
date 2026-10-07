@@ -1,0 +1,46 @@
+{% load i18n %}
+<div class="card-body">
+  {% with judges=entry.document.judges.all %}
+    {% if entry.document.court or judges %}
+      <div class="row g-3 mb-2">
+        {% if entry.document.court %}
+          <dl class="{% if judges %}col-6{% else %}col-12{% endif %} mb-0">
+            <dt class="small text-uppercase text-muted fw-normal">
+              {% trans 'Court' %}
+            </dt>
+            <dd class="text-muted mb-0">
+              <a href="{% url 'court' entry.document.court.code %}">{{ entry.document.court.name }}</a>
+            </dd>
+          </dl>
+        {% endif %}
+        {% if judges %}
+          <dl class="{% if entry.document.court %}col-6{% else %}col-12{% endif %} mb-0">
+            <dt class="small text-uppercase text-muted fw-normal">
+              {% trans 'Judges' %}
+            </dt>
+            <dd class="text-muted mb-0">
+              {% for judge in judges %}
+                <a href="{{ judge.get_absolute_url }}" data-key-link="judge">{{ judge }}</a>
+                {% if not forloop.last %},{% endif %}
+              {% endfor %}
+            </dd>
+          </dl>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  <h5 class="mb-0 card-title">
+    <a href="{{ entry.document.get_absolute_url }}">{{ entry.document.title }}</a>
+  </h5>
+  <div class="mt-2">{% include 'peachjam/_document_labels.html' with labels=entry.document.labels.all %}</div>
+  {% if entry.document.blurb %}<p class="mb-2 mt-2">{{ entry.document.blurb|default_if_none:"" }}</p>{% endif %}
+  {% with entry.document.outcomes.all as outcomes %}
+    {% if outcomes %}
+      <div class="mt-1">
+        {% for outcome in outcomes %}
+          <span class="badge rounded-pill bg-primary-subtle text-primary">{{ outcome }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+</div>

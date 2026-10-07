@@ -21,7 +21,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_search", "0004_auto_20240719_1050"),
     ]

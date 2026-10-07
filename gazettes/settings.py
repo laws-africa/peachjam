@@ -1,5 +1,7 @@
 from peachjam.settings import *  # noqa
 
+TIME_ZONE = "UTC"
+
 # Application definition
 INSTALLED_APPS = [
     "gazettes",
@@ -20,6 +22,7 @@ CORS_URLS_REGEX = r"^.*$"
 
 
 ROOT_URLCONF = "gazettes.urls"
+ALLOWED_HOSTS = build_allowed_hosts("gazettes.africa", "www.gazettes.africa")  # noqa
 
 
 # Database

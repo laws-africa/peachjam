@@ -1,0 +1,24 @@
+[run]
+branch = True
+relative_files = True
+source =
+    peachjam
+    peachjam_subs
+    peachjam_search
+    africanlii
+    liiweb
+
+[report]
+omit =
+    */migrations/*
+    */tests/*
+    manage.py
+exclude_lines =
+    pragma: no cover
+    raise NotImplementedError
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+    @abstractmethod
+skip_covered = True
+show_missing = True
+precision = 2

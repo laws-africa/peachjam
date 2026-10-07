@@ -4,6 +4,7 @@ import unittest.util
 from unittest.mock import ANY, Mock, call
 
 from countries_plus.models import Country
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
 from languages_plus.models import Language
@@ -51,6 +52,17 @@ class DynamicS3StorageTestCase(TestCase):
             date=datetime.date(2022, 1, 1),
         )
         self.mock = TestableStorage.connection = Mock()
+
+    def test_source_file_start_page_validation(self):
+        field = SourceFile._meta.get_field("start_page")
+
+        self.assertIsNone(field.clean(None, None))
+        self.assertEqual(1, field.clean(1, None))
+        self.assertEqual(36, field.clean(36, None))
+
+        for value in (0, -1):
+            with self.subTest(value=value), self.assertRaises(ValidationError):
+                field.clean(value, None)
 
     def test_basics(self):
         sf = SourceFile(document=self.doc)

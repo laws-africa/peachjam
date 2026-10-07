@@ -1,0 +1,10 @@
+{% load i18n %}
+{% if form.errors %}
+  <div class="alert alert-danger">{{ form.errors }}</div>
+{% else %}
+  <div class="mb-3">
+    <h2 class="h4">{% trans "Raw query results" %}</h2>
+    <p class="text-muted mb-0">{{ index }}</p>
+  </div>
+  {% include "peachjam_search/_debug_json_tabs.html" with prefix="raw-debug" query_json=query_json response_json=raw_response_json %}
+{% endif %}

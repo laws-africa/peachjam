@@ -1,11 +1,37 @@
-from django.test import TestCase
+import datetime
+import os
+import threading
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from types import SimpleNamespace
+from unittest.mock import patch
 
-from peachjam.adapters import IndigoAdapter
-from peachjam.models import Taxonomy
+import requests
+from countries_plus.models import Country
+from django.conf import settings
+from django.test import TestCase, override_settings
+from django.utils.text import slugify
+from languages_plus.models import Language
+
+from peachjam.adapters import (
+    IndigoAdapter,
+    IndigoEnrichmentDatasetIngestor,
+    JudgmentAdapter,
+    RequestsAdapter,
+)
+from peachjam.models import (
+    Court,
+    GenericDocument,
+    Judgment,
+    Legislation,
+    ProvisionTopicEnrichment,
+    SourceFile,
+    Taxonomy,
+)
 
 
 class IndigoAdapterTest(TestCase):
     maxDiff = None
+    fixtures = ["tests/countries", "tests/languages"]
 
     def setUp(self):
         self.adapter = IndigoAdapter(
@@ -234,3 +260,650 @@ class IndigoAdapterTest(TestCase):
             ],
             local_tree,
         )
+
+    def test_enrichment_dataset_ingestor_imports_provision_topics(self):
+        document = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="act",
+            frbr_uri_number="1",
+            title="Arbitration Act",
+            metadata_json={"commenced": True},
+        )
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        taxonomy_tree = {
+            "results": [
+                {
+                    "name": "Enrichments",
+                    "slug": "enrichments",
+                    "children": [
+                        {
+                            "name": "Arbitration law",
+                            "slug": "enrichments-arbitration-law",
+                            "children": [
+                                {
+                                    "name": "Validity",
+                                    "slug": "enrichments-arbitration-law-validity",
+                                    "children": [],
+                                },
+                                {
+                                    "name": "Recognition",
+                                    "slug": "arbitration-law-recognition",
+                                    "children": [],
+                                },
+                            ],
+                        }
+                    ],
+                }
+            ]
+        }
+        dataset = {
+            "enrichments": [
+                {
+                    "work": document.work.frbr_uri,
+                    "provision_id": "sec_1",
+                    "taxonomy_topic": "arbitration-law-validity",
+                }
+            ]
+        }
+
+        Taxonomy.load_bulk(
+            [
+                {
+                    "data": {
+                        "name": "Enrichments arbitration law",
+                    },
+                    "children": [],
+                }
+            ]
+        )
+
+        adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            json=lambda: taxonomy_tree if url.endswith("/taxonomy-topics") else dataset
+        )
+
+        adapter.import_dataset()
+
+        topic = Taxonomy.objects.get(slug="enrichments-arbitration-law-validity")
+        Taxonomy.objects.get(slug="enrichments-arbitration-law-recognition")
+        enrichment = ProvisionTopicEnrichment.objects.get()
+        self.assertEqual(document.work, enrichment.work)
+        self.assertEqual("sec_1", enrichment.provision_eid)
+        self.assertEqual(topic, enrichment.topic)
+
+    def test_enrichment_dataset_ingestor_check_for_updates_returns_dataset_sentinel(
+        self,
+    ):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-02T00:00:00Z",
+            "enrichments": [],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 1, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual([adapter.DATASET_DOCUMENT_ID], updated)
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_check_for_updates_checks_works_when_dataset_fresh(
+        self,
+    ):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [
+                {
+                    "work": "/akn/za/act/2024/1",
+                    "provision_id": "sec_1",
+                    "taxonomy_topic": "arbitration-law-validity",
+                }
+            ],
+        }
+        adapter.get_work = lambda work_frbr_uri: {  # noqa: E731
+            "url": "http://example.com/akn/za/act/2024/1/eng@2024-01-01",
+            "updated_at": "2024-01-03T00:00:00Z",
+            "points_in_time": [
+                {
+                    "expressions": [
+                        {
+                            "url": "http://example.com/akn/za/act/2024/1/eng@2024-01-01",
+                            "updated_at": "2024-01-03T00:00:00Z",
+                        },
+                        {
+                            "url": "http://example.com/akn/za/act/2024/1/fra@2024-01-01",
+                            "updated_at": "2024-01-03T00:00:00Z",
+                        },
+                    ]
+                }
+            ],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual(
+            [
+                "http://example.com/akn/za/act/2024/1/eng@2024-01-01",
+                "http://example.com/akn/za/act/2024/1/fra@2024-01-01",
+            ],
+            sorted(updated),
+        )
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_queues_missing_local_work(self):
+        document = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="act",
+            frbr_uri_number="1",
+            title="Existing Act",
+            metadata_json={"commenced": True},
+        )
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [
+                {"work": document.work_frbr_uri},
+                {"work": "/akn/za/act/2024/2"},
+            ],
+        }
+        adapter.get_work = lambda work_frbr_uri: {  # noqa: E731
+            "url": f"http://example.com{work_frbr_uri}/eng@2024-01-01",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "points_in_time": [],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual(
+            ["http://example.com/akn/za/act/2024/2/eng@2024-01-01"],
+            updated,
+        )
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_skips_unchanged_existing_work(self):
+        document = Legislation.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="act",
+            frbr_uri_number="1",
+            title="Existing Act",
+            metadata_json={"commenced": True},
+        )
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [{"work": document.work_frbr_uri}],
+        }
+        adapter.get_work = lambda work_frbr_uri: {  # noqa: E731
+            "url": f"http://example.com{work_frbr_uri}/eng@2024-01-01",
+            "updated_at": "2024-01-01T00:00:00Z",
+            "points_in_time": [],
+        }
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual([], updated)
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_skips_missing_remote_work(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        response = SimpleNamespace(status_code=404)
+        adapter.get_dataset = lambda: {  # noqa: E731
+            "updated_at": "2024-01-01T00:00:00Z",
+            "enrichments": [{"work": "/akn/za/act/2024/1"}],
+        }
+
+        def get_work(work_frbr_uri):
+            raise requests.exceptions.HTTPError(response=response)
+
+        adapter.get_work = get_work
+
+        last_refreshed = datetime.datetime(2024, 1, 2, tzinfo=datetime.timezone.utc)
+        updated, deleted = adapter.check_for_updates(last_refreshed)
+
+        self.assertEqual([], updated)
+        self.assertEqual([], deleted)
+
+    def test_enrichment_dataset_ingestor_update_document_imports_dataset(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+
+        with patch.object(adapter, "import_dataset") as import_dataset:
+            adapter.update_document(adapter.DATASET_DOCUMENT_ID)
+
+        import_dataset.assert_called_once_with()
+
+    def test_enrichment_dataset_ingestor_update_document_delegates_document_urls(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+
+        with patch.object(IndigoAdapter, "update_document") as update_document:
+            adapter.update_document(
+                "http://example.com/akn/za/act/2024/1/eng@2024-01-01"
+            )
+
+        update_document.assert_called_once_with(
+            "http://example.com/akn/za/act/2024/1/eng@2024-01-01"
+        )
+
+    def test_enrichment_dataset_ingestor_requires_local_taxonomy_root(self):
+        adapter = IndigoEnrichmentDatasetIngestor(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "dataset_id": "5",
+                "taxonomy_topic_root": "enrichments-arbitration-law:enrichments-arbitration-law",
+            },
+        )
+        taxonomy_tree = {
+            "results": [
+                {
+                    "name": "Arbitration law",
+                    "slug": "enrichments-arbitration-law",
+                    "children": [],
+                }
+            ]
+        }
+        dataset = {"enrichments": []}
+
+        adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            json=lambda: taxonomy_tree if url.endswith("/taxonomy-topics") else dataset
+        )
+
+        with self.assertRaisesMessage(
+            ValueError,
+            "Taxonomy root enrichments-arbitration-law not found locally",
+        ):
+            adapter.import_dataset()
+
+    @patch("peachjam.adapters.indigo.SourceFile.track_changes", autospec=True)
+    def test_download_source_file_creates_tracked_source_file(self, track_changes):
+        document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2022, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Fixture PDF",
+        )
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            pdf_content = fixture.read()
+
+        self.adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            content=pdf_content,
+            headers={},
+        )
+
+        self.adapter.download_source_file(
+            "http://example.com/source.pdf",
+            document,
+            "Fixture PDF",
+            start_page=36,
+        )
+
+        document.refresh_from_db()
+        source_file = SourceFile.objects.get(document=document)
+        self.assertEqual("fixture-pdf.pdf", source_file.filename)
+        self.assertEqual("application/pdf", source_file.mimetype)
+        self.assertEqual(len(pdf_content), source_file.size)
+        self.assertEqual(36, source_file.start_page)
+        track_changes.assert_called_once_with(source_file)
+
+    @patch.object(IndigoAdapter, "create_publication_file")
+    @patch.object(IndigoAdapter, "clear_publication_file")
+    @patch.object(IndigoAdapter, "download_source_file")
+    def test_stub_uses_publication_document_start_page(
+        self, download_source_file, clear_publication_file, create_publication_file
+    ):
+        created_document = object()
+        publication_document = {
+            "url": "http://example.com/gazette.pdf",
+            "start_page": 36,
+        }
+        document = {
+            "title": "Fixture PDF",
+            "stub": True,
+            "publication_document": publication_document,
+        }
+
+        self.adapter.attach_source_and_publication_file(
+            "http://example.com/document", document, created_document
+        )
+
+        download_source_file.assert_called_once_with(
+            "http://example.com/gazette.pdf",
+            created_document,
+            "Fixture PDF",
+            start_page=36,
+        )
+        clear_publication_file.assert_called_once_with(created_document)
+        create_publication_file.assert_called_once_with(
+            publication_document, created_document, "Fixture PDF", stub=True
+        )
+
+    @patch.object(IndigoAdapter, "create_publication_file")
+    @patch.object(IndigoAdapter, "clear_publication_file")
+    @patch.object(IndigoAdapter, "download_source_file")
+    def test_stub_allows_publication_document_without_start_page(
+        self, download_source_file, clear_publication_file, create_publication_file
+    ):
+        created_document = object()
+        document = {
+            "title": "Fixture PDF",
+            "stub": True,
+            "publication_document": {"url": "http://example.com/gazette.pdf"},
+        }
+
+        self.adapter.attach_source_and_publication_file(
+            "http://example.com/document", document, created_document
+        )
+
+        download_source_file.assert_called_once_with(
+            "http://example.com/gazette.pdf",
+            created_document,
+            "Fixture PDF",
+            start_page=None,
+        )
+
+    @patch.object(IndigoAdapter, "create_publication_file")
+    @patch.object(IndigoAdapter, "clear_publication_file")
+    @patch.object(IndigoAdapter, "download_source_file")
+    def test_non_stub_does_not_use_publication_document_start_page(
+        self, download_source_file, clear_publication_file, create_publication_file
+    ):
+        created_document = object()
+        publication_document = {
+            "url": "http://example.com/gazette.pdf",
+            "start_page": 36,
+        }
+        document = {
+            "title": "Fixture PDF",
+            "stub": False,
+            "publication_document": publication_document,
+        }
+
+        self.adapter.attach_source_and_publication_file(
+            "http://example.com/document", document, created_document
+        )
+
+        download_source_file.assert_called_once_with(
+            "http://example.com/document.pdf",
+            created_document,
+            "Fixture PDF",
+        )
+        clear_publication_file.assert_called_once_with(created_document)
+        create_publication_file.assert_called_once_with(
+            publication_document, created_document, "Fixture PDF", stub=False
+        )
+
+
+class JudgmentAdapterTest(TestCase):
+    fixtures = ["tests/countries", "tests/languages", "tests/courts"]
+
+    def setUp(self):
+        self.adapter = JudgmentAdapter(
+            None,
+            {
+                "token": "XXX",
+                "api_url": "http://example.com",
+                "court_code": "eacj",
+            },
+        )
+
+    def remote_judgment_doc(self, **overrides):
+        doc = {
+            "title": "Remote judgment",
+            "case_name": "Foo v Bar",
+            "created_at": "2024-01-01T00:00:00Z",
+            "updated_at": "2024-01-02T00:00:00Z",
+            "citation": "Remote citation",
+            "work_frbr_uri": "/akn/za/judgment/eacj/2024/1",
+            "expression_frbr_uri": "/akn/za/judgment/eacj/2024/1/eng@2024-01-01",
+            "jurisdiction": "ZA",
+            "language": "en",
+            "court": {"code": "EACJ", "name": "East African Court of Justice"},
+            "registry": None,
+            "locality": None,
+            "serial_number": 1,
+            "serial_number_override": None,
+            "mnc": "[2024] EACJ 1",
+            "date": "2024-01-01",
+            "allow_robots": True,
+            "published": True,
+            "flynote": "Remote flynote",
+            "flynote_raw": "Remote flynote raw",
+            "case_summary": "<p>Remote summary</p>",
+            "case_summary_public": True,
+            "blurb": "Remote blurb",
+            "issues": ["Issue 1"],
+            "held": ["Held 1"],
+            "order": "Remote order",
+            "summary_ai_generated": True,
+            "summary_generated_at": "2024-01-03T00:00:00Z",
+            "summary_language": "English",
+            "summary_trace_id": "trace-123",
+            "case_numbers": [],
+            "judges": [],
+            "topics": [],
+        }
+        doc.update(overrides)
+        return doc
+
+    @patch("peachjam.adapters.judgments.SourceFile.track_changes", autospec=True)
+    @patch("peachjam.adapters.judgments.SourceFile.ensure_file_as_pdf", autospec=True)
+    def test_attach_source_file_creates_tracked_source_file(
+        self, ensure_file_as_pdf, track_changes
+    ):
+        judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2022, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Fixture judgment",
+        )
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            pdf_content = fixture.read()
+
+        self.adapter.client_get = lambda url: SimpleNamespace(  # noqa: E731
+            content=pdf_content,
+        )
+
+        self.adapter.attach_source_file(
+            {
+                "expression_frbr_uri": judgment.expression_frbr_uri,
+                "title": judgment.title,
+            },
+            judgment,
+        )
+
+        judgment.refresh_from_db()
+        source_file = SourceFile.objects.get(document=judgment)
+        self.assertEqual(
+            f"{os.path.splitext(slugify(judgment.title))[0]}.pdf",
+            source_file.filename,
+        )
+        self.assertEqual("application/pdf", source_file.mimetype)
+        track_changes.assert_called_once_with(source_file)
+        ensure_file_as_pdf.assert_called_once_with(source_file)
+
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_update_document_imports_summary_fields(self, generate_summary):
+        doc = self.remote_judgment_doc()
+
+        self.adapter.client_get = lambda url: SimpleNamespace(json=lambda: doc)  # noqa: E731
+        self.adapter.get_content_html = lambda doc: "<p>Remote content</p>"  # noqa: E731
+        self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
+
+        self.adapter.update_document(
+            "http://example.com/judgments/akn/za/judgment/eacj/2024/1/eng@2024-01-01"
+        )
+
+        judgment = Judgment.objects.get(expression_frbr_uri=doc["expression_frbr_uri"])
+        self.assertEqual("<p>Remote summary</p>", judgment.case_summary)
+        self.assertEqual(True, judgment.case_summary_public)
+        self.assertEqual("Remote blurb", judgment.blurb)
+        self.assertEqual("Remote flynote raw", judgment.flynote_raw)
+        self.assertEqual("Remote flynote", judgment.flynote)
+        self.assertEqual(["Issue 1"], judgment.issues)
+        self.assertEqual(["Held 1"], judgment.held)
+        self.assertEqual("Remote order", judgment.order)
+        self.assertTrue(judgment.summary_ai_generated)
+        self.assertEqual("English", judgment.summary_language)
+        self.assertEqual("trace-123", judgment.summary_trace_id)
+        self.assertIsNotNone(judgment.summary_generated_at)
+        generate_summary.assert_not_called()
+
+    @override_settings(PEACHJAM={**settings.PEACHJAM, "SUMMARISER_LANGUAGE": "English"})
+    @patch("peachjam.models.judgment.generate_judgment_summary")
+    def test_update_document_skips_wrong_language_ai_summary(self, generate_summary):
+        doc = self.remote_judgment_doc(summary_language="French")
+
+        self.adapter.client_get = lambda url: SimpleNamespace(json=lambda: doc)  # noqa: E731
+        self.adapter.get_content_html = lambda doc: "<p>Remote content</p>"  # noqa: E731
+        self.adapter.attach_source_file = lambda doc, created_doc: None  # noqa: E731
+
+        self.adapter.update_document(
+            "http://example.com/judgments/akn/za/judgment/eacj/2024/1/eng@2024-01-01"
+        )
+
+        judgment = Judgment.objects.get(expression_frbr_uri=doc["expression_frbr_uri"])
+        self.assertIsNone(judgment.case_summary)
+        self.assertFalse(judgment.case_summary_public)
+        self.assertIsNone(judgment.blurb)
+        self.assertIsNone(judgment.issues)
+        self.assertIsNone(judgment.held)
+        self.assertIsNone(judgment.order)
+        self.assertFalse(judgment.summary_ai_generated)
+        self.assertIsNone(judgment.summary_generated_at)
+        self.assertEqual("English", judgment.summary_language)
+        self.assertIsNone(judgment.summary_trace_id)
+        self.assertTrue(
+            any(call.args == (judgment.pk,) for call in generate_summary.call_args_list)
+        )
+
+
+class HtmlServer:
+    """Tiny HTTP server that serves UTF-8 HTML, optionally declaring a charset."""
+
+    BODY = "<p>le Président du Tribunal d’Abidjan</p>"
+
+    def __init__(self, content_type):
+        server = self
+
+        class Handler(BaseHTTPRequestHandler):
+            def do_GET(self):
+                body = server.BODY.encode("utf-8")
+                self.send_response(200)
+                self.send_header("Content-Type", content_type)
+                self.send_header("Content-Length", str(len(body)))
+                self.end_headers()
+                self.wfile.write(body)
+
+            def log_message(self, *args):
+                pass
+
+        self.httpd = ThreadingHTTPServer(("127.0.0.1", 0), Handler)
+        self.url = f"http://127.0.0.1:{self.httpd.server_address[1]}"
+
+    def __enter__(self):
+        self.thread = threading.Thread(target=self.httpd.serve_forever, daemon=True)
+        self.thread.start()
+        return self
+
+    def __exit__(self, *args):
+        self.httpd.shutdown()
+        self.httpd.server_close()
+        self.thread.join()
+
+
+class RequestsAdapterEncodingTest(TestCase):
+    def test_assumes_utf8_when_charset_not_declared(self):
+        # requests defaults to ISO-8859-1 for text/* without a charset, which mangles UTF-8
+        with HtmlServer("text/html") as server:
+            adapter = RequestsAdapter(None, {"api_url": server.url})
+            r = adapter.client_get(server.url + "/foo")
+
+        self.assertEqual("utf-8", r.encoding)
+        self.assertEqual(HtmlServer.BODY, r.text)
+
+    def test_respects_declared_charset(self):
+        with HtmlServer("text/html; charset=utf-8") as server:
+            adapter = RequestsAdapter(None, {"api_url": server.url})
+            r = adapter.client_get(server.url + "/foo")
+
+        self.assertEqual(HtmlServer.BODY, r.text)

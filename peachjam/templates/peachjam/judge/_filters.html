@@ -1,0 +1,40 @@
+{% load i18n %}
+{% if judge_rendered_facets %}
+  <aside id="{{ judge_filter_form_id }}-filters-section"
+         class="col-lg-3"
+         aria-labelledby="{{ judge_filter_form_id }}-filters-heading">
+    <button class="btn btn-primary d-lg-none w-100 mb-3"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#{{ judge_filter_form_id }}-filters"
+            aria-expanded="false"
+            aria-controls="{{ judge_filter_form_id }}-filters">
+      {% trans "Filters" %}
+    </button>
+    <div class="collapse d-lg-block"
+         id="{{ judge_filter_form_id }}-filters"
+         data-component="DocumentFilterForm"
+         hx-include="#{{ judge_filter_form_id }}"
+         hx-target="#judge-list-updates"
+         hx-select="#judge-list-updates"
+         hx-swap="outerHTML"
+         hx-push-url="true"
+         hx-sync="#{{ judge_filter_form_id }}:replace">
+      <div class="document-list-facets">
+        <ul class="list-group">
+          <li class="position-relative list-group-item bg-light d-flex justify-content-between align-items-center">
+            <h2 id="{{ judge_filter_form_id }}-filters-heading"
+                class="h6 mb-0 skip-link-target">{% trans "Filters" %}</h2>
+            {% if judge_show_clear_all %}
+              <a href="{{ request.path }}"
+                 data-track-event="Listing | Clear filter | all"
+                 hx-get="{{ request.path }}"
+                 hx-params="none">{% trans "Clear all" %}</a>
+            {% endif %}
+          </li>
+          {% include "peachjam/_facet_groups.html" with rendered_facets=judge_rendered_facets filter_form_id=judge_filter_form_id disable_push_url=True %}
+        </ul>
+      </div>
+    </div>
+  </aside>
+{% endif %}

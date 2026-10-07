@@ -8,14 +8,20 @@
             aria-label="{% trans "Close" %}"></button>
   </div>
   <div class="modal-body">
-    <p>
-      <strong>{% trans 'You are not logged in' %}.</strong>
-    </p>
-    <p>{% trans 'To save a document you need to be logged in' %}.</p>
+    {% if PEACHJAM_SETTINGS.accounts_enabled %}
+      <p>
+        <strong>{% trans 'You are not logged in' %}.</strong>
+      </p>
+      <p>{% trans 'To save a document you need to be logged in' %}.</p>
+    {% else %}
+      <p>{% trans 'Saving documents requires an account, and accounts are not available on this site.' %}</p>
+    {% endif %}
   </div>
   <div class="modal-footer d-flex">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
-    <a href="{% url 'account_login' %}?next={{ next_url|urlencode }}"
-       class="btn btn-primary">{% trans 'Log in' %}</a>
+    {% if PEACHJAM_SETTINGS.accounts_enabled %}
+      <a href="{% url 'account_login' %}?next={{ next_url|urlencode }}"
+         class="btn btn-primary">{% trans 'Log in' %}</a>
+    {% endif %}
   </div>
 </div>

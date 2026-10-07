@@ -79,6 +79,12 @@
             </ul>
           </div>
         {% endblock %}
+        {% block account-content-delete %}
+          <hr class="my-5"/>
+          <h3>{% trans "Delete account" %}</h3>
+          <p>{% trans "Permanently delete your account and remove your personal information." %}</p>
+          <a href="{% url 'delete_account' %}" class="btn btn-danger mb-3">{% trans "Delete account" %}</a>
+        {% endblock %}
       {% endblock %}
     </div>
   </div>

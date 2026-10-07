@@ -2,7 +2,12 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "Africa/Maseru"
+
 INSTALLED_APPS = ["lesotholii.apps.LesothoLIIConfig"] + INSTALLED_APPS  # noqa
+
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("lesotholii.org", "www.lesotholii.org")  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "LesothoLII"  # noqa

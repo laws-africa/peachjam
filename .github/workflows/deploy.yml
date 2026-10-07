@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 concurrency:
-  group: liiweb2.africanlii.org
+  group: peachjam-deploy
 
 jobs:
   preconditions:
@@ -18,7 +18,7 @@ jobs:
             echo "Deployment skipped because commit message contains 'nodeploy'."
             exit 1
           fi
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Fail if peachjam/js files changed
@@ -34,37 +34,14 @@ jobs:
   # web3.laws.africa
   # ------------------
 
-  deploy-tanzlii:
-    needs: preconditions
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    name: Deploy to tanzlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to tanzlii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/tanzlii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/tanzlii-peachjam'
-          git_push_flags: '--force'
-
   deploy-gazettes:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to gazettes.africa
     needs:
-      - deploy-tanzlii
       - preconditions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to gazettes.africa
@@ -88,7 +65,7 @@ jobs:
       - preconditions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to malawilii.org
@@ -112,7 +89,7 @@ jobs:
     name: Deploy to namiblii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to namiblii.org
@@ -128,39 +105,15 @@ jobs:
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/namiblii-peachjam'
           git_push_flags: '--force'
 
-  deploy-ghalii:
+  deploy-seylii:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     needs:
       - deploy-namiblii
       - preconditions
-    name: Deploy to ghalii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to ghalii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/ghalii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/ghalii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-seylii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-ghalii
-      - preconditions
     name: Deploy to seylii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to seylii.org
@@ -184,7 +137,7 @@ jobs:
     name: Deploy to zimlii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to zimlii.org
@@ -208,7 +161,7 @@ jobs:
     name: Deploy to nigerialii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to nigerialii.org
@@ -232,7 +185,7 @@ jobs:
     name: Deploy to zambialii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to zambialii.org
@@ -256,7 +209,7 @@ jobs:
     name: Deploy to lesotholii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to lesotholii.org
@@ -280,7 +233,7 @@ jobs:
     name: Deploy to mauritiuslii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to mauritiuslii.laws.africa
@@ -296,39 +249,15 @@ jobs:
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/mauritiuslii-peachjam'
           git_push_flags: '--force'
 
-  deploy-civlii:
+  deploy-open-by-laws:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     needs:
       - deploy-mauritiuslii
       - preconditions
-    name: Deploy to civlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to civlii.laws.africa
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/civlii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/civlii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-open-by-laws:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-civlii
-      - preconditions
     name: Deploy to open-by-laws
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to openbylaws.org.za
@@ -344,107 +273,18 @@ jobs:
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/open-by-laws'
           git_push_flags: '--force'
 
-  deploy-obl-microsites:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-open-by-laws
-      - preconditions
-    name: Deploy to open by-laws microsites
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to openbylaws.org.za
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/obl-microsites'
-          git_push_flags: '--force'
-
   # ------------------
   # web4.laws.africa
   # ------------------
-
-  deploy-africanlii:
-    needs: preconditions
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    name: Deploy to africanlii.org
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to africanlii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web4.laws.africa:22/africanlii'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/africanlii'
-          git_push_flags: '--force'
-
-  deploy-ulii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-africanlii
-      - preconditions
-    name: Deploy to ulii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to ulii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web4.laws.africa:22/ulii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/ulii-peachjam'
-          git_push_flags: '--force'
-
-  deploy-senlii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-ulii
-      - preconditions
-    name: Deploy to senlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: git push to senlii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web4.laws.africa:22/senlii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/senlii-peachjam'
-          git_push_flags: '--force'
 
   deploy-rwandalii:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to rwandalii
     needs:
-      - deploy-senlii
       - preconditions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to rwandalii.laws.africa
@@ -468,7 +308,7 @@ jobs:
       - preconditions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to eswatinilii.org
@@ -492,7 +332,7 @@ jobs:
     name: Deploy to sierralii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to sierralii.org
@@ -516,7 +356,7 @@ jobs:
       - preconditions
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to tcilii.org
@@ -540,7 +380,7 @@ jobs:
     name: Deploy to zanzibarlii
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: git push to zanzibarlii.org

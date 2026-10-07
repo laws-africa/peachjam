@@ -5,6 +5,15 @@
   {% if original.must_be_anonymised and not original.anonymised %}
     <div class="alert alert-warning">{% trans "This judgment must be anonymised before it can be published." %}</div>
   {% endif %}
+  {% if original.missing_public_source_file %}
+    <div class="alert alert-warning">
+      {% if original.anonymised %}
+        {% trans "No source document is available to users. Attach a source file and mark it as anonymised." %}
+      {% else %}
+        {% trans "No source document is available to users. Attach a source file." %}
+      {% endif %}
+    </div>
+  {% endif %}
 {% endblock %}
 {% block extra_actions %}
   {% if original %}

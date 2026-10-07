@@ -4,13 +4,13 @@
   {% if doc_table_toggle %}
     <td class="cell-toggle">
       {% if document.children %}
-        <button class="btn btn-sm bg-none collapsed"
+        <button class="btn btn-sm bg-none{% if not doc_table_children_expanded %} collapsed{% endif %}"
                 type="button"
-                title="{{ PEACHJAM_SETTINGS.subleg_label }}"
+                title="{{ doc_table_toggle_title }}"
                 data-bs-toggle="collapse"
-                data-bs-target="#doc-table-children-{{ forloop.counter0 }}"
-                aria-expanded="false"
-                aria-controls="doc-table-children-{{ forloop.counter0 }}">
+                data-bs-target="#{{ doc_table_dom_id|default:'doc-table' }}-children-{{ forloop.counter0 }}"
+                aria-expanded="{% if doc_table_children_expanded %}true{% else %}false{% endif %}"
+                aria-controls="{{ doc_table_dom_id|default:'doc-table' }}-children-{{ forloop.counter0 }}">
           <i class="bi"></i>
         </button>
       {% endif %}
@@ -20,9 +20,11 @@
     <td id="{% if document.group_id %}{{ document.group_id }}{% endif %}"
         class="cell-group">{{ document.title }}</td>
   {% else %}
-    <td class="cell-title">
+    <td class="cell-title{% if doc_table_full_title_width %} w-100{% endif %}">
       <div class="d-flex">
-        <a href="{{ document.get_absolute_url }}">{{ document.title }}</a>
+        <a href="{% if document_url %}{{ document_url }}{% else %}{{ document.get_absolute_url }}{% endif %}"
+           {% if document_hx_get %}hx-get="{{ document_hx_get }}"{% endif %}
+           data-key-link="document">{{ document.title }}</a>
         {% if document.work.languages|length > 1 %}
           <span class="d-inline-block ms-2"
                 data-bs-toggle="tooltip"
@@ -30,38 +32,33 @@
             <i class="bi bi-translate"></i>
           </span>
         {% endif %}
-        <span id="saved-document-star--{{ document.pk }}"></span>
+        <span class="saved-document-star--{{ document.pk }}"></span>
       </div>
       {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
       {% if doc_table_show_treatments %}
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
-      {% if document.doc_type == "judgment" %}
-        {% if document.blurb %}<div class="my-2">{{ document.blurb }}</div>{% endif %}
-        {% if document.flynote %}<div class="fst-italic my-2">{{ document.flynote|safe }}</div>{% endif %}
+      {% if document.doc_type == "judgment" or document.flynote %}
+        {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document %}
       {% elif document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=document.listing_taxonomies %}
         </div>
       {% endif %}
-      <div id="saved-document-table-detail--{{ document.pk }}"></div>
+      <div class="saved-document-table-detail saved-document-table-detail--{{ document.pk }}"></div>
     </td>
   {% endif %}
   {% if doc_table_citations %}<td class="cell-citation">{{ document.citation|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_jurisdiction %}
-    <td>
-      {% if MULTIPLE_JURISDICTIONS or document.jurisdiction != PEACHJAM_SETTINGS.default_document_jurisdiction %}
-        {% jurisdiction_icon document %}&nbsp;{{ document.jurisdiction|default_if_none:'' }}
-        {% if document.locality %}· {{ document.locality }}{% endif %}
-      {% elif MULTIPLE_LOCALITIES %}
-        {{ document.locality|default_if_none:'' }}
-      {% endif %}
-    </td>
+    <td>{% include 'peachjam/document/_jurisdiction.html' %}</td>
   {% endif %}
   {% if doc_table_show_author %}<td>{{ document.author.first|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_court %}<td>{{ document.court|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_sub_publication %}<td>{{ document.sub_publication|default_if_none:'' }}</td>{% endif %}
   {% if doc_table_show_frbr_uri_number %}<td>{{ document.frbr_uri_number }}</td>{% endif %}
   {% if doc_table_show_doc_type %}<td style="white-space: nowrap;">{{ document.get_doc_type_display }}</td>{% endif %}
+  {% if doc_table_show_incoming_citation_count %}
+    <td class="text-end text-nowrap">{{ document.incoming_citation_count|default_if_none:'' }}</td>
+  {% endif %}
   {% if doc_table_show_date %}<td class="cell-date text-nowrap">{{ document.date|default_if_none:'' }}</td>{% endif %}
 </tr>

@@ -1,44 +1,53 @@
+import logging
+
 import allauth.account.signals as allauth_signals
+from asgiref.sync import async_to_sync
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
 from django.contrib.auth.signals import user_logged_in, user_logged_out
+from django.db import transaction
 from django.db.models import signals
 from django.dispatch import receiver
 from django.dispatch.dispatcher import Signal
 from django_comments.models import Comment
 from django_comments.signals import comment_will_be_posted
 
-from peachjam.customerio import get_customerio
+from peachjam.customerio import get_customerio, track_account_created_signup_event
 from peachjam.models import (
     Annotation,
+    CitationLink,
     CoreDocument,
-    DocumentContent,
+    DocumentChatThread,
     ExtractedCitation,
     Folder,
+    JudgmentFlynote,
+    Relationship,
     SavedDocument,
-    SourceFile,
     UserFollowing,
     UserProfile,
     Work,
 )
 from peachjam.tasks import (
-    generate_judgment_summary,
+    refresh_flynote_document_count,
+    serialise_judgment_flynote_tree,
     update_extracted_citations_for_a_work,
 )
 from peachjam_search.models import SavedSearch
 
 User = get_user_model()
 
+log = logging.getLogger(__name__)
+
 
 # a user has requested a password reset
 password_reset_started = Signal()
 
 
-@receiver(signals.post_save)
-def doc_saved_update_language(sender, instance, **kwargs):
-    """Update language list on related work when a subclass of CoreDocument is saved."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        instance.work.update_languages()
+@receiver(signals.post_save, sender=get_user_model())
+def user_saved(sender, instance, created, **kwargs):
+    if created:
+        # ensure a user profile exists
+        UserProfile.objects.get_or_create(user=instance)
 
 
 @receiver(signals.post_delete)
@@ -51,25 +60,28 @@ def doc_deleted_update_language(sender, instance, **kwargs):
             work.update_languages()
 
 
-@receiver(signals.post_save)
-def doc_saved_update_extracted_citations(sender, instance, **kwargs):
-    """Update extracted citations when a subclass of CoreDocument is saved."""
-    if isinstance(instance, CoreDocument) and not kwargs["raw"]:
-        update_extracted_citations_for_a_work(instance.work_id)
-
-
 @receiver(signals.post_delete)
 def doc_deleted_update_extracted_citations(sender, instance, **kwargs):
-    """Update language list on related work after a subclass of CoreDocument is deleted."""
+    """Update extracted citations after a subclass of CoreDocument is deleted."""
     if isinstance(instance, CoreDocument):
         update_extracted_citations_for_a_work(instance.work_id)
 
 
-@receiver(signals.post_save, sender=SourceFile)
-def convert_to_pdf(sender, instance, created, **kwargs):
-    """Convert a source file to PDF when it's saved"""
-    if created:
-        instance.ensure_file_as_pdf()
+@receiver(signals.post_save, sender=CitationLink)
+def citation_link_saved_update_extracted_citations(sender, instance, raw, **kwargs):
+    """Update extracted citations when source citation links are changed."""
+    if not raw:
+        update_extracted_citations_for_a_work(instance.document.work_id)
+
+
+@receiver(signals.post_delete, sender=CitationLink)
+def citation_link_deleted_update_extracted_citations(sender, instance, **kwargs):
+    """Update extracted citations when source citation links are deleted."""
+    try:
+        update_extracted_citations_for_a_work(instance.document.work_id)
+    except CoreDocument.DoesNotExist:
+        # the citation link was deleted when the document was deleted
+        pass
 
 
 @receiver(signals.post_save, sender=ExtractedCitation)
@@ -102,7 +114,8 @@ def before_comment_posted(sender, comment, request, **kwargs):
 
 @receiver(user_logged_in)
 def set_user_language(sender, request, user, **kwargs):
-    setattr(request, "set_language", user.userprofile.preferred_language.iso_639_1)
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    setattr(request, "set_language", profile.preferred_language.iso_639_1)
 
 
 @receiver(allauth_signals.email_changed)
@@ -123,7 +136,7 @@ def user_saved_updated_customerio(sender, instance, **kwargs):
 
 @receiver(allauth_signals.user_signed_up)
 def user_signed_up_update_customerio(sender, request, user, **kwargs):
-    get_customerio().track_user_signed_up(user)
+    track_account_created_signup_event(user, request=request)
 
 
 @receiver(signals.post_save, sender=UserProfile)
@@ -154,6 +167,11 @@ def unsaved_search_customerio(sender, instance, **kwargs):
     get_customerio().track_unsaved_search(instance)
 
 
+@receiver(signals.post_delete, sender=SavedSearch)
+def saved_search_deleted_update_customerio(sender, instance, **kwargs):
+    get_customerio().update_user_details(instance.user)
+
+
 @receiver(signals.post_save, sender=SavedDocument)
 def saved_document_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
@@ -165,6 +183,11 @@ def unsaved_document_customerio(sender, instance, **kwargs):
     get_customerio().track_unsaved_document(instance)
 
 
+@receiver(signals.post_delete, sender=SavedDocument)
+def saved_document_deleted_update_customerio(sender, instance, **kwargs):
+    get_customerio().update_user_details(instance.user)
+
+
 @receiver(signals.post_save, sender=UserFollowing)
 def user_followed_customerio(sender, instance, created, raw, **kwargs):
     if not raw and created:
@@ -174,6 +197,12 @@ def user_followed_customerio(sender, instance, created, raw, **kwargs):
 @receiver(signals.pre_delete, sender=UserFollowing)
 def user_unfollowed_customerio(sender, instance, **kwargs):
     get_customerio().track_unfollow(instance)
+
+
+@receiver(signals.post_delete, sender=UserFollowing)
+def user_following_deleted_update_customerio(sender, instance, **kwargs):
+    if not instance.saved_search_id and not instance.saved_document_id:
+        get_customerio().update_user_details(instance.user)
 
 
 @receiver(signals.post_save, sender=Annotation)
@@ -195,21 +224,6 @@ def password_reset_started_customerio(sender, request, user, **kwargs):
 @receiver(allauth_signals.password_reset, sender=User)
 def password_reset_customerio(sender, request, user, **kwargs):
     get_customerio().track_password_reset(user)
-
-
-@receiver(signals.post_save, sender=DocumentContent)
-def judgment_content_changed_generate_summary(sender, instance, **kwargs):
-    if not instance.document.doc_type == "judgment":
-        return
-    judgment = instance.document
-    should_generate = (
-        not judgment.case_summary  # No summary at all
-        or judgment.summary_ai_generated  # Summary exists but is AI-generated
-    ) and (
-        not judgment.must_be_anonymised or judgment.anonymised  # Anonymization OK
-    )
-    if should_generate:
-        generate_judgment_summary(judgment.pk)
 
 
 @receiver(signals.post_save, sender=SavedDocument)
@@ -237,3 +251,43 @@ def notify_new_citation(sender, instance, **kwargs):
 
     if not kwargs["raw"]:
         update_users_new_citation(instance.pk)
+
+
+@receiver(signals.post_save, sender=Relationship)
+def notify_new_relationship(sender, instance, **kwargs):
+    """Notify users following the subject work when a new relationship is created."""
+    from peachjam.tasks import update_users_new_relationship
+
+    update_users_new_relationship(instance.pk)
+
+
+@receiver(signals.post_delete, sender=DocumentChatThread)
+def chat_thread_deleted(sender, instance, **kwargs):
+    """Cleanup chat session data."""
+    from peachjam.chat.agent import get_session
+
+    session = get_session(instance)
+    async_to_sync(session.clear_session)()
+
+
+@receiver(signals.post_save, sender=JudgmentFlynote)
+def judgment_flynote_saved_serialise_judgment(sender, instance, raw, **kwargs):
+    if not raw:
+        root_id = instance.flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
+        serialise_judgment_flynote_tree(instance.document_id)
+
+
+@receiver(signals.post_delete, sender=JudgmentFlynote)
+def judgment_flynote_deleted_serialise_judgment(sender, instance, **kwargs):
+    from peachjam.models.flynote import Flynote
+
+    flynote = Flynote.objects.filter(pk=instance.flynote_id).first()
+    if flynote:
+        root_id = flynote.get_root().pk
+        transaction.on_commit(
+            lambda root_id=root_id: refresh_flynote_document_count(root_id)
+        )
+    serialise_judgment_flynote_tree(instance.document_id)

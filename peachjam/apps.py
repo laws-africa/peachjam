@@ -1,5 +1,6 @@
 from django.apps import AppConfig
 from django.conf import settings
+from django.db.models.signals import post_migrate
 from django.utils import timezone
 
 
@@ -9,41 +10,47 @@ class PeachJamConfig(AppConfig):
     def ready(self):
         import jazzmin.settings
         from countries_plus.models import Country
+        from docpipe import soffice
         from docpipe.matchers import CitationMatcher
 
         import peachjam.adapters  # noqa
+        import peachjam.checks  # noqa
         import peachjam.signals  # noqa
+        from peachjam.auth import create_all_users_permission_group_after_migrate
         from peachjam.helpers import get_country_absolute_url
 
         jazzmin.settings.THEMES["peachjam"] = "stylesheets/peachjam-jazzmin.css"
 
         Country.get_absolute_url = get_country_absolute_url
+        post_migrate.connect(
+            create_all_users_permission_group_after_migrate,
+            sender=self,
+            dispatch_uid="peachjam.create_all_users_permission_group",
+        )
         # bump up the context for citation extraction
         CitationMatcher.text_prefix_length = CitationMatcher.text_suffix_length = 100
 
-        # enforce timeouts and memory limits on soffice
-        from docpipe import soffice
-
-        soffice.TIMEOUT = 60 * 10  # 10 minutes
-        soffice.SOFFICE_CMD = "timeout"
-        soffice.SOFFICE_ARGS = [
-            # send SIGKLL when the grace period is up
-            "--signal=KILL",
-            # send again 1s later
-            "--kill-after=1s",
-            # timeout in seconds, a bit longer than python's timeout
-            f"{soffice.TIMEOUT + 30}s",
-            # set resource limits
-            "prlimit",
-            # max memory (2 GB)
-            f"--as={2 * 1024 * 1024 * 1024}",
-            "--",
-            # usual soffice command
-            "soffice",
-            "--headless",
-        ]
-
         if not settings.DEBUG:
+            # enforce timeouts and memory limits on soffice
+            soffice.TIMEOUT = 60 * 10  # 10 minutes
+            soffice.SOFFICE_CMD = "timeout"
+            soffice.SOFFICE_ARGS = [
+                # send SIGKLL when the grace period is up
+                "--signal=KILL",
+                # send again 1s later
+                "--kill-after=1s",
+                # timeout in seconds, a bit longer than python's timeout
+                f"{soffice.TIMEOUT + 30}s",
+                # set resource limits
+                "prlimit",
+                # max memory (2 GB)
+                f"--as={2 * 1024 * 1024 * 1024}",
+                "--",
+                # usual soffice command
+                "soffice",
+                "--headless",
+            ]
+
             from background_task.models import Task
 
             from peachjam.models import Ingestor
@@ -64,4 +71,15 @@ class PeachJamConfig(AppConfig):
             ).replace(hour=3, minute=0, second=0)
             rank_works(schedule=run_at, repeat=Task.WEEKLY)
             update_user_follows(schedule=Task.HOURLY, repeat=Task.DAILY)
-            send_timeline_email_alerts(schedule=Task.HOURLY, repeat=Task.DAILY)
+            digest_run_at = timezone.localtime()
+            if digest_run_at.hour >= 10:
+                digest_run_at += timezone.timedelta(days=1)
+            while digest_run_at.weekday() >= 5:
+                digest_run_at += timezone.timedelta(days=1)
+            digest_run_at = digest_run_at.replace(
+                hour=10,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
+            send_timeline_email_alerts(schedule=digest_run_at, repeat=Task.DAILY)

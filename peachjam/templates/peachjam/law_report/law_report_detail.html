@@ -1,0 +1,49 @@
+{% extends "peachjam/layouts/detail.html" %}
+{% load i18n peachjam %}
+{% block title %}{{ law_report.title }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'law_report_list' %}">{% trans 'Law reports' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ law_report.title }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}
+    <div class="my-4">
+      <h1 id="main-page-heading" class="mb-0">{{ law_report.title }}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
+             hx-trigger="load"></div>
+      {% endblock %}
+    </div>
+  {% endif %}
+{% endblock %}
+{% block detail-content %}
+  <h2>{% trans 'Volumes' %}</h2>
+  {% if law_report_volumes %}
+    <div class="row row-cols-1 row-cols-md-auto g-4">
+      {% for volume_column in law_report_volume_columns %}
+        <div class="col">
+          <ul class="list-unstyled mb-0">
+            {% for volume in volume_column %}
+              <li class="mb-2">
+                <a href="{{ volume.get_absolute_url }}">{{ volume.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>{% trans 'No volumes found.' %}</p>
+  {% endif %}
+{% endblock %}

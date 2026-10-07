@@ -1,11 +1,27 @@
 import os
+import shutil
+from datetime import date
+from unittest import skipUnless
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
+from django.utils import timezone
 from django_webtest import WebTest
 from webtest import Upload
 
-from peachjam.models import Judgment
+from peachjam.book_word import DOCX_MIMETYPE, markdown_to_docx
+from peachjam.models import (
+    Book,
+    Country,
+    GenericDocument,
+    Journal,
+    JournalArticle,
+    Judgment,
+    Language,
+    SourceFile,
+    VolumeIssue,
+)
 
 
 class TestJudgmentAdmin(WebTest):
@@ -13,6 +29,58 @@ class TestJudgmentAdmin(WebTest):
 
     def setUp(self):
         self.app.set_user(User.objects.get(username="admin@example.com"))
+
+    def make_judgment(self, anonymised=False):
+        return Judgment.objects.create(
+            case_name="Warning test case",
+            court_id=1,
+            date=date(2026, 1, 8),
+            language=Language.objects.get(pk="en"),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            anonymised=anonymised,
+        )
+
+    def attach_source_file(self, judgment, file_is_anonymised):
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/gauteng_judgment.pdf"), "rb"
+        ) as pdf_file:
+            return SourceFile.objects.create(
+                document=judgment,
+                file=SimpleUploadedFile(
+                    "warning-source.pdf",
+                    pdf_file.read(),
+                    content_type="application/pdf",
+                ),
+                filename="warning-source.pdf",
+                mimetype="application/pdf",
+                file_is_anonymised=file_is_anonymised,
+            )
+
+    def test_judgment_admin_shows_readonly_summary_ai_metadata(self):
+        judgment = self.make_judgment()
+        judgment.case_summary = "AI generated summary"
+        judgment.summary_ai_generated = True
+        judgment.summary_generated_at = timezone.now()
+        judgment.summary_language = "English"
+        judgment.summary_trace_id = "trace-123"
+        judgment.save()
+
+        judgment_change_url = reverse(
+            "admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk}
+        )
+        response = self.app.get(judgment_change_url)
+
+        self.assertContains(response, "Summary AI generated")
+        self.assertContains(response, "Summary generated at")
+        self.assertContains(response, "Summary language")
+        self.assertContains(response, "Summary trace ID")
+        self.assertContains(response, "trace-123")
+
+        form = response.forms["judgment_form"]
+        self.assertNotIn("summary_ai_generated", form.fields)
+        self.assertNotIn("summary_generated_at", form.fields)
+        self.assertNotIn("summary_language", form.fields)
+        self.assertNotIn("summary_trace_id", form.fields)
 
     def test_add_judgment_docx_swap_pdf(self):
         # add judgment
@@ -55,7 +123,7 @@ class TestJudgmentAdmin(WebTest):
         # check if content_html has been extracted
         self.assertIn(
             "The second count is robbery, in that on or about near the place mentioned in count",
-            judgment.content_html,
+            judgment.document_content.content_html,
         )
         self.assertEqual(
             "file.docx",
@@ -146,6 +214,242 @@ class TestJudgmentAdmin(WebTest):
         judgment.refresh_from_db()
         self.assertIn(
             "The second count is robbery, in that on or about near the place mentioned in count",
-            judgment.content_html,
+            judgment.document_content.content_html,
         )
         self.assertEqual("file.docx", judgment.source_file.filename)
+
+    def test_change_form_warns_if_judgment_has_no_source_file(self):
+        judgment = self.make_judgment()
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertContains(
+            response,
+            "No source document is available to users. Attach a source file.",
+        )
+
+    def test_change_form_warns_if_anonymised_source_file_is_not_safe(self):
+        judgment = self.make_judgment(anonymised=True)
+        self.attach_source_file(judgment, file_is_anonymised=False)
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertContains(
+            response,
+            "No source document is available to users. Attach a source file and mark it as anonymised.",
+        )
+
+    def test_change_form_does_not_warn_when_source_file_is_marked_anonymised(self):
+        judgment = self.make_judgment(anonymised=True)
+        self.attach_source_file(judgment, file_is_anonymised=True)
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertNotContains(
+            response,
+            "No source document is available to users.",
+        )
+
+    def test_change_form_does_not_warn_when_generated_anonymised_pdf_exists(self):
+        judgment = self.make_judgment(anonymised=True)
+        source_file = self.attach_source_file(judgment, file_is_anonymised=False)
+        source_file.anonymised_file_as_pdf = SimpleUploadedFile(
+            "anonymised.pdf", b"anonymised PDF", content_type="application/pdf"
+        )
+        source_file.save()
+
+        response = self.app.get(
+            reverse("admin:peachjam_judgment_change", kwargs={"object_id": judgment.pk})
+        )
+
+        self.assertNotContains(
+            response,
+            "No source document is available to users.",
+        )
+
+    def test_dup_files_check(self):
+        judgment = self.make_judgment(anonymised=True)
+        self.attach_source_file(judgment, file_is_anonymised=True)
+
+        url = reverse("check_duplicate_file") + "?sha256=" + judgment.source_file.sha256
+
+        response = self.app.get(url)
+        self.assertEqual(200, response.status_code)
+        self.assertIn(
+            judgment.title,
+            response.text,
+        )
+
+        # log out
+        self.app.reset()
+        response = self.app.get(url, user=None, status=403)
+        self.assertEqual(403, response.status_code)
+
+
+class TestDocumentAdminHtmlEdit(WebTest):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.app.set_user(User.objects.get(username="admin@example.com"))
+        self.document = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=date(2022, 9, 14),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Admin source_html integration",
+        )
+        doc_content = self.document.get_or_create_document_content()
+        doc_content.set_source_html("<h1>Initial</h1><p>Initial</p>")
+        self.document.save()
+
+    def test_admin_edit_source_html_updates_content_text_and_toc(self):
+        change_url = reverse(
+            "admin:peachjam_genericdocument_change",
+            kwargs={"object_id": self.document.pk},
+        )
+        form = self.app.get(change_url).forms["genericdocument_form"]
+        form["source_html"] = "<h1>Edited Heading</h1><p>Edited body</p>"
+
+        response = form.submit()
+        self.assertEqual(302, response.status_code)
+
+        self.document.refresh_from_db()
+        self.assertEqual(
+            "<h1>Edited Heading</h1><p>Edited body</p>",
+            self.document.document_content.source_html,
+        )
+        self.assertIn("Edited body", self.document.document_content.content_html)
+        self.assertIn("Edited Heading", self.document.document_content.content_text)
+        self.assertTrue(self.document.document_content.toc_json)
+
+
+class TestBookAdminWordImportExport(WebTest):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.app.set_user(User.objects.get(username="admin@example.com"))
+        self.book = Book.objects.create(
+            title="Refugee law reader",
+            publisher="Laws.Africa",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=date(2026, 1, 8),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_number="refugee-law-reader",
+            content_markdown=(
+                "# Old heading\n\n"
+                "Old body\n\n"
+                '<la-akoma-ntoso frbr-expression-uri="/akn/za/act/1998/130/eng/~sec_1" '
+                'fetch partner="laws.africa">'
+            ),
+        )
+        self.book.get_or_create_document_content(True)
+        self.book.convert_content_markdown()
+        self.book.get_or_create_document_content().save()
+
+    def test_change_form_has_word_actions(self):
+        response = self.app.get(
+            reverse("admin:peachjam_book_change", kwargs={"object_id": self.book.pk})
+        )
+
+        self.assertIn("Download Word version", response.text)
+        self.assertIn("Import Word version", response.text)
+
+    @skipUnless(shutil.which("pandoc"), "pandoc is required")
+    def test_download_word_version(self):
+        response = self.app.get(
+            reverse(
+                "admin:peachjam_book_download_word",
+                kwargs={"object_id": self.book.pk},
+            )
+        )
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(DOCX_MIMETYPE, response.content_type)
+        self.assertIn("attachment;", response.headers["Content-Disposition"])
+
+    @skipUnless(shutil.which("pandoc"), "pandoc is required")
+    def test_import_word_version_preview_and_confirm(self):
+        import_url = reverse(
+            "admin:peachjam_book_import_word", kwargs={"object_id": self.book.pk}
+        )
+        markdown = (
+            "# New heading\n\n"
+            "New body\n\n"
+            '<la-akoma-ntoso frbr-expression-uri="/akn/za/act/1998/130/eng/~sec_2" '
+            'fetch partner="laws.africa">'
+        )
+        docx = markdown_to_docx(markdown)
+
+        form = self.app.get(import_url).forms["book-word-upload-form"]
+        form["word_file"] = Upload("book.docx", docx, DOCX_MIMETYPE)
+        preview = form.submit()
+
+        self.assertEqual(200, preview.status_code)
+        self.assertIn("Preview", preview.text)
+        self.assertIn("New heading", preview.text)
+        self.assertIn("Heading changes", preview.text)
+        self.assertIn('class="diff"', preview.text)
+        self.assertIn("diff_sub", preview.text)
+        self.assertIn("diff_add", preview.text)
+        self.assertNotIn("Images are not supported", preview.text)
+
+        confirm_form = preview.forms["book-word-confirm-form"]
+        response = confirm_form.submit()
+        self.assertRedirects(
+            response,
+            reverse("admin:peachjam_book_change", kwargs={"object_id": self.book.pk}),
+        )
+
+        self.book.refresh_from_db()
+        self.assertIn("New heading", self.book.content_markdown)
+        self.assertIn(
+            '<la-akoma-ntoso frbr-expression-uri="/akn/za/act/1998/130/eng/~sec_2" '
+            'fetch partner="laws.africa">',
+            self.book.content_markdown,
+        )
+        self.assertIn("New heading", self.book.document_content.content_html)
+
+
+class TestJournalArticleAdmin(WebTest):
+    fixtures = ["tests/users", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.app.set_user(User.objects.get(username="admin@example.com"))
+        self.journal = Journal.objects.create(
+            title="Contemporary Labour Law",
+            slug="contemporary-labour-law",
+        )
+        self.volume = VolumeIssue.objects.create(
+            title="Volume 1",
+            journal=self.journal,
+        )
+
+    def test_add_journal_article_with_journal_and_volume(self):
+        journal_article_add_url = reverse("admin:peachjam_journalarticle_add")
+        journal_article_list_url = reverse("admin:peachjam_journalarticle_changelist")
+
+        form = self.app.get(journal_article_add_url).forms["journalarticle_form"]
+        form["title"] = "New journal article"
+        form["jurisdiction"] = "ZA"
+        form["language"] = "en"
+        form["journal"].force_value(str(self.journal.pk))
+        form["volume"].force_value(str(self.volume.pk))
+        form["date_0"] = "19"
+        form["date_1"] = "3"
+        form["date_2"] = "2026"
+        form["frbr_uri_doctype"] = "doc"
+        form["frbr_uri_number"] = "new-journal-article"
+
+        response = form.submit()
+        self.assertRedirects(response, journal_article_list_url)
+
+        article = JournalArticle.objects.get(title="New journal article")
+        self.assertEqual(self.journal.pk, article.journal_id)
+        self.assertEqual(self.volume.pk, article.volume_id)
+        self.assertTrue(hasattr(article, "document_content"))

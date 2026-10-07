@@ -1,7 +1,8 @@
-{% load i18n %}
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
 <div class="modal-content" id="saved-document-modal-content">
   <form hx-target="{{ target }}"
-        hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}">
+        {% if not saved_document.is_subscription_locked %}hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}"{% endif %}>
     <div class="modal-header">
       <p class="h5 modal-title">{{ MY_LII }}</p>
       <button type="button"
@@ -11,46 +12,60 @@
     </div>
     <div class="modal-body">
       <p class="h5">{{ saved_document.document.title }}</p>
-      <div>
-        <textarea class="form-control"
-                  name="{{ form.note.name }}"
-                  maxlength="{{ form.note.field.max_length }}"
-                  placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
-      </div>
-      <label class="form-label mt-3" for="{{ form.folders.id_for_label }}">{{ form.folders.label }}</label>
-      <div class="overflow-auto" style="max-height: 200px">{{ form.folders }}</div>
-      <button type="button"
-              class="btn btn-link link-underline link-underline-opacity-0 ps-0"
-              data-bs-toggle="collapse"
-              data-bs-target="#addFolder"
-              aria-expanded="false"
-              aria-controls="addFolder">
-        {% trans 'New folder...' %}
-      </button>
-      <div class="collapse" id="addFolder">
-        {% if not folder_limit_reached %}
-          <input class="form-control"
-                 maxlength="{{ form.new_folder.field.max_length }}"
-                 id="{{ form.new_folder.id_for_label }}"
-                 name="{{ form.new_folder.name }}"
-                 placeholder="{% trans 'New folder name' %}"
-                 type="text"/>
-        {% else %}
-          <div class="alert alert-warning d-flex">
-            <div class="me-2">
-              <i class="bi bi-exclamation-triangle-fill"></i>
-            </div>
-            <div>
-              <div class="fw-bold">{% trans 'You have reached your limit for document folders.' %}</div>
-              {% if folder_upgrade %}
-                {% blocktrans trimmed with product=folder_upgrade.name %}
-              <div>To add more folders, please upgrade to {{ product }}.</div>
-            {% endblocktrans %}
-              {% endif %}
-            </div>
+      {% if saved_document.is_subscription_locked %}
+        <div class="alert alert-warning">
+          <div class="fw-bold">
+            <i class="bi bi-lock-fill"></i>
+            {% trans 'Saved beyond your subscription limit' %}
           </div>
-        {% endif %}
-      </div>
+          <div>
+            {% blocktrans trimmed with expires=saved_document.subscription_lock_expires_at|date change_subscription_url=change_subscription_url %}
+              We'll keep this saved document until {{ expires }}. <a href="{{ change_subscription_url }}">Upgrade your subscription</a> to restore access.
+            {% endblocktrans %}
+          </div>
+        </div>
+      {% else %}
+        <div>
+          <textarea class="form-control"
+                    name="{{ form.note.name }}"
+                    maxlength="{{ form.note.field.max_length }}"
+                    placeholder="{% trans "A note to yourself about this document" %}">{{ form.note.value|default_if_none:'' }}</textarea>
+        </div>
+        <label class="form-label mt-3" for="{{ form.folders.id_for_label }}">{{ form.folders.label }}</label>
+        <div class="overflow-auto" style="max-height: 200px">{{ form.folders }}</div>
+        <button type="button"
+                class="btn btn-link link-underline link-underline-opacity-0 ps-0"
+                data-bs-toggle="collapse"
+                data-bs-target="#addFolder"
+                aria-expanded="false"
+                aria-controls="addFolder">
+          {% trans 'New folder...' %}
+        </button>
+        <div class="collapse" id="addFolder">
+          {% if not folder_limit_reached %}
+            <input class="form-control"
+                   maxlength="{{ form.new_folder.field.max_length }}"
+                   id="{{ form.new_folder.id_for_label }}"
+                   name="{{ form.new_folder.name }}"
+                   placeholder="{% trans 'New folder name' %}"
+                   type="text"/>
+          {% else %}
+            <div class="alert alert-warning d-flex">
+              <div class="me-2">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+              </div>
+              <div>
+                <div class="fw-bold">{% trans 'You have reached your limit for document folders.' %}</div>
+                {% if folder_upgrade %}
+                  {% blocktrans trimmed with product=folder_upgrade.name %}
+                    To add more folders, please upgrade to {{ product }}.
+                  {% endblocktrans %}
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      {% endif %}
       <div class="mt-3">
         <a href="{% url 'folder_list' %}">{% trans 'All saved documents' %}</a>
       </div>
@@ -68,7 +83,9 @@
         <button type="button"
                 class="btn btn-outline-secondary ms-2"
                 data-bs-dismiss="modal">{% trans 'Close' %}</button>
-        <button class="btn btn-primary ms-1" type="submit" data-bs-dismiss="modal">{% trans 'Save' %}</button>
+        {% if not saved_document.is_subscription_locked %}
+          <button class="btn btn-primary ms-1" type="submit" data-bs-dismiss="modal">{% trans 'Save' %}</button>
+        {% endif %}
       </div>
     </div>
   </form>

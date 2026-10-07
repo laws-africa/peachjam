@@ -3,7 +3,8 @@
     "model": "peachjam.courtclass",
     "pk": 1,
     "fields": {
-      "name": "Apex Court"
+      "name": "Apex Court",
+      "slug": "apex-court"
     }
   },
   {

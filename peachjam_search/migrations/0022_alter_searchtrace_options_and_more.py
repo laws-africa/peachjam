@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_search", "0021_es_mapping_add_principal_commenced_repealed"),
     ]

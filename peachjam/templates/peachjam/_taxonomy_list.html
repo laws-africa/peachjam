@@ -9,7 +9,8 @@
             <ul class="list-group list-group-flush">
               {% for child in taxonomy.children %}
                 <li class="list-group-item">
-                  <a href="{% url taxonomy_url taxonomy.data.slug child.data.slug %}">{{ child.data.name }}</a>
+                  <a href="{% url taxonomy_url taxonomy.data.slug child.data.slug %}"
+                     data-key-link="topic">{{ child.data.name }}</a>
                 </li>
               {% endfor %}
             </ul>

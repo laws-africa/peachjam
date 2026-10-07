@@ -1,6 +1,10 @@
 {% load i18n %}
-{% url 'account_signup' as signup %}
-{% url 'account_login' as login %}
-{% blocktrans trimmed with signup_url=signup login_url=login next=request.get_full_path|urlencode %}
-  <a href="{{ signup_url }}?next={{ next }}">Sign up</a> or <a href="{{ login_url }}?next={{ next }}">log in</a> to download search results.
-{% endblocktrans %}
+{% if PEACHJAM_SETTINGS.accounts_enabled %}
+  {% url 'account_signup' as signup %}
+  {% url 'account_login' as login %}
+  {% blocktrans trimmed with signup_url=signup login_url=login next=request.get_full_path|urlencode %}
+    <a href="{{ signup_url }}?next={{ next }}">Sign up</a> or <a href="{{ login_url }}?next={{ next }}">log in</a> to download search results.
+  {% endblocktrans %}
+{% else %}
+  {% trans "Downloading search results requires an account, and accounts are not available on this site." %}
+{% endif %}

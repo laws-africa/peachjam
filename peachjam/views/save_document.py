@@ -29,6 +29,7 @@ In summary:
 * Bootstrap is used to toggle a single, global Saved Document modal
 * HTMX is used to inject the correct content into the modal when it is shown
 """
+
 import re
 
 from django.contrib.auth import get_user_model
@@ -36,8 +37,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMix
 from django.db.models import Prefetch
 from django.forms.forms import Form
 from django.http import Http404
-from django.http.response import HttpResponse, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
+from django.http.response import (
+    HttpResponse,
+    HttpResponseBadRequest,
+    HttpResponseForbidden,
+)
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -45,6 +50,7 @@ from django.views.generic import (
     ListView,
     TemplateView,
     UpdateView,
+    View,
 )
 from django.views.generic.detail import DetailView
 
@@ -59,7 +65,7 @@ User = get_user_model()
 
 class AllowSavedDocumentMixin:
     def dispatch(self, *args, **kwargs):
-        if not pj_settings().allow_save_documents:
+        if not pj_settings().save_documents_enabled:
             raise Http404("Saving documents is not allowed.")
         return super().dispatch(*args, **kwargs)
 
@@ -114,6 +120,11 @@ class BaseFolderFormMixin(BaseFolderMixin):
             kwargs["data"] = data
         return kwargs
 
+    def form_valid(self, form):
+        if getattr(self, "object", None) and self.object.is_subscription_locked:
+            return HttpResponseForbidden("Folder is locked")
+        return super().form_valid(form)
+
 
 class FolderCreateView(AtomicPostMixin, BaseFolderFormMixin, CreateView):
     permission_required = "peachjam.add_folder"
@@ -140,7 +151,12 @@ class FolderDownloadView(BaseFolderMixin, DetailView):
 
     def get(self, request, *args, **kwargs):
         folder = self.get_object()
-        pks = [sd.document_id for sd in folder.saved_documents.only("document_id")]
+        if folder.is_subscription_locked:
+            return HttpResponseForbidden("Folder is locked")
+        pks = [
+            sd.document_id
+            for sd in folder.saved_documents.filter(subscription_locked_at__isnull=True)
+        ]
         dataset = DownloadDocumentsResource().export(
             DownloadDocumentsResource.get_objects_for_download(pks)
         )
@@ -230,6 +246,8 @@ class SavedDocumentFormMixin(
         return self.request.user.saved_documents.all()
 
     def form_valid(self, form):
+        if self.object.is_subscription_locked:
+            return HttpResponseForbidden("Saved document is locked")
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -336,3 +354,33 @@ class SavedDocumentDeleteView(SavedDocumentFormMixin, DeleteView):
     # stub form that always validates
     form_class = Form
     http_method_names = ["post"]
+
+
+class SavedDocumentRemoveFromFolderView(
+    AtomicPostMixin,
+    AllowSavedDocumentMixin,
+    LoginRequiredMixin,
+    PermissionRequiredMixin,
+    View,
+):
+    permission_required = "peachjam.change_saveddocument"
+    http_method_names = ["post"]
+
+    def get_saved_document(self):
+        return get_object_or_404(
+            self.request.user.saved_documents.all(),
+            pk=self.kwargs["pk"],
+        )
+
+    def post(self, request, *args, **kwargs):
+        saved_document = self.get_saved_document()
+        folder = get_object_or_404(
+            request.user.folders.all(),
+            pk=self.kwargs["folder_pk"],
+        )
+
+        saved_document.folders.remove(folder)
+        if not saved_document.folders.exists():
+            saved_document.delete()
+
+        return redirect(request.GET.get("next") or reverse("folder_list"))

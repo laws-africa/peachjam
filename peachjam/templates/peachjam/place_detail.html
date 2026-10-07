@@ -4,7 +4,7 @@
 {% block page-title %}
   {% if not entity_profile %}
     <div class="my-4">
-      <h1>{{ place }}</h1>
+      <h1 id="main-page-heading">{{ place }}</h1>
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ place|get_follow_params }}"
              hx-trigger="load"></div>

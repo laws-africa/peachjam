@@ -1,14 +1,13 @@
 import hashlib
 import logging
 import math
-import uuid
+from typing import List
 
 from django.conf import settings
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.db.models import Avg, F, Q
 from django.forms import model_to_dict
-from django.utils import timezone
 from pgvector.django import HnswIndex, MaxInnerProduct, VectorField
 
 from peachjam.models import CoreDocument, Judgment, Work
@@ -103,10 +102,11 @@ class DocumentEmbedding(models.Model):
         self.text_embedding = None
 
         qs = ContentChunk.objects.filter(document=self.document)
+        doc_content = self.document.get_or_create_document_content()
         if (
-            self.document.content_html
-            and self.document.content_html_is_akn
-            and self.document.toc_json
+            doc_content.content_html
+            and doc_content.content_html_is_akn
+            and doc_content.toc_json
         ):
             # The document is AKN with a TOC and has been chunked recursively based on the TOC.
             # This means that, for example, a chapter has been chunked and embeddings calculated, and then
@@ -122,7 +122,7 @@ class DocumentEmbedding(models.Model):
             #
             # So, instead we only get the embeddings for the top-level TOC containers and take the average of those.
             top_level_ids = [
-                item["id"] or item["type"] for item in self.document.toc_json
+                item["id"] or item["type"] for item in doc_content.toc_json
             ]
             qs = qs.filter(Q(portion__in=top_level_ids) | Q(type="summary"))
 
@@ -173,7 +173,7 @@ class DocumentEmbedding(models.Model):
         """Refresh summary chunks and document-level embedding for a document, if they don't exist or the document
         summary has changed.
         """
-        if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
+        if not settings.PEACHJAM["DOCUMENT_EMBEDDINGS"]:
             return
 
         summary_text = ContentChunk.get_summary_text(document)
@@ -206,10 +206,10 @@ class DocumentEmbedding(models.Model):
         """Refresh content chunks and document-level embedding for a document, if they don't exist or the document
         text has changed.
         """
-        if not settings.PEACHJAM["SEARCH_SEMANTIC"]:
+        if not settings.PEACHJAM["DOCUMENT_EMBEDDINGS"]:
             return
-
-        text = document.get_content_as_text()
+        doc_content = document.get_or_create_document_content()
+        text = doc_content.get_content_as_text()
         text_md5 = hashlib.md5(text.encode()).hexdigest() if text else None
 
         doc_embedding = cls.objects.filter(document=document).first()
@@ -362,11 +362,87 @@ class ContentChunk(models.Model):
         return f'ContentChunk<#{self.pk} {self.document}: "{self.text}">'
 
     @classmethod
+    def get_average_embedding(cls, document, chunk_type, portion=None):
+        """Get the average embedding for chunks on a document."""
+        qs = cls.objects.filter(document=document, type=chunk_type)
+        if portion is not None:
+            qs = qs.filter(portion=portion)
+
+        avg = qs.aggregate(avg=Avg("text_embedding")).get("avg")
+        if avg is not None and len(avg):
+            avg = normalize_vector(avg)
+
+        return avg
+
+    @classmethod
+    def get_average_provision_embedding(cls, document, portion):
+        """Get the average embedding for a provision, falling back to parent EIDs."""
+        portions = [portion]
+        while "__" in portion:
+            portion = portion.rsplit("__", 1)[0]
+            portions.append(portion)
+
+        for provision in portions:
+            avg_embedding = cls.get_average_embedding(
+                document, "provision", portion=provision
+            )
+            if avg_embedding:
+                return avg_embedding
+
+        return None
+
+    @classmethod
+    def get_similar_provisions(
+        cls,
+        source_document,
+        source_portion,
+        target_documents,
+        threshold=0.8,
+        n_similar=10,
+    ) -> List["ContentChunk"]:
+        """Get provisions in target_documents similar to source_portion."""
+        avg_embedding = cls.get_average_provision_embedding(
+            source_document, source_portion
+        )
+        if not avg_embedding:
+            return []
+
+        qs = cls.objects.filter(
+            type="provision", document__in=target_documents
+        ).exclude(portion__isnull=True)
+
+        similar_provisions = (
+            qs.annotate(
+                similarity=MaxInnerProduct("text_embedding", avg_embedding) * -1
+            )
+            .filter(similarity__gt=threshold)
+            .values("document_id", "portion", "title", "similarity")
+            .order_by("-similarity")
+        )[: n_similar * 3]
+
+        provisions = []
+        seen = set()
+        for provision in similar_provisions:
+            if provision["portion"] in seen:
+                continue
+            seen.add(provision["portion"])
+            provisions.append(provision)
+            if len(provisions) == n_similar:
+                break
+
+        return provisions
+
+    @classmethod
     def make_content_chunks(cls, document):
         from peachjam_search.documents import SearchableDocument
 
         chunks = []
-        if document.content_html and document.content_html_is_akn and document.toc_json:
+        doc_content = document.get_or_create_document_content()
+        if (
+            doc_content.content_html
+            and doc_content.content_html_is_akn
+            and doc_content.toc_json
+        ):
             # AKN provisions
             provisions = SearchableDocument().prepare_provisions(document)
             for provision in provisions:
@@ -390,7 +466,8 @@ class ContentChunk(models.Model):
 
         else:
             # plain html or PDF text
-            text = (document.get_content_as_text() or "").strip()
+            doc_content = document.get_or_create_document_content()
+            text = (doc_content.get_content_as_text() or "").strip()
             if text:
                 if "\f" in text:
                     # pages
@@ -484,48 +561,3 @@ class ContentChunk(models.Model):
                 new_chunks.append(chunk)
 
         return new_chunks
-
-
-class ChatThread(models.Model):
-    id = models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="chat_threads"
-    )
-    document = models.ForeignKey(CoreDocument, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    score = models.IntegerField(default=0)
-    messages_json = models.JSONField(blank=True, null=True)
-
-    class Meta:
-        ordering = ["-updated_at"]
-
-    async def asave_message_history(self, graph, config):
-        # we just want the messages from the first snapshot
-        async for snapshot in graph.aget_state_history(config):
-            self.messages_json = [
-                message.to_json() for message in snapshot.values.get("messages", [])
-            ]
-            await self.asave()
-            break
-
-    @classmethod
-    def count_active_for_user(cls, user):
-        """How many active chat threads does the user have? Used to enforce monthly limits."""
-        now = timezone.now()
-        month_start = now.replace(
-            day=1,
-            hour=0,
-            minute=0,
-            second=0,
-            microsecond=0,
-        )
-        return (
-            cls.objects.filter(
-                user=user,
-                updated_at__gte=month_start,
-            )
-            .values("document_id")
-            .distinct()
-            .count()
-        )

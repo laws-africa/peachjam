@@ -1,5 +1,8 @@
 # Repository Guidelines
 
+## Agent context
+Use `docs/ARCHITECTURE.md` to build system context before making non-trivial code changes. Treat this file as the working instructions for how to operate in the repository, and treat `docs/ARCHITECTURE.md` as the reference for how the platform is structured.
+
 ## Project Structure & Module Organization
 The core Django app lives in `peachjam/`, which includes templates, templatetags, migrations, locale data, and the TypeScript/Vue source under `peachjam/js`.
 
@@ -20,11 +23,16 @@ Reusable scripts (data imports, translation extraction) live in `scripts/`.
 - You don't need to compile javascript or SCSS before committing, CI handles that.
 
 ## Coding Style & Naming Conventions
-Python code is formatted by Black and ordered with isort (Black profile) while Flake8 enforces a 120-character limit and ignores E203. Use 4-space indentation, descriptive module names, and keep Django apps cohesive.
+Python code is formatted and linted by Ruff, including import ordering. Ruff formats at 88 characters and enforces a 120-character maximum. Use 4-space indentation, descriptive module names, and keep Django apps cohesive.
 
-Templates must pass djLint and remain free of user-specific content when cached. Front-end files follow the ESLint Standard + Vue 3 configuration with mandatory semicolons; co-locate shared helpers under `peachjam/js/utils`.
-
-Don't use a leading underscore for protected or private method names on classes.
+- Do not use a leading underscore for protected or private method names on classes.
+- Provide short docstrings for complex classes or methods.
+- Let `ruff check --fix` and `ruff format` clean up code via pre-commit instead of manual shuffling.
+- Use `snake_case` for functions, `PascalCase` for classes, and align template names with their views (eg. `subscription_detail.html`).
+- Document FSM transitions and payload contracts inline whenever Payfast or Xero logic changes.
+- Templates must pass djLint and remain free of user-specific content when cached.
+- Front-end files follow the ESLint Standard + Vue 3 configuration with mandatory semicolons
+- co-locate shared helpers under `peachjam/js/utils`.
 
 ## Testing Guidelines
 Prefer Django `TestCase` classes located in `<app>/tests.py`, loading fixtures from `<app>/fixtures/`. Cover caching-sensitive paths, exercise view logic with `self.client`, and patch `timezone.now` for time-dependent assertions.
@@ -36,3 +44,55 @@ Use short, present-tense commit subjects (e.g., `simplify account page`); append
 
 ## Caching Guardrails
 Cacheable views must omit session access, `Set-Cookie`, and inline CSRF tokens. Load personalised islands via htmx endpoints and rely on the caching sanity middleware to catch leaks—fix violations before merging.
+
+## Data Components (HTML `data-component` + JS class)
+Use data-components when you need to bind behaviour to a specific HTML node without creating a Vue app.
+
+How the system works:
+- Templates declare a component name on an element: `data-component="ComponentName"`.
+- The name must exist in `peachjam/js/components/index.ts` in the exported `components` map.
+- Runtime boot starts in `peachjam/js/app.ts`, which calls `peachJam.setup()`.
+- `peachjam/js/peachjam.ts` then:
+  - scans the page for `[data-component]`,
+  - instantiates with `new components[name](el)`,
+  - stores the instance on the node as `el.component`,
+  - repeats this for htmx-inserted content via `htmx:load`.
+
+How to add a new data-component:
+1. Create a class in `peachjam/js/components/...` (usually `.ts`, `.js` also exists in legacy files) with a constructor that accepts the root element, e.g. `constructor(root: HTMLElement)`.
+2. Read config from `root.dataset.*` when needed (template `data-foo-bar` becomes `root.dataset.fooBar`).
+3. Add `data-component="YourComponentName"` to the target template node.
+4. Import and register the class in `peachjam/js/components/index.ts` under the same key string used in the template.
+5. Ensure initialization is idempotent/safe for dynamic content, because components are auto-created for htmx loads as well as first page load.
+
+Examples in this repo:
+- `peachjam/templates/peachjam/_copy_to_clipboard.html` + `peachjam/js/components/clipboard.ts` (`CopyToClipboard`).
+- `peachjam/templates/peachjam/_document_table.html` + `peachjam/js/components/document-table.ts` (`DocumentTable`).
+- `peachjam/templates/peachjam/_taxonomy_tree_facet.html` + `peachjam/js/components/taxonomy-tree.ts` (`TaxonomyTree`).
+
+## Frontend style guide
+
+* Use vanilla Bootstrap CSS where possible.
+* Prefer Bootstrap components and building blocks (buttons, cards, lists, tables, etc.) over rolling your own, unless the layout or instructions really call for it.
+* Use "Sentence case" not "Title Case" for headings, labels and buttons.
+* Prefer default styling for buttons. Don't adjust padding, font weight or custom colours. Use btn-primary for primary buttons or btn-secondary.
+* Prefer `alert-primary` to `alert-info` for informational notices. Use success, warning and danger variants when those semantic states apply.
+* The default heading margins are usually fine, only adjust them if really necessary for spacing.
+
+## Accessibility requirements
+
+Build and modify UI with accessibility in mind by default. Meet WCAG 2.2 AA at minimum, and prefer higher conformance where practical. Do not introduce accessibility regressions in existing flows, semantics, keyboard support, focus behavior, color contrast, accessible names, or announcements.
+
+When changing existing UI, preserve or improve its accessibility characteristics. In particular:
+
+* Prefer semantic HTML and native controls over ARIA workarounds.
+* Preserve keyboard access and native control behavior. Do not replace native checkbox, radio, select, or button behavior with custom interaction unless explicitly required.
+* Ensure focus order and focus targets remain meaningful. Skip links and programmatic focus should land on real, named targets.
+* Add or preserve accessible names for landmarks, form controls, icon-only buttons/links, and dynamic regions.
+* Prefer `aria-labelledby` when there is a real visible or visually-hidden heading/label in the DOM; use `aria-label` only when necessary.
+* When adding a top-level page, set `id="main-page-heading"` on that page's main `h1` so the main content region has a stable accessible label source.
+* Do not add ARIA that duplicates or conflicts with native semantics.
+* Links should use normal link styling, including underlines. The exception is a title link in a `.card-clickable` card when it uses `.stretched-link`: the card provides the click affordance. Give that link `.text-decoration-none` and make it at least h5-sized, either by wrapping it in an `h5`/heading with the `h5` class or by adding `.text-h5`.
+* Preserve or improve announcements for dynamic updates such as HTMX/AJAX content changes.
+* Ensure hidden content is not incorrectly focusable or exposed to assistive technology.
+* Avoid dead skip links, broken fragment targets, and inaccessible bypass mechanisms.

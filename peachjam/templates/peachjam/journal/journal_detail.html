@@ -1,0 +1,47 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n peachjam %}
+{% block title %}{{ journal.title }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'journal_list' %}">{% trans 'Journals' %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ journal.title }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block page-title %}
+  {% if not entity_profile %}
+    <div class="my-4">
+      <h1 id="main-page-heading" class="mb-0">{{ journal.title }}</h1>
+      {% block follow-button %}
+        <div hx-get="{% url 'user_following_button' %}?{{ journal|get_follow_params }}"
+             hx-trigger="load"></div>
+      {% endblock %}
+    </div>
+  {% endif %}
+{% endblock %}
+{% block page-header %}
+  {{ block.super }}
+  {% if volume_groups %}
+    <div class="flow-columns mb-4">
+      {% for group in volume_groups %}
+        <div class="flow-columns-group">
+          <ul class="list-unstyled">
+            {% for volume in group %}
+              <li>
+                <a href="{% url 'volume_detail' journal.slug volume.slug %}">{{ volume.title }}</a>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}

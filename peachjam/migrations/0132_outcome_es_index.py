@@ -29,7 +29,6 @@ def forwards(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0131_rename_order_outcome"),
     ]

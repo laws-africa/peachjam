@@ -1,0 +1,6 @@
+{% load i18n peachjam_subs %}
+{% change_subscription_url as change_subscription_url %}
+<div class="d-flex flex-wrap gap-2">
+  <a href="{% url 'my_account' %}" class="btn btn-link">{% trans "Back to my account" %}</a>
+  <a href="{{ change_subscription_url }}" class="btn btn-primary ms-auto">{% trans "Manage subscription" %}</a>
+</div>

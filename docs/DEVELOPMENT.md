@@ -1,0 +1,413 @@
+# Developing PeachJam
+
+## Prerequisites
+
+- PostgreSQL
+- pip
+- Elasticsearch
+- global Sass
+
+## Local setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/laws-africa/peach-jam.git
+   ```
+
+2. Set up and activate a Python 3.6+ virtual environment:
+
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   pip install -e '.[dev]'
+   pip install 'psycopg[binary]==3.2.12'
+   ```
+
+4. Ensure PostgreSQL is running, then create a `peachjam` user and database:
+
+   ```bash
+   sudo su - postgres -c 'createuser -d -P peachjam'
+   sudo su - postgres -c 'createdb peachjam'
+   ```
+
+5. Optionally export a custom connection string to override the default:
+
+   ```bash
+   export DATABASE_URL=postgres://<USER>:<PASSWORD>@<HOST>:<PORT>/<DATABASE_NAME>
+   ```
+
+6. Run migrations and initial data setup:
+
+   ```bash
+   python manage.py migrate
+   python manage.py setup_countries_languages
+   python manage.py loaddata ./peachjam/fixtures/documents/sample_documents.json
+   ```
+
+7. Create an admin user:
+
+   ```bash
+   python manage.py createsuperuser
+   ```
+
+8. Start the dev server:
+
+   ```bash
+   python manage.py runserver
+   ```
+
+## Running Specific Sites
+
+To run a specific site shell in this repository (for example `liiweb`), set the `DJANGO_SETTINGS_MODULE` environment variable:
+
+```bash
+export DJANGO_SETTINGS_MODULE=liiweb.settings
+python manage.py runserver
+```
+
+## Compiling SCSS
+
+Ensure you have sass installed globally:
+
+```bash
+npm install -g sass
+```
+
+If you need to manually compile the SCSS files:
+
+```bash
+python manage.py compilescss
+```
+
+## Setup pre-commit
+
+The project has linting enabled using pre-commit. It runs on the CI pipeline, so you need to enable locally as well. Run
+the following to allow Precommit to format and fix any linting errors on your code.
+```
+pre-commit install
+```
+
+## Continuous integration test environment
+
+The [test workflow](../.github/workflows/test.yml) runs the test matrix in the
+`peachjam-ci-base` container image. This avoids installing LibreOffice, Pandoc,
+Poppler, Node, Sass, and the Python dependency set separately for every test
+job.
+
+`Dockerfile.ci-base` starts from the same `ubuntu:24.04` base as the deployment
+`Dockerfile`. It installs the stable system tools, production Node packages, and
+the Python extras used in CI (`.[ml,dev]`). It removes the temporary Peachjam
+distribution after resolving those dependencies, so it provides no Peachjam
+application code. Core tests install their checkout, while other projects can
+install the exact Peachjam commit pinned in their own `pyproject.toml`.
+
+At the start of each test workflow, the `build-ci-base` job calculates an image
+tag from every dependency input copied into the Dockerfile:
+
+- `Dockerfile.ci-base`
+- `pyproject.toml` and `bin/`
+- `package.json` and `package-lock.json`
+
+The resulting immutable tag looks like
+`ghcr.io/laws-africa/peachjam-ci-base:deps-<hash>`. Source-only changes do not
+change this tag, so the workflow finds the existing image in GHCR and skips the
+Docker build entirely. The workflow also maintains a `:cache` tag with Docker's
+inline cache metadata. When a dependency input changes, the new image can still
+reuse unchanged earlier layers: a `pyproject.toml` change normally reruns only
+the final Python dependency installation.
+
+Each test job checks out the pull request and runs:
+
+```bash
+pip install --no-deps -e .
+```
+
+This editable install is fast and ensures that tests execute the current pull
+request's Python code while using the dependencies from the CI image. The
+containerized test job reaches its PostgreSQL service at `postgres:5432`, rather
+than `localhost:5432`.
+
+When changing system tooling, update both `Dockerfile.ci-base` and the
+deployment `Dockerfile` so their platform setup remains aligned. When changing
+Python dependencies, update `pyproject.toml`; the workflow automatically builds
+a new image for the changed dependency inputs.
+
+## Adding translation strings
+
+Translations for strings are added on [CrowdIn](https://laws-africa.crowdin.com/).
+
+Django translations are stored in the `locale` directories under each sub-project. Javascript and Vue translations are stored in `peachjam/js/locale/en/translation.json`.
+
+If you have added or changed strings that need translating, you must [tell Django to update the .po files](https://docs.djangoproject.com/en/3.2/topics/i18n/translation/#localization-how-to-create-language-files) so that translations can be supplied through CrowdIn.
+
+```bash
+scripts/extract-translations.sh
+```
+
+And then commit the changes. CrowdIn will pick up any changed strings and make them available for translation. Once they are translated, it will open a pull request to merge the changes into `main`.
+
+## Front-end build workflow
+
+Peachjam's TypeScript and Vue source lives under `peachjam/js` and is compiled into static JavaScript with webpack.
+During local development run;
+
+```
+npx webpack -w --mode development
+```
+
+from the project root to watch and rebuild assets whenever you save. Do not commit the generated files in
+`peachjam/static/js/`, that will be built automatically on `main` as described below.
+
+Any time a change lands on `main`, [the build workflow](../.github/workflows/build.yml) runs webpack and compares the
+compiled output with the previous commit. If real differences are detected, the workflow commits the updated bundles
+back to `main`. That follow-up commit is what ultimately lands the production-ready JavaScript in the repository, so
+developers do not need to worry about checking in built assets themselves. This commit includes `[nobuild]` in the
+commit message to prevent a circular build loop.
+
+The same push to `main` also triggers [the deployment workflow](../.github/workflows/deploy.yml) which pushes the code to
+each Dokku target in turn. If you are merging a pull request and want to avoid that deploy, include `nodeploy` anywhere
+in your merge commit message so that the workflow skips its jobs.
+
+## Ingestors
+
+See [INGESTORS.md](INGESTORS.md) for the scheduled ingestor lifecycle, adapter
+contracts, and Indigo-specific import behavior.
+
+## Frontend UI conventions
+
+Use Bootstrap's standard components and contextual classes wherever possible. For
+informational notices, prefer `alert-primary` to `alert-info`: Peachjam's primary
+alert uses the product's primary colour on a subtle, faded background and provides
+the intended visual emphasis. Continue to use `alert-success`, `alert-warning`, and
+`alert-danger` when those semantic states apply.
+
+## Key link analytics
+
+Peachjam can emit a Customer.io event when a user clicks a marked "key link" on an important page. This is intended for feature-usage analysis, for example understanding whether users click documents from the homepage courts block, the document metadata section, or the My LII timeline.
+
+### How it works
+
+Tracking only runs when the page `<body>` has `data-key-link-page`. The shared base layout adds this automatically from `KEY_LINK_PAGE`. The general context processor defaults it to the resolved URL view name, with namespace separators normalized to underscores. Views may override the default when several URLs represent one logical page or when a more stable product name is useful.
+
+Marked links and other clickable controls use:
+
+```html
+<a href="..." data-key-link="document">...</a>
+<button type="submit" data-key-link="follow">...</button>
+```
+
+The frontend sends a `Key link clicked` event with:
+
+- `link`: the value from `data-key-link`
+- `href`: the resolved link URL
+- `page`: the value from `body[data-key-link-page]`
+- `feature`: the nearest `data-key-link-feature` on the link or one of its ancestors, or `none`
+
+### When to add `KEY_LINK_PAGE`
+
+Override `KEY_LINK_PAGE` where the resolved URL name is not the best logical page name. Current examples include:
+
+- `homepage`
+- `document_detail`
+- `my_lii`
+
+As a rule, override it when several routes should be grouped into one page category, or when you want to distinguish the page from another route with the same effective role.
+
+### When to add `data-key-link-feature`
+
+Wrap the smallest meaningful feature/container around a group of key links, for example:
+
+- homepage courts, collections, recent-document blocks
+- document-detail metadata, citations, related-documents, suggested-documents, sublegislation tabs
+- My LII timeline blocks
+
+Use a stable machine-friendly name such as `courts`, `document_metadata`, `incoming_citations`, or `my_lii_timeline`.
+
+Do not nest feature wrappers merely to describe individual links. A feature is the UI
+component that contains the links, while `data-key-link` distinguishes the individual
+destinations. For example, a row of judgment discovery cards should have one
+`data-key-link-feature="discovery_cards"` on the row and a `data-key-link` on each
+card link, rather than a separate feature wrapper around each card.
+
+### When to add `data-key-link`
+
+Add `data-key-link` to the actual links or controls you care about, using a short human-friendly label such as:
+
+- `document`
+- `court`
+- `topic`
+- `judge`
+
+Prefer annotating shared partials like document tables and relationship lists so all reused instances stay consistent.
+
+Use `topic` for all taxonomy and flynote destinations. Flynotes are the topic
+implementation, not a distinct key-link type, so do not introduce labels such as
+`flynote`, `flynotes`, or `topics` for those links.
+
+## Caching
+
+This project serves one shared, cacheable HTML to everyone (anonymous and signed-in), and then hydrates small, per-user “islands” after page load. This keeps pages fast via public caches, while still showing user-specific UI (menu/profile chip, favourites, flash messages, etc.).
+
+Below is what’s implemented, why, and how to build new pages without breaking caching.
+
+### Goals
+
+* Speed for everyone: aggressive shared caching (CDN + browser) on public pages.
+* Zero cache leaks: no user-specific data in cacheable HTML.
+* Clean separation: per-user content loads from private endpoints (not cacheable).
+* Predictable behavior: guardrails via middleware and a few conventions.
+
+### What’s Implemented
+
+#### Public HTML + Private Islands
+
+* Cacheable pages (e.g. documents, listings, home) render no user-specific content.
+* Headers (example): Cache-Control: public, max-age=60, stale-while-revalidate=120, stale-if-error=600
+* Per-user islands (loaded after DOM ready via htmx GETs)
+* On every pageload, htmx GETs /user/loaded (private, no-store) to get user info (name, avatar), messages (toasts), and other per-user bits.
+* Restricted pages (permissioned docs/taxonomies): not cacheable (private, no-store).
+
+Reasoning: Public HTML becomes identical for all users → the CDN can reuse it broadly. Personalization moves to private endpoints that are safe to call with cookies and can set/refresh cookies without polluting caches.
+
+#### Cookies, Sessions, and Messages
+
+* We use signed-cookie sessions only for authenticated users.
+* Django messages use the default SessionStorage, but are never rendered in cacheable HTML.
+* Instead, view classes use messages.info(...), and /user/loaded returns the messages as HTML for a toast UI.
+* CSRF is not emitted in public HTML. Use /_token to set the cookie, then send X-CSRFToken on unsafe requests.
+
+Reasoning: Keeps public pages cookie-agnostic and avoids Set-Cookie on cacheable responses.
+
+#### i18n & URLs
+
+* Language for multi-language sites is in the URL prefix (/en/..., /fr/...), not in cookies.
+
+Reasoning: Distinct URLs → distinct cache keys and SEO-friendly.
+
+#### Middleware Guardrails
+
+* Sanity middleware (last in stack): if a response is cacheable, it asserts:
+* no Set-Cookie
+* no Vary: Cookie
+* no CSRF hidden inputs in HTML (heuristic)
+
+Reasoning: Fail fast in dev; avoid accidental cache poisoning in prod.
+
+### How to Build New Pages
+
+When your page is public/cacheable
+
+#### Do
+
+* Render no user-specific data (assume the viewer is anonymous).
+* Load any personalized bits via htmx GET islands.
+* If a form uses POST, use `data-csrf` to ensure it automatically gets a CSRF token when submitted.
+
+#### Don’t
+
+* Touch request.session, messages, or get_token() during render.
+* Include {% csrf_token %} in the template.
+* Emit Set-Cookie or Vary: Cookie.
+
+### Tips
+
+If your page is private / personalized / restricted, mark as not cacheable with `never_cache` or equivalent.
+
+In that case, it’s fine if it reads/writes the session, sets cookies, renders {% csrf_token %}, or displays messages inline.
+
+When you need a form or unsafe POST on a public page, render the form via a private island (htmx GET) so the response can set CSRF safely,
+or use `data-csrf` on the form to fetch /_token automatically.
+
+Per-user islands (htmx):
+
+* Endpoints must return small JSON or HTML fragments and be private, no-store.
+* Batch where possible (e.g., ?ids=1,2,3 for favourites).
+* Keep payloads and DB work tiny—these run on every page view for signed-in users.
+
+### Common Footguns (and how we avoid them)
+
+* Vary: Cookie on public pages → stripped by last middleware if the page is truly public.
+* Accidental CSRF fields in public HTML → sanity middleware fails the request.
+* Messages rendered on public pages → moved to /user/loaded (private).
+
+If you’re unsure whether something belongs in the cacheable HTML or an island, default to island. It’s easy to merge later; it’s much harder to unwind a cache leak.
+
+## Favicons
+
+To generate or update a favicon for a site:
+
+1. `pip install favicons`
+2. create a .PNG of the icon and put it into lii-name/static/images/lii-name-icon.png
+3. run the favicons CLI as follows (it seems a bit broken):
+
+```
+python .env/lib/python3.10/site-packages/favicons/cli.py generate --source lii-name/static/images/lii-name-icon.png --output-directory t
+```
+
+That will generate a bunch of icons in the director `t/`.
+
+Copy only certain files into the project:
+
+```
+cp t/favicon.ico t/favicon-16x16.png t/favicon-32x32.png t/favicon-96x96.png t/favicon-180x180.png lii-name/static/images/
+```
+
+## Search query classification models
+
+Peachjam Search uses machine learning models to classify user search queries. These models require large dependencies like numpy and scikit-learn to be installed,
+and so aren't included in the default set of dependencies.
+
+To set up dependencies for local use of the search query classification models, run:
+
+```bash
+pip install -e '.[dev,ml]'
+```
+
+To set up dependencies to train new models, run:
+
+```bash
+pip install -e '.[dev,ml,ml_train]'
+```
+
+Evaluate the packaged model, or a model trained to a temporary path, against a
+labelled CSV with `query` and `label` columns:
+
+```bash
+python manage.py search_classifier labelled-searches.csv --evaluate
+python manage.py search_classifier labelled-searches.csv --evaluate \
+  --model-path /tmp/query-classifier-candidate.joblib \
+  --evaluation-output /tmp/query-classifier-results.csv
+```
+
+The evaluation includes the production rules and ML confidence threshold. It
+reports accuracy, coverage, per-label metrics, and writes individual predictions
+when `--evaluation-output` is supplied.
+
+## Admin theme
+
+Peachjam customises the Django admin view using [Django Jazzmin](https://django-jazzmin.readthedocs.io/). We build
+a custom bundle of Bootstrap 4 specifically for the admin area from the [jazzmin-theme](jazzmin-theme) directory.
+
+To make changes to it:
+
+```bash
+cd jazzmin-theme
+npm i
+# make your changes to peachjam-jazzmin.scss
+# ...
+npm run watch
+```
+
+Once you're done, run:
+
+```bash
+npm run build
+```
+
+and commit both your changes, and the updated [peachjam/static/stylesheets/peachjam-jazzmin.css](peachjam/static/stylesheets/peachjam-jazzmin.css).

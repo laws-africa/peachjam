@@ -1,7 +1,9 @@
+import logging
+
 from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.db import models
+from django.db import connection, models, transaction
 from django.urls import reverse
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -10,12 +12,13 @@ from treebeard.mp_tree import MP_Node
 
 from peachjam.models import CoreDocument, EntityProfile
 
+log = logging.getLogger(__name__)
+
 
 class Taxonomy(MP_Node):
     name = models.CharField(_("name"), max_length=255)
     path_name = models.CharField(_("path name"), max_length=4096, blank=True)
     slug = models.SlugField(_("slug"), max_length=10 * 1024, unique=True)
-    node_order_by = ["name"]
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
@@ -38,6 +41,14 @@ class Taxonomy(MP_Node):
         null=False,
         help_text=_(
             "Allow users to make this taxonomy and its descendants available offline."
+        ),
+    )
+    hidden = models.BooleanField(
+        _("hidden"),
+        default=False,
+        null=False,
+        help_text=_(
+            "Hide this taxonomy and its descendants from public taxonomy listings."
         ),
     )
 
@@ -147,7 +158,7 @@ class Taxonomy(MP_Node):
             if is_restricted and not is_allowed:
                 exclude.append(child["id"])
 
-        children = self.get_children().exclude(id__in=exclude)
+        children = self.get_children().exclude(id__in=exclude).order_by("name")
         return children
 
     def get_offline_ancestor(self):
@@ -155,6 +166,31 @@ class Taxonomy(MP_Node):
         if self.allow_offline:
             return self
         return self.get_ancestors().filter(allow_offline=True).first()
+
+    @classmethod
+    def sort_bulk_tree(cls, tree):
+        """Sort a treebeard dump_bulk tree by taxonomy name at every level."""
+        tree.sort(
+            key=lambda node: (
+                str(node.get("data", {}).get("name") or "").casefold(),
+                str(node.get("data", {}).get("slug") or "").casefold(),
+            )
+        )
+        for node in tree:
+            if "children" in node:
+                cls.sort_bulk_tree(node["children"])
+        return tree
+
+    @classmethod
+    def sort_item_tree(cls, tree):
+        """Sort a nested taxonomy-object tree by taxonomy name at every level."""
+        return {
+            topic: cls.sort_item_tree(children)
+            for topic, children in sorted(
+                tree.items(),
+                key=lambda item: (item[0].name.casefold(), item[0].slug.casefold()),
+            )
+        }
 
     @classmethod
     def get_tree_for_items(cls, items):
@@ -175,7 +211,7 @@ class Taxonomy(MP_Node):
                     current_level[node] = {}
                 current_level = current_level[node]
 
-        return tree
+        return cls.sort_item_tree(tree)
 
     @classmethod
     def get_allowed_taxonomies(cls, user=None, root=None):
@@ -191,7 +227,11 @@ class Taxonomy(MP_Node):
         node_ids = []
 
         def filter_nodes(node):
-            is_restricted = node.get("data", {}).get("restricted", False)
+            data = node.get("data", {})
+            is_hidden = data.get("hidden", False)
+            if is_hidden:
+                return None
+            is_restricted = data.get("restricted", False)
             is_allowed = node.get("id") in allowed_taxonomies
             if is_restricted and not is_allowed:
                 return None
@@ -221,7 +261,7 @@ class Taxonomy(MP_Node):
             if filtered_node is not None
         ]
         return {
-            "tree": filtered_taxonomies,
+            "tree": cls.sort_bulk_tree(filtered_taxonomies),
             "pk_list": node_ids,
         }
 
@@ -258,3 +298,77 @@ class DocumentTopic(models.Model):
 
     def __str__(self):
         return f"{self.topic.name} - {self.document.title}"
+
+
+class TaxonomyDocumentCount(models.Model):
+    """Pre-calculated count of distinct documents linked to a taxonomy node
+    and all its descendants. Follows the ProvisionCitationCount pattern."""
+
+    taxonomy = models.OneToOneField(
+        Taxonomy,
+        on_delete=models.CASCADE,
+        related_name="document_count_cache",
+        verbose_name=_("taxonomy"),
+    )
+    count = models.PositiveIntegerField(_("count"), default=0)
+
+    class Meta:
+        verbose_name = _("taxonomy document count")
+        verbose_name_plural = _("taxonomy document counts")
+
+    def __str__(self):
+        return f"{self.taxonomy.name}: {self.count}"
+
+    @classmethod
+    def refresh_for_taxonomy(cls, root):
+        """Recompute document counts for all descendants of root.
+
+        Each node's count includes documents linked directly to it plus documents
+        linked to any of its descendants. Uses treebeard's materialised path
+        (steplen=4) to walk ancestors efficiently in a single SQL query.
+        """
+        if root is None:
+            return
+
+        root_path = root.path
+
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                # Delete existing counts for this tree
+                cursor.execute(
+                    """
+                    DELETE FROM peachjam_taxonomydocumentcount
+                    WHERE taxonomy_id IN (
+                        SELECT id FROM peachjam_taxonomy WHERE path LIKE %s
+                    )
+                    """,
+                    [root_path + "%"],
+                )
+
+                # For each taxonomy node in the tree, count distinct documents
+                # linked to it or any of its descendants. We do this by joining
+                # DocumentTopic (leaf links) back to all ancestor nodes using
+                # the materialised path: a node is an ancestor of another if
+                # the descendant's path starts with the ancestor's path.
+                cursor.execute(
+                    """
+                    INSERT INTO peachjam_taxonomydocumentcount (taxonomy_id, count)
+                    SELECT
+                        ancestor.id,
+                        COUNT(DISTINCT dt.document_id)
+                    FROM peachjam_taxonomy ancestor
+                    INNER JOIN peachjam_taxonomy descendant
+                        ON descendant.path LIKE ancestor.path || '%%'
+                    INNER JOIN peachjam_documenttopic dt
+                        ON dt.topic_id = descendant.id
+                    WHERE ancestor.path LIKE %s
+                    GROUP BY ancestor.id
+                    """,
+                    [root_path + "%"],
+                )
+
+        log.info(
+            "Refreshed document counts for taxonomy tree rooted at '%s' (pk=%s)",
+            root.slug,
+            root.pk,
+        )

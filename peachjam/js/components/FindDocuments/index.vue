@@ -193,10 +193,9 @@
             </MobileFacetsDrawer>
           </div>
 
-          <div class="col-md-12 col-lg-9 position-relative">
+          <div class="col-md-12 col-lg-9 position-relative" @click="itemClicked">
             <div>
               <FacetBadges v-model="facets" :permissive="searchInfo.count === 0" />
-              <div id="saved-search-button" />
               <div
                 id="saved-search-modal"
                 class="modal fade"
@@ -206,13 +205,35 @@
               >
                 <div id="saved-search-modal-dialog" class="modal-dialog" />
               </div>
+              <div
+                v-if="searchInfo.count && searchInfo.flynote_results_html"
+                v-html="searchInfo.flynote_results_html"
+              />
+              <div
+                v-if="searchInfo.entity_results_html"
+                v-html="searchInfo.entity_results_html"
+              />
               <div v-if="searchInfo.count">
                 <div class="my-3 d-flex">
                   <div class="me-2">
                     <span v-if="searchInfo.count > 9999">{{ $t('More than 10,000 documents found.') }}</span>
-                    <span v-else>{{ $t('{document_count} documents found', { document_count: searchInfo.count }) }}</span>
+                    <span v-else>{{ $t('{count} document found', { count: searchInfo.count }) }}</span>
                       &nbsp;
-                    <a href="#" @click.prevent="download" hx-swap="outerHTML" class="d-none d-md-inline">{{ $t('Download to Excel') }}</a>
+                    <a
+                      href="#"
+                      @click.prevent="download"
+                      hx-swap="outerHTML"
+                      class="d-none d-md-inline"
+                    >
+                      {{ $t('Download to Excel') }}
+                    </a>
+                    <a
+                      v-if="canDebugSearch"
+                      :href="debugUrl()"
+                      class="ms-2 d-none d-md-inline"
+                    >
+                      {{ $t('Debug') }}
+                    </a>
                   </div>
                   <select
                     v-model="ordering"
@@ -229,9 +250,9 @@
                     </option>
                   </select>
                 </div>
+                <div id="saved-search-button" class="mb-3" />
                 <div
                   ref="results"
-                  @click="itemClicked"
                   v-html="searchInfo.results_html"
                 />
                 <SearchFeedback :trace-id="searchInfo.trace_id" />
@@ -261,6 +282,8 @@
     <!-- DOM Hack for i18next to parse facet to locale json. i18next skips t functions in script element -->
     <div v-if="false">
       {{ $t('Document type') }}
+      {{ $t('Publication') }}
+      {{ $t('Sub-publication') }}
       {{ $t('Author') }}
       {{ $t('Court') }}
       {{ $t('Court registry') }}
@@ -391,6 +414,20 @@ export default {
         options: []
       },
       {
+        title: this.$t('Publication'),
+        name: 'publication',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
+        title: this.$t('Sub-publication'),
+        name: 'sub_publication',
+        type: 'checkboxes',
+        value: [],
+        options: []
+      },
+      {
         title: this.$t('Outcome'),
         name: 'outcome',
         type: 'checkboxes',
@@ -473,6 +510,9 @@ export default {
     },
     facetsLoading () {
       return this.facetsLoadingCount > 0;
+    },
+    canDebugSearch () {
+      return peachJam.user.perms.includes('peachjam_search.can_debug_search');
     }
   },
 
@@ -531,6 +571,23 @@ export default {
         buckets.reverse();
       }
       return buckets;
+    },
+
+    sortFacetOptionsBySelectedValues (facet) {
+      const selectedValues = Array.isArray(facet.value)
+        ? facet.value
+        : (facet.value ? [facet.value] : []);
+      const selected = new Set(selectedValues.map(value => String(value)));
+
+      if (!selected.size) {
+        return;
+      }
+
+      facet.options = [...facet.options].sort((a, b) => {
+        const aSelected = selected.has(String(a.value)) ? 0 : 1;
+        const bSelected = selected.has(String(b.value)) ? 0 : 1;
+        return aSelected - bSelected;
+      });
     },
 
     handlePageChange (newPage) {
@@ -681,7 +738,7 @@ export default {
             facet.options = generateOptions(
               this.sortBuckets(
                 facetInfo[`_filter_${facet.name}`][facet.name].buckets,
-               false,
+                false,
                 // sort nature by descending count, everything else alphabetically
                 facet.name === 'nature'
               ),
@@ -697,6 +754,8 @@ export default {
           const availableOptions = facet.options.map(option => option.value);
           facet.value = urlParams.getAll(facet.name).filter(value => availableOptions.includes(value));
         }
+
+        this.sortFacetOptionsBySelectedValues(facet);
       });
     },
 
@@ -787,7 +846,10 @@ export default {
         this.loadingCount = this.loadingCount + 1;
 
         // scroll to put the search box at the top of the window
-        scrollToElement(this.$refs['search-box']);
+        const searchBox = this.$refs['search-box'];
+        if (searchBox instanceof HTMLElement) {
+          scrollToElement(searchBox);
+        }
 
         // search tip
         if (this.q && this.q.indexOf('"') === -1 && this.q.indexOf(' ') > -1) {
@@ -833,7 +895,7 @@ export default {
                 this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
               }
               this.trackSearch(params);
-              this.savedSearchModal();
+              this.$nextTick(() => this.savedSearchModal());
               this.linkTraces(previousId, this.searchInfo.trace_id);
               this.loadSaveDocumentButtons();
             } else {
@@ -901,6 +963,28 @@ export default {
     },
 
     async itemClicked (event) {
+      const flynoteResult = event.target.closest('[data-flynote-result-id]');
+      if (flynoteResult) {
+        await this.trackResultCardClick(event, flynoteResult, {
+          resultAttribute: 'data-flynote-result-id',
+          resultField: 'flynote_result',
+          endpoint: `${this.urlPrefix}/search/api/flynote-click/`,
+          label: 'Flynote'
+        });
+        return;
+      }
+
+      const entityResult = event.target.closest('[data-entity-result-id]');
+      if (entityResult) {
+        await this.trackResultCardClick(event, entityResult, {
+          resultAttribute: 'data-entity-result-id',
+          resultField: 'entity_result',
+          endpoint: `${this.urlPrefix}/search/api/entity-click/`,
+          label: 'Entity'
+        });
+        return;
+      }
+
       const item = event.target.closest('[data-position]');
       if (item) {
         const params = new URLSearchParams();
@@ -909,15 +993,60 @@ export default {
         params.set('position', item.getAttribute('data-position'));
         params.set('search_trace', this.searchInfo.trace_id);
         try {
-          fetch(`${this.urlPrefix}/search/api/click/`, {
+          const response = await fetch(`${this.urlPrefix}/search/api/click/`, {
             method: 'POST',
-            headers: await authHeaders(),
+            keepalive: true,
             body: params
           });
+          if (!response.ok) {
+            console.error('Search click tracking failed', {
+              status: response.status,
+              statusText: response.statusText,
+              url: response.url,
+              contentType: response.headers.get('content-type'),
+              cfMitigated: response.headers.get('cf-mitigated'),
+              cfRay: response.headers.get('cf-ray')
+            });
+            throw new Error(`Search click tracking failed with status ${response.status}`);
+          }
         } catch (err) {
-          console.log(err);
+          console.error(err);
+          throw err;
         }
       }
+    },
+
+    async trackResultCardClick (event, link, { resultAttribute, resultField, endpoint, label }) {
+      const data = new FormData();
+      data.set(resultField, link.getAttribute(resultAttribute));
+      const href = link.getAttribute('href');
+
+      // Card clicks navigate away from the results page. Wait briefly for a
+      // CSRF-authenticated request before following the link, while keeping a
+      // strict bound so tracking never makes navigation feel slow. sendBeacon
+      // cannot include the CSRF header Django requires here.
+      const tracking = (async () => {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          keepalive: true,
+          headers: await authHeaders(),
+          body: data
+        });
+        if (!response.ok) {
+          throw new Error(`${label} click tracking failed with status ${response.status}`);
+        }
+      })();
+
+      try {
+        event.preventDefault();
+        await Promise.race([
+          tracking,
+          new Promise(resolve => setTimeout(resolve, 300))
+        ]);
+      } catch (err) {
+        console.error(err);
+      }
+      if (href) window.location.assign(href);
     },
 
     resetAdvancedFields () {
@@ -972,6 +1101,11 @@ export default {
     downloadUrl () {
       const params = this.generateSearchParams();
       return `${this.urlPrefix}/search/api/documents/download?${params.toString()}`;
+    },
+
+    debugUrl () {
+      const params = this.generateSearchParams();
+      return `${this.urlPrefix}/search/debug/?${params.toString()}`;
     }
   }
 };

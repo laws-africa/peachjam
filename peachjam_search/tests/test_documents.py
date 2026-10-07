@@ -1,6 +1,6 @@
 from django.test import TestCase  # noqa
 
-from peachjam.models import CoreDocument, Judgment
+from peachjam.models import CoreDocument, Gazette, Judgment
 from peachjam_search.documents import SearchableDocument
 
 
@@ -14,6 +14,23 @@ class SearchableDocumentTestCase(TestCase):
         self.assertEqual("Activity report", sd.prepare_nature_en(doc))
         doc.nature.name_fr = "Rapport d'activité"
         self.assertEqual("Rapport d'activité", sd.prepare_nature_fr(doc))
+
+    def test_translated_locality_field(self):
+        doc = CoreDocument.objects.exclude(locality=None).first()
+        sd = SearchableDocument()
+
+        self.assertEqual(doc.locality.name, sd.prepare_locality_en(doc))
+        doc.locality.name_fr = "Union africaine (UA)"
+        self.assertEqual("Union africaine (UA)", sd.prepare_locality_fr(doc))
+
+    def test_mapping_is_strict_with_translated_locality_fields(self):
+        mapping = SearchableDocument._index.to_dict()["mappings"]
+
+        self.assertEqual("strict", mapping["dynamic"])
+        for language in ("en", "fr", "pt", "sw"):
+            self.assertEqual(
+                "keyword", mapping["properties"][f"locality_{language}"]["type"]
+            )
 
     def test_summary_field(self):
         sd = SearchableDocument()
@@ -33,3 +50,20 @@ class SearchableDocumentTestCase(TestCase):
             "dodgy  summary  field  fun issue 1 issue 2 issue 3 held 1 held 2 order",
             sd.prepare_summary(j),
         )
+
+    def test_gazette_publication_fields(self):
+        sd = SearchableDocument()
+        gazette = Gazette(
+            publication="Government Gazette",
+            sub_publication="Legal Notices A",
+        )
+
+        self.assertEqual("Government Gazette", sd.prepare_publication(gazette))
+        self.assertEqual("Legal Notices A", sd.prepare_sub_publication(gazette))
+
+    def test_gazette_publication_fields_ignore_non_gazettes(self):
+        sd = SearchableDocument()
+        doc = CoreDocument()
+
+        self.assertIsNone(sd.prepare_publication(doc))
+        self.assertIsNone(sd.prepare_sub_publication(doc))

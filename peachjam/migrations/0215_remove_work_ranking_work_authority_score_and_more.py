@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0214_backfill_must_be_anonymised"),
     ]

@@ -6,7 +6,6 @@ from peachjam.models import CoreDocument
 
 
 class Gazette(CoreDocument):
-
     decorator = GazetteDecorator()
 
     publication = models.CharField(

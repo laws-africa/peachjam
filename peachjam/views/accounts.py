@@ -1,6 +1,15 @@
+import string
+
+from allauth.account.forms import ConfirmLoginCodeForm, ReauthenticateForm
+from allauth.account.mixins import NextRedirectMixin
+from allauth.account.views import ConfirmLoginCodeView as AllauthConfirmLoginCodeView
+from allauth.account.views import SignupView as AllauthSignupView
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
+from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -9,11 +18,159 @@ from django.utils.translation import gettext as _
 from django.views.generic import FormView
 from django.views.generic.base import TemplateView
 
-from peachjam.forms import TermsAcceptanceForm, UserProfileForm
+from peachjam.customerio import get_customerio
+from peachjam.forms import (
+    DeleteAccountForm,
+    OnboardingProfileForm,
+    PasswordSignupForm,
+    TermsAcceptanceForm,
+    UserProfileForm,
+)
 from peachjam.models import DocumentAccessGroup, UserProfile
 from peachjam.views.mixins import AtomicPostMixin
+from peachjam_subs.models import Subscription
+from peachjam_subs.organisations import organisations_enabled
 
 User = get_user_model()
+
+
+def normalise_login_code(code):
+    allowed_chars = string.ascii_letters + string.digits
+    return "".join(ch for ch in code or "" if ch in allowed_chars).lower()
+
+
+class PeachjamConfirmLoginCodeForm(ConfirmLoginCodeForm):
+    def clean_code(self):
+        code = self.cleaned_data.get("code")
+        self.cleaned_data["code"] = normalise_login_code(code)
+        return super().clean_code()
+
+
+class SignupView(AllauthSignupView):
+    def dispatch(self, request, *args, **kwargs):
+        if settings.PEACHJAM["AUTH_OTP"]:
+            return redirect(self.passthrough_next_url(reverse("account_login")))
+        return super().dispatch(request, *args, **kwargs)
+
+
+class UserAuthView(AllauthConfirmLoginCodeView):
+    form_class = PeachjamConfirmLoginCodeForm
+    template_name = "account/user_auth.html"
+
+    def _get_email_and_user(self):
+        email = self._process.state.get("email")
+        user = User.objects.filter(email=email).first() if email else None
+        return email, user
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("action")
+
+        if action == "resend":
+            return self._handle_resend(request)
+        elif action == "password_login":
+            return self._handle_password_login(request)
+        elif action == "signup_password":
+            return self._handle_signup_password(request)
+
+        return super().post(request, *args, **kwargs)
+
+    def _handle_resend(self, request):
+        self._process.send()
+        self._process.record_resend()
+        self._process.persist()
+        return HttpResponseRedirect(request.get_full_path())
+
+    def _handle_password_login(self, request):
+        email, user = self._get_email_and_user()
+        if not email or not user or not user.has_usable_password():
+            return HttpResponseRedirect(request.get_full_path())
+
+        form = ReauthenticateForm(user=user, data=request.POST)
+        if form.is_valid():
+            return self._process.finish(self.get_next_url())
+        form_class = self.get_form_class()
+        verify_form = form_class(code=self._process.code)
+        ctx = self.get_context_data(form=verify_form)
+        ctx["password_form"] = form
+        ctx["show_password_section"] = True
+        return self.render_to_response(ctx)
+
+    def _handle_signup_password(self, request):
+        email, user = self._get_email_and_user()
+        if user:
+            return HttpResponseRedirect(request.get_full_path())
+
+        form = PasswordSignupForm(request.POST)
+        if form.is_valid():
+            new_user, resp = form.try_save(request)
+            if resp:
+                return resp
+            if new_user:
+                return self._process.finish(self.get_next_url())
+        return self._render_with_signup_errors(signup_form=form)
+
+    def _render_with_signup_errors(self, signup_form):
+        self._extra_signup_form = signup_form
+        form_class = self.get_form_class()
+        verify_form = form_class(code=self._process.code)
+        ctx = self.get_context_data(form=verify_form)
+        ctx["show_password_section"] = True
+        return self.render_to_response(ctx)
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        email, user = self._get_email_and_user()
+
+        is_existing = user is not None
+        has_password = user.has_usable_password() if user else False
+
+        ctx["is_existing_user"] = is_existing
+        ctx["has_usable_password"] = has_password
+
+        if is_existing and has_password and "password_form" not in ctx:
+            ctx["password_form"] = ReauthenticateForm(user=user)
+
+        extra_su = getattr(self, "_extra_signup_form", None)
+        if not is_existing:
+            ctx["signup_form"] = extra_su or PasswordSignupForm(
+                initial={"email": email}
+            )
+
+        return ctx
+
+
+class OnboardView(NextRedirectMixin, AtomicPostMixin, LoginRequiredMixin, FormView):
+    """Collect required names and optional onboarding profile answers."""
+
+    template_name = "account/onboard.html"
+    form_class = OnboardingProfileForm
+
+    def dispatch(self, request, *args, **kwargs):
+        profile = getattr(request.user, "userprofile", None)
+        if profile and not profile.requires_onboarding():
+            return redirect(self.get_success_url())
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_default_success_url(self):
+        return reverse("home_page")
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["user"] = self.request.user
+        kwargs["skipped"] = self.request.POST.get("action") == "skip"
+        return kwargs
+
+    def form_valid(self, form):
+        profile = form.save()
+        if profile.onboarding_completed_at:
+            get_customerio().track_onboarding_completed(self.request.user)
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        form.save_names()
+        if not self.request.user.userprofile.requires_name_onboarding():
+            form.hide_name_fields()
+        return super().form_invalid(form)
 
 
 class AccountView(LoginRequiredMixin, TemplateView):
@@ -24,6 +181,29 @@ class AccountView(LoginRequiredMixin, TemplateView):
         context["document_access_groups"] = DocumentAccessGroup.objects.filter(
             group__in=self.request.user.groups.all()
         )
+        if organisations_enabled():
+            from peachjam_subs.models import OrganisationInvitation
+            from peachjam_subs.organisations.services import organisation_service
+
+            subscription_state = organisation_service.subscription_state_for_user(
+                self.request.user
+            )
+            context["organisation_subscription_state"] = subscription_state
+            context["organisation_membership"] = subscription_state.membership
+            context["organisation_seat_assignment"] = subscription_state.assignment
+            context["organisation_invitations"] = (
+                OrganisationInvitation.objects.filter(
+                    email__iexact=self.request.user.email,
+                    status=OrganisationInvitation.Status.PENDING,
+                    expires_at__gt=timezone.now(),
+                ).select_related(
+                    "organisation",
+                    "requested_product_offering__product",
+                    "requested_product_offering__pricing_plan",
+                )
+                if self.request.user.email
+                else OrganisationInvitation.objects.none()
+            )
         return context
 
 
@@ -54,6 +234,52 @@ class EditAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
             ),
         )
         return context
+
+
+class DeleteAccountView(AtomicPostMixin, LoginRequiredMixin, FormView):
+    template_name = "user_account/delete_account.html"
+    form_class = DeleteAccountForm
+
+    def get_success_url(self):
+        return reverse("account_logged_out")
+
+    def get_subscription(self):
+        return Subscription.get_or_create_active_for_user(self.request.user)
+
+    def has_paid_subscription(self):
+        subscription = self.get_subscription()
+        return bool(
+            subscription and subscription.product_offering.pricing_plan.price > 0
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["has_paid_subscription"] = self.has_paid_subscription()
+        return context
+
+    def form_valid(self, form):
+        if self.has_paid_subscription():
+            messages.warning(
+                self.request,
+                _(
+                    "Cancel your subscription before deleting your account. Your account will remain on the free "
+                    "plan after the paid period ends."
+                ),
+            )
+            return redirect("delete_account")
+        feedback = form.record_account_deletion()
+        try:
+            self.request.user.userprofile.delete_account(
+                deleted_reason=feedback.get_reason_display(),
+                deletion_feedback=feedback,
+            )
+        except ValidationError as exc:
+            feedback.delete()
+            messages.warning(self.request, "; ".join(exc.messages))
+            return redirect("delete_account")
+        get_customerio().track_offboarding_feedback(self.request.user, feedback)
+        messages.success(self.request, _("Your account has been deleted."))
+        return redirect(self.get_success_url())
 
 
 class LoggedOutView(TemplateView):

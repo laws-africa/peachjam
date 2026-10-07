@@ -3,7 +3,7 @@
   <i class="bi bi-pj pj-related"></i>
   {% trans "Related documents" %}
 </h4>
-<div class="row">
+<div class="row" data-key-link-feature="related_documents">
   {% if relationships_as_object %}
     <div class="col-lg">
       {% for verb, rels in relationships_as_object %}
@@ -13,7 +13,8 @@
             {% if rel.subject_work %}
               <li>
                 {% translate rel.predicate.reverse_verb as verb %}
-                <a href="{{ rel.subject_work.get_absolute_url }}">{{ rel.subject_work.title }}</a>
+                <a href="{{ rel.subject_work.get_absolute_url }}"
+                   data-key-link="document">{{ rel.subject_work.title }}</a>
               </li>
             {% endif %}
           {% endfor %}
@@ -29,7 +30,8 @@
           {% for rel in rels %}
             {% if rel.object_work %}
               <li>
-                <a href="{{ rel.object_work.get_absolute_url }}">{{ rel.object_work.title }}</a>
+                <a href="{{ rel.object_work.get_absolute_url }}"
+                   data-key-link="document">{{ rel.object_work.title }}</a>
               </li>
             {% endif %}
           {% endfor %}

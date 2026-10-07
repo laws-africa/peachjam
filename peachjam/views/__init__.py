@@ -17,10 +17,14 @@ from .document_nature import *
 from .document_problem import *
 from .documents import *
 from .external_document import *
+from .flynotes import *
 from .gazette import *
 from .generic_document import *
 from .home import *
+from .journals import *
+from .judges import *
 from .judgment import *
+from .law_reports import *
 from .legislation import *
 from .login import *
 from .my import *

@@ -42,6 +42,9 @@ export default class SearchTypeahead {
       autoselectFirst: false,
       highlightTyped: true,
       shouldLoadFromServer: this.shouldLoadFromServer.bind(this),
+      onServerError: (error, signal) => {
+        // do nothing to avoid noisey errors
+      },
       onServerResponse: async (response) => {
         const data = await response.json();
         const suggestions = data.suggestions.prefix.options.map((option) => {

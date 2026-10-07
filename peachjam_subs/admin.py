@@ -1,5 +1,7 @@
+from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.http import HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import path, reverse
@@ -12,13 +14,156 @@ from peachjam.admin import UserAdminCustom
 
 from .models import (
     Feature,
+    OffboardingFeedback,
+    Organisation,
+    OrganisationAuditEvent,
+    OrganisationInvitation,
+    OrganisationMembership,
+    OrganisationSeat,
+    OrganisationSeatAssignment,
     PricingPlan,
     Product,
     ProductOffering,
     Subscription,
     SubscriptionSettings,
     subscription_settings,
+    validate_selectable_offering_catalog,
 )
+
+
+class OrganisationMembershipInline(admin.TabularInline):
+    model = OrganisationMembership
+    extra = 0
+    autocomplete_fields = ("user",)
+
+
+class OrganisationSeatInline(admin.TabularInline):
+    model = OrganisationSeat
+    extra = 0
+    autocomplete_fields = ("product_offering", "pending_product_offering")
+
+
+@admin.register(Organisation)
+class OrganisationAdmin(admin.ModelAdmin):
+    list_display = ("name", "status", "billing_period", "privacy_mode", "owner")
+    list_filter = ("status", "billing_period", "privacy_mode")
+    search_fields = ("name", "memberships__user__email")
+    readonly_fields = (
+        "public_id",
+        "created_at",
+        "activated_at",
+        "closing_at",
+        "closed_at",
+    )
+    inlines = (OrganisationMembershipInline, OrganisationSeatInline)
+
+
+@admin.register(OrganisationInvitation)
+class OrganisationInvitationAdmin(admin.ModelAdmin):
+    list_display = ("email", "organisation", "role", "status", "expires_at")
+    list_filter = ("status", "role")
+    search_fields = ("email", "organisation__name")
+    readonly_fields = ("token", "created_at", "accepted_at", "cancelled_at")
+
+
+@admin.register(OrganisationSeatAssignment)
+class OrganisationSeatAssignmentAdmin(admin.ModelAdmin):
+    list_display = ("seat", "membership", "started_at", "ended_at")
+    search_fields = ("membership__user__email", "seat__organisation__name")
+    readonly_fields = ("started_at", "ended_at")
+
+
+@admin.register(OrganisationAuditEvent)
+class OrganisationAuditEventAdmin(admin.ModelAdmin):
+    list_display = ("organisation", "event_type", "actor", "created_at")
+    list_filter = ("event_type", "created_at")
+    search_fields = ("organisation__name", "message")
+    readonly_fields = (
+        "organisation",
+        "actor",
+        "membership",
+        "invitation",
+        "seat",
+        "event_type",
+        "message",
+        "event_data",
+        "created_at",
+    )
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
+class ProductAdminForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        selectable_offerings = cleaned_data.get("selectable_offerings")
+        instance = self.instance
+
+        if selectable_offerings is None:
+            return cleaned_data
+
+        if not instance.pk and selectable_offerings.exists():
+            raise ValidationError(
+                _("Save the product first, then configure selectable offerings.")
+            )
+
+        if instance.pk:
+            mismatched = selectable_offerings.exclude(product=instance)
+            if mismatched.exists():
+                raise ValidationError(
+                    _(
+                        "Selectable offerings for '%(product)s' must belong to that product."
+                    )
+                    % {"product": instance.name}
+                )
+
+        pairs = []
+        for product in Product.objects.prefetch_related(
+            "selectable_offerings__pricing_plan"
+        ):
+            offerings = (
+                list(selectable_offerings)
+                if instance.pk and product.pk == instance.pk
+                else list(product.selectable_offerings.all())
+            )
+            pairs.append((product, offerings))
+
+        validate_selectable_offering_catalog(pairs)
+        return cleaned_data
+
+
+class SubscriptionSettingsAdminForm(forms.ModelForm):
+    class Meta:
+        model = SubscriptionSettings
+        fields = "__all__"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        key_products = cleaned_data.get("key_products")
+        if key_products is None:
+            return cleaned_data
+
+        missing = [
+            product.name
+            for product in key_products
+            if not product.selectable_offerings.exists()
+        ]
+        if missing:
+            raise ValidationError(
+                _(
+                    "Key products must have at least one selectable offering configured: %(products)s"
+                )
+                % {"products": ", ".join(missing)}
+            )
+        return cleaned_data
 
 
 @admin.register(Feature)
@@ -30,10 +175,11 @@ class FeatureAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductAdminForm
     list_display = ("name", "description", "tier")
     search_fields = ("name",)
     readonly_fields = ("group",)
-    filter_horizontal = ("features", "key_features")
+    filter_horizontal = ("features", "key_features", "selectable_offerings")
 
 
 @admin.register(PricingPlan)
@@ -41,6 +187,7 @@ class PricingPlanAdmin(admin.ModelAdmin):
     list_display = ("name", "price", "period")
     search_fields = ("name",)
     list_filter = ("period",)
+    ordering = ("name",)
 
 
 @admin.register(ProductOffering)
@@ -48,6 +195,7 @@ class ProductOfferingAdmin(GuardedModelAdmin):
     list_display = ("product", "pricing_plan")
     search_fields = ("product__name", "pricing_plan__name")
     list_filter = ("product", "pricing_plan")
+    ordering = ("product__name", "pricing_plan__name")
 
 
 @admin.register(Subscription)
@@ -97,7 +245,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
             try:
                 subscription.close()
                 # ensure the user has an active subscription
-                Subscription.get_or_create_active_for_user(request.user)
+                Subscription.get_or_create_active_for_user(subscription.user)
                 messages.success(request, _("Subscription cancelled."))
             except TransitionNotAllowed:
                 messages.warning(request, _("Subscription cannot be cancelled."))
@@ -120,8 +268,38 @@ class SubscriptionAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
 
+@admin.register(OffboardingFeedback)
+class OffboardingFeedbackAdmin(admin.ModelAdmin):
+    list_display = (
+        "event_type",
+        "reason",
+        "current_product_offering",
+        "requested_product_offering",
+        "created_at",
+    )
+    list_filter = (
+        "event_type",
+        "reason",
+        "created_at",
+        "current_product_offering",
+        "requested_product_offering",
+    )
+    search_fields = ("comment", "user__username")
+    readonly_fields = (
+        "user",
+        "event_type",
+        "reason",
+        "comment",
+        "current_product_offering",
+        "requested_product_offering",
+        "created_at",
+    )
+
+
 @admin.register(SubscriptionSettings)
 class SubscriptionSettingsAdmin(admin.ModelAdmin):
+    form = SubscriptionSettingsAdminForm
+
     def has_add_permission(self, request):
         return False
 

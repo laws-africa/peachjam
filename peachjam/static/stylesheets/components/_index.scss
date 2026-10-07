@@ -1,8 +1,12 @@
+@import "auth";
 @import "autocomplete";
+@import "buttons";
 @import "charts";
 @import "chat";
 @import "diffs";
+@import "prose";
 @import "document-content";
+@import "document-history";
 @import "entity-profile";
 @import "enrichments";
 @import "footer";
@@ -12,6 +16,7 @@
 @import "letter-radiobox";
 @import "loaders";
 @import "navs";
+@import "journals";
 @import "tables";
 @import "terms-of-use";
 @import "text";

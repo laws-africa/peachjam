@@ -32,6 +32,113 @@ class TestContentChunks(TestCase):
             frbr_uri_date="2024",
         )
 
+    def make_document(self, title, number):
+        return GenericDocument.objects.create(
+            jurisdiction=Country.objects.first(),
+            title=title,
+            date=date.today(),
+            language=Language.objects.first(),
+            frbr_uri_doctype="doc",
+            frbr_uri_number=number,
+            frbr_uri_date="2024",
+        )
+
+    def test_get_similar_provisions(self):
+        target = self.make_document("Target", "target")
+        source_embedding = [1.0] + [0.0] * 1023
+
+        ContentChunk.objects.create(
+            document=self.document,
+            type="provision",
+            text="source",
+            portion="sec_1",
+            text_embedding=source_embedding,
+        )
+        ContentChunk.objects.create(
+            document=target,
+            type="provision",
+            text="matching chunk one",
+            portion="sec_2",
+            title="Section 2",
+            text_embedding=source_embedding,
+        )
+        ContentChunk.objects.create(
+            document=target,
+            type="provision",
+            text="matching chunk two",
+            portion="sec_2",
+            title="Section 2",
+            text_embedding=source_embedding,
+        )
+        ContentChunk.objects.create(
+            document=target,
+            type="provision",
+            text="different",
+            portion="sec_3",
+            title="Section 3",
+            text_embedding=[0.0, 1.0] + [0.0] * 1022,
+        )
+
+        self.assertEqual(
+            [
+                {
+                    "document_id": target.pk,
+                    "portion": "sec_2",
+                    "title": "Section 2",
+                }
+            ],
+            [
+                {
+                    "document_id": provision["document_id"],
+                    "portion": provision["portion"],
+                    "title": provision["title"],
+                }
+                for provision in ContentChunk.get_similar_provisions(
+                    self.document, "sec_1", [target]
+                )
+            ],
+        )
+
+    def test_get_similar_provisions_falls_back_to_parent_provision_embedding(self):
+        target = self.make_document("Target", "target")
+        source_embedding = [1.0] + [0.0] * 1023
+
+        ContentChunk.objects.create(
+            document=self.document,
+            type="provision",
+            text="source",
+            portion="sec_2__para_a",
+            text_embedding=source_embedding,
+        )
+        ContentChunk.objects.create(
+            document=target,
+            type="provision",
+            text="matching chunk",
+            portion="sec_3",
+            title="Section 3",
+            text_embedding=source_embedding,
+        )
+
+        self.assertEqual(
+            [
+                {
+                    "document_id": target.pk,
+                    "portion": "sec_3",
+                    "title": "Section 3",
+                }
+            ],
+            [
+                {
+                    "document_id": provision["document_id"],
+                    "portion": provision["portion"],
+                    "title": provision["title"],
+                }
+                for provision in ContentChunk.get_similar_provisions(
+                    self.document, "sec_2__para_a__subpara_b__p_1", [target]
+                )
+            ],
+        )
+
     def test_make_content_chunks_text_simple(self):
         self.assertEqual(
             [
@@ -271,8 +378,10 @@ class TestContentChunks(TestCase):
             frbr_uri_number="test",
             frbr_uri_date="2024",
             metadata_json={"commenced": True},
-            content_html_is_akn=True,
-            content_html="""
+        )
+        doc_content = self.document.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.content_html = """
 <section id="chp_1">
   <h1>Chapter 1</h1>
   <p>Chapter text</p>
@@ -281,26 +390,26 @@ class TestContentChunks(TestCase):
     <p>Section text</p>
   </div>
 </section>
-            """,
-            toc_json=[
-                {
-                    "id": "chp_1",
-                    "title": "Chapter 1",
-                    "type": "chapter",
-                    "num": "1",
-                    "basic_unit": False,
-                    "children": [
-                        {
-                            "id": "chp_1__sec_1",
-                            "type": "section",
-                            "num": "1",
-                            "basic_unit": True,
-                            "title": None,
-                        }
-                    ],
-                }
-            ],
-        )
+            """
+        doc_content.toc_json = [
+            {
+                "id": "chp_1",
+                "title": "Chapter 1",
+                "type": "chapter",
+                "num": "1",
+                "basic_unit": False,
+                "children": [
+                    {
+                        "id": "chp_1__sec_1",
+                        "type": "section",
+                        "num": "1",
+                        "basic_unit": True,
+                        "title": None,
+                    }
+                ],
+            }
+        ]
+        doc_content.save()
 
         settings.PEACHJAM["SEARCH_SEMANTIC"] = True
         try:

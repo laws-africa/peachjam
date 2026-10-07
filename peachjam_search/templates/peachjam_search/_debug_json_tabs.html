@@ -1,0 +1,75 @@
+{% load i18n %}
+<div class="card mb-3">
+  <div class="card-header">
+    <ul class="nav nav-tabs card-header-tabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active"
+                data-bs-toggle="tab"
+                data-bs-target="#{{ prefix }}-query"
+                type="button"
+                role="tab">
+          {% trans "Elasticsearch query" %}
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#{{ prefix }}-response"
+                type="button"
+                role="tab">
+          {% trans "Raw response" %}
+        </button>
+      </li>
+      {% if extra_json %}
+        <li class="nav-item" role="presentation">
+          <button class="nav-link"
+                  data-bs-toggle="tab"
+                  data-bs-target="#{{ prefix }}-extra"
+                  type="button"
+                  role="tab">
+            {{ extra_label }}
+          </button>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+  <div class="card-body">
+    <div class="tab-content">
+      <div id="{{ prefix }}-query" class="tab-pane active show" role="tabpanel">
+        <pre class="overflow-auto" style="max-height: 70vh"><code>{{ query_json }}</code></pre>
+        <button type="button"
+                class="btn btn-outline-secondary copy-to-clipboard"
+                title="{% trans "Copy to clipboard" %}"
+                data-component="CopyToClipboard"
+                data-value="{{ query_json }}"
+                data-confirmation="{% trans "Copied!" %}">
+          {% trans "Copy to clipboard" %}
+        </button>
+      </div>
+      <div id="{{ prefix }}-response" class="tab-pane" role="tabpanel">
+        <pre class="overflow-auto" style="max-height: 70vh"><code>{{ response_json }}</code></pre>
+        <button type="button"
+                class="btn btn-outline-secondary copy-to-clipboard"
+                title="{% trans "Copy to clipboard" %}"
+                data-component="CopyToClipboard"
+                data-value="{{ response_json }}"
+                data-confirmation="{% trans "Copied!" %}">
+          {% trans "Copy to clipboard" %}
+        </button>
+      </div>
+      {% if extra_json %}
+        <div id="{{ prefix }}-extra" class="tab-pane" role="tabpanel">
+          <pre class="overflow-auto" style="max-height: 70vh"><code>{{ extra_json }}</code></pre>
+          <button type="button"
+                  class="btn btn-outline-secondary copy-to-clipboard"
+                  title="{% trans "Copy to clipboard" %}"
+                  data-component="CopyToClipboard"
+                  data-value="{{ extra_json }}"
+                  data-confirmation="{% trans "Copied!" %}">
+            {% trans "Copy to clipboard" %}
+          </button>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>

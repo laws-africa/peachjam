@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("languages_plus", "0004_auto_20171214_0004"),
         ("peachjam", "0200_alter_taxonomy_options_userfollowing_and_more"),

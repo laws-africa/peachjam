@@ -7,10 +7,12 @@ import CitationLinkGutterItem from './CitationLinkGutterItem.vue';
 import { ComponentPublicInstance } from 'vue';
 import { authHeaders } from '../../api';
 import peachJam from '../../peachjam';
+import { readJsonScript } from '../../utils/json-script';
 
 export interface ICitationLink {
   document: number | string | null;
   id: number | null;
+  is_external?: boolean;
   text: string;
   url: string;
   // eslint-disable-next-line camelcase
@@ -35,8 +37,7 @@ export default class PDFCitationLinks implements IGutterEnrichmentProvider {
     this.root = root;
     this.documentId = root.dataset.documentId || null;
     this.manager = manager;
-    const el = document.getElementById('citation-links');
-    this.links = JSON.parse((el ? el.textContent : '') || '[]');
+    this.links = readJsonScript<ICitationLink[]>('citation-links', []);
     this.applyLinks();
     peachJam.whenUserLoaded().then((user) => {
       if (user.perms.includes('peachjam.add_citationlink')) {

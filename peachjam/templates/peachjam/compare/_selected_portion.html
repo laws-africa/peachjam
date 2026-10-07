@@ -1,0 +1,38 @@
+{% load i18n peachjam %}
+<div class="p-3">
+  <div class="d-flex justify-content-between align-items-start gap-2">
+    <div>
+      <h2 id="compare-side-{{ side }}-heading" class="h5 mb-1">
+        <a href="{{ selected.document_url }}">{{ selected.document.title }}</a>
+      </h2>
+      <div>
+        <a href="{{ selected.provision_url }}">{{ selected.portion_title }}</a>
+      </div>
+    </div>
+    <div class="d-flex flex-column gap-2">
+      <button type="button"
+              class="btn btn-secondary btn-sm"
+              hx-get="{% url 'compare_chooser' %}?side={{ side }}&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
+              hx-target="#compare-column-{{ side }}"
+              hx-swap="innerHTML">
+        {% trans "Change document" %}
+      </button>
+      <button type="button"
+              class="btn btn-secondary btn-sm"
+              hx-get="{% url 'compare_chooser' %}?side={{ side }}&document-uri={{ selected.document.expression_frbr_uri|urlencode }}&uri-a={{ uri_a|urlencode }}&uri-b={{ uri_b|urlencode }}"
+              hx-target="#compare-column-{{ side }}"
+              hx-swap="innerHTML">
+        {% trans "Change provision" %}
+      </button>
+    </div>
+  </div>
+</div>
+<div class="border rounded bg-white">
+  <la-akoma-ntoso frbr-expression-uri="{{ selected.document.expression_frbr_uri }}"
+  class="d-block p-3 content content__html frbr-doctype-{{ selected.document.frbr_uri_doctype }} frbr-subtype-{{ selected.document.frbr_uri_subtype }}"
+  style="max-height: 70vh;
+  overflow-y: auto"
+  lang="{{ selected.document.language.iso }}">
+  {{ selected.portion_html|qualify_local_refs:selected.document.expression_frbr_uri|safe }}
+  </la-akoma-ntoso>
+</div>

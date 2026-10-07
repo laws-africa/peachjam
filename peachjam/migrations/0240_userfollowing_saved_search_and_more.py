@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam_search", "0019_es_mapping_add_summary"),
         ("peachjam", "0239_remove_timelineevent_user_notified_and_more"),

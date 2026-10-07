@@ -4,7 +4,6 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0225_judgment_blurb_judgment_held_judgment_issues_and_more"),
     ]

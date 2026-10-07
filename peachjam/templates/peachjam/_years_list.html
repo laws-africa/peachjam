@@ -1,24 +1,38 @@
 {% load i18n %}
 {% if years %}
-  <div class="pl-0 mt-2 mb-3 align-items-center d-none d-lg-flex">
-    <i class="bi bi-calendar me-2"></i>
-    <div>
-      <a class="text-nowrap {% if not year %} active{% endif %}"
-         href="{{ all_years_url }}">{% trans 'All years' %}</a>
-    </div>
-    <ul class="year-nav mb-0 ms-2">
-      {% for y in years %}
-        <li>
-          {% if y.year == year %}
-            {{ y.year }}
-          {% else %}
-            <a href="{{ y.url }}">{{ y.year }}</a>
-          {% endif %}
-        </li>
-      {% endfor %}
-    </ul>
-  </div>
-  <select class="form-select mb-3 d-block d-lg-none"
+  <section id="years-section" aria-labelledby="years-heading" tabindex="-1">
+    <h2 id="years-heading" class="h6 visually-hidden skip-link-target">{% trans 'Years' %}</h2>
+    {% if years|length > 8 and years_skip_target_id %}
+      <a class="visually-hidden-focusable d-inline-block mb-2"
+         href="#{{ years_skip_target_id }}">{% trans 'Skip past years' %}</a>
+    {% endif %}
+    <nav id="years-nav"
+         class="pl-0 mt-2 mb-3 d-none d-lg-block"
+         aria-labelledby="years-heading">
+      <div class="align-items-center d-lg-flex">
+        <i class="bi bi-calendar me-2"></i>
+        <div>
+          <a class="text-nowrap {% if not year %} active{% endif %}"
+             href="{{ all_years_url }}">{% trans 'All years' %}</a>
+        </div>
+        <ul class="year-nav mb-0 ms-2">
+          {% for y in years %}
+            <li>
+              {% if y.year == year %}
+                {{ y.year }}
+              {% else %}
+                <a href="{{ y.url }}">{{ y.year }}</a>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </nav>
+  </section>
+  <label class="form-label d-block d-lg-none mb-1"
+         for="year-navigation-select">{% trans 'Browse by year' %}</label>
+  <select id="year-navigation-select"
+          class="form-select mb-3 d-block d-lg-none"
           data-component="NavigationSelect">
     <option value="{{ all_years_url }}">
       {% trans 'All years' %}

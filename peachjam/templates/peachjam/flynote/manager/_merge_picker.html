@@ -1,0 +1,19 @@
+<div id="merge-picker">
+  <form id="merge-search-form"
+        method="get"
+        hx-get="{{ picker_url }}"
+        hx-target="#merge-picker-content"
+        hx-swap="innerHTML"
+        hx-include="#merge-picker-state"
+        hx-trigger="input changed delay:300ms from:#id_q, search from:#id_q">
+    <div class="mb-3">
+      <label for="id_q" class="form-label">Find sibling flynotes to merge</label>
+      <input id="id_q"
+             type="search"
+             name="q"
+             value="{{ query }}"
+             class="form-control"/>
+    </div>
+  </form>
+  <div id="merge-picker-content">{% include "peachjam/flynote/manager/_merge_picker_content.html" %}</div>
+</div>

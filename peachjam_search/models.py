@@ -1,6 +1,7 @@
 import json
 import logging
 import uuid
+from dataclasses import replace
 from datetime import timedelta
 from math import exp
 from urllib.parse import urlencode
@@ -14,6 +15,7 @@ from django.shortcuts import reverse
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 
+from peachjam.models.flynote import Flynote
 from peachjam_subs.models import Subscription
 
 log = logging.getLogger(__name__)
@@ -21,6 +23,15 @@ log = logging.getLogger(__name__)
 
 class SearchTrace(models.Model):
     """A search performed by a user."""
+
+    class Kind(models.TextChoices):
+        DOCUMENTS = "documents", "Documents"
+        PORTIONS = "portions", "Portions"
+        FLYNOTES = "flynotes", "Legal topics"
+
+    class Status(models.TextChoices):
+        COMPLETED = "completed", "Completed"
+        TIMED_OUT = "timed_out", "Timed out"
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     # this is the name of the search configuration, for tracking changes across versions
@@ -43,12 +54,21 @@ class SearchTrace(models.Model):
     filters_string = models.CharField(max_length=2048, null=True)
     ordering = models.CharField(max_length=1024, null=True)
     suggestion = models.CharField(max_length=1024, null=True)
+    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.DOCUMENTS)
 
     query_clean = models.CharField(max_length=2048, null=True)
     query_clean_n_words = models.IntegerField(null=True)
     query_clean_n_chars = models.IntegerField(null=True)
     query_classification = models.CharField(max_length=50, null=True)
     query_classification_confidence = models.FloatField(null=True)
+    query_analysis = models.JSONField(null=True)
+    search_profile = models.CharField(max_length=100, null=True)
+    status = models.CharField(
+        max_length=20, choices=Status.choices, default=Status.COMPLETED
+    )
+    elasticsearch_query = models.JSONField(null=True)
+    error_type = models.CharField(max_length=255, null=True)
+    error_message = models.CharField(max_length=2048, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
@@ -59,6 +79,13 @@ class SearchTrace(models.Model):
             ("can_download_search", "Can download search results"),
             ("can_search_portions", "Can use portion search API"),
         ]
+
+    @classmethod
+    def truncate_field_value(cls, field_name, value):
+        """Trim a string to the maximum length of a model field."""
+        if value is None:
+            return None
+        return value[: cls._meta.get_field(field_name).max_length]
 
     @classmethod
     def prune(cls, days=90):
@@ -76,6 +103,37 @@ class SearchTrace(models.Model):
         params.update({"page": self.page})
         params.update({"ordering": self.ordering})
         return reverse("search:search") + "?" + urlencode(params, doseq=True)
+
+    def get_search_debug_url(self):
+        """Re-build a search debug URL for this trace."""
+        if self.kind == self.Kind.PORTIONS:
+            portion_inputs = self.filters or {}
+            params = {
+                "debug_tab": "portions",
+                "portion_text": self.search,
+                "portion_top_k": portion_inputs.get("top_k", 10),
+            }
+            for field in ("pre_filters", "filters"):
+                if portion_inputs.get(field):
+                    params[f"portion_{field}"] = json.dumps(portion_inputs[field])
+            return reverse("search:search_debug") + "?" + urlencode(params)
+
+        params = {"search": self.search}
+        params.update(
+            {k: v for k, v in (self.filters.items() or {}) if k != "is_most_recent"}
+        )
+        params.update({"page": self.page})
+        params.update({"ordering": self.ordering})
+        if self.mode and self.mode != "text":
+            params["mode"] = self.mode
+        for field, value in (self.field_searches or {}).items():
+            if value:
+                params[f"search__{field}"] = value
+        return reverse("search:search_debug") + "?" + urlencode(params, doseq=True)
+
+    def get_query_analysis_json(self):
+        """Return query analysis formatted for display in the search trace UI."""
+        return json.dumps(self.query_analysis, indent=2, sort_keys=True)
 
 
 class SearchClick(models.Model):
@@ -99,6 +157,112 @@ class SearchClick(models.Model):
         super().save(*args, **kwargs)
 
 
+class SearchFlynoteResult(models.Model):
+    """A flynote result rendered as part of a tracked search.
+
+    The result is deliberately independent of the document-search card UI so
+    it can also record results shown on the legal topics page in future.
+    """
+
+    class Surface(models.TextChoices):
+        DOCUMENT_SEARCH_CARD = "document_search_card", "Document search card"
+        TOPICS_PAGE_BRANCH = "topics_page_branch", "Topics page branch"
+        TOPICS_PAGE_MATCH = "topics_page_match", "Topics page matching topic"
+
+    class Source(models.TextChoices):
+        DIRECT_QUERY = "direct_query", "Direct query match"
+        DOCUMENT_SUPPORT = "document_support", "Document-supported match"
+
+    class SelectionReason(models.TextChoices):
+        DIRECT_NAME_MATCH = "direct_name_match", "Direct name match"
+        LEXICAL_DOCUMENT_SUPPORT = (
+            "lexical_document_support",
+            "Lexical document support",
+        )
+        STRONG_DOCUMENT_CONVERGENCE = (
+            "strong_document_convergence",
+            "Strong document convergence",
+        )
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    search_trace = models.ForeignKey(
+        SearchTrace, on_delete=models.CASCADE, related_name="flynote_results"
+    )
+    flynote = models.ForeignKey(
+        Flynote, null=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    # These fields preserve what was displayed if a topic is later renamed,
+    # moved, merged, or removed from the active taxonomy.
+    flynote_name = models.CharField(max_length=255)
+    flynote_path_labels = models.JSONField()
+    position = models.PositiveSmallIntegerField()
+    surface = models.CharField(max_length=30, choices=Surface.choices)
+    source = models.CharField(max_length=30, choices=Source.choices)
+    selection_reason = models.CharField(max_length=40, choices=SelectionReason.choices)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("position",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("search_trace", "surface", "position"),
+                name="unique_search_flynote_result_position",
+            ),
+            models.UniqueConstraint(
+                fields=("search_trace", "surface", "flynote"),
+                name="unique_search_flynote_result_flynote",
+            ),
+        ]
+
+
+class SearchFlynoteClick(models.Model):
+    """The first recorded click on a rendered flynote search result."""
+
+    flynote_result = models.OneToOneField(
+        SearchFlynoteResult, on_delete=models.CASCADE, related_name="click"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class SearchEntityResult(models.Model):
+    """An entity card rendered as part of a tracked document search."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    search_trace = models.ForeignKey(
+        SearchTrace, on_delete=models.CASCADE, related_name="entity_results"
+    )
+    entity_type = models.CharField(max_length=30)
+    entity_id = models.PositiveIntegerField()
+    entity_label = models.CharField(max_length=255)
+    entity_url = models.CharField(max_length=2048)
+    match_type = models.CharField(max_length=30)
+    confidence = models.FloatField()
+    position = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("position",)
+        constraints = [
+            models.UniqueConstraint(
+                fields=("search_trace", "position"),
+                name="unique_search_entity_result_position",
+            ),
+            models.UniqueConstraint(
+                fields=("search_trace", "entity_type", "entity_id"),
+                name="unique_search_entity_result_entity",
+            ),
+        ]
+
+
+class SearchEntityClick(models.Model):
+    """The first recorded click on a rendered entity search result."""
+
+    entity_result = models.OneToOneField(
+        SearchEntityResult, on_delete=models.CASCADE, related_name="click"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
 class SavedSearch(models.Model):
     q = models.CharField(max_length=4098, null=True, blank=True)
     a = models.CharField(max_length=4098, null=True, blank=True)
@@ -108,6 +272,12 @@ class SavedSearch(models.Model):
         User, on_delete=models.CASCADE, related_name="saved_searches"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    subscription_locked_at = models.DateTimeField(
+        _("subscription locked at"), null=True, blank=True
+    )
+    subscription_lock_expires_at = models.DateTimeField(
+        _("subscription lock expires at"), null=True, blank=True
+    )
 
     # TODO: remove this field after back fill since we now use user following last alerted at
     last_alerted_at = models.DateTimeField(null=True, blank=True, auto_now_add=True)
@@ -126,6 +296,10 @@ class SavedSearch(models.Model):
         if f:
             s = f"{s} ({f})"
         return s
+
+    @property
+    def is_subscription_locked(self):
+        return self.subscription_locked_at is not None
 
     def pretty_query(self):
         s = ""
@@ -175,10 +349,6 @@ class SavedSearch(models.Model):
 
         # sort params alphabetically so that the lookup is consistent
         self.filters = self.get_sorted_filters_string()
-
-    def save(self, *args, **kwargs):
-        self.full_clean()
-        super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         filters = self.get_filters_dict()
@@ -239,11 +409,10 @@ class SavedSearch(models.Model):
         else:
             self.generate_advanced_search_params(params)
 
-        engine = SearchEngine()
-        engine.page_size = 20
         form = SearchForm(params)
         form.is_valid()
-        form.configure_engine(engine)
+        query = replace(form.build_search_query(), page_size=20)
+        engine = SearchEngine(query)
         es_response = engine.execute()
 
         # unpack the hits

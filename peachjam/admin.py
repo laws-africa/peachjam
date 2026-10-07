@@ -1,7 +1,10 @@
 import copy
 import json
+import logging
 from datetime import date
 
+import sentry_sdk
+from allauth.socialaccount.models import SocialAccount
 from background_task.models import Task
 from ckeditor.widgets import CKEditorWidget
 from countries_plus.models import Country
@@ -9,22 +12,26 @@ from dal import autocomplete
 from django import forms
 from django.conf import settings
 from django.contrib import admin, messages
-from django.contrib.admin.utils import flatten_fieldsets, quote
+from django.contrib.admin import helpers
+from django.contrib.admin.utils import flatten_fieldsets, quote, unquote
 from django.contrib.auth import get_user_model
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.admin import GenericStackedInline, GenericTabularInline
+from django.contrib.contenttypes.admin import GenericStackedInline
 from django.contrib.contenttypes.models import ContentType
-from django.core.exceptions import ValidationError
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.db import transaction
+from django.db.models import Q
+from django.http import Http404
 from django.http.response import FileResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.defaultfilters import filesizeformat
 from django.template.response import TemplateResponse
 from django.urls import path, reverse
 from django.utils import timezone
 from django.utils.dateparse import parse_date
 from django.utils.dates import MONTHS
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from django.utils.text import slugify
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
@@ -36,6 +43,15 @@ from nonrelated_inlines.admin import NonrelatedStackedInline, NonrelatedTabularI
 from treebeard.admin import TreeAdmin
 from treebeard.forms import MoveNodeForm, movenodeform_factory
 
+from peachjam.analysis.judges import judge_identity_service
+from peachjam.book_word import (
+    DOCX_MIMETYPE,
+    BookWordError,
+    analyse_markdown,
+    docx_to_markdown,
+    html_diff_headings,
+    markdown_to_docx,
+)
 from peachjam.extractor import ExtractorError, ExtractorService
 from peachjam.forms import (
     AttachedFilesForm,
@@ -46,6 +62,7 @@ from peachjam.forms import (
     RatificationForm,
     SourceFileForm,
 )
+from peachjam.logging import set_log_context
 from peachjam.models import (
     AlternativeName,
     Article,
@@ -71,28 +88,38 @@ from peachjam.models import (
     CustomProperty,
     CustomPropertyLabel,
     DocumentAccessGroup,
+    DocumentChatThread,
     DocumentNature,
     DocumentTopic,
     EntityProfile,
     ExternalDocument,
+    Flynote,
     Gazette,
     GenericDocument,
-    Image,
     Ingestor,
     IngestorSetting,
     Journal,
+    JournalArticle,
     Judge,
+    JudgeAlias,
+    JudgePerson,
+    JudgeTitle,
     Judgment,
     JurisdictionProfile,
     Label,
+    LawReport,
+    LawReportEntry,
+    LawReportVolume,
     Legislation,
     Locality,
     LowerBench,
     MatterType,
+    OnboardingIntent,
     Outcome,
     Partner,
     PartnerLogo,
     PeachJamSettings,
+    PracticeType,
     Predicate,
     ProvisionEnrichment,
     PublicationFile,
@@ -106,6 +133,7 @@ from peachjam.models import (
     UnconstitutionalProvision,
     UserFollowing,
     UserProfile,
+    VolumeIssue,
     Work,
     citations_processor,
     pj_settings,
@@ -131,6 +159,7 @@ from peachjam_search.models import SavedSearch
 from peachjam_search.tasks import search_model_saved
 
 User = get_user_model()
+log = logging.getLogger(__name__)
 
 
 class BaseAdmin(admin.ModelAdmin):
@@ -194,6 +223,17 @@ class PeachJamSettingsAdmin(admin.ModelAdmin):
         "document_jurisdictions",
     )
 
+    def formfield_for_dbfield(self, db_field, request, **kwargs):
+        if db_field.name == "document_debug_external_links":
+            kwargs["widget"] = forms.Textarea(
+                attrs={
+                    "wrap": "off",
+                    "style": "white-space: pre; overflow-x: auto;",
+                    "class": "vLargeTextField",
+                }
+            )
+        return super().formfield_for_dbfield(db_field, request, **kwargs)
+
     def has_add_permission(self, request):
         return False
 
@@ -225,6 +265,50 @@ class SourceFileFilter(admin.SimpleListFilter):
             return queryset.filter(document__doc_type="legal_instrument")
         else:
             return queryset
+
+
+class FlynoteDocumentCountFilter(admin.SimpleListFilter):
+    title = "document count"
+    parameter_name = "document_count_range"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("0", "0"),
+            ("1", "1"),
+            ("2_5", "2-5"),
+            ("6_10", "6-10"),
+            ("11_20", "11-20"),
+            ("21_50", "21-50"),
+            ("51_plus", "51+"),
+        )
+
+    def queryset(self, request, queryset):
+        value = self.value()
+        if value == "0":
+            return queryset.filter(
+                Q(document_count_cache__count=0) | Q(document_count_cache__isnull=True)
+            )
+        if value == "1":
+            return queryset.filter(document_count_cache__count=1)
+        if value == "2_5":
+            return queryset.filter(
+                document_count_cache__count__gte=2, document_count_cache__count__lte=5
+            )
+        if value == "6_10":
+            return queryset.filter(
+                document_count_cache__count__gte=6, document_count_cache__count__lte=10
+            )
+        if value == "11_20":
+            return queryset.filter(
+                document_count_cache__count__gte=11, document_count_cache__count__lte=20
+            )
+        if value == "21_50":
+            return queryset.filter(
+                document_count_cache__count__gte=21, document_count_cache__count__lte=50
+            )
+        if value == "51_plus":
+            return queryset.filter(document_count_cache__count__gte=51)
+        return queryset
 
 
 class BaseAttachmentFileInline(admin.StackedInline):
@@ -267,7 +351,7 @@ class PublicationFileInline(BaseAttachmentFileInline):
 
 class TopicChoiceField(forms.ModelChoiceField):
     def label_from_instance(self, obj):
-        return f"{'-'*(obj.depth-1)} {obj.name}"
+        return f"{'-' * (obj.depth - 1)} {obj.name}"
 
 
 class TopicForm(forms.ModelForm):
@@ -344,7 +428,7 @@ class TopicTreeWidget(forms.CheckboxSelectMultiple):
             for kid in item.get("children", []):
                 fixup(kid)
 
-        tree = Taxonomy.dump_bulk()
+        tree = Taxonomy.sort_bulk_tree(Taxonomy.dump_bulk())
         for x in tree:
             fixup(x)
         return tree
@@ -363,7 +447,7 @@ class DocumentForm(forms.ModelForm):
     )
     edit_activity_start = forms.DateTimeField(widget=forms.HiddenInput())
     edit_activity_stage = forms.CharField(widget=forms.HiddenInput())
-    content_html = forms.CharField(
+    source_html = forms.CharField(
         widget=CKEditorWidget(
             extra_plugins=["lawwidgets"],
             external_plugin_resources=[
@@ -372,9 +456,6 @@ class DocumentForm(forms.ModelForm):
         ),
         required=False,
     )
-    flynote = forms.CharField(widget=CKEditorWidget(), required=False)
-    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
-    order = forms.CharField(widget=CKEditorWidget(), required=False)
     date = forms.DateField(widget=DateSelectorWidget())
 
     def __init__(self, data=None, *args, **kwargs):
@@ -412,8 +493,11 @@ class DocumentForm(forms.ModelForm):
                 (x, x) for x in self.Meta.model.frbr_uri_doctypes
             ]
 
-        if self.instance and self.instance.content_html_is_akn:
-            self.fields["content_html"].widget.attrs["readonly"] = True
+        if self.instance and self.instance.pk:
+            doc_content = self.instance.get_or_create_document_content()
+            self.fields["source_html"].initial = doc_content.source_html
+            if doc_content.content_html_is_akn:
+                self.fields["source_html"].widget.attrs["readonly"] = True
 
         self.fields["edit_activity_start"].initial = timezone.now()
         self.fields["edit_activity_stage"].initial = (
@@ -429,17 +513,18 @@ class DocumentForm(forms.ModelForm):
 
     def full_clean(self):
         super().full_clean()
-        if "content_html" in self.changed_data:
-            # if the content_html has changed, set it and update related attributes
-            self.instance.set_content_html(self.instance.content_html)
-            if self.instance.pk:
-                self.instance.update_text_content()
+        if "source_html" in self.changed_data:
+            # source_html is the editable source and content_html is derived from it
+            doc_content = self.instance.get_or_create_document_content(True)
+            doc_content.set_source_html(self.cleaned_data["source_html"])
 
-    def clean_content_html(self):
+    def clean_source_html(self):
         # prevent CKEditor-based editing of AKN HTML
-        if self.instance.content_html_is_akn:
-            return self.instance.content_html
-        return self.cleaned_data["content_html"]
+        if self.instance and self.instance.pk:
+            doc_content = self.instance.get_or_create_document_content()
+            if doc_content.content_html_is_akn:
+                return doc_content.source_html
+        return self.cleaned_data["source_html"]
 
     def create_topics(self, instance):
         topics = self.cleaned_data.get("topics", [])
@@ -457,6 +542,7 @@ class DocumentForm(forms.ModelForm):
 
     def _save_m2m(self):
         super()._save_m2m()
+        self.instance.get_or_create_document_content().save()
         self.create_topics(self.instance)
 
     @property
@@ -467,38 +553,63 @@ class DocumentForm(forms.ModelForm):
             return reverse("admin:peachjam_extract_judgment")
 
 
+class BookWordImportUploadForm(forms.Form):
+    """Upload step for converting a clean DOCX into preview markdown."""
+
+    word_file = forms.FileField(label=gettext_lazy("Word document"))
+
+    def clean_word_file(self):
+        word_file = self.cleaned_data["word_file"]
+        if not (word_file.name or "").lower().endswith(".docx"):
+            raise forms.ValidationError(gettext_lazy("Only .docx files are supported."))
+        return word_file
+
+
+class BookWordImportConfirmForm(forms.Form):
+    """Confirm step that carries previewed markdown into the final save."""
+
+    content_markdown = forms.CharField(widget=forms.Textarea(attrs={"hidden": True}))
+
+
 class AttachedFilesInline(BaseAttachmentFileInline):
     model = AttachedFiles
     form = AttachedFilesForm
 
 
-class ImageInline(BaseAttachmentFileInline):
-    model = Image
+class BackgroundTasksAdminMixin:
+    @admin.display(description=gettext_lazy("Background tasks"))
+    def background_tasks(self, obj):
+        if not obj or not obj.pk:
+            return "-"
 
-
-class BackgroundTaskInline(GenericTabularInline):
-    model = Task
-    ct_field = "creator_content_type"
-    ct_fk_field = "creator_object_id"
-    fields = ("task", "run_at", "attempts", "has_error")
-    readonly_fields = fields
-    extra = 0
-    can_delete = False
-
-    def task(self, obj):
-        return format_html(
-            '<a href="{url}">{title}</a>',
-            url=reverse(
-                "admin:background_task_task_change",
-                kwargs={
-                    "object_id": obj.pk,
-                },
+        tasks = Task.objects.filter(
+            creator_content_type=ContentType.objects.get_for_model(
+                obj, for_concrete_model=False
             ),
-            title=obj.task_name,
-        )
+            creator_object_id=obj.pk,
+        ).order_by("run_at", "pk")
+        if not tasks.exists():
+            return "-"
 
-    def has_error(self, obj):
-        return bool(obj.last_error)
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}">{}</a> ({}, attempts: {})</li>',
+                (
+                    (
+                        reverse(
+                            "admin:background_task_task_change",
+                            kwargs={"object_id": task.pk},
+                        ),
+                        task.task_name,
+                        task.run_at,
+                        task.attempts,
+                    )
+                    for task in tasks
+                ),
+            ),
+        )
 
 
 class CustomPropertyInline(admin.TabularInline):
@@ -536,11 +647,11 @@ class AccessGroupForm(forms.Form):
 
 
 # better forms for django guardian admin views
-GuardedModelAdminMixin.get_obj_perms_group_select_form = (
-    lambda self, request: GuardianGroupForm
+GuardedModelAdminMixin.get_obj_perms_group_select_form = lambda self, request: (
+    GuardianGroupForm
 )
-GuardedModelAdminMixin.get_obj_perms_user_select_form = (
-    lambda self, request: GuardianUserForm
+GuardedModelAdminMixin.get_obj_perms_user_select_form = lambda self, request: (
+    GuardianUserForm
 )
 
 
@@ -588,7 +699,7 @@ class AccessGroupMixin(GuardedModelAdminMixin):
     document_access_link.short_description = gettext_lazy("Restricted access groups")
 
 
-class DocumentAdmin(AccessGroupMixin, BaseAdmin):
+class DocumentAdmin(BackgroundTasksAdminMixin, AccessGroupMixin, BaseAdmin):
     # used in change_form.html
     is_document_admin = True
     form = DocumentForm
@@ -597,9 +708,7 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         PublicationFileInline,
         AlternativeNameInline,
         AttachedFilesInline,
-        ImageInline,
         CustomPropertyInline,
-        BackgroundTaskInline,
     ]
     list_display = (
         "title",
@@ -617,10 +726,13 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         "created_at",
         "updated_at",
         "work_frbr_uri",
-        "toc_json",
+        "document_content_html_is_akn",
+        "document_content_toc_json",
         "metadata_json",
         "work_link",
         "document_access_link",
+        "background_tasks",
+        "images",
     )
     exclude = ("doc_type",)
     date_hierarchy = "date"
@@ -680,7 +792,8 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             gettext_lazy("Content"),
             {
                 "fields": [
-                    "content_html",
+                    "source_html",
+                    "images",
                 ]
             },
         ),
@@ -689,11 +802,12 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             {
                 "classes": ("collapse",),
                 "fields": [
-                    "content_html_is_akn",
+                    "document_content_html_is_akn",
                     "allow_robots",
                     "restricted",
                     "document_access_link",
-                    "toc_json",
+                    "background_tasks",
+                    "document_content_toc_json",
                     "metadata_json",
                 ],
             },
@@ -709,6 +823,12 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
     ]
 
     new_document_form_mixin = NewDocumentFormMixin
+
+    def get_object(self, request, object_id, from_field=None):
+        obj = super().get_object(request, object_id, from_field=from_field)
+        if obj and request.method == "POST":
+            set_log_context(frbr_uri=obj.expression_frbr_uri)
+        return obj
 
     def get_inlines(self, request, obj):
         inlines = self.inlines
@@ -730,6 +850,46 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
 
         return fieldsets
 
+    @admin.display(description=gettext_lazy("TOC JSON"))
+    def document_content_toc_json(self, obj):
+        try:
+            return obj.document_content.toc_json
+        except ObjectDoesNotExist:
+            return None
+
+    @admin.display(boolean=True, description=gettext_lazy("content HTML is AKN"))
+    def document_content_html_is_akn(self, obj):
+        try:
+            return obj.document_content.content_html_is_akn
+        except ObjectDoesNotExist:
+            return False
+
+    @admin.display(description=gettext_lazy("Images"))
+    def images(self, obj):
+        if not obj or not obj.pk:
+            return "-"
+
+        images = obj.images.all().order_by("pk")
+        if not images.exists():
+            return "-"
+
+        return format_html(
+            "<ul>{}</ul>",
+            format_html_join(
+                "",
+                '<li><a href="{}" target="_blank">{}</a> ({}, {})</li>',
+                (
+                    (
+                        image.file.url,
+                        image.filename or image.file.name,
+                        image.mimetype,
+                        filesizeformat(image.size),
+                    )
+                    for image in images
+                ),
+            ),
+        )
+
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
             kwargs["fields"] = self.new_document_form_mixin.adjust_fields(
@@ -745,12 +905,116 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         return super().get_form(request, obj, **kwargs)
 
     def render_change_form(self, request, context, *args, **kwargs):
+        # The document admin form is complex. Sometimes we get validation errors that are about hidden fields.
+        # So here we check for validation errors in the form and any inlines and add a non-field error to the main
+        # form with a summary of the fields that have errors. We also log the validation errors with some context to
+        # help with debugging.
+        if request.method == "POST" and not getattr(
+            request, "_document_admin_validation_reported", False
+        ):
+            adminform = context.get("adminform")
+            report = self._build_validation_error_report(context)
+            if adminform and report["summary_fields"]:
+                request._document_admin_validation_reported = True
+                model_label = (
+                    f"{self.model._meta.app_label}.{self.model._meta.model_name}"
+                )
+                object_id = getattr(context.get("original"), "pk", None)
+                user = getattr(request, "user", None)
+                summary_message = _(
+                    "Validation errors were found in: %(fields)s. Check inline sections and non-field errors as well."
+                ) % {"fields": ", ".join(report["summary_fields"])}
+                log.warning(
+                    "Admin validation errors for %s object_id=%s user=%s path=%s details=%s",
+                    model_label,
+                    object_id,
+                    user,
+                    request.path,
+                    report["details"],
+                )
+                form = adminform.form
+                if summary_message not in form.non_field_errors():
+                    form.add_error(None, summary_message)
+                    context["errors"] = helpers.AdminErrorList(
+                        form,
+                        [
+                            inline_admin_formset.formset
+                            for inline_admin_formset in context.get(
+                                "inline_admin_formsets", []
+                            )
+                        ],
+                    )
+                self.message_user(
+                    request,
+                    summary_message,
+                    level=messages.ERROR,
+                )
+
         # this is our only chance to inject a pre-filled field from the querystring for both add and change
         if request.GET.get("stage"):
             context["adminform"].form.fields[
                 "edit_activity_stage"
             ].initial = request.GET["stage"]
         return super().render_change_form(request, context, *args, **kwargs)
+
+    def _build_validation_error_report(self, context):
+        report = {"summary_fields": [], "details": {"form": {}, "formsets": []}}
+        adminform = context.get("adminform")
+        if not adminform:
+            return report
+
+        def add_summary(label):
+            if label not in report["summary_fields"]:
+                report["summary_fields"].append(label)
+
+        form = adminform.form
+        if form.errors:
+            report["details"]["form"]["fields"] = {
+                field: [str(error) for error in errors]
+                for field, errors in form.errors.items()
+            }
+            for field in form.errors:
+                add_summary(field)
+
+        non_field_errors = [str(error) for error in form.non_field_errors()]
+        if non_field_errors:
+            report["details"]["form"]["non_field_errors"] = non_field_errors
+            add_summary(_("main form (non-field)"))
+
+        for inline_admin_formset in context.get("inline_admin_formsets", []):
+            formset = inline_admin_formset.formset
+            formset_report = {
+                "prefix": formset.prefix,
+                "non_form_errors": [str(error) for error in formset.non_form_errors()],
+                "forms": [],
+            }
+            if formset_report["non_form_errors"]:
+                add_summary(f"{formset.prefix} (non-form)")
+
+            for index, inline_form in enumerate(formset.forms):
+                form_errors = {
+                    field: [str(error) for error in errors]
+                    for field, errors in inline_form.errors.items()
+                }
+                inline_non_field_errors = [
+                    str(error) for error in inline_form.non_field_errors()
+                ]
+                if form_errors or inline_non_field_errors:
+                    entry = {
+                        "index": index,
+                        "fields": form_errors,
+                        "non_field_errors": inline_non_field_errors,
+                    }
+                    formset_report["forms"].append(entry)
+                    for field in form_errors:
+                        add_summary(f"{formset.prefix}[{index}].{field}")
+                    if inline_non_field_errors:
+                        add_summary(f"{formset.prefix}[{index}] (non-field)")
+
+            if formset_report["non_form_errors"] or formset_report["forms"]:
+                report["details"]["formsets"].append(formset_report)
+
+        return report
 
     def save_model(self, request, obj, form, change):
         if not change:
@@ -780,10 +1044,8 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         else:
             alternative_names_has_changed = False
 
-        if (
-            not change
-            or ["date", "title", "citation"] in form.changed_data
-            or alternative_names_has_changed
+        if self.should_queue_re_extract_citations(
+            form, alternative_names_has_changed, change
         ):
             cp = citations_processor()
             cp.queue_re_extract_citations(form.instance.date)
@@ -798,6 +1060,18 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
             sf = getattr(form.instance, "source_file", None)
             if sf:
                 sf.set_download_filename()
+
+    def should_queue_re_extract_citations(
+        self, form, alternative_names_has_changed, change
+    ):
+        """Return whether this edit can affect citation extraction in other documents."""
+        return (
+            not change
+            or any(
+                field in form.changed_data for field in ("date", "title", "citation")
+            )
+            or alternative_names_has_changed
+        )
 
     def get_urls(self):
         return [
@@ -839,10 +1113,10 @@ class DocumentAdmin(AccessGroupMixin, BaseAdmin):
         count = 0
         with transaction.atomic():
             for doc in queryset.only("pk"):
-                if doc.extract_content_from_source_file():
+                doc_content = doc.get_or_create_document_content(True)
+                if doc_content.extract_content_from_source_file():
                     count += 1
-                    doc.extract_citations()
-                    doc.save()
+                    doc_content.save()
         self.message_user(
             request,
             _("Re-imported content from %(count)d documents.") % {"count": count},
@@ -985,12 +1259,154 @@ class TaxonomyAdmin(AccessGroupMixin, TreeAdmin):
                 fixup(kid)
 
         # grab the tree and turn it into something la-table-of-contents-controller understands
-        tree = self.model.dump_bulk()
+        tree = self.model.sort_bulk_tree(self.model.dump_bulk())
         for x in tree:
             fixup(x)
         resp.context_data["tree_json"] = json.dumps(tree)
 
         return resp
+
+
+@admin.register(Flynote)
+class FlynoteAdmin(admin.ModelAdmin):
+    change_list_template = "admin/peachjam/flynote/change_list.html"
+    list_display = ("name", "document_count", "depth", "deprecated")
+    list_filter = ("depth", "deprecated", FlynoteDocumentCountFilter)
+    search_fields = ("name",)
+    ordering = ("name",)
+    readonly_fields = (
+        "numchild",
+        "ancestors_links",
+        "children_links",
+        "depth",
+        "document_count",
+    )
+    fields = (
+        "ancestors_links",
+        "name",
+        "deprecated",
+        "depth",
+        "numchild",
+        "document_count",
+        "children_links",
+    )
+    actions = ("refresh_document_counts_now", "mark_deprecated", "mark_active")
+
+    def has_add_permission(self, request):
+        return False
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        manager_url = f"{reverse('flynote-manager')}?flynote={object_id}"
+        return HttpResponseRedirect(manager_url)
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("document_count_cache")
+
+    def get_action_queryset_roots(self, queryset):
+        selected_paths = set(queryset.values_list("path", flat=True))
+        roots = []
+        for flynote in queryset.order_by("path"):
+            if any(
+                flynote.path[:end] in selected_paths
+                for end in range(flynote.steplen, len(flynote.path), flynote.steplen)
+            ):
+                continue
+            roots.append(flynote)
+        return roots
+
+    def get_action_target_roots(self, queryset):
+        root_paths = {
+            path[: self.model.steplen]
+            for path in queryset.values_list("path", flat=True)
+        }
+        return self.model.get_root_nodes().filter(path__in=root_paths).order_by("path")
+
+    @admin.action(description=_("Refresh selected flynote roots now"))
+    def refresh_document_counts_now(self, request, queryset):
+        from peachjam.models.flynote import FlynoteDocumentCount
+
+        roots = list(self.get_action_target_roots(queryset))
+        for root in roots:
+            FlynoteDocumentCount.refresh_for_flynote(root)
+
+        self.message_user(
+            request,
+            _("Refreshed %(count)s flynote roots.") % {"count": len(roots)},
+            messages.SUCCESS,
+        )
+
+    @admin.action(description=_("Mark selected flynotes as deprecated"))
+    def mark_deprecated(self, request, queryset):
+        updated = 0
+        for flynote in self.get_action_queryset_roots(queryset):
+            if flynote.deprecated:
+                continue
+            flynote.deprecated = True
+            flynote.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            _("Deprecated %(count)s flynote branches.") % {"count": updated},
+            messages.SUCCESS,
+        )
+
+    @admin.action(description=_("Mark selected flynotes as active"))
+    def mark_active(self, request, queryset):
+        updated = 0
+        for flynote in self.get_action_queryset_roots(queryset):
+            if not flynote.deprecated:
+                continue
+            flynote.deprecated = False
+            flynote.save()
+            updated += 1
+
+        self.message_user(
+            request,
+            _("Reactivated %(count)s flynote branches.") % {"count": updated},
+            messages.SUCCESS,
+        )
+
+    @admin.display(description=_("Documents"), ordering="document_count_cache__count")
+    def document_count(self, obj):
+        cache = getattr(obj, "document_count_cache", None)
+        return cache.count if cache else 0
+
+    @admin.display(description=_("Ancestors"))
+    def ancestors_links(self, obj):
+        if not obj or obj.is_root():
+            return "-"
+
+        ancestors = obj.get_ancestors()
+        return format_html_join(
+            format_html(" — "),
+            '<a href="{}">{}</a>',
+            (
+                (
+                    reverse("admin:peachjam_flynote_change", args=[ancestor.pk]),
+                    ancestor.name,
+                )
+                for ancestor in ancestors
+            ),
+        )
+
+    @admin.display(description=_("Children"))
+    def children_links(self, obj):
+        if not obj:
+            return "-"
+
+        children = obj.get_children()
+        if not children:
+            return "-"
+
+        return format_html_join(
+            format_html("<br>"),
+            '<a href="{}">{}</a>',
+            (
+                (reverse("admin:peachjam_flynote_change", args=[child.pk]), child.name)
+                for child in children
+            ),
+        )
 
 
 @admin.register(CoreDocument)
@@ -1044,10 +1460,226 @@ class CaseNumberAdmin(admin.StackedInline):
     fields = ["matter_type", "number", "year", "string_override"]
 
 
+class PreviewModelChoiceIterator:
+    """Yield temporary preview choices before the normal model choices.
+
+    The extractor can suggest aliases or judge people that do not exist yet.
+    These sentinel choices keep the suggestion visible in the admin form while
+    still letting normal model validation convert the value to None.
+    """
+
+    def __init__(self, field, preview_choices):
+        self.field = field
+        self.queryset = field.queryset
+        self.preview_choices = preview_choices
+
+    def __iter__(self):
+        original_queryset = self.field.queryset
+        try:
+            self.field.queryset = self.queryset
+            yield from self.preview_choices
+            yield from forms.models.ModelChoiceIterator(self.field)
+        finally:
+            self.field.queryset = original_queryset
+
+
+class BenchInlineForm(forms.ModelForm):
+    """Admin form that converts extracted judge names into editable bench rows."""
+
+    alias_preview_value = "__alias_preview__"
+    judge_preview_value = "__judge_preview__"
+    judge_person_suggestion = forms.CharField(
+        required=False,
+        widget=forms.HiddenInput(),
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if "judge" in self.fields:
+            self.fields["judge"].widget = forms.HiddenInput()
+            self.fields["judge"].required = False
+        self.allow_preview_value("matched_alias", self.alias_preview_value)
+        self.allow_preview_value("judge_person", self.judge_preview_value)
+
+        extracted_name = (
+            self.initial.get("extracted_name") or self.instance.extracted_name or ""
+        ).strip()
+        if extracted_name:
+            self.fields["extracted_name"].widget.attrs["readonly"] = True
+
+        judge_person_suggestion = (
+            self.initial.get("judge_person_suggestion") or ""
+        ).strip()
+        judge_person = self.initial.get("judge_person") or getattr(
+            self.instance, "judge_person", None
+        )
+        self.fields["judge_person_suggestion"].initial = (
+            getattr(judge_person, "full_name", None) or judge_person_suggestion
+        )
+
+        if extracted_name and not (
+            self.initial.get("matched_alias") or self.instance.matched_alias_id
+        ):
+            self.set_preview_option(
+                "matched_alias",
+                self.alias_preview_value,
+                extracted_name,
+            )
+
+        if judge_person_suggestion and not (
+            self.initial.get("judge_person") or self.instance.judge_person_id
+        ):
+            self.set_preview_option(
+                "judge_person",
+                self.judge_preview_value,
+                judge_person_suggestion,
+            )
+
+    def allow_preview_value(self, field_name, preview_value):
+        """Allow a sentinel preview choice to validate as an empty relation."""
+        field = self.fields[field_name]
+        original_to_python = field.to_python
+
+        def to_python(value):
+            if value == preview_value:
+                return None
+            return original_to_python(value)
+
+        field.to_python = to_python
+
+    def set_preview_option(self, field_name, preview_value, label):
+        """Add a temporary choice for an extracted value that is not saved yet."""
+        field = self.fields[field_name]
+        preview_choices = PreviewModelChoiceIterator(
+            field,
+            [(preview_value, label)],
+        )
+        field._choices = preview_choices
+        field.widget.choices = preview_choices
+        field.initial = preview_value
+        self.initial[field_name] = preview_value
+
+    def clean(self):
+        cleaned_data = super().clean()
+        matched_alias = cleaned_data.get("matched_alias")
+        judge_person = cleaned_data.get("judge_person")
+
+        if (
+            matched_alias
+            and judge_person
+            and matched_alias.judge_person_id != judge_person.pk
+        ):
+            self.add_error(
+                "judge_person",
+                gettext_lazy("Selected canonical judge does not own the chosen alias."),
+            )
+
+        if matched_alias and not judge_person:
+            cleaned_data["judge_person"] = matched_alias.judge_person
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        matched_alias = self.cleaned_data.get("matched_alias")
+        judge_person = self.cleaned_data.get("judge_person")
+        extracted_name = (self.cleaned_data.get("extracted_name") or "").strip()
+        if matched_alias is None and extracted_name:
+            if judge_person is None:
+                judge_person = judge_identity_service.resolve_judge_person(
+                    [extracted_name]
+                )["judge_person"]
+                instance.judge_person = judge_person
+
+            matched_alias = (
+                JudgeAlias.objects.filter(
+                    judge_person=judge_person,
+                    name__iexact=extracted_name,
+                )
+                .order_by("pk")
+                .first()
+            )
+            if matched_alias is None:
+                matched_alias = JudgeAlias(
+                    judge_person=judge_person,
+                    name=extracted_name,
+                )
+                matched_alias.save()
+            instance.matched_alias = matched_alias
+
+        if matched_alias and not instance.judge_person_id:
+            instance.judge_person = matched_alias.judge_person
+
+        if not instance.judge_id:
+            judge_name = (
+                matched_alias.name if matched_alias is not None else extracted_name
+            )
+            if judge_name:
+                instance.judge, _ = Judge.objects.get_or_create(name=judge_name)
+
+        if commit:
+            instance.save()
+            self.save_m2m()
+
+        return instance
+
+    class Meta:
+        model = Bench
+        fields = "__all__"
+        labels = {
+            "extracted_name": gettext_lazy("Extracted name"),
+            "matched_alias": gettext_lazy("Judge title"),
+            "judge_person": gettext_lazy("Judge"),
+        }
+        help_texts = {
+            "extracted_name": gettext_lazy(
+                "Exact judge name as it appeared in the uploaded judgment."
+            ),
+            "matched_alias": gettext_lazy(
+                "Judge alias or display title to use for this judgment."
+            ),
+            "judge_person": gettext_lazy(
+                "Canonical judge identity used for aggregation and future judge pages."
+            ),
+        }
+
+
 class BenchInline(admin.TabularInline):
-    # by using an inline, the ordering of the judges is preserved
+    # Keeping bench rows as an inline preserves the order in which judges are entered.
+    form = BenchInlineForm
     model = Bench
     extra = 3
+    fields = (
+        "extracted_name",
+        "matched_alias",
+        "judge_person_suggestion",
+        "judge_person",
+    )
+    verbose_name = gettext_lazy("judge")
+    verbose_name_plural = gettext_lazy("judges")
+
+    def get_formset(self, request, obj=None, **kwargs):
+        return super().get_formset(
+            request,
+            obj,
+            widgets={
+                "judge": autocomplete.ModelSelect2(url="autocomplete-judges"),
+                "judge_person": autocomplete.ModelSelect2(
+                    url="autocomplete-judge-people"
+                ),
+                "matched_alias": autocomplete.ModelSelect2(
+                    url="autocomplete-judge-aliases"
+                ),
+            },
+            **kwargs,
+        )
+
+
+class LegacyBenchInline(admin.TabularInline):
+    # Legacy judge editing path used while canonical judge identity is disabled.
+    model = Bench
+    extra = 3
+    fields = ("judge",)
     verbose_name = gettext_lazy("judge")
     verbose_name_plural = gettext_lazy("judges")
 
@@ -1125,14 +1757,23 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
         )
 
 
-class JudgmentAdminForm(DocumentForm):
+class JudgmentForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
+    case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
+    flynote_raw = forms.CharField(
+        widget=forms.Textarea(attrs={"style": "width: 100%;"}),
+        required=False,
+        help_text=_("Enter one flynote per line."),
+    )
     held = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 15, "cols": 50}), required=False
+        widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
+        required=False,
     )
     issues = forms.CharField(
-        widget=forms.Textarea(attrs={"rows": 15, "cols": 50}), required=False
+        widget=forms.Textarea(attrs={"style": "width: 100%; white-space: nowrap;"}),
+        required=False,
     )
+    order = forms.CharField(widget=CKEditorWidget(), required=False)
 
     class Meta:
         model = Judgment
@@ -1149,6 +1790,13 @@ class JudgmentAdminForm(DocumentForm):
 
     def clean_held(self):
         return self.cleaned_data["held"].splitlines()
+
+    def clean_flynote_raw(self):
+        from peachjam.analysis.flynotes import FlynoteParser
+
+        return FlynoteParser().normalise_multiline_text(
+            self.cleaned_data["flynote_raw"]
+        )
 
     def clean_issues(self):
         return self.cleaned_data["issues"].splitlines()
@@ -1175,17 +1823,22 @@ class JudgmentAdminForm(DocumentForm):
         return value
 
 
+class LawReportEntryInline(admin.TabularInline):
+    model = LawReportEntry
+    extra = 1
+
+
 @admin.register(Judgment)
 class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     help_topic = "judgments/upload-a-judgment"
-    form = JudgmentAdminForm
+    form = JudgmentForm
     resource_classes = [JudgmentResource]
     inlines = [
-        BenchInline,
         LowerBenchInline,
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
         JudgmentRelationshipStackedInline,
+        LawReportEntryInline,
     ] + DocumentAdmin.inlines
     filter_horizontal = ("judges", "attorneys", "outcomes")
     list_filter = (*DocumentAdmin.list_filter, "court")
@@ -1207,28 +1860,38 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     fieldsets[1][1]["fields"].insert(0, "attorneys")
 
     fieldsets[2][1]["classes"] = ["collapse"]
-    fieldsets.insert(
-        4,
-        (
-            gettext_lazy("Summary"),
-            {
-                "fields": [
-                    "case_summary_public",
-                    "blurb",
-                    "flynote",
-                    "case_summary",
-                    "issues",
-                    "held",
-                    "order",
-                ]
-            },
+    (
+        fieldsets.insert(
+            4,
+            (
+                gettext_lazy("Summary"),
+                {
+                    "fields": [
+                        "case_summary_public",
+                        "summary_ai_generated",
+                        "summary_generated_at",
+                        "summary_language",
+                        "summary_trace_id",
+                        "blurb",
+                        "flynote_raw",
+                        "case_summary",
+                        "issues",
+                        "held",
+                        "order",
+                    ]
+                },
+            ),
         ),
-    ),
+    )
     readonly_fields = [
         "mnc",
         "serial_number",
         "title",
         "citation",
+        "summary_ai_generated",
+        "summary_generated_at",
+        "summary_language",
+        "summary_trace_id",
         "frbr_uri_doctype",
         "frbr_uri_subtype",
         "frbr_uri_actor",
@@ -1275,6 +1938,14 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
         return fieldsets
 
+    def get_inlines(self, request, obj=None):
+        bench_inline = (
+            BenchInline
+            if JudgePerson.canonical_identity_enabled()
+            else LegacyBenchInline
+        )
+        return [bench_inline] + self.inlines
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -1297,14 +1968,18 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         """
         extractor = ExtractorService()
         file = request.FILES.get("file")
-        if not extractor.enabled() or request.method != "POST" or not file:
+        if request.method != "POST" or not file:
             return HttpResponse()
 
         error = None
         details = {}
         try:
+            details = extractor.extract_judgment_details(
+                pj_settings().default_document_jurisdiction, file
+            )
+        except ExtractorError as e:
             if settings.DEBUG:
-                # for testing
+                # fall back to sample extracted data only when the real extractor fails in dev
                 details = {
                     "language": "afr",
                     "court": "Continental Court",
@@ -1321,11 +1996,8 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
                     ],
                 }
             else:
-                details = extractor.extract_judgment_details(
-                    pj_settings().default_document_jurisdiction, file
-                )
-        except ExtractorError as e:
-            error = e
+                sentry_sdk.capture_exception(e)
+                error = e
 
         # turn references into Django objects
         extractor.process_judgment_details(details)
@@ -1333,14 +2005,23 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         # prepare form data
         inlines = []
         formsets = []
+        bench_rows = details.pop("bench_rows", [])
+        extracted_judges = details.pop("extracted_judges", [])
 
-        if details.get("judges"):
-            judges = [{"judge": j} for j in details["judges"]]
+        if bench_rows:
             # make it pretty for the template
-            details["judges"] = "; ".join(str(j) for j in details["judges"])
+            details["judges"] = "; ".join(extracted_judges)
 
             # prepare the formset
             inline = BenchInline(Judgment, self.admin_site)
+            inline.extra = len(bench_rows) + inline.extra
+            inlines.append(inline)
+            formsets.append(inline.get_formset(request)(initial=bench_rows))
+        elif details.get("judges"):
+            judges = [{"judge": j} for j in details["judges"]]
+            details["judges"] = "; ".join(str(j) for j in details["judges"])
+
+            inline = LegacyBenchInline(Judgment, self.admin_site)
             inline.extra = len(judges) + inline.extra
             inlines.append(inline)
             formsets.append(inline.get_formset(request)(initial=judges))
@@ -1419,7 +2100,9 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
     def generate_summary_view(self, request, object_id):
         if request.user.has_perm("peachjam.can_generate_judgment_summary"):
             message = _("Generating summary for judgment with ID: {}").format(object_id)
-            generate_judgment_summary(object_id)
+            doc = self.model.objects.get(pk=object_id)
+            doc.track_changes()
+            doc.generate_summary()
             self.message_user(request, message)
         else:
             message = _("You do not have permission to generate judgment summaries.")
@@ -1477,16 +2160,36 @@ class IngestorForm(forms.ModelForm):
 
     def save(self, *args, **kwargs):
         instance = super().save(*args, **kwargs)
-        instance.queue_task()
+        if kwargs.get("commit", True):
+            instance.queue_task()
         return instance
 
 
 @admin.register(Ingestor)
-class IngestorAdmin(admin.ModelAdmin):
+class IngestorAdmin(BackgroundTasksAdminMixin, admin.ModelAdmin):
     inlines = [IngestorSettingInline]
     actions = ["refresh_all_content", "update_latest_content"]
-    list_display = ("name", "adapter", "last_refreshed_at", "enabled")
+    list_display = (
+        "name",
+        "adapter",
+        "last_refreshed_at",
+        "enabled",
+    )
+    readonly_fields = ("background_tasks",)
+    fields = (
+        "adapter",
+        "name",
+        "last_refreshed_at",
+        "repeat",
+        "schedule",
+        "enabled",
+        "background_tasks",
+    )
     form = IngestorForm
+
+    def save_related(self, request, form, formsets, change):
+        super().save_related(request, form, formsets, change)
+        form.instance.queue_task()
 
     def refresh_all_content(self, request, queryset):
         queryset.update(last_refreshed_at=None)
@@ -1606,7 +2309,46 @@ class ArticleAdmin(ImportExportMixin, admin.ModelAdmin):
 
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
-    pass
+    list_display = (
+        "user",
+        "onboarding_intents_display",
+        "practice_type",
+        "onboarding_completed_at",
+        "onboarding_skipped_at",
+    )
+    list_filter = (
+        "onboarding_intents",
+        "practice_type",
+        "onboarding_completed_at",
+        "onboarding_skipped_at",
+    )
+    search_fields = (
+        "user__username",
+        "user__email",
+        "user__first_name",
+        "user__last_name",
+    )
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("user", "practice_type")
+            .prefetch_related("onboarding_intents")
+        )
+
+    @admin.display(description=_("onboarding intents"))
+    def onboarding_intents_display(self, obj):
+        return ", ".join(str(intent) for intent in obj.onboarding_intents.all())
+
+
+@admin.register(OnboardingIntent, PracticeType)
+class OnboardingOptionAdmin(admin.ModelAdmin):
+    list_display = ("label", "order", "active")
+    list_editable = ("order", "active")
+    list_filter = ("active",)
+    ordering = ("order", "label")
+    search_fields = ("label",)
 
 
 class RelationshipInline(admin.TabularInline):
@@ -1731,7 +2473,6 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     resource_classes = [GazetteResource]
     inlines = [
         SourceFileInline,
-        BackgroundTaskInline,
     ]
     prepopulated_fields = {}
 
@@ -1748,8 +2489,8 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
     )
     fieldsets[1][1]["fields"].remove("citation")
     fieldsets[1][1]["fields"].remove("source_url")
-    fieldsets[4][1]["fields"].remove("toc_json")
-    fieldsets[4][1]["fields"].remove("content_html_is_akn")
+    fieldsets[4][1]["fields"].remove("document_content_toc_json")
+    fieldsets[4][1]["fields"].remove("document_content_html_is_akn")
     fieldsets[4][1]["fields"].extend(["publication", "sub_publication"])
     # remove content fieldset
     fieldsets.pop(3)
@@ -1762,6 +2503,7 @@ class GazetteAdmin(ImportExportMixin, DocumentAdmin):
 
 @admin.register(Book)
 class BookAdmin(DocumentAdmin):
+    change_form_template = "admin/peachjam/book/change_form.html"
     fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
     fieldsets[3][1]["fields"].insert(3, "content_markdown")
 
@@ -1770,8 +2512,156 @@ class BookAdmin(DocumentAdmin):
             "https://cdn.jsdelivr.net/npm/@lawsafrica/law-widgets@latest/dist/lawwidgets/lawwidgets.js",
         )
 
+    def get_urls(self):
+        return [
+            path(
+                "<path:object_id>/download-word/",
+                self.admin_site.admin_view(self.download_word),
+                name="peachjam_book_download_word",
+            ),
+            path(
+                "<path:object_id>/import-word/",
+                self.admin_site.admin_view(self.import_word),
+                name="peachjam_book_import_word",
+            ),
+        ] + super().get_urls()
+
+    def download_word(self, request, object_id):
+        """Download the Book's markdown source as an editor-friendly DOCX."""
+
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            raise Http404
+        if not self.has_change_permission(request, obj):
+            raise PermissionDenied
+
+        try:
+            docx = markdown_to_docx(obj.content_markdown or "")
+        except BookWordError as e:
+            self.message_user(request, str(e), level=messages.ERROR)
+            return HttpResponseRedirect(
+                reverse("admin:peachjam_book_change", args=[quote(obj.pk)])
+            )
+
+        filename = f"{slugify(obj.title) or 'book'}.docx"
+        response = HttpResponse(docx, content_type=DOCX_MIMETYPE)
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+    def import_word(self, request, object_id):
+        """Preview and optionally save markdown extracted from an uploaded DOCX."""
+
+        obj = self.get_object(request, unquote(object_id))
+        if obj is None:
+            raise Http404
+        if not self.has_change_permission(request, obj):
+            raise PermissionDenied
+
+        context = {
+            **self.admin_site.each_context(request),
+            "opts": self.model._meta,
+            "original": obj,
+            "title": _("Import Word version"),
+            "upload_form": BookWordImportUploadForm(),
+            "confirm_form": None,
+            "old_analysis": analyse_markdown(obj.content_markdown or ""),
+            "new_analysis": None,
+            "preview_markdown": None,
+            "preview_errors": [],
+            "heading_diff_html": "",
+        }
+
+        if request.method == "POST" and request.POST.get("confirm"):
+            form = BookWordImportConfirmForm(request.POST)
+            if form.is_valid():
+                markdown = form.cleaned_data["content_markdown"]
+                analysis = analyse_markdown(markdown)
+                errors = self.get_book_word_preview_errors(analysis)
+                if errors:
+                    context.update(
+                        {
+                            "confirm_form": form,
+                            "new_analysis": analysis,
+                            "preview_markdown": markdown,
+                            "preview_errors": errors,
+                            "heading_diff_html": html_diff_headings(
+                                obj.content_markdown or "", markdown
+                            ),
+                        }
+                    )
+                else:
+                    self.save_imported_word_markdown(obj, markdown)
+                    self.message_user(
+                        request,
+                        _("Imported Word version for %(title)s.")
+                        % {"title": obj.title},
+                    )
+                    return HttpResponseRedirect(
+                        reverse("admin:peachjam_book_change", args=[quote(obj.pk)])
+                    )
+        elif request.method == "POST":
+            form = BookWordImportUploadForm(request.POST, request.FILES)
+            context["upload_form"] = form
+            if form.is_valid():
+                try:
+                    markdown = docx_to_markdown(form.cleaned_data["word_file"])
+                    analysis = analyse_markdown(markdown)
+                    context.update(
+                        {
+                            "confirm_form": BookWordImportConfirmForm(
+                                initial={"content_markdown": markdown}
+                            ),
+                            "new_analysis": analysis,
+                            "preview_markdown": markdown,
+                            "preview_errors": self.get_book_word_preview_errors(
+                                analysis
+                            ),
+                            "heading_diff_html": html_diff_headings(
+                                obj.content_markdown or "", markdown
+                            ),
+                        }
+                    )
+                except BookWordError as e:
+                    form.add_error("word_file", str(e))
+
+        return TemplateResponse(
+            request,
+            "admin/peachjam/book/import_word.html",
+            context,
+        )
+
+    def get_book_word_preview_errors(self, analysis):
+        """Return import blockers found after DOCX-to-markdown conversion."""
+
+        errors = []
+        if analysis.protected_law_widget_count:
+            errors.append(
+                _(
+                    "Some protected law widget markers were not restored. The import cannot be confirmed."
+                )
+            )
+        if analysis.image_count:
+            errors.append(
+                _(
+                    "Images are not supported in this Word import. Remove images from the DOCX and upload again."
+                )
+            )
+        return errors
+
+    def save_imported_word_markdown(self, obj, markdown):
+        """Persist imported markdown through the existing Book content hooks."""
+
+        with transaction.atomic():
+            doc_content = obj.get_or_create_document_content(True)
+            obj.track_changes()
+            obj.content_markdown = markdown
+            obj.save()
+            doc_content.save()
+            obj.extract_citations()
+
     def save_model(self, request, obj, form, change):
         if "content_markdown" in form.changed_data:
+            obj.get_or_create_document_content(True)
             obj.convert_content_markdown()
 
         resp = super().save_model(request, obj, form, change)
@@ -1782,9 +2672,50 @@ class BookAdmin(DocumentAdmin):
         return resp
 
 
+@admin.register(JournalArticle)
+class JournalArticleAdmin(DocumentAdmin):
+    autocomplete_fields = [
+        "journal",
+    ]
+    fieldsets = copy.deepcopy(DocumentAdmin.fieldsets)
+    fieldsets[0][1]["fields"].extend(["journal", "volume", "page_range", "authors"])
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "volume":
+            kwargs["widget"] = autocomplete.ModelSelect2(
+                url="autocomplete-volume-issues", forward=["journal"]
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
+class VolumeIssueInline(admin.TabularInline):
+    model = VolumeIssue
+    extra = 1
+    fields = ("title", "slug")
+    readonly_fields = ("slug",)
+
+
 @admin.register(Journal)
-class JournalAdmin(DocumentAdmin):
-    pass
+class JournalAdmin(admin.ModelAdmin):
+    inlines = [VolumeIssueInline, EntityProfileInline]
+    prepopulated_fields = {"slug": ("title",)}
+    list_display = (
+        "title",
+        "doi",
+    )
+    search_fields = ("title", "slug", "doi")
+
+
+class LawReportVolumeInline(admin.StackedInline):
+    model = LawReportVolume
+    extra = 1
+    prepopulated_fields = {"slug": ("title",)}
+
+
+@admin.register(LawReport)
+class LawReportAdmin(admin.ModelAdmin):
+    inlines = [LawReportVolumeInline, EntityProfileInline]
+    prepopulated_fields = {"slug": ("title",)}
 
 
 @admin.register(ExternalDocument)
@@ -1806,7 +2737,8 @@ class ExternalDocumentAdmin(DocumentAdmin):
 class CourtRegistryAdmin(BaseAdmin):
     help_topic = "site-admin/add-court-registries"
     readonly_fields = ("code",)
-    list_display = ("name", "code")
+    list_display = ("court", "name", "code")
+    list_select_related = ("court",)
 
 
 @admin.register(Outcome)
@@ -1843,9 +2775,35 @@ class SavedSearchInline(admin.TabularInline):
         return False
 
 
+class SocialAccountInline(admin.TabularInline):
+    """Show OAuth identities linked to a user without exposing their tokens."""
+
+    model = SocialAccount
+    extra = 0
+    can_delete = False
+    fields = ("provider", "uid_link", "date_joined", "last_login")
+    readonly_fields = fields
+    verbose_name = "Linked social account"
+    verbose_name_plural = "Linked social accounts"
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def uid_link(self, obj):
+        if not obj.pk:
+            return "-"
+        url = reverse("admin:socialaccount_socialaccount_change", args=[obj.pk])
+        return format_html('<a href="{}">{}</a>', url, obj.uid)
+
+    uid_link.short_description = _("UID")
+
+
 class UserAdminCustom(ImportExportMixin, UserAdmin):
     resource_classes = [UserResource]
-    inlines = [UserFollowingInline, SavedSearchInline]
+    inlines = [SocialAccountInline, UserFollowingInline, SavedSearchInline]
     actions = ["require_accept_terms"]
 
     def require_accept_terms(self, request, queryset):
@@ -1887,6 +2845,70 @@ class JurisdictionProfileAdmin(admin.ModelAdmin):
 class JudgeAdmin(admin.ModelAdmin):
     list_display = ("name",)
     search_fields = ("name",)
+
+
+class JudgeAliasInline(admin.TabularInline):
+    model = JudgeAlias
+    extra = 1
+    fields = ("name", "title", "normalized_name")
+    readonly_fields = ("title", "normalized_name")
+
+
+class CanonicalJudgeIdentityAdminMixin:
+    def has_module_permission(self, request):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_module_permission(request)
+        )
+
+    def has_view_permission(self, request, obj=None):
+        return JudgePerson.canonical_identity_enabled() and super().has_view_permission(
+            request, obj=obj
+        )
+
+    def has_add_permission(self, request):
+        return JudgePerson.canonical_identity_enabled() and super().has_add_permission(
+            request
+        )
+
+    def has_change_permission(self, request, obj=None):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_change_permission(request, obj=obj)
+        )
+
+    def has_delete_permission(self, request, obj=None):
+        return (
+            JudgePerson.canonical_identity_enabled()
+            and super().has_delete_permission(request, obj=obj)
+        )
+
+
+@admin.register(JudgePerson)
+class JudgePersonAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
+    list_display = ("first_name", "last_name", "slug")
+    search_fields = ("first_name", "last_name", "aliases__name")
+    inlines = [JudgeAliasInline]
+
+
+@admin.register(JudgeAlias)
+class JudgeAliasAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
+    list_display = ("name", "title", "judge_person", "normalized_name")
+    search_fields = (
+        "name",
+        "title__name",
+        "title__abbreviation",
+        "normalized_name",
+        "judge_person__first_name",
+        "judge_person__last_name",
+    )
+    autocomplete_fields = ("judge_person",)
+
+
+@admin.register(JudgeTitle)
+class JudgeTitleAdmin(CanonicalJudgeIdentityAdminMixin, admin.ModelAdmin):
+    list_display = ("name", "abbreviation")
+    search_fields = ("name", "abbreviation")
 
 
 @admin.register(MatterType)
@@ -1958,11 +2980,97 @@ class PartnerAdmin(admin.ModelAdmin):
     form = PartnerForm
 
 
+@admin.register(DocumentChatThread)
+class ChatThreadAdmin(admin.ModelAdmin):
+    list_display = ("id", "user", "document_link", "score", "updated_at")
+    readonly_fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    fields = (
+        "id",
+        "user",
+        "document_link",
+        "score",
+        "created_at",
+        "updated_at",
+        "messages_display",
+    )
+    date_hierarchy = "updated_at"
+    list_select_related = ("user", "core_document")
+    search_fields = ("id", "user__username", "core_document__title")
+
+    def has_add_permission(self, request):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
+        )
+
+    document_link.short_description = _("Document")
+
+    def messages_display(self, obj):
+        if not obj.messages_json:
+            return "-"
+        formatted = json.dumps(obj.messages_json, indent=2, sort_keys=True)
+        return format_html("<pre>{}</pre>", formatted)
+
+    messages_display.short_description = _("Messages JSON")
+
+
+class ChatThreadInline(admin.TabularInline):
+    model = DocumentChatThread
+    extra = 0
+    can_delete = False
+    fields = ("updated_at", "document_link", "score")
+    readonly_fields = fields
+    show_change_link = True
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("core_document")
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+    def document_link(self, obj):
+        return format_html(
+            "<a href='{}'>{}</a>",
+            obj.core_document.get_absolute_url(),
+            obj.core_document,
+        )
+
+    document_link.short_description = _("Document")
+
+
+if ChatThreadInline not in UserAdminCustom.inlines:
+    UserAdminCustom.inlines.append(ChatThreadInline)
+
+
+@admin.register(CitationLink)
+class CitationLinkAdmin(admin.ModelAdmin):
+    readonly_fields = ("origin",)
+
+    def save_model(self, request, obj, form, change):
+        if not change or form.has_changed():
+            obj.origin = CitationLink.Origin.MANUAL
+        super().save_model(request, obj, form, change)
+
+
 admin.site.register(
     [
         AttachedFileNature,
         CaseAction,
-        CitationLink,
         CitationProcessing,
         CourtDivision,
         CustomPropertyLabel,

@@ -1,36 +1,196 @@
 import datetime
+import os
+from unittest.mock import patch
 
+from allauth.account.models import EmailAddress
+from allauth.socialaccount.models import SocialAccount
 from countries_plus.models import Country
 from django.conf import settings
+from django.conf.urls.i18n import i18n_patterns
 from django.contrib.auth.models import Permission, User
 from django.core.cache import caches
 from django.core.files.base import ContentFile
-from django.test import TestCase, override_settings
-from django.urls import reverse
+from django.http import HttpResponse
+from django.template.loader import render_to_string
+from django.test import SimpleTestCase, TestCase, override_settings
+from django.urls import include, path, reverse
 from languages_plus.models import Language
 
+from peachjam.account_signals import (
+    user_account_post_delete,
+    user_account_pre_delete,
+)
 from peachjam.models import (
+    Annotation,
     CaseHistory,
     CoreDocument,
     Court,
+    CourtClass,
+    Flynote,
+    FlynoteDocumentCount,
+    Folder,
+    GenericDocument,
     Judgment,
+    LawReport,
+    Legislation,
+    Locality,
     Outcome,
     PeachJamSettings,
+    SavedDocument,
     SourceFile,
+    UserFollowing,
+    Work,
 )
+from peachjam.views.generic_views import FilteredDocumentListView
 from peachjam.views.robots import (
+    RobotsView,
     _language_prefixes,
     _place_codes,
     _prefixed_place_rules,
 )
+from peachjam_search.models import SavedSearch
+from peachjam_subs.models import (
+    OffboardingFeedback,
+    ProductOffering,
+    Subscription,
+)
+
+
+def home_page_view(request):
+    return HttpResponse("Home")
+
+
+# mirror production: i18n routes (incl. document_popup) live under i18n_patterns and
+# so carry a language prefix, while non_i18n routes do not.
+urlpatterns = [
+    path("", include("peachjam.urls.non_i18n")),
+] + i18n_patterns(
+    path("", home_page_view, name="home_page"),
+    path("", include("peachjam.urls.i18n")),
+)
+
+
+class FilteredDocumentListViewTestCase(SimpleTestCase):
+    def test_radio_options_keep_stable_order(self):
+        options = [
+            ("act", "Act"),
+            ("government-notice", "Government Notice"),
+            ("statutory-instrument", "Statutory Instrument"),
+        ]
+        context = {
+            "facet_data": {
+                "natures": {
+                    "type": "radio",
+                    "options": options,
+                    "values": ["statutory-instrument"],
+                }
+            }
+        }
+
+        FilteredDocumentListView().order_facet_options(context)
+
+        self.assertEqual(options, context["facet_data"]["natures"]["options"])
+
+    def test_selected_facet_count_counts_each_selected_value(self):
+        context = {
+            "facet_data": {
+                "natures": {"values": ["act", "bill"]},
+                "alphabet": {"values": "a"},
+                "years": {"values": []},
+            }
+        }
+
+        FilteredDocumentListView().show_facet_clear_all(context)
+
+        self.assertEqual(3, context["selected_facets_count"])
+        self.assertTrue(context["show_clear_all"])
 
 
 class PeachjamViewsTest(TestCase):
-    fixtures = ["tests/countries", "documents/sample_documents", "tests/users"]
+    fixtures = [
+        "tests/countries",
+        "tests/languages",
+        "documents/sample_documents",
+        "tests/users",
+        "tests/journal_article",
+        "tests/products",
+    ]
+
+    @override_settings(ROOT_URLCONF="peachjam.urls")
+    def test_legislation_listing_hides_language_facet_for_single_language(self):
+        response = self.client.get(reverse("legislation_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("languages", response.context["facet_data"])
+
+    @override_settings(ROOT_URLCONF="peachjam.urls")
+    def test_legislation_listing_filters_by_document_language(self):
+        english_document = Legislation.objects.get(
+            expression_frbr_uri="/akn/aa-au/act/1969/civil-aviation-commission/eng@1969-01-17"
+        )
+        french_document = Legislation.objects.create(
+            jurisdiction=english_document.jurisdiction,
+            locality=english_document.locality,
+            frbr_uri_doctype=english_document.frbr_uri_doctype,
+            frbr_uri_date=english_document.frbr_uri_date,
+            frbr_uri_number=english_document.frbr_uri_number,
+            title=english_document.title,
+            date=english_document.date,
+            language=Language.objects.get(pk="fr"),
+            published=True,
+        )
+        self.assertEqual(english_document.work_id, french_document.work_id)
+
+        response = self.client.get(reverse("legislation_list"), {"languages": "fr"})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(french_document, response.context["paginator"].object_list)
+        self.assertNotIn(english_document, response.context["paginator"].object_list)
+        self.assertTrue(
+            all(
+                doc.language_id == "fr"
+                for doc in response.context["paginator"].object_list
+            )
+        )
+        self.assertIn(
+            ("fr", "French"), response.context["facet_data"]["languages"]["options"]
+        )
+        self.assertEqual(["fr"], response.context["facet_data"]["languages"]["values"])
+
+    def test_judgment_listing_filters_by_document_language(self):
+        document = Judgment.objects.filter(published=True).first()
+        document.language = Language.objects.get(pk="fr")
+        document.save(update_fields=["language"])
+
+        response = self.client.get(
+            reverse("court", kwargs={"code": "all"}), {"languages": "fr"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(document, response.context["documents"])
+        self.assertTrue(
+            all(
+                doc.language_id == "fr"
+                for doc in response.context["paginator"].object_list
+            )
+        )
+        self.assertIn(
+            ("fr", "French"), response.context["facet_data"]["languages"]["options"]
+        )
+        self.assertEqual(["fr"], response.context["facet_data"]["languages"]["values"])
+
+    @staticmethod
+    def pdf_fixture_content():
+        with open(
+            os.path.abspath("peachjam/fixtures/source_files/test.pdf"),
+            "rb",
+        ) as fixture:
+            return fixture.read()
 
     def test_login_page(self):
         response = self.client.get(reverse("account_login"))
         self.assertTemplateUsed(response, "account/login.html")
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "account_login")
 
     def test_homepage(self):
         response = self.client.get(reverse("home_page"))
@@ -52,11 +212,49 @@ class PeachjamViewsTest(TestCase):
             recent_documents,
         )
 
+    def test_place_page_uses_translated_locality_name(self):
+        Locality.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            code="ecowas",
+            name="Communauté Économique des États de l'Afrique de l'Ouest",
+            name_en="Economic Community of West African States (ECOWAS)",
+            name_fr="Communauté Économique des États de l'Afrique de l'Ouest",
+        )
+
+        response = self.client.get("/en/place/aa-ecowas")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            '<h1 id="main-page-heading">Economic Community of West African States (ECOWAS)</h1>',
+        )
+        self.assertNotContains(
+            response, "Communauté Économique des États de l'Afrique de l'Ouest"
+        )
+
+        response = self.client.get("/fr/place/aa-ecowas")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            "Communauté Économique des États de l&#x27;Afrique de l&#x27;Ouest",
+        )
+        self.assertNotContains(
+            response, "Economic Community of West African States (ECOWAS)"
+        )
+
     def test_judgment_listing(self):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.context["KEY_LINK_PAGE"], "judgment_list")
+        self.assertContains(response, 'data-key-link-feature="navbar"')
+        self.assertContains(response, 'data-key-link-feature="navbar_search"')
+        self.assertContains(response, 'data-key-link="search"')
+        self.assertContains(response, 'data-key-link-feature="discovery_cards"')
+        self.assertContains(response, 'data-key-link-feature="courts"')
+        self.assertContains(response, 'data-key-link-feature="recent_judgments"')
 
-        documents = [doc.title for doc in response.context.get("documents")]
+        documents = [doc.title for doc in response.context.get("recent_judgments")]
         court_classes = [
             court_class.name for court_class in response.context.get("court_classes")
         ]
@@ -66,6 +264,135 @@ class PeachjamViewsTest(TestCase):
             documents,
         )
         self.assertIn("High Court", court_classes)
+        self.assertEqual(
+            Judgment.objects.filter(published=True).count(),
+            response.context["doc_count"],
+        )
+        self.assertEqual(
+            LawReport.objects.count(), response.context["law_report_count"]
+        )
+        self.assertFalse(response.context["show_law_reports"])
+        self.assertContains(response, 'href="#court-hierarchy-heading"')
+        self.assertContains(response, f'href="{reverse("court_list")}"')
+        self.assertNotContains(response, f'href="{reverse("law_report_list")}"')
+        for court_class in response.context["court_classes"]:
+            self.assertContains(response, f'href="{court_class.get_absolute_url()}"')
+            for court in court_class.courts.all():
+                self.assertTrue(court.judgment_set.filter(published=True).exists())
+        self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_court_list_page(self):
+        response = self.client.get(reverse("court_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "peachjam/court_list.html")
+        self.assertContains(
+            response,
+            '<h1 id="main-page-heading" class="mb-1">Courts</h1>',
+        )
+        self.assertContains(response, "ECOWAS Community Court of Justice")
+        self.assertContains(
+            response,
+            f'href="{reverse("court", kwargs={"code": "ECOWASCJ"})}"',
+        )
+        self.assertFalse(response.context["other_courts"])
+        self.assertNotContains(response, "Other courts")
+        for court_class in response.context["court_classes"]:
+            for court in court_class.courts.all():
+                self.assertContains(response, f'href="{court.get_absolute_url()}"')
+                self.assertTrue(court.judgment_set.filter(published=True).exists())
+
+    def test_court_lists_include_courts_without_class(self):
+        court = Court.objects.create(
+            name="Court without a class",
+            code="court-without-a-class",
+            court_class=None,
+        )
+        court_without_judgments = Court.objects.create(
+            name="Court without published judgments",
+            code="court-without-published-judgments",
+            court_class=None,
+        )
+        judgment = Judgment.objects.filter(published=True).first()
+        Judgment.objects.filter(pk=judgment.pk).update(court=court)
+
+        for view_name in ["judgment_list", "court_list"]:
+            response = self.client.get(reverse(view_name))
+
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(court, response.context["other_courts"])
+            self.assertNotIn(court_without_judgments, response.context["other_courts"])
+            self.assertContains(response, "Other courts")
+            self.assertContains(response, f'href="{court.get_absolute_url()}"')
+            self.assertNotContains(
+                response, f'href="{court_without_judgments.get_absolute_url()}"'
+            )
+
+    def test_judgment_listing_shows_law_reports_card_when_configured(self):
+        LawReport.objects.create(title="Zambia Law Reports", slug="zambia-law-reports")
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.context["show_law_reports"])
+        self.assertContains(response, f'href="{reverse("law_report_list")}"')
+
+    def test_judgment_listing_excludes_court_classes_without_published_judgments(self):
+        court_class = CourtClass.objects.create(name="Unpublished courts")
+        court = Court.objects.create(
+            name="Unpublished court",
+            code="unpublished-court",
+            court_class=court_class,
+        )
+        judgment = Judgment.objects.filter(published=True).first()
+        Judgment.objects.filter(pk=judgment.pk).update(
+            court=court,
+            published=False,
+        )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertNotIn(court_class, response.context["court_classes"])
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUMMARISE_USE_FLYNOTE_TREE": True,
+            "SHOW_FLYNOTE_TOPICS": True,
+        }
+    )
+    def test_judgment_listing_limits_topic_preview_to_fifteen(self):
+        for index in range(17):
+            flynote = Flynote.add_root(name=f"Topic {index + 1}")
+            FlynoteDocumentCount.objects.create(
+                flynote=flynote,
+                count=17 - index,
+            )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(10, len(response.context["top_flynote_topics"]))
+        self.assertNotContains(response, 'data-component="TopicCourtBalance"')
+
+    def test_judgment_listing_limits_recent_judgments_to_ten(self):
+        for day in range(1, 13):
+            Judgment.objects.create(
+                language=Language.objects.first(),
+                court=Court.objects.first(),
+                date=datetime.date(2025, 1, day),
+                jurisdiction=Country.objects.first(),
+                case_name=f"Recent judgment {day}",
+            )
+
+        response = self.client.get(reverse("judgment_list"))
+
+        self.assertEqual(response.status_code, 200)
+        recent_judgments = list(response.context["recent_judgments"])
+        self.assertEqual(10, len(recent_judgments))
+        self.assertEqual(datetime.date(2025, 1, 12), recent_judgments[0].date)
+        self.assertEqual(
+            datetime.date(2025, 1, 12), response.context["latest_judgment_date"]
+        )
 
     def test_court_listing(self):
         response = self.client.get(reverse("court", kwargs={"code": "ECOWASCJ"}))
@@ -79,6 +406,7 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "/judgments/ECOWASCJ/2018/")
         self.assertContains(response, "/judgments/ECOWASCJ/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+        self.assertNotIn("courts", response.context["facet_data"])
 
     def test_court_year_listing(self):
         response = self.client.get(
@@ -99,6 +427,7 @@ class PeachjamViewsTest(TestCase):
         self.assertEqual(response.context["year"], 2016)
         self.assertContains(response, "/judgments/ECOWASCJ/2018/")
         self.assertContains(response, "/judgments/ECOWASCJ/2016/")
+        self.assertContains(response, "Browse by year")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
 
     def test_court_year_listing_bad_year(self):
@@ -127,6 +456,28 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "/judgments/all/2018/")
         self.assertContains(response, "/judgments/all/2016/")
         self.assertNotIn("years", response.context["facet_data"], [2016, 2018])
+        self.assertIn("courts", response.context["facet_data"])
+        self.assertIn(
+            ("ECOWAS Community Court of Justice", "ECOWAS Community Court of Justice"),
+            response.context["facet_data"]["courts"]["options"],
+        )
+        self.assertIn(
+            ("most_cited", "Most cited"),
+            response.context["form"].fields["sort"].choices,
+        )
+
+    def test_all_judgments_listing_keeps_most_cited_results_ungrouped(self):
+        response = self.client.get(
+            reverse("court", kwargs={"code": "all"}), {"sort": "most_cited"}
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            any(
+                getattr(document, "is_group", False)
+                for document in response.context["documents"]
+            )
+        )
 
     @override_settings(
         DEBUG=False,
@@ -222,6 +573,23 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertTrue(hasattr(response.context["document"], "repealed"))
 
+    def test_journal_article_detail(self):
+        response = self.client.get(
+            reverse(
+                "document_detail",
+                kwargs={
+                    "frbr_uri": "akn/zm/doc/journal-article/2026-01-02/test-journal-article/eng@2026-01-02"
+                },
+            )
+        )
+        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(response.context["document"].doc_type, "journal_article")
+        self.assertEqual(
+            response.context["document"].expression_frbr_uri,
+            "/akn/zm/doc/journal-article/2026-01-02/test-journal-article/eng@2026-01-02",
+        )
+
     def test_generic_document_listing(self):
         response = self.client.get(reverse("generic_document_list"))
         self.assertEqual(response.status_code, 200)
@@ -290,6 +658,22 @@ class PeachjamViewsTest(TestCase):
 
         body = response.content.decode()
         self.assertIn("Disallow: /search/", body)
+        self.assertIn("Sitemap: http://testserver/sitemap.xml", body)
+        self.assertIn("User-agent: OAI-SearchBot", body)
+        self.assertIn("User-agent: Claude-SearchBot", body)
+        self.assertIn("Disallow: /akn/", body)
+        self.assertEqual(
+            RobotsView.common_disallow_paths,
+            [
+                "/api/",
+                "/accounts/",
+                "/my/",
+                "/user/",
+                "/purchase/",
+                "/judgments/",
+                "/gazettes/",
+            ],
+        )
 
         for code, _ in settings.LANGUAGES:
             self.assertIn(f"Disallow: /{code}/search/", body)
@@ -308,6 +692,22 @@ class PeachjamViewsTest(TestCase):
         response = self.client.get("/robots.txt")
         self.assertContains(response, "foo\nbar")
 
+    def test_sitemap_index(self):
+        response = self.client.get("/sitemap.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Content-Type"], "application/xml")
+        self.assertContains(response, "/sitemaps/pages.xml")
+        self.assertContains(response, "/sitemaps/articles.xml")
+        self.assertContains(response, "/sitemaps/legislation.xml")
+
+    def test_legislation_sitemap_excludes_non_indexable_documents(self):
+        response = self.client.get("/sitemaps/legislation.xml")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "/judgment/")
+        self.assertNotContains(response, "/officialGazette/")
+
     def test_account_profile(self):
         response = self.client.get(reverse("my_account"))
         self.assertEqual(response.status_code, 302)
@@ -318,6 +718,180 @@ class PeachjamViewsTest(TestCase):
         )
         response = self.client.get(reverse("my_account"))
         self.assertEqual(response.status_code, 200)
+
+    def test_delete_account_page(self):
+        self.client._login(
+            User.objects.first(), "django.contrib.auth.backends.ModelBackend"
+        )
+        response = self.client.get(reverse("delete_account"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Delete account")
+
+    def test_delete_account_page_blocks_paid_subscription(self):
+        user = User.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+        Subscription.objects.create(
+            user=user,
+            product_offering=ProductOffering.objects.get(pricing_plan__price=10),
+            status=Subscription.Status.ACTIVE,
+            active_at=datetime.datetime.now(datetime.timezone.utc),
+        )
+
+        response = self.client.get(reverse("delete_account"))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Cancel your subscription")
+        self.assertNotContains(response, "I understand this action cannot be undone")
+        self.assertNotContains(
+            response, "Are you sure you want to delete your account?"
+        )
+
+    def test_delete_account_post_blocks_paid_subscription(self):
+        user = User.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+        sub = Subscription.objects.create(
+            user=user,
+            product_offering=ProductOffering.objects.get(pricing_plan__price=10),
+            status=Subscription.Status.ACTIVE,
+            active_at=datetime.datetime.now(datetime.timezone.utc),
+        )
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("delete_account"))
+        user.refresh_from_db()
+        sub.refresh_from_db()
+        self.assertTrue(user.is_active)
+        self.assertEqual(Subscription.Status.ACTIVE, sub.status)
+        self.assertFalse(user.username.startswith("deleted-"))
+        self.assertFalse(OffboardingFeedback.objects.exists())
+
+    def test_delete_account_anonymises_user(self):
+        user = User.objects.first()
+        sub = Subscription.get_or_create_active_for_user(user)
+        doc = CoreDocument.objects.first()
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+
+        EmailAddress.objects.create(
+            user=user, email=user.email, verified=True, primary=True
+        )
+        SocialAccount.objects.create(
+            user=user, provider="test", uid=f"social-{user.pk}"
+        )
+        Annotation.objects.create(user=user, document=doc, text="note")
+        folder = Folder.objects.create(user=user, name="My folder")
+        saved_document = SavedDocument.objects.create(user=user, work=doc.work)
+        saved_document.folders.add(folder)
+        SavedSearch.objects.create(user=user, q="test")
+        UserFollowing.objects.create(user=user, court=Court.objects.first())
+        self.assertEqual(sub.status, Subscription.Status.ACTIVE)
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("account_logged_out"))
+
+        user.refresh_from_db()
+        profile = user.userprofile
+        self.assertTrue(user.username.startswith("deleted-"))
+        self.assertEqual(user.email, "")
+        self.assertEqual(user.first_name, "")
+        self.assertEqual(user.last_name, "")
+        self.assertFalse(user.is_active)
+        self.assertFalse(user.has_usable_password())
+
+        self.assertIsNotNone(profile.deleted_at)
+        self.assertEqual(profile.deleted_reason, "Not using it enough")
+        self.assertEqual(len(profile.email_hash), 64)
+        feedback = OffboardingFeedback.objects.get()
+        self.assertIsNone(feedback.user)
+        self.assertEqual(feedback.comment, "No longer needed")
+
+        self.assertEqual(Annotation.objects.filter(user=user).count(), 0)
+        self.assertEqual(Folder.objects.filter(user=user).count(), 0)
+        self.assertEqual(SavedDocument.objects.filter(user=user).count(), 0)
+        self.assertEqual(SavedSearch.objects.filter(user=user).count(), 0)
+        self.assertEqual(UserFollowing.objects.filter(user=user).count(), 0)
+        self.assertEqual(EmailAddress.objects.filter(user=user).count(), 0)
+        self.assertEqual(SocialAccount.objects.filter(user=user).count(), 0)
+
+        sub.refresh_from_db()
+        self.assertEqual(sub.status, Subscription.Status.CLOSED)
+
+    def test_delete_account_emits_lifecycle_signals(self):
+        user = User.objects.first()
+        events = []
+
+        def record_pre(sender, instance, user, deleted_reason, **kwargs):
+            events.append(("pre", user.is_active, user.email, instance.deleted_at))
+
+        def record_post(sender, instance, user, deleted_reason, **kwargs):
+            events.append(("post", user.is_active, user.email, instance.deleted_at))
+
+        user_account_pre_delete.connect(record_pre)
+        user_account_post_delete.connect(record_post)
+        try:
+            user.userprofile.delete_account("No longer needed")
+        finally:
+            user_account_pre_delete.disconnect(record_pre)
+            user_account_post_delete.disconnect(record_post)
+
+        self.assertEqual("pre", events[0][0])
+        self.assertTrue(events[0][1])
+        self.assertTrue(events[0][2])
+        self.assertIsNone(events[0][3])
+        self.assertEqual("post", events[1][0])
+        self.assertFalse(events[1][1])
+        self.assertEqual("", events[1][2])
+        self.assertIsNotNone(events[1][3])
+
+    @patch("peachjam.customerio.CustomerIO.enabled", return_value=True)
+    @patch("peachjam.customerio.analytics.identify")
+    @patch("peachjam.customerio.analytics.track")
+    def test_delete_account_tracks_customerio_with_user_details(
+        self, mock_track, mock_identify, mock_enabled
+    ):
+        user = User.objects.first()
+        User.objects.filter(pk=user.pk).update(first_name="Test", last_name="User")
+        user.refresh_from_db()
+        original_email = user.email
+        Subscription.get_or_create_active_for_user(user)
+        self.client._login(user, "django.contrib.auth.backends.ModelBackend")
+
+        response = self.client.post(
+            reverse("delete_account"),
+            data={
+                "confirm_delete": True,
+                "reason": OffboardingFeedback.Reason.NOT_USING_ENOUGH,
+                "comment": "No longer needed",
+            },
+        )
+
+        self.assertRedirects(response, reverse("account_logged_out"))
+        deleted_call = [
+            call for call in mock_track.call_args_list if call.args[1] == "User Deleted"
+        ][0]
+        details = deleted_call.args[2]
+        self.assertEqual(user.pk, details["user_id"])
+        self.assertEqual("Test", details["first_name"])
+        self.assertEqual("User", details["last_name"])
+        self.assertEqual(original_email, details["email"])
+        self.assertEqual(64, len(details["email_hash"]))
+        self.assertEqual(OffboardingFeedback.Reason.NOT_USING_ENOUGH, details["reason"])
+        self.assertEqual("No longer needed", details["comment"])
 
     def test_case_history(self):
         self.user = User.objects.first()
@@ -330,6 +904,7 @@ class PeachjamViewsTest(TestCase):
 
         main_case = Judgment.objects.create(
             case_name="Main case",
+            blurb="The case blurb",
             jurisdiction=Country.objects.first(),
             court=Court.objects.first(),
             date=datetime.date(2025, 1, 1),
@@ -357,7 +932,8 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertContains(response, "Case history")
         self.assertContains(response, main_case.title)
-        self.assertContains(response, appeal_allowed.name)
+        self.assertContains(response, main_case.blurb)
+        self.assertNotContains(response, appeal_allowed.name)
 
         response = self.client.get(
             reverse("document_case_histories", args=[main_case.expression_frbr_uri[1:]])
@@ -365,7 +941,149 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, "reviewed by another court")
         self.assertContains(response, "Case history")
         self.assertContains(response, appeal_case.title)
-        self.assertContains(response, appeal_allowed.name)
+        self.assertNotContains(response, appeal_allowed.name)
+
+    def test_case_history_hidden_without_linked_histories(self):
+        self.user = User.objects.first()
+        self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="can_view_case_history")
+        )
+
+        standalone_case = Judgment.objects.create(
+            case_name="Standalone case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 6, 1),
+            language=Language.objects.first(),
+        )
+
+        response = self.client.get(
+            reverse(
+                "document_case_histories",
+                args=[standalone_case.expression_frbr_uri[1:]],
+            )
+        )
+        self.assertNotContains(response, "Case history")
+        self.assertNotContains(response, "reviewed by another court")
+
+    def test_case_history_recurses_and_hides_unlinked_rows(self):
+        self.user = User.objects.first()
+        self.client._login(self.user, "django.contrib.auth.backends.ModelBackend")
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="can_view_case_history")
+        )
+
+        outcome_ancestor = Outcome.objects.create(name="Outcome Ancestor")
+        outcome_current = Outcome.objects.create(name="Outcome Current")
+        outcome_child = Outcome.objects.create(name="Outcome Child")
+        outcome_grandchild = Outcome.objects.create(name="Outcome Grandchild")
+
+        ancestor_case = Judgment.objects.create(
+            case_name="Ancestor case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 1, 1),
+            language=Language.objects.first(),
+        )
+        current_case = Judgment.objects.create(
+            case_name="Current case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 3, 1),
+            language=Language.objects.first(),
+        )
+        child_case = Judgment.objects.create(
+            case_name="Child case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 4, 1),
+            language=Language.objects.first(),
+        )
+        grandchild_case = Judgment.objects.create(
+            case_name="Grandchild case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2025, 5, 1),
+            language=Language.objects.first(),
+        )
+        great_ancestor_case = Judgment.objects.create(
+            case_name="Great ancestor case",
+            jurisdiction=Country.objects.first(),
+            court=Court.objects.first(),
+            date=datetime.date(2024, 12, 1),
+            language=Language.objects.first(),
+        )
+
+        CaseHistory.objects.create(
+            judgment_work=ancestor_case.work,
+            historical_judgment_work=great_ancestor_case.work,
+            outcome=outcome_ancestor,
+        )
+        CaseHistory.objects.create(
+            judgment_work=current_case.work,
+            historical_judgment_work=ancestor_case.work,
+            outcome=outcome_current,
+        )
+        CaseHistory.objects.create(
+            judgment_work=child_case.work,
+            historical_judgment_work=current_case.work,
+            outcome=outcome_child,
+        )
+        CaseHistory.objects.create(
+            judgment_work=grandchild_case.work,
+            historical_judgment_work=child_case.work,
+            outcome=outcome_grandchild,
+        )
+
+        unlinked_work = Work.objects.create(
+            frbr_uri="/akn/aa/judgment/test/1900/999",
+            frbr_uri_country="aa",
+            frbr_uri_place="aa",
+            frbr_uri_doctype="judgment",
+            frbr_uri_actor="test",
+            frbr_uri_date="1900",
+            frbr_uri_number="999",
+            title="Unlinked work",
+            languages=["eng"],
+        )
+        CaseHistory.objects.create(
+            judgment_work=current_case.work,
+            historical_judgment_work=unlinked_work,
+            outcome=outcome_current,
+            case_number="Missing linked document case",
+        )
+
+        response = self.client.get(
+            reverse(
+                "document_case_histories", args=[current_case.expression_frbr_uri[1:]]
+            )
+        )
+
+        self.assertContains(response, "Case history")
+        self.assertContains(response, great_ancestor_case.title)
+        self.assertContains(response, ancestor_case.title)
+        self.assertContains(response, current_case.title)
+        self.assertContains(response, child_case.title)
+        self.assertContains(response, grandchild_case.title)
+        self.assertNotContains(response, outcome_ancestor.name)
+        self.assertNotContains(response, outcome_child.name)
+        self.assertNotContains(response, outcome_grandchild.name)
+        self.assertNotContains(response, "Missing linked document case")
+
+        response_text = response.content.decode()
+        self.assertLess(
+            response_text.index(grandchild_case.title),
+            response_text.index(child_case.title),
+        )
+        self.assertLess(
+            response_text.index(child_case.title),
+            response_text.index(current_case.title),
+        )
+        self.assertLess(
+            response_text.index(current_case.title),
+            response_text.index(ancestor_case.title),
+        )
 
     def test_document_source_file(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
@@ -388,6 +1106,10 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
+            resp["Content-Disposition"],
+            f'attachment; filename="{sf.filename_for_download()}"',
+        )
+        self.assertEqual(
             self.client.get(f"{doc.get_absolute_url()}/source.pdf").status_code, 404
         )
         doc.published = True
@@ -395,9 +1117,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
         )
         self.assertEqual(
@@ -405,7 +1128,115 @@ class PeachjamViewsTest(TestCase):
         )
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.content, b"test")
+        self.assertEqual(resp.content, pdf_content)
+
+    def test_pdf_document_content_includes_source_file_start_page(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="AA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Gazette instrument",
+        )
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"pdf", name="gazette.pdf"),
+            mimetype="application/pdf",
+            start_page=36,
+        )
+        context = {
+            "display_type": "pdf",
+            "document": doc,
+            "document_diffs_url": "",
+            "show_sidebar": False,
+        }
+
+        content = render_to_string("peachjam/_document_content.html", context)
+        self.assertIn('data-pdf-start-page="36"', content)
+
+        source_file.start_page = None
+        source_file.save()
+        content = render_to_string("peachjam/_document_content.html", context)
+        self.assertNotIn("data-pdf-start-page", content)
+
+    def test_document_debug_external_links(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        site_settings = PeachJamSettings.load()
+        site_settings.document_debug_external_links = "\n".join(
+            [
+                "Search app logs | "
+                "https://example.com/foo/?a=b&frbr_uri={expression_frbr_uri}",
+                "Document by id | https://example.com/documents?id={id}&title={title}",
+                "Missing separator",
+                " | https://example.com/missing-label",
+            ]
+        )
+        site_settings.save()
+
+        self.client.force_login(User.objects.get(username="admin@example.com"))
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.context["external_debug_links"],
+            [
+                {
+                    "label": "Search app logs",
+                    "url": "https://example.com/foo/?a=b&frbr_uri="
+                    "%2Fakn%2Faa-au%2Fjudgment%2Fecowascj%2F2016%2F52%2Feng%402016-11-09",
+                },
+                {
+                    "label": "Document by id",
+                    "url": f"https://example.com/documents?id={doc.id}&title="
+                    "Obi%20vs%20Federal%20Republic%20of%20Nigeria%20%5B2016%5D%20"
+                    "ECOWASCJ%2052%20%2809%20November%202016%29",
+                },
+            ],
+        )
+        self.assertContains(response, "Search app logs")
+        self.assertContains(response, "Document by id")
+        self.assertNotContains(response, "Missing separator")
+
+    def test_document_debug_requires_change_permission(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        user = User.objects.get(username="officer@example.com")
+
+        self.client.force_login(user)
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 403)
+
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_coredocument")
+        )
+        self.client.force_login(User.objects.get(pk=user.pk))
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_document_debug_hides_summary_tab_without_generate_permission(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        user = User.objects.get(username="officer@example.com")
+        user.user_permissions.add(
+            Permission.objects.get(codename="change_coredocument")
+        )
+
+        self.client.force_login(User.objects.get(pk=user.pk))
+        response = self.client.get(reverse("document_debug", kwargs={"pk": doc.pk}))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, 'href="#debug-summary-tab"', html=False)
+
+    def test_document_summary_requires_generate_permission(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        user = User.objects.get(username="officer@example.com")
+        user.user_permissions.add(Permission.objects.get(codename="can_debug_document"))
+
+        self.client.force_login(User.objects.get(pk=user.pk))
+        response = self.client.post(reverse("document_summary", kwargs={"pk": doc.pk}))
+        self.assertEqual(response.status_code, 403)
 
     def test_document_source_unpublished(self):
         frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
@@ -428,9 +1259,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -462,9 +1294,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -493,9 +1326,10 @@ class PeachjamViewsTest(TestCase):
         )
 
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             source_url="https://example.com",
         )
@@ -535,9 +1369,10 @@ class PeachjamViewsTest(TestCase):
 
         # pdf source file is anonymised
         sf.delete()
+        pdf_content = self.pdf_fixture_content()
         sf = SourceFile.objects.create(
             document=doc,
-            file=ContentFile(b"test", name="test.pdf"),
+            file=ContentFile(pdf_content, name="test.pdf"),
             mimetype="application/pdf",
             file_is_anonymised=True,
         )
@@ -564,3 +1399,162 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, b"anon")
+
+    def test_anonymised_source_files_do_not_redirect_to_storage_or_remote_urls(self):
+        frbr_uri = "/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        doc = CoreDocument.objects.get(expression_frbr_uri=frbr_uri)
+        doc.anonymised = True
+        doc.save()
+
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"source", name="original-parties.docx"),
+            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            file_is_anonymised=True,
+        )
+        with patch.object(
+            source_file.file.storage,
+            "custom_domain",
+            "files.example",
+            create=True,
+        ):
+            response = self.client.get(f"{doc.get_absolute_url()}/source")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn("original-parties", response.get("Location", ""))
+        self.assertIn(
+            source_file.filename_for_download(), response["Content-Disposition"]
+        )
+
+        source_file.delete()
+        source_file = SourceFile.objects.create(
+            document=doc,
+            file=ContentFile(b"original", name="original-parties.pdf"),
+            mimetype="application/pdf",
+            source_url="https://example.com/original-parties.pdf",
+            anonymised_file_as_pdf=ContentFile(b"anonymised", name="safe.pdf"),
+        )
+        with patch.object(
+            source_file.anonymised_file_as_pdf.storage,
+            "custom_domain",
+            "files.example",
+            create=True,
+        ):
+            response = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"anonymised")
+        self.assertNotIn("original-parties", response.get("Location", ""))
+        self.assertIn(
+            source_file.filename_for_download(".pdf"), response["Content-Disposition"]
+        )
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUPPORT_EMAIL": "support@example.com",
+        }
+    )
+    def test_homepage_with_helpscout_beacon_renders_script_and_footer_trigger(self):
+        pj_settings = PeachJamSettings.load()
+        pj_settings.helpscout_beacon_id = "beacon-123"
+        # Ensure footer social/contact block renders
+        pj_settings.facebook_link = "https://facebook.com/example"
+        pj_settings.save()
+
+        response = self.client.get(reverse("home_page"))
+        self.assertEqual(response.status_code, 200)
+
+        # Beacon script/init should be present
+        self.assertContains(response, "https://beacon-v2.helpscout.net")
+        self.assertContains(response, "window.Beacon(")
+        self.assertContains(response, '"helpscoutBeaconId": "beacon-123"')
+        self.assertContains(response, "data-contact-us-beacon")
+        # Footer contact button should include beacon trigger + mailto fallback href
+        self.assertContains(response, 'href="mailto:support@example.com"')
+
+    @override_settings(
+        PEACHJAM={
+            **settings.PEACHJAM,
+            "SUPPORT_EMAIL": "support@example.com",
+        }
+    )
+    def test_homepage_without_helpscout_beacon_has_plain_mailto_contact_link(self):
+        pj_settings = PeachJamSettings.load()
+        pj_settings.helpscout_beacon_id = ""
+        # Ensure footer social/contact block renders
+        pj_settings.facebook_link = "https://facebook.com/example"
+        pj_settings.save()
+
+        response = self.client.get(reverse("home_page"))
+        self.assertEqual(response.status_code, 200)
+
+        # Beacon script/init should not be present
+        self.assertNotContains(response, "https://beacon-v2.helpscout.net")
+        self.assertNotContains(response, 'window.Beacon("init"')
+
+        # Contact button should be plain mailto (no beacon trigger attr)
+        self.assertContains(response, 'href="mailto:support@example.com"')
+        self.assertNotContains(response, "data-contact-us-beacon")
+
+
+class DocumentPopupViewTestCase(TestCase):
+    fixtures = ["tests/countries", "tests/languages"]
+
+    def test_popup_portion_qualifies_local_internal_refs(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Popup test document",
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html(
+            (
+                '<section id="sec_1" data-eid="sec_1">'
+                '<a class="akn-ref" href="#sec_2" data-href="#sec_2">section 2</a>'
+                "</section>"
+                '<section id="sec_2" data-eid="sec_2"><p>Target</p></section>'
+            )
+        )
+        doc_content.save()
+
+        response = self.client.get(
+            f"/en/p/localhost/e/popup{doc.expression_frbr_uri}/~sec_1"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        expected = f"{doc.expression_frbr_uri}#sec_2"
+        self.assertContains(response, f'href="{expected}"')
+        self.assertContains(response, f'data-href="{expected}"')
+
+    def test_popup_portion_looks_up_data_eid(self):
+        doc = GenericDocument.objects.create(
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+            frbr_uri_doctype="doc",
+            title="Popup test document",
+        )
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html_is_akn = True
+        doc_content.set_content_html(
+            (
+                '<section id="sec_1" data-eid="sec_1">'
+                '<span data-eid="defn-term-arbitration_agreement">'
+                "arbitration agreement means an agreement to arbitrate"
+                "</span>"
+                "</section>"
+            )
+        )
+        doc_content.save()
+
+        response = self.client.get(
+            f"/en/p/localhost/e/popup{doc.expression_frbr_uri}/~defn-term-arbitration_agreement"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "arbitration agreement means")
+        self.assertNotContains(response, "Popup test document")

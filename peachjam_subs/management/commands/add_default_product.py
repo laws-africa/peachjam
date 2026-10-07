@@ -98,7 +98,7 @@ class Command(BaseCommand):
         "search_download": {
             "name": "Download search results",
             "permissions": [
-                "peachjam.can_download_search",
+                "peachjam_search.can_download_search",
             ],
             "order": 12,
         },

@@ -9,9 +9,11 @@
       {% endif %}
     {% endblock %}
   </div>
-  <div class="col-12 col-sm-6 col-lg-4 mb-2">
-    {% block quick-search %}
-      {% include 'peachjam/_quick_search.html' %}
-    {% endblock %}
-  </div>
+  {% if not hide_search %}
+    <div class="col-12 col-sm-6 col-lg-4 mb-2">
+      {% block quick-search %}
+        {% include 'peachjam/_quick_search.html' %}
+      {% endblock %}
+    </div>
+  {% endif %}
 </div>

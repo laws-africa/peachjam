@@ -7,7 +7,6 @@ import peachjam.models.attachments
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [

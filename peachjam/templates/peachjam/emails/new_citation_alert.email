@@ -1,6 +1,23 @@
 {% extends 'peachjam/emails/layouts/alert.html' %}
-{% load i18n %}
-{% block subject %}{{ subject_line }}{% endblock %}
+{% load i18n peachjam %}
+{% block subject %}
+  {% if saved_documents|length > 1 %}
+    {% blocktrans trimmed with title=saved_documents.0.saved_document.title %}New citations for {{ title }} and more{% endblocktrans %}
+  {% else %}
+    {% blocktrans trimmed with title=saved_documents.0.saved_document.title %}New citations for {{ title }}{% endblocktrans %}
+  {% endif %}
+{% endblock %}
 {% block alert-body %}
-  {% include "peachjam/emails/new_citation_alert_body.html"  %}
+  <p>{% trans "We have found citations for documents that you have saved." %}</p>
+  {% for item in saved_documents %}
+    <p>
+      <a href="{% absolute_url site item.saved_document.get_absolute_url %}?utm_campaign=new_citation&utm_source=alert&utm_medium=email"><b>{{ item.saved_document.title }}</b></a>
+    </p>
+    <ul>
+      {% for citing in item.citing_documents %}
+        {% include "peachjam/emails/_alert_document_list_item.html" with url_path=citing.document.get_absolute_url utm_campaign="new_citation" title=citing.document.title blurb=citing.document.blurb flynote=citing.document.flynote provision_citations=citing.provision_citations %}
+      {% endfor %}
+    </ul>
+    <hr/>
+  {% endfor %}
 {% endblock %}

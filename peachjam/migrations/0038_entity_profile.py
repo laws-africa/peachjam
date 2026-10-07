@@ -3,11 +3,10 @@
 import django.db.models.deletion
 from django.db import migrations, models
 
-import peachjam.models.profile
+import peachjam.models.entity_profile
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
         ("peachjam", "0037_merge_0036_doc_alternative_names_0036_gazette"),
@@ -34,7 +33,7 @@ class Migration(migrations.Migration):
                     models.ImageField(
                         blank=True,
                         null=True,
-                        upload_to=peachjam.models.profile.entity_profile_photo_filename,
+                        upload_to=peachjam.models.entity_profile.entity_profile_photo_filename,
                     ),
                 ),
                 (
@@ -42,7 +41,7 @@ class Migration(migrations.Migration):
                     models.ImageField(
                         blank=True,
                         null=True,
-                        upload_to=peachjam.models.profile.entity_profile_photo_filename,
+                        upload_to=peachjam.models.entity_profile.entity_profile_photo_filename,
                     ),
                 ),
                 ("object_id", models.PositiveIntegerField()),

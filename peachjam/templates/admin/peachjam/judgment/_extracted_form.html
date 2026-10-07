@@ -8,6 +8,9 @@
     <ul>
       {% for key, value in details.items %}<li>{{ key }}: {{ value }}</li>{% endfor %}
     </ul>
+    <p class="mb-0">
+      {% trans "Review the extracted name and the suggested judge title and judge below. Adjust the suggestions if needed before saving." %}
+    </p>
   {% endif %}
 </div>
 <div id="inputs">

@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0187_folder_created_at_saveddocument_created_at"),
     ]

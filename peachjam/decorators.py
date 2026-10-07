@@ -38,6 +38,10 @@ class DocumentDecorator:
 class JudgmentDecorator(DocumentDecorator):
     """Judgment decorators are used to add extra functionality to judgments."""
 
+    def assign_mnc(self, document):
+        """Build the judgment's media-neutral citation."""
+        return document.generate_citation()
+
     def apply_labels(self, document):
         """Apply labels to this judgment based on its properties."""
         from peachjam.models import Label
@@ -210,7 +214,7 @@ class GazetteDecorator(DocumentDecorator):
                 BreadCrumb(
                     document.locality.name,
                     reverse(
-                        "gazettes_by_locality", args=[document.locality.place_code]
+                        "gazettes_by_locality", args=[document.locality.place_code()]
                     ),
                 )
             )
@@ -219,7 +223,7 @@ class GazetteDecorator(DocumentDecorator):
                     str(document.date.year),
                     reverse(
                         "gazettes_by_year",
-                        args=[document.locality.place_code, document.date.year],
+                        args=[document.locality.place_code(), document.date.year],
                     ),
                 )
             )
@@ -307,10 +311,32 @@ class BookDecorator(DocumentDecorator):
         return crumbs
 
 
-class JournalDecorator(DocumentDecorator):
+class JournalArticleDecorator(DocumentDecorator):
     def get_breadcrumbs(self, document):
         crumbs = super().get_breadcrumbs(document)
-        crumbs.append(BreadCrumb(_("Journals"), reverse("journal_list")))
+        crumbs.append(
+            BreadCrumb(_("Journals"), reverse("journal_list")),
+        )
+
+        if document.journal:
+            crumbs.append(
+                BreadCrumb(
+                    document.journal.title,
+                    reverse("journal_detail", args=[document.journal.slug]),
+                ),
+            )
+
+        if document.volume:
+            crumbs.append(
+                BreadCrumb(
+                    document.volume.title,
+                    reverse(
+                        "volume_detail",
+                        args=[document.journal.slug, document.volume.slug],
+                    ),
+                )
+            )
+
         return crumbs
 
 

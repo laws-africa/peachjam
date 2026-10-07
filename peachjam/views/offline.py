@@ -28,7 +28,8 @@ class OfflineView(TemplateView):
 
 class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
     """This view tells the offline system what pages need to be cached for this taxonomy topic. This includes
-    the documents in the topic (and its children), and the pages for browsing the topic."""
+    the documents in the topic (and its children), and the pages for browsing the topic.
+    """
 
     model = Taxonomy
     queryset = Taxonomy.objects.filter(allow_offline=True)
@@ -88,7 +89,8 @@ class TaxonomyManifestView(AllowedTaxonomyMixin, DetailView):
             for image in doc.images.all():
                 urls.append(doc.get_absolute_url() + "/media/" + image.filename)
 
-            if not doc.content_html:
+            doc_content = doc.get_or_create_document_content()
+            if not doc_content.content_html:
                 # PDF
                 urls.append(
                     reverse("document_source_pdf", args=[doc.expression_frbr_uri[1:]])

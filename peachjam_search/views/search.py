@@ -1,4 +1,6 @@
 import json
+import logging
+from dataclasses import replace
 from urllib.parse import urlencode, urlparse
 
 from django.conf import settings
@@ -32,29 +34,69 @@ from django.views.generic import (
     UpdateView,
 )
 from django_htmx.http import HttpResponseClientRedirect
+from elastic_transport import ConnectionTimeout
+from rest_framework import status
 from rest_framework.mixins import CreateModelMixin
 from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Label, pj_settings
-from peachjam.resources import DownloadDocumentsResource
+from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
-from peachjam_search.classifier import QueryClassifier
+from peachjam_search.compiler import ElasticsearchSearchCompiler
 from peachjam_search.engine import SearchEngine
+from peachjam_search.entity_matcher import EntityMatcher
+from peachjam_search.flynotes import FlynoteSearchMatcher
 from peachjam_search.forms import (
+    DocumentSearchDebugForm,
+    PortionSearchDebugForm,
+    RawSearchDebugForm,
     SavedSearchCreateForm,
     SavedSearchUpdateForm,
     SearchFeedbackCreateForm,
     SearchForm,
 )
-from peachjam_search.models import SavedSearch, SearchTrace
-from peachjam_search.serializers import SearchClickSerializer, SearchHit
+from peachjam_search.models import (
+    SavedSearch,
+    SearchEntityClick,
+    SearchEntityResult,
+    SearchFlynoteClick,
+    SearchFlynoteResult,
+    SearchTrace,
+)
+from peachjam_search.resources import SearchResultsDownloadResource
+from peachjam_search.serializers import (
+    SearchClickSerializer,
+    SearchEntityClickSerializer,
+    SearchFlynoteClickSerializer,
+    SearchHit,
+)
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
 SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
+
+log = logging.getLogger(__name__)
+
+
+def debug_json(value):
+    return json.dumps(debug_jsonable(value), indent=2, default=str)
+
+
+def debug_jsonable(value):
+    if hasattr(value, "to_dict") and not isinstance(value, dict):
+        try:
+            value = value.to_dict()
+        except TypeError:
+            pass
+
+    if isinstance(value, dict):
+        return {key: debug_jsonable(child) for key, child in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [debug_jsonable(child) for child in value]
+    return value
 
 
 class SearchView(TemplateView):
@@ -80,13 +122,15 @@ class DocumentSearchView(TemplateView):
     http_method_names = ["get"]
     action = "search"
     template_name = "peachjam_search/search_request_debug.html"
-    config_version = "2025-07-28"
+    config_version = "2026-07-24"
     user_can_debug = False
     # used by the /explain endpoint
     use_explain = False
 
     def get(self, request, *args, **kwargs):
-        self.user_can_debug = self.request.user.has_perm("peachjam_search.debug_search")
+        self.user_can_debug = self.request.user.has_perm(
+            "peachjam_search.can_debug_search"
+        )
         return getattr(self, self.action)(request, *args, **kwargs)
 
     def prepare(self, request, facets=False):
@@ -98,7 +142,7 @@ class DocumentSearchView(TemplateView):
             form.cleaned_data["facets"] = True
 
         engine = self.make_search_engine(form)
-        if not engine.query and not engine.field_queries:
+        if not engine.search_query.query and not engine.search_query.field_queries:
             # no search term
             return JsonResponse({"error": "No search term"}, status=400), None, None
 
@@ -110,17 +154,66 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        es_response = engine.execute()
+        debug_payload = engine.build_debug_payload()
+        try:
+            es_response = engine.execute_search()
+        except ConnectionTimeout as error:
+            # A timeout has no ES response, but the compiled query is the most
+            # useful evidence for diagnosing it with Elasticsearch support.
+            # It is redacted before persistence, so embedding vectors are not
+            # copied into SearchTrace.
+            try:
+                self.save_search_trace(
+                    engine,
+                    0,
+                    status=SearchTrace.Status.TIMED_OUT,
+                    elasticsearch_query=debug_payload["redacted_query"],
+                    error=error,
+                )
+            except Exception:
+                # Monitoring must never conceal the timeout seen by the user.
+                log.exception("Unable to save a timed-out search trace")
+            raise
         trace = self.save_search_trace(engine, es_response.hits.total.value)
 
         hits = SearchHit.from_es_hits(engine, es_response.hits)
         SearchHit.attach_documents(hits)
         # only keep those with documents
         hits = [h for h in hits if h.document]
+        entity_hits = self.save_entity_results(trace, self.match_entities(engine))
+        flynote_hits = self.match_flynotes(engine, hits)
+        flynote_hits = self.save_flynote_results(trace, flynote_hits)
+        has_direct_flynote_match = any(
+            hit.source == "direct_query" for hit in flynote_hits
+        )
 
         response = {
             "count": es_response.hits.total.value,
             "facets": es_response.aggregations.to_dict(),
+            "entity_results_html": render_to_string(
+                "peachjam_search/_entity_search_hit_list.html",
+                {
+                    "request": request,
+                    "entity_hits": entity_hits,
+                },
+            ),
+            "flynote_results_html": (
+                render_to_string(
+                    "peachjam_search/_flynote_search_hit_list.html",
+                    {
+                        "request": request,
+                        "flynote_hits": flynote_hits,
+                        "flynote_search_url": (
+                            f"{reverse('flynote_list')}?"
+                            f"{urlencode({'q': engine.search_query.query})}"
+                            if has_direct_flynote_match
+                            else None
+                        ),
+                    },
+                )
+                if flynote_hits
+                else ""
+            ),
             "results_html": render_to_string(
                 "peachjam_search/_search_hit_list.html",
                 {
@@ -152,7 +245,7 @@ class DocumentSearchView(TemplateView):
         suggestions = []
 
         if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            suggestions = SearchEngine().suggest(q).suggest.to_dict()
+            suggestions = ElasticsearchSearchCompiler().suggest(q).suggest.to_dict()
             suggestions["prefix"] = suggestions["prefix"][0]
 
         response = {"suggestions": suggestions}
@@ -165,7 +258,7 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        engine.page_size = 0
+        engine.set_search_query(replace(engine.search_query, page_size=0))
         es_response = engine.execute()
 
         return self.render(
@@ -182,7 +275,7 @@ class DocumentSearchView(TemplateView):
         if response:
             return response
 
-        if not request.user.has_perm("peachjam_search.download_search"):
+        if not request.user.has_perm("peachjam_search.can_download_search"):
             if request.htmx:
                 # this is the initial request to download, show a friendly permission-denied box
                 self.template_name = "peachjam_search/_download_403.html"
@@ -193,19 +286,30 @@ class DocumentSearchView(TemplateView):
             # the download is allowed, do a full redirect to start it
             return HttpResponseClientRedirect(request.get_full_path())
 
-        # only need the ids
-        engine.source = ["_id"]
-        engine.explain = False
-        # TODO: first 1000 hits
-        engine.page = 1
-        engine.page_size = 1000
-        response = engine.execute()
-        pks = [int(hit.meta.id) for hit in response.hits]
-
-        dataset = DownloadDocumentsResource().export(
-            DownloadDocumentsResource.get_objects_for_download(pks)
+        # Only request fields needed by the download. In a federated search, Elasticsearch
+        # ids belong to the remote site's database and cannot be used as local primary keys.
+        engine.set_search_query(
+            replace(
+                engine.search_query,
+                source=SearchResultsDownloadResource.search_source_fields,
+                explain=False,
+                page=1,
+                page_size=1000,
+            )
         )
-        fmt = DownloadDocumentsResource.download_formats[
+        response = engine.execute()
+        hits = SearchHit.from_es_hits(engine, response.hits)
+        local_documents = (
+            SearchResultsDownloadResource.get_objects_for_download_by_frbr_uris(
+                [hit.expression_frbr_uri for hit in hits]
+            )
+        )
+        SearchHit.attach_documents(hits, documents=local_documents)
+
+        dataset = SearchResultsDownloadResource().export(
+            [hit.document for hit in hits if hit.document]
+        )
+        fmt = SearchResultsDownloadResource.download_formats[
             form.cleaned_data.get("format") or "xlsx"
         ]()
         data = fmt.export_data(dataset)
@@ -220,14 +324,77 @@ class DocumentSearchView(TemplateView):
         return response
 
     def make_search_engine(self, form):
-        engine = SearchEngine()
-        form.configure_engine(engine)
-
-        engine.explain = self.use_explain
+        mode = "text"
         if settings.PEACHJAM["SEARCH_SEMANTIC"]:
-            engine.mode = form.cleaned_data.get("mode") or engine.mode
+            mode = form.cleaned_data.get("mode") or mode
+        search_query = form.build_search_query(mode=mode)
+        search_query = replace(search_query, explain=self.use_explain)
+        return SearchEngine(search_query)
 
-        return engine
+    def make_entity_matcher(self):
+        return EntityMatcher.get_instance()
+
+    def match_entities(self, engine):
+        if engine.search_query.page != 1 or engine.search_query.field_queries:
+            return []
+        return self.make_entity_matcher().match(engine.search_query.query)
+
+    def match_flynotes(self, engine, hits):
+        """Find supplementary legal-topic cards for a first-page legal-term search."""
+        if (
+            engine.search_query.page != 1
+            or engine.search_query.field_queries
+            or not Judgment.flynote_topics_enabled()
+            or getattr(getattr(engine, "analysis", None), "intent", None)
+            != "legal_term"
+        ):
+            return []
+        return FlynoteSearchMatcher().match(engine.search_query.query, hits)
+
+    def save_flynote_results(self, trace, flynote_hits):
+        """Persist the exact topic cards rendered for a search trace.
+
+        The result model also has surfaces for the legal topics page, so this
+        method deliberately records presentation data rather than card-only
+        analytics.
+        """
+        if not trace:
+            return flynote_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(flynote_hits, start=1):
+            result = SearchFlynoteResult.objects.create(
+                search_trace=trace,
+                flynote=hit.flynote,
+                flynote_name=hit.flynote.name,
+                flynote_path_labels=hit.path_labels,
+                position=position,
+                surface=SearchFlynoteResult.Surface.DOCUMENT_SEARCH_CARD,
+                source=hit.source,
+                selection_reason=hit.selection_reason,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
+
+    def save_entity_results(self, trace, entity_hits):
+        """Persist entity cards so their display and clicks are traceable."""
+        if not trace:
+            return entity_hits
+
+        tracked_hits = []
+        for position, hit in enumerate(entity_hits, start=1):
+            result = SearchEntityResult.objects.create(
+                search_trace=trace,
+                entity_type=hit.entity_type,
+                entity_id=hit.entity_id,
+                entity_label=hit.label,
+                entity_url=hit.url,
+                match_type=hit.match_type,
+                confidence=hit.confidence,
+                position=position,
+            )
+            tracked_hits.append(replace(hit, result_id=str(result.pk)))
+        return tracked_hits
 
     def render(self, response):
         if "html" in self.request.GET and self.user_can_debug:
@@ -240,46 +407,291 @@ class DocumentSearchView(TemplateView):
 
         return response
 
-    def save_search_trace(self, engine, n_results):
-        filters_string = "; ".join(f"{k}={v}" for k, v in engine.filters.items())
+    def save_search_trace(
+        self,
+        engine: SearchEngine,
+        n_results,
+        *,
+        status=SearchTrace.Status.COMPLETED,
+        elasticsearch_query=None,
+        error=None,
+    ):
+        def strip_null_bytes(value):
+            if isinstance(value, str):
+                return value.replace("\00", " ")
+            if isinstance(value, dict):
+                return {key: strip_null_bytes(child) for key, child in value.items()}
+            if isinstance(value, list):
+                return [strip_null_bytes(child) for child in value]
+            return value
 
-        search = self.request.GET.get("search", "")[:2048]
-        # ignore nulls
-        search = search.replace("\00", " ")
+        filters_string = "; ".join(
+            f"{k}={v}" for k, v in engine.search_query.filters.items()
+        )
 
-        qclass = self.classify_query(search)
+        truncate = SearchTrace.truncate_field_value
+        search = strip_null_bytes(self.request.GET.get("search", ""))
+        suggestion = strip_null_bytes(self.request.GET.get("suggestion", ""))
 
-        # save the search trace
+        analysis = getattr(engine, "analysis", None)
+        analysis_data = strip_null_bytes(analysis.to_dict()) if analysis else None
+        profile = getattr(getattr(engine, "plan", None), "profile", None)
+        profile_name = profile.name if profile else None
+        clean_query = analysis_data["clean_query"] if analysis_data else None
+
         with transaction.atomic():
             return SearchTrace.objects.create(
                 user=self.request.user if self.request.user.is_authenticated else None,
                 config_version=self.config_version,
                 request_id=self.request.id if self.request.id != "none" else None,
-                mode=engine.mode,
-                search=search,
-                field_searches=engine.field_queries,
+                mode=engine.plan.mode,
+                search=truncate("search", search),
+                field_searches=engine.search_query.field_queries,
                 n_results=n_results,
-                page=engine.page,
-                filters=engine.filters,
-                filters_string=filters_string,
+                page=engine.search_query.page,
+                filters=engine.search_query.filters,
+                filters_string=truncate("filters_string", filters_string),
                 ordering=self.request.GET.get("ordering"),
-                suggestion=self.request.GET.get("suggestion", "")[:1024],
-                ip_address=self.request.headers.get("x-forwarded-for"),
-                user_agent=self.request.headers.get("user-agent"),
-                query_clean=qclass.query_clean,
-                query_clean_n_words=qclass.n_words,
-                query_clean_n_chars=qclass.n_chars,
-                query_classification=(qclass.label.value if qclass.label else None),
-                query_classification_confidence=qclass.confidence,
+                suggestion=truncate("suggestion", suggestion),
+                ip_address=truncate(
+                    "ip_address", self.request.headers.get("x-forwarded-for")
+                ),
+                user_agent=truncate(
+                    "user_agent", self.request.headers.get("user-agent")
+                ),
+                query_clean=truncate("query_clean", clean_query),
+                query_clean_n_words=len(clean_query.split()) if clean_query else None,
+                query_clean_n_chars=len(clean_query) if clean_query else None,
+                query_classification=(
+                    analysis_data.get("classifier_intent") or analysis_data["intent"]
+                    if analysis_data
+                    else None
+                ),
+                query_classification_confidence=(
+                    analysis_data["confidence"] if analysis_data else None
+                ),
+                query_analysis=analysis_data,
+                search_profile=profile_name,
+                status=status,
+                elasticsearch_query=elasticsearch_query,
+                error_type=type(error).__name__ if error else None,
+                error_message=truncate("error_message", str(error)) if error else None,
             )
-
-    def classify_query(self, query):
-        return QueryClassifier().classify(query)
 
 
 class SearchClickViewSet(AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet):
     permission_classes = (AllowAny,)
     serializer_class = SearchClickSerializer
+
+
+class SearchFlynoteClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    """Record a card click once, without delaying navigation to the topic."""
+
+    permission_classes = (AllowAny,)
+    serializer_class = SearchFlynoteClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchFlynoteClick.objects.get_or_create(
+            flynote_result=serializer.validated_data["flynote_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class SearchEntityClickViewSet(
+    AtomicWriteViewSetMixin, CreateModelMixin, GenericViewSet
+):
+    permission_classes = (AllowAny,)
+    serializer_class = SearchEntityClickSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        click, created = SearchEntityClick.objects.get_or_create(
+            entity_result=serializer.validated_data["entity_result"]
+        )
+        return Response(
+            self.get_serializer(click).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+
+class SearchDebugMixin(PermissionRequiredMixin):
+    permission_required = "peachjam_search.can_debug_search"
+
+    def has_permission(self):
+        return self.request.user.has_perm(self.permission_required)
+
+
+@method_decorator(never_cache, name="dispatch")
+class SearchDebugView(SearchDebugMixin, TemplateView):
+    template_name = "peachjam_search/search_debug.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query_params = self.request.GET.urlencode()
+        portion_initial = {"top_k": 10}
+        if self.request.GET.get("debug_tab") == "portions":
+            portion_initial.update(
+                {
+                    "text": self.request.GET.get("portion_text", ""),
+                    "top_k": self.request.GET.get("portion_top_k", 10),
+                }
+            )
+            for field in ("pre_filters", "filters"):
+                value = self.request.GET.get(f"portion_{field}")
+                if value:
+                    portion_initial[field] = value
+        context.update(
+            {
+                "document_query_params": query_params,
+                "portion_form": PortionSearchDebugForm(initial=portion_initial),
+                "debug_tab": self.request.GET.get("debug_tab", "documents"),
+                "raw_form": RawSearchDebugForm(
+                    initial={
+                        "query": json.dumps({"query": {"match_all": {}}}, indent=2)
+                    }
+                ),
+            }
+        )
+        return context
+
+
+@method_decorator(never_cache, name="dispatch")
+class DocumentSearchDebugView(SearchDebugMixin, View):
+    template_name = "peachjam_search/_document_search_debug_results.html"
+
+    def post(self, request, *args, **kwargs):
+        params = QueryDict(request.POST.get("query_params", ""), mutable=True)
+        params.setdefault("page", "1")
+        params.setdefault("ordering", "-score")
+
+        form = DocumentSearchDebugForm(params)
+        if not form.is_valid():
+            return self.render({"form": form})
+
+        mode = "text"
+        if settings.PEACHJAM["SEARCH_SEMANTIC"]:
+            mode = form.cleaned_data.get("mode") or mode
+        engine = SearchEngine(form.build_search_query(mode=mode))
+
+        debug_payload = engine.build_debug_payload()
+        es_response = engine.execute()
+        hits = SearchHit.from_es_hits(engine, es_response.hits)
+        SearchHit.attach_documents(hits)
+        hits = [h for h in hits if h.document]
+
+        return self.render(
+            {
+                "form": form,
+                "query_params": params.urlencode(),
+                "query_json": debug_json(debug_payload["redacted_query"]),
+                "raw_response_json": debug_json(es_response),
+                "planning_json": debug_json(
+                    {
+                        "analysis": debug_payload["analysis"],
+                        "plan": debug_payload["plan"],
+                    }
+                ),
+                "count": es_response.hits.total.value,
+                "hits": hits,
+                "can_debug": True,
+                "show_jurisdiction": settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"],
+            }
+        )
+
+    def render(self, context):
+        return HttpResponse(render_to_string(self.template_name, context, self.request))
+
+
+@method_decorator(never_cache, name="dispatch")
+class PortionSearchDebugView(SearchDebugMixin, View):
+    template_name = "peachjam_search/_portion_search_debug_results.html"
+
+    def post(self, request, *args, **kwargs):
+        form = PortionSearchDebugForm(request.POST)
+        if not form.is_valid():
+            return self.render({"form": form})
+
+        input_data = form.cleaned_data["validated_portion_search"]
+        engine = self.make_engine(input_data)
+        debug_payload = engine.build_debug_payload()
+        es_response = engine.execute()
+
+        from peachjam_search.views.api import PortionSearchView
+
+        portion_view = PortionSearchView()
+        portion_view.request = request
+        portion_view.engine = engine
+        portions = portion_view.build_portions(es_response, request)
+        portions = portions[: input_data["top_k"]]
+
+        return self.render(
+            {
+                "form": form,
+                "query_json": debug_json(debug_payload["redacted_query"]),
+                "raw_response_json": debug_json(es_response),
+                "raw_count": es_response.hits.total.value,
+                "portions": portions,
+                "portions_json": debug_json(
+                    [p.model_dump(mode="json") for p in portions]
+                ),
+            }
+        )
+
+    def make_engine(self, input_data):
+        from peachjam_search.engine import (
+            PortionSearchEngine,
+            make_portion_search_query,
+        )
+        from peachjam_search.search_pipeline import SearchPlanner
+
+        filters = [
+            input_data[field]
+            for field in ("pre_filters", "filters")
+            if input_data.get(field)
+        ]
+        search_query = make_portion_search_query(input_data["text"], filters)
+        planner = SearchPlanner(semantic_k=input_data["top_k"] * 10)
+        return PortionSearchEngine(search_query, planner=planner)
+
+    def render(self, context):
+        return HttpResponse(render_to_string(self.template_name, context, self.request))
+
+
+@method_decorator(never_cache, name="dispatch")
+class RawSearchDebugView(SearchDebugMixin, View):
+    template_name = "peachjam_search/_raw_search_debug_results.html"
+
+    def post(self, request, *args, **kwargs):
+        form = RawSearchDebugForm(request.POST)
+        if not form.is_valid():
+            return self.render({"form": form})
+
+        query = dict(form.cleaned_data["query"])
+        if form.cleaned_data.get("size") is not None:
+            query["size"] = form.cleaned_data["size"]
+
+        compiler = ElasticsearchSearchCompiler()
+        response = compiler.client.search(index=compiler.index, body=query)
+        response_body = response.body if hasattr(response, "body") else response
+        return self.render(
+            {
+                "form": form,
+                "index": compiler.index,
+                "query_json": debug_json(query),
+                "raw_response_json": debug_json(response_body),
+            }
+        )
+
+    def render(self, context):
+        return HttpResponse(render_to_string(self.template_name, context, self.request))
 
 
 @method_decorator(never_cache, name="dispatch")
@@ -334,7 +746,7 @@ class SearchTraceDetailView(PermissionRequiredMixin, DetailView):
 
 class AllowSavedSearchesMixin:
     def dispatch(self, *args, **kwargs):
-        if not pj_settings().allow_save_searches:
+        if not pj_settings().save_searches_enabled:
             raise Http404("Saving searches is not allowed.")
         return super().dispatch(*args, **kwargs)
 
@@ -433,6 +845,11 @@ class SavedSearchUpdateView(BaseSavedSearchFormView, UpdateView):
     permission_required = "peachjam_search.change_savedsearch"
     template_name = "peachjam_search/saved_search_form.html"
     form_class = SavedSearchUpdateForm
+
+    def form_valid(self, form):
+        if self.object.is_subscription_locked:
+            return HttpResponseForbidden("Search alert is locked")
+        return super().form_valid(form)
 
 
 class SavedSearchListView(BaseSavedSearchFormView, ListView):

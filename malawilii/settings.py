@@ -2,7 +2,12 @@ from django.utils.translation import gettext_lazy as _
 
 from liiweb.settings import *  # noqa
 
+TIME_ZONE = "Africa/Blantyre"
+
 INSTALLED_APPS = ["malawilii.apps.MalawiLIIConfig"] + INSTALLED_APPS  # noqa
+
+PEACHJAM["CHAT_ENABLED"] = True  # noqa
+ALLOWED_HOSTS = build_allowed_hosts("malawilii.org", "www.malawilii.org")  # noqa
 
 
 JAZZMIN_SETTINGS["site_title"] = "MalawiLII"  # noqa
@@ -32,5 +37,5 @@ LANGUAGES = [
 if not DEBUG:  # noqa
     # malawilii media files are stored on S3 and served via a Cloudflare CDN (via copying to R2).
     # We can therefore set long-lived cache headers and serve them from a custom domain.
-    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400*5}"}
+    AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400 * 5}"}
     AWS_S3_CUSTOM_DOMAIN = "media.malawilii.org"

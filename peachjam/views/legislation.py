@@ -1,20 +1,29 @@
+import string
 from datetime import datetime, timedelta
 from functools import cached_property
+from types import SimpleNamespace
+from urllib.parse import urlencode
 
+from django.apps import apps
 from django.contrib import messages
 from django.db.models import CharField, Func, Prefetch, Value
 from django.db.models.functions.text import Substr
 from django.http import Http404
+from django.shortcuts import get_object_or_404
 from django.template.defaultfilters import date as format_date
+from django.urls import reverse
+from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.html import mark_safe
 from django.utils.translation import gettext as _
-from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView
 
-from peachjam.forms import LegislationFilterForm, UnconstitutionalProvisionFilterForm
-from peachjam.helpers import add_slash_to_frbr_uri
+from peachjam.forms import (
+    LegislationFilterForm,
+    UnconstitutionalProvisionFilterForm,
+)
+from peachjam.helpers import add_slash, add_slash_to_frbr_uri
 from peachjam.models import (
     CoreDocument,
     Glossary,
@@ -39,8 +48,9 @@ class LegislationListView(FilteredDocumentListView):
     template_name = "peachjam/legislation_list.html"
     navbar_link = "legislation"
     extra_context = {
+        "KEY_LINK_PAGE": "legislation_list",
         "nature": "Act",
-        "help_link": "legislation/",
+        "help_link": "legislation/finding-legislation",
         "doc_table_show_date": False,
     }
     form_defaults = {"sort": "title"}
@@ -48,6 +58,7 @@ class LegislationListView(FilteredDocumentListView):
 
     def add_facets(self, context):
         super().add_facets(context)
+        self.add_languages_facet(context)
         # move the alphabet facet first, it's highly used on the legislation page for some LIIs
         if "alphabet" in context["facet_data"]:
             facets = {"alphabet": context["facet_data"].pop("alphabet")}
@@ -89,10 +100,44 @@ class LegislationListView(FilteredDocumentListView):
             UnconstitutionalProvision.objects.exists()
             or UncommencedProvision.objects.exists()
         )
-        context[
-            "show_unconstitutional_provisions"
-        ] = UnconstitutionalProvision.objects.exists()
+        context["show_unconstitutional_provisions"] = (
+            UnconstitutionalProvision.objects.exists()
+        )
         context["show_uncommenced_provisions"] = UncommencedProvision.objects.exists()
+        return context
+
+
+class LegislationSubsidiaryView(LegislationListView):
+    template_name = "peachjam/document/_legislation_subsidiary.html"
+    latest_expression_only = True
+    paginate_by = None
+
+    def get_template_names(self):
+        if self.request.htmx and self.request.htmx.target == "children-tab":
+            return self.template_name
+        return super().get_template_names()
+
+    @cached_property
+    def legislation(self):
+        return get_object_or_404(
+            Legislation,
+            expression_frbr_uri=add_slash(self.kwargs.get("frbr_uri")),
+        )
+
+    def get_base_queryset(self):
+        return Legislation.objects.filter(
+            parent_work=self.legislation.work,
+            published=True,
+        ).for_document_table()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["legislation"] = self.legislation
+        context["doc_table_show_date"] = False
+        context["doc_table_disable_push_url"] = True
+        context["doc_table_citations"] = True
+        context["doc_table_show_jurisdiction"] = False
+        context["doc_table_show_doc_type"] = False
         return context
 
 
@@ -102,25 +147,39 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     template_name = "peachjam/legislation_detail.html"
     permission_required = "peachjam.can_view_historical_legislation"
 
-    def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        if not self.object.is_most_recent():
-            add_never_cache_headers(response)
-        return response
+    def get_object(self):
+        # caching the object here to avoid multiple db hits
+        if not hasattr(self, "_object"):
+            self.object = super().get_object()
+        return self.object
 
     def has_permission(self):
-        # if it's the most recent version, always allow
-        self.object = self.get_object()
-        if self.object.is_most_recent():
+        obj = self.get_object()
+        if obj.is_most_recent():
             return True
         return super().has_permission()
+
+    def dispatch(self, request, *args, **kwargs):
+        response = super().dispatch(request, *args, **kwargs)
+
+        # Historical legislation should never be cached
+        if hasattr(self, "object") and not self.object.is_most_recent():
+            add_never_cache_headers(response)
+
+        return response
 
     def get_subscription_required_template(self):
         return self.template_name
 
     def get_subscription_required_context(self):
+        all_versions = CoreDocument.objects.filter(
+            work_frbr_uri=self.object.work_frbr_uri
+        )
         return {
             "document": self.object,
+            "date_versions": all_versions.filter(
+                language=self.object.language
+            ).order_by("-date"),
         }
 
     def get_context_data(self, **kwargs):
@@ -129,7 +188,9 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         context["timeline"] = self.get_timeline()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
-        context["child_documents"] = self.get_child_documents()
+        context["child_documents_count"] = self.model.objects.filter(
+            parent_work=self.object.work
+        ).count()
         return context
 
     def get_notices(self):
@@ -214,19 +275,12 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         points_in_time = self.get_points_in_time()
         work_amendments = self.get_work_amendments()
         current_object_date = self.object.date.strftime("%Y-%m-%d")
+        has_unapplied_amendments = self.has_unapplied_amendments(current_object_date)
 
-        if not work_amendments:
-            latest_amendment_date = None
-        else:
-            work_amendments_dates = [
-                work_amendment["date"] for work_amendment in work_amendments
-            ]
-            latest_amendment_date = max(work_amendments_dates)
+        if not points_in_time and has_unapplied_amendments:
+            self.set_unapplied_amendment_notice(notices)
 
-            if not points_in_time and latest_amendment_date > current_object_date:
-                self.set_unapplied_amendment_notice(notices)
-
-        if points_in_time and work_amendments:
+        if points_in_time:
             point_in_time_dates = [
                 point_in_time["date"] for point_in_time in points_in_time
             ]
@@ -237,7 +291,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                 return notices
 
             if index == len(point_in_time_dates) - 1:
-                if self.object.repealed and repeal:
+                if work_amendments and self.object.repealed and repeal:
                     if repeal["repealing_uri"]:
                         notices.append(
                             {
@@ -265,10 +319,11 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                             }
                         )
 
-                elif work_amendments and latest_amendment_date > current_object_date:
+                elif has_unapplied_amendments:
                     self.set_unapplied_amendment_notice(notices)
 
                 else:
+                    # show latest notice even if no amendments
                     notices.append(
                         {
                             "type": messages.INFO,
@@ -278,7 +333,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                             % {"friendly_type": friendly_type},
                         }
                     )
-            else:
+            elif work_amendments:
                 date = datetime.strptime(
                     point_in_time_dates[index + 1], "%Y-%m-%d"
                 ).date() - timedelta(days=1)
@@ -344,6 +399,21 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     def get_work_amendments(self):
         return self.object.metadata_json.get("work_amendments", None)
 
+    def has_unapplied_amendments(self, current_object_date):
+        """Return true when an effective amendment has no matching expression."""
+        today = timezone.localdate().strftime("%Y-%m-%d")
+        point_in_time_dates = [p["date"] for p in self.get_points_in_time()]
+        for amendment in self.get_work_amendments() or []:
+            date = amendment.get("date")
+            if (
+                date
+                and date <= today
+                and date > current_object_date
+                and date not in point_in_time_dates
+            ):
+                return True
+        return False
+
     def get_commencement_info(self):
         """Returns commenced, commenced_in_full.
         commenced_in_full defaults to True.
@@ -375,6 +445,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
     def get_timeline(self):
         timeline = self.object.timeline_json
         points_in_time = self.get_points_in_time()
+        today = timezone.localdate().strftime("%Y-%m-%d")
 
         # prepare for setting contains_unapplied_amendment flag
         point_in_time_dates = [p["date"] for p in points_in_time]
@@ -394,6 +465,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         }
 
         for entry in timeline:
+            entry["is_current"] = entry["date"] == self.object.date.strftime("%Y-%m-%d")
             # add expression_frbr_uri
             for event in entry["events"]:
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
@@ -401,6 +473,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                 if event["type"] == "amendment":
                     entry["contains_unapplied_amendment"] = (
                         entry["date"] not in point_in_time_dates
+                        and entry["date"] <= today
                         and entry["date"] > latest_expression_date
                     )
 
@@ -453,21 +526,20 @@ class DocumentUncommencedProvisionListView(DetailView):
         return context
 
 
-@method_decorator(never_cache, name="dispatch")
 class UncommencedProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_uncommencedprovision"
+    private_cache = True
     template_name = "peachjam/provision_enrichment/uncommenced_provision_list.html"
+    document_table_template_name = (
+        "peachjam/provision_enrichment/_uncommenced_table.html"
+    )
+    document_table_form_template_name = (
+        "peachjam/provision_enrichment/_uncommenced_table_form.html"
+    )
     latest_expression_only = True
 
     def get_subscription_required_template(self):
         return self.template_name
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_uncommenced_table.html"]
-            return ["peachjam/provision_enrichment/_uncommenced_table_form.html"]
-        return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
@@ -491,25 +563,22 @@ class UnconstitutionalProvisionDetailView(DetailView):
     context_object_name = "enrichment"
 
 
-@method_decorator(never_cache, name="dispatch")
 class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationListView):
     permission_required = "peachjam.view_unconstitutionalprovision"
+    private_cache = True
     template_name = "peachjam/provision_enrichment/unconstitutional_provision_list.html"
+    document_table_template_name = (
+        "peachjam/provision_enrichment/_unconstitutional_table.html"
+    )
+    document_table_form_template_name = (
+        "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html"
+    )
     latest_expression_only = True
     form_class = UnconstitutionalProvisionFilterForm
     exclude_facets = ["alphabet", "years"]
 
     def get_subscription_required_template(self):
         return self.template_name
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_unconstitutional_table.html"]
-            return [
-                "peachjam/provision_enrichment/_unconstitutional_provisions_table_form.html"
-            ]
-        return super().get_template_names()
 
     def get_base_queryset(self, *args, **kwargs):
         qs = super().get_base_queryset(*args, **kwargs)
@@ -576,9 +645,11 @@ class UnconstitutionalProvisionListView(SubscriptionRequiredMixin, LegislationLi
         return context
 
 
-@method_decorator(never_cache, name="dispatch")
 class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
     model = Glossary
+    private_cache = True
+    # this is expensive and is not used
+    queryset = Glossary.objects.defer("data")
     slug_url_kwarg = "place_code"
     slug_field = "place_code"
     permission_required = "peachjam.view_glossary"
@@ -595,18 +666,16 @@ class PlaceGlossaryView(SubscriptionRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        letters = list(self.object.data.keys())
-        if letters and letters[0] == "0":
-            letters.pop(0)
-            letters.append("0")
+        context["KEY_LINK_PAGE"] = "glossary"
+        letters = [*string.ascii_lowercase, "0"]
         context["letters"] = letters
-        context["first_letter"] = letters[0] if letters else None
         context.update(self.get_subscription_required_context())
         return context
 
 
 class PlaceGlossaryLetterView(PlaceGlossaryView):
     template_name = "peachjam/glossary/_glossary_letter.html"
+    queryset = Glossary.objects.all()
     letter = None
 
     def get(self, *args, **kwargs):
@@ -620,36 +689,7 @@ class PlaceGlossaryLetterView(PlaceGlossaryView):
         return context
 
 
-@method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
-class DocumentProvisionCitationView(
-    SubscriptionRequiredMixin, FilteredDocumentListView
-):
-    permission_required = "peachjam.view_provisioncitation"
-    template_name = "peachjam/provision_enrichment/provision_citations.html"
-
-    def get_subscription_required_template(self):
-        return self.template_name
-
-    def get_subscription_required_context(self):
-        return {
-            "document": self.document,
-            "provision_title": self.document.friendly_provision_title(
-                self.provision_eid
-            ),
-            "provision_html": self.document.get_provision_by_eid(self.provision_eid),
-            "provision_eid": self.provision_eid,
-        }
-
-    def get_template_names(self):
-        if self.request.htmx:
-            if self.request.htmx.target == "doc-table":
-                return ["peachjam/provision_enrichment/_provision_citations_table.html"]
-            return [
-                "peachjam/provision_enrichment/_provision_citations_table_form.html"
-            ]
-        return super().get_template_names()
-
+class DocumentProvisionMixin:
     @cached_property
     def document(self):
         obj = CoreDocument.objects.filter(
@@ -669,13 +709,106 @@ class DocumentProvisionCitationView(
     def provision_eid(self):
         return self.kwargs.get("provision_eid", "")
 
+    def get_provision_context(self):
+        return {
+            "document": self.document,
+            "provision_title": self.document.friendly_provision_title(
+                self.provision_eid
+            ),
+            "provision_html": self.document.get_provision_by_eid(self.provision_eid),
+            "provision_eid": self.provision_eid,
+            "provision_tab": self.provision_tab,
+        }
+
+
+class LegislationProvisionListView(LegislationListView):
+    """A specialised form of LegislationListView that lists provisions of legislation.
+
+    Subclasses should implement the logic to load provisions, and override prepare_provision to add any extra
+    attributes to the provision objects that are needed for display.
+    """
+
+    document_table_template_name = "peachjam/document/_provisions_table.html"
+    document_table_form_template_name = "peachjam/document/_provisions_table_form.html"
+
+    def prepare_provision(self, document, provision):
+        provision.document = document
+        provision.title = self.get_provision_title(document, provision)
+        provision.url = self.get_provision_url(document, provision)
+        provision.compare_url = self.get_compare_url(document, provision)
+        provision.provision_popup_url = self.get_provision_popup_url(
+            document, provision
+        )
+        return provision
+
+    def get_provision_title(self, document, provision):
+        title = getattr(provision, "title", None)
+        if title:
+            return title
+        if getattr(provision, "whole_work", False):
+            return document.title
+        provision_eid = getattr(provision, "provision_eid", None)
+        if provision_eid:
+            return document.friendly_provision_title(provision_eid)
+        return document.title
+
+    def get_provision_url(self, document, provision):
+        provision_eid = getattr(provision, "provision_eid", None)
+        if getattr(provision, "whole_work", False) or not provision_eid:
+            return document.get_absolute_url()
+        return f"{document.get_absolute_url()}#{provision_eid}"
+
+    def get_compare_url(self, document, provision):
+        provision_eid = getattr(provision, "provision_eid", None)
+        if not provision_eid:
+            return None
+        params = {
+            "uri-a": f"{document.expression_frbr_uri}/~{provision_eid}",
+        }
+        return f"{reverse('compare_portions')}?{urlencode(params)}"
+
+    def get_provision_popup_url(self, document, provision):
+        expression_frbr_uri = document.expression_frbr_uri
+        if not expression_frbr_uri:
+            return None
+
+        frbr_uri = expression_frbr_uri.lstrip("/")
+        provision_eid = getattr(provision, "provision_eid", None)
+        if not getattr(provision, "whole_work", False) and provision_eid:
+            frbr_uri = f"{frbr_uri}/~{provision_eid}"
+        partner = self.request.get_host().split(":")[0]
+        return reverse(
+            "document_popup", kwargs={"partner": partner, "frbr_uri": frbr_uri}
+        )
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentProvisionCitationView(
+    DocumentProvisionMixin, SubscriptionRequiredMixin, FilteredDocumentListView
+):
+    permission_required = "peachjam.view_provisioncitation"
+    private_cache = True
+    template_name = "peachjam/provision_enrichment/provision_citations.html"
+    document_table_template_name = (
+        "peachjam/provision_enrichment/_provision_citations_table.html"
+    )
+    document_table_form_template_name = (
+        "peachjam/provision_enrichment/_provision_citations_table_form.html"
+    )
+    latest_expression_only = True
+    provision_tab = "citations"
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return self.get_provision_context()
+
     @cached_property
     def provision_citations(self):
         contexts = ProvisionCitation.objects.filter(
             work=self.document.work, provision_eid=self.provision_eid
         ).prefetch_related("work")
-        if not contexts.exists():
-            raise Http404("No citations found for this provision.")
         return contexts
 
     def get_base_queryset(self, *args, **kwargs):
@@ -698,6 +831,7 @@ class DocumentProvisionCitationView(
         context = super().get_context_data(**kwargs)
         context.update(self.get_subscription_required_context())
         context["citation_contexts"] = self.provision_citations
+        context["page_title"] = _("Citations")
         target_eid = self.provision_eid or None
         citing_documents_count = (
             ProvisionCitationCount.objects.filter(
@@ -707,4 +841,110 @@ class DocumentProvisionCitationView(
             .first()
         )
         context["citing_documents_count"] = citing_documents_count or 0
+        return context
+
+
+@method_decorator(add_slash_to_frbr_uri(), name="setup")
+class DocumentProvisionSimilarView(
+    DocumentProvisionMixin, SubscriptionRequiredMixin, LegislationProvisionListView
+):
+    # same permission as DocumentProvisionCitationView just to simplify things
+    permission_required = "peachjam.view_provisioncitation"
+    private_cache = True
+    template_name = "peachjam/document/similar_provisions.html"
+    latest_expression_only = True
+    similarity_threshold = 0.8
+    n_similar = 10
+    exclude_facets = ["alphabet"]
+    paginate_by = 0
+    provision_tab = "similar"
+    _similar_provisions = None
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_context(self):
+        return self.get_provision_context()
+
+    def get_base_queryset(self, *args, **kwargs):
+        if not apps.is_installed("peachjam_ml"):
+            return self.model.objects.none()
+
+        qs = super().get_base_queryset(*args, **kwargs)
+        qs = qs.exclude(work=self.document.work)
+        return qs.filter(pk__in=self.get_similar_document_ids(qs))
+
+    def get_similar_document_ids(self, documents_qs):
+        return {
+            provision["document_id"]
+            for provision in self.get_similar_provisions(documents_qs)
+        }
+
+    def get_similar_provisions(self, documents_qs):
+        if not apps.is_installed("peachjam_ml"):
+            return []
+
+        # simple cache, since this is expensive
+        if self._similar_provisions is None:
+            from peachjam_ml.models import ContentChunk
+
+            self._similar_provisions = ContentChunk.get_similar_provisions(
+                self.document,
+                self.provision_eid,
+                documents_qs,
+                threshold=self.similarity_threshold,
+                n_similar=self.n_similar,
+            )
+
+        return self._similar_provisions
+
+    def prepare_provision(self, document, provision):
+        portion_id = provision["portion"]
+        return super().prepare_provision(
+            document,
+            SimpleNamespace(
+                provision_eid=portion_id,
+                portion_id=portion_id,
+                title=provision["title"],
+                similarity=provision["similarity"],
+            ),
+        )
+
+    def get_compare_url(self, document, provision):
+        params = {
+            "uri-a": f"{self.document.expression_frbr_uri}/~{self.provision_eid}",
+            "uri-b": f"{document.expression_frbr_uri}/~{provision.provision_eid}",
+        }
+        return f"{reverse('compare_portions')}?{urlencode(params)}"
+
+    def get_provision_title(self, document, provision):
+        return provision.title or document.friendly_provision_title(
+            provision.provision_eid
+        )
+
+    def decorate_documents_with_similar_provisions(self, documents):
+        similar_provisions = self.get_similar_provisions(documents)
+        if not similar_provisions:
+            return
+
+        document_map = {document.pk: document for document in documents}
+
+        results = []
+        for provision in similar_provisions:
+            document = document_map.get(provision["document_id"])
+            if not document:
+                continue
+
+            if not hasattr(document, "provisions"):
+                document.provisions = []
+                results.append(document)
+            document.provisions.append(self.prepare_provision(document, provision))
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.get_subscription_required_context())
+        self.decorate_documents_with_similar_provisions(context["documents"])
+        context["doc_count_noun"] = _("document with similar provisions")
+        context["doc_count_noun_plural"] = _("documents with similar provisions")
+        context["page_title"] = _("Similar provisions")
         return context

@@ -1,4 +1,5 @@
 from django.http import Http404, HttpResponse
+from django.utils.http import content_disposition_header
 from django_filters import rest_framework as filters
 from drf_spectacular.utils import OpenApiTypes, extend_schema
 from rest_framework import status, viewsets
@@ -78,23 +79,21 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     def source_txt(self, request, expression_frbr_uri=None):
         """Source document in text form (if available)."""
         obj = self.get_object()
-        # we only allow certain formats
-        try:
-            content = getattr(obj, "document_content")
-        except AttributeError:
-            raise Http404()
+        content = obj.get_or_create_document_content()
 
         # return content.content_text as a normal drf response object
-        return HttpResponse(content.content_text, content_type="text/plain")
+        return HttpResponse(
+            content.content_text, content_type="text/plain; charset=utf-8"
+        )
 
     @extend_schema(responses={(200, "text/html"): OpenApiTypes.STR})
     @action(detail=True, url_path=".html")
     def content_html(self, request, expression_frbr_uri=None):
         obj = self.get_object()
-        content = obj.content_html
+        content = obj.get_or_create_document_content().content_html
         if not content:
             raise Http404()
-        return HttpResponse(content, content_type="text/html")
+        return HttpResponse(content, content_type="text/html; charset=utf-8")
 
     @extend_schema(responses={(200, "application/pdf"): OpenApiTypes.BINARY})
     @action(detail=True, url_path="source.pdf")
@@ -133,7 +132,7 @@ class BaseDocumentViewSet(viewsets.ReadOnlyModelViewSet):
     def make_response(self, f, content_type, fname):
         file_bytes = f.read()
         response = HttpResponse(file_bytes, content_type=content_type)
-        response["Content-Disposition"] = f"inline; filename={fname}"
+        response["Content-Disposition"] = content_disposition_header(False, fname)
         response["Content-Length"] = str(len(file_bytes))
         return response
 

@@ -1,7 +1,9 @@
 import copy
 import logging
 
-from allauth.account.forms import LoginForm, SignupForm
+from allauth.account.adapter import get_adapter
+from allauth.account.fields import PasswordField
+from allauth.account.forms import LoginForm, PasswordVerificationMixin, SignupForm
 from dal import autocomplete
 from django import forms
 from django.conf import settings
@@ -15,26 +17,35 @@ from django.db.models import Q
 from django.db.models.functions.text import Substr
 from django.http import QueryDict
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation.trans_real import get_languages
 from django_recaptcha.fields import ReCaptchaField
 from django_recaptcha.widgets import ReCaptchaV2Invisible
 from languages_plus.models import Language
 
+from peachjam.analysis.judges import judge_identity_service
+from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.models import (
     Annotation,
     AttachedFiles,
     CoreDocument,
     Folder,
+    JudgeAlias,
+    JudgePerson,
+    OnboardingIntent,
+    PracticeType,
     PublicationFile,
     Ratification,
     SavedDocument,
     SourceFile,
     UnconstitutionalProvision,
+    UserProfile,
     pj_settings,
 )
 from peachjam.plugins import plugins
 from peachjam.storage import clean_filename
+from peachjam_subs.forms import OffboardingFeedbackForm
 
 log = logging.getLogger(__name__)
 
@@ -64,6 +75,203 @@ def adapter_choices():
     return [(key, p.name) for key, p in plugins.registry["ingestor-adapter"].items()]
 
 
+class JudgeIdentityWorkflowForm(forms.Form):
+    APPLY_IDENTITY_CHANGES = "apply_identity_changes"
+    MERGE_JUDGE_PEOPLE = "merge_judge_people"
+    DELETE_RECORDS = "delete_records"
+
+    action = forms.ChoiceField(
+        choices=(
+            (APPLY_IDENTITY_CHANGES, APPLY_IDENTITY_CHANGES),
+            (MERGE_JUDGE_PEOPLE, MERGE_JUDGE_PEOPLE),
+            (DELETE_RECORDS, DELETE_RECORDS),
+        ),
+        widget=forms.HiddenInput(),
+    )
+    selected_aliases = forms.ModelMultipleChoiceField(
+        queryset=JudgeAlias.objects.select_related("judge_person", "title").all(),
+        required=False,
+    )
+    selected_judge_people = forms.ModelMultipleChoiceField(
+        queryset=JudgePerson.objects.all(),
+        required=False,
+    )
+    target_judge_person = forms.ModelChoiceField(
+        queryset=JudgePerson.objects.all(),
+        required=False,
+        label=_("target judge person"),
+        help_text=_(
+            "Choose the judge person that should receive the selected aliases, or the judge person you want to rename."
+        ),
+        widget=autocomplete.ModelSelect2(url="autocomplete-judge-people"),
+    )
+    target_first_name = forms.CharField(
+        required=False,
+        label=_("first name"),
+        help_text=_("Optional. Enter the judge person's given names."),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mogoeng Mogoeng",
+            }
+        ),
+    )
+    target_last_name = forms.CharField(
+        required=False,
+        label=_("last name"),
+        help_text=_(
+            "Use these name fields to create a new judge person or rename the selected judge person."
+        ),
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Mogoeng",
+            }
+        ),
+    )
+    merge_target_judge_person = forms.ModelChoiceField(
+        queryset=JudgePerson.objects.all(),
+        required=False,
+        label=_("merge into"),
+        help_text=_(
+            "Choose the judge person that should remain after merging the selected duplicates."
+        ),
+        widget=autocomplete.ModelSelect2(url="autocomplete-judge-people"),
+    )
+    delete_mode = forms.ChoiceField(
+        required=False,
+        label=_("delete what"),
+        choices=(
+            ("aliases", _("Delete selected aliases only")),
+            ("judge_people", _("Delete selected judge people only")),
+            (
+                "both",
+                _("Delete both selected aliases and selected judge people"),
+            ),
+        ),
+        initial="aliases",
+        widget=forms.RadioSelect(),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        action = cleaned_data.get("action")
+        validators = {
+            self.APPLY_IDENTITY_CHANGES: self.clean_apply_identity_changes,
+            self.MERGE_JUDGE_PEOPLE: self.clean_merge_judge_people,
+            self.DELETE_RECORDS: self.clean_delete_records,
+        }
+        validator = validators.get(action)
+        if validator is None:
+            raise ValidationError(_("Choose a workflow action."))
+        validator(cleaned_data)
+        return cleaned_data
+
+    def clean_apply_identity_changes(self, cleaned_data):
+        selected_aliases = list(cleaned_data.get("selected_aliases") or [])
+        judge_person = cleaned_data.get("target_judge_person")
+        first_name = (cleaned_data.get("target_first_name") or "").strip()
+        last_name = (cleaned_data.get("target_last_name") or "").strip()
+        cleaned_data["target_first_name"] = first_name
+        cleaned_data["target_last_name"] = last_name
+
+        if selected_aliases:
+            if not judge_person and not last_name:
+                canonical_name = judge_identity_service.canonical_name_from_aliases(
+                    [alias.name for alias in selected_aliases],
+                )
+                first_name, last_name = judge_identity_service.split_person_name(
+                    canonical_name
+                )
+                cleaned_data["target_first_name"] = first_name
+                cleaned_data["target_last_name"] = last_name
+        else:
+            if judge_person is None:
+                self.add_error(
+                    "target_judge_person",
+                    _("Choose the judge person you want to rename."),
+                )
+            if not last_name:
+                self.add_error(
+                    "target_last_name",
+                    _("Enter the new last name when no aliases are selected."),
+                )
+            if judge_person is not None and (
+                first_name,
+                last_name,
+            ) == (judge_person.first_name, judge_person.last_name):
+                self.add_error(
+                    "target_last_name",
+                    _("Enter a different name for the selected judge person."),
+                )
+
+        if judge_person is None or not last_name:
+            return
+
+        existing = (
+            JudgePerson.objects.filter(
+                first_name__iexact=first_name,
+                last_name__iexact=last_name,
+            )
+            .exclude(pk=judge_person.pk)
+            .first()
+        )
+        if existing:
+            self.add_error(
+                "target_last_name",
+                _(
+                    "A judge person with this name already exists. "
+                    "Move aliases to it or merge into it instead of "
+                    "renaming."
+                ),
+            )
+
+    def clean_merge_judge_people(self, cleaned_data):
+        selected_judge_people = list(cleaned_data.get("selected_judge_people") or [])
+        merge_target = cleaned_data.get("merge_target_judge_person")
+
+        if not selected_judge_people:
+            self.add_error(
+                "selected_judge_people",
+                _("Select at least one judge person to merge."),
+            )
+        if merge_target is None:
+            self.add_error(
+                "merge_target_judge_person",
+                _("Choose the judge person that should remain."),
+            )
+            return
+
+        duplicates = [
+            judge_person
+            for judge_person in selected_judge_people
+            if judge_person.pk != merge_target.pk
+        ]
+        if not duplicates:
+            self.add_error(
+                "selected_judge_people",
+                _(
+                    "Select at least one duplicate judge person besides the merge target."
+                ),
+            )
+
+    def clean_delete_records(self, cleaned_data):
+        delete_mode = cleaned_data.get("delete_mode") or "aliases"
+        selected_aliases = list(cleaned_data.get("selected_aliases") or [])
+        selected_judge_people = list(cleaned_data.get("selected_judge_people") or [])
+
+        if delete_mode in {"aliases", "both"} and not selected_aliases:
+            self.add_error(
+                "selected_aliases",
+                _("Select at least one alias to delete."),
+            )
+        if delete_mode in {"judge_people", "both"} and not selected_judge_people:
+            self.add_error(
+                "selected_judge_people",
+                _("Select at least one judge person to delete."),
+            )
+
+
 class NewDocumentFormMixin:
     """Mixin for the admin view when creating a new document that adds a new field to allow the user to upload a
     file from which key data can be extracted.
@@ -84,26 +292,18 @@ class NewDocumentFormMixin:
         super()._save_m2m()
         if self.cleaned_data.get("upload_file"):
             self.process_upload_file(self.cleaned_data["upload_file"])
-            self.run_analysis()
 
     def process_upload_file(self, upload_file):
         # store the uploaded file
         upload_file.seek(0)
-        SourceFile(
+        source_file = SourceFile(
             document=self.instance,
-            file=File(upload_file, name=upload_file.name),
             filename=upload_file.name,
             mimetype=upload_file.content_type,
-        ).save()
-
-        # extract content, if we can
-        if self.instance.extract_content_from_source_file():
-            self.instance.save()
-
-    def run_analysis(self):
-        """Apply analysis pipelines for this newly created document."""
-        if self.instance.extract_citations():
-            self.instance.save()
+        )
+        source_file.track_changes()
+        source_file.file = File(upload_file, name=upload_file.name)
+        source_file.save()
 
     @classmethod
     def adjust_fieldsets(cls, fieldsets):
@@ -150,8 +350,10 @@ class BaseDocumentFilterForm(forms.Form):
     years = PermissiveTypedListField(coerce=int, required=False)
     alphabet = forms.CharField(required=False)
     authors = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    courts = PermissiveTypedListField(coerce=remove_nulls, required=False)
     doc_type = PermissiveTypedListField(coerce=remove_nulls, required=False)
     judges = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    judge_people = PermissiveTypedListField(coerce=int, required=False)
     natures = PermissiveTypedListField(coerce=remove_nulls, required=False)
     localities = PermissiveTypedListField(coerce=remove_nulls, required=False)
     registries = PermissiveTypedListField(coerce=remove_nulls, required=False)
@@ -161,6 +363,7 @@ class BaseDocumentFilterForm(forms.Form):
     case_actions = PermissiveTypedListField(coerce=remove_nulls, required=False)
     taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
     labels = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    languages = PermissiveTypedListField(coerce=remove_nulls, required=False)
     q = forms.CharField(required=False)
 
     sort = forms.ChoiceField(
@@ -181,6 +384,7 @@ class BaseDocumentFilterForm(forms.Form):
         "courts",
         "doc_type",
         "judges",
+        "judge_people",
         "natures",
         "localities",
         "registries",
@@ -189,6 +393,7 @@ class BaseDocumentFilterForm(forms.Form):
         "outcomes",
         "case_actions",
         "labels",
+        "languages",
         "taxonomies",
     ]
 
@@ -213,7 +418,8 @@ class BaseDocumentFilterForm(forms.Form):
         if filter_q and exclude != "q":
             queryset = self.apply_filter_q(queryset)
 
-        return queryset
+        # filters may join against tables that produce duplicate rows, so ensure distinct documents
+        return queryset.distinct()
 
     def order_queryset(self, queryset, exclude=None):
         sort = self.cleaned_data.get("sort") or "-date"
@@ -234,11 +440,11 @@ class BaseDocumentFilterForm(forms.Form):
 
     def apply_filter_authors(self, queryset):
         authors = self.cleaned_data.get("authors")
-        return (
-            queryset.filter(author__name__in=authors)
-            if authors and hasattr(queryset.model, "author")
-            else queryset
-        )
+        if authors and hasattr(queryset.model, "author"):
+            return queryset.filter(author__name__in=authors)
+        if authors and hasattr(queryset.model, "authors"):
+            return queryset.filter(authors__name__in=authors).distinct()
+        return queryset
 
     def apply_filter_courts(self, queryset):
         courts = self.cleaned_data.get("courts", [])
@@ -257,6 +463,14 @@ class BaseDocumentFilterForm(forms.Form):
         return (
             queryset.filter(judges__name__in=judges).distinct()
             if judges and hasattr(queryset.model, "judges")
+            else queryset
+        )
+
+    def apply_filter_judge_people(self, queryset):
+        judge_people = self.cleaned_data.get("judge_people", [])
+        return (
+            queryset.filter(bench__judge_person_id__in=judge_people).distinct()
+            if judge_people and hasattr(queryset.model, "bench")
             else queryset
         )
 
@@ -316,6 +530,10 @@ class BaseDocumentFilterForm(forms.Form):
             queryset.filter(labels__name__in=labels).distinct() if labels else queryset
         )
 
+    def apply_filter_languages(self, queryset):
+        languages = self.cleaned_data.get("languages", [])
+        return queryset.filter(language_id__in=languages) if languages else queryset
+
     def apply_filter_taxonomies(self, queryset):
         taxonomies = self.cleaned_data.get("taxonomies", [])
         return (
@@ -330,9 +548,39 @@ class BaseDocumentFilterForm(forms.Form):
             terms = q.split()
             queries = Q()
             for term in terms:
-                queries &= Q(Q(title__icontains=term) | Q(citation__icontains=term))
+                queries &= Q(
+                    Q(title__icontains=term)
+                    | Q(citation__icontains=term)
+                    | Q(alternative_names__title__icontains=term)
+                )
             queryset = queryset.filter(queries)
         return queryset
+
+
+class JudgmentDocumentFilterForm(BaseDocumentFilterForm):
+    most_cited_sort = "most_cited"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["sort"].choices = [
+            *self.fields["sort"].choices,
+            (self.most_cited_sort, _("Most cited")),
+        ]
+
+    def order_queryset(self, queryset, exclude=None):
+        if self.cleaned_data.get("sort") == self.most_cited_sort:
+            return queryset.order_by("-work__n_citing_works", self.secondary_sort)
+        return super().order_queryset(queryset, exclude)
+
+
+class JournalArticleFilterForm(BaseDocumentFilterForm):
+    journals = PermissiveTypedListField(coerce=int, required=False)
+
+    filter_fields = BaseDocumentFilterForm.filter_fields + ["journals"]
+
+    def apply_filter_journals(self, queryset):
+        journals = self.cleaned_data.get("journals")
+        return queryset.filter(journal_id__in=journals) if journals else queryset
 
 
 class LegislationFilterForm(BaseDocumentFilterForm):
@@ -360,6 +608,15 @@ class LegislationFilterForm(BaseDocumentFilterForm):
                 ordering[i] = "-frbr_uri_date"
 
         return queryset.order_by(*ordering)
+
+
+class ProvisionTopicEnrichmentFilterForm(LegislationFilterForm):
+    countries = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    filter_fields = LegislationFilterForm.filter_fields + ["countries"]
+
+    def apply_filter_countries(self, queryset):
+        countries = self.cleaned_data.get("countries", [])
+        return queryset.filter(jurisdiction_id__in=countries) if countries else queryset
 
 
 class GazetteFilterForm(BaseDocumentFilterForm):
@@ -446,15 +703,9 @@ class SourceFileForm(AttachmentFormMixin, forms.ModelForm):
         fields = "__all__"
         exclude = ("file_as_pdf",)
 
-    def _save_m2m(self):
-        super()._save_m2m()
-        if "file" in self.changed_data:
-            if self.instance.document.extract_content_from_source_file():
-                self.instance.document.save()
-
-                # if the file is changed, we need delete the existing pdf and re-generate
-                self.instance.file_as_pdf.delete()
-                self.instance.ensure_file_as_pdf()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.instance.track_changes()
 
 
 class PublicationFileForm(AttachmentFormMixin, forms.ModelForm):
@@ -467,6 +718,57 @@ class AttachedFilesForm(AttachmentFormMixin, forms.ModelForm):
     class Meta:
         model = AttachedFiles
         fields = "__all__"
+
+
+class DocumentSummaryForm(forms.Form):
+    summary_prompt_str = forms.CharField(
+        label=_("Summary prompt"),
+        required=False,
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": 12,
+            }
+        ),
+        help_text=_("Optional. Overrides the default summary prompt."),
+    )
+    llm_model = forms.CharField(
+        label=_("Model"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+        help_text=_("Optional. Overrides the configured model."),
+    )
+    language = forms.CharField(
+        label=_("Translation language"),
+        required=False,
+        widget=forms.TextInput(
+            attrs={
+                "class": "form-control",
+            }
+        ),
+        help_text=_(
+            "Optional. Translates the summary when set to a non-English language."
+        ),
+    )
+
+    @classmethod
+    def build(cls, data=None):
+        summariser = JudgmentSummariser()
+        try:
+            summary_prompt_str = summariser.get_summary_prompt_str()
+        except Exception:
+            summary_prompt_str = ""
+
+        initial = {
+            "summary_prompt_str": summary_prompt_str,
+            "llm_model": summariser.llm_model or summariser.default_llm_model,
+            "language": summariser.summary_language,
+        }
+        return cls(data=data, initial=initial)
 
 
 class DocumentProblemForm(forms.Form):
@@ -575,7 +877,9 @@ class SaveDocumentForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["folders"].queryset = self.instance.user.folders.all()
+        self.fields["folders"].queryset = self.instance.user.folders.filter(
+            subscription_locked_at__isnull=True
+        )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -590,14 +894,20 @@ class SaveDocumentForm(forms.ModelForm):
 
         if not folders:
             # default a folder
-            most_recent_saved = self.instance.user.saved_documents.order_by(
-                "-created_at"
-            ).first()
+            most_recent_saved = (
+                self.instance.user.saved_documents.filter(
+                    subscription_locked_at__isnull=True
+                )
+                .order_by("-created_at")
+                .first()
+            )
             if most_recent_saved and most_recent_saved.folders.all().last():
                 folders = [most_recent_saved.folders.all().last()]
 
             if not folders:
-                folders = self.instance.user.folders.all()[:1]
+                folders = self.instance.user.folders.filter(
+                    subscription_locked_at__isnull=True
+                )[:1]
 
             if not folders:
                 folders = [
@@ -629,6 +939,114 @@ class PeachjamLoginForm(LoginForm):
     captcha = get_recaptcha_field()
 
 
+class PasswordSignupForm(PasswordVerificationMixin, PeachjamSignupForm):
+    password1 = PasswordField(label=_("Password"), autocomplete="new-password")
+    password2 = PasswordField(label=_("Password (again)"), autocomplete="new-password")
+
+    def clean(self):
+        # PasswordVerificationMixin.clean() checks password1 == password2
+        cleaned = super().clean()
+        password = cleaned.get("password1")
+        if password:
+            try:
+                get_adapter().clean_password(password)
+            except forms.ValidationError as e:
+                self.add_error("password1", e)
+        return cleaned
+
+
+class OnboardingProfileForm(forms.Form):
+    first_name = forms.CharField(
+        label=_("First name"),
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control", "autofocus": True}),
+    )
+    last_name = forms.CharField(
+        label=_("Last name"),
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    onboarding_intents = forms.ModelMultipleChoiceField(
+        label=_("What are you hoping to do today?"),
+        queryset=OnboardingIntent.objects.none(),
+        required=False,
+        widget=forms.CheckboxSelectMultiple(attrs={"class": "form-check-input"}),
+    )
+    practice_type = forms.ModelChoiceField(
+        label=_("What best describes your role or organisation?"),
+        queryset=PracticeType.objects.none(),
+        required=False,
+        empty_label=None,
+        widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        self.skipped = kwargs.pop("skipped", False)
+        super().__init__(*args, **kwargs)
+        profile = self.user.userprofile
+        if not profile.requires_name_onboarding():
+            self.hide_name_fields()
+
+        selected_intents = profile.onboarding_intents.all()
+        self.fields["onboarding_intents"].queryset = OnboardingIntent.objects.filter(
+            Q(active=True) | Q(pk__in=selected_intents)
+        ).distinct()
+        self.fields["practice_type"].queryset = PracticeType.objects.filter(
+            Q(active=True) | Q(pk=profile.practice_type_id)
+        )
+        self.initial.update(
+            {
+                "first_name": self.user.first_name,
+                "last_name": self.user.last_name,
+                "onboarding_intents": selected_intents,
+                "practice_type": profile.practice_type,
+            }
+        )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        if (
+            not self.skipped
+            and not cleaned_data.get("onboarding_intents")
+            and not cleaned_data.get("practice_type")
+        ):
+            raise forms.ValidationError(
+                _("Choose at least one option or select Not now.")
+            )
+        return cleaned_data
+
+    def hide_name_fields(self):
+        self.fields["first_name"].widget = forms.HiddenInput()
+        self.fields["last_name"].widget = forms.HiddenInput()
+
+    def save_names(self):
+        updated_fields = []
+        for field_name in ("first_name", "last_name"):
+            value = self.cleaned_data.get(field_name)
+            if value and value != getattr(self.user, field_name):
+                setattr(self.user, field_name, value)
+                updated_fields.append(field_name)
+        if updated_fields:
+            self.user.save(update_fields=updated_fields)
+
+    def save(self):
+        profile = self.user.userprofile
+        self.save_names()
+        profile.practice_type = self.cleaned_data["practice_type"]
+        if self.skipped:
+            profile.onboarding_completed_at = None
+            profile.onboarding_skipped_at = timezone.now()
+        else:
+            profile.onboarding_completed_at = timezone.now()
+            profile.onboarding_skipped_at = None
+        profile.save()
+        profile.onboarding_intents.set(self.cleaned_data["onboarding_intents"])
+        return profile
+
+
 class UserProfileForm(forms.Form):
     first_name = forms.CharField(max_length=255, required=False)
     last_name = forms.CharField(max_length=255, required=False)
@@ -655,6 +1073,42 @@ class UserProfileForm(forms.Form):
         self.user.save()
         self.user.refresh_from_db()
         return self.user
+
+
+class EmailAlertFrequencyForm(forms.Form):
+    email_alert_frequency = forms.ChoiceField(
+        label=_("Email alert frequency"),
+        choices=UserProfile.EmailAlertFrequency.choices,
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop("user")
+        kwargs.setdefault(
+            "initial",
+            {"email_alert_frequency": self.user.userprofile.email_alert_frequency},
+        )
+        super().__init__(*args, **kwargs)
+
+    def save(self):
+        self.user.userprofile.email_alert_frequency = self.cleaned_data[
+            "email_alert_frequency"
+        ]
+        self.user.userprofile.save(update_fields=["email_alert_frequency"])
+
+
+class DeleteAccountForm(OffboardingFeedbackForm):
+    confirm_delete = forms.BooleanField(
+        label=_("I understand this action cannot be undone"),
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        error_messages={"required": _("Please confirm account deletion.")},
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["reason"].label = _(
+            "What is the main reason you are deleting your account?"
+        )
 
 
 class TermsAcceptanceForm(forms.Form):

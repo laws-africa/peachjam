@@ -1,15 +1,40 @@
+import operator
+from collections import defaultdict
+from functools import reduce
+
 from django.contrib import messages
+from django.core.cache import cache
+from django.db.models import F, IntegerField, Q, Value, Window
+from django.db.models.functions import Coalesce, Length, RowNumber, Substr
+from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse
+from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
 from django.utils.safestring import mark_safe
 from django.utils.text import gettext_lazy as _
-from django.utils.timezone import now
-from django.views.decorators.cache import never_cache
-from django.views.generic import DetailView, TemplateView
+from django.utils.text import slugify
+from django.views.generic import DetailView, ListView, TemplateView
 
+from peachjam.forms import JudgmentDocumentFilterForm
 from peachjam.helpers import add_slash_to_frbr_uri
-from peachjam.models import CourtClass, Judgment
+from peachjam.models import (
+    CaseAction,
+    CaseHistory,
+    Court,
+    CourtClass,
+    CourtDivision,
+    Judge,
+    JudgePerson,
+    Judgment,
+    LawReport,
+    Outcome,
+)
+from peachjam.models.flynote import Flynote
 from peachjam.registry import registry
-from peachjam.views.generic_views import BaseDocumentDetailView
+from peachjam.views.generic_views import (
+    BaseDocumentDetailView,
+    FilteredDocumentListView,
+)
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -20,25 +45,639 @@ class JudgmentListView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        context["recent_judgments"] = (
+        context["KEY_LINK_PAGE"] = "judgment_list"
+        context["recent_judgments"] = list(
             Judgment.objects.for_document_table()
-            .exclude(published=False)
-            .order_by("-date")[:30]
+            .filter(published=True)
+            .order_by("-date")[:10]
+        )
+        context["latest_judgment_date"] = (
+            context["recent_judgments"][0].date if context["recent_judgments"] else None
         )
         context["nature"] = "Judgment"
         context["doc_count"] = Judgment.objects.filter(published=True).count()
-        context["doc_count_noun"] = _("judgment")
-        context["doc_count_noun_plural"] = _("judgments")
         context["help_link"] = "judgments/courts"
-        self.add_entity_profile(context)
+        context["show_canonical_judges"] = JudgePerson.canonical_identity_enabled()
+        context["law_report_count"] = LawReport.objects.count()
+        context["show_law_reports"] = context["law_report_count"] > 0
+        context["show_flynote_topics"] = (
+            Judgment.flynote_topics_enabled()
+            and Flynote.objects.undeprecated().filter(depth=1).exists()
+        )
         self.get_court_classes(context)
+        self.get_other_courts(context)
+        if context["show_flynote_topics"]:
+            flynote_topics = list(self.get_flynote_topics_queryset()[:10])
+            context["top_flynote_topics"] = FlynoteViewMixin().make_flynote_list(
+                flynote_topics
+            )
         return context
 
     def get_court_classes(self, context):
-        context["court_classes"] = CourtClass.objects.prefetch_related("courts")
+        context["court_classes"] = list(CourtClass.get_court_classes_with_judgments())
 
-    def add_entity_profile(self, context):
-        pass
+    def get_other_courts(self, context):
+        context["other_courts"] = list(Court.get_unclassified_with_judgments())
+
+    def get_flynote_topics_queryset(self):
+        return (
+            FlynoteViewMixin.annotate_with_counts(
+                Flynote.objects.undeprecated().filter(depth=1)
+            )
+            .filter(doc_count__gt=0)
+            .order_by("-doc_count", "name")
+        )
+
+
+class FilteredJudgmentView(FilteredDocumentListView):
+    """Base list view for filtering judgments."""
+
+    model = Judgment
+    form_class = JudgmentDocumentFilterForm
+    navbar_link = "judgments"
+    queryset = Judgment.objects.prefetch_related(
+        "judges", "labels", "attorneys", "outcomes"
+    ).select_related("work")
+    exclude_facets = ["years"]
+    form_defaults = {"sort": "-date"}
+    group_by_date = "month-year"
+    show_year_navigation = True
+
+    def base_view_name(self):
+        return _("Judgments")
+
+    def page_title(self):
+        return self.base_view_name()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context["nature"] = "Judgment"
+        context["page_title"] = self.page_title()
+        context["doc_table_show_jurisdiction"] = False
+        context["doc_table_title_label"] = _("Citation")
+        context["doc_table_date_label"] = _("Judgment date")
+        context["doc_count_noun"] = _("judgment")
+        context["doc_count_noun_plural"] = _("judgments")
+
+        if self.show_year_navigation:
+            self.populate_years(context)
+        context["documents"] = self.group_documents(context["documents"])
+
+        return context
+
+    def add_judges_facet(self, context):
+        if "judges" not in self.exclude_facets:
+            if JudgePerson.canonical_identity_enabled():
+                judges = sorted(
+                    self.form.filter_queryset(
+                        self.get_base_queryset(), exclude="judge_people"
+                    )
+                    .filter(bench__judge_person__isnull=False)
+                    .order_by()
+                    .values_list(
+                        "bench__judge_person_id",
+                        "bench__judge_person__first_name",
+                        "bench__judge_person__last_name",
+                    )
+                    .distinct(),
+                    key=lambda judge: (judge[2], judge[1]),
+                )
+                if judges:
+                    context["facet_data"]["judge_people"] = {
+                        "label": JudgePerson.model_label_plural,
+                        "type": "checkbox",
+                        "options": [
+                            (
+                                str(judge_id),
+                                " ".join(
+                                    part for part in (first_name, last_name) if part
+                                ),
+                            )
+                            for judge_id, first_name, last_name in judges
+                        ],
+                        "values": self.request.GET.getlist("judge_people"),
+                    }
+                return
+
+            judges = list(
+                judge
+                for judge in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="judges"
+                )
+                .order_by()
+                .values_list("judges__name", flat=True)
+                .distinct()
+                if judge
+            )
+            if judges:
+                context["facet_data"]["judges"] = {
+                    "label": Judge.model_label_plural,
+                    "type": "checkbox",
+                    "options": sorted([(j, j) for j in judges]),
+                    "values": self.request.GET.getlist("judges"),
+                }
+
+    def add_courts_facet(self, context):
+        if "courts" not in self.exclude_facets:
+            courts = Court.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="courts"
+                )
+                .order_by()
+                .values_list("court_id", flat=True)
+                .distinct()
+            )
+            if courts:
+                context["facet_data"]["courts"] = {
+                    "label": _("Courts"),
+                    "type": "checkbox",
+                    "options": sorted([(court.name, court.name) for court in courts]),
+                    "values": self.request.GET.getlist("courts"),
+                }
+
+    def add_labels_facet(self, context):
+        if "labels" not in self.exclude_facets:
+            labels = list(
+                label
+                for label in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="labels"
+                )
+                .order_by()
+                .values_list("labels__name", flat=True)
+                .distinct()
+                if label
+            )
+            if labels:
+                context["facet_data"]["labels"] = {
+                    "label": _("Labels"),
+                    "type": "checkbox",
+                    "options": sorted([(x, x) for x in labels]),
+                    "values": self.request.GET.getlist("labels"),
+                }
+
+    def add_outcomes_facet(self, context):
+        if "outcomes" not in self.exclude_facets:
+            outcomes = Outcome.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="outcomes"
+                )
+                .order_by()
+                .values_list("outcomes__id", flat=True)
+                .distinct()
+            )
+            if outcomes:
+                context["facet_data"]["outcomes"] = {
+                    "label": _("Outcomes"),
+                    "type": "checkbox",
+                    "options": sorted(
+                        [(outcome.name, outcome.name) for outcome in outcomes]
+                    ),
+                    "values": self.request.GET.getlist("outcomes"),
+                }
+
+    def add_case_action_facet(self, context):
+        if "case_actions" not in self.exclude_facets:
+            case_actions = CaseAction.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="case_actions"
+                )
+                .order_by()
+                .values_list("case_action_id", flat=True)
+                .distinct()
+            )
+
+            context["facet_data"]["case_actions"] = {
+                "label": _("Case actions"),
+                "type": "checkbox",
+                "options": sorted([(v.name, v.name) for v in case_actions]),
+                "values": self.request.GET.getlist("case_actions"),
+            }
+
+    def add_attorneys_facet(self, context):
+        if "attorneys" not in self.exclude_facets:
+            attorneys = list(
+                attorney
+                for attorney in self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="attorneys"
+                )
+                .order_by()
+                .values_list("attorneys__name", flat=True)
+                .distinct()
+                if attorney
+            )
+            if attorneys:
+                context["facet_data"]["attorneys"] = {
+                    "label": _("Attorneys"),
+                    "type": "checkbox",
+                    "options": sorted([(a, a) for a in attorneys]),
+                    "values": self.request.GET.getlist("attorneys"),
+                }
+
+    def add_divisions_facet(self, context):
+        if "divisions" not in self.exclude_facets:
+            divisions = CourtDivision.objects.filter(
+                pk__in=self.form.filter_queryset(
+                    self.get_base_queryset(), exclude="divisions"
+                )
+                .order_by()
+                .values_list("division_id", flat=True)
+                .distinct()
+            )
+
+            context["facet_data"]["divisions"] = {
+                "label": _("Court divisions"),
+                "type": "checkbox",
+                "options": sorted([(d.code, d.name) for d in divisions]),
+                "values": self.request.GET.getlist("divisions"),
+            }
+
+    def add_facets(self, context):
+        context["facet_data"] = {}
+        self.add_judges_facet(context)
+        self.add_courts_facet(context)
+        self.add_years_facet(context)
+        self.add_languages_facet(context)
+        self.add_labels_facet(context)
+        self.add_divisions_facet(context)
+        self.add_outcomes_facet(context)
+        self.add_case_action_facet(context)
+        self.add_attorneys_facet(context)
+        self.add_taxonomies_facet(context)
+        self.add_alphabet_facet(context)
+
+    def group_documents(self, documents, group_by=None):
+        if (
+            group_by is None
+            and self.form.cleaned_data.get("sort")
+            == JudgmentDocumentFilterForm.most_cited_sort
+        ):
+            return documents
+        return super().group_documents(documents, group_by)
+
+    def populate_years(self, context):
+        cache_key = f"judgment_years_{slugify(self.base_view_name())}"
+        years = cache.get(cache_key)
+        if years is None:
+            years = self.get_base_queryset(exclude=["year", "month"]).dates(
+                "date", "year", order="DESC"
+            )
+            cache.set(cache_key, years)
+        context["years"] = years
+
+
+class FlynoteViewMixin:
+    matching_subtopics_per_card = 3
+
+    @staticmethod
+    def flynote_tree_enabled():
+        return Judgment.flynote_tree_enabled()
+
+    @staticmethod
+    def flynote_topics_enabled():
+        return Judgment.flynote_topics_enabled()
+
+    @staticmethod
+    def annotate_with_counts(qs):
+        return qs.annotate(
+            doc_count=Coalesce(
+                F("document_count_cache__count"),
+                Value(0),
+                output_field=IntegerField(),
+            )
+        )
+
+    @staticmethod
+    def get_top_children_by_count(parent_flynotes):
+        if not parent_flynotes:
+            return {}
+
+        depth = parent_flynotes[0].depth
+        direct_child_filter = reduce(
+            operator.or_,
+            (Q(path__startswith=flynote.path) for flynote in parent_flynotes),
+        )
+
+        children_qs = (
+            Flynote.objects.undeprecated()
+            .filter(depth=depth + 1)
+            .filter(direct_child_filter)
+            .annotate(
+                parent_path=Substr("path", 1, Length("path") - Flynote.steplen),
+                doc_count=Coalesce(
+                    F("document_count_cache__count"),
+                    Value(0),
+                    output_field=IntegerField(),
+                ),
+            )
+            .annotate(
+                rank=Window(
+                    expression=RowNumber(),
+                    partition_by=[F("parent_path")],
+                    order_by=[F("doc_count").desc(), F("name").asc()],
+                ),
+            )
+            .filter(rank__lte=3)
+            .order_by("parent_path", "rank")
+        )
+
+        children_by_parent = defaultdict(list)
+        for child in children_qs:
+            children_by_parent[child.parent_path].append(child.name)
+
+        path_to_pk = {f.path: f.pk for f in parent_flynotes}
+        return {path_to_pk[path]: names for path, names in children_by_parent.items()}
+
+    def make_flynote_list(self, flynotes):
+        child_names = self.get_top_children_by_count(flynotes)
+        return [
+            {
+                "flynote": f,
+                "count": f.doc_count,
+                "child_names": child_names.get(f.pk, []),
+                "more_child_count": max(0, f.numchild - len(child_names.get(f.pk, []))),
+            }
+            for f in flynotes
+        ]
+
+    def filter_flynote_descendants_by_query(self, children_qs, query, parent_path):
+        """Filter direct children by matching descendants and collect the matching paths."""
+        matching_flynotes = list(
+            self.annotate_with_counts(
+                Flynote.objects.matching_names(query).filter(
+                    path__startswith=parent_path,
+                )
+            )
+            .exclude(path=parent_path)
+            .only("pk", "path", "name", "depth")
+        )
+        child_path_length = len(parent_path) + Flynote.steplen
+        matching_child_paths = {
+            flynote.path[:child_path_length] for flynote in matching_flynotes
+        }
+        children_qs = children_qs.filter(path__in=matching_child_paths)
+        visible_child_paths = set(children_qs.values_list("path", flat=True))
+
+        matching_flynotes_by_child = defaultdict(list)
+        for flynote in matching_flynotes:
+            child_path = flynote.path[:child_path_length]
+            if child_path not in visible_child_paths or flynote.path == child_path:
+                continue
+            matching_flynotes_by_child[child_path].append(flynote)
+
+        requested_paths = set()
+        matching_paths = defaultdict(list)
+        matching_more_counts = {}
+        for child_path, child_matches in matching_flynotes_by_child.items():
+            child_matches.sort(
+                key=lambda flynote: (
+                    flynote.depth,
+                    -flynote.doc_count,
+                    flynote.name.casefold(),
+                )
+            )
+            matching_more_counts[child_path] = max(
+                0, len(child_matches) - self.matching_subtopics_per_card
+            )
+            for flynote in child_matches[: self.matching_subtopics_per_card]:
+                path = [
+                    flynote.path[:end]
+                    for end in range(
+                        child_path_length + Flynote.steplen,
+                        len(flynote.path) + 1,
+                        Flynote.steplen,
+                    )
+                ]
+                requested_paths.update(path)
+                matching_paths[child_path].append(path)
+
+        flynotes_by_path = {
+            flynote.path: flynote
+            for flynote in Flynote.objects.undeprecated()
+            .filter(path__in=requested_paths)
+            .order_by("path")
+        }
+        return (
+            children_qs,
+            {
+                child_path: [
+                    {"nodes": [flynotes_by_path[path] for path in path_group]}
+                    for path_group in path_groups
+                ]
+                for child_path, path_groups in matching_paths.items()
+            },
+            matching_more_counts,
+        )
+
+
+class FlynoteListView(FlynoteViewMixin, ListView):
+    """Lists top-level flynotes for exploration."""
+
+    model = Flynote
+    template_name = "peachjam/flynote/list.html"
+    context_object_name = "flynotes"
+    paginate_by = None
+
+    def get(self, request, *args, **kwargs):
+        if (
+            not self.flynote_tree_enabled()
+            or not Flynote.objects.undeprecated().filter(depth=1).exists()
+        ):
+            return redirect(reverse("judgment_list"))
+        return super().get(request, *args, **kwargs)
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["peachjam/flynote/_topic_results.html"]
+        return super().get_template_names()
+
+    def get_queryset(self):
+        return self.annotate_with_counts(
+            Flynote.objects.undeprecated().filter(depth=1)
+        ).filter(doc_count__gt=0)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        topics_qs = context["flynotes"]
+        query = self.request.GET.get("q", "").strip()
+        sort = self.request.GET.get("sort", "judgments")
+        if query:
+            (
+                topics_qs,
+                matching_paths,
+                matching_more_counts,
+            ) = self.filter_flynote_descendants_by_query(topics_qs, query, "")
+        else:
+            matching_paths = {}
+            matching_more_counts = {}
+
+        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
+        topic_items = self.make_flynote_list(list(topics_qs.order_by(*ordering)))
+        for item in topic_items:
+            item["matching_paths"] = matching_paths.get(item["flynote"].path, [])
+            item["matching_more_count"] = matching_more_counts.get(
+                item["flynote"].path, 0
+            )
+            item["inline_child_names"] = True
+        context["flynotes"] = topic_items
+        context["flynote_cards"] = topic_items
+        context["topic_count"] = len(topic_items)
+        context["topic_query"] = query
+        context["flynote_query"] = query
+        context["topic_sort"] = sort
+        return context
+
+
+class FlynoteDetailView(
+    SubscriptionRequiredMixin, FlynoteViewMixin, FilteredJudgmentView
+):
+    """List of documents and children under a flynote. In HTMX mode, updates the document list."""
+
+    form_defaults = {
+        "sort": JudgmentDocumentFilterForm.most_cited_sort,
+        "secondary_sort": "-date",
+    }
+    template_name = "peachjam/flynote/detail.html"
+    exclude_facets = []
+    show_year_navigation = False
+    permission_required = "peachjam.view_linked_judgments"
+    initial_subtopics_page_size = 9
+    more_subtopics_page_size = 15
+    search_subtopics_page_size = 12
+
+    def get_flynote_document_listing_id(self):
+        return f"flynote-document-listing-{self.flynote.pk}"
+
+    def is_linked_judgments_htmx_request(self):
+        return self.request.htmx and self.request.htmx.target in {
+            self.get_flynote_document_listing_id(),
+            self.get_document_table_form_id(),
+            self.get_document_table_id(),
+        }
+
+    def is_subtopics_htmx_request(self):
+        return (
+            self.request.htmx and self.request.htmx.target == "flynote-more-subtopics"
+        )
+
+    def is_subtopics_search_htmx_request(self):
+        return (
+            self.request.htmx and self.request.htmx.target == "flynote-subtopic-results"
+        )
+
+    def has_permission(self):
+        if not self.is_linked_judgments_htmx_request():
+            return True
+        return super().has_permission()
+
+    def get_template_names(self):
+        if self.is_subtopics_htmx_request():
+            return ["peachjam/flynote/_more_cards.html"]
+        if self.is_subtopics_search_htmx_request():
+            return ["peachjam/flynote/_cards_results.html"]
+        if (
+            self.request.htmx
+            and self.request.htmx.target == self.get_flynote_document_listing_id()
+        ):
+            return ["peachjam/_document_table_form.html"]
+        return super().get_template_names()
+
+    def dispatch(self, request, *args, **kwargs):
+        if not self.flynote_tree_enabled():
+            return redirect(reverse("judgment_list"))
+        self.flynote = get_object_or_404(
+            Flynote.objects.undeprecated(), pk=self.kwargs["pk"]
+        )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_base_queryset(self, exclude=None):
+        return (
+            super()
+            .get_base_queryset(exclude=exclude)
+            .filter(
+                flynotes__flynote__path__startswith=self.flynote.path,
+            )
+            .distinct()
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["flynote_document_listing_id"] = self.get_flynote_document_listing_id()
+
+        if (
+            not self.request.htmx
+            or self.is_subtopics_htmx_request()
+            or self.is_subtopics_search_htmx_request()
+        ):
+            self.subtopic_cards(context)
+            context["flynote"] = self.flynote
+            context["ancestors"] = self.flynote.get_ancestors()
+
+        return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        if self.request.htmx:
+            add_never_cache_headers(response)
+        return response
+
+    def subtopic_cards(self, context):
+        children_qs = self.annotate_with_counts(
+            self.flynote.get_children().filter(deprecated=False)
+        ).filter(doc_count__gt=0)
+        query = self.request.GET.get("subtopic_q", "").strip()
+        sort = self.request.GET.get("sort", "judgments")
+        subtopics_offset = 0
+        if self.is_subtopics_htmx_request():
+            try:
+                subtopics_offset = max(
+                    0, int(self.request.GET.get("subtopics_offset", 0))
+                )
+            except (TypeError, ValueError):
+                pass
+
+        if query:
+            (
+                children_qs,
+                matching_paths,
+                matching_more_counts,
+            ) = self.filter_flynote_descendants_by_query(
+                children_qs, query, self.flynote.path
+            )
+            page_size = self.search_subtopics_page_size
+        else:
+            matching_paths = {}
+            matching_more_counts = {}
+            page_size = (
+                self.more_subtopics_page_size
+                if self.is_subtopics_htmx_request()
+                else self.initial_subtopics_page_size
+            )
+
+        ordering = ("name",) if sort == "name" else ("-doc_count", "name")
+        total_subtopic_count = children_qs.count()
+        flynote_cards = list(
+            children_qs.order_by(*ordering)[
+                subtopics_offset : subtopics_offset + page_size
+            ]
+        )
+        next_subtopics_offset = subtopics_offset + len(flynote_cards)
+
+        context["flynote_cards"] = self.make_flynote_list(flynote_cards)
+        for item in context["flynote_cards"]:
+            item["matching_paths"] = matching_paths.get(item["flynote"].path, [])
+            item["matching_more_count"] = matching_more_counts.get(
+                item["flynote"].path, 0
+            )
+        context["has_more_topics"] = next_subtopics_offset < total_subtopic_count
+        context["next_subtopics_offset"] = (
+            next_subtopics_offset if context["has_more_topics"] else None
+        )
+        context["total_subtopic_count"] = total_subtopic_count
+        context["subtopic_query"] = query
+        context["flynote_query"] = query
+        context["subtopic_sort"] = sort
 
 
 @registry.register_doc_type("judgment")
@@ -65,18 +704,26 @@ class JudgmentDetailView(BaseDocumentDetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["judges"] = (
-            self.get_object()
-            .bench.prefetch_related("judge")
-            .values_list("judge__name", flat=True)
-        )
+        bench_rows = self.object.bench.select_related("judge", "judge_person").all()
+        if JudgePerson.canonical_identity_enabled():
+            judges = []
+            seen = set()
+            for bench in bench_rows:
+                judge = bench.judge_person or bench.judge
+                key = (judge.__class__, judge.pk)
+                if key not in seen:
+                    judges.append(judge)
+                    seen.add(key)
+            context["judges"] = judges
+        else:
+            context["judges"] = [bench.judge for bench in bench_rows]
         return context
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_case_history"
+    private_cache = True
     model = Judgment
     slug_url_kwarg = "frbr_uri"
     slug_field = "expression_frbr_uri"
@@ -87,67 +734,70 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
 
     def add_case_histories(self, context):
         document = self.get_object()
+        case_histories = self.get_connected_case_histories(document.work_id)
+        histories = self.get_case_history_entries(document, case_histories)
 
-        # judgments that impact this one
-        histories = [
-            {
-                "document": ch.judgment_work.documents.first(),
-                "children": [
-                    {
-                        "case_history": ch,
-                        "document": document,
-                    }
-                ],
-            }
-            for ch in document.work.incoming_case_histories.select_related(
-                "court", "historical_judgment_work", "outcome"
-            )
-            # ignore incoming history entries for dangling works that don't have a document
-            if ch.judgment_work.documents.first()
-        ]
-
-        if histories:
-            context["show_review_notice"] = True
-
-        # judgments that this one impacts
-        outgoing_histories = [
-            {
-                "case_history": ch,
-                "document": ch.historical_judgment_work.documents.first()
-                if ch.historical_judgment_work
-                else None,
-            }
-            for ch in document.work.case_histories.select_related(
-                "historical_judgment_work", "outcome"
-            ).prefetch_related(
-                "historical_judgment_work__documents",
-                "historical_judgment_work__documents__outcomes",
-                "historical_judgment_work__documents__court",
-                "historical_judgment_work__documents__judges",
-            )
-        ]
-        if outgoing_histories:
-            histories.append(
-                {
-                    "document": document,
-                    "children": outgoing_histories,
-                }
-            )
-
-        today = now().date()
-        for history in histories:
-            for child in history["children"]:
-                child["info"] = child["document"] or child["case_history"]
-
-            # sort by date descending
-            history["children"].sort(
-                key=lambda x: x["info"].date or today, reverse=True
-            )
-
-        # sort by date descending
-        histories.sort(key=lambda x: x["document"].date, reverse=True)
+        context["show_review_notice"] = bool(case_histories)
 
         context["case_histories"] = histories
+        return histories
+
+    def get_connected_case_histories(self, root_work_id):
+        case_histories = {}
+        pending_work_ids = {root_work_id}
+        visited_work_ids = set()
+
+        while pending_work_ids:
+            work_ids_to_process = pending_work_ids
+            pending_work_ids = set()
+            visited_work_ids.update(work_ids_to_process)
+
+            histories = CaseHistory.objects.filter(
+                Q(judgment_work_id__in=work_ids_to_process)
+                | Q(historical_judgment_work_id__in=work_ids_to_process)
+            )
+
+            for case_history in histories:
+                if case_history.pk in case_histories:
+                    continue
+
+                case_histories[case_history.pk] = case_history
+                for work_id in (
+                    case_history.judgment_work_id,
+                    case_history.historical_judgment_work_id,
+                ):
+                    if work_id and work_id not in visited_work_ids:
+                        pending_work_ids.add(work_id)
+
+        return list(case_histories.values())
+
+    def get_case_history_entries(self, document, case_histories):
+        work_ids = {document.work_id}
+        for case_history in case_histories:
+            work_ids.add(case_history.judgment_work_id)
+            if case_history.historical_judgment_work_id:
+                work_ids.add(case_history.historical_judgment_work_id)
+
+        documents_by_work_id = {document.work_id: document}
+        related_documents = (
+            Judgment.objects.filter(work_id__in=work_ids - {document.work_id})
+            .latest_expression()
+            .select_related("court")
+            .prefetch_related("judges", "outcomes", "labels")
+        )
+        for related_document in related_documents:
+            documents_by_work_id[related_document.work_id] = related_document
+
+        histories = []
+        for case_document in documents_by_work_id.values():
+            history = {
+                "document": case_document,
+                "date": case_document.date,
+                "is_current": case_document.work_id == document.work_id,
+            }
+            histories.append(history)
+
+        histories.sort(key=lambda history: history["document"].date, reverse=True)
 
         return histories
 
@@ -163,9 +813,9 @@ class CaseHistoryView(SubscriptionRequiredMixin, DetailView):
 
 
 @method_decorator(add_slash_to_frbr_uri(), name="setup")
-@method_decorator(never_cache, name="dispatch")
 class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     permission_required = "peachjam.can_view_document_summary"
+    private_cache = True
     template_name = "peachjam/document/_judgment_summary.html"
     model = Judgment
     slug_url_kwarg = "frbr_uri"

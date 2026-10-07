@@ -7,7 +7,6 @@ import peachjam.models.attachments
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("peachjam", "0160_ingestor_repeat_ingestor_schedule"),
     ]

@@ -12,6 +12,7 @@ class ProvisionEnrichment(PolymorphicModel):
         ("unconstitutional_provision", _("Unconstitutional provision")),
         ("uncommenced_provision", _("Uncommenced provision")),
         ("provision_citation", _("Provision citation")),
+        ("provision_topic", _("Provision topic")),
     )
 
     work = models.ForeignKey(
@@ -119,6 +120,23 @@ class UncommencedProvision(ProvisionEnrichment):
 
     def save(self, *args, **kwargs):
         self.enrichment_type = "uncommenced_provision"
+        super().save(*args, **kwargs)
+
+
+class ProvisionTopicEnrichment(ProvisionEnrichment):
+    topic = models.ForeignKey(
+        "peachjam.Taxonomy",
+        on_delete=models.PROTECT,
+        related_name="provision_enrichments",
+        verbose_name=_("topic"),
+    )
+
+    class Meta:
+        verbose_name = _("provision topic enrichment")
+        verbose_name_plural = _("provision topic enrichments")
+
+    def save(self, *args, **kwargs):
+        self.enrichment_type = "provision_topic"
         super().save(*args, **kwargs)
 
 

@@ -1,21 +1,45 @@
+import hashlib
 import logging
+from urllib.parse import quote
 
 from countries_plus.models import Country
+from django.conf import settings
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ValidationError
 from django.core.files.base import File
-from django.db import models
-from django.db.models import Max, Prefetch
+from django.db import models, transaction
+from django.db.models import Exists, Max, OuterRef, Prefetch
 from django.template.defaultfilters import date as format_date
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.utils.translation import override as lang_override
+from django_lifecycle import AFTER_SAVE, BEFORE_SAVE
 
+from peachjam.analysis.judges import judge_identity_service
+from peachjam.analysis.summariser import JudgmentSummariser
 from peachjam.decorators import CauseListDecorator, JudgmentDecorator
-from peachjam.models import CoreDocument, Locality, SourceFile
-from peachjam.tasks import create_anonymised_source_file_pdf
+from peachjam.models import (
+    CoreDocument,
+    DocumentContent,
+    Locality,
+    SourceFile,
+    on_attribute_changed,
+)
+from peachjam.models.flynote import Flynote, JudgmentFlynote
+from peachjam.tasks import (
+    create_anonymised_source_file_pdf,
+    generate_judgment_summary,
+    update_flynote_taxonomy,
+)
 
 log = logging.getLogger(__name__)
+
+
+def default_summary_language():
+    return settings.PEACHJAM["SUMMARISER_LANGUAGE"]
 
 
 class Attorney(models.Model):
@@ -44,11 +68,165 @@ class Judge(models.Model):
 
     class Meta:
         ordering = ("name",)
+        verbose_name = _("legacy judge")
+        verbose_name_plural = _("legacy judges")
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        base_url = reverse("court", kwargs={"code": "all"})
+        return f"{base_url}?judges={quote(self.name)}"
+
+
+class JudgePerson(models.Model):
+    model_label = _("Judge")
+    model_label_plural = _("Judges")
+    first_name = models.CharField(_("first name"), max_length=1024, blank=True)
+    last_name = models.CharField(_("last name"), max_length=1024)
+    slug = models.SlugField(
+        _("slug"), max_length=255, null=False, blank=True, unique=True
+    )
+    description = models.TextField(_("description"), blank=True)
+
+    class Meta:
+        ordering = ("last_name", "first_name", "pk")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("first_name", "last_name"),
+                name="unique_judge_person_name",
+            )
+        ]
         verbose_name = _("judge")
         verbose_name_plural = _("judges")
 
     def __str__(self):
+        return self.full_name
+
+    @property
+    def full_name(self):
+        return " ".join(part for part in (self.first_name, self.last_name) if part)
+
+    @staticmethod
+    def canonical_identity_enabled():
+        return settings.PEACHJAM.get("CANONICAL_JUDGE_IDENTITY", False)
+
+    @staticmethod
+    def available_flynote_topics(judge_person=None):
+        """Return root flynote topics linked to canonical judges' judgments."""
+        if not Judgment.flynote_topics_enabled():
+            return Flynote.objects.none()
+
+        linked_judgments = JudgmentFlynote.objects.filter(
+            flynote__path__startswith=OuterRef("path"),
+            document__published=True,
+            document__bench__judge_person__isnull=False,
+        )
+        if judge_person is not None:
+            linked_judgments = linked_judgments.filter(
+                document__bench__judge_person=judge_person
+            )
+
+        return (
+            Flynote.get_root_nodes()
+            .filter(deprecated=False)
+            .annotate(has_judge_judgments=Exists(linked_judgments))
+            .filter(has_judge_judgments=True)
+            .order_by("name")
+        )
+
+    def get_absolute_url(self):
+        return reverse("judge", kwargs={"slug": self.slug})
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = judge_identity_service.unique_judge_slug(
+                self.__class__,
+                self.full_name,
+                pk=self.pk,
+            )
+        return super().save(*args, **kwargs)
+
+
+class JudgeTitle(models.Model):
+    name = models.CharField(_("name"), max_length=255)
+    abbreviation = models.CharField(_("abbreviation"), max_length=32, unique=True)
+
+    class Meta:
+        ordering = ("name", "abbreviation")
+        verbose_name = _("judicial title")
+        verbose_name_plural = _("judicial titles")
+
+    def __str__(self):
+        return f"{self.name} ({self.abbreviation})"
+
+    def save(self, *args, **kwargs):
+        self.name = self.name.strip()
+        self.abbreviation = self.abbreviation.strip().upper()
+        return super().save(*args, **kwargs)
+
+
+class JudgeAlias(models.Model):
+    model_label = _("Judge")
+    model_label_plural = _("Judges")
+
+    judge_person = models.ForeignKey(
+        JudgePerson,
+        related_name="aliases",
+        on_delete=models.CASCADE,
+        verbose_name=_("judge person"),
+    )
+    name = models.CharField(_("name"), max_length=1024, null=False, blank=False)
+    normalized_name = models.CharField(
+        _("normalized name"), max_length=1024, null=False, blank=False, db_index=True
+    )
+    title = models.ForeignKey(
+        JudgeTitle,
+        related_name="aliases",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        verbose_name=_("judicial title"),
+    )
+
+    class Meta:
+        ordering = ("name", "pk")
+        verbose_name = _("judge alias")
+        verbose_name_plural = _("judge aliases")
+
+    def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        parts = judge_identity_service.parse_configured_judge_name(self.name)
+        self.normalized_name = parts["normalized_name"]
+        title_changed = False
+        if parts["title"]:
+            self.title = JudgeTitle.objects.filter(
+                abbreviation__iexact=parts["title"]
+            ).first()
+            title_changed = True
+        elif self.pk:
+            previous = JudgeAlias.objects.select_related("title").get(pk=self.pk)
+            previous_parts = judge_identity_service.parse_configured_judge_name(
+                previous.name
+            )
+            title_was_inferred = (
+                previous.title
+                and previous_parts["title"]
+                and previous.title.abbreviation.casefold()
+                == previous_parts["title"].casefold()
+            )
+            if title_was_inferred and self.title_id == previous.title_id:
+                self.title = None
+                title_changed = True
+        if kwargs.get("update_fields") is not None:
+            update_fields = set(kwargs["update_fields"])
+            update_fields.add("normalized_name")
+            if title_changed:
+                update_fields.add("title")
+            kwargs["update_fields"] = update_fields
+        return super().save(*args, **kwargs)
 
 
 class Outcome(models.Model):
@@ -120,9 +298,33 @@ class CourtClass(models.Model):
     def get_absolute_url(self):
         return reverse("court_class", args=[self.slug])
 
+    def clean(self):
+        super().clean()
+        if self.name and not slugify(self.name):
+            raise ValidationError(
+                {"name": _("Name must contain at least one letter or number.")}
+            )
+
     def save(self, *args, **kwargs):
         self.slug = slugify(self.name)
+        if not self.slug:
+            raise ValidationError(
+                {"name": _("Name must contain at least one letter or number.")}
+            )
         return super().save(*args, **kwargs)
+
+    @classmethod
+    def get_court_classes_with_judgments(cls):
+        return (
+            cls.objects.filter(courts__judgment__published=True)
+            .prefetch_related(
+                Prefetch(
+                    "courts",
+                    queryset=Court.objects.filter(judgment__published=True).distinct(),
+                )
+            )
+            .distinct()
+        )
 
     @classmethod
     def get_court_classes_with_cause_lists(cls):
@@ -197,8 +399,24 @@ class Court(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        if self.locality and self.locality.jurisdiction != self.country:
+            raise ValidationError(
+                {
+                    "locality": _(
+                        "The locality's jurisdiction and the court's country must match."
+                    )
+                }
+            )
+
     def get_absolute_url(self):
         return reverse("court", args=[self.code])
+
+    @classmethod
+    def get_unclassified_with_judgments(cls):
+        return cls.objects.filter(
+            court_class__isnull=True, judgment__published=True
+        ).distinct()
 
 
 class CourtRegistryManager(models.Manager):
@@ -228,7 +446,7 @@ class CourtRegistry(models.Model):
         unique_together = ("court", "name")
 
     def __str__(self):
-        return f"{self.name} - {self.court}"
+        return f"{self.court.code} - {self.name}"
 
     def get_absolute_url(self):
         return reverse("court_registry", args=[self.court.code, self.code])
@@ -240,13 +458,8 @@ class CourtRegistry(models.Model):
 
 
 class Bench(models.Model):
-    # This model is not strictly necessary, as it's almost identical to the default that Django creates
-    # for a many-to-many relationship. However, by creating it, we can indicate that the ordering should
-    # be on the PK of the model. This means that we can preserve the ordering of Judges as the are
-    # entered in the admin interface.
-    #
-    # To use this effectively, views that need the judges to be ordered, should call "judgement.bench.all()"
-    # and not "judgment.judges.all()".
+    # Bench is a real through model because it preserves judge order and stores
+    # canonical judge identity links for each source-level judge entry.
     judgment = models.ForeignKey(
         "Judgment",
         related_name="bench",
@@ -254,6 +467,32 @@ class Bench(models.Model):
         verbose_name=_("judgment"),
     )
     judge = models.ForeignKey(Judge, on_delete=models.PROTECT, verbose_name=_("judge"))
+    judge_person = models.ForeignKey(
+        JudgePerson,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="bench_entries",
+        verbose_name=_("judge"),
+        help_text=_("Canonical judge identity for this bench row."),
+    )
+    matched_alias = models.ForeignKey(
+        JudgeAlias,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="bench_entries",
+        verbose_name=_("matched alias"),
+        help_text=_("Alias that matched the legacy judge name to the canonical judge."),
+    )
+    extracted_name = models.CharField(
+        _("extracted name"),
+        max_length=1024,
+        blank=True,
+        help_text=_(
+            "Judge name exactly as it appeared in the source, for example 'ABBAN, J.A.'."
+        ),
+    )
 
     class Meta:
         # this is to re-use the existing table rather than creating a new one
@@ -282,7 +521,7 @@ class Judgment(CoreDocument):
     decorator = JudgmentDecorator()
 
     court = models.ForeignKey(
-        Court, on_delete=models.PROTECT, null=True, verbose_name=_("court")
+        Court, on_delete=models.PROTECT, null=False, verbose_name=_("court")
     )
     registry = models.ForeignKey(
         CourtRegistry,
@@ -327,6 +566,9 @@ class Judgment(CoreDocument):
     )
     # Summary fields
     case_summary = models.TextField(_("case summary"), null=True, blank=True)
+    # flynote_raw is editable by the user and is used to update flynote (which is displayed on the site), possibly
+    # via the Flynote model. See the Flynote model for a description of how the flynote fields work.
+    flynote_raw = models.TextField(_("flynote (raw)"), null=True, blank=True)
     flynote = models.TextField(_("flynote"), null=True, blank=True)
     order = models.TextField(_("order"), null=True, blank=True)
     case_summary_public = models.BooleanField(
@@ -365,6 +607,13 @@ class Judgment(CoreDocument):
         null=True,
         blank=True,
         help_text=_("When the AI summary was generated"),
+    )
+    summary_language = models.CharField(
+        _("summary language"),
+        max_length=128,
+        blank=True,
+        default=default_summary_language,
+        help_text=_("The language used for the AI-generated summary"),
     )
     summary_trace_id = models.CharField(
         _("summary trace ID"),
@@ -437,16 +686,66 @@ class Judgment(CoreDocument):
     def __str__(self):
         return self.title
 
+    @staticmethod
+    def flynote_tree_enabled():
+        return settings.PEACHJAM.get("SUMMARISE_USE_FLYNOTE_TREE", False)
+
+    @staticmethod
+    def flynote_topics_enabled():
+        return Judgment.flynote_tree_enabled() and settings.PEACHJAM.get(
+            "SHOW_FLYNOTE_TOPICS", False
+        )
+
+    @cached_property
+    def linked_flynotes(self):
+        if not self.flynote_topics_enabled() or not self.flynote:
+            return []
+
+        return [
+            {
+                "flynote": judgment_flynote.flynote,
+                "nodes": [
+                    *judgment_flynote.flynote.get_ancestors(),
+                    judgment_flynote.flynote,
+                ],
+            }
+            for judgment_flynote in self.flynotes.select_related("flynote").order_by(
+                "flynote__path"
+            )
+        ]
+
+    @property
+    def flynote_lines(self):
+        if not self.flynote:
+            return []
+        return [line.strip() for line in self.flynote.splitlines() if line.strip()]
+
+    @property
+    def missing_public_source_file(self):
+        """Whether users have no source document that is safe to download."""
+        try:
+            source_file = self.source_file
+        except SourceFile.DoesNotExist:
+            return True
+
+        if self.anonymised:
+            return not (
+                (source_file.file and source_file.file_is_anonymised)
+                or source_file.anonymised_file_as_pdf
+            )
+
+        return not source_file.file
+
     def assign_mnc(self):
         """Assign an MNC to this judgment, if one hasn't already been assigned or if details have changed."""
-        if self.date and self.court:
+        if self.date and self.court_id:
             if (
-                self.mnc != self.generate_citation()
+                self.mnc != self.decorator.assign_mnc(self)
                 or self.serial_number_override
                 and self.serial_number != self.serial_number_override
             ):
                 self.serial_number = self.generate_serial_number()
-                self.mnc = self.generate_citation()
+                self.mnc = self.decorator.assign_mnc(self)
 
     def generate_serial_number(self):
         """Generate a candidate serial number for this decision, based on the delivery year and court."""
@@ -456,7 +755,7 @@ class Judgment(CoreDocument):
 
         # use select_for_update to lock the touched rows, to avoid a race condition and duplicate serial numbers
         query = Judgment.objects.select_for_update().filter(
-            date__year=self.date.year, court=self.court
+            date__year=self.date.year, court_id=self.court_id
         )
         if self.pk:
             query = query.exclude(pk=self.pk)
@@ -473,7 +772,7 @@ class Judgment(CoreDocument):
         # enforce certain defaults for judgment FRBR URIs
         if self.auto_assign_details:
             self.frbr_uri_doctype = "judgment"
-            self.frbr_uri_actor = self.court.code.lower() if self.court else None
+            self.frbr_uri_actor = self.court.code.lower() if self.court_id else None
             self.frbr_uri_date = str(self.date.year) if self.date else ""
             self.frbr_uri_number = str(self.serial_number) if self.serial_number else ""
         return super().generate_work_frbr_uri()
@@ -481,9 +780,9 @@ class Judgment(CoreDocument):
     def clean(self):
         if self.auto_assign_details:
             self.assign_mnc()
-        self.flynote = self.clean_html_field(self.flynote)
-        self.case_summary = self.clean_html_field(self.case_summary)
-        self.order = self.clean_html_field(self.order)
+        self.flynote = DocumentContent.clean_html_field(self.flynote)
+        self.case_summary = DocumentContent.clean_html_field(self.case_summary)
+        self.order = DocumentContent.clean_html_field(self.order)
         super().clean()
 
     def assign_title(self):
@@ -525,12 +824,11 @@ class Judgment(CoreDocument):
         if self.registry:
             self.court = self.registry.court
 
-        if self.court is not None:
-            if self.court.country:
-                self.jurisdiction = self.court.country
-
-            if self.court.locality:
-                self.locality = self.court.locality
+        if self.court_id:
+            court = self.court
+            if court.country:
+                self.jurisdiction = court.country
+                self.locality = court.locality
 
         self.doc_type = "judgment"
         if self.auto_assign_details:
@@ -546,8 +844,13 @@ class Judgment(CoreDocument):
     def ensure_anonymised_source_file(self):
         """If this judgment is anonymised but its source file isn't, then queue up a task to generate a PDF
         from the anonymised file."""
+        doc_content = self.get_or_create_document_content()
         if self.anonymised:
-            if self.content_html and not self.content_html_is_akn:
+            if (
+                doc_content
+                and doc_content.content_html
+                and not doc_content.content_html_is_akn
+            ):
                 if (
                     not hasattr(self, "source_file")
                     or not self.source_file.file_is_anonymised
@@ -569,32 +872,94 @@ class Judgment(CoreDocument):
             self.source_file.anonymised_file_as_pdf = None
             self.source_file.save()
 
+    def anonymised_source_file_fingerprint(self):
+        """Return a fingerprint of the values used to render an anonymised PDF."""
+        content_html = (
+            DocumentContent.objects.filter(document_id=self.pk)
+            .values_list("content_html", flat=True)
+            .first()
+            or ""
+        )
+        values = (self.case_name or "", self.title or "", content_html)
+        return hashlib.sha256("\0".join(values).encode()).hexdigest()
+
     def create_anonymised_source_file_pdf(self):
         """Create an anonymised source file from the HTML of this judgment. If there is already a source file,
         store this new one as the anonymised pdf. Otherwise, create a new source file using this PDF and set
         the anonymised flag."""
-        if self.anonymised and self.content_html and not self.content_html_is_akn:
+        doc_content = self.get_or_create_document_content()
+        if (
+            self.anonymised
+            and doc_content
+            and doc_content.content_html
+            and not doc_content.content_html_is_akn
+        ):
+            fingerprint = self.anonymised_source_file_fingerprint()
             pdf = self.convert_html_to_pdf()
             f = File(pdf, name=f"{slugify(self.case_name)}.pdf")
 
-            try:
-                self.source_file.anonymised_file_as_pdf = f
-                self.source_file.save()
-            except SourceFile.DoesNotExist:
-                # create a new source file with this PDF as the main file, and the anonymised flag set.
-                # there's a small chance of a race condition here, the task will just be retried
-                SourceFile.objects.create(
-                    document=self,
-                    file=f,
-                    mimetype="application/pdf",
-                    file_is_anonymised=True,
-                )
+            # Rendering can take some time. Re-check the inputs while holding the judgment row lock so that an
+            # outdated queued task cannot overwrite a newer PDF, or restore one after anonymisation is removed.
+            with transaction.atomic():
+                current = Judgment.objects.select_for_update().get(pk=self.pk)
+                if (
+                    not current.anonymised
+                    or current.anonymised_source_file_fingerprint() != fingerprint
+                ):
+                    return
+
+                try:
+                    source_file = current.source_file
+                except SourceFile.DoesNotExist:
+                    # Create a source file using the anonymised PDF when there is no original source file.
+                    # There is a small chance of a race condition here; the task will then be retried.
+                    SourceFile.objects.create(
+                        document=current,
+                        file=f,
+                        mimetype="application/pdf",
+                        file_is_anonymised=True,
+                    )
+                else:
+                    if source_file.file_is_anonymised:
+                        return
+                    source_file.anonymised_file_as_pdf = f
+                    source_file.save()
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["case_name", "title", "anonymised"],
+        ["SourceFile.anonymised_file_as_pdf"],
+    )
+    def update_anonymised_source_file(self):
+        """Keep the derived anonymised PDF aligned with judgment metadata and state."""
+        self.ensure_anonymised_source_file()
+
+    @on_attribute_changed(
+        AFTER_SAVE,
+        ["must_be_anonymised", "anonymised"],
+        ["blurb", "case_summary", "flynote_raw", "held", "issues", "order"],
+    )
+    def potentially_generate_summary(self):
+        if self.should_have_summary():
+            generate_judgment_summary(self.pk)
+
+    def should_have_summary(self):
+        return (
+            not self.case_summary  # No summary at all
+            or self.summary_ai_generated  # Summary exists but is AI-generated
+        ) and (
+            not self.must_be_anonymised or self.anonymised  # Anonymization OK
+        )
 
     def generate_summary(self):
         """Generate an AI summary for this judgment."""
-        from peachjam.analysis.summariser import SummariserService
+        if not self.should_have_summary():
+            log.warning(
+                f"Judgment {self} does not meet criteria for summary generation, skipping."
+            )
+            return
 
-        summariser = SummariserService()
+        summariser = JudgmentSummariser()
         if not summariser.enabled():
             log.warning(
                 "Summariser service is not enabled, skipping AI summary generation."
@@ -602,21 +967,43 @@ class Judgment(CoreDocument):
             return
 
         try:
-            response = summariser.summarise_judgment(self)
-            summary = response.get("summary", {})
-            if not summary:
+            summary = summariser.summarise_judgment(self)
+            if not summary.summary:
                 log.warning(f"No summary found in response {self.pk}, skipping.")
                 return
-            self.blurb = summary.get("blurb", "")
-            self.case_summary = summary.get("summary", "")
-            self.flynote = summary.get("flynote", "")
-            self.held = summary.get("held", [])
-            self.issues = summary.get("issues", [])
-            self.order = summary.get("order", "")
+            self.blurb = summary.blurb
+            self.case_summary = summary.summary
+            # self.flynote will be updated based on self.flynote_raw
+            self.flynote_raw = summary.flynote
+            self.held = summary.held
+            self.issues = summary.issues
+            self.order = summary.order
             self.summary_ai_generated = True
+            self.summary_generated_at = timezone.now()
+            self.summary_language = summariser.summary_language
             self.save()
         except Exception as e:
             log.error(f"Error generating AI summary for judgment {self.pk}", exc_info=e)
+
+    @on_attribute_changed(BEFORE_SAVE, ["flynote_raw"], ["flynote", "flynote_tree"])
+    def sync_flynote(self):
+        """The flynote_raw field has changed, copy it to flynote and populate the flynote tree (if configured)."""
+        self.flynote = self.flynote_raw
+
+        if settings.PEACHJAM["SUMMARISE_USE_FLYNOTE_TREE"] and self.pk:
+            # This will eventually update both flynote and flynote_raw to match the flynote tree.
+            # We set flynote above since this background task may take a while to run.
+            update_flynote_taxonomy(self.pk)
+
+    def serialise_flynote_tree(self):
+        """Serialise the flynote tree to a string for storage in flynote and flynote_raw."""
+        from peachjam.models import Flynote
+
+        judgment_flynotes = list(self.flynotes.select_related("flynote"))
+
+        # we update flynote_raw as well (without triggering attribute change events) so that a human can edit
+        # the flynote and we won't lose the changes made through the Flynote tree
+        self.flynote_raw = self.flynote = Flynote.flynotes_to_string(judgment_flynotes)
 
 
 class CaseNumber(models.Model):
@@ -720,7 +1107,6 @@ class CaseHistory(models.Model):
 
 
 class CauseList(CoreDocument):
-
     decorator = CauseListDecorator()
 
     frbr_uri_doctypes = ["doc"]

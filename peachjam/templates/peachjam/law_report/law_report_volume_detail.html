@@ -1,0 +1,85 @@
+{% extends 'peachjam/layouts/document_list.html' %}
+{% load i18n peachjam %}
+{% block title %}{{ law_report.title }} - {{ law_report_volume.title }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'law_report_list' %}">{% trans 'Law reports' %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{{ law_report.get_absolute_url }}">{{ law_report.title }}</a>
+        </li>
+        {% if section == "judgments" %}
+          <li class="breadcrumb-item active" aria-current="page">{{ law_report_volume.title }}</li>
+        {% else %}
+          <li class="breadcrumb-item">
+            <a href="{{ law_report_volume.get_absolute_url }}">{{ law_report_volume.title }}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ section_title }}</li>
+        {% endif %}
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block entity-profile %}{% endblock %}
+{% block page-title %}
+  <div class="my-4">
+    <h1 id="main-page-heading" class="mb-0">{{ law_report.title }}</h1>
+    {% block follow-button %}
+      <div class="my-2"
+           hx-get="{% url 'user_following_button' %}?{{ law_report|get_follow_params }}"
+           hx-trigger="load">
+      </div>
+    {% endblock %}
+    <h2 class="h4 mb-0">{{ law_report_volume.title }}</h2>
+  </div>
+{% endblock %}
+{% block count-and-search %}{% endblock %}
+{% block nav-tabs %}
+  {% if section == "judgments" %}
+    <div class="mb-4">
+      <h2 class="h5 mb-3">{% trans 'Explore related indexes' %}</h2>
+      <div class="row row-cols-1 row-cols-md-2 g-3">
+        <div class="col">
+          <div class="card card-clickable h-100 position-relative">
+            <div class="card-body">
+              <h3 class="h5 card-title mb-2">
+                <a class="stretched-link text-decoration-none"
+                   href="{% url 'law_report_volume_cases_index' law_report.slug law_report_volume.slug %}">
+                  {% trans 'Cited cases' %}
+                </a>
+              </h3>
+              <p class="card-text text-muted mb-0">{% trans 'Browse judgments cited by the reported judgments in this volume.' %}</p>
+            </div>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card card-clickable h-100 position-relative">
+            <div class="card-body">
+              <h3 class="h5 card-title mb-2">
+                <a class="stretched-link text-decoration-none"
+                   href="{% url 'law_report_volume_legislation_index' law_report.slug law_report_volume.slug %}">
+                  {% trans 'Cited legislation' %}
+                </a>
+              </h3>
+              <p class="card-text text-muted mb-0">
+                {% trans 'Browse legislation cited by the reported judgments in this volume.' %}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+{% endblock %}
+{% block alerts %}
+  <div class="mb-3">
+    <h2 class="h4 mb-1">{{ section_title }}</h2>
+    {% if section_description %}<p class="text-muted mb-0">{{ section_description }}</p>{% endif %}
+  </div>
+{% endblock %}

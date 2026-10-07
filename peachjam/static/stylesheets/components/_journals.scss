@@ -1,0 +1,14 @@
+.journal-card__media {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  background: #ffffff;
+}
+
+.journal-card__placeholder {
+  display: grid;
+  place-items: center;
+  color: $gray-600;
+  font-size: 2.5rem;
+  background: $gray-100;
+}

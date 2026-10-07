@@ -9,8 +9,10 @@ from peachjam.views import (
     AnnotationListView,
     CaseHistoryView,
     CaseSummaryView,
+    CompareChooserView,
     ComparePortionsView,
     DocumentAttachmentView,
+    DocumentCapabilitiesView,
     DocumentCitationsTabView,
     DocumentCitationsView,
     DocumentDebugView,
@@ -19,12 +21,14 @@ from peachjam.views import (
     DocumentPopupView,
     DocumentProblemView,
     DocumentProvisionCitationView,
+    DocumentProvisionSimilarView,
     DocumentPublicationView,
     DocumentSocialImageView,
     DocumentSourcePDFView,
     DocumentSourceView,
     DocumentSummaryView,
     DocumentTextContentView,
+    LegislationSubsidiaryView,
     PartnerLogoView,
 )
 
@@ -56,9 +60,14 @@ urlpatterns = [
         name="document_attachment",
     ),
     re_path(
-        r"^(?P<frbr_uri>akn/.+?)/provision(?:/(?P<provision_eid>.+))?$",
+        r"^(?P<frbr_uri>akn/.+?)/provision/(?P<provision_eid>.+)/similar$",
+        cache_page(CACHE_DURATION)(DocumentProvisionSimilarView.as_view()),
+        name="document_provision_similar",
+    ),
+    re_path(
+        r"^(?P<frbr_uri>akn/.+?)/provision/(?P<provision_eid>.+)/citations$",
         cache_page(CACHE_DURATION)(DocumentProvisionCitationView.as_view()),
-        name="document_citation_context",
+        name="document_provision_citations",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations/tab$",
@@ -86,6 +95,11 @@ urlpatterns = [
         name="document_social_image",
     ),
     re_path(
+        r"^(?P<frbr_uri>akn/.*)/subsidiary$",
+        LegislationSubsidiaryView.as_view(),
+        name="legislation_subsidiary",
+    ),
+    re_path(
         r"^(?P<frbr_uri>akn/?.*)$",
         DocumentDetailViewResolver.as_view(),
         name="document_detail",
@@ -94,11 +108,17 @@ urlpatterns = [
     path(
         "p/<str:partner>/e/popup/<path:frbr_uri>",
         cache_page(CACHE_DURATION)(DocumentPopupView.as_view()),
+        name="document_popup",
     ),
     path(
         "document-problem/",
         DocumentProblemView.as_view(),
         name="document_problem",
+    ),
+    path(
+        "api/documents/<int:pk>/capabilities",
+        DocumentCapabilitiesView.as_view(),
+        name="document_capabilities",
     ),
     # Annotations
     path(
@@ -147,6 +167,11 @@ urlpatterns = [
         "partners/<int:pk>/logo/<int:logo_pk>",
         PartnerLogoView.as_view(),
         name="partner_logo",
+    ),
+    path(
+        "compare/chooser",
+        CompareChooserView.as_view(),
+        name="compare_chooser",
     ),
     path(
         "compare",

@@ -22,7 +22,6 @@ class Command(BaseCommand):
         for user in users:
             self.stdout.write(f"Processing user {user.username}...")
             with transaction.atomic():
-
                 TimelineEvent.objects.filter(user_following__user=user).delete()
                 for follow in user.following.all():
                     self.stdout.write(

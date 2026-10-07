@@ -10,11 +10,11 @@ for js_file in peachjam/static/js/app-prod.js peachjam/static/js/pdf.worker-prod
 
   for f in $js_file $js_file.head; do
     # remove the debug ids from the first 1000 chars
-    head -c 1000 $f | sed -E '
+    head -c 2000 $f | sed -E '
       s/sentryDebugIds\[t\]="[^"]+"/sentryDebugIds[t]=""/g;
       s/sentryDebugIdIdentifier="[^"]+"/sentryDebugIdIdentifier=""/g;
       s/SENTRY_RELEASE=\{id:"[^"]+"\}/SENTRY_RELEASE={id:""}/g' > $f.stripped
-    tail -c +1000 $f >> $f.stripped
+    tail -c +2000 $f >> $f.stripped
   done
 
   diff -q $js_file.stripped $js_file.head.stripped

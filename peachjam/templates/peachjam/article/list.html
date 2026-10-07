@@ -2,14 +2,15 @@
 {% load i18n peachjam %}
 {% block article-header %}
   {% if year %}
-    <h1 class="my-4">{% trans "Articles" %} - {{ year }}</h1>
+    <h1 id="main-page-heading" class="my-4">{% trans "Articles" %} - {{ year }}</h1>
   {% else %}
-    <h1 class="my-4">{% trans "Latest Articles" %}</h1>
+    <h1 id="main-page-heading" class="my-4">{% trans "Latest Articles" %}</h1>
   {% endif %}
 {% endblock %}
 {% block article-content %}
-  {% include 'peachjam/_years_list.html' with showallyears=True %}
+  {% include 'peachjam/_years_list.html' with showallyears=True years_skip_target_id='article-list-heading' %}
   {% block article-list %}
+    <h2 id="article-list-heading" class="h6 visually-hidden skip-link-target">{% trans "Articles" %}</h2>
     {% include "peachjam/article/_list.html" %}
   {% endblock %}
   {% include 'peachjam/_pagination.html' %}

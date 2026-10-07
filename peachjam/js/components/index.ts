@@ -3,16 +3,20 @@ import { RelationshipEnrichments } from './RelationshipEnrichment';
 import { ProvisionEnrichments } from './ProvisionEnrichments';
 import { AnnotationsProvider } from './Annotations';
 import DocumentFilterForm from './document-filter-form';
+import FormValidation from './form-validation';
 import DocumentTable from './document-table';
 import DocumentContent from './DocumentContent/index';
 import DocumentDetail from './document-detail';
 import FloatingHeader from './floating-header';
+import FlynoteDetailActions from './flynote-detail-actions';
 import GlossaryFilter from './glossary';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
+import NumberStepper from './number-stepper';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
 import TermsOfUse from './terms-of-use';
+import UserAuth from './user-auth';
 import SearchTypeahead from './search-typeahead';
 import ShareMenuItem from './share-menu-item';
 import SearchInput from './search-input';
@@ -21,6 +25,7 @@ import { DocumentChatBanner, DocumentChatOpenButton } from './chat';
 
 import { OfflineDetails, OfflineTaxonomyStatus } from './Offline';
 import DocumentProblemModal from './DocumentProblemModal.vue';
+import FlynoteManager from './FlynoteManager/index.vue';
 import FindDocuments from './FindDocuments/index.vue';
 import PocketLawDownload from './PocketLawDownload.vue';
 import TaxonomyTopics from './TaxonomyTopics.vue';
@@ -34,11 +39,14 @@ const components: Record<string, any> = {
   DocumentContent,
   DocumentDetail,
   DocumentFilterForm,
+  FormValidation,
   DocumentTable,
   FloatingHeader,
+  FlynoteDetailActions,
   GlossaryFilter,
   DocumentUploader,
   NavigationSelect,
+  NumberStepper,
   RelationshipEnrichments,
   ProvisionEnrichments,
   AnnotationsProvider,
@@ -49,10 +57,12 @@ const components: Record<string, any> = {
   ToggleTab,
   TaxonomyTree,
   TermsOfUse,
+  UserAuth,
 
   // Vue components
   AnonApp,
   DocumentProblemModal,
+  FlynoteManager,
   FindDocuments,
   OfflineDetails,
   OfflineTaxonomyStatus,
