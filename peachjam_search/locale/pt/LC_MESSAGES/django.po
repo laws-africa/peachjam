@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-09 14:35+0300\n"
+"POT-Creation-Date: 2026-09-17 09:23+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -14,51 +14,41 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
 
-#: entity_matcher.py:90
+#: entity_matcher.py:76
 msgid "Court"
 msgstr "Tribunal"
 
-#: entity_matcher.py:116
+#: entity_matcher.py:99
 msgid "Judge"
 msgstr "Juiz"
 
-#: entity_matcher.py:163
+#: entity_matcher.py:142
 msgid "Locality"
 msgstr "Localidade"
 
-#: models.py:290
+#: models.py:276
 msgid "subscription locked at"
 msgstr ""
 
-#: models.py:293
+#: models.py:279
 msgid "subscription lock expires at"
 msgstr ""
 
-#: models.py:362
+#: models.py:348
 msgid "Search alert limit reached"
 msgstr "Limite de alerta de pesquisa atingido"
 
-#: models.py:445
+#: models.py:431
 msgid "feedback"
 msgstr "opinião"
 
-#: models.py:447
+#: models.py:433
 msgid "name"
 msgstr "Nome"
 
-#: models.py:452
+#: models.py:438
 msgid "email address"
 msgstr "endereço de e-mail"
-
-#: suggestions.py:60
-#, fuzzy
-#| msgid "Advanced search"
-msgid "Document"
-msgstr "Pesquisa avançada"
-
-#: suggestions.py:100
-msgid "Legal topic"
-msgstr ""
 
 #: templates/peachjam_search/_debug_json_tabs.html:11
 #: templates/peachjam_search/_searchtrace_card.html:110
@@ -266,7 +256,6 @@ msgid "Debug"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:27
-#: templates/peachjam_search/box.html:14 templates/peachjam_search/box.html:20
 #: templates/peachjam_search/search.html:4
 #: templates/peachjam_search/searchtrace_list.html:32
 msgid "Search"
@@ -393,18 +382,6 @@ msgstr "Identificação do rastreamento"
 #: templates/peachjam_search/_searchtrace_form.html:8
 msgid "Go"
 msgstr "Ir"
-
-#: templates/peachjam_search/box.html:4 templates/peachjam_search/box.html:8
-#, fuzzy
-#| msgid "Search alert"
-msgid "Search omnibox"
-msgstr "Alerta de pesquisa"
-
-#: templates/peachjam_search/box.html:15
-#, fuzzy
-#| msgid "Search Alerts"
-msgid "Search documents"
-msgstr "Alertas de pesquisa"
 
 #: templates/peachjam_search/saved_search_button.html:19
 #: templates/peachjam_search/saved_search_form.html:8
@@ -544,12 +521,12 @@ msgstr "Criado em"
 msgid "No search traces found."
 msgstr "Nenhum vestígio de busca encontrado."
 
-#: views/search.py:130
+#: views/search.py:107
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Pesquisar %(app_name)s"
 
-#: views/search.py:737
+#: views/search.py:713
 msgid "Search trace not found"
 msgstr "Rastreamento de pesquisa não encontrado"
 
