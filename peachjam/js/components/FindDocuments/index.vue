@@ -63,13 +63,12 @@
               class="form-control"
               :placeholder="searchPlaceholder"
               :aria-label="$t('Search documents')"
-              aria-describedby="basic-addon2"
               required
-              @typeahead="onTypeahead"
             >
             <button
               type="submit"
               class="btn btn-primary ms-2"
+              :aria-label="$t('Search')"
               :disabled="loading"
             >
               <span
@@ -311,7 +310,7 @@ import { scrollToElement } from '../../utils/function';
 import FacetBadges from './FacetBadges.vue';
 import analytics from '../../analytics';
 import { authHeaders } from '../../api';
-import SearchTypeahead from '../search-typeahead';
+import SearchInput from '../search-input';
 import htmx from 'htmx.org';
 import SearchFeedback from './SearchFeedback.vue';
 import { loadSavedDocuments } from '../saved-documents';
@@ -534,10 +533,17 @@ export default {
   },
 
   mounted () {
-    if (this.showSuggestions) {
-      this.searchTypeahead = new SearchTypeahead(this.$refs.searchInput, true);
-    }
     this.loadState();
+    this.searchInput = new SearchInput(this.$refs.searchInput, {
+      shortcutsUrl: `${this.urlPrefix}/search/api/omnibox/`,
+      suggestionsUrl: `${this.urlPrefix}/search/api/documents/suggest/`,
+      showSuggestions: Boolean(this.showSuggestions),
+      onSearch: (query, suggestion) => {
+        this.q = query;
+        this.suggestion = suggestion ? { type: suggestion } : null;
+        this.simpleSearch();
+      }
+    });
     window.addEventListener('popstate', () => this.loadState());
     this.$el.addEventListener('show.bs.tab', this.tabChanged);
   },
@@ -545,12 +551,6 @@ export default {
   methods: {
     tabChanged (e) {
       this.googleActive = e.target.id === 'google-search-tab';
-    },
-
-    onTypeahead (e) {
-      this.suggestion = e.detail.suggestion;
-      this.q = this.suggestion.value;
-      this.simpleSearch();
     },
 
     setOrdering (ordering) {
@@ -844,9 +844,6 @@ export default {
 
     async search (pushState = true) {
       this.searchTip = null;
-      if (this.searchTypeahead) {
-        this.searchTypeahead.autocomplete.hideSuggestions();
-      }
 
       // if one of the search fields is true perform search
       if (this.q || (Array.isArray(this.advancedSearchCriteria) && this.advancedSearchCriteria.some(f => f.text))) {
@@ -902,6 +899,14 @@ export default {
                 this.formatFacets(this.searchInfo.facets, this.searchInfo.count);
               }
               this.trackSearch(params);
+              if (this.page === 1) {
+                window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
+                  detail: {
+                    query: this.q || this.advancedSearchCriteria.filter(item => item.text).map(item => item.text).join(' · '),
+                    url: document.location.pathname + '?' + this.serialiseState()
+                  }
+                }));
+              }
               this.$nextTick(() => this.savedSearchModal());
               this.linkTraces(previousId, this.searchInfo.trace_id);
               this.loadSaveDocumentButtons();

@@ -1,37 +1,45 @@
-#: entity_matcher.py:76
+#: entity_matcher.py:90
 msgid "Court"
 msgstr ""
 
-#: entity_matcher.py:99
+#: entity_matcher.py:116
 msgid "Judge"
 msgstr ""
 
-#: entity_matcher.py:142
+#: entity_matcher.py:163
 msgid "Locality"
 msgstr ""
 
-#: models.py:276
+#: models.py:290
 msgid "subscription locked at"
 msgstr ""
 
-#: models.py:279
+#: models.py:293
 msgid "subscription lock expires at"
 msgstr ""
 
-#: models.py:348
+#: models.py:362
 msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:431
+#: models.py:445
 msgid "feedback"
 msgstr ""
 
-#: models.py:433
+#: models.py:447
 msgid "name"
 msgstr ""
 
-#: models.py:438
+#: models.py:452
 msgid "email address"
+msgstr ""
+
+#: suggestions.py:60
+msgid "Document"
+msgstr ""
+
+#: suggestions.py:100
+msgid "Legal topic"
 msgstr ""
 
 #: templates/peachjam_search/_debug_json_tabs.html:11
@@ -236,6 +244,7 @@ msgid "Debug"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:27
+#: templates/peachjam_search/box.html:14 templates/peachjam_search/box.html:20
 #: templates/peachjam_search/search.html:4
 #: templates/peachjam_search/searchtrace_list.html:32
 msgid "Search"
@@ -359,6 +368,14 @@ msgstr ""
 
 #: templates/peachjam_search/_searchtrace_form.html:8
 msgid "Go"
+msgstr ""
+
+#: templates/peachjam_search/box.html:4 templates/peachjam_search/box.html:8
+msgid "Search omnibox"
+msgstr ""
+
+#: templates/peachjam_search/box.html:15
+msgid "Search documents"
 msgstr ""
 
 #: templates/peachjam_search/saved_search_button.html:19
@@ -489,11 +506,11 @@ msgstr ""
 msgid "No search traces found."
 msgstr ""
 
-#: views/search.py:107
+#: views/search.py:130
 #, python-format
 msgid "Search %(app_name)s"
 msgstr ""
 
-#: views/search.py:713
+#: views/search.py:737
 msgid "Search trace not found"
 msgstr ""

@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-09-17 09:23+0000\n"
+"POT-Creation-Date: 2026-10-09 14:35+0300\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Language-Team: Swahili\n"
 "Language: sw_KE\n"
@@ -14,41 +14,51 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_search/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 247\n"
 
-#: entity_matcher.py:76
+#: entity_matcher.py:90
 msgid "Court"
 msgstr "Mahakama"
 
-#: entity_matcher.py:99
+#: entity_matcher.py:116
 msgid "Judge"
 msgstr "Jaji"
 
-#: entity_matcher.py:142
+#: entity_matcher.py:163
 msgid "Locality"
 msgstr "Eneo"
 
-#: models.py:276
+#: models.py:290
 msgid "subscription locked at"
 msgstr ""
 
-#: models.py:279
+#: models.py:293
 msgid "subscription lock expires at"
 msgstr ""
 
-#: models.py:348
+#: models.py:362
 msgid "Search alert limit reached"
 msgstr "Kikomo cha tahadhari ya utafutaji kimefikiwa"
 
-#: models.py:431
+#: models.py:445
 msgid "feedback"
 msgstr "maoni"
 
-#: models.py:433
+#: models.py:447
 msgid "name"
 msgstr "jina"
 
-#: models.py:438
+#: models.py:452
 msgid "email address"
 msgstr "anwani ya baruapepe"
+
+#: suggestions.py:60
+#, fuzzy
+#| msgid "Advanced search"
+msgid "Document"
+msgstr "Utafutaji wa kina"
+
+#: suggestions.py:100
+msgid "Legal topic"
+msgstr ""
 
 #: templates/peachjam_search/_debug_json_tabs.html:11
 #: templates/peachjam_search/_searchtrace_card.html:110
@@ -256,6 +266,7 @@ msgid "Debug"
 msgstr ""
 
 #: templates/peachjam_search/_searchtrace_card.html:27
+#: templates/peachjam_search/box.html:14 templates/peachjam_search/box.html:20
 #: templates/peachjam_search/search.html:4
 #: templates/peachjam_search/searchtrace_list.html:32
 msgid "Search"
@@ -382,6 +393,18 @@ msgstr "Kitambulisho cha kufuatilia"
 #: templates/peachjam_search/_searchtrace_form.html:8
 msgid "Go"
 msgstr "Nenda"
+
+#: templates/peachjam_search/box.html:4 templates/peachjam_search/box.html:8
+#, fuzzy
+#| msgid "Search alert"
+msgid "Search omnibox"
+msgstr "Tahadhari ya utafutaji"
+
+#: templates/peachjam_search/box.html:15
+#, fuzzy
+#| msgid "Search Alerts"
+msgid "Search documents"
+msgstr "Tafuta Tahadhari"
 
 #: templates/peachjam_search/saved_search_button.html:19
 #: templates/peachjam_search/saved_search_form.html:8
@@ -521,12 +544,12 @@ msgstr "Imeundwa Katika"
 msgid "No search traces found."
 msgstr "Hakuna ufuatiliaji wa utafutaji uliopatikana."
 
-#: views/search.py:107
+#: views/search.py:130
 #, python-format
 msgid "Search %(app_name)s"
 msgstr "Tafuta %(app_name)s"
 
-#: views/search.py:713
+#: views/search.py:737
 msgid "Search trace not found"
 msgstr "Ufuatiliaji wa utafutaji haujapatikana"
 

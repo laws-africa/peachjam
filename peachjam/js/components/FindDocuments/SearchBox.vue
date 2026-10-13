@@ -1,344 +1,254 @@
 <template>
-  <div
-    v-show="isVisible"
-    ref="root"
-    class="search-box"
-    :class="rootClasses"
+  <dialog
+    ref="dialog"
+    class="search-box border rounded shadow p-3"
     :style="overlayStyle"
+    aria-labelledby="omnibox-heading"
+    @cancel.prevent="close"
+    @keydown.esc.prevent.stop="close"
+    @click="outsideClick"
   >
-    <form class="search-box__form" @submit.prevent="triggerSearch">
-      <div class="search-box__icon-wrapper">
-        <button
-          type="button"
-          class="search-box__icon-btn d-flex d-md-none align-items-center justify-content-center"
-          :aria-label="$t('Cancel search')"
-          @click="handleCancel"
-        >
-          <i class="bi bi-x-lg" aria-hidden="true" />
-        </button>
-        <span class="search-box__icon d-none d-md-flex align-items-center justify-content-center">
-          <i class="bi bi-search" aria-hidden="true" />
-        </span>
-      </div>
+    <h2 id="omnibox-heading" class="visually-hidden">
+      {{ $t('Search and shortcuts') }}
+    </h2>
+    <form class="d-flex align-items-center gap-2" @submit.prevent="search()">
       <input
-        ref="inputEl"
-        :value="query"
+        ref="input"
+        v-model="query"
         type="search"
-        class="form-control search-box__input"
+        class="form-control"
         :placeholder="placeholder"
         :aria-label="inputLabel"
         autocomplete="off"
-        @input="handleInput"
-        @keydown.down.prevent="focusFirstDropdownItem"
-        @keydown.up.prevent="focusLastDropdownItem"
+        @keydown.down.prevent="focusResult(0)"
+        @keydown.up.prevent="focusResult(-1)"
       >
-      <button
-        type="submit"
-        class="btn btn-primary ms-2 search-box__submit d-none d-md-block"
-        :disabled="!query.trim()"
-      >
+      <button type="submit" class="btn btn-primary" :disabled="!query.trim()">
         {{ $t('Search') }}
       </button>
+      <button
+        type="button"
+        class="btn-close flex-shrink-0"
+        :aria-label="$t('Close search')"
+        @click="close"
+      />
     </form>
-    <div v-if="dropdownItems.length" class="search-box__dropdown">
-      <ul ref="dropdownList" class="list-unstyled mb-0" role="listbox">
-        <li
-          v-for="(item, index) in dropdownItems"
-          :key="itemKey(item, index)"
-          class="d-flex align-items-center search-box__dropdown-item"
-          role="option"
-          tabindex="0"
-          @click="handleSelect(item)"
-          @keydown.enter.prevent="handleSelect(item)"
-          @keydown.space.prevent="handleSelect(item)"
-          @keydown.down.prevent="focusNextItem($event)"
-          @keydown.up.prevent="focusPreviousItem($event)"
-          @mousedown.prevent
-        >
-          <span class="search-box__item-icon d-flex align-items-center justify-content-center me-2">
-            <i :class="iconClass(item)" aria-hidden="true" />
-          </span>
-          <div class="flex-grow-1 text-truncate">
-            {{ item.text }}
-          </div>
-          <small v-if="item.meta" class="text-muted ms-2 text-nowrap">
-            {{ item.meta }}
-          </small>
-        </li>
-      </ul>
+    <div class="search-box__results mt-3" @keydown="resultKeydown">
+      <p
+        class="visually-hidden"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+      >
+        <template v-if="loading">
+          {{ $t('Loading shortcuts') }}
+        </template>
+        <template v-else>
+          {{ $t('{count} suggestions available', { count: resultCount }) }}
+        </template>
+      </p>
+      <p v-if="shortcutsError" class="text-body-secondary small">
+        {{ $t('Your shortcuts could not be loaded. You can still search.') }}
+      </p>
+      <section
+        v-for="group in groups"
+        :key="group.key"
+        :aria-labelledby="`omnibox-${group.key}`"
+        class="mb-3"
+      >
+        <h3 :id="`omnibox-${group.key}`" class="h6 text-body-secondary">
+          {{ group.label }}
+        </h3>
+        <ul class="list-group list-group-flush">
+          <li v-for="item in group.items" :key="item.id" class="list-group-item px-0 py-0">
+            <a
+              v-if="item.url"
+              :href="item.url"
+              class="search-box__result d-flex align-items-center gap-2 py-2"
+              @click="$emit('shortcut', $event, item)"
+            >
+              <i :class="icon(item)" aria-hidden="true" />
+              <span class="flex-grow-1">{{ item.text }}</span>
+              <span class="badge text-bg-secondary">{{ typeLabel(item) }}</span>
+            </a>
+            <button
+              v-else
+              type="button"
+              class="search-box__result btn btn-link w-100 d-flex align-items-center gap-2 text-start"
+              @click="search(item.text, item.suggestionType)"
+            >
+              <i class="bi bi-search" aria-hidden="true" />
+              <span class="flex-grow-1">{{ item.text }}</span>
+              <span class="badge text-bg-secondary">{{ item.meta }}</span>
+            </button>
+          </li>
+        </ul>
+      </section>
+      <p v-if="!resultCount && !loading && !suggestionsLoading" class="text-body-secondary">
+        <template v-if="query.trim()">
+          {{ $t('Press Enter to search.') }}
+        </template>
+        <template v-else-if="userId !== null">
+          {{ $t('Start typing to search. Your recent searches and saved items will appear here.') }}
+        </template>
+        <template v-else>
+          {{ $t('Start typing to find documents, courts, judges and places.') }}
+        </template>
+      </p>
+      <p v-if="suggestionsLoading" class="text-body-secondary small" role="status">
+        {{ $t('Loading search suggestions') }}
+      </p>
+      <p v-if="suggestionsError" class="text-body-secondary small" role="status">
+        {{ $t('Search suggestions could not be loaded. Press Enter to search.') }}
+      </p>
     </div>
-  </div>
+  </dialog>
 </template>
 
 <script>
-const DESKTOP_BREAKPOINT = 992;
-
 export default {
   name: 'SearchBox',
   props: {
-    modelValue: {
-      type: String,
-      default: ''
-    },
-    suggestions: {
-      type: Array,
-      default: () => []
-    },
-    history: {
-      type: Array,
-      default: () => []
-    },
-    placeholder: {
-      type: String,
-      default: 'Search...'
-    },
-    inputLabel: {
-      type: String,
-      default: 'Search documents'
-    }
+    modelValue: { type: String, default: '' },
+    groups: { type: Array, default: () => [] },
+    userId: { type: Number, default: null },
+    loading: Boolean,
+    shortcutsError: Boolean,
+    suggestionsLoading: Boolean,
+    suggestionsError: Boolean
   },
-  emits: ['update:modelValue', 'search', 'cancel'],
+  emits: ['update:modelValue', 'search', 'shortcut', 'close'],
   data () {
     return {
-      query: this.modelValue || '',
-      isVisible: true,
-      anchorEl: null,
+      query: this.modelValue,
+      placeholder: '',
+      inputLabel: '',
+      anchor: null,
       overlayStyle: {},
-      isDesktopViewport: true,
-      outsideClickBound: false
+      restoringFocus: false,
+      isOpen: false,
+      isMobile: false
     };
   },
   computed: {
-    rootClasses () {
-      return {
-        'search-box--overlay': this.isOverlayActive
-      };
-    },
-    isOverlayActive () {
-      return Boolean(this.anchorEl && this.isDesktopViewport);
-    },
-    dropdownItems () {
-      const trimmed = this.query.trim();
-      if (!trimmed) {
-        return this.history;
-      }
-      return this.suggestions;
+    resultCount () {
+      return this.groups.reduce((count, group) => count + group.items.length, 0);
     }
   },
   watch: {
-    modelValue (value) {
-      if (value !== this.query) {
-        this.query = value || '';
-      }
-    }
+    modelValue (value) { this.query = value; },
+    query (value) { this.$emit('update:modelValue', value); }
   },
   mounted () {
-    this.updateViewportFlag();
-    window.addEventListener('resize', this.handleResize, { passive: true });
-    document.addEventListener('keydown', this.handleEscapeKey);
+    window.addEventListener('resize', this.position);
+    window.addEventListener('scroll', this.position, true);
+    document.addEventListener('pointerdown', this.documentPointerdown);
+    document.addEventListener('focusin', this.documentFocusin);
+    window.visualViewport?.addEventListener('resize', this.position);
+    window.visualViewport?.addEventListener('scroll', this.position);
   },
   beforeUnmount () {
-    window.removeEventListener('resize', this.handleResize);
-    this.unbindOutsideClick();
-    document.removeEventListener('keydown', this.handleEscapeKey);
+    this.close();
+    window.removeEventListener('resize', this.position);
+    window.removeEventListener('scroll', this.position, true);
+    document.removeEventListener('pointerdown', this.documentPointerdown);
+    document.removeEventListener('focusin', this.documentFocusin);
+    window.visualViewport?.removeEventListener('resize', this.position);
+    window.visualViewport?.removeEventListener('scroll', this.position);
   },
   methods: {
-    show (anchorEl) {
-      this.isVisible = true;
-      this.anchorEl = anchorEl;
-      this.bindOutsideClick();
-      this.updateOverlay();
-      this.$nextTick(() => {
-        this.focusInput();
-      });
+    show (anchor) {
+      if (this.restoringFocus || this.isOpen) return false;
+      this.anchor = anchor;
+      this.placeholder = anchor.placeholder;
+      this.inputLabel = anchor.getAttribute('aria-label') || this.$t('Search documents');
+      this.query = anchor.value;
+      this.isOpen = true;
+      this.isMobile = window.innerWidth < 992;
+      this.anchorForm = anchor.form || anchor;
+      this.previousVisibility = this.anchorForm.style.visibility;
+      this.previousOverflow = document.body.style.overflow;
+      this.position();
+      this.anchorForm.style.visibility = 'hidden';
+      if (this.isMobile) {
+        document.body.style.overflow = 'hidden';
+        this.$refs.dialog.showModal();
+      } else {
+        this.$refs.dialog.show();
+      }
+      this.$refs.input.focus({ preventScroll: true });
+      return true;
     },
-    hide () {
-      this.isVisible = false;
-      this.anchorEl = null;
-      this.overlayStyle = {};
-      this.unbindOutsideClick();
+    close (restoreFocus = true) {
+      if (!this.isOpen) return;
+      this.isOpen = false;
+      this.restoringFocus = true;
+      if (this.anchor?.isConnected && this.anchor.value !== this.query) {
+        this.anchor.value = this.query;
+        this.anchor.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      this.anchorForm.style.visibility = this.previousVisibility;
+      this.$refs.dialog.close();
+      if (this.isMobile) document.body.style.overflow = this.previousOverflow;
+      if (restoreFocus && this.anchor?.isConnected) this.anchor.focus({ preventScroll: true });
+      this.anchor = null;
+      this.$emit('close');
+      this.$nextTick(() => { this.restoringFocus = false; });
     },
-    handleInput (event) {
-      this.query = event.target.value;
-      this.emitInputChange();
+    search (text = this.query, suggestion = null) {
+      const query = text.trim();
+      if (!query) return;
+      this.$emit('search', query, suggestion);
     },
-    emitInputChange () {
-      this.$emit('update:modelValue', this.query);
-    },
-    triggerSearch () {
-      const value = this.query.trim();
-      if (!value) {
+    position () {
+      if (!this.anchor) return;
+      if (this.isMobile !== (window.innerWidth < 992)) {
+        this.close();
         return;
       }
-      this.$emit('search', value);
-    },
-    handleSelect (item) {
-      if (!item || !item.text) {
-        return;
-      }
-      this.query = item.text;
-      this.emitInputChange();
-      this.triggerSearch();
-    },
-    handleCancel () {
-      this.$emit('cancel');
-    },
-    focusFirstDropdownItem () {
-      if (!this.dropdownItems.length) {
-        return;
-      }
-      this.focusDropdownBoundaryItem('start');
-    },
-    focusLastDropdownItem () {
-      if (!this.dropdownItems.length) {
-        return;
-      }
-      this.focusDropdownBoundaryItem('end');
-    },
-    focusDropdownBoundaryItem (position) {
-      const list = this.$refs.dropdownList;
-      if (!list) {
-        return;
-      }
-      const items = Array.from(list.querySelectorAll('[role="option"]'));
-      if (!items.length) {
-        return;
-      }
-      const target = position === 'end' ? items[items.length - 1] : items[0];
-      if (target && typeof target.focus === 'function') {
-        target.focus();
+      const viewport = window.visualViewport;
+      const height = viewport?.height || window.innerHeight;
+      if (window.innerWidth < 992) {
+        this.overlayStyle = { top: `${viewport?.offsetTop || 0}px`, left: '0', width: '100%', height: `${height}px` };
+      } else {
+        const rect = this.anchorForm.getBoundingClientRect();
+        const width = Math.min(Math.max(rect.width, 640), window.innerWidth - 32);
+        const left = Math.min(Math.max(16, rect.left), window.innerWidth - width - 16);
+        const top = Math.max(16, Math.min(rect.top, height / 2));
+        this.overlayStyle = { top: `${top}px`, left: `${left}px`, width: `${width}px`, maxHeight: `${height - top - 16}px` };
       }
     },
-    focusNextItem (event) {
-      this.focusDropdownItem(event, 1);
+    outsideClick (event) {
+      if (event.target !== this.$refs.dialog) return;
+      const rect = this.$refs.dialog.getBoundingClientRect();
+      if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) this.close();
     },
-    focusPreviousItem (event) {
-      this.focusDropdownItem(event, -1);
+    documentPointerdown (event) {
+      if (this.isOpen && !this.isMobile && !this.$refs.dialog.contains(event.target)) this.close(false);
     },
-    focusDropdownItem (event, delta) {
-      const currentItem = event.currentTarget;
-      if (!currentItem) {
-        return;
-      }
-      const list = currentItem.parentElement;
-      if (!list) {
-        return;
-      }
-      const items = Array.from(list.querySelectorAll('[role=\"option\"]'));
-      if (!items.length) {
-        return;
-      }
-      const currentIndex = items.indexOf(currentItem);
-      if (currentIndex === -1) {
-        return;
-      }
-      if (delta > 0 && currentIndex === items.length - 1) {
-        this.focusInputFromDropdown();
-        return;
-      }
-      if (delta < 0 && currentIndex === 0) {
-        this.focusInputFromDropdown();
-        return;
-      }
-      const nextIndex = currentIndex + delta;
-      const nextItem = items[nextIndex];
-      if (nextItem && typeof nextItem.focus === 'function') {
-        nextItem.focus();
-      }
+    documentFocusin (event) {
+      if (this.isOpen && !this.isMobile && !this.$refs.dialog.contains(event.target)) this.close(false);
     },
-    focusInputFromDropdown () {
-      this.focusInput();
+    focusResult (index) {
+      const results = this.$refs.dialog.querySelectorAll('.search-box__result');
+      const target = results[index < 0 ? results.length - 1 : index];
+      if (target) target.focus();
     },
-    handleEscapeKey (event) {
-      if (!this.isVisible) {
-        return;
-      }
-      if (event.key === 'Escape' || event.key === 'Esc') {
-        event.preventDefault();
-        this.handleCancel();
-      }
+    resultKeydown (event) {
+      if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
+      const results = Array.from(this.$refs.dialog.querySelectorAll('.search-box__result'));
+      const index = results.indexOf(event.target);
+      if (index < 0) return;
+      event.preventDefault();
+      const next = index + (event.key === 'ArrowDown' ? 1 : -1);
+      if (next < 0 || next >= results.length) this.$refs.input.focus();
+      else results[next].focus();
     },
-    updateOverlay () {
-      if (!this.anchorEl || !this.isDesktopViewport) {
-        this.overlayStyle = {};
-        return;
-      }
-      const rect = this.anchorEl.getBoundingClientRect();
-      const scrollY = window.scrollY ?? window.pageYOffset ?? 0;
-      const scrollX = window.scrollX ?? window.pageXOffset ?? 0;
-      this.overlayStyle = {
-        position: 'absolute',
-        top: `${rect.top + scrollY}px`,
-        left: `${rect.left + scrollX}px`,
-        width: `${rect.width}px`,
-        zIndex: 1050
-      };
+    icon (item) {
+      return { document: 'bi bi-star-fill', folder: 'bi bi-folder', saved_search: 'bi bi-star-fill', history: 'bi bi-clock-history' }[item.type];
     },
-    handleResize () {
-      this.updateViewportFlag();
-      this.$nextTick(() => {
-        this.updateOverlay();
-      });
-    },
-    updateViewportFlag () {
-      this.isDesktopViewport = window.innerWidth >= DESKTOP_BREAKPOINT;
-    },
-    focusInput () {
-      const input = this.$refs.inputEl;
-      if (input) {
-        input.focus();
-        if (typeof input.setSelectionRange === 'function') {
-          const length = input.value ? input.value.length : 0;
-          input.setSelectionRange(length, length);
-        }
-      }
-    },
-    bindOutsideClick () {
-      if (this.outsideClickBound) {
-        return;
-      }
-      document.addEventListener('mousedown', this.handleOutsideClick);
-      document.addEventListener('touchstart', this.handleOutsideClick);
-      this.outsideClickBound = true;
-    },
-    unbindOutsideClick () {
-      if (!this.outsideClickBound) {
-        return;
-      }
-      document.removeEventListener('mousedown', this.handleOutsideClick);
-      document.removeEventListener('touchstart', this.handleOutsideClick);
-      this.outsideClickBound = false;
-    },
-    handleOutsideClick (event) {
-      const root = this.$refs.root;
-      if (!root) {
-        return;
-      }
-      if (root.contains(event.target)) {
-        return;
-      }
-      if (this.anchorEl && this.anchorEl.contains(event.target)) {
-        return;
-      }
-      this.$emit('cancel');
-    },
-    itemKey (item, index) {
-      if (!item) {
-        return index;
-      }
-      if (item.id || item.value) {
-        return item.id || item.value;
-      }
-      if (item.text) {
-        return `${item.type || 'item'}-${item.text}-${index}`;
-      }
-      return index;
-    },
-    iconClass (item) {
-      if (item.type === 'history') {
-        return 'bi bi-clock-history';
-      }
-      return 'bi bi-search';
+    typeLabel (item) {
+      return item.meta || { document: this.$t('Saved document'), folder: this.$t('Saved folder'), saved_search: this.$t('Saved search'), history: this.$t('Recent search') }[item.type];
     }
   }
 };
@@ -346,117 +256,37 @@ export default {
 
 <style scoped>
 .search-box {
-  background-color: var(--bs-body-bg);
-  border-radius: 0.5rem;
-  padding: 1rem;
-  position: relative;
+  position: fixed;
+  margin: 0;
+  max-width: none;
+  max-height: none;
+  color: var(--bs-body-color);
+  background: var(--bs-body-bg);
+  z-index: 1050;
 }
 
-.search-box--overlay {
-  padding: 0;
-  border-radius: 0.5rem;
-  background-color: var(--bs-body-bg);
-  border: 1px solid var(--bs-border-color);
-  box-shadow: 0 0.5rem 1.5rem rgba(33, 37, 41, 0.2);
-}
-
-.search-box--overlay .search-box__form {
-  padding: 0.25rem 0.5rem;
-}
-
-.search-box--overlay .search-box__dropdown {
-  margin-top: 0.25rem;
-}
-
-.search-box__form {
+.search-box[open] {
   display: flex;
-  align-items: center;
+  flex-direction: column;
 }
 
-.search-box__icon-wrapper {
-  width: 2rem;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.search-box::backdrop {
+  background: rgba(0, 0, 0, 0.25);
 }
 
-.search-box__icon-btn {
-  border: none;
-  background: transparent;
-  width: 100%;
-  height: 100%;
-  color: inherit;
+.search-box__results {
+  overflow-y: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
 }
 
-.search-box__icon {
-  width: 100%;
+.search-box__result {
+  overflow-wrap: anywhere;
 }
 
-.search-box__input {
-  flex: 1;
-  border-radius: 0;
-  border: 1px solid var(--bs-border-color);
-  border-width: 0px 0px 1px 0px;
-  box-shadow: none;
-}
-
-.search-box__input:focus {
-  border-width: 0px 0px 1px 0px;
-  box-shadow: none;
-}
-
-.search-box__submit {
-  flex-shrink: 0;
-}
-
-.search-box__dropdown {
-  margin-top: 0.75rem;
-  overflow: hidden;
-}
-
-.search-box__dropdown-item {
-  cursor: pointer;
-  padding: 0.25rem 0.5rem;
-}
-
-.search-box__dropdown-item:focus {
-  outline: none;
-  background-color: var(--bg-brand-pale);
-}
-
-.search-box__item-icon {
-  width: 2rem;
-  flex-shrink: 0;
-}
-
-@media (max-width: 992px) {
+@media (max-width: 991.98px) {
   .search-box {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 100vh;
-    padding: 1rem;
-    z-index: 1050;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .search-box__form {
-    padding-bottom: 0.5rem;
-  }
-
-  .search-box__dropdown {
-    margin-top: 0;
-    flex: 1;
-    overflow-y: auto;
-    border: none;
-    border-radius: 0;
-  }
-
-  .search-box__dropdown-item {
-    padding-left: 0;
+    border-radius: 0 !important;
   }
 }
 </style>

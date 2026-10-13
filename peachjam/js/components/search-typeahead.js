@@ -1,4 +1,5 @@
 import Autocomplete from 'bootstrap5-autocomplete/autocomplete.js';
+import SearchSuggestions from '../utils/search-suggestions';
 
 class CustomAutocomplete extends Autocomplete {
   constructor (input, options) {
@@ -22,12 +23,7 @@ export default class SearchTypeahead {
   constructor (input, forVue) {
     this.forVue = forVue;
     this.input = input;
-    // searches without suggestions; if the input has one of these as a prefix, we know we don't want to
-    // call the server again
-    this.noSuggestions = new Map();
-    this.noSuggestionsTtlMs = 30 * 60 * 1000;
-    // don't call the server if the value is longer than this
-    this.maxValueLength = 100;
+    this.suggestions = new SearchSuggestions();
 
     this.autocomplete = CustomAutocomplete.getOrCreateInstance(this.input, {
       liveServer: true,
@@ -48,25 +44,7 @@ export default class SearchTypeahead {
           console.warn('Unable to load search suggestions', error);
         }
       },
-      onServerResponse: async (response) => {
-        const data = await response.json();
-        const suggestions = data.suggestions.map((suggestion) => {
-          return {
-            value: suggestion.value,
-            label: suggestion.value,
-            type: suggestion.type,
-            typeLabel: suggestion.type_label
-          };
-        });
-        if (!suggestions.length) {
-          // An incomplete response must expire as quickly as its HTTP cache.
-          const maxAge = (response.headers.get('Cache-Control') || '').match(/(?:^|,)\s*max-age=(\d+)/i);
-          const ttlMs = maxAge ? Number(maxAge[1]) * 1000 : this.noSuggestionsTtlMs;
-          const query = new URL(response.url).searchParams.get('q');
-          if (query) this.noSuggestions.set(query.toLowerCase(), Date.now() + ttlMs);
-        }
-        return suggestions;
-      },
+      onServerResponse: response => this.suggestions.readResponse(response),
       onRenderItem: (item) => {
         const label = this.highlightLabel(item.label);
         const typeLabel = this.escapeHtml(item.typeLabel);
@@ -87,24 +65,7 @@ export default class SearchTypeahead {
   }
 
   shouldLoadFromServer () {
-    const value = this.input.value.toLowerCase();
-
-    if (value.length > this.maxValueLength) {
-      return false;
-    }
-
-    if (value.length) {
-      for (const [prefix, expiresAt] of this.noSuggestions) {
-        if (expiresAt <= Date.now()) {
-          this.noSuggestions.delete(prefix);
-          continue;
-        }
-        if (value.startsWith(prefix) || value === prefix) {
-          return false;
-        }
-      }
-    }
-    return true;
+    return this.suggestions.shouldLoad(this.input.value);
   }
 
   escapeHtml (value) {
