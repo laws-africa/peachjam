@@ -211,6 +211,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
         "ends_on",
         "created_at",
         "active_at",
+        "billing_anchor_on",
         "closed_at",
         "start_of_current_period",
         "end_of_current_period",
@@ -218,6 +219,7 @@ class SubscriptionAdmin(admin.ModelAdmin):
     readonly_fields = [
         "created_at",
         "active_at",
+        "billing_anchor_on",
         "closed_at",
         "status",
         "start_of_current_period",
