@@ -35,7 +35,6 @@ from peachjam.models import (
     DocumentNature,
     ProvisionCitationCount,
     Relationship,
-    SourceFile,
     Taxonomy,
     UncommencedProvision,
     UnconstitutionalProvision,
@@ -581,7 +580,6 @@ class BaseDocumentDetailView(DetailView):
             for item in provision_citations
         ]
 
-        context["download_options"] = self.get_download_options()
         context["KEY_LINK_PAGE"] = "document_detail"
         context["related_documents_table_id"] = self.get_document_table_id("related")
         context["similar_documents_table_id"] = self.get_document_table_id("similar")
@@ -742,45 +740,6 @@ class BaseDocumentDetailView(DetailView):
             context["annotation_subscription_product"] = (
                 Product.get_lowest_product_for_permission("peachjam.add_annotation")
             )
-
-    def get_download_options(self):
-        """Get the various formats that should be shown in the download menu. The first one will be the default."""
-        options = []
-
-        try:
-            source_file = self.object.source_file
-        except SourceFile.DoesNotExist:
-            return options
-
-        # use this source file unless it is a Judgment and it is not anonymised
-        can_use_source_file = (
-            not getattr(self.object, "must_be_anonymised", False)
-            or source_file.file_is_anonymised
-        )
-        if can_use_source_file:
-            options.append(
-                {
-                    "label": source_file.filename_extension().upper(),
-                    "url": reverse(
-                        "document_source", args=[self.object.expression_frbr_uri[1:]]
-                    ),
-                    "size": source_file.size,
-                }
-            )
-
-        # always offer a PDF version if the source file is not a PDF
-        if not options or source_file.filename_extension() != "pdf":
-            options.append(
-                {
-                    "label": "PDF",
-                    "url": reverse(
-                        "document_source_pdf",
-                        args=[self.object.expression_frbr_uri[1:]],
-                    ),
-                }
-            )
-
-        return options
 
 
 class CSRFTokenView(View):

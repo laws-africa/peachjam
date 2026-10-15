@@ -545,6 +545,7 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             ("can_view_historical_legislation", "Can view historical legislation"),
             ("can_view_case_history", "Can view case history"),
             ("can_view_provision_changes", "Can view provision changes"),
+            ("can_download_document", "Can download document files"),
         ]
 
     def __str__(self):

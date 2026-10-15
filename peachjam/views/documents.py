@@ -26,12 +26,13 @@ from peachjam.models import (
     DocumentNature,
     DocumentSocialImage,
     ExtractedCitation,
+    SourceFile,
     pj_settings,
 )
 from peachjam.registry import registry
 from peachjam.resolver import resolver
 from peachjam.storage import clean_filename
-from peachjam.views import BaseDocumentDetailView
+from peachjam.views.generic_views import BaseDocumentDetailView
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 
 
@@ -116,6 +117,85 @@ class DocumentDetailViewResolver(View):
         raise Exception(
             f"The document type {obj.doc_type} does not have a view registered."
         )
+
+
+@method_decorator(never_cache, name="dispatch")
+class DocumentToolbarView(SubscriptionRequiredMixin, DetailView):
+    """Render the personalised, non-cacheable controls for a document toolbar."""
+
+    template_name = "peachjam/_document_detail_toolbar_content.html"
+    model = CoreDocument
+    queryset = CoreDocument.objects.filter(published=True)
+    context_object_name = "document"
+    http_method_names = ["get"]
+    permission_required = "peachjam.can_download_document"
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        if obj.restricted:
+            perm = f"{obj._meta.app_label}.view_{obj._meta.model_name}"
+            if not self.request.user.has_perm(perm, obj):
+                raise Http404()
+        return obj
+
+    def has_permission(self):
+        # The toolbar remains available to everyone; the download action is
+        # resolved separately so denied users can be shown an upgrade prompt.
+        return True
+
+    def get_download_options(self):
+        """Return the source-file formats available from the download menu."""
+        options = []
+
+        try:
+            source_file = self.object.source_file
+        except SourceFile.DoesNotExist:
+            return options
+
+        can_use_source_file = (
+            not getattr(self.object, "must_be_anonymised", False)
+            or source_file.file_is_anonymised
+        )
+        if can_use_source_file:
+            options.append(
+                {
+                    "label": source_file.filename_extension().upper(),
+                    "url": reverse(
+                        "document_source",
+                        args=[self.object.expression_frbr_uri[1:]],
+                    ),
+                    "size": source_file.size,
+                }
+            )
+
+        if not options or source_file.filename_extension() != "pdf":
+            options.append(
+                {
+                    "label": "PDF",
+                    "url": reverse(
+                        "document_source_pdf",
+                        args=[self.object.expression_frbr_uri[1:]],
+                    ),
+                }
+            )
+
+        return options
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_settings = pj_settings()
+        context["show_save_doc_button"] = site_settings.save_documents_enabled and (
+            not self.request.user.is_authenticated
+            or self.request.user.has_perm("peachjam.add_saveddocument")
+        )
+        context["download_options"] = self.get_download_options()
+        context["download_allowed"] = (
+            not site_settings.document_downloads_require_permission
+            or self.request.user.has_perm(self.permission_required)
+        )
+        if context["download_options"] and not context["download_allowed"]:
+            context.update(self.build_subscription_required_context())
+        return context
 
 
 class DocumentSourceView(DocumentDetailView):
