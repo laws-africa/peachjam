@@ -95,22 +95,28 @@
 {% endblock %}
 {% block extra-metadata %}
   {{ block.super }}
-  {% if document.case_summary %}
+  {% block before-judgment-summary %}{% endblock %}
+  {% if document.case_summary or document.blurb or document.flynote %}
     <dl class="document-metadata-list d-md-flex">
       <dt>
-        {% trans 'Summary' %}
+        {% block judgment-summary-heading %}
+          {% trans 'Summary' %}
+        {% endblock %}
       </dt>
       <dd>
         {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document show_flynote_heading=True link_flynote_topics=True %}
-        <details>
-          <summary class="mb-1" data-track-event="Document | Toggle summary">
-            {% trans 'Read full summary' %}
-          </summary>
-          <div class="judgment-full-summary"></div>
-        </details>
-        <div hx-trigger="load"
-             hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}">
-        </div>
+        {% if document.case_summary %}
+          <details>
+            <summary class="mb-1" data-track-event="Document | Toggle summary">
+              {% trans 'Read full summary' %}
+            </summary>
+            <div class="judgment-full-summary"></div>
+          </details>
+          <div hx-trigger="load"
+               hx-get="{% url 'document_case_summary' document.expression_frbr_uri|strip_first_character %}">
+          </div>
+        {% endif %}
+        {% block after-judgment-summary %}{% endblock %}
       </dd>
     </dl>
   {% endif %}
