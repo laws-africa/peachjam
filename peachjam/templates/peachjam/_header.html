@@ -39,11 +39,16 @@
                      class="form-control"
                      placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                      aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
-                     aria-describedby="search-addon"
-                     {% if SEARCH_SUGGESTIONS %}data-component="SearchTypeahead"{% endif %}
+                     data-component="SearchInput"
+                     data-shortcuts-url="{% url 'search:omnibox_shortcuts' %}"
+                     data-suggestions-url="{% url 'search:search_suggestions' %}"
+                     data-show-suggestions="{{ SEARCH_SUGGESTIONS|yesno:'true,false' }}"
                      name="q"/>
-              <button class="btn btn-secondary" type="submit" id="search-addon">
-                <i class="bi bi-search text-white"></i>
+              <button class="btn btn-secondary"
+                      type="submit"
+                      id="search-addon"
+                      aria-label="{% trans 'Search' %}">
+                <i class="bi bi-search text-white" aria-hidden="true"></i>
               </button>
             </div>
           {% endblock %}
