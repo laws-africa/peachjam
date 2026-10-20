@@ -115,6 +115,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.humanize",
     "django.contrib.messages",
+    "django.contrib.postgres",
     "django.contrib.sitemaps",
     "django.contrib.sites",
     "django.contrib.staticfiles",

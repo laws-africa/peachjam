@@ -51,7 +51,7 @@ def _patched_finish(self, redirect_url):
             if created:
                 user.set_unusable_password()
                 user.save()
-                track_account_created_signup_event(user)
+                track_account_created_signup_event(user, request=self.request)
             self.state["user_id"] = user_id_to_str(user)
             self._user = user
     return _original_finish(self, redirect_url)

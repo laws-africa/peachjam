@@ -94,6 +94,24 @@ def get_proper_elided_page_range(paginator, number, on_each_side=3, on_ends=2):
 
 
 @register.simple_tag
+def get_mobile_elided_page_range(paginator, number):
+    """Return a compact page range that moves with the current mobile page."""
+    page_count = paginator.num_pages
+    if page_count <= 5:
+        return list(range(1, page_count + 1))
+
+    if number <= 2:
+        return [1, 2, 3, paginator.ELLIPSIS, page_count]
+
+    pages = list(range(number - 1, min(number + 1, page_count) + 1))
+    if pages[-1] < page_count - 1:
+        pages.extend([paginator.ELLIPSIS, page_count])
+    elif pages[-1] == page_count - 1:
+        pages.append(page_count)
+    return pages
+
+
+@register.simple_tag
 def query_string(*args, **kwargs):
     """
     Combines dictionaries of query parameters and individual query parameters

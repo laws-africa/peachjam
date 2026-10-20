@@ -24,9 +24,11 @@ def year_and_month_aggs(queryset, place_code=None):
     results = []
 
     items = list(
-        queryset.annotate(
-            year=ExtractYear("date"), month=ExtractMonth("date"), count=Count("pk")
-        ).values("year", "month", "count")
+        queryset.order_by()
+        .annotate(year=ExtractYear("date"), month=ExtractMonth("date"))
+        .values("year", "month")
+        .annotate(count=Count("pk"))
+        .order_by("-year", "month")
     )
 
     # sort by years and months
@@ -92,8 +94,9 @@ class GazetteListView(TemplateView):
         context["localities"] = self.get_localities(context)
         context["locality_groups"] = chunks(context["localities"], 3)
         queryset = self.get_queryset()
-        context["years"] = year_and_month_aggs(queryset, self.kwargs.get("code"))
-        context["doc_count"] = queryset.count()
+        years = year_and_month_aggs(queryset, self.kwargs.get("code"))
+        context["years"] = years
+        context["doc_count"] = sum(year["count"] for year in years)
         context["doc_count_noun"] = _("gazette")
         context["doc_count_noun_plural"] = _("gazettes")
         context["nature"] = "Gazette"

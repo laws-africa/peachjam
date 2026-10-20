@@ -387,8 +387,12 @@ msgstr "Esta funcionalidade não está disponível de momento."
 #: organisations/services.py:368
 #, fuzzy
 #| msgid "Sign up with your email address."
-msgid "Sign in with the verified email address that was invited."
+msgid "Sign in with an account using the invited email address."
 msgstr "Registe-se com o seu endereço de e-mail."
+
+#: organisations/services.py:587
+msgid "This email address is already verified for another account."
+msgstr ""
 
 #: organisations/services.py:373
 msgid "This account already belongs to an organisation."
@@ -763,4 +767,3 @@ msgstr "Subscrição"
 #: views.py:30
 msgid "Your pending subscription change has been cancelled."
 msgstr "A sua alteração de subscrição pendente foi cancelada."
-

@@ -1,5 +1,6 @@
 import datetime
 from io import StringIO
+from types import SimpleNamespace
 from unittest.mock import patch
 
 from countries_plus.models import Country
@@ -8,7 +9,7 @@ from django.contrib import admin
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from languages_plus.models import Language
 
@@ -486,6 +487,40 @@ class JudgmentFormExtractorUrlTests(TestCase):
                 reverse("admin:peachjam_extract_judgment"),
                 form.extractor_url,
             )
+
+
+class ExtractorRequestTests(SimpleTestCase):
+    def test_blank_court_name_fails_before_request(self):
+        extractor = ExtractorService()
+        extractor.api_token = "token"
+        extractor.api_url = "https://extractor.example/"
+        court = SimpleNamespace(pk=27, code="blank-court", name="  ")
+
+        with (
+            patch("peachjam.extractor.Court.objects.all", return_value=[court]),
+            patch("peachjam.extractor.requests.post") as post,
+        ):
+            with self.assertRaisesRegex(
+                ExtractorError,
+                r"courts have blank names: blank-court \(id=27\)",
+            ):
+                extractor.extract_judgment_details(
+                    SimpleNamespace(pk="TZ"),
+                    SimpleNamespace(),
+                )
+
+        post.assert_not_called()
+
+    def test_validated_names_preserves_resolved_names(self):
+        objects = [
+            SimpleNamespace(pk=1, name="English Court"),
+            SimpleNamespace(pk=2, name="Mahakama"),
+        ]
+
+        self.assertEqual(
+            ["English Court", "Mahakama"],
+            ExtractorService().validated_names(objects, "courts"),
+        )
 
 
 @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
@@ -1665,6 +1700,29 @@ class JudgmentExtractViewRenderingTests(TestCase):
         self.assertIn('value="__alias_preview__"', content)
         self.assertIn(">Anukam<", content)
         self.assertIn('value="__judge_preview__"', content)
+
+    @override_settings(DEBUG=False)
+    @patch("peachjam.admin.sentry_sdk.capture_exception")
+    def test_extract_view_reports_error_and_renders_it(self, capture_exception):
+        file = SimpleUploadedFile(
+            "judgment.pdf",
+            b"%PDF-1.4 fake",
+            content_type="application/pdf",
+        )
+        error = ExtractorError("Court blank-court (id=27) has a blank name")
+
+        with patch(
+            "peachjam.admin.ExtractorService.extract_judgment_details",
+            side_effect=error,
+        ):
+            response = self.client.post(
+                reverse("admin:peachjam_extract_judgment"),
+                {"file": file},
+            )
+
+        self.assertEqual(200, response.status_code)
+        self.assertContains(response, str(error))
+        capture_exception.assert_called_once_with(error)
 
 
 class BackfillJudgePeopleCommandTests(TestCase):

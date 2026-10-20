@@ -1,5 +1,6 @@
 import logging
 
+import css_inline
 from customerio import APIClient, Regions, SendEmailRequest
 from django.conf import settings
 from django.contrib.sites.models import Site
@@ -32,6 +33,11 @@ class TemplateBackend(BaseTemplateBackend):
             template_dir=template_dir,
             file_extension=file_extension,
         )
+
+        if parts.get("html"):
+            # Email clients cannot reliably use a large stylesheet in the head.
+            # Inline ordinary rules, but retain media queries for responsive layouts.
+            parts["html"] = css_inline.inline(parts["html"], keep_at_rules=True)
 
         if parts.get("subject"):
             parts["subject"] = (

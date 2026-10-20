@@ -136,7 +136,7 @@ def user_saved_updated_customerio(sender, instance, **kwargs):
 
 @receiver(allauth_signals.user_signed_up)
 def user_signed_up_update_customerio(sender, request, user, **kwargs):
-    track_account_created_signup_event(user)
+    track_account_created_signup_event(user, request=request)
 
 
 @receiver(signals.post_save, sender=UserProfile)

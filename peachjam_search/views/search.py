@@ -19,7 +19,11 @@ from django.http.response import (
 )
 from django.shortcuts import redirect, reverse
 from django.template.loader import render_to_string
-from django.utils.cache import add_never_cache_headers
+from django.utils.cache import (
+    add_never_cache_headers,
+    patch_cache_control,
+    patch_vary_headers,
+)
 from django.utils.decorators import method_decorator
 from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
@@ -41,7 +45,14 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
-from peachjam.models import Author, CourtRegistry, Judge, Judgment, Label, pj_settings
+from peachjam.models import (
+    Author,
+    CourtRegistry,
+    Judge,
+    Judgment,
+    Label,
+    pj_settings,
+)
 from peachjam.views import AtomicPostMixin
 from peachjam.views.mixins import AtomicWriteViewSetMixin
 from peachjam_api.serializers import LabelSerializer
@@ -73,12 +84,24 @@ from peachjam_search.serializers import (
     SearchFlynoteClickSerializer,
     SearchHit,
 )
+from peachjam_search.suggestions import SearchSuggestionService
 from peachjam_subs.models import Subscription
 
 CACHE_SECS = 15 * 60
-SUGGESTIONS_CACHE_SECS = 60 * 60 * 6
+DEGRADED_SUGGESTIONS_CACHE_SECS = 30
+CLIENT_SUGGESTIONS_CACHE_SECS = 30 * 60
 
 log = logging.getLogger(__name__)
+
+
+def strip_null_bytes(value):
+    if isinstance(value, str):
+        return value.replace("\00", " ")
+    if isinstance(value, dict):
+        return {key: strip_null_bytes(child) for key, child in value.items()}
+    if isinstance(value, list):
+        return [strip_null_bytes(child) for child in value]
+    return value
 
 
 def debug_json(value):
@@ -186,7 +209,6 @@ class DocumentSearchView(TemplateView):
         has_direct_flynote_match = any(
             hit.source == "direct_query" for hit in flynote_hits
         )
-
         response = {
             "count": es_response.hits.total.value,
             "facets": es_response.aggregations.to_dict(),
@@ -239,17 +261,24 @@ class DocumentSearchView(TemplateView):
         self.use_explain = True
         return self.search(request, *args, **kwargs)
 
-    @method_decorator(cache_page(SUGGESTIONS_CACHE_SECS))
     def suggest(self, request, *args, **kwargs):
-        q = request.GET.get("q")
-        suggestions = []
-
-        if q and settings.PEACHJAM["SEARCH_SUGGESTIONS"]:
-            suggestions = ElasticsearchSearchCompiler().suggest(q).suggest.to_dict()
-            suggestions["prefix"] = suggestions["prefix"][0]
-
-        response = {"suggestions": suggestions}
-        return self.render(response)
+        service = SearchSuggestionService()
+        response = self.render(
+            {"suggestions": service.suggest(request.GET.get("q", ""))}
+        )
+        # Suggestions are public. Browsers and shared caches may reuse them;
+        # degraded responses expire quickly so recovered providers can retry.
+        patch_cache_control(
+            response,
+            public=True,
+            max_age=(
+                DEGRADED_SUGGESTIONS_CACHE_SECS
+                if service.degraded
+                else CLIENT_SUGGESTIONS_CACHE_SECS
+            ),
+        )
+        patch_vary_headers(response, ["Accept-Language"])
+        return response
 
     @method_decorator(cache_page(CACHE_SECS))
     def facets(self, request, *args, **kwargs):
@@ -340,16 +369,20 @@ class DocumentSearchView(TemplateView):
         return self.make_entity_matcher().match(engine.search_query.query)
 
     def match_flynotes(self, engine, hits):
-        """Find supplementary legal-topic cards for a first-page legal-term search."""
+        """Match exact topic names for every query; expand legal-term searches."""
         if (
             engine.search_query.page != 1
             or engine.search_query.field_queries
             or not Judgment.flynote_topics_enabled()
-            or getattr(getattr(engine, "analysis", None), "intent", None)
-            != "legal_term"
         ):
             return []
-        return FlynoteSearchMatcher().match(engine.search_query.query, hits)
+        matcher = FlynoteSearchMatcher()
+        return matcher.match(
+            engine.search_query.query,
+            hits,
+            exact_only=getattr(getattr(engine, "analysis", None), "intent", None)
+            != "legal_term",
+        )
 
     def save_flynote_results(self, trace, flynote_hits):
         """Persist the exact topic cards rendered for a search trace.
@@ -416,15 +449,6 @@ class DocumentSearchView(TemplateView):
         elasticsearch_query=None,
         error=None,
     ):
-        def strip_null_bytes(value):
-            if isinstance(value, str):
-                return value.replace("\00", " ")
-            if isinstance(value, dict):
-                return {key: strip_null_bytes(child) for key, child in value.items()}
-            if isinstance(value, list):
-                return [strip_null_bytes(child) for child in value]
-            return value
-
         filters_string = "; ".join(
             f"{k}={v}" for k, v in engine.search_query.filters.items()
         )

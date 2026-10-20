@@ -387,8 +387,12 @@ msgstr "Kipengele hiki hakipatikani kwa sasa."
 #: organisations/services.py:368
 #, fuzzy
 #| msgid "Sign up with your email address."
-msgid "Sign in with the verified email address that was invited."
+msgid "Sign in with an account using the invited email address."
 msgstr "Jisajili na barua pepe yako."
+
+#: organisations/services.py:587
+msgid "This email address is already verified for another account."
+msgstr ""
 
 #: organisations/services.py:373
 msgid "This account already belongs to an organisation."
@@ -763,4 +767,3 @@ msgstr "Usajili"
 #: views.py:30
 msgid "Your pending subscription change has been cancelled."
 msgstr "Mabadiliko ya usajili unaosubiri kutekelezwa yameghairiwa."
-

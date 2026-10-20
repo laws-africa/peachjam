@@ -1,6 +1,7 @@
 {% load i18n %}
 {% if subscription_required %}
-  <div class="dropdown follow-control" data-key-link-feature="following">
+  <div class="dropdown follow-control position-static"
+       data-key-link-feature="following">
     <button class="btn btn-outline-primary dropdown-toggle"
             data-key-link="follow_dropdown"
             type="button"
@@ -9,7 +10,7 @@
       <i class="bi bi-bell"></i>
       {% trans "Follow" %}
     </button>
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu col-10 col-sm-6 col-lg-3">
       <li>
         <button class="dropdown-item text-wrap"
                 data-key-link="follow"
@@ -49,7 +50,8 @@
     </div>
   </div>
 {% else %}
-  <div class="dropdown follow-control" data-key-link-feature="following">
+  <div class="dropdown follow-control position-static"
+       data-key-link-feature="following">
     <button class="btn {% if follow %}btn-primary{% else %}btn-outline-primary{% endif %} dropdown-toggle"
             data-key-link="{% if follow %}unfollow_dropdown{% else %}follow_dropdown{% endif %}"
             type="button"
@@ -62,7 +64,7 @@
         {% trans "Follow" %}
       {% endif %}
     </button>
-    <ul class="dropdown-menu">
+    <ul class="dropdown-menu col-10 col-sm-6 col-lg-3">
       {% if follow %}
         <li>
           <div class="dropdown-item-text">

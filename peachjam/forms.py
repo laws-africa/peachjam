@@ -363,6 +363,7 @@ class BaseDocumentFilterForm(forms.Form):
     case_actions = PermissiveTypedListField(coerce=remove_nulls, required=False)
     taxonomies = PermissiveTypedListField(coerce=remove_nulls, required=False)
     labels = PermissiveTypedListField(coerce=remove_nulls, required=False)
+    languages = PermissiveTypedListField(coerce=remove_nulls, required=False)
     q = forms.CharField(required=False)
 
     sort = forms.ChoiceField(
@@ -392,6 +393,7 @@ class BaseDocumentFilterForm(forms.Form):
         "outcomes",
         "case_actions",
         "labels",
+        "languages",
         "taxonomies",
     ]
 
@@ -527,6 +529,10 @@ class BaseDocumentFilterForm(forms.Form):
         return (
             queryset.filter(labels__name__in=labels).distinct() if labels else queryset
         )
+
+    def apply_filter_languages(self, queryset):
+        languages = self.cleaned_data.get("languages", [])
+        return queryset.filter(language_id__in=languages) if languages else queryset
 
     def apply_filter_taxonomies(self, queryset):
         taxonomies = self.cleaned_data.get("taxonomies", [])

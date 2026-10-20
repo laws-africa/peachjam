@@ -25,6 +25,7 @@ from peachjam_subs.organisations.notifications import (
     notify_email,
     notify_invitation,
     notify_member,
+    notify_owner_added,
 )
 from peachjam_subs.organisations.signals import (
     organisation_billing_recipients_changed,
@@ -239,6 +240,57 @@ class OrganisationService:
             event_data={"billing_period": billing_period, "privacy_mode": privacy_mode},
         )
         return organisation
+
+    @transaction.atomic
+    def add_existing_owner(self, *, organisation, user, offering, actor):
+        """Add an existing account as owner and assign a committed seat."""
+        organisation = Organisation.objects.select_for_update().get(pk=organisation.pk)
+        self.ensure_can_manage(actor, organisation)
+        self.ensure_organisation_accepts_invitations(organisation)
+        if organisation.owner:
+            raise ValidationError(_("This organisation already has an owner."))
+        if OrganisationMembership.objects.filter(
+            user=user, status=OrganisationMembership.Status.ACTIVE
+        ).exists():
+            raise ValidationError(_("This account already belongs to an organisation."))
+        self.ensure_offering_available(organisation, offering, actor=actor)
+        if not self.public_offerings().filter(pk=offering.pk).exists():
+            assign_perm("peachjam_subs.can_subscribe", user, offering)
+        seat = self.find_available_seat(organisation, offering)
+        if not seat:
+            raise ValidationError(
+                _("There is no committed seat available for the owner.")
+            )
+
+        membership = OrganisationMembership.objects.create(
+            organisation=organisation,
+            user=user,
+            role=OrganisationMembership.Role.OWNER,
+        )
+        assignment = OrganisationSeatAssignment.objects.create(
+            seat=seat, membership=membership
+        )
+        OrganisationAuditEvent.objects.create(
+            organisation=organisation,
+            actor=actor,
+            membership=membership,
+            seat=seat,
+            event_type=OrganisationAuditEvent.EventType.MEMBER_ADDED,
+            message="Added an existing account as organisation owner.",
+            event_data={"user_id": user.pk, "email": user.email},
+        )
+        organisation_billing_recipients_changed.send(
+            sender=OrganisationMembership,
+            organisation=organisation,
+        )
+        organisation_seat_assigned.send(
+            sender=OrganisationSeatAssignment,
+            assignment=assignment,
+            created_seat=False,
+            opening=False,
+        )
+        notify_owner_added(user, organisation)
+        return membership
 
     @transaction.atomic
     def send_invitation(
@@ -567,11 +619,28 @@ class OrganisationService:
         notify_invitation(invitation)
         return invitation
 
-    def verified_invitation_email(self, user, invitation):
-        """Return whether the user has verified the invitation email address."""
-        return EmailAddress.objects.filter(
-            user=user, email__iexact=invitation.email, verified=True
-        ).exists()
+    def invitation_email_matches_user(self, user, invitation):
+        """Match the invited address to the account presenting its emailed token."""
+        return user.email.casefold() == invitation.email.casefold() or (
+            EmailAddress.objects.filter(
+                user=user, email__iexact=invitation.email
+            ).exists()
+        )
+
+    def verify_invitation_email(self, user, invitation):
+        """Treat acceptance of the emailed invitation as address verification."""
+        address = EmailAddress.objects.filter(
+            user=user, email__iexact=invitation.email
+        ).first()
+        if address is None:
+            address = EmailAddress.objects.create(
+                user=user, email=invitation.email.lower()
+            )
+        if not address.set_verified():
+            raise ValidationError(
+                _("This email address is already verified for another account.")
+            )
+        address.set_as_primary(conditional=True)
 
     def find_available_seat(self, organisation, offering):
         """Return an unassigned active seat for the exact offering."""
@@ -692,9 +761,9 @@ class OrganisationService:
         if invitation.status != OrganisationInvitation.Status.PENDING:
             raise ValidationError(_("This invitation is no longer available."))
         self.ensure_organisation_accepts_invitations(organisation)
-        if not self.verified_invitation_email(user, invitation):
+        if not self.invitation_email_matches_user(user, invitation):
             raise ValidationError(
-                _("Sign in with the verified email address that was invited.")
+                _("Sign in with an account using the invited email address.")
             )
         if OrganisationMembership.objects.filter(
             user=user, status=OrganisationMembership.Status.ACTIVE
@@ -770,6 +839,7 @@ class OrganisationService:
                 self.activate_assignment(assignment)
 
         invitation.accept(membership)
+        self.verify_invitation_email(user, invitation)
         OrganisationAuditEvent.objects.create(
             organisation=organisation,
             actor=user,

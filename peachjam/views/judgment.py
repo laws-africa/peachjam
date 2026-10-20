@@ -297,6 +297,7 @@ class FilteredJudgmentView(FilteredDocumentListView):
         self.add_judges_facet(context)
         self.add_courts_facet(context)
         self.add_years_facet(context)
+        self.add_languages_facet(context)
         self.add_labels_facet(context)
         self.add_divisions_facet(context)
         self.add_outcomes_facet(context)

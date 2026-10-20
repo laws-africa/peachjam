@@ -38,7 +38,7 @@
       {% if doc_table_show_treatments %}
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
-      {% if document.doc_type == "judgment" %}
+      {% if document.doc_type == "judgment" or document.flynote %}
         {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document %}
       {% elif document.listing_taxonomies %}
         <div class="d-none d-md-block ms-3">
