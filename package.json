@@ -48,7 +48,7 @@
     "sass-loader": "^12.6.0",
     "ts-loader": "^9.5.1",
     "typescript": "^5.6.3",
-    "vue": "^3.2.31",
+    "vue": "^3.5.44",
     "vue-loader": "^17.4.2",
     "vue-select": "^4.0.0-beta.3",
     "vue-style-loader": "^4.1.3",
