@@ -1,0 +1,23 @@
+{% extends "peachjam/layouts/main.html" %}
+{% load i18n %}
+{% block title %}
+  {% trans 'Search omnibox' %}
+{% endblock %}
+{% block page-content %}
+  <div class="container py-4">
+    <h1 id="main-page-heading">{% trans 'Search omnibox' %}</h1>
+    <form method="get" action="{% url 'search:search' %}" class="d-flex">
+      <input type="hidden" name="suggestion"/>
+      <input type="search"
+             name="q"
+             class="form-control"
+             placeholder="{% trans 'Search' %}"
+             aria-label="{% trans 'Search documents' %}"
+             data-component="SearchInput"
+             data-shortcuts-url="{% url 'search:omnibox_shortcuts' %}"
+             data-suggestions-url="{% url 'search:search_suggestions' %}"
+             data-show-suggestions="{{ SEARCH_SUGGESTIONS|yesno:'true,false' }}"/>
+      <button type="submit" class="btn btn-primary ms-2">{% trans 'Search' %}</button>
+    </form>
+  </div>
+{% endblock %}

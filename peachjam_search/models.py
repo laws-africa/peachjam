@@ -98,10 +98,24 @@ class SearchTrace(models.Model):
         """Re-build a search URL for this trace."""
         params = {"q": self.search}
         params.update(
-            {k: v for k, v in (self.filters.items() or {}) if k != "is_most_recent"}
+            {
+                k: v
+                for k, v in (self.filters or {}).items()
+                if k not in {"is_most_recent", "date", "q", "page", "ordering", "mode"}
+            }
         )
-        params.update({"page": self.page})
-        params.update({"ordering": self.ordering})
+        # The search page restores date controls from these URL parameters.
+        date_range = (self.filters or {}).get("date")
+        if date_range:
+            if date_range[0]:
+                params["date_from"] = date_range[0]
+            if date_range[1]:
+                params["date_to"] = date_range[1]
+        params["page"] = self.page
+        if self.ordering:
+            params["ordering"] = self.ordering
+        if self.mode and self.mode != "text":
+            params["mode"] = self.mode
         return reverse("search:search") + "?" + urlencode(params, doseq=True)
 
     def get_search_debug_url(self):
