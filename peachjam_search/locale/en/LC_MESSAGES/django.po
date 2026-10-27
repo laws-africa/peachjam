@@ -1,12 +1,12 @@
-#: entity_matcher.py:76
+#: entity_matcher.py:90
 msgid "Court"
 msgstr ""
 
-#: entity_matcher.py:99
+#: entity_matcher.py:116
 msgid "Judge"
 msgstr ""
 
-#: entity_matcher.py:142
+#: entity_matcher.py:163
 msgid "Locality"
 msgstr ""
 
@@ -32,6 +32,14 @@ msgstr ""
 
 #: models.py:438
 msgid "email address"
+msgstr ""
+
+#: suggestions.py:60
+msgid "Document"
+msgstr ""
+
+#: suggestions.py:100
+msgid "Legal topic"
 msgstr ""
 
 #: templates/peachjam_search/_debug_json_tabs.html:11
@@ -489,11 +497,11 @@ msgstr ""
 msgid "No search traces found."
 msgstr ""
 
-#: views/search.py:107
+#: views/search.py:130
 #, python-format
 msgid "Search %(app_name)s"
 msgstr ""
 
-#: views/search.py:713
+#: views/search.py:737
 msgid "Search trace not found"
 msgstr ""
