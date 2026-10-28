@@ -10,6 +10,7 @@ from django.db.models import F
 from django.http.response import HttpResponse, JsonResponse, StreamingHttpResponse
 from django.template.loader import render_to_string
 from django.views.generic import DetailView
+from langfuse import propagate_attributes
 from openai.types.responses.response_text_delta_event import ResponseTextDeltaEvent
 
 from peachjam.chat.agent import DocumentChat, extract_assistant_response
@@ -199,14 +200,22 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
         chat = DocumentChat(thread)
         await chat.setup()
 
-        with langfuse.start_as_current_observation(
-            name="document_chat",
-            as_type="generation",
-            input={
-                "expression_frbr_uri": thread.document.expression_frbr_uri,
-                "question": message["content"],
-            },
-        ) as generation:
+        with (
+            langfuse.start_as_current_observation(
+                name="document_chat",
+                as_type="generation",
+                input={
+                    "expression_frbr_uri": thread.document.expression_frbr_uri,
+                    "question": message["content"],
+                },
+            ) as generation,
+            propagate_attributes(
+                trace_name="document_chat",
+                tags=[settings.PEACHJAM["APP_NAME"]],
+                user_id=thread.user.username,
+                session_id=str(thread.id),
+            ),
+        ):
             log.info(f"Streaming chat for {thread}")
             result = Runner.run_streamed(
                 chat.agent,
@@ -236,12 +245,7 @@ class DocumentChatView(AsyncDispatchMixin, ChatThreadDetailMixin):
                 )
             reply["trace_id"] = generation.trace_id
 
-            generation.update_trace(
-                tags=[settings.PEACHJAM["APP_NAME"]],
-                user_id=thread.user.username,
-                session_id=str(thread.id),
-                output={"reply": reply["content"]},
-            )
+            generation.update(output={"reply": reply["content"]})
 
         # send the full final response
         yield self.format_sse("message", reply)

@@ -7,6 +7,7 @@ from agents import Agent, ModelSettings, Runner, RunResult, function_tool
 from django.conf import settings
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db import connection
+from langfuse import propagate_attributes
 from openai.types import Reasoning
 from pydantic import BaseModel
 
@@ -293,12 +294,18 @@ class JudgmentSummariser:
     def summarise(self, expression_frbr_uri, text, language=None) -> JudgmentSummary:
         log.info("Generating judgment summary for %s", expression_frbr_uri)
 
-        with langfuse.start_as_current_observation(
-            name="summarise_judgment",
-            as_type="generation",
-            input={"expression_frbr_uri": expression_frbr_uri},
-            prompt=self.summary_prompt,
-        ) as generation:
+        with (
+            langfuse.start_as_current_observation(
+                name="summarise_judgment",
+                as_type="generation",
+                input={"expression_frbr_uri": expression_frbr_uri, "text": text},
+                prompt=self.summary_prompt,
+            ) as generation,
+            propagate_attributes(
+                trace_name="summarise_judgment",
+                tags=[settings.PEACHJAM["APP_NAME"]],
+            ),
+        ):
             summary = self.generate_summary(text)
             summary = self.match_flynotes(summary)
             summary = self.translate_summary(summary, language)
