@@ -27,14 +27,7 @@ urlpatterns = [
         name="search_explain",
     ),
     path("api/documents/facets", views.DocumentSearchView.as_view(action="facets")),
-    path(
-        "api/documents/suggest/",
-        views.DocumentSearchView.as_view(action="suggest"),
-        name="search_suggestions",
-    ),
-    path(
-        "api/omnibox/", views.OmniboxShortcutsView.as_view(), name="omnibox_shortcuts"
-    ),
+    path("api/documents/suggest/", views.DocumentSearchView.as_view(action="suggest")),
     path("api/link-traces", views.LinkTracesView.as_view()),
     path("api/", include(router.urls)),
     path(
@@ -91,11 +84,6 @@ urlpatterns = [
         name="search_feedback_create",
     ),
     path("", views.SearchView.as_view(), name="search"),
-    path(
-        "box",
-        views.TemplateView.as_view(template_name="peachjam_search/box.html"),
-        name="search_box",
-    ),
     path("traces", views.SearchTraceListView.as_view(), name="search_traces"),
     path(
         "traces/<uuid:pk>", views.SearchTraceDetailView.as_view(), name="search_trace"

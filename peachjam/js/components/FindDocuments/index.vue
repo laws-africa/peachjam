@@ -535,8 +535,6 @@ export default {
   mounted () {
     this.loadState();
     this.searchInput = new SearchInput(this.$refs.searchInput, {
-      shortcutsUrl: `${this.urlPrefix}/search/api/omnibox/`,
-      suggestionsUrl: `${this.urlPrefix}/search/api/documents/suggest/`,
       showSuggestions: Boolean(this.showSuggestions),
       onSearch: (query, suggestion) => {
         this.q = query;

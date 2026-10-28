@@ -66,6 +66,9 @@ class OmniboxShortcuts:
                 status=SearchTrace.Status.COMPLETED,
                 page=1,
             )
+            .only(
+                "id", "search", "field_searches", "filters", "ordering", "mode", "page"
+            )
             .exclude(search="")
             .order_by("-created_at")[:100]
         )

@@ -16,10 +16,12 @@ from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.dates import MONTHS
+from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.text import gettext_lazy as _
 from django.utils.text import slugify
+from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, ListView, TemplateView, View
 from languages_plus.models import Language
 from lxml import html
@@ -48,6 +50,7 @@ from peachjam_api.serializers import (
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
 )
+from peachjam_search.omnibox import OmniboxShortcuts
 from peachjam_subs.models import Product, Subscription
 
 
@@ -790,6 +793,7 @@ class CSRFTokenView(View):
         return HttpResponse(get_token(request), content_type="text/plain")
 
 
+@method_decorator(never_cache, name="dispatch")
 class PageLoadedView(TemplateView):
     """Called after all page loads via htmx. This allows us to inject user-specific content onto generic cached pages.
 
@@ -804,6 +808,7 @@ class PageLoadedView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["sentry_enabled"] = bool(settings.PEACHJAM["SENTRY_DSN_KEY"])
         context["signup_completed"] = False
+        shortcuts = OmniboxShortcuts().for_user(self.request.user)
 
         if self.request.user.is_authenticated:
             if (
@@ -817,6 +822,7 @@ class PageLoadedView(TemplateView):
             context["user_json"] = json.dumps(
                 {
                     "id": self.request.user.id,
+                    "omnibox": shortcuts,
                     "email": self.request.user.email,
                     "name": user_display(self.request.user),
                     "is_staff": self.request.user.is_staff,
@@ -843,7 +849,7 @@ class PageLoadedView(TemplateView):
                 }
             )
         else:
-            context["user_json"] = json.dumps({"perms": []})
+            context["user_json"] = json.dumps({"perms": [], "omnibox": shortcuts})
 
         return context
 

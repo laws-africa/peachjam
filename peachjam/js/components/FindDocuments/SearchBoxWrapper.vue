@@ -3,13 +3,9 @@
     ref="searchBox"
     v-model="query"
     :groups="groups"
-    :user-id="shortcuts.user_id"
-    :loading="loading"
-    :shortcuts-error="shortcutsError"
-    :suggestions-loading="suggestionsLoading"
-    :suggestions-error="suggestionsError"
     @search="search"
     @shortcut="openShortcut"
+    @remove-history="removeHistory"
     @close="cancel"
   />
 </template>
@@ -18,6 +14,7 @@
 import SearchBox from './SearchBox.vue';
 import SearchSuggestions from '../../utils/search-suggestions';
 import OmniboxHistory from '../../utils/omnibox-history';
+import peachJam from '../../peachjam';
 
 export default {
   name: 'SearchBoxWrapper',
@@ -30,10 +27,6 @@ export default {
       recentIds: [],
       recentSearches: [],
       suggestions: [],
-      loading: false,
-      shortcutsError: false,
-      suggestionsLoading: false,
-      suggestionsError: false,
       isOpen: false
     };
   },
@@ -49,8 +42,8 @@ export default {
           return text === term ? 0 : (text.startsWith(term) ? 1 : 2);
         };
         saved.sort((a, b) => matchRank(a) - matchRank(b) || this.recency(a) - this.recency(b));
-        if (saved.length) groups.push({ key: 'saved', label: this.$t('Saved items'), items: saved.slice(0, 8) });
-        if (this.suggestions.length) groups.push({ key: 'suggestions', label: this.$t('Search suggestions'), items: this.suggestions });
+        if (saved.length) groups.push({ key: 'saved', label: this.$t('Saved items'), items: saved.slice(0, 8), showTypes: true });
+        if (this.suggestions.length) groups.push({ key: 'suggestions', label: this.$t('Search suggestions'), items: this.suggestions, showTypes: true });
         return groups;
       }
       if (this.recentSearches.length) {
@@ -74,57 +67,43 @@ export default {
     query () { this.loadSuggestions(); }
   },
   mounted () {
-    this.shortcutRequests = new Map();
     this.suggestionSource = new SearchSuggestions();
     this.pendingSearches = [];
+    window.addEventListener('peachjam.user-loaded', this.loadShortcuts);
     window.addEventListener('peachjam.search-completed', this.recordSearch);
     window.addEventListener('hashchange', this.recordCurrentPage);
     document.addEventListener('htmx:afterSwap', this.recordCurrentPage);
+    document.addEventListener('htmx:afterRequest', this.savedItemsChanged);
+    this.loadShortcuts();
   },
   beforeUnmount () {
     this.cancel();
+    window.removeEventListener('peachjam.user-loaded', this.loadShortcuts);
     window.removeEventListener('peachjam.search-completed', this.recordSearch);
     window.removeEventListener('hashchange', this.recordCurrentPage);
     document.removeEventListener('htmx:afterSwap', this.recordCurrentPage);
+    document.removeEventListener('htmx:afterRequest', this.savedItemsChanged);
   },
   methods: {
-    preload (url) {
-      // Deduplicate concurrent loads, but refresh on every open so saves and searches appear immediately.
-      this.shortcutsUrl = url;
-      if (this.shortcutRequests.has(url)) return this.shortcutRequests.get(url);
-      this.loading = true;
-      this.shortcutsError = false;
-      const promise = fetch(url, { cache: 'no-store', credentials: 'same-origin' })
-        .then(async response => {
-          if (!response.ok) throw new Error('Unable to load shortcuts');
-          const data = await response.json();
-          if (this.shortcutsUrl === url) {
-            this.shortcuts = data;
-            if (!this.history || this.history.userId !== data.user_id) this.history = new OmniboxHistory(data.user_id);
-            for (const search of this.pendingSearches) this.history.remember(search.query, search.url);
-            this.pendingSearches = [];
-            this.recentSearches = this.history.recent(data.recent_searches);
-            this.readRecency();
-            this.recordCurrentPage();
-          }
-          return data;
-        })
-        .catch(() => {
-          if (this.shortcutsUrl === url) {
-            this.shortcutsError = true;
-            this.shortcuts = { user_id: null, recent_searches: [], saved_items: [] };
-            this.history = null;
-            this.pendingSearches = [];
-            this.recentSearches = [];
-          }
-          return null;
-        })
-        .finally(() => {
-          this.shortcutRequests.delete(url);
-          if (this.shortcutsUrl === url) this.loading = false;
-        });
-      this.shortcutRequests.set(url, promise);
-      return promise;
+    loadShortcuts () {
+      const data = peachJam.user.omnibox;
+      if (!data) return;
+      this.shortcuts = data;
+      if (!this.history || this.history.userId !== data.user_id) this.history = new OmniboxHistory(data.user_id);
+      for (const search of this.pendingSearches) this.history.remember(search.query, search.url);
+      this.pendingSearches = [];
+      this.recentSearches = this.history.recent(data.recent_searches);
+      this.readRecency();
+      this.recordCurrentPage();
+    },
+    savedItemsChanged (event) {
+      const { successful, requestConfig } = event.detail;
+      if (!successful || requestConfig.verb.toLowerCase() !== 'post') return;
+      const path = new URL(requestConfig.path, window.location.origin).pathname;
+      const prefix = peachJam.config.urlLangPrefix;
+      if ([`${prefix}/user/saved-documents/`, `${prefix}/my/folders/`, `${prefix}/search/saved-searches/`].some(url => path.startsWith(url))) {
+        peachJam.loaded();
+      }
     },
     show (input, config) {
       if (!this.$refs.searchBox.show(input)) return;
@@ -132,7 +111,6 @@ export default {
       this.query = input.value;
       this.isOpen = true;
       this.loadSuggestions();
-      this.preload(config.shortcutsUrl);
     },
     cancel () {
       this.isOpen = false;
@@ -186,38 +164,34 @@ export default {
       this.lastVisitedFolder = folderItem?.id;
     },
     recordSearch (event) {
-      if (this.shortcutsError) return;
       const search = event.detail;
-      if (!this.history || this.loading) {
+      if (!this.history) {
         this.pendingSearches.push(search);
         return;
       }
       this.history.remember(search.query, search.url);
       this.recentSearches = this.history.recent(this.shortcuts.recent_searches);
     },
+    removeHistory (item) {
+      this.history.remove(item.url);
+      this.recentSearches = this.history.recent(this.shortcuts.recent_searches);
+    },
     loadSuggestions () {
       clearTimeout(this.suggestionTimer);
       this.suggestionController?.abort();
       this.suggestions = [];
-      this.suggestionsLoading = false;
-      this.suggestionsError = false;
       const term = this.query.trim();
       if (!this.isOpen || !this.config.showSuggestions || term.length < 3 || !this.suggestionSource.shouldLoad(term)) return;
-      this.suggestionsLoading = true;
       this.suggestionTimer = setTimeout(async () => {
         const controller = new AbortController();
         this.suggestionController = controller;
         try {
-          const items = await this.suggestionSource.load(term, this.config.suggestionsUrl, controller.signal);
+          const items = await this.suggestionSource.load(term, `${peachJam.config.urlLangPrefix}/search/api/documents/suggest/`, controller.signal);
           if (controller.signal.aborted || !this.isOpen || this.query.trim() !== term) return;
           this.suggestions = items.map((item, index) => ({
             id: `suggestion-${index}`, text: item.value, meta: item.typeLabel, suggestionType: item.type
           }));
-        } catch (_) {
-          if (!controller.signal.aborted) this.suggestionsError = true;
-        } finally {
-          if (!controller.signal.aborted) this.suggestionsLoading = false;
-        }
+        } catch (_) { /* Search remains available when suggestions cannot be loaded. */ }
       }, 200);
     }
   }

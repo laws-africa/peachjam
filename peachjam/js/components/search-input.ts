@@ -3,14 +3,11 @@ import { vueI18n } from '../i18n';
 import SearchBoxWrapper from './FindDocuments/SearchBoxWrapper.vue';
 
 interface SearchInputOptions {
-  shortcutsUrl?: string;
-  suggestionsUrl?: string;
   showSuggestions?: boolean;
   onSearch?: (query: string, suggestion: string | null) => void;
 }
 
 interface Omnibox {
-  preload: (url: string) => void;
   show: (input: HTMLInputElement, options: SearchInputOptions) => void;
 }
 
@@ -33,8 +30,6 @@ export default class SearchInput {
     }
     const wrapper = omnibox;
     const config = {
-      shortcutsUrl: root.dataset.shortcutsUrl || '/search/api/omnibox/',
-      suggestionsUrl: root.dataset.suggestionsUrl || '/search/api/documents/suggest/',
       showSuggestions: root.dataset.showSuggestions !== 'false',
       onSearch: (query: string, suggestion: string | null) => {
         root.value = query;
@@ -45,7 +40,6 @@ export default class SearchInput {
       },
       ...options
     };
-    wrapper.preload(config.shortcutsUrl);
     root.addEventListener('focus', () => wrapper.show(root, config));
     root.addEventListener('click', () => wrapper.show(root, config));
   }

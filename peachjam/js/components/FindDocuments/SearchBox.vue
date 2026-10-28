@@ -34,22 +34,6 @@
       />
     </form>
     <div class="search-box__results mt-3" @keydown="resultKeydown">
-      <p
-        class="visually-hidden"
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <template v-if="loading">
-          {{ $t('Loading shortcuts') }}
-        </template>
-        <template v-else>
-          {{ $t('{count} suggestions available', { count: resultCount }) }}
-        </template>
-      </p>
-      <p v-if="shortcutsError" class="text-body-secondary small">
-        {{ $t('Your shortcuts could not be loaded. You can still search.') }}
-      </p>
       <section
         v-for="group in groups"
         :key="group.key"
@@ -60,47 +44,39 @@
           {{ group.label }}
         </h3>
         <ul class="list-group list-group-flush">
-          <li v-for="item in group.items" :key="item.id" class="list-group-item px-0 py-0">
+          <li v-for="item in group.items" :key="item.id" class="search-box__row list-group-item d-flex align-items-stretch px-0 py-0">
             <a
               v-if="item.url"
               :href="item.url"
-              class="search-box__result d-flex align-items-center gap-2 py-2"
+              class="search-box__result btn btn-link border-0 rounded-0 d-flex align-items-center gap-2 text-start flex-grow-1 px-0 py-2"
               @click="$emit('shortcut', $event, item)"
             >
-              <i :class="icon(item)" aria-hidden="true" />
+              <i :class="icon(item)" class="search-box__icon flex-shrink-0" aria-hidden="true" />
               <span class="flex-grow-1">{{ item.text }}</span>
-              <span class="badge text-bg-secondary">{{ typeLabel(item) }}</span>
+              <span v-if="group.showTypes" class="badge text-bg-secondary">{{ typeLabel(item) }}</span>
             </a>
             <button
               v-else
               type="button"
-              class="search-box__result btn btn-link w-100 d-flex align-items-center gap-2 text-start"
+              class="search-box__result btn btn-link border-0 rounded-0 d-flex align-items-center gap-2 text-start flex-grow-1 px-0 py-2"
               @click="search(item.text, item.suggestionType)"
             >
-              <i class="bi bi-search" aria-hidden="true" />
+              <i class="search-box__icon bi bi-search flex-shrink-0" aria-hidden="true" />
               <span class="flex-grow-1">{{ item.text }}</span>
-              <span class="badge text-bg-secondary">{{ item.meta }}</span>
+              <span v-if="group.showTypes" class="badge text-bg-secondary">{{ item.meta }}</span>
+            </button>
+            <button
+              v-if="item.type === 'history'"
+              type="button"
+              class="search-box__remove btn btn-link flex-shrink-0"
+              :aria-label="$t('Remove recent search: {query}', { query: item.text })"
+              @click="removeHistory(item)"
+            >
+              <i class="bi bi-x-lg" aria-hidden="true" />
             </button>
           </li>
         </ul>
       </section>
-      <p v-if="!resultCount && !loading && !suggestionsLoading" class="text-body-secondary">
-        <template v-if="query.trim()">
-          {{ $t('Press Enter to search.') }}
-        </template>
-        <template v-else-if="userId !== null">
-          {{ $t('Start typing to search. Your recent searches and saved items will appear here.') }}
-        </template>
-        <template v-else>
-          {{ $t('Start typing to find documents, courts, judges and places.') }}
-        </template>
-      </p>
-      <p v-if="suggestionsLoading" class="text-body-secondary small" role="status">
-        {{ $t('Loading search suggestions') }}
-      </p>
-      <p v-if="suggestionsError" class="text-body-secondary small" role="status">
-        {{ $t('Search suggestions could not be loaded. Press Enter to search.') }}
-      </p>
     </div>
   </dialog>
 </template>
@@ -110,14 +86,9 @@ export default {
   name: 'SearchBox',
   props: {
     modelValue: { type: String, default: '' },
-    groups: { type: Array, default: () => [] },
-    userId: { type: Number, default: null },
-    loading: Boolean,
-    shortcutsError: Boolean,
-    suggestionsLoading: Boolean,
-    suggestionsError: Boolean
+    groups: { type: Array, default: () => [] }
   },
-  emits: ['update:modelValue', 'search', 'shortcut', 'close'],
+  emits: ['update:modelValue', 'search', 'shortcut', 'remove-history', 'close'],
   data () {
     return {
       query: this.modelValue,
@@ -129,11 +100,6 @@ export default {
       isOpen: false,
       isMobile: false
     };
-  },
-  computed: {
-    resultCount () {
-      return this.groups.reduce((count, group) => count + group.items.length, 0);
-    }
   },
   watch: {
     modelValue (value) { this.query = value; },
@@ -237,12 +203,21 @@ export default {
     resultKeydown (event) {
       if (!['ArrowDown', 'ArrowUp'].includes(event.key)) return;
       const results = Array.from(this.$refs.dialog.querySelectorAll('.search-box__result'));
-      const index = results.indexOf(event.target);
+      const index = results.indexOf(event.target.closest('li')?.querySelector('.search-box__result'));
       if (index < 0) return;
       event.preventDefault();
       const next = index + (event.key === 'ArrowDown' ? 1 : -1);
       if (next < 0 || next >= results.length) this.$refs.input.focus();
       else results[next].focus();
+    },
+    async removeHistory (item) {
+      const results = Array.from(this.$refs.dialog.querySelectorAll('.search-box__result'));
+      const index = results.indexOf(document.activeElement.closest('li')?.querySelector('.search-box__result'));
+      this.$emit('remove-history', item);
+      await this.$nextTick();
+      const remaining = this.$refs.dialog.querySelectorAll('.search-box__result');
+      const target = remaining[Math.min(index, remaining.length - 1)] || this.$refs.input;
+      target.focus();
     },
     icon (item) {
       return { document: 'bi bi-star-fill', folder: 'bi bi-folder', saved_search: 'bi bi-star-fill', history: 'bi bi-clock-history' }[item.type];
@@ -282,6 +257,23 @@ export default {
 
 .search-box__result {
   overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.search-box__icon {
+  width: 1.25em;
+  text-align: center;
+}
+
+.search-box__row:focus-within {
+  background-color: var(--bs-light);
+  box-shadow: inset 3px 0 0 var(--bs-primary);
+}
+
+.search-box__result:focus-visible,
+.search-box__remove:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: none;
 }
 
 @media (max-width: 991.98px) {

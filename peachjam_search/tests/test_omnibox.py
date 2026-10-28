@@ -1,3 +1,4 @@
+import json
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth.models import Permission, User
@@ -8,6 +9,7 @@ from django.utils import timezone
 
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam_search.models import SavedSearch, SearchTrace
+from peachjam_search.omnibox import OmniboxShortcuts
 
 
 class OmniboxTests(TestCase):
@@ -31,10 +33,14 @@ class OmniboxTests(TestCase):
         self.search = SavedSearch.objects.create(
             user=self.user, q="criminal law", filters="court=high-court&year=2025"
         )
-        self.url = reverse("search:omnibox_shortcuts")
+        self.url = reverse("loaded")
 
     def login(self, user=None):
         self.client.force_login(user or self.user)
+
+    def shortcuts(self):
+        response = self.client.get(self.url)
+        return json.loads(response.context["user_json"])["omnibox"]
 
     def trace(self, **kwargs):
         return SearchTrace.objects.create(
@@ -53,18 +59,17 @@ class OmniboxTests(TestCase):
         self.trace()
         response = self.client.get(self.url)
         self.assertEqual(
-            response.json(),
+            json.loads(response.context["user_json"])["omnibox"],
             {"user_id": None, "recent_searches": [], "saved_items": []},
         )
         self.assertIn("private", response["Cache-Control"])
         self.assertIn("no-store", response["Cache-Control"])
-        self.assertIn("Cookie", response["Vary"])
 
     def test_shortcuts_belong_to_current_user_and_are_not_cached(self):
         self.trace()
         self.login()
         response = self.client.get(self.url)
-        data = response.json()
+        data = json.loads(response.context["user_json"])["omnibox"]
         self.assertEqual(data["user_id"], self.user.pk)
         self.assertEqual(
             {item["url"] for item in data["saved_items"]},
@@ -77,7 +82,7 @@ class OmniboxTests(TestCase):
         self.assertEqual(len(data["recent_searches"]), 1)
         self.assertIn("no-store", response["Cache-Control"])
         self.login(self.other)
-        data = self.client.get(self.url).json()
+        data = self.shortcuts()
         self.assertEqual(data["saved_items"], [])
         self.assertEqual(data["recent_searches"], [])
 
@@ -91,7 +96,7 @@ class OmniboxTests(TestCase):
         self.trace(field_searches={"title": "criminal law"})
         self.trace(search=" ")
         self.login()
-        recent = self.client.get(self.url).json()["recent_searches"]
+        recent = self.shortcuts()["recent_searches"]
         self.assertEqual(len(recent), 1)
         self.assertEqual(recent[0]["id"], str(newest.pk))
         self.assertEqual(
@@ -106,17 +111,24 @@ class OmniboxTests(TestCase):
             },
         )
 
+    def test_recent_searches_load_without_extra_queries(self):
+        self.trace(search="criminal law")
+        self.trace(search="contract", filters={"date": ["2025-01-01", None]})
+        with self.assertNumQueries(1):
+            recent = OmniboxShortcuts().recent_searches(self.user)
+        self.assertEqual(len(recent), 2)
+
     def test_locked_items_are_excluded(self):
         for item in (self.saved, self.folder, self.search):
             item.subscription_locked_at = timezone.now()
             item.save()
         self.login()
-        self.assertEqual(self.client.get(self.url).json()["saved_items"], [])
+        self.assertEqual(self.shortcuts()["saved_items"], [])
 
     def test_recent_search_date_range_uses_search_page_parameters(self):
         self.trace(filters={"date": ["2025-01-01", "2025-12-31"]})
         self.login()
-        recent = self.client.get(self.url).json()["recent_searches"]
+        recent = self.shortcuts()["recent_searches"]
         params = parse_qs(urlparse(recent[0]["url"]).query)
         self.assertEqual(params["date_from"], ["2025-01-01"])
         self.assertEqual(params["date_to"], ["2025-12-31"])
@@ -128,12 +140,12 @@ class OmniboxTests(TestCase):
         pjs.allow_save_searches = False
         pjs.save()
         self.login()
-        self.assertEqual(self.client.get(self.url).json()["saved_items"], [])
+        self.assertEqual(self.shortcuts()["saved_items"], [])
 
     def test_folder_and_saved_search_permissions_are_respected(self):
         self.user.user_permissions.clear()
         self.login()
-        items = self.client.get(self.url).json()["saved_items"]
+        items = self.shortcuts()["saved_items"]
         self.assertEqual([item["type"] for item in items], ["document"])
 
     def test_advanced_saved_search_replays_original_criteria(self):
@@ -143,17 +155,25 @@ class OmniboxTests(TestCase):
         )
         self.search.save()
         self.login()
-        items = self.client.get(self.url).json()["saved_items"]
+        items = self.shortcuts()["saved_items"]
         item = next(item for item in items if item["type"] == "saved_search")
         self.assertEqual(item["url"], self.search.get_absolute_url())
         self.assertIn("contract", item["text"])
 
-    def test_prototype_page_contains_no_personalised_data(self):
+    def test_shortcut_titles_cannot_escape_the_user_script(self):
+        self.folder.name = "</script><script>alert(1)</script>"
+        self.folder.save()
         self.login()
-        response = self.client.get(reverse("search:search_box"))
+        response = self.client.get(self.url)
+        self.assertNotContains(response, self.folder.name)
+        self.assertIn("JSON.parse(", response.content.decode())
+        data = json.loads(response.context["user_json"])["omnibox"]
+        self.assertIn(self.folder.name, [item["text"] for item in data["saved_items"]])
+
+    def test_public_page_does_not_include_personal_shortcuts(self):
+        self.login()
+        response = self.client.get(reverse("home_page"))
         self.assertContains(response, 'data-component="SearchInput"')
-        self.assertContains(response, 'id="main-page-heading"')
-        self.assertNotContains(response, "criminal law")
         self.assertNotContains(response, "Research")
 
 

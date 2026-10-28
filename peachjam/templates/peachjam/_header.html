@@ -40,8 +40,6 @@
                      placeholder="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                      aria-label="{% blocktrans %}Search {{ APP_NAME }}{% endblocktrans %}"
                      data-component="SearchInput"
-                     data-shortcuts-url="{% url 'search:omnibox_shortcuts' %}"
-                     data-suggestions-url="{% url 'search:search_suggestions' %}"
                      data-show-suggestions="{{ SEARCH_SUGGESTIONS|yesno:'true,false' }}"
                      name="q"/>
               <button class="btn btn-secondary"

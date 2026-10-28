@@ -1,4 +1,4 @@
-/** Share suggestion parsing and empty-prefix expiry across both search interfaces. */
+/** Load suggestions and expire cached empty prefixes. */
 export default class SearchSuggestions {
   constructor () {
     this.noSuggestions = new Map();
