@@ -139,6 +139,24 @@ class DocumentViewTestCase(WebTest):
 
         self.assertContains(response, '"is_external": true')
 
+    def test_legislation_images_remain_prefixed_after_loading_deferred_timeline(self):
+        doc = Legislation.objects.get(
+            expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
+        )
+        self.assertIn("timeline_json", doc.get_deferred_fields())
+        doc_content = doc.get_or_create_document_content()
+        doc_content.content_html = '<div><img src="media/image.png"></div>'
+        doc_content.save()
+
+        response = self.app.get(doc.get_absolute_url())
+
+        self.assertContains(
+            response,
+            f'src="{doc.expression_frbr_uri}/media/image.png"',
+        )
+        self.assertContains(response, 'loading="lazy"')
+        self.assertNotContains(response, 'src="media/image.png"')
+
 
 class RestrictedDocumentsTestCase(WebTest):
     fixtures = [
