@@ -327,6 +327,11 @@ class PortionType(str, Enum):
     SUMMARY = "summary"
 
 
+class PortionCourt(BaseModel):
+    name: str
+    code: str
+
+
 class PortionMetadata(BaseModel):
     work_frbr_uri: str
     frbr_place: str
@@ -336,6 +341,8 @@ class PortionMetadata(BaseModel):
     # TODO: enable once data is backfilled correctly in ES
     # frbr_actor: Optional[str] = None
     title: str
+    court: Optional[PortionCourt] = None
+    neutral_citation: Optional[str] = None
     repealed: Optional[bool] = None
     commenced: Optional[bool] = None
     principal: Optional[bool] = None
