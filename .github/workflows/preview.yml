@@ -15,65 +15,42 @@ env:
   ORCHESTRATOR: laws-africa/peachjam-preview
 
 jobs:
-  request:
-    name: Request a preview
+  preview:
+    name: Request a preview or its teardown
+    # a label event is about that one label; a push, reopen or close is about every preview label the PR carries
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
       (
-        (github.event.action == 'labeled' &&
-          (github.event.label.name == 'preview' || startsWith(github.event.label.name, 'preview:'))) ||
-        ((github.event.action == 'synchronize' || github.event.action == 'reopened') &&
+        ((github.event.action == 'labeled' || github.event.action == 'unlabeled') &&
+          startsWith(github.event.label.name, 'preview')) ||
+        (github.event.action != 'labeled' && github.event.action != 'unlabeled' &&
           contains(join(github.event.pull_request.labels.*.name, ' '), 'preview'))
       )
     runs-on: ubuntu-latest
     steps:
-      - name: Dispatch preview-up for each preview label
+      - name: Dispatch for each preview label
         env:
           GH_TOKEN: ${{ secrets.PREVIEW_DISPATCH_TOKEN }}
           ACTION: ${{ github.event.action }}
           LABEL: ${{ github.event.label.name }}
-          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
+          REPO: ${{ github.event.repository.name }}
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          ACTOR: ${{ github.actor }}
         run: |
           set -euo pipefail
-          # a label event is for that one label; a push or reopen redeploys every preview the PR carries
-          if [ "$ACTION" = labeled ]; then labels=$LABEL; else labels=$(jq -r '.[]' <<<"$LABELS"); fi
-          { grep -E '^preview(:[a-z0-9]+)?$' <<<"$labels" || true; } | while read -r label; do
+          case $ACTION in
+            labeled|unlabeled) labels=$LABEL ;;
+            *) labels=$LABELS ;;
+          esac
+          case $ACTION in
+            unlabeled|closed) workflow=preview-down; args=(-f reason="$ACTION") ;;
+            *) workflow=preview-up; args=(-f head_sha="$HEAD_SHA" -f requested_by="$ACTOR") ;;
+          esac
+          for label in $labels; do
+            [[ $label =~ ^preview(:[a-z0-9]+)?$ ]] || continue
             site=${label#preview:}; [ "$label" = preview ] && site=lawlibrary
-            gh workflow run preview-up.yml -R "$ORCHESTRATOR" \
-              -f repo="${{ github.event.repository.name }}" \
-              -f pr="${{ github.event.pull_request.number }}" \
-              -f site="$site" \
-              -f head_sha="${{ github.event.pull_request.head.sha }}" \
-              -f requested_by="${{ github.actor }}"
-            echo "Requested $site. Progress: https://github.com/$ORCHESTRATOR/actions/workflows/preview-up.yml" >> "$GITHUB_STEP_SUMMARY"
-          done
-
-  teardown:
-    name: Request teardown
-    if: >-
-      github.event.pull_request.head.repo.full_name == github.repository &&
-      (
-        (github.event.action == 'closed' &&
-          contains(join(github.event.pull_request.labels.*.name, ' '), 'preview')) ||
-        (github.event.action == 'unlabeled' &&
-          (github.event.label.name == 'preview' || startsWith(github.event.label.name, 'preview:')))
-      )
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dispatch preview-down for each preview label
-        env:
-          GH_TOKEN: ${{ secrets.PREVIEW_DISPATCH_TOKEN }}
-          ACTION: ${{ github.event.action }}
-          LABEL: ${{ github.event.label.name }}
-          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
-        run: |
-          set -euo pipefail
-          if [ "$ACTION" = unlabeled ]; then labels=$LABEL; else labels=$(jq -r '.[]' <<<"$LABELS"); fi
-          { grep -E '^preview(:[a-z0-9]+)?$' <<<"$labels" || true; } | while read -r label; do
-            site=${label#preview:}; [ "$label" = preview ] && site=lawlibrary
-            gh workflow run preview-down.yml -R "$ORCHESTRATOR" \
-              -f repo="${{ github.event.repository.name }}" \
-              -f pr="${{ github.event.pull_request.number }}" \
-              -f site="$site" \
-              -f reason="$ACTION"
+            gh workflow run "$workflow.yml" -R "$ORCHESTRATOR" -f repo="$REPO" -f pr="$PR" -f site="$site" "${args[@]}"
+            echo "$workflow $site: https://github.com/$ORCHESTRATOR/actions/workflows/$workflow.yml" >> "$GITHUB_STEP_SUMMARY"
           done
