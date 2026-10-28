@@ -1,12 +1,15 @@
 from django import forms
 from django.contrib import admin, messages
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ValidationError
+from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import path, reverse
+from django.utils.decorators import method_decorator
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
+from django.views.decorators.http import require_POST
 from django_fsm import TransitionNotAllowed
 from guardian.admin import GuardedModelAdmin
 
@@ -228,18 +231,62 @@ class SubscriptionAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         if obj:
-            return self.readonly_fields + ["user"]
+            fields = self.readonly_fields + ["user"]
+            if hasattr(obj, "billing_agreement"):
+                fields += ["starts_on", "ends_on", "product_offering"]
+            return fields
         return self.readonly_fields
 
+    def render_change_form(
+        self, request, context, add=False, change=False, form_url="", obj=None
+    ):
+        context["can_activate_subscription"] = bool(
+            obj
+            and obj.is_pending
+            and not hasattr(obj, "billing_agreement")
+            and self.has_change_permission(request, obj)
+        )
+        return super().render_change_form(request, context, add, change, form_url, obj)
+
+    @method_decorator(require_POST)
+    @transaction.atomic
     def activate_subscription(self, request, subscription_id):
-        if request.method == "POST":
-            subscription = Subscription.objects.get(pk=subscription_id)
+        """Grant unmanaged access without bypassing a billing agreement."""
+        subscription = get_object_or_404(
+            Subscription.objects.select_for_update(), pk=subscription_id
+        )
+        if not self.has_change_permission(request, subscription):
+            raise PermissionDenied
+        if hasattr(subscription, "billing_agreement"):
+            messages.warning(
+                request,
+                _("Billing-managed subscriptions must be activated through billing."),
+            )
+        else:
+            previous_status = subscription.status
             try:
                 subscription.activate()
-                messages.success(request, _("Subscription activated."))
             except TransitionNotAllowed:
-                messages.warning(request, _("Subscription cannot be activated."))
-        return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/admin/"))
+                messages.warning(
+                    request,
+                    subscription.activation_block_reason()
+                    or _("Subscription cannot be activated."),
+                )
+            else:
+                self.log_change(
+                    request,
+                    subscription,
+                    _("Manual subscription activation: %(previous)s → %(current)s.")
+                    % {"previous": previous_status, "current": subscription.status},
+                )
+                messages.success(
+                    request,
+                    _("Subscription activation processed. Current status: %(status)s.")
+                    % {"status": subscription.get_status_display()},
+                )
+        return HttpResponseRedirect(
+            reverse("admin:peachjam_subs_subscription_change", args=[subscription.pk])
+        )
 
     def close_subscription(self, request, subscription_id):
         if request.method == "POST":

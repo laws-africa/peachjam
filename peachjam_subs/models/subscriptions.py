@@ -13,6 +13,7 @@ from guardian.shortcuts import get_objects_for_user
 
 from peachjam.models import SingletonModel
 from peachjam_subs.dates import period_bounds, site_date
+from peachjam_subs.lifecycle_signals import subscription_activation_check
 
 log = logging.getLogger(__name__)
 
@@ -410,8 +411,23 @@ class Subscription(models.Model):
 
     objects = SubscriptionManager()
 
+    def activation_block_reason(self):
+        """Explain why activation must wait, or return None when it may proceed."""
+        if self.starts_on is not None and self.starts_on > site_date():
+            return _("The subscription start date has not arrived.")
+        return next(
+            (
+                reason
+                for _, reason in subscription_activation_check.send(
+                    sender=type(self), subscription=self
+                )
+                if reason
+            ),
+            None,
+        )
+
     def can_activate(self):
-        return self.starts_on is None or self.starts_on <= site_date()
+        return self.activation_block_reason() is None
 
     @property
     def product(self):
