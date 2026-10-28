@@ -28,6 +28,12 @@ class Migration(migrations.Migration):
                     ("can_view_case_history", "Can view case history"),
                     ("can_view_provision_changes", "Can view provision changes"),
                     ("can_download_document", "Can download document files"),
+                    (
+                        "can_download_legislation",
+                        "Can download legislation files",
+                    ),
+                    ("can_download_judgment", "Can download judgment files"),
+                    ("can_download_gazette", "Can download gazette files"),
                 ],
             },
         ),
@@ -36,7 +42,7 @@ class Migration(migrations.Migration):
             name="document_downloads_require_permission",
             field=models.BooleanField(
                 default=False,
-                help_text="Require users to have the document download permission before showing document download controls.",
+                help_text="Require users to have the relevant document download permission before showing document download controls.",
                 verbose_name="require permission for document downloads",
             ),
         ),

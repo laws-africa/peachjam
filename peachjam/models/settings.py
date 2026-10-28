@@ -188,7 +188,7 @@ class PeachJamSettings(SingletonModel):
         verbose_name=_("require permission for document downloads"),
         default=False,
         help_text=_(
-            "Require users to have the document download permission before showing document download controls."
+            "Require users to have the relevant document download permission before showing document download controls."
         ),
     )
     show_contact_form = models.BooleanField(

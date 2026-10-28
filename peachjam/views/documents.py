@@ -184,6 +184,7 @@ class DocumentToolbarView(SubscriptionRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         site_settings = pj_settings()
+        self.permission_required = self.object.download_permission
         context["show_save_doc_button"] = site_settings.save_documents_enabled and (
             not self.request.user.is_authenticated
             or self.request.user.has_perm("peachjam.add_saveddocument")

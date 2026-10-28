@@ -359,6 +359,8 @@ class CoreDocumentQuerySet(PolymorphicQuerySet):
 
 
 class CoreDocument(AttributeHooksMixin, PolymorphicModel):
+    download_permission = "peachjam.can_download_document"
+
     # There are three ways of indicating a document's type:
     #
     # 1. doc_type: This is historical and not widely used, since PolymorphicModel does the bulk of the work for us.
@@ -546,6 +548,9 @@ class CoreDocument(AttributeHooksMixin, PolymorphicModel):
             ("can_view_case_history", "Can view case history"),
             ("can_view_provision_changes", "Can view provision changes"),
             ("can_download_document", "Can download document files"),
+            ("can_download_legislation", "Can download legislation files"),
+            ("can_download_judgment", "Can download judgment files"),
+            ("can_download_gazette", "Can download gazette files"),
         ]
 
     def __str__(self):
