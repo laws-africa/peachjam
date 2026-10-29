@@ -5,6 +5,7 @@
   "main": "",
   "scripts": {
     "typecheck": "tsc --noEmit",
+    "test:omnibox": "node scripts/test-omnibox.cjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
