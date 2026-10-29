@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-10-29 07:59+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -17,37 +17,47 @@ msgstr ""
 "X-Crowdin-File: /main/peachjam_subs/locale/en/LC_MESSAGES/django.po\n"
 "X-Crowdin-File-ID: 267\n"
 
-#: admin.py:115
+#: admin.py:118
 msgid "Save the product first, then configure selectable offerings."
 msgstr "Hifadhi bidhaa kwanza, kisha usanidi matoleo yanayoweza kuchaguliwa."
 
-#: admin.py:123
+#: admin.py:126
 #, python-format
 msgid "Selectable offerings for '%(product)s' must belong to that product."
 msgstr "Matoleo yanayoweza kuchaguliwa kwa '%(product)s' lazima yawe ya bidhaa hiyo."
 
-#: admin.py:162
+#: admin.py:165
 #, python-format
 msgid "Key products must have at least one selectable offering configured: %(products)s"
 msgstr "Bidhaa muhimu lazima ziwe na angalau toleo moja linaloweza kuchaguliwa lililosanidiwa: %(products)s"
 
-#: admin.py:239
-msgid "Subscription activated."
-msgstr "Usajili umewezeshwa."
+#: admin.py:263
+msgid "Billing-managed subscriptions must be activated through billing."
+msgstr ""
 
-#: admin.py:241
+#: admin.py:273
 msgid "Subscription cannot be activated."
 msgstr "Usajili hauwezi kuwezeshwa."
 
-#: admin.py:251
+#: admin.py:279
+#, python-format
+msgid "Manual subscription activation: %(previous)s → %(current)s."
+msgstr ""
+
+#: admin.py:284
+#, python-format
+msgid "Subscription activation processed. Current status: %(status)s."
+msgstr ""
+
+#: admin.py:298
 msgid "Subscription cancelled."
 msgstr "Usajili umeghairiwa."
 
-#: admin.py:253
+#: admin.py:300
 msgid "Subscription cannot be cancelled."
 msgstr "Usajili hauwezi kughairiwa."
 
-#: admin.py:360
+#: admin.py:407
 msgid "View"
 msgstr "Tazama"
 
@@ -68,7 +78,7 @@ msgid "Provisional"
 msgstr ""
 
 #: models/organisations.py:25 models/organisations.py:162
-#: models/organisations.py:353 models/subscriptions.py:378
+#: models/organisations.py:353 models/subscriptions.py:379
 msgid "Active"
 msgstr "Inayotumika"
 
@@ -79,7 +89,7 @@ msgid "Closing"
 msgstr "Imefungwa"
 
 #: models/organisations.py:27 models/organisations.py:665
-#: models/subscriptions.py:379
+#: models/subscriptions.py:380
 msgid "Closed"
 msgstr "Imefungwa"
 
@@ -120,7 +130,7 @@ msgstr ""
 msgid "Awaiting payment"
 msgstr ""
 
-#: models/organisations.py:210 models/subscriptions.py:377
+#: models/organisations.py:210 models/subscriptions.py:378
 msgid "Pending"
 msgstr "Inasubiri"
 
@@ -321,104 +331,110 @@ msgstr ""
 msgid "This object must belong to the audit event's organisation."
 msgstr ""
 
-#: models/subscriptions.py:31
+#: models/subscriptions.py:32
 #, python-format
 msgid "Product '%(product)s' has more than one selectable %(period)s offering."
 msgstr "Bidhaa '%(product)s' ina zaidi ya ofa moja ya %(period)s inayoweza kuchaguliwa."
 
-#: models/subscriptions.py:47
+#: models/subscriptions.py:48
 #, python-format
 msgid "Product '%(product)s' annual selectable price (%(annual)s) must be higher than monthly (%(monthly)s)."
 msgstr "Bidhaa '%(product)s' bei inayoweza kuchaguliwa kwa mwaka (%(annual)s) lazima iwe juu kuliko kila mwezi (%(monthly)s)."
 
-#: models/subscriptions.py:77
+#: models/subscriptions.py:78
 #, python-format
 msgid "Selectable %(period)s pricing must increase with tier: '%(product)s' (%(price)s) is not higher than '%(prev_product)s' (%(prev_price)s)."
 msgstr "Bei inayoweza kuchaguliwa %(period)s lazima iongezeke kulingana na kiwango: '%(product)s' (%(price)s) si kubwa kuliko '%(prev_product)s' (%(prev_price)s)."
 
-#: models/subscriptions.py:119
+#: models/subscriptions.py:120
 msgid "Offerings explicitly available to users for this product (for example monthly and annual)."
 msgstr "Matoleo yanapatikana wazi kwa watumiaji kwa bidhaa hii (kwa mfano kila mwezi na kila mwaka)."
 
-#: models/subscriptions.py:258
+#: models/subscriptions.py:259
 msgid "Annually"
 msgstr "Kila mwaka"
 
-#: models/subscriptions.py:259
+#: models/subscriptions.py:260
 msgid "Monthly"
 msgstr "Kila mwezi"
 
-#: models/subscriptions.py:269 models/subscriptions.py:303
+#: models/subscriptions.py:270 models/subscriptions.py:304
 msgid "month"
 msgstr "mwezi"
 
-#: models/subscriptions.py:270
+#: models/subscriptions.py:271
 msgid "year"
 msgstr "mwaka"
 
-#: models/subscriptions.py:290 models/subscriptions.py:304
+#: models/subscriptions.py:291 models/subscriptions.py:305
 msgid "FREE"
 msgstr "BILA MALIPO"
 
-#: models/subscriptions.py:682
+#: models/subscriptions.py:417
+#, fuzzy
+#| msgid "Subscription cannot be activated."
+msgid "The subscription start date has not arrived."
+msgstr "Usajili hauwezi kuwezeshwa."
+
+#: models/subscriptions.py:698
 #, fuzzy
 #| msgid "Subscription"
 msgid "Subscription downgrade"
 msgstr "Usajili"
 
-#: models/subscriptions.py:683
+#: models/subscriptions.py:699
 msgid "Account deletion"
 msgstr ""
 
-#: models/subscriptions.py:686
+#: models/subscriptions.py:702
 msgid "Too expensive"
 msgstr ""
 
-#: models/subscriptions.py:687
+#: models/subscriptions.py:703
 msgid "Not using it enough"
 msgstr ""
 
-#: models/subscriptions.py:688
+#: models/subscriptions.py:704
 msgid "Missing a feature"
 msgstr ""
 
-#: models/subscriptions.py:689
+#: models/subscriptions.py:705
 msgid "Technical issue"
 msgstr ""
 
-#: models/subscriptions.py:692
+#: models/subscriptions.py:708
 msgid "Switching to an alternative"
 msgstr ""
 
-#: models/subscriptions.py:694
+#: models/subscriptions.py:710
 msgid "Temporary need"
 msgstr ""
 
-#: models/subscriptions.py:695
+#: models/subscriptions.py:711
 msgid "Other"
 msgstr ""
 
-#: models/subscriptions.py:774
+#: models/subscriptions.py:790
 msgid "Default product offering"
 msgstr "Utoaji wa bidhaa chaguomsingi"
 
-#: models/subscriptions.py:779
+#: models/subscriptions.py:795
 msgid "These products are highlighted in the product listing."
 msgstr "Bidhaa hizi zimeangaziwa kwenye orodha ya bidhaa."
 
-#: models/subscriptions.py:787
+#: models/subscriptions.py:803
 msgid "Trial product offering"
 msgstr "Sadaka ya bidhaa ya majaribio"
 
-#: models/subscriptions.py:788
+#: models/subscriptions.py:804
 msgid "If set, this product offering is used for trials."
 msgstr "Ikiwa imewekwa, toleo la bidhaa hii linatumika kwa majaribio."
 
-#: models/subscriptions.py:792
+#: models/subscriptions.py:808
 msgid "Trial duration (days)"
 msgstr "Muda wa majaribio (siku)"
 
-#: models/subscriptions.py:793
+#: models/subscriptions.py:809
 msgid "Number of days for the trial period."
 msgstr "Idadi ya siku kwa kipindi cha majaribio."
 
@@ -931,3 +947,6 @@ msgstr "Usajili"
 #: views.py:30
 msgid "Your pending subscription change has been cancelled."
 msgstr "Mabadiliko ya usajili unaosubiri kutekelezwa yameghairiwa."
+
+#~ msgid "Subscription activated."
+#~ msgstr "Usajili umewezeshwa."
