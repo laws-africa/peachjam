@@ -1,8 +1,26 @@
 {% extends 'peachjam/layouts/document_list.html' %}
 {% load i18n %}
 {% block title %}{{ page_heading }}{% endblock %}
+{% block breadcrumbs %}
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+          <a href="{% url 'home_page' %}">{% trans "Home" %}</a>
+        </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'legislation_list' %}">{% trans "Legislation" %}</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ page_heading }}</li>
+      </ol>
+    </nav>
+  </div>
+{% endblock %}
+{% block entity-profile %}
+  {% if not view.national_only %}{{ block.super }}{% endif %}
+{% endblock %}
 {% block page-title %}
-  {% if not entity_profile %}
+  {% if view.national_only or not entity_profile %}
     <div class="my-4">
       <h1 id="main-page-heading">{{ page_heading }}</h1>
       <p class="lead mb-0">{{ page_description }}</p>
