@@ -22,58 +22,58 @@
           {% endif %}
         </div>
         <div class="col-12 col-lg-7">
-          <form action="{% url 'legislation_list_all' %}" method="get" role="search">
-            <fieldset>
-              <legend class="visually-hidden">
-                {% trans "Find legislation" %}
-              </legend>
-              <div class="row g-2 align-items-end">
-                <div class="col-12 col-md-5 offset-md-1">
-                  <label class="form-label" for="legislation-search">{% trans "Title or citation" %}</label>
-                  <input id="legislation-search"
-                         type="search"
-                         class="form-control"
-                         name="q"
-                         placeholder="{% trans 'For example, Income Tax Act' %}"/>
-                </div>
-                <div class="col-6 col-md-2">
-                  <label class="form-label" for="legislation-year">{% trans "Year" %}</label>
-                  <select id="legislation-year" class="form-select" name="years">
-                    <option value="">
-                      {% trans "Any year" %}
-                    </option>
-                    {% for year in legislation_search_years %}
-                      <option value="{{ year }}">
-                        {{ year }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-6 col-md-3">
-                  <label class="form-label" for="legislation-nature">{% trans "Document nature" %}</label>
-                  <select id="legislation-nature" class="form-select" name="natures">
-                    <option value="">
-                      {% trans "Any nature" %}
-                    </option>
-                    {% for item in legislation_search_natures %}
-                      <option value="{{ item.nature__code }}">
-                        {{ item.nature__name }}
-                      </option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-12 col-md-1 d-grid">
-                  <button class="btn btn-primary" type="submit">
-                    <span class="d-md-none">{% trans "Search" %}</span>
-                    <i class="bi bi-search d-none d-md-inline" aria-hidden="true"></i>
-                    <span class="visually-hidden d-none d-md-inline">{% trans "Search legislation" %}</span>
-                  </button>
-                </div>
-              </div>
-            </fieldset>
-          </form>
-          <a class="d-inline-block mt-2"
-             href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search" %}</a>
+          <div class="row">
+            <div class="col-12 col-md-11 offset-md-1">
+              <form action="{% url 'legislation_list_all' %}" method="get" role="search">
+                <fieldset>
+                  <legend class="visually-hidden">
+                    {% trans "Find legislation" %}
+                  </legend>
+                  <div class="row g-2 align-items-end">
+                    <div class="col-12 col-md-5">
+                      <label class="form-label" for="legislation-search">{% trans "Title or citation" %}</label>
+                      <input id="legislation-search"
+                             type="search"
+                             class="form-control"
+                             name="q"
+                             placeholder="{% trans 'For example, Income Tax Act' %}"/>
+                    </div>
+                    <div class="col-6 col-md-2">
+                      <label class="form-label" for="legislation-year">{% trans "Year" %}</label>
+                      <select id="legislation-year" class="form-select" name="years">
+                        <option value="">
+                          {% trans "Any year" %}
+                        </option>
+                        {% for year in legislation_search_years %}
+                          <option value="{{ year }}">
+                            {{ year }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-6 col-md-3">
+                      <label class="form-label" for="legislation-nature">{% trans "Document nature" %}</label>
+                      <select id="legislation-nature" class="form-select" name="natures">
+                        <option value="">
+                          {% trans "Any nature" %}
+                        </option>
+                        {% for item in legislation_search_natures %}
+                          <option value="{{ item.nature__code }}">
+                            {{ item.nature__name }}
+                          </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                    <div class="col-12 col-md-2 d-grid">
+                      <button class="btn btn-primary" type="submit">{% trans "Search" %}</button>
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+              <a class="d-inline-block mt-2"
+                 href="{% url 'search:search' %}?show-advanced-tab=1&amp;nature={{ nature }}">{% trans "Advanced search" %}</a>
+            </div>
+          </div>
         </div>
       </div>
       <div class="row g-3" aria-label="{% trans 'Legislation collections' %}">
@@ -180,9 +180,7 @@
                  aria-labelledby="browse-by-document-nature-heading">
           <div class="card h-100">
             <div class="card-body d-flex flex-column">
-              <h3 id="browse-by-document-nature-heading" class="h4">
-                {% trans "Document nature" %}
-              </h3>
+              <h3 id="browse-by-document-nature-heading" class="h4">{% trans "Document nature" %}</h3>
               <p class="text-muted">
                 {% trans "Choose the nature of the legislation you need." %}
               </p>

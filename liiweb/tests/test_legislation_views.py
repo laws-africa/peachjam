@@ -1,6 +1,7 @@
 from datetime import date
 from io import StringIO
 
+from bs4 import BeautifulSoup
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls.base import reverse
@@ -10,6 +11,8 @@ from languages_plus.models import Language
 from peachjam.models import (
     DocumentNature,
     DocumentTopic,
+    EntityProfile,
+    JurisdictionProfile,
     Legislation,
     Locality,
     PeachJamSettings,
@@ -32,6 +35,11 @@ class LegislationViewsTest(TestCase):
         self.assertContains(response, f'action="{reverse("legislation_list_all")}"')
         self.assertContains(response, 'name="years"')
         self.assertContains(response, 'name="natures"')
+        soup = BeautifulSoup(response.content, "html.parser")
+        search_form = soup.find("form", action=reverse("legislation_list_all"))
+        search_button = search_form.find("button", type="submit")
+        self.assertEqual("Search", search_button.get_text(strip=True))
+        self.assertIsNone(search_button.find("i"))
         self.assertContains(response, "Browse by year")
         self.assertContains(response, "Current legislation")
         self.assertNotContains(response, "Local legislation")
@@ -42,7 +50,7 @@ class LegislationViewsTest(TestCase):
             f"{reverse('legislation_list_all')}?years="
             f"{response.context['legislation_years'][0]}",
         )
-        self.assertContains(response, "Legislation by status")
+        self.assertContains(response, "Legislation that is not currently in force")
         self.assertContains(response, "Popular legislation")
         self.assertNotContains(response, "View all popular legislation")
         self.assertNotContains(response, "bi-arrow-right")
@@ -250,6 +258,51 @@ class LegislationViewsTest(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual([], list(response.context.get("documents")))
+
+    def test_legislation_listing_ignores_empty_nature_filter(self):
+        response = self.client.get(reverse("legislation_list_all"), {"natures": ""})
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ["D", "Divorce Act, 1979"],
+            [document.title for document in response.context["documents"]],
+        )
+
+    def test_variant_listing_uses_variant_heading_and_breadcrumbs(self):
+        jurisdiction = Legislation.objects.get(pk=3040).jurisdiction
+        site_settings = PeachJamSettings.load()
+        site_settings.document_jurisdictions.set([jurisdiction])
+        jurisdiction_profile = JurisdictionProfile.objects.create(
+            jurisdiction=jurisdiction
+        )
+        EntityProfile.objects.create(
+            content_object=jurisdiction_profile,
+            title="National Legislation",
+        )
+
+        for url_name, heading in [
+            ("legislation_list_recent", "Recent legislation"),
+            ("legislation_list_subsidiary", site_settings.subleg_label),
+        ]:
+            with self.subTest(url_name=url_name):
+                response = self.client.get(reverse(url_name))
+
+                self.assertEqual(response.status_code, 200)
+                soup = BeautifulSoup(response.content, "html.parser")
+                self.assertTrue(
+                    soup.title.get_text(" ", strip=True).startswith(heading)
+                )
+                self.assertEqual(
+                    heading,
+                    soup.find("h1", id="main-page-heading").get_text(strip=True),
+                )
+                breadcrumb = soup.find("nav", attrs={"aria-label": "breadcrumb"})
+                self.assertIsNotNone(breadcrumb)
+                self.assertEqual(
+                    heading,
+                    breadcrumb.find("li", class_="active").get_text(strip=True),
+                )
+                self.assertNotContains(response, "National Legislation")
 
     def test_legislation_listing_filters_subsidiary_expressions_by_language(self):
         parent = (
