@@ -475,7 +475,7 @@ class BaseDocumentFilterForm(forms.Form):
         )
 
     def apply_filter_natures(self, queryset):
-        natures = self.cleaned_data.get("natures", [])
+        natures = [nature for nature in self.cleaned_data.get("natures", []) if nature]
         return queryset.filter(nature__code__in=natures) if natures else queryset
 
     def apply_filter_localities(self, queryset):
