@@ -29,6 +29,7 @@ from peachjam.models import (
     Flynote,
     FlynoteDocumentCount,
     Folder,
+    Gazette,
     GenericDocument,
     Judgment,
     LawReport,
@@ -50,9 +51,12 @@ from peachjam.views.robots import (
 )
 from peachjam_search.models import SavedSearch
 from peachjam_subs.models import (
+    Feature,
     OffboardingFeedback,
+    Product,
     ProductOffering,
     Subscription,
+    subscription_settings,
 )
 
 
@@ -1129,6 +1133,147 @@ class PeachjamViewsTest(TestCase):
         resp = self.client.get(f"{doc.get_absolute_url()}/source.pdf")
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content, pdf_content)
+
+    def create_document_source_file(self, document=None):
+        document = document or CoreDocument.objects.get(
+            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        )
+        SourceFile.objects.filter(document=document).delete()
+        SourceFile.objects.create(
+            document=document,
+            file=ContentFile(b"test", name="test.txt"),
+            mimetype="text/plain",
+        )
+        return document
+
+    def test_document_types_use_distinct_download_permissions(self):
+        self.assertEqual(
+            "peachjam.can_download_document", CoreDocument.download_permission
+        )
+        self.assertEqual(
+            "peachjam.can_download_document", GenericDocument.download_permission
+        )
+        self.assertEqual(
+            "peachjam.can_download_legislation", Legislation.download_permission
+        )
+        self.assertEqual("peachjam.can_download_judgment", Judgment.download_permission)
+        self.assertEqual("peachjam.can_download_gazette", Gazette.download_permission)
+
+    def test_document_page_uses_personalised_toolbar_fragment(self):
+        document = self.create_document_source_file()
+
+        response = self.client.get(document.get_absolute_url())
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(
+            response,
+            f'hx-get="{reverse("document_toolbar", kwargs={"pk": document.pk})}"',
+        )
+        self.assertContains(response, 'hx-swap="innerHTML"')
+        self.assertNotContains(response, "Download TXT")
+
+    def test_document_toolbar_allows_downloads_by_default(self):
+        document = self.create_document_source_file()
+
+        response = self.client.get(
+            reverse("document_toolbar", kwargs={"pk": document.pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Download TXT", count=2)
+        self.assertContains(
+            response,
+            f'href="{document.get_absolute_url()}/source"',
+            count=2,
+        )
+        self.assertIn("no-store", response.headers["Cache-Control"])
+
+    def test_document_toolbar_locks_downloads_without_permission(self):
+        document = self.create_document_source_file()
+        site_settings = PeachJamSettings.load()
+        site_settings.document_downloads_require_permission = True
+        site_settings.save()
+
+        permission = Permission.objects.get(
+            content_type__app_label="peachjam", codename="can_download_judgment"
+        )
+        feature = Feature.objects.create(name="Court judgment downloads")
+        feature.permissions.add(permission)
+        product = Product.objects.get(pk=3)
+        product.features.add(feature)
+        subscription_settings().key_products.add(product)
+
+        response = self.client.get(
+            reverse("document_toolbar", kwargs={"pk": document.pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "bi-lock-fill", count=2)
+        self.assertContains(response, "Download document")
+        self.assertContains(response, product.name)
+        self.assertNotContains(response, f"{document.get_absolute_url()}/source")
+        self.assertIn("no-store", response.headers["Cache-Control"])
+
+    def test_document_toolbar_allows_user_with_download_permission(self):
+        document = self.create_document_source_file()
+        site_settings = PeachJamSettings.load()
+        site_settings.document_downloads_require_permission = True
+        site_settings.save()
+        user = User.objects.get(username="officer@example.com")
+        user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="peachjam",
+                codename="can_download_judgment",
+            )
+        )
+        self.client.force_login(user)
+
+        response = self.client.get(
+            reverse("document_toolbar", kwargs={"pk": document.pk})
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Download TXT", count=2)
+        self.assertNotContains(response, "bi-lock-fill")
+
+    def test_document_toolbar_checks_permission_for_document_type(self):
+        judgment = self.create_document_source_file()
+        legislation = self.create_document_source_file(Legislation.objects.first())
+        site_settings = PeachJamSettings.load()
+        site_settings.document_downloads_require_permission = True
+        site_settings.save()
+        user = User.objects.get(username="officer@example.com")
+        user.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="peachjam",
+                codename="can_download_legislation",
+            )
+        )
+        self.client.force_login(user)
+
+        legislation_response = self.client.get(
+            reverse("document_toolbar", kwargs={"pk": legislation.pk})
+        )
+        judgment_response = self.client.get(
+            reverse("document_toolbar", kwargs={"pk": judgment.pk})
+        )
+
+        self.assertContains(legislation_response, "Download TXT", count=2)
+        self.assertNotContains(legislation_response, "bi-lock-fill")
+        self.assertContains(judgment_response, "bi-lock-fill", count=2)
+        self.assertNotContains(
+            judgment_response, f"{judgment.get_absolute_url()}/source"
+        )
+
+    def test_document_source_route_remains_public_when_toolbar_is_locked(self):
+        document = self.create_document_source_file()
+        site_settings = PeachJamSettings.load()
+        site_settings.document_downloads_require_permission = True
+        site_settings.save()
+
+        response = self.client.get(f"{document.get_absolute_url()}/source")
+
+        self.assertEqual(response.status_code, 200)
 
     def test_pdf_document_content_includes_source_file_start_page(self):
         doc = GenericDocument.objects.create(

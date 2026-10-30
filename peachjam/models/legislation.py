@@ -18,6 +18,7 @@ class LegislationManager(CoreDocumentManager):
 
 class Legislation(CoreDocument):
     decorator = LegislationDecorator()
+    download_permission = "peachjam.can_download_legislation"
 
     objects = LegislationManager.from_queryset(CoreDocumentQuerySet)()
 

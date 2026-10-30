@@ -184,6 +184,13 @@ class PeachJamSettings(SingletonModel):
         default=True,
         help_text=_("Allow private document annotations."),
     )
+    document_downloads_require_permission = models.BooleanField(
+        verbose_name=_("require permission for document downloads"),
+        default=False,
+        help_text=_(
+            "Require users to have the relevant document download permission before showing document download controls."
+        ),
+    )
     show_contact_form = models.BooleanField(
         verbose_name=_("show contact form"),
         default=False,

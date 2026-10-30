@@ -1,0 +1,130 @@
+{% load i18n %}
+<div class="me-auto">
+  {% if show_save_doc_button %}
+    <!-- these will be replaced by htmx -->
+    <div class="save-document-button save-document-button--{{ document.id }}"></div>
+  {% endif %}
+</div>
+<div id="edit-document-button">{% include "peachjam/_document_edit_button.html" %}</div>
+{% if download_options %}
+  {% if download_allowed %}
+    <div class="btn-group dropdown-center ms-2 d-none d-md-block">
+      <a href="{{ download_options.0.url }}"
+         class="btn btn-secondary btn-shrink-sm"
+         data-track-event="Document | Download"
+         target="_blank">
+        {% trans "Download" %} {{ download_options.0.label }}
+        {% if download_options.0.size %}({{ download_options.0.size|filesizeformat }}){% endif %}
+      </a>
+      {% if download_options|length > 1 %}
+        <button type="button"
+                class="btn btn-secondary btn-shrink-sm dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown"
+                aria-expanded="false">
+          <span class="visually-hidden">{% trans "Toggle download menu" %}</span>
+        </button>
+        <ul class="dropdown-menu">
+          {% for option in download_options|slice:"1:" %}
+            <li>
+              <a class="dropdown-item"
+                 href="{{ option.url }}"
+                 data-track-event="Document | Download"
+                 target="_blank">{% trans "Download" %} {{ option.label }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
+  {% else %}
+    <button type="button"
+            class="btn btn-secondary btn-shrink-sm ms-2 d-none d-md-block"
+            data-bs-toggle="modal"
+            data-bs-target="#document-download-subscription-modal-{{ document.pk }}">
+      <i class="bi bi-lock-fill" aria-hidden="true"></i>
+      {% trans "Download" %}
+    </button>
+  {% endif %}
+{% endif %}
+<button type="button"
+        class="btn btn-outline-secondary btn-shrink-sm ms-2 d-none d-md-block"
+        data-bs-toggle="modal"
+        data-bs-target="#documentProblemModal">
+  {% trans 'Report a problem' %}
+</button>
+<div class="modal fade"
+     id="documentProblemModal"
+     tabindex="-1"
+     aria-labelledby="documentProblemModalTitle"
+     aria-hidden="true"
+     data-vue-component="DocumentProblemModal">
+</div>
+<div class="d-md-none dropdown">
+  <button class="btn btn-outline-secondary btn-shrink-sm ms-2"
+          type="button"
+          data-bs-toggle="dropdown"
+          aria-expanded="false">
+    <i class="bi bi-three-dots" aria-hidden="true"></i>
+    <span class="visually-hidden">{% trans "Document actions" %}</span>
+  </button>
+  <ul class="dropdown-menu">
+    <li>
+      <button class="dropdown-item" data-component="ShareMenuItem">{% trans "Share" %}</button>
+    </li>
+    {% if download_options %}
+      {% if download_allowed %}
+        {% for option in download_options %}
+          <li>
+            <a href="{{ option.url }}"
+               class="dropdown-item"
+               data-track-event="Document | Download"
+               target="_blank">
+              {% trans "Download" %} {{ option.label }}
+              {% if option.size %}({{ option.size|filesizeformat }}){% endif %}
+            </a>
+          </li>
+        {% endfor %}
+      {% else %}
+        <li>
+          <button type="button"
+                  class="dropdown-item"
+                  data-bs-toggle="modal"
+                  data-bs-target="#document-download-subscription-modal-{{ document.pk }}">
+            <i class="bi bi-lock-fill" aria-hidden="true"></i>
+            {% trans "Download" %}
+          </button>
+        </li>
+      {% endif %}
+    {% endif %}
+    <li>
+      <hr class="dropdown-divider" />
+    </li>
+    <li>
+      <a class="dropdown-item"
+         href="#documentProblemModal"
+         data-bs-toggle="modal">{% trans "Report a problem" %}</a>
+    </li>
+  </ul>
+</div>
+{% if download_options and not download_allowed %}
+  <div class="modal fade"
+       id="document-download-subscription-modal-{{ document.pk }}"
+       tabindex="-1"
+       aria-labelledby="document-download-subscription-modal-title-{{ document.pk }}"
+       aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title fs-5"
+              id="document-download-subscription-modal-title-{{ document.pk }}">
+            {% trans "Download document" %}
+          </h2>
+          <button type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="{% trans "Close" %}"></button>
+        </div>
+        <div class="modal-body">{% include "peachjam_subs/_subscription_required.html" %}</div>
+      </div>
+    </div>
+  </div>
+{% endif %}
