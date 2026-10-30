@@ -1,3 +1,4 @@
+import datetime
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,8 @@ from peachjam.models import (
     Judge,
     Judgment,
     Label,
+    LeadingAuthority,
+    LegalSubject,
     Locality,
 )
 from peachjam_search.entity_matcher import EntitySearchHit
@@ -1068,6 +1071,43 @@ class SearchViewsTest(TestCase):
 
         self.assertIn("Reported", html)
         self.assertIn("badge rounded-pill bg-success", html)
+
+    def test_search_hit_highlights_leading_authority(self):
+        request = RequestFactory().get("/search/?search=test")
+        document = Judgment.objects.first()
+        LeadingAuthority.objects.create(
+            judgment=document,
+            subject=LegalSubject.objects.create(
+                name="Plascon-Evans rule",
+                subject_type=LegalSubject.DOCTRINE,
+            ),
+            editorial_note="The leading formulation of the rule.",
+            as_at_date=datetime.date(2026, 8, 1),
+            published=True,
+        )
+        hit = {
+            "document": document,
+            "position": 1,
+            "best_match": False,
+            "highlight": {},
+            "pages": [],
+            "provisions": [],
+        }
+
+        html = render_to_string(
+            "peachjam_search/_search_hit.html",
+            {
+                "request": request,
+                "hit": hit,
+                "show_jurisdiction": False,
+                "can_debug": False,
+            },
+            request=request,
+        )
+
+        self.assertIn("leading-authority-card", html)
+        self.assertIn("Leading authority", html)
+        self.assertIn("for the Plascon-Evans rule", html)
 
     def test_search_hit_flynote_preserves_line_breaks(self):
         request = RequestFactory().get("/search/?search=test")
