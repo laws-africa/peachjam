@@ -1,5 +1,6 @@
 {% include 'peachjam/user/_messages.html' %}
 {% include 'peachjam/user/_menu.html' %}
+{# Folder names and document titles must not break out of the inline script. #}
 <script type="text/javascript">peachjam.user = JSON.parse('{{ user_json|escapejs }}'); peachjam.userLoaded();</script>
 {% if signup_completed %}
   <script type="text/javascript">peachjam.analytics.trackEvent('Account', 'Signup completed');</script>

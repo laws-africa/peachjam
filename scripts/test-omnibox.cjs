@@ -63,7 +63,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
             { id: 'folder-2', type: 'folder', text: 'Law', url: '/my/folders/#folder-2' },
             { id: 'search-2', type: 'saved_search', text: 'Law alerts', url: '/search/?q=law' }
           ] : [
-            { id: 'document-1', type: 'document', work_id: 1, text: 'Contract Act', url: '/document/contract/' },
+            { id: 'document-1', type: 'document', work_id: 101, text: 'Contract Act', url: '/document/contract/' },
             { id: 'folder-1', type: 'folder', text: 'Contract research', url: '/my/folders/#folder-1' },
             { id: 'search-1', type: 'saved_search', text: 'Contracts in 2025', url: '/search/?q=contracts&year=2025' },
             ...(newlySaved ? [{ id: 'document-2', type: 'document', work_id: 2, text: 'New saved document', url: '/document/new/' }] : [])]
@@ -81,7 +81,8 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
       }
       if (url.pathname === `${urlPrefix}/search/api/documents/suggest/`) return request.respond({ status: suggestionsFail ? 503 : 200, contentType: 'application/json', body: JSON.stringify({ suggestions: [{ value: url.searchParams.get('q') + ' law', type: 'title', type_label: 'Document title' }] }) });
       if (url.pathname === '/document/contract/') return request.respond({ contentType: 'text/html', body: '<h1>Document opened</h1>' });
-      if (url.pathname === '/document/ordinary/') return request.respond({ contentType: 'text/html', body: html.replace('<h1>Omnibox preview</h1>', '<h1>Document page</h1><div id="document-content" data-work-id="1"></div>') });
+      if (url.pathname === '/document/ordinary/') return request.respond({ contentType: 'text/html', body: html.replace('<h1>Omnibox preview</h1>', '<h1>Document page</h1><div id="document-content" data-work-id="101" data-document-id="202"></div>') });
+      if (url.pathname === '/document/different-work/') return request.respond({ contentType: 'text/html', body: html.replace('<h1>Omnibox preview</h1>', '<h1>Other work</h1><div id="document-content" data-work-id="999" data-document-id="101"></div>') });
       if (url.pathname === '/my/folders/') return request.respond({ contentType: 'text/html', body: html.replace('<h1>Omnibox preview</h1>', '<h1>Saved folders</h1><div id="folder-1">Contract research</div>') });
       return request.respond({ contentType: 'text/html', body: html });
     });
@@ -142,6 +143,9 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.goto('http://omnibox.test/document/ordinary/');
     await page.waitForFunction(() => JSON.parse(localStorage.getItem('peachjam.omnibox.7') || '[]').includes('document-1'));
     await page.evaluate(() => localStorage.removeItem('peachjam.omnibox.7'));
+    await page.goto('http://omnibox.test/document/different-work/');
+    await page.evaluate(() => window.userLoad);
+    assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('peachjam.omnibox.7') || '[]').includes('document-1')), false);
     await page.goto('http://omnibox.test/my/folders/');
     await page.evaluate(() => window.userLoad);
     assert.equal(await page.evaluate(() => JSON.parse(localStorage.getItem('peachjam.omnibox.7') || '[]').includes('folder-1')), false);

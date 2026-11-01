@@ -7,6 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
+from peachjam.middleware import GeneralUpdateCacheMiddleware
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
 from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.omnibox import OmniboxShortcuts
@@ -55,15 +56,17 @@ class OmniboxTests(TestCase):
             }
         )
 
-    def test_anonymous_response_is_empty_and_private(self):
+    def test_anonymous_response_is_empty_and_excluded_from_caching(self):
         self.trace()
         response = self.client.get(self.url)
         self.assertEqual(
             json.loads(response.context["user_json"])["omnibox"],
             {"user_id": None, "recent_searches": [], "saved_items": []},
         )
-        self.assertIn("private", response["Cache-Control"])
-        self.assertIn("no-store", response["Cache-Control"])
+        middleware = GeneralUpdateCacheMiddleware(lambda request: response)
+        self.assertFalse(
+            middleware._should_update_cache(response.wsgi_request, response)
+        )
 
     def test_shortcuts_belong_to_current_user_and_are_not_cached(self):
         self.trace()
@@ -80,11 +83,21 @@ class OmniboxTests(TestCase):
             },
         )
         self.assertEqual(len(data["recent_searches"]), 1)
-        self.assertIn("no-store", response["Cache-Control"])
+        middleware = GeneralUpdateCacheMiddleware(lambda request: response)
+        self.assertFalse(
+            middleware._should_update_cache(response.wsgi_request, response)
+        )
         self.login(self.other)
         data = self.shortcuts()
         self.assertEqual(data["saved_items"], [])
         self.assertEqual(data["recent_searches"], [])
+
+    def test_language_prefixed_user_response_is_excluded_from_caching(self):
+        from django.test import RequestFactory
+
+        middleware = GeneralUpdateCacheMiddleware(lambda request: None)
+        request = RequestFactory().get("/fr/user/loaded")
+        self.assertFalse(middleware._should_update_cache(request, None))
 
     def test_recent_searches_deduplicate_and_preserve_filters_and_mode(self):
         params = {"court": ["high-court"], "year": ["2025"], "is_most_recent": True}
