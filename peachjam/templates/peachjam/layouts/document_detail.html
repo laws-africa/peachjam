@@ -546,8 +546,10 @@
                id="citations-tab"
                role="tabpanel"
                aria-labelledby="citations-tab">
-            <div class="spinner-when-empty">
-            </div>
+            {# Keep empty for the CSS :empty selector. #}
+            {# djlint:off #}
+            <div class="spinner-when-empty"></div>
+            {# djlint:on #}
           </div>
         {% endif %}
         {% if document.work.ratification %}

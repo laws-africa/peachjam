@@ -12,6 +12,8 @@ from django_fsm import GET_STATE, FSMField, transition
 from guardian.shortcuts import get_objects_for_user
 
 from peachjam.models import SingletonModel
+from peachjam_subs.dates import period_bounds, site_date
+from peachjam_subs.lifecycle_signals import subscription_activation_check
 
 log = logging.getLogger(__name__)
 
@@ -384,6 +386,7 @@ class Subscription(models.Model):
     status = FSMField(choices=Status.choices, max_length=20, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
     active_at = models.DateTimeField(null=True, blank=True)
+    billing_anchor_on = models.DateField(null=True, blank=True, editable=False)
     closed_at = models.DateTimeField(null=True, blank=True)
 
     is_trial = models.BooleanField(
@@ -408,8 +411,23 @@ class Subscription(models.Model):
 
     objects = SubscriptionManager()
 
+    def activation_block_reason(self):
+        """Explain why activation must wait, or return None when it may proceed."""
+        if self.starts_on is not None and self.starts_on > site_date():
+            return _("The subscription start date has not arrived.")
+        return next(
+            (
+                reason
+                for _, reason in subscription_activation_check.send(
+                    sender=type(self), subscription=self
+                )
+                if reason
+            ),
+            None,
+        )
+
     def can_activate(self):
-        return self.starts_on is None or self.starts_on <= timezone.now().date()
+        return self.activation_block_reason() is None
 
     @property
     def product(self):
@@ -473,6 +491,7 @@ class Subscription(models.Model):
 
         # it might already be set, if there was a trial subscription, and we don't want to lose that timestamp
         self.active_at = self.active_at or timezone.now()
+        self.billing_anchor_on = self.billing_anchor_on or site_date(self.active_at)
 
         # set up a trial if applicable
         sub_settings = subscription_settings()
@@ -483,7 +502,7 @@ class Subscription(models.Model):
                 product_offering=trial_offering,
                 is_trial=True,
                 trial_replaces=self,
-                ends_on=timezone.now().date()
+                ends_on=site_date()
                 + timedelta(days=sub_settings.trial_duration_days - 1),
             )
 
@@ -513,34 +532,18 @@ class Subscription(models.Model):
 
     def period_bounds_for_date(self, date):
         """Return the start and end dates for the subscription period containing the given date."""
-        start_date = (
-            self.active_at.date() if self.active_at else (self.starts_on or date)
+        anchor = self.billing_anchor_on or (
+            site_date(self.active_at) if self.active_at else (self.starts_on or date)
         )
-        if date < start_date:
-            date = start_date
-        period = self.product_offering.pricing_plan.period
-
-        # Step 1: Find how many whole periods have passed since start_date
-        elapsed = relativedelta(date, start_date)
-        n = {
-            PricingPlan.Period.MONTHLY: elapsed.years * 12 + elapsed.months,
-            PricingPlan.Period.ANNUALLY: elapsed.years,
-        }[period]
-
-        # Step 2: Compute the end of the current period
-        delta = self.product_offering.pricing_plan.relative_delta()
-        current_period_start = start_date + n * delta
-        current_period_end = current_period_start + delta - timedelta(days=1)
-
-        return current_period_start, current_period_end
+        return period_bounds(anchor, date, self.product_offering.pricing_plan.period)
 
     def end_of_current_period(self):
         """Returns the last day of the current subscription period."""
-        return self.period_bounds_for_date(timezone.now().date())[1]
+        return self.period_bounds_for_date(site_date())[1]
 
     def start_of_current_period(self):
         """Returns the first day of the current subscription period."""
-        return self.period_bounds_for_date(timezone.now().date())[0]
+        return self.period_bounds_for_date(site_date())[0]
 
     def next_billing_date(self):
         """This is always two days after the end of the current period, which is one day after the start of the next
@@ -558,7 +561,7 @@ class Subscription(models.Model):
         daily_rate = self.product_offering.pricing_plan.price / total_days
 
         # remaining days and their value
-        today = timezone.now().date()
+        today = site_date()
         remaining_days = (end_date - today).days + 1  # includes today
         value = daily_rate * remaining_days
 
@@ -621,7 +624,7 @@ class Subscription(models.Model):
     @classmethod
     def update_subscriptions(cls):
         """Activate pending subscriptions and close active subscriptions as needed."""
-        today = timezone.now().date()
+        today = site_date()
 
         # Activate pending subscriptions that should be active today
         for sub in cls.objects.filter(

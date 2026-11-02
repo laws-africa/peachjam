@@ -5,6 +5,7 @@ from cobalt.uri import FrbrUri
 from django.utils.html import strip_tags
 from elasticsearch_dsl import Search
 from elasticsearch_dsl.query import Bool
+from modeltranslation.utils import get_translation_fields
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,7 @@ from peachjam_search.models import SearchTrace
 from peachjam_search.search_pipeline import SearchPlanner
 from peachjam_search.serializers import (
     PortionContent,
+    PortionCourt,
     PortionHit,
     PortionMetadata,
     PortionSearchRequestSerializer,
@@ -428,15 +430,29 @@ class PortionSearchView(APIView):
         if summaries_to_load:
             summaries = {
                 j.expression_frbr_uri: j
-                for j in Judgment.objects.filter(
-                    expression_frbr_uri__in=summaries_to_load
-                ).only("expression_frbr_uri", "case_summary", "issues", "held")
+                for j in Judgment.objects.select_related("court")
+                .filter(expression_frbr_uri__in=summaries_to_load)
+                .only(
+                    "expression_frbr_uri",
+                    "polymorphic_ctype_id",
+                    "case_summary",
+                    "issues",
+                    "held",
+                    "mnc",
+                    "court__name",
+                    "court__code",
+                    *[f"court__{field}" for field in get_translation_fields("name")],
+                )
             }
 
             for portion in portions:
                 if portion.metadata.portion_type == PortionType.SUMMARY:
                     judgment = summaries.get(portion.metadata.expression_frbr_uri)
                     if judgment:
+                        portion.metadata.court = PortionCourt(
+                            name=judgment.court.name, code=judgment.court.code
+                        )
+                        portion.metadata.neutral_citation = judgment.mnc or None
                         summary_parts = []
                         if judgment.case_summary:
                             summary_parts.append(judgment.case_summary)

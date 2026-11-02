@@ -308,6 +308,17 @@ class TestDocumentAdminHtmlEdit(WebTest):
         doc_content.set_source_html("<h1>Initial</h1><p>Initial</p>")
         self.document.save()
 
+    def test_admin_editor_includes_text_and_background_colour_controls(self):
+        change_url = reverse(
+            "admin:peachjam_genericdocument_change",
+            kwargs={"object_id": self.document.pk},
+        )
+
+        response = self.app.get(change_url)
+
+        self.assertContains(response, "&quot;TextColor&quot;")
+        self.assertContains(response, "&quot;BGColor&quot;")
+
     def test_admin_edit_source_html_updates_content_text_and_toc(self):
         change_url = reverse(
             "admin:peachjam_genericdocument_change",

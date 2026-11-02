@@ -731,6 +731,7 @@ CKEDITOR_CONFIGS = {
             ],
             ["Link", "Unlink", "Anchor"],
             ["Image", "Flash", "Table", "HorizontalRule", "Iframe"],
+            ["TextColor", "BGColor"],
             ["Smiley", "SpecialChar", "LaAkn"],
             ["Source"],
         ],

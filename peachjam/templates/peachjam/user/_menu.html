@@ -122,7 +122,7 @@
       id="user-menu"
       data-key-link-feature="user_menu">
     <li class="nav-item">
-      <a class="btn btn-primary"
+      <a class="btn btn-primary text-nowrap"
          data-key-link="login"
          href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}">
         <i class="bi bi-person-circle"></i>

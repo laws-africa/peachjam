@@ -22,6 +22,7 @@ from peachjam.models import (
     Flynote,
     FlynoteDocumentCount,
     Judge,
+    Judgment,
     Label,
     Locality,
 )
@@ -34,6 +35,7 @@ from peachjam_search.models import (
     SearchTrace,
 )
 from peachjam_search.search_pipeline import QueryAnalysis, SearchQuery
+from peachjam_search.serializers import PortionMetadata, PortionSearchResponseSerializer
 from peachjam_search.views.api import PortionSearchView
 from peachjam_search.views.search import (
     DocumentSearchView,
@@ -1117,6 +1119,94 @@ class PortionSearchViewTest(TestCase):
     def setUp(self):
         self.request_factory = RequestFactory()
 
+    def build_judgment_portions(self, judgments):
+        response = Response(
+            Search(),
+            {
+                "hits": {
+                    "hits": [
+                        {
+                            "_score": 1.0,
+                            "_source": {
+                                "expression_frbr_uri": judgment.expression_frbr_uri,
+                                "title": judgment.title,
+                                "frbr_uri_subtype": None,
+                            },
+                        }
+                        for judgment in judgments
+                    ]
+                }
+            },
+        )
+        view = PortionSearchView()
+        view.engine = SimpleNamespace(
+            compiler=SimpleNamespace(client="default", index="test")
+        )
+        request = self.request_factory.get("/api/v1/search/portions")
+        view.request = request
+        return view.build_portions(response, request)
+
+    def test_judgment_metadata_and_summaries_load_in_one_query(self):
+        judgments = list(Judgment.objects.select_related("court").order_by("pk"))
+        self.assertGreaterEqual(len(judgments), 2)
+        Judgment.objects.filter(pk__in=[j.pk for j in judgments]).update(
+            case_summary="Summary text", issues=["An issue"], held=["A finding"]
+        )
+
+        with self.assertNumQueries(1):
+            portions = self.build_judgment_portions(judgments)
+            results = PortionSearchResponseSerializer({"results": portions}).data[
+                "results"
+            ]
+
+        self.assertEqual(len(results), len(judgments))
+        for result, judgment in zip(results, judgments):
+            self.assertEqual(
+                result["metadata"]["court"],
+                {"name": judgment.court.name, "code": judgment.court.code},
+            )
+            self.assertEqual(result["metadata"]["neutral_citation"], judgment.mnc)
+            self.assertEqual(result["metadata"]["title"], judgment.title)
+            self.assertEqual(result["metadata"]["portion_type"], "summary")
+            self.assertEqual(
+                result["content"]["text"],
+                "Summary text\n\nIssues:\n- An issue\n\nHeld:\n- A finding",
+            )
+
+    def test_judgment_empty_neutral_citation(self):
+        judgment = Judgment.objects.first()
+        Judgment.objects.filter(pk=judgment.pk).update(mnc="")
+        portions = self.build_judgment_portions([judgment])
+        result = PortionSearchResponseSerializer({"results": portions}).data["results"][
+            0
+        ]
+        self.assertIsNone(result["metadata"]["neutral_citation"])
+        self.assertIsNotNone(result["metadata"]["court"])
+
+    def test_missing_judgment_metadata(self):
+        judgment = SimpleNamespace(
+            expression_frbr_uri="/akn/za/judgment/zasca/2099/999/eng@2099-01-01",
+            title="Missing judgment",
+        )
+        portions = self.build_judgment_portions([judgment])
+        result = PortionSearchResponseSerializer({"results": portions}).data["results"][
+            0
+        ]
+        self.assertIsNone(result["metadata"]["court"])
+        self.assertIsNone(result["metadata"]["neutral_citation"])
+        self.assertEqual(result["content"]["text"], "")
+
+    def test_court_metadata_schema(self):
+        schema = PortionMetadata.model_json_schema()
+        self.assertEqual(
+            schema["properties"]["court"]["anyOf"],
+            [{"$ref": "#/$defs/PortionCourt"}, {"type": "null"}],
+        )
+        court = schema["$defs"]["PortionCourt"]
+        self.assertEqual(court["required"], ["name", "code"])
+        self.assertEqual(court["properties"]["name"]["type"], "string")
+        self.assertEqual(court["properties"]["code"]["type"], "string")
+
     def test_build_portions_falls_back_to_provision_inner_hits(self):
         expression_frbr_uri = "/akn/aa-au/act/charter/2007/elections-democracy-and-governance/eng@2007-01-30"
         search = Search()
@@ -1173,6 +1263,11 @@ class PortionSearchViewTest(TestCase):
         self.assertEqual(1, len(portions))
         portion = portions[0]
         self.assertEqual("Foo bar baz", portion.content.text)
+        result = PortionSearchResponseSerializer({"results": portions}).data["results"][
+            0
+        ]
+        self.assertIsNone(result["metadata"]["court"])
+        self.assertIsNone(result["metadata"]["neutral_citation"])
         self.assertEqual("provision", portion.metadata.portion_type)
         self.assertEqual("sec_1", portion.metadata.portion_id)
         self.assertEqual("Section 1", portion.metadata.portion_title)

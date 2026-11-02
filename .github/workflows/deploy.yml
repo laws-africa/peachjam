@@ -81,34 +81,10 @@ jobs:
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/malawilii-peachjam'
           git_push_flags: '--force'
 
-  deploy-namiblii:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - deploy-malawilii
-      - preconditions
-    name: Deploy to namiblii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: git push to namiblii.org
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/namiblii-peachjam'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/namiblii-peachjam'
-          git_push_flags: '--force'
-
   deploy-seylii:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     needs:
-      - deploy-namiblii
+      - deploy-malawilii
       - preconditions
     name: Deploy to seylii
     runs-on: ubuntu-latest

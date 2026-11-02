@@ -3,6 +3,7 @@ from decimal import Decimal
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
+from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Permission, User
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
@@ -12,10 +13,12 @@ from django.test.utils import override_settings
 from django.urls import path, reverse
 from django.utils import timezone
 from django.views import View
+from django_fsm import TransitionNotAllowed
 from guardian.shortcuts import assign_perm
 
 from peachjam.models import Court, Glossary
 from peachjam_subs.forms import OffboardingFeedbackForm
+from peachjam_subs.lifecycle_signals import subscription_activation_check
 from peachjam_subs.mixins import SubscriptionRequiredMixin
 from peachjam_subs.models import (
     Feature,
@@ -297,6 +300,141 @@ class SubscriptionTests(TestCase):
         self.sub_settings = subscription_settings()
         for product in Product.objects.all():
             product.selectable_offerings.set(product.productoffering_set.all())
+
+    def test_activation_policy_blocks_before_any_entitlement_changes(self):
+        subscription = Subscription.objects.create(
+            user=self.user,
+            product_offering=self.product_offering,
+            starts_on=date(2000, 1, 1),
+        )
+
+        blocked_id = subscription.pk
+
+        def block(sender, subscription, **kwargs):
+            if subscription.pk == blocked_id:
+                return "Opening payment required."
+            return None
+
+        subscription_activation_check.connect(block, sender=Subscription)
+        self.addCleanup(
+            subscription_activation_check.disconnect, block, sender=Subscription
+        )
+        before = list(self.user.subscriptions.values())
+        self.assertEqual(
+            "Opening payment required.", subscription.activation_block_reason()
+        )
+        self.assertFalse(subscription.can_activate())
+        with self.assertRaises(TransitionNotAllowed):
+            subscription.activate()
+        Subscription.update_subscriptions()
+        self.assertEqual(before, list(self.user.subscriptions.values()))
+
+    def test_subscription_admin_activates_unmanaged_access_and_records_actor(self):
+        staff = User.objects.create_superuser(
+            "subscription-admin", "admin@example.com", "test"
+        )
+        self.client.force_login(staff)
+        subscription = Subscription.objects.create(
+            user=self.user,
+            product_offering=self.product_offering,
+            ends_on=timezone.localdate() + timedelta(days=30),
+        )
+        self.sub_settings.trial_product_offering = None
+        self.sub_settings.save(update_fields=["trial_product_offering"])
+        response = self.client.get(
+            reverse("admin:peachjam_subs_subscription_change", args=[subscription.pk])
+        )
+        self.assertContains(response, "Activate subscription")
+        url = reverse(
+            "admin:peachjam_subs_subscription_activate", args=[subscription.pk]
+        )
+        self.assertEqual(405, self.client.get(url).status_code)
+        self.client.post(url)
+        subscription.refresh_from_db()
+        self.assertEqual(Subscription.Status.ACTIVE, subscription.status)
+        self.assertEqual(
+            timezone.localdate() + timedelta(days=30), subscription.ends_on
+        )
+        entry = LogEntry.objects.get(
+            user=staff,
+            object_id=str(subscription.pk),
+            content_type__app_label="peachjam_subs",
+            content_type__model="subscription",
+        )
+        self.assertIn("pending → active", entry.change_message)
+
+    def test_subscription_admin_activation_requires_change_permission(self):
+        staff = User.objects.create_user("subscription-viewer", is_staff=True)
+        staff.user_permissions.add(
+            Permission.objects.get(
+                content_type__app_label="peachjam_subs", codename="view_subscription"
+            )
+        )
+        self.client.force_login(staff)
+        subscription = Subscription.objects.create(
+            user=self.user, product_offering=self.product_offering
+        )
+        response = self.client.get(
+            reverse("admin:peachjam_subs_subscription_change", args=[subscription.pk])
+        )
+        self.assertNotContains(response, "Activate subscription")
+        response = self.client.post(
+            reverse("admin:peachjam_subs_subscription_activate", args=[subscription.pk])
+        )
+        self.assertEqual(403, response.status_code)
+        subscription.refresh_from_db()
+        self.assertEqual(Subscription.Status.PENDING, subscription.status)
+
+    def test_subscription_admin_activation_respects_start_date(self):
+        staff = User.objects.create_superuser(
+            "subscription-admin", "admin@example.com", "test"
+        )
+        self.client.force_login(staff)
+        subscription = Subscription.objects.create(
+            user=self.user,
+            product_offering=self.product_offering,
+            starts_on=timezone.localdate() + timedelta(days=1),
+        )
+        self.client.post(
+            reverse("admin:peachjam_subs_subscription_activate", args=[subscription.pk])
+        )
+        subscription.refresh_from_db()
+        self.assertEqual(Subscription.Status.PENDING, subscription.status)
+        self.assertFalse(
+            LogEntry.objects.filter(user=staff, object_id=str(subscription.pk)).exists()
+        )
+
+    def test_subscription_admin_protects_only_billing_managed_fields(self):
+        staff = User.objects.create_superuser(
+            "subscription-admin", "admin@example.com", "test"
+        )
+        self.client.force_login(staff)
+        subscription = Subscription.objects.create(
+            user=self.user, product_offering=self.product_offering
+        )
+        url = reverse("admin:peachjam_subs_subscription_change", args=[subscription.pk])
+        data = {
+            "product_offering": ProductOffering.objects.first().pk,
+            "starts_on": "2020-01-01",
+            "ends_on": "2020-12-31",
+            "_save": "Save",
+        }
+
+        with patch.object(Subscription, "billing_agreement", object(), create=True):
+            response = self.client.post(url, data)
+            self.assertEqual(302, response.status_code)
+            subscription.refresh_from_db()
+            self.assertEqual(self.product_offering.pk, subscription.product_offering_id)
+            self.assertIsNone(subscription.starts_on)
+            self.assertIsNone(subscription.ends_on)
+        response = self.client.post(url, data)
+        self.assertEqual(302, response.status_code)
+        subscription.refresh_from_db()
+        self.assertEqual(
+            int(data["product_offering"]), subscription.product_offering_id
+        )
+        self.assertEqual(date(2020, 1, 1), subscription.starts_on)
+        self.assertEqual(date(2020, 12, 31), subscription.ends_on)
 
     @patch("django.utils.timezone.now")
     def test_start_of_current_period(self, mock_now):

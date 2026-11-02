@@ -2,7 +2,7 @@
 {% load i18n %}
 {% block extra_actions %}
   {% if original.pk %}
-    {% if not original.is_active %}
+    {% if can_activate_subscription %}
       <button formaction="{% url 'admin:peachjam_subs_subscription_activate' original.pk %}"
               form="subscription-button-form"
               class="btn btn-success form-control mt-3"
