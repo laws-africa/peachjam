@@ -1,7 +1,6 @@
 from datetime import date
 
 from django.db import migrations
-from django.db.models import Q
 from django.utils.text import slugify
 
 REVIEW_DATE = date(2026, 10, 14)
@@ -84,7 +83,16 @@ def load_demo_data(apps, schema_editor):
     LeadingAuthoritySource = apps.get_model("peachjam", "LeadingAuthoritySource")
     LegalSubject = apps.get_model("peachjam", "LegalSubject")
 
-    for uri, subject_name, citation in AUTHORITIES:
+    judgments = iter(
+        Judgment.objects.filter(
+            published=True,
+            expression_frbr_uri__startswith="/akn/za/judgment/",
+        )
+        .exclude(expression_frbr_uri="")
+        .order_by("-date", "pk")[: len(AUTHORITIES)]
+    )
+
+    for _uri, subject_name, _citation in AUTHORITIES:
         subject, _ = LegalSubject.objects.get_or_create(
             name=subject_name,
             defaults={
@@ -92,10 +100,10 @@ def load_demo_data(apps, schema_editor):
                 "subject_type": "doctrine",
             },
         )
-        work_uri = uri.split("/eng@", 1)[0]
-        judgment = Judgment.objects.filter(
-            Q(expression_frbr_uri=uri) | Q(work_frbr_uri=work_uri)
-        ).first()
+        if LeadingAuthority.objects.filter(subject=subject).exists():
+            continue
+
+        judgment = next(judgments, None)
         if judgment is None:
             continue
 
@@ -110,8 +118,10 @@ def load_demo_data(apps, schema_editor):
         )
         LeadingAuthoritySource.objects.get_or_create(
             leading_authority=authority,
-            citation=citation,
-            defaults={"url": f"https://lawlibrary.org.za{uri}"},
+            citation=judgment.mnc or judgment.citation or judgment.title,
+            defaults={
+                "url": (f"https://lawlibrary.org.za{judgment.expression_frbr_uri}")
+            },
         )
 
 
@@ -119,9 +129,8 @@ def unload_demo_data(apps, schema_editor):
     LeadingAuthority = apps.get_model("peachjam", "LeadingAuthority")
     LegalSubject = apps.get_model("peachjam", "LegalSubject")
 
-    for uri, subject_name, _citation in AUTHORITIES:
+    for _uri, subject_name, _citation in AUTHORITIES:
         LeadingAuthority.objects.filter(
-            judgment__expression_frbr_uri=uri,
             subject__name=subject_name,
             editorial_note=f"Leading authority for {subject_name}.",
             reviewed_on=REVIEW_DATE,
