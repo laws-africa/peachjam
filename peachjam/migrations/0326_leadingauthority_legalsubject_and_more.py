@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                     ),
                 ),
                 ("editorial_note", models.TextField(verbose_name="editorial note")),
-                ("as_at_date", models.DateField(verbose_name="reviewed as at")),
+                ("reviewed_on", models.DateField(verbose_name="reviewed on")),
                 (
                     "published",
                     models.BooleanField(default=False, verbose_name="published"),
@@ -127,7 +127,6 @@ class Migration(migrations.Migration):
             model_name="leadingauthority",
             name="subject",
             field=models.ForeignKey(
-                limit_choices_to={"subject_type__in": ("doctrine", "principle")},
                 on_delete=django.db.models.deletion.PROTECT,
                 related_name="leading_authorities",
                 to="peachjam.legalsubject",

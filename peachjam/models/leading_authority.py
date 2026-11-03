@@ -62,13 +62,10 @@ class LeadingAuthority(models.Model):
         LegalSubject,
         related_name="leading_authorities",
         on_delete=models.PROTECT,
-        limit_choices_to={
-            "subject_type__in": (LegalSubject.DOCTRINE, LegalSubject.PRINCIPLE)
-        },
         verbose_name=_("legal subject"),
     )
     editorial_note = models.TextField(_("editorial note"))
-    as_at_date = models.DateField(_("reviewed as at"))
+    reviewed_on = models.DateField(_("reviewed on"))
     published = models.BooleanField(_("published"), default=False)
 
     class Meta:
@@ -94,20 +91,6 @@ class LeadingAuthority(models.Model):
             .prefetch_related("sources"),
             to_attr="_published_leading_authorities",
         )
-
-    def clean(self):
-        super().clean()
-        if self.subject_id and self.subject.subject_type not in (
-            LegalSubject.DOCTRINE,
-            LegalSubject.PRINCIPLE,
-        ):
-            raise ValidationError(
-                {
-                    "subject": _(
-                        "A leading authority must relate to a doctrine or principle."
-                    )
-                }
-            )
 
 
 class LeadingAuthoritySource(models.Model):

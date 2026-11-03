@@ -100,7 +100,7 @@ def load_demo_data(apps, schema_editor):
             subject=subject,
             defaults={
                 "editorial_note": f"Leading authority for {subject_name}.",
-                "as_at_date": REVIEW_DATE,
+                "reviewed_on": REVIEW_DATE,
                 "published": True,
             },
         )
@@ -120,7 +120,7 @@ def unload_demo_data(apps, schema_editor):
             judgment__expression_frbr_uri=uri,
             subject__name=subject_name,
             editorial_note=f"Leading authority for {subject_name}.",
-            as_at_date=REVIEW_DATE,
+            reviewed_on=REVIEW_DATE,
             published=True,
         ).delete()
 

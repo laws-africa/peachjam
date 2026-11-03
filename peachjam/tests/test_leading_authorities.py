@@ -1,7 +1,6 @@
 import datetime
 
 from countries_plus.models import Country
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 from languages_plus.models import Language
 
@@ -34,7 +33,7 @@ class LeadingAuthorityTestCase(TestCase):
 
         self.assertEqual("plascon-evans-rule", subject.slug)
 
-    def test_leading_authority_requires_doctrine_or_principle(self):
+    def test_leading_authority_allows_any_legal_subject(self):
         authority = LeadingAuthority(
             judgment=self.make_judgment(),
             subject=LegalSubject.objects.create(
@@ -42,14 +41,10 @@ class LeadingAuthorityTestCase(TestCase):
                 subject_type=LegalSubject.AREA_OF_LAW,
             ),
             editorial_note="A leading authority.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
         )
 
-        with self.assertRaisesMessage(
-            ValidationError,
-            "A leading authority must relate to a doctrine or principle.",
-        ):
-            authority.full_clean()
+        authority.full_clean()
 
     def test_published_leading_authorities_excludes_drafts(self):
         judgment = self.make_judgment()
@@ -60,7 +55,7 @@ class LeadingAuthorityTestCase(TestCase):
                 subject_type=LegalSubject.DOCTRINE,
             ),
             editorial_note="The leading formulation of the rule.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
             published=True,
         )
         LeadingAuthoritySource.objects.create(
@@ -75,7 +70,7 @@ class LeadingAuthorityTestCase(TestCase):
                 subject_type=LegalSubject.PRINCIPLE,
             ),
             editorial_note="Not ready for publication.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
         )
 
         judgment = Judgment.objects.for_document_table().get(pk=judgment.pk)

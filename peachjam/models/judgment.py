@@ -701,6 +701,7 @@ class Judgment(CoreDocument):
 
     @cached_property
     def published_leading_authorities(self):
+        # The optimized prefetch stores its result under this separate to_attr.
         if hasattr(self, "_published_leading_authorities"):
             return self._published_leading_authorities
         return list(

@@ -92,7 +92,7 @@ class TestJudgmentAdmin(WebTest):
                 subject_type=LegalSubject.DOCTRINE,
             ),
             editorial_note="The leading formulation of the rule.",
-            as_at_date=date(2026, 8, 1),
+            reviewed_on=date(2026, 8, 1),
         )
 
         response = self.app.get(
