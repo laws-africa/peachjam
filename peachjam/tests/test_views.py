@@ -555,7 +555,7 @@ class PeachjamViewsTest(TestCase):
                 subject_type=LegalSubject.DOCTRINE,
             ),
             editorial_note="The leading formulation of the rule.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
             published=True,
         )
         LeadingAuthoritySource.objects.create(
@@ -570,7 +570,7 @@ class PeachjamViewsTest(TestCase):
                 subject_type=LegalSubject.PRINCIPLE,
             ),
             editorial_note="Unpublished editorial note.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
         )
 
         response = self.client.get(
@@ -605,7 +605,7 @@ class PeachjamViewsTest(TestCase):
                 subject_type=LegalSubject.DOCTRINE,
             ),
             editorial_note="A leading authority for the example doctrine.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
             published=True,
         )
 

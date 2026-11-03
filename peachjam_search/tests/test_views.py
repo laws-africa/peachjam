@@ -1082,7 +1082,7 @@ class SearchViewsTest(TestCase):
                 subject_type=LegalSubject.DOCTRINE,
             ),
             editorial_note="The leading formulation of the rule.",
-            as_at_date=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 1),
             published=True,
         )
         hit = {
