@@ -583,13 +583,13 @@ class PeachjamViewsTest(TestCase):
         )
 
         self.assertContains(response, "Leading authority")
-        self.assertContains(response, 'class="leading-authority-banner__icon')
+        self.assertContains(response, 'class="leading-authority-detail')
         self.assertContains(response, "Plascon-Evans rule")
         self.assertContains(response, "The leading formulation of the rule.")
         self.assertContains(response, "Example source")
         self.assertNotContains(response, "Unpublished editorial note.")
         content = response.content.decode()
-        self.assertLess(
+        self.assertGreater(
             content.index("The leading formulation of the rule."),
             content.index('id="document-tab-list"'),
         )
@@ -614,7 +614,9 @@ class PeachjamViewsTest(TestCase):
         )
 
         self.assertContains(response, "Leading authority")
+        self.assertContains(response, "badge rounded-pill bg-secondary")
         self.assertContains(response, "Example doctrine")
+        self.assertNotContains(response, "for the Example doctrine")
 
     def test_legislation_listing(self):
         response = self.client.get(reverse("legislation_list"))

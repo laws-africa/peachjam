@@ -1,5 +1,9 @@
-{% if labels %}
-  <div class="d-flex align-items-center">
+{% load i18n %}
+{% if labels or leading_authorities %}
+  <div class="d-flex align-items-center gap-1">
     {% for label in labels %}<span class="badge rounded-pill bg-{{ label.level }}">{{ label.name }}</span>{% endfor %}
+    {% if leading_authorities %}
+      <span class="badge rounded-pill bg-secondary leading-authority-label">{% trans "Leading authority" %}</span>
+    {% endif %}
   </div>
 {% endif %}

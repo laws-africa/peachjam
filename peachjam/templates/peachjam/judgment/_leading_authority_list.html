@@ -1,14 +1,13 @@
 {% load i18n %}
 {% if leading_authorities %}
-  <div class="leading-authority-listing d-flex align-items-center mt-3 pt-2">
+  <div class="leading-authority-listing d-flex align-items-start mt-2">
     <span class="leading-authority-listing__icon me-2" aria-hidden="true">⚖</span>
     <div>
       {% for authority in leading_authorities %}
-        <div>
-          <strong>{% trans "Leading authority" %}</strong>
-          <span class="leading-authority-listing__subject">
-            {% blocktrans with subject=authority.subject.name %}for the {{ subject }}{% endblocktrans %}
-          </span>
+        <div{% if not forloop.last %} class="mb-1"{% endif %}>
+          <strong class="text-muted fst-italic">{% trans "Leading authority" %}</strong>
+          <span aria-hidden="true">–</span>
+          <span>{{ authority.subject.name }}</span>
         </div>
       {% endfor %}
     </div>
