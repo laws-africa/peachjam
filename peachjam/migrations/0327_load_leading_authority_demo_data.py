@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.db import migrations
+from django.db.models import Q
 from django.utils.text import slugify
 
 REVIEW_DATE = date(2026, 10, 14)
@@ -84,10 +85,6 @@ def load_demo_data(apps, schema_editor):
     LegalSubject = apps.get_model("peachjam", "LegalSubject")
 
     for uri, subject_name, citation in AUTHORITIES:
-        judgment = Judgment.objects.filter(expression_frbr_uri=uri).first()
-        if judgment is None:
-            continue
-
         subject, _ = LegalSubject.objects.get_or_create(
             name=subject_name,
             defaults={
@@ -95,6 +92,13 @@ def load_demo_data(apps, schema_editor):
                 "subject_type": "doctrine",
             },
         )
+        work_uri = uri.split("/eng@", 1)[0]
+        judgment = Judgment.objects.filter(
+            Q(expression_frbr_uri=uri) | Q(work_frbr_uri=work_uri)
+        ).first()
+        if judgment is None:
+            continue
+
         authority, _ = LeadingAuthority.objects.get_or_create(
             judgment=judgment,
             subject=subject,
