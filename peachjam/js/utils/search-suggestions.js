@@ -38,28 +38,34 @@ export default class SearchSuggestions {
 
   getGroups () {
     const term = this.query.trim().toLocaleLowerCase();
-    const saved = this.shortcuts.saved_items.filter(item => item.text.toLocaleLowerCase().includes(term));
+    const matches = item => item.text.toLocaleLowerCase().includes(term);
+    const saved = this.shortcuts.saved_items.filter(matches);
+    const recent = (this.history?.items || []).filter(matches);
     const groups = [];
+    if (recent.length) groups.push({ key: 'history', label: i18n.t('Recent searches'), items: recent.slice(0, 3) });
     if (term) {
       const matchRank = item => {
         const text = item.text.toLocaleLowerCase();
         return text === term ? 0 : (text.startsWith(term) ? 1 : 2);
       };
       saved.sort((a, b) => matchRank(a) - matchRank(b) || this.recency(a) - this.recency(b));
-      if (saved.length) groups.push({ key: 'saved', label: i18n.t('Saved items'), items: saved.slice(0, 8), showTypes: true });
+    } else {
+      // Browser recency takes priority; newest-saved order is the fallback.
+      saved.sort((a, b) => this.recency(a) - this.recency(b));
+    }
+    const searches = saved.filter(item => item.type === 'saved_search');
+    if (searches.length) groups.push({ key: 'saved_search', label: i18n.t('Saved searches'), items: searches.slice(0, 4) });
+    if (term) {
+      const items = saved.filter(item => item.type !== 'saved_search');
+      if (items.length) groups.push({ key: 'saved', label: i18n.t('Saved items'), items: items.slice(0, 8), showTypes: true });
       if (this.suggestions.length) groups.push({ key: 'suggestions', label: i18n.t('Search suggestions'), items: this.suggestions, showTypes: true });
       return groups;
     }
-    const recent = this.history?.items || [];
-    if (recent.length) groups.push({ key: 'history', label: i18n.t('Recent searches'), items: recent.slice(0, 5) });
     for (const [type, label] of [
       ['document', i18n.t('Saved documents')],
-      ['folder', i18n.t('Saved folders')],
-      ['saved_search', i18n.t('Saved searches')]
+      ['folder', i18n.t('Saved folders')]
     ]) {
       const items = saved.filter(item => item.type === type);
-      // Browser recency takes priority; newest-saved order is the fallback.
-      items.sort((a, b) => this.recency(a) - this.recency(b));
       if (items.length) groups.push({ key: type, label, items: items.slice(0, 4) });
     }
     return groups;

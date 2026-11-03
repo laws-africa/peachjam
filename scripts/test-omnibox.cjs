@@ -149,7 +149,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.type('dialog input', 'contract');
     await page.waitForSelector('#omnibox-suggestions');
     const headings = await page.$$eval('dialog h3', els => els.map(el => el.textContent.trim()));
-    assert.deepEqual(headings, ['Saved items', 'Search suggestions']);
+    assert.deepEqual(headings, ['Recent searches', 'Saved searches', 'Saved items', 'Search suggestions']);
     const rowLayout = await page.evaluate(() => {
       const geometry = selector => {
         const row = document.querySelector(selector);
@@ -372,7 +372,30 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.waitForFunction(() => document.querySelector('#omnibox-saved + ul a')?.getAttribute('href') === '/my/folders/#folder-2');
     const ranked = await page.$$eval('#omnibox-saved + ul a', links => links.map(link => link.getAttribute('href')));
     assert.equal(ranked.length, 8);
-    assert.equal(ranked[1], '/search/?q=law');
+    assert.equal(await page.$eval('#omnibox-saved_search + ul a', el => el.getAttribute('href')), '/search/?q=law');
+    await page.keyboard.press('Escape');
+
+    // Show only three recent entries, then filter the full history as the user types.
+    await page.evaluate(() => {
+      for (let index = 0; index < 5; index++) {
+        window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
+          detail: { query: `Research ${index}`, url: `/search/?q=research-${index}` }
+        }));
+      }
+    });
+    await waitForHistory();
+    await page.click('#anchor');
+    await page.$eval('dialog input', el => { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.waitForFunction(() => document.querySelectorAll('#omnibox-history + ul a').length === 3);
+    assert.deepEqual(await page.$$eval('#omnibox-history + ul a', links => links.map(link => link.textContent.trim())), ['Research 4', 'Research 3', 'Research 2']);
+    assert.deepEqual((await page.$$eval('dialog h3', els => els.map(el => el.textContent.trim()))).slice(0, 2), ['Recent searches', 'Saved searches']);
+    await page.type('dialog input', 'RESEARCH 0');
+    await page.waitForFunction(() => document.querySelector('#omnibox-history + ul a')?.textContent.includes('Research 0'));
+    assert.equal(await page.$('#omnibox-saved_search'), null);
+    await page.$eval('dialog input', el => { el.value = 'law'; el.dispatchEvent(new Event('input', { bubbles: true })); });
+    await page.waitForSelector('#omnibox-saved_search + ul a');
+    assert.equal(await page.$('#omnibox-history'), null);
+    assert.equal(await page.$eval('#omnibox-saved_search + ul a', el => el.textContent.trim()), 'Law alerts');
     await page.keyboard.press('Escape');
     shortcutsFail = true;
     suggestionsFail = true;
