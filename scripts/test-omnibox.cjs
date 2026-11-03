@@ -8,7 +8,7 @@ const webpack = require(`${repo}/node_modules/webpack`);
 const puppeteer = require(`${repo}/node_modules/puppeteer`);
 const config = require(`${repo}/webpack.config.js`)({}, { mode: 'development' })[0];
 const entry = path.join(buildDir, 'entry.js');
-fs.writeFileSync(entry, `export { default as peachJam } from ${JSON.stringify(repo + '/peachjam/js/peachjam.ts')};\nexport { default as SearchInput } from ${JSON.stringify(repo + '/peachjam/js/components/search-input.ts')};\nexport { default as OmniboxHistory } from ${JSON.stringify(repo + '/peachjam/js/utils/omnibox-history.js')};\nexport { default as htmx } from ${JSON.stringify(require.resolve('htmx.org'))};`);
+fs.writeFileSync(entry, `export { default as peachJam } from ${JSON.stringify(repo + '/peachjam/js/peachjam.ts')};\nexport { default as SearchInput } from ${JSON.stringify(repo + '/peachjam/js/components/search-input.ts')};\nexport { default as htmx } from ${JSON.stringify(require.resolve('htmx.org'))};`);
 config.context = repo;
 config.entry = entry;
 config.output = { path: buildDir, filename: 'omnibox.js', library: { name: 'OmniboxTest', type: 'window' } };
@@ -32,6 +32,28 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     let userDelay = 0;
     let holdUserResponse = false;
     let releaseUserResponse;
+    let holdHistoryResponse = false;
+    let releaseHistoryResponse;
+    let historyFail = false;
+    const historyItems = () => page.evaluate(() => window.omniboxSource.history.items);
+    const waitForHistory = () => page.evaluate(() => window.omniboxSource.historyUpdates);
+    const accountHistory = new Map();
+    const historyKey = value => {
+      const url = new URL(value, 'http://omnibox.test');
+      for (const key of ['suggestion', 'gsc.tab']) url.searchParams.delete(key);
+      for (const [key, value] of [['page', '1'], ['ordering', '-score'], ['mode', 'text']]) {
+        if (url.searchParams.get(key) === value) url.searchParams.delete(key);
+      }
+      if (url.searchParams.has('q')) url.searchParams.set('q', url.searchParams.get('q').trim().replace(/\s+/g, ' ').toLowerCase());
+      url.searchParams.sort();
+      return url.searchParams.toString();
+    };
+    const historyData = () => {
+      const fallback = { id: 'recent', type: 'history', text: 'contract law', url: '/search/?q=contract+law&court=high-court' };
+      const items = [...accountHistory.values()].reverse();
+      if (!accountHistory.has(historyKey(fallback.url))) items.push(fallback);
+      return { recent_searches: items.filter(item => !item.removed) };
+    };
     page.on('pageerror', error => { errors.push(error.message); console.error(error); });
     await page.setRequestInterception(true);
     const css = fs.readFileSync(`${repo}/node_modules/bootstrap/dist/css/bootstrap.css`, 'utf8');
@@ -42,22 +64,38 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
       const {SearchInput, peachJam, htmx} = window.OmniboxTest;
       window.peachjam = peachJam;
       window.htmx = htmx;
+      document.cookie = 'csrftoken=local-test-token; path=/';
       peachJam.config.urlLangPrefix = location.pathname.startsWith('/fr/') ? '/fr' : '';
       window.SearchInput = SearchInput;
       window.submissions=[];
       document.querySelector('#form').addEventListener('submit', e => {e.preventDefault(); window.submissions.push({query:e.target.q.value,suggestion:e.target.suggestion.value});});
       new SearchInput(document.querySelector('#anchor'));
       new SearchInput(document.querySelector('#second'), {onSearch: (query,suggestion) => window.submissions.push({query,suggestion})});
+      window.omniboxSource = document.querySelector('dialog').__vueParentComponent.parent.ctx.suggestionSource;
       window.userLoad = peachJam.loaded();
       </script></body></html>`;
     page.on('request', request => {
       const url = new URL(request.url());
       requests.push(url.pathname);
       if (url.pathname === '/omnibox.js') return request.respond({ contentType: 'application/javascript', body: fs.readFileSync(path.join(buildDir, 'omnibox.js'), 'utf8') });
+      if (url.pathname === `${urlPrefix}/user/search-history`) {
+        if (historyFail) return request.respond({ status: 503, body: 'Unavailable' });
+        const body = new URLSearchParams(request.postData());
+        const key = historyKey(body.get('url'));
+        accountHistory.delete(key);
+        accountHistory.set(key, { id: `history-${key}`, type: 'history', text: body.get('text'), url: body.get('url'), removed: body.get('action') === 'remove' });
+        const bodyText = JSON.stringify(historyData());
+        const respond = () => request.respond({ contentType: 'application/json', body: bodyText });
+        if (holdHistoryResponse) {
+          releaseHistoryResponse = respond;
+          return;
+        }
+        return respond();
+      }
       if (url.pathname === `${urlPrefix}/user/loaded`) {
         const shortcuts = {
           user_id: 7,
-          recent_searches: [{ id: 'recent', type: 'history', text: 'contract law', url: '/search/?q=contract+law&court=high-court' }],
+          ...historyData(),
           saved_items: rankingCase ? [
             ...Array.from({ length: 8 }, (_, index) => ({ id: `document-${index}`, type: 'document', work_id: index, text: `A law document ${index}`, url: `/document/${index}/` })),
             { id: 'folder-2', type: 'folder', text: 'Law', url: '/my/folders/#folder-2' },
@@ -97,6 +135,9 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     assert.equal(requests.filter(path => path === '/search/api/omnibox/').length, 0);
     assert.equal(await page.$eval('dialog input', el => document.activeElement === el), true);
     assert.equal(await page.$eval('dialog', el => el.matches(':modal')), false);
+    const desktopInput = await page.$eval('dialog input', el => ({ border: getComputedStyle(el).borderTopWidth, shadow: getComputedStyle(el).boxShadow }));
+    assert.deepEqual(desktopInput, { border: '0px', shadow: 'none' });
+    assert.equal(await page.$eval('dialog button[type="submit"] span', el => getComputedStyle(el).display === 'none'), false);
     assert.equal(await page.$eval('#form', el => getComputedStyle(el).visibility), 'hidden');
     await page.keyboard.press('ArrowDown');
     assert.match(await page.evaluate(() => document.activeElement.href), /court=high-court/);
@@ -114,7 +155,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
         const row = document.querySelector(selector);
         const icon = row.querySelector('.search-box__icon').getBoundingClientRect();
         const text = row.querySelector('span').getBoundingClientRect();
-        return { iconLeft: icon.left, iconWidth: icon.width, textLeft: text.left };
+        return { iconLeft: icon.left, iconWidth: icon.width, textLeft: text.left, iconInset: icon.left - row.getBoundingClientRect().left };
       };
       return {
         saved: geometry('#omnibox-saved + ul a'),
@@ -122,6 +163,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
       };
     });
     assert.deepEqual(rowLayout.saved, rowLayout.suggestion);
+    assert.ok(rowLayout.saved.iconInset >= 12);
     assert.ok(await page.$$('dialog .badge').then(items => items.length > 0));
     await page.keyboard.press('ArrowDown');
     const savedHighlight = await page.evaluate(() => getComputedStyle(document.activeElement.closest('li')).backgroundColor);
@@ -159,6 +201,9 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     assert.equal(rect.width, rect.innerWidth);
     assert.equal(rect.height, rect.innerHeight);
     assert.equal(await page.$eval('dialog', el => el.matches(':modal')), true);
+    assert.equal(await page.$eval('dialog button[type="submit"] span', el => getComputedStyle(el).display), 'none');
+    assert.equal(await page.$eval('dialog button[type="submit"] i', el => getComputedStyle(el).display === 'none'), false);
+    assert.equal(await page.$eval('dialog button[type="submit"]', el => el.getAttribute('aria-label')), 'Search');
     await page.keyboard.press('Tab');
     await page.keyboard.press('Tab');
     assert.equal(await page.evaluate(() => !!document.activeElement.closest('dialog')), true);
@@ -212,68 +257,112 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
       completed('Other query', '/search/?q=Other+query');
       completed('Cached query', '/search/?q=Cached+query&page=1');
     });
-    const history = await page.evaluate(() => JSON.parse(localStorage.getItem('peachjam.omnibox.searches.7')));
-    assert.deepEqual(history.map(item => item.text), ['Cached query', 'Other query']);
+    await waitForHistory();
+    assert.deepEqual((await historyItems()).map(item => item.text), ['Cached query', 'Other query', 'contract law']);
+    assert.equal(await page.evaluate(() => localStorage.getItem('peachjam.omnibox.searches.7')), null);
     await page.click('#second');
     await page.$eval('dialog input', el => { el.value = ''; el.dispatchEvent(new Event('input', { bubbles: true })); });
     await page.waitForFunction(() => document.querySelector('#omnibox-history + ul a')?.textContent.includes('Cached query'));
-    await page.keyboard.press('Escape');
-    const isolation = await page.evaluate(() => {
-      const { OmniboxHistory } = window.OmniboxTest;
-      const history = new OmniboxHistory(7);
-      history.remember('contract law', '/search/?suggestion=title&q=contract+law&court=high-court&page=1');
-      return {
-        merged: history.recent([{ id: 'server', type: 'history', text: 'contract law', url: '/search/?court=high-court&q=contract+law&page=1&ordering=-score&mode=text' }]).filter(item => item.text === 'contract law').length,
-        otherUser: new OmniboxHistory(8).recent().length,
-        anonymous: new OmniboxHistory(null).recent().length
-      };
-    });
-    assert.deepEqual(isolation, { merged: 1, otherUser: 0, anonymous: 0 });
-    const distinctSearches = await page.evaluate(() => {
-      const history = new window.OmniboxTest.OmniboxHistory(9);
-      history.remember('law', '/search/?q=law');
-      history.remember('law', '/search/?q=law&page=1&ordering=-score&mode=text');
-      history.remember('law', '/search/?q=law&ordering=-date');
-      history.remember('law', '/search/?q=law&mode=hybrid');
-      history.remember('law', '/search/?q=law&court=high-court');
-      history.remember('law', '/search/?q=law&page=2');
-      return history.recent().map(item => item.url);
-    });
-    assert.deepEqual(distinctSearches, [
-      '/search/?page=2&q=law',
-      '/search/?court=high-court&q=law',
-      '/search/?mode=hybrid&q=law',
-      '/search/?ordering=-date&q=law',
-      '/search/?q=law'
-    ]);
 
-    // Removing both local and server-provided recents persists after a full page reload.
-    await page.click('#second');
-    await page.waitForSelector('#omnibox-history');
+    // Each control has its own visible keyboard focus, including the remove button.
+    await page.keyboard.press('ArrowDown');
+    const resultFocus = await page.evaluate(() => getComputedStyle(document.activeElement).boxShadow);
+    assert.notEqual(resultFocus, 'none');
+    await page.keyboard.press('Tab');
+    assert.equal(await page.evaluate(() => document.activeElement.classList.contains('search-box__remove')), true);
+    assert.notEqual(await page.evaluate(() => getComputedStyle(document.activeElement).boxShadow), 'none');
+
+    // A user-menu response captured before a removal must not restore the entry.
+    holdUserResponse = true;
+    const staleRefresh = page.waitForRequest(request => new URL(request.url()).pathname === '/user/loaded');
+    await page.evaluate(() => { window.userRefresh = window.peachjam.loaded(); });
+    await staleRefresh;
     await page.$eval('#omnibox-history + ul button[aria-label="Remove recent search: contract law"]', el => el.focus());
     await page.keyboard.press('Enter');
+    await waitForHistory();
+    await page.waitForFunction(() => !document.querySelector('button[aria-label="Remove recent search: contract law"]'));
     assert.equal(await page.$eval('dialog', el => el.open), true);
     assert.equal(await page.evaluate(() => !!document.activeElement.closest('dialog')), true);
+    holdUserResponse = false;
+    await releaseUserResponse();
+    await page.evaluate(() => window.userRefresh);
+    assert.equal((await historyItems()).some(item => item.text === 'contract law'), false);
+
     await page.click('#omnibox-history + ul button[aria-label="Remove recent search: Cached query"]');
+    await waitForHistory();
+    assert.deepEqual((await historyItems()).map(item => item.text), ['Other query']);
     await page.goto('http://omnibox.test/');
     await page.click('#second');
     await page.waitForSelector('#omnibox-document');
     const recentNames = await page.$$eval('#omnibox-history + ul a', links => links.map(link => link.textContent.trim()));
     assert.deepEqual(recentNames, ['Other query']);
+
+    // Failed removals preserve the confirmed list and the focused remove button.
+    historyFail = true;
+    await page.$eval('#omnibox-history + ul button', el => el.focus());
+    await page.keyboard.press('Enter');
+    await waitForHistory();
+    assert.deepEqual((await historyItems()).map(item => item.text), ['Other query']);
+    assert.equal(await page.evaluate(() => document.activeElement.classList.contains('search-box__remove')), true);
+    historyFail = false;
+
+    // A failed queued write must not discard an earlier confirmed removal.
+    holdHistoryResponse = true;
+    const confirmedRemoval = page.waitForRequest(request => new URL(request.url()).pathname === '/user/search-history');
+    await page.click('#omnibox-history + ul button[aria-label="Remove recent search: Other query"]');
+    await confirmedRemoval;
+    historyFail = true;
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
+      detail: { query: 'Failed queued query', url: '/search/?q=failed-queued' }
+    })));
+    holdHistoryResponse = false;
+    await releaseHistoryResponse();
+    await waitForHistory();
+    assert.deepEqual(await historyItems(), []);
+    assert.equal(await page.$('#omnibox-history'), null);
+    assert.equal(await page.evaluate(() => !!document.activeElement.closest('dialog')), true);
+    historyFail = false;
     await page.keyboard.press('Escape');
-    const deletion = await page.evaluate(() => {
-      const { OmniboxHistory } = window.OmniboxTest;
-      const history = new OmniboxHistory(17);
-      const server = [{ id: 'old', type: 'history', text: 'law', url: '/search/?q=law&page=1&ordering=-score' }];
-      history.remember('law', '/search/?q=law');
-      history.remove(server[0].url);
-      const reloaded = new OmniboxHistory(17);
-      const removedCount = reloaded.recent(server).length;
-      const otherUserCount = new OmniboxHistory(18).recent(server).length;
-      reloaded.remember('law', '/search/?q=law');
-      return { removedCount, otherUserCount, repeatedCount: reloaded.recent(server).length };
+
+    // History writes retain the original replay URL, including capitalization and spacing.
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
+      detail: { query: 'Foo AND Bar', url: '/search/?q=Foo+AND++Bar&court=high-court' }
+    })));
+    await waitForHistory();
+    assert.equal((await historyItems())[0].url, '/search/?q=Foo+AND++Bar&court=high-court');
+
+    // An in-flight response must not populate a different user's history.
+    holdHistoryResponse = true;
+    const pendingHistory = page.waitForRequest(request => new URL(request.url()).pathname === '/user/search-history');
+    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
+      detail: { query: 'Private query', url: '/search/?q=private' }
+    })));
+    await pendingHistory;
+    await page.evaluate(() => {
+      window.peachjam.user.omnibox = { user_id: 8, recent_searches: [], saved_items: [] };
+      window.peachjam.userLoaded();
     });
-    assert.deepEqual(deletion, { removedCount: 0, otherUserCount: 1, repeatedCount: 1 });
+    assert.deepEqual(await historyItems(), []);
+    // Even signing back into the original account must invalidate its old response.
+    await page.evaluate(() => {
+      window.peachjam.user.omnibox = { user_id: 7, recent_searches: [], saved_items: [] };
+      window.peachjam.userLoaded();
+    });
+    holdHistoryResponse = false;
+    await releaseHistoryResponse();
+    await waitForHistory();
+    assert.deepEqual(await historyItems(), []);
+    const historyRequestCount = requests.filter(path => path === '/user/search-history').length;
+    await page.evaluate(() => {
+      window.peachjam.user.omnibox = { user_id: null, recent_searches: [], saved_items: [] };
+      window.peachjam.userLoaded();
+      window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
+        detail: { query: 'Anonymous query', url: '/search/?q=anonymous' }
+      }));
+    });
+    await waitForHistory();
+    assert.equal(requests.filter(path => path === '/user/search-history').length, historyRequestCount);
+    assert.deepEqual(await historyItems(), []);
     rankingCase = true;
     await page.evaluate(() => document.dispatchEvent(new CustomEvent('htmx:afterRequest', {
       detail: { successful: true, requestConfig: { verb: 'post', path: '/my/folders/create' } }
@@ -292,11 +381,11 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.evaluate(() => window.userLoad);
     assert.equal(await page.$$('dialog section').then(items => items.length), 0);
     assert.equal(await page.$$('dialog p').then(items => items.length), 0);
-    const storedHistory = await page.evaluate(() => localStorage.getItem('peachjam.omnibox.searches.7'));
+    const historyRequestCountBeforeLoad = requests.filter(path => path.endsWith('/user/search-history')).length;
     await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
       detail: { query: 'Unknown user', url: '/search/?q=unknown' }
     })));
-    assert.equal(await page.evaluate(() => localStorage.getItem('peachjam.omnibox.searches.7')), storedHistory);
+    assert.equal(requests.filter(path => path.endsWith('/user/search-history')).length, historyRequestCountBeforeLoad);
     const failedSuggestion = page.waitForResponse(response => response.url().includes('/documents/suggest/'));
     await page.type('dialog input', 'failed suggestion');
     await (await failedSuggestion).text();
@@ -315,7 +404,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     })));
     await page.click('#anchor');
     await page.waitForSelector('#omnibox-document');
-    await page.waitForFunction(() => JSON.parse(localStorage.getItem('peachjam.omnibox.searches.7')).some(item => item.text === 'Early search'));
+    await page.waitForFunction(() => window.omniboxSource.history.items.some(item => item.text === 'Early search'));
     await page.type('dialog input', 'law');
     await page.waitForSelector('#omnibox-suggestions');
     assert.equal(requests.filter(path => path === '/fr/user/loaded').length, 1);

@@ -1,6 +1,6 @@
 import i18n from 'i18next';
 import peachJam from '../peachjam';
-import OmniboxHistory from './omnibox-history';
+import { authHeaders } from '../api';
 
 /** Provide search suggestions, personal shortcuts and history, keeping them current as the user navigates. */
 export default class SearchSuggestions {
@@ -11,6 +11,7 @@ export default class SearchSuggestions {
     this.shortcuts = { user_id: null, recent_searches: [], saved_items: [] };
     this.recentIds = [];
     this.pendingSearches = [];
+    this.historyUpdates = Promise.resolve();
     this.suggestions = [];
     this.noSuggestions = new Map();
     this.noSuggestionsTtlMs = 30 * 60 * 1000;
@@ -49,7 +50,7 @@ export default class SearchSuggestions {
       if (this.suggestions.length) groups.push({ key: 'suggestions', label: i18n.t('Search suggestions'), items: this.suggestions, showTypes: true });
       return groups;
     }
-    const recent = this.history?.recent(this.shortcuts.recent_searches) || [];
+    const recent = this.history?.items || [];
     if (recent.length) groups.push({ key: 'history', label: i18n.t('Recent searches'), items: recent.slice(0, 5) });
     for (const [type, label] of [
       ['document', i18n.t('Saved documents')],
@@ -68,8 +69,12 @@ export default class SearchSuggestions {
     const data = peachJam.user.omnibox;
     if (!data) return;
     this.shortcuts = data;
-    if (!this.history || this.history.userId !== data.user_id) this.history = new OmniboxHistory(data.user_id);
-    for (const search of this.pendingSearches) this.history.remember(search.query, search.url);
+    // After initialization, only ordered history writes update this list. A user-menu
+    // refresh may have read history before one of those writes completed.
+    if (!this.history || this.history.userId !== data.user_id) {
+      this.history = { userId: data.user_id, items: data.recent_searches };
+    }
+    for (const search of this.pendingSearches) this.recordSearch(search);
     this.pendingSearches = [];
     this.readRecency();
     this.recordCurrentPage();
@@ -143,13 +148,32 @@ export default class SearchSuggestions {
       this.pendingSearches.push(search);
       return;
     }
-    this.history.remember(search.query, search.url);
-    this.changed();
+    return this.updateHistory('record', search.url, search.query);
   }
 
   removeHistory (item) {
-    this.history.remove(item.url);
-    this.changed();
+    return this.updateHistory('remove', item.url, item.text);
+  }
+
+  updateHistory (action, url, text) {
+    const history = this.history;
+    if (history.userId === null || !text.trim()) return;
+    // Preserve action order when a user searches and removes an item in quick succession.
+    this.historyUpdates = this.historyUpdates.then(async () => {
+      if (this.history !== history) return;
+      const response = await fetch(`${peachJam.config.urlLangPrefix}/user/search-history`, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: await authHeaders(),
+        body: new URLSearchParams({ action, url, text })
+      });
+      if (!response.ok) throw new Error('Unable to update search history');
+      const data = await response.json();
+      if (this.history !== history) return;
+      history.items = data.recent_searches;
+      this.changed();
+    }).catch(() => { /* Keep the last confirmed history when the server is unavailable. */ });
+    return this.historyUpdates;
   }
 
   update (query, showSuggestions = true) {

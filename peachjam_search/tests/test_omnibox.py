@@ -3,13 +3,15 @@ from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth.models import Permission, User
 from django.core.cache import cache
-from django.test import TestCase
+from django.db import connection
+from django.test import Client, TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
 from peachjam.middleware import GeneralUpdateCacheMiddleware
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
-from peachjam_search.models import SavedSearch, SearchTrace
+from peachjam_search.models import SavedSearch, SearchHistory, SearchTrace
 from peachjam_search.omnibox import OmniboxShortcuts
 
 
@@ -130,6 +132,161 @@ class OmniboxTests(TestCase):
         with self.assertNumQueries(1):
             recent = OmniboxShortcuts().recent_searches(self.user)
         self.assertEqual(len(recent), 2)
+
+    def update_history(
+        self, action, url="/search/?q=Constitution", text="Constitution"
+    ):
+        return self.client.post(
+            reverse("search_history"), {"action": action, "url": url, "text": text}
+        )
+
+    def test_history_removal_is_account_wide_and_preserves_analytics(self):
+        self.trace(search="Constitution")
+        self.trace(search="constitution", ordering="-score")
+        self.login()
+        response = self.update_history("remove")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["recent_searches"], [])
+        self.assertEqual(SearchTrace.objects.filter(user=self.user).count(), 2)
+        other_browser = Client()
+        other_browser.force_login(self.user)
+        loaded = other_browser.get(self.url)
+        self.assertEqual(
+            json.loads(loaded.context["user_json"])["omnibox"]["recent_searches"], []
+        )
+        self.login(self.other)
+        self.assertEqual(SearchHistory.objects.filter(user=self.other).count(), 0)
+        self.assertEqual(self.update_history("record").status_code, 200)
+        self.login()
+        self.assertEqual(self.shortcuts()["recent_searches"], [])
+
+    def test_repeating_removed_search_restores_it(self):
+        self.login()
+        self.update_history("remove")
+        response = self.update_history(
+            "record", "/search/?q=constitution&gsc.tab=0&ordering=-score&page=1"
+        )
+        self.assertEqual(len(response.json()["recent_searches"]), 1)
+        self.assertFalse(SearchHistory.objects.get(user=self.user).removed)
+        self.assertEqual(SearchHistory.objects.filter(user=self.user).count(), 1)
+
+    def test_history_requires_login_and_csrf(self):
+        self.assertEqual(self.update_history("remove").status_code, 302)
+        csrf_client = Client(enforce_csrf_checks=True)
+        csrf_client.force_login(self.user)
+        self.assertEqual(
+            csrf_client.post(
+                reverse("search_history"),
+                {"action": "remove", "url": "/search/?q=law", "text": "law"},
+            ).status_code,
+            403,
+        )
+
+    def test_history_rejects_invalid_entries(self):
+        self.login()
+        for url in [
+            "https://example.com/search/?q=law",
+            "javascript:alert(1)",
+            "/search/",
+        ]:
+            with self.subTest(url=url):
+                self.assertEqual(self.update_history("record", url).status_code, 400)
+        self.assertEqual(SearchHistory.objects.count(), 0)
+
+    def test_case_and_analytics_parameters_do_not_duplicate_history(self):
+        self.trace(search="Constitution")
+        self.trace(search="constitution", ordering="-score")
+        self.login()
+        self.assertEqual(len(self.shortcuts()["recent_searches"]), 1)
+        self.update_history("record", "/search/?q=Constitution&gsc.tab=0")
+        self.assertEqual(len(self.shortcuts()["recent_searches"]), 1)
+
+    def test_distinct_filters_are_preserved(self):
+        service = OmniboxShortcuts()
+        self.assertEqual(
+            service.search_key("/search/?q=law&court=b&court=a"),
+            service.search_key("/fr/search/?court=a&court=b&q=LAW"),
+        )
+        self.assertNotEqual(
+            service.search_key("/search/?q=law&court=a"),
+            service.search_key("/search/?q=law&court=b"),
+        )
+
+    def test_history_preserves_original_query_when_deduplicating(self):
+        self.login()
+        url = "/search/?q=Foo+AND++Bar&court=high-court"
+        self.update_history("record", url, "Foo AND  Bar")
+        response = self.update_history(
+            "record", "/search/?q=foo+and+bar&court=high-court&gsc.tab=0", "foo and bar"
+        )
+        self.assertEqual(len(response.json()["recent_searches"]), 1)
+        self.assertEqual(SearchHistory.objects.filter(user=self.user).count(), 1)
+        response = self.update_history("record", url, "Foo AND  Bar")
+        params = parse_qs(urlparse(response.json()["recent_searches"][0]["url"]).query)
+        self.assertEqual(params["q"], ["Foo AND  Bar"])
+
+    def test_history_keeps_distinct_filters_sort_modes_and_pages(self):
+        self.login()
+        urls = [
+            "/search/?q=law",
+            "/search/?q=law&court=high-court",
+            "/search/?q=law&ordering=-date",
+            "/search/?q=law&mode=hybrid",
+            "/search/?q=law&page=2",
+        ]
+        for url in urls:
+            self.update_history("record", url, "law")
+        response = self.update_history(
+            "record", "/search/?q=LAW&page=1&ordering=-score&mode=text", "LAW"
+        )
+        self.assertEqual(len(response.json()["recent_searches"]), len(urls))
+        self.assertEqual(
+            SearchHistory.objects.filter(user=self.user).count(), len(urls)
+        )
+
+    def test_full_account_history_uses_one_bounded_query(self):
+        service = OmniboxShortcuts()
+        SearchHistory.objects.bulk_create(
+            [
+                SearchHistory(
+                    user=self.user,
+                    key=service.search_key(f"/search/?q=query-{i}"),
+                    text=f"query-{i}",
+                    query_string=f"q=query-{i}",
+                )
+                for i in range(30)
+            ]
+        )
+        with CaptureQueriesContext(connection) as queries:
+            items = service.history(self.user)["recent_searches"]
+        self.assertEqual(len(items), 12)
+        self.assertEqual(len(queries), 1)
+        self.assertIn("LIMIT 12", queries[0]["sql"])
+
+    def test_trace_fallback_fills_history_past_removed_candidates(self):
+        service = OmniboxShortcuts()
+        for i in range(20):
+            self.trace(search=f"query-{i}")
+        SearchHistory.objects.bulk_create(
+            [
+                SearchHistory(
+                    user=self.user,
+                    key=service.search_key(f"/search/?q=query-{i}"),
+                    text=f"query-{i}",
+                    query_string=f"q=query-{i}",
+                    removed=True,
+                )
+                for i in range(15, 20)
+            ]
+        )
+        with CaptureQueriesContext(connection) as queries:
+            items = service.history(self.user)["recent_searches"]
+        self.assertEqual(len(items), 12)
+        self.assertEqual(items[0]["text"], "query-14")
+        self.assertEqual(len(queries), 3)
+        self.assertIn("LIMIT 12", queries[0]["sql"])
+        self.assertIn("LIMIT 100", queries[1]["sql"])
+        self.assertIn(" IN ", queries[2]["sql"])
 
     def test_locked_items_are_excluded(self):
         for item in (self.saved, self.folder, self.search):

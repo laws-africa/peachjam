@@ -3,9 +3,9 @@
     ref="searchBox"
     v-model="query"
     :groups="groups"
+    :remove-history="removeHistory"
     @search="search"
     @shortcut="openShortcut"
-    @remove-history="removeHistory"
     @close="cancel"
   />
 </template>
@@ -54,7 +54,7 @@ export default {
       if (!event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) this.$refs.searchBox.close();
     },
     removeHistory (item) {
-      this.suggestionSource.removeHistory(item);
+      return this.suggestionSource.removeHistory(item);
     }
   }
 };

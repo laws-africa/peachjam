@@ -1,7 +1,7 @@
 <template>
   <dialog
     ref="dialog"
-    class="search-box border rounded shadow p-3"
+    class="search-box border rounded shadow p-0"
     :style="overlayStyle"
     aria-labelledby="omnibox-heading"
     @cancel.prevent="close"
@@ -11,20 +11,26 @@
     <h2 id="omnibox-heading" class="visually-hidden">
       {{ $t('Search and shortcuts') }}
     </h2>
-    <form class="d-flex align-items-center gap-2" @submit.prevent="search()">
+    <form class="search-box__form d-flex align-items-center gap-2 p-2 border-bottom" @submit.prevent="search()">
       <input
         ref="input"
         v-model="query"
         type="search"
-        class="form-control"
+        class="search-box__input form-control border-0 rounded-0"
         :placeholder="placeholder"
         :aria-label="inputLabel"
         autocomplete="off"
         @keydown.down.prevent="focusResult(0)"
         @keydown.up.prevent="focusResult(-1)"
       >
-      <button type="submit" class="btn btn-primary" :disabled="!query.trim()">
-        {{ $t('Search') }}
+      <button
+        type="submit"
+        class="btn btn-primary"
+        :disabled="!query.trim()"
+        :aria-label="$t('Search')"
+      >
+        <i class="bi bi-search d-lg-none" aria-hidden="true" />
+        <span class="d-none d-lg-inline">{{ $t('Search') }}</span>
       </button>
       <button
         type="button"
@@ -40,7 +46,7 @@
         :aria-labelledby="`omnibox-${group.key}`"
         class="mb-3"
       >
-        <h3 :id="`omnibox-${group.key}`" class="h6 text-body-secondary">
+        <h3 :id="`omnibox-${group.key}`" class="h6 text-body-secondary px-3">
           {{ group.label }}
         </h3>
         <ul class="list-group list-group-flush">
@@ -48,7 +54,7 @@
             <a
               v-if="item.url"
               :href="item.url"
-              class="search-box__result btn btn-link border-0 rounded-0 d-flex align-items-center gap-2 text-start flex-grow-1 px-0 py-2"
+              class="search-box__result btn btn-link border-0 rounded-0 d-flex align-items-center gap-2 text-start flex-grow-1 px-3 py-2"
               @click="$emit('shortcut', $event, item)"
             >
               <i :class="icon(item)" class="search-box__icon flex-shrink-0" aria-hidden="true" />
@@ -58,7 +64,7 @@
             <button
               v-else
               type="button"
-              class="search-box__result btn btn-link border-0 rounded-0 d-flex align-items-center gap-2 text-start flex-grow-1 px-0 py-2"
+              class="search-box__result btn btn-link border-0 rounded-0 d-flex align-items-center gap-2 text-start flex-grow-1 px-3 py-2"
               @click="search(item.text, item.suggestionType)"
             >
               <i class="search-box__icon bi bi-search flex-shrink-0" aria-hidden="true" />
@@ -70,7 +76,7 @@
               type="button"
               class="search-box__remove btn btn-link flex-shrink-0"
               :aria-label="$t('Remove recent search: {query}', { query: item.text })"
-              @click="removeHistory(item)"
+              @click="removeHistoryItem(item)"
             >
               <i class="bi bi-x-lg" aria-hidden="true" />
             </button>
@@ -86,9 +92,10 @@ export default {
   name: 'SearchBox',
   props: {
     modelValue: { type: String, default: '' },
-    groups: { type: Array, default: () => [] }
+    groups: { type: Array, default: () => [] },
+    removeHistory: { type: Function, required: true }
   },
-  emits: ['update:modelValue', 'search', 'shortcut', 'remove-history', 'close'],
+  emits: ['update:modelValue', 'search', 'shortcut', 'close'],
   data () {
     return {
       query: this.modelValue,
@@ -210,11 +217,14 @@ export default {
       if (next < 0 || next >= results.length) this.$refs.input.focus();
       else results[next].focus();
     },
-    async removeHistory (item) {
+    async removeHistoryItem (item) {
+      const focused = document.activeElement;
       const results = Array.from(this.$refs.dialog.querySelectorAll('.search-box__result'));
-      const index = results.indexOf(document.activeElement.closest('li')?.querySelector('.search-box__result'));
-      this.$emit('remove-history', item);
+      const index = results.indexOf(focused.closest('li')?.querySelector('.search-box__result'));
+      await this.removeHistory(item);
       await this.$nextTick();
+      // Do not steal focus if the user moved away while waiting for the server.
+      if (!this.isOpen || focused.isConnected || document.activeElement !== document.body) return;
       const remaining = this.$refs.dialog.querySelectorAll('.search-box__result');
       const target = remaining[Math.min(index, remaining.length - 1)] || this.$refs.input;
       target.focus();
@@ -260,6 +270,10 @@ export default {
   min-width: 0;
 }
 
+.search-box__input:focus {
+  box-shadow: none;
+}
+
 .search-box__icon {
   width: 1.25em;
   text-align: center;
@@ -268,12 +282,6 @@ export default {
 .search-box__row:focus-within {
   background-color: var(--bs-light);
   box-shadow: inset 3px 0 0 var(--bs-primary);
-}
-
-.search-box__result:focus-visible,
-.search-box__remove:focus-visible {
-  outline: 2px solid transparent;
-  box-shadow: none;
 }
 
 @media (max-width: 991.98px) {

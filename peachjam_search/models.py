@@ -21,6 +21,31 @@ from peachjam_subs.models import Subscription
 log = logging.getLogger(__name__)
 
 
+class SearchHistory(models.Model):
+    """Account history and removals, independent of search analytics."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    key = models.CharField(max_length=64)
+    text = models.CharField(max_length=4098)
+    query_string = models.TextField()
+    removed = models.BooleanField(default=False)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "key"], name="unique_user_search_history"
+            )
+        ]
+        ordering = ["-updated_at", "-pk"]
+        indexes = [
+            models.Index(
+                fields=["user", "removed", "-updated_at", "-id"],
+                name="search_history_recent_idx",
+            )
+        ]
+
+
 class SearchTrace(models.Model):
     """A search performed by a user."""
 
