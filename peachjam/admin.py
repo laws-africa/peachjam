@@ -1848,8 +1848,8 @@ class LegalSubjectAdmin(admin.ModelAdmin):
 
 @admin.register(LeadingAuthority)
 class LeadingAuthorityAdmin(admin.ModelAdmin):
-    list_display = ("judgment", "subject", "as_at_date", "published")
-    list_filter = ("published", "subject__subject_type", "as_at_date")
+    list_display = ("judgment", "subject", "reviewed_on", "published")
+    list_filter = ("published", "subject__subject_type", "reviewed_on")
     search_fields = ("judgment__title", "subject__name", "editorial_note")
     autocomplete_fields = ("judgment", "subject")
     list_select_related = ("judgment", "subject")
