@@ -3,7 +3,14 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
+from peachjam.models import (
+    Annotation,
+    CoreDocument,
+    Folder,
+    SavedDocument,
+    Work,
+    pj_settings,
+)
 from peachjam_subs.models import Subscription
 
 
@@ -283,10 +290,17 @@ class SavedDocumentViewsTest(TestCase):
         self.assertEqual(list(sd.folders.all()), [extra_folder])
 
     def test_remove_from_last_folder_deletes_saved_document(self):
-        sd = SavedDocument.objects.create(
-            user=self.user, work=CoreDocument.objects.get(pk=4124).work
-        )
+        document = CoreDocument.objects.get(pk=4124)
+        sd = SavedDocument.objects.create(user=self.user, work=document.work)
         sd.folders.set([self.folder])
+        annotation = Annotation.objects.create(
+            user=self.user, document=document, text="My note"
+        )
+        other_annotation = Annotation.objects.create(
+            user=User.objects.exclude(pk=self.user.pk).first(),
+            document=document,
+            text="Another user's note",
+        )
 
         response = self.client.post(
             reverse(
@@ -299,6 +313,29 @@ class SavedDocumentViewsTest(TestCase):
             response, reverse("folder_list"), fetch_redirect_response=False
         )
         self.assertFalse(SavedDocument.objects.filter(pk=sd.pk).exists())
+        self.assertFalse(Annotation.objects.filter(pk=annotation.pk).exists())
+        self.assertTrue(Annotation.objects.filter(pk=other_annotation.pk).exists())
+
+    def test_remove_from_last_folder_without_document(self):
+        work = Work.objects.create(
+            frbr_uri="/akn/za/act/2026/1", title="Work without expressions"
+        )
+        sd = SavedDocument.objects.create(user=self.user, work=work)
+        sd.folders.set([self.folder])
+        self.assertIsNone(sd.document)
+
+        response = self.client.post(
+            reverse(
+                "saved_document_remove_from_folder",
+                kwargs={"pk": sd.pk, "folder_pk": self.folder.pk},
+            )
+        )
+
+        self.assertRedirects(
+            response, reverse("folder_list"), fetch_redirect_response=False
+        )
+        self.assertFalse(SavedDocument.objects.filter(pk=sd.pk).exists())
+        self.assertTrue(Work.objects.filter(pk=work.pk).exists())
 
     def test_delete_folder_keeps_saved_documents_in_other_folders(self):
         extra_folder = Folder.objects.create(user=self.user, name="extra")

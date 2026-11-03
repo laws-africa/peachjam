@@ -163,5 +163,7 @@ class SavedDocument(models.Model):
             raise ValidationError(_("Saved documents limit reached"))
 
     def delete(self, using=None, keep_parents=False):
-        self.document.annotations.filter(user=self.user).delete()
+        document = self.document
+        if document is not None:
+            document.annotations.filter(user=self.user).delete()
         return super().delete(using=using, keep_parents=keep_parents)
