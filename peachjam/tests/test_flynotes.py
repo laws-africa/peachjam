@@ -26,6 +26,7 @@ from peachjam.tasks import (
     refresh_flynote_document_count,
 )
 from peachjam.templatetags.peachjam import highlight_matches
+from peachjam.views.judgment import FlynoteViewMixin
 
 
 class HighlightMatchesTest(TestCase):
@@ -2614,6 +2615,37 @@ class JudgmentListFlynoteTopicsTest(TestCase):
         response = self.client.get(reverse("judgment_list"))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, reverse("flynote_list"))
+
+
+class FlynoteDescendantSearchTest(TestCase):
+    def setUp(self):
+        self.root = Flynote.add_root(name="Criminal law")
+        self.child = self.root.add_child(name="Sentencing")
+        self.middle = self.child.add_child(name="Offences")
+        self.leaf = self.middle.add_child(name="Murder")
+        self.other_match = self.child.add_child(name="Murder penalties")
+        FlynoteDocumentCount.objects.create(flynote=self.child, count=2)
+
+    def matching_paths(self):
+        view = FlynoteViewMixin()
+        children = view.annotate_with_counts(self.root.get_children()).filter(
+            doc_count__gt=0
+        )
+        _, paths, _ = view.filter_flynote_descendants_by_query(
+            children, "murder", self.root.path
+        )
+        return [path["nodes"] for path in paths[self.child.path]]
+
+    def test_complete_breadcrumbs_preserve_ancestors_and_matching_leaves(self):
+        self.assertEqual(
+            self.matching_paths(), [[self.other_match], [self.middle, self.leaf]]
+        )
+
+    def test_incomplete_breadcrumbs_are_skipped_without_losing_valid_matches(self):
+        # Simulate legacy inconsistent data: an active match below a deprecated node.
+        Flynote.objects.filter(pk=self.middle.pk).update(deprecated=True)
+
+        self.assertEqual(self.matching_paths(), [[self.other_match]])
 
 
 @override_settings(
