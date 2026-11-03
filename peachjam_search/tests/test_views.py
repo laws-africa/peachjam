@@ -1072,7 +1072,7 @@ class SearchViewsTest(TestCase):
         self.assertIn("Reported", html)
         self.assertIn("badge rounded-pill bg-success", html)
 
-    def test_search_hit_highlights_leading_authority(self):
+    def test_search_hit_labels_leading_authority(self):
         request = RequestFactory().get("/search/?search=test")
         document = Judgment.objects.first()
         LeadingAuthority.objects.create(
@@ -1105,9 +1105,11 @@ class SearchViewsTest(TestCase):
             request=request,
         )
 
-        self.assertIn("leading-authority-card", html)
+        self.assertNotIn("leading-authority-card", html)
+        self.assertIn("badge rounded-pill bg-secondary", html)
         self.assertIn("Leading authority", html)
-        self.assertIn("for the Plascon-Evans rule", html)
+        self.assertIn("Plascon-Evans rule", html)
+        self.assertNotIn("for the Plascon-Evans rule", html)
 
     def test_search_hit_flynote_preserves_line_breaks(self):
         request = RequestFactory().get("/search/?search=test")
