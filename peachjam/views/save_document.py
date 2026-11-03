@@ -194,9 +194,12 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
 
         requested_ids = requested_ids[:50]  # sanity limit
 
-        # Fetch all requested CoreDocuments
+        # Only ids and works are needed, so skip the polymorphic subclass fetches
         docs = {
-            doc.id: doc for doc in CoreDocument.objects.filter(pk__in=requested_ids)
+            doc.id: doc
+            for doc in CoreDocument.objects.non_polymorphic()
+            .filter(pk__in=requested_ids)
+            .select_related("work")
         }
 
         saved_docs = {}
@@ -204,10 +207,14 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
         if self.request.user.is_authenticated and docs:
             # Get all SavedDocuments for works linked to requested CoreDocuments
             work_ids = [doc.work_id for doc in docs.values()]
-            existing_sds = SavedDocument.objects.filter(
-                user=self.request.user,
-                work_id__in=work_ids,
-            ).select_related("work")
+            existing_sds = (
+                SavedDocument.objects.filter(
+                    user=self.request.user,
+                    work_id__in=work_ids,
+                )
+                .select_related("work", "user")
+                .prefetch_related("folders")
+            )
 
             # Map by work_id for lookup
             saved_by_work = {sd.work_id: sd for sd in existing_sds}
