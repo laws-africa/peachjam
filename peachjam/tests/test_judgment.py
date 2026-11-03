@@ -657,7 +657,7 @@ class JudgmentTestCase(TestCase):
         self.assertIn("— PIE Act", normalized_html)
         self.assertEqual(2, html.count("<ul"))
 
-    def test_document_table_row_highlights_leading_authority(self):
+    def test_document_table_row_labels_leading_authority(self):
         class EmptyRelatedManager:
             def all(self):
                 return []
@@ -698,9 +698,12 @@ class JudgmentTestCase(TestCase):
             },
         )
 
-        self.assertIn('class="document-row leading-authority-row"', html)
+        self.assertIn('class="document-row"', html)
+        self.assertNotIn("leading-authority-row", html)
+        self.assertIn("badge rounded-pill bg-secondary", html)
         self.assertIn("Leading authority", html)
-        self.assertIn("for the Plascon-Evans rule", html)
+        self.assertIn("Plascon-Evans rule", html)
+        self.assertNotIn("for the Plascon-Evans rule", html)
 
     def test_grouped_linked_flynotes_indents_children_under_compressed_topic(self):
         def node(name):
