@@ -8,6 +8,7 @@ from unittest.mock import patch
 import requests
 from countries_plus.models import Country
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase, override_settings
 from django.utils.text import slugify
 from languages_plus.models import Language
@@ -19,6 +20,7 @@ from peachjam.adapters import (
     RequestsAdapter,
 )
 from peachjam.models import (
+    CoreDocument,
     Court,
     GenericDocument,
     Judgment,
@@ -46,6 +48,66 @@ class IndigoAdapterTest(TestCase):
 
         self.assertFalse(self.adapter.is_responsible_for("/akn/bw/act/2009/1"))
         self.assertFalse(self.adapter.is_responsible_for("/akn/za-xxx/act/2009/1"))
+
+    def test_import_detects_an_expression_with_a_retired_legal_instrument_type(self):
+        legacy_type, _ = ContentType.objects.get_or_create(
+            app_label="peachjam", model="legalinstrument"
+        )
+        document = CoreDocument.objects.create(
+            polymorphic_ctype=legacy_type,
+            doc_type="legal_instrument",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            language=Language.objects.get(pk="en"),
+            date=datetime.date(2003, 4, 1),
+            frbr_uri_doctype="act",
+            frbr_uri_subtype="protocol",
+            frbr_uri_date="2003",
+            frbr_uri_number="r30",
+            title="Protocol",
+        )
+        remote_document = {
+            "frbr_uri": document.work_frbr_uri,
+            "stub": False,
+            "title": "Updated protocol",
+            "country": "za",
+            "language": "eng",
+            "locality": None,
+            "created_at": "2003-04-01T00:00:00Z",
+            "updated_at": "2026-11-01T00:00:00Z",
+            "publication_document": None,
+            "numbered_title": "Protocol R30 of 2003",
+            "expression_date": "2003-04-01",
+            "nature": "act",
+            "subtype": "protocol",
+            "type_name": "Protocol",
+            "timeline": [],
+            "commencements": [],
+            "repeal": None,
+            "principal": True,
+        }
+        with (
+            patch.object(
+                self.adapter,
+                "client_get",
+                return_value=SimpleNamespace(json=lambda: remote_document),
+            ),
+            patch.object(self.adapter, "get_toc_json", return_value=[]),
+            patch.object(
+                self.adapter, "get_content_html", return_value="<p>Protocol</p>"
+            ),
+        ):
+            with self.assertRaisesMessage(
+                Exception,
+                f"Delete the existing document (CoreDocument #{document.pk}).",
+            ):
+                self.adapter.update_document(
+                    f"http://example.com{document.expression_frbr_uri}"
+                )
+
+        self.assertTrue(
+            CoreDocument.objects.non_polymorphic().filter(pk=document.pk).exists()
+        )
+        self.assertFalse(Legislation.objects.filter(pk=document.pk).exists())
 
     def test_is_responsible_for_include_doctypes(self):
         self.adapter.include_doctypes = ["act"]

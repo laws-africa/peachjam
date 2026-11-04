@@ -362,9 +362,12 @@ class IndigoAdapter(RequestsAdapter):
 
         # the document may already be in the database, but not as the right document type.
         # It's unlikely, but does happen and is confusing to debug, so let's check for it explicitly.
-        core_doc = CoreDocument.objects.filter(
-            expression_frbr_uri=expression_frbr_uri
-        ).first()
+        # Include base rows whose polymorphic child is missing.
+        core_doc = (
+            CoreDocument.objects.non_polymorphic()
+            .filter(expression_frbr_uri=expression_frbr_uri)
+            .first()
+        )
         existing_doc = model.objects.filter(
             expression_frbr_uri=expression_frbr_uri
         ).first()
