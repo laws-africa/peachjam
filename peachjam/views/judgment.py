@@ -463,6 +463,8 @@ class FlynoteViewMixin:
                 child_path: [
                     {"nodes": [flynotes_by_path[path] for path in path_group]}
                     for path_group in path_groups
+                    # Tree edits or deprecated ancestors can leave an incomplete path.
+                    if all(path in flynotes_by_path for path in path_group)
                 ]
                 for child_path, path_groups in matching_paths.items()
             },
