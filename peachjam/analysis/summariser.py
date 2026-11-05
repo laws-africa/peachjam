@@ -207,7 +207,7 @@ def search_flynotes(keywords: list[str], parent_id: int) -> str:
 
 
 class JudgmentSummariser:
-    default_llm_model = "gpt-5.6-luna"
+    default_llm_model = "gpt-6-luna"
     llm_model = None
     summary_prompt_name = "summarise/judgment"
     summary_prompt_str = None
