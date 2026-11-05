@@ -1,4 +1,5 @@
 import string
+from copy import deepcopy
 from datetime import datetime, timedelta
 from functools import cached_property
 from types import SimpleNamespace
@@ -15,7 +16,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.cache import add_never_cache_headers
 from django.utils.decorators import method_decorator
-from django.utils.html import mark_safe
+from django.utils.html import format_html, mark_safe
 from django.utils.translation import gettext as _
 from django.views.generic import DetailView
 
@@ -188,6 +189,17 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         context["timeline"] = self.get_timeline()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
+        repeal = self.get_repeal_info()
+        if repeal and repeal["is_future"]:
+            context["labels"] = [
+                SimpleNamespace(
+                    name=self.get_future_repeal_action(label.code).capitalize(),
+                    level="warning",
+                )
+                if label.code == repeal["verb"]
+                else label
+                for label in context["labels"]
+            ]
         context["child_documents_count"] = self.model.objects.filter(
             parent_work=self.object.work
         ).count()
@@ -210,7 +222,20 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         if self.object.repealed and repeal:
             args = {"friendly_type": friendly_type}
             args.update(repeal)
-            if repeal.get("repealing_uri"):
+            if repeal["is_future"]:
+                args["action"] = self.get_future_repeal_action(repeal["verb"])
+                if repeal.get("repealing_uri"):
+                    html = format_html(
+                        _(
+                            "This {friendly_type} {action} on {date} by "
+                            '<a href="{repealing_uri}">{repealing_title}</a>.'
+                        ),
+                        **args,
+                    )
+                else:
+                    html = _("This %(friendly_type)s %(action)s on %(date)s.") % args
+                notices.append({"type": messages.WARNING, "html": html})
+            elif repeal.get("repealing_uri"):
                 notices.append(
                     {
                         "type": messages.ERROR,
@@ -291,7 +316,12 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                 return notices
 
             if index == len(point_in_time_dates) - 1:
-                if work_amendments and self.object.repealed and repeal:
+                if (
+                    work_amendments
+                    and self.object.repealed
+                    and repeal
+                    and not repeal["is_future"]
+                ):
                     if repeal["repealing_uri"]:
                         notices.append(
                             {
@@ -341,7 +371,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                     "expression_frbr_uri"
                 ]
 
-                if self.object.repealed and repeal:
+                if self.object.repealed and repeal and not repeal["is_future"]:
                     if repeal["repealing_uri"]:
                         msg = _(
                             "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s."
@@ -374,7 +404,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                     }
                 )
 
-        if self.object.date > datetime.now().date():
+        if self.object.date > current_date:
             notices.append(
                 {
                     "type": messages.WARNING,
@@ -386,8 +416,15 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
 
     def get_repeal_info(self):
         repeal_info = self.object.metadata_json.get("repeal", None)
-        if repeal_info and not repeal_info.get("verb"):
-            repeal_info.update({"verb": "repealed"})
+        if repeal_info:
+            repeal_info = {
+                **repeal_info,
+                "verb": repeal_info.get("verb") or "repealed",
+                "is_future": bool(
+                    repeal_info.get("date")
+                    and repeal_info["date"] > timezone.localdate().isoformat()
+                ),
+            }
         return repeal_info
 
     def get_friendly_type(self):
@@ -445,7 +482,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         )
 
     def get_timeline(self):
-        timeline = self.object.timeline_json
+        timeline = deepcopy(self.object.timeline_json)
         points_in_time = self.get_points_in_time()
         today = timezone.localdate().strftime("%Y-%m-%d")
 
@@ -471,6 +508,11 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
             entry["is_future"] = entry["date"] > today
             # add expression_frbr_uri
             for event in entry["events"]:
+                event["display_description"] = (
+                    self.get_future_event_description(event)
+                    if entry["is_future"]
+                    else event["description"]
+                )
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
                 # add contains_unapplied_amendment flag
                 if event["type"] == "amendment":
@@ -481,6 +523,62 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                     )
 
         return timeline
+
+    def get_future_repeal_action(self, verb):
+        """Shared wording for future repeal notices, labels and timeline events."""
+        return {
+            "repealed": _("will be repealed"),
+            "revoked": _("will be revoked"),
+            "withdrawn": _("will be withdrawn"),
+            "lapsed": _("will lapse"),
+            "expired": _("will expire"),
+            "retired": _("will be retired"),
+            "replaced": _("will be replaced"),
+            "disapplied": _("will be disapplied"),
+        }.get(verb, _("will be %(verb)s") % {"verb": verb})
+
+    def get_future_event_description(self, event):
+        """Render future wording while preserving Indigo's imported descriptions."""
+        description = event["description"]
+        event_type = event["type"]
+        if event_type == "commencement":
+            return _("Commences by") if event.get("by_frbr_uri") else _("Commences")
+        if event_type == "assent":
+            return _("Will be assented to")
+        if event_type == "consolidation":
+            return _("Will be consolidated")
+        if event_type == "chapter":
+            return _("Will become %(chapter)s") % {"chapter": description}
+        if event_type == "publication":
+            metadata = self.object.metadata_json
+            publication = " ".join(
+                str(value)
+                for value in (
+                    metadata.get("publication_name"),
+                    metadata.get("publication_number"),
+                )
+                if value
+            )
+            if publication:
+                return _("Will be published in %(publication)s") % {
+                    "publication": publication
+                }
+            return _("Will be published")
+        if event_type == "amendment":
+            # Indigo exports revisions as amendments without a separate verb.
+            if description == "Revised by":
+                return _("Will be revised by")
+            return _("Will be amended by")
+        if event_type == "repeal":
+            repeal = self.get_repeal_info()
+            if repeal:
+                action = self.get_future_repeal_action(repeal["verb"]).capitalize()
+                return (
+                    _("%(action)s by") % {"action": action}
+                    if event.get("by_frbr_uri")
+                    else action
+                )
+        return _("Scheduled: %(description)s") % {"description": description}
 
     def get_child_documents(self):
         docs_ids = self.model.objects.filter(
