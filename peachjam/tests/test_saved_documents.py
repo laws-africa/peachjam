@@ -126,6 +126,20 @@ class SavedDocumentViewsTest(TestCase):
 
         self.assert_no_recursive(response)
 
+    def test_fragments_query_count_is_constant(self):
+        # user, profile, settings x2, documents, saved documents, folders
+        with self.assertNumQueries(7):
+            self.client.get(reverse("saved_document_fragments") + "?doc_ids=5389,3407")
+
+        SavedDocument.objects.create(
+            user=self.user, work=CoreDocument.objects.get(pk=4124).work
+        ).folders.set([self.folder])
+
+        with self.assertNumQueries(7):
+            self.client.get(
+                reverse("saved_document_fragments") + "?doc_ids=5389,3407,4124,5519"
+            )
+
     def test_fragment_deduplication(self):
         response = self.client.get(
             reverse("saved_document_fragments")
