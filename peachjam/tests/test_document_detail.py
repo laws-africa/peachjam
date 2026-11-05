@@ -3,6 +3,7 @@ from unittest.mock import patch
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
+from django.template.loader import render_to_string
 from django.test import SimpleTestCase, TestCase
 from django.utils.translation import override
 from django_webtest import WebTest
@@ -13,6 +14,123 @@ from peachjam.templatetags.peachjam import legislation_publication_detail
 from peachjam.views.legislation import LegislationDetailView
 
 User = get_user_model()
+
+
+class LegislationFutureEventsTestCase(SimpleTestCase):
+    def setUp(self):
+        self.doc = Legislation(
+            date=date(2026, 1, 23),
+            metadata_json={"type_name": "legislation", "commenced": True},
+            timeline_json=[],
+        )
+        self.view = LegislationDetailView()
+        self.view.object = self.doc
+        today = patch(
+            "peachjam.views.legislation.timezone.localdate",
+            return_value=date(2026, 11, 5),
+        )
+        today.start()
+        self.addCleanup(today.stop)
+        language = override("en")
+        language.__enter__()
+        self.addCleanup(language.__exit__, None, None, None)
+
+    def test_future_commencement_notice_with_or_without_commenced_flag(self):
+        for commenced in (True, False):
+            with self.subTest(commenced=commenced):
+                self.doc.metadata_json.update(
+                    commenced=commenced,
+                    commencements=[{"date": "2027-01-23"}],
+                )
+                notices = self.view.get_notices()
+                html = render_to_string(
+                    "peachjam/document/_warning_notices.html", {"messages": notices}
+                )
+                self.assertIn("alert-warning", html)
+                self.assertIn(
+                    "This legislation will come into force on 23 January 2027.", html
+                )
+                self.assertNotIn("has not yet come into force.", html)
+
+    def test_notice_uses_main_date_when_commencement_list_is_absent_or_empty(self):
+        for commencements in (None, [], [{"date": None}]):
+            with self.subTest(commencements=commencements):
+                self.doc.metadata_json.update(
+                    commencement_date="2027-01-23", commencements=commencements
+                )
+                self.assertIn("23 January 2027", self.view.get_notices()[0]["html"])
+
+    def test_past_and_today_commencements_have_no_future_notice(self):
+        for commencement_date in ("2026-11-04", "2026-11-05"):
+            with self.subTest(commencement_date=commencement_date):
+                self.doc.metadata_json["commencements"] = [{"date": commencement_date}]
+                self.assertEqual([], self.view.get_notices())
+
+    def test_partial_commencement_notice_is_preserved(self):
+        self.doc.metadata_json["commenced_in_full"] = False
+        self.assertIn(
+            "has not yet come into force in full", self.view.get_notices()[0]["html"]
+        )
+
+    def test_unknown_commencement_notice_is_preserved(self):
+        self.doc.metadata_json["commenced"] = False
+        self.assertEqual(
+            "This legislation has not yet come into force.",
+            self.view.get_notices()[0]["html"],
+        )
+
+    def render_history_entry(self, event, event_date):
+        self.doc.timeline_json = [{"date": event_date, "events": [event]}]
+        entry = self.view.get_timeline()[0]
+        return render_to_string(
+            "peachjam/document/_document_history_legislation_entry.html",
+            {"entry": entry, "document": self.doc},
+        )
+
+    def test_future_commencement_wording_preserves_related_work_and_note(self):
+        event = {
+            "type": "commencement",
+            "description": "Commenced by",
+            "by_frbr_uri": "/akn/za/act/2026/1",
+            "by_title": "Commencement notice",
+            "note": "Only section 2",
+        }
+        html = self.render_history_entry(event, "2027-01-23")
+        self.assertIn("Commences by", html)
+        self.assertIn('href="/akn/za/act/2026/1"', html)
+        self.assertIn("Commencement notice", html)
+        self.assertIn("Only section 2", html)
+        self.assertEqual("Commenced by", event["description"])
+
+    def test_commencement_wording_changes_only_for_future_dates(self):
+        for event_date, expected in (
+            ("2026-11-04", "Commenced"),
+            ("2026-11-05", "Commenced"),
+            ("2026-11-06", "Commences"),
+        ):
+            with self.subTest(event_date=event_date):
+                html = self.render_history_entry(
+                    {"type": "commencement", "description": "Commenced"}, event_date
+                )
+                self.assertIn(expected, html)
+                self.assertEqual(event_date > "2026-11-05", "Upcoming" in html)
+
+    def test_all_future_event_types_are_marked_upcoming(self):
+        for event_type, description in (
+            ("publication", "Published in Government Gazette 53991"),
+            ("assent", "Assented to"),
+            ("amendment", "Revised by"),
+            ("repeal", "Revoked by"),
+            ("consolidation", "Consolidation"),
+            ("chapter", "Chapter 12"),
+        ):
+            for event_date in ("2026-11-04", "2026-11-05", "2026-11-06"):
+                with self.subTest(event_type=event_type, event_date=event_date):
+                    html = self.render_history_entry(
+                        {"type": event_type, "description": description}, event_date
+                    )
+                    self.assertIn(description, html)
+                    self.assertEqual(event_date > "2026-11-05", "Upcoming" in html)
 
 
 class LegislationPublicationTestCase(SimpleTestCase):

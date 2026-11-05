@@ -233,25 +233,25 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
                     }
                 )
 
-        current_date = datetime.now().date()
+        current_date = timezone.localdate()
         latest_commencement_date = self.get_latest_commencement_date()
-        if commenced:
-            if latest_commencement_date and latest_commencement_date > current_date:
-                notices.append(
-                    {
-                        "type": messages.WARNING,
-                        "html": _(
-                            "This %(friendly_type)s will come into force on %(date)s."
-                        )
-                        % {
-                            "friendly_type": friendly_type,
-                            "date": format_date(latest_commencement_date, "j F Y"),
-                        },
-                    }
-                )
+        if latest_commencement_date and latest_commencement_date > current_date:
+            notices.append(
+                {
+                    "type": messages.WARNING,
+                    "html": _(
+                        "This %(friendly_type)s will come into force on %(date)s."
+                    )
+                    % {
+                        "friendly_type": friendly_type,
+                        "date": format_date(latest_commencement_date, "j F Y"),
+                    },
+                }
+            )
+        elif commenced:
             # don't overwhelm users with commencement notices -- only add this if
             # it is commenced in general, AND there isn't also a future commencement
-            elif not commenced_in_full:
+            if not commenced_in_full:
                 notices.append(
                     {
                         "type": messages.WARNING,
@@ -427,6 +427,8 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
             for commencement in self.object.metadata_json.get("commencements", []) or []
             if commencement["date"]
         ]
+        if self.object.metadata_json.get("commencement_date"):
+            commencement_dates.append(self.object.metadata_json["commencement_date"])
         if commencement_dates:
             return datetime.strptime(str(max(commencement_dates)), "%Y-%m-%d").date()
         return None
@@ -466,6 +468,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
 
         for entry in timeline:
             entry["is_current"] = entry["date"] == self.object.date.strftime("%Y-%m-%d")
+            entry["is_future"] = entry["date"] > today
             # add expression_frbr_uri
             for event in entry["events"]:
                 entry["expression_frbr_uri"] = expression_uris.get(entry["date"])
