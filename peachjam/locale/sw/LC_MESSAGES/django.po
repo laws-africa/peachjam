@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-06 09:29+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -2591,19 +2591,19 @@ msgstr "wasifu wa mtumiaji"
 msgid "user profiles"
 msgstr "wasifu wa mtumiaji"
 
-#: settings.py:399
+#: settings.py:402
 msgid "English"
 msgstr "Kiingereza"
 
-#: settings.py:400
+#: settings.py:403
 msgid "French"
 msgstr "Kifaransa"
 
-#: settings.py:401
+#: settings.py:404
 msgid "Portuguese"
 msgstr "Kireno"
 
-#: settings.py:402
+#: settings.py:405
 msgid "Swahili"
 msgstr "Kiswahili"
 
@@ -6075,7 +6075,7 @@ msgstr "Matokeo"
 msgid "Case actions"
 msgstr "Vitendo vya kesi"
 
-#: views/judgment.py:697
+#: views/judgment.py:699
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr "Hukumu hii haijatambulishwa ili kulinda taarifa za kibinafsi kwa kufuata sheria."
 

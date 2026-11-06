@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-06 09:29+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2537,19 +2537,19 @@ msgstr ""
 msgid "user profiles"
 msgstr ""
 
-#: settings.py:399
+#: settings.py:402
 msgid "English"
 msgstr ""
 
-#: settings.py:400
+#: settings.py:403
 msgid "French"
 msgstr ""
 
-#: settings.py:401
+#: settings.py:404
 msgid "Portuguese"
 msgstr ""
 
-#: settings.py:402
+#: settings.py:405
 msgid "Swahili"
 msgstr ""
 
@@ -5849,7 +5849,7 @@ msgstr ""
 msgid "Case actions"
 msgstr ""
 
-#: views/judgment.py:697
+#: views/judgment.py:699
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr ""
 
