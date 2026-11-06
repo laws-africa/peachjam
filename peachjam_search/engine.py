@@ -90,6 +90,22 @@ class SearchEngine:
 
     def execute_search(self) -> Any:
         response = self.compiled_search.execute()
+        if response._shards.failed and settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
+            reasons = [
+                failure.get("reason", {})
+                for failure in response._shards.to_dict().get("failures", [])
+            ]
+            if reasons and all(
+                reason.get("type") == "task_cancelled_exception"
+                and reason.get("reason", "").startswith(
+                    "task cancelled [http channel ["
+                )
+                and reason.get("reason", "").endswith(" closed]")
+                for reason in reasons
+            ):
+                log.warning("Retrying ES search cancelled after an HTTP channel closed")
+                # Search.execute() caches responses, including failed shard results.
+                response = self.compiled_search.execute(ignore_cache=True)
         if response._shards.failed:
             log.error(f"ES query failed: {response._shards.failures}")
             if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
