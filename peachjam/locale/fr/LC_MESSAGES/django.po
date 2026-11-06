@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-06 09:29+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -2591,19 +2591,19 @@ msgstr "profil de l'utilisateur"
 msgid "user profiles"
 msgstr "profils des utilisateurs"
 
-#: settings.py:399
+#: settings.py:402
 msgid "English"
 msgstr "Anglais"
 
-#: settings.py:400
+#: settings.py:403
 msgid "French"
 msgstr "Français"
 
-#: settings.py:401
+#: settings.py:404
 msgid "Portuguese"
 msgstr "Portugais"
 
-#: settings.py:402
+#: settings.py:405
 msgid "Swahili"
 msgstr "Swahili"
 
@@ -6075,7 +6075,7 @@ msgstr "Résultats"
 msgid "Case actions"
 msgstr "Décisions sur l’affaire"
 
-#: views/judgment.py:697
+#: views/judgment.py:699
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr "Ce jugement a été anonymisé afin de protéger les informations personnelles conformément à la loi."
 
