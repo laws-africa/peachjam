@@ -207,7 +207,7 @@ def search_flynotes(keywords: list[str], parent_id: int) -> str:
 
 
 class JudgmentSummariser:
-    default_llm_model = settings.OPENAI_MODEL_SMALL
+    default_llm_model = settings.OPENAI_MODEL
     llm_model = None
     summary_prompt_name = "summarise/judgment"
     summary_prompt_str = None

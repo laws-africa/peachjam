@@ -73,7 +73,7 @@ class JudgmentSummariserE2ETest(TestCase):
             "You are continuing a judgment summarisation workflow. "
             "Follow the latest developer instructions exactly and return the requested output."
         )
-        self.summariser.llm_model = settings.OPENAI_MODEL_SMALL
+        self.summariser.llm_model = settings.OPENAI_MODEL
         self.summariser.create_agent("South Africa")
 
         self.summariser.run_result = MagicMock()
@@ -167,7 +167,7 @@ class JudgmentSummariserE2ETest(TestCase):
 
         summariser = JudgmentSummariser()
         summariser.match_flynotes_to_db = False
-        summariser.llm_model = settings.OPENAI_MODEL_SMALL
+        summariser.llm_model = settings.OPENAI_MODEL
         summariser.summary_prompt_str = (
             "You are summarising a court judgment for legal research. Return concise but "
             "substantive values for issues, held, order, summary, flynote, and blurb."
