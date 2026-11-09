@@ -1,17 +1,19 @@
 import json
+from unittest.mock import patch
 from urllib.parse import parse_qs, urlparse
 
 from django.contrib.auth.models import Permission, User
 from django.core.cache import cache
 from django.db import connection
-from django.test import Client, TestCase
+from django.test import Client, TestCase, override_settings
 from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
+from elasticsearch_dsl.response import Response
 
 from peachjam.middleware import GeneralUpdateCacheMiddleware
 from peachjam.models import CoreDocument, Folder, SavedDocument, pj_settings
-from peachjam_search.models import SavedSearch, SearchHistory, SearchTrace
+from peachjam_search.models import SavedSearch, SearchTrace
 from peachjam_search.omnibox import OmniboxShortcuts
 
 
@@ -101,192 +103,185 @@ class OmniboxTests(TestCase):
         request = RequestFactory().get("/fr/user/loaded")
         self.assertFalse(middleware._should_update_cache(request, None))
 
-    def test_recent_searches_deduplicate_and_preserve_filters_and_mode(self):
-        params = {"court": ["high-court"], "year": ["2025"], "is_most_recent": True}
-        self.trace(filters=params, mode="hybrid", ordering="-date")
-        newest = self.trace(filters=params, mode="hybrid", ordering="-date")
-        self.trace(page=2)
-        self.trace(kind=SearchTrace.Kind.PORTIONS)
-        self.trace(search="timed out", status=SearchTrace.Status.TIMED_OUT)
-        self.trace(field_searches={"title": "criminal law"})
-        self.trace(search=" ")
+    def test_history_uses_only_eligible_traces(self):
+        excluded = [
+            {"page": 2},
+            {"kind": SearchTrace.Kind.PORTIONS},
+            {"status": SearchTrace.Status.TIMED_OUT},
+            {"field_searches": {"title": "law"}},
+            {"filters": {"court": ["high-court"]}},
+            {"filters": {"date": ["2025-01-01", None]}},
+            {"search": " "},
+            {"search": ""},
+            {"hidden": True},
+            {"mode": "hybrid"},
+            {"ordering": "-date"},
+        ]
+        for kwargs in excluded:
+            with self.subTest(kwargs=kwargs):
+                trace = self.trace(**kwargs)
+                self.assertFalse(
+                    SearchTrace.objects.for_search_history()
+                    .filter(pk=trace.pk)
+                    .exists()
+                )
+        self.trace(search="Law", field_searches={}, filters={}, ordering="-score")
+        newest = self.trace(search=" law ")
         self.login()
-        recent = self.shortcuts()["recent_searches"]
-        self.assertEqual(len(recent), 1)
-        self.assertEqual(recent[0]["id"], str(newest.pk))
+        items = self.shortcuts()["recent_searches"]
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["id"], str(newest.pk))
+        self.assertEqual(items[0]["text"], " law ")
         self.assertEqual(
-            parse_qs(urlparse(recent[0]["url"]).query),
-            {
-                "q": ["criminal law"],
-                "court": ["high-court"],
-                "year": ["2025"],
-                "mode": ["hybrid"],
-                "ordering": ["-date"],
-                "page": ["1"],
-            },
+            items[0]["delete_url"], reverse("search:history_delete", args=[newest.pk])
         )
 
-    def test_recent_searches_load_without_extra_queries(self):
-        self.trace(search="criminal law")
-        self.trace(search="contract", filters={"date": ["2025-01-01", None]})
-        with self.assertNumQueries(1):
+    def test_recent_searches_use_one_query_and_latest_twelve_distinct_searches(self):
+        for i in range(15):
+            self.trace(search=f"query-{i}")
+        for i in range(105):
+            self.trace(search="repeated")
+        with CaptureQueriesContext(connection) as queries:
             recent = OmniboxShortcuts().recent_searches(self.user)
-        self.assertEqual(len(recent), 2)
+        self.assertEqual(len(queries), 1)
+        self.assertEqual(len(recent), 12)
+        self.assertEqual(
+            [x["text"] for x in recent[:3]], ["repeated", "query-14", "query-13"]
+        )
 
-    def update_history(
-        self, action, url="/search/?q=Constitution", text="Constitution"
-    ):
-        return self.client.post(
-            reverse("search_history"), {"action": action, "url": url, "text": text}
+    def remove_history(self, trace, client=None):
+        return (client or self.client).post(
+            reverse("search:history_delete", args=[trace.pk])
         )
 
     def test_history_removal_is_account_wide_and_preserves_analytics(self):
-        self.trace(search="Constitution")
-        self.trace(search="constitution", ordering="-score")
+        first = self.trace(search="Constitution")
+        second = self.trace(search=" constitution ", ordering="-score")
+        other = self.trace(user=self.other, search="Constitution")
+        filtered = self.trace(search="Constitution", filters={"court": ["high-court"]})
+        advanced = self.trace(search="Constitution", field_searches={"title": "law"})
         self.login()
-        response = self.update_history("remove")
+        response = self.remove_history(second)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["recent_searches"], [])
-        self.assertEqual(SearchTrace.objects.filter(user=self.user).count(), 2)
+        self.assertEqual(SearchTrace.objects.count(), 5)
+        for trace in (first, second, other, filtered, advanced):
+            trace.refresh_from_db()
+            self.assertEqual(trace.hidden, trace in (first, second))
         other_browser = Client()
         other_browser.force_login(self.user)
         loaded = other_browser.get(self.url)
         self.assertEqual(
             json.loads(loaded.context["user_json"])["omnibox"]["recent_searches"], []
         )
-        self.login(self.other)
-        self.assertEqual(SearchHistory.objects.filter(user=self.other).count(), 0)
-        self.assertEqual(self.update_history("record").status_code, 200)
-        self.login()
-        self.assertEqual(self.shortcuts()["recent_searches"], [])
 
-    def test_repeating_removed_search_restores_it(self):
+    def test_repeating_removed_search_restores_it_with_a_new_trace(self):
+        trace = self.trace()
         self.login()
-        self.update_history("remove")
-        response = self.update_history(
-            "record", "/search/?q=constitution&gsc.tab=0&ordering=-score&page=1"
+        self.remove_history(trace)
+        newest = self.trace()
+        response = self.client.get(reverse("search:history"))
+        self.assertEqual(
+            [x["id"] for x in response.json()["recent_searches"]], [str(newest.pk)]
         )
-        self.assertEqual(len(response.json()["recent_searches"]), 1)
-        self.assertFalse(SearchHistory.objects.get(user=self.user).removed)
-        self.assertEqual(SearchHistory.objects.filter(user=self.user).count(), 1)
+        trace.refresh_from_db()
+        self.assertTrue(trace.hidden)
+        self.assertIn("no-store", response.headers["Cache-Control"])
+
+    @override_settings(
+        CACHES={
+            "default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}
+        },
+        CACHE_MIDDLEWARE_SECONDS=1800,
+    )
+    def test_cached_results_are_reused_with_fresh_private_traces(self):
+        def results(search):
+            return Response(
+                search,
+                {
+                    "_shards": {"failed": 0},
+                    "hits": {"total": {"value": 0}, "hits": []},
+                    "aggregations": {},
+                },
+            )
+
+        url = reverse("search:search_documents") + "?search=criminal+law"
+        with patch(
+            "peachjam_search.compiler.RetrieverSearch.execute",
+            autospec=True,
+            side_effect=results,
+        ) as execute:
+            first_anonymous = self.client.get(url)
+            second_anonymous = self.client.get(url)
+            for response in (first_anonymous, second_anonymous):
+                self.assertEqual(response.status_code, 200)
+                control = response.headers["Cache-Control"]
+                self.assertIn("private", control)
+                self.assertIn("no-store", control)
+                self.assertIn("max-age=0", control)
+                self.assertNotIn("public", control)
+            self.assertNotEqual(
+                first_anonymous.json()["trace_id"], second_anonymous.json()["trace_id"]
+            )
+            self.assertEqual(execute.call_count, 1)
+            self.login()
+            first_response = self.client.get(url)
+            self.assertIn("no-store", first_response.headers["Cache-Control"])
+            trace = SearchTrace.objects.get(pk=first_response.json()["trace_id"])
+            self.assertEqual(trace.user, self.user)
+            self.remove_history(trace)
+            second_response = self.client.get(url)
+            self.assertNotEqual(
+                first_response.json()["trace_id"], second_response.json()["trace_id"]
+            )
+            self.assertEqual(execute.call_count, 1)
+            self.assertEqual(
+                self.shortcuts()["recent_searches"][0]["id"],
+                second_response.json()["trace_id"],
+            )
+            self.login(self.other)
+            other_response = self.client.get(url)
+            self.assertEqual(
+                SearchTrace.objects.get(pk=other_response.json()["trace_id"]).user,
+                self.other,
+            )
+            self.assertEqual(execute.call_count, 1)
+            self.client.get(reverse("search:search_documents") + "?search=contract")
+            self.assertEqual(execute.call_count, 2)
 
     def test_history_requires_login_and_csrf(self):
-        self.assertEqual(self.update_history("remove").status_code, 302)
+        trace = self.trace()
+        self.assertEqual(self.remove_history(trace).status_code, 302)
+        self.assertEqual(self.client.get(reverse("search:history")).status_code, 302)
         csrf_client = Client(enforce_csrf_checks=True)
         csrf_client.force_login(self.user)
-        self.assertEqual(
-            csrf_client.post(
-                reverse("search_history"),
-                {"action": "remove", "url": "/search/?q=law", "text": "law"},
-            ).status_code,
-            403,
-        )
+        self.assertEqual(self.remove_history(trace, csrf_client).status_code, 403)
 
-    def test_history_rejects_invalid_entries(self):
+    def test_history_cannot_remove_another_users_trace_or_ineligible_trace(self):
         self.login()
-        for url in [
-            "https://example.com/search/?q=law",
-            "javascript:alert(1)",
-            "/search/",
+        for trace in [
+            self.trace(user=self.other),
+            self.trace(filters={"court": ["high-court"]}),
+            self.trace(hidden=True),
         ]:
-            with self.subTest(url=url):
-                self.assertEqual(self.update_history("record", url).status_code, 400)
-        self.assertEqual(SearchHistory.objects.count(), 0)
-
-    def test_case_and_analytics_parameters_do_not_duplicate_history(self):
-        self.trace(search="Constitution")
-        self.trace(search="constitution", ordering="-score")
-        self.login()
-        self.assertEqual(len(self.shortcuts()["recent_searches"]), 1)
-        self.update_history("record", "/search/?q=Constitution&gsc.tab=0")
-        self.assertEqual(len(self.shortcuts()["recent_searches"]), 1)
-
-    def test_distinct_filters_are_preserved(self):
-        service = OmniboxShortcuts()
+            with self.subTest(trace=trace.pk):
+                self.assertEqual(self.remove_history(trace).status_code, 404)
         self.assertEqual(
-            service.search_key("/search/?q=law&court=b&court=a"),
-            service.search_key("/fr/search/?court=a&court=b&q=LAW"),
+            self.client.post(
+                reverse(
+                    "search:history_delete",
+                    args=["00000000-0000-0000-0000-000000000000"],
+                )
+            ).status_code,
+            404,
         )
-        self.assertNotEqual(
-            service.search_key("/search/?q=law&court=a"),
-            service.search_key("/search/?q=law&court=b"),
-        )
-
-    def test_history_preserves_original_query_when_deduplicating(self):
-        self.login()
-        url = "/search/?q=Foo+AND++Bar&court=high-court"
-        self.update_history("record", url, "Foo AND  Bar")
-        response = self.update_history(
-            "record", "/search/?q=foo+and+bar&court=high-court&gsc.tab=0", "foo and bar"
-        )
-        self.assertEqual(len(response.json()["recent_searches"]), 1)
-        self.assertEqual(SearchHistory.objects.filter(user=self.user).count(), 1)
-        response = self.update_history("record", url, "Foo AND  Bar")
-        params = parse_qs(urlparse(response.json()["recent_searches"][0]["url"]).query)
-        self.assertEqual(params["q"], ["Foo AND  Bar"])
-
-    def test_history_keeps_distinct_filters_sort_modes_and_pages(self):
-        self.login()
-        urls = [
-            "/search/?q=law",
-            "/search/?q=law&court=high-court",
-            "/search/?q=law&ordering=-date",
-            "/search/?q=law&mode=hybrid",
-            "/search/?q=law&page=2",
-        ]
-        for url in urls:
-            self.update_history("record", url, "law")
-        response = self.update_history(
-            "record", "/search/?q=LAW&page=1&ordering=-score&mode=text", "LAW"
-        )
-        self.assertEqual(len(response.json()["recent_searches"]), len(urls))
+        trace = self.trace()
         self.assertEqual(
-            SearchHistory.objects.filter(user=self.user).count(), len(urls)
+            self.client.get(
+                reverse("search:history_delete", args=[trace.pk])
+            ).status_code,
+            405,
         )
-
-    def test_full_account_history_uses_one_bounded_query(self):
-        service = OmniboxShortcuts()
-        SearchHistory.objects.bulk_create(
-            [
-                SearchHistory(
-                    user=self.user,
-                    key=service.search_key(f"/search/?q=query-{i}"),
-                    text=f"query-{i}",
-                    query_string=f"q=query-{i}",
-                )
-                for i in range(30)
-            ]
-        )
-        with CaptureQueriesContext(connection) as queries:
-            items = service.history(self.user)["recent_searches"]
-        self.assertEqual(len(items), 12)
-        self.assertEqual(len(queries), 1)
-        self.assertIn("LIMIT 12", queries[0]["sql"])
-
-    def test_trace_fallback_fills_history_past_removed_candidates(self):
-        service = OmniboxShortcuts()
-        for i in range(20):
-            self.trace(search=f"query-{i}")
-        SearchHistory.objects.bulk_create(
-            [
-                SearchHistory(
-                    user=self.user,
-                    key=service.search_key(f"/search/?q=query-{i}"),
-                    text=f"query-{i}",
-                    query_string=f"q=query-{i}",
-                    removed=True,
-                )
-                for i in range(15, 20)
-            ]
-        )
-        with CaptureQueriesContext(connection) as queries:
-            items = service.history(self.user)["recent_searches"]
-        self.assertEqual(len(items), 12)
-        self.assertEqual(items[0]["text"], "query-14")
-        self.assertEqual(len(queries), 3)
-        self.assertIn("LIMIT 12", queries[0]["sql"])
-        self.assertIn("LIMIT 100", queries[1]["sql"])
-        self.assertIn(" IN ", queries[2]["sql"])
 
     def test_locked_items_are_excluded(self):
         for item in (self.saved, self.folder, self.search):
@@ -294,15 +289,6 @@ class OmniboxTests(TestCase):
             item.save()
         self.login()
         self.assertEqual(self.shortcuts()["saved_items"], [])
-
-    def test_recent_search_date_range_uses_search_page_parameters(self):
-        self.trace(filters={"date": ["2025-01-01", "2025-12-31"]})
-        self.login()
-        recent = self.shortcuts()["recent_searches"]
-        params = parse_qs(urlparse(recent[0]["url"]).query)
-        self.assertEqual(params["date_from"], ["2025-01-01"])
-        self.assertEqual(params["date_to"], ["2025-12-31"])
-        self.assertNotIn("date", params)
 
     def test_disabled_saved_features_are_excluded(self):
         pjs = pj_settings()

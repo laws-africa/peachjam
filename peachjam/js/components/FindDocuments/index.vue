@@ -898,12 +898,7 @@ export default {
               }
               this.trackSearch(params);
               if (this.page === 1) {
-                window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-                  detail: {
-                    query: this.q || this.advancedSearchCriteria.filter(item => item.text).map(item => item.text).join(' · '),
-                    url: document.location.pathname + '?' + this.serialiseState()
-                  }
-                }));
+                window.dispatchEvent(new CustomEvent('peachjam.search-completed'));
               }
               this.$nextTick(() => this.savedSearchModal());
               this.linkTraces(previousId, this.searchInfo.trace_id);

@@ -10,7 +10,7 @@ export default class SearchSuggestions {
     this.active = false;
     this.shortcuts = { user_id: null, recent_searches: [], saved_items: [] };
     this.recentIds = [];
-    this.pendingSearches = [];
+    this.pendingHistoryRefresh = false;
     this.historyUpdates = Promise.resolve();
     this.suggestions = [];
     this.noSuggestions = new Map();
@@ -18,7 +18,7 @@ export default class SearchSuggestions {
     this.maxValueLength = 100;
     this.listeners = [
       [window, 'peachjam.user-loaded', () => this.loadShortcuts()],
-      [window, 'peachjam.search-completed', event => this.recordSearch(event.detail)],
+      [window, 'peachjam.search-completed', () => this.refreshHistory()],
       [window, 'hashchange', () => this.recordCurrentPage()],
       [document, 'htmx:afterSwap', () => this.recordCurrentPage()],
       [document, 'htmx:afterRequest', event => this.savedItemsChanged(event)]
@@ -80,8 +80,8 @@ export default class SearchSuggestions {
     if (!this.history || this.history.userId !== data.user_id) {
       this.history = { userId: data.user_id, items: data.recent_searches };
     }
-    for (const search of this.pendingSearches) this.recordSearch(search);
-    this.pendingSearches = [];
+    if (this.pendingHistoryRefresh) this.refreshHistory();
+    this.pendingHistoryRefresh = false;
     this.readRecency();
     this.recordCurrentPage();
     this.changed();
@@ -149,29 +149,28 @@ export default class SearchSuggestions {
     if (changed) this.changed();
   }
 
-  recordSearch (search) {
+  refreshHistory () {
     if (!this.history) {
-      this.pendingSearches.push(search);
+      this.pendingHistoryRefresh = true;
       return;
     }
-    return this.updateHistory('record', search.url, search.query);
+    return this.updateHistory();
   }
 
   removeHistory (item) {
-    return this.updateHistory('remove', item.url, item.text);
+    return this.updateHistory(item.delete_url);
   }
 
-  updateHistory (action, url, text) {
+  updateHistory (deleteUrl) {
     const history = this.history;
-    if (history.userId === null || !text.trim()) return;
-    // Preserve action order when a user searches and removes an item in quick succession.
+    if (history.userId === null) return;
+    // Keep refreshes and removals ordered so an older response cannot restore a removed entry.
     this.historyUpdates = this.historyUpdates.then(async () => {
       if (this.history !== history) return;
-      const response = await fetch(`${peachJam.config.urlLangPrefix}/user/search-history`, {
-        method: 'POST',
+      const response = await fetch(deleteUrl || `${peachJam.config.urlLangPrefix}/search/history/`, {
+        method: deleteUrl ? 'POST' : 'GET',
         credentials: 'same-origin',
-        headers: await authHeaders(),
-        body: new URLSearchParams({ action, url, text })
+        headers: deleteUrl ? await authHeaders() : {}
       });
       if (!response.ok) throw new Error('Unable to update search history');
       const data = await response.json();

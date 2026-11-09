@@ -625,7 +625,8 @@ class SearchViewsTest(TestCase):
 
         response = self.client.get(reverse("search:search_documents") + "?search=test")
         self.assertEqual(response.status_code, 200)
-        self.assertIn("max-age=900", response.headers["Cache-Control"])
+        self.assertIn("no-store", response.headers["Cache-Control"])
+        self.assertIn("private", response.headers["Cache-Control"])
 
     @patch("peachjam_search.compiler.RetrieverSearch.execute", autospec=True)
     def test_search_includes_entity_hits_above_document_hits(self, mock_search):
