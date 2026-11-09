@@ -30,7 +30,6 @@ from .login import *
 from .my import *
 from .partner import *
 from .place import *
-from .pocketlaw import *
 from .robots import *
 from .save_document import *
 from .taxonomy import *

@@ -2,7 +2,6 @@
 {% load i18n %}
 <footer class="pt-4 pb-4 footer">
   <div class="container">
-    <a href="{% url 'pocketlaw_resources' %}" style="display: none"></a>
     {% block newsletter-form %}
       {% if PEACHJAM_SETTINGS.mailchimp_form_url %}
         {% include 'peachjam/_mailchimp_form.html' %}

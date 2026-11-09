@@ -5,7 +5,6 @@ from liiweb.views.donate import DonatePageView
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name="home_page"),
-    path("pocketlaw", views.PocketlawView.as_view(), name="pocketlaw"),
     path(
         "legislation/",
         include(

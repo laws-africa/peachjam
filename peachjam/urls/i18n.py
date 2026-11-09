@@ -9,7 +9,6 @@ from peachjam.views import (
     JudgePersonDetailView,
     JudgePersonListView,
     PlaceDetailView,
-    PocketLawResources,
     TermsOfUsePageView,
 )
 from peachjam.views.metabase_stats import MetabaseStatsView
@@ -41,9 +40,6 @@ urlpatterns = [
     path("", include("peachjam.urls.chat")),
     # general
     path("about/", AboutPageView.as_view(), name="about"),
-    path(
-        "pocketlaw-resources", PocketLawResources.as_view(), name="pocketlaw_resources"
-    ),
     path("stats", MetabaseStatsView.as_view(), name="metabase_stats"),
     path("terms-of-use/", TermsOfUsePageView.as_view(), name="terms_of_use"),
     # admin
