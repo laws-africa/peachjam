@@ -48,6 +48,7 @@ from peachjam_api.serializers import (
     UncommencedProvisionsSerializer,
     UnconstitutionalProvisionsSerializer,
 )
+from peachjam_search.omnibox import OmniboxShortcuts
 from peachjam_subs.models import Product, Subscription
 
 
@@ -805,6 +806,7 @@ class PageLoadedView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["sentry_enabled"] = bool(settings.PEACHJAM["SENTRY_DSN_KEY"])
         context["signup_completed"] = False
+        shortcuts = OmniboxShortcuts().for_user(self.request.user)
 
         if self.request.user.is_authenticated:
             if (
@@ -818,6 +820,7 @@ class PageLoadedView(TemplateView):
             context["user_json"] = json.dumps(
                 {
                     "id": self.request.user.id,
+                    "omnibox": shortcuts,
                     "email": self.request.user.email,
                     "name": user_display(self.request.user),
                     "is_staff": self.request.user.is_staff,
@@ -844,7 +847,7 @@ class PageLoadedView(TemplateView):
                 }
             )
         else:
-            context["user_json"] = json.dumps({"perms": []})
+            context["user_json"] = json.dumps({"perms": [], "omnibox": shortcuts})
 
         return context
 

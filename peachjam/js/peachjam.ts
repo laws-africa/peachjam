@@ -44,6 +44,8 @@ export interface PeachJamConfig {
 
 class PeachJam {
   private components: any[];
+  private userLoadPromise: Promise<void> | null = null;
+  private userLoadPending = false;
   public analytics: Analytics;
   public config: PeachJamConfig = {
     appName: 'Peach Jam',
@@ -431,9 +433,19 @@ class PeachJam {
   }
 
   loaded () {
-    // use htmx to populate user-specific content islands when the page loads.
-    // @ts-ignore
-    htmxAjax('get', `${this.config.urlLangPrefix}/user/loaded`);
+    // Coalesce changes during a load into one follow-up, so older data cannot arrive last.
+    this.userLoadPending = true;
+    if (!this.userLoadPromise) {
+      this.userLoadPromise = this.loadUser().finally(() => { this.userLoadPromise = null; });
+    }
+    return this.userLoadPromise;
+  }
+
+  async loadUser () {
+    do {
+      this.userLoadPending = false;
+      await htmxAjax('get', `${this.config.urlLangPrefix}/user/loaded`);
+    } while (this.userLoadPending);
   }
 
   userLoaded () {

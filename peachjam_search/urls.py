@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework import routers
 
 from . import views
+from .views.history import SearchHistoryDeleteView, SearchHistoryView
 
 router = routers.DefaultRouter()
 router.register("click", views.SearchClickViewSet, basename="search_click")
@@ -15,6 +16,12 @@ router.register(
 # Wire up our API using automatic URL routing.
 # Additionally, we include login URLs for the browsable API.
 urlpatterns = [
+    path("history/", SearchHistoryView.as_view(), name="history"),
+    path(
+        "history/<uuid:pk>/delete",
+        SearchHistoryDeleteView.as_view(),
+        name="history_delete",
+    ),
     path("api/documents/", views.DocumentSearchView.as_view(), name="search_documents"),
     path(
         "api/documents/download",
