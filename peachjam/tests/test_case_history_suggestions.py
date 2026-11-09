@@ -11,6 +11,7 @@ from peachjam.analysis.case_history import CaseHistorySuggestionService
 from peachjam.models import (
     CaseHistory,
     CaseHistorySuggestion,
+    CaseNumber,
     Court,
     CourtClass,
     Judgment,
@@ -148,6 +149,36 @@ class TestCaseHistorySuggestion(CaseHistorySuggestionTestMixin, TestCase):
         suggestion = CaseHistorySuggestion.objects.get()
         self.assertEqual(later, suggestion.judgment)
         self.assertEqual(historical, suggestion.historical_judgment)
+
+    def test_service_matches_kenya_appeal_wording_and_case_number(self):
+        historical = self.make_judgment(
+            "Thomas Biwott Lougen v Republic",
+            date(2018, 7, 31),
+            self.high_court,
+        )
+        CaseNumber.objects.create(
+            document=historical,
+            string_override="Criminal Appeal 125\N{NO-BREAK SPACE}of\N{NO-BREAK SPACE}2016",
+            year=2016,
+        )
+        judgment = self.make_judgment("Lougen v Republic", date(2024, 8, 21), self.sca)
+        content = judgment.get_or_create_document_content()
+        content.content_text = (
+            "Being an appeal from the judgment of the High Court of Kenya at "
+            "Eldoret, dated 31 July 2018 in Criminal Appeal 125 of 2016."
+        )
+        content.save()
+
+        count = CaseHistorySuggestionService().suggest(judgment)
+
+        self.assertEqual(1, count)
+        suggestion = CaseHistorySuggestion.objects.get()
+        self.assertEqual(historical, suggestion.historical_judgment)
+        self.assertEqual(
+            CaseHistorySuggestion.RelationshipType.APPEAL_FROM,
+            suggestion.relationship_type,
+        )
+        self.assertIn("case_number", suggestion.matching_methods)
 
 
 class TestCaseHistorySuggestionAdmin(CaseHistorySuggestionTestMixin, WebTest):

@@ -49,8 +49,10 @@ NEUTRAL_CITATION_RE = re.compile(
     re.I,
 )
 CASE_NUMBER_RE = re.compile(
-    r"(?:case\s+(?:no\.?|number)|under\s+case\s+number)\s*[:#-]?\s*"
-    r"([A-Z]{0,12}\s*\d{1,8}(?:/|-|\s+of\s+)\d{2,4})",
+    r"\b((?:(?:civil|criminal|commercial|constitutional|election|"
+    r"environment(?:\s+and\s+land)?|employment(?:\s+and\s+labour\s+relations)?|"
+    r"judicial\s+review)\s+)?(?:appeal|application|petition|revision|case)\s+"
+    r"(?:no\.?\s*)?[A-Z]{0,12}\s*\d{1,8}(?:/|-|\s+of\s+)\d{2,4})\b",
     re.I,
 )
 
@@ -102,7 +104,8 @@ RELATION_PATTERNS = collections.OrderedDict(
             CaseHistorySuggestion.RelationshipType.APPEAL_FROM,
             re.compile(
                 r"on\s+(?:an?\s+|applications?\s+for\s+leave\s+to\s+)?"
-                r"appeal\s+from|appeal(?:s|ed|ing)?\s+against\s+(?:an?\s+|the\s+)?"
+                r"appeal\s+from|(?:being\s+)?(?:an?\s+)?appeal\s+from|"
+                r"appeal(?:s|ed|ing)?\s+against\s+(?:an?\s+|the\s+)?"
                 r"(?:judgment|decision|order)|appeal\s+lies?\s+against",
                 re.I,
             ),
@@ -193,7 +196,8 @@ def compact(value):
 
 
 def normalize_case_number(value):
-    value = compact(value).upper().replace(" OF ", "/")
+    value = re.sub(r"\bNO\.?\s*", "", compact(value), flags=re.I)
+    value = value.upper().replace(" OF ", "/")
     return re.sub(r"[^A-Z0-9]", "", value)
 
 
@@ -404,7 +408,11 @@ class CaseHistorySuggestionService:
                 self.add_match(matches, target, "citation_link", max(position, 0))
 
         for case_match in CASE_NUMBER_RE.finditer(text):
-            normalized = normalize_case_number(case_match.group(1))
+            raw_case_number = compact(case_match.group(1))
+            normalized = normalize_case_number(raw_case_number)
+            numeric_parts = re.findall(r"\d+", raw_case_number)
+            year = int(numeric_parts[-1]) if numeric_parts else None
+            serial = numeric_parts[-2] if len(numeric_parts) >= 2 else None
             possible_numbers = CaseNumber.objects.filter(
                 document__date__lt=judgment.date
             ).select_related(
@@ -413,9 +421,13 @@ class CaseHistorySuggestionService:
                 "document__court__court_class",
                 "document__work",
             )
-            for case_number in possible_numbers.filter(
-                string__iexact=compact(case_match.group(1))
-            )[:20]:
+            if year:
+                possible_numbers = possible_numbers.filter(
+                    Q(year=year) | Q(string__icontains=str(year))
+                )
+            if serial:
+                possible_numbers = possible_numbers.filter(string__icontains=serial)
+            for case_number in possible_numbers[:100]:
                 if normalize_case_number(case_number.string) == normalized:
                     self.add_match(
                         matches,
