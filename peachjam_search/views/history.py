@@ -11,7 +11,7 @@ from peachjam_search.omnibox import OmniboxShortcuts
 
 @method_decorator(never_cache, name="dispatch")
 class SearchHistoryView(LoginRequiredMixin, View):
-    """Load the signed-in user's history after a completed search."""
+    """Refresh the signed-in user's history from existing search traces."""
 
     def get(self, request):
         return JsonResponse(

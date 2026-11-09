@@ -73,9 +73,10 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
       new SearchInput(document.querySelector('#second'), {onSearch: (query,suggestion) => window.submissions.push({query,suggestion})});
       window.omniboxSource = document.querySelector('dialog').__vueParentComponent.parent.ctx.suggestionSource;
       window.mockCompletedSearches = [];
-      window.addEventListener('peachjam.search-completed', event => {
-        if (event.detail) window.mockCompletedSearches.push(event.detail);
-      });
+      window.completedSearch = (search, cached = false) => {
+        if (!cached) window.mockCompletedSearches.push(search);
+        window.dispatchEvent(new CustomEvent('peachjam.search-completed'));
+      };
       window.userLoad = peachJam.loaded();
       </script></body></html>`;
     page.on('request', async request => {
@@ -83,16 +84,18 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
       requests.push(url.pathname);
       if (url.pathname === '/omnibox.js') return request.respond({ contentType: 'application/javascript', body: fs.readFileSync(path.join(buildDir, 'omnibox.js'), 'utf8') });
       if (url.pathname.startsWith(`${urlPrefix}/search/history/`)) {
-        // Search results already created these traces on the server. The client only refreshes the list.
-        const completed = await page.evaluate(() => window.mockCompletedSearches.splice(0));
-        if (historyFail) return request.respond({ status: 503, body: 'Unavailable' });
-        for (const search of completed) {
-          const key = historyKey(search.url);
-          accountHistory.delete(key);
-          accountHistory.set(key, { id: `trace-${key}`, type: 'history', text: search.query, url: search.url });
+        assert.equal(request.postData(), undefined);
+        if (request.method() === 'GET') {
+          const searches = await page.evaluate(() => window.mockCompletedSearches.splice(0));
+          for (const search of searches) {
+            const key = historyKey(search.url);
+            accountHistory.delete(key);
+            accountHistory.set(key, { id: `trace-${key}`, type: 'history', text: search.query, url: search.url });
+          }
         }
+        if (historyFail) return request.respond({ status: 503, body: 'Unavailable' });
         if (request.method() === 'POST') {
-          assert.equal(request.postData(), undefined);
+          assert.ok(url.pathname.endsWith('/delete'));
           const id = decodeURIComponent(url.pathname.split('/').at(-2));
           const fallback = { id: 'recent', type: 'history', text: 'contract law', url: '/search/?q=contract+law' };
           const item = [...accountHistory.values(), fallback].find(item => item.id === id);
@@ -267,7 +270,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
 
     // Completed searches refresh history from server traces without sending query text.
     await page.evaluate(() => {
-      const completed = (query, url) => window.dispatchEvent(new CustomEvent('peachjam.search-completed', { detail: { query, url } }));
+      const completed = (query, url) => window.completedSearch({ query, url });
       completed('Cached query', '/search/?q=Cached+query&suggestion=title');
       completed('Other query', '/search/?q=Other+query');
       completed('Cached query', '/search/?q=Cached+query&page=1');
@@ -306,6 +309,9 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.click('#omnibox-history + ul button[aria-label="Remove recent search: Cached query"]');
     await waitForHistory();
     assert.deepEqual((await historyItems()).map(item => item.text), ['Other query']);
+    await page.evaluate(() => window.completedSearch({ query: 'Cached query', url: '/search/?q=Cached+query' }, true));
+    await waitForHistory();
+    assert.deepEqual((await historyItems()).map(item => item.text), ['Other query']);
     await page.goto('http://omnibox.test/');
     await page.click('#second');
     await page.waitForSelector('#omnibox-document');
@@ -327,9 +333,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.click('#omnibox-history + ul button[aria-label="Remove recent search: Other query"]');
     await confirmedRemoval;
     historyFail = true;
-    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-      detail: { query: 'Failed queued query', url: '/search/?q=failed-queued' }
-    })));
+    await page.evaluate(() => window.completedSearch({ query: 'Failed queued query', url: '/search/?q=failed-queued' }));
     holdHistoryResponse = false;
     await releaseHistoryResponse();
     await waitForHistory();
@@ -340,18 +344,14 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.keyboard.press('Escape');
 
     // Refreshes retain the original replay URL supplied by the server.
-    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-      detail: { query: 'Foo AND Bar', url: '/search/?q=Foo+AND++Bar' }
-    })));
+    await page.evaluate(() => window.completedSearch({ query: 'Foo AND Bar', url: '/search/?q=Foo+AND++Bar' }));
     await waitForHistory();
     assert.equal((await historyItems())[0].url, '/search/?q=Foo+AND++Bar');
 
     // An in-flight response must not populate a different user's history.
     holdHistoryResponse = true;
     const pendingHistory = page.waitForRequest(request => new URL(request.url()).pathname.startsWith('/search/history/'));
-    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-      detail: { query: 'Private query', url: '/search/?q=private' }
-    })));
+    await page.evaluate(() => window.completedSearch({ query: 'Private query', url: '/search/?q=private' }));
     await pendingHistory;
     await page.evaluate(() => {
       window.peachjam.user.omnibox = { user_id: 8, recent_searches: [], saved_items: [] };
@@ -371,9 +371,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     await page.evaluate(() => {
       window.peachjam.user.omnibox = { user_id: null, recent_searches: [], saved_items: [] };
       window.peachjam.userLoaded();
-      window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-        detail: { query: 'Anonymous query', url: '/search/?q=anonymous' }
-      }));
+      window.completedSearch({ query: 'Anonymous query', url: '/search/?q=anonymous' });
     });
     await waitForHistory();
     assert.equal(requests.filter(path => path.startsWith('/search/history/')).length, historyRequestCount);
@@ -393,9 +391,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     // Show only three recent entries, then filter the full history as the user types.
     await page.evaluate(() => {
       for (let index = 0; index < 5; index++) {
-        window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-          detail: { query: `Research ${index}`, url: `/search/?q=research-${index}` }
-        }));
+        window.completedSearch({ query: `Research ${index}`, url: `/search/?q=research-${index}` });
       }
     });
     await waitForHistory();
@@ -420,9 +416,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     assert.equal(await page.$$('dialog section').then(items => items.length), 0);
     assert.equal(await page.$$('dialog p').then(items => items.length), 0);
     const historyRequestCountBeforeLoad = requests.filter(path => path.includes('/search/history/')).length;
-    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-      detail: { query: 'Unknown user', url: '/search/?q=unknown' }
-    })));
+    await page.evaluate(() => window.completedSearch({ query: 'Unknown user', url: '/search/?q=unknown' }));
     assert.equal(requests.filter(path => path.includes('/search/history/')).length, historyRequestCountBeforeLoad);
     const failedSuggestion = page.waitForResponse(response => response.url().includes('/documents/suggest/'));
     await page.type('dialog input', 'failed suggestion');
@@ -437,9 +431,7 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     urlPrefix = '/fr';
     userDelay = 500;
     await page.goto('http://omnibox.test/fr/');
-    await page.evaluate(() => window.dispatchEvent(new CustomEvent('peachjam.search-completed', {
-      detail: { query: 'Early search', url: '/fr/search/?q=early' }
-    })));
+    await page.evaluate(() => window.completedSearch({ query: 'Early search', url: '/fr/search/?q=early' }));
     await page.click('#anchor');
     await page.waitForSelector('#omnibox-document');
     await page.waitForFunction(() => window.omniboxSource.history.items.some(item => item.text === 'Early search'));
@@ -448,6 +440,6 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     assert.equal(requests.filter(path => path === '/fr/user/loaded').length, 1);
     assert.ok(requests.includes('/fr/search/api/documents/suggest/'));
     assert.deepEqual(errors, []);
-    console.log('PASS: persistent recent-search removal, consistent row alignment and focus, trace-based history refreshes, user isolation, ranking, serialized refreshes, mobile layout, keyboard support and failure fallback.');
+    console.log('PASS: persistent recent-search removal, consistent row alignment and focus, existing history traces with cached search responses, user isolation, ranking, serialized refreshes, mobile layout, keyboard support and failure fallback.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => fs.rmSync(buildDir, { recursive: true, force: true }));

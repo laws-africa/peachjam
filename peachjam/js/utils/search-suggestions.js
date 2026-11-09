@@ -154,23 +154,23 @@ export default class SearchSuggestions {
       this.pendingHistoryRefresh = true;
       return;
     }
-    return this.updateHistory();
+    return this.updateHistory(`${peachJam.config.urlLangPrefix}/search/history/`);
   }
 
   removeHistory (item) {
-    return this.updateHistory(item.delete_url);
+    return this.updateHistory(item.delete_url, 'POST');
   }
 
-  updateHistory (deleteUrl) {
+  updateHistory (url, method = 'GET') {
     const history = this.history;
     if (history.userId === null) return;
     // Keep refreshes and removals ordered so an older response cannot restore a removed entry.
     this.historyUpdates = this.historyUpdates.then(async () => {
       if (this.history !== history) return;
-      const response = await fetch(deleteUrl || `${peachJam.config.urlLangPrefix}/search/history/`, {
-        method: deleteUrl ? 'POST' : 'GET',
+      const response = await fetch(url, {
+        method,
         credentials: 'same-origin',
-        headers: deleteUrl ? await authHeaders() : {}
+        headers: method === 'POST' ? await authHeaders() : {}
       });
       if (!response.ok) throw new Error('Unable to update search history');
       const data = await response.json();

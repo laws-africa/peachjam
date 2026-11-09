@@ -1,11 +1,7 @@
-import hashlib
-import json
 import logging
 from typing import Any, Iterable, List, Literal, Optional, Self
 
 from django.conf import settings
-from django.core.cache import cache
-from elasticsearch_dsl.response import Response
 from pydantic import BaseModel
 
 from peachjam_search.compiler import ElasticsearchSearchCompiler, RetrieverSearch
@@ -92,29 +88,12 @@ class SearchEngine:
         self.compiled_search = self.compiler.compile(self.search_query, self.plan)
         return self.compiled_search
 
-    def execute_search(self, cache_timeout=None) -> Any:
-        """Execute the compiled query, optionally reusing shared Elasticsearch results."""
-        cache_key = None
-        if cache_timeout:
-            query = {
-                "index": self.compiler.index,
-                "query": self.compiled_search.to_dict(),
-            }
-            digest = hashlib.sha256(
-                json.dumps(query, sort_keys=True).encode()
-            ).hexdigest()
-            cache_key = f"search-results:{digest}"
-            cached = cache.get(cache_key)
-            if cached is not None:
-                return Response(self.compiled_search, cached)
-
+    def execute_search(self) -> Any:
         response = self.compiled_search.execute()
         if response._shards.failed:
             log.error(f"ES query failed: {response._shards.failures}")
             if settings.ELASTICSEARCH_FAIL_ON_SHARD_FAILURE:
                 raise Exception(f"ES query failed: {response._shards.failures}")
-        elif cache_key:
-            cache.set(cache_key, response.to_dict(), timeout=cache_timeout)
         return response
 
     def suggest(self, query: str) -> Any:

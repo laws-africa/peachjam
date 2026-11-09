@@ -171,18 +171,15 @@ class DocumentSearchView(TemplateView):
 
         return None, form, engine
 
-    @method_decorator(never_cache)
+    @method_decorator(cache_page(CACHE_SECS))
     def search(self, request, *args, **kwargs):
-        # Cache Elasticsearch results below; each request still needs its own trace.
         response, form, engine = self.prepare(request)
         if response:
             return response
 
         debug_payload = engine.build_debug_payload()
         try:
-            es_response = engine.execute_search(
-                cache_timeout=None if self.use_explain else CACHE_SECS
-            )
+            es_response = engine.execute_search()
         except ConnectionTimeout as error:
             # A timeout has no ES response, but the compiled query is the most
             # useful evidence for diagnosing it with Elasticsearch support.

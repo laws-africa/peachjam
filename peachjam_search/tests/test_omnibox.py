@@ -181,9 +181,8 @@ class OmniboxTests(TestCase):
         self.remove_history(trace)
         newest = self.trace()
         response = self.client.get(reverse("search:history"))
-        self.assertEqual(
-            [x["id"] for x in response.json()["recent_searches"]], [str(newest.pk)]
-        )
+        self.assertEqual(len(response.json()["recent_searches"]), 1)
+        self.assertEqual(response.json()["recent_searches"][0]["text"], newest.search)
         trace.refresh_from_db()
         self.assertTrue(trace.hidden)
         self.assertIn("no-store", response.headers["Cache-Control"])
@@ -194,7 +193,7 @@ class OmniboxTests(TestCase):
         },
         CACHE_MIDDLEWARE_SECONDS=1800,
     )
-    def test_cached_results_are_reused_with_fresh_private_traces(self):
+    def test_cached_search_and_history_refresh_do_not_create_extra_traces(self):
         def results(search):
             return Response(
                 search,
@@ -205,49 +204,64 @@ class OmniboxTests(TestCase):
                 },
             )
 
+        self.login()
         url = reverse("search:search_documents") + "?search=criminal+law"
         with patch(
             "peachjam_search.compiler.RetrieverSearch.execute",
             autospec=True,
             side_effect=results,
         ) as execute:
-            first_anonymous = self.client.get(url)
-            second_anonymous = self.client.get(url)
-            for response in (first_anonymous, second_anonymous):
-                self.assertEqual(response.status_code, 200)
-                control = response.headers["Cache-Control"]
-                self.assertIn("private", control)
-                self.assertIn("no-store", control)
-                self.assertIn("max-age=0", control)
-                self.assertNotIn("public", control)
-            self.assertNotEqual(
-                first_anonymous.json()["trace_id"], second_anonymous.json()["trace_id"]
-            )
-            self.assertEqual(execute.call_count, 1)
-            self.login()
-            first_response = self.client.get(url)
-            self.assertIn("no-store", first_response.headers["Cache-Control"])
-            trace = SearchTrace.objects.get(pk=first_response.json()["trace_id"])
+            first = self.client.get(url)
+            self.assertEqual(first.status_code, 200)
+            self.assertIn("max-age=900", first.headers["Cache-Control"])
+            trace = SearchTrace.objects.get(pk=first.json()["trace_id"])
             self.assertEqual(trace.user, self.user)
+            history = self.client.get(reverse("search:history"))
+            self.assertIn("no-store", history.headers["Cache-Control"])
+            self.assertEqual(
+                [item["id"] for item in history.json()["recent_searches"]],
+                [str(trace.pk)],
+            )
+            self.assertEqual(SearchTrace.objects.count(), 1)
+            repeated = self.client.get(url)
+            self.assertEqual(repeated.content, first.content)
+            self.client.get(reverse("search:history"))
+            self.assertEqual(SearchTrace.objects.count(), 1)
+            self.assertEqual(execute.call_count, 1)
             self.remove_history(trace)
-            second_response = self.client.get(url)
-            self.assertNotEqual(
-                first_response.json()["trace_id"], second_response.json()["trace_id"]
-            )
-            self.assertEqual(execute.call_count, 1)
+            repeated = self.client.get(url)
+            self.assertEqual(repeated.content, first.content)
             self.assertEqual(
-                self.shortcuts()["recent_searches"][0]["id"],
-                second_response.json()["trace_id"],
+                self.client.get(reverse("search:history")).json()["recent_searches"], []
             )
-            self.login(self.other)
-            other_response = self.client.get(url)
-            self.assertEqual(
-                SearchTrace.objects.get(pk=other_response.json()["trace_id"]).user,
-                self.other,
-            )
+            self.assertEqual(SearchTrace.objects.count(), 1)
             self.assertEqual(execute.call_count, 1)
-            self.client.get(reverse("search:search_documents") + "?search=contract")
+            # A real execution after the cache expires creates a new eligible trace.
+            cache.clear()
+            fresh = self.client.get(url)
+            self.assertNotEqual(fresh.json()["trace_id"], first.json()["trace_id"])
+            self.assertEqual(
+                len(
+                    self.client.get(reverse("search:history")).json()["recent_searches"]
+                ),
+                1,
+            )
+            self.assertEqual(SearchTrace.objects.count(), 2)
             self.assertEqual(execute.call_count, 2)
+
+    def test_history_refresh_never_copies_another_users_or_anonymous_traces(self):
+        other = self.trace(user=self.other)
+        anonymous = self.trace(user=None)
+        self.login()
+        response = self.client.get(reverse("search:history"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["recent_searches"], [])
+        self.assertEqual(SearchTrace.objects.count(), 2)
+        other.refresh_from_db()
+        anonymous.refresh_from_db()
+        self.assertEqual(other.user, self.other)
+        self.assertIsNone(anonymous.user)
+        self.assertEqual(self.client.post(reverse("search:history")).status_code, 405)
 
     def test_history_requires_login_and_csrf(self):
         trace = self.trace()

@@ -36,6 +36,7 @@ class SearchTraceQuerySet(models.QuerySet):
                 mode="text",
                 hidden=False,
             )
+            # Query-only value for grouping and matching; not a database field.
             .annotate(history_text=Lower(Trim("search")))
             .exclude(history_text="")
         )
@@ -45,8 +46,6 @@ class SearchTrace(models.Model):
     """A search performed by a user."""
 
     objects = SearchTraceQuerySet.as_manager()
-
-    hidden = models.BooleanField(default=False)
 
     class Kind(models.TextChoices):
         DOCUMENTS = "documents", "Documents"
@@ -94,6 +93,7 @@ class SearchTrace(models.Model):
     error_type = models.CharField(max_length=255, null=True)
     error_message = models.CharField(max_length=2048, null=True)
 
+    hidden = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
