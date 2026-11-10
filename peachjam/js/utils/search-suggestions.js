@@ -198,9 +198,12 @@ export default class SearchSuggestions {
   loadSuggestions (showSuggestions) {
     clearTimeout(this.suggestionTimer);
     this.suggestionController?.abort();
-    this.suggestions = [];
     const term = this.query.trim();
-    if (!showSuggestions || term.length < 3 || !this.shouldLoad(term)) return;
+    if (!showSuggestions || term.length < 3 || !this.shouldLoad(term)) {
+      this.suggestions = [];
+      return;
+    }
+    // Keep the current list visible during the debounce and request, including cache hits.
     this.suggestionTimer = setTimeout(async () => {
       const controller = new AbortController();
       this.suggestionController = controller;
@@ -209,7 +212,11 @@ export default class SearchSuggestions {
         if (controller.signal.aborted || !this.active || this.query.trim() !== term) return;
         this.suggestions = items;
         this.changed();
-      } catch (_) { /* Search remains available when suggestions cannot be loaded. */ }
+      } catch (_) {
+        if (controller.signal.aborted || !this.active || this.query.trim() !== term) return;
+        this.suggestions = [];
+        this.changed();
+      }
     }, 200);
   }
 

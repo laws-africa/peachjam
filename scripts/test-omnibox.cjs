@@ -26,6 +26,8 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     const requests = [];
     let shortcutsFail = false;
     let suggestionsFail = false;
+    let holdSuggestions = false;
+    let releaseSuggestions;
     let newlySaved = false;
     let rankingCase = false;
     let urlPrefix = '';
@@ -135,7 +137,14 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
         }
         return setTimeout(respond, userDelay);
       }
-      if (url.pathname === `${urlPrefix}/search/api/documents/suggest/`) return request.respond({ status: suggestionsFail ? 503 : 200, contentType: 'application/json', body: JSON.stringify({ suggestions: [{ value: url.searchParams.get('q') + ' law', type: 'title', type_label: 'Document title' }] }) });
+      if (url.pathname === `${urlPrefix}/search/api/documents/suggest/`) {
+        const respond = () => request.respond({ status: suggestionsFail ? 503 : 200, contentType: 'application/json', body: JSON.stringify({ suggestions: url.searchParams.get('q') === 'no-results' ? [] : [{ value: url.searchParams.get('q') + ' law', type: 'title', type_label: 'Document title' }] }) });
+        if (holdSuggestions) {
+          releaseSuggestions = respond;
+          return;
+        }
+        return respond();
+      }
       if (url.pathname === '/document/contract/') return request.respond({ contentType: 'text/html', body: '<h1>Document opened</h1>' });
       if (url.pathname === '/document/ordinary/') return request.respond({ contentType: 'text/html', body: html.replace('<h1>Omnibox preview</h1>', '<h1>Document page</h1><div id="document-content" data-work-id="101" data-document-id="202"></div>') });
       if (url.pathname === '/document/different-work/') return request.respond({ contentType: 'text/html', body: html.replace('<h1>Omnibox preview</h1>', '<h1>Other work</h1><div id="document-content" data-work-id="999" data-document-id="101"></div>') });
@@ -408,6 +417,64 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     assert.equal(await page.$('#omnibox-history'), null);
     assert.equal(await page.$eval('#omnibox-saved_search + ul a', el => el.textContent.trim()), 'Law alerts');
     await page.keyboard.press('Escape');
+    // Retain the same suggestion nodes through both debounce and a slow request,
+    // for signed-in and anonymous users. Empty results leave no margin or divider.
+    rankingCase = false;
+    for (const anonymous of [false, true]) {
+      await page.goto('http://omnibox.test/');
+      await page.evaluate(() => window.userLoad);
+      if (anonymous) await page.evaluate(() => {
+        window.peachjam.user.omnibox = { user_id: null, recent_searches: [], saved_items: [] };
+        window.peachjam.userLoaded();
+      });
+      await page.click('#second');
+      const setQuery = value => page.$eval('dialog input', (el, value) => {
+        el.value = value;
+        el.dispatchEvent(new Event('input', { bubbles: true }));
+      }, value);
+      await setQuery('contrac');
+      await page.waitForFunction(() => document.querySelector('#omnibox-suggestions + ul button')?.textContent.includes('contrac law'));
+      await page.evaluate(() => {
+        window.previousSuggestion = document.querySelector('#omnibox-suggestions + ul button');
+        window.previousSavedSearch = document.querySelector('#omnibox-saved_search');
+        window.resultsHeight = document.querySelector('dialog').getBoundingClientRect().height;
+      });
+      holdSuggestions = true;
+      const pending = page.waitForRequest(request => request.url().includes('/documents/suggest/') && new URL(request.url()).searchParams.get('q') === 'contract');
+      await setQuery('contract');
+      assert.equal(await page.evaluate(() => window.previousSuggestion.isConnected), true);
+      await pending;
+      assert.equal(await page.evaluate(() => window.previousSuggestion.isConnected), true);
+      assert.equal(await page.$eval('#omnibox-suggestions + ul button', el => el.textContent.includes('contrac law')), true);
+      assert.equal(await page.evaluate(() => document.querySelector('dialog').getBoundingClientRect().height === window.resultsHeight), true);
+      if (!anonymous) assert.equal(await page.evaluate(() => window.previousSavedSearch.isConnected), true);
+      holdSuggestions = false;
+      await releaseSuggestions();
+      await page.waitForFunction(() => document.querySelector('#omnibox-suggestions + ul button')?.textContent.includes('contract law'));
+      await setQuery('co');
+      await page.waitForFunction(() => !document.querySelector('#omnibox-suggestions'));
+      await setQuery('contract');
+      await page.waitForSelector('#omnibox-suggestions');
+      holdSuggestions = true;
+      const emptyResponse = page.waitForRequest(request => request.url().includes('/documents/suggest/') && new URL(request.url()).searchParams.get('q') === 'no-results');
+      await setQuery('no-results');
+      await emptyResponse;
+      await page.$eval('#omnibox-suggestions + ul button', el => el.focus());
+      holdSuggestions = false;
+      await releaseSuggestions();
+      await page.waitForFunction(() => !document.querySelector('.search-box__results'));
+      assert.equal(await page.$eval('dialog input', el => document.activeElement === el), true);
+      assert.equal(await page.$eval('.search-box__form', el => getComputedStyle(el).borderBottomWidth), '0px');
+      await setQuery('no-results-more');
+      assert.equal(await page.$('.search-box__results'), null);
+      await setQuery('contract');
+      await page.waitForSelector('#omnibox-suggestions');
+      suggestionsFail = true;
+      await setQuery('unavailable');
+      await page.waitForFunction(() => !document.querySelector('.search-box__results'));
+      suggestionsFail = false;
+      await page.keyboard.press('Escape');
+    }
     shortcutsFail = true;
     suggestionsFail = true;
     await page.goto('http://omnibox.test/');
@@ -440,6 +507,6 @@ const build = () => new Promise((resolve, reject) => webpack(config, (error, sta
     assert.equal(requests.filter(path => path === '/fr/user/loaded').length, 1);
     assert.ok(requests.includes('/fr/search/api/documents/suggest/'));
     assert.deepEqual(errors, []);
-    console.log('PASS: persistent recent-search removal, consistent row alignment and focus, existing history traces with cached search responses, user isolation, ranking, serialized refreshes, mobile layout, keyboard support and failure fallback.');
+    console.log('PASS: suggestion retention during debounce and slow requests, empty-result spacing, persistent recent-search removal, row alignment and focus, history traces, user isolation, ranking, serialized refreshes, mobile layout, keyboard support and failure fallback.');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; }).finally(() => fs.rmSync(buildDir, { recursive: true, force: true }));
