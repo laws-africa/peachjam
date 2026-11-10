@@ -1,11 +1,12 @@
 import json
 from dataclasses import replace
+from types import SimpleNamespace
 from unittest.mock import Mock, call, patch
 
 from django.http import QueryDict
-from django.test import TestCase  # noqa
+from django.test import SimpleTestCase, TestCase, override_settings  # noqa
 
-from peachjam_search.compiler import ElasticsearchSearchCompiler
+from peachjam_search.compiler import ElasticsearchSearchCompiler, RetrieverSearch
 from peachjam_search.engine import (
     PortionSearchEngine,
     PortionSearchFilters,
@@ -61,6 +62,86 @@ LEGACY_PROFILE = SearchProfile(
 def legacy_engine() -> SearchEngine:
     """Build a stable legacy-profile engine for compiler regression fixtures."""
     return SearchEngine(planner=SearchPlanner(SearchProfileSet(default=LEGACY_PROFILE)))
+
+
+@override_settings(ELASTICSEARCH_FAIL_ON_SHARD_FAILURE=True)
+class SearchExecutionTest(SimpleTestCase):
+    cancelled_reason = {
+        "type": "task_cancelled_exception",
+        "reason": "task cancelled [http channel [Netty4HttpChannel{localAddress=/172.17.0.6:18609}] closed]",
+    }
+
+    def make_engine(self, *failure_groups):
+        client = Mock()
+        client.search.side_effect = [
+            SimpleNamespace(
+                body={
+                    "_shards": {
+                        "failed": len(reasons),
+                        "failures": [{"reason": reason} for reason in reasons],
+                    },
+                    "hits": {"total": {"value": 0, "relation": "eq"}, "hits": []},
+                }
+            )
+            for reasons in failure_groups
+        ]
+        engine = SearchEngine()
+        engine.compiled_search = RetrieverSearch(using=client)
+        return engine, client
+
+    def test_successful_search_is_not_retried(self):
+        engine, client = self.make_engine([])
+
+        self.assertEqual(0, engine.execute_search()._shards.failed)
+        client.search.assert_called_once()
+
+    def test_closed_channel_cancellation_retries_with_a_fresh_request(self):
+        engine, client = self.make_engine([self.cancelled_reason], [])
+
+        self.assertEqual(0, engine.execute_search()._shards.failed)
+        self.assertEqual(2, client.search.call_count)
+        self.assertEqual(
+            client.search.call_args_list[0], client.search.call_args_list[1]
+        )
+
+    def test_persistent_cancellation_still_fails_after_one_retry(self):
+        engine, client = self.make_engine(
+            [self.cancelled_reason], [self.cancelled_reason]
+        )
+
+        with self.assertRaisesRegex(Exception, "ES query failed"):
+            engine.execute_search()
+
+        self.assertEqual(2, client.search.call_count)
+
+    def test_other_shard_failures_are_not_retried(self):
+        failures = [
+            [{"type": "query_shard_exception", "reason": "Invalid query"}],
+            [{"type": "circuit_breaking_exception", "reason": "Data too large"}],
+            [{"type": "task_cancelled_exception", "reason": "Cancelled by user"}],
+            [
+                {
+                    "type": "task_cancelled_exception",
+                    "reason": "task cancelled [Fatal failure during search: Data too large]",
+                }
+            ],
+            [self.cancelled_reason, {"type": "query_shard_exception"}],
+        ]
+        for reasons in failures:
+            with self.subTest(reasons=reasons):
+                engine, client = self.make_engine(reasons)
+
+                with self.assertRaisesRegex(Exception, "ES query failed"):
+                    engine.execute_search()
+
+                client.search.assert_called_once()
+
+    @override_settings(ELASTICSEARCH_FAIL_ON_SHARD_FAILURE=False)
+    def test_partial_results_setting_is_preserved(self):
+        engine, client = self.make_engine([self.cancelled_reason])
+
+        self.assertEqual(1, engine.execute_search()._shards.failed)
+        client.search.assert_called_once()
 
 
 class TestSearchEngine(TestCase):

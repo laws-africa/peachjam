@@ -10,6 +10,7 @@ from allauth.account import app_settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
+from django.db.models.functions import Lower, Trim
 from django.http import QueryDict
 from django.shortcuts import reverse
 from django.utils.timezone import now
@@ -21,8 +22,30 @@ from peachjam_subs.models import Subscription
 log = logging.getLogger(__name__)
 
 
+class SearchTraceQuerySet(models.QuerySet):
+    def for_search_history(self):
+        """Select visible, completed, first-page text searches without filters."""
+        return (
+            self.filter(
+                models.Q(field_searches__isnull=True) | models.Q(field_searches={}),
+                models.Q(filters__isnull=True) | models.Q(filters={}),
+                models.Q(ordering__isnull=True) | models.Q(ordering__in=["", "-score"]),
+                kind=SearchTrace.Kind.DOCUMENTS,
+                status=SearchTrace.Status.COMPLETED,
+                page=1,
+                mode="text",
+                hidden=False,
+            )
+            # Query-only value for grouping and matching; not a database field.
+            .annotate(history_text=Lower(Trim("search")))
+            .exclude(history_text="")
+        )
+
+
 class SearchTrace(models.Model):
     """A search performed by a user."""
+
+    objects = SearchTraceQuerySet.as_manager()
 
     class Kind(models.TextChoices):
         DOCUMENTS = "documents", "Documents"
@@ -70,6 +93,7 @@ class SearchTrace(models.Model):
     error_type = models.CharField(max_length=255, null=True)
     error_message = models.CharField(max_length=2048, null=True)
 
+    hidden = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
@@ -98,10 +122,24 @@ class SearchTrace(models.Model):
         """Re-build a search URL for this trace."""
         params = {"q": self.search}
         params.update(
-            {k: v for k, v in (self.filters.items() or {}) if k != "is_most_recent"}
+            {
+                k: v
+                for k, v in (self.filters or {}).items()
+                if k not in {"is_most_recent", "date", "q", "page", "ordering", "mode"}
+            }
         )
-        params.update({"page": self.page})
-        params.update({"ordering": self.ordering})
+        # The search page restores date controls from these URL parameters.
+        date_range = (self.filters or {}).get("date")
+        if date_range:
+            if date_range[0]:
+                params["date_from"] = date_range[0]
+            if date_range[1]:
+                params["date_to"] = date_range[1]
+        params["page"] = self.page
+        if self.ordering:
+            params["ordering"] = self.ordering
+        if self.mode and self.mode != "text":
+            params["mode"] = self.mode
         return reverse("search:search") + "?" + urlencode(params, doseq=True)
 
     def get_search_debug_url(self):

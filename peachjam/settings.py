@@ -32,6 +32,9 @@ from peachjam.sentry import sentry_profiles_sampler, sentry_traces_sampler
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Shared workhorse model for extraction, chat, and other routine AI tasks.
+OPENAI_MODEL = "gpt-6-luna"
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
