@@ -349,7 +349,9 @@ class LegislationViewsTest(TestCase):
         )
         self.assertEqual(english_child.work_id, french_child.work_id)
 
-        response = self.client.get(reverse("legislation_list_all"), {"languages": "fr"})
+        response = self.client.get(
+            reverse("legislation_list_current"), {"languages": "fr"}
+        )
         self.assertEqual(response.status_code, 200)
         listed_parent = next(
             doc
