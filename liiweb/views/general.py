@@ -1,5 +1,3 @@
-from django.views.generic import TemplateView
-
 from peachjam.models import (
     Article,
     CourtClass,
@@ -41,11 +39,3 @@ class HomePageView(PJHomePageView):
             .order_by("-date")[:5]
         )
         return context
-
-
-class PocketlawView(TemplateView):
-    template_name = "liiweb/pocketlaw.html"
-    extra_context = {"KEY_LINK_PAGE": "pocket_law"}
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(pocketlaw_version="1.0.7", **kwargs)

@@ -125,30 +125,6 @@
       </div>
     </section>
   {% endblock %}
-  {% block pocketlaw %}
-    {% if PEACHJAM_SETTINGS.pocket_law_repo %}
-      <section class="my-5">
-        <div class="container">
-          <div class="row">
-            <div class="col-sm-3 mb-3">
-              <img src="{% static 'images/pocketlaw-logo.png' %}"
-                   alt="Pocket Law"
-                   class="img-fluid"/>
-            </div>
-            <div class="col-sm-9 ps-sm-5">
-              <h2 class="mb-4">{% blocktrans trimmed %}Use {{ APP_NAME }} when you're offline{% endblocktrans %}</h2>
-              <p class="lead">
-                {% blocktrans trimmed %}
-                  Pocket Law is an offline copy of the caselaw, legislation and other legal materials from {{ APP_NAME }}.
-                {% endblocktrans %}
-              </p>
-              <a href="{% url 'pocketlaw' %}" class="btn btn-lg btn-primary">Pocket Law</a>
-            </div>
-          </div>
-        </div>
-      </section>
-    {% endif %}
-  {% endblock %}
   {% block recent-articles %}
     {% if recent_articles %}
       <section class="my-5">

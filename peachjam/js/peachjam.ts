@@ -88,8 +88,6 @@ class PeachJam {
     window.dispatchEvent(new Event('peachjam.before-setup'));
     this.setupConfig();
     this.setupSentry();
-    // add the current user agent to the root HTML element for use with pocketlaw
-    document.documentElement.setAttribute('data-user-agent', navigator.userAgent.toLowerCase());
     this.setupAnalytics();
     this.setupHtmx();
     this.createComponents(document.body);
