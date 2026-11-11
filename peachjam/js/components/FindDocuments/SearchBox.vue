@@ -11,7 +11,7 @@
     <h2 id="omnibox-heading" class="visually-hidden">
       {{ $t('Search and shortcuts') }}
     </h2>
-    <form class="search-box__form d-flex align-items-center gap-2 p-2 border-bottom" @submit.prevent="search()">
+    <form class="search-box__form d-flex align-items-center gap-2 p-2" :class="{ 'border-bottom': groups.length }" @submit.prevent="search()">
       <input
         ref="input"
         v-model="query"
@@ -39,7 +39,7 @@
         @click="close"
       />
     </form>
-    <div class="search-box__results mt-3" @keydown="resultKeydown">
+    <div v-if="groups.length" class="search-box__results mt-3" @keydown="resultKeydown">
       <section
         v-for="group in groups"
         :key="group.key"
@@ -110,7 +110,14 @@ export default {
   },
   watch: {
     modelValue (value) { this.query = value; },
-    query (value) { this.$emit('update:modelValue', value); }
+    query (value) { this.$emit('update:modelValue', value); },
+    async groups () {
+      const focused = document.activeElement;
+      if (!focused.matches('#omnibox-suggestions + ul .search-box__result')) return;
+      await this.$nextTick();
+      // Keep keyboard focus in the search when a refreshed suggestion disappears.
+      if (this.isOpen && !focused.isConnected && document.activeElement === document.body) this.$refs.input.focus();
+    }
   },
   mounted () {
     window.addEventListener('resize', this.position);
