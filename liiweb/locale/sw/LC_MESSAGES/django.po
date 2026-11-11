@@ -195,7 +195,7 @@ msgstr "Washirika wetu"
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
-#: views/legislation.py:180
+#: views/legislation.py:181
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"

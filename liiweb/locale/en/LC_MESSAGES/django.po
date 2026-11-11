@@ -196,7 +196,7 @@ msgstr ""
 msgid "Other African Legal Information Institutions"
 msgstr ""
 
-#: views/legislation.py:180
+#: views/legislation.py:181
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr ""

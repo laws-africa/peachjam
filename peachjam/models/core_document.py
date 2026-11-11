@@ -6,6 +6,7 @@ import shutil
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
+from urllib.parse import urlencode
 
 from cobalt.akn import StructuredDocument, datestring
 from cobalt.uri import FrbrUri
@@ -102,12 +103,51 @@ class DocumentNature(models.Model):
         return self.name
 
 
+class LocalityType(models.Model):
+    name = models.CharField(_("name"), max_length=255, unique=True)
+    code = models.SlugField(_("code"), unique=True)
+    legislation_title = models.CharField(
+        _("legislation title"),
+        max_length=255,
+        default="legislation",
+        help_text=_("Heading suffix, for example legislation or By-laws."),
+    )
+    collection_title = models.CharField(
+        _("collection title"),
+        max_length=255,
+        help_text=_("For example Provincial legislation or Municipal by-laws."),
+    )
+    show_subsidiary_legislation = models.BooleanField(
+        _("show subsidiary legislation"), default=True
+    )
+    show_document_nature = models.BooleanField(_("show document nature"), default=True)
+
+    class Meta:
+        verbose_name = _("locality type")
+        verbose_name_plural = _("locality types")
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return reverse("locality_legislation") + "?" + urlencode({"type": self.code})
+
+
 class Locality(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False)
     jurisdiction = models.ForeignKey(
         Country, on_delete=models.PROTECT, verbose_name=_("jurisdiction")
     )
     code = models.CharField(_("code"), max_length=20, null=False)
+    locality_type = models.ForeignKey(
+        LocalityType,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="localities",
+        verbose_name=_("locality type"),
+    )
     entity_profile = GenericRelation(
         "peachjam.EntityProfile", verbose_name=_("profile")
     )
