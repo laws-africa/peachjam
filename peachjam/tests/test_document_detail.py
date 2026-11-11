@@ -333,7 +333,7 @@ class DocumentViewTestCase(WebTest):
     @patch(
         "peachjam.views.legislation.timezone.localdate", return_value=date(2026, 11, 5)
     )
-    def test_future_repeal_banner_and_status_label(self, localdate):
+    def test_future_repeal_banner(self, localdate):
         doc = Legislation.objects.get(
             expression_frbr_uri="/akn/za/act/1979/70/eng@2020-10-22"
         )
@@ -346,24 +346,11 @@ class DocumentViewTestCase(WebTest):
             "repealing_title": "Future repealing Act",
         }
         doc.save()
-        doc.labels.filter(code="repealed").update(name="Custom repeal caption")
         response = self.app.get(doc.get_absolute_url())
         self.assertContains(response, "will be repealed on 2027-01-23")
-        self.assertContains(
-            response,
-            '<span class="badge rounded-pill bg-warning">Will be repealed</span>',
-            html=True,
-        )
+        self.assertNotContains(response, "Will be repealed</span>")
         self.assertNotContains(response, "was repealed on 2027-01-23")
-        self.assertNotContains(
-            response,
-            '<span class="badge rounded-pill bg-danger">Repealed</span>',
-            html=True,
-        )
-        # Presentation changes must not rewrite the source label or metadata.
-        self.assertTrue(
-            doc.labels.filter(code="repealed", name="Custom repeal caption").exists()
-        )
+        # Presentation changes must not rewrite the source metadata.
         doc.refresh_from_db()
         self.assertNotIn("is_future", doc.metadata_json["repeal"])
 

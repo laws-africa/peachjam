@@ -189,17 +189,6 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         context["timeline"] = self.get_timeline()
         context["friendly_type"] = self.get_friendly_type()
         context["notices"] = self.get_notices()
-        repeal = self.get_repeal_info()
-        if repeal and repeal["is_future"]:
-            context["labels"] = [
-                SimpleNamespace(
-                    name=self.get_future_repeal_action(label.code).capitalize(),
-                    level="warning",
-                )
-                if label.code == repeal["verb"]
-                else label
-                for label in context["labels"]
-            ]
         context["child_documents_count"] = self.model.objects.filter(
             parent_work=self.object.work
         ).count()
@@ -525,7 +514,7 @@ class LegislationDetailView(SubscriptionRequiredMixin, BaseDocumentDetailView):
         return timeline
 
     def get_future_repeal_action(self, verb):
-        """Shared wording for future repeal notices, labels and timeline events."""
+        """Shared wording for future repeal notices and timeline events."""
         return {
             "repealed": _("will be repealed"),
             "revoked": _("will be revoked"),
