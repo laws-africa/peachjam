@@ -8,15 +8,11 @@ from urllib.parse import urlencode
 from django.apps import apps
 from django.contrib import messages
 from django.db.models import (
-    Case,
     CharField,
     Count,
     Func,
-    IntegerField,
     Prefetch,
-    Q,
     Value,
-    When,
 )
 from django.db.models.functions.text import Substr
 from django.http import Http404
@@ -39,7 +35,6 @@ from peachjam.models import (
     CoreDocument,
     Glossary,
     Legislation,
-    PopularLegislation,
     ProvisionCitation,
     ProvisionCitationCount,
     UncommencedProvision,
@@ -68,6 +63,7 @@ class LegislationListView(FilteredDocumentListView):
     form_defaults = {"sort": "title"}
     form_class = LegislationFilterForm
     show_landing_page = False
+    show_document_nature = True
     hidden_landing_natures = ["document"]
 
     def add_facets(self, context):
@@ -112,14 +108,17 @@ class LegislationListView(FilteredDocumentListView):
             "is_group": True,
             "title": pj_settings().subleg_label,
         }
-        context["show_more_resources"] = (
-            UnconstitutionalProvision.objects.exists()
-            or UncommencedProvision.objects.exists()
-        )
+        works = self.get_landing_page_queryset().values("work_id")
         context["show_unconstitutional_provisions"] = (
-            UnconstitutionalProvision.objects.exists()
+            UnconstitutionalProvision.objects.filter(work_id__in=works).exists()
         )
-        context["show_uncommenced_provisions"] = UncommencedProvision.objects.exists()
+        context["show_uncommenced_provisions"] = UncommencedProvision.objects.filter(
+            work_id__in=works
+        ).exists()
+        context["show_more_resources"] = (
+            context["show_unconstitutional_provisions"]
+            or context["show_uncommenced_provisions"]
+        )
         return context
 
     def get_landing_page_context(self):
@@ -129,27 +128,22 @@ class LegislationListView(FilteredDocumentListView):
             id__in=latest_expression_ids,
             published=True,
         ).for_document_table()
-        counts = latest_expressions.aggregate(
-            total=Count("id"),
-            repealed=Count("id", filter=Q(repealed=True)),
-            uncommenced=Count(
-                "id",
-                filter=Q(metadata_json__commenced=False),
-            ),
-        )
+        counts = {"total": latest_expressions.count()}
         search_years = list(
             latest_expressions.annotate(year=Substr("frbr_uri_date", 1, 4))
             .values_list("year", flat=True)
             .distinct()
             .order_by("-year")
         )
-        search_natures = list(
-            latest_expressions.filter(nature__isnull=False)
-            .exclude(nature__code__in=self.hidden_landing_natures)
-            .values("nature__code", "nature__name")
-            .annotate(count=Count("id"))
-            .order_by("-count", "nature__name")
-        )
+        search_natures = []
+        if self.show_document_nature:
+            search_natures = list(
+                latest_expressions.filter(nature__isnull=False)
+                .exclude(nature__code__in=self.hidden_landing_natures)
+                .values("nature__code", "nature__name")
+                .annotate(count=Count("id"))
+                .order_by("-count", "nature__name")
+            )
         topics = list(
             latest_expressions.filter(taxonomies__topic__isnull=False)
             .values(
@@ -166,24 +160,11 @@ class LegislationListView(FilteredDocumentListView):
             metadata_json__publication_date__gte=recent_since,
         )
 
-        popular_work_ids = list(
-            PopularLegislation.objects.values_list("work_id", flat=True)
+        popular_legislation = list(
+            latest_expressions.filter(work__popular_legislation__isnull=False).order_by(
+                "work__popular_legislation__position", "work__popular_legislation__pk"
+            )[:10]
         )
-        if popular_work_ids:
-            popular_order = Case(
-                *[
-                    When(work_id=work_id, then=position)
-                    for position, work_id in enumerate(popular_work_ids)
-                ],
-                output_field=IntegerField(),
-            )
-            popular_legislation = list(
-                latest_expressions.filter(work_id__in=popular_work_ids)
-                .annotate(popular_order=popular_order)
-                .order_by("popular_order")[:10]
-            )
-        else:
-            popular_legislation = []
         recent_queryset = recent_queryset.order_by(
             "-metadata_json__publication_date",
             "-frbr_uri_date",

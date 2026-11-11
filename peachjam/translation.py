@@ -9,6 +9,7 @@ from peachjam.models import (
     DocumentNature,
     Label,
     Locality,
+    LocalityType,
     Outcome,
     Predicate,
     Taxonomy,
@@ -49,6 +50,11 @@ class LabelTranslationOptions(TranslationOptions):
 @register(Locality)
 class LocalityTranslationOptions(TranslationOptions):
     fields = ("name",)
+
+
+@register(LocalityType)
+class LocalityTypeTranslationOptions(TranslationOptions):
+    fields = ("name", "legislation_title", "collection_title")
 
 
 @register(Outcome)

@@ -15,6 +15,7 @@ from peachjam.models import (
     JurisdictionProfile,
     Legislation,
     Locality,
+    LocalityType,
     PeachJamSettings,
     PopularLegislation,
     Taxonomy,
@@ -50,7 +51,7 @@ class LegislationViewsTest(TestCase):
             f"{reverse('legislation_list_all')}?years="
             f"{response.context['legislation_years'][0]}",
         )
-        self.assertContains(response, "Legislation that is not currently in force")
+        self.assertContains(response, "Legislation not currently in force")
         self.assertContains(response, "Popular legislation")
         self.assertNotContains(response, "View all popular legislation")
         self.assertNotContains(response, "bi-arrow-right")
@@ -59,7 +60,7 @@ class LegislationViewsTest(TestCase):
         self.assertIsNone(response.context["paginator"])
         self.assertEqual([], response.context["popular_legislation"])
         self.assertEqual(
-            404,
+            200,
             self.client.get(reverse("locality_legislation")).status_code,
         )
 
@@ -82,7 +83,7 @@ class LegislationViewsTest(TestCase):
         listing_response = self.client.get(
             reverse("locality_legislation_list", args=[locality.place_code()])
         )
-        self.assertContains(listing_response, 'class="nav nav-tabs')
+        self.assertTemplateUsed(listing_response, "liiweb/legislation_landing.html")
 
     def test_landing_page_hides_empty_configured_localities(self):
         locality = Locality.objects.get(pk=1)
@@ -369,3 +370,239 @@ class LegislationViewsTest(TestCase):
         )
         self.assertIn(english_child, default_parent.children)
         self.assertNotIn(french_child, default_parent.children)
+
+
+@override_settings(ROOT_URLCONF="liiweb.urls")
+class LocalityLandingPageTest(TestCase):
+    fixtures = ["tests/countries", "tests/languages", "documents/sample_documents"]
+
+    def setUp(self):
+        # Use arbitrary type codes to ensure behaviour is configured, not hard-coded.
+        self.municipal_type = LocalityType.objects.create(
+            name="Test municipality",
+            code="towns",
+            legislation_title="By-laws",
+            collection_title="Municipal by-laws",
+            show_subsidiary_legislation=False,
+            show_document_nature=False,
+        )
+        self.provincial_type = LocalityType.objects.create(
+            name="Test province",
+            code="regions",
+            collection_title="Provincial legislation",
+        )
+        self.municipality = Locality.objects.create(
+            name="Cape Town",
+            jurisdiction_id="ZA",
+            code="cpt",
+            locality_type=self.municipal_type,
+        )
+        self.province = Locality.objects.create(
+            name="Western Cape",
+            jurisdiction_id="ZA",
+            code="wc",
+            locality_type=self.provincial_type,
+        )
+        self.municipal_document = self.create_legislation(
+            self.municipality, "Municipal test by-law"
+        )
+        self.provincial_document = self.create_legislation(
+            self.province, "Provincial test act"
+        )
+        settings = PeachJamSettings.load()
+        settings.default_document_jurisdiction_id = "ZA"
+        settings.save()
+
+    def create_legislation(self, locality, title):
+        return Legislation.objects.create(
+            jurisdiction=locality.jurisdiction,
+            locality=locality,
+            frbr_uri_doctype="act",
+            frbr_uri_date="2026",
+            frbr_uri_number="1",
+            date=timezone.now().date(),
+            language_id="en",
+            title=title,
+            published=True,
+            principal=True,
+            nature=DocumentNature.objects.get(name="Act"),
+            metadata_json={
+                "principal": True,
+                "publication_date": timezone.now().date().isoformat(),
+            },
+        )
+
+    def landing_url(self, locality):
+        return reverse("locality_legislation_list", args=[locality.place_code()])
+
+    def test_municipality_uses_configured_terminology_and_features(self):
+        EntityProfile.objects.create(
+            content_object=self.municipality,
+            background_photo="localities/cape-town.jpg",
+        )
+        PopularLegislation.objects.create(work=self.municipal_document.work, position=1)
+        PopularLegislation.objects.create(
+            work=self.provincial_document.work, position=2
+        )
+        response = self.client.get(self.landing_url(self.municipality))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "liiweb/legislation_landing.html")
+        self.assertContains(
+            response, '<h1 id="main-page-heading">Cape Town By-laws</h1>', html=True
+        )
+        self.assertContains(response, "Browse by-laws")
+        self.assertContains(response, "Current by-laws")
+        self.assertContains(response, "Popular by-laws")
+        self.assertNotContains(response, "Document nature")
+        self.assertNotContains(response, 'name="natures"')
+        soup = BeautifulSoup(response.content, "html.parser")
+        advanced_search = soup.find("a", string="Advanced search")["href"]
+        self.assertNotIn("nature=", advanced_search)
+        self.assertIn("locality=Cape%20Town", advanced_search)
+        self.assertNotContains(response, "Subsidiary legislation")
+        self.assertContains(response, "localities/cape-town.jpg")
+        self.assertEqual(response.context["legislation_counts"]["total"], 1)
+        self.assertEqual(
+            response.context["popular_legislation"], [self.municipal_document]
+        )
+        self.assertEqual(
+            response.context["recent_legislation"], [self.municipal_document]
+        )
+        self.assertContains(
+            response,
+            f'action="{reverse("locality_legislation_list_all", args=["za-cpt"])}"',
+        )
+        self.assertFalse(response.cookies)
+
+    def test_province_retains_legislation_features(self):
+        response = self.client.get(self.landing_url(self.province))
+        self.assertContains(
+            response,
+            '<h1 id="main-page-heading">Western Cape legislation</h1>',
+            html=True,
+        )
+        self.assertContains(response, "Document nature")
+        self.assertContains(
+            response, reverse("locality_legislation_list_subsidiary", args=["za-wc"])
+        )
+        self.assertEqual(response.context["legislation_counts"]["total"], 1)
+        self.assertEqual(
+            response.context["recent_legislation"], [self.provincial_document]
+        )
+
+    def test_national_page_has_separate_locality_type_cards(self):
+        response = self.client.get(reverse("legislation_list"))
+        self.assertContains(response, "Provincial legislation")
+        self.assertContains(response, "Municipal by-laws")
+        for locality_type, locality in [
+            (self.municipal_type, self.municipality),
+            (self.provincial_type, self.province),
+        ]:
+            collection = self.client.get(
+                reverse("locality_legislation"), {"type": locality_type.code}
+            )
+            self.assertEqual(collection.status_code, 200)
+            self.assertEqual(
+                [locality],
+                [
+                    item
+                    for group in collection.context["locality_groups"]
+                    for item in group
+                ],
+            )
+        self.assertEqual(
+            self.client.get(
+                reverse("locality_legislation"), {"type": "missing"}
+            ).status_code,
+            404,
+        )
+
+    def test_municipal_listings_keep_filters_and_links_local(self):
+        for variant in ["all", "current", "recent", "repealed", "uncommenced"]:
+            with self.subTest(variant=variant):
+                response = self.client.get(
+                    reverse("locality_legislation_list_" + variant, args=["za-cpt"])
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertTemplateUsed(
+                    response, "liiweb/locality_legislation_list.html"
+                )
+                self.assertContains(response, "by-laws")
+                self.assertNotIn("natures", response.context["facet_data"])
+                self.assertFalse(response.context["doc_table_toggle"])
+                self.assertNotContains(response, self.provincial_document.title)
+        self.assertEqual(
+            self.client.get(
+                reverse("locality_legislation_list_subsidiary", args=["za-cpt"])
+            ).status_code,
+            404,
+        )
+
+    def test_filtered_landing_and_htmx_requests_show_local_listing(self):
+        response = self.client.get(
+            self.landing_url(self.municipality), {"years": "2026"}
+        )
+        self.assertTemplateUsed(response, "liiweb/locality_legislation_list.html")
+        self.assertNotContains(response, self.provincial_document.title)
+        response = self.client.get(
+            self.landing_url(self.municipality),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="document-table",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateNotUsed(response, "liiweb/legislation_landing.html")
+
+    def test_untyped_locality_retains_default_legislation_behaviour(self):
+        self.province.locality_type = None
+        self.province.save()
+        response = self.client.get(self.landing_url(self.province))
+        self.assertContains(response, "Western Cape legislation")
+        self.assertContains(response, "Document nature")
+        self.assertContains(
+            response, reverse("locality_legislation_list_subsidiary", args=["za-wc"])
+        )
+
+    def test_popular_locality_documents_can_be_curated_in_admin(self):
+        from django.forms import modelform_factory
+
+        form_class = modelform_factory(PopularLegislation, fields=["work", "position"])
+        form = form_class(data={"work": self.municipal_document.work_id, "position": 1})
+        self.assertTrue(form.is_valid(), form.errors)
+        form.save()
+        national_document = Legislation.objects.get(pk=3040)
+        settings = PeachJamSettings.load()
+        settings.default_document_jurisdiction = national_document.jurisdiction
+        settings.save()
+        self.assertEqual(PopularLegislation.add_suggestions(limit=1), 1)
+        self.assertTrue(
+            PopularLegislation.objects.filter(work=national_document.work).exists()
+        )
+
+    def test_locality_profile_details_are_reused_on_landing_and_listing(self):
+        EntityProfile.objects.create(
+            content_object=self.municipality,
+            about_html="<p>About this municipality</p>",
+            address="Municipal offices",
+            website_url="https://municipality.example/",
+        )
+        for url in [
+            self.landing_url(self.municipality),
+            reverse("locality_legislation_list_all", args=["za-cpt"]),
+        ]:
+            with self.subTest(url=url):
+                response = self.client.get(url)
+                self.assertContains(response, "About this municipality")
+                self.assertContains(response, "Municipal offices")
+                self.assertContains(response, "https://municipality.example/")
+                soup = BeautifulSoup(response.content, "html.parser")
+                self.assertEqual(len(soup.find_all("h1")), 1)
+                self.assertIsNotNone(soup.find("h1", id="main-page-heading"))
+
+    def test_locality_type_codes_are_not_reserved_for_the_untyped_collection(self):
+        self.municipal_type.code = "untyped"
+        self.municipal_type.save()
+        response = self.client.get(self.municipal_type.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Cape Town")
+        self.assertNotContains(response, "Western Cape")
+        self.assertEqual(response.context["locality_type"], self.municipal_type)

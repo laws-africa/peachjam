@@ -195,7 +195,7 @@ msgstr "Nossos parceiros"
 msgid "Other African Legal Information Institutions"
 msgstr "Outras Instituições Jurídicas Africanas"
 
-#: views/legislation.py:180
+#: views/legislation.py:181
 #, python-format
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Legislação"

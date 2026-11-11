@@ -69,7 +69,6 @@ class PopularLegislation(models.Model):
         Work,
         limit_choices_to={
             "documents__doc_type": "legislation",
-            "documents__locality__isnull": True,
             "documents__published": True,
         },
         on_delete=models.CASCADE,
@@ -91,7 +90,14 @@ class PopularLegislation(models.Model):
         """Fill empty positions with ranked national legislation."""
         from peachjam.models import PeachJamSettings
 
-        existing_work_ids = list(cls.objects.values_list("work_id", flat=True))
+        existing_work_ids = list(
+            cls.objects.filter(
+                work__documents__doc_type="legislation",
+                work__documents__locality__isnull=True,
+            )
+            .values_list("work_id", flat=True)
+            .distinct()
+        )
         available_positions = max(0, limit - len(existing_work_ids))
         if not available_positions:
             return 0

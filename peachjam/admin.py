@@ -112,6 +112,7 @@ from peachjam.models import (
     LawReportVolume,
     Legislation,
     Locality,
+    LocalityType,
     LowerBench,
     MatterType,
     OnboardingIntent,
@@ -2838,10 +2839,24 @@ class LabelAdmin(admin.ModelAdmin):
 
 @admin.register(Locality)
 class LocalityAdmin(admin.ModelAdmin):
-    list_display = ("name", "jurisdiction", "code")
+    list_display = ("name", "jurisdiction", "code", "locality_type")
+    list_filter = ("jurisdiction", "locality_type")
+    autocomplete_fields = ("locality_type",)
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code")
     inlines = [EntityProfileInline]
+
+
+@admin.register(LocalityType)
+class LocalityTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "collection_title",
+        "show_subsidiary_legislation",
+        "show_document_nature",
+    )
+    prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code", "collection_title")
 
 
 @admin.register(JurisdictionProfile)

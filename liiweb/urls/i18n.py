@@ -59,6 +59,13 @@ urlpatterns = [
                                 name="locality_legislation_list",
                             ),
                             path(
+                                "current",
+                                views.LocalityLegislationListView.as_view(
+                                    landing_page=False
+                                ),
+                                name="locality_legislation_list_current",
+                            ),
+                            path(
                                 "all",
                                 views.LocalityLegislationListView.as_view(
                                     variant="all"
