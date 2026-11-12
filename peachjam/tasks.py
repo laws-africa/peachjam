@@ -202,36 +202,6 @@ def extract_citations(document_id):
 
         log.info("Citations extracted")
 
-        from peachjam.models import Judgment
-
-        if isinstance(doc, Judgment):
-            suggest_case_histories(doc.pk)
-
-
-@background(queue="peachjam", schedule=60, remove_existing_tasks=True)
-def suggest_case_histories(judgment_id):
-    """Refresh case-history suggestions after judgment text and citations settle."""
-    from peachjam.analysis.case_history import CaseHistorySuggestionService
-    from peachjam.models import Judgment
-
-    judgment = (
-        Judgment.objects.filter(pk=judgment_id)
-        .select_related(
-            "court",
-            "court__court_class",
-            "document_content",
-            "work",
-        )
-        .first()
-    )
-    if not judgment:
-        log.info("No judgment with id %s exists, ignoring.", judgment_id)
-        return
-
-    with log_context(frbr_uri=judgment.expression_frbr_uri):
-        count = CaseHistorySuggestionService().suggest(judgment)
-        log.info("Refreshed %s case-history suggestions", count)
-
 
 @background(queue="peachjam", schedule=60, remove_existing_tasks=True)
 @transaction.atomic

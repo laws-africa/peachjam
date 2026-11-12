@@ -76,7 +76,6 @@ from peachjam.models import (
     Book,
     CaseAction,
     CaseHistory,
-    CaseHistorySuggestion,
     CaseNumber,
     CauseList,
     CitationLink,
@@ -154,7 +153,6 @@ from peachjam.resources import (
 from peachjam.tasks import extract_citations as extract_citations_task
 from peachjam.tasks import (
     generate_judgment_summary,
-    suggest_case_histories,
     update_extracted_citations_for_a_work,
 )
 from peachjam_search.models import SavedSearch
@@ -1759,67 +1757,6 @@ class CaseHistoryInlineAdmin(NonrelatedStackedInline):
         )
 
 
-class CaseHistorySuggestionInlineAdmin(NonrelatedStackedInline):
-    model = CaseHistorySuggestion
-    verbose_name = gettext_lazy("case history suggestion")
-    verbose_name_plural = gettext_lazy("case history suggestions")
-    extra = 0
-    can_delete = False
-    fields = [
-        ("historical_judgment_link", "relationship_type"),
-        ("disposition", "confidence", "score"),
-        "matching_methods_display",
-        "evidence",
-        "status",
-        "editor_note",
-        ("reviewed_by", "reviewed_at"),
-    ]
-    readonly_fields = [
-        "historical_judgment_link",
-        "relationship_type",
-        "disposition",
-        "confidence",
-        "score",
-        "matching_methods_display",
-        "evidence",
-        "reviewed_by",
-        "reviewed_at",
-    ]
-
-    def get_form_queryset(self, obj):
-        return CaseHistorySuggestion.objects.filter(judgment=obj).select_related(
-            "historical_judgment", "reviewed_by"
-        )
-
-    def save_new_instance(self, parent, instance):
-        instance.judgment = parent
-
-    def has_add_permission(self, request, obj=None):
-        return False
-
-    def has_view_permission(self, request, obj=None):
-        return request.user.has_perm(
-            "peachjam.change_judgment", obj
-        ) or request.user.has_perm("peachjam.change_judgment")
-
-    def has_change_permission(self, request, obj=None):
-        return self.has_view_permission(request, obj)
-
-    @admin.display(description=gettext_lazy("Historical judgment"))
-    def historical_judgment_link(self, obj):
-        if not obj or not obj.historical_judgment_id:
-            return ""
-        url = reverse(
-            "admin:peachjam_judgment_change",
-            args=[quote(obj.historical_judgment_id)],
-        )
-        return format_html('<a href="{}">{}</a>', url, obj.historical_judgment)
-
-    @admin.display(description=gettext_lazy("Matching methods"))
-    def matching_methods_display(self, obj):
-        return ", ".join(method.replace("_", " ") for method in obj.matching_methods)
-
-
 class JudgmentForm(DocumentForm):
     hearing_date = forms.DateField(widget=DateSelectorWidget(), required=False)
     case_summary = forms.CharField(widget=CKEditorWidget(), required=False)
@@ -1900,7 +1837,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
         LowerBenchInline,
         CaseNumberAdmin,
         CaseHistoryInlineAdmin,
-        CaseHistorySuggestionInlineAdmin,
         JudgmentRelationshipStackedInline,
         LawReportEntryInline,
     ] + DocumentAdmin.inlines
@@ -1979,7 +1915,6 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
 
     actions = DocumentAdmin.actions + [
         "generate_summary",
-        "refresh_case_history_suggestions",
     ]
 
     class Media:
@@ -2009,34 +1944,7 @@ class JudgmentAdmin(ImportExportMixin, DocumentAdmin):
             if JudgePerson.canonical_identity_enabled()
             else LegacyBenchInline
         )
-        inlines = [bench_inline] + self.inlines
-        if obj is None:
-            inlines.remove(CaseHistorySuggestionInlineAdmin)
-        return inlines
-
-    def save_formset(self, request, form, formset, change):
-        if formset.model is not CaseHistorySuggestion:
-            return super().save_formset(request, form, formset, change)
-
-        suggestions = formset.save(commit=False)
-        for suggestion in suggestions:
-            if suggestion.status == CaseHistorySuggestion.Status.ACCEPTED:
-                suggestion.accept(request.user)
-            elif suggestion.status == CaseHistorySuggestion.Status.REJECTED:
-                suggestion.reject(request.user)
-            else:
-                suggestion.save()
-        formset.save_m2m()
-
-    @admin.action(description=gettext_lazy("Refresh case history suggestions"))
-    def refresh_case_history_suggestions(self, request, queryset):
-        for judgment in queryset:
-            suggest_case_histories(judgment.pk, creator=judgment)
-        self.message_user(
-            request,
-            _("Queued case history suggestion analysis for %(count)d judgments.")
-            % {"count": queryset.count()},
-        )
+        return [bench_inline] + self.inlines
 
     def get_urls(self):
         urls = super().get_urls()
