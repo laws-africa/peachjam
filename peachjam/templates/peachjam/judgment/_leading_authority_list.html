@@ -1,15 +1,27 @@
 {% load i18n %}
 {% if leading_authorities %}
-  <div class="leading-authority-listing d-flex align-items-start mt-2">
-    <span class="leading-authority-listing__icon me-2" aria-hidden="true">⚖</span>
-    <div>
-      {% for authority in leading_authorities %}
-        <div{% if not forloop.last %} class="mb-1"{% endif %}>
-          <strong class="text-muted fst-italic">{% trans "Leading authority" %}</strong>
-          <span aria-hidden="true">–</span>
-          <span>{{ authority.subject.name }}</span>
-        </div>
-      {% endfor %}
+  {% if compact %}
+    <div class="leading-authority-citation d-flex align-items-start gap-1 mt-1">
+      <span class="text-muted fst-normal" aria-hidden="true">⚖</span>
+      <div>
+        <strong class="text-muted fst-italic">{% trans "Leading authority" %}</strong>
+        <span aria-hidden="true">–</span>
+        <span>{{ leading_authorities.0.subject.name }}</span>
+      </div>
     </div>
-  </div>
+  {% else %}
+    <div class="leading-authority-listing d-flex align-items-start mt-2">
+      <span class="leading-authority-listing__icon me-2 fst-normal"
+            aria-hidden="true">⚖</span>
+      <div>
+        {% for authority in leading_authorities %}
+          <div{% if not forloop.last %} class="mb-1"{% endif %}>
+            <strong class="text-muted fst-italic">{% trans "Leading authority" %}</strong>
+            <span aria-hidden="true">–</span>
+            <span>{{ authority.subject.name }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
 {% endif %}

@@ -705,6 +705,20 @@ class JudgmentTestCase(TestCase):
         self.assertIn("Plascon-Evans rule", html)
         self.assertNotIn("for the Plascon-Evans rule", html)
 
+        compact_html = render_to_string(
+            "peachjam/_document_table_row.html",
+            {
+                "document": document,
+                "doc_table_compact_leading_authorities": True,
+            },
+        )
+
+        self.assertIn("leading-authority-citation", compact_html)
+        self.assertIn("Leading authority", compact_html)
+        self.assertIn("⚖", compact_html)
+        self.assertIn("Plascon-Evans rule", compact_html)
+        self.assertIn('class="text-muted fst-normal"', compact_html)
+
     def test_grouped_linked_flynotes_indents_children_under_compressed_topic(self):
         def node(name):
             slug = name.lower().replace(" ", "-")

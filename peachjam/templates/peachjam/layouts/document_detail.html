@@ -189,6 +189,7 @@
                         aria-controls="citations-tab"
                         aria-selected="false"
                         hx-get="{% url 'document_citations_first_load' document.expression_frbr_uri|strip_first_character %}"
+                        {% if debug %}hx-headers='{"Cache-Control": "no-cache"}'{% endif %}
                         hx-target="#citations-tab"
                         hx-swap="innerHTML"
                         hx-trigger="click once">

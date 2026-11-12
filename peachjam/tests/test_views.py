@@ -33,7 +33,6 @@ from peachjam.models import (
     Judgment,
     LawReport,
     LeadingAuthority,
-    LeadingAuthoritySource,
     LegalSubject,
     Legislation,
     Locality,
@@ -548,7 +547,7 @@ class PeachjamViewsTest(TestCase):
         judgment = Judgment.objects.get(
             expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
         )
-        authority = LeadingAuthority.objects.create(
+        LeadingAuthority.objects.create(
             judgment=judgment,
             subject=LegalSubject.objects.create(
                 name="Plascon-Evans rule",
@@ -557,11 +556,6 @@ class PeachjamViewsTest(TestCase):
             editorial_note="The leading formulation of the rule.",
             reviewed_on=datetime.date(2026, 8, 1),
             published=True,
-        )
-        LeadingAuthoritySource.objects.create(
-            leading_authority=authority,
-            citation="Example source",
-            url="https://example.com/source",
         )
         LeadingAuthority.objects.create(
             judgment=judgment,
@@ -586,7 +580,6 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(response, 'class="leading-authority-detail')
         self.assertContains(response, "Plascon-Evans rule")
         self.assertContains(response, "The leading formulation of the rule.")
-        self.assertContains(response, "Example source")
         self.assertNotContains(response, "Unpublished editorial note.")
         content = response.content.decode()
         self.assertGreater(
