@@ -22,8 +22,8 @@
     </div>
   </div>
   <div class="text-end">
-    {% if SUPPORT_EMAIL %}
-      <a class="me-3" href="mailto:{{ SUPPORT_EMAIL }}">{% trans "Contact us" %}</a>
+    {% if CONTACT_EMAIL %}
+      <a class="me-3" href="mailto:{{ CONTACT_EMAIL }}">{% trans "Contact us" %}</a>
     {% endif %}
     <a href="{{ PEACHJAM_SETTINGS.user_help_link }}">{% trans 'Help' %}</a>
   </div>

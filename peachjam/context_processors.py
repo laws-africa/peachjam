@@ -21,7 +21,7 @@ def general(request):
         "DEBUG": settings.DEBUG,
         "APP_NAME": settings.PEACHJAM["APP_NAME"],
         "MY_LII": settings.PEACHJAM["MY_LII"],
-        "SUPPORT_EMAIL": settings.PEACHJAM["SUPPORT_EMAIL"],
+        "CONTACT_EMAIL": pj.contact_email,
         "PEACHJAM_SETTINGS": pj,
         "CURRENT_LANGUAGE": language,
         "KEY_LINK_PAGE": key_link_page,
