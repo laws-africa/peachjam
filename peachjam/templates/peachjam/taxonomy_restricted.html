@@ -9,8 +9,8 @@
       {% if request.user.is_authenticated %}
         <p>
           {% trans "Your account does not currently have permission to view this collection." %}
-          {% if SUPPORT_EMAIL %}
-            {% blocktrans trimmed with email=SUPPORT_EMAIL %}
+          {% if CONTACT_EMAIL %}
+            {% blocktrans trimmed with email=CONTACT_EMAIL %}
               To request institutional access, please contact us at <a href="mailto:{{ email }}">{{ email }}</a>.
             {% endblocktrans %}
           {% endif %}
@@ -23,9 +23,9 @@
         {% else %}
           <p>{% trans "This collection is restricted, and accounts are not available on this site." %}</p>
         {% endif %}
-        {% if SUPPORT_EMAIL %}
+        {% if CONTACT_EMAIL %}
           <p class="mt-3">
-            {% blocktrans trimmed with email=SUPPORT_EMAIL %}
+            {% blocktrans trimmed with email=CONTACT_EMAIL %}
               Don't have an account? To request institutional access, contact us at <a href="mailto:{{ email }}">{{ email }}</a>.
             {% endblocktrans %}
           </p>

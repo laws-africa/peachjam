@@ -53,6 +53,46 @@ IAM policy:
 
       dokku config:set CONFIG1=value CONFIG2=value
 
+### Contact and email addresses
+
+Set **Contact email** in the Django admin's **Site settings** singleton
+(`PeachJamSettings.contact_email`). This required field defaults to
+`info@laws.africa` and supplies public contact links, terms pages and enquiries.
+Configure the site's address after creating a new deployment.
+
+**Admin emails** controls internal recipients for contact-form messages,
+document problem reports and MCP feedback. Enter whitespace-separated addresses.
+If blank, notifications use Django's `ADMINS`. Contact-form messages also copy
+`ADMINS` when site admin addresses are configured.
+
+Set the deployment variable `DEFAULT_FROM_EMAIL` to the approved outgoing sender:
+
+```sh
+dokku config:set <app_name> DEFAULT_FROM_EMAIL='"ExampleLII" <info@example.org>'
+```
+
+This also sets Django's `SERVER_EMAIL`. Without an explicit value, both default
+to the application name with `info@laws.africa`. Changing **Contact email** does
+not change the outgoing sender. CustomerIO transactional templates configure
+their sender separately.
+
+#### Upgrading from SUPPORT_EMAIL
+
+`SUPPORT_EMAIL` is no longer a runtime setting. When deploying this change:
+
+1. Before deployment, set `DEFAULT_FROM_EMAIL` explicitly if the outgoing sender
+   previously relied on `SUPPORT_EMAIL`.
+2. Keep `SUPPORT_EMAIL` in the migration process's environment until migration
+   `0326_peachjamsettings_contact_email_and_more` has run. It copies the old value
+   into **Contact email**, replacing the new model default.
+3. Verify **Contact email** in Site settings, then remove `SUPPORT_EMAIL` from
+   deployment configuration.
+
+If migration ran without the old variable, enter the address in Site settings
+manually; adding the variable afterwards will not rerun migration. Sites that
+previously hard-coded their address in terms templates should also configure
+**Contact email** explicitly.
+
 ### Important
 - Set the DJANGO_DEBUG environment variable to true on the first instance to disable ingestors and for initial migrations to run. Set it to false after successfully deploying your application.
 

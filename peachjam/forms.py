@@ -801,9 +801,7 @@ class DocumentProblemForm(forms.Form):
 
         subject = settings.EMAIL_SUBJECT_PREFIX + _("Document problem reported")
 
-        default_admin_emails = [email for name, email in settings.ADMINS]
-        site_admin_emails = (pj_settings().admin_emails or "").split()
-        recipients = site_admin_emails or default_admin_emails
+        recipients = pj_settings().get_admin_emails()
         reply_to = (
             [self.cleaned_data.get("email_address")]
             if self.cleaned_data.get("email_address")
@@ -849,14 +847,11 @@ class ContactUsForm(forms.Form):
 
         subject = settings.EMAIL_SUBJECT_PREFIX + _("Contact us message")
 
-        default_admin_emails = [email for name, email in settings.ADMINS]
-        site_admin_emails = (pj_settings().admin_emails or "").split()
-
         send_mail(
             subject=subject,
             message=plain_txt_msg,
             from_email=None,
-            recipient_list=default_admin_emails + site_admin_emails,
+            recipient_list=pj_settings().get_admin_emails(include_defaults=True),
             html_message=html,
             fail_silently=False,
         )

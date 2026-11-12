@@ -121,12 +121,20 @@ class PeachJamSettings(SingletonModel):
         null=True,
         blank=True,
     )
+    contact_email = models.EmailField(
+        verbose_name=_("contact email"),
+        default="info@laws.africa",
+        help_text=_("Public contact address. Defaults to info@laws.africa."),
+    )
     admin_emails = models.CharField(
         verbose_name=_("admin emails"),
         max_length=1024,
         null=True,
         blank=True,
-        help_text=_("Enter one or more email addresses separated by spaces."),
+        help_text=_(
+            "Internal recipients for contact messages, document reports and feedback. "
+            "Enter addresses separated by spaces. Defaults to Django ADMINS."
+        ),
     )
     matomo_domain = models.CharField(
         verbose_name=_("matomo domain"),
@@ -224,6 +232,12 @@ class PeachJamSettings(SingletonModel):
 
     class Meta:
         verbose_name = verbose_name_plural = _("site settings")
+        constraints = [
+            models.CheckConstraint(
+                check=~models.Q(contact_email=""),
+                name="site_settings_contact_email_not_empty",
+            )
+        ]
 
     @property
     def twitter_username(self):
@@ -250,6 +264,14 @@ class PeachJamSettings(SingletonModel):
     @property
     def annotations_enabled(self):
         return self.accounts_enabled and self.allow_annotations
+
+    def get_admin_emails(self, include_defaults=False):
+        """Resolve internal notification recipients, optionally copying deployment admins."""
+        defaults = [email for name, email in settings.ADMINS]
+        recipients = (self.admin_emails or "").split()
+        if include_defaults:
+            recipients = defaults + recipients
+        return list(dict.fromkeys(recipients or defaults))
 
     def __str__(self):
         return "Settings"

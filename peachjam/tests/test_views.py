@@ -1449,14 +1449,9 @@ class PeachjamViewsTest(TestCase):
             source_file.filename_for_download(".pdf"), response["Content-Disposition"]
         )
 
-    @override_settings(
-        PEACHJAM={
-            **settings.PEACHJAM,
-            "SUPPORT_EMAIL": "support@example.com",
-        }
-    )
     def test_homepage_with_helpscout_beacon_renders_script_and_footer_trigger(self):
         pj_settings = PeachJamSettings.load()
+        pj_settings.contact_email = "support@example.com"
         pj_settings.helpscout_beacon_id = "beacon-123"
         # Ensure footer social/contact block renders
         pj_settings.facebook_link = "https://facebook.com/example"
@@ -1473,14 +1468,9 @@ class PeachjamViewsTest(TestCase):
         # Footer contact button should include beacon trigger + mailto fallback href
         self.assertContains(response, 'href="mailto:support@example.com"')
 
-    @override_settings(
-        PEACHJAM={
-            **settings.PEACHJAM,
-            "SUPPORT_EMAIL": "support@example.com",
-        }
-    )
     def test_homepage_without_helpscout_beacon_has_plain_mailto_contact_link(self):
         pj_settings = PeachJamSettings.load()
+        pj_settings.contact_email = "support@example.com"
         pj_settings.helpscout_beacon_id = ""
         # Ensure footer social/contact block renders
         pj_settings.facebook_link = "https://facebook.com/example"

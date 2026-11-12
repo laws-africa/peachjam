@@ -186,7 +186,6 @@ TEMPLATES = [
 
 PEACHJAM = {
     "APP_NAME": os.environ.get("APP_NAME", "Peachjam"),
-    "SUPPORT_EMAIL": os.environ.get("SUPPORT_EMAIL"),
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
     "LAWSAFRICA_API_KEY": os.environ.get(
@@ -262,7 +261,7 @@ WSGI_APPLICATION = "peachjam.wsgi.application"
 EMAIL_SUBJECT_PREFIX = f"[{PEACHJAM['APP_NAME']}] "
 SERVER_EMAIL = DEFAULT_FROM_EMAIL = (
     os.environ.get("DEFAULT_FROM_EMAIL")
-    or f'"{PEACHJAM["APP_NAME"]}" <{PEACHJAM["SUPPORT_EMAIL"]}>'
+    or f'"{PEACHJAM["APP_NAME"]}" <info@laws.africa>'
 )
 
 # Django all-auth
