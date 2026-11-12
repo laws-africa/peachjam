@@ -2,12 +2,12 @@ from importlib import import_module
 
 from django.db import migrations
 
-demo_data = import_module("peachjam.migrations.0327_load_leading_authority_demo_data")
+demo_data = import_module("peachjam.migrations.0328_load_leading_authority_demo_data")
 
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0327_load_leading_authority_demo_data"),
+        ("peachjam", "0328_load_leading_authority_demo_data"),
     ]
 
     operations = [
