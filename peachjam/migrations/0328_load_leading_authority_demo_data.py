@@ -145,7 +145,7 @@ def unload_demo_data(apps, schema_editor):
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0326_leadingauthority_legalsubject_and_more"),
+        ("peachjam", "0327_leadingauthority_legalsubject_and_more"),
     ]
 
     operations = [

@@ -6,7 +6,7 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
     dependencies = [
-        ("peachjam", "0325_flynote_name_prefix_index"),
+        ("peachjam", "0326_remove_peachjamsettings_pocket_law_repo"),
     ]
 
     operations = [
