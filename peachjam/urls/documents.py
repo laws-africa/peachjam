@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.urls import include, path, re_path
 from django.views.decorators.cache import cache_page
 
@@ -32,13 +31,6 @@ from peachjam.views import (
     LegislationSubsidiaryView,
     PartnerLogoView,
 )
-
-
-def cache_citations(view):
-    if settings.DEBUG:
-        return view
-    return cache_page(CACHE_DURATION)(view)
-
 
 urlpatterns = [
     # document detail views
@@ -79,12 +71,12 @@ urlpatterns = [
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations/tab$",
-        cache_citations(DocumentCitationsTabView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentCitationsTabView.as_view()),
         name="document_citations_first_load",
     ),
     re_path(
         r"^(?P<frbr_uri>akn/.*)/citations$",
-        cache_citations(DocumentCitationsView.as_view()),
+        cache_page(CACHE_DURATION)(DocumentCitationsView.as_view()),
         name="document_citations",
     ),
     re_path(
