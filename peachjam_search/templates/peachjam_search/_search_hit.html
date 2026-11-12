@@ -60,7 +60,7 @@
               {% endfor %}
             </span>
           {% endif %}
-          {% include 'peachjam/_document_labels.html' with labels=hit.document.labels.all %}
+          {% include 'peachjam/_document_labels.html' with labels=hit.document.labels.all leading_authorities=hit.document.published_leading_authorities %}
           {% if can_debug %}
             <a class="me-3"
                href="#debug-{{ hit.document.id }}"
@@ -70,6 +70,7 @@
         {% if hit.document.matter_type %}<div>{{ hit.document.matter_type }}</div>{% endif %}
         {% if hit.document.doc_type == "judgment" %}
           {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=hit.document %}
+          {% include 'peachjam/judgment/_leading_authority_list.html' with leading_authorities=hit.document.published_leading_authorities %}
         {% elif hit.document.listing_taxonomies %}
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=hit.document.listing_taxonomies %}
         {% endif %}

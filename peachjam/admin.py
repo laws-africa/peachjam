@@ -110,6 +110,8 @@ from peachjam.models import (
     LawReport,
     LawReportEntry,
     LawReportVolume,
+    LeadingAuthority,
+    LegalSubject,
     Legislation,
     Locality,
     LowerBench,
@@ -1826,6 +1828,23 @@ class JudgmentForm(DocumentForm):
 class LawReportEntryInline(admin.TabularInline):
     model = LawReportEntry
     extra = 1
+
+
+@admin.register(LegalSubject)
+class LegalSubjectAdmin(admin.ModelAdmin):
+    list_display = ("name", "subject_type")
+    list_filter = ("subject_type",)
+    search_fields = ("name", "description")
+    prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(LeadingAuthority)
+class LeadingAuthorityAdmin(admin.ModelAdmin):
+    list_display = ("judgment", "subject", "reviewed_on", "published")
+    list_filter = ("published", "subject__subject_type", "reviewed_on")
+    search_fields = ("judgment__title", "subject__name", "editorial_note")
+    autocomplete_fields = ("judgment", "subject")
+    list_select_related = ("judgment", "subject")
 
 
 @admin.register(Judgment)

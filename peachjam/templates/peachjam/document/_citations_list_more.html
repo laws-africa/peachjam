@@ -1,4 +1,4 @@
 {% for document in docs %}
-  {% include 'peachjam/_document_table_row.html' with doc_table_show_treatments=True %}
+  {% include 'peachjam/_document_table_row.html' with doc_table_show_treatments=True doc_table_compact_leading_authorities=True %}
 {% endfor %}
 {% include 'peachjam/document/_citations_list_more_button.html' %}

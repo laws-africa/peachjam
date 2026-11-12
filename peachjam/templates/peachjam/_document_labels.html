@@ -1,5 +1,5 @@
 {% if labels %}
-  <div class="d-flex align-items-center">
+  <div class="d-flex align-items-center gap-1">
     {% for label in labels %}<span class="badge rounded-pill bg-{{ label.level }}">{{ label.name }}</span>{% endfor %}
   </div>
 {% endif %}

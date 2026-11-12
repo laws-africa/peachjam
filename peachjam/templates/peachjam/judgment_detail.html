@@ -115,6 +115,10 @@
     </dl>
   {% endif %}
 {% endblock %}
+{% block document-metadata %}
+  {% include 'peachjam/judgment/_leading_authorities.html' with leading_authorities=document.published_leading_authorities %}
+  {{ block.super }}
+{% endblock %}
 {% block post-metadata-cols %}
   {{ block.super }}
   {% with arbitration_judgment=document.arbitration_classification %}
