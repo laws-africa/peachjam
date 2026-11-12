@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-12 10:33+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: French\n"
@@ -38,11 +38,11 @@ msgstr "Faire un don"
 msgid "Search %(APP_NAME)s"
 msgstr "Rechercher dans %(APP_NAME)s"
 
-#: templates/liiweb/_hero_search.html:19
+#: templates/liiweb/_hero_search.html:20
 msgid "Search"
 msgstr "Recherche"
 
-#: templates/liiweb/_hero_search.html:24
+#: templates/liiweb/_hero_search.html:25
 msgid "Advanced search"
 msgstr "Recherche avancée"
 
@@ -87,21 +87,11 @@ msgstr "Cours"
 msgid "Collections"
 msgstr "Collections"
 
-#: templates/liiweb/home.html:139
-#, python-format
-msgid "Use %(APP_NAME)s when you're offline"
-msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
-
-#: templates/liiweb/home.html:141
-#, python-format
-msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
-msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
-
-#: templates/liiweb/home.html:156
+#: templates/liiweb/home.html:132
 msgid "Latest Articles"
 msgstr "Derniers articles"
 
-#: templates/liiweb/home.html:158
+#: templates/liiweb/home.html:134
 msgid "View more articles"
 msgstr "Voir plus d'articles"
 
@@ -154,44 +144,35 @@ msgstr "Toutes les lois"
 msgid "Home"
 msgstr "Accueil"
 
-#: templates/liiweb/pocketlaw.html:7
-msgid "Pocket Law"
-msgstr "Loi de poche"
-
 #: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr "À propos"
 
-#: templates/peachjam/_footer.html:12
-#, python-format
-msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-msgstr "Utilisez %(APP_NAME)s hors ligne avec <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-
-#: templates/peachjam/_footer.html:20
+#: templates/peachjam/_footer.html:9
 msgid "Site Statistics"
 msgstr "Statistiques du site"
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
+#: templates/peachjam/_footer.html:14 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr "Aide"
 
-#: templates/peachjam/_footer.html:28
+#: templates/peachjam/_footer.html:17
 msgid "About us"
 msgstr "À propos de nous"
 
-#: templates/peachjam/_footer.html:31
+#: templates/peachjam/_footer.html:20
 msgid "Contact us"
 msgstr "Contactez-nous"
 
-#: templates/peachjam/_footer.html:34
+#: templates/peachjam/_footer.html:23
 msgid "Terms of Use"
 msgstr "Termes et conditions d'utilisation"
 
-#: templates/peachjam/_footer.html:40
+#: templates/peachjam/_footer.html:29
 msgid "Our partners"
 msgstr "Nos partenaires"
 
-#: templates/peachjam/_footer.html:53
+#: templates/peachjam/_footer.html:42
 msgid "Other African Legal Information Institutions"
 msgstr "Autres Institutions Africaines d'information Juridique"
 
@@ -200,3 +181,17 @@ msgstr "Autres Institutions Africaines d'information Juridique"
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Législation"
 
+#, python-format
+#~ msgid "Use %(APP_NAME)s when you're offline"
+#~ msgstr "Utilisez %(APP_NAME)s lorsque vous êtes hors ligne"
+
+#, python-format
+#~ msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
+#~ msgstr "Pocket Law est une copie hors ligne de la jurisprudence, de la législation et d'autres documents juridiques de %(APP_NAME)s."
+
+#~ msgid "Pocket Law"
+#~ msgstr "Loi de poche"
+
+#, python-format
+#~ msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
+#~ msgstr "Utilisez %(APP_NAME)s hors ligne avec <a href=\"%(pocket_law_url)s\">Pocket Law</a>."

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-12 10:33+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -39,11 +39,11 @@ msgstr ""
 msgid "Search %(APP_NAME)s"
 msgstr ""
 
-#: templates/liiweb/_hero_search.html:19
+#: templates/liiweb/_hero_search.html:20
 msgid "Search"
 msgstr ""
 
-#: templates/liiweb/_hero_search.html:24
+#: templates/liiweb/_hero_search.html:25
 msgid "Advanced search"
 msgstr ""
 
@@ -88,21 +88,11 @@ msgstr ""
 msgid "Collections"
 msgstr ""
 
-#: templates/liiweb/home.html:139
-#, python-format
-msgid "Use %(APP_NAME)s when you're offline"
-msgstr ""
-
-#: templates/liiweb/home.html:141
-#, python-format
-msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
-msgstr ""
-
-#: templates/liiweb/home.html:156
+#: templates/liiweb/home.html:132
 msgid "Latest Articles"
 msgstr ""
 
-#: templates/liiweb/home.html:158
+#: templates/liiweb/home.html:134
 msgid "View more articles"
 msgstr ""
 
@@ -155,44 +145,35 @@ msgstr ""
 msgid "Home"
 msgstr ""
 
-#: templates/liiweb/pocketlaw.html:7
-msgid "Pocket Law"
-msgstr ""
-
 #: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr ""
 
-#: templates/peachjam/_footer.html:12
-#, python-format
-msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-msgstr ""
-
-#: templates/peachjam/_footer.html:20
+#: templates/peachjam/_footer.html:9
 msgid "Site Statistics"
 msgstr ""
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
+#: templates/peachjam/_footer.html:14 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr ""
 
-#: templates/peachjam/_footer.html:28
+#: templates/peachjam/_footer.html:17
 msgid "About us"
 msgstr ""
 
-#: templates/peachjam/_footer.html:31
+#: templates/peachjam/_footer.html:20
 msgid "Contact us"
 msgstr ""
 
-#: templates/peachjam/_footer.html:34
+#: templates/peachjam/_footer.html:23
 msgid "Terms of Use"
 msgstr ""
 
-#: templates/peachjam/_footer.html:40
+#: templates/peachjam/_footer.html:29
 msgid "Our partners"
 msgstr ""
 
-#: templates/peachjam/_footer.html:53
+#: templates/peachjam/_footer.html:42
 msgid "Other African Legal Information Institutions"
 msgstr ""
 

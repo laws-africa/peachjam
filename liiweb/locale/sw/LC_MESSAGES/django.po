@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-12 10:33+0000\n"
 "PO-Revision-Date: 2026-05-25 09:32\n"
 "Last-Translator: \n"
 "Language-Team: Swahili\n"
@@ -38,11 +38,11 @@ msgstr "Changia"
 msgid "Search %(APP_NAME)s"
 msgstr "Tafuta %(APP_NAME)s"
 
-#: templates/liiweb/_hero_search.html:19
+#: templates/liiweb/_hero_search.html:20
 msgid "Search"
 msgstr "Tafuta"
 
-#: templates/liiweb/_hero_search.html:24
+#: templates/liiweb/_hero_search.html:25
 msgid "Advanced search"
 msgstr "Utafutaji wa kina"
 
@@ -87,21 +87,11 @@ msgstr "Mahakama"
 msgid "Collections"
 msgstr "Makusanyo"
 
-#: templates/liiweb/home.html:139
-#, python-format
-msgid "Use %(APP_NAME)s when you're offline"
-msgstr "Tumia %(APP_NAME)s ukiwa nje ya mtandao"
-
-#: templates/liiweb/home.html:141
-#, python-format
-msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
-msgstr "Pocket Law ni nakala ya nje ya mtandao ya sheria ya kesi, sheria na nyaraka nyingine za kisheria kutoka %(APP_NAME)s."
-
-#: templates/liiweb/home.html:156
+#: templates/liiweb/home.html:132
 msgid "Latest Articles"
 msgstr "Makala za Hivi Karibuni"
 
-#: templates/liiweb/home.html:158
+#: templates/liiweb/home.html:134
 msgid "View more articles"
 msgstr "Tazama makala zaidi"
 
@@ -154,44 +144,35 @@ msgstr "Sheria zote"
 msgid "Home"
 msgstr "Nyumbani"
 
-#: templates/liiweb/pocketlaw.html:7
-msgid "Pocket Law"
-msgstr "Sheria zisizo mtandaoni"
-
 #: templates/peachjam/_footer.html:4 templates/peachjam/_header.html:29
 msgid "About"
 msgstr "Kuhusu"
 
-#: templates/peachjam/_footer.html:12
-#, python-format
-msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
-msgstr "Tumia %(APP_NAME)s nje ya mtandao na <a href=\"%(pocket_law_url)s\">Pocket law</a>."
-
-#: templates/peachjam/_footer.html:20
+#: templates/peachjam/_footer.html:9
 msgid "Site Statistics"
 msgstr "Takwimu za Tovuti"
 
-#: templates/peachjam/_footer.html:25 templates/peachjam/_header.html:35
+#: templates/peachjam/_footer.html:14 templates/peachjam/_header.html:35
 msgid "Help"
 msgstr "Msaada"
 
-#: templates/peachjam/_footer.html:28
+#: templates/peachjam/_footer.html:17
 msgid "About us"
 msgstr "Kuhusu sisi"
 
-#: templates/peachjam/_footer.html:31
+#: templates/peachjam/_footer.html:20
 msgid "Contact us"
 msgstr "Wasiliana nasi"
 
-#: templates/peachjam/_footer.html:34
+#: templates/peachjam/_footer.html:23
 msgid "Terms of Use"
 msgstr "Masharti ya matumizi"
 
-#: templates/peachjam/_footer.html:40
+#: templates/peachjam/_footer.html:29
 msgid "Our partners"
 msgstr "Washirika wetu"
 
-#: templates/peachjam/_footer.html:53
+#: templates/peachjam/_footer.html:42
 msgid "Other African Legal Information Institutions"
 msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 
@@ -200,3 +181,17 @@ msgstr "Taasisi Nyingine za Taarifa za Kisheria za Afrika"
 msgid "%(locality)s Legislation"
 msgstr "%(locality)s Sheria"
 
+#, python-format
+#~ msgid "Use %(APP_NAME)s when you're offline"
+#~ msgstr "Tumia %(APP_NAME)s ukiwa nje ya mtandao"
+
+#, python-format
+#~ msgid "Pocket Law is an offline copy of the caselaw, legislation and other legal materials from %(APP_NAME)s."
+#~ msgstr "Pocket Law ni nakala ya nje ya mtandao ya sheria ya kesi, sheria na nyaraka nyingine za kisheria kutoka %(APP_NAME)s."
+
+#~ msgid "Pocket Law"
+#~ msgstr "Sheria zisizo mtandaoni"
+
+#, python-format
+#~ msgid "Use %(APP_NAME)s offline with <a href=\"%(pocket_law_url)s\">Pocket Law</a>."
+#~ msgstr "Tumia %(APP_NAME)s nje ya mtandao na <a href=\"%(pocket_law_url)s\">Pocket law</a>."
