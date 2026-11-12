@@ -614,7 +614,7 @@ class PeachjamViewsTest(TestCase):
         )
 
         self.assertContains(response, "Leading authority")
-        self.assertContains(response, "badge rounded-pill bg-secondary")
+        self.assertNotContains(response, "leading-authority-label")
         self.assertContains(response, "Example doctrine")
         self.assertNotContains(response, "for the Example doctrine")
 

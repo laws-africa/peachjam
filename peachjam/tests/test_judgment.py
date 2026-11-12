@@ -700,7 +700,7 @@ class JudgmentTestCase(TestCase):
 
         self.assertIn('class="document-row"', html)
         self.assertNotIn("leading-authority-row", html)
-        self.assertIn("badge rounded-pill bg-secondary", html)
+        self.assertNotIn("leading-authority-label", html)
         self.assertIn("Leading authority", html)
         self.assertIn("Plascon-Evans rule", html)
         self.assertNotIn("for the Plascon-Evans rule", html)
