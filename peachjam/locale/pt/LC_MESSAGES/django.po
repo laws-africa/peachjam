@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-12 10:33+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Last-Translator: \n"
 "Language-Team: Portuguese\n"
@@ -583,13 +583,13 @@ msgid "Select at least one judge person to delete."
 msgstr ""
 
 #: forms.py:372 forms.py:373 models/entity_profile.py:13
-#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:279
+#: templates/peachjam/_ratification_table.html:6 views/generic_views.py:280
 msgid "Title"
 msgstr "Título"
 
 #: forms.py:374 forms.py:375 templates/peachjam/causelist_detail.html:35
 #: templates/peachjam/layouts/document_detail.html:315
-#: views/generic_views.py:280
+#: views/generic_views.py:281
 msgid "Date"
 msgstr "Data"
 
@@ -633,71 +633,71 @@ msgstr "Opcional. Traduz o resumo quando definido para um idioma diferente do in
 msgid "Document problem reported"
 msgstr "Problema no documento relatado"
 
-#: forms.py:850
+#: forms.py:848
 msgid "Contact us message"
 msgstr "Mensagem de contato"
 
-#: forms.py:868
+#: forms.py:863
 msgid "Folders"
 msgstr "Pastas"
 
-#: forms.py:925
+#: forms.py:920
 msgid "Please provide a valid name"
 msgstr "Por favor, forneça um nome válido"
 
-#: forms.py:931 forms.py:960
+#: forms.py:926 forms.py:955
 msgid "First name"
 msgstr "Nome próprio"
 
-#: forms.py:934 forms.py:966
+#: forms.py:929 forms.py:961
 msgid "Last name"
 msgstr "Último nome"
 
-#: forms.py:943 templates/account/login.html:89
+#: forms.py:938 templates/account/login.html:89
 #: templates/account/signup.html:47 templates/account/user_auth.html:103
 #: templates/account/user_auth.html:145 templates/user_account/home.html:26
 msgid "Password"
 msgstr "Senha"
 
-#: forms.py:944 templates/account/signup.html:61
+#: forms.py:939 templates/account/signup.html:61
 msgid "Password (again)"
 msgstr "Palavra-passe (novamente)"
 
-#: forms.py:972
+#: forms.py:967
 msgid "What are you hoping to do today?"
 msgstr ""
 
-#: forms.py:978
+#: forms.py:973
 msgid "What best describes your role or organisation?"
 msgstr ""
 
-#: forms.py:1017
+#: forms.py:1012
 msgid "Choose at least one option or select Not now."
 msgstr ""
 
-#: forms.py:1080
+#: forms.py:1075
 msgid "Email alert frequency"
 msgstr ""
 
-#: forms.py:1102
+#: forms.py:1097
 msgid "I understand this action cannot be undone"
 msgstr "Entendo que esta ação não pode ser anulada."
 
-#: forms.py:1104
+#: forms.py:1099
 msgid "Please confirm account deletion."
 msgstr "Por favor, confirme a eliminação da conta."
 
-#: forms.py:1110
+#: forms.py:1105
 #, fuzzy
 #| msgid "Please tell us briefly why you are deleting your account."
 msgid "What is the main reason you are deleting your account?"
 msgstr "Por favor, explique brevemente por que razão está a eliminar a sua conta."
 
-#: forms.py:1116
+#: forms.py:1111
 msgid "I agree to the Terms of Use"
 msgstr "Concordo com os Termos de Utilização."
 
-#: forms.py:1119
+#: forms.py:1114
 msgid "You must accept the terms to continue."
 msgstr "É preciso aceitar os termos para continuar."
 
@@ -713,7 +713,7 @@ msgstr ""
 #: models/core_document.py:899 models/judgment.py:1032 models/taxonomies.py:287
 #: templates/peachjam/_document_count.html:8
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:4
-#: timeline_email_service.py:259 views/generic_views.py:153
+#: timeline_email_service.py:259 views/generic_views.py:154
 #, fuzzy
 #| msgid "document"
 msgid "document"
@@ -2246,140 +2246,146 @@ msgid "re-extract citations"
 msgstr "reextrair citações"
 
 #: models/settings.py:113
-msgid "Pocket Law repo"
-msgstr "Repositório Pocket Law"
-
-#: models/settings.py:116
 msgid "editor help link"
 msgstr "link de ajuda do editor"
 
-#: models/settings.py:122
+#: models/settings.py:119
 msgid "user help link"
 msgstr "link de ajuda do usuário"
 
-#: models/settings.py:128
+#: models/settings.py:125
+#, fuzzy
+#| msgid "contact form URL"
+msgid "contact email"
+msgstr "URL do formulário de contato"
+
+#: models/settings.py:127
+msgid "Public contact address. Defaults to info@laws.africa."
+msgstr ""
+
+#: models/settings.py:130
 msgid "admin emails"
 msgstr "e-mails de administrador"
 
-#: models/settings.py:132
-msgid "Enter one or more email addresses separated by spaces."
-msgstr "Insira um ou mais endereços de e-mail separados por espaços."
-
 #: models/settings.py:135
+msgid "Internal recipients for contact messages, document reports and feedback. Enter addresses separated by spaces. Defaults to Django ADMINS."
+msgstr ""
+
+#: models/settings.py:140
 msgid "matomo domain"
 msgstr "domínio matomo"
 
-#: models/settings.py:139
+#: models/settings.py:144
 msgid "Matomo domain (e.g. mysite.matomo.cloud)"
 msgstr "Domínio Matomo (por exemplo, meusite.matomo.cloud)"
 
-#: models/settings.py:142
+#: models/settings.py:147
 msgid "matomo site ID"
 msgstr "ID do site matomo"
 
-#: models/settings.py:146
+#: models/settings.py:151
 msgid "Matomo site ID (e.g. 2)"
 msgstr "ID do site Matomo (por exemplo, 2)"
 
-#: models/settings.py:149
+#: models/settings.py:154
 msgid "survey link"
 msgstr "link da pesquisa"
 
-#: models/settings.py:154
+#: models/settings.py:159
 msgid "allow save documents"
 msgstr "permitir salvar documentos"
 
-#: models/settings.py:156
+#: models/settings.py:161
 msgid "Allow documents to be saved."
 msgstr "Permitir que documentos sejam salvos."
 
-#: models/settings.py:159
+#: models/settings.py:164
 msgid "allow anonymisation"
 msgstr "permitir anonimização"
 
-#: models/settings.py:161
+#: models/settings.py:166
 msgid "Allow documents to be anonymised."
 msgstr "Permitir que os documentos sejam anonimizados."
 
-#: models/settings.py:164
+#: models/settings.py:169
 msgid "allow save searches"
 msgstr "permitir salvar pesquisas"
 
-#: models/settings.py:166
+#: models/settings.py:171
 msgid "Allow searches to be saved."
 msgstr "Permitir que pesquisas sejam salvas."
 
-#: models/settings.py:169
+#: models/settings.py:174
 msgid "allow signups"
 msgstr "permitir inscrições"
 
-#: models/settings.py:172
+#: models/settings.py:177
 msgid "Deprecated compatibility field. Use the global accounts switch instead."
 msgstr ""
 
-#: models/settings.py:176
+#: models/settings.py:181
 #, fuzzy
 #| msgid "allow robots"
 msgid "allow follows"
 msgstr "allow robots"
 
-#: models/settings.py:179
+#: models/settings.py:184
 msgid "Allow courts, authors, topics, and other entities to be followed."
 msgstr ""
 
-#: models/settings.py:183
+#: models/settings.py:188
 #, fuzzy
 #| msgid "annotations"
 msgid "allow annotations"
 msgstr "Anotações"
 
-#: models/settings.py:185
+#: models/settings.py:190
 #, fuzzy
 #| msgid "allow save documents"
 msgid "Allow private document annotations."
 msgstr "permitir salvar documentos"
 
-#: models/settings.py:188
+#: models/settings.py:193
 msgid "show contact form"
 msgstr "mostrar formulário de contato"
 
-#: models/settings.py:190
+#: models/settings.py:195
 msgid "Show the contact form."
 msgstr "Mostrar o formulário de contato."
 
-#: models/settings.py:195
+#: models/settings.py:200
 msgid "Additional robots.txt rules."
 msgstr "Regras adicionais do robots.txt."
 
-#: models/settings.py:201
+#: models/settings.py:206
 msgid "ID of a Google custom search engine."
 msgstr "ID de um mecanismo de busca personalizado do Google."
 
-#: models/settings.py:207
+#: models/settings.py:212
 msgid "ID of a helpscout contact us beacon."
 msgstr "Identificação de um sinalizador de contacto do HelpScout."
 
-#: models/settings.py:213
+#: models/settings.py:218
 msgid "Secret key for helpscout signature."
 msgstr "Chave secreta para a assinatura do HelpScout."
 
-#: models/settings.py:216
+#: models/settings.py:221
 msgid "allow criminal data extraction"
 msgstr "permitir extração de dados criminais"
 
-#: models/settings.py:218
+#: models/settings.py:223
 msgid "Allow AI-based criminal data extraction for judgments."
 msgstr "Permitir a extração de dados criminais com base em IA para efeitos de julgamento."
 
-#: models/settings.py:221
+#: models/settings.py:226
 msgid "default email alert frequency"
 msgstr ""
 
-#: models/settings.py:225
+#: models/settings.py:230
 msgid "Default frequency for new users' email alert digests."
 msgstr ""
 
-#: models/settings.py:229
+#: models/settings.py:234
 msgid "site settings"
 msgstr "configurações do site"
 
@@ -2591,19 +2597,19 @@ msgstr "perfil do usuário"
 msgid "user profiles"
 msgstr "perfis de usuário"
 
-#: settings.py:399
+#: settings.py:401
 msgid "English"
 msgstr "Inglês"
 
-#: settings.py:400
+#: settings.py:402
 msgid "French"
 msgstr "Francês"
 
-#: settings.py:401
+#: settings.py:403
 msgid "Portuguese"
 msgstr "Português"
 
-#: settings.py:402
+#: settings.py:404
 msgid "Swahili"
 msgstr "Suaíli"
 
@@ -3145,7 +3151,7 @@ msgstr ""
 #: templates/admin/tree_change_list.html:7
 #: templates/peachjam/_document_content_sidebar.html:57
 #: templates/peachjam/_facet_groups.html:56
-#: templates/peachjam/_facet_groups.html:57
+#: templates/peachjam/_facet_groups.html:57 templates/peachjam/_header.html:48
 #: templates/peachjam/_quick_search.html:4
 #: templates/peachjam/_quick_search.html:7
 #: templates/peachjam/judgment_list.html:34
@@ -3446,8 +3452,8 @@ msgid "Browse by month"
 msgstr "Navegue por mês"
 
 #: templates/peachjam/_court_years_list.html:4
-#: templates/peachjam/_years_list.html:4 views/generic_views.py:429
-#: views/legislation.py:80
+#: templates/peachjam/_years_list.html:4 views/generic_views.py:430
+#: views/legislation.py:81
 msgid "Years"
 msgstr "anos"
 
@@ -3517,7 +3523,7 @@ msgstr "Páginas"
 
 #: templates/peachjam/_document_count.html:14
 #: templates/peachjam/law_report/law_report_volume_legislation_index.html:5
-#: views/generic_views.py:154
+#: views/generic_views.py:155
 msgid "documents"
 msgstr "documentos"
 
@@ -4352,12 +4358,12 @@ msgid "All unconstitutional provisions"
 msgstr "Todas as disposições inconstitucionais"
 
 #: templates/peachjam/document/provision_detail.html:34
-#: templates/peachjam/layouts/document_detail.html:195 views/legislation.py:834
+#: templates/peachjam/layouts/document_detail.html:195 views/legislation.py:924
 msgid "Citations"
 msgstr "Citações"
 
 #: templates/peachjam/document/provision_detail.html:41
-#: views/legislation.py:949
+#: views/legislation.py:1039
 msgid "Similar provisions"
 msgstr "Disposições semelhantes"
 
@@ -4516,7 +4522,7 @@ msgid "Browse judgments organised by legal topic. Select a topic to explore more
 msgstr ""
 
 #: templates/peachjam/flynote/list.html:24 views/causelist.py:170
-#: views/generic_views.py:341
+#: views/generic_views.py:342
 msgid "Topics"
 msgstr "Disciplinas"
 
@@ -5309,12 +5315,12 @@ msgid "Show uncommenced provisions for %(title)s"
 msgstr "Mostrar disposições não iniciadas para %(title)s"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:22
-#: views/legislation.py:596 views/legislation.py:600
+#: views/legislation.py:686 views/legislation.py:690
 msgid "Resolved"
 msgstr "Resolvido"
 
 #: templates/peachjam/provision_enrichment/_unconstitutional_provision_detail.html:24
-#: views/legislation.py:601
+#: views/legislation.py:691
 msgid "Unresolved"
 msgstr "Não resolvido"
 
@@ -5945,7 +5951,7 @@ msgstr "listas de causas"
 msgid "CauseList"
 msgstr "Lista de Causas"
 
-#: views/causelist.py:115 views/generic_views.py:371
+#: views/causelist.py:115 views/generic_views.py:372
 msgid "Document nature"
 msgstr "Natureza do documento"
 
@@ -5953,7 +5959,7 @@ msgstr "Natureza do documento"
 msgid "Court divisions"
 msgstr "Divisões do tribunal"
 
-#: views/causelist.py:180 views/generic_views.py:352
+#: views/causelist.py:180 views/generic_views.py:353
 msgid "Alphabet"
 msgstr "Alfabeto"
 
@@ -5977,7 +5983,7 @@ msgstr "Emitir"
 msgid "Supplement"
 msgstr "Suplemento"
 
-#: views/generic_views.py:447
+#: views/generic_views.py:448
 #, fuzzy
 #| msgid "Language"
 msgid "Languages"
@@ -6075,7 +6081,7 @@ msgstr "Resultados"
 msgid "Case actions"
 msgstr "Ações de caso"
 
-#: views/judgment.py:697
+#: views/judgment.py:699
 msgid "This judgment has been anonymised to protect personal information in compliance with the law."
 msgstr "Este julgamento foi tornado anônimo para proteger informações pessoais em conformidade com a lei."
 
@@ -6099,73 +6105,179 @@ msgstr[0] "Citado por %(count)s acórdão"
 msgstr[1] "Citado por %(count)s acórdãos"
 
 #: views/legislation.py:219
+#, fuzzy, python-brace-format
+#| msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+msgid "This {friendly_type} {action} on {date} by <a href=\"{repealing_uri}\">{repealing_title}</a>."
+msgstr "Este %(friendly_type)s foi %(verb)s em %(date)s por <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
+
+#: views/legislation.py:225
+#, fuzzy, python-format
+#| msgid "This %(friendly_type)s %(verb)s on %(date)s."
+msgid "This %(friendly_type)s %(action)s on %(date)s."
+msgstr "Este %(friendly_type)s %(verb)s em %(date)s."
+
+#: views/legislation.py:233
 #, python-format
 msgid "This %(friendly_type)s was %(verb)s on %(date)s by <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 msgstr "Este %(friendly_type)s foi %(verb)s em %(date)s por <a href=\"%(repealing_uri)s\">%(repealing_title)s</a>."
 
-#: views/legislation.py:231
+#: views/legislation.py:245
 #, python-format
 msgid "This %(friendly_type)s %(verb)s on %(date)s."
 msgstr "Este %(friendly_type)s %(verb)s em %(date)s."
 
-#: views/legislation.py:244
+#: views/legislation.py:257
 #, python-format
 msgid "This %(friendly_type)s will come into force on %(date)s."
 msgstr "Este %(friendly_type)s entrará em vigor em %(date)s."
 
-#: views/legislation.py:259
+#: views/legislation.py:273
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force in full. See the Uncommenced provisions tab for more information."
 msgstr "Este %(friendly_type)s ainda não entrou em vigor na íntegra. Consulte o separador \"Disposições não iniciadas\" para obter mais informações."
 
-#: views/legislation.py:270
+#: views/legislation.py:284
 #, python-format
 msgid "This %(friendly_type)s has not yet come into force."
 msgstr "Este %(friendly_type)s ainda não entrou em vigor."
 
-#: views/legislation.py:300
+#: views/legislation.py:319
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it was %(verb)s."
 msgstr "Esta é a versão deste %(friendly_type)s como era quando era %(verb)s."
 
-#: views/legislation.py:313
+#: views/legislation.py:332
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was when it %(verb)s."
 msgstr "Esta é a versão deste %(friendly_type)s tal como era quando %(verb)s."
 
-#: views/legislation.py:331
+#: views/legislation.py:350
 #, python-format
 msgid "This is the latest version of this %(friendly_type)s."
 msgstr "Esta é a versão mais recente deste %(friendly_type)s."
 
-#: views/legislation.py:347
+#: views/legislation.py:366
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it was %(verb)s</a>."
 msgstr "Esta é a versão deste %(friendly_type)s tal como era de %(date_from)s a %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lê a versão tal como era quando era %(verb)s</a>."
 
-#: views/legislation.py:352
+#: views/legislation.py:371
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Read the version as it was when it %(verb)s</a>."
 msgstr "Esta é a versão deste %(friendly_type)s tal como era de %(date_from)s a %(date_to)s. <a href=\"%(expression_frbr_uri)s\">Lê a versão tal como era quando %(verb)s</a>."
 
-#: views/legislation.py:357
+#: views/legislation.py:376
 #, python-format
 msgid "This is the version of this %(friendly_type)s as it was from %(date_from)s to %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Read the latest available version</a>."
 msgstr "Esta é a versão deste %(friendly_type)s como era de %(date_from)s a %(date_to)s.  <a href=\"%(expression_frbr_uri)s\">Leia a última versão disponível</a>."
 
-#: views/legislation.py:381
+#: views/legislation.py:400
 msgid "This version is at a future date."
 msgstr "Esta versão está numa data futura."
 
-#: views/legislation.py:439
+#: views/legislation.py:467
 msgid "There are outstanding amendments that have not yet been applied. See the History tab for more information."
 msgstr "Existem alterações pendentes que ainda não foram aplicadas. Consulte a guia Histórico para obter mais informações."
 
-#: views/legislation.py:947
+#: views/legislation.py:519
+#, fuzzy
+#| msgid "repealed"
+msgid "will be repealed"
+msgstr "revogado"
+
+#: views/legislation.py:520
+msgid "will be revoked"
+msgstr ""
+
+#: views/legislation.py:521
+msgid "will be withdrawn"
+msgstr ""
+
+#: views/legislation.py:522
+msgid "will lapse"
+msgstr ""
+
+#: views/legislation.py:523
+msgid "will expire"
+msgstr ""
+
+#: views/legislation.py:524
+msgid "will be retired"
+msgstr ""
+
+#: views/legislation.py:525
+msgid "will be replaced"
+msgstr ""
+
+#: views/legislation.py:526
+msgid "will be disapplied"
+msgstr ""
+
+#: views/legislation.py:527
+#, python-format
+msgid "will be %(verb)s"
+msgstr ""
+
+#: views/legislation.py:534
+#, fuzzy
+#| msgid "commencements JSON"
+msgid "Commences by"
+msgstr "início JSON"
+
+#: views/legislation.py:534
+#, fuzzy
+#| msgid "New Commencement"
+msgid "Commences"
+msgstr "Nova cerimónia de formatura"
+
+#: views/legislation.py:536
+msgid "Will be assented to"
+msgstr ""
+
+#: views/legislation.py:538
+msgid "Will be consolidated"
+msgstr ""
+
+#: views/legislation.py:540
+#, python-format
+msgid "Will become %(chapter)s"
+msgstr ""
+
+#: views/legislation.py:552
+#, python-format
+msgid "Will be published in %(publication)s"
+msgstr ""
+
+#: views/legislation.py:555
+#, fuzzy
+#| msgid "Articles published."
+msgid "Will be published"
+msgstr "Artigos publicados."
+
+#: views/legislation.py:559
+msgid "Will be revised by"
+msgstr ""
+
+#: views/legislation.py:560
+msgid "Will be amended by"
+msgstr ""
+
+#: views/legislation.py:566
+#, python-format
+msgid "%(action)s by"
+msgstr ""
+
+#: views/legislation.py:570
+#, fuzzy, python-format
+#| msgid "profile description"
+msgid "Scheduled: %(description)s"
+msgstr "Descrição do perfil"
+
+#: views/legislation.py:1037
 msgid "document with similar provisions"
 msgstr "documento com disposições semelhantes"
 
-#: views/legislation.py:948
+#: views/legislation.py:1038
 msgid "documents with similar provisions"
 msgstr "documentos com disposições semelhantes"
 
@@ -6173,6 +6285,12 @@ msgstr "documentos com disposições semelhantes"
 #, python-format
 msgid "Your email update frequency has been updated to %(frequency)s."
 msgstr ""
+
+#~ msgid "Pocket Law repo"
+#~ msgstr "Repositório Pocket Law"
+
+#~ msgid "Enter one or more email addresses separated by spaces."
+#~ msgstr "Insira um ou mais endereços de e-mail separados por espaços."
 
 #~ msgid "Allow users to create accounts"
 #~ msgstr "Permitir que os utilizadores criem contas"

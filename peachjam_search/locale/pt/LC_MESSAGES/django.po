@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: 39b2fd8e1f2e7f60a21a2ff40372741a\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-27 13:01+0000\n"
+"POT-Creation-Date: 2026-11-12 10:33+0000\n"
 "PO-Revision-Date: 2026-06-18 11:10\n"
 "Language-Team: Portuguese\n"
 "Language: pt_PT\n"
@@ -26,27 +26,27 @@ msgstr "Juiz"
 msgid "Locality"
 msgstr "Localidade"
 
-#: models.py:276
+#: models.py:315
 msgid "subscription locked at"
 msgstr ""
 
-#: models.py:279
+#: models.py:318
 msgid "subscription lock expires at"
 msgstr ""
 
-#: models.py:348
+#: models.py:387
 msgid "Search alert limit reached"
 msgstr "Limite de alerta de pesquisa atingido"
 
-#: models.py:431
+#: models.py:470
 msgid "feedback"
 msgstr "opinião"
 
-#: models.py:433
+#: models.py:472
 msgid "name"
 msgstr "Nome"
 
-#: models.py:438
+#: models.py:477
 msgid "email address"
 msgstr "endereço de e-mail"
 

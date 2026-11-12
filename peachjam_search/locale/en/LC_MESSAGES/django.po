@@ -10,27 +10,27 @@ msgstr ""
 msgid "Locality"
 msgstr ""
 
-#: models.py:276
+#: models.py:315
 msgid "subscription locked at"
 msgstr ""
 
-#: models.py:279
+#: models.py:318
 msgid "subscription lock expires at"
 msgstr ""
 
-#: models.py:348
+#: models.py:387
 msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:431
+#: models.py:470
 msgid "feedback"
 msgstr ""
 
-#: models.py:433
+#: models.py:472
 msgid "name"
 msgstr ""
 
-#: models.py:438
+#: models.py:477
 msgid "email address"
 msgstr ""
 
