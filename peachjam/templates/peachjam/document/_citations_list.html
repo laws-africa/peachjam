@@ -6,7 +6,7 @@
       <span class="badge bg-secondary ms-auto align-self-center">{{ citation_group.n_docs }}</span>
     </div>
     <div class="card-body-doc-table">
-      {% include 'peachjam/_document_table.html' with doc_table_show_treatments=True doc_table_hide_thead=True doc_table_id=citation_group.table_id documents=citation_group.docs %}
+      {% include 'peachjam/_document_table.html' with doc_table_show_treatments=True doc_table_compact_leading_authorities=True doc_table_hide_thead=True doc_table_id=citation_group.table_id documents=citation_group.docs %}
       {% if citation_group.docs|length < citation_group.n_docs %}
         {% include 'peachjam/document/_citations_list_more_button.html' with truncated=True doc_table_id=citation_group.table_id nature=citation_group.nature offset=0 %}
       {% endif %}

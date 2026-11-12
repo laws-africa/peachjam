@@ -39,7 +39,7 @@
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
       {% if document.doc_type == "judgment" %}
-        {% include 'peachjam/judgment/_leading_authority_list.html' with leading_authorities=document.published_leading_authorities %}
+        {% include 'peachjam/judgment/_leading_authority_list.html' with leading_authorities=document.published_leading_authorities compact=doc_table_compact_leading_authorities %}
       {% endif %}
       {% if document.doc_type == "judgment" or document.flynote %}
         {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document %}

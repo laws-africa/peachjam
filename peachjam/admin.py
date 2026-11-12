@@ -111,7 +111,6 @@ from peachjam.models import (
     LawReportEntry,
     LawReportVolume,
     LeadingAuthority,
-    LeadingAuthoritySource,
     LegalSubject,
     Legislation,
     Locality,
@@ -1831,13 +1830,6 @@ class LawReportEntryInline(admin.TabularInline):
     extra = 1
 
 
-class LeadingAuthoritySourceInline(admin.TabularInline):
-    model = LeadingAuthoritySource
-    extra = 1
-    min_num = 1
-    validate_min = True
-
-
 @admin.register(LegalSubject)
 class LegalSubjectAdmin(admin.ModelAdmin):
     list_display = ("name", "subject_type")
@@ -1853,7 +1845,6 @@ class LeadingAuthorityAdmin(admin.ModelAdmin):
     search_fields = ("judgment__title", "subject__name", "editorial_note")
     autocomplete_fields = ("judgment", "subject")
     list_select_related = ("judgment", "subject")
-    inlines = (LeadingAuthoritySourceInline,)
 
 
 @admin.register(Judgment)

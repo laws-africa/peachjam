@@ -93,36 +93,6 @@ class Migration(migrations.Migration):
                 "ordering": ("name",),
             },
         ),
-        migrations.CreateModel(
-            name="LeadingAuthoritySource",
-            fields=[
-                (
-                    "id",
-                    models.BigAutoField(
-                        auto_created=True,
-                        primary_key=True,
-                        serialize=False,
-                        verbose_name="ID",
-                    ),
-                ),
-                ("citation", models.TextField(verbose_name="citation")),
-                ("url", models.URLField(blank=True, verbose_name="URL")),
-                (
-                    "leading_authority",
-                    models.ForeignKey(
-                        on_delete=django.db.models.deletion.CASCADE,
-                        related_name="sources",
-                        to="peachjam.leadingauthority",
-                        verbose_name="leading authority",
-                    ),
-                ),
-            ],
-            options={
-                "verbose_name": "leading authority source",
-                "verbose_name_plural": "leading authority sources",
-                "ordering": ("pk",),
-            },
-        ),
         migrations.AddField(
             model_name="leadingauthority",
             name="subject",

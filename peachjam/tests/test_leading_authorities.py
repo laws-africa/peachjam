@@ -8,7 +8,6 @@ from peachjam.models import (
     Court,
     Judgment,
     LeadingAuthority,
-    LeadingAuthoritySource,
     LegalSubject,
 )
 
@@ -58,11 +57,6 @@ class LeadingAuthorityTestCase(TestCase):
             reviewed_on=datetime.date(2026, 8, 1),
             published=True,
         )
-        LeadingAuthoritySource.objects.create(
-            leading_authority=published,
-            citation="Example source",
-            url="https://example.com/source",
-        )
         LeadingAuthority.objects.create(
             judgment=judgment,
             subject=LegalSubject.objects.create(
@@ -76,9 +70,3 @@ class LeadingAuthorityTestCase(TestCase):
         judgment = Judgment.objects.for_document_table().get(pk=judgment.pk)
 
         self.assertEqual([published], judgment.published_leading_authorities)
-        published = judgment.published_leading_authorities[0]
-        with self.assertNumQueries(0):
-            self.assertEqual(
-                ["Example source"],
-                [source.citation for source in published.sources.all()],
-            )

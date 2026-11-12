@@ -705,9 +705,7 @@ class Judgment(CoreDocument):
         if hasattr(self, "_published_leading_authorities"):
             return self._published_leading_authorities
         return list(
-            self.leading_authorities.filter(published=True)
-            .select_related("subject")
-            .prefetch_related("sources")
+            self.leading_authorities.filter(published=True).select_related("subject")
         )
 
     @staticmethod

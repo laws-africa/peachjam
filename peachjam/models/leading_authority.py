@@ -86,27 +86,6 @@ class LeadingAuthority(models.Model):
     def published_prefetch(cls):
         return models.Prefetch(
             "leading_authorities",
-            queryset=cls.objects.filter(published=True)
-            .select_related("subject")
-            .prefetch_related("sources"),
+            queryset=cls.objects.filter(published=True).select_related("subject"),
             to_attr="_published_leading_authorities",
         )
-
-
-class LeadingAuthoritySource(models.Model):
-    leading_authority = models.ForeignKey(
-        LeadingAuthority,
-        related_name="sources",
-        on_delete=models.CASCADE,
-        verbose_name=_("leading authority"),
-    )
-    citation = models.TextField(_("citation"))
-    url = models.URLField(_("URL"), blank=True)
-
-    class Meta:
-        ordering = ("pk",)
-        verbose_name = _("leading authority source")
-        verbose_name_plural = _("leading authority sources")
-
-    def __str__(self):
-        return self.citation
