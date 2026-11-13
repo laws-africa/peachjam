@@ -28,6 +28,7 @@ from peachjam.views import (
     DocumentSourceView,
     DocumentSummaryView,
     DocumentTextContentView,
+    DocumentToolbarView,
     LegislationSubsidiaryView,
     PartnerLogoView,
 )
@@ -147,6 +148,11 @@ urlpatterns = [
                 ),
             ]
         ),
+    ),
+    path(
+        "document/<int:pk>/toolbar",
+        DocumentToolbarView.as_view(),
+        name="document_toolbar",
     ),
     path(
         "document/<int:pk>/debug",

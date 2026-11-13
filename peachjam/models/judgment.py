@@ -519,6 +519,7 @@ class LowerBench(models.Model):
 
 class Judgment(CoreDocument):
     decorator = JudgmentDecorator()
+    download_permission = "peachjam.can_download_judgment"
 
     court = models.ForeignKey(
         Court, on_delete=models.PROTECT, null=False, verbose_name=_("court")

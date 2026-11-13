@@ -7,6 +7,7 @@ from peachjam.models import CoreDocument
 
 class Gazette(CoreDocument):
     decorator = GazetteDecorator()
+    download_permission = "peachjam.can_download_gazette"
 
     publication = models.CharField(
         _("publication"), max_length=100, null=True, blank=True
