@@ -112,6 +112,7 @@ from peachjam.models import (
     LawReportVolume,
     Legislation,
     Locality,
+    LocalityType,
     LowerBench,
     MatterType,
     OnboardingIntent,
@@ -119,6 +120,7 @@ from peachjam.models import (
     Partner,
     PartnerLogo,
     PeachJamSettings,
+    PopularLegislation,
     PracticeType,
     Predicate,
     ProvisionEnrichment,
@@ -1442,6 +1444,14 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work", "commencements_json", "timeline_json"] + list(
         DocumentAdmin.readonly_fields
     )
+
+
+@admin.register(PopularLegislation)
+class PopularLegislationAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("work",)
+    list_display = ("work", "position")
+    list_editable = ("position",)
+    ordering = ("position", "pk")
 
 
 @admin.register(Bill)
@@ -2829,10 +2839,24 @@ class LabelAdmin(admin.ModelAdmin):
 
 @admin.register(Locality)
 class LocalityAdmin(admin.ModelAdmin):
-    list_display = ("name", "jurisdiction", "code")
+    list_display = ("name", "jurisdiction", "code", "locality_type")
+    list_filter = ("jurisdiction", "locality_type")
+    autocomplete_fields = ("locality_type",)
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code")
     inlines = [EntityProfileInline]
+
+
+@admin.register(LocalityType)
+class LocalityTypeAdmin(admin.ModelAdmin):
+    list_display = (
+        "name",
+        "collection_title",
+        "show_subsidiary_legislation",
+        "show_document_nature",
+    )
+    prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code", "collection_title")
 
 
 @admin.register(JurisdictionProfile)
