@@ -34,12 +34,15 @@
         {% endif %}
         <span class="saved-document-star--{{ document.pk }}"></span>
       </div>
-      {% include 'peachjam/_document_labels.html' with labels=document.labels.all leading_authorities=document.published_leading_authorities %}
+      {% include 'peachjam/_document_labels.html' with labels=document.labels.all %}
       {% if doc_table_show_treatments %}
         {% include 'peachjam/document/_document_treatments.html' with treatments=document.treatments.all %}
       {% endif %}
       {% if document.doc_type == "judgment" %}
-        {% include 'peachjam/judgment/_leading_authority_list.html' with leading_authorities=document.published_leading_authorities compact=doc_table_compact_leading_authorities %}
+        <div class="leading-authority-listing--{{ document.pk }}"
+             data-leading-authority-document-id="{{ document.pk }}"
+             data-leading-authority-layout="listing">
+        </div>
       {% endif %}
       {% if document.doc_type == "judgment" or document.flynote %}
         {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=document %}

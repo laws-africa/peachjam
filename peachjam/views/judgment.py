@@ -27,6 +27,7 @@ from peachjam.models import (
     JudgePerson,
     Judgment,
     LawReport,
+    LeadingAuthority,
     Outcome,
 )
 from peachjam.models.flynote import Flynote
@@ -843,4 +844,101 @@ class CaseSummaryView(SubscriptionRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context.update(self.get_subscription_required_context())
+        return context
+
+
+class LeadingAuthorityFragmentsView(SubscriptionRequiredMixin, TemplateView):
+    """Load subscription-gated leading-authority fragments in bulk."""
+
+    permission_required = "peachjam.view_leadingauthority"
+    private_cache = True
+    template_name = "peachjam/judgment/_leading_authority_fragments.html"
+    max_documents = 50
+
+    @staticmethod
+    def parse_ids(value):
+        ids = []
+        for raw_id in value.split(","):
+            raw_id = raw_id.strip()
+            if raw_id.isdigit():
+                document_id = int(raw_id)
+                if document_id and document_id not in ids:
+                    ids.append(document_id)
+        return ids
+
+    def get_requested_ids(self):
+        if not hasattr(self, "_requested_ids"):
+            listing_ids = self.parse_ids(self.request.GET.get("listing_doc_ids", ""))
+            detail_ids = self.parse_ids(self.request.GET.get("detail_doc_ids", ""))
+
+            allowed_ids = []
+            for document_id in listing_ids + detail_ids:
+                if document_id not in allowed_ids:
+                    allowed_ids.append(document_id)
+                if len(allowed_ids) == self.max_documents:
+                    break
+
+            allowed_ids = set(allowed_ids)
+            self._requested_ids = {
+                "listing": [pk for pk in listing_ids if pk in allowed_ids],
+                "detail": [pk for pk in detail_ids if pk in allowed_ids],
+            }
+        return self._requested_ids
+
+    def get_visible_document_ids(self):
+        requested_ids = self.get_requested_ids()
+        document_ids = set(requested_ids["listing"] + requested_ids["detail"])
+        judgments = Judgment.objects.filter(pk__in=document_ids, published=True).only(
+            "pk", "restricted"
+        )
+
+        visible_ids = []
+        for judgment in judgments:
+            if not judgment.restricted or self.request.user.has_perm(
+                "peachjam.view_judgment", judgment
+            ):
+                visible_ids.append(judgment.pk)
+        return visible_ids
+
+    def build_fragment_context(self, include_authorities):
+        requested_ids = self.get_requested_ids()
+        authorities_by_document = defaultdict(list)
+
+        if include_authorities:
+            authorities = LeadingAuthority.objects.filter(
+                judgment_id__in=self.get_visible_document_ids(), published=True
+            ).select_related("subject")
+            for authority in authorities:
+                authorities_by_document[authority.judgment_id].append(authority)
+
+        return {
+            "listing_entries": [
+                {
+                    "document_id": document_id,
+                    "leading_authorities": authorities_by_document[document_id],
+                }
+                for document_id in requested_ids["listing"]
+            ],
+            "detail_entries": [
+                {
+                    "document_id": document_id,
+                    "leading_authorities": authorities_by_document[document_id],
+                }
+                for document_id in requested_ids["detail"]
+            ],
+        }
+
+    def get_subscription_required_template(self):
+        return self.template_name
+
+    def get_subscription_required_base_context(self):
+        # Keep the feature invisible when a user does not have access.
+        return {"subscription_required": True}
+
+    def get_subscription_required_context(self):
+        return self.build_fragment_context(include_authorities=False)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update(self.build_fragment_context(include_authorities=True))
         return context

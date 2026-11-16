@@ -543,7 +543,7 @@ class PeachjamViewsTest(TestCase):
         )
         self.assertTrue(hasattr(response.context["document"], "court"))
 
-    def test_judgment_detail_shows_published_leading_authorities(self):
+    def test_judgment_detail_defers_leading_authorities(self):
         judgment = Judgment.objects.get(
             expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
         )
@@ -576,18 +576,16 @@ class PeachjamViewsTest(TestCase):
             )
         )
 
-        self.assertContains(response, "Leading authority")
-        self.assertContains(response, 'class="leading-authority-detail')
-        self.assertContains(response, "Plascon-Evans rule")
-        self.assertContains(response, "The leading formulation of the rule.")
-        self.assertNotContains(response, "Unpublished editorial note.")
-        content = response.content.decode()
-        self.assertGreater(
-            content.index("The leading formulation of the rule."),
-            content.index('id="document-tab-list"'),
+        self.assertContains(response, f"leading-authority-detail--{judgment.pk}")
+        self.assertContains(
+            response, f'data-leading-authority-document-id="{judgment.pk}"'
         )
+        self.assertContains(response, 'data-leading-authority-layout="detail"')
+        self.assertNotContains(response, "Plascon-Evans rule")
+        self.assertNotContains(response, "The leading formulation of the rule.")
+        self.assertNotContains(response, "Unpublished editorial note.")
 
-    def test_judgment_listing_shows_published_leading_authorities(self):
+    def test_judgment_listing_defers_leading_authorities(self):
         judgment = Judgment.objects.get(
             expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
         )
@@ -606,10 +604,12 @@ class PeachjamViewsTest(TestCase):
             reverse("court_year", kwargs={"code": "all", "year": 2016})
         )
 
-        self.assertContains(response, "Leading authority")
-        self.assertNotContains(response, "leading-authority-label")
-        self.assertContains(response, "Example doctrine")
-        self.assertNotContains(response, "for the Example doctrine")
+        self.assertContains(response, f"leading-authority-listing--{judgment.pk}")
+        self.assertContains(
+            response, f'data-leading-authority-document-id="{judgment.pk}"'
+        )
+        self.assertContains(response, 'data-leading-authority-layout="listing"')
+        self.assertNotContains(response, "Example doctrine")
 
     def test_legislation_listing(self):
         response = self.client.get(reverse("legislation_list"))

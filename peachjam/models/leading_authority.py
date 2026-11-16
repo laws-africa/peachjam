@@ -81,11 +81,3 @@ class LeadingAuthority(models.Model):
 
     def __str__(self):
         return f"{self.judgment} — {self.subject}"
-
-    @classmethod
-    def published_prefetch(cls):
-        return models.Prefetch(
-            "leading_authorities",
-            queryset=cls.objects.filter(published=True).select_related("subject"),
-            to_attr="_published_leading_authorities",
-        )

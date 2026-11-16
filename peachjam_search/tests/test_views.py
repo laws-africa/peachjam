@@ -1072,9 +1072,11 @@ class SearchViewsTest(TestCase):
         self.assertIn("Reported", html)
         self.assertIn("badge rounded-pill bg-success", html)
 
-    def test_search_hit_labels_leading_authority(self):
+    def test_search_hit_defers_leading_authority_until_before_summary(self):
         request = RequestFactory().get("/search/?search=test")
         document = Judgment.objects.first()
+        document.blurb = "Search result summary."
+        document.save(update_fields=["blurb"])
         LeadingAuthority.objects.create(
             judgment=document,
             subject=LegalSubject.objects.create(
@@ -1105,11 +1107,12 @@ class SearchViewsTest(TestCase):
             request=request,
         )
 
-        self.assertNotIn("leading-authority-card", html)
-        self.assertNotIn("leading-authority-label", html)
-        self.assertIn("Leading authority", html)
-        self.assertIn("Plascon-Evans rule", html)
-        self.assertNotIn("for the Plascon-Evans rule", html)
+        placeholder = f"leading-authority-listing--{document.pk}"
+        self.assertIn(placeholder, html)
+        self.assertIn(f'data-leading-authority-document-id="{document.pk}"', html)
+        self.assertIn('data-leading-authority-layout="listing"', html)
+        self.assertLess(html.index(placeholder), html.index("Search result summary."))
+        self.assertNotIn("Plascon-Evans rule", html)
 
     def test_search_hit_flynote_preserves_line_breaks(self):
         request = RequestFactory().get("/search/?search=test")

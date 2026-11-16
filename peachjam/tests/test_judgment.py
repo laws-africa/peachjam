@@ -662,7 +662,6 @@ class JudgmentTestCase(TestCase):
             def all(self):
                 return []
 
-        authority = SimpleNamespace(subject=SimpleNamespace(name="Plascon-Evans rule"))
         document = SimpleNamespace(
             children=[],
             pk=1,
@@ -673,7 +672,6 @@ class JudgmentTestCase(TestCase):
             labels=EmptyRelatedManager(),
             treatments=EmptyRelatedManager(),
             doc_type="judgment",
-            published_leading_authorities=[authority],
             blurb=None,
             flynote=None,
             flynote_lines=[],
@@ -701,23 +699,10 @@ class JudgmentTestCase(TestCase):
         self.assertIn('class="document-row"', html)
         self.assertNotIn("leading-authority-row", html)
         self.assertNotIn("leading-authority-label", html)
-        self.assertIn("Leading authority", html)
-        self.assertIn("Plascon-Evans rule", html)
-        self.assertNotIn("for the Plascon-Evans rule", html)
-
-        compact_html = render_to_string(
-            "peachjam/_document_table_row.html",
-            {
-                "document": document,
-                "doc_table_compact_leading_authorities": True,
-            },
-        )
-
-        self.assertIn("leading-authority-citation", compact_html)
-        self.assertIn("Leading authority", compact_html)
-        self.assertIn("⚖", compact_html)
-        self.assertIn("Plascon-Evans rule", compact_html)
-        self.assertIn('class="text-muted fst-normal"', compact_html)
+        self.assertIn("leading-authority-listing--1", html)
+        self.assertIn('data-leading-authority-document-id="1"', html)
+        self.assertIn('data-leading-authority-layout="listing"', html)
+        self.assertNotIn("Leading authority", html)
 
     def test_grouped_linked_flynotes_indents_children_under_compressed_topic(self):
         def node(name):

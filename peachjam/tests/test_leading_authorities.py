@@ -1,7 +1,9 @@
 import datetime
 
 from countries_plus.models import Country
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
+from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.models import (
@@ -45,10 +47,21 @@ class LeadingAuthorityTestCase(TestCase):
 
         authority.full_clean()
 
-    def test_published_leading_authorities_excludes_drafts(self):
-        judgment = self.make_judgment()
-        published = LeadingAuthority.objects.create(
-            judgment=judgment,
+
+class LeadingAuthorityFragmentsTestCase(TestCase):
+    fixtures = ["tests/courts", "tests/countries", "tests/languages"]
+
+    def setUp(self):
+        self.user = User.objects.create_user("subscriber@example.com")
+        self.judgment = Judgment.objects.create(
+            language=Language.objects.get(pk="en"),
+            court=Court.objects.first(),
+            date=datetime.date(2019, 1, 1),
+            jurisdiction=Country.objects.get(pk="ZA"),
+            case_name="Foo v Bar",
+        )
+        self.authority = LeadingAuthority.objects.create(
+            judgment=self.judgment,
             subject=LegalSubject.objects.create(
                 name="Plascon-Evans rule",
                 subject_type=LegalSubject.DOCTRINE,
@@ -58,15 +71,105 @@ class LeadingAuthorityTestCase(TestCase):
             published=True,
         )
         LeadingAuthority.objects.create(
-            judgment=judgment,
+            judgment=self.judgment,
+            subject=LegalSubject.objects.create(
+                name="Motion proceedings",
+                subject_type=LegalSubject.PROCEDURE,
+            ),
+            editorial_note="The procedural application of the rule.",
+            reviewed_on=datetime.date(2026, 8, 2),
+            published=True,
+        )
+        LeadingAuthority.objects.create(
+            judgment=self.judgment,
             subject=LegalSubject.objects.create(
                 name="Draft principle",
                 subject_type=LegalSubject.PRINCIPLE,
             ),
             editorial_note="Not ready for publication.",
-            reviewed_on=datetime.date(2026, 8, 1),
+            reviewed_on=datetime.date(2026, 8, 3),
+        )
+        self.url = reverse("leading_authority_fragments")
+
+    def grant_permission(self):
+        self.user.user_permissions.add(
+            Permission.objects.get(
+                codename="view_leadingauthority",
+                content_type__app_label="peachjam",
+            )
+        )
+        self.client.force_login(self.user)
+
+    def test_entitled_user_gets_listing_and_detail_fragments(self):
+        self.grant_permission()
+
+        response = self.client.get(
+            self.url,
+            {
+                "listing_doc_ids": str(self.judgment.pk),
+                "detail_doc_ids": str(self.judgment.pk),
+            },
         )
 
-        judgment = Judgment.objects.for_document_table().get(pk=judgment.pk)
+        self.assertContains(
+            response,
+            f"outerHTML:.leading-authority-listing--{self.judgment.pk}",
+        )
+        self.assertContains(
+            response,
+            f"outerHTML:.leading-authority-detail--{self.judgment.pk}",
+        )
+        self.assertContains(response, "Plascon-Evans rule", count=2)
+        self.assertContains(response, "Motion proceedings", count=2)
+        self.assertContains(response, "The leading formulation of the rule.")
+        self.assertNotContains(response, "Draft principle")
+        self.assertNotContains(response, "Not ready for publication.")
+        self.assertNotContains(response, "data-leading-authority-document-id")
+        self.assertIn("private", response.headers["Cache-Control"])
 
-        self.assertEqual([published], judgment.published_leading_authorities)
+    def test_unentitled_user_gets_no_authority_data(self):
+        self.client.force_login(self.user)
+
+        response = self.client.get(
+            self.url,
+            {
+                "listing_doc_ids": str(self.judgment.pk),
+                "detail_doc_ids": str(self.judgment.pk),
+            },
+        )
+
+        self.assertContains(
+            response,
+            f"outerHTML:.leading-authority-listing--{self.judgment.pk}",
+        )
+        self.assertContains(
+            response,
+            f"outerHTML:.leading-authority-detail--{self.judgment.pk}",
+        )
+        self.assertNotContains(response, "Plascon-Evans rule")
+        self.assertNotContains(response, "The leading formulation of the rule.")
+        self.assertIn("no-store", response.headers["Cache-Control"])
+
+    def test_restricted_judgment_is_not_exposed_without_object_permission(self):
+        self.grant_permission()
+        self.judgment.restricted = True
+        self.judgment.save(update_fields=["restricted"])
+
+        response = self.client.get(self.url, {"detail_doc_ids": str(self.judgment.pk)})
+
+        self.assertNotContains(response, "Plascon-Evans rule")
+        self.assertNotContains(response, "The leading formulation of the rule.")
+
+    def test_ids_are_deduplicated_and_invalid_values_are_ignored(self):
+        self.grant_permission()
+
+        response = self.client.get(
+            self.url,
+            {"listing_doc_ids": (f"{self.judgment.pk},invalid,{self.judgment.pk},0")},
+        )
+
+        self.assertContains(
+            response,
+            f'class="leading-authority-listing--{self.judgment.pk}"',
+            count=1,
+        )

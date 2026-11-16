@@ -313,6 +313,7 @@ import { authHeaders } from '../../api';
 import SearchInput from '../search-input';
 import htmx from 'htmx.org';
 import SearchFeedback from './SearchFeedback.vue';
+import { loadLeadingAuthorities } from '../leading-authorities';
 import { loadSavedDocuments } from '../saved-documents';
 import peachJam from '../../peachjam';
 
@@ -902,7 +903,7 @@ export default {
               }
               this.$nextTick(() => this.savedSearchModal());
               this.linkTraces(previousId, this.searchInfo.trace_id);
-              this.loadSaveDocumentButtons();
+              this.loadResultFragments();
             } else {
               this.error = response.statusText;
             }
@@ -1099,8 +1100,11 @@ export default {
       }
     },
 
-    loadSaveDocumentButtons () {
-      this.$nextTick(() => loadSavedDocuments(this.$refs.results));
+    loadResultFragments () {
+      this.$nextTick(() => {
+        loadLeadingAuthorities(this.$refs.results);
+        loadSavedDocuments(this.$refs.results);
+      });
     },
 
     downloadUrl () {

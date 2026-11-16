@@ -116,7 +116,10 @@
   {% endif %}
 {% endblock %}
 {% block document-metadata %}
-  {% include 'peachjam/judgment/_leading_authorities.html' with leading_authorities=document.published_leading_authorities %}
+  <div class="leading-authority-detail--{{ document.pk }}"
+       data-leading-authority-document-id="{{ document.pk }}"
+       data-leading-authority-layout="detail">
+  </div>
   {{ block.super }}
 {% endblock %}
 {% block post-metadata-cols %}
