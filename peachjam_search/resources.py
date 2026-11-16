@@ -1,3 +1,5 @@
+from collections.abc import Iterable
+
 from peachjam.models import CoreDocument
 from peachjam.resources import DownloadDocumentsResource
 
@@ -66,6 +68,8 @@ class SearchResultsDownloadResource(DownloadDocumentsResource):
             values = values.all()
         if isinstance(values, str):
             return values
+        if not isinstance(values, Iterable):
+            return cls.render_related_value(values)
         return ", ".join(cls.render_related_value(value) for value in values)
 
     @classmethod
