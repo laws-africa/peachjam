@@ -74,7 +74,7 @@ For Kenya Law, create an ingestor on Gazettes.Africa with adapter
 | `token` | A token for a Kenya Law account with `peachjam.api_gazette` permission |
 | `jurisdiction` | `KE` (optional filter) |
 
-Deploy the shared gazette API changes to Kenya Law before enabling the ingestor.
+Deploy the shared gazette API changes before enabling the ingestor.
 The first refresh imports all matching gazettes; subsequent refreshes use
 `updated_at__gte`. Records retain source identifiers and metadata, and unchanged
 PDFs are reused. A document deleted after listing is skipped; a failed PDF
