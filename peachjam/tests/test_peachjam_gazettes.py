@@ -14,7 +14,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from peachjam.adapters import PeachjamGazetteAdapter
-from peachjam.models import Gazette, Ingestor, Locality, SourceFile
+from peachjam.models import Gazette, Ingestor, Judgment, Locality, SourceFile
 
 
 @override_settings(DYNAMIC_STORAGE=None)
@@ -66,7 +66,19 @@ class PeachjamGazetteAdapterTest(TestCase):
             return SimpleNamespace(content=self.pdf)
         raise AssertionError(f"Unexpected URL: {url}")
 
-    def test_first_refresh_and_incremental_pagination(self):
+    def test_first_refresh_records_cutoff_without_importing_archive(self):
+        before = datetime.now(timezone.utc)
+        with patch.object(self.ingestor, "get_adapter", return_value=self.adapter):
+            self.ingestor.check_for_updates()
+        self.ingestor.refresh_from_db()
+        self.assertGreaterEqual(self.ingestor.last_refreshed_at, before)
+        self.assertLessEqual(
+            self.ingestor.last_refreshed_at, datetime.now(timezone.utc)
+        )
+        self.adapter.client_get.assert_not_called()
+
+    def test_incremental_pagination(self):
+        since = datetime(2026, 11, 13, tzinfo=timezone.utc)
         next_page = "https://example.com/api/v1/gazettes?cursor=next"
         pages = [
             {"results": [self.doc], "next": next_page},
@@ -76,10 +88,11 @@ class PeachjamGazetteAdapterTest(TestCase):
             SimpleNamespace(json=lambda page=page: page) for page in pages
         ]
         self.assertEqual(
-            self.adapter.check_for_updates(None), ([self.uri, "another-gazette"], [])
+            self.adapter.check_for_updates(since), ([self.uri, "another-gazette"], [])
         )
         self.assertEqual(
-            self.adapter.client_get.call_args_list[0].kwargs, {"params": {}}
+            self.adapter.client_get.call_args_list[0].kwargs,
+            {"params": {"updated_at__gte": since.isoformat()}},
         )
         self.assertEqual(self.adapter.client_get.call_args_list[1].args, (next_page,))
 
@@ -216,7 +229,7 @@ class PeachjamGazetteAdapterTest(TestCase):
 
 @override_settings(ROOT_URLCONF="peachjam.urls", DYNAMIC_STORAGE=None)
 class GazetteAPITest(TestCase):
-    fixtures = ["tests/countries", "tests/languages"]
+    fixtures = ["tests/countries", "tests/languages", "tests/courts"]
 
     def setUp(self):
         directory = TemporaryDirectory()
@@ -294,3 +307,59 @@ class GazetteAPITest(TestCase):
             reverse("api_gazette_source_pdf", args=[self.gazette.expression_frbr_uri])
         )
         self.assertEqual(response.status_code, 404)
+
+    def test_bulk_validation_checks_gazettes(self):
+        missing = self.gazette.expression_frbr_uri.replace("/200/", "/201/")
+        response = self.client.post(
+            reverse("validate_gazette_expression_frbr_uris"),
+            {"expression_frbr_uris": [self.gazette.expression_frbr_uri, missing]},
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json(), {"invalid_expression_frbr_uris": [missing]})
+
+    def test_original_bulk_validator_still_checks_judgments(self):
+        judgment = Judgment.objects.create(
+            jurisdiction_id="KE",
+            language_id="en",
+            court_id=1,
+            date=date(2026, 11, 13),
+            title="Judgment",
+            auto_assign_details=False,
+            serial_number=1,
+            frbr_uri_doctype="judgment",
+            frbr_uri_actor="eacj",
+            frbr_uri_number="1",
+        )
+        response = self.client.post(
+            reverse("validate_expression_frbr_uris"),
+            {
+                "expression_frbr_uris": [
+                    judgment.expression_frbr_uri,
+                    self.gazette.expression_frbr_uri,
+                ]
+            },
+            format="json",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json(),
+            {"invalid_expression_frbr_uris": [self.gazette.expression_frbr_uri]},
+        )
+
+    def test_bulk_validation_rejects_invalid_payload(self):
+        response = self.client.post(
+            reverse("validate_gazette_expression_frbr_uris"), {}, format="json"
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_bulk_validation_requires_gazette_api_permission(self):
+        user = get_user_model().objects.create_user(username="without-gazette-access")
+        for account in [None, user]:
+            self.client.force_authenticate(account)
+            response = self.client.post(
+                reverse("validate_gazette_expression_frbr_uris"),
+                {"expression_frbr_uris": [self.gazette.expression_frbr_uri]},
+                format="json",
+            )
+            self.assertEqual(response.status_code, 403)

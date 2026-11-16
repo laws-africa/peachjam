@@ -60,6 +60,11 @@ urlpatterns = [
         name="api_judgment_detail",
     ),
     path(
+        "validate-gazette-expression-frbr-uris",
+        public_views.ValidateGazetteExpressionFrbrUrisView.as_view(),
+        name="validate_gazette_expression_frbr_uris",
+    ),
+    path(
         "validate-expression-frbr-uris",
         public_views.ValidateExpressionFrbrUrisView.as_view(),
         name="validate_expression_frbr_uris",

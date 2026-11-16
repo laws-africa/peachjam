@@ -193,10 +193,12 @@ class PeachjamGazetteAdapter(RequestsAdapter):
         self.client.headers["Authorization"] = f"Token {self.settings['token']}"
 
     def check_for_updates(self, last_refreshed):
-        """Find all gazettes on the first run, then only those changed since refresh."""
+        """Import incremental changes; leave historical reconciliation to export comparison."""
+        if last_refreshed is None:
+            # Ingestor.check_for_updates records this refresh's start time as the cutoff.
+            return [], []
         params = {}
-        if last_refreshed:
-            params["updated_at__gte"] = last_refreshed.isoformat()
+        params["updated_at__gte"] = last_refreshed.isoformat()
         if self.settings.get("jurisdiction"):
             params["jurisdiction"] = self.settings["jurisdiction"]
 
@@ -282,3 +284,59 @@ class PeachjamGazetteAdapter(RequestsAdapter):
         source_file.size = len(pdf)
         source_file.source_url = source_url
         source_file.save()
+
+
+@plugins.register("ingestor-adapter")
+class PeachjamGazetteDeleteAdapter(PeachjamGazetteAdapter):
+    """Check Kenyan gazettes against Kenya Law using the judgment deletion workflow."""
+
+    def queryset(self):
+        return Gazette.objects.filter(jurisdiction_id="KE")
+
+    def check_for_updates(self, last_refreshed):
+        """Queue batched existence checks for all Kenyan gazettes, including shared history."""
+        from peachjam.tasks import get_deleted_documents
+
+        batch_size = int(self.settings.get("batch_range") or 10000)
+        if batch_size < 1:
+            raise ValueError("batch_range must be positive")
+        pks = list(self.queryset().order_by("pk").values_list("pk", flat=True))
+        for start in range(0, len(pks), batch_size):
+            batch = pks[start : start + batch_size]
+            get_deleted_documents(self.ingestor.pk, batch[0], batch[-1])
+        return [], []
+
+    def get_deleted_documents(self, range_start, range_end):
+        """Validate an inclusive primary-key range without shifting after earlier deletions."""
+        from peachjam.tasks import delete_document
+
+        uris = list(
+            self.queryset()
+            .filter(pk__gte=range_start, pk__lte=range_end)
+            .order_by("pk")
+            .values_list("expression_frbr_uri", flat=True)
+        )
+        if not uris:
+            return
+        result = self.client_post(
+            f"{self.api_url}/validate-gazette-expression-frbr-uris",
+            json={"expression_frbr_uris": uris},
+        ).json()
+        # Do not trust a remote response to expand the local deletion scope.
+        for uri in set(result["invalid_expression_frbr_uris"]).intersection(uris):
+            delete_document(self.ingestor.pk, uri)
+
+    def delete_document(self, expression_frbr_uri):
+        """Re-check existence immediately before deleting a local Kenyan gazette."""
+        gazette = (
+            self.queryset().filter(expression_frbr_uri=expression_frbr_uri).first()
+        )
+        if gazette is None:
+            return
+        try:
+            self.client_get(f"{self.api_url}/gazettes{expression_frbr_uri}")
+        except requests.HTTPError as error:
+            if error.response.status_code != 404:
+                raise
+            logger.info("Deleting Kenyan gazette %s", expression_frbr_uri)
+            gazette.delete()
