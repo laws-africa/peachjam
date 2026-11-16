@@ -1,8 +1,12 @@
+import hashlib
 import logging
 from datetime import date
 
 import requests
 from cobalt.uri import FrbrUri
+from django.core.files.base import ContentFile
+from django.db import transaction
+from django.utils.text import slugify
 from languages_plus.models import Language
 
 from peachjam.models import Gazette, SourceFile, get_country_and_locality
@@ -164,3 +168,117 @@ class GazetteAPIAdapter(RequestsAdapter):
         if data.get("action") == "deleted" and data.get("gazette", {}).get("frbr_uri"):
             logger.info("Will delete document")
             delete_document(self.ingestor.pk, data["gazette"]["frbr_uri"])
+
+
+@plugins.register("ingestor-adapter")
+class PeachjamGazetteAdapter(RequestsAdapter):
+    """Import gazettes and their PDFs from another Peachjam site, such as Kenya Law."""
+
+    metadata_fields = (
+        "title",
+        "publication",
+        "sub_publication",
+        "supplement",
+        "supplement_number",
+        "part",
+        "volume_number",
+        "special",
+        "published",
+        "allow_robots",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.api_url = self.api_url.rstrip("/")
+        self.client.headers["Authorization"] = f"Token {self.settings['token']}"
+
+    def check_for_updates(self, last_refreshed):
+        """Find all gazettes on the first run, then only those changed since refresh."""
+        params = {}
+        if last_refreshed:
+            params["updated_at__gte"] = last_refreshed.isoformat()
+        if self.settings.get("jurisdiction"):
+            params["jurisdiction"] = self.settings["jurisdiction"]
+
+        updated = []
+        url = f"{self.api_url}/gazettes"
+        while url:
+            page = self.client_get(url, params=params).json()
+            updated.extend(entry["expression_frbr_uri"] for entry in page["results"])
+            url = page["next"]
+            params = {}
+        return updated, []
+
+    def update_document(self, expression_frbr_uri):
+        """Upsert a source gazette by its existing identifier, preserving its metadata."""
+        url = f"{self.api_url}/gazettes{expression_frbr_uri}"
+        try:
+            doc = self.client_get(url).json()
+        except requests.HTTPError as error:
+            if error.response.status_code == 404:
+                logger.info(
+                    "Gazette %s no longer exists, skipping", expression_frbr_uri
+                )
+                return
+            raise
+        if doc["expression_frbr_uri"] != expression_frbr_uri:
+            raise ValueError("The source returned a different gazette identifier")
+
+        frbr_uri = FrbrUri.parse(expression_frbr_uri)
+        if frbr_uri.doctype != "officialGazette":
+            raise ValueError("The source document is not a gazette")
+        place = frbr_uri.country
+        if frbr_uri.locality:
+            place += f"-{frbr_uri.locality}"
+        country, locality = get_country_and_locality(place)
+        data = {field: doc[field] for field in self.metadata_fields}
+        data.update(
+            jurisdiction=country,
+            locality=locality,
+            language=Language.objects.get(pk=doc["language"]),
+            date=date.fromisoformat(doc["date"]),
+            frbr_uri_doctype=frbr_uri.doctype,
+            frbr_uri_subtype=frbr_uri.subtype,
+            frbr_uri_actor=frbr_uri.actor,
+            frbr_uri_date=frbr_uri.date,
+            frbr_uri_number=frbr_uri.number,
+            ingestor=self.ingestor,
+        )
+        candidate = Gazette(**data)
+        candidate.work_frbr_uri = candidate.generate_work_frbr_uri()
+        if candidate.generate_expression_frbr_uri() != expression_frbr_uri:
+            raise ValueError("Gazette metadata does not match its source identifier")
+
+        # Fetch and validate the PDF before creating or changing any local records.
+        source_url = f"{url}/source.pdf"
+        pdf = self.client_get(source_url).content
+        if not pdf.startswith(b"%PDF-"):
+            raise ValueError("The source did not return a PDF for this gazette")
+
+        with transaction.atomic():
+            gazette, created = Gazette.objects.update_or_create(
+                expression_frbr_uri=expression_frbr_uri, defaults=data
+            )
+            self.attach_pdf(gazette, source_url, pdf)
+        logger.info("Imported gazette %s (new: %s)", expression_frbr_uri, created)
+
+    def attach_pdf(self, gazette, source_url, pdf):
+        """Replace the source file only when its content has changed."""
+        source_file = getattr(gazette, "source_file", None)
+        digest = hashlib.sha256(pdf).hexdigest()
+        if source_file and source_file.file and source_file.sha256 == digest:
+            if source_file.source_url != source_url:
+                SourceFile.objects.filter(pk=source_file.pk).update(
+                    source_url=source_url
+                )
+            return
+
+        filename = f"{slugify(gazette.title)[:200] or 'gazette'}.pdf"
+        source_file = source_file or SourceFile(document=gazette)
+        source_file.track_changes()
+        source_file.file = ContentFile(pdf, name=filename)
+        source_file.filename = filename
+        source_file.mimetype = "application/pdf"
+        source_file.size = len(pdf)
+        source_file.source_url = source_url
+        source_file.save()

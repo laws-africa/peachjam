@@ -25,6 +25,16 @@ urlpatterns = [
     path("", include(router.urls)),
     path("search/", include("peachjam_search.urls_api")),
     re_path(
+        r"^gazettes(?P<expression_frbr_uri>/akn/.*)/source\.pdf$",
+        public_views.GazettesViewSet.as_view({"get": "source_pdf"}),
+        name="api_gazette_source_pdf",
+    ),
+    re_path(
+        r"^gazettes(?P<expression_frbr_uri>/akn/.*)$",
+        public_views.GazettesViewSet.as_view({"get": "retrieve"}),
+        name="api_gazette_detail",
+    ),
+    re_path(
         r"^judgments(?P<expression_frbr_uri>/akn/.*)/source.txt$",
         public_views.JudgmentsViewSet.as_view({"get": "source_txt"}),
         name="api_judgment_source_txt",

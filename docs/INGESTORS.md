@@ -58,3 +58,29 @@ Dataset imports and document imports are queued as separate background tasks.
 If a document is fetched because an enrichment references a missing work, the
 dataset import may not see that document until a later scheduled refresh unless
 the dataset itself was also queued and happens to run after the document import.
+
+## Gazettes from another Peachjam site
+
+`PeachjamGazetteAdapter` imports gazettes and PDFs from another Peachjam site's
+API. `GazetteAPIAdapter` continues to serve the legacy Gazettes.Africa archive
+API and its shared S3 files.
+
+For Kenya Law, create an ingestor on Gazettes.Africa with adapter
+`PeachjamGazetteAdapter` and these settings:
+
+| Setting | Value |
+| --- | --- |
+| `api_url` | `https://kenyalaw.org/api/v1` |
+| `token` | A token for a Kenya Law account with `peachjam.api_gazette` permission |
+| `jurisdiction` | `KE` (optional filter) |
+
+Deploy the shared gazette API changes to Kenya Law before enabling the ingestor.
+The first refresh imports all matching gazettes; subsequent refreshes use
+`updated_at__gte`. Records retain source identifiers and metadata, and unchanged
+PDFs are reused. A document deleted after listing is skipped; a failed PDF
+download raises an error without changing the local record. Source deletions
+are not propagated.
+
+Before enabling scheduled imports, test one gazette locally with
+`ingestor.update_document(expression_frbr_uri)` and repeat to check that it is
+updated without duplicates.
