@@ -70,7 +70,7 @@ For Kenya Law, create an ingestor on Gazettes.Africa with adapter
 
 | Setting | Value |
 | --- | --- |
-| `api_url` | `https://kenyalaw.org/api/v1` |
+| `api_url` | `https://example.com/api/v1` |
 | `token` | A token for a Kenya Law account with `peachjam.api_gazette` permission |
 | `jurisdiction` | `KE` (optional filter) |
 
