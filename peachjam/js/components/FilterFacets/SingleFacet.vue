@@ -54,7 +54,7 @@
                 {{ option.label }}
               </label>
             </div>
-            <div>
+            <div v-if="option.count !== undefined">
               <span class="badge bg-light text-dark">{{ option.count }}</span>
             </div>
           </div>

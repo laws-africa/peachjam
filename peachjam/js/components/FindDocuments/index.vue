@@ -485,8 +485,19 @@ export default {
       }
     ];
 
+    // a search limited to topics by its URL; there are no buckets, so the options are the chosen topics
+    facets.unshift({
+      title: this.$t('Topic'),
+      name: 'taxonomies',
+      type: 'checkboxes',
+      value: [],
+      options: [],
+      fixedOptions: true,
+      optionLabels: JSON.parse(document.querySelector('#data-labels').textContent).taxonomies || {}
+    });
+
     if (this.showJurisdiction) {
-      facets.splice(1, 0, {
+      facets.splice(2, 0, {
         title: this.$t('Jurisdiction'),
         name: 'jurisdiction',
         type: 'checkboxes',
@@ -677,6 +688,12 @@ export default {
         if (params.has(facet.name)) {
           facet.value = params.getAll(facet.name);
         }
+        if (facet.fixedOptions) {
+          facet.options = facet.value.map(value => ({
+            label: facet.optionLabels[value] || value,
+            value
+          }));
+        }
       });
 
       if (params.has('date_from')) this.advancedSearchDateCriteria.date_from = params.get('date_from');
@@ -730,6 +747,8 @@ export default {
       };
 
       this.facets.forEach((facet) => {
+        if (facet.fixedOptions) return;
+
         if (facet.name === 'year') {
           facet.options = generateOptions(
             this.sortBuckets(
