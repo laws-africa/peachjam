@@ -51,6 +51,7 @@ from peachjam.models import (
     Judge,
     Judgment,
     Label,
+    Taxonomy,
     pj_settings,
 )
 from peachjam.views import AtomicPostMixin
@@ -136,9 +137,18 @@ class SearchView(TemplateView):
             "judge": Judge.model_label_plural,
             "searchPlaceholder": search_placeholder_text,
             "documentLabels": LabelSerializer(Label.objects.all(), many=True).data,
+            "taxonomies": self.get_taxonomy_labels(),
         }
         context["show_jurisdiction"] = settings.PEACHJAM["SEARCH_JURISDICTION_FILTER"]
         return context
+
+    def get_taxonomy_labels(self):
+        """Names of the topics the search is limited to, keyed by slug."""
+        slugs = self.request.GET.getlist("taxonomies")
+        if not slugs:
+            return {}
+        topics = Taxonomy.objects.filter(slug__in=slugs)
+        return {topic.slug: topic.name for topic in topics}
 
 
 class DocumentSearchView(TemplateView):

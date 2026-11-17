@@ -28,6 +28,7 @@ from peachjam.models import (
     LeadingAuthority,
     LegalSubject,
     Locality,
+    Taxonomy,
 )
 from peachjam_search.entity_matcher import EntitySearchHit
 from peachjam_search.models import (
@@ -393,6 +394,25 @@ class SearchViewsTest(TestCase):
         )
         self.assertContains(response, "Debug")
         self.assertContains(response, reverse("search:search_debug"))
+
+    def test_search_page_names_the_topics_it_is_limited_to(self):
+        root = Taxonomy.add_root(name="Investment law")
+        child = root.add_child(name="Land access")
+        Taxonomy.add_root(name="Labour")
+
+        response = self.client.get(
+            reverse("search:search"),
+            {"q": "lease", "taxonomies": [root.slug, child.slug, "no-such-topic"]},
+        )
+
+        self.assertEqual(
+            {root.slug: "Investment law", child.slug: "Land access"},
+            response.context["labels"]["taxonomies"],
+        )
+        self.assertEqual(
+            {},
+            self.client.get(reverse("search:search")).context["labels"]["taxonomies"],
+        )
 
     def test_find_documents_has_staff_debug_entrypoint(self):
         source = (
