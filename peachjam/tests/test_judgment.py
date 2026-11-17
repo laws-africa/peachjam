@@ -701,7 +701,7 @@ class JudgmentTestCase(TestCase):
         self.assertNotIn("leading-authority-label", html)
         self.assertIn("leading-authority-listing--1", html)
         self.assertIn('data-leading-authority-document-id="1"', html)
-        self.assertIn('data-leading-authority-layout="listing"', html)
+        self.assertIn('data-leading-authority-presentation="listing"', html)
         self.assertNotIn("Leading authority", html)
 
     def test_grouped_linked_flynotes_indents_children_under_compressed_topic(self):

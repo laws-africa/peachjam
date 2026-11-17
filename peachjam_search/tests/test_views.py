@@ -1110,7 +1110,7 @@ class SearchViewsTest(TestCase):
         placeholder = f"leading-authority-listing--{document.pk}"
         self.assertIn(placeholder, html)
         self.assertIn(f'data-leading-authority-document-id="{document.pk}"', html)
-        self.assertIn('data-leading-authority-layout="listing"', html)
+        self.assertIn('data-leading-authority-presentation="listing"', html)
         self.assertLess(html.index(placeholder), html.index("Search result summary."))
         self.assertNotIn("Plascon-Evans rule", html)
 

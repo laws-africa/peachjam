@@ -89,7 +89,12 @@ class LeadingAuthorityFragmentsTestCase(TestCase):
             editorial_note="Not ready for publication.",
             reviewed_on=datetime.date(2026, 8, 3),
         )
-        self.url = reverse("leading_authority_fragments")
+        self.listing_url = reverse(
+            "leading_authority_fragments", kwargs={"presentation": "listing"}
+        )
+        self.detail_url = reverse(
+            "leading_authority_fragments", kwargs={"presentation": "detail"}
+        )
 
     def grant_permission(self):
         self.user.user_permissions.add(
@@ -103,59 +108,61 @@ class LeadingAuthorityFragmentsTestCase(TestCase):
     def test_entitled_user_gets_listing_and_detail_fragments(self):
         self.grant_permission()
 
-        response = self.client.get(
-            self.url,
-            {
-                "listing_doc_ids": str(self.judgment.pk),
-                "detail_doc_ids": str(self.judgment.pk),
-            },
+        listing_response = self.client.get(
+            self.listing_url, {"doc_ids": str(self.judgment.pk)}
+        )
+        detail_response = self.client.get(
+            self.detail_url, {"doc_ids": str(self.judgment.pk)}
         )
 
         self.assertContains(
-            response,
+            listing_response,
             f"outerHTML:.leading-authority-listing--{self.judgment.pk}",
         )
+        self.assertNotContains(listing_response, "leading-authority-detail")
         self.assertContains(
-            response,
+            detail_response,
             f"outerHTML:.leading-authority-detail--{self.judgment.pk}",
         )
-        self.assertContains(response, "Plascon-Evans rule", count=2)
-        self.assertContains(response, "Motion proceedings", count=2)
-        self.assertContains(response, "The leading formulation of the rule.")
-        self.assertNotContains(response, "Draft principle")
-        self.assertNotContains(response, "Not ready for publication.")
-        self.assertNotContains(response, "data-leading-authority-document-id")
-        self.assertIn("private", response.headers["Cache-Control"])
+        self.assertNotContains(detail_response, "leading-authority-listing")
+        for response in (listing_response, detail_response):
+            self.assertContains(response, "Plascon-Evans rule")
+            self.assertContains(response, "Motion proceedings")
+            self.assertNotContains(response, "Draft principle")
+            self.assertNotContains(response, "Not ready for publication.")
+            self.assertNotContains(response, "data-leading-authority-document-id")
+            self.assertIn("private", response.headers["Cache-Control"])
+        self.assertContains(detail_response, "The leading formulation of the rule.")
 
     def test_unentitled_user_gets_no_authority_data(self):
         self.client.force_login(self.user)
 
-        response = self.client.get(
-            self.url,
-            {
-                "listing_doc_ids": str(self.judgment.pk),
-                "detail_doc_ids": str(self.judgment.pk),
-            },
+        listing_response = self.client.get(
+            self.listing_url, {"doc_ids": str(self.judgment.pk)}
+        )
+        detail_response = self.client.get(
+            self.detail_url, {"doc_ids": str(self.judgment.pk)}
         )
 
         self.assertContains(
-            response,
+            listing_response,
             f"outerHTML:.leading-authority-listing--{self.judgment.pk}",
         )
         self.assertContains(
-            response,
+            detail_response,
             f"outerHTML:.leading-authority-detail--{self.judgment.pk}",
         )
-        self.assertNotContains(response, "Plascon-Evans rule")
-        self.assertNotContains(response, "The leading formulation of the rule.")
-        self.assertIn("no-store", response.headers["Cache-Control"])
+        for response in (listing_response, detail_response):
+            self.assertNotContains(response, "Plascon-Evans rule")
+            self.assertNotContains(response, "The leading formulation of the rule.")
+            self.assertIn("no-store", response.headers["Cache-Control"])
 
     def test_restricted_judgment_is_not_exposed_without_object_permission(self):
         self.grant_permission()
         self.judgment.restricted = True
         self.judgment.save(update_fields=["restricted"])
 
-        response = self.client.get(self.url, {"detail_doc_ids": str(self.judgment.pk)})
+        response = self.client.get(self.detail_url, {"doc_ids": str(self.judgment.pk)})
 
         self.assertNotContains(response, "Plascon-Evans rule")
         self.assertNotContains(response, "The leading formulation of the rule.")
@@ -164,8 +171,8 @@ class LeadingAuthorityFragmentsTestCase(TestCase):
         self.grant_permission()
 
         response = self.client.get(
-            self.url,
-            {"listing_doc_ids": (f"{self.judgment.pk},invalid,{self.judgment.pk},0")},
+            self.listing_url,
+            {"doc_ids": (f"{self.judgment.pk},invalid,{self.judgment.pk},0")},
         )
 
         self.assertContains(

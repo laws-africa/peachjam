@@ -580,7 +580,7 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(
             response, f'data-leading-authority-document-id="{judgment.pk}"'
         )
-        self.assertContains(response, 'data-leading-authority-layout="detail"')
+        self.assertContains(response, 'data-leading-authority-presentation="detail"')
         self.assertNotContains(response, "Plascon-Evans rule")
         self.assertNotContains(response, "The leading formulation of the rule.")
         self.assertNotContains(response, "Unpublished editorial note.")
@@ -608,7 +608,7 @@ class PeachjamViewsTest(TestCase):
         self.assertContains(
             response, f'data-leading-authority-document-id="{judgment.pk}"'
         )
-        self.assertContains(response, 'data-leading-authority-layout="listing"')
+        self.assertContains(response, 'data-leading-authority-presentation="listing"')
         self.assertNotContains(response, "Example doctrine")
 
     def test_legislation_listing(self):

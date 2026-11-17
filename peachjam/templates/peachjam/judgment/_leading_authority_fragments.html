@@ -1,16 +1,17 @@
-{% for entry in listing_entries %}
-  <div class="leading-authority-listing--{{ entry.document_id }}"
-       hx-swap-oob="outerHTML:.leading-authority-listing--{{ entry.document_id }}">
-    {% if not subscription_required %}
-      {% include "peachjam/judgment/_leading_authority_list.html" with leading_authorities=entry.leading_authorities %}
-    {% endif %}
-  </div>
-{% endfor %}
-{% for entry in detail_entries %}
-  <div class="leading-authority-detail--{{ entry.document_id }}"
-       hx-swap-oob="outerHTML:.leading-authority-detail--{{ entry.document_id }}">
-    {% if not subscription_required %}
-      {% include "peachjam/judgment/_leading_authorities.html" with leading_authorities=entry.leading_authorities %}
-    {% endif %}
-  </div>
+{% for entry in entries %}
+  {% if presentation == "listing" %}
+    <div class="leading-authority-listing--{{ entry.document_id }}"
+         hx-swap-oob="outerHTML:.leading-authority-listing--{{ entry.document_id }}">
+      {% if not subscription_required %}
+        {% include "peachjam/judgment/_leading_authority_list.html" with leading_authorities=entry.leading_authorities %}
+      {% endif %}
+    </div>
+  {% else %}
+    <div class="leading-authority-detail--{{ entry.document_id }}"
+         hx-swap-oob="outerHTML:.leading-authority-detail--{{ entry.document_id }}">
+      {% if not subscription_required %}
+        {% include "peachjam/judgment/_leading_authorities.html" with leading_authorities=entry.leading_authorities %}
+      {% endif %}
+    </div>
+  {% endif %}
 {% endfor %}

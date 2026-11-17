@@ -22,22 +22,24 @@ export function loadLeadingAuthorities (root: HTMLElement | null = null) {
     const documentId = placeholder.getAttribute('data-leading-authority-document-id');
     if (!documentId) continue;
 
-    if (placeholder.getAttribute('data-leading-authority-layout') === 'detail') {
+    if (placeholder.getAttribute('data-leading-authority-presentation') === 'detail') {
       detailIds.add(documentId);
     } else {
       listingIds.add(documentId);
     }
   }
 
-  if (!listingIds.size && !detailIds.size) return;
+  loadPresentation('listing', listingIds);
+  loadPresentation('detail', detailIds);
+}
+
+function loadPresentation (presentation: 'listing' | 'detail', documentIds: Set<string>) {
+  if (!documentIds.size) return;
 
   const searchParams = new URLSearchParams();
-  if (listingIds.size) {
-    searchParams.set('listing_doc_ids', Array.from(listingIds).join(','));
-  }
-  if (detailIds.size) {
-    searchParams.set('detail_doc_ids', Array.from(detailIds).join(','));
-  }
-
-  htmxAjax('get', `${peachJam.config.urlLangPrefix}/leading-authorities/fragments?${searchParams.toString()}`);
+  searchParams.set('doc_ids', Array.from(documentIds).join(','));
+  htmxAjax(
+    'get',
+    `${peachJam.config.urlLangPrefix}/leading-authorities/fragments/${presentation}?${searchParams.toString()}`
+  );
 }

@@ -34,8 +34,8 @@ from peachjam.views import (
 )
 
 urlpatterns = [
-    path(
-        "leading-authorities/fragments",
+    re_path(
+        r"^leading-authorities/fragments/(?P<presentation>listing|detail)$",
         LeadingAuthorityFragmentsView.as_view(),
         name="leading_authority_fragments",
     ),

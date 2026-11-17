@@ -868,29 +868,15 @@ class LeadingAuthorityFragmentsView(SubscriptionRequiredMixin, TemplateView):
 
     def get_requested_ids(self):
         if not hasattr(self, "_requested_ids"):
-            listing_ids = self.parse_ids(self.request.GET.get("listing_doc_ids", ""))
-            detail_ids = self.parse_ids(self.request.GET.get("detail_doc_ids", ""))
-
-            allowed_ids = []
-            for document_id in listing_ids + detail_ids:
-                if document_id not in allowed_ids:
-                    allowed_ids.append(document_id)
-                if len(allowed_ids) == self.max_documents:
-                    break
-
-            allowed_ids = set(allowed_ids)
-            self._requested_ids = {
-                "listing": [pk for pk in listing_ids if pk in allowed_ids],
-                "detail": [pk for pk in detail_ids if pk in allowed_ids],
-            }
+            self._requested_ids = self.parse_ids(self.request.GET.get("doc_ids", ""))[
+                : self.max_documents
+            ]
         return self._requested_ids
 
     def get_visible_document_ids(self):
-        requested_ids = self.get_requested_ids()
-        document_ids = set(requested_ids["listing"] + requested_ids["detail"])
-        judgments = Judgment.objects.filter(pk__in=document_ids, published=True).only(
-            "pk", "restricted"
-        )
+        judgments = Judgment.objects.filter(
+            pk__in=self.get_requested_ids(), published=True
+        ).only("pk", "restricted")
 
         visible_ids = []
         for judgment in judgments:
@@ -901,7 +887,6 @@ class LeadingAuthorityFragmentsView(SubscriptionRequiredMixin, TemplateView):
         return visible_ids
 
     def build_fragment_context(self, include_authorities):
-        requested_ids = self.get_requested_ids()
         authorities_by_document = defaultdict(list)
 
         if include_authorities:
@@ -912,19 +897,13 @@ class LeadingAuthorityFragmentsView(SubscriptionRequiredMixin, TemplateView):
                 authorities_by_document[authority.judgment_id].append(authority)
 
         return {
-            "listing_entries": [
+            "presentation": self.kwargs["presentation"],
+            "entries": [
                 {
                     "document_id": document_id,
                     "leading_authorities": authorities_by_document[document_id],
                 }
-                for document_id in requested_ids["listing"]
-            ],
-            "detail_entries": [
-                {
-                    "document_id": document_id,
-                    "leading_authorities": authorities_by_document[document_id],
-                }
-                for document_id in requested_ids["detail"]
+                for document_id in self.get_requested_ids()
             ],
         }
 
