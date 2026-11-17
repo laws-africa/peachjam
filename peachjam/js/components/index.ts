@@ -12,6 +12,7 @@ import FlynoteDetailActions from './flynote-detail-actions';
 import GlossaryFilter from './glossary';
 import DocumentUploader from './document-uploader';
 import NavigationSelect from './navigation-select';
+import HoverDropdown from './hover-dropdown';
 import NumberStepper from './number-stepper';
 import { ToggleTab } from './tabs';
 import TaxonomyTree from './taxonomy-tree';
@@ -44,6 +45,7 @@ const components: Record<string, any> = {
   GlossaryFilter,
   DocumentUploader,
   NavigationSelect,
+  HoverDropdown,
   NumberStepper,
   RelationshipEnrichments,
   ProvisionEnrichments,

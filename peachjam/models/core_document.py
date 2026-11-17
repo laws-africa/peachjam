@@ -133,6 +133,28 @@ class LocalityType(models.Model):
     def get_absolute_url(self):
         return reverse("locality_legislation") + "?" + urlencode({"type": self.code})
 
+    @classmethod
+    def get_site_collections(cls):
+        """Return public locality collections for navigation and landing page cards."""
+        localities = Locality.get_site_localities()
+        collections = [
+            {
+                "code": item.code,
+                "title": item.collection_title,
+                "url": item.get_absolute_url(),
+            }
+            for item in cls.objects.filter(localities__in=localities).distinct()
+        ]
+        if localities.filter(locality_type__isnull=True).exists():
+            collections.append(
+                {
+                    "code": "",
+                    "title": _("Local legislation"),
+                    "url": reverse("locality_legislation") + "?type=",
+                }
+            )
+        return collections
+
 
 class Locality(models.Model):
     name = models.CharField(_("name"), max_length=255, null=False)
@@ -157,6 +179,27 @@ class Locality(models.Model):
         verbose_name_plural = _("localities")
         ordering = ["name"]
         unique_together = ["name", "jurisdiction"]
+
+    @classmethod
+    def get_site_localities(cls):
+        """Return site localities with published legislation in configured jurisdictions."""
+        from peachjam.models.legislation import Legislation
+
+        settings = pj_settings()
+        documents = Legislation.objects.filter(published=True, locality__isnull=False)
+        if settings.default_document_jurisdiction_id:
+            documents = documents.filter(
+                jurisdiction=settings.default_document_jurisdiction_id
+            )
+        else:
+            documents = documents.filter(
+                jurisdiction_id__in=settings.document_jurisdictions.values_list(
+                    "pk", flat=True
+                )
+            )
+        return cls.objects.filter(
+            pk__in=documents.order_by().values_list("locality_id", flat=True).distinct()
+        )
 
     def place_code(self):
         return f"{self.jurisdiction.pk.lower()}-{self.code}"
