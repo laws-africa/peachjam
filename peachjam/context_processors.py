@@ -52,6 +52,10 @@ def general(request):
             "sentry": {
                 "dsn": settings.PEACHJAM["SENTRY_DSN_KEY"],
                 "environment": settings.PEACHJAM["SENTRY_ENVIRONMENT"],
+                "release": settings.PEACHJAM["SENTRY_RELEASE"],
+                "applicationPackage": settings.PEACHJAM["SENTRY_RELEASE_PACKAGE"],
+                "applicationRevision": settings.PEACHJAM["APPLICATION_REVISION"],
+                "peachjamRevision": settings.PEACHJAM["PEACHJAM_REVISION"],
             },
             "helpscoutBeaconId": pj.helpscout_beacon_id,
         },

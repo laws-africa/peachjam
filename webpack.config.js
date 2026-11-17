@@ -60,9 +60,16 @@ module.exports = (env, argv) => {
         org: 'lawsafrica',
         project: 'lii',
         telemetry: false,
-        applicationKey: 'peachjam-frontend'
+        applicationKey: 'peachjam-frontend',
+        // Runtime Django settings provide the application release to both the
+        // browser and Python SDKs. Keep Debug ID source-map uploads here, but
+        // do not create a competing frontend-only release at build time.
+        release: {
+          create: false,
+          finalize: false,
+          inject: false
+        }
       })
     ]
   }];
 }
-

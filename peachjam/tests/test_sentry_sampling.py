@@ -1,5 +1,7 @@
 import os
 import time
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from django.conf import settings
@@ -13,11 +15,87 @@ from peachjam.sentry import (
     SENTRY_SAMPLING_COOKIE_NAME,
     SENTRY_SAMPLING_COOKIE_SALT,
     SENTRY_SAMPLING_MAX_AGE,
+    get_sentry_release_info,
+    get_sentry_runtime_tags,
     get_sentry_sampling_mode_from_request,
     get_sentry_sampling_mode_from_wsgi_environ,
     sentry_profiles_sampler,
     sentry_traces_sampler,
 )
+
+
+class SentryReleaseInfoTest(TestCase):
+    def write_pyproject(self, directory, package, dependencies=None):
+        dependencies = dependencies or []
+        dependency_lines = "\n".join(f'    "{item}",' for item in dependencies)
+        path = Path(directory) / "pyproject.toml"
+        path.write_text(
+            f"""
+[project]
+name = "{package}"
+version = "0.0.1"
+dependencies = [
+{dependency_lines}
+]
+
+[tool.peachjam.sentry]
+release-package = "{package}"
+""".strip()
+        )
+        return path
+
+    def test_base_peachjam_release_uses_deployment_revision(self):
+        with TemporaryDirectory() as directory:
+            path = self.write_pyproject(directory, "peachjam")
+            info = get_sentry_release_info(path, {"GIT_REV": "a" * 40})
+
+        self.assertEqual(f"peachjam@{'a' * 40}", info.release)
+        self.assertEqual("a" * 40, info.peachjam_revision)
+
+    def test_dependent_app_reads_pinned_peachjam_revision(self):
+        peachjam_revision = "b" * 40
+        dependency = (
+            "peachjam[ml] @ git+https://github.com/laws-africa/"
+            f"peachjam.git@{peachjam_revision}"
+        )
+        with TemporaryDirectory() as directory:
+            path = self.write_pyproject(
+                directory,
+                "kenyalaw-pj",
+                [dependency],
+            )
+            info = get_sentry_release_info(path, {"GIT_REV": "c" * 40})
+
+        self.assertEqual(f"kenyalaw-pj@{'c' * 40}", info.release)
+        self.assertEqual(peachjam_revision, info.peachjam_revision)
+
+    def test_explicit_release_and_dependency_overrides_take_precedence(self):
+        with TemporaryDirectory() as directory:
+            path = self.write_pyproject(directory, "peachjam-pro")
+            info = get_sentry_release_info(
+                path,
+                {
+                    "SENTRY_RELEASE": "preview@release-1",
+                    "PEACHJAM_REVISION": "preview-peachjam",
+                },
+            )
+
+        self.assertEqual("preview@release-1", info.release)
+        self.assertEqual("preview-peachjam", info.peachjam_revision)
+
+    def test_missing_pyproject_keeps_release_metadata_optional(self):
+        info = get_sentry_release_info("/missing/pyproject.toml", {})
+
+        self.assertEqual({}, info.context())
+
+    def test_runtime_tags_include_process_type(self):
+        self.assertEqual(
+            {"process_type": "tasks"},
+            get_sentry_runtime_tags({"SENTRY_PROCESS_TYPE": "tasks"}),
+        )
+
+    def test_runtime_tags_are_optional(self):
+        self.assertEqual({}, get_sentry_runtime_tags({}))
 
 
 class SentrySamplingTests(TestCase):

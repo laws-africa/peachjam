@@ -27,7 +27,12 @@ from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 from peachjam.logging import LoggingContextFilter
-from peachjam.sentry import sentry_profiles_sampler, sentry_traces_sampler
+from peachjam.sentry import (
+    get_sentry_release_info,
+    get_sentry_runtime_tags,
+    sentry_profiles_sampler,
+    sentry_traces_sampler,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -184,10 +189,16 @@ TEMPLATES = [
     },
 ]
 
+SENTRY_RELEASE_INFO = get_sentry_release_info()
+
 PEACHJAM = {
     "APP_NAME": os.environ.get("APP_NAME", "Peachjam"),
     "SENTRY_DSN_KEY": os.environ.get("SENTRY_DSN_KEY"),
     "SENTRY_ENVIRONMENT": os.environ.get("SENTRY_ENVIRONMENT", "staging"),
+    "SENTRY_RELEASE": SENTRY_RELEASE_INFO.release,
+    "SENTRY_RELEASE_PACKAGE": SENTRY_RELEASE_INFO.package,
+    "APPLICATION_REVISION": SENTRY_RELEASE_INFO.revision,
+    "PEACHJAM_REVISION": SENTRY_RELEASE_INFO.peachjam_revision,
     "LAWSAFRICA_API_KEY": os.environ.get(
         "LAWSAFRICA_API_KEY", os.environ.get("CITATOR_API_KEY")
     ),
@@ -488,8 +499,17 @@ if not DEBUG:
     )
 
     def before_send(event, hint):
-        # set the app name on all events
-        event.setdefault("tags", {})["app_name"] = PEACHJAM["APP_NAME"]
+        tags = event.setdefault("tags", {})
+        tags["app_name"] = PEACHJAM["APP_NAME"]
+        if SENTRY_RELEASE_INFO.package:
+            tags["application_package"] = SENTRY_RELEASE_INFO.package
+        if SENTRY_RELEASE_INFO.peachjam_revision:
+            tags["peachjam_revision"] = SENTRY_RELEASE_INFO.peachjam_revision
+        tags.update(get_sentry_runtime_tags())
+
+        event.setdefault("contexts", {})["application_versions"] = (
+            SENTRY_RELEASE_INFO.context()
+        )
 
         # don't set /static to Sentry, to avoid using up quota
         if "request" in event and event["request"].get("url"):
@@ -501,6 +521,7 @@ if not DEBUG:
     sentry_sdk.init(
         dsn=PEACHJAM["SENTRY_DSN_KEY"],
         environment=PEACHJAM["SENTRY_ENVIRONMENT"],
+        release=PEACHJAM["SENTRY_RELEASE"],
         integrations=[DjangoIntegration(), sentry_logging],
         before_send=before_send,
         before_send_transaction=before_send,
