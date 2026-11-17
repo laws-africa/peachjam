@@ -13,29 +13,12 @@ from peachjam.helpers import chunks, get_language
 from peachjam.models import (
     Glossary,
     JurisdictionProfile,
-    Legislation,
     Locality,
     LocalityType,
     get_country_and_locality_or_404,
     pj_settings,
 )
 from peachjam.views import LegislationListView as BaseLegislationListView
-
-
-def get_site_localities():
-    """Return configured site localities that have published legislation."""
-    settings = pj_settings()
-    documents = Legislation.objects.filter(published=True, locality__isnull=False)
-    if settings.default_document_jurisdiction_id:
-        documents = documents.filter(
-            jurisdiction=settings.default_document_jurisdiction_id
-        )
-    else:
-        jurisdiction_ids = settings.document_jurisdictions.values_list("pk", flat=True)
-        documents = documents.filter(jurisdiction_id__in=jurisdiction_ids)
-    return Locality.objects.filter(
-        pk__in=documents.order_by().values_list("locality_id", flat=True).distinct()
-    )
 
 
 class LegislationListView(BaseLegislationListView):
@@ -178,23 +161,7 @@ class LegislationListView(BaseLegislationListView):
         context["doc_table_show_jurisdiction"] = False
         context.update(self.get_legislation_presentation())
         if self.show_landing_page and self.national_only:
-            localities = get_site_localities()
-            context["locality_collections"] = [
-                {
-                    "title": locality_type.collection_title,
-                    "url": locality_type.get_absolute_url(),
-                }
-                for locality_type in LocalityType.objects.filter(
-                    localities__in=localities
-                ).distinct()
-            ]
-            if localities.filter(locality_type__isnull=True).exists():
-                context["locality_collections"].append(
-                    {
-                        "title": _("Local legislation"),
-                        "url": reverse("locality_legislation") + "?type=",
-                    }
-                )
+            context["locality_collections"] = LocalityType.get_site_collections()
         elif self.national_only:
             page_heading, page_description = self.variant_page_content[self.variant]
             context["page_heading"] = page_heading or pj_settings().subleg_label
@@ -305,7 +272,7 @@ class LocalityLegislationView(TemplateView):
         return context
 
     def get_localities(self):
-        return get_site_localities()
+        return Locality.get_site_localities()
 
 
 class LocalityLegislationListView(LegislationListView):

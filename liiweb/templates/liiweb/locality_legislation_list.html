@@ -8,6 +8,9 @@
         <li class="breadcrumb-item">
           <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
         </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'legislation_list' %}">{% trans 'Legislation' %}</a>
+        </li>
         {% block breadcrumbs-locality %}
           <li class="breadcrumb-item">
             <a href="{{ locality_collection_url }}">{{ locality_legislation_title }}</a>
