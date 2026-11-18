@@ -1,8 +1,7 @@
 {% load i18n %}
 {% if leading_authorities %}
   <div class="leading-authority-listing d-flex align-items-start mt-2">
-    <span class="leading-authority-listing__icon me-2 fst-normal"
-          aria-hidden="true">⚖</span>
+    <span class="leading-authority__icon me-2 fst-normal" aria-hidden="true">⚖</span>
     <div>
       {% for authority in leading_authorities %}
         <div{% if not forloop.last %} class="mb-1"{% endif %}>
