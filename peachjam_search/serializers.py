@@ -85,14 +85,13 @@ class SearchHit:
             fake_documents = settings.PEACHJAM["SEARCH_FAKE_DOCUMENTS"]
 
         if documents is None:
-            documents = (
+            documents = list(
                 CoreDocument.objects.for_document_table()
                 .filter(
                     expression_frbr_uri__in=[hit.expression_frbr_uri for hit in hits]
                 )
                 .prefetch_related("alternative_names")
             )
-
         documents = {d.expression_frbr_uri: d for d in documents}
         for hit in hits:
             hit.document = documents.get(hit.expression_frbr_uri)

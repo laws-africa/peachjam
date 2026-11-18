@@ -32,6 +32,8 @@ from peachjam.models import (
     GenericDocument,
     Judgment,
     LawReport,
+    LeadingAuthority,
+    LegalSubject,
     Legislation,
     Locality,
     Outcome,
@@ -540,6 +542,74 @@ class PeachjamViewsTest(TestCase):
             "/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29",
         )
         self.assertTrue(hasattr(response.context["document"], "court"))
+
+    def test_judgment_detail_defers_leading_authorities(self):
+        judgment = Judgment.objects.get(
+            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+        )
+        LeadingAuthority.objects.create(
+            judgment=judgment,
+            subject=LegalSubject.objects.create(
+                name="Plascon-Evans rule",
+                subject_type=LegalSubject.DOCTRINE,
+            ),
+            editorial_note="The leading formulation of the rule.",
+            reviewed_on=datetime.date(2026, 8, 1),
+            published=True,
+        )
+        LeadingAuthority.objects.create(
+            judgment=judgment,
+            subject=LegalSubject.objects.create(
+                name="Draft principle",
+                subject_type=LegalSubject.PRINCIPLE,
+            ),
+            editorial_note="Unpublished editorial note.",
+            reviewed_on=datetime.date(2026, 8, 1),
+        )
+
+        response = self.client.get(
+            reverse(
+                "document_detail",
+                kwargs={
+                    "frbr_uri": "akn/aa-au/judgment/ecowascj/2018/17/eng@2018-06-29"
+                },
+            )
+        )
+
+        self.assertContains(response, f"leading-authority-detail--{judgment.pk}")
+        self.assertContains(
+            response, f'data-leading-authority-document-id="{judgment.pk}"'
+        )
+        self.assertContains(response, 'data-leading-authority-presentation="detail"')
+        self.assertNotContains(response, "Plascon-Evans rule")
+        self.assertNotContains(response, "The leading formulation of the rule.")
+        self.assertNotContains(response, "Unpublished editorial note.")
+
+    def test_judgment_listing_defers_leading_authorities(self):
+        judgment = Judgment.objects.get(
+            expression_frbr_uri="/akn/aa-au/judgment/ecowascj/2016/52/eng@2016-11-09"
+        )
+        LeadingAuthority.objects.create(
+            judgment=judgment,
+            subject=LegalSubject.objects.create(
+                name="Example doctrine",
+                subject_type=LegalSubject.DOCTRINE,
+            ),
+            editorial_note="A leading authority for the example doctrine.",
+            reviewed_on=datetime.date(2026, 8, 1),
+            published=True,
+        )
+
+        response = self.client.get(
+            reverse("court_year", kwargs={"code": "all", "year": 2016})
+        )
+
+        self.assertContains(response, f"leading-authority-listing--{judgment.pk}")
+        self.assertContains(
+            response, f'data-leading-authority-document-id="{judgment.pk}"'
+        )
+        self.assertContains(response, 'data-leading-authority-presentation="listing"')
+        self.assertNotContains(response, "Example doctrine")
 
     def test_legislation_listing(self):
         response = self.client.get(reverse("legislation_list"))

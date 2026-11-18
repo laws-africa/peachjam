@@ -1,3 +1,4 @@
+import datetime
 import json
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,8 @@ from peachjam.models import (
     Judge,
     Judgment,
     Label,
+    LeadingAuthority,
+    LegalSubject,
     Locality,
     Taxonomy,
 )
@@ -1088,6 +1091,48 @@ class SearchViewsTest(TestCase):
 
         self.assertIn("Reported", html)
         self.assertIn("badge rounded-pill bg-success", html)
+
+    def test_search_hit_defers_leading_authority_until_before_summary(self):
+        request = RequestFactory().get("/search/?search=test")
+        document = Judgment.objects.first()
+        document.blurb = "Search result summary."
+        document.save(update_fields=["blurb"])
+        LeadingAuthority.objects.create(
+            judgment=document,
+            subject=LegalSubject.objects.create(
+                name="Plascon-Evans rule",
+                subject_type=LegalSubject.DOCTRINE,
+            ),
+            editorial_note="The leading formulation of the rule.",
+            reviewed_on=datetime.date(2026, 8, 1),
+            published=True,
+        )
+        hit = {
+            "document": document,
+            "position": 1,
+            "best_match": False,
+            "highlight": {},
+            "pages": [],
+            "provisions": [],
+        }
+
+        html = render_to_string(
+            "peachjam_search/_search_hit.html",
+            {
+                "request": request,
+                "hit": hit,
+                "show_jurisdiction": False,
+                "can_debug": False,
+            },
+            request=request,
+        )
+
+        placeholder = f"leading-authority-listing--{document.pk}"
+        self.assertIn(placeholder, html)
+        self.assertIn(f'data-leading-authority-document-id="{document.pk}"', html)
+        self.assertIn('data-leading-authority-presentation="listing"', html)
+        self.assertLess(html.index(placeholder), html.index("Search result summary."))
+        self.assertNotIn("Plascon-Evans rule", html)
 
     def test_search_hit_flynote_preserves_line_breaks(self):
         request = RequestFactory().get("/search/?search=test")

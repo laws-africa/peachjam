@@ -1,0 +1,25 @@
+{% load i18n %}
+{% if leading_authorities %}
+  <section class="leading-authority-detail mb-5"
+           aria-labelledby="leading-authorities-heading">
+    <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
+      <div class="d-flex align-items-center gap-2">
+        <span class="leading-authority__icon text-muted fst-normal"
+              aria-hidden="true">⚖</span>
+        <h2 id="leading-authorities-heading" class="h5 mb-0">{% trans "Leading authority" %}</h2>
+      </div>
+      <span class="text-muted fst-italic">{% trans "locus classicus" %}</span>
+    </div>
+    <ul class="list-unstyled mb-0">
+      {% for authority in leading_authorities %}
+        <li {% if not forloop.last %} class="mb-3"{% endif %}>
+          <h3 class="h6">{{ authority.subject.name }}</h3>
+          <div class="leading-authority-note">{{ authority.editorial_note|linebreaks }}</div>
+          <p class="small text-muted mb-1">
+            {% blocktrans with review_date=authority.reviewed_on|date:"DATE_FORMAT" %}Reviewed on {{ review_date }}{% endblocktrans %}
+          </p>
+        </li>
+      {% endfor %}
+    </ul>
+  </section>
+{% endif %}
