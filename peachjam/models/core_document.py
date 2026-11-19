@@ -106,6 +106,7 @@ class DocumentNature(models.Model):
 class LocalityType(models.Model):
     name = models.CharField(_("name"), max_length=255, unique=True)
     code = models.SlugField(_("code"), unique=True)
+    position = models.PositiveIntegerField(_("position"), default=0)
     legislation_title = models.CharField(
         _("legislation title"),
         max_length=255,
@@ -125,7 +126,7 @@ class LocalityType(models.Model):
     class Meta:
         verbose_name = _("locality type")
         verbose_name_plural = _("locality types")
-        ordering = ["name"]
+        ordering = ("position", "pk")
 
     def __str__(self):
         return self.name
@@ -148,9 +149,7 @@ class LocalityType(models.Model):
                     "locality_type": item.name.lower(),
                 },
             }
-            for item in cls.objects.filter(localities__in=localities)
-            .order_by("pk")
-            .distinct()
+            for item in cls.objects.filter(localities__in=localities).distinct()
         ]
         if localities.filter(locality_type__isnull=True).exists():
             collections.append(

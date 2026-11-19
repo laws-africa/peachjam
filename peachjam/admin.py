@@ -2870,10 +2870,13 @@ class LocalityAdmin(admin.ModelAdmin):
 class LocalityTypeAdmin(admin.ModelAdmin):
     list_display = (
         "name",
+        "position",
         "collection_title",
         "show_subsidiary_legislation",
         "show_document_nature",
     )
+    list_editable = ("position",)
+    ordering = ("position", "pk")
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code", "collection_title")
 

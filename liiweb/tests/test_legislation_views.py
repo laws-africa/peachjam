@@ -490,6 +490,26 @@ class LocalityLandingPageTest(TestCase):
             response.context["recent_legislation"], [self.provincial_document]
         )
 
+    def test_locality_collections_follow_editable_positions(self):
+        # The municipality was created first, but explicit positions take priority.
+        self.municipal_type.position = 2
+        self.municipal_type.save(update_fields=["position"])
+        self.provincial_type.position = 1
+        self.provincial_type.save(update_fields=["position"])
+        response = self.client.get(reverse("legislation_list"))
+        self.assertEqual(
+            [item["code"] for item in response.context["locality_collections"]],
+            [self.provincial_type.code, self.municipal_type.code],
+        )
+
+        self.provincial_type.position = 3
+        self.provincial_type.save(update_fields=["position"])
+        response = self.client.get(reverse("legislation_list"))
+        self.assertEqual(
+            [item["code"] for item in response.context["locality_collections"]],
+            [self.municipal_type.code, self.provincial_type.code],
+        )
+
     def test_national_page_has_separate_locality_type_cards(self):
         response = self.client.get(reverse("legislation_list"))
         self.assertContains(response, "Provincial legislation")
