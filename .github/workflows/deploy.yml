@@ -31,21 +31,23 @@ jobs:
           fi
 
   sentry-release:
-    name: Create Sentry release
+    name: Record Sentry release and production deployment
     needs:
       - preconditions
+    if: ${{ needs.preconditions.result == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - name: Create release and associate commits
+      - name: Record release and production deployment
         uses: getsentry/action-release@v3
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: lawsafrica
           SENTRY_PROJECT: lii
         with:
+          environment: production
           release: peachjam@${{ github.sha }}
           set_commits: auto
 
@@ -390,27 +392,3 @@ jobs:
           ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
           git_remote_url: 'ssh://dokku@backend1.laws.africa:22/zanzibarlii-peachjam'
           git_push_flags: '--force'
-
-  sentry-deployment:
-    name: Record Sentry production deployment
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    needs:
-      - preconditions
-      - sentry-release
-      - deploy-open-by-laws
-      - deploy-zanzibarlii
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: Record production deployment
-        uses: getsentry/action-release@v3
-        env:
-          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          SENTRY_ORG: lawsafrica
-          SENTRY_PROJECT: lii
-        with:
-          environment: production
-          release: peachjam@${{ github.sha }}
-          set_commits: skip
