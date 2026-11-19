@@ -3,8 +3,10 @@ import { Dropdown } from 'bootstrap';
 /** Add desktop hover to Bootstrap dropdowns while preserving native button controls. */
 export default class HoverDropdown {
   constructor (root: HTMLElement) {
-    const toggle = root.querySelector<HTMLButtonElement>('[data-bs-toggle="dropdown"]');
+    if (root.dataset.hoverDropdownInitialized) return;
+    const toggle = root.querySelector<HTMLElement>('[data-bs-toggle="dropdown"]');
     if (!toggle) return;
+    root.dataset.hoverDropdownInitialized = 'true';
     const dropdown = Dropdown.getOrCreateInstance(toggle);
     const desktopHover = window.matchMedia('(min-width: 992px) and (hover: hover) and (pointer: fine)');
     let closeTimer: ReturnType<typeof setTimeout>;

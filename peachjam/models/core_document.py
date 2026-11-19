@@ -142,8 +142,15 @@ class LocalityType(models.Model):
                 "code": item.code,
                 "title": item.collection_title,
                 "url": item.get_absolute_url(),
+                "description": _("Browse %(legislation)s by %(locality_type)s.")
+                % {
+                    "legislation": item.legislation_title.lower(),
+                    "locality_type": item.name.lower(),
+                },
             }
-            for item in cls.objects.filter(localities__in=localities).distinct()
+            for item in cls.objects.filter(localities__in=localities)
+            .order_by("pk")
+            .distinct()
         ]
         if localities.filter(locality_type__isnull=True).exists():
             collections.append(
@@ -151,6 +158,7 @@ class LocalityType(models.Model):
                     "code": "",
                     "title": _("Local legislation"),
                     "url": reverse("locality_legislation") + "?type=",
+                    "description": _("Browse legislation by locality."),
                 }
             )
         return collections
