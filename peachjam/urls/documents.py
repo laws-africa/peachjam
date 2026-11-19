@@ -28,11 +28,17 @@ from peachjam.views import (
     DocumentSourceView,
     DocumentSummaryView,
     DocumentTextContentView,
+    LeadingAuthorityFragmentsView,
     LegislationSubsidiaryView,
     PartnerLogoView,
 )
 
 urlpatterns = [
+    re_path(
+        r"^leading-authorities/fragments/(?P<presentation>listing|detail)$",
+        LeadingAuthorityFragmentsView.as_view(),
+        name="leading_authority_fragments",
+    ),
     # document detail views
     re_path(
         r"^(?P<frbr_uri>akn/.*)/source$",

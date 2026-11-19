@@ -112,7 +112,8 @@ class SearchTrace(models.Model):
         return value[: cls._meta.get_field(field_name).max_length]
 
     @classmethod
-    def prune(cls, days=90):
+    def prune(cls, days=180):
+        """Delete traces older than 180 days, allowing quarterly analytics refreshes."""
         cutoff = now() - timedelta(days=days)
         log.info(f"Pruning search traces older than {days} days")
         deleted = cls.objects.filter(created_at__lt=cutoff).delete()

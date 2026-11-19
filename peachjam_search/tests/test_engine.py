@@ -888,6 +888,31 @@ class TestSearchEngine(TestCase):
             json.dumps(d, indent=2, sort_keys=True),
         )
 
+    def test_taxonomies_filter_limits_every_retriever(self):
+        params = QueryDict("", mutable=True)
+        params["search"] = "lease"
+        params.setlist("taxonomies", ["investment-law", "arbitration"])
+        params["facets"] = "1"
+
+        engine = SearchEngine()
+        form = SearchForm(params)
+        self.assertTrue(form.is_valid())
+        form.configure_engine(engine)
+
+        d = engine.build_search().to_dict()
+
+        self.assertEqual(
+            ["investment-law", "arbitration"],
+            engine.search_query.filters["taxonomies"],
+        )
+        # not a facet, so it is a hard filter and the facet counts respect it
+        self.assertIn(
+            {"terms": {"taxonomies": ["investment-law", "arbitration"]}},
+            d["query"]["function_score"]["query"]["bool"]["filter"],
+        )
+        self.assertNotIn("post_filter", d)
+        self.assertNotIn("_filter_taxonomies", d["aggs"])
+
     def test_gazette_publication_filters(self):
         params = QueryDict("", mutable=True)
         params["publication"] = "Government Gazette"

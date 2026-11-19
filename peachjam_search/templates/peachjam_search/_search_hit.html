@@ -69,6 +69,10 @@
         </div>
         {% if hit.document.matter_type %}<div>{{ hit.document.matter_type }}</div>{% endif %}
         {% if hit.document.doc_type == "judgment" %}
+          <div class="leading-authority-listing--{{ hit.document.pk }}"
+               data-leading-authority-document-id="{{ hit.document.pk }}"
+               data-leading-authority-presentation="listing">
+          </div>
           {% include 'peachjam/judgment/_blurb_and_flynotes.html' with document=hit.document %}
         {% elif hit.document.listing_taxonomies %}
           {% include 'peachjam/_document_taxonomies.html' with taxonomies=hit.document.listing_taxonomies %}

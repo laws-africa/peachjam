@@ -4,6 +4,7 @@ import components from './components';
 import { vueI18n } from './i18n';
 import { createAndMountApp } from './utils/vue-utils';
 import { htmxAjax } from './utils/function';
+import { loadLeadingAuthorities } from './components/leading-authorities';
 import { loadSavedDocuments } from './components/saved-documents';
 
 import '@lawsafrica/law-widgets/dist/components/la-akoma-ntoso';
@@ -102,6 +103,7 @@ class PeachJam {
     this.setupFormCSRF();
     this.loaded();
     this.setupHelpScoutBeacon();
+    loadLeadingAuthorities();
     loadSavedDocuments();
     window.dispatchEvent(new Event('peachjam.after-setup'));
   }
@@ -138,6 +140,7 @@ class PeachJam {
       // mount components on new elements
       this.createComponents(e.target as HTMLElement);
       this.createVueComponents(e.target as HTMLElement);
+      loadLeadingAuthorities(e.target as HTMLElement);
       loadSavedDocuments(e.target as HTMLElement);
     });
 

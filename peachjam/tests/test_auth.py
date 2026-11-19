@@ -1083,7 +1083,7 @@ class AccountPromptTemplateTests(TestCase):
             "user": request.user,
             "PEACHJAM_SETTINGS": SimpleNamespace(accounts_enabled=False),
             "next_url": "/",
-            "SUPPORT_EMAIL": "support@example.com",
+            "CONTACT_EMAIL": "support@example.com",
             "saved_search": SimpleNamespace(pk=False, is_subscription_locked=False),
             "taxonomy": SimpleNamespace(name="Restricted"),
             "lowest_product": None,

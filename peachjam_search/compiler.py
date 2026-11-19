@@ -53,6 +53,7 @@ class ElasticsearchSearchCompiler:
         "outcome",
         "case_action",
         "labels",
+        "taxonomies",
     }
 
     # these support ranges
