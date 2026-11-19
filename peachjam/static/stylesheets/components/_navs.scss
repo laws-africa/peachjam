@@ -22,7 +22,8 @@ $dropdown-box-shadow: $box-shadow-lg;
       @include box-shadow($dropdown-box-shadow);
     }
 
-    .dropdown:hover .dropdown-menu {
+    // Components that manage Bootstrap state must also control visibility for Escape.
+    .dropdown:not([data-component="HoverDropdown"]):hover .dropdown-menu {
       display: block;
       margin-top: 0;
     }
