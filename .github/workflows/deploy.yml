@@ -49,7 +49,10 @@ jobs:
         with:
           environment: production
           release: peachjam@${{ github.sha }}
-          set_commits: auto
+          set_commits: manual
+          repo: laws-africa/peachjam
+          commit: ${{ github.sha }}
+          previous_commit: ${{ github.event.before }}
 
   # ------------------
   # web3.laws.africa
