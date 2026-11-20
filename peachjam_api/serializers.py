@@ -337,6 +337,15 @@ class GazetteSerializer(BaseSerializerMixin, serializers.ModelSerializer):
             "updated_at",
             "url",
             "work_frbr_uri",
+            "publication",
+            "sub_publication",
+            "supplement",
+            "supplement_number",
+            "part",
+            "volume_number",
+            "special",
+            "published",
+            "allow_robots",
         )
 
 
