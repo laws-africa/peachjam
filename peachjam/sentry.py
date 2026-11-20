@@ -18,7 +18,11 @@ can show a checkmark for the active mode.
 """
 
 import os
+import re
+import tomllib
+from dataclasses import dataclass
 from http.cookies import CookieError, SimpleCookie
+from pathlib import Path
 
 from django.conf import settings
 from django.core import signing
@@ -30,6 +34,94 @@ SENTRY_SAMPLING_MAX_AGE = 5 * 60
 SENTRY_SAMPLING_TRACE = "trace"
 SENTRY_SAMPLING_PROFILE = "profile"
 SENTRY_SAMPLING_MODES = {SENTRY_SAMPLING_TRACE, SENTRY_SAMPLING_PROFILE}
+
+PEACHJAM_DEPENDENCY_RE = re.compile(
+    r"peachjam(?:\[[^]]+\])?\s*@\s*"
+    r"git\+https://github\.com/laws-africa/peachjam\.git@"
+    r"(?P<revision>[0-9a-f]{40})(?:\s|$)",
+    re.IGNORECASE,
+)
+
+
+@dataclass(frozen=True)
+class SentryReleaseInfo:
+    """Describe the deployed application and its PeachJam dependency."""
+
+    release: str | None
+    package: str | None
+    revision: str | None
+    peachjam_revision: str | None
+
+    def context(self):
+        return {
+            key: value
+            for key, value in {
+                "release": self.release,
+                "package": self.package,
+                "revision": self.revision,
+                "peachjam_revision": self.peachjam_revision,
+            }.items()
+            if value
+        }
+
+
+def get_sentry_release_info(pyproject_path=None, environ=None):
+    """Build Sentry release metadata for the application being deployed."""
+    environ = os.environ if environ is None else environ
+    pyproject_path = Path(pyproject_path or Path.cwd() / "pyproject.toml")
+    pyproject = load_pyproject(pyproject_path)
+
+    sentry_config = pyproject.get("tool", {}).get("peachjam", {}).get("sentry", {})
+    project = pyproject.get("project", {})
+    package = (
+        environ.get("SENTRY_RELEASE_PACKAGE")
+        or sentry_config.get("release-package")
+        or project.get("name")
+    )
+    revision = environ.get("GIT_REV")
+    release = environ.get("SENTRY_RELEASE")
+
+    if not revision and release and package and release.startswith(f"{package}@"):
+        revision = release.removeprefix(f"{package}@")
+    if not release and package and revision:
+        release = f"{package}@{revision}"
+
+    peachjam_revision = environ.get("PEACHJAM_REVISION")
+    if not peachjam_revision:
+        if package == "peachjam":
+            peachjam_revision = revision
+        else:
+            peachjam_revision = get_peachjam_dependency_revision(project)
+
+    return SentryReleaseInfo(
+        release=release,
+        package=package,
+        revision=revision,
+        peachjam_revision=peachjam_revision,
+    )
+
+
+def get_sentry_runtime_tags(environ=None):
+    """Return tags that describe the current server process."""
+    environ = os.environ if environ is None else environ
+    process_type = environ.get("SENTRY_PROCESS_TYPE")
+    return {"process_type": process_type} if process_type else {}
+
+
+def load_pyproject(path):
+    try:
+        with path.open("rb") as f:
+            return tomllib.load(f)
+    except (FileNotFoundError, OSError, tomllib.TOMLDecodeError):
+        return {}
+
+
+def get_peachjam_dependency_revision(project):
+    for dependency in project.get("dependencies", []):
+        match = PEACHJAM_DEPENDENCY_RE.fullmatch(dependency.strip())
+        if match:
+            return match.group("revision")
+    return None
 
 
 def get_sentry_sampling_mode_from_request(request):

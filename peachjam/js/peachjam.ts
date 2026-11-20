@@ -40,6 +40,10 @@ export interface PeachJamConfig {
   sentry: {
     dsn: string | null;
     environment: string | null;
+    release: string | null;
+    applicationPackage: string | null;
+    applicationRevision: string | null;
+    peachjamRevision: string | null;
   }
 }
 
@@ -65,7 +69,11 @@ class PeachJam {
     },
     sentry: {
       dsn: null,
-      environment: null
+      environment: null,
+      release: null,
+      applicationPackage: null,
+      applicationRevision: null,
+      peachjamRevision: null
     }
   };
 
@@ -212,6 +220,7 @@ class PeachJam {
     Sentry.init({
       dsn: this.config.sentry.dsn,
       environment: this.config.sentry.environment ?? undefined,
+      release: this.config.sentry.release ?? undefined,
       integrations: [
         Sentry.thirdPartyErrorFilterIntegration({
           filterKeys: ['peachjam-frontend'],
@@ -238,6 +247,19 @@ class PeachJam {
 
         return event;
       }
+    });
+    Sentry.setTag('app_name', this.config.appName);
+    if (this.config.sentry.applicationPackage) {
+      Sentry.setTag('application_package', this.config.sentry.applicationPackage);
+    }
+    if (this.config.sentry.peachjamRevision) {
+      Sentry.setTag('peachjam_revision', this.config.sentry.peachjamRevision);
+    }
+    Sentry.setContext('application_versions', {
+      release: this.config.sentry.release,
+      package: this.config.sentry.applicationPackage,
+      revision: this.config.sentry.applicationRevision,
+      peachjam_revision: this.config.sentry.peachjamRevision
     });
   }
 

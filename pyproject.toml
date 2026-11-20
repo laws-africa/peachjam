@@ -110,6 +110,9 @@ dependencies = [
     "whitenoise==5.3.0",
 ]
 
+[tool.peachjam.sentry]
+release-package = "peachjam"
+
 [tool.setuptools.data-files]
 "bin" = [
     "bin/html-to-png",
