@@ -556,6 +556,11 @@ SASS_PROCESSOR_INCLUDE_DIRS = [
 # determine whether an individual file is in S3 or a local file.
 #
 # In DEBUG mode, we default to the default locale file storage. In production, we use S3.
+# Sign direct downloads against the S3 API endpoint rather than a public custom domain.
+AWS_S3_CUSTOM_DOMAIN = None
+AWS_QUERYSTRING_AUTH = True
+AWS_QUERYSTRING_EXPIRE = 300
+
 DYNAMIC_STORAGE = {
     # use file storage by default
     "DEFAULTS": {"": "file:"},
@@ -572,7 +577,6 @@ if not DEBUG:
     AWS_STORAGE_BUCKET_NAME = os.environ.get("AWS_STORAGE_BUCKET_NAME", "")
     AWS_S3_REGION_NAME = os.environ.get("AWS_S3_REGION_NAME", "")
     AWS_S3_SIGNATURE_VERSION = "s3v4"
-    AWS_QUERYSTRING_AUTH = True
 
     # In production, use S3 and the default S3 bucket
     DYNAMIC_STORAGE["DEFAULTS"][""] = f"s3:{AWS_STORAGE_BUCKET_NAME}:"

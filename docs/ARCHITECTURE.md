@@ -308,6 +308,28 @@ Caching is a first-class concern. The middleware stack includes:
 
 Views and templates must avoid leaking user-specific state into cacheable responses.
 
+### Media URLs and private storage
+
+Uploaded media can live in private S3/R2 buckets. A file field's `.url` is a signed storage URL with a short expiry (`AWS_QUERYSTRING_EXPIRE`, currently five minutes). Pages, feeds, and structured metadata may be cached or consumed after that URL expires. Always embed a stable, named Django endpoint instead; do not embed `file.url`, `article.image.url`, or equivalent file-field URLs in these responses.
+
+Public images stream through `PublicImageView` in `peachjam/views/media.py`. Its routes in `peachjam/urls/non_i18n.py` select the model, field, and visibility queryset explicitly:
+
+| Image | Route name | Argument |
+| --- | --- | --- |
+| Article image | `article_image` | `article.pk` |
+| Author photo | `author_image` | `user_profile.pk` |
+| Entity profile photo | `entity_profile_image` | `entity_profile.pk` |
+| Entity background photo | `entity_background_image` | `entity_profile.pk` |
+
+For example, use `src="{% url 'article_image' article.pk %}"` in templates. In Python, use `reverse("article_image", args=[article.pk])`; for feeds or structured metadata, wrap it in `request.build_absolute_uri()` when an absolute URL is needed. Keep the existing field-presence check when images are optional.
+
+When adding a public image field, add a named endpoint using `PublicImageView.as_view(...)` with a fixed `field_name` and a model or queryset. Limit the queryset to objects whose images may be public, such as published articles. Do not expose arbitrary model names, field names, or storage paths through request parameters. Public image endpoints are not suitable for protected document content.
+
+Document images use `document_media`; PDFs and downloads use their existing document endpoints, including `document_source_pdf`, `document_source`, `document_attachment`, `document_publication`, and `document_social_image`. These endpoints enforce document access before issuing a fresh signed S3/R2 redirect. Redirects are browser-private and cacheable for `max(0, AWS_QUERYSTRING_EXPIRE - 60)` seconds. Anonymised source files continue to stream through Django, and external source URLs keep their existing behaviour. Article attachments and partner logos also retain their streaming endpoints.
+
+Accessing `.url` belongs at the point where a download endpoint issues its storage redirect, rather than when rendering a longer-lived page.
+
+
 ### Background jobs
 
 Background work is handled through `django-background-tasks-updated`.

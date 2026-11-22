@@ -13,7 +13,7 @@
         <figure class="mb-4">
           <img alt="article image"
                class="img-fluid rounded"
-               src="{{ article.image.url }}"/>
+               src="{% url 'article_image' article.pk %}"/>
         </figure>
       {% endif %}
       <h1 id="main-page-heading">{{ article.title }}</h1>
@@ -79,7 +79,7 @@
   <div class="card mb-3">
     {% if user_profile.photo %}
       <img class="user-profile-photo mt-3"
-           src="{{ user_profile.photo.url }}"
+           src="{% url 'author_image' user_profile.pk %}"
            alt="User profile photo"/>
     {% endif %}
     <div class="card-body">

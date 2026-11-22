@@ -32,7 +32,7 @@
                 <div class="card-body d-flex gap-3 align-items-start">
                   {% if profile and profile.profile_photo %}
                     <img class="journal-card__media border rounded"
-                         src="{{ profile.profile_photo.url }}"
+                         src="{% url 'entity_profile_image' profile.pk %}"
                          alt="{{ law_report.title }}"/>
                   {% else %}
                     <div class="journal-card__media journal-card__placeholder border rounded"
