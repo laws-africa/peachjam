@@ -287,6 +287,13 @@ class LocalityLegislationListView(LegislationListView):
     national_only = False
     legislation_url_name = "locality_legislation_list"
 
+    @property
+    def show_landing_page(self):
+        locality_type = self.locality.locality_type
+        return (
+            not locality_type or locality_type.show_landing_page
+        ) and super().show_landing_page
+
     def get(self, *args, **kwargs):
         code = kwargs["code"]
         if "-" not in code:
@@ -387,7 +394,10 @@ class LocalityLegislationListView(LegislationListView):
                 ).exists(),
             }
         )
-        if not self.show_landing_page:
+        if (
+            not self.show_landing_page
+            and self.request.resolver_match.url_name != self.legislation_url_name
+        ):
             headings = {
                 "current": _("Current %(legislation)s"),
                 "all": _("All %(legislation)s"),

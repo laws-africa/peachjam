@@ -474,6 +474,45 @@ class LocalityLandingPageTest(TestCase):
         )
         self.assertFalse(response.cookies)
 
+    def test_locality_can_open_directly_to_its_document_listing(self):
+        self.municipal_type.show_landing_page = False
+        self.municipal_type.save(update_fields=["show_landing_page"])
+        EntityProfile.objects.create(
+            content_object=self.municipality,
+            background_photo="localities/cape-town.jpg",
+        )
+        response = self.client.get(self.landing_url(self.municipality))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "liiweb/locality_legislation_list.html")
+        self.assertTemplateNotUsed(response, "liiweb/legislation_landing.html")
+        self.assertContains(response, self.municipal_document.title)
+        self.assertNotContains(response, self.provincial_document.title)
+        self.assertContains(response, "localities/cape-town.jpg")
+        self.assertNotContains(response, "Browse by-laws")
+        self.assertNotContains(response, "Document nature")
+        self.assertNotIn("natures", response.context["facet_data"])
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertEqual(
+            soup.find("h1", id="main-page-heading").get_text(strip=True),
+            "Cape Town By-laws",
+        )
+        self.assertEqual(
+            [item.get_text(strip=True) for item in soup.select(".breadcrumb-item")],
+            ["Home", "Legislation", "Municipal by-laws", "Cape Town"],
+        )
+        self.assertFalse(response.cookies)
+        filtered = self.client.get(
+            self.landing_url(self.municipality), {"q": "No matching title"}
+        )
+        self.assertNotContains(filtered, self.municipal_document.title)
+        table = self.client.get(
+            self.landing_url(self.municipality),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="document-table",
+        )
+        self.assertContains(table, self.municipal_document.title)
+        self.assertNotContains(table, self.provincial_document.title)
+
     def test_province_retains_legislation_features(self):
         response = self.client.get(self.landing_url(self.province))
         self.assertContains(

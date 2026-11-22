@@ -16,10 +16,14 @@
             <a href="{{ locality_collection_url }}">{{ locality_legislation_title }}</a>
           </li>
         {% endblock %}
-        <li class="breadcrumb-item">
-          <a href="{{ locality_landing_url }}">{{ landing_page_heading }}</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">{{ page_heading }}</li>
+        {% if request.resolver_match.url_name == view.legislation_url_name %}
+          <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
+        {% else %}
+          <li class="breadcrumb-item">
+            <a href="{{ locality_landing_url }}">{{ landing_page_heading }}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ page_heading }}</li>
+        {% endif %}
       </ol>
     </nav>
   </div>
@@ -28,7 +32,7 @@
   {% if not entity_profile %}
     <div class="my-4">
       <h1 id="main-page-heading">{{ page_heading }}</h1>
-      <p class="lead">{{ landing_page_heading }}</p>
+      {% if page_heading != landing_page_heading %}<p class="lead">{{ landing_page_heading }}</p>{% endif %}
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ locality|get_follow_params }}"
              hx-trigger="load"></div>
