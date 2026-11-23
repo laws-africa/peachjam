@@ -199,11 +199,12 @@ class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
         self.sha256 = hashlib.sha256(f.read()).hexdigest()
 
     def save(self, *args, **kwargs):
+        uploaded_file = self.file and not self.file._committed
         self.calculate_sha256()
         pk = self.pk
         super().save(*args, **kwargs)
-        if not pk:
-            # first save, set the download filename
+        if not pk and uploaded_file:
+            # Only change metadata for uploads, not imported references to existing objects.
             self.set_download_filename()
 
     @on_attribute_changed(BEFORE_SAVE, ["file"], ["file_as_pdf"])

@@ -182,3 +182,22 @@ class R2DownloadTests(SimpleTestCase):
         source.file.storage.access_key = "s3-key"
         source.file.storage.secret_key = "s3-secret"
         self.assertIn("/mirror-bucket/media/test.pdf", source.file.url)
+
+
+@override_settings(
+    R2_ENDPOINT_URL="https://account.r2.cloudflarestorage.com",
+    R2_ACCESS_KEY_ID="r2-key",
+    R2_SECRET_ACCESS_KEY="r2-secret",
+)
+class SharedGazetteR2DownloadTests(SimpleTestCase):
+    def test_shared_archive_mapping_signs_a_gazette_download(self):
+        storage = DynamicS3Boto3Storage(
+            name="s3:lawsafrica-gazettes-archive:archive/za/test.pdf",
+            access_key="s3-key",
+            secret_key="s3-secret",
+        )
+        url = urlsplit(storage.url("archive/za/test.pdf"))
+        self.assertEqual(url.hostname, "account.r2.cloudflarestorage.com")
+        self.assertEqual(url.path, "/gazettes-archive/archive/za/test.pdf")
+        self.assertEqual(parse_qs(url.query)["X-Amz-Expires"], ["300"])
+        self.assertEqual(storage.bucket_name, "lawsafrica-gazettes-archive")

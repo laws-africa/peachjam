@@ -115,11 +115,11 @@ class GazetteAPIAdapter(RequestsAdapter):
         logger.info(f"New document: {new}")
 
         s3_file = "s3:" + document["s3_location"].replace("/", ":", 1)
+        # Let storage handle downloads rather than persisting the service's download_url.
         sf, created = SourceFile.objects.update_or_create(
             document=gazette,
             defaults={
                 "file": s3_file,
-                "source_url": document["download_url"],
                 "mimetype": "application/pdf",
                 "filename": document["key"] + ".pdf",
                 "size": document["size"],

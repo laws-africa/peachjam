@@ -562,7 +562,7 @@ AWS_QUERYSTRING_AUTH = True
 AWS_QUERYSTRING_EXPIRE = 300
 
 # Map S3 buckets to R2 mirrors for download URLs only. S3 remains the primary store.
-R2_DOWNLOAD_BUCKETS = {}
+R2_DOWNLOAD_BUCKETS = {"lawsafrica-gazettes-archive": "gazettes-archive"}
 R2_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL", "")
 R2_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID", "")
 R2_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY", "")

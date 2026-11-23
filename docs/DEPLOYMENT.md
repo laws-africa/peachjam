@@ -85,8 +85,13 @@ Where uploads are stored on S3 and copied to R2, configure a download-only bucke
 mapping in the site's settings:
 
 ```python
-R2_DOWNLOAD_BUCKETS = {"example-s3-files": "example-r2-files"}
+R2_DOWNLOAD_BUCKETS = {**R2_DOWNLOAD_BUCKETS, "example-s3-files": "example-r2-files"}
 ```
+
+The base mapping includes `lawsafrica-gazettes-archive` → `gazettes-archive`.
+Extend it in site settings as above; replacing the dictionary drops shared
+mappings. R2 credentials must include Object Read access to the shared archive
+bucket as well as the site's own mirror.
 
 Both the default `peachjam.storage.S3Storage` and the dynamic S3 backend use this
 mapping when generating `.url()`. Saves, reads (including Django-streamed files),
@@ -115,6 +120,27 @@ canonical PDF endpoint redirects to the R2 S3 API hostname and expected mirror
 bucket, with a valid signature. Test an unmapped bucket still uses S3 and that an
 upload still lands on S3. URL generation does not check object existence or fetch
 an object; it makes no network request to either storage service.
+
+### Gazette source URL cleanup
+
+Migration `0329_clear_gazette_source_urls` uses one bulk SQL update to remove
+source-file redirects to `gazettes.africa` and `archive.gazettes.africa` (including
+`www` variants) where the record belongs to a gazette and its stored file has a
+non-empty `s3:lawsafrica-gazettes-archive:` key. The existing file path is used for
+signed delivery. Other URLs, buckets, document types and document provenance URLs
+are unchanged. The gazette ingestion adapter no longer sets source-file URLs
+from the service's `download_url` field. Imported references to existing S3 objects do
+not trigger download-filename metadata writes; newly uploaded files retain their
+metadata update. This allows read-only access to the shared archive.
+
+Before deploying this migration, back up the affected source-file IDs and URLs,
+verify that application credentials can read the archive, and configure CORS for
+the consuming website on whichever bucket serves the signed response (S3 or R2).
+The update bypasses dynamic file fields and model/storage hooks; it does not check
+or modify physical objects. It is idempotent, but its reverse operation is a
+no-op: restoring the original URL values requires the backup. After deployment,
+clear cached redirects and check an inline gazette PDF through its canonical URL.
+Missing files and incorrect MIME types need separate repairs.
 
 ### S3 CORS
 

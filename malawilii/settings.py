@@ -34,7 +34,7 @@ LANGUAGES = [
 ]
 
 
-R2_DOWNLOAD_BUCKETS = {"malawilii-files": "malawilii-files"}
+R2_DOWNLOAD_BUCKETS = {**R2_DOWNLOAD_BUCKETS, "malawilii-files": "malawilii-files"}  # noqa: F405
 
 if not DEBUG:  # noqa
     # Allow downloaded media to be cached by the browser.
