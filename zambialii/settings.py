@@ -30,7 +30,7 @@ LANGUAGES = [
 ]
 
 
-R2_DOWNLOAD_BUCKETS = {"zambialii-files": "zambialii-files"}
+R2_DOWNLOAD_BUCKETS = {**R2_DOWNLOAD_BUCKETS, "zambialii-files": "zambialii-files"}  # noqa: F405
 
 if not DEBUG:  # noqa
     # Allow downloaded media to be cached by the browser.
