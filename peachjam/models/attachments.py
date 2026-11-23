@@ -182,7 +182,9 @@ class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
         """For S3-backed storages, set the content-disposition header to a filename suitable for download. This is
         only when serving the file from S3 or some other CDN backed by S3 (including CloudFront and CloudFlare).
         """
-        if not self.source_url and getattr(self.file.storage, "bucket_name", None):
+        if self.source_url or getattr(self.file.storage, "silent_readonly", False):
+            return
+        if getattr(self.file.storage, "bucket_name", None):
             metadata = self.file.storage.get_object_parameters(self.file.name)
             metadata["ContentDisposition"] = (
                 f'attachment; filename="{self.filename_for_download()}"'
@@ -199,12 +201,11 @@ class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
         self.sha256 = hashlib.sha256(f.read()).hexdigest()
 
     def save(self, *args, **kwargs):
-        uploaded_file = self.file and not self.file._committed
         self.calculate_sha256()
         pk = self.pk
         super().save(*args, **kwargs)
-        if not pk and uploaded_file:
-            # Only change metadata for uploads, not imported references to existing objects.
+        if not pk:
+            # First save: writable storage can update the download filename.
             self.set_download_filename()
 
     @on_attribute_changed(BEFORE_SAVE, ["file"], ["file_as_pdf"])

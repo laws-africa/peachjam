@@ -573,7 +573,13 @@ DYNAMIC_STORAGE = {
     "PREFIXES": {
         # storage backends for the different prefixes
         "file": {"storage": "peachjam.storage.DynamicFileSystemStorage"},
-        "s3": {"storage": "peachjam.storage.DynamicS3Boto3Storage"},
+        "s3": {
+            "storage": "peachjam.storage.DynamicS3Boto3Storage",
+            "buckets": {
+                # Consuming sites must not mutate the shared archive's objects.
+                "lawsafrica-gazettes-archive": {"silent_readonly": True},
+            },
+        },
     },
 }
 

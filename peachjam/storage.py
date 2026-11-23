@@ -6,6 +6,7 @@ from django.db.models.fields.files import FieldFile
 from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from storages.backends.s3boto3 import S3Boto3Storage
+from storages.utils import clean_name
 
 """ Support for storing file fields in different storages. This lets us store and work with content
 in different S3 buckets.
@@ -205,7 +206,7 @@ class DynamicS3Boto3Storage(DynamicStorageMixin, S3Storage):
     def _save(self, name, content):
         if self.silent_readonly:
             # no-op if readonly
-            return self.format_name(self._clean_name(name))
+            return self.format_name(clean_name(name))
         return super()._save(name, content)
 
     def delete(self, name):

@@ -129,9 +129,11 @@ source-file redirects to `gazettes.africa` and `archive.gazettes.africa` (includ
 non-empty `s3:lawsafrica-gazettes-archive:` key. The existing file path is used for
 signed delivery. Other URLs, buckets, document types and document provenance URLs
 are unchanged. The gazette ingestion adapter no longer sets source-file URLs
-from the service's `download_url` field. Imported references to existing S3 objects do
-not trigger download-filename metadata writes; newly uploaded files retain their
-metadata update. This allows read-only access to the shared archive.
+from the service's `download_url` field. Consuming sites configure the shared
+archive with `silent_readonly = True`, which prevents uploads, deletes and
+metadata writes, including when a gazette is edited in the admin. The Gazettes
+application deep-copies this configuration and makes its own archive writable.
+Writable uploads retain their download-filename metadata updates.
 
 Before deploying this migration, back up the affected source-file IDs and URLs,
 verify that application credentials can read the archive, and configure CORS for

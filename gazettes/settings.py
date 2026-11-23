@@ -1,4 +1,12 @@
+from copy import deepcopy
+
 from peachjam.settings import *  # noqa
+
+# This application owns the archive; consuming sites inherit read-only access.
+DYNAMIC_STORAGE = deepcopy(DYNAMIC_STORAGE)  # noqa: F405
+DYNAMIC_STORAGE["PREFIXES"]["s3"]["buckets"]["lawsafrica-gazettes-archive"][
+    "silent_readonly"
+] = False
 
 TIME_ZONE = "UTC"
 
