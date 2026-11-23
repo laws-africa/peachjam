@@ -150,6 +150,7 @@ class GazetteSourceURLMigrationTests(TestCase):
             mimetype="application/pdf",
             size=123,
         )
+        self.assertTrue(source.file.storage.silent_readonly)
         with (
             patch.object(
                 S3Boto3Storage,
@@ -160,14 +161,16 @@ class GazetteSourceURLMigrationTests(TestCase):
                 S3Boto3Storage, "_save", side_effect=AssertionError("No uploads")
             ),
             patch.object(
-                SourceFile,
-                "set_download_filename",
+                S3Boto3Storage,
+                "get_object_parameters",
                 side_effect=AssertionError("No metadata writes"),
             ),
         ):
             source.save()
             # The adapter restores the raw reference after the dynamic field strips its prefix.
             SourceFile.objects.filter(pk=source.pk).update(file=path)
+            # Admin edits call this method directly, outside SourceFile.save().
+            source.set_download_filename()
         open_file.assert_called_once()
         self.assertIsNone(source.source_url)
         with connection.cursor() as cursor:

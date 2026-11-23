@@ -201,3 +201,30 @@ class SharedGazetteR2DownloadTests(SimpleTestCase):
         self.assertEqual(url.path, "/gazettes-archive/archive/za/test.pdf")
         self.assertEqual(parse_qs(url.query)["X-Amz-Expires"], ["300"])
         self.assertEqual(storage.bucket_name, "lawsafrica-gazettes-archive")
+
+
+class ReadOnlyArchiveStorageTests(SimpleTestCase):
+    def test_external_source_url_skips_storage_access(self):
+        source = SourceFile(source_url="https://example.org/document.pdf")
+        with patch(
+            "peachjam.storage.DynamicStorageFieldFile.__init__",
+            side_effect=AssertionError("No storage access for an external URL"),
+        ):
+            source.set_download_filename()
+
+    def test_consuming_sites_cannot_upload_or_delete_shared_archive_objects(self):
+        storage = DynamicS3Boto3Storage(
+            name="s3:lawsafrica-gazettes-archive:archive/za/test.pdf",
+            access_key="s3-key",
+            secret_key="s3-secret",
+        )
+        self.assertTrue(storage.silent_readonly)
+        with patch(
+            "botocore.client.BaseClient._make_api_call",
+            side_effect=AssertionError("No storage writes"),
+        ):
+            self.assertEqual(
+                storage.save("archive/za/test.pdf", ContentFile(b"PDF")),
+                "s3:lawsafrica-gazettes-archive:archive/za/test.pdf",
+            )
+            storage.delete("archive/za/test.pdf")

@@ -1,7 +1,7 @@
 import datetime
 import re
 import unittest.util
-from unittest.mock import ANY, Mock, call
+from unittest.mock import ANY, Mock, call, patch
 
 from countries_plus.models import Country
 from django.core.exceptions import ValidationError
@@ -63,6 +63,21 @@ class DynamicS3StorageTestCase(TestCase):
         for value in (0, -1):
             with self.subTest(value=value), self.assertRaises(ValidationError):
                 field.clean(value, None)
+
+    def test_upload_committed_before_model_save_still_sets_download_filename(self):
+        source = SourceFile(
+            document=self.doc,
+            file="pending.pdf",
+            filename="test.pdf",
+            mimetype="application/pdf",
+            size=3,
+        )
+        source.file.save("test.pdf", ContentFile(b"PDF"), save=False)
+        self.assertTrue(source.file._committed)
+        self.mock.reset_mock()
+        with patch.object(source, "calculate_sha256"):
+            source.save()
+        self.mock.meta.client.copy_object.assert_called_once()
 
     def test_basics(self):
         sf = SourceFile(document=self.doc)
