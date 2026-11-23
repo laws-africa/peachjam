@@ -45,6 +45,11 @@ Use short, present-tense commit subjects (e.g., `simplify account page`); append
 ## Caching Guardrails
 Cacheable views must omit session access, `Set-Cookie`, and inline CSRF tokens. Load personalised islands via htmx endpoints and rely on the caching sanity middleware to catch leaks—fix violations before merging.
 
+## Media URLs
+Use named Django URLs for uploaded images and downloads in templates, feeds, and structured metadata. Do not embed a file field's `.url`: S3/R2 URLs expire, while the page or feed containing them may remain cached. Use `{% url 'article_image' article.pk %}`, `{% url 'author_image' user_profile.pk %}`, or the entity image routes. In Python, use `reverse()` and `request.build_absolute_uri()` when an absolute URL is needed.
+
+For a new public image field, configure `PublicImageView` with a fixed field name and a queryset that enforces publication/visibility rules. Document images and downloads must use their document routes so document access checks are preserved. See [Media URLs and private storage](docs/ARCHITECTURE.md#media-urls-and-private-storage) for route names and examples.
+
 ## Data Components (HTML `data-component` + JS class)
 Use data-components when you need to bind behaviour to a specific HTML node without creating a Vue app.
 

@@ -3,12 +3,41 @@ from django.conf.urls.static import static
 from django.contrib.sitemaps import views as sitemap_views
 from django.urls import include, path
 
+from peachjam.models import Article, EntityProfile, UserProfile
 from peachjam.sitemaps import sitemaps
 from peachjam.views import RobotsView
 from peachjam.views.generic_views import CSRFTokenView
+from peachjam.views.media import PublicImageView
 
 # these urls do NOT get i18n language prefixes
 urlpatterns = [
+    path(
+        "images/article/<int:pk>",
+        PublicImageView.as_view(
+            queryset=Article.objects.filter(published=True), field_name="image"
+        ),
+        name="article_image",
+    ),
+    path(
+        "images/author/<int:pk>",
+        PublicImageView.as_view(
+            queryset=UserProfile.objects.filter(
+                user__articles__published=True
+            ).distinct(),
+            field_name="photo",
+        ),
+        name="author_image",
+    ),
+    path(
+        "images/entity/<int:pk>/profile",
+        PublicImageView.as_view(model=EntityProfile, field_name="profile_photo"),
+        name="entity_profile_image",
+    ),
+    path(
+        "images/entity/<int:pk>/background",
+        PublicImageView.as_view(model=EntityProfile, field_name="background_photo"),
+        name="entity_background_image",
+    ),
     path(
         "sitemap.xml",
         sitemap_views.index,

@@ -2,14 +2,14 @@
 <div class="entity-profile {% if entity_profile.background_photo %} has-background-photo{% endif %}">
   <div class="entity-profile__background-photo">
     {% if entity_profile.background_photo %}
-      <img src="{{ entity_profile.background_photo.url }}"
+      <img src="{% url 'entity_background_image' entity_profile.pk %}"
            alt="background image"
            loading="lazy"/>
     {% endif %}
   </div>
   <div class="entity-profile__body">
     {% if entity_profile.profile_photo %}
-      <img src="{{ entity_profile.profile_photo.url }}"
+      <img src="{% url 'entity_profile_image' entity_profile.pk %}"
            class="entity-profile__body__profile-image"
            alt="profile image"
            loading="lazy"/>

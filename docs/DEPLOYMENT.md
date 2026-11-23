@@ -37,6 +37,164 @@ IAM policy:
 }
 ```
 
+## Private media storage and CORS
+
+Configure CORS **before enabling signed document redirects** on a deployment.
+The PDF viewer fetches the stable document `/source.pdf` URL, then follows its
+redirect to S3 or R2. This is a cross-origin browser request: a valid signature
+alone is insufficient unless the final storage response allows the website's
+origin. Django's CORS middleware cannot add headers to responses served by S3/R2.
+A download opened directly in a browser tab may work while the inline viewer fails.
+
+### Storage and origin configuration
+
+Use the standard S3-compatible storage backend with `AWS_QUERYSTRING_AUTH = True`,
+`AWS_QUERYSTRING_EXPIRE = 300`, and `AWS_S3_CUSTOM_DOMAIN = None`, as configured in
+`peachjam.settings`. For R2, configure the account's S3 API endpoint and R2
+credentials. Native R2 signed URLs use the S3 API hostname, not a public custom
+domain. Keep public-access configuration separate from CORS configuration.
+
+Document redirects are browser-private, with `max-age` set to
+`max(0, AWS_QUERYSTRING_EXPIRE - 60)` and `must-revalidate`. Configure Cloudflare to
+respect these headers; do not force shared caching or stale serving of redirects.
+Keep stable named Django URLs in pages and metadata so cached HTML does not embed
+expiring storage URLs. See [media URL guidance](ARCHITECTURE.md#media-urls-and-private-storage).
+
+For each bucket that can serve a document, allow its consuming website origins:
+
+- Use exact origins including scheme and any non-default port, such as
+  `https://example.org`, without a path or trailing slash.
+- Include every website that fetches content from a shared bucket. Source files
+  can reference a different bucket from the deployment's default bucket.
+- Sites redirect `www` to the canonical hostname, so `www` origins are unnecessary.
+  Add other hostnames only if they actually serve pages that fetch these files.
+- Allow `GET` and `HEAD`, the `Range` request header, and a 3,600-second CORS
+  preflight cache. This preflight lifetime is independent of signed URL expiry.
+- CORS does not grant object permissions or make a bucket public. Signed requests
+  still require valid credentials/signatures. Do not change policies, ACLs, public
+  access, custom domains, or replication while applying a CORS-only update.
+
+Inspect and back up existing rules before changing them. The update commands below
+replace the entire CORS policy: merge the required rule into the saved policy and
+preserve existing origins and other rules. Do not replace an existing wildcard
+rule with a narrower rule as an incidental part of this setup.
+
+### S3 CORS
+
+Use the AWS profile for the account that owns the bucket. To inspect its policy:
+
+```sh
+aws --profile <profile> s3api get-bucket-cors --bucket <bucket> > s3-cors.before.json
+```
+
+`NoSuchCORSConfiguration` means there is no existing policy; `AccessDenied` means
+use credentials authorised for bucket CORS management, not that CORS is absent.
+
+Create `s3-cors.json` with the merged policy. For a bucket with no existing rules:
+
+```json
+{
+  "CORSRules": [
+    {
+      "AllowedOrigins": ["https://example.org"],
+      "AllowedMethods": ["GET", "HEAD"],
+      "AllowedHeaders": ["Range"],
+      "MaxAgeSeconds": 3600
+    }
+  ]
+}
+```
+
+Review the file, apply it, and read it back:
+
+```sh
+aws --profile <profile> s3api put-bucket-cors --bucket <bucket> --cors-configuration file://s3-cors.json
+aws --profile <profile> s3api get-bucket-cors --bucket <bucket>
+```
+
+The AWS console's CORS editor takes the `CORSRules` array alone, without the outer
+object. See [AWS's CORS configuration reference](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html).
+
+### R2 CORS with the Cloudflare CLI
+
+S3 and R2 bucket policies are independent, including for replicated content.
+Configure each bucket that serves browser requests. Inspect the account's buckets,
+custom-domain mappings, and existing CORS rules using `cf`:
+
+```sh
+cf r2 buckets list --per-page 100
+cf r2 buckets domains custom list --bucket-name <bucket>
+cf r2 buckets cors get <bucket> > r2-cors.before.json
+```
+
+Follow the pagination cursor if the bucket listing has more results. An R2 bucket
+name can differ from its S3 source; confirm the mapping rather than assuming it.
+Use `--profile <profile>` if a specific Cloudflare auth profile is needed.
+
+Create `r2-cors.json` with the merged policy. The Cloudflare API/CLI format differs
+from the S3 format above. For a bucket with no existing rules:
+
+```json
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": ["https://example.org"],
+        "methods": ["GET", "HEAD"],
+        "headers": ["Range"]
+      },
+      "maxAgeSeconds": 3600
+    }
+  ]
+}
+```
+
+Validate the proposed request, apply it, then read it back. `--body` takes the raw
+JSON text; the CLI's `--rules` flag instead accepts a JSON array or `@path`.
+
+```sh
+cf r2 buckets cors update <bucket> --body "$(cat r2-cors.json)" --dry-run
+cf r2 buckets cors update <bucket> --body "$(cat r2-cors.json)"
+cf r2 buckets cors get <bucket>
+```
+
+See [Cloudflare's R2 CORS API reference](https://developers.cloudflare.com/api/resources/r2/subresources/buckets/subresources/cors/).
+
+### Verification and rollout
+
+1. Read back the CORS policy for every affected bucket and compare it with the
+   intended policy. Existing rules must remain intact.
+2. Test a preflight request against the actual storage hostname and an object path:
+
+   ```sh
+   curl --include --request OPTIONS \
+     --header 'Origin: https://example.org' \
+     --header 'Access-Control-Request-Method: GET' \
+     --header 'Access-Control-Request-Headers: range' \
+     'https://<storage-host>/<object-path>'
+   ```
+
+   Expect a successful response with `Access-Control-Allow-Origin` matching the
+   website (or an intentionally preserved wildcard), allowed methods including
+   `GET`/`HEAD`, and an allowed `Range` header.
+3. Open a document that renders as a PDF on the website. In browser developer
+   tools, verify that the canonical source request redirects to a fresh signed
+   URL and the final `GET` succeeds with `Access-Control-Allow-Origin`. A successful
+   preflight alone does not prove that the signature or object permissions work.
+   Also verify a document containing embedded images.
+4. Clear cached pages containing old direct media URLs when deploying the stable
+   image routes. If an existing R2 custom domain still serves cached objects with
+   old CORS headers, purge the affected cached objects separately; an API policy
+   update alone does not refresh those cached responses.
+5. When migrating a public bucket to private access, verify signed URLs and
+   streamed public images first. Disabling public custom domains or `r2.dev`
+   access is a separate, deliberate operation, not part of configuring CORS.
+
+If the browser reports missing `Access-Control-Allow-Origin`, check CORS on the
+**final response's bucket** and the exact website origin. A fresh signed request
+may also reveal an underlying storage error that the browser masks as CORS. This
+is separate from a Cloudflare challenge on the canonical website endpoint.
+
 ## Create the dokku app
 
 - SSH into the Dokku host and create the application as follows:

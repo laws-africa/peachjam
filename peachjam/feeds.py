@@ -3,6 +3,7 @@ import re
 
 from django.conf import settings
 from django.contrib.syndication.views import Feed
+from django.urls import reverse
 from django.utils.feedgenerator import Atom1Feed, Rss201rev2Feed
 
 from peachjam.models import Article
@@ -19,7 +20,9 @@ class ArticleFeed(Feed):
 
     def item_extra_kwargs(self, item):
         if item.image:
-            image_url = self.request.build_absolute_uri(item.image.url)
+            image_url = self.request.build_absolute_uri(
+                reverse("article_image", args=[item.pk])
+            )
         else:
             image_url = ""
 

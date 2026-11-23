@@ -10,12 +10,13 @@ from django.http import Http404, HttpResponse, JsonResponse
 from django.http.response import FileResponse, HttpResponseForbidden
 from django.shortcuts import get_list_or_404, get_object_or_404, redirect, reverse
 from django.template.loader import render_to_string
-from django.utils.cache import add_never_cache_headers
+from django.utils.cache import add_never_cache_headers, patch_cache_control
 from django.utils.decorators import method_decorator
 from django.utils.http import content_disposition_header
 from django.utils.translation import get_language
 from django.views.decorators.cache import never_cache
 from django.views.generic import DetailView, View
+from storages.backends.s3boto3 import S3Boto3Storage
 
 from peachjam.analysis.summariser import JudgmentSummariser, SummariserError
 from peachjam.forms import DocumentSummaryForm
@@ -44,6 +45,18 @@ class DocumentDetailView(DetailView):
     slug_field = "expression_frbr_uri"
     slug_url_kwarg = "frbr_uri"
     context_object_name = "document"
+
+    def redirect_to_storage(self, file):
+        # Redirect to the storage-specific URL for this file. In production, this is usually a signed S3 url.
+        response = redirect(file.url)
+        # The client can cache the redirect for a bit less than the signed URL validity.
+        patch_cache_control(
+            response,
+            private=True,
+            max_age=max(0, settings.AWS_QUERYSTRING_EXPIRE - 60),
+            must_revalidate=True,
+        )
+        return response
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
@@ -149,12 +162,10 @@ class DocumentSourceView(DocumentDetailView):
                 if source_file.source_url and not anonymised:
                     return redirect(source_file.source_url)
 
-                if (
-                    getattr(source_file.file.storage, "custom_domain", None)
-                    and not anonymised
+                if not anonymised and isinstance(
+                    source_file.file.storage, S3Boto3Storage
                 ):
-                    # use the storage's custom domain to serve the file
-                    return redirect(source_file.file.url)
+                    return self.redirect_to_storage(source_file.file)
 
                 return self.make_response(
                     source_file.file.open(),
@@ -198,9 +209,8 @@ class DocumentSourcePDFView(DocumentSourceView):
                 ):
                     return redirect(source_file.source_url)
 
-                if getattr(pdf.storage, "custom_domain", None) and not anonymised:
-                    # use the storage's custom domain to serve the file
-                    return redirect(pdf.url)
+                if not anonymised and isinstance(pdf.storage, S3Boto3Storage):
+                    return self.redirect_to_storage(pdf)
                 else:
                     return self.make_response(
                         pdf,
@@ -225,6 +235,9 @@ class DocumentPublicationView(DocumentSourceView):
             if publication_file.url:
                 return redirect(publication_file.url)
 
+            if isinstance(publication_file.file.storage, S3Boto3Storage):
+                return self.redirect_to_storage(publication_file.file)
+
             return self.make_response(
                 publication_file.file.open(),
                 publication_file.mimetype,
@@ -244,9 +257,8 @@ class DocumentMediaView(DocumentDetailView):
         # see https://github.com/laws-africa/peachjam/issues/2024
         img = get_list_or_404(self.object.images, filename=self.kwargs["filename"])[0]
 
-        if getattr(img.file.storage, "custom_domain", None):
-            # use the storage's custom domain to serve the file
-            return redirect(img.file.url)
+        if isinstance(img.file.storage, S3Boto3Storage):
+            return self.redirect_to_storage(img.file)
 
         file = img.file.open()
         file_bytes = file.read()
@@ -261,9 +273,8 @@ class DocumentAttachmentView(DocumentDetailView):
             filename=self.kwargs["filename"]
         ).first()
         if file and not file.private:
-            if getattr(file.file.storage, "custom_domain", None):
-                # use the storage's custom domain to serve the file
-                return redirect(file.file.url)
+            if isinstance(file.file.storage, S3Boto3Storage):
+                return self.redirect_to_storage(file.file)
 
             file_bytes = file.file.open().read()
             response = HttpResponse(file_bytes, content_type=file.mimetype)
@@ -423,9 +434,8 @@ class DocumentSocialImageView(DocumentDetailView):
             return HttpResponse(html_str)
 
         image = DocumentSocialImage.get_or_create_for_document(document, html_str)
-        if getattr(image.file.storage, "custom_domain", None):
-            # use the storage's custom domain to serve the file
-            return redirect(image.file.url)
+        if isinstance(image.file.storage, S3Boto3Storage):
+            return self.redirect_to_storage(image.file)
 
         return FileResponse(image.file, content_type="image/png")
 
