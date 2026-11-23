@@ -293,67 +293,7 @@
       </div>
     </div>
   </section>
-  {% if show_more_resources or show_glossary %}
-    <section class="bg-light py-5" aria-labelledby="research-tools-heading">
-      <div class="container">
-        <div class="text-center mb-4">
-          <h2 id="research-tools-heading">
-            {% trans "More resources" %}
-          </h2>
-          <p class="lead mb-0">
-            {% trans "Check individual provisions and look up defined legal terms." %}
-          </p>
-        </div>
-        <div class="row g-4 justify-content-center">
-          {% if show_unconstitutional_provisions %}
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="card card-clickable h-100 position-relative">
-                <div class="card-body">
-                  <h3 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="{% url 'unconstitutional_provision_list' %}{% if locality %}?localities={{ locality.name|urlencode }}{% endif %}">{% trans "Unconstitutional provisions" %}</a>
-                  </h3>
-                  <p class="card-text mb-0">
-                    {% trans "See provisions affected by constitutional decisions." %}
-                  </p>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-          {% if show_uncommenced_provisions %}
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="card card-clickable h-100 position-relative">
-                <div class="card-body">
-                  <h3 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="{% url 'uncommenced_provision_list' %}{% if locality %}?localities={{ locality.name|urlencode }}{% endif %}">{% trans "Uncommenced provisions" %}</a>
-                  </h3>
-                  <p class="card-text mb-0">
-                    {% trans "See individual sections that are not yet in force." %}
-                  </p>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-          {% if show_glossary %}
-            <div class="col-12 col-md-6 col-xl-4">
-              <div class="card card-clickable h-100 position-relative">
-                <div class="card-body">
-                  <h3 class="h5 mb-2">
-                    <a class="stretched-link text-decoration-none"
-                       href="{% url 'glossary' place_code=place_code %}">{% trans "Glossary of defined terms" %}</a>
-                  </h3>
-                  <p class="card-text mb-0">
-                    {% blocktrans with legislation=legislation_noun %}Look up terms defined across {{ legislation }}.{% endblocktrans %}
-                  </p>
-                </div>
-              </div>
-            </div>
-          {% endif %}
-        </div>
-      </div>
-    </section>
-  {% endif %}
+  {% include 'liiweb/_legislation_resources.html' %}
   {% trans "document" as document_noun %}
   {% trans "documents" as document_noun_plural %}
   <section class="container py-5"
@@ -377,7 +317,7 @@
         <h3 id="recent-legislation-heading" class="h4 mb-3">
           {% blocktrans with legislation=legislation_noun %}Recent {{ legislation }}{% endblocktrans %}
         </h3>
-        {% include "peachjam/_document_table.html" with documents=recent_legislation doc_count=recent_legislation|length doc_count_noun=document_noun doc_count_noun_plural=document_noun_plural doc_table_id="recent-legislation-table" doc_table_citations=True doc_table_show_date=True doc_table_hide_thead=True hide_pagination=True %}
+        {% include "peachjam/_document_table.html" with documents=recent_legislation doc_count=recent_legislation|length doc_count_noun=document_noun doc_count_noun_plural=document_noun_plural doc_table_id="recent-legislation-table" doc_table_citations=True doc_table_show_date=True doc_table_use_publication_date=True doc_table_hide_thead=True hide_pagination=True %}
         <a class="btn btn-primary mt-3" href="{{ legislation_urls.recent }}">{% blocktrans with legislation=legislation_noun %}View all recent {{ legislation }}{% endblocktrans %}</a>
       </section>
     </div>

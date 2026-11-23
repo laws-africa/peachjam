@@ -1,6 +1,9 @@
 {% extends "liiweb/legislation_list.html" %}
 {% load i18n peachjam %}
-{% block title %}{{ page_heading }} – {{ landing_page_heading }}{% endblock %}
+{% block title %}
+  {{ page_heading }}
+  {% if page_heading != landing_page_heading %}– {{ landing_page_heading }}{% endif %}
+{% endblock %}
 {% block breadcrumbs %}
   <div class="container">
     <nav aria-label="{% trans 'Breadcrumb' %}">
@@ -28,6 +31,11 @@
     </nav>
   </div>
 {% endblock %}
+{% block entity-profile %}
+  {% if entity_profile %}
+    {% include 'peachjam/_entity_profile.html' with entity_profile_extra_template='liiweb/_legislation_resources.html' resources_compact=True show_empty_resources=True %}
+  {% endif %}
+{% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
     <div class="my-4">
@@ -37,8 +45,33 @@
         <div hx-get="{% url 'user_following_button' %}?{{ locality|get_follow_params }}"
              hx-trigger="load"></div>
       {% endblock %}
+      {% include 'liiweb/_legislation_resources.html' with resources_compact=True show_empty_resources=True %}
     </div>
   {% endif %}
+{% endblock %}
+{% block nav-tabs %}
+  <nav aria-label="{% trans 'Legislation collections' %}" class="mb-3">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link{% if view.variant == 'current' %} active{% endif %}"
+           {% if view.variant == 'current' %}aria-current="page"{% endif %}
+           data-key-link="legislation_current"
+           href="{{ legislation_urls.current }}">{% trans 'Current legislation' %}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if view.variant == 'repealed' %} active{% endif %}"
+           {% if view.variant == 'repealed' %}aria-current="page"{% endif %}
+           data-key-link="legislation_repealed"
+           href="{{ legislation_urls.repealed }}">{% trans 'Repealed legislation' %}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if view.variant == 'all' %} active{% endif %}"
+           {% if view.variant == 'all' %}aria-current="page"{% endif %}
+           data-key-link="legislation_all"
+           href="{{ legislation_urls.all }}">{% trans 'All legislation' %}</a>
+      </li>
+    </ul>
+  </nav>
 {% endblock %}
 {% block alerts %}
   {% if view.variant == 'repealed' %}

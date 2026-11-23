@@ -77,6 +77,13 @@ class LegislationListView(BaseLegislationListView):
             return None
         return super().get_paginate_by(queryset)
 
+    def add_doc_count(self, context):
+        # The landing page's empty queryset is not the listing's document count.
+        if self.show_landing_page:
+            context["doc_count"] = 0
+        else:
+            super().add_doc_count(context)
+
     def get_template_names(self):
         if self.show_landing_page:
             return ["liiweb/legislation_landing.html"]

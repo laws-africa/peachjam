@@ -2,16 +2,19 @@ from datetime import date
 from io import StringIO
 
 from bs4 import BeautifulSoup
+from django.core.cache import cache
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls.base import reverse
 from django.utils import timezone
+from django.utils.formats import date_format
 from languages_plus.models import Language
 
 from peachjam.models import (
     DocumentNature,
     DocumentTopic,
     EntityProfile,
+    Glossary,
     JurisdictionProfile,
     Legislation,
     Locality,
@@ -19,6 +22,8 @@ from peachjam.models import (
     PeachJamSettings,
     PopularLegislation,
     Taxonomy,
+    UncommencedProvision,
+    UnconstitutionalProvision,
 )
 
 
@@ -134,6 +139,35 @@ class LegislationViewsTest(TestCase):
         recent_document = response.context["recent_legislation"][0]
         self.assertEqual(publication_date, recent_document.landing_publication_date)
         self.assertNotIn("metadata_json", recent_document.get_deferred_fields())
+        self.assertNotEqual(publication_date, document.date)
+        soup = BeautifulSoup(response.content, "html.parser")
+        cell = soup.select_one("#recent-legislation-table .cell-date")
+        self.assertEqual(
+            cell.get_text(strip=True), date_format(publication_date, "DATE_FORMAT")
+        )
+
+    @override_settings(
+        CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}
+    )
+    def test_landing_page_does_not_cache_an_empty_listing_count(self):
+        cache.clear()
+        Legislation.objects.filter(pk=3040).update(principal=True)
+        url = reverse("legislation_list")
+        key = f"{url}_doc_count"
+        cache.delete(key)
+        self.client.get(url)
+        self.assertIsNone(cache.get(key))
+
+        response = self.client.get(
+            url, HTTP_HX_REQUEST="true", HTTP_HX_TARGET="document-table"
+        )
+        self.assertEqual(response.context["doc_count"], 1)
+        self.assertContains(response, "Divorce Act, 1979")
+        self.assertEqual(cache.get(key), 1)
+
+        # A subsequent landing-page visit must also leave the real count intact.
+        self.client.get(url)
+        self.assertEqual(cache.get(key), 1)
 
     def test_current_legislation_has_its_own_listing_page(self):
         response = self.client.get(reverse("legislation_list_current"))
@@ -413,13 +447,13 @@ class LocalityLandingPageTest(TestCase):
         settings.default_document_jurisdiction_id = "ZA"
         settings.save()
 
-    def create_legislation(self, locality, title):
+    def create_legislation(self, locality, title, number="1"):
         return Legislation.objects.create(
             jurisdiction=locality.jurisdiction,
             locality=locality,
             frbr_uri_doctype="act",
             frbr_uri_date="2026",
-            frbr_uri_number="1",
+            frbr_uri_number=number,
             date=timezone.now().date(),
             language_id="en",
             title=title,
@@ -512,6 +546,123 @@ class LocalityLandingPageTest(TestCase):
         )
         self.assertContains(table, self.municipal_document.title)
         self.assertNotContains(table, self.provincial_document.title)
+
+    def test_direct_listing_navigation_filters_local_documents(self):
+        self.municipal_type.show_landing_page = False
+        self.municipal_type.save(update_fields=["show_landing_page"])
+        repealed = self.create_legislation(self.municipality, "Old by-law", "2")
+        repealed.repealed = True
+        repealed.metadata_json["repeal"] = {"verb": "repealed"}
+        repealed.save(update_fields=["repealed", "metadata_json"])
+        uncommenced = self.create_legislation(self.municipality, "Future by-law", "3")
+        uncommenced.metadata_json["commenced"] = False
+        uncommenced.save(update_fields=["metadata_json"])
+        for variant, expected in [
+            ("current", [self.municipal_document, uncommenced]),
+            ("recent", [self.municipal_document, repealed, uncommenced]),
+            ("uncommenced", [uncommenced]),
+            ("repealed", [repealed]),
+            ("all", [self.municipal_document, repealed, uncommenced]),
+        ]:
+            with self.subTest(variant=variant):
+                url = reverse("locality_legislation_list_" + variant, args=["za-cpt"])
+                response = self.client.get(url)
+                soup = BeautifulSoup(response.content, "html.parser")
+                links = soup.select('nav[aria-label="Legislation collections"] a')
+                self.assertEqual(
+                    [link.get_text(strip=True) for link in links],
+                    ["Current legislation", "Repealed legislation", "All legislation"],
+                )
+                self.assertEqual(
+                    [
+                        link["href"]
+                        for link in links
+                        if link.get("aria-current") == "page"
+                    ],
+                    [url] if variant in ["current", "repealed", "all"] else [],
+                )
+                self.assertTrue(all(link.get("data-key-link") for link in links))
+                self.assertTrue(
+                    all(
+                        link["href"].startswith(self.landing_url(self.municipality))
+                        for link in links
+                    )
+                )
+                documents = [
+                    doc
+                    for doc in response.context["documents"]
+                    if not getattr(doc, "is_group", False)
+                ]
+                self.assertCountEqual(documents, expected)
+                self.assertNotContains(response, self.provincial_document.title)
+                table = self.client.get(
+                    url, HTTP_HX_REQUEST="true", HTTP_HX_TARGET="document-table"
+                )
+                for doc in expected:
+                    self.assertContains(table, doc.title)
+        province = self.client.get(
+            reverse("locality_legislation_list_current", args=["za-wc"])
+        )
+        soup = BeautifulSoup(province.content, "html.parser")
+        self.assertEqual(
+            soup.select_one('nav[aria-label="Legislation collections"] a').get_text(
+                strip=True
+            ),
+            "Current legislation",
+        )
+
+    def test_direct_listing_reuses_resource_cards_for_locality(self):
+        self.municipal_type.show_landing_page = False
+        self.municipal_type.save(update_fields=["show_landing_page"])
+        UnconstitutionalProvision.objects.create(work=self.provincial_document.work)
+        UncommencedProvision.objects.create(work=self.provincial_document.work)
+        response = self.client.get(self.landing_url(self.municipality))
+        self.assertContains(response, "More resources")
+        self.assertFalse(response.context["show_unconstitutional_provisions"])
+        self.assertFalse(response.context["show_uncommenced_provisions"])
+        self.assertNotContains(response, "Glossary of defined terms")
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertEqual(
+            len(soup.select('section[aria-labelledby="research-tools-heading"] .card')),
+            2,
+        )
+        self.assertIsNone(
+            soup.select_one(
+                'a[href="' + reverse("glossary", kwargs={"place_code": "za-cpt"}) + '"]'
+            )
+        )
+
+        UnconstitutionalProvision.objects.create(work=self.municipal_document.work)
+        UncommencedProvision.objects.create(work=self.municipal_document.work)
+        Glossary.objects.create(place_code="za-cpt")
+        EntityProfile.objects.create(content_object=self.municipality)
+        response = self.client.get(self.landing_url(self.municipality))
+        self.assertTemplateUsed(response, "liiweb/_legislation_resources.html")
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertEqual(len(soup.select(".entity-profile__body__info .card")), 3)
+        links = soup.select('section[aria-labelledby="research-tools-heading"] .card a')
+        self.assertEqual(
+            [link.get_text(strip=True) for link in links],
+            [
+                "Unconstitutional provisions",
+                "Uncommenced provisions",
+                "Glossary of defined terms",
+            ],
+        )
+        self.assertEqual(
+            [link["href"] for link in links],
+            [
+                reverse("unconstitutional_provision_list") + "?localities=Cape%20Town",
+                reverse("uncommenced_provision_list") + "?localities=Cape%20Town",
+                reverse("glossary", kwargs={"place_code": "za-cpt"}),
+            ],
+        )
+        table = self.client.get(
+            self.landing_url(self.municipality),
+            HTTP_HX_REQUEST="true",
+            HTTP_HX_TARGET="document-table",
+        )
+        self.assertNotContains(table, "More resources")
 
     def test_province_retains_legislation_features(self):
         response = self.client.get(self.landing_url(self.province))
