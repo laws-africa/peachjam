@@ -30,6 +30,8 @@ LANGUAGES = [
 ]
 
 
+R2_DOWNLOAD_BUCKETS = {"zambialii-files": "zambialii-files"}
+
 if not DEBUG:  # noqa
     # Allow downloaded media to be cached by the browser.
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": f"max-age={86400 * 5}"}

@@ -48,7 +48,7 @@ A download opened directly in a browser tab may work while the inline viewer fai
 
 ### Storage and origin configuration
 
-Use the standard S3-compatible storage backend with `AWS_QUERYSTRING_AUTH = True`,
+Use Peachjam's S3 storage backend with `AWS_QUERYSTRING_AUTH = True`,
 `AWS_QUERYSTRING_EXPIRE = 300`, and `AWS_S3_CUSTOM_DOMAIN = None`, as configured in
 `peachjam.settings`. For R2, configure the account's S3 API endpoint and R2
 credentials. Native R2 signed URLs use the S3 API hostname, not a public custom
@@ -78,6 +78,43 @@ Inspect and back up existing rules before changing them. The update commands bel
 replace the entire CORS policy: merge the required rule into the saved policy and
 preserve existing origins and other rules. Do not replace an existing wildcard
 rule with a narrower rule as an incidental part of this setup.
+
+### Delivering downloads from an R2 mirror
+
+Where uploads are stored on S3 and copied to R2, configure a download-only bucket
+mapping in the site's settings:
+
+```python
+R2_DOWNLOAD_BUCKETS = {"example-s3-files": "example-r2-files"}
+```
+
+Both the default `peachjam.storage.S3Storage` and the dynamic S3 backend use this
+mapping when generating `.url()`. Saves, reads (including Django-streamed files),
+deletes and metadata operations continue to use the original S3 credentials,
+endpoint and bucket. Stored file names and object keys do not change. Unmapped
+buckets keep normal signed S3 URLs. The mapping does not enable or change copying
+between S3 and R2; use the existing mirror process.
+
+Obtain an R2 Access Key ID and Secret Access Key with **Object Read** permission
+on the mapped R2 buckets. These are S3 API credentials, not the Cloudflare API
+token used by `cf`. Keep them in deployment secrets, separate from AWS credentials.
+Configure these environment variables:
+
+- `R2_ACCESS_KEY_ID`: the R2 access key ID.
+- `R2_SECRET_ACCESS_KEY`: its secret access key.
+- `R2_ENDPOINT_URL`: `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
+
+Leave `R2_ENDPOINT_URL` unset to retain S3 downloads. Install the two credentials
+first, then set the endpoint to activate R2 URLs on mapped buckets. Once enabled,
+missing credentials raise a configuration error rather than using AWS credentials
+against R2. R2 signing uses region `auto`, Signature V4, and the same expiry as S3
+(`AWS_QUERYSTRING_EXPIRE`). Existing redirect caching remains unchanged.
+
+Before activation, configure R2 CORS as below. After activation, check that a
+canonical PDF endpoint redirects to the R2 S3 API hostname and expected mirror
+bucket, with a valid signature. Test an unmapped bucket still uses S3 and that an
+upload still lands on S3. URL generation does not check object existence or fetch
+an object; it makes no network request to either storage service.
 
 ### S3 CORS
 

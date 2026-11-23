@@ -325,6 +325,8 @@ For example, use `src="{% url 'article_image' article.pk %}"` in templates. In P
 
 When adding a public image field, add a named endpoint using `PublicImageView.as_view(...)` with a fixed `field_name` and a model or queryset. Limit the queryset to objects whose images may be public, such as published articles. Do not expose arbitrary model names, field names, or storage paths through request parameters. Public image endpoints are not suitable for protected document content.
 
+The S3 backend can generate download URLs for an R2 mirror using `R2_DOWNLOAD_BUCKETS` and separate R2 credentials. This changes only `.url()`; uploads, server-side reads and metadata remain on S3. See [R2 mirror delivery configuration](DEPLOYMENT.md#delivering-downloads-from-an-r2-mirror).
+
 Document images use `document_media`; PDFs and downloads use their existing document endpoints, including `document_source_pdf`, `document_source`, `document_attachment`, `document_publication`, and `document_social_image`. These endpoints enforce document access before issuing a fresh signed S3/R2 redirect. Redirects are browser-private and cacheable for `max(0, AWS_QUERYSTRING_EXPIRE - 60)` seconds. Anonymised source files continue to stream through Django, and external source URLs keep their existing behaviour. Article attachments and partner logos also retain their streaming endpoints.
 
 Accessing `.url` belongs at the point where a download endpoint issues its storage redirect, rather than when rendering a longer-lived page.

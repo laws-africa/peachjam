@@ -1,7 +1,9 @@
 from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 from django.core.files.storage import FileSystemStorage, default_storage
 from django.db import models
 from django.db.models.fields.files import FieldFile
+from django.utils.functional import cached_property
 from django.utils.module_loading import import_string
 from storages.backends.s3boto3 import S3Boto3Storage
 
@@ -143,7 +145,43 @@ class DynamicFileSystemStorage(DynamicStorageMixin, FileSystemStorage):
     prefix = "file"
 
 
-class DynamicS3Boto3Storage(DynamicStorageMixin, S3Boto3Storage):
+class S3Storage(S3Boto3Storage):
+    """Keep file operations on S3, optionally signing download URLs for an R2 mirror."""
+
+    @cached_property
+    def r2_download_storage(self):
+        bucket = settings.R2_DOWNLOAD_BUCKETS.get(self.bucket_name)
+        if not bucket or not settings.R2_ENDPOINT_URL:
+            return None
+        if not settings.R2_ACCESS_KEY_ID or not settings.R2_SECRET_ACCESS_KEY:
+            raise ImproperlyConfigured(
+                "R2 downloads require R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY."
+            )
+        # This backend is used only for .url(), never for opening or saving files.
+        return S3Boto3Storage(
+            bucket_name=bucket,
+            endpoint_url=settings.R2_ENDPOINT_URL,
+            access_key=settings.R2_ACCESS_KEY_ID,
+            secret_key=settings.R2_SECRET_ACCESS_KEY,
+            security_token=None,
+            session_profile=None,
+            region_name="auto",
+            signature_version="s3v4",
+            addressing_style="path",
+            custom_domain=None,
+            querystring_auth=True,
+            querystring_expire=self.querystring_expire,
+            location=self.location,
+        )
+
+    def url(self, name, parameters=None, expire=None, http_method=None):
+        storage = self.r2_download_storage
+        if storage is None:
+            return super().url(name, parameters, expire, http_method)
+        return storage.url(name, parameters, expire, http_method)
+
+
+class DynamicS3Boto3Storage(DynamicStorageMixin, S3Storage):
     """S3 storage that knows how to add and strip the bucket prefix from the filename.
 
     Additionally, if silent_readonly is set, then this storage will silently discard
