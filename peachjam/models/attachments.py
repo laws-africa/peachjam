@@ -169,7 +169,8 @@ class SourceFile(AttributeHooksMixin, AttachmentAbstractModel):
             convert_source_file_to_pdf(self.id, creator=self.document)
 
     def filename_extension(self):
-        return os.path.splitext(self.filename)[1][1:]
+        # Older Indigo imports retained the quotes from Content-Disposition headers.
+        return os.path.splitext(self.filename.strip('"'))[1][1:]
 
     def filename_for_download(self, ext=None):
         """Return a generated filename appropriate for use when downloading this source file."""

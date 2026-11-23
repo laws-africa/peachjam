@@ -1,7 +1,6 @@
 import json
 import logging
 import operator
-import re
 from datetime import datetime
 from functools import cached_property, reduce
 from tempfile import NamedTemporaryFile
@@ -14,6 +13,7 @@ from dateutil import parser
 from django.core.files import File
 from django.db.models import Q
 from django.utils import translation
+from django.utils.http import parse_header_parameters
 from django.utils.text import slugify
 from languages_plus.models import Language
 
@@ -603,12 +603,10 @@ class IndigoAdapter(RequestsAdapter):
 
         with NamedTemporaryFile() as f:
             r = self.client_get(url)
-            try:
-                # sometimes this header is not present
-                d = r.headers["Content-Disposition"]
-                filename = re.findall("filename=(.+)", d)[0]
-            except KeyError:
-                filename = f"{slugify(title)}.pdf"
+            _, params = parse_header_parameters(
+                r.headers.get("Content-Disposition", "")
+            )
+            filename = params.get("filename") or f"{slugify(title)}.pdf"
             f.write(r.content)
 
             # there is a small race condition here if SourceFile is created in the db while we do this. In that case
