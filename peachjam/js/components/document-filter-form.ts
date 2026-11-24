@@ -19,8 +19,15 @@ export default class DocumentFilterForm {
 
   prepareForSwap (event: Event) {
     this.cleanupOffcanvas();
-    if (!(event as CustomEvent).detail.shouldSwap) {
+    const detail = (event as CustomEvent).detail;
+    if (!detail.shouldSwap) {
       return;
+    }
+
+    if (detail.target === this.root) {
+      // a filter change replaces the whole form; show the top of the new one once it is in place
+      const id = this.root.id;
+      document.body.addEventListener('htmx:afterSettle', () => DocumentFilterForm.scrollToTop(id), { once: true });
     }
 
     // outerHTML inserts the new form before removing this one, so ensure the
@@ -28,6 +35,14 @@ export default class DocumentFilterForm {
     this.root.querySelectorAll<HTMLInputElement>('input[type="radio"]:checked').forEach((radio) => {
       radio.checked = false;
     });
+  }
+
+  static scrollToTop (id: string) {
+    const form = document.getElementById(id);
+    // only when the top is off screen: the new results may be shorter than the old scroll position
+    if (form && form.getBoundingClientRect().top < 0) {
+      form.scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
   }
 
   moveFilters () {
