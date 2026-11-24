@@ -13,8 +13,29 @@ from django.core.asgi import get_asgi_application
 from uvicorn_worker import UvicornWorker
 
 
+def get_uvicorn_worker_config():
+    config = {"loop": "auto", "http": "auto", "lifespan": "off"}
+
+    concurrency = os.getenv("UVICORN_LIMIT_CONCURRENCY", "").strip()
+    if not concurrency:
+        return config
+
+    try:
+        concurrency = int(concurrency)
+    except ValueError as exception:
+        raise ValueError(
+            "UVICORN_LIMIT_CONCURRENCY must be a positive integer"
+        ) from exception
+
+    if concurrency < 1:
+        raise ValueError("UVICORN_LIMIT_CONCURRENCY must be a positive integer")
+
+    config["limit_concurrency"] = concurrency
+    return config
+
+
 class DjangoUvicornWorker(UvicornWorker):
-    CONFIG_KWARGS = {"loop": "auto", "http": "auto", "lifespan": "off"}
+    CONFIG_KWARGS = get_uvicorn_worker_config()
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "liiweb.settings")
