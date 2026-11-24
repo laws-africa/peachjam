@@ -2868,6 +2868,7 @@ class LocalityAdmin(admin.ModelAdmin):
 
 @admin.register(LocalityType)
 class LocalityTypeAdmin(admin.ModelAdmin):
+    inlines = [EntityProfileInline]
     list_display = (
         "name",
         "position",

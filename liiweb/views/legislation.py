@@ -349,7 +349,13 @@ class LocalityLegislationListView(LegislationListView):
         return super().get_variant_queryset(qs)
 
     def add_entity_profile(self, context):
-        context["entity_profile"] = self.locality.entity_profile.first()
+        locality_profile = self.locality.entity_profile.first()
+        locality_type = self.locality.locality_type
+        type_profile = locality_type.entity_profile.first() if locality_type else None
+        context["entity_profile"] = locality_profile or type_profile
+        if type_profile and type_profile.background_photo:
+            context["entity_profile_background"] = type_profile
+        context["entity_profile_follow_target"] = self.locality
         context["entity_profile_title"] = self.locality.name
 
     def get_legislation_presentation(self):

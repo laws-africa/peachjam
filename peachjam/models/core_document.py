@@ -122,6 +122,9 @@ class LocalityType(models.Model):
         _("show subsidiary legislation"), default=True
     )
     show_document_nature = models.BooleanField(_("show document nature"), default=True)
+    entity_profile = GenericRelation(
+        "peachjam.EntityProfile", verbose_name=_("profile")
+    )
 
     class Meta:
         verbose_name = _("locality type")

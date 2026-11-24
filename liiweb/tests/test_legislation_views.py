@@ -1,14 +1,18 @@
 from datetime import date
-from io import StringIO
+from io import BytesIO, StringIO
+from tempfile import TemporaryDirectory
 
 from bs4 import BeautifulSoup
+from django.contrib.auth import get_user_model
 from django.core.cache import cache
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 from django.urls.base import reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 from languages_plus.models import Language
+from PIL import Image
 
 from peachjam.models import (
     DocumentNature,
@@ -537,6 +541,106 @@ class LocalityLandingPageTest(TestCase):
                     self.assertEqual(
                         str(soup.select_one(".entity-profile")), str(baseline)
                     )
+
+    def test_localities_inherit_type_banner_and_keep_their_own_profile_details(self):
+        type_profile = EntityProfile.objects.create(
+            content_object=self.municipal_type,
+            background_photo="types/municipal.jpg",
+        )
+        own_profile = EntityProfile.objects.create(
+            content_object=self.municipality,
+            background_photo="localities/old-banner.jpg",
+            about_html="<p>Cape Town description.</p>",
+        )
+        other_town = Locality.objects.create(
+            name="Another town",
+            code="other-town",
+            jurisdiction_id="ZA",
+            locality_type=self.municipal_type,
+        )
+        banner_url = reverse("entity_background_image", args=[type_profile.pk])
+        for locality in [self.municipality, other_town]:
+            for variant in ["current", "repealed", "all"]:
+                with self.subTest(locality=locality.code, variant=variant):
+                    response = self.client.get(
+                        reverse(
+                            "locality_legislation_list_" + variant,
+                            args=[locality.place_code()],
+                        )
+                    )
+                    soup = BeautifulSoup(response.content, "html.parser")
+                    image = soup.select_one(".entity-profile__background-photo img")
+                    self.assertEqual(image["src"], banner_url)
+                    follow = soup.select_one(".entity-profile__body__info [hx-get]")
+                    self.assertEqual(
+                        follow["hx-get"],
+                        reverse("user_following_button") + f"?locality={locality.pk}",
+                    )
+                    self.assertFalse(response.cookies)
+        self.assertContains(
+            self.client.get(self.landing_url(self.municipality)),
+            "Cape Town description.",
+        )
+        self.assertNotEqual(type_profile.pk, own_profile.pk)
+        province = self.client.get(self.landing_url(self.province))
+        self.assertNotContains(province, banner_url)
+
+    def test_admin_can_upload_and_replace_a_locality_type_banner(self):
+        administrator = get_user_model().objects.create_superuser(
+            username="type-editor", email="type-editor@example.com", password="password"
+        )
+        self.client.force_login(administrator)
+        url = reverse("admin:peachjam_localitytype_add")
+        with TemporaryDirectory() as media_root, self.settings(MEDIA_ROOT=media_root):
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            formset = response.context["inline_admin_formsets"][0].formset
+            prefix = formset.prefix
+            image = BytesIO()
+            Image.new("RGB", (2, 2), "green").save(image, "PNG")
+            data = {
+                "name": "District",
+                "name_en": "District",
+                "code": "district",
+                "collection_title": "District legislation",
+                "collection_title_en": "District legislation",
+                "legislation_title": "legislation",
+                "legislation_title_en": "legislation",
+                "position": 2,
+                "show_document_nature": "on",
+                "show_subsidiary_legislation": "on",
+                prefix + "-TOTAL_FORMS": "1",
+                prefix + "-INITIAL_FORMS": "0",
+                prefix + "-MIN_NUM_FORMS": "0",
+                prefix + "-MAX_NUM_FORMS": "1",
+                prefix + "-0-background_photo": SimpleUploadedFile(
+                    "district.png", image.getvalue(), content_type="image/png"
+                ),
+                "_save": "Save",
+            }
+            response = self.client.post(url, data)
+            self.assertEqual(response.status_code, 302)
+            locality_type = LocalityType.objects.get(code="district")
+            profile = locality_type.entity_profile.get()
+            image_url = reverse("entity_background_image", args=[profile.pk])
+            self.client.logout()
+            response = self.client.get(image_url)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(b"".join(response.streaming_content), image.getvalue())
+
+            # Replacing the uploaded image keeps the same stable public URL.
+            replacement = BytesIO()
+            Image.new("RGB", (2, 2), "blue").save(replacement, "PNG")
+            profile.background_photo.save(
+                "replacement.png",
+                SimpleUploadedFile(
+                    "replacement.png", replacement.getvalue(), content_type="image/png"
+                ),
+            )
+            response = self.client.get(image_url)
+            self.assertEqual(
+                b"".join(response.streaming_content), replacement.getvalue()
+            )
 
     def test_direct_listing_navigation_filters_local_documents(self):
         repealed = self.create_legislation(self.municipality, "Old by-law", "2")
