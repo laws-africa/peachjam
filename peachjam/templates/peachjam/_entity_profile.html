@@ -24,7 +24,27 @@
           </div>
         {% endif %}
       </div>
-      {% include "peachjam/_entity_profile_details.html" %}
+      {% if entity_profile.about_html %}<div class="mb-2">{{ entity_profile.about_html|safe }}</div>{% endif %}
+      <div class="row">
+        {% if entity_profile.address %}
+          <div class="col-12 col-sm-6">
+            <div>
+              <strong>{% trans 'Physical address' %}</strong>
+            </div>
+            <div>{{ entity_profile.address }}</div>
+          </div>
+        {% endif %}
+        {% if entity_profile.website_url %}
+          <div class="col-12 col-sm-6">
+            <div>
+              <strong>{% trans 'Visit website' %}</strong>
+            </div>
+            <a href="{{ entity_profile.website_url }}" target="_blank">{{ entity_profile.website_url }}
+              {% include 'peachjam/_opens_in_new_tab.html' %}
+            </a>
+          </div>
+        {% endif %}
+      </div>
       {% if entity_profile_extra_template %}
         {% include entity_profile_extra_template %}
       {% endif %}

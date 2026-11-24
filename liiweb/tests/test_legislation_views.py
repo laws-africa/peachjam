@@ -88,7 +88,9 @@ class LegislationViewsTest(TestCase):
         listing_response = self.client.get(
             reverse("locality_legislation_list", args=[locality.place_code()])
         )
-        self.assertTemplateUsed(listing_response, "liiweb/legislation_landing.html")
+        self.assertTemplateUsed(
+            listing_response, "liiweb/locality_legislation_list.html"
+        )
 
     def test_landing_page_hides_empty_configured_localities(self):
         locality = Locality.objects.get(pk=1)
@@ -469,48 +471,7 @@ class LocalityLandingPageTest(TestCase):
     def landing_url(self, locality):
         return reverse("locality_legislation_list", args=[locality.place_code()])
 
-    def test_municipality_uses_configured_terminology_and_features(self):
-        EntityProfile.objects.create(
-            content_object=self.municipality,
-            background_photo="localities/cape-town.jpg",
-        )
-        PopularLegislation.objects.create(work=self.municipal_document.work, position=1)
-        PopularLegislation.objects.create(
-            work=self.provincial_document.work, position=2
-        )
-        response = self.client.get(self.landing_url(self.municipality))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "liiweb/legislation_landing.html")
-        self.assertContains(
-            response, '<h1 id="main-page-heading">Cape Town By-laws</h1>', html=True
-        )
-        self.assertContains(response, "Browse by-laws")
-        self.assertContains(response, "Current by-laws")
-        self.assertContains(response, "Popular by-laws")
-        self.assertNotContains(response, "Document nature")
-        self.assertNotContains(response, 'name="natures"')
-        soup = BeautifulSoup(response.content, "html.parser")
-        advanced_search = soup.find("a", string="Advanced search")["href"]
-        self.assertNotIn("nature=", advanced_search)
-        self.assertIn("locality=Cape%20Town", advanced_search)
-        self.assertNotContains(response, "Subsidiary legislation")
-        self.assertContains(response, "localities/cape-town.jpg")
-        self.assertEqual(response.context["legislation_counts"]["total"], 1)
-        self.assertEqual(
-            response.context["popular_legislation"], [self.municipal_document]
-        )
-        self.assertEqual(
-            response.context["recent_legislation"], [self.municipal_document]
-        )
-        self.assertContains(
-            response,
-            f'action="{reverse("locality_legislation_list_all", args=["za-cpt"])}"',
-        )
-        self.assertFalse(response.cookies)
-
-    def test_locality_can_open_directly_to_its_document_listing(self):
-        self.municipal_type.show_landing_page = False
-        self.municipal_type.save(update_fields=["show_landing_page"])
+    def test_municipality_uses_shared_listing_with_configured_features(self):
         EntityProfile.objects.create(
             content_object=self.municipality,
             background_photo="localities/cape-town.jpg",
@@ -521,7 +482,13 @@ class LocalityLandingPageTest(TestCase):
         self.assertTemplateNotUsed(response, "liiweb/legislation_landing.html")
         self.assertContains(response, self.municipal_document.title)
         self.assertNotContains(response, self.provincial_document.title)
-        self.assertContains(response, "localities/cape-town.jpg")
+        self.assertContains(
+            response,
+            reverse(
+                "entity_background_image",
+                args=[self.municipality.entity_profile.first().pk],
+            ),
+        )
         self.assertNotContains(response, "Browse by-laws")
         self.assertNotContains(response, "Document nature")
         self.assertNotIn("natures", response.context["facet_data"])
@@ -548,8 +515,6 @@ class LocalityLandingPageTest(TestCase):
         self.assertNotContains(table, self.provincial_document.title)
 
     def test_direct_listing_navigation_filters_local_documents(self):
-        self.municipal_type.show_landing_page = False
-        self.municipal_type.save(update_fields=["show_landing_page"])
         repealed = self.create_legislation(self.municipality, "Old by-law", "2")
         repealed.repealed = True
         repealed.metadata_json["repeal"] = {"verb": "repealed"}
@@ -612,8 +577,6 @@ class LocalityLandingPageTest(TestCase):
         )
 
     def test_direct_listing_reuses_resource_cards_for_locality(self):
-        self.municipal_type.show_landing_page = False
-        self.municipal_type.save(update_fields=["show_landing_page"])
         UnconstitutionalProvision.objects.create(work=self.provincial_document.work)
         UncommencedProvision.objects.create(work=self.provincial_document.work)
         response = self.client.get(self.landing_url(self.municipality))
@@ -671,14 +634,12 @@ class LocalityLandingPageTest(TestCase):
             '<h1 id="main-page-heading">Western Cape legislation</h1>',
             html=True,
         )
-        self.assertContains(response, "Document nature")
-        self.assertContains(
-            response, reverse("locality_legislation_list_subsidiary", args=["za-wc"])
-        )
-        self.assertEqual(response.context["legislation_counts"]["total"], 1)
-        self.assertEqual(
-            response.context["recent_legislation"], [self.provincial_document]
-        )
+        self.assertTemplateUsed(response, "liiweb/locality_legislation_list.html")
+        self.assertTemplateNotUsed(response, "liiweb/legislation_landing.html")
+        self.assertIn("natures", response.context["form"].fields)
+        self.assertTrue(response.context["doc_table_toggle"])
+        self.assertContains(response, self.provincial_document.title)
+        self.assertNotContains(response, self.municipal_document.title)
 
     def test_locality_collections_follow_editable_positions(self):
         # The municipality was created first, but explicit positions take priority.
@@ -767,10 +728,10 @@ class LocalityLandingPageTest(TestCase):
         self.province.save()
         response = self.client.get(self.landing_url(self.province))
         self.assertContains(response, "Western Cape legislation")
-        self.assertContains(response, "Document nature")
-        self.assertContains(
-            response, reverse("locality_legislation_list_subsidiary", args=["za-wc"])
-        )
+        self.assertTemplateUsed(response, "liiweb/locality_legislation_list.html")
+        self.assertTemplateNotUsed(response, "liiweb/legislation_landing.html")
+        self.assertIn("natures", response.context["form"].fields)
+        self.assertTrue(response.context["doc_table_toggle"])
 
     def test_popular_locality_documents_can_be_curated_in_admin(self):
         from django.forms import modelform_factory

@@ -2874,7 +2874,6 @@ class LocalityTypeAdmin(admin.ModelAdmin):
         "collection_title",
         "show_subsidiary_legislation",
         "show_document_nature",
-        "show_landing_page",
     )
     list_editable = ("position",)
     ordering = ("position", "pk")

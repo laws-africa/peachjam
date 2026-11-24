@@ -194,8 +194,6 @@ class LegislationListView(BaseLegislationListView):
         return {
             "landing_page_heading": _("Legislation"),
             "legislation_noun": _("legislation"),
-            "show_document_nature": True,
-            "show_subleg": True,
             "legislation_urls": {
                 variant: reverse(
                     self.legislation_url_name + "_" + variant,
@@ -294,12 +292,7 @@ class LocalityLegislationListView(LegislationListView):
     national_only = False
     legislation_url_name = "locality_legislation_list"
 
-    @property
-    def show_landing_page(self):
-        locality_type = self.locality.locality_type
-        return (
-            not locality_type or locality_type.show_landing_page
-        ) and super().show_landing_page
+    show_landing_page = False
 
     def get(self, *args, **kwargs):
         code = kwargs["code"]
@@ -371,8 +364,6 @@ class LocalityLegislationListView(LegislationListView):
                     "title": title,
                 },
                 "legislation_noun": title.lower(),
-                "show_document_nature": self.show_document_nature,
-                "show_subleg": self.show_subleg,
             }
         )
         return presentation
@@ -401,10 +392,7 @@ class LocalityLegislationListView(LegislationListView):
                 ).exists(),
             }
         )
-        if (
-            not self.show_landing_page
-            and self.request.resolver_match.url_name != self.legislation_url_name
-        ):
+        if self.request.resolver_match.url_name != self.legislation_url_name:
             headings = {
                 "current": _("Current %(legislation)s"),
                 "all": _("All %(legislation)s"),
@@ -418,7 +406,4 @@ class LocalityLegislationListView(LegislationListView):
                 else pj_settings().subleg_label
             )
         context["entity_profile_title"] = context["page_heading"]
-        profile = context.get("entity_profile")
-        if profile and profile.background_photo:
-            context["legislation_banner_url"] = profile.background_photo.url
         return context

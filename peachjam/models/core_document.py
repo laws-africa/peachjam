@@ -122,11 +122,6 @@ class LocalityType(models.Model):
         _("show subsidiary legislation"), default=True
     )
     show_document_nature = models.BooleanField(_("show document nature"), default=True)
-    show_landing_page = models.BooleanField(
-        _("show landing page"),
-        default=True,
-        help_text=_("If disabled, open the locality's document listing directly."),
-    )
 
     class Meta:
         verbose_name = _("locality type")
