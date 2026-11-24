@@ -39,7 +39,7 @@
     "eslint-plugin-vue": "^8.5.0",
     "flag-icons": "^6.6.6",
     "htmx.org": "^2.0.4",
-    "i18next": "^23.0.6",
+    "i18next": "^27.2.6",
     "i18next-cli": "^1.57.0",
     "i18next-cli-vue": "^1.0.4",
     "lodash.debounce": "^4.0.8",
