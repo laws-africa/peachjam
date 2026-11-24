@@ -39,8 +39,7 @@
 {% block page-title %}
   {% if not entity_profile %}
     <div class="my-4">
-      <h1 id="main-page-heading">{{ page_heading }}</h1>
-      {% if page_heading != landing_page_heading %}<p class="lead">{{ landing_page_heading }}</p>{% endif %}
+      <h1 id="main-page-heading">{{ landing_page_heading }}</h1>
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ locality|get_follow_params }}"
              hx-trigger="load"></div>

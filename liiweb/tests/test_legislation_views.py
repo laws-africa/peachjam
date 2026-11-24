@@ -514,6 +514,30 @@ class LocalityLandingPageTest(TestCase):
         self.assertContains(table, self.municipal_document.title)
         self.assertNotContains(table, self.provincial_document.title)
 
+    def test_locality_profile_header_is_identical_across_collection_tabs(self):
+        for locality in [self.municipality, self.province]:
+            EntityProfile.objects.create(
+                content_object=locality,
+                background_photo="localities/banner.jpg",
+                about_html="<p>Locality profile description.</p>",
+            )
+            response = self.client.get(self.landing_url(locality))
+            baseline = BeautifulSoup(response.content, "html.parser").select_one(
+                ".entity-profile"
+            )
+            for variant in ["current", "repealed", "all"]:
+                with self.subTest(locality=locality.code, variant=variant):
+                    response = self.client.get(
+                        reverse(
+                            "locality_legislation_list_" + variant,
+                            args=[locality.place_code()],
+                        )
+                    )
+                    soup = BeautifulSoup(response.content, "html.parser")
+                    self.assertEqual(
+                        str(soup.select_one(".entity-profile")), str(baseline)
+                    )
+
     def test_direct_listing_navigation_filters_local_documents(self):
         repealed = self.create_legislation(self.municipality, "Old by-law", "2")
         repealed.repealed = True

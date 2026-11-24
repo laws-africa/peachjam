@@ -405,5 +405,5 @@ class LocalityLegislationListView(LegislationListView):
                 if self.variant in headings
                 else pj_settings().subleg_label
             )
-        context["entity_profile_title"] = context["page_heading"]
+        context["entity_profile_title"] = context["landing_page_heading"]
         return context
