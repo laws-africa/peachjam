@@ -72,6 +72,7 @@ class OrganisationService:
         return ProductOffering.objects.filter(
             selectable_for_products__in=subscription_settings().key_products.all(),
             pricing_plan__price__gt=0,
+            available_to_organisations=True,
         )
 
     def offerings_available_to_organisation(self, organisation=None, actor=None):
@@ -91,7 +92,8 @@ class OrganisationService:
                 klass=ProductOffering,
             ).values("pk")
         queryset = ProductOffering.objects.filter(
-            Q(pk__in=self.public_offerings().values("pk")) | Q(pk__in=permitted_ids)
+            Q(pk__in=self.public_offerings().values("pk")) | Q(pk__in=permitted_ids),
+            available_to_organisations=True,
         )
         if organisation:
             queryset = queryset.filter(pricing_plan__period=organisation.billing_period)

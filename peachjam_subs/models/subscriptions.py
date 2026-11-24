@@ -5,6 +5,7 @@ from decimal import Decimal
 from dateutil.relativedelta import relativedelta
 from django.contrib.auth.models import Group, Permission, User
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -315,6 +316,21 @@ class PricingPlan(models.Model):
 
 
 class ProductOffering(models.Model):
+    available_to_organisations = models.BooleanField(
+        default=True,
+        help_text=_(
+            "Allow new organisation subscriptions and seats. Existing seats can still renew or be reduced."
+        ),
+    )
+    allow_discounts = models.BooleanField(default=True)
+    initial_period_months = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1)],
+        help_text=_(
+            "Optional first paid term in calendar months. Renewals use the pricing plan."
+        ),
+    )
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     pricing_plan = models.ForeignKey(PricingPlan, on_delete=models.CASCADE)
 
@@ -387,6 +403,8 @@ class Subscription(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     active_at = models.DateTimeField(null=True, blank=True)
     billing_anchor_on = models.DateField(null=True, blank=True, editable=False)
+    # Exclusive boundary: the first ordinary renewal period starts on this date.
+    initial_period_ends_on = models.DateField(null=True, blank=True, editable=False)
     closed_at = models.DateTimeField(null=True, blank=True)
 
     is_trial = models.BooleanField(
@@ -535,6 +553,10 @@ class Subscription(models.Model):
         anchor = self.billing_anchor_on or (
             site_date(self.active_at) if self.active_at else (self.starts_on or date)
         )
+        if self.initial_period_ends_on:
+            if date < self.initial_period_ends_on:
+                return anchor, self.initial_period_ends_on - timedelta(days=1)
+            anchor = self.initial_period_ends_on
         return period_bounds(anchor, date, self.product_offering.pricing_plan.period)
 
     def end_of_current_period(self):
