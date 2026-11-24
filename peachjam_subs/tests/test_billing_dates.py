@@ -21,7 +21,7 @@ class BillingDatesTest(SimpleTestCase):
     def test_periods_preserve_month_end_anniversaries(self):
         anchor = date(2026, 1, 31)
         self.assertEqual(
-            (date(2026, 2, 28), date(2026, 3, 27)),
+            (date(2026, 2, 28), date(2026, 3, 30)),
             period_bounds(anchor, date(2026, 2, 28), "monthly"),
         )
         self.assertEqual(
