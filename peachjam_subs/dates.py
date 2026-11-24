@@ -21,5 +21,5 @@ def period_bounds(anchor, value, period):
     if start > value:
         count -= 1
         start = anchor + relativedelta(months=count * months)
-    end = start + relativedelta(months=months) - timedelta(days=1)
+    end = anchor + relativedelta(months=(count + 1) * months) - timedelta(days=1)
     return start, end
