@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from io import BytesIO, StringIO
 from tempfile import TemporaryDirectory
 
@@ -151,6 +151,45 @@ class LegislationViewsTest(TestCase):
         self.assertEqual(
             cell.get_text(strip=True), date_format(publication_date, "DATE_FORMAT")
         )
+
+    def test_recent_highlights_keep_current_expression_when_future_expression_exists(
+        self,
+    ):
+        today = timezone.now().date()
+        fields = {
+            "jurisdiction": Legislation.objects.get(pk=3040).jurisdiction,
+            "frbr_uri_doctype": "act",
+            "frbr_uri_date": str(today.year),
+            "frbr_uri_number": "recent-highlights",
+            "language_id": "en",
+            "metadata_json": {
+                "publication_date": (today - timedelta(days=1)).isoformat()
+            },
+            "published": True,
+            "principal": True,
+        }
+        document = Legislation.objects.create(
+            **fields,
+            date=today - timedelta(days=30),
+            title="Current expression of recent act",
+        )
+        future = Legislation.objects.create(
+            **fields,
+            date=today + timedelta(days=30),
+            title="Future expression of recent act",
+        )
+        self.assertEqual(document.work_id, future.work_id)
+        response = self.client.get(reverse("legislation_list"))
+        self.assertEqual(
+            [doc.pk for doc in response.context["recent_legislation"]], [document.pk]
+        )
+        soup = BeautifulSoup(response.content, "html.parser")
+        highlights = soup.select_one("#recent-legislation-table")
+        self.assertIn(document.title, highlights.get_text())
+        self.assertNotIn(future.title, highlights.get_text())
+        listing = self.client.get(reverse("legislation_list_recent"))
+        self.assertContains(listing, document.title)
+        self.assertNotContains(listing, future.title)
 
     @override_settings(
         CACHES={"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache"}}

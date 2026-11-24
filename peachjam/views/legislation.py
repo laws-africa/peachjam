@@ -155,10 +155,17 @@ class LegislationListView(FilteredDocumentListView):
         )
         today = timezone.now().date()
         recent_since = (today - timedelta(days=365)).isoformat()
-        recent_queryset = latest_expressions.filter(
-            date__lte=today,
-            metadata_json__publication_date__gte=recent_since,
+        recent_expression_ids = (
+            queryset.filter(
+                date__lte=today,
+                metadata_json__publication_date__gte=recent_since,
+            )
+            .latest_expression()
+            .values("id")
         )
+        recent_queryset = self.model.objects.filter(
+            id__in=recent_expression_ids
+        ).for_document_table()
 
         popular_legislation = list(
             latest_expressions.filter(work__popular_legislation__isnull=False).order_by(
