@@ -58,6 +58,110 @@ class OrganisationServiceTests(TestCase):
             owner=self.owner,
         )
 
+    def test_organisation_applicability_overrides_catalogue_and_permissions(self):
+        self.offering.product.selectable_offerings.add(self.offering)
+        subscription_settings().key_products.add(self.offering.product)
+        self.offering.initial_period_months = 15
+        self.offering.save()
+        self.assertIn(
+            self.offering,
+            organisation_service.offerings_available_to_organisation(self.organisation),
+        )
+        self.offering.available_to_organisations = False
+        self.offering.save()
+        self.assertNotIn(self.offering, organisation_service.public_offerings())
+        self.assertNotIn(
+            self.offering,
+            organisation_service.offerings_available_to_organisation(self.organisation),
+        )
+        self.assertNotIn(
+            self.offering,
+            organisation_service.offerings_available_to_organisation(actor=self.staff),
+        )
+        with self.assertRaisesMessage(ValidationError, "not available"):
+            organisation_service.ensure_offering_available(
+                self.organisation, self.offering
+            )
+
+    def test_private_individual_only_offer_cannot_be_added_invited_or_selected(self):
+        self.offering.available_to_organisations = False
+        self.offering.save()
+        # This offering is permitted to the owner, but not in the public catalogue.
+        self.offering.product.selectable_offerings.clear()
+        with self.assertRaisesMessage(ValidationError, "not available"):
+            organisation_service.stage_capacity_additions(
+                organisation=self.organisation,
+                additions=[(self.offering, 1)],
+                actor=self.owner,
+            )
+        with self.assertRaisesMessage(ValidationError, "not available"):
+            organisation_service.send_invitation(
+                organisation=self.organisation,
+                email=self.member.email,
+                role=OrganisationMembership.Role.MEMBER,
+                requested_product_offering=self.offering,
+                actor=self.owner,
+            )
+        seat = OrganisationSeat.objects.create(
+            organisation=self.organisation,
+            product_offering=ProductOffering.objects.get(pk=3),
+        )
+        with self.assertRaisesMessage(ValidationError, "not available"):
+            organisation_service.change_seat_plan(
+                seat=seat,
+                offering=self.offering,
+                renewal_on=timezone.localdate(),
+                actor=self.owner,
+            )
+        self.assertFalse(self.organisation.seat_changes.exists())
+
+    def test_new_owner_setup_cannot_select_individual_only_offer(self):
+        self.offering.available_to_organisations = False
+        self.offering.save()
+        empty = organisation_service.create_organisation(
+            name="New setup",
+            billing_period="monthly",
+            privacy_mode=Organisation.PrivacyMode.BILLING_ONLY,
+            actor=self.staff,
+        )
+        with self.assertRaisesMessage(ValidationError, "not available"):
+            organisation_service.add_existing_owner(
+                organisation=empty,
+                user=self.member,
+                offering=self.offering,
+                actor=self.staff,
+            )
+        self.assertIsNone(empty.owner)
+
+    def test_separate_campaign_does_not_change_standard_organisation_terms(self):
+        standard = self.offering
+        standard.pricing_plan.period = "annually"
+        standard.pricing_plan.save()
+        self.organisation.billing_period = "annually"
+        self.organisation.save(update_fields=["billing_period"])
+        campaign = ProductOffering.objects.create(
+            product=standard.product,
+            pricing_plan=PricingPlan.objects.create(
+                name="Campaign annual",
+                price=standard.pricing_plan.price,
+                period="annually",
+            ),
+            initial_period_months=15,
+            allow_discounts=False,
+            available_to_organisations=False,
+        )
+        standard.product.selectable_offerings.set([campaign])
+        subscription_settings().key_products.add(standard.product)
+        available = organisation_service.offerings_available_to_organisation(
+            self.organisation
+        )
+        self.assertIn(
+            standard, available
+        )  # Existing owner permission retains the standard choice.
+        self.assertNotIn(campaign, available)
+        self.assertTrue(standard.allow_discounts)
+        self.assertIsNone(standard.initial_period_months)
+
     def test_private_free_offering_is_available_through_owner_permission(self):
         self.organisation.billing_period = PricingPlan.Period.ANNUALLY
         self.organisation.save(update_fields=["billing_period"])

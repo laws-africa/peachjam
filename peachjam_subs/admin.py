@@ -195,7 +195,13 @@ class PricingPlanAdmin(admin.ModelAdmin):
 
 @admin.register(ProductOffering)
 class ProductOfferingAdmin(GuardedModelAdmin):
-    list_display = ("product", "pricing_plan")
+    list_display = (
+        "product",
+        "pricing_plan",
+        "initial_period_months",
+        "allow_discounts",
+        "available_to_organisations",
+    )
     search_fields = ("product__name", "pricing_plan__name")
     list_filter = ("product", "pricing_plan")
     ordering = ("product__name", "pricing_plan__name")
