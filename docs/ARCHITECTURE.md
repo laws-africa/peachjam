@@ -12,7 +12,7 @@ The system has four layers:
 
 1. **Shared platform**: `peachjam`
 2. **Supporting shared apps**: `peachjam_search`, `peachjam_api`, `peachjam_subs`, `peachjam_ml`
-3. **Site shells**: `liiweb`, `gazettes`, `open_by_laws`, and jurisdiction-specific apps such as `zambialii`, `malawilii`, `seylii`
+3. **Site shells**: `liiweb`, `open_by_laws`, and jurisdiction-specific apps such as `zambialii`, `malawilii`, `seylii`
 4. **Frontend assets**: TypeScript/Vue/HTMX code under `peachjam/js`, bundled by webpack into `peachjam/static/js`
 
 ## Boot and request flow
@@ -38,7 +38,6 @@ The system has four layers:
 Examples:
 
 - `liiweb.settings`: base shell used by some LII sites
-- `gazettes.settings`: Gazettes.Africa-specific DB/middleware/CORS
 - `open_by_laws.settings`: municipal by-laws deployment with legacy microsite redirects
 
 ### URL composition
@@ -237,16 +236,6 @@ Typical responsibilities:
 - override branding and language labels
 - enable/disable features such as chat or ML
 - add site-specific templates/static assets
-
-### `gazettes`
-
-Specialized deployment for Gazettes.Africa.
-
-Responsibilities:
-
-- own DB/default app settings
-- custom middleware and context processor
-- multi-jurisdiction gazette-focused behavior
 
 ### `open_by_laws`
 
