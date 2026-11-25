@@ -114,6 +114,7 @@ from peachjam.models import (
     LegalSubject,
     Legislation,
     Locality,
+    LocalityType,
     LowerBench,
     MatterType,
     OnboardingIntent,
@@ -121,6 +122,7 @@ from peachjam.models import (
     Partner,
     PartnerLogo,
     PeachJamSettings,
+    PopularLegislation,
     PracticeType,
     Predicate,
     ProvisionEnrichment,
@@ -1444,6 +1446,14 @@ class LegislationAdmin(ImportExportMixin, DocumentAdmin):
     readonly_fields = ["parent_work", "commencements_json", "timeline_json"] + list(
         DocumentAdmin.readonly_fields
     )
+
+
+@admin.register(PopularLegislation)
+class PopularLegislationAdmin(admin.ModelAdmin):
+    autocomplete_fields = ("work",)
+    list_display = ("work", "position")
+    list_editable = ("position",)
+    ordering = ("position", "pk")
 
 
 @admin.register(Bill)
@@ -2848,10 +2858,50 @@ class LabelAdmin(admin.ModelAdmin):
 
 @admin.register(Locality)
 class LocalityAdmin(admin.ModelAdmin):
-    list_display = ("name", "jurisdiction", "code")
+    list_display = ("name", "jurisdiction", "code", "locality_type")
+    list_filter = ("jurisdiction", "locality_type")
+    autocomplete_fields = ("locality_type",)
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code")
     inlines = [EntityProfileInline]
+
+
+class LocalityTypeForm(forms.ModelForm):
+    profile_photo = EntityProfile._meta.get_field("profile_photo").formfield()
+
+    class Meta:
+        model = LocalityType
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            profile = self.instance.entity_profile.first()
+            if profile:
+                self.initial["profile_photo"] = profile.profile_photo
+
+
+@admin.register(LocalityType)
+class LocalityTypeAdmin(admin.ModelAdmin):
+    form = LocalityTypeForm
+    list_display = (
+        "name",
+        "position",
+        "collection_title",
+        "show_subsidiary_legislation",
+        "show_document_nature",
+    )
+    list_editable = ("position",)
+    ordering = ("position", "pk")
+    prepopulated_fields = {"code": ("name",)}
+    search_fields = ("name", "code", "collection_title")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "profile_photo" in form.changed_data:
+            obj.entity_profile.update_or_create(
+                defaults={"profile_photo": form.cleaned_data["profile_photo"] or ""}
+            )
 
 
 @admin.register(JurisdictionProfile)

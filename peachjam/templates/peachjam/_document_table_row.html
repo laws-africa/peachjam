@@ -66,5 +66,7 @@
   {% if doc_table_show_incoming_citation_count %}
     <td class="text-end text-nowrap">{{ document.incoming_citation_count|default_if_none:'' }}</td>
   {% endif %}
-  {% if doc_table_show_date %}<td class="cell-date text-nowrap">{{ document.date|default_if_none:'' }}</td>{% endif %}
+  {% if doc_table_show_date %}
+    <td class="cell-date text-nowrap">{% firstof document_date document.date '' %}</td>
+  {% endif %}
 </tr>

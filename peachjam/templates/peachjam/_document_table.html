@@ -16,6 +16,7 @@ variables like "hide_xxx" default to being "on".
 * doc_table_hide_thead: Hide the table header
 * doc_table_title_label: label to use for Title column (default: Title)
 * doc_table_date_label: label to use for Date column (default: Date)
+* doc_table_use_publication_date: Use landing_publication_date for date cells (default: false)
 * doc_table_show_author: show document author (and author column)
 * doc_table_show_court: show document court (and court column)
 * doc_table_show_counts: show filtered and total document counts at the top of the table
@@ -116,7 +117,11 @@ variables like "hide_xxx" default to being "on".
         </thead>
       {% endif %}
       {% for document in documents %}
-        {% include 'peachjam/_document_table_row.html' %}
+        {% if doc_table_use_publication_date %}
+          {% include 'peachjam/_document_table_row.html' with document_date=document.landing_publication_date %}
+        {% else %}
+          {% include 'peachjam/_document_table_row.html' %}
+        {% endif %}
         {% if document.children %}
           <tbody id="{{ doc_table_dom_id }}-children-{{ forloop.counter0 }}"
                  class="doc-table-children collapse{% if doc_table_children_expanded %} show{% endif %}">

@@ -1,14 +1,14 @@
 {% load i18n peachjam %}
-<div class="entity-profile {% if entity_profile.background_photo %} has-background-photo{% endif %}">
+<div class="entity-profile {% if entity_profile_background_url or entity_profile.background_photo %} has-background-photo{% endif %}">
   <div class="entity-profile__background-photo">
-    {% if entity_profile.background_photo %}
-      <img src="{% url 'entity_background_image' entity_profile.pk %}"
+    {% if entity_profile_background_url or entity_profile.background_photo %}
+      <img src="{% if entity_profile_background_url %}{{ entity_profile_background_url }}{% else %}{% url 'entity_background_image' entity_profile.pk %}{% endif %}"
            alt="background image"
            loading="lazy"/>
     {% endif %}
   </div>
   <div class="entity-profile__body">
-    {% if entity_profile.profile_photo %}
+    {% if entity_profile.profile_photo and not hide_profile_photo %}
       <img src="{% url 'entity_profile_image' entity_profile.pk %}"
            class="entity-profile__body__profile-image"
            alt="profile image"
@@ -16,10 +16,10 @@
     {% endif %}
     <div class="entity-profile__body__info">
       <div>
-        <h1>{{ entity_profile_title|default:entity_profile.title }}</h1>
+        <h1 id="main-page-heading">{{ entity_profile_title|default:entity_profile.title }}</h1>
         {% if not hide_follow_button %}
           <div class="my-2"
-               hx-get="{% url 'user_following_button' %}?{{ entity_profile.content_object|get_follow_params }}"
+               hx-get="{% url 'user_following_button' %}?{{ entity_profile_follow_target|default:entity_profile.content_object|get_follow_params }}"
                hx-trigger="load">
           </div>
         {% endif %}
@@ -45,6 +45,9 @@
           </div>
         {% endif %}
       </div>
+      {% if entity_profile_extra_template %}
+        {% include entity_profile_extra_template %}
+      {% endif %}
     </div>
   </div>
 </div>

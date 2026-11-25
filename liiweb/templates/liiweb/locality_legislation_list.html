@@ -1,57 +1,92 @@
 {% extends "liiweb/legislation_list.html" %}
 {% load i18n peachjam %}
-{% block title %}{{ locality_legislation_title }}{% endblock %}
+{% block title %}
+  {{ page_heading }}
+  {% if page_heading != landing_page_heading %}– {{ landing_page_heading }}{% endif %}
+{% endblock %}
 {% block breadcrumbs %}
-  <div class="container">
-    <nav aria-label="breadcrumb">
+  <div class="container" id="locality-legislation-breadcrumbs">
+    <nav aria-label="{% trans 'Breadcrumb' %}">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
           <a href="{% url 'home_page' %}">{% trans 'Home' %}</a>
         </li>
+        <li class="breadcrumb-item">
+          <a href="{% url 'legislation_list' %}">{% trans 'Legislation' %}</a>
+        </li>
         {% block breadcrumbs-locality %}
           <li class="breadcrumb-item">
-            <a href="{% url 'locality_legislation' %}">{{ locality_legislation_title }}</a>
+            <a href="{{ locality_collection_url }}">{{ locality_legislation_title }}</a>
           </li>
         {% endblock %}
-        <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
+        {% if request.resolver_match.url_name == view.legislation_url_name %}
+          <li class="breadcrumb-item active" aria-current="page">{{ locality.name }}</li>
+        {% else %}
+          <li class="breadcrumb-item">
+            <a href="{{ locality_landing_url }}">{{ landing_page_heading }}</a>
+          </li>
+          <li class="breadcrumb-item active" aria-current="page">{{ page_heading }}</li>
+        {% endif %}
       </ol>
     </nav>
   </div>
 {% endblock %}
-{% block nav-tabs %}
-  <nav class="nav nav-tabs mb-3 border-bottom">
-    <li class="nav-item">
-      <a class="nav-link {% if view.variant == 'current' %}active{% endif %}"
-         href="{% url 'locality_legislation_list' locality.place_code %}">
-        {% block current_tab_title %}
-          {% trans "Current legislation" %}
-        {% endblock %}
-      </a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link {% if view.variant == 'repealed' %}active{% endif %}"
-         href="{% url 'locality_legislation_list_repealed' locality.place_code %}">{% trans "Repealed legislation" %}</a>
-    </li>
-    {% if show_subleg %}
-      <li class="nav-item">
-        <a class="nav-link {% if view.variant == 'subleg' %}active{% endif %}"
-           href="{% url 'locality_legislation_list_subsidiary' locality.place_code %}">{{ PEACHJAM_SETTINGS.subleg_label }}</a>
-      </li>
-    {% endif %}
-    <li class="nav-item">
-      <a class="nav-link {% if view.variant == 'all' %}active{% endif %}"
-         href="{% url 'locality_legislation_list_all' locality.place_code %}">{% trans "All legislation" %}</a>
-    </li>
-  </nav>
+{% block entity-profile %}
+  {% if entity_profile %}
+    {% include 'peachjam/_entity_profile.html' with entity_profile_extra_template='liiweb/_legislation_resources.html' resources_compact=True show_empty_resources=True %}
+  {% endif %}
 {% endblock %}
 {% block page-title %}
   {% if not entity_profile %}
     <div class="my-4">
-      <h1>{{ page_heading }}</h1>
+      <h1 id="main-page-heading">{{ landing_page_heading }}</h1>
       {% block follow-button %}
         <div hx-get="{% url 'user_following_button' %}?{{ locality|get_follow_params }}"
              hx-trigger="load"></div>
       {% endblock %}
+      {% include 'liiweb/_legislation_resources.html' with resources_compact=True show_empty_resources=True %}
+    </div>
+  {% endif %}
+{% endblock %}
+{% block nav-tabs %}
+  <nav aria-label="{% trans 'Legislation collections' %}"
+       class="mb-3"
+       hx-boost="true"
+       hx-target="#documents"
+       hx-select="#documents"
+       hx-select-oob="#locality-legislation-breadcrumbs"
+       hx-swap="outerHTML show:none"
+       hx-push-url="true"
+       hx-sync="this:replace">
+    <ul class="nav nav-tabs">
+      <li class="nav-item">
+        <a class="nav-link{% if view.variant == 'current' %} active{% endif %}"
+           id="locality-legislation-current"
+           {% if view.variant == 'current' %}aria-current="page"{% endif %}
+           data-key-link="legislation_current"
+           href="{{ legislation_urls.current }}">{% trans 'Current legislation' %}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if view.variant == 'repealed' %} active{% endif %}"
+           id="locality-legislation-repealed"
+           {% if view.variant == 'repealed' %}aria-current="page"{% endif %}
+           data-key-link="legislation_repealed"
+           href="{{ legislation_urls.repealed }}">{% trans 'Repealed legislation' %}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link{% if view.variant == 'all' %} active{% endif %}"
+           id="locality-legislation-all"
+           {% if view.variant == 'all' %}aria-current="page"{% endif %}
+           data-key-link="legislation_all"
+           href="{{ legislation_urls.all }}">{% trans 'All legislation' %}</a>
+      </li>
+    </ul>
+  </nav>
+{% endblock %}
+{% block alerts %}
+  {% if view.variant == 'repealed' %}
+    <div class="alert alert-danger">
+      {% blocktrans with legislation=legislation_noun %}You are viewing repealed {{ legislation }}. These documents are no longer in force.{% endblocktrans %}
     </div>
   {% endif %}
 {% endblock %}

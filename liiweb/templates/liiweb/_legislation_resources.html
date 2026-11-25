@@ -1,0 +1,58 @@
+{% load i18n %}
+{% if show_more_resources or show_glossary or show_empty_resources %}
+  <section class="{% if resources_compact %}mt-4{% else %}bg-light py-5{% endif %}"
+           aria-labelledby="research-tools-heading">
+    <div{% if not resources_compact %} class="container"{% endif %}>
+      <div class="{% if resources_compact %}mb-3{% else %}text-center mb-4{% endif %}">
+        <h2 id="research-tools-heading"
+            {% if resources_compact %} class="h4"{% endif %}>{% trans "More resources" %}</h2>
+        {% if not resources_compact %}
+          <p class="lead mb-0">{% trans "Check individual provisions and look up defined legal terms." %}</p>
+        {% endif %}
+      </div>
+      <div class="row g-3{% if not resources_compact %} justify-content-center{% endif %}">
+        {% if show_unconstitutional_provisions or show_empty_resources %}
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="card card-clickable h-100 position-relative">
+              <div class="card-body">
+                <h3 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'unconstitutional_provision_list' %}{% if locality %}?localities={{ locality.name|urlencode }}{% endif %}">{% trans "Unconstitutional provisions" %}</a>
+                </h3>
+                <p class="card-text mb-0">{% trans "See provisions affected by constitutional decisions." %}</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        {% if show_uncommenced_provisions or show_empty_resources %}
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="card card-clickable h-100 position-relative">
+              <div class="card-body">
+                <h3 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'uncommenced_provision_list' %}{% if locality %}?localities={{ locality.name|urlencode }}{% endif %}">{% trans "Uncommenced provisions" %}</a>
+                </h3>
+                <p class="card-text mb-0">{% trans "See individual sections that are not yet in force." %}</p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+        {% if show_glossary %}
+          <div class="col-12 col-md-6 col-xl-4">
+            <div class="card card-clickable h-100 position-relative">
+              <div class="card-body">
+                <h3 class="h5 mb-2">
+                  <a class="stretched-link text-decoration-none"
+                     href="{% url 'glossary' place_code=place_code %}">{% trans "Glossary of defined terms" %}</a>
+                </h3>
+                <p class="card-text mb-0">
+                  {% blocktrans with legislation=legislation_noun %}Look up terms defined across {{ legislation }}.{% endblocktrans %}
+                </p>
+              </div>
+            </div>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+{% endif %}
