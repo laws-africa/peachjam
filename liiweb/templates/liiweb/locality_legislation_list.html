@@ -5,7 +5,7 @@
   {% if page_heading != landing_page_heading %}– {{ landing_page_heading }}{% endif %}
 {% endblock %}
 {% block breadcrumbs %}
-  <div class="container">
+  <div class="container" id="locality-legislation-breadcrumbs">
     <nav aria-label="{% trans 'Breadcrumb' %}">
       <ol class="breadcrumb">
         <li class="breadcrumb-item">
@@ -49,22 +49,33 @@
   {% endif %}
 {% endblock %}
 {% block nav-tabs %}
-  <nav aria-label="{% trans 'Legislation collections' %}" class="mb-3">
+  <nav aria-label="{% trans 'Legislation collections' %}"
+       class="mb-3"
+       hx-boost="true"
+       hx-target="#documents"
+       hx-select="#documents"
+       hx-select-oob="#locality-legislation-breadcrumbs"
+       hx-swap="outerHTML show:none"
+       hx-push-url="true"
+       hx-sync="this:replace">
     <ul class="nav nav-tabs">
       <li class="nav-item">
         <a class="nav-link{% if view.variant == 'current' %} active{% endif %}"
+           id="locality-legislation-current"
            {% if view.variant == 'current' %}aria-current="page"{% endif %}
            data-key-link="legislation_current"
            href="{{ legislation_urls.current }}">{% trans 'Current legislation' %}</a>
       </li>
       <li class="nav-item">
         <a class="nav-link{% if view.variant == 'repealed' %} active{% endif %}"
+           id="locality-legislation-repealed"
            {% if view.variant == 'repealed' %}aria-current="page"{% endif %}
            data-key-link="legislation_repealed"
            href="{{ legislation_urls.repealed }}">{% trans 'Repealed legislation' %}</a>
       </li>
       <li class="nav-item">
         <a class="nav-link{% if view.variant == 'all' %} active{% endif %}"
+           id="locality-legislation-all"
            {% if view.variant == 'all' %}aria-current="page"{% endif %}
            data-key-link="legislation_all"
            href="{{ legislation_urls.all }}">{% trans 'All legislation' %}</a>

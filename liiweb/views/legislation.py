@@ -294,6 +294,15 @@ class LocalityLegislationListView(LegislationListView):
 
     show_landing_page = False
 
+    def get_template_names(self):
+        if self.request.htmx and (
+            self.request.htmx.target == "documents"
+            or self.request.htmx.history_restore_request
+        ):
+            # Collection navigation selects the listing and breadcrumbs from this page.
+            return [self.template_name]
+        return super().get_template_names()
+
     def get(self, *args, **kwargs):
         code = kwargs["code"]
         if "-" not in code:
@@ -353,8 +362,11 @@ class LocalityLegislationListView(LegislationListView):
         locality_type = self.locality.locality_type
         type_profile = locality_type.entity_profile.first() if locality_type else None
         context["entity_profile"] = locality_profile or type_profile
-        if type_profile and type_profile.background_photo:
-            context["entity_profile_background"] = type_profile
+        if type_profile and type_profile.profile_photo:
+            context["entity_profile_background_url"] = reverse(
+                "entity_profile_image", args=[type_profile.pk]
+            )
+        context["hide_profile_photo"] = locality_profile is None
         context["entity_profile_follow_target"] = self.locality
         context["entity_profile_title"] = self.locality.name
 

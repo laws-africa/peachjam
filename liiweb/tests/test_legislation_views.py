@@ -581,10 +581,40 @@ class LocalityLandingPageTest(TestCase):
                         str(soup.select_one(".entity-profile")), str(baseline)
                     )
 
+    def test_collection_navigation_keeps_full_page_for_htmx_selection_and_history(self):
+        for headers in [
+            {
+                "HTTP_HX_REQUEST": "true",
+                "HTTP_HX_TARGET": "documents",
+                "HTTP_HX_BOOSTED": "true",
+            },
+            {"HTTP_HX_REQUEST": "true", "HTTP_HX_HISTORY_RESTORE_REQUEST": "true"},
+        ]:
+            with self.subTest(headers=headers):
+                response = self.client.get(
+                    reverse("locality_legislation_list_repealed", args=["za-cpt"]),
+                    **headers,
+                )
+                self.assertTemplateUsed(
+                    response, "liiweb/locality_legislation_list.html"
+                )
+                soup = BeautifulSoup(response.content, "html.parser")
+                self.assertIsNotNone(soup.select_one("#documents"))
+                self.assertIsNotNone(
+                    soup.select_one("#locality-legislation-breadcrumbs")
+                )
+                active = soup.select_one(
+                    'nav[aria-label="Legislation collections"] a.active'
+                )
+                self.assertEqual(active.get_text(strip=True), "Repealed legislation")
+                self.assertEqual(active["aria-current"], "page")
+                self.assertIsNotNone(soup.select_one(".alert-danger"))
+                self.assertFalse(response.cookies)
+
     def test_localities_inherit_type_banner_and_keep_their_own_profile_details(self):
         type_profile = EntityProfile.objects.create(
             content_object=self.municipal_type,
-            background_photo="types/municipal.jpg",
+            profile_photo="types/municipal.jpg",
         )
         own_profile = EntityProfile.objects.create(
             content_object=self.municipality,
@@ -597,7 +627,7 @@ class LocalityLandingPageTest(TestCase):
             jurisdiction_id="ZA",
             locality_type=self.municipal_type,
         )
-        banner_url = reverse("entity_background_image", args=[type_profile.pk])
+        banner_url = reverse("entity_profile_image", args=[type_profile.pk])
         for locality in [self.municipality, other_town]:
             for variant in ["current", "repealed", "all"]:
                 with self.subTest(locality=locality.code, variant=variant):
@@ -609,6 +639,9 @@ class LocalityLandingPageTest(TestCase):
                     )
                     soup = BeautifulSoup(response.content, "html.parser")
                     image = soup.select_one(".entity-profile__background-photo img")
+                    self.assertIsNone(
+                        soup.select_one(".entity-profile__body__profile-image")
+                    )
                     self.assertEqual(image["src"], banner_url)
                     follow = soup.select_one(".entity-profile__body__info [hx-get]")
                     self.assertEqual(
@@ -634,6 +667,11 @@ class LocalityLandingPageTest(TestCase):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
             formset = response.context["inline_admin_formsets"][0].formset
+            self.assertIn("profile_photo", formset.empty_form.fields)
+            self.assertFalse(
+                set(formset.empty_form.fields)
+                & {"title", "about_html", "website_url", "address", "background_photo"}
+            )
             prefix = formset.prefix
             image = BytesIO()
             Image.new("RGB", (2, 2), "green").save(image, "PNG")
@@ -652,7 +690,7 @@ class LocalityLandingPageTest(TestCase):
                 prefix + "-INITIAL_FORMS": "0",
                 prefix + "-MIN_NUM_FORMS": "0",
                 prefix + "-MAX_NUM_FORMS": "1",
-                prefix + "-0-background_photo": SimpleUploadedFile(
+                prefix + "-0-profile_photo": SimpleUploadedFile(
                     "district.png", image.getvalue(), content_type="image/png"
                 ),
                 "_save": "Save",
@@ -661,7 +699,7 @@ class LocalityLandingPageTest(TestCase):
             self.assertEqual(response.status_code, 302)
             locality_type = LocalityType.objects.get(code="district")
             profile = locality_type.entity_profile.get()
-            image_url = reverse("entity_background_image", args=[profile.pk])
+            image_url = reverse("entity_profile_image", args=[profile.pk])
             self.client.logout()
             response = self.client.get(image_url)
             self.assertEqual(response.status_code, 200)
@@ -670,7 +708,7 @@ class LocalityLandingPageTest(TestCase):
             # Replacing the uploaded image keeps the same stable public URL.
             replacement = BytesIO()
             Image.new("RGB", (2, 2), "blue").save(replacement, "PNG")
-            profile.background_photo.save(
+            profile.profile_photo.save(
                 "replacement.png",
                 SimpleUploadedFile(
                     "replacement.png", replacement.getvalue(), content_type="image/png"

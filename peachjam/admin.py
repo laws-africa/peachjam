@@ -220,6 +220,11 @@ class EntityProfileInline(GenericStackedInline):
     form = EntityProfileForm
 
 
+class LocalityTypeProfileInline(EntityProfileInline):
+    form = forms.ModelForm
+    fields = ("profile_photo",)
+
+
 @admin.register(PeachJamSettings)
 class PeachJamSettingsAdmin(admin.ModelAdmin):
     filter_horizontal = (
@@ -2868,7 +2873,7 @@ class LocalityAdmin(admin.ModelAdmin):
 
 @admin.register(LocalityType)
 class LocalityTypeAdmin(admin.ModelAdmin):
-    inlines = [EntityProfileInline]
+    inlines = [LocalityTypeProfileInline]
     list_display = (
         "name",
         "position",
