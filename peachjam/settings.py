@@ -344,19 +344,11 @@ if DEBUG:
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 default_db_url = "postgres://peachjam:peachjam@localhost:5432/peachjam"
-gazette_db_url = "postgres://indigo:indigo@localhost:5432/indigo"
 default_db_config = dj_database_url.config(default=default_db_url)
 # pgbouncer transaction pooling requires DISABLE_SERVER_SIDE_CURSORS
 default_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
-gazette_db_config = dj_database_url.config(
-    default=gazette_db_url, env="GAZETTES_DATABASE_URL"
-)
-gazette_db_config["DISABLE_SERVER_SIDE_CURSORS"] = True
+DATABASES = {"default": default_db_config}
 
-DATABASES = {
-    "default": default_db_config,
-    "gazettes_africa": gazette_db_config,
-}
 CONN_MAX_AGE = int(os.environ.get("CONN_MAX_AGE", 0))
 
 # descriptive name for this application in psql's pg_stat_activity output, to help link connections to apps

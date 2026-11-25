@@ -58,34 +58,10 @@ jobs:
   # web3.laws.africa
   # ------------------
 
-  deploy-gazettes:
-    if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
-    name: Deploy to gazettes.africa
-    needs:
-      - preconditions
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - name: git push to gazettes.africa
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@web3.laws.africa:22/gazettes'
-          git_push_flags: '--force'
-      - name: git push to backend1
-        uses: dokku/github-action@master
-        with:
-          ssh_private_key: ${{ secrets.SSH_DEPLOYMENT_KEY }}
-          git_remote_url: 'ssh://dokku@backend1.laws.africa:22/gazettes'
-          git_push_flags: '--force'
-
   deploy-malawilii:
     if: ${{ !cancelled() && needs.preconditions.result == 'success' }}
     name: Deploy to malawilii
     needs:
-      - deploy-gazettes
       - preconditions
     runs-on: ubuntu-latest
     steps:
