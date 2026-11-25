@@ -666,13 +666,13 @@ class LocalityLandingPageTest(TestCase):
         with TemporaryDirectory() as media_root, self.settings(MEDIA_ROOT=media_root):
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
-            formset = response.context["inline_admin_formsets"][0].formset
-            self.assertIn("profile_photo", formset.empty_form.fields)
+            self.assertFalse(response.context["inline_admin_formsets"])
+            form = response.context["adminform"].form
+            self.assertIn("profile_photo", form.fields)
             self.assertFalse(
-                set(formset.empty_form.fields)
+                set(form.fields)
                 & {"title", "about_html", "website_url", "address", "background_photo"}
             )
-            prefix = formset.prefix
             image = BytesIO()
             Image.new("RGB", (2, 2), "green").save(image, "PNG")
             data = {
@@ -686,11 +686,7 @@ class LocalityLandingPageTest(TestCase):
                 "position": 2,
                 "show_document_nature": "on",
                 "show_subsidiary_legislation": "on",
-                prefix + "-TOTAL_FORMS": "1",
-                prefix + "-INITIAL_FORMS": "0",
-                prefix + "-MIN_NUM_FORMS": "0",
-                prefix + "-MAX_NUM_FORMS": "1",
-                prefix + "-0-profile_photo": SimpleUploadedFile(
+                "profile_photo": SimpleUploadedFile(
                     "district.png", image.getvalue(), content_type="image/png"
                 ),
                 "_save": "Save",
@@ -700,7 +696,6 @@ class LocalityLandingPageTest(TestCase):
             locality_type = LocalityType.objects.get(code="district")
             profile = locality_type.entity_profile.get()
             image_url = reverse("entity_profile_image", args=[profile.pk])
-            self.client.logout()
             response = self.client.get(image_url)
             self.assertEqual(response.status_code, 200)
             self.assertEqual(b"".join(response.streaming_content), image.getvalue())
@@ -708,16 +703,33 @@ class LocalityLandingPageTest(TestCase):
             # Replacing the uploaded image keeps the same stable public URL.
             replacement = BytesIO()
             Image.new("RGB", (2, 2), "blue").save(replacement, "PNG")
-            profile.profile_photo.save(
-                "replacement.png",
-                SimpleUploadedFile(
-                    "replacement.png", replacement.getvalue(), content_type="image/png"
-                ),
+            url = reverse("admin:peachjam_localitytype_change", args=[locality_type.pk])
+            response = self.client.get(url)
+            self.assertFalse(response.context["inline_admin_formsets"])
+            self.assertEqual(
+                response.context["adminform"].form.initial["profile_photo"],
+                profile.profile_photo,
             )
+            data["profile_photo"] = SimpleUploadedFile(
+                "replacement.png", replacement.getvalue(), content_type="image/png"
+            )
+            self.assertEqual(self.client.post(url, data).status_code, 302)
+            self.assertEqual(locality_type.entity_profile.get().pk, profile.pk)
             response = self.client.get(image_url)
             self.assertEqual(
                 b"".join(response.streaming_content), replacement.getvalue()
             )
+
+            # Saving other fields keeps the photo; clearing it reuses the same profile.
+            del data["profile_photo"]
+            self.assertEqual(self.client.post(url, data).status_code, 302)
+            profile.refresh_from_db()
+            self.assertTrue(profile.profile_photo)
+            data["profile_photo-clear"] = "on"
+            self.assertEqual(self.client.post(url, data).status_code, 302)
+            profile.refresh_from_db()
+            self.assertFalse(profile.profile_photo)
+            self.assertEqual(locality_type.entity_profile.count(), 1)
 
     def test_direct_listing_navigation_filters_local_documents(self):
         repealed = self.create_legislation(self.municipality, "Old by-law", "2")

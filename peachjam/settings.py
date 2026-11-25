@@ -666,7 +666,6 @@ JAZZMIN_SETTINGS = {
         {"app": "liiweb"},
     ],
     "changeform_format": "horizontal_tabs",
-    "changeform_format_overrides": {"peachjam.LocalityType": "single"},
 }
 
 JAZZMIN_UI_TWEAKS = {

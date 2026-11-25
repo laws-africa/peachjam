@@ -220,11 +220,6 @@ class EntityProfileInline(GenericStackedInline):
     form = EntityProfileForm
 
 
-class LocalityTypeProfileInline(EntityProfileInline):
-    form = forms.ModelForm
-    fields = ("profile_photo",)
-
-
 @admin.register(PeachJamSettings)
 class PeachJamSettingsAdmin(admin.ModelAdmin):
     filter_horizontal = (
@@ -2871,9 +2866,24 @@ class LocalityAdmin(admin.ModelAdmin):
     inlines = [EntityProfileInline]
 
 
+class LocalityTypeForm(forms.ModelForm):
+    profile_photo = EntityProfile._meta.get_field("profile_photo").formfield()
+
+    class Meta:
+        model = LocalityType
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance.pk:
+            profile = self.instance.entity_profile.first()
+            if profile:
+                self.initial["profile_photo"] = profile.profile_photo
+
+
 @admin.register(LocalityType)
 class LocalityTypeAdmin(admin.ModelAdmin):
-    inlines = [LocalityTypeProfileInline]
+    form = LocalityTypeForm
     list_display = (
         "name",
         "position",
@@ -2885,6 +2895,13 @@ class LocalityTypeAdmin(admin.ModelAdmin):
     ordering = ("position", "pk")
     prepopulated_fields = {"code": ("name",)}
     search_fields = ("name", "code", "collection_title")
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
+        if "profile_photo" in form.changed_data:
+            obj.entity_profile.update_or_create(
+                defaults={"profile_photo": form.cleaned_data["profile_photo"] or ""}
+            )
 
 
 @admin.register(JurisdictionProfile)
