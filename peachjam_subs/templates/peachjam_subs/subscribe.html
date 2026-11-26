@@ -1,6 +1,6 @@
 {% extends 'peachjam/layouts/main.html' %}
 {% block title %}{{ MY_LII }}{% endblock %}
-{% load i18n static %}
+{% load peachjam i18n static %}
 {% block page-content %}
   <div class="py-5 bg-brand-pale">
     <div class="container">
@@ -12,7 +12,9 @@
               {{ MY_LII }} is a free account that helps you personalise and organise your legal research. It’s simple to use, always free, and makes working with the law easier.
             {% endblocktrans %}
           </p>
-          <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg mt-2">{% trans "Sign up for free" %}</a>
+          {% url 'account_signup' as signup_target %}{% account_url signup_target action='signup' as decorated_account_url %}
+          <a href="{{ decorated_account_url }}"
+             class="btn btn-primary btn-lg mt-2">{% trans "Sign up for free" %}</a>
         </div>
       </div>
     </div>
@@ -83,7 +85,8 @@
       </div>
     </section>
     <section class="text-center">
-      <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">{% trans "Create your free account" %}</a>
+      {% url 'account_signup' as signup_target %}{% account_url signup_target action='signup' as decorated_account_url %}
+      <a href="{{ decorated_account_url }}" class="btn btn-primary btn-lg">{% trans "Create your free account" %}</a>
     </section>
   </div>
 {% endblock %}

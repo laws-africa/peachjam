@@ -374,6 +374,7 @@ class AccountAdapterOnboardingTests(TestCase):
     def post_login_destination(self, destination=None, signup=False):
         request = RequestFactory().get(reverse("account_login"))
         request.user = self.user
+        request.session = {}
 
         with patch(
             "allauth.account.adapter.DefaultAccountAdapter.post_login",
@@ -957,7 +958,7 @@ class HeaderUserMenuTests(TestCase):
     def test_header_shows_login_button_when_account_urls_enabled(self):
         html = self.render_menu(accounts_enabled=True)
 
-        self.assertIn(f'href="{reverse("account_login")}?next=/"', html)
+        self.assertIn(f'href="{reverse("account_login")}?next=%2F"', html)
         self.assertIn('data-key-link-feature="user_menu"', html)
         self.assertIn('data-key-link="login"', html)
 

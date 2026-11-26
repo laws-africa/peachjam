@@ -86,6 +86,10 @@ class BaseFolderMixin(
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
 
+        context["create_folder_permission"] = FolderCreateView.permission_required
+        context["save_document_permission"] = (
+            SavedDocumentCreateView.permission_required
+        )
         context["folders"] = self.request.user.folders.prefetch_related(
             Prefetch(
                 "saved_documents",
@@ -177,6 +181,10 @@ class SavedDocumentFragmentsView(AllowSavedDocumentMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        context["save_document_permission"] = (
+            SavedDocumentCreateView.permission_required
+        )
+
         legacy_ids = self.request.GET.getlist("doc_id")
 
         if "doc_ids" in self.request.GET:
@@ -262,6 +270,9 @@ class SavedDocumentFormMixin(
 
     def get_context_data(self, *args, **kwargs):
         context = super().get_context_data(*args, **kwargs)
+        context["save_document_permission"] = (
+            SavedDocumentCreateView.permission_required
+        )
         sub = Subscription.objects.active_for_user(self.object.user).first()
         if sub:
             (
@@ -312,6 +323,7 @@ class SavedDocumentCreateView(SavedDocumentFormMixin, CreateView):
             return self.render_to_response(
                 {
                     "document": self.document,
+                    "required_permission": self.get_permission_required()[0],
                     "next_url": self.request.htmx.current_url,
                 }
             )

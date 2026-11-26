@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load peachjam i18n %}
 {% if subscription_required %}
   <div class="dropdown follow-control position-static"
        data-key-link-feature="following">
@@ -42,8 +42,8 @@
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans "Close" %}</button>
           {% if not request.user.is_authenticated and PEACHJAM_SETTINGS.accounts_enabled %}
-            <a href="{% url "account_login" %}?next={{ request.htmx.current_url_abs_path }}"
-               class="btn btn-primary">{% trans "Log in" %}</a>
+            {% url 'account_login' as login_target %}{% account_url login_target action='login' next_url=request.htmx.current_url_abs_path permission=required_permission as decorated_account_url %}
+            <a href="{{ decorated_account_url }}" class="btn btn-primary">{% trans "Log in" %}</a>
           {% endif %}
         </div>
       </div>

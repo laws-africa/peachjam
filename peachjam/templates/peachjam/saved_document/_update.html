@@ -1,5 +1,5 @@
 {% load i18n peachjam_subs %}
-{% change_subscription_url as change_subscription_url %}
+{% change_subscription_url permission=save_document_permission as change_subscription_url %}
 <span class="saved-document-star saved-document-star--{{ saved_document.document.id }}"
       hx-swap-oob="outerHTML:.saved-document-star--{{ saved_document.document.id }}"
       data-bs-toggle="modal"

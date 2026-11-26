@@ -2,6 +2,7 @@ import datetime
 import hashlib
 import json
 import re
+from typing import Literal
 from urllib.parse import urljoin
 
 from django import template
@@ -16,6 +17,7 @@ from django.utils.html import conditional_escape, format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
+from peachjam.account_urls import account_url as build_account_url
 from peachjam.analysis.flynotes import FlynoteDisplayGrouper
 from peachjam.auth import user_display
 from peachjam.models import DocumentChatThread
@@ -352,4 +354,33 @@ def recent_chats(user):
         .filter(document_rank=1)
         .select_related("core_document")
         .order_by("-updated_at")[:10]
+    )
+
+
+@register.simple_tag(takes_context=True)
+def account_url(
+    context,
+    url,
+    action: Literal["login", "signup", "subscribe", "upgrade"] | None = None,
+    permission=None,
+    next_url=None,
+):
+    """Build an account link using the configured account adapter.
+
+    ``url`` is an existing destination URL. If supplied, ``next_url`` replaces
+    its ``next`` query parameter and is URL-encoded before calling the adapter.
+    Other query parameters are preserved. ``action`` is ``login`` (sign-in
+    entry), ``signup`` (account creation), ``subscribe`` (access a gated feature)
+    or ``upgrade`` (change a plan or resolve a usage limit). It may be None when
+    no action hint is available. The optional permission name identifies the
+    feature's access requirement for the adapter.
+
+    Example: {% account_url login_url action='login' next_url=request.path %}
+    """
+    return build_account_url(
+        context.get("request"),
+        url,
+        action=action,
+        permission=permission,
+        next_url=next_url,
     )

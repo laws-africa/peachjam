@@ -1,5 +1,5 @@
 {% load i18n peachjam_subs %}
-{% change_subscription_url as change_subscription_url %}
+{% change_subscription_url permission=save_document_permission as change_subscription_url %}
 <div id="saved-doc-{{ saved_document.pk }}" class="border-bottom">
   <div class="py-2">
     {% if saved_document.is_subscription_locked %}

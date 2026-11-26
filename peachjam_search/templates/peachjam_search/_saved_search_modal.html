@@ -1,5 +1,5 @@
 {% load i18n peachjam_subs %}
-{% change_subscription_url as change_subscription_url %}
+{% change_subscription_url permission=create_saved_search_permission as change_subscription_url %}
 <div hx-swap-oob="true"
      id="saved-search-modal-dialog"
      class="modal-dialog">

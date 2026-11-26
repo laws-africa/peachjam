@@ -46,6 +46,7 @@ class SubscriptionRequiredMixin(PermissionRequiredMixin):
         lowest_offering = self.get_lowest_offering_for_product(lowest_product)
 
         return {
+            "required_permission": perm,
             "subscription_required": True,
             "lowest_product": lowest_product,
             "lowest_offering": lowest_offering,

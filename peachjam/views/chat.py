@@ -111,6 +111,7 @@ class StartDocumentChatView(
             return None
 
         context = {
+            "required_permission": self.get_permission_required()[0],
             "chats_used": n_active,
             "chat_limit": chat_limit,
             "lowest_product": lowest_product,

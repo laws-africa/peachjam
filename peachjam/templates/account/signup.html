@@ -1,5 +1,5 @@
 {% extends "allauth/layouts/base.html" %}
-{% load account i18n %}
+{% load peachjam account i18n %}
 {% block title %}
   {% trans 'Sign Up' %}
 {% endblock %}
@@ -8,7 +8,8 @@
     <script>window.location.replace("{{ login_url }}");</script>
     <p class="text-center">
       {% trans 'Redirecting to login...' %}
-      <a href="{{ login_url }}">{% trans 'Click here' %}</a>
+      {% account_url login_url action='login' as decorated_account_url %}
+      <a href="{{ decorated_account_url }}">{% trans 'Click here' %}</a>
     </p>
   {% else %}
     <div class="text-center">
@@ -18,6 +19,7 @@
     <form method="post" action="{% url 'account_signup' %}" id="signup-form">
       <p>{% trans 'Create your account by filling in the form below.' %}</p>
       {% csrf_token %}
+      {% include "account/_extra_form_fields.html" %}
       {% if redirect_field_value %}
         <input type="hidden"
                name="{{ redirect_field_name }}"
@@ -84,7 +86,8 @@
       </div>
       <div class="text-center">
         {% trans 'Already have an account?' %}
-        <a href="{{ login_url }}">{% trans 'Log in' %}</a>
+        {% account_url login_url action='login' as decorated_account_url %}
+        <a href="{{ decorated_account_url }}">{% trans 'Log in' %}</a>
       </div>
     </form>
   {% endif %}

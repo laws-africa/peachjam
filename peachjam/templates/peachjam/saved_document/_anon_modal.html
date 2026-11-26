@@ -1,4 +1,4 @@
-{% load i18n %}
+{% load peachjam i18n %}
 <div class="modal-content" id="saved-document-modal-content">
   <div class="modal-header">
     <p class="h5 modal-title">{% trans 'Save document' %}</p>
@@ -20,8 +20,8 @@
   <div class="modal-footer d-flex">
     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% trans 'Close' %}</button>
     {% if PEACHJAM_SETTINGS.accounts_enabled %}
-      <a href="{% url 'account_login' %}?next={{ next_url|urlencode }}"
-         class="btn btn-primary">{% trans 'Log in' %}</a>
+      {% url 'account_login' as login_target %}{% account_url login_target action='login' next_url=next_url permission=required_permission as decorated_account_url %}
+      <a href="{{ decorated_account_url }}" class="btn btn-primary">{% trans 'Log in' %}</a>
     {% endif %}
   </div>
 </div>

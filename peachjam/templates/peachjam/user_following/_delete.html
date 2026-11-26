@@ -1,5 +1,5 @@
 {% load i18n peachjam_subs %}
-{% change_subscription_url as change_subscription_url %}
+{% change_subscription_url permission=create_follow_permission as change_subscription_url %}
 <form hx-post="{% url 'user_following_delete' object.pk %}?{{ request.GET.urlencode }}"
       data-key-link-feature="following">
   {% csrf_token %}
