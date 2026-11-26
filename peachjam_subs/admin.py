@@ -132,6 +132,11 @@ class ProductAdminForm(forms.ModelForm):
         for product in Product.objects.prefetch_related(
             "selectable_offerings__pricing_plan"
         ):
+            if instance.pk and product.pk == instance.pk:
+                # ModelForm applies submitted model fields after clean(). Validate
+                # the proposed tier/name rather than the values still in the DB.
+                product.tier = cleaned_data.get("tier", product.tier)
+                product.name = cleaned_data.get("name", product.name)
             offerings = (
                 list(selectable_offerings)
                 if instance.pk and product.pk == instance.pk
@@ -196,13 +201,14 @@ class PricingPlanAdmin(admin.ModelAdmin):
 @admin.register(ProductOffering)
 class ProductOfferingAdmin(GuardedModelAdmin):
     list_display = (
+        "display_name",
         "product",
         "pricing_plan",
         "initial_period_months",
         "allow_discounts",
         "available_to_organisations",
     )
-    search_fields = ("product__name", "pricing_plan__name")
+    search_fields = ("name_override", "product__name", "pricing_plan__name")
     list_filter = ("product", "pricing_plan")
     ordering = ("product__name", "pricing_plan__name")
 

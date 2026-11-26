@@ -316,6 +316,19 @@ class PricingPlan(models.Model):
 
 
 class ProductOffering(models.Model):
+    name_override = models.CharField(
+        max_length=100,
+        blank=True,
+        help_text=_(
+            "Optional name shown when purchasing this offering. Defaults to the product name."
+        ),
+    )
+    description_override = models.TextField(
+        blank=True,
+        help_text=_(
+            "Optional description shown when purchasing this offering. Defaults to the product description."
+        ),
+    )
     available_to_organisations = models.BooleanField(
         default=True,
         help_text=_(
@@ -335,13 +348,20 @@ class ProductOffering(models.Model):
     pricing_plan = models.ForeignKey(PricingPlan, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ("product", "pricing_plan")
         permissions = [
             ("can_subscribe", "Can subscribe to this offering"),
         ]
 
     def __str__(self):
-        return f"{self.product} - {self.pricing_plan}"
+        return f"{self.display_name} - {self.pricing_plan}"
+
+    @property
+    def display_name(self):
+        return self.name_override or self.product.name
+
+    @property
+    def display_description(self):
+        return self.description_override or self.product.description
 
     @classmethod
     def product_offerings_available_to_user(cls, user):
