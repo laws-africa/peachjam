@@ -1,5 +1,5 @@
 {% load i18n peachjam_subs %}
-{% change_subscription_url as change_subscription_url %}
+{% change_subscription_url permission=save_document_permission as change_subscription_url %}
 <div class="modal-content" id="saved-document-modal-content">
   <form hx-target="{{ target }}"
         {% if not saved_document.is_subscription_locked %}hx-post="{% url 'saved_document_update' saved_document.id %}?next={{ next }}"{% endif %}>

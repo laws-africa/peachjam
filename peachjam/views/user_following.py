@@ -108,6 +108,7 @@ class UserFollowingButtonView(AllowFollowsMixin, SubscriptionRequiredMixin, Form
             ).first()
 
         return {
+            "required_permission": self.get_permission_required()[0],
             "follow": follow,
             "followed_object": form.followed_object,
             "followed_object_type": UserFollowing._meta.get_field(
@@ -138,6 +139,13 @@ class UserFollowingButtonView(AllowFollowsMixin, SubscriptionRequiredMixin, Form
 
 class BaseUserFollowingView(AllowFollowsMixin, LoginRequiredMixin):
     model = UserFollowing
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["create_follow_permission"] = (
+            UserFollowingCreateView.permission_required
+        )
+        return context
 
     def get_queryset(self):
         return self.request.user.following.filter(

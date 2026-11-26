@@ -3,6 +3,8 @@
 {# Folder names and document titles must not break out of the inline script. #}
 <script type="text/javascript">peachjam.user = JSON.parse('{{ user_json|escapejs }}'); peachjam.userLoaded();</script>
 {% if signup_completed %}
-  <script type="text/javascript">peachjam.analytics.trackEvent('Account', 'Signup completed');</script>
+  {% block signup_completed_analytics %}
+    <script type="text/javascript">peachjam.analytics.trackEvent('Account', 'Signup completed');</script>
+  {% endblock %}
 {% endif %}
 {% block user-loaded-system-messages %}{% endblock %}

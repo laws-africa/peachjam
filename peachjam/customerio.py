@@ -2,6 +2,8 @@ from customerio import analytics
 from django.conf import settings
 from django.utils.module_loading import import_string
 
+from peachjam.account_signals import account_created
+
 analytics.write_key = settings.PEACHJAM["CUSTOMERIO_PYTHON_KEY"]
 analytics.host = "https://cdp-eu.customer.io"
 
@@ -256,6 +258,7 @@ def get_customerio():
 
 def track_account_created_signup_event(user, *, request=None):
     """Track account creation and queue browser analytics for public signups."""
+    account_created.send(sender=type(user), user=user, request=request)
     get_customerio().track_user_signed_up(user)
     if request is not None:
         request.session[SIGNUP_COMPLETED_SESSION_KEY] = user.pk

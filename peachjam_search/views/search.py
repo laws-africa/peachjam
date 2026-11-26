@@ -788,6 +788,13 @@ class AllowSavedSearchesMixin:
 class SavedSearchButtonView(AllowSavedSearchesMixin, TemplateView):
     template_name = "peachjam_search/saved_search_button.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["create_saved_search_permission"] = (
+            SavedSearchCreateView.permission_required
+        )
+        return context
+
     def get(self, *args, **kwargs):
         if self.request.user.is_authenticated and self.request.htmx:
             params = dict(
@@ -848,6 +855,9 @@ class BaseSavedSearchFormView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["create_saved_search_permission"] = (
+            SavedSearchCreateView.permission_required
+        )
         sub = Subscription.objects.active_for_user(self.request.user).first()
         if sub:
             (

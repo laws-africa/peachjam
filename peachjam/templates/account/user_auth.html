@@ -1,5 +1,5 @@
 {% extends "allauth/layouts/base.html" %}
-{% load i18n %}
+{% load peachjam i18n %}
 {% block title %}
   {% if is_existing_user %}
     {% trans 'Log In' %}
@@ -19,6 +19,7 @@
       </div>
       <form method="post" action="{% url 'account_confirm_login_code' %}">
         {% csrf_token %}
+        {% include "account/_extra_form_fields.html" %}
         {% if verify_form.non_field_errors %}
           <div class="alert alert-danger mb-3">
             {% for error in verify_form.non_field_errors %}{{ error }}{% endfor %}
@@ -57,6 +58,7 @@
               action="{% url 'account_confirm_login_code' %}"
               class="d-inline">
           {% csrf_token %}
+          {% include "account/_extra_form_fields.html" %}
           <input type="hidden" name="action" value="resend" />
           <button type="submit" class="btn btn-link">{% trans 'Request a new one-time code' %}</button>
         </form>
@@ -69,6 +71,7 @@
                 action="{% url 'account_reset_password' %}"
                 class="d-grid">
             {% csrf_token %}
+            {% include "account/_extra_form_fields.html" %}
             <input type="hidden" name="email" value="{{ email }}" />
             <button type="submit" class="btn btn-outline-primary">{% trans 'Use a password instead' %}</button>
           </form>
@@ -93,6 +96,7 @@
         </p>
         <form method="post" action="{% url 'account_confirm_login_code' %}">
           {% csrf_token %}
+          {% include "account/_extra_form_fields.html" %}
           <input type="hidden" name="action" value="password_login" />
           {% if password_form.non_field_errors %}
             <div class="alert alert-danger mb-3">
@@ -134,6 +138,7 @@
         </p>
         <form method="post" action="{% url 'account_confirm_login_code' %}">
           {% csrf_token %}
+          {% include "account/_extra_form_fields.html" %}
           <input type="hidden" name="action" value="signup_password" />
           {% if signup_form.non_field_errors %}
             <div class="alert alert-danger mb-3">
@@ -183,6 +188,7 @@
     </div>
     <form method="post" action="{% url 'account_logout' %}" class="text-center">
       {% csrf_token %}
+      {% include "account/_extra_form_fields.html" %}
       <input type="hidden" name="next" value="{% url 'account_login' %}" />
       <button type="submit" class="btn btn-link mt-4">{% trans 'Back to login' %}</button>
     </form>

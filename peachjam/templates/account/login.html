@@ -1,5 +1,5 @@
 {% extends "allauth/layouts/base.html" %}
-{% load account socialaccount static %}
+{% load peachjam account socialaccount static %}
 {% load i18n %}
 {% block title %}
   {% trans 'Log In' %}
@@ -13,6 +13,7 @@
     <form method="post" action="{% url 'account_login' %}" id="email-login">
       <p>{% trans 'Enter your email address to log in or sign up.' %}</p>
       {% csrf_token %}
+      {% include "account/_extra_form_fields.html" %}
       {% if redirect_field_value %}
         <input type="hidden"
                name="{{ redirect_field_name }}"
@@ -60,6 +61,7 @@
     <form method="post" action="{% url 'account_login' %}" id="email-login">
       <p>{% trans 'Enter your email and password to log in.' %}</p>
       {% csrf_token %}
+      {% include "account/_extra_form_fields.html" %}
       {% if redirect_field_value %}
         <input type="hidden"
                name="{{ redirect_field_name }}"
@@ -115,7 +117,8 @@
       </div>
       <div class="text-center">
         {% trans "Don't have an account?" %}
-        <a href="{{ signup_url }}">{% trans 'Sign up' %}</a>
+        {% account_url signup_url action='signup' as decorated_account_url %}
+        <a href="{{ decorated_account_url }}">{% trans 'Sign up' %}</a>
       </div>
     </form>
   {% endif %}

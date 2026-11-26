@@ -1,4 +1,4 @@
-{% load i18n peachjam account %}
+{% load peachjam i18n peachjam account %}
 {% if user.is_authenticated %}
   <ul class="navbar-nav ms-auto me-2"
       hx-swap-oob="true"
@@ -122,9 +122,10 @@
       id="user-menu"
       data-key-link-feature="user_menu">
     <li class="nav-item">
+      {% url 'account_login' as login_target %}{% account_url login_target action='login' next_url=request.htmx.current_url_abs_path as decorated_account_url %}
       <a class="btn btn-primary text-nowrap"
          data-key-link="login"
-         href="{% url 'account_login' %}?next={{ request.htmx.current_url_abs_path|urlencode }}">
+         href="{{ decorated_account_url }}">
         <i class="bi bi-person-circle"></i>
         {% trans "Log in" %}
       </a>
