@@ -10,27 +10,27 @@ msgstr ""
 msgid "Locality"
 msgstr ""
 
-#: models.py:276
+#: models.py:315
 msgid "subscription locked at"
 msgstr ""
 
-#: models.py:279
+#: models.py:318
 msgid "subscription lock expires at"
 msgstr ""
 
-#: models.py:348
+#: models.py:387
 msgid "Search alert limit reached"
 msgstr ""
 
-#: models.py:431
+#: models.py:470
 msgid "feedback"
 msgstr ""
 
-#: models.py:433
+#: models.py:472
 msgid "name"
 msgstr ""
 
-#: models.py:438
+#: models.py:477
 msgid "email address"
 msgstr ""
 
@@ -217,21 +217,21 @@ msgstr ""
 msgid "Best match"
 msgstr ""
 
-#: templates/peachjam_search/_search_hit.html:86
+#: templates/peachjam_search/_search_hit.html:90
 msgid "Explanation"
 msgstr ""
 
-#: templates/peachjam_search/_search_hit.html:91
+#: templates/peachjam_search/_search_hit.html:95
 msgid "Raw"
 msgstr ""
 
-#: templates/peachjam_search/_search_hit.html:112
+#: templates/peachjam_search/_search_hit.html:116
 #: templates/peachjam_search/_searchtrace_card.html:60
 #: templates/peachjam_search/searchtrace_list.html:34
 msgid "Page"
 msgstr ""
 
-#: templates/peachjam_search/_search_hit.html:130
+#: templates/peachjam_search/_search_hit.html:134
 msgid "Download"
 msgstr ""
 
@@ -497,11 +497,11 @@ msgstr ""
 msgid "No search traces found."
 msgstr ""
 
-#: views/search.py:130
+#: views/search.py:131
 #, python-format
 msgid "Search %(app_name)s"
 msgstr ""
 
-#: views/search.py:737
+#: views/search.py:747
 msgid "Search trace not found"
 msgstr ""
