@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from countries_plus.models import Country
 from django.contrib.messages.storage.base import Message
 from django.core.paginator import Paginator
+from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.test import TestCase
 from django.test.client import RequestFactory
@@ -11,7 +12,14 @@ from django.urls import reverse
 from languages_plus.models import Language
 
 from peachjam.forms import BaseDocumentFilterForm
-from peachjam.models import AlternativeName, GenericDocument
+from peachjam.models import (
+    AlternativeName,
+    CaseAction,
+    DocumentTopic,
+    GenericDocument,
+    Judgment,
+    Taxonomy,
+)
 from peachjam.templatetags.peachjam import get_mobile_elided_page_range
 
 
@@ -36,6 +44,35 @@ class BaseDocumentFilterFormTestCase(TestCase):
         for title in [doc.title for doc in documents]:
             self.assertTrue(title.startswith("A"))
 
+    def test_unfiltered_queryset_does_not_use_distinct(self):
+        form = BaseDocumentFilterForm({}, {})
+        self.assertTrue(form.is_valid())
+
+        documents = form.filter_queryset(GenericDocument.objects.all())
+
+        self.assertFalse(documents.query.distinct)
+
+    def test_single_valued_filter_does_not_use_distinct(self):
+        form = BaseDocumentFilterForm({}, {"languages": "en"})
+        self.assertTrue(form.is_valid())
+
+        documents = form.filter_queryset(GenericDocument.objects.all())
+
+        self.assertFalse(documents.query.distinct)
+
+    def test_case_action_filter_does_not_use_distinct(self):
+        action = CaseAction.objects.create(name="Allowed")
+        judgment = Judgment.objects.first()
+        judgment.case_action = action
+        judgment.save(update_fields=["case_action"])
+        form = BaseDocumentFilterForm({}, {"case_actions": action.name})
+        self.assertTrue(form.is_valid())
+
+        documents = form.filter_queryset(Judgment.objects.all())
+
+        self.assertFalse(documents.query.distinct)
+        self.assertEqual([judgment.pk], list(documents.values_list("pk", flat=True)))
+
     def test_q_filter_deduplicates_documents_with_multiple_matching_alternative_names(
         self,
     ):
@@ -54,6 +91,28 @@ class BaseDocumentFilterFormTestCase(TestCase):
 
         documents = form.filter_queryset(GenericDocument.objects.all(), filter_q=True)
 
+        self.assertTrue(documents.query.distinct)
+        self.assertEqual([document.pk], list(documents.values_list("pk", flat=True)))
+
+    def test_taxonomy_filter_deduplicates_documents_matching_multiple_topics(self):
+        document = GenericDocument.objects.first()
+        root = Taxonomy.add_root(name="Performance topics")
+        child = root.add_child(name="Query performance")
+        DocumentTopic.objects.bulk_create(
+            [
+                DocumentTopic(document=document, topic=root),
+                DocumentTopic(document=document, topic=child),
+            ]
+        )
+        params = QueryDict(
+            f"taxonomies={root.slug}&taxonomies={child.slug}", mutable=False
+        )
+        form = BaseDocumentFilterForm({}, params)
+        self.assertTrue(form.is_valid())
+
+        documents = form.filter_queryset(GenericDocument.objects.all())
+
+        self.assertTrue(documents.query.distinct)
         self.assertEqual([document.pk], list(documents.values_list("pk", flat=True)))
 
     def test_document_table_form_renders_accessibility_hooks_for_long_facets(self):
