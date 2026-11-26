@@ -12,6 +12,7 @@ import os
 import time
 
 from django.core.asgi import get_asgi_application
+from django.urls import Resolver404, resolve
 from uvicorn_worker import UvicornWorker
 
 log = logging.getLogger(__name__)
@@ -28,21 +29,16 @@ def asgi_request_diagnostics_enabled():
 
 
 def request_route_family(path):
-    """Group public request paths without logging identifiers or query strings."""
+    """Return the matched Django view name without logging path identifiers."""
     path = path or "/"
 
-    if path.startswith("/akn/"):
-        if path.endswith(("/source", "/source.pdf")):
-            return "document-source"
-        if path.endswith("/social-image.png"):
-            return "document-social-image"
-        return "document"
-
-    if path.startswith("/v1/p/") and "/changed-provisions/" in path:
-        return "changed-provisions"
+    try:
+        return resolve(path).view_name
+    except Resolver404:
+        pass
 
     first_segment = path.strip("/").partition("/")[0]
-    return first_segment or "home"
+    return f"unresolved:{first_segment or 'home'}"
 
 
 class ASGIRequestDiagnostics:

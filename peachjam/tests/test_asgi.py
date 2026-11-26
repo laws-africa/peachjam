@@ -4,6 +4,7 @@ from unittest.mock import Mock, patch
 
 from asgiref.sync import async_to_sync
 from django.test import SimpleTestCase
+from django.urls import Resolver404
 
 from peachjam.asgi import (
     ASGIRequestDiagnostics,
@@ -57,33 +58,26 @@ class ASGIRequestDiagnosticsConfigTests(SimpleTestCase):
 
 
 class RequestRouteFamilyTests(SimpleTestCase):
-    def test_groups_public_document_routes_without_identifiers(self):
+    @patch("peachjam.asgi.resolve")
+    def test_uses_resolved_view_name_without_path_identifiers(self, resolve):
+        resolve.return_value.view_name = "judgment_list"
+
+        self.assertEqual("judgment_list", request_route_family("/judgments/"))
+        resolve.assert_called_once_with("/judgments/")
+
+    @patch("peachjam.asgi.resolve")
+    def test_distinguishes_listing_routes_by_view_name(self, resolve):
+        resolve.return_value.view_name = "court_registry_month"
+
         self.assertEqual(
-            "document-source",
-            request_route_family(
-                "/akn/ke/judgment/kehc/2024/1/eng@2024-01-01/source.pdf"
-            ),
-        )
-        self.assertEqual(
-            "document-social-image",
-            request_route_family(
-                "/akn/ke/judgment/kehc/2024/1/eng@2024-01-01/social-image.png"
-            ),
-        )
-        self.assertEqual(
-            "document",
-            request_route_family("/akn/ke/judgment/kehc/2024/1/eng@2024-01-01"),
+            "court_registry_month",
+            request_route_family("/judgments/courts/example/registry/2026/11/"),
         )
 
-    def test_groups_changed_provisions_and_top_level_routes(self):
-        self.assertEqual(
-            "changed-provisions",
-            request_route_family(
-                "/v1/p/kenyalaw.org/e/changed-provisions/akn/ke/act/2024/1"
-            ),
-        )
-        self.assertEqual("search", request_route_family("/search"))
-        self.assertEqual("home", request_route_family("/"))
+    @patch("peachjam.asgi.resolve", side_effect=Resolver404)
+    def test_uses_coarse_family_for_unresolved_paths(self, resolve):
+        self.assertEqual("unresolved:missing", request_route_family("/missing/value"))
+        self.assertEqual("unresolved:home", request_route_family("/"))
 
 
 class ASGIRequestDiagnosticsTests(SimpleTestCase):
@@ -108,7 +102,10 @@ class ASGIRequestDiagnosticsTests(SimpleTestCase):
         )
         return messages
 
-    def test_logs_request_start_and_completion(self):
+    @patch("peachjam.asgi.resolve")
+    def test_logs_request_start_and_completion(self, resolve):
+        resolve.return_value.view_name = "search"
+
         async def app(scope, receive, send):
             await send({"type": "http.response.start", "status": 200})
             await send({"type": "http.response.body", "body": b"ok"})
