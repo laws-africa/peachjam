@@ -193,6 +193,7 @@ class ValidateExpressionFrbrUrisView(APIView):
     """Validates a list of decision expression FRBR URIs and returns those that aren't valid."""
 
     permission_classes = (IsAuthenticated,)
+    model = Judgment
 
     def post(self, request, *args, **kwargs):
         serializer = BatchValidateFrbrUrisRequestSerializer(data=request.data)
@@ -211,7 +212,14 @@ class ValidateExpressionFrbrUrisView(APIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
     def get_invalid_uris(self, frbr_uris):
-        valid_uris = Judgment.objects.filter(
+        valid_uris = self.model.objects.filter(
             expression_frbr_uri__in=frbr_uris
         ).values_list("expression_frbr_uri", flat=True)
         return set(frbr_uris) - set(valid_uris)
+
+
+class ValidateGazetteExpressionFrbrUrisView(ValidateExpressionFrbrUrisView):
+    """Return missing gazette identifiers using the existing bulk-validation contract."""
+
+    permission_classes = (GazetteAPIPermission,)
+    model = Gazette
