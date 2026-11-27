@@ -285,6 +285,24 @@ class LawReportViewsTestCase(TestCase):
             response, 'placeholder="Filter documents by title"', html=False
         )
 
+    def test_law_report_volume_detail_deduplicates_report_entries(self):
+        LawReportEntry.objects.create(
+            judgment=self.first_judgment,
+            law_report_volume=self.volume_1,
+        )
+
+        response = self.client.get(self.volume_1.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            [self.first_judgment.pk],
+            [
+                document.pk
+                for document in response.context["documents"]
+                if getattr(document, "pk", None) == self.first_judgment.pk
+            ],
+        )
+
     def test_law_report_volume_detail_view_cases_tab(self):
         url = reverse(
             "law_report_volume_cases_index",

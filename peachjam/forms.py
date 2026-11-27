@@ -418,8 +418,7 @@ class BaseDocumentFilterForm(forms.Form):
         if filter_q and exclude != "q":
             queryset = self.apply_filter_q(queryset)
 
-        # filters may join against tables that produce duplicate rows, so ensure distinct documents
-        return queryset.distinct()
+        return queryset
 
     def order_queryset(self, queryset, exclude=None):
         sort = self.cleaned_data.get("sort") or "-date"
@@ -519,7 +518,7 @@ class BaseDocumentFilterForm(forms.Form):
     def apply_filter_case_actions(self, queryset):
         actions = self.cleaned_data.get("case_actions", [])
         return (
-            queryset.filter(case_action__name__in=actions).distinct()
+            queryset.filter(case_action__name__in=actions)
             if actions and hasattr(queryset.model, "case_action")
             else queryset
         )
@@ -537,7 +536,7 @@ class BaseDocumentFilterForm(forms.Form):
     def apply_filter_taxonomies(self, queryset):
         taxonomies = self.cleaned_data.get("taxonomies", [])
         return (
-            queryset.filter(taxonomies__topic__slug__in=taxonomies)
+            queryset.filter(taxonomies__topic__slug__in=taxonomies).distinct()
             if taxonomies
             else queryset
         )
@@ -553,7 +552,7 @@ class BaseDocumentFilterForm(forms.Form):
                     | Q(citation__icontains=term)
                     | Q(alternative_names__title__icontains=term)
                 )
-            queryset = queryset.filter(queries)
+            queryset = queryset.filter(queries).distinct()
         return queryset
 
 
