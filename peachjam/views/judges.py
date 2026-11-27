@@ -378,7 +378,7 @@ class JudgePersonDetailView(JudgePublicPageMixin, FilteredJudgmentView):
             )
         if exclude != "year_ranges" and self.selected_years():
             queryset = queryset.filter(date__year__in=self.selected_years())
-        return queryset
+        return queryset.distinct()
 
     def add_facets(self, context):
         context["facet_data"] = {}

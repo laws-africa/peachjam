@@ -105,7 +105,9 @@ class LawReportVolumeDetailView(
 
     def get_base_queryset(self, exclude=None):
         qs = super().get_base_queryset(exclude=exclude)
-        return qs.filter(law_report_entries__law_report_volume=self.law_report_volume)
+        return qs.filter(
+            law_report_entries__law_report_volume=self.law_report_volume
+        ).distinct()
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

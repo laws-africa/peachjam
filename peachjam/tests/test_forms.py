@@ -14,10 +14,18 @@ from languages_plus.models import Language
 from peachjam.forms import BaseDocumentFilterForm
 from peachjam.models import (
     AlternativeName,
+    Attorney,
+    Author,
+    Bench,
     CaseAction,
     DocumentTopic,
     GenericDocument,
+    JournalArticle,
+    Judge,
+    JudgePerson,
     Judgment,
+    Label,
+    Outcome,
     Taxonomy,
 )
 from peachjam.templatetags.peachjam import get_mobile_elided_page_range
@@ -26,6 +34,21 @@ from peachjam.templatetags.peachjam import get_mobile_elided_page_range
 class BaseDocumentFilterFormTestCase(TestCase):
     fixtures = ["tests/countries", "documents/sample_documents", "tests/languages"]
     maxDiff = None
+
+    def assert_filter_returns_document_once(
+        self, queryset, params, document, *, filter_q=False
+    ):
+        """Assert filter joins do not return duplicate document rows."""
+        form = BaseDocumentFilterForm({}, params)
+        self.assertTrue(form.is_valid(), form.errors)
+
+        document_ids = list(
+            form.filter_queryset(queryset, filter_q=filter_q).values_list(
+                "pk", flat=True
+            )
+        )
+
+        self.assertEqual([document.pk], document_ids)
 
     def test_years_filter_with_single_year(self):
         response = self.client.get(reverse("legislation_list") + "?years=2007")
@@ -86,13 +109,103 @@ class BaseDocumentFilterFormTestCase(TestCase):
         AlternativeName.objects.create(document=document, title="Unique marker one")
         AlternativeName.objects.create(document=document, title="Unique marker two")
 
-        form = BaseDocumentFilterForm({}, {"q": "marker"})
-        self.assertTrue(form.is_valid())
+        self.assert_filter_returns_document_once(
+            GenericDocument.objects.all(), {"q": "marker"}, document, filter_q=True
+        )
 
-        documents = form.filter_queryset(GenericDocument.objects.all(), filter_q=True)
+    def test_author_filter_deduplicates_documents_matching_multiple_authors(self):
+        document = JournalArticle.objects.create(
+            title="Article with multiple authors",
+            publisher="Test publisher",
+            jurisdiction=Country.objects.get(pk="ZA"),
+            date=datetime.date(2024, 1, 1),
+            language=Language.objects.get(pk="en"),
+        )
+        authors = [
+            Author.objects.create(name=f"Filter author {index}", code=f"author-{index}")
+            for index in range(2)
+        ]
+        document.authors.add(*authors)
 
-        self.assertTrue(documents.query.distinct)
-        self.assertEqual([document.pk], list(documents.values_list("pk", flat=True)))
+        self.assert_filter_returns_document_once(
+            JournalArticle.objects.all(),
+            QueryDict("authors=Filter+author+0&authors=Filter+author+1"),
+            document,
+        )
+
+    def test_judge_filter_deduplicates_documents_matching_multiple_judges(self):
+        document = Judgment.objects.first()
+        judges = [
+            Judge.objects.create(name=f"Filter Judge {index}") for index in range(2)
+        ]
+        document.judges.add(*judges)
+
+        self.assert_filter_returns_document_once(
+            Judgment.objects.all(),
+            QueryDict("judges=Filter+Judge+0&judges=Filter+Judge+1"),
+            document,
+        )
+
+    def test_judge_person_filter_deduplicates_multiple_matching_bench_rows(self):
+        document = Judgment.objects.first()
+        judge_person = JudgePerson.objects.create(
+            last_name="Filter Judge Person", slug="filter-judge-person"
+        )
+        for index in range(2):
+            Bench.objects.create(
+                judgment=document,
+                judge=Judge.objects.create(name=f"Judge person alias {index}"),
+                judge_person=judge_person,
+            )
+
+        self.assert_filter_returns_document_once(
+            Judgment.objects.all(),
+            {"judge_people": str(judge_person.pk)},
+            document,
+        )
+
+    def test_attorney_filter_deduplicates_documents_matching_multiple_attorneys(self):
+        document = Judgment.objects.first()
+        attorneys = [
+            Attorney.objects.create(name=f"Filter Attorney {index}")
+            for index in range(2)
+        ]
+        document.attorneys.add(*attorneys)
+
+        self.assert_filter_returns_document_once(
+            Judgment.objects.all(),
+            QueryDict("attorneys=Filter+Attorney+0&attorneys=Filter+Attorney+1"),
+            document,
+        )
+
+    def test_outcome_filter_deduplicates_documents_matching_multiple_outcomes(self):
+        document = Judgment.objects.first()
+        outcomes = [
+            Outcome.objects.create(name=f"Filter Outcome {index}") for index in range(2)
+        ]
+        document.outcomes.add(*outcomes)
+
+        self.assert_filter_returns_document_once(
+            Judgment.objects.all(),
+            QueryDict("outcomes=Filter+Outcome+0&outcomes=Filter+Outcome+1"),
+            document,
+        )
+
+    def test_label_filter_deduplicates_documents_matching_multiple_labels(self):
+        document = GenericDocument.objects.first()
+        labels = [
+            Label.objects.create(
+                name=f"Filter Label {index}", code=f"filter-label-{index}"
+            )
+            for index in range(2)
+        ]
+        document.labels.add(*labels)
+
+        self.assert_filter_returns_document_once(
+            GenericDocument.objects.all(),
+            QueryDict("labels=Filter+Label+0&labels=Filter+Label+1"),
+            document,
+        )
 
     def test_taxonomy_filter_deduplicates_documents_matching_multiple_topics(self):
         document = GenericDocument.objects.first()
@@ -107,13 +220,9 @@ class BaseDocumentFilterFormTestCase(TestCase):
         params = QueryDict(
             f"taxonomies={root.slug}&taxonomies={child.slug}", mutable=False
         )
-        form = BaseDocumentFilterForm({}, params)
-        self.assertTrue(form.is_valid())
-
-        documents = form.filter_queryset(GenericDocument.objects.all())
-
-        self.assertTrue(documents.query.distinct)
-        self.assertEqual([document.pk], list(documents.values_list("pk", flat=True)))
+        self.assert_filter_returns_document_once(
+            GenericDocument.objects.all(), params, document
+        )
 
     def test_document_table_form_renders_accessibility_hooks_for_long_facets(self):
         request = RequestFactory().get("/documents/")

@@ -1239,6 +1239,26 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertNotContains(response, "Alphabet")
 
     @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
+    def test_judge_detail_deduplicates_multiple_matching_bench_rows(self):
+        Bench.objects.create(
+            judgment=self.judgment,
+            judge=Judge.objects.create(name="Justice Abban alternative source name"),
+            judge_person=self.judge_person,
+        )
+
+        response = self.client.get(self.judge_person.get_absolute_url())
+
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(
+            [self.judgment.pk],
+            [
+                document.pk
+                for document in response.context["documents"]
+                if getattr(document, "pk", None) == self.judgment.pk
+            ],
+        )
+
+    @override_settings(PEACHJAM=CANONICAL_JUDGE_IDENTITY_SETTINGS)
     def test_judge_detail_htmx_response_skips_dashboard_analysis(self):
         response = self.client.get(
             self.judge_person.get_absolute_url(),
@@ -1382,7 +1402,9 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
     def test_judge_detail_filters_judgments_by_flynote_topic_and_descendants(self):
         civil = Flynote.add_root(name="Civil law")
         contract = civil.add_child(name="Contract")
+        delict = civil.add_child(name="Delict")
         JudgmentFlynote.objects.create(document=self.judgment, flynote=contract)
+        JudgmentFlynote.objects.create(document=self.judgment, flynote=delict)
 
         other_judgment = Judgment.objects.create(
             language=Language.objects.get(pk="en"),
@@ -1408,6 +1430,14 @@ class CanonicalJudgeIdentityPublicPageTests(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertIn(self.judgment, response.context["documents"])
         self.assertNotIn(other_judgment, response.context["documents"])
+        self.assertEqual(
+            [self.judgment.pk],
+            [
+                document.pk
+                for document in response.context["documents"]
+                if getattr(document, "pk", None) == self.judgment.pk
+            ],
+        )
         self.assertEqual(
             [str(civil.pk)], response.context["facet_data"]["topics"]["values"]
         )
